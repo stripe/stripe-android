@@ -726,13 +726,11 @@ class LinkControllerInteractorTest {
         interactor.state(application).test {
             val preview = awaitItem().selectedPaymentMethodPreview
             assertThat(preview?.sublabel).isEqualTo("Visa Credit \u2066•••• 4242\u2069")
-            assertThat(preview?.instrumentDetails)
-                .isEqualTo(PaymentMethodPreviewDetails.Card(CardBrand.Visa, "credit", "4242"))
         }
-        interactor.selectedPaymentMethodPreview.test {
-            assertThat(awaitItem()?.instrumentDetails)
-                .isEqualTo(PaymentMethodPreviewDetails.Card(CardBrand.Visa, "credit", "4242"))
-        }
+        val selection = requireNotNull(interactor.getPaymentMethodPreviewForOnramp(application))
+        assertThat(selection.instrumentDetails)
+            .isEqualTo(PaymentMethodPreviewDetails.Card(CardBrand.Visa, "credit", "4242"))
+        assertThat(selection.preview.sublabel).isEqualTo("Visa Credit \u2066•••• 4242\u2069")
         linkAccountManager.createPaymentMethodCalls.expectNoEvents()
     }
 
@@ -760,27 +758,32 @@ class LinkControllerInteractorTest {
         val interactor = createInteractor()
         configure(interactor)
         interactor.updateState { it.copy(selectedPaymentMethod = createTestPaymentMethod()) }
-        val snapshot = requireNotNull(interactor.selectedPaymentMethodPreview.value)
+        val snapshot = requireNotNull(interactor.getPaymentMethodPreviewForOnramp(application))
         interactor.presentPaymentMethods(FakeActivityResultLauncher(), "test@example.com", null)
 
         interactor.presentPaymentMethodsResultFlow.test {
             interactor.onLinkActivityResult(result)
             assertThat(awaitItem()).isNotInstanceOf(LinkController.PresentPaymentMethodsResult.Success::class.java)
         }
-        interactor.selectedPaymentMethodPreview.test {
-            assertThat(awaitItem()?.instrumentDetails).isEqualTo(snapshot.instrumentDetails)
-        }
-        interactor.state(application).test {
-            assertThat(awaitItem().selectedPaymentMethodPreview?.instrumentDetails)
-                .isEqualTo(snapshot.instrumentDetails)
-        }
+        val current = requireNotNull(interactor.getPaymentMethodPreviewForOnramp(application))
+        assertThat(current.instrumentDetails).isEqualTo(snapshot.instrumentDetails)
+        assertThat(current.preview.sublabel).isEqualTo(snapshot.preview.sublabel)
         assertThat(snapshot.instrumentDetails)
             .isEqualTo(PaymentMethodPreviewDetails.Card(CardBrand.Visa, "credit", "4242"))
         linkAccountManager.createPaymentMethodCalls.expectNoEvents()
     }
 
     @Test
-    fun `both preview state paths retain passthrough card metadata before creation`() = runTest {
+    fun `onramp preview is absent before selecting an instrument`() = runTest {
+        val interactor = createInteractor()
+        configure(interactor)
+
+        assertThat(interactor.getPaymentMethodPreviewForOnramp(application)).isNull()
+        linkAccountManager.createPaymentMethodCalls.expectNoEvents()
+    }
+
+    @Test
+    fun `onramp preview retains passthrough card metadata before creation`() = runTest {
         val interactor = createInteractor()
         configure(interactor)
         val paymentMethod = PaymentMethod.Builder()
@@ -803,19 +806,18 @@ class LinkControllerInteractorTest {
         }
         val expected = PaymentMethodPreviewDetails.Card(CardBrand.MasterCard, "debit", "4444")
 
-        interactor.selectedPaymentMethodPreview.test {
-            assertThat(awaitItem()?.instrumentDetails).isEqualTo(expected)
-        }
+        val selection = requireNotNull(interactor.getPaymentMethodPreviewForOnramp(application))
+        assertThat(selection.instrumentDetails).isEqualTo(expected)
         interactor.state(application).test {
             val state = awaitItem()
-            assertThat(state.selectedPaymentMethodPreview?.instrumentDetails).isEqualTo(expected)
+            assertThat(selection.preview.sublabel).isEqualTo(state.selectedPaymentMethodPreview?.sublabel)
             assertThat(state.createdPaymentMethod).isNull()
         }
         linkAccountManager.createPaymentMethodCalls.expectNoEvents()
     }
 
     @Test
-    fun `both preview paths replace snapshots when switching card to bank`() = runTest {
+    fun `onramp preview replaces snapshots when switching card to bank`() = runTest {
         val interactor = createInteractor()
         configure(interactor)
         interactor.updateState {
@@ -830,19 +832,18 @@ class LinkControllerInteractorTest {
             )
         }
 
+        val cardSelection = requireNotNull(interactor.getPaymentMethodPreviewForOnramp(application))
         interactor.selectedPaymentMethodPreview.test {
-            val cardPreview = requireNotNull(awaitItem())
-            interactor.state(application).test {
-                assertThat(awaitItem().selectedPaymentMethodPreview?.instrumentDetails)
-                    .isEqualTo(cardPreview.instrumentDetails)
-                selectBankPaymentMethod(interactor)
-                assertThat(awaitItem().selectedPaymentMethodPreview?.instrumentDetails)
-                    .isInstanceOf(PaymentMethodPreviewDetails.BankAccount::class.java)
-            }
-            assertThat(awaitItem()?.instrumentDetails).isInstanceOf(PaymentMethodPreviewDetails.BankAccount::class.java)
-            assertThat(cardPreview.instrumentDetails)
-                .isEqualTo(PaymentMethodPreviewDetails.Card(CardBrand.Visa, "debit", "4242"))
+            assertThat(awaitItem()?.type).isEqualTo(LinkController.PaymentMethodType.Card)
+            selectBankPaymentMethod(interactor)
+            assertThat(awaitItem()?.type).isEqualTo(LinkController.PaymentMethodType.BankAccount)
         }
+        val bankSelection = requireNotNull(interactor.getPaymentMethodPreviewForOnramp(application))
+        assertThat(bankSelection.instrumentDetails).isInstanceOf(PaymentMethodPreviewDetails.BankAccount::class.java)
+        assertThat(bankSelection.preview.type).isEqualTo(LinkController.PaymentMethodType.BankAccount)
+        assertThat(cardSelection.preview.type).isEqualTo(LinkController.PaymentMethodType.Card)
+        assertThat(cardSelection.instrumentDetails)
+            .isEqualTo(PaymentMethodPreviewDetails.Card(CardBrand.Visa, "debit", "4242"))
         linkAccountManager.createPaymentMethodCalls.expectNoEvents()
     }
 
@@ -863,8 +864,9 @@ class LinkControllerInteractorTest {
         val preview = interactor.selectedPaymentMethodPreview.first()
 
         assertThat(preview?.sublabel).isEqualTo("Crypto 0x••••22Dd")
-        assertThat(preview?.instrumentDetails).isNull()
-        assertThat(interactor.state(application).first().selectedPaymentMethodPreview?.instrumentDetails).isNull()
+        val selection = requireNotNull(interactor.getPaymentMethodPreviewForOnramp(application))
+        assertThat(selection.instrumentDetails).isNull()
+        assertThat(selection.preview.sublabel).isEqualTo(preview?.sublabel)
     }
 
     @Test
@@ -1471,7 +1473,7 @@ class LinkControllerInteractorTest {
         configure(interactor)
         signIn()
         interactor.updateState { it.copy(selectedPaymentMethod = createTestPaymentMethod()) }
-        val snapshot = requireNotNull(interactor.selectedPaymentMethodPreview.value)
+        val snapshot = requireNotNull(interactor.getPaymentMethodPreviewForOnramp(application))
         assertThat(snapshot.instrumentDetails).isInstanceOf(PaymentMethodPreviewDetails.Card::class.java)
 
         val result = interactor.logOut()
@@ -1480,6 +1482,7 @@ class LinkControllerInteractorTest {
         assertThat(linkAccountHolder.linkAccountInfo.value.account).isNull()
         assertThat(interactor.selectedPaymentMethodPreview.value).isNull()
         assertThat(interactor.state(application).value.selectedPaymentMethodPreview).isNull()
+        assertThat(interactor.getPaymentMethodPreviewForOnramp(application)).isNull()
         assertThat(snapshot.instrumentDetails)
             .isEqualTo(PaymentMethodPreviewDetails.Card(CardBrand.Visa, "credit", "4242"))
     }

@@ -95,6 +95,7 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.identity.IdentityVerificationSheet.VerificationFlowResult
 import com.stripe.android.link.LinkAppearance
 import com.stripe.android.link.LinkController
+import com.stripe.android.link.OnrampPaymentMethodPreview
 import com.stripe.android.link.PaymentMethodPreviewDetails
 import com.stripe.android.link.exceptions.LinkUnavailableException
 import com.stripe.android.model.CardBrand
@@ -1535,6 +1536,9 @@ class OnrampInteractorTest {
             )
         ).thenReturn(Result.success(createPaymentTokenResponse))
 
+        whenever(linkController.getPaymentMethodPreviewForOnramp(any())).thenReturn(
+            OnrampPaymentMethodPreview(mockCardPaymentMethodPreview(), instrumentDetails = null)
+        )
         interactor.handlePresentPaymentMethodsResult(
             LinkController.PresentPaymentMethodsResult.Success,
             RuntimeEnvironment.getApplication()
@@ -1867,8 +1871,8 @@ class OnrampInteractorTest {
             sublabel = "4242",
             type = LinkController.PaymentMethodType.Generic,
         )
-        whenever(linkController.state(any())).thenReturn(
-            MutableStateFlow(LinkController.State(selectedPaymentMethodPreview = preview))
+        whenever(linkController.getPaymentMethodPreviewForOnramp(any())).thenReturn(
+            OnrampPaymentMethodPreview(preview, instrumentDetails = null)
         )
 
         val result = interactor.handlePresentPaymentMethodsResult(
@@ -2067,8 +2071,8 @@ class OnrampInteractorTest {
     private fun collectLinkPreview(details: PaymentMethodPreviewDetails): OnrampCollectPaymentMethodResult.Completed {
         val context = RuntimeEnvironment.getApplication()
         val preview = LinkController.PaymentMethodPreview.create(context, details)
-        whenever(linkController.state(any())).thenReturn(
-            MutableStateFlow(LinkController.State(selectedPaymentMethodPreview = preview))
+        whenever(linkController.getPaymentMethodPreviewForOnramp(any())).thenReturn(
+            OnrampPaymentMethodPreview(preview, details)
         )
         return interactor.handlePresentPaymentMethodsResult(
             LinkController.PresentPaymentMethodsResult.Success, context
@@ -2134,14 +2138,9 @@ class OnrampInteractorTest {
     fun testHandlePresentPaymentMethodsResultSuccess() {
         val context = RuntimeEnvironment.getApplication()
         val paymentMethodPreview = mockCardPaymentMethodPreview()
-
-        val mockState = LinkController.State(
-            internalLinkAccount = null,
-            merchantLogoUrl = null,
-            selectedPaymentMethodPreview = paymentMethodPreview,
-            createdPaymentMethod = null
+        whenever(linkController.getPaymentMethodPreviewForOnramp(any())).thenReturn(
+            OnrampPaymentMethodPreview(paymentMethodPreview, instrumentDetails = null)
         )
-        whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockState))
 
         interactor.onLinkControllerState(mockLinkStateWithAccount())
 
@@ -2155,6 +2154,8 @@ class OnrampInteractorTest {
         assertThat(completed.instrumentDetails).isNull()
         assertThat(completed.kycInfo).isNull()
         assertThat(completed.displayData.label).isEqualTo(paymentMethodPreview.label)
+        verify(linkController).getPaymentMethodPreviewForOnramp(context)
+        verify(linkController, never()).state(any())
 
         testAnalyticsService.assertContainsEvent(OnrampAnalyticsEvent.CollectPaymentMethodCompleted(null))
     }
@@ -2162,13 +2163,7 @@ class OnrampInteractorTest {
     @Test
     fun testHandlePresentPaymentMethodsResultMissingSelectedPaymentMethod() {
         val context = RuntimeEnvironment.getApplication()
-        val mockState = LinkController.State(
-            internalLinkAccount = null,
-            merchantLogoUrl = null,
-            selectedPaymentMethodPreview = null,
-            createdPaymentMethod = null
-        )
-        whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockState))
+        whenever(linkController.getPaymentMethodPreviewForOnramp(any())).thenReturn(null)
 
         interactor.onLinkControllerState(mockLinkStateWithAccount())
 

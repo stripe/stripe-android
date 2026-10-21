@@ -94,7 +94,7 @@ class LinkPaymentMethodPreviewTest {
         assertThat(preview.instrumentDetails).isEqualTo(
             PaymentMethodPreviewDetails.BankAccount(null, "Stripe Test Bank Account", "4242")
         )
-        assertThat(preview.type).isEqualTo(LinkController.PaymentMethodType.BankAccount)
+        assertThat(preview.preview.type).isEqualTo(LinkController.PaymentMethodType.BankAccount)
     }
 
     @Test
@@ -104,7 +104,26 @@ class LinkPaymentMethodPreviewTest {
         ).preview()
 
         assertThat(preview.instrumentDetails).isNull()
-        assertThat(preview.type).isEqualTo(LinkController.PaymentMethodType.Generic)
+        assertThat(preview.preview.type).isEqualTo(LinkController.PaymentMethodType.Generic)
+    }
+
+    @Test
+    fun `consumer preview overload passes instrument details without changing display preview`() {
+        val details = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD
+        val instrument = PaymentMethodPreviewDetails.Card(details.brand, "debit", details.last4)
+        val selection = details.toPreview(
+            context = context,
+            iconLoader = iconLoader,
+            reduceLinkBranding = false,
+            isDarkTheme = false,
+            instrumentDetails = instrument,
+        )
+        val display = details.toPreview(context, iconLoader, reduceLinkBranding = false, isDarkTheme = false)
+
+        assertThat(selection.instrumentDetails).isSameInstanceAs(instrument)
+        assertThat(selection.preview.label).isEqualTo(display.label)
+        assertThat(selection.preview.sublabel).isEqualTo(display.sublabel)
+        assertThat(selection.preview.type).isEqualTo(display.type)
     }
 
     @Test
@@ -130,19 +149,21 @@ class LinkPaymentMethodPreviewTest {
     }
 
     @Test
-    fun `card factory preserves its structured source`() {
+    fun `card factory retains existing display behavior`() {
         val details = PaymentMethodPreviewDetails.Card(CardBrand.Unknown, "future", "1234")
+        val preview = LinkController.PaymentMethodPreview.create(context, details)
 
-        assertThat(LinkController.PaymentMethodPreview.create(context, details).instrumentDetails)
-            .isSameInstanceAs(details)
+        assertThat(preview.type).isEqualTo(LinkController.PaymentMethodType.Card)
+        assertThat(preview.sublabel).contains("1234")
     }
 
     @Test
-    fun `bank factory preserves its structured source`() {
+    fun `bank factory retains existing display behavior`() {
         val details = PaymentMethodPreviewDetails.BankAccount(null, null, "6789")
+        val preview = LinkController.PaymentMethodPreview.create(context, details)
 
-        assertThat(LinkController.PaymentMethodPreview.create(context, details).instrumentDetails)
-            .isSameInstanceAs(details)
+        assertThat(preview.type).isEqualTo(LinkController.PaymentMethodType.BankAccount)
+        assertThat(preview.sublabel).contains("6789")
     }
 
     @Test
@@ -154,7 +175,7 @@ class LinkPaymentMethodPreviewTest {
             type = LinkController.PaymentMethodType.Card,
         )
 
-        assertThat(preview.instrumentDetails).isNull()
+        assertThat(LinkController.PaymentMethodPreview::class.java.constructors).hasLength(1)
         assertThat(preview.label).isEqualTo("Link")
         assertThat(preview.sublabel).isNull()
         assertThat(
@@ -175,9 +196,13 @@ class LinkPaymentMethodPreviewTest {
 
         assertThat(preview.instrumentDetails).isEqualTo(expected)
         assertThat(directPreview.instrumentDetails).isEqualTo(expected)
-        assertThat(preview.label).isEqualTo(directPreview.label)
-        assertThat(preview.sublabel).isEqualTo(directPreview.sublabel)
-        assertThat(preview.type).isEqualTo(directPreview.type)
+        val displayPreview = details.toPreview(context, iconLoader, reduceLinkBranding = false, isDarkTheme = false)
+        assertThat(preview.preview.label).isEqualTo(displayPreview.label)
+        assertThat(preview.preview.sublabel).isEqualTo(displayPreview.sublabel)
+        assertThat(preview.preview.type).isEqualTo(displayPreview.type)
+        assertThat(directPreview.preview.label).isEqualTo(displayPreview.label)
+        assertThat(directPreview.preview.sublabel).isEqualTo(displayPreview.sublabel)
+        assertThat(directPreview.preview.type).isEqualTo(displayPreview.type)
     }
 
     private fun assertPassthroughCard(funding: String, expectedFunding: String) {
@@ -206,8 +231,13 @@ class LinkPaymentMethodPreviewTest {
         LinkPaymentMethod.LinkPaymentDetails(details, collectedCvc = null, billingPhone = null)
 
     private fun LinkPaymentMethod.preview() =
-        toPreview(context, iconLoader, reduceLinkBranding = false, isDarkTheme = false)
+        toOnrampPreview(context, iconLoader, reduceLinkBranding = false, isDarkTheme = false)
 
-    private fun ConsumerPaymentDetails.PaymentDetails.preview() =
-        toPreview(context, iconLoader, reduceLinkBranding = false, isDarkTheme = false)
+    private fun ConsumerPaymentDetails.PaymentDetails.preview() = toPreview(
+        context = context,
+        iconLoader = iconLoader,
+        reduceLinkBranding = false,
+        isDarkTheme = false,
+        instrumentDetails = instrumentDetails(passthroughCard = null),
+    )
 }

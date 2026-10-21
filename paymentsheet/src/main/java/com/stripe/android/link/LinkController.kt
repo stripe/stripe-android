@@ -176,6 +176,11 @@ class LinkController @Inject internal constructor(
 
     // Crypto Onramp specific methods
 
+    /** Returns display and instrument details from the same committed Link selection. */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun getPaymentMethodPreviewForOnramp(context: Context): OnrampPaymentMethodPreview? =
+        interactor.getPaymentMethodPreviewForOnramp(context)
+
     /**
      * [CRYPTO ONRAMP ONLY] Register a new Link consumer account.
      *
@@ -898,17 +903,8 @@ class LinkController @Inject internal constructor(
         val label: String,
         val sublabel: String?,
         @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        val type: PaymentMethodType,
-        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        val instrumentDetails: PaymentMethodPreviewDetails?
+        val type: PaymentMethodType
     ) {
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        constructor(
-            imageLoader: suspend () -> Drawable,
-            label: String,
-            sublabel: String?,
-            type: PaymentMethodType
-        ) : this(imageLoader, label, sublabel, type, instrumentDetails = null)
 
         /**
          * An image representing a payment method; e.g. the VISA logo.

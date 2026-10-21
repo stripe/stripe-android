@@ -1,28 +1,48 @@
 package com.stripe.android.link
 
 import android.content.Context
+import androidx.annotation.RestrictTo
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardFunding
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentSelection
 
-/** Supplies retained passthrough metadata to the consumer-details preview mapper. */
-internal fun LinkPaymentMethod.toPreview(
+/** Onramp-only snapshot; the ordinary Link display preview remains unchanged. */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class OnrampPaymentMethodPreview(
+    val preview: LinkController.PaymentMethodPreview,
+    val instrumentDetails: PaymentMethodPreviewDetails?
+)
+
+internal fun LinkPaymentMethod.toOnrampPreview(
     context: Context,
     iconLoader: PaymentSelection.IconLoader,
     reduceLinkBranding: Boolean,
     isDarkTheme: Boolean,
-): LinkController.PaymentMethodPreview {
+): OnrampPaymentMethodPreview {
     val linkDetails = (this as? LinkPaymentMethod.LinkPaymentDetails)?.linkPaymentDetails
+    val passthroughCard = (linkDetails as? LinkPaymentDetails.Passthrough)?.paymentMethod?.card
     return details.toPreview(
         context = context,
         iconLoader = iconLoader,
         reduceLinkBranding = reduceLinkBranding,
         isDarkTheme = isDarkTheme,
-        passthroughCard = (linkDetails as? LinkPaymentDetails.Passthrough)?.paymentMethod?.card,
+        instrumentDetails = details.instrumentDetails(passthroughCard),
     )
 }
+
+/** Passes bounded metadata alongside the existing display preview only for onramp. */
+internal fun ConsumerPaymentDetails.PaymentDetails.toPreview(
+    context: Context,
+    iconLoader: PaymentSelection.IconLoader,
+    reduceLinkBranding: Boolean,
+    isDarkTheme: Boolean,
+    instrumentDetails: PaymentMethodPreviewDetails?,
+): OnrampPaymentMethodPreview = OnrampPaymentMethodPreview(
+    preview = toPreview(context, iconLoader, reduceLinkBranding, isDarkTheme),
+    instrumentDetails = instrumentDetails,
+)
 
 internal fun ConsumerPaymentDetails.PaymentDetails.instrumentDetails(
     passthroughCard: PaymentMethod.Card?

@@ -171,13 +171,6 @@ and absent metadata are not debit. Bank-account subsidy is a separate policy, no
 value. Known cards with missing/unrecognized funding report `CardFunding.Unknown`; unsupported
 instruments or unavailable card data return `instrumentDetails = null`. Do not parse display labels for policy.
 
-Always replace your stored result and recompute policy after a new successful collection in the
-same checkout attempt. Previously returned results remain snapshots, not token-bound attestations.
-Discard cached policy state on logout or a cleared selection; cancellation/failure does not provide
-a new successful snapshot. Token-time customer, account, and KYC routing checks still run and may
-require recollection. Collection metadata proves neither ownership, mandate validity, payment
-success, nor final fees: the session quote is authoritative.
-
 Wallet last4 may identify a tokenized number rather than the physical card's printed last4.
 These summaries contain no full card/account/routing numbers, CVC, fingerprints, raw wallet
 credentials, or billing data. Reading them adds no metadata request or PaymentMethod creation/share

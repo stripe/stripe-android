@@ -150,7 +150,7 @@ internal class LinkControllerInteractor @Inject constructor(
             val isDarkTheme = state.linkConfiguration?.linkAppearance?.style.isDarkTheme(
                 isSystemDarkTheme = application.isSystemDarkTheme()
             )
-            state.selectedPaymentMethod?.toPreview(
+            state.selectedPaymentMethod?.details?.toPreview(
                 context = application,
                 iconLoader = cachedIconLoader,
                 reduceLinkBranding = state.linkConfiguration?.linkAppearance?.reduceLinkBranding ?: false,
@@ -165,7 +165,7 @@ internal class LinkControllerInteractor @Inject constructor(
                 elementsSessionId = state.linkConfiguration?.elementsSessionId,
                 internalLinkAccount = account,
                 merchantLogoUrl = state.linkConfiguration?.merchantLogoUrl,
-                selectedPaymentMethodPreview = state.selectedPaymentMethod
+                selectedPaymentMethodPreview = state.selectedPaymentMethod?.details
                     ?.toPreview(
                         context = context,
                         iconLoader = cachedIconLoader,
@@ -175,6 +175,16 @@ internal class LinkControllerInteractor @Inject constructor(
                 createdPaymentMethod = state.createdPaymentMethod,
             )
         }
+    }
+
+    fun getPaymentMethodPreviewForOnramp(context: Context): OnrampPaymentMethodPreview? {
+        val state = _state.value
+        return state.selectedPaymentMethod?.toOnrampPreview(
+            context = context,
+            iconLoader = cachedIconLoader,
+            reduceLinkBranding = state.linkConfiguration?.linkAppearance?.reduceLinkBranding ?: false,
+            isDarkTheme = state.linkConfiguration?.linkAppearance?.style.isDarkTheme(context.isSystemDarkTheme()),
+        )
     }
 
     suspend fun configure(configuration: LinkController.Configuration): Result<Unit> {
@@ -854,8 +864,7 @@ internal fun PaymentMethodPreviewDetails.toPreview(
         },
         label = label,
         sublabel = sublabel,
-        type = type,
-        instrumentDetails = this,
+        type = type
     )
 }
 
@@ -864,20 +873,6 @@ internal fun ConsumerPaymentDetails.PaymentDetails.toPreview(
     iconLoader: PaymentSelection.IconLoader,
     reduceLinkBranding: Boolean,
     isDarkTheme: Boolean,
-): LinkController.PaymentMethodPreview = toPreview(
-    context = context,
-    iconLoader = iconLoader,
-    reduceLinkBranding = reduceLinkBranding,
-    isDarkTheme = isDarkTheme,
-    passthroughCard = null,
-)
-
-internal fun ConsumerPaymentDetails.PaymentDetails.toPreview(
-    context: Context,
-    iconLoader: PaymentSelection.IconLoader,
-    reduceLinkBranding: Boolean,
-    isDarkTheme: Boolean,
-    passthroughCard: PaymentMethod.Card?,
 ): LinkController.PaymentMethodPreview {
     val label = context.getString(com.stripe.android.R.string.stripe_link)
     val sublabel = paymentOptionLabel.resolve(context)
@@ -911,8 +906,7 @@ internal fun ConsumerPaymentDetails.PaymentDetails.toPreview(
         },
         label = label,
         sublabel = sublabel,
-        type = type,
-        instrumentDetails = instrumentDetails(passthroughCard),
+        type = type
     )
 }
 

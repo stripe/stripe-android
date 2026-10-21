@@ -890,7 +890,8 @@ internal class OnrampInteractor @Inject constructor(
                     paymentMethodType = _state.value.collectingPaymentMethodType
                 )
             )
-            linkController.state(context).value.selectedPaymentMethodPreview?.let { preview ->
+            linkController.getPaymentMethodPreviewForOnramp(context)?.let { selection ->
+                val preview = selection.preview
                 _state.update { state ->
                     state.copy(selectedPaymentSource = SelectedPaymentSource.Link)
                 }
@@ -902,7 +903,7 @@ internal class OnrampInteractor @Inject constructor(
                         type = preview.type.toDisplayType()
                     ),
                     kycInfo = null,
-                    instrumentDetails = when (val details = preview.instrumentDetails) {
+                    instrumentDetails = when (val details = selection.instrumentDetails) {
                         is PaymentMethodPreviewDetails.Card -> OnrampInstrumentDetails.Card(
                             funding = CardFunding.fromCode(details.funding),
                             brand = details.brand,
