@@ -50,6 +50,7 @@ internal class FinancialConnectionsLiteViewModel(
 
     private val _state = MutableStateFlow<State?>(null)
     val state: StateFlow<State?> = _state.asStateFlow()
+    private var terminalUrlHandled = false
 
     init {
         viewModelScope.launch(workContext) {
@@ -73,15 +74,19 @@ internal class FinancialConnectionsLiteViewModel(
     }
 
     fun handleUrl(uri: String) = withState { state ->
+        if (terminalUrlHandled) return@withState
+
         when {
-            uri.contains(state.successUrl) -> {
+            FinancialConnectionsLiteRedirectUrls.matchesTerminalUrl(uri, state.successUrl) -> {
+                terminalUrlHandled = true
                 when (args.flowType) {
                     FinancialConnectionsSheetFlowType.ForData -> onSuccessFromDataFlow(userCancelled = false)
                     FinancialConnectionsSheetFlowType.ForToken -> onSuccessFromTokenFlow(userCancelled = false)
                     FinancialConnectionsSheetFlowType.ForInstantDebits -> onSuccessFromInstantDebits(uri)
                 }
             }
-            uri.contains(state.cancelUrl) -> {
+            FinancialConnectionsLiteRedirectUrls.matchesTerminalUrl(uri, state.cancelUrl) -> {
+                terminalUrlHandled = true
                 when (args.flowType) {
                     FinancialConnectionsSheetFlowType.ForData -> onSuccessFromDataFlow(userCancelled = true)
                     FinancialConnectionsSheetFlowType.ForToken -> onSuccessFromTokenFlow(userCancelled = true)

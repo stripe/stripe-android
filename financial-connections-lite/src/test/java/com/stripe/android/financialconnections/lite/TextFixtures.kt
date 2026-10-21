@@ -23,8 +23,8 @@ internal object TextFixtures {
     val syncResponse = SynchronizeSessionResponse(
         manifest = FinancialConnectionsSessionManifest(
             hostedAuthUrl = "https://example.com/auth",
-            successUrl = "https://example.com/success",
-            cancelUrl = "https://example.com/cancel",
+            successUrl = "stripe-auth://link-accounts/com.example/success",
+            cancelUrl = "stripe-auth://link-accounts/com.example/cancel",
         )
     )
 

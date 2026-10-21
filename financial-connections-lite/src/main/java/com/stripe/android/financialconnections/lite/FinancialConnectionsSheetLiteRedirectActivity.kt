@@ -1,7 +1,6 @@
 package com.stripe.android.financialconnections.lite
 
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 
@@ -17,27 +16,12 @@ internal class FinancialConnectionsSheetLiteRedirectActivity : ComponentActivity
          * clear everything on the stack above the opening activity, including CCT.
          */
         intent.data?.let { uri ->
-            uri.toIntent()
-                ?.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                ?.also { it.data = uri }
-                ?.let { startActivity(it) }
+            if (FinancialConnectionsLiteRedirectUrls.isBankAuthReturn(uri.toString(), packageName)) {
+                Intent(this, FinancialConnectionsSheetLiteActivity::class.java)
+                    .setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                    .also { it.data = uri }
+                    .let { startActivity(it) }
+            }
         }
-    }
-
-    /**
-     * @return Intent, or null if deeplink cannot be mapped to an Intent (in case of unknown deep links).
-     */
-    private fun Uri.toIntent(): Intent? = when {
-        isFinancialConnectionsScheme().not() -> null
-        else -> FinancialConnectionsSheetLiteActivity::class.java
-    }?.let { destinationActivity ->
-        Intent(
-            this@FinancialConnectionsSheetLiteRedirectActivity,
-            destinationActivity
-        )
-    }
-
-    private fun Uri.isFinancialConnectionsScheme(): Boolean {
-        return (this.scheme == "stripe")
     }
 }
