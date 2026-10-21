@@ -941,9 +941,9 @@ internal class PlaygroundTestDriver(
         Espresso.onIdle()
         composeTestRule.waitForIdle()
 
-        // Expect the OTP dialog
+        // Expect the OTP dialog. Code entry stays disabled until the verification code has been sent.
         composeTestRule.waitUntilExactlyOneExists(
-            matcher = hasTestTag("OTP-0"),
+            matcher = hasTestTag("OTP-0").and(isEnabled()),
             timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds,
         )
 

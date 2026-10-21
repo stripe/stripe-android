@@ -23,6 +23,7 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.SharePaymentDetails
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.model.VerificationType
 
 internal open class FakeLinkRepository : LinkRepository {
     var lookupConsumerResult = Result.success(TestFactory.CONSUMER_SESSION_LOOKUP)
@@ -229,6 +230,9 @@ internal open class FakeLinkRepository : LinkRepository {
 
     override suspend fun startVerification(
         consumerSessionClientSecret: String,
+        type: VerificationType,
+        accountPhoneNumber: String?,
+        emailAddress: String?,
         isResendSmsCode: Boolean,
         apiConfiguration: ApiConfiguration.State,
     ) = startVerificationResult
@@ -236,6 +240,7 @@ internal open class FakeLinkRepository : LinkRepository {
     override suspend fun confirmVerification(
         verificationCode: String,
         consumerSessionClientSecret: String,
+        type: VerificationType,
         consentGranted: Boolean?,
         apiConfiguration: ApiConfiguration.State,
     ): Result<ConsumerSession> = confirmVerificationResult
