@@ -21,6 +21,12 @@ copy_test_results ".*/build/reports/androidTests/managedDevice$"
 copy_test_results ".*/build/outputs/androidTest-results/managedDevice$"
 copy_test_results ".*/build/test-results/testDebugUnitTest$"
 copy_test_results ".*/build/instrumentation-test-results$"
+for directory in /tmp/vdtesting_test_*
+do
+  if [ -d "$directory" ]; then
+    cp -R "$directory" "/tmp/test_results/"
+  fi
+done
 
 # If screenshots were requested, and it's a failure.
 if [ "$INCLUDE_SCREENSHOT_ON_FAILURE" == "true" ] && [ "$BITRISE_BUILD_STATUS" == 1 ]; then
