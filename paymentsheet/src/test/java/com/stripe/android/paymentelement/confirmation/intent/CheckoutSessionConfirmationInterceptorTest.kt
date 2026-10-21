@@ -102,7 +102,10 @@ class CheckoutSessionConfirmationInterceptorTest {
         } else {
             when (type) {
                 PaymentMethod.Type.Card -> bodyPart("payment_method_data[card][number]", "4242424242424242")
-                PaymentMethod.Type.Link -> bodyPart("payment_method_data[link][payment_details_id]", "payment_details_123")
+                PaymentMethod.Type.Link -> bodyPart(
+                    "payment_method_data[link][payment_details_id]",
+                    "payment_details_123",
+                )
                 PaymentMethod.Type.SepaDebit -> bodyPart("payment_method_data[sepa_debit][iban]", "my_iban")
                 else -> error("Unexpected test type: $type")
             }
