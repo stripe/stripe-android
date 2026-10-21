@@ -7,6 +7,7 @@ import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePr
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.FormFieldId
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.currentCoroutineContext
@@ -14,7 +15,7 @@ import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
@@ -30,16 +31,7 @@ internal class InlineAutocompleteController(
         ActiveByQuery, ActiveBySearch, Inactive
     }
 
-    private sealed class ActiveWork {
-        open fun cancel() {}
-        object None : ActiveWork()
-        class Predicting(val job: Job, val query: Pair<String, String>) : ActiveWork() {
-            override fun cancel() { job.cancel() }
-        }
-        class Selecting(val job: Job) : ActiveWork() {
-            override fun cancel() { job.cancel() }
-        }
-    }
+    private class PredictionWork(val job: Job, val query: Pair<String, String>)
 
     private var activationState: ActivationState = ActivationState.ActiveByQuery
     private var lastObservedCountry: String? = null
@@ -47,11 +39,8 @@ internal class InlineAutocompleteController(
     private var queryFlow: StateFlow<String>? = null
     private var countryFlow: StateFlow<String?>? = null
     private var observeJob: Job? = null
-    private var activeWork: ActiveWork = ActiveWork.None
-        set(value) {
-            field.cancel()
-            field = value
-        }
+    private var predictionWork: PredictionWork? = null
+    private var selectionJob: Job? = null
     var autocompleteFilledAddress: Address? = null
         private set
 
@@ -72,42 +61,34 @@ internal class InlineAutocompleteController(
         observeJob = coroutineScope.launch {
             combine(query, country) { q, c -> q to (c ?: "") }
                 .debounce(AutocompleteViewModel.SEARCH_DEBOUNCE_MS)
-                .collectLatest { (q, c) ->
-                    val countrySupported = isCountrySupported(c)
-                    val countryChanged = c != lastObservedCountry
-                    if (countryChanged) {
-                        lastObservedCountry = c
-                        if (!countrySupported) {
-                            cancelPredictionWork()
-                            _inlinePredictionsState.value =
-                                AutocompleteAddressInteractor.InlinePredictionsState.Idle
-                            eventListenerProvider()?.invoke(
-                                AutocompleteAddressInteractor.Event.OnValues(
-                                    mapOf(FormFieldId.Country to c)
-                                )
-                            )
-                            return@collectLatest
-                        }
-                    }
-                    if ((activeWork as? ActiveWork.Predicting)?.query == (q to c)) {
-                        return@collectLatest
-                    }
-                    cancelPredictionWork()
-                    if (!isQueryEligible(q, c)) {
-                        _inlinePredictionsState.value =
-                            AutocompleteAddressInteractor.InlinePredictionsState.Idle
-                        if (countryChanged && activationState != ActivationState.Inactive) {
-                            eventListenerProvider()?.invoke(
-                                AutocompleteAddressInteractor.Event.OnValues(
-                                    mapOf(FormFieldId.Country to c)
-                                )
-                            )
-                        }
-                        return@collectLatest
-                    }
-                    fetchPredictions(q, c)
-                }
+                .collect { (q, c) -> onQueryChanged(q, c) }
         }
+    }
+
+    private fun onQueryChanged(query: String, country: String) {
+        val countryChanged = country != lastObservedCountry
+        if (countryChanged) {
+            lastObservedCountry = country
+            if (!isCountrySupported(country)) {
+                cancelPredictionWork()
+                _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
+                eventListenerProvider()?.invoke(
+                    AutocompleteAddressInteractor.Event.OnValues(mapOf(FormFieldId.Country to country))
+                )
+                return
+            }
+        }
+        if (!isQueryEligible(query, country)) {
+            cancelPredictionWork()
+            _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
+            if (countryChanged && activationState != ActivationState.Inactive) {
+                eventListenerProvider()?.invoke(
+                    AutocompleteAddressInteractor.Event.OnValues(mapOf(FormFieldId.Country to country))
+                )
+            }
+            return
+        }
+        requestPredictions(query, country, isExplicitSearch = false)
     }
 
     fun onSearchActivated() {
@@ -115,13 +96,25 @@ internal class InlineAutocompleteController(
         activationState = ActivationState.ActiveBySearch
         val q = queryFlow?.value ?: return
         val c = countryFlow?.value ?: ""
-        if (!isQueryEligible(q, c)) return
-        val job = coroutineScope.launch { fetchPredictions(q, c) }
-        activeWork = ActiveWork.Predicting(job, q to c)
+        requestPredictions(q, c, isExplicitSearch = true)
+    }
+
+    private fun requestPredictions(query: String, country: String, isExplicitSearch: Boolean) {
+        if (!isQueryEligible(query, country)) return
+        if (!isExplicitSearch && predictionWork?.query == (query to country)) return
+        cancelPredictionWork()
+        if (isExplicitSearch) {
+            cancelSelectionWork()
+        }
+        val job = coroutineScope.launch(start = CoroutineStart.LAZY) { fetchPredictions(query, country) }
+        predictionWork = PredictionWork(job, query to country)
+        job.start()
     }
 
     fun onPredictionSelected(predictionId: String) {
-        val job = coroutineScope.launch {
+        cancelPredictionWork()
+        cancelSelectionWork()
+        val job = coroutineScope.launch(start = CoroutineStart.LAZY) {
             val locale = AppCompatDelegate.getApplicationLocales()[0] ?: Locale.getDefault()
             try {
                 val result = placesClient.fetchPlace(predictionId, locale)
@@ -134,7 +127,8 @@ internal class InlineAutocompleteController(
                 placesClient.resetSession()
             }
         }
-        activeWork = ActiveWork.Selecting(job)
+        selectionJob = job
+        job.start()
     }
 
     private fun handleFetchPlaceSuccess(address: Address) {
@@ -156,7 +150,8 @@ internal class InlineAutocompleteController(
     }
 
     fun onDismissed() {
-        activeWork = ActiveWork.None
+        cancelPredictionWork()
+        cancelSelectionWork()
         _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
         if (activationState == ActivationState.ActiveBySearch) {
             activationState = ActivationState.Inactive
@@ -168,6 +163,7 @@ internal class InlineAutocompleteController(
         // supported and unsupported countries still toggles the form's mode while the inline
         // field is unfocused (e.g. after the form has expanded to manual entry).
         predictionsPaused = true
+        cancelPredictionWork()
         _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
     }
 
@@ -181,7 +177,8 @@ internal class InlineAutocompleteController(
 
     fun expandFormFromInline() {
         activationState = ActivationState.Inactive
-        activeWork = ActiveWork.None
+        cancelPredictionWork()
+        cancelSelectionWork()
         _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
         emitExpandForm(
             query = queryFlow?.value,
@@ -191,14 +188,19 @@ internal class InlineAutocompleteController(
 
     fun dispose() {
         observeJob?.cancel()
-        activeWork = ActiveWork.None
+        cancelPredictionWork()
+        cancelSelectionWork()
         _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
     }
 
     private fun cancelPredictionWork() {
-        if (activeWork is ActiveWork.Predicting) {
-            activeWork = ActiveWork.None
-        }
+        predictionWork?.job?.cancel()
+        predictionWork = null
+    }
+
+    private fun cancelSelectionWork() {
+        selectionJob?.cancel()
+        selectionJob = null
     }
 
     private fun isQueryEligible(query: String, country: String): Boolean {
