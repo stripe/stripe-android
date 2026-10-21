@@ -29,8 +29,6 @@ dependencies {
     implementation libs.material
     implementation libs.retrofitKotlinSerializationConverter
 
-    debugImplementation libs.leakCanary
-
     testImplementation testLibs.junit
 
     androidTestImplementation testLibs.androidx.junit

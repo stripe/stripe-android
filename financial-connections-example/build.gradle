@@ -68,7 +68,6 @@ dependencies {
 
     debugImplementation libs.compose.uiTestManifest
     debugImplementation libs.compose.uiTooling
-    debugImplementation libs.leakCanary
 
     androidTestImplementation testLibs.espresso.core
     androidTestImplementation testLibs.androidx.composeUi

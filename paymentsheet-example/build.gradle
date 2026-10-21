@@ -60,7 +60,7 @@ android {
         applicationId "com.stripe.android.paymentsheet.example"
         versionCode 11
 
-        testInstrumentationRunner "com.stripe.android.utils.PaymentSheetTestRunner"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         buildConfigField "boolean", "IS_RUNNING_IN_CI", "$gradle.ext.isCi"
         buildConfigField "boolean", "DIRECTLY_TO_PLAYGROUND", "${directlyToPlayground()}"
@@ -144,7 +144,6 @@ dependencies {
 
     // Needed for createComposeRule, but not createAndroidComposeRule:
     debugImplementation libs.compose.uiTestManifest
-    debugImplementation libs.leakCanary
 
     testImplementation testLibs.junit
     testImplementation testLibs.truth
@@ -176,6 +175,5 @@ dependencies {
     androidTestImplementation testLibs.espresso.core
     androidTestImplementation testLibs.espresso.intents
     androidTestImplementation testLibs.espresso.web
-    androidTestImplementation testLibs.leakCanaryInstrumentation
     androidTestImplementation testLibs.truth
 }
