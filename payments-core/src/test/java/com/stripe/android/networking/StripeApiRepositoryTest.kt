@@ -3050,7 +3050,7 @@ internal class StripeApiRepositoryTest {
     }
 
     @Test
-    fun createConfirmationToken_withAttribution_setsCorrectPaymentUserAgent() = runTest {
+    fun createConfirmationToken_withAttribution_includesPaymentMethodAndFraudData() = runTest {
         val stripeResponse = StripeResponse(
             200,
             "",
@@ -3061,10 +3061,18 @@ internal class StripeApiRepositoryTest {
 
         val productUsage = "TestProductUsage"
         val attribution = "example_product_usage"
+        val fraudDetectionData = FraudDetectionData(
+            guid = "guid",
+            muid = "muid",
+            sid = "sid",
+        )
+        whenever(fraudDetectionDataRepository.getCached()).thenReturn(fraudDetectionData)
+
+        val paymentMethodData = PaymentMethodCreateParamsFixtures.DEFAULT_CARD.copy(
+            productUsage = setOf(attribution)
+        )
         val confirmationTokenParams = ConfirmationTokenParams(
-            paymentMethodData = PaymentMethodCreateParamsFixtures.DEFAULT_CARD.copy(
-                productUsage = setOf(attribution)
-            ),
+            paymentMethodData = paymentMethodData,
             returnUrl = "https://example.com/return"
         )
 
@@ -3076,9 +3084,13 @@ internal class StripeApiRepositoryTest {
         verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
         val apiRequest = apiRequestArgumentCaptor.firstValue
         val paymentMethodDataParams =
-            apiRequest.params?.get("payment_method_data") as Map<*, *>
+            apiRequest.params?.get(ConfirmStripeIntentParams.PARAM_PAYMENT_METHOD_DATA) as Map<*, *>
+        assertThat(paymentMethodDataParams).containsAtLeastEntriesIn(paymentMethodData.toParamMap())
         assertThat(paymentMethodDataParams["payment_user_agent"])
             .isEqualTo("stripe-android/${StripeSdkVersion.VERSION_NAME};$productUsage;$attribution")
+        assertThat(paymentMethodDataParams).containsAtLeastEntriesIn(fraudDetectionData.params)
+        assertThat(apiRequest.params?.get("return_url"))
+            .isEqualTo(confirmationTokenParams.returnUrl)
 
         verifyAnalyticsRequest(
             event = PaymentAnalyticsEvent.ConfirmationTokenCreate,

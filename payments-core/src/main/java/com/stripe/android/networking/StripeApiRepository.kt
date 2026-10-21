@@ -613,15 +613,11 @@ class StripeApiRepository @JvmOverloads internal constructor(
         paymentMethodCreateParams: PaymentMethodCreateParams,
         options: ApiRequest.Options
     ): Result<PaymentMethod> {
-        fireFraudDetectionDataRequest()
-
         return fetchStripeModelResult(
             apiRequestFactory.createPost(
                 paymentMethodsUrl,
                 options,
-                paymentMethodCreateParams.toParamMap()
-                    .plus(buildPaymentUserAgentPair(paymentMethodCreateParams.attribution))
-                    .plus(fraudDetectionData?.params.orEmpty())
+                buildPaymentMethodData(paymentMethodCreateParams)
             ),
             PaymentMethodJsonParser()
         ) {
@@ -734,14 +730,16 @@ class StripeApiRepository @JvmOverloads internal constructor(
         confirmationTokenParams: ConfirmationTokenParams,
         options: ApiRequest.Options
     ): Result<ConfirmationToken> {
+        val params = confirmationTokenParams.toParamMap().toMutableMap()
+        confirmationTokenParams.paymentMethodData?.let {
+            params[ConfirmStripeIntentParams.PARAM_PAYMENT_METHOD_DATA] = buildPaymentMethodData(it)
+        }
+
         return fetchStripeModelResult(
             apiRequestFactory.createPost(
                 confirmationTokensUrl,
                 options,
-                maybeAddPaymentUserAgent(
-                    confirmationTokenParams.toParamMap(),
-                    confirmationTokenParams.paymentMethodData
-                )
+                params
             ),
             ConfirmationTokenJsonParser()
         ) {
@@ -1923,6 +1921,16 @@ class StripeApiRepository @JvmOverloads internal constructor(
 
     private fun buildPaymentUserAgentPair(attribution: Set<String> = emptySet()) =
         PAYMENT_USER_AGENT to buildPaymentUserAgent(attribution)
+
+    private fun buildPaymentMethodData(
+        paymentMethodCreateParams: PaymentMethodCreateParams
+    ): Map<String, Any> {
+        fireFraudDetectionDataRequest()
+
+        return paymentMethodCreateParams.toParamMap()
+            .plus(buildPaymentUserAgentPair(paymentMethodCreateParams.attribution))
+            .plus(fraudDetectionData?.params.orEmpty())
+    }
 
     override fun buildPaymentUserAgent(attribution: Set<String>): String {
         return setOf("stripe-android/${StripeSdkVersion.VERSION_NAME}")
