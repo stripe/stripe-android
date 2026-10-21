@@ -121,7 +121,7 @@ internal class LinkControllerInteractor @Inject constructor(
     private fun createPaymentMethodForPresentResult() {
         coroutineScope.launch {
             createPaymentMethodMutex.withLock {
-                val pmResult = performCreatePaymentMethod(apiKey = null)
+                val pmResult = performCreatePaymentMethod(apiKey = null).map { it.paymentMethod }
                 updateState { it.copy(createdPaymentMethod = pmResult.getOrNull()) }
                 val presentResult = pmResult.fold(
                     onSuccess = { pm -> LinkController.PresentResult.Completed(pm) },
@@ -583,10 +583,19 @@ internal class LinkControllerInteractor @Inject constructor(
     }
 
     suspend fun createPaymentMethod(apiKey: String? = null): LinkController.CreatePaymentMethodResult {
-        val paymentMethodResult = performCreatePaymentMethod(apiKey)
+        val paymentMethodResult = performCreatePaymentMethod(apiKey).map { it.paymentMethod }
         updateState { it.copy(createdPaymentMethod = paymentMethodResult.getOrNull()) }
         return paymentMethodResult.fold(
             onSuccess = { LinkController.CreatePaymentMethodResult.Success(it) },
+            onFailure = { LinkController.CreatePaymentMethodResult.Failed(it) },
+        )
+    }
+
+    suspend fun createPaymentMethodForOnramp(apiKey: String): LinkController.CreatePaymentMethodResult {
+        val result = performCreatePaymentMethod(apiKey)
+        updateState { it.copy(createdPaymentMethod = result.getOrNull()?.paymentMethod) }
+        return result.fold(
+            onSuccess = { LinkController.CreatePaymentMethodResult.Success(it.paymentMethod, it.details) },
             onFailure = { LinkController.CreatePaymentMethodResult.Failed(it) },
         )
     }
@@ -731,7 +740,12 @@ internal class LinkControllerInteractor @Inject constructor(
         )
     }
 
-    private suspend fun performCreatePaymentMethod(apiKey: String?): Result<PaymentMethod> {
+    private data class CreatedPaymentMethod(
+        val paymentMethod: PaymentMethod,
+        val details: PaymentMethodPreviewDetails?,
+    )
+
+    private suspend fun performCreatePaymentMethod(apiKey: String?): Result<CreatedPaymentMethod> {
         val state = _state.value
         val component = requireLinkComponent(state)
             .getOrElse { return Result.failure(it) }
@@ -739,7 +753,8 @@ internal class LinkControllerInteractor @Inject constructor(
         val paymentMethod = state.selectedPaymentMethod
             ?: return Result.failure(IllegalStateException("No selected payment method"))
 
-        return if (configuration.passthroughModeEnabled) {
+        val details = paymentMethod.details.toPaymentMethodPreviewDetails()
+        val result = if (configuration.passthroughModeEnabled) {
             component.linkAccountManager.sharePaymentDetails(
                 paymentDetailsId = paymentMethod.details.id,
                 expectedPaymentMethodType = computeExpectedPaymentMethodType(configuration, paymentMethod.details),
@@ -755,6 +770,7 @@ internal class LinkControllerInteractor @Inject constructor(
                 linkPaymentMethod = paymentMethod
             )
         }
+        return result.map { CreatedPaymentMethod(it, details) }
     }
 
     private fun LinkAttestationCheck.Result.toResult(): Result<Unit> =
@@ -826,6 +842,17 @@ sealed interface PaymentMethodPreviewDetails {
         val last4: String
     ) : PaymentMethodPreviewDetails
 }
+
+internal fun ConsumerPaymentDetails.PaymentDetails.toPaymentMethodPreviewDetails(): PaymentMethodPreviewDetails? =
+    when (this) {
+        is ConsumerPaymentDetails.Card -> PaymentMethodPreviewDetails.Card(brand, funding.code, last4)
+        is ConsumerPaymentDetails.BankAccount -> PaymentMethodPreviewDetails.BankAccount(
+            bankIconCode = null,
+            bankName = null,
+            last4 = last4,
+        )
+        is ConsumerPaymentDetails.Generic, is ConsumerPaymentDetails.Passthrough -> null
+    }
 
 internal fun PaymentMethodPreviewDetails.toPreview(
     context: Context,

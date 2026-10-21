@@ -84,7 +84,7 @@ class LinkController @Inject internal constructor(
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun createPaymentMethodForOnramp(apiKey: String): CreatePaymentMethodResult {
-        return interactor.createPaymentMethod(apiKey)
+        return interactor.createPaymentMethodForOnramp(apiKey)
     }
 
     /**
@@ -623,10 +623,19 @@ class LinkController @Inject internal constructor(
 
         /**
          * The payment method was created successfully.
+         *
+         * @param paymentMethod The created payment method.
+         * @param paymentMethodDetails A bounded snapshot of the underlying instrument captured for
+         * onramp creation. Null for other creation paths or unsupported instrument details.
          */
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Poko
-        class Success internal constructor(val paymentMethod: PaymentMethod) : CreatePaymentMethodResult
+        class Success internal constructor(
+            val paymentMethod: PaymentMethod,
+            val paymentMethodDetails: PaymentMethodPreviewDetails?,
+        ) : CreatePaymentMethodResult {
+            internal constructor(paymentMethod: PaymentMethod) : this(paymentMethod, null)
+        }
 
         /**
          * An error occurred while creating the payment method.

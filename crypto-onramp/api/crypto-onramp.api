@@ -331,6 +331,11 @@ public final class com/stripe/android/crypto/onramp/model/OnrampAuthorizeResult$
 	public final fun getError ()Ljava/lang/Throwable;
 }
 
+public final class com/stripe/android/crypto/onramp/model/OnrampBankAccountDetails {
+	public static final field $stable I
+	public final fun getLast4 ()Ljava/lang/String;
+}
+
 public final class com/stripe/android/crypto/onramp/model/OnrampCallbacks {
 	public static final field $stable I
 	public fun <init> ()V
@@ -437,6 +442,7 @@ public abstract interface class com/stripe/android/crypto/onramp/model/OnrampCre
 
 public final class com/stripe/android/crypto/onramp/model/OnrampCreateCryptoPaymentTokenResult$Completed : com/stripe/android/crypto/onramp/model/OnrampCreateCryptoPaymentTokenResult {
 	public static final field $stable I
+	public final fun getBankAccountDetails ()Lcom/stripe/android/crypto/onramp/model/OnrampBankAccountDetails;
 	public final fun getCardDetails ()Lcom/stripe/android/crypto/onramp/model/OnrampCardDetails;
 	public final fun getCryptoPaymentToken ()Ljava/lang/String;
 }

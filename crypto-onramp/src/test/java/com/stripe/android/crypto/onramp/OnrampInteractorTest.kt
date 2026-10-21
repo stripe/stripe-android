@@ -94,6 +94,7 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.identity.IdentityVerificationSheet.VerificationFlowResult
 import com.stripe.android.link.LinkAppearance
 import com.stripe.android.link.LinkController
+import com.stripe.android.link.PaymentMethodPreviewDetails
 import com.stripe.android.link.exceptions.LinkUnavailableException
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardFunding
@@ -1669,6 +1670,7 @@ class OnrampInteractorTest {
         val result = interactor.createCryptoPaymentToken() as OnrampCreateCryptoPaymentTokenResult.Completed
 
         assertThat(result.cryptoPaymentToken).isEqualTo("test-token")
+        assertThat(result.bankAccountDetails).isNull()
         if (cardCase.card == null) {
             assertThat(result.cardDetails).isNull()
         } else {
@@ -1830,6 +1832,167 @@ class OnrampInteractorTest {
         collectWallet(PaymentMethodType.GooglePay, walletPaymentMethod(card = null))
         val result = interactor.createCryptoPaymentToken() as OnrampCreateCryptoPaymentTokenResult.Completed
         assertThat(result.cardDetails).isNull()
+    }
+
+    @Test
+    fun `Link cards expose original funding details with the token`(
+        @TestParameter funding: CardFunding,
+    ) = runWalletTokenScenario {
+        selectLinkInstrument(PaymentMethodPreviewDetails.Card(CardBrand.MasterCard, funding.code, "4444"))
+
+        val result = interactor.createCryptoPaymentToken() as OnrampCreateCryptoPaymentTokenResult.Completed
+
+        assertThat(result.cryptoPaymentToken).isEqualTo("test-token")
+        assertThat(result.cardDetails?.funding).isEqualTo(funding)
+        assertThat(result.cardDetails?.brand).isEqualTo(CardBrand.MasterCard)
+        assertThat(result.cardDetails?.last4).isEqualTo("4444")
+        assertThat(result.bankAccountDetails).isNull()
+        verify(linkController).createPaymentMethodForOnramp("pk_test_wallet")
+        verify(cryptoApiRepository).createPaymentToken("test-customer", "test-payment-method", null)
+    }
+
+    @Test
+    fun `Link ACH returns bank details even when the returned PaymentMethod is a card`() = runWalletTokenScenario {
+        selectLinkInstrument(PaymentMethodPreviewDetails.BankAccount(null, null, "6789"))
+
+        val result = interactor.createCryptoPaymentToken() as OnrampCreateCryptoPaymentTokenResult.Completed
+
+        assertThat(result.cryptoPaymentToken).isEqualTo("test-token")
+        assertThat(result.cardDetails).isNull()
+        assertThat(result.bankAccountDetails?.last4).isEqualTo("6789")
+        verify(linkController).createPaymentMethodForOnramp("pk_test_wallet")
+        verify(cryptoApiRepository).createPaymentToken("test-customer", "test-payment-method", null)
+    }
+
+    @Test
+    fun `Link unavailable metadata never falls back to the returned card wrapper`() = runWalletTokenScenario {
+        selectLinkInstrument(null)
+
+        val result = interactor.createCryptoPaymentToken() as OnrampCreateCryptoPaymentTokenResult.Completed
+
+        assertThat(result.cryptoPaymentToken).isEqualTo("test-token")
+        assertThat(result.cardDetails).isNull()
+        assertThat(result.bankAccountDetails).isNull()
+    }
+
+    @Test
+    fun `Link unrecognized funding is unknown`() = runWalletTokenScenario {
+        selectLinkInstrument(PaymentMethodPreviewDetails.Card(CardBrand.Visa, "unrecognized", "4242"))
+
+        val result = interactor.createCryptoPaymentToken() as OnrampCreateCryptoPaymentTokenResult.Completed
+
+        assertThat(result.cardDetails?.funding).isEqualTo(CardFunding.Unknown)
+        assertThat(result.bankAccountDetails).isNull()
+    }
+
+    @Test
+    fun `Link token keeps original card when selection changes during creation`(
+        @TestParameter waitForLink: Boolean,
+    ) = runWalletTokenScenario {
+        val original = selectLinkInstrument(PaymentMethodPreviewDetails.Card(CardBrand.Visa, "DEBIT", "4242"))
+        val resume = CompletableDeferred<Unit>()
+        whenever(linkController.createPaymentMethodForOnramp("pk_test_wallet")).doSuspendableAnswer {
+            if (waitForLink) resume.await()
+            original
+        }
+        whenever(cryptoApiRepository.createPaymentToken("test-customer", "test-payment-method", null))
+            .doSuspendableAnswer {
+                if (!waitForLink) resume.await()
+                Result.success(CreatePaymentTokenResponse("test-token"))
+            }
+        val request = async(start = CoroutineStart.UNDISPATCHED) { interactor.createCryptoPaymentToken() }
+        assertThat(request.isCompleted).isFalse()
+        verify(linkController).createPaymentMethodForOnramp("pk_test_wallet")
+        collectWallet(PaymentMethodType.GooglePay, walletPaymentMethod(card = WalletCardCase.Credit.card))
+        resume.complete(Unit)
+
+        val result = request.await() as OnrampCreateCryptoPaymentTokenResult.Completed
+
+        assertThat(result.cardDetails?.funding).isEqualTo(CardFunding.Debit)
+        assertThat(result.cardDetails?.last4).isEqualTo("4242")
+        assertThat(result.bankAccountDetails).isNull()
+        verify(cryptoApiRepository).createPaymentToken("test-customer", "test-payment-method", null)
+    }
+
+    @Test
+    fun `Link card to bank replacement cannot change in-flight token metadata`() = runWalletTokenScenario {
+        selectLinkInstrument(PaymentMethodPreviewDetails.Card(CardBrand.Visa, "debit", "4242"))
+        val response = CompletableDeferred<Result<CreatePaymentTokenResponse>>()
+        whenever(cryptoApiRepository.createPaymentToken("test-customer", "test-payment-method", null))
+            .doSuspendableAnswer { response.await() }
+        val request = async(start = CoroutineStart.UNDISPATCHED) { interactor.createCryptoPaymentToken() }
+        assertThat(request.isCompleted).isFalse()
+        verify(cryptoApiRepository).createPaymentToken("test-customer", "test-payment-method", null)
+        selectLinkInstrument(PaymentMethodPreviewDetails.BankAccount(null, null, "6789"))
+        response.complete(Result.success(CreatePaymentTokenResponse("test-token")))
+
+        val original = request.await() as OnrampCreateCryptoPaymentTokenResult.Completed
+        val replacement = interactor.createCryptoPaymentToken() as OnrampCreateCryptoPaymentTokenResult.Completed
+
+        assertThat(original.cardDetails?.funding).isEqualTo(CardFunding.Debit)
+        assertThat(original.bankAccountDetails).isNull()
+        assertThat(replacement.cardDetails).isNull()
+        assertThat(replacement.bankAccountDetails?.last4).isEqualTo("6789")
+    }
+
+    @Test
+    fun `Link token failure does not publish bank metadata`() = runWalletTokenScenario {
+        selectLinkInstrument(PaymentMethodPreviewDetails.BankAccount(null, null, "6789"))
+        whenever(cryptoApiRepository.createPaymentToken("test-customer", "test-payment-method", null))
+            .thenReturn(Result.failure(IllegalStateException("test failure")))
+
+        assertThat(interactor.createCryptoPaymentToken())
+            .isInstanceOf(OnrampCreateCryptoPaymentTokenResult.Failed::class.java)
+    }
+
+    @Test
+    fun `replacing Link bank with wallet clears bank metadata`() = runWalletTokenScenario {
+        selectLinkInstrument(PaymentMethodPreviewDetails.BankAccount(null, null, "6789"))
+        val bank = interactor.createCryptoPaymentToken() as OnrampCreateCryptoPaymentTokenResult.Completed
+        assertThat(bank.bankAccountDetails?.last4).isEqualTo("6789")
+        collectWallet(PaymentMethodType.SamsungPay, walletPaymentMethod())
+
+        val result = interactor.createCryptoPaymentToken() as OnrampCreateCryptoPaymentTokenResult.Completed
+
+        assertThat(result.cardDetails?.funding).isEqualTo(CardFunding.Debit)
+        assertThat(result.bankAccountDetails).isNull()
+    }
+
+    @Test
+    fun `Link bank cancellation retains selection while logout clears it`() = runWalletTokenScenario {
+        selectLinkInstrument(PaymentMethodPreviewDetails.BankAccount(null, null, "6789"))
+        val first = interactor.createCryptoPaymentToken() as OnrampCreateCryptoPaymentTokenResult.Completed
+        assertThat(first.bankAccountDetails?.last4).isEqualTo("6789")
+        val canceled = interactor.handlePresentPaymentMethodsResult(
+            LinkController.PresentPaymentMethodsResult.Canceled,
+            RuntimeEnvironment.getApplication(),
+        )
+        assertThat(canceled).isInstanceOf(OnrampCollectPaymentMethodResult.Cancelled::class.java)
+        val retained = interactor.createCryptoPaymentToken() as OnrampCreateCryptoPaymentTokenResult.Completed
+        assertThat(retained.bankAccountDetails?.last4).isEqualTo("6789")
+        whenever(linkController.logOut()).thenReturn(mock<LinkController.LogOutResult.Success>())
+
+        interactor.logOut()
+
+        assertThat(interactor.state.value.selectedPaymentSource).isNull()
+        assertThat(interactor.createCryptoPaymentToken())
+            .isInstanceOf(OnrampCreateCryptoPaymentTokenResult.Failed::class.java)
+    }
+
+    private suspend fun selectLinkInstrument(
+        details: PaymentMethodPreviewDetails?,
+    ): LinkController.CreatePaymentMethodResult.Success {
+        whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithSelectedPaymentPreview()))
+        interactor.handlePresentPaymentMethodsResult(
+            LinkController.PresentPaymentMethodsResult.Success,
+            RuntimeEnvironment.getApplication(),
+        )
+        val result = mock<LinkController.CreatePaymentMethodResult.Success> {
+            on { paymentMethod } doReturn walletPaymentMethod()
+            on { paymentMethodDetails } doReturn details
+        }
+        whenever(linkController.createPaymentMethodForOnramp("pk_test_wallet")).thenReturn(result)
+        return result
     }
 
     private fun runWalletTokenScenario(block: suspend TestScope.() -> Unit) = runTest {

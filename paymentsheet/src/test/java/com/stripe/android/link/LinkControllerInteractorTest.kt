@@ -5,6 +5,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.google.testing.junit.testparameterinjector.TestParameter
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.link.account.FakeLinkAccountManager
@@ -17,8 +18,11 @@ import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.link.injection.LinkMetadata
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.CardBrand
+import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.model.SharePaymentDetails
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
@@ -30,8 +34,10 @@ import com.stripe.android.utils.FakeActivityResultLauncher
 import com.stripe.android.utils.FakeLinkComponent
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -42,7 +48,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
-import org.robolectric.RobolectricTestRunner
+import org.robolectric.RobolectricTestParameterInjector
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 import java.util.Optional
@@ -51,7 +57,7 @@ import kotlin.jvm.optionals.getOrNull
 
 @Suppress("LargeClass")
 @ExperimentalCoroutinesApi
-@RunWith(RobolectricTestRunner::class)
+@RunWith(RobolectricTestParameterInjector::class)
 class LinkControllerInteractorTest {
     private val dispatcher = UnconfinedTestDispatcher()
 
@@ -410,6 +416,206 @@ class LinkControllerInteractorTest {
         interactor.state(application).test {
             assertThat(awaitItem().createdPaymentMethod).isNull()
         }
+    }
+
+    @Test
+    fun `onramp creation returns the underlying card details`(
+        @TestParameter passthrough: Boolean,
+        @TestParameter funding: ConsumerPaymentDetails.Card.Funding,
+        @TestParameter newlyEntered: Boolean,
+    ) = runTest {
+        val interactor = createInteractor()
+        configure(interactor, passthroughModeEnabled = passthrough)
+        val card = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(
+            funding = funding, brand = CardBrand.Visa, last4 = "4242",
+        )
+        val selected = if (newlyEntered) {
+            LinkPaymentMethod.LinkPaymentDetails(
+                LinkPaymentDetails.New(
+                    paymentDetails = card,
+                    confirmParams = TestFactory.LINK_NEW_PAYMENT_DETAILS.confirmParams,
+                    originalParams = TestFactory.LINK_NEW_PAYMENT_DETAILS.originalParams,
+                ),
+                collectedCvc = null,
+                billingPhone = null,
+            )
+        } else {
+            selectedInstrument(card)
+        }
+        interactor.updateState { it.copy(selectedPaymentMethod = selected) }
+
+        val result = interactor.createPaymentMethodForOnramp("pk_test_wallet")
+            as LinkController.CreatePaymentMethodResult.Success
+
+        assertThat(result.paymentMethodDetails).isEqualTo(
+            PaymentMethodPreviewDetails.Card(CardBrand.Visa, funding.code, "4242")
+        )
+        assertThat(interactor.lastCreatedPaymentMethod).isSameInstanceAs(result.paymentMethod)
+        assertCreationCall(passthrough, selected)
+    }
+
+    @Test
+    fun `onramp bank metadata does not come from the returned card wrapper`(
+        @TestParameter passthrough: Boolean,
+    ) = runTest {
+        val interactor = createInteractor()
+        configure(interactor, passthroughModeEnabled = passthrough)
+        stubSharedCardWrapper()
+        val selected = selectedInstrument(TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT.copy(last4 = "6789"))
+        interactor.updateState { it.copy(selectedPaymentMethod = selected) }
+
+        val result = interactor.createPaymentMethodForOnramp("pk_test_wallet")
+            as LinkController.CreatePaymentMethodResult.Success
+
+        assertThat(result.paymentMethod.card).isNotNull()
+        assertThat(result.paymentMethodDetails).isEqualTo(
+            PaymentMethodPreviewDetails.BankAccount(bankIconCode = null, bankName = null, last4 = "6789")
+        )
+        assertCreationCall(passthrough, selected)
+    }
+
+    @Test
+    fun `unsupported underlying instruments do not infer metadata from the created card`(
+        @TestParameter passthrough: Boolean,
+        @TestParameter generic: Boolean,
+    ) = runTest {
+        val interactor = createInteractor()
+        configure(interactor, passthroughModeEnabled = passthrough)
+        stubSharedCardWrapper()
+        val selected = selectedInstrument(
+            if (generic) {
+                TestFactory.CONSUMER_PAYMENT_DETAILS_GENERIC
+            } else {
+                TestFactory.CONSUMER_PAYMENT_DETAILS_PASSTHROUGH
+            }
+        )
+        interactor.updateState { it.copy(selectedPaymentMethod = selected) }
+
+        val result = interactor.createPaymentMethodForOnramp("pk_test_wallet")
+            as LinkController.CreatePaymentMethodResult.Success
+
+        assertThat(result.paymentMethod.card).isNotNull()
+        assertThat(result.paymentMethodDetails).isNull()
+        assertCreationCall(passthrough, selected)
+    }
+
+    @Test
+    fun `onramp metadata follows the captured selection during create or share`(
+        @TestParameter passthrough: Boolean,
+        @TestParameter replaceWithBank: Boolean,
+    ) = runTest {
+        val interactor = createInteractor()
+        configure(interactor, passthroughModeEnabled = passthrough)
+        val selected = selectedInstrument(
+            TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(funding = ConsumerPaymentDetails.Card.Funding.Debit)
+        )
+        interactor.updateState { it.copy(selectedPaymentMethod = selected) }
+        val resume = CompletableDeferred<Unit>()
+        linkAccountManager.createPaymentMethodResultProvider = {
+            resume.await()
+            linkAccountManager.createPaymentMethodResult
+        }
+        linkAccountManager.sharePaymentDetailsResultProvider = {
+            resume.await()
+            linkAccountManager.sharePaymentDetails
+        }
+        val request = async(start = CoroutineStart.UNDISPATCHED) {
+            interactor.createPaymentMethodForOnramp("pk_test_wallet")
+        }
+        assertThat(request.isCompleted).isFalse()
+        assertCreationCall(passthrough, selected)
+        val replacement = if (replaceWithBank) {
+            TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT
+        } else {
+            TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(funding = ConsumerPaymentDetails.Card.Funding.Credit)
+        }
+        interactor.updateState { it.copy(selectedPaymentMethod = selectedInstrument(replacement)) }
+        resume.complete(Unit)
+
+        val result = request.await() as LinkController.CreatePaymentMethodResult.Success
+
+        val details = result.paymentMethodDetails as PaymentMethodPreviewDetails.Card
+        assertThat(details.funding).isEqualTo(ConsumerPaymentDetails.Card.Funding.Debit.code)
+        assertThat(details.last4).isEqualTo(selected.details.last4)
+        assertThat(interactor.lastCreatedPaymentMethod).isSameInstanceAs(result.paymentMethod)
+        linkAccountManager.createPaymentMethodCalls.ensureAllEventsConsumed()
+        linkAccountManager.sharePaymentDetailsCalls.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `failed onramp creation clears created method without publishing metadata`(
+        @TestParameter passthrough: Boolean,
+    ) = runTest {
+        val interactor = createInteractor()
+        configure(interactor, passthroughModeEnabled = passthrough)
+        val selected = createTestPaymentMethod()
+        interactor.updateState {
+            it.copy(selectedPaymentMethod = selected, createdPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        }
+        val error = IllegalStateException("test failure")
+        linkAccountManager.createPaymentMethodResult = Result.failure(error)
+        linkAccountManager.sharePaymentDetails = Result.failure(error)
+
+        val result = interactor.createPaymentMethodForOnramp("pk_test_wallet")
+
+        assertThat((result as LinkController.CreatePaymentMethodResult.Failed).error).isSameInstanceAs(error)
+        assertThat(interactor.lastCreatedPaymentMethod).isNull()
+        assertCreationCall(passthrough, selected)
+    }
+
+    @Test
+    fun `onramp creation rejects missing setup`(
+        @TestParameter configured: Boolean,
+    ) = runTest {
+        val interactor = createInteractor()
+        if (configured) {
+            configure(interactor)
+        }
+
+        val result = interactor.createPaymentMethodForOnramp("pk_test_wallet")
+
+        assertThat(result).isInstanceOf(LinkController.CreatePaymentMethodResult.Failed::class.java)
+        assertThat(interactor.lastCreatedPaymentMethod).isNull()
+        linkAccountManager.createPaymentMethodCalls.ensureAllEventsConsumed()
+        linkAccountManager.sharePaymentDetailsCalls.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `payment method only success constructor remains available`() {
+        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        val constructor = LinkController.CreatePaymentMethodResult.Success::class.java
+            .getConstructor(com.stripe.android.model.PaymentMethod::class.java)
+
+        val result = constructor.newInstance(paymentMethod)
+
+        assertThat(result.paymentMethod).isSameInstanceAs(paymentMethod)
+        assertThat(result.paymentMethodDetails).isNull()
+    }
+
+    private fun stubSharedCardWrapper() {
+        linkAccountManager.sharePaymentDetails = Result.success(
+            SharePaymentDetails(
+                paymentMethodId = "test-wrapper",
+                encodedPaymentMethod = """
+                    {"id":"test-wrapper","type":"card","card":{"brand":"visa","last4":"1111"}}
+                """.trimIndent(),
+            )
+        )
+    }
+
+    private fun selectedInstrument(details: ConsumerPaymentDetails.PaymentDetails): LinkPaymentMethod =
+        LinkPaymentMethod.ConsumerPaymentDetails(details, collectedCvc = null, billingPhone = null)
+
+    private suspend fun assertCreationCall(passthrough: Boolean, selected: LinkPaymentMethod) {
+        if (passthrough) {
+            val call = linkAccountManager.sharePaymentDetailsCalls.awaitItem()
+            assertThat(call.paymentDetailsId).isEqualTo(selected.details.id)
+            assertThat(call.apiKey).isEqualTo("pk_test_wallet")
+        } else {
+            assertThat(linkAccountManager.createPaymentMethodCalls.awaitItem()).isSameInstanceAs(selected)
+        }
+        linkAccountManager.createPaymentMethodCalls.ensureAllEventsConsumed()
+        linkAccountManager.sharePaymentDetailsCalls.ensureAllEventsConsumed()
     }
 
     @Test

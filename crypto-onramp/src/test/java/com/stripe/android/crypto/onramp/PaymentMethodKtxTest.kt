@@ -1,6 +1,8 @@
 package com.stripe.android.crypto.onramp
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.crypto.onramp.model.OnrampBankAccountDetails
+import com.stripe.android.crypto.onramp.model.OnrampCardDetails
 import com.stripe.android.crypto.onramp.model.OnrampCreateCryptoPaymentTokenResult
 import com.stripe.android.crypto.onramp.model.onrampCardDetails
 import com.stripe.android.crypto.onramp.model.platformPayKycInfo
@@ -8,6 +10,7 @@ import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardFunding
 import com.stripe.android.model.PaymentMethod
+import org.junit.Assert.assertThrows
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -344,6 +347,29 @@ class PaymentMethodKtxTest {
         val constructor = OnrampCreateCryptoPaymentTokenResult.Completed::class.java
             .getConstructor(String::class.java)
         assertThat(constructor.newInstance("test-token").cryptoPaymentToken).isEqualTo("test-token")
+    }
+
+    @Test
+    fun `card result constructor remains available`() {
+        val card = cardPaymentMethod("debit").onrampCardDetails()
+        val constructor = OnrampCreateCryptoPaymentTokenResult.Completed::class.java
+            .getConstructor(String::class.java, OnrampCardDetails::class.java)
+
+        val result = constructor.newInstance("test-token", card)
+
+        assertThat(result.cardDetails).isSameInstanceAs(card)
+        assertThat(result.bankAccountDetails).isNull()
+    }
+
+    @Test
+    fun `token result rejects simultaneous card and bank summaries`() {
+        assertThrows(IllegalArgumentException::class.java) {
+            OnrampCreateCryptoPaymentTokenResult.Completed(
+                "test-token",
+                cardPaymentMethod("debit").onrampCardDetails(),
+                OnrampBankAccountDetails("6789"),
+            )
+        }
     }
 
     private fun cardPaymentMethod(funding: String?): PaymentMethod = PaymentMethod.Builder()

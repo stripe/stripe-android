@@ -113,6 +113,14 @@ internal open class FakeLinkAccountManager(
     }
     val createPaymentMethodCalls = Turbine<LinkPaymentMethod>()
     var sharePaymentDetails: Result<SharePaymentDetails> = Result.success(TestFactory.LINK_SHARE_PAYMENT_DETAILS)
+    var sharePaymentDetailsResultProvider: suspend () -> Result<SharePaymentDetails> = { sharePaymentDetails }
+    val sharePaymentDetailsCalls = Turbine<SharePaymentDetailsCall>()
+
+    data class SharePaymentDetailsCall(
+        val paymentDetailsId: String,
+        val apiKey: String?,
+    )
+
     var updatePaymentDetailsResult = Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS)
     var updatePhoneNumberResult: Result<LinkAccount> = Result.success(TestFactory.LINK_ACCOUNT)
     var deletePaymentDetailsResult: Result<Unit> = Result.success(Unit)
@@ -259,7 +267,8 @@ internal open class FakeLinkAccountManager(
         allowRedisplay: String?,
         apiKey: String?
     ): Result<SharePaymentDetails> {
-        return sharePaymentDetails
+        sharePaymentDetailsCalls.add(SharePaymentDetailsCall(paymentDetailsId, apiKey))
+        return sharePaymentDetailsResultProvider()
     }
 
     override suspend fun createLinkAccountSession(): Result<LinkAccountSession> {

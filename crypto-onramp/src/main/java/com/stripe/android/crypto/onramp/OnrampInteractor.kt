@@ -39,6 +39,7 @@ import com.stripe.android.crypto.onramp.model.KycSubmission
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampAttachKycInfoResult
 import com.stripe.android.crypto.onramp.model.OnrampAuthorizeResult
+import com.stripe.android.crypto.onramp.model.OnrampBankAccountDetails
 import com.stripe.android.crypto.onramp.model.OnrampCardDetails
 import com.stripe.android.crypto.onramp.model.OnrampCheckoutResult
 import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentMethodResult
@@ -82,7 +83,9 @@ import com.stripe.android.crypto.onramp.ui.VerifyKycActivityResult
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.link.LinkController
+import com.stripe.android.link.PaymentMethodPreviewDetails
 import com.stripe.android.link.ui.wallet.paymentOptionLabel
+import com.stripe.android.model.CardFunding
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
@@ -756,40 +759,46 @@ internal class OnrampInteractor @Inject constructor(
 
                 validateWalletAccount(selected, platformPublishableKey)
 
-                val paymentMethodId = when (selected) {
+                val paymentSource = when (selected) {
                     SelectedPaymentSource.Link -> {
                         when (
                             val result = linkController.createPaymentMethodForOnramp(apiKey = platformPublishableKey)
                         ) {
                             is LinkController.CreatePaymentMethodResult.Success -> {
-                                result.paymentMethod.id
+                                result.toTokenPaymentSource()
                             }
                             is LinkController.CreatePaymentMethodResult.Failed -> {
                                 throw result.error
                             }
                         }
                     }
-                    is SelectedPaymentSource.GooglePay -> selected.paymentMethodId
-                    is SelectedPaymentSource.SamsungPay -> selected.paymentMethodId
+                    is SelectedPaymentSource.Wallet -> TokenPaymentSource(
+                        paymentMethodId = selected.paymentMethodId,
+                        cardDetails = selected.cardDetails,
+                        bankAccountDetails = null,
+                    )
                 }
 
                 cryptoApiRepository.createPaymentToken(
                     cryptoCustomerId = cryptoCustomerId,
-                    paymentMethod = paymentMethodId,
+                    paymentMethod = paymentSource.paymentMethodId,
                     countryHint = state.configurationState?.countryHint,
-                )
+                ).map { token ->
+                    OnrampCreateCryptoPaymentTokenResult.Completed(
+                        cryptoPaymentToken = token.id,
+                        cardDetails = paymentSource.cardDetails,
+                        bankAccountDetails = paymentSource.bankAccountDetails,
+                    )
+                }
             }
             .fold(
-                onSuccess = { cryptoPaymentToken ->
+                onSuccess = { result ->
                     analyticsService?.track(
                         OnrampAnalyticsEvent.CryptoPaymentTokenCreated(
                             paymentMethodType = _state.value.collectingPaymentMethodType
                         )
                     )
-                    OnrampCreateCryptoPaymentTokenResult.Completed(
-                        cryptoPaymentToken = cryptoPaymentToken.id,
-                        cardDetails = (state.selectedPaymentSource as? SelectedPaymentSource.Wallet)?.cardDetails,
-                    )
+                    result
                 },
                 onFailure = { error ->
                     val mappedError = mapError(Operation.CreateCryptoPaymentToken, error)
@@ -1634,6 +1643,25 @@ internal data class OnrampState(
     val platformKeyCache: PlatformKeyCache? = null,
     val selectedPaymentSource: SelectedPaymentSource? = null
 )
+
+private data class TokenPaymentSource(
+    val paymentMethodId: String,
+    val cardDetails: OnrampCardDetails?,
+    val bankAccountDetails: OnrampBankAccountDetails?,
+)
+
+private fun LinkController.CreatePaymentMethodResult.Success.toTokenPaymentSource(): TokenPaymentSource {
+    val details = paymentMethodDetails
+    return TokenPaymentSource(
+        paymentMethodId = paymentMethod.id,
+        cardDetails = (details as? PaymentMethodPreviewDetails.Card)?.let {
+            OnrampCardDetails(CardFunding.fromCode(it.funding), it.brand, it.last4)
+        },
+        bankAccountDetails = (details as? PaymentMethodPreviewDetails.BankAccount)?.let {
+            OnrampBankAccountDetails(it.last4)
+        },
+    )
+}
 
 internal sealed interface SelectedPaymentSource {
     val analyticsValue: String

@@ -13,6 +13,7 @@ The crypto-onramp helps you build a headless crypto onramp flow in your Android 
    * [Integration](#Integration)
    * [Platform Pay before Link authentication](#Platform-Pay-before-Link-authentication)
    * [Samsung Pay](#Samsung-Pay)
+   * [Funding instrument details](#Funding-instrument-details)
    * [Example](#Example)
 
 <!--te-->
@@ -171,21 +172,34 @@ The resulting Samsung payment credential is exchanged for a Stripe token and the
 PaymentMethod using the onramp platform publishable key. An absent SDK or payment failure is
 delivered through the existing `OnrampCollectPaymentMethodResult.Failed` callback.
 
+### Funding instrument details
+
 After successful collection, `createCryptoPaymentToken()` returns a `Completed` result containing
-both `cryptoPaymentToken` and optional `cardDetails` for the same selected payment method. Samsung
-Pay and Google Pay expose `funding` (`CardFunding`), `brand` (`CardBrand`), and nullable `last4` from
-card data already received by the SDK, without an additional network request. Link-backed selections
-return null card details. Missing or unrecognized funding maps to `CardFunding.Unknown`; a missing
-card object produces null card details and does not prevent token creation.
+`cryptoPaymentToken` and optional `cardDetails` or `bankAccountDetails` for the same funding
+instrument. This applies to platform wallets and Link, including direct card entry and ACH, without
+an additional network request:
+
+| Selection | `cardDetails` | `bankAccountDetails` |
+| --- | --- | --- |
+| Samsung Pay or Google Pay card | Funding, brand, and last four when card data is present | null |
+| Link debit card (saved or newly entered) | `CardFunding.Debit`, brand, and last four | null |
+| Link credit card | `CardFunding.Credit`, brand, and last four | null |
+| Link bank account/ACH | null | Account last four |
+| Unsupported or unavailable instrument details | null | null |
+
+At most one summary is populated. Missing or unrecognized card funding maps to
+`CardFunding.Unknown`; it is never inferred from a card-like label or the outer Link payment method.
+Missing metadata does not prevent token creation. Details are returned with the token to keep them
+paired with the instrument captured for creation, even if the selection changes during the request.
 
 To make a fee-subsidy decision before creating a session:
 
-1. Collect the Samsung Pay card and complete any required authentication and KYC steps.
-2. Call `createCryptoPaymentToken()` and send the successful token and its `cardDetails` together
-   to your backend. If account routing changed, recollect the wallet as described above.
+1. Collect the payment method and complete any required authentication and KYC steps.
+2. Call `createCryptoPaymentToken()` and send the successful token and its instrument summary
+   together to your backend. If account routing changed, recollect the platform wallet as described above.
 3. Your backend may choose merchant-paid fees through `fee_responsibility` for explicit
-   `CardFunding.Debit`. Do not assume debit eligibility for `Credit`, `Prepaid`, `Unknown`, or
-   absent card details.
+   `CardFunding.Debit` or a supported ACH selection identified by `bankAccountDetails`. Do not
+   assume debit eligibility for `Credit`, `Prepaid`, `Unknown`, or absent instrument details.
 4. Create the onramp session, display its final quote, and ask for confirmation before checkout.
 
 The SDK reports metadata; it does not apply Samsung-specific pricing or automatically subsidize
@@ -194,6 +208,8 @@ Client-supplied card metadata is suitable for a voluntary subsidy decision, not 
 eligibility or security rule. Independently enforced eligibility requires separate backend work.
 Funding is a classification, not proof of ownership or identity. Wallet `last4` may refer to the
 tokenized card number rather than the physical card number and is not an ownership identifier.
+Bank account `last4` does not attest ownership, settlement speed, mandate validity, or successful
+payment. Full account and routing numbers are not exposed.
 
 ### Example
 

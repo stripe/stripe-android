@@ -5,7 +5,7 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardFunding
 
 /**
- * Card summary for the wallet payment method used to create a crypto payment token.
+ * Card summary for the funding instrument used to create a crypto payment token.
  *
  * @param funding The card's funding classification, or [CardFunding.Unknown] when unavailable.
  * Funding is not proof of card ownership or identity.
