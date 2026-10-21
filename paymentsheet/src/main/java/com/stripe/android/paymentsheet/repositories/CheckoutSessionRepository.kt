@@ -10,8 +10,8 @@ import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.executeRequestWithResultParser
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.model.PaymentMethodUpdateParams
+import com.stripe.android.networking.ConfirmationParamsFactory
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
-import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
 import java.util.TimeZone
@@ -22,7 +22,7 @@ import javax.inject.Provider
 @OptIn(CheckoutSessionPreview::class)
 internal class CheckoutSessionRepository @Inject constructor(
     private val stripeNetworkClient: StripeNetworkClient,
-    private val stripeRepository: StripeRepository,
+    private val confirmationParamsFactory: ConfirmationParamsFactory,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
     private val apiRequestOptionsProvider: Provider<ApiRequest.Options>,
@@ -74,7 +74,7 @@ internal class CheckoutSessionRepository @Inject constructor(
         id: String,
         params: ConfirmCheckoutSessionParams,
     ): Result<CheckoutSessionResponse> {
-        val requestParams = stripeRepository.prepareConfirmationParams(
+        val requestParams = confirmationParamsFactory.create(
             params.toParamMap(),
             params.paymentMethodData,
         )

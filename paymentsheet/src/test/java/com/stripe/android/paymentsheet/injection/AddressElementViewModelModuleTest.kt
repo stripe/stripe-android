@@ -32,12 +32,12 @@ import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
-import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
 import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.forms.FormFieldEntry
+import com.stripe.android.utils.TestConfirmationParamsFactory
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -396,7 +396,7 @@ class AddressElementViewModelModuleTest {
     private fun createTaxRegionUpdater(): CheckoutSessionTaxRegionUpdater {
         return CheckoutSessionTaxRegionUpdater(
             CheckoutSessionRepository(
-                stripeRepository = object : AbsFakeStripeRepository() {},
+                confirmationParamsFactory = TestConfirmationParamsFactory.create(),
                 stripeNetworkClient = DefaultStripeNetworkClient(),
                 analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
                 paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(

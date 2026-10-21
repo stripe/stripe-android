@@ -476,12 +476,6 @@ interface StripeRepository {
     fun buildPaymentUserAgent(attribution: Set<String> = emptySet()): String
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    fun prepareConfirmationParams(
-        params: Map<String, Any>,
-        paymentMethodCreateParams: PaymentMethodCreateParams?
-    ): Map<String, *>
-
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         val DEFAULT_REQUEST_SURFACE = RequestSurface.PaymentElement

@@ -10,6 +10,7 @@ import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.core.exception.LocalStripeException
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
+import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
@@ -44,11 +45,11 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
-import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.SetupIntentFactory
+import com.stripe.android.utils.TestConfirmationParamsFactory
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -82,7 +83,9 @@ class CheckoutSessionConfirmationInterceptorTest {
             else -> error("Unexpected test type: $type")
         }
         val createParams = when (type) {
-            PaymentMethod.Type.Card -> PaymentMethodCreateParamsFixtures.DEFAULT_CARD
+            PaymentMethod.Type.Card -> PaymentMethodCreateParamsFixtures.DEFAULT_CARD.copy(
+                card = PaymentMethodCreateParamsFixtures.CARD_WITH_ATTRIBUTION,
+            )
             PaymentMethod.Type.Link -> PaymentMethodCreateParams.createLink(
                 paymentDetailsId = "payment_details_123",
                 consumerSessionClientSecret = "consumer_session_secret",
@@ -110,8 +113,15 @@ class CheckoutSessionConfirmationInterceptorTest {
                     PaymentMethod.Type.SepaDebit -> bodyPart("payment_method_data[sepa_debit][iban]", "my_iban")
                     else -> error("Unexpected test type: $type")
                 },
-                bodyPart("payment_method_data[payment_user_agent]", "test_user_agent"),
+                bodyPart(
+                    "payment_method_data[payment_user_agent]",
+                    setOf("stripe-android/${StripeSdkVersion.VERSION_NAME}")
+                        .plus(createParams.attribution)
+                        .joinToString(";"),
+                ),
                 bodyPart("payment_method_data[guid]", "test_guid"),
+                bodyPart("payment_method_data[muid]", "test_muid"),
+                bodyPart("payment_method_data[sid]", "test_sid"),
             )
         }
 
@@ -924,10 +934,8 @@ class CheckoutSessionConfirmationInterceptorTest {
         checkoutSessionResponse: CheckoutSessionResponse = CheckoutSessionResponseFactory.create(),
         block: suspend Scenario.() -> Unit,
     ) {
-        val stripeRepository = FakeStripeRepository()
-
         val checkoutSessionRepository = CheckoutSessionRepository(
-            stripeRepository = stripeRepository,
+            confirmationParamsFactory = TestConfirmationParamsFactory.create(),
             stripeNetworkClient = DefaultStripeNetworkClient(),
             analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
             paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
@@ -995,24 +1003,6 @@ class CheckoutSessionConfirmationInterceptorTest {
                 ),
                 shippingValues = shippingValues,
             )
-    }
-
-    private class FakeStripeRepository : AbsFakeStripeRepository() {
-        override fun prepareConfirmationParams(
-            params: Map<String, Any>,
-            paymentMethodCreateParams: PaymentMethodCreateParams?
-        ): Map<String, *> {
-            if (paymentMethodCreateParams == null) return params
-
-            return params.plus(
-                "payment_method_data" to paymentMethodCreateParams.toParamMap().plus(
-                    mapOf(
-                        "payment_user_agent" to "test_user_agent",
-                        "guid" to "test_guid",
-                    )
-                )
-            )
-        }
     }
 
     private companion object {

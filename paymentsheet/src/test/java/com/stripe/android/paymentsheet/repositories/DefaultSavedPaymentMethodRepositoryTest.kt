@@ -17,9 +17,9 @@ import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
-import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.android.utils.FakeCustomerRepository
+import com.stripe.android.utils.TestConfirmationParamsFactory
 import kotlinx.coroutines.test.runTest
 import org.json.JSONObject
 import org.junit.Rule
@@ -343,7 +343,7 @@ class DefaultSavedPaymentMethodRepositoryTest {
             onRetrievePaymentMethod = { _ -> retrievePaymentMethodResult },
         )
         val checkoutSessionRepository = CheckoutSessionRepository(
-            stripeRepository = object : AbsFakeStripeRepository() {},
+            confirmationParamsFactory = TestConfirmationParamsFactory.create(),
             stripeNetworkClient = DefaultStripeNetworkClient(),
             analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
             paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
