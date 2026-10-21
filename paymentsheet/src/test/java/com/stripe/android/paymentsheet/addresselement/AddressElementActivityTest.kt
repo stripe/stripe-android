@@ -265,7 +265,7 @@ internal class AddressElementActivityTest {
     }
 
     @Test
-    fun `standalone shipping can be canceled with close before saving`() = runScenario(
+    fun `unchanged input can be canceled with close before saving`() = runScenario(
         args = AddressElementActivityContract.Args.Standalone(
             apiConfiguration = DEFAULT_API_CONFIG,
             config = AddressLauncher.Configuration.Builder()
@@ -276,6 +276,7 @@ internal class AddressElementActivityTest {
         addressPage.assertReadyToSave()
         addressPage.clickClose()
 
+        addressPage.assertDiscardConfirmationNotDisplayed()
         assertThat(awaitStandaloneResult()).isEqualTo(AddressLauncherResult.Canceled())
     }
 
@@ -330,7 +331,7 @@ internal class AddressElementActivityTest {
     }
 
     @Test
-    fun `checkout shipping root back requests confirmation without popping input`() = runScenario {
+    fun `unchanged input can be canceled with root back without popping input`() = runScenario {
         addressPage.assertReadyToSave()
 
         activityScenario.onActivity { activity ->
@@ -344,16 +345,34 @@ internal class AddressElementActivityTest {
                 .isSameInstanceAs(inputEntry)
         }
 
-        addressPage.assertDiscardConfirmation(PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG)
-        assertThat(activityScenario.state).isEqualTo(Lifecycle.State.RESUMED)
-        addressPage.discardChanges()
+        assertThat(awaitResult()).isEqualTo(AddressElementActivityContract.Result.Canceled)
+    }
+
+    @Test
+    fun `unchanged input can be canceled with scrim accessibility action`() = runScenario {
+        addressPage.assertReadyToSave()
+        addressPage.dismissViaScrimAccessibilityAction()
 
         assertThat(awaitResult()).isEqualTo(AddressElementActivityContract.Result.Canceled)
     }
 
     @Test
-    fun `checkout shipping scrim requests confirmation before canceling`() = runScenario {
-        assertCheckoutDismissalRequestsConfirmation {
+    fun `close confirms edited input and cancel preserves the form`() = runScenario {
+        assertDirtyDismissal(editedName = EDITED_NAME) { addressPage.clickClose() }
+    }
+
+    @Test
+    fun `root back confirms edited input and cancel preserves the form`() = runScenario {
+        assertDirtyDismissal(editedName = EDITED_NAME) {
+            activityScenario.onActivity { activity ->
+                activity.onBackPressedDispatcher.onBackPressed()
+            }
+        }
+    }
+
+    @Test
+    fun `scrim confirms edited input and cancel preserves the form`() = runScenario {
+        assertDirtyDismissal(editedName = EDITED_NAME) {
             addressPage.dismissViaScrimAccessibilityAction()
         }
     }
@@ -361,6 +380,7 @@ internal class AddressElementActivityTest {
     @Test
     fun `finished cancellation allows the sheet to hide without requesting confirmation again`() = runScenario {
         addressPage.assertReadyToSave()
+        addressPage.editName(EDITED_NAME)
 
         activityScenario.onActivity { activity ->
             val stateHolder = ViewModelProvider(activity)[AddressElementViewModel::class.java].resultStateHolder
@@ -466,46 +486,44 @@ internal class AddressElementActivityTest {
     }
 
     @Test
-    fun `checkout shipping repeated root back stays on confirmation after editing the country`() = runScenario {
-        addressPage.assertReadyToSave()
-        addressPage.selectCountry("Canada")
-
-        activityScenario.onActivity { activity ->
-            activity.onBackPressedDispatcher.onBackPressed()
-            activity.onBackPressedDispatcher.onBackPressed()
-        }
-
-        addressPage.assertDiscardConfirmation(PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG)
-        addressPage.discardChanges()
-
-        assertThat(awaitResult()).isEqualTo(AddressElementActivityContract.Result.Canceled)
-    }
-
-    @Test
-    fun `checkout shipping close requests confirmation before canceling`() = runScenario {
-        assertCheckoutDismissalRequestsConfirmation {
-            addressPage.clickClose()
-        }
-    }
-
-    @Test
-    fun `checkout shipping canceling discard confirmation preserves edits and enables the form`() = runScenario {
+    fun `reverted edits cancel immediately`() = runScenario(
+        args = standaloneArgs(SHIPPING_ADDRESS),
+    ) {
         addressPage.assertReadyToSave()
         addressPage.editName(EDITED_NAME)
+        addressPage.editName(requireNotNull(SHIPPING_ADDRESS.name))
+        addressPage.assertName(requireNotNull(SHIPPING_ADDRESS.name))
 
         addressPage.clickClose()
 
-        addressPage.assertDiscardConfirmation(PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG)
-        addressPage.keepEditing()
         addressPage.assertDiscardConfirmationNotDisplayed()
-        addressPage.assertName(EDITED_NAME)
-        addressPage.assertReadyToSave()
-        assertThat(activityScenario.state).isEqualTo(Lifecycle.State.RESUMED)
+        assertThat(awaitStandaloneResult()).isEqualTo(AddressLauncherResult.Canceled())
     }
 
     @Test
-    fun `checkout shipping discard dialog survives recreation`() = runScenario {
+    fun `edited input still requires confirmation after recreation`() = runScenario(
+        args = standaloneArgs(SHIPPING_ADDRESS),
+    ) {
         addressPage.assertReadyToSave()
+        addressPage.editName(EDITED_NAME)
+        activityScenario.recreate()
+        activityScenario.onActivity { activity = it }
+        composeTestRule.waitForIdle()
+        addressPage.assertName(EDITED_NAME)
+
+        addressPage.clickClose()
+        addressPage.assertDiscardConfirmation(PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG)
+        addressPage.discardChanges()
+
+        assertThat(awaitStandaloneResult()).isEqualTo(AddressLauncherResult.Canceled())
+    }
+
+    @Test
+    fun `discard confirmation survives recreation and keep editing preserves input`() = runScenario(
+        args = standaloneArgs(SHIPPING_ADDRESS),
+    ) {
+        addressPage.assertReadyToSave()
+        addressPage.editName(EDITED_NAME)
         addressPage.clickClose()
         addressPage.assertDiscardConfirmation(PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG)
 
@@ -514,31 +532,16 @@ internal class AddressElementActivityTest {
         composeTestRule.waitForIdle()
 
         addressPage.assertDiscardConfirmation(PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG)
-    }
+        addressPage.keepEditing()
+        addressPage.assertDiscardConfirmationNotDisplayed()
+        addressPage.assertName(EDITED_NAME)
+        addressPage.assertReadyToSave()
 
-    @Test
-    fun `standalone close immediately cancels edited input`() = runScenario(
-        args = standaloneArgs(SHIPPING_ADDRESS),
-    ) {
-        assertStandaloneDismissesImmediately(editedName = EDITED_NAME) { addressPage.clickClose() }
-    }
+        addressPage.clickClose()
+        addressPage.assertDiscardConfirmation(PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG)
+        addressPage.discardChanges()
 
-    @Test
-    fun `standalone root back immediately cancels edited input`() = runScenario(
-        args = standaloneArgs(SHIPPING_ADDRESS),
-    ) {
-        assertStandaloneDismissesImmediately(editedName = EDITED_NAME) {
-            activityScenario.onActivity { it.onBackPressedDispatcher.onBackPressed() }
-        }
-    }
-
-    @Test
-    fun `standalone scrim immediately cancels edited input`() = runScenario(
-        args = standaloneArgs(SHIPPING_ADDRESS),
-    ) {
-        assertStandaloneDismissesImmediately(editedName = EDITED_NAME) {
-            addressPage.dismissViaScrimAccessibilityAction()
-        }
+        assertThat(awaitStandaloneResult()).isEqualTo(AddressLauncherResult.Canceled())
     }
 
     private fun standaloneArgs(address: AddressDetails) = AddressElementActivityContract.Args.Standalone(

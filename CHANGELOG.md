@@ -7,6 +7,9 @@ NEXT_VERSION_BUMP: MINOR
 * [ADDED][14589](https://github.com/stripe/stripe-android/pull/14589) Added Touch 'n Go API bindings and PaymentSheet support for payments and setup.
 * [ADDED][14590](https://github.com/stripe/stripe-android/pull/14590) Added TrueMoney API bindings and PaymentSheet support.
 
+### AddressElement
+* [Changed] Address Element asks for confirmation before discarding unsaved address changes.
+
 ## 23.24.0 - 2026-10-19
 
 ### Crypto Onramp

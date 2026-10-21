@@ -47,6 +47,10 @@ internal class AddressElementActivity : ComponentActivity() {
 
     private val viewModel: AddressElementViewModel by viewModels { viewModelFactory }
 
+    private val inputAddressViewModel: InputAddressViewModel by viewModels {
+        InputAddressViewModel.Factory(viewModel.inputAddressViewModelSubcomponentFactoryProvider)
+    }
+
     private val starterArgs by lazy {
         AddressElementActivityContract.Args.fromIntent(intent)
     }
@@ -111,8 +115,7 @@ internal class AddressElementActivity : ComponentActivity() {
                     ) {
                         composable(AddressElementScreen.InputAddress.route) {
                             InputAddressScreen(
-                                inputAddressViewModelSubcomponentFactoryProvider =
-                                    viewModel.inputAddressViewModelSubcomponentFactoryProvider,
+                                viewModel = inputAddressViewModel,
                                 onCloseClick = ::dismiss,
                             )
                         }
@@ -161,7 +164,7 @@ internal class AddressElementActivity : ComponentActivity() {
 
     private fun dismiss() {
         viewModel.resultStateHolder.onUserCancel(
-            shouldConfirmCancellation = starterArgs is AddressElementActivityContract.Args.CheckoutShipping,
+            shouldConfirmCancellation = inputAddressViewModel.hasChanges(),
         )
     }
 
