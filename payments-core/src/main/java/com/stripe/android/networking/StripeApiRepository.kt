@@ -158,7 +158,6 @@ class StripeApiRepository @JvmOverloads internal constructor(
         PaymentAnalyticsRequestFactory(context, publishableKeyProvider, productUsageTokens),
     private val confirmationParamsFactory: ConfirmationParamsFactory = ConfirmationParamsFactory(
         productUsageTokens = productUsageTokens,
-        fraudDetectionDataRepository = fraudDetectionDataRepository,
     ),
     betas: Set<StripeApiBeta> = emptySet(),
     apiVersion: String = ApiVersion(betas = betas.map { it.code }.toSet()).code,
@@ -206,6 +205,10 @@ class StripeApiRepository @JvmOverloads internal constructor(
     private val fraudDetectionData: FraudDetectionData?
         get() = fraudDetectionDataRepository.getCached()
 
+    init {
+        fireFraudDetectionDataRequest()
+    }
+
     override suspend fun retrieveStripeIntent(
         clientSecret: String,
         options: ApiRequest.Options,
@@ -252,13 +255,14 @@ class StripeApiRepository @JvmOverloads internal constructor(
         options: ApiRequest.Options,
         expandFields: List<String>
     ): Result<PaymentIntent> {
-        val params = confirmationParamsFactory.addPaymentUserAgentAndFraudDetectionData(
+        val params = confirmationParamsFactory.create(
             confirmPaymentIntentParams.toParamMap()
                 // Omit client_secret with user key auth.
                 .let { if (options.apiKeyIsUserKey) it.minus(PARAM_CLIENT_SECRET) else it }
                 .plus(createExpandParam(expandFields)),
             confirmPaymentIntentParams.paymentMethodCreateParams,
-            confirmPaymentIntentParams.sourceParams
+            sourceParams = confirmPaymentIntentParams.sourceParams,
+            fraudDetectionData = fraudDetectionData,
         )
 
         val paymentIntentId = runCatching {
@@ -458,13 +462,14 @@ class StripeApiRepository @JvmOverloads internal constructor(
             apiRequestFactory.createPost(
                 getConfirmSetupIntentUrl(setupIntentId),
                 options,
-                confirmationParamsFactory.addPaymentUserAgentAndFraudDetectionData(
+                confirmationParamsFactory.create(
                     confirmSetupIntentParams.toParamMap()
                         // Omit client_secret with user key auth.
                         .let { if (options.apiKeyIsUserKey) it.minus(PARAM_CLIENT_SECRET) else it }
                         .plus(createExpandParam(expandFields)),
                     confirmSetupIntentParams.paymentMethodCreateParams,
-                    sourceParams = null
+                    sourceParams = null,
+                    fraudDetectionData = fraudDetectionData,
                 )
             ),
             SetupIntentJsonParser()
@@ -725,13 +730,20 @@ class StripeApiRepository @JvmOverloads internal constructor(
         confirmationTokenParams: ConfirmationTokenParams,
         options: ApiRequest.Options
     ): Result<ConfirmationToken> {
+        // ID-based confirmations have no new payment method data to attach fraud signals to.
+        if (confirmationTokenParams.paymentMethodData != null) {
+            fireFraudDetectionDataRequest()
+        }
+
         return fetchStripeModelResult(
             apiRequestFactory.createPost(
                 confirmationTokensUrl,
                 options,
                 confirmationParamsFactory.create(
                     confirmationTokenParams.toParamMap(),
-                    confirmationTokenParams.paymentMethodData
+                    confirmationTokenParams.paymentMethodData,
+                    sourceParams = null,
+                    fraudDetectionData = fraudDetectionData,
                 )
             ),
             ConfirmationTokenJsonParser()
