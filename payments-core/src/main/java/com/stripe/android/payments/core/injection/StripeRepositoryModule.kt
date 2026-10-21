@@ -2,10 +2,8 @@ package com.stripe.android.payments.core.injection
 
 import android.content.Context
 import androidx.annotation.RestrictTo
-import com.stripe.android.DefaultFraudDetectionDataRepository
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
-import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestV2Executor
@@ -18,8 +16,6 @@ import com.stripe.android.networking.StripeRepository
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
-import javax.inject.Provider
-import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -41,18 +37,6 @@ abstract class StripeRepositoryModule {
     ): StripeRepository
 
     internal companion object {
-        @Provides
-        @Singleton
-        fun providesFraudDetectionDataRepository(
-            context: Context,
-            apiConfigurationProvider: Provider<ApiConfiguration.State>,
-            @IOContext workContext: CoroutineContext,
-        ): FraudDetectionDataRepository = DefaultFraudDetectionDataRepository(
-            context = context,
-            apiConfigurationProvider = apiConfigurationProvider,
-            workContext = workContext,
-        )
-
         @Provides
         fun providesAnalyticsRequestV2Executor(
             application: Context,

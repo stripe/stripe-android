@@ -170,8 +170,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
         @Named(PRODUCT_USAGE) productUsageTokens: Set<String>,
         paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
         analyticsRequestExecutor: AnalyticsRequestExecutor,
-        logger: Logger,
-        fraudDetectionDataRepository: FraudDetectionDataRepository,
+        logger: Logger
     ) : this(
         context = appContext,
         publishableKeyProvider = { apiConfigurationProvider.get().publishableKey },
@@ -179,7 +178,11 @@ class StripeApiRepository @JvmOverloads internal constructor(
         logger = logger,
         workContext = workContext,
         productUsageTokens = productUsageTokens,
-        fraudDetectionDataRepository = fraudDetectionDataRepository,
+        fraudDetectionDataRepository = DefaultFraudDetectionDataRepository(
+            context = appContext,
+            apiConfigurationProvider = apiConfigurationProvider,
+            workContext = workContext,
+        ),
         cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(
             context = appContext,
             productUsageTokens = productUsageTokens,
@@ -188,7 +191,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
             apiConfigurationProvider = apiConfigurationProvider,
         ),
         paymentAnalyticsRequestFactory = paymentAnalyticsRequestFactory,
-        analyticsRequestExecutor = analyticsRequestExecutor,
+        analyticsRequestExecutor = analyticsRequestExecutor
     )
 
     private val apiRequestFactory = ApiRequest.Factory(
@@ -250,7 +253,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
         options: ApiRequest.Options,
         expandFields: List<String>
     ): Result<PaymentIntent> {
-        val params = prepareConfirmationParams(
+        val params = ConfirmationParamsUtils.prepareConfirmationParams(
             confirmPaymentIntentParams.toParamMap()
                 // Omit client_secret with user key auth.
                 .let { if (options.apiKeyIsUserKey) it.minus(PARAM_CLIENT_SECRET) else it }
@@ -458,7 +461,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
             apiRequestFactory.createPost(
                 getConfirmSetupIntentUrl(setupIntentId),
                 options,
-                prepareConfirmationParams(
+                ConfirmationParamsUtils.prepareConfirmationParams(
                     confirmSetupIntentParams.toParamMap()
                         // Omit client_secret with user key auth.
                         .let { if (options.apiKeyIsUserKey) it.minus(PARAM_CLIENT_SECRET) else it }
@@ -736,7 +739,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
             apiRequestFactory.createPost(
                 confirmationTokensUrl,
                 options,
-                prepareConfirmationParams(
+                ConfirmationParamsUtils.prepareConfirmationParams(
                     confirmationTokenParams.toParamMap(),
                     confirmationTokenParams.paymentMethodData,
                     sourceParams = null,
@@ -1926,7 +1929,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
         PAYMENT_USER_AGENT to buildPaymentUserAgent(attribution)
 
     override fun buildPaymentUserAgent(attribution: Set<String>): String {
-        return buildPaymentUserAgent(productUsageTokens, attribution)
+        return ConfirmationParamsUtils.buildPaymentUserAgent(productUsageTokens, attribution)
     }
 
     private suspend fun ConfirmPaymentIntentParams.maybeForDashboard(
