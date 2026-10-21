@@ -4,7 +4,6 @@
  * Don't add any configuration here that is not common to *every* android example application.
  */
 apply plugin: "com.android.application"
-apply plugin: "kotlin-android"
 
 apply from: rootProject.file('build-configuration/version.gradle')
 
