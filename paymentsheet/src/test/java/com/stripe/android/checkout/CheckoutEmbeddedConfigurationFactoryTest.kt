@@ -28,9 +28,21 @@ import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConf
 internal class CheckoutEmbeddedConfigurationFactoryTest {
 
     @Test
+    fun `returns null when payment element is not configured`() {
+        val result = CheckoutEmbeddedConfigurationFactory(appName = "Test App").create(
+            configuration = CheckoutController.Configuration().build(),
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+            collectedDetails = collectedDetails(),
+        )
+
+        assertThat(result).isNull()
+    }
+
+    @Test
     fun `uses the provided merchant display name`() {
         val configuration = CheckoutController.Configuration()
             .merchantDisplayName("Acme Corp")
+            .paymentElement(PaymentElement.Configuration())
             .build()
 
         val result = factory().create(
@@ -320,6 +332,7 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
     fun `populates billing details from configuration defaults`() {
         val result = factory().create(
             configuration = CheckoutController.Configuration()
+                .paymentElement(PaymentElement.Configuration())
                 .defaults(
                     CheckoutController.Configuration.Defaults().phone("+15555551234").billingDetails(
                         CheckoutController.Configuration.Defaults.ContactDetails()
@@ -397,6 +410,7 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
         val defaults = CheckoutController.Configuration.Defaults().phone("+15555551234")
         assertThat(defaults.build().phone).isEqualTo("+15555551234")
         val configuration = CheckoutController.Configuration()
+            .paymentElement(PaymentElement.Configuration())
             .defaults(defaults.phone(null))
             .build()
 

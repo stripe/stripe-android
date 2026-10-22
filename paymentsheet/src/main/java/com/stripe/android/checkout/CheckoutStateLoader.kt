@@ -106,7 +106,7 @@ internal class CheckoutStateLoader @Inject constructor(
                 collectedEmail = collectedDetails.email,
             ),
             embeddedConfiguration = embeddedConfig,
-            paymentMethodLayout = configuration.paymentElementConfiguration.paymentMethodLayout.asPaymentSheet(),
+            paymentMethodLayout = configuration.paymentElementConfiguration?.paymentMethodLayout?.asPaymentSheet(),
             expressCheckoutElementConfiguration = expressCheckoutElementConfiguration,
         )
 
@@ -151,7 +151,7 @@ internal class CheckoutStateLoader @Inject constructor(
     private suspend fun loadPaymentElements(
         initializationMode: PaymentElementLoader.InitializationMode,
         embeddedConfiguration: EmbeddedPaymentElement.Configuration?,
-        paymentMethodLayout: PaymentSheet.PaymentMethodLayout,
+        paymentMethodLayout: PaymentSheet.PaymentMethodLayout?,
         expressCheckoutElementConfiguration: CommonConfiguration?,
     ): LoadResults = coroutineScope {
         val metadata = PaymentElementLoader.Metadata(
@@ -159,13 +159,14 @@ internal class CheckoutStateLoader @Inject constructor(
             initializedViaCompose = false,
         )
         val paymentElementStateDeferred = embeddedConfiguration?.let { configuration ->
+            val layout = paymentMethodLayout ?: return@let null
             async {
                 paymentElementLoader.load(
                     initializationMode = initializationMode,
                     integrationConfiguration = PaymentElementLoader.Configuration.Embedded(
                         isRowSelectionImmediateAction = internalRowSelectionCallback.get() != null,
                         configuration = configuration,
-                        paymentMethodLayout = paymentMethodLayout,
+                        paymentMethodLayout = layout,
                     ),
                     metadata = metadata,
                 ).getOrThrow()

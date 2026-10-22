@@ -29,6 +29,28 @@ import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConf
 internal class CheckoutCommonConfigurationFactoryTest {
 
     @Test
+    fun `create returns null when payment element is not configured`() {
+        val result = CheckoutCommonConfigurationFactory(appName = "Test App").create(
+            configuration = CheckoutController.Configuration().build(),
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+            collectedDetails = collectedDetails(),
+        )
+
+        assertThat(result).isNull()
+    }
+
+    @Test
+    fun `createForPaymentElement returns null when payment element is not configured`() {
+        val result = CheckoutCommonConfigurationFactory(appName = "Test App").createForPaymentElement(
+            configuration = CheckoutController.Configuration().build(),
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+            collectedDetails = collectedDetails(),
+        )
+
+        assertThat(result).isNull()
+    }
+
+    @Test
     fun `matches the common configuration derived from the embedded configuration`() {
         val configuration = CheckoutController.Configuration()
             .paymentElement(
@@ -69,6 +91,7 @@ internal class CheckoutCommonConfigurationFactoryTest {
     fun `uses the provided merchant display name`() {
         val configuration = CheckoutController.Configuration()
             .merchantDisplayName("Acme Corp")
+            .paymentElement(PaymentElement.Configuration())
             .build()
 
         val result = factory().create(
@@ -310,6 +333,7 @@ internal class CheckoutCommonConfigurationFactoryTest {
     @Test
     fun `maps configured billing defaults to payment element and express checkout element`() {
         val configuration = CheckoutController.Configuration()
+            .paymentElement(PaymentElement.Configuration())
             .defaults(
                 CheckoutController.Configuration.Defaults().phone("+15555551234").billingDetails(
                     CheckoutController.Configuration.Defaults.ContactDetails()
@@ -530,6 +554,7 @@ internal class CheckoutCommonConfigurationFactoryTest {
         val defaults = CheckoutController.Configuration.Defaults().phone("+15555551234")
         assertThat(defaults.build().phone).isEqualTo("+15555551234")
         val configuration = CheckoutController.Configuration()
+            .paymentElement(PaymentElement.Configuration())
             .defaults(defaults.phone(null))
             .expressCheckoutElement(ExpressCheckoutElement.Configuration())
             .build()
