@@ -195,6 +195,7 @@ internal class RequestExecutorTest {
         assertTrue(result.isFailure)
         val exception = result.exceptionOrNull() as APIException
         assertTrue(exception.message!!.contains("returns null for"))
+        assertThat(exception.requestId).isEqualTo("req_test")
     }
 
     @Test

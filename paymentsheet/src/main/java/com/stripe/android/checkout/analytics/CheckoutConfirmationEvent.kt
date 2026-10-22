@@ -17,13 +17,11 @@ internal sealed class CheckoutConfirmationEvent : AnalyticsEvent {
         confirmationContext: CheckoutConfirmationContext,
         analyticsMetadata: AnalyticsMetadata,
         duration: Duration?,
-        requestId: String?,
     ) : CheckoutConfirmationEvent() {
         override val eventName: String = "checkout_elements.confirm.succeeded"
         override val params: Map<String, Any> = buildMap {
             putAll(confirmationParams(confirmationContext))
             putAll(analyticsMetadata.paramsMap)
-            requestId?.let { put("request_id", it) }
             putAll(duration.mapOfDurationInSeconds())
         }
     }
@@ -55,6 +53,7 @@ internal sealed class CheckoutConfirmationEvent : AnalyticsEvent {
             confirmationContext.paymentSelection.linkContext()?.let { put("link_context", it) }
             put("invocation_source", confirmationContext.invocationSource.code)
             put("active_link_session", confirmationContext.activeLinkSession)
+            confirmationContext.requestId?.let { put("request_id", it) }
         }
     }
 }

@@ -71,7 +71,10 @@ suspend fun <Response : StripeModel> executeRequestWithResultParserAndRequestId(
                     Result.success(response.requestId?.value to parsedResponse)
                 } else {
                     Result.failure(
-                        APIException(message = "$responseJsonParser returns null for ${response.responseJson()}")
+                        APIException(
+                            requestId = response.requestId?.value,
+                            message = "$responseJsonParser returns null for ${response.responseJson()}",
+                        )
                     )
                 }
             }

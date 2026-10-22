@@ -4,6 +4,7 @@ package com.stripe.android.checkout
 
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkout.analytics.CheckoutConfirmationContextHolder
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.ApiConfigurationPreview
 import com.stripe.android.core.StripeError
@@ -23,7 +24,6 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.MutableConfirmationMetadata
-import com.stripe.android.paymentelement.confirmation.intent.CheckoutSessionRequestIdKey
 import com.stripe.android.paymentelement.confirmation.intent.CheckoutSessionResponseKey
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationTypeKey
@@ -173,9 +173,10 @@ internal class CheckoutAnalyticsPerformerTest {
     }
 
     @Test
-    fun `express checkout confirmation context survives performer recreation`() = runScenario {
+    fun `express checkout confirmation context and request id survive recreation`() = runScenario {
         val selection = PaymentSelection.Link(brand = LinkBrand.Link)
         performer.onExpressCheckoutElementConfirmationStarted(selection)
+        confirmationContextHolder.setRequestId("req_before_next_action")
 
         val restoredPerformer = recreatePerformer()
         startReporting(restoredPerformer)
@@ -185,7 +186,10 @@ internal class CheckoutAnalyticsPerformerTest {
             ExpectedEvent(
                 event = "checkout_elements.confirm.succeeded",
                 publishableKey = DEFAULT_METADATA_PUBLISHABLE_KEY,
-                params = mapOf("selected_lpm" to "link"),
+                params = mapOf(
+                    "selected_lpm" to "link",
+                    "request_id" to "req_before_next_action",
+                ),
             ),
         )
     }
@@ -282,9 +286,9 @@ internal class CheckoutAnalyticsPerformerTest {
         val resultWithResponse = successfulResult().copy(
             metadata = MutableConfirmationMetadata().apply {
                 set(CheckoutSessionResponseKey, confirmationResponse)
-                set(CheckoutSessionRequestIdKey, "req_confirmed")
             }
         )
+        confirmationContextHolder.setRequestId("req_confirmed")
 
         confirmationHandler.state.value = ConfirmationHandler.State.Complete(resultWithResponse)
 
@@ -307,7 +311,7 @@ internal class CheckoutAnalyticsPerformerTest {
     }
 
     @Test
-    fun `success without confirmation request metadata omits request id`() = runScenario {
+    fun `success without a confirm response id omits request id`() = runScenario {
         startReporting()
         performer.onPaymentElementConfirmationStarted(PaymentSelection.GooglePay)
 
@@ -333,6 +337,86 @@ internal class CheckoutAnalyticsPerformerTest {
             ),
         )
         assertThat(request).doesNotContainKey("request_id")
+    }
+
+    @Test
+    fun `next action failure retains confirm request id`() = runScenario {
+        startReporting()
+        performer.onPaymentElementConfirmationStarted(PaymentSelection.GooglePay)
+        confirmationContextHolder.setRequestId("req_confirm_before_next_action")
+
+        confirmationHandler.state.value = ConfirmationHandler.State.Complete(
+            ConfirmationHandler.Result.Failed(
+                cause = IllegalStateException("Authentication failed"),
+                message = "Unable to confirm".resolvableString,
+                type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+            )
+        )
+
+        analyticsRequestExecutor.awaitAndAssertConfirmationRequest(
+            ExpectedEvent(
+                event = "checkout_elements.confirm.failed",
+                publishableKey = DEFAULT_METADATA_PUBLISHABLE_KEY,
+                params = mapOf("request_id" to "req_confirm_before_next_action"),
+            ),
+        )
+    }
+
+    @Test
+    fun `confirm request id takes precedence over next action error request id`() = runScenario {
+        startReporting()
+        performer.onPaymentElementConfirmationStarted(PaymentSelection.GooglePay)
+        confirmationContextHolder.setRequestId("req_confirm_before_next_action")
+
+        confirmationHandler.state.value = ConfirmationHandler.State.Complete(
+            ConfirmationHandler.Result.Failed(
+                cause = APIException(requestId = "req_next_action"),
+                message = "Unable to confirm".resolvableString,
+                type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+            )
+        )
+
+        analyticsRequestExecutor.awaitAndAssertConfirmationRequest(
+            ExpectedEvent(
+                event = "checkout_elements.confirm.failed",
+                publishableKey = DEFAULT_METADATA_PUBLISHABLE_KEY,
+                params = mapOf("request_id" to "req_confirm_before_next_action"),
+            ),
+        )
+    }
+
+    @Test
+    fun `new confirmation does not reuse the previous request id`() = runScenario {
+        startReporting()
+        performer.onPaymentElementConfirmationStarted(PaymentSelection.GooglePay)
+        confirmationContextHolder.setRequestId("req_first_confirm")
+        confirmationHandler.state.value = ConfirmationHandler.State.Complete(successfulResult())
+        analyticsRequestExecutor.awaitAndAssertConfirmationRequest(
+            ExpectedEvent(
+                event = "checkout_elements.confirm.succeeded",
+                publishableKey = DEFAULT_METADATA_PUBLISHABLE_KEY,
+                params = mapOf("request_id" to "req_first_confirm"),
+            ),
+        )
+        assertThat(confirmationContextHolder.context).isNull()
+
+        confirmationHandler.state.value = ConfirmationHandler.State.Idle
+        performer.onPaymentElementConfirmationStarted(PaymentSelection.GooglePay)
+        confirmationHandler.state.value = ConfirmationHandler.State.Complete(
+            ConfirmationHandler.Result.Failed(
+                cause = APIException(requestId = "req_second_confirm"),
+                message = "Unable to confirm".resolvableString,
+                type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+            )
+        )
+
+        analyticsRequestExecutor.awaitAndAssertConfirmationRequest(
+            ExpectedEvent(
+                event = "checkout_elements.confirm.failed",
+                publishableKey = DEFAULT_METADATA_PUBLISHABLE_KEY,
+                params = mapOf("request_id" to "req_second_confirm"),
+            ),
+        )
     }
 
     private fun assertFailureNotReported(type: ConfirmationHandler.Result.Failed.ErrorType) = runScenario {
@@ -408,9 +492,18 @@ internal class CheckoutAnalyticsPerformerTest {
         private val backgroundScope: CoroutineScope,
         private val testScheduler: TestCoroutineScheduler,
     ) {
+        val confirmationContextHolder = CheckoutConfirmationContextHolder(
+            savedStateHandle = savedStateHandle,
+            uiContext = UnconfinedTestDispatcher(testScheduler),
+        )
         val performer: CheckoutAnalyticsPerformer = createPerformer()
 
-        fun recreatePerformer(): CheckoutAnalyticsPerformer = createPerformer()
+        fun recreatePerformer(): CheckoutAnalyticsPerformer = createPerformer(
+            contextHolder = CheckoutConfirmationContextHolder(
+                savedStateHandle = savedStateHandle,
+                uiContext = UnconfinedTestDispatcher(testScheduler),
+            ),
+        )
 
         fun startReporting(performer: CheckoutAnalyticsPerformer = this.performer) {
             backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
@@ -418,7 +511,9 @@ internal class CheckoutAnalyticsPerformerTest {
             }
         }
 
-        private fun createPerformer(): CheckoutAnalyticsPerformer = TestCheckoutAnalyticsPerformerFactory.create(
+        private fun createPerformer(
+            contextHolder: CheckoutConfirmationContextHolder = confirmationContextHolder,
+        ): CheckoutAnalyticsPerformer = TestCheckoutAnalyticsPerformerFactory.create(
             confirmationHandler = confirmationHandler,
             savedStateHandle = savedStateHandle,
             stateHolder = stateHolder,
@@ -427,6 +522,7 @@ internal class CheckoutAnalyticsPerformerTest {
             durationProvider = durationProvider,
             apiConfiguration = fallbackApiConfiguration,
             workContext = UnconfinedTestDispatcher(testScheduler),
+            confirmationContextHolder = contextHolder,
         )
     }
 

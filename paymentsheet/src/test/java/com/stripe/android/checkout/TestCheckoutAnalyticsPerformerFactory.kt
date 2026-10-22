@@ -3,6 +3,7 @@ package com.stripe.android.checkout
 import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
+import com.stripe.android.checkout.analytics.CheckoutConfirmationContextHolder
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.ApiConfigurationPreview
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
@@ -25,9 +26,13 @@ internal object TestCheckoutAnalyticsPerformerFactory {
         linkAccountHolder: LinkAccountHolder = LinkAccountHolder(savedStateHandle),
         durationProvider: DurationProvider = FakeDurationProvider(),
         apiConfiguration: ApiConfiguration.State = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
+        confirmationContextHolder: CheckoutConfirmationContextHolder = CheckoutConfirmationContextHolder(
+            savedStateHandle = savedStateHandle,
+            uiContext = workContext,
+        ),
     ): CheckoutAnalyticsPerformer = CheckoutAnalyticsPerformer(
         confirmationHandler = confirmationHandler,
-        savedStateHandle = savedStateHandle,
+        confirmationContextHolder = confirmationContextHolder,
         stateHolder = stateHolder,
         linkAccountHolder = linkAccountHolder,
         context = ApplicationProvider.getApplicationContext<Context>(),

@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.confirmation.intent
 
 import android.content.Context
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
+import com.stripe.android.checkout.analytics.CheckoutConfirmationContextHolder
 import com.stripe.android.checkout.toCheckoutAddress
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.exception.LocalStripeException
@@ -51,6 +52,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
     private val stripeRepository: StripeRepository,
     private val checkoutSessionRepository: CheckoutSessionRepository,
     private val checkoutSessionTaxRegionUpdater: CheckoutSessionTaxRegionUpdater,
+    private val confirmationContextHolder: CheckoutConfirmationContextHolder,
     private val requestOptions: ApiRequest.Options,
 ) : IntentConfirmationInterceptor {
 
@@ -169,7 +171,10 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
             id = integrationMetadata.id,
             params = params,
         ).fold(
-            onSuccess = { (requestId, response) -> handleConfirmResponse(response, requestId) },
+            onSuccess = { (requestId, response) ->
+                confirmationContextHolder.setRequestId(requestId)
+                handleConfirmResponse(response)
+            },
             onFailure = { error ->
                 ConfirmationDefinition.Action.Fail(
                     cause = error,
@@ -182,7 +187,6 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
 
     private fun handleConfirmResponse(
         response: CheckoutSessionResponse,
-        requestId: String?,
     ): ConfirmationDefinition.Action<Args> {
         val intent: StripeIntent = response.paymentIntent ?: response.setupIntent
             ?: run {
@@ -203,7 +207,6 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
                     metadata = MutableConfirmationMetadata().apply {
                         set(DeferredIntentConfirmationTypeKey, DeferredIntentConfirmationType.Server)
                         set(CheckoutSessionResponseKey, response)
-                        requestId?.let { set(CheckoutSessionRequestIdKey, it) }
                     },
                     completedFullPaymentFlow = true,
                 )
