@@ -144,22 +144,21 @@ internal class RequestExecutorTest {
     }
 
     @Test
-    fun `executeRequestWithResultParser passes transport response to response parser`() = runTest {
+    fun `executeRequestWithResultParserAndRequestId returns request id with parsed model`() = runTest {
         whenever(mockNetworkClient.executeRequest(testRequest)).thenReturn(successResponse)
-        whenever(mockModelParser.parse(any())).thenReturn(TestStripeModel("test_data"))
+        val expectedModel = TestStripeModel("test_data")
+        whenever(mockModelParser.parse(any())).thenReturn(expectedModel)
 
-        val result = executeRequestWithResultParser(
+        val result = executeRequestWithResultParserAndRequestId(
             stripeNetworkClient = mockNetworkClient,
             stripeErrorJsonParser = mockErrorParser,
             request = testRequest,
-            responseParser = { response ->
-                mockModelParser.parse(response.responseJson())?.let { parsedModel ->
-                    TestStripeModel("${parsedModel.data}-${response.requestId?.value}")
-                }
-            },
+            responseJsonParser = mockModelParser,
         )
 
-        assertThat(result.getOrThrow()).isEqualTo(TestStripeModel("test_data-req_test"))
+        val (requestId, model) = result.getOrThrow()
+        assertThat(requestId).isEqualTo("req_test")
+        assertThat(model).isEqualTo(expectedModel)
     }
 
     @Test
@@ -179,27 +178,6 @@ internal class RequestExecutorTest {
         assertEquals("req_error", exception.requestId)
         assertEquals(HttpURLConnection.HTTP_BAD_REQUEST, exception.statusCode)
         assertEquals(testStripeError, exception.stripeError)
-    }
-
-    @Test
-    fun `executeRequestWithResultParser preserves failures when response parser is provided`() = runTest {
-        whenever(mockNetworkClient.executeRequest(testRequest)).thenReturn(errorResponse)
-        whenever(mockErrorParser.parse(any())).thenReturn(testStripeError)
-
-        val result = executeRequestWithResultParser<TestStripeModel>(
-            stripeNetworkClient = mockNetworkClient,
-            stripeErrorJsonParser = mockErrorParser,
-            request = testRequest,
-            responseParser = { _: StripeResponse<String> ->
-                error("Response parser should not run for an error response")
-            },
-        )
-
-        assertThat(result.isFailure).isTrue()
-        val exception = result.exceptionOrNull() as APIException
-        assertThat(exception.requestId).isEqualTo("req_error")
-        assertThat(exception.statusCode).isEqualTo(HttpURLConnection.HTTP_BAD_REQUEST)
-        assertThat(exception.stripeError).isEqualTo(testStripeError)
     }
 
     @Test

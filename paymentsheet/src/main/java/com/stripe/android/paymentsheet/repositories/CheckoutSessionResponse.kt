@@ -11,7 +11,6 @@ import kotlinx.parcelize.Parcelize
 internal data class CheckoutSessionResponse(
     val id: String,
     val configId: String?,
-    val requestId: String?,
     val currency: String,
     val paymentStatus: PaymentStatus,
     val status: Status,

@@ -18,10 +18,8 @@ import org.json.JSONObject
  * Strict parser for the modeless, unified Payment Pages response.
  */
 internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSessionResponse> {
-    override fun parse(json: JSONObject): CheckoutSessionResponse? = parse(json, requestId = null)
-
     @Suppress("CyclomaticComplexMethod", "LongMethod")
-    fun parse(json: JSONObject, requestId: String?): CheckoutSessionResponse? = runCatching {
+    override fun parse(json: JSONObject): CheckoutSessionResponse? = runCatching {
         require(json.requiredString("ui_mode") == "mobile_elements")
         require(json.requiredString("mode") == "modeless")
         val id = json.requiredString("session_id")
@@ -66,7 +64,6 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
         CheckoutSessionResponse(
             id = id,
             configId = configId,
-            requestId = requestId,
             currency = currency,
             paymentStatus = paymentStatus,
             status = status,

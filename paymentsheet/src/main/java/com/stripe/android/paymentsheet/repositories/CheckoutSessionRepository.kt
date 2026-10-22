@@ -7,8 +7,7 @@ import com.stripe.android.core.model.parsers.StripeErrorJsonParser
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
-import com.stripe.android.core.networking.executeRequestWithResultParser
-import com.stripe.android.core.networking.responseJson
+import com.stripe.android.core.networking.executeRequestWithResultParserAndRequestId
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
@@ -37,9 +36,15 @@ internal class CheckoutSessionRepository @Inject constructor(
     private suspend fun executePost(
         url: String,
         params: Map<String, *>,
-    ): Result<CheckoutSessionResponse> {
+    ): Result<CheckoutSessionResponse> = executePostWithRequestId(url, params)
+        .map { (_, response) -> response }
+
+    private suspend fun executePostWithRequestId(
+        url: String,
+        params: Map<String, *>,
+    ): Result<Pair<String?, CheckoutSessionResponse>> {
         val options = apiRequestOptionsProvider.get()
-        return executeRequestWithResultParser(
+        return executeRequestWithResultParserAndRequestId(
             stripeErrorJsonParser = stripeErrorJsonParser,
             stripeNetworkClient = stripeNetworkClient,
             request = apiRequestFactory.createPost(
@@ -47,12 +52,7 @@ internal class CheckoutSessionRepository @Inject constructor(
                 options = options,
                 params = params,
             ),
-            responseParser = { response ->
-                CheckoutSessionResponseJsonParser.parse(
-                    json = response.responseJson(),
-                    requestId = response.requestId?.value,
-                )
-            },
+            responseJsonParser = CheckoutSessionResponseJsonParser,
         )
     }
 
@@ -77,7 +77,7 @@ internal class CheckoutSessionRepository @Inject constructor(
     suspend fun confirm(
         id: String,
         params: ConfirmCheckoutSessionParams,
-    ): Result<CheckoutSessionResponse> = executePost(
+    ): Result<Pair<String?, CheckoutSessionResponse>> = executePostWithRequestId(
         url = confirmUrl(id),
         params = params.toParamMap().plus(Pair("elements_session_client[is_aggregation_expected]", "true")),
     )

@@ -75,19 +75,19 @@ class CheckoutSessionRepositoryTest {
 
     @Test
     fun `confirm reports request id from successful response header`() = runTest {
-        val requestId = "req_checkout_confirm"
+        val expectedRequestId = "req_checkout_confirm"
         networkRule.checkoutConfirm { response ->
             response.testBodyFromFile("checkout-session-confirm.json")
-            response.setHeader("Request-Id", requestId)
+            response.setHeader("Request-Id", expectedRequestId)
         }
 
-        val result = repository.confirm(
+        val (requestId, response) = repository.confirm(
             id = DEFAULT_CHECKOUT_SESSION_ID,
             params = confirmParams(),
         ).getOrThrow()
 
-        assertThat(result.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
-        assertThat(result.requestId).isEqualTo(requestId)
+        assertThat(response.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
+        assertThat(requestId).isEqualTo(expectedRequestId)
     }
 
     @Test
@@ -97,13 +97,13 @@ class CheckoutSessionRepositoryTest {
             response.removeHeader("request-id")
         }
 
-        val result = repository.confirm(
+        val (requestId, response) = repository.confirm(
             id = DEFAULT_CHECKOUT_SESSION_ID,
             params = confirmParams(),
         ).getOrThrow()
 
-        assertThat(result.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
-        assertThat(result.requestId).isNull()
+        assertThat(response.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
+        assertThat(requestId).isNull()
     }
 
     @Test

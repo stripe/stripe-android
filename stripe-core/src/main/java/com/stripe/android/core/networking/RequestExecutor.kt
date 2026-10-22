@@ -42,20 +42,20 @@ suspend fun <Response : StripeModel> executeRequestWithResultParser(
     stripeErrorJsonParser: StripeErrorJsonParser,
     request: StripeRequest,
     responseJsonParser: ModelJsonParser<Response>,
-): Result<Response> = executeRequestWithResultParser(
+): Result<Response> = executeRequestWithResultParserAndRequestId(
     stripeNetworkClient = stripeNetworkClient,
     stripeErrorJsonParser = stripeErrorJsonParser,
     request = request,
-    responseParser = { response -> responseJsonParser.parse(response.responseJson()) },
-)
+    responseJsonParser = responseJsonParser,
+).map { (_, response) -> response }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-suspend fun <Response : StripeModel> executeRequestWithResultParser(
+suspend fun <Response : StripeModel> executeRequestWithResultParserAndRequestId(
     stripeNetworkClient: StripeNetworkClient,
     stripeErrorJsonParser: StripeErrorJsonParser,
     request: StripeRequest,
-    responseParser: (StripeResponse<String>) -> Response?,
-): Result<Response> {
+    responseJsonParser: ModelJsonParser<Response>,
+): Result<Pair<String?, Response>> {
     return runCatching {
         stripeNetworkClient.executeRequest(request)
     }.fold(
@@ -64,14 +64,14 @@ suspend fun <Response : StripeModel> executeRequestWithResultParser(
                 Result.failure(apiException(stripeErrorJsonParser, response))
             } else {
                 val parsedResponse = runCatching {
-                    responseParser(response)
+                    responseJsonParser.parse(response.responseJson())
                 }.getOrNull()
 
                 if (parsedResponse != null) {
-                    Result.success(parsedResponse)
+                    Result.success(response.requestId?.value to parsedResponse)
                 } else {
                     Result.failure(
-                        APIException(message = "$responseParser returns null for ${response.responseJson()}")
+                        APIException(message = "$responseJsonParser returns null for ${response.responseJson()}")
                     )
                 }
             }

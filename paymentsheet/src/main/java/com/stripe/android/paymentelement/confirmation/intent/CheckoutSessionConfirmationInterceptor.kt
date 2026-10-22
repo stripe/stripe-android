@@ -169,7 +169,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
             id = integrationMetadata.id,
             params = params,
         ).fold(
-            onSuccess = ::handleConfirmResponse,
+            onSuccess = { (requestId, response) -> handleConfirmResponse(response, requestId) },
             onFailure = { error ->
                 ConfirmationDefinition.Action.Fail(
                     cause = error,
@@ -182,6 +182,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
 
     private fun handleConfirmResponse(
         response: CheckoutSessionResponse,
+        requestId: String?,
     ): ConfirmationDefinition.Action<Args> {
         val intent: StripeIntent = response.paymentIntent ?: response.setupIntent
             ?: run {
@@ -202,7 +203,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
                     metadata = MutableConfirmationMetadata().apply {
                         set(DeferredIntentConfirmationTypeKey, DeferredIntentConfirmationType.Server)
                         set(CheckoutSessionResponseKey, response)
-                        response.requestId?.let { set(CheckoutSessionRequestIdKey, it) }
+                        requestId?.let { set(CheckoutSessionRequestIdKey, it) }
                     },
                     completedFullPaymentFlow = true,
                 )
