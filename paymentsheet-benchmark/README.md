@@ -83,3 +83,26 @@ or an inferred total number of skipped refreshes.
 
 See [VALIDATION.md](VALIDATION.md) for the initial managed-device smoke run and
 an independently checked trace-to-frame match.
+
+## Isolated fix comparisons
+
+Pass `-Pandroid.testInstrumentationRunnerArguments.paymentsheet.workload=full`,
+`hidden`, or `captcha` to select the workload. `full` is the default. `hidden`
+retains full address collection while hiding name/email/phone. `captcha` uses
+full billing collection and enables real passive CAPTCHA warmup with hCaptcha's
+public test site key. The CAPTCHA JavaScript is not fixture-backed; this workload
+measures startup/presentation only, not token readiness or confirmation success.
+Record the installed WebView provider version when reporting it.
+
+`presentToLoadMs`, `presentToFirstDrawMs`, and
+`presentToFirstPresentedFrameMs` start immediately before building/presenting
+PaymentSheet in the benchmark activity. They complement the loader-return
+metrics: moving work before loader return must not be counted as eliminated work.
+These intervals exclude initial benchmark Activity/application startup.
+
+For each independent fix, build the unchanged harness with baseline production
+sources and then with only that fix. Use `coldWithBaselineProfile` in both arms,
+so the profile-packaging fix is compared with profiles enabled in both apps.
+Preserve each arm's JSON, traces, APK hash, source patch, compilation mode, and
+workload before running the next arm. Use a fresh baseline for each fix to reveal
+host/device drift. Do not add the individual deltas: the fixes overlap.

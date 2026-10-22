@@ -12,9 +12,31 @@ internal class FirstLoadedFrameMetric : TraceMetric() {
         traceSession: TraceProcessor.Session,
     ): List<Measurement> {
         val packageName = captureInfo.targetPackageName.replace("'", "''")
-        val rows = traceSession.query(
+        val rows = traceSession.query(query(packageName)).toList()
+        val frame = checkNotNull(rows.singleOrNull()) {
+            "Expected one loaded PaymentSheet frame with a completed draw trace and FrameTimeline token. " +
+                "Inspect this iteration's Perfetto trace; missing markers/frames must not yield a passing measurement."
+        }
+        return listOf(
+            Measurement("presentToLoadMs", frame.double("present_to_load_ms")),
+            Measurement("presentToFirstDrawMs", frame.double("present_to_draw_ms")),
+            Measurement("presentToFirstPresentedFrameMs", frame.double("present_to_frame_ms")),
+            Measurement("loadToFirstDrawMs", frame.double("draw_ms")),
+            Measurement("loadToFirstPresentedFrameMs", frame.double("presented_ms")),
+            Measurement("firstPresentedFrameOverrunMs", frame.double("overrun_ms")),
+        )
+    }
+
+    private fun query(packageName: String): String =
             """
-            WITH boundary AS (
+            WITH presentation AS (
+                SELECT s.ts AS presented_at, p.upid
+                FROM slice s
+                JOIN thread_track t ON s.track_id = t.id
+                JOIN thread th USING (utid)
+                JOIN process p USING (upid)
+                WHERE s.name = 'PaymentSheetBenchmark#present' AND p.name = '$packageName'
+            ), boundary AS (
                 SELECT s.ts AS loaded_at, s.ts + s.dur AS drawn_at, p.upid
                 FROM slice s
                 JOIN process_track t ON s.track_id = t.id
@@ -47,21 +69,14 @@ internal class FirstLoadedFrameMetric : TraceMetric() {
             SELECT
                 (p.drawn_at - p.loaded_at) / 1000000.0 AS draw_ms,
                 (p.ts + p.dur - p.loaded_at) / 1000000.0 AS presented_ms,
-                (p.ts + p.dur - e.ts - e.dur) / 1000000.0 AS overrun_ms
+                (p.ts + p.dur - e.ts - e.dur) / 1000000.0 AS overrun_ms,
+                (p.loaded_at - start.presented_at) / 1000000.0 AS present_to_load_ms,
+                (p.drawn_at - start.presented_at) / 1000000.0 AS present_to_draw_ms,
+                (p.ts + p.dur - start.presented_at) / 1000000.0 AS present_to_frame_ms
             FROM presented p
+            JOIN presentation start ON start.upid = p.upid
             JOIN expected_frame_timeline_slice e
                 ON e.upid = p.upid AND e.surface_frame_token = p.surface_frame_token
                     AND e.layer_name = p.layer_name
             """.trimIndent()
-        ).toList()
-        val frame = checkNotNull(rows.singleOrNull()) {
-            "Expected one loaded PaymentSheet frame with a completed draw trace and FrameTimeline token. " +
-                "Inspect this iteration's Perfetto trace; missing markers/frames must not yield a passing measurement."
-        }
-        return listOf(
-            Measurement("loadToFirstDrawMs", frame.double("draw_ms")),
-            Measurement("loadToFirstPresentedFrameMs", frame.double("presented_ms")),
-            Measurement("firstPresentedFrameOverrunMs", frame.double("overrun_ms")),
-        )
-    }
 }

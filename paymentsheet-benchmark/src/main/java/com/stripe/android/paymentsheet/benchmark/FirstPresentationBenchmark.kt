@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.benchmark
 
+import android.content.Intent
 import androidx.benchmark.macro.BaselineProfileMode
 import androidx.benchmark.macro.CompilationMode
 import androidx.benchmark.macro.ExperimentalMetricApi
@@ -8,6 +9,7 @@ import androidx.benchmark.macro.StartupMode
 import androidx.benchmark.macro.junit4.MacrobenchmarkRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
+import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.Until
 import org.junit.Rule
@@ -44,7 +46,14 @@ internal class FirstPresentationBenchmark {
             iterations = 10,
             setupBlock = { pressHome() },
         ) {
-            startActivityAndWait()
+            val workload = InstrumentationRegistry.getArguments().getString("paymentsheet.workload") ?: "full"
+            check(workload in setOf("full", "hidden", "captcha")) { "Unknown workload: $workload" }
+            startActivityAndWait(
+                Intent().setClassName(
+                    "com.stripe.android.paymentsheet.benchmarkapp",
+                    "com.stripe.android.paymentsheet.benchmarkapp.BenchmarkActivity",
+                ).putExtra("workload", workload)
+            )
             val loadedForm = By.text("Card information").pkg("com.stripe.android.paymentsheet.benchmarkapp")
             check(device.wait(Until.hasObject(loadedForm), LOAD_TIMEOUT_MILLIS)) {
                 val hierarchy = ByteArrayOutputStream().also { device.dumpWindowHierarchy(it) }

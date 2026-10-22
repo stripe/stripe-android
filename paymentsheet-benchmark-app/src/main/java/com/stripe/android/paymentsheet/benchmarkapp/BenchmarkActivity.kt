@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.benchmarkapp
 
 import android.os.Bundle
+import android.os.Trace
 import android.widget.TextView
 import androidx.activity.ComponentActivity
 import com.stripe.android.PaymentConfiguration
@@ -11,9 +12,19 @@ import com.stripe.android.paymentsheet.PaymentSheet
 internal class BenchmarkActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        ConnectionFactory.Default.connectionOpener = FixtureConnectionOpener(assets)
+        ConnectionFactory.Default.connectionOpener = FixtureConnectionOpener(
+            assets = assets,
+            captchaEnabled = intent.getStringExtra("workload") == "captcha",
+        )
         PaymentConfiguration.init(this, "pk_test_benchmark")
 
+        Trace.beginSection("PaymentSheetBenchmark#present")
+        val workload = intent.getStringExtra("workload") ?: "full"
+        val contactMode = if (workload == "hidden") {
+            PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never
+        } else {
+            PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
+        }
         val paymentSheet = PaymentSheet.Builder { result ->
             setContentView(TextView(this).apply { text = "Unexpected sheet result: $result" })
         }.build(this)
@@ -26,14 +37,15 @@ internal class BenchmarkActivity : ComponentActivity() {
                     .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
                     .billingDetailsCollectionConfiguration(
                         PaymentSheet.BillingDetailsCollectionConfiguration(
-                            name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                            email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                            phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                            name = contactMode,
+                            email = contactMode,
+                            phone = contactMode,
                             address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
                         )
                     )
                     .build(),
             )
         }
+        Trace.endSection()
     }
 }

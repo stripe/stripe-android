@@ -13,7 +13,10 @@ import java.security.cert.Certificate
 import javax.net.ssl.HttpsURLConnection
 
 /** Intercepts SDK HTTP at the existing connection seam; no request reaches a live endpoint. */
-internal class FixtureConnectionOpener(private val assets: AssetManager) : ConnectionFactory.ConnectionOpener {
+internal class FixtureConnectionOpener(
+    private val assets: AssetManager,
+    private val captchaEnabled: Boolean,
+) : ConnectionFactory.ConnectionOpener {
     override fun open(
         request: StripeRequest,
         callback: HttpURLConnection.(StripeRequest) -> Unit,
@@ -21,7 +24,8 @@ internal class FixtureConnectionOpener(private val assets: AssetManager) : Conne
         val url = URL(request.url)
         val body = when {
             url.host == "api.stripe.com" && url.path == "/v1/elements/sessions" -> {
-                assets.open("elements-session.json").use { it.readBytes() }
+                val fixture = if (captchaEnabled) "elements-session-captcha.json" else "elements-session.json"
+                assets.open(fixture).use { it.readBytes() }
             }
             url.host == "r.stripe.com" || url.host == "q.stripe.com" || url.host == "m.stripe.com" -> {
                 "{}".toByteArray()
