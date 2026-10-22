@@ -1,0 +1,74 @@
+diff --git a/paymentsheet/src/main/java/com/stripe/android/paymentsheet/forms/CompleteFormFieldValueFilter.kt b/paymentsheet/src/main/java/com/stripe/android/paymentsheet/forms/CompleteFormFieldValueFilter.kt
+index 5a8ce871b3..fa9d78ec65 100644
+--- a/paymentsheet/src/main/java/com/stripe/android/paymentsheet/forms/CompleteFormFieldValueFilter.kt
++++ b/paymentsheet/src/main/java/com/stripe/android/paymentsheet/forms/CompleteFormFieldValueFilter.kt
+@@ -14,7 +14,6 @@ import kotlinx.coroutines.flow.combine
+ internal class CompleteFormFieldValueFilter(
+     private val currentFieldValueMap: Flow<Map<FormFieldId, FormFieldEntry>>,
+     private val hiddenIdentifiers: Flow<Set<FormFieldId>>,
+-    private val userRequestedReuse: Flow<PaymentSelection.CustomerRequestedSave>,
+     private val defaultValues: Map<FormFieldId, String>,
+ ) {
+     /**
+@@ -24,13 +23,19 @@ internal class CompleteFormFieldValueFilter(
+     fun filterFlow() = combine(
+         currentFieldValueMap,
+         hiddenIdentifiers,
+-        userRequestedReuse,
+-    ) { idFieldSnapshotMap, hiddenIdentifiers, userRequestedReuse ->
++    ) { idFieldSnapshotMap, hiddenIdentifiers ->
+         filterFlow(
+             idFieldSnapshotMap,
+             hiddenIdentifiers,
+-            userRequestedReuse,
+-            defaultValues,
++            userRequestedReuse = when (val save = idFieldSnapshotMap[FormFieldId.SaveForFutureUse]) {
++                null -> PaymentSelection.CustomerRequestedSave.NoRequest
++                else -> if (save.value.toBoolean()) {
++                    PaymentSelection.CustomerRequestedSave.RequestReuse
++                } else {
++                    PaymentSelection.CustomerRequestedSave.RequestNoReuse
++                }
++            },
++            defaultValues = defaultValues,
+         )
+     }
+ 
+diff --git a/paymentsheet/src/main/java/com/stripe/android/paymentsheet/forms/FormViewModel.kt b/paymentsheet/src/main/java/com/stripe/android/paymentsheet/forms/FormViewModel.kt
+index fecf1a1e1e..f6813064ed 100644
+--- a/paymentsheet/src/main/java/com/stripe/android/paymentsheet/forms/FormViewModel.kt
++++ b/paymentsheet/src/main/java/com/stripe/android/paymentsheet/forms/FormViewModel.kt
+@@ -4,7 +4,6 @@ import androidx.annotation.VisibleForTesting
+ import androidx.lifecycle.ViewModel
+ import androidx.lifecycle.ViewModelProvider
+ import androidx.lifecycle.viewModelScope
+-import com.stripe.android.paymentsheet.model.PaymentSelection
+ import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
+ import com.stripe.android.ui.core.elements.BillingAddressElement
+ import com.stripe.android.uicore.elements.AddressFieldsElement
+@@ -86,25 +85,10 @@ internal class FormViewModel(
+         externalHiddenIdentifiers.plus(cardBillingIdentifiers)
+     }
+ 
+-    // This will convert the save for future use value into a CustomerRequestedSave operation
+-    private val userRequestedReuse = currentFieldValues().map { currentFieldValues ->
+-        currentFieldValues.filter { it.first == FormFieldId.SaveForFutureUse }
+-            .map { it.second.value.toBoolean() }
+-            .map { saveForFutureUse ->
+-                if (saveForFutureUse) {
+-                    PaymentSelection.CustomerRequestedSave.RequestReuse
+-                } else {
+-                    PaymentSelection.CustomerRequestedSave.RequestNoReuse
+-                }
+-            }
+-            .firstOrNull() ?: PaymentSelection.CustomerRequestedSave.NoRequest
+-    }
+-
+     val completeFormValues =
+         CompleteFormFieldValueFilter(
+             currentFieldValues().map { it.toMap() },
+             hiddenIdentifiers,
+-            userRequestedReuse,
+             formArguments.defaultFormValues,
+         ).filterFlow()
+ 

@@ -9,8 +9,8 @@ The target app presents a card-only PaymentIntent with full billing address,
 name, email, and phone collection. SDK HTTP requests use an in-memory connection
 backed by the app's own elements-session fixture; unexpected endpoints fail.
 The production PaymentSheet loader, controllers, and Compose UI still execute.
-This workload excludes saved methods, Link, Google Pay, and CAPTCHA/WebView.
-Add separate benchmark workloads to measure those paths.
+The default workload excludes saved methods, Link, Google Pay, and CAPTCHA/WebView.
+The `hidden` and `captcha` variants are described below.
 
 ## Run on the managed device
 
@@ -106,3 +106,6 @@ so the profile-packaging fix is compared with profiles enabled in both apps.
 Preserve each arm's JSON, traces, APK hash, source patch, compilation mode, and
 workload before running the next arm. Use a fresh baseline for each fix to reveal
 host/device drift. Do not add the individual deltas: the fixes overlap.
+
+See [the independent 16-fix comparison report](comparisons/2026-10-22/README.md)
+for measured samples, source patches, APK identities, and uncertainty.

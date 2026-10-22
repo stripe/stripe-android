@@ -1,0 +1,2 @@
+# Preserve diff context lines (including the single space on blank context lines).
+patches/*.patch -whitespace

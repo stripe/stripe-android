@@ -1,0 +1,18 @@
+{
+  "fix": 14,
+  "order": [
+    "14-repeat-fix",
+    "14-repeat-baseline"
+  ],
+  "prebuildCommand": "./gradlew :paymentsheet-benchmark:assembleDebug :paymentsheet-benchmark-app:assembleRelease",
+  "cooldownSecondsPerArm": 60,
+  "buildSeconds": {
+    "fix": 9,
+    "baseline": 2
+  },
+  "benchmarkSeconds": {
+    "fix": 59,
+    "baseline": 55
+  },
+  "note": "Same source patch, fresh builds; APK hashes differ from initial block. This is not an exact-binary repeat."
+}

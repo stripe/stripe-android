@@ -1,0 +1,100 @@
+diff --git a/payments-core/build.gradle b/payments-core/build.gradle
+index ef22893cc6..321bc4b516 100644
+--- a/payments-core/build.gradle
++++ b/payments-core/build.gradle
+@@ -26,6 +26,7 @@ dependencies {
+     implementation libs.androidx.recyclerView
+     implementation libs.androidx.savedState
+     implementation libs.androidx.viewModel
++    implementation libs.androidx.webkit
+     implementation libs.compose.activity
+     implementation libs.compose.foundation
+     implementation libs.compose.material
+diff --git a/payments-core/src/main/java/com/stripe/android/hcaptcha/DefaultHCaptchaService.kt b/payments-core/src/main/java/com/stripe/android/hcaptcha/DefaultHCaptchaService.kt
+index 0ddb7e7917..1d35631a9b 100644
+--- a/payments-core/src/main/java/com/stripe/android/hcaptcha/DefaultHCaptchaService.kt
++++ b/payments-core/src/main/java/com/stripe/android/hcaptcha/DefaultHCaptchaService.kt
+@@ -21,7 +21,8 @@ import kotlin.time.Duration.Companion.seconds
+ 
+ internal class DefaultHCaptchaService(
+     private val hCaptchaProvider: HCaptchaProvider,
+-    private val captchaEventsReporter: CaptchaEventsReporter
++    private val captchaEventsReporter: CaptchaEventsReporter,
++    private val prepareWebView: suspend (FragmentActivity) -> Unit,
+ ) : HCaptchaService {
+     private val cachedResult = MutableStateFlow<CachedResult>(CachedResult.Idle)
+ 
+@@ -113,6 +114,9 @@ internal class DefaultHCaptchaService(
+         val hCaptcha = hCaptchaProvider.get()
+         captchaEventsReporter.init(siteKey)
+         val result = runCatching {
++            // Creating the CAPTCHA view implicitly starts Chromium on Main unless startup
++            // has finished. Wait for asynchronous startup before touching WebView APIs.
++            prepareWebView(activity)
+             startVerification(
+                 activity = activity,
+                 siteKey = siteKey,
+diff --git a/payments-core/src/main/java/com/stripe/android/hcaptcha/HCaptchaModule.kt b/payments-core/src/main/java/com/stripe/android/hcaptcha/HCaptchaModule.kt
+index 432af530ce..dd39ad43bb 100644
+--- a/payments-core/src/main/java/com/stripe/android/hcaptcha/HCaptchaModule.kt
++++ b/payments-core/src/main/java/com/stripe/android/hcaptcha/HCaptchaModule.kt
+@@ -27,7 +27,11 @@ object HCaptchaModule {
+         captchaEventsReporter: CaptchaEventsReporter
+     ): HCaptchaService {
+         return hCaptchaService ?: synchronized(this) {
+-            hCaptchaService ?: DefaultHCaptchaService(hCaptchaProvider, captchaEventsReporter)
++            hCaptchaService ?: DefaultHCaptchaService(
++                hCaptchaProvider = hCaptchaProvider,
++                captchaEventsReporter = captchaEventsReporter,
++                prepareWebView = { activity -> HCaptchaWebViewStartup.awaitReady(activity.applicationContext) },
++            )
+                 .also { hCaptchaService = it }
+         }
+     }
+diff --git a/payments-core/src/main/java/com/stripe/android/hcaptcha/HCaptchaWebViewStartup.kt b/payments-core/src/main/java/com/stripe/android/hcaptcha/HCaptchaWebViewStartup.kt
+new file mode 100644
+index 0000000000..02bbfa4ca0
+--- /dev/null
++++ b/payments-core/src/main/java/com/stripe/android/hcaptcha/HCaptchaWebViewStartup.kt
+@@ -0,0 +1,41 @@
++package com.stripe.android.hcaptcha
++
++import android.content.Context
++import androidx.annotation.OptIn
++import androidx.webkit.WebViewCompat
++import androidx.webkit.WebViewStartUpConfig
++import kotlinx.coroutines.Dispatchers
++import kotlinx.coroutines.asExecutor
++import kotlinx.coroutines.suspendCancellableCoroutine
++import java.util.concurrent.Executor
++import kotlin.coroutines.resume
++import kotlin.coroutines.resumeWithException
++
++internal object HCaptchaWebViewStartup {
++    @OptIn(WebViewCompat.ExperimentalAsyncStartUp::class)
++    @Suppress("TooGenericExceptionCaught") // Forward failures from the provider's startup Runnable.
++    suspend fun awaitReady(context: Context) = suspendCancellableCoroutine { continuation ->
++        // WebKit 1.15's startup callback has no failure method. Forward failures from
++        // its executor to the caller so missing/broken WebView providers don't crash
++        // a worker thread or leave CAPTCHA confirmation waiting for startup forever.
++        val executor = Executor { command ->
++            Dispatchers.IO.asExecutor().execute {
++                try {
++                    command.run()
++                } catch (error: Exception) {
++                    if (continuation.isActive) {
++                        continuation.resumeWithException(error)
++                    }
++                }
++            }
++        }
++        WebViewCompat.startUpWebView(
++            context,
++            WebViewStartUpConfig.Builder(executor).build(),
++        ) {
++            if (continuation.isActive) {
++                continuation.resume(Unit)
++            }
++        }
++    }
++}

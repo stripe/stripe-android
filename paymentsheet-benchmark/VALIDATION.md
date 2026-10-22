@@ -9,7 +9,8 @@ PaymentSheet performance fixes; it applies no manually curated Stripe profiles.
 
 These are emulator smoke-run observations, not representative device performance
 or an estimate of savings from any proposed fix or from baseline profiles.
-There is no before/after implementation comparison in this PR.
+This initial smoke run did not compare production fixes. The later
+[independent comparison report](comparisons/2026-10-22/README.md) records those trials.
 
 Environment: Google APIs ARM64 image,
 `google/sdk_gphone64_arm64/emu64a:13/TE1A.240213.009/12342917:userdebug/dev-keys`,

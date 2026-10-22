@@ -1,0 +1,37 @@
+diff --git a/stripe-ui-core/src/main/java/com/stripe/android/uicore/elements/AddressElementUiRegistry.kt b/stripe-ui-core/src/main/java/com/stripe/android/uicore/elements/AddressElementUiRegistry.kt
+index 0da422726c..cecedcf01c 100644
+--- a/stripe-ui-core/src/main/java/com/stripe/android/uicore/elements/AddressElementUiRegistry.kt
++++ b/stripe-ui-core/src/main/java/com/stripe/android/uicore/elements/AddressElementUiRegistry.kt
+@@ -3,20 +3,22 @@ package com.stripe.android.uicore.elements
+ import com.stripe.android.uicore.address.AddressSchemaRegistry
+ import com.stripe.android.uicore.address.transformToElementList
+ 
+-internal class AddressElementUiRegistry(schemaRegistry: AddressSchemaRegistry) {
+-    private val defaultElements = schemaRegistry.defaultSchema.schemaElements().transformToElementList(
+-        countryCode = schemaRegistry.defaultSchema.countryCode
++internal class AddressElementUiRegistry(
++    private val createElements: (String?) -> List<SectionFieldElement>?,
++) {
++    constructor(schemaRegistry: AddressSchemaRegistry) : this(
++        createElements = { countryCode ->
++            schemaRegistry.get(countryCode)?.transformToElementList(
++                countryCode = countryCode ?: schemaRegistry.defaultSchema.countryCode
++            )
++        }
+     )
+ 
+-    private val elements = schemaRegistry.all.mapValues { (countryCode, schema) ->
+-        schema.schemaElements().transformToElementList(countryCode)
+-    }
++    private val elements = mutableMapOf<String?, List<SectionFieldElement>>()
+ 
+     fun get(countryCode: String?): List<SectionFieldElement>? {
+-        return if (countryCode != null) {
+-            elements[countryCode]
+-        } else {
+-            defaultElements
++        return elements[countryCode] ?: createElements(countryCode)?.also {
++            elements[countryCode] = it
+         }
+     }
+ }
