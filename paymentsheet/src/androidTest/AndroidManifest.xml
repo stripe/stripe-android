@@ -6,6 +6,10 @@
 
     <application>
         <activity
+            android:name="com.stripe.android.checkout.CheckoutShippingAddressElementHostActivity"
+            android:theme="@style/Theme.AppCompat.Light"
+            android:exported="false" />
+        <activity
             android:name="com.stripe.android.paymentsheet.MainActivity"
             android:theme="@style/Theme.AppCompat.Light"
             android:exported="false" />
