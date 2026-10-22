@@ -46,6 +46,18 @@ internal class KycScreenTest {
     val coroutineTestRule = CoroutineTestRule(UnconfinedTestDispatcher())
 
     @Test
+    fun `empty source overview offers adding documents without upload slots`() = runScenario(
+        state = screenState(
+            page = KycCollectionPage.DocumentOverview,
+            document = documentState(slots = emptyList(), editingSlotIndex = null),
+        ),
+    ) {
+        composeRule.onNodeWithTag(KYC_ADD_DOCUMENTS_TAG).assertIsDisplayed().performClick()
+        assertThat(addDocuments).isTrue()
+        composeRule.onNodeWithTag("PrimaryButtonTag").assertIsNotEnabled()
+    }
+
+    @Test
     fun `document type selector remains open after state restoration`() = runScenario(
         state = screenState(page = KycCollectionPage.DocumentEditor),
     ) {
@@ -399,7 +411,7 @@ internal class KycScreenTest {
                     ),
                 ),
                 editingSlotIndex = null,
-            ).copy(maxDocumentTypes = 2),
+            ).copy(maxDocumentTypes = 2, canAddDocuments = false),
             canSubmit = true,
             completedDocumentCount = 2,
         ),
@@ -686,6 +698,7 @@ internal class KycScreenTest {
                 minDocumentTypes = 1,
                 maxDocumentTypes = 10,
                 maxFilesPerDocumentType = 10,
+                canAddDocuments = true,
                 editingSlotIndex = editingSlotIndex,
                 slots = slots,
                 documentCollectionPrompt = null,

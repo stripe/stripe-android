@@ -14,6 +14,36 @@ import org.junit.Test
 
 internal class KycStateHolderTest {
     @Test
+    fun `removing last source document and leaving editor permits adding a replacement`() {
+        val holder = stateHolderFromFixture("source_of_funds_required.json")
+        holder.onContinue()
+        holder.state.questions.forEach { holder.onQuestionAnswerChanged(it.id, "Test answer") }
+        holder.onContinue()
+        holder.onAddDocuments()
+        val slot = requireNotNull(holder.state.document?.editingSlotIndex)
+        holder.onFileSelected(slot, "payslip.png", "file_test")
+        holder.onContinue()
+        assertThat(holder.state.completedDocumentCount).isEqualTo(1)
+
+        holder.onEditDocuments(slot)
+        holder.onFileRemoved(slot)
+        holder.onBack()
+
+        assertThat(holder.state.page).isEqualTo(KycCollectionPage.DocumentOverview)
+        assertThat(holder.state.document?.slots).isEmpty()
+        assertThat(holder.state.document?.canAddDocuments).isTrue()
+        assertThat(holder.state.canSubmit).isFalse()
+        holder.onAddDocuments()
+        assertThat(holder.state.page).isEqualTo(KycCollectionPage.DocumentEditor)
+        val replacementSlot = requireNotNull(holder.state.document?.editingSlotIndex)
+        assertThat(holder.canSelectFile(replacementSlot)).isTrue()
+        holder.onFileSelected(replacementSlot, "replacement.png", "file_replacement")
+        holder.onContinue()
+        assertThat(holder.state.completedDocumentCount).isEqualTo(1)
+        assertThat(holder.state.canSubmit).isTrue()
+    }
+
+    @Test
     fun `proof of address fixture preserves server categories through submission`() {
         val stateHolder = stateHolderFromFixture("proof_of_address_required.json")
         stateHolder.onContinue()

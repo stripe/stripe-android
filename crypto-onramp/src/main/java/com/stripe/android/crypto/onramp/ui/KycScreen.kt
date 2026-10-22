@@ -481,8 +481,7 @@ private fun DocumentOverviewContent(
         )
         SourceDocumentsCard(
             groups = groups,
-            canAddDocuments = groups.size < (state.document?.maxDocumentTypes ?: 0) &&
-                state.document?.slots?.firstOrNull()?.subtypes.orEmpty().any { it.id !in groups },
+            canAddDocuments = state.document?.canAddDocuments == true,
             onAddDocuments = onAddDocuments,
             onEditDocuments = onEditDocuments,
         )
@@ -1415,6 +1414,7 @@ internal data class KycDocumentState(
     val minDocumentTypes: Int,
     val maxDocumentTypes: Int,
     val maxFilesPerDocumentType: Int,
+    val canAddDocuments: Boolean,
     val editingSlotIndex: Int?,
     val slots: List<KycDocumentSlotState>,
 )
