@@ -3,6 +3,7 @@ package com.stripe.android.checkout
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutController.Address
 import com.stripe.android.common.configuration.ConfigurationDefaults
+import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.elements.ExpressCheckoutElement.Configuration.GooglePayConfiguration
@@ -14,6 +15,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.CardFundingFilteringPrivatePreview
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import org.junit.Test
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic as PSAutomatic
@@ -542,7 +544,50 @@ internal class CheckoutCommonConfigurationFactoryTest {
         assertThat(expressConfiguration.defaultBillingDetails?.phone).isNull()
     }
 
-    private fun factory(appName: String = "Test App") = CheckoutCommonConfigurationFactory(appName)
+    private fun factory(appName: String = "Test App") = TestFactory(appName)
+
+    // TODO: we definitely will not be doing this.
+    private class TestFactory(appName: String) {
+        private val factory = CheckoutCommonConfigurationFactory(appName)
+
+        fun create(
+            configuration: CheckoutController.Configuration.State,
+            checkoutSessionResponse: CheckoutSessionResponse,
+            collectedDetails: CheckoutCollectedDetails,
+        ): CommonConfiguration {
+            return requireNotNull(
+                factory.create(
+                    configuration = configuration,
+                    checkoutSessionResponse = checkoutSessionResponse,
+                    collectedDetails = collectedDetails,
+                )
+            )
+        }
+
+        fun createForPaymentElement(
+            configuration: CheckoutController.Configuration.State,
+            checkoutSessionResponse: CheckoutSessionResponse,
+            collectedDetails: CheckoutCollectedDetails,
+        ): CommonConfiguration {
+            return factory.createForPaymentElement(
+                configuration = configuration,
+                checkoutSessionResponse = checkoutSessionResponse,
+                collectedDetails = collectedDetails,
+            )
+        }
+
+        fun createForExpressCheckoutElement(
+            configuration: CheckoutController.Configuration.State,
+            checkoutSessionResponse: CheckoutSessionResponse,
+            collectedDetails: CheckoutCollectedDetails,
+        ): CommonConfiguration? {
+            return factory.createForExpressCheckoutElement(
+                configuration = configuration,
+                checkoutSessionResponse = checkoutSessionResponse,
+                collectedDetails = collectedDetails,
+            )
+        }
+    }
 
     private fun controllerConfiguration(
         appearance: PaymentElement.Configuration.Appearance = PaymentElement.Configuration.Appearance(),

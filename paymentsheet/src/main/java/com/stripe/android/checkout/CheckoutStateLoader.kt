@@ -115,17 +115,19 @@ internal class CheckoutStateLoader @Inject constructor(
         // previous selection comes from the incoming state, not a separate holder. An empty
         // selection on reload must stay empty until the customer selects again or reconfigures.
         val selection = embeddedConfig?.let { embeddedConfiguration ->
-            loadResults.paymentMethodMetadata?.let { paymentMethodMetadata ->
-                selectionChooser.choose(
-                    paymentMethodMetadata = paymentMethodMetadata,
-                    paymentMethods = loadResults.customer?.paymentMethods,
-                    previousSelection = carryForward.previousSelection,
-                    newSelection = loadResults.paymentSelection.takeIf {
-                        carryForward.isInitialLoad || carryForward.previousSelection != null
-                    },
-                    newConfiguration = commonConfiguration,
-                    formSheetAction = embeddedConfiguration.formSheetAction,
-                )
+            commonConfiguration?.let { newConfiguration ->
+                loadResults.paymentMethodMetadata?.let { paymentMethodMetadata ->
+                    selectionChooser.choose(
+                        paymentMethodMetadata = paymentMethodMetadata,
+                        paymentMethods = loadResults.customer?.paymentMethods,
+                        previousSelection = carryForward.previousSelection,
+                        newSelection = loadResults.paymentSelection.takeIf {
+                            carryForward.isInitialLoad || carryForward.previousSelection != null
+                        },
+                        newConfiguration = newConfiguration,
+                        formSheetAction = embeddedConfiguration.formSheetAction,
+                    )
+                }
             }
         }
 
