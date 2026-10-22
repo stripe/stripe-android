@@ -151,6 +151,7 @@ internal class LinkControllerCoordinatorTest {
             linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
             selectedPayment = null,
             shippingAddress = null,
+            confirmationRequestId = null,
         )
         val coordinator = createCoordinator(
             activityResult = testResult

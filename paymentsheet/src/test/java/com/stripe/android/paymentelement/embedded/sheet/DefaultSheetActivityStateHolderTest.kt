@@ -235,7 +235,8 @@ internal class DefaultSheetActivityStateHolderTest {
 
             confirmationHandler.state.value = ConfirmationHandler.State.Complete(
                 result = ConfirmationHandler.Result.Canceled(
-                    action = ConfirmationHandler.Result.Canceled.Action.None
+                    action = ConfirmationHandler.Result.Canceled.Action.None,
+                    confirmationRequestId = null,
                 )
             )
             val canceledState = awaitItem()

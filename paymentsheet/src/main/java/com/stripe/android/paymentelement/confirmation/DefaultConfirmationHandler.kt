@@ -43,6 +43,12 @@ internal class DefaultConfirmationHandler(
             savedStateHandle.set(INITIAL_CONFIRMATION_ARGUMENTS_KEY, value)
         }
 
+    private var confirmationRequestId: String?
+        get() = savedStateHandle[CONFIRMATION_REQUEST_ID_KEY]
+        set(value) {
+            savedStateHandle[CONFIRMATION_REQUEST_ID_KEY] = value
+        }
+
     private val isInitiallyAwaitingForResultData = retrieveIsAwaitingForResultData()
 
     override val hasReloadedFromProcessDeath = isInitiallyAwaitingForResultData != null
@@ -69,6 +75,7 @@ internal class DefaultConfirmationHandler(
                     onHandlerResult(
                         ConfirmationHandler.Result.Canceled(
                             action = ConfirmationHandler.Result.Canceled.Action.None,
+                            confirmationRequestId = confirmationRequestId,
                         )
                     )
                 }
@@ -109,8 +116,6 @@ internal class DefaultConfirmationHandler(
     override suspend fun start(
         arguments: ConfirmationHandler.Args,
     ) {
-        initialConfirmationArguments = arguments
-
         withContext(coroutineScope.coroutineContext) {
             val currentState = _state.value
 
@@ -118,6 +123,8 @@ internal class DefaultConfirmationHandler(
                 return@withContext
             }
 
+            initialConfirmationArguments = arguments
+            confirmationRequestId = null
             confirm(arguments)
         }
     }
@@ -162,6 +169,7 @@ internal class DefaultConfirmationHandler(
                     ),
                     message = R.string.stripe_something_went_wrong.resolvableString,
                     type = ConfirmationHandler.Result.Failed.ErrorType.Internal,
+                    confirmationRequestId = confirmationRequestId,
                 )
             )
 
@@ -179,6 +187,8 @@ internal class DefaultConfirmationHandler(
         val action = withContext(ioContext) {
             mediator.action(confirmationOption, arguments)
         }
+        action.confirmationRequestId?.let { confirmationRequestId = it }
+
         when (action) {
             is ConfirmationMediator.Action.Launch -> {
                 storeIsAwaitingForResult(
@@ -195,6 +205,7 @@ internal class DefaultConfirmationHandler(
                         cause = action.cause,
                         message = action.message,
                         type = action.errorType,
+                        confirmationRequestId = confirmationRequestId,
                     )
                 )
             }
@@ -204,6 +215,7 @@ internal class DefaultConfirmationHandler(
                         intent = action.intent,
                         metadata = action.metadata,
                         completedFullPaymentFlow = action.completedFullPaymentFlow,
+                        confirmationRequestId = confirmationRequestId,
                     )
                 )
             }
@@ -211,6 +223,8 @@ internal class DefaultConfirmationHandler(
     }
 
     private fun onResult(result: ConfirmationDefinition.Result) {
+        result.confirmationRequestId?.let { confirmationRequestId = it }
+
         val confirmationResult = when (result) {
             is ConfirmationDefinition.Result.NextStep -> {
                 removeIsAwaitingForResult()
@@ -229,14 +243,17 @@ internal class DefaultConfirmationHandler(
                 intent = result.intent,
                 metadata = result.metadata,
                 completedFullPaymentFlow = result.completedFullPaymentFlow,
+                confirmationRequestId = confirmationRequestId,
             )
             is ConfirmationDefinition.Result.Failed -> ConfirmationHandler.Result.Failed(
                 cause = result.cause,
                 type = result.type,
                 message = result.message,
+                confirmationRequestId = confirmationRequestId,
             )
             is ConfirmationDefinition.Result.Canceled -> ConfirmationHandler.Result.Canceled(
                 action = result.action,
+                confirmationRequestId = confirmationRequestId,
             )
         }
 
@@ -259,6 +276,7 @@ internal class DefaultConfirmationHandler(
         }
 
         initialConfirmationArguments = null
+        savedStateHandle.remove<String>(CONFIRMATION_REQUEST_ID_KEY)
 
         removeIsAwaitingForResult()
     }
@@ -324,6 +342,7 @@ internal class DefaultConfirmationHandler(
     }
 
     internal companion object {
+        internal const val CONFIRMATION_REQUEST_ID_KEY = "ConfirmationHandler.confirmationRequestId"
         private const val AWAITING_CONFIRMATION_RESULT_KEY = "AwaitingConfirmationResult"
         private const val INITIAL_CONFIRMATION_ARGUMENTS_KEY = "INITIAL_CONFIRMATION_ARGUMENTS_KEY"
     }

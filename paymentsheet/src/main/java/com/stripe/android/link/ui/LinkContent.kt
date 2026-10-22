@@ -339,13 +339,15 @@ private fun OAuthConsentRoute(
 private fun noLinkAccountResult(): LinkActivityResult {
     return LinkActivityResult.Failed(
         error = NoLinkAccountFoundException(),
-        linkAccountUpdate = LinkAccountUpdate.None
+        linkAccountUpdate = LinkAccountUpdate.None,
+        confirmationRequestId = null,
     )
 }
 
 private fun noPaymentDetailsResult(): LinkActivityResult {
     return LinkActivityResult.Failed(
         error = NoPaymentDetailsFoundException(),
-        linkAccountUpdate = LinkAccountUpdate.None
+        linkAccountUpdate = LinkAccountUpdate.None,
+        confirmationRequestId = null,
     )
 }

@@ -42,6 +42,7 @@ internal class CustomerSheetConfirmationInterceptor @AssistedInject constructor(
                 cause = cause,
                 message = cause.stripeErrorMessage(),
                 errorType = ConfirmationHandler.Result.Failed.ErrorType.Internal,
+                confirmationRequestId = null,
             )
         }
 
@@ -52,6 +53,7 @@ internal class CustomerSheetConfirmationInterceptor @AssistedInject constructor(
                 return ConfirmationDefinition.Action.Complete(
                     intent = intent.copy(paymentMethod = paymentMethod),
                     completedFullPaymentFlow = true,
+                    confirmationRequestId = null,
                 )
             }
 
@@ -80,6 +82,7 @@ internal class CustomerSheetConfirmationInterceptor @AssistedInject constructor(
                     cause = cause,
                     message = cause.stripeErrorMessage(),
                     errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                    confirmationRequestId = null,
                 )
             }
         )
@@ -97,7 +100,8 @@ internal class CustomerSheetConfirmationInterceptor @AssistedInject constructor(
         return ConfirmationDefinition.Action.Fail(
             errorType = ConfirmationHandler.Result.Failed.ErrorType.Internal,
             cause = error,
-            message = error.stripeErrorMessage()
+            message = error.stripeErrorMessage(),
+            confirmationRequestId = null,
         )
     }
 

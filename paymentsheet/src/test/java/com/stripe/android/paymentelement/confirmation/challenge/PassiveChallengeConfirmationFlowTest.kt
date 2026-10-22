@@ -47,6 +47,7 @@ internal class PassiveChallengeConfirmationFlowTest {
                 confirmationChallengeState = ConfirmationChallengeState(passiveChallengeComplete = true),
             ),
             arguments = CONFIRMATION_PARAMETERS,
+            confirmationRequestId = null,
         ),
     )
 
@@ -66,6 +67,7 @@ internal class PassiveChallengeConfirmationFlowTest {
                 confirmationChallengeState = ConfirmationChallengeState(passiveChallengeComplete = true),
             ),
             arguments = CONFIRMATION_PARAMETERS,
+            confirmationRequestId = null,
         ),
     )
 

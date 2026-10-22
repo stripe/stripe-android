@@ -51,7 +51,8 @@ internal class DefaultLinkAnalyticsHelperTest {
         val analyticsHelper = DefaultLinkAnalyticsHelper(eventReporter)
         analyticsHelper.onLinkResult(
             LinkActivityResult.Completed(
-                linkAccountUpdate = LinkAccountUpdate.None
+                linkAccountUpdate = LinkAccountUpdate.None,
+                confirmationRequestId = null,
             )
         )
         assertThat(eventReporter.calledCount).isEqualTo(1)
@@ -68,7 +69,8 @@ internal class DefaultLinkAnalyticsHelperTest {
         analyticsHelper.onLinkResult(
             linkActivityResult = LinkActivityResult.Failed(
                 error = IllegalStateException(),
-                linkAccountUpdate = LinkAccountUpdate.None
+                linkAccountUpdate = LinkAccountUpdate.None,
+                confirmationRequestId = null,
             )
         )
         assertThat(eventReporter.calledCount).isEqualTo(1)
@@ -85,7 +87,8 @@ internal class DefaultLinkAnalyticsHelperTest {
         analyticsHelper.onLinkResult(
             linkActivityResult = LinkActivityResult.Canceled(
                 reason = LinkActivityResult.Canceled.Reason.BackPressed,
-                linkAccountUpdate = LinkAccountUpdate.None
+                linkAccountUpdate = LinkAccountUpdate.None,
+                confirmationRequestId = null,
             )
         )
         assertThat(eventReporter.calledCount).isEqualTo(1)
@@ -102,7 +105,8 @@ internal class DefaultLinkAnalyticsHelperTest {
         analyticsHelper.onLinkResult(
             linkActivityResult = LinkActivityResult.Canceled(
                 reason = LinkActivityResult.Canceled.Reason.LoggedOut,
-                linkAccountUpdate = LinkAccountUpdate.None
+                linkAccountUpdate = LinkAccountUpdate.None,
+                confirmationRequestId = null,
             )
         )
         assertThat(eventReporter.calledCount).isEqualTo(1)

@@ -137,6 +137,7 @@ class PaymentMethodViewModelTest {
                 LinkActivityResult.Completed(
                     linkAccountUpdate = LinkAccountUpdate.Value(null, PaymentConfirmed),
                     selectedPayment = null,
+                    confirmationRequestId = null,
                 )
             )
         assertThat(viewModel.state.value.primaryButtonState).isEqualTo(PrimaryButtonState.Enabled)
@@ -180,7 +181,10 @@ class PaymentMethodViewModelTest {
         val linkConfirmationHandler = FakeLinkConfirmationHandler()
 
         linkConfirmationHandler.confirmWithLinkPaymentDetailsResult =
-            LinkConfirmationResult.Failed("Payment failed".resolvableString)
+            LinkConfirmationResult.Failed(
+                message = "Payment failed".resolvableString,
+                confirmationRequestId = null,
+            )
 
         val viewModel = createViewModel(
             linkConfirmationHandler = linkConfirmationHandler
@@ -200,7 +204,8 @@ class PaymentMethodViewModelTest {
     @Test
     fun `onPayClicked handles cancellation`() = runTest {
         val linkConfirmationHandler = FakeLinkConfirmationHandler()
-        linkConfirmationHandler.confirmWithLinkPaymentDetailsResult = LinkConfirmationResult.Canceled
+        linkConfirmationHandler.confirmWithLinkPaymentDetailsResult =
+            LinkConfirmationResult.Canceled(confirmationRequestId = null)
 
         val viewModel = createViewModel(
             linkConfirmationHandler = linkConfirmationHandler

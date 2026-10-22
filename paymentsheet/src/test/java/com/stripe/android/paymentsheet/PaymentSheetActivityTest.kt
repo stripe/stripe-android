@@ -799,6 +799,7 @@ internal class PaymentSheetActivityTest {
             confirmationHandler.state.value = ConfirmationHandler.State.Complete(
                 result = ConfirmationHandler.Result.Succeeded(
                     intent = PAYMENT_INTENT,
+                    confirmationRequestId = null,
                 )
             )
         }

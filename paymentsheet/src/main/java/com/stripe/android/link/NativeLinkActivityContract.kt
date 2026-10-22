@@ -38,7 +38,8 @@ internal class NativeLinkActivityContract @Inject constructor(
         return when (resultCode) {
             Activity.RESULT_CANCELED -> {
                 LinkActivityResult.Canceled(
-                    linkAccountUpdate = LinkAccountUpdate.None
+                    linkAccountUpdate = LinkAccountUpdate.None,
+                    confirmationRequestId = null,
                 )
             }
 
@@ -47,13 +48,15 @@ internal class NativeLinkActivityContract @Inject constructor(
                     BundleCompat.getParcelable(it, LinkActivityContract.EXTRA_RESULT, LinkActivityResult::class.java)
                 }
                 return result ?: LinkActivityResult.Canceled(
-                    linkAccountUpdate = LinkAccountUpdate.None
+                    linkAccountUpdate = LinkAccountUpdate.None,
+                    confirmationRequestId = null,
                 )
             }
 
             else -> {
                 LinkActivityResult.Canceled(
-                    linkAccountUpdate = LinkAccountUpdate.None
+                    linkAccountUpdate = LinkAccountUpdate.None,
+                    confirmationRequestId = null,
                 )
             }
         }

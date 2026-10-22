@@ -43,7 +43,12 @@ internal class OAuthConsentViewModel @Inject constructor(
     init {
         if (consentPane == null) {
             // Shouldn't happen, if consent data is not available, we can assume it's not needed.
-            dismissWithResult(LinkActivityResult.Completed(LinkAccountUpdate.Value(linkAccount)))
+            dismissWithResult(
+                LinkActivityResult.Completed(
+                    linkAccountUpdate = LinkAccountUpdate.Value(linkAccount),
+                    confirmationRequestId = null,
+                )
+            )
         }
     }
 
@@ -64,6 +69,7 @@ internal class OAuthConsentViewModel @Inject constructor(
                         LinkActivityResult.Completed(
                             linkAccountUpdate = LinkAccountUpdate.Value(linkAccount),
                             authorizationConsentGranted = consentGranted,
+                            confirmationRequestId = null,
                         )
                     )
                 },

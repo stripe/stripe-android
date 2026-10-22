@@ -182,6 +182,7 @@ internal class LinkPaymentLauncherTest {
             linkActivityResult = LinkActivityResult.Completed(
                 linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
                 selectedPayment = null,
+                confirmationRequestId = null,
             ),
             expectedMarkAsUsedCalls = 1,
         )
@@ -199,7 +200,8 @@ internal class LinkPaymentLauncherTest {
     fun `ActivityResultRegistry callback should handle Canceled result correctly`() {
         testActivityResultCallbackWithActivityResultRegistry(
             linkActivityResult = LinkActivityResult.Canceled(
-                linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT)
+                linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
+                confirmationRequestId = null,
             ),
             expectedMarkAsUsedCalls = 0,
         )
@@ -210,7 +212,8 @@ internal class LinkPaymentLauncherTest {
         testActivityResultCallbackWithActivityResultRegistry(
             linkActivityResult = LinkActivityResult.Failed(
                 error = Exception("oops"),
-                linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT)
+                linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
+                confirmationRequestId = null,
             ),
             expectedMarkAsUsedCalls = 0,
         )
@@ -221,7 +224,8 @@ internal class LinkPaymentLauncherTest {
         testActivityResultCallbackWithResultCaller(
             linkActivityResult = LinkActivityResult.Completed(
                 linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
-                selectedPayment = null
+                selectedPayment = null,
+                confirmationRequestId = null,
             ),
             expectedMarkAsUsedCalls = 1,
         )
@@ -239,7 +243,8 @@ internal class LinkPaymentLauncherTest {
     fun `ActivityResultCaller callback should handle Canceled result correctly`() {
         testActivityResultCallbackWithResultCaller(
             linkActivityResult = LinkActivityResult.Canceled(
-                linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT)
+                linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
+                confirmationRequestId = null,
             ),
             expectedMarkAsUsedCalls = 0,
         )
@@ -250,7 +255,8 @@ internal class LinkPaymentLauncherTest {
         testActivityResultCallbackWithResultCaller(
             linkActivityResult = LinkActivityResult.Failed(
                 error = Exception("oops"),
-                linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT)
+                linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
+                confirmationRequestId = null,
             ),
             expectedMarkAsUsedCalls = 0,
         )

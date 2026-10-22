@@ -262,6 +262,7 @@ internal class SignUpViewModel @Inject constructor(
                 LinkActivityResult.Completed(
                     linkAccountUpdate = LinkAccountUpdate.Value(linkAccount),
                     selectedPayment = null,
+                    confirmationRequestId = null,
                 )
             )
         } else if (targetScreen == LinkScreen.Verification) {

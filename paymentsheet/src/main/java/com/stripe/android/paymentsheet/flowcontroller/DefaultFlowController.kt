@@ -543,6 +543,7 @@ internal class DefaultFlowController @Inject internal constructor(
                         cause = exception,
                         message = exception.stripeErrorMessage(),
                         type = ConfirmationHandler.Result.Failed.ErrorType.Internal,
+                        confirmationRequestId = null,
                     )
                 )
             }

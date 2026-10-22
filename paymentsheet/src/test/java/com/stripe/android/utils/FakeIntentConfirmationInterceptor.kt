@@ -38,6 +38,7 @@ internal class FakeIntentConfirmationInterceptor : IntentConfirmationInterceptor
                     deferredIntentConfirmationType = DeferredIntentConfirmationType.Client.takeIf { isDeferred },
                 ),
                 receivesResultInProcess = false,
+                confirmationRequestId = null,
             )
         channel.trySend(nextStep)
     }
@@ -61,6 +62,7 @@ internal class FakeIntentConfirmationInterceptor : IntentConfirmationInterceptor
                     )
                 },
                 completedFullPaymentFlow = completedFullPaymentFlow,
+                confirmationRequestId = null,
             )
         )
     }
@@ -73,6 +75,7 @@ internal class FakeIntentConfirmationInterceptor : IntentConfirmationInterceptor
                     deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
                 ),
                 receivesResultInProcess = false,
+                confirmationRequestId = null,
             )
         )
     }
@@ -83,6 +86,7 @@ internal class FakeIntentConfirmationInterceptor : IntentConfirmationInterceptor
                 cause = cause,
                 message = message.resolvableString,
                 errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                confirmationRequestId = null,
             )
         )
     }

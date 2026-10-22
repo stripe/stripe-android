@@ -5,8 +5,8 @@ import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.model.ConsumerPaymentDetails
 
 internal class FakeLinkConfirmationHandler : LinkConfirmationHandler {
-    var confirmResult: Result = Result.Succeeded
-    var confirmWithLinkPaymentDetailsResult: Result = Result.Succeeded
+    var confirmResult: Result = Result.Succeeded(confirmationRequestId = null)
+    var confirmWithLinkPaymentDetailsResult: Result = Result.Succeeded(confirmationRequestId = null)
     val calls = arrayListOf<Call>()
     val confirmWithLinkPaymentDetailsCall = arrayListOf<ConfirmWithLinkPaymentDetailsCall>()
 

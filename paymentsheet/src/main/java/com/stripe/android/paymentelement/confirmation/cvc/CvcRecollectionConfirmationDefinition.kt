@@ -47,6 +47,7 @@ internal class CvcRecollectionConfirmationDefinition @Inject constructor(
         return ConfirmationDefinition.Action.Launch(
             launcherArguments = EmptyConfirmationLauncherArgs,
             receivesResultInProcess = true,
+            confirmationRequestId = null,
         )
     }
 
@@ -92,9 +93,11 @@ internal class CvcRecollectionConfirmationDefinition @Inject constructor(
                     }
                 ),
                 arguments = confirmationArgs,
+                confirmationRequestId = null,
             )
             is CvcRecollectionResult.Cancelled -> ConfirmationDefinition.Result.Canceled(
                 action = ConfirmationHandler.Result.Canceled.Action.InformCancellation,
+                confirmationRequestId = null,
             )
         }
     }

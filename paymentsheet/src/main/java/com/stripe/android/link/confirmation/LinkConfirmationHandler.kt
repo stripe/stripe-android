@@ -27,7 +27,18 @@ internal interface LinkConfirmationHandler {
 }
 
 internal sealed interface Result {
-    data object Succeeded : Result
-    data object Canceled : Result
-    data class Failed(val message: ResolvableString) : Result
+    val confirmationRequestId: String?
+
+    data class Succeeded(
+        override val confirmationRequestId: String?,
+    ) : Result
+
+    data class Canceled(
+        override val confirmationRequestId: String?,
+    ) : Result
+
+    data class Failed(
+        val message: ResolvableString,
+        override val confirmationRequestId: String?,
+    ) : Result
 }

@@ -63,10 +63,12 @@ class DefaultConfirmationHandlerTest {
     fun `On lifecycle destroyed, should unregister all launchers`() = test(
         shouldRegister = false,
         someDefinitionAction = ConfirmationDefinition.Action.Launch(
+            confirmationRequestId = null,
             launcherArguments = SomeConfirmationDefinition.LauncherArgs,
             receivesResultInProcess = true,
         ),
         someOtherDefinitionAction = ConfirmationDefinition.Action.Launch(
+            confirmationRequestId = null,
             launcherArguments = SomeOtherConfirmationDefinition.LauncherArgs,
             receivesResultInProcess = true,
         ),
@@ -167,6 +169,7 @@ class DefaultConfirmationHandlerTest {
     @Test
     fun `On 'start' with 'SomeDefinition' option, should complete with failed result`() = test(
         someDefinitionAction = ConfirmationDefinition.Action.Fail(
+            confirmationRequestId = "req_confirm",
             cause = IllegalStateException("Failed!"),
             message = R.string.stripe_something_went_wrong.resolvableString,
             errorType = ConfirmationHandler.Result.Failed.ErrorType.Internal,
@@ -183,6 +186,7 @@ class DefaultConfirmationHandlerTest {
             val completeState = awaitCompleteState()
             val failedResult = completeState.result.assertFailed()
 
+            assertThat(failedResult.confirmationRequestId).isEqualTo("req_confirm")
             assertThat(failedResult.cause).isInstanceOf<IllegalStateException>()
             assertThat(failedResult.cause.message).isEqualTo("Failed!")
             assertThat(failedResult.message).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
@@ -195,6 +199,7 @@ class DefaultConfirmationHandlerTest {
     @Test
     fun `On 'start' with 'SomeOtherDefinition' option, should complete with failed result`() = test(
         someOtherDefinitionAction = ConfirmationDefinition.Action.Fail(
+            confirmationRequestId = null,
             cause = IllegalStateException("Failed!"),
             message = R.string.stripe_something_went_wrong.resolvableString,
             errorType = ConfirmationHandler.Result.Failed.ErrorType.Internal,
@@ -223,6 +228,7 @@ class DefaultConfirmationHandlerTest {
     @Test
     fun `On complete action, should complete with success result`() = test(
         someDefinitionAction = ConfirmationDefinition.Action.Complete(
+            confirmationRequestId = "req_confirm",
             intent = UPDATED_PAYMENT_INTENT,
             completedFullPaymentFlow = true,
         ),
@@ -238,6 +244,7 @@ class DefaultConfirmationHandlerTest {
             val completeState = awaitCompleteState()
             val successResult = completeState.result.assertSucceeded()
 
+            assertThat(successResult.confirmationRequestId).isEqualTo("req_confirm")
             assertThat(successResult.intent).isEqualTo(UPDATED_PAYMENT_INTENT)
             assertThat(successResult.completedFullPaymentFlow).isTrue()
 
@@ -250,6 +257,7 @@ class DefaultConfirmationHandlerTest {
     @Test
     fun `On complete action with uncompleted flow, should complete with success result`() = test(
         someDefinitionAction = ConfirmationDefinition.Action.Complete(
+            confirmationRequestId = null,
             intent = UPDATED_PAYMENT_INTENT,
             metadata = MutableConfirmationMetadata().apply {
                 set(SomeStringMetadataKey, "something")
@@ -293,12 +301,14 @@ class DefaultConfirmationHandlerTest {
     @Test
     fun `On success result from launched action, should complete with success result`() = launcherResultTest(
         result = ConfirmationDefinition.Result.Succeeded(
+            confirmationRequestId = null,
             intent = UPDATED_PAYMENT_INTENT,
             completedFullPaymentFlow = true,
         ),
     ) { completeState ->
         val successResult = completeState.result.assertSucceeded()
 
+        assertThat(successResult.confirmationRequestId).isEqualTo("req_confirm")
         assertThat(successResult.intent).isEqualTo(UPDATED_PAYMENT_INTENT)
         assertThat(successResult.completedFullPaymentFlow).isTrue()
 
@@ -309,6 +319,7 @@ class DefaultConfirmationHandlerTest {
     fun `On success result with uncompleted flow from launched action, should complete as expected`() =
         launcherResultTest(
             result = ConfirmationDefinition.Result.Succeeded(
+                confirmationRequestId = null,
                 intent = UPDATED_PAYMENT_INTENT,
                 metadata = MutableConfirmationMetadata().apply {
                     set(SomeStringMetadataKey, "something")
@@ -332,6 +343,7 @@ class DefaultConfirmationHandlerTest {
     @Test
     fun `On failed result from launched action, should complete with failed result`() = launcherResultTest(
         result = ConfirmationDefinition.Result.Failed(
+            confirmationRequestId = null,
             cause = IllegalStateException("Failed!"),
             message = R.string.stripe_something_went_wrong.resolvableString,
             type = ConfirmationHandler.Result.Failed.ErrorType.Internal,
@@ -339,6 +351,7 @@ class DefaultConfirmationHandlerTest {
     ) { completeState ->
         val failedResult = completeState.result.assertFailed()
 
+        assertThat(failedResult.confirmationRequestId).isEqualTo("req_confirm")
         assertThat(failedResult.cause).isInstanceOf<IllegalStateException>()
         assertThat(failedResult.cause.message).isEqualTo("Failed!")
         assertThat(failedResult.message).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
@@ -348,11 +361,13 @@ class DefaultConfirmationHandlerTest {
     @Test
     fun `On canceled result from launched action, should complete with canceled result`() = launcherResultTest(
         result = ConfirmationDefinition.Result.Canceled(
+            confirmationRequestId = null,
             action = ConfirmationHandler.Result.Canceled.Action.ModifyPaymentDetails,
         ),
     ) { completeState ->
         val canceledResult = completeState.result.assertCanceled()
 
+        assertThat(canceledResult.confirmationRequestId).isEqualTo("req_confirm")
         assertThat(canceledResult.action).isEqualTo(ConfirmationHandler.Result.Canceled.Action.ModifyPaymentDetails)
     }
 
@@ -395,18 +410,22 @@ class DefaultConfirmationHandlerTest {
     @Test
     fun `On next step result, should move to next definition and complete from after its result`() = test(
         someDefinitionAction = ConfirmationDefinition.Action.Launch(
+            confirmationRequestId = "req_confirm",
             launcherArguments = SomeConfirmationDefinition.LauncherArgs,
             receivesResultInProcess = true,
         ),
         someDefinitionResult = ConfirmationDefinition.Result.NextStep(
+            confirmationRequestId = null,
             confirmationOption = SomeOtherConfirmationDefinition.Option,
             arguments = CONFIRMATION_PARAMETERS,
         ),
         someOtherDefinitionAction = ConfirmationDefinition.Action.Launch(
+            confirmationRequestId = null,
             launcherArguments = SomeOtherConfirmationDefinition.LauncherArgs,
             receivesResultInProcess = true,
         ),
         someOtherDefinitionResult = ConfirmationDefinition.Result.Succeeded(
+            confirmationRequestId = null,
             intent = PAYMENT_INTENT,
         ),
     ) {
@@ -430,6 +449,7 @@ class DefaultConfirmationHandlerTest {
             val completeState = awaitCompleteState()
             val successResult = completeState.result.assertSucceeded()
 
+            assertThat(successResult.confirmationRequestId).isEqualTo("req_confirm")
             assertThat(successResult.intent).isEqualTo(PAYMENT_INTENT)
             assertThat(successResult.metadata).isEqualTo(MutableConfirmationMetadata())
 
@@ -448,6 +468,7 @@ class DefaultConfirmationHandlerTest {
         test(
             savedStateHandle = createPrepopulatedSavedStateHandle(receivesResultInProcess = true),
             someDefinitionResult = ConfirmationDefinition.Result.Succeeded(
+                confirmationRequestId = null,
                 intent = PAYMENT_INTENT,
             ),
             dispatcher = dispatcher,
@@ -478,7 +499,10 @@ class DefaultConfirmationHandlerTest {
         val dispatcher = StandardTestDispatcher()
 
         test(
-            savedStateHandle = createPrepopulatedSavedStateHandle(receivesResultInProcess = false),
+            savedStateHandle = createPrepopulatedSavedStateHandle(
+                receivesResultInProcess = false,
+                confirmationRequestId = "req_restored",
+            ),
             dispatcher = dispatcher,
         ) {
             assertThat(confirmationHandler.hasReloadedFromProcessDeath).isTrue()
@@ -496,8 +520,10 @@ class DefaultConfirmationHandlerTest {
 
                 val canceledResult = completeState.result.assertCanceled()
 
+                assertThat(canceledResult.confirmationRequestId).isEqualTo("req_restored")
                 assertThat(canceledResult.action).isEqualTo(ConfirmationHandler.Result.Canceled.Action.None)
 
+                assertThat(savedStateHandle.contains(DefaultConfirmationHandler.CONFIRMATION_REQUEST_ID_KEY)).isFalse()
                 confirmationHandler.assertAwaitResultCallReceivesSameResult(completeState)
             }
         }
@@ -510,6 +536,7 @@ class DefaultConfirmationHandlerTest {
         test(
             savedStateHandle = createPrepopulatedSavedStateHandle(receivesResultInProcess = false),
             someDefinitionResult = ConfirmationDefinition.Result.Succeeded(
+                confirmationRequestId = null,
                 intent = PAYMENT_INTENT,
             ),
             dispatcher = dispatcher,
@@ -540,16 +567,22 @@ class DefaultConfirmationHandlerTest {
         val dispatcher = StandardTestDispatcher()
 
         test(
-            savedStateHandle = createPrepopulatedSavedStateHandle(receivesResultInProcess = false),
+            savedStateHandle = createPrepopulatedSavedStateHandle(
+                receivesResultInProcess = false,
+                confirmationRequestId = "req_restored",
+            ),
             someDefinitionResult = ConfirmationDefinition.Result.NextStep(
+                confirmationRequestId = null,
                 arguments = CONFIRMATION_PARAMETERS,
                 confirmationOption = SomeOtherConfirmationDefinition.Option,
             ),
             someOtherDefinitionAction = ConfirmationDefinition.Action.Launch(
+                confirmationRequestId = null,
                 launcherArguments = SomeOtherConfirmationDefinition.LauncherArgs,
                 receivesResultInProcess = false,
             ),
             someOtherDefinitionResult = ConfirmationDefinition.Result.Succeeded(
+                confirmationRequestId = null,
                 intent = UPDATED_PAYMENT_INTENT,
             ),
             dispatcher = dispatcher,
@@ -573,6 +606,7 @@ class DefaultConfirmationHandlerTest {
                 val completeState = awaitCompleteState()
                 val successResult = completeState.result.assertSucceeded()
 
+                assertThat(successResult.confirmationRequestId).isEqualTo("req_restored")
                 assertThat(successResult.intent).isEqualTo(UPDATED_PAYMENT_INTENT)
                 assertThat(successResult.metadata).isEqualTo(MutableConfirmationMetadata())
 
@@ -596,10 +630,12 @@ class DefaultConfirmationHandlerTest {
 
         test(
             someDefinitionAction = ConfirmationDefinition.Action.Launch(
+                confirmationRequestId = null,
                 launcherArguments = SomeConfirmationDefinition.LauncherArgs,
                 receivesResultInProcess = true,
             ),
             someDefinitionResult = ConfirmationDefinition.Result.Succeeded(
+                confirmationRequestId = null,
                 intent = PAYMENT_INTENT,
             ),
             dispatcher = dispatcher,
@@ -653,11 +689,76 @@ class DefaultConfirmationHandlerTest {
         someDefinitionScenario.bootstrapCalls.ensureAllEventsConsumed()
     }
 
+    @Test
+    fun `Launched flow can return its own confirmation request ID`() = launcherResultTest(
+        requestId = null,
+        result = ConfirmationDefinition.Result.Canceled(
+            action = ConfirmationHandler.Result.Canceled.Action.InformCancellation,
+            confirmationRequestId = "req_link_confirm",
+        ),
+    ) { completeState ->
+        assertThat(completeState.result.confirmationRequestId).isEqualTo("req_link_confirm")
+    }
+
+    @Test
+    fun `New attempt does not reuse the previous confirmation request ID`() = test(
+        someDefinitionAction = ConfirmationDefinition.Action.Fail(
+            cause = IllegalStateException("Failed!"),
+            message = R.string.stripe_something_went_wrong.resolvableString,
+            errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+            confirmationRequestId = "req_previous",
+        ),
+    ) {
+        confirmationHandler.state.test {
+            assertIdleState()
+            confirmationHandler.start(createArguments(SomeConfirmationDefinition.Option))
+            assertSomeDefinitionActionCalled()
+            assertSomeDefinitionConfirmingState()
+            assertThat(awaitCompleteState().result.confirmationRequestId).isEqualTo("req_previous")
+
+            confirmationHandler.start(createArguments(SomeOtherConfirmationDefinition.Option))
+            assertSomeOtherDefinitionActionCalled()
+            assertSomeOtherDefinitionConfirmingState()
+            assertThat(awaitCompleteState().result.confirmationRequestId).isNull()
+        }
+    }
+
+    @Test
+    fun `Start during confirmation preserves the active attempt and request ID`() = test(
+        someDefinitionAction = ConfirmationDefinition.Action.Launch(
+            launcherArguments = SomeConfirmationDefinition.LauncherArgs,
+            receivesResultInProcess = true,
+            confirmationRequestId = "req_active",
+        ),
+        someDefinitionResult = ConfirmationDefinition.Result.Succeeded(
+            intent = UPDATED_PAYMENT_INTENT,
+            confirmationRequestId = null,
+        ),
+    ) {
+        confirmationHandler.state.test {
+            assertIdleState()
+            confirmationHandler.start(createArguments(SomeConfirmationDefinition.Option))
+            assertSomeDefinitionActionCalled()
+            assertSomeDefinitionConfirmingState()
+            assertSomeDefinitionLaunchCalled()
+
+            confirmationHandler.start(createArguments(SomeOtherConfirmationDefinition.Option))
+            expectNoEvents()
+
+            sendSomeDefinitionLauncherResult()
+            assertSomeDefinitionToResultCalled()
+            assertThat(awaitCompleteState().result.confirmationRequestId).isEqualTo("req_active")
+            assertThat(confirmationSaverTurbine.awaitItem().second).isEqualTo(SomeConfirmationDefinition.Option)
+        }
+    }
+
     private fun launcherResultTest(
         result: ConfirmationDefinition.Result,
+        requestId: String? = "req_confirm",
         test: suspend Scenario.(ConfirmationHandler.State.Complete) -> Unit,
     ) = test(
         someDefinitionAction = ConfirmationDefinition.Action.Launch(
+            confirmationRequestId = requestId,
             launcherArguments = SomeConfirmationDefinition.LauncherArgs,
             receivesResultInProcess = true,
         ),
@@ -684,6 +785,7 @@ class DefaultConfirmationHandlerTest {
 
     private fun persistedParametersTest(receivesResultInProcess: Boolean) = test(
         someDefinitionAction = ConfirmationDefinition.Action.Launch(
+            confirmationRequestId = "req_confirm",
             launcherArguments = SomeConfirmationDefinition.LauncherArgs,
             receivesResultInProcess = receivesResultInProcess,
         ),
@@ -697,6 +799,8 @@ class DefaultConfirmationHandlerTest {
             assertSomeDefinitionConfirmingState()
             assertSomeDefinitionLaunchCalled()
 
+            assertThat(savedStateHandle.get<String>(DefaultConfirmationHandler.CONFIRMATION_REQUEST_ID_KEY))
+                .isEqualTo("req_confirm")
             assertThat(savedStateHandle.contains(AWAITING_CONFIRMATION_RESULT_KEY)).isTrue()
             assertThat(savedStateHandle.contains(SOME_DEFINITION_PERSISTED_KEY)).isTrue()
 
@@ -723,12 +827,14 @@ class DefaultConfirmationHandlerTest {
     private fun test(
         someDefinitionAction: ConfirmationDefinition.Action<SomeConfirmationDefinition.LauncherArgs> =
             ConfirmationDefinition.Action.Fail(
+                confirmationRequestId = null,
                 cause = IllegalStateException("Failed!"),
                 message = R.string.stripe_something_went_wrong.resolvableString,
                 errorType = ConfirmationHandler.Result.Failed.ErrorType.Internal,
             ),
         someDefinitionResult: ConfirmationDefinition.Result =
             ConfirmationDefinition.Result.Failed(
+                confirmationRequestId = null,
                 cause = IllegalStateException("Failed!"),
                 message = R.string.stripe_something_went_wrong.resolvableString,
                 type = ConfirmationHandler.Result.Failed.ErrorType.Internal,
@@ -736,12 +842,14 @@ class DefaultConfirmationHandlerTest {
         someDefinitionIsConfirmable: Boolean = true,
         someOtherDefinitionAction: ConfirmationDefinition.Action<SomeOtherConfirmationDefinition.LauncherArgs> =
             ConfirmationDefinition.Action.Fail(
+                confirmationRequestId = null,
                 cause = IllegalStateException("Failed!"),
                 message = R.string.stripe_something_went_wrong.resolvableString,
                 errorType = ConfirmationHandler.Result.Failed.ErrorType.Internal,
             ),
         someOtherDefinitionResult: ConfirmationDefinition.Result =
             ConfirmationDefinition.Result.Failed(
+                confirmationRequestId = null,
                 cause = IllegalStateException("Failed!"),
                 message = R.string.stripe_something_went_wrong.resolvableString,
                 type = ConfirmationHandler.Result.Failed.ErrorType.Internal,
@@ -849,7 +957,9 @@ class DefaultConfirmationHandlerTest {
 
     private fun createPrepopulatedSavedStateHandle(
         receivesResultInProcess: Boolean,
+        confirmationRequestId: String? = null,
     ) = SavedStateHandle().apply {
+        set(DefaultConfirmationHandler.CONFIRMATION_REQUEST_ID_KEY, confirmationRequestId)
         set(
             "AwaitingConfirmationResult",
             DefaultConfirmationHandler.AwaitingConfirmationResultData(
@@ -1045,11 +1155,13 @@ class DefaultConfirmationHandlerTest {
     private class SomeConfirmationDefinition(
         action: ConfirmationDefinition.Action<LauncherArgs> =
             ConfirmationDefinition.Action.Fail(
+                confirmationRequestId = null,
                 cause = IllegalStateException("Failed!"),
                 message = R.string.stripe_something_went_wrong.resolvableString,
                 errorType = ConfirmationHandler.Result.Failed.ErrorType.Internal,
             ),
         result: ConfirmationDefinition.Result = ConfirmationDefinition.Result.Canceled(
+            confirmationRequestId = null,
             action = ConfirmationHandler.Result.Canceled.Action.InformCancellation,
         ),
         private val isConfirmable: Boolean,
@@ -1091,11 +1203,13 @@ class DefaultConfirmationHandlerTest {
     private class SomeOtherConfirmationDefinition(
         action: ConfirmationDefinition.Action<LauncherArgs> =
             ConfirmationDefinition.Action.Fail(
+                confirmationRequestId = null,
                 cause = IllegalStateException("Failed!"),
                 message = R.string.stripe_something_went_wrong.resolvableString,
                 errorType = ConfirmationHandler.Result.Failed.ErrorType.Internal,
             ),
         result: ConfirmationDefinition.Result = ConfirmationDefinition.Result.Canceled(
+            confirmationRequestId = null,
             action = ConfirmationHandler.Result.Canceled.Action.InformCancellation,
         ),
     ) : FakeConfirmationDefinition<

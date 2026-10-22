@@ -48,6 +48,7 @@ internal class LinkInlineSignupConfirmationDefinition(
         return ConfirmationDefinition.Action.Launch(
             launcherArguments = LauncherArguments(nextConfirmationOption),
             receivesResultInProcess = true,
+            confirmationRequestId = null,
         )
     }
 
@@ -77,6 +78,7 @@ internal class LinkInlineSignupConfirmationDefinition(
         return ConfirmationDefinition.Result.NextStep(
             confirmationOption = result.nextConfirmationOption,
             arguments = confirmationArgs,
+            confirmationRequestId = null,
         )
     }
 

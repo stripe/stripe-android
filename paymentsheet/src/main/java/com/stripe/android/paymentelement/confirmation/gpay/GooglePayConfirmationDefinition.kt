@@ -59,12 +59,14 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
                 cause = IllegalStateException(message),
                 message = R.string.stripe_something_went_wrong.resolvableString,
                 errorType = ConfirmationHandler.Result.Failed.ErrorType.MerchantIntegration,
+                confirmationRequestId = null,
             )
         }
 
         return ConfirmationDefinition.Action.Launch(
             launcherArguments = EmptyConfirmationLauncherArgs,
             receivesResultInProcess = true,
+            confirmationRequestId = null,
         )
     }
 
@@ -134,6 +136,7 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
                 ConfirmationDefinition.Result.NextStep(
                     confirmationOption = nextConfirmationOption,
                     arguments = confirmationArgs,
+                    confirmationRequestId = null,
                 )
             }
             is GooglePayPaymentMethodLauncher.Result.Failed -> {
@@ -145,11 +148,13 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
                         else -> PaymentsCoreR.string.stripe_internal_error.resolvableString
                     },
                     type = ConfirmationHandler.Result.Failed.ErrorType.GooglePay(result.errorCode),
+                    confirmationRequestId = null,
                 )
             }
             is GooglePayPaymentMethodLauncher.Result.Canceled -> {
                 ConfirmationDefinition.Result.Canceled(
                     action = ConfirmationHandler.Result.Canceled.Action.InformCancellation,
+                    confirmationRequestId = null,
                 )
             }
         }

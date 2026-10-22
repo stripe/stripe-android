@@ -617,6 +617,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                             cause = exception,
                             message = exception.stripeErrorMessage(),
                             type = ConfirmationHandler.Result.Failed.ErrorType.Internal,
+                            confirmationRequestId = null,
                         )
                     )
                 }

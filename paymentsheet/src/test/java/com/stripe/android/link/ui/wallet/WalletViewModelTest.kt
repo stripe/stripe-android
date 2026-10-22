@@ -142,7 +142,8 @@ class WalletViewModelTest {
             .isEqualTo(
                 LinkActivityResult.Failed(
                     error = error,
-                    linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT)
+                    linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
+                    confirmationRequestId = null,
                 )
             )
         assertThat(logger.errorLogs).isEqualTo(listOf("WalletViewModel Fatal error: " to error))
@@ -559,14 +560,18 @@ class WalletViewModelTest {
             .isEqualTo(
                 LinkActivityResult.Completed(
                     linkAccountUpdate = LinkAccountUpdate.Value(null, PaymentConfirmed),
-                    selectedPayment = null
+                    selectedPayment = null,
+                    confirmationRequestId = null,
                 )
             )
     }
 
     @Test
     fun `performPaymentConfirmation displays error on failure result`() = runTest(dispatcher) {
-        val confirmationResult = LinkConfirmationResult.Failed("oops".resolvableString)
+        val confirmationResult = LinkConfirmationResult.Failed(
+            message = "oops".resolvableString,
+            confirmationRequestId = null,
+        )
         val validCard = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(expiryYear = 2099)
         val linkAccountManager = WalletLinkAccountManager()
         linkAccountManager.listPaymentDetailsResult = Result.success(
@@ -595,7 +600,7 @@ class WalletViewModelTest {
 
     @Test
     fun `performPaymentConfirmation does nothing on canceled result`() = runTest(dispatcher) {
-        val confirmationResult = LinkConfirmationResult.Canceled
+        val confirmationResult = LinkConfirmationResult.Canceled(confirmationRequestId = null)
         val validCard = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(expiryYear = 2099)
         val linkAccountManager = WalletLinkAccountManager()
         linkAccountManager.listPaymentDetailsResult = Result.success(

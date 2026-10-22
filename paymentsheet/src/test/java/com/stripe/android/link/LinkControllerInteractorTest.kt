@@ -695,7 +695,8 @@ class LinkControllerInteractorTest {
             interactor.onLinkActivityResult(
                 LinkActivityResult.Canceled(
                     reason = LinkActivityResult.Canceled.Reason.BackPressed,
-                    linkAccountUpdate = LinkAccountUpdate.Value(null)
+                    linkAccountUpdate = LinkAccountUpdate.Value(null),
+                    confirmationRequestId = null,
                 )
             )
             assertThat(awaitItem()).isEqualTo(LinkController.PresentPaymentMethodsResult.Canceled)
@@ -717,6 +718,7 @@ class LinkControllerInteractorTest {
                     linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
                     selectedPayment = linkPaymentMethod,
                     shippingAddress = null,
+                    confirmationRequestId = null,
                 )
             )
 
@@ -879,7 +881,8 @@ class LinkControllerInteractorTest {
             interactor.onLinkActivityResult(
                 LinkActivityResult.Failed(
                     error = error,
-                    linkAccountUpdate = LinkAccountUpdate.Value(null)
+                    linkAccountUpdate = LinkAccountUpdate.Value(null),
+                    confirmationRequestId = null,
                 )
             )
             val result = awaitItem()
@@ -897,7 +900,8 @@ class LinkControllerInteractorTest {
         interactor.onLinkActivityResult(
             LinkActivityResult.Canceled(
                 reason = LinkActivityResult.Canceled.Reason.BackPressed,
-                linkAccountUpdate = LinkAccountUpdate.Value(null)
+                linkAccountUpdate = LinkAccountUpdate.Value(null),
+                confirmationRequestId = null,
             )
         )
 
@@ -1376,7 +1380,8 @@ class LinkControllerInteractorTest {
                 name = "Canceled",
                 linkActivityResult = LinkActivityResult.Canceled(
                     reason = LinkActivityResult.Canceled.Reason.BackPressed,
-                    linkAccountUpdate = LinkAccountUpdate.Value(null)
+                    linkAccountUpdate = LinkAccountUpdate.Value(null),
+                    confirmationRequestId = null,
                 ),
                 expectedAuthorizeResult = LinkController.AuthorizeResult.Canceled
             ),
@@ -1386,7 +1391,8 @@ class LinkControllerInteractorTest {
                     linkAccountUpdate = LinkAccountUpdate.Value(null),
                     selectedPayment = null,
                     shippingAddress = null,
-                    authorizationConsentGranted = true
+                    authorizationConsentGranted = true,
+                    confirmationRequestId = null,
                 ),
                 expectedAuthorizeResult = LinkController.AuthorizeResult.Consented
             ),
@@ -1396,7 +1402,8 @@ class LinkControllerInteractorTest {
                     linkAccountUpdate = LinkAccountUpdate.Value(null),
                     selectedPayment = null,
                     shippingAddress = null,
-                    authorizationConsentGranted = false
+                    authorizationConsentGranted = false,
+                    confirmationRequestId = null,
                 ),
                 expectedAuthorizeResult = LinkController.AuthorizeResult.Denied
             ),
@@ -1406,7 +1413,8 @@ class LinkControllerInteractorTest {
                     linkAccountUpdate = LinkAccountUpdate.Value(null),
                     selectedPayment = null,
                     shippingAddress = null,
-                    authorizationConsentGranted = null
+                    authorizationConsentGranted = null,
+                    confirmationRequestId = null,
                 ),
                 expectedAuthorizeResult = LinkController.AuthorizeResult.Canceled
             ),
@@ -1414,7 +1422,8 @@ class LinkControllerInteractorTest {
                 name = "Failed",
                 linkActivityResult = LinkActivityResult.Failed(
                     error = error,
-                    linkAccountUpdate = LinkAccountUpdate.Value(null)
+                    linkAccountUpdate = LinkAccountUpdate.Value(null),
+                    confirmationRequestId = null,
                 ),
                 expectedAuthorizeResult = LinkController.AuthorizeResult.Failed(error)
             )
@@ -1561,7 +1570,8 @@ class LinkControllerInteractorTest {
             interactor.onLinkActivityResult(
                 LinkActivityResult.Canceled(
                     reason = LinkActivityResult.Canceled.Reason.BackPressed,
-                    linkAccountUpdate = LinkAccountUpdate.Value(null)
+                    linkAccountUpdate = LinkAccountUpdate.Value(null),
+                    confirmationRequestId = null,
                 )
             )
             assertThat(awaitItem()).isInstanceOf(LinkController.PresentResult.Canceled::class.java)
@@ -1584,6 +1594,7 @@ class LinkControllerInteractorTest {
                     linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
                     selectedPayment = createTestPaymentMethod(),
                     shippingAddress = null,
+                    confirmationRequestId = null,
                 )
             )
             val result = awaitItem()
@@ -1607,6 +1618,7 @@ class LinkControllerInteractorTest {
                     linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
                     selectedPayment = createTestPaymentMethod(),
                     shippingAddress = null,
+                    confirmationRequestId = null,
                 )
             )
             assertThat(awaitItem()).isInstanceOf(LinkController.PresentResult.Completed::class.java)
@@ -1634,6 +1646,7 @@ class LinkControllerInteractorTest {
                     linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
                     selectedPayment = createTestPaymentMethod(cvc = "111"),
                     shippingAddress = null,
+                    confirmationRequestId = null,
                 )
             )
             assertThat(linkAccountManager.createPaymentMethodCalls.awaitItem().collectedCvc).isEqualTo("111")
@@ -1644,6 +1657,7 @@ class LinkControllerInteractorTest {
                     linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
                     selectedPayment = createTestPaymentMethod(cvc = "222"),
                     shippingAddress = null,
+                    confirmationRequestId = null,
                 )
             )
             linkAccountManager.createPaymentMethodCalls.expectNoEvents()
@@ -1676,6 +1690,7 @@ class LinkControllerInteractorTest {
                     linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
                     selectedPayment = createTestPaymentMethod(),
                     shippingAddress = null,
+                    confirmationRequestId = null,
                 )
             )
             awaitItem() // wait for PresentResult
@@ -1696,7 +1711,8 @@ class LinkControllerInteractorTest {
             interactor.onLinkActivityResult(
                 LinkActivityResult.Failed(
                     error = error,
-                    linkAccountUpdate = LinkAccountUpdate.Value(null)
+                    linkAccountUpdate = LinkAccountUpdate.Value(null),
+                    confirmationRequestId = null,
                 )
             )
             val result = awaitItem() as LinkController.PresentResult.Failed
@@ -1721,6 +1737,7 @@ class LinkControllerInteractorTest {
                         linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
                         selectedPayment = createTestPaymentMethod(),
                         shippingAddress = null,
+                        confirmationRequestId = null,
                     )
                 )
                 val result = awaitItem()
@@ -1743,6 +1760,7 @@ class LinkControllerInteractorTest {
                         linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
                         selectedPayment = null,
                         shippingAddress = null,
+                        confirmationRequestId = null,
                     )
                 )
                 val result = awaitItem()
@@ -1762,6 +1780,7 @@ class LinkControllerInteractorTest {
                 linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
                 selectedPayment = createTestPaymentMethod(),
                 shippingAddress = null,
+                confirmationRequestId = null,
             )
         )
 
@@ -1779,7 +1798,8 @@ class LinkControllerInteractorTest {
         interactor.onLinkActivityResult(
             LinkActivityResult.Canceled(
                 reason = LinkActivityResult.Canceled.Reason.BackPressed,
-                linkAccountUpdate = LinkAccountUpdate.Value(null)
+                linkAccountUpdate = LinkAccountUpdate.Value(null),
+                confirmationRequestId = null,
             )
         )
 
@@ -1789,7 +1809,8 @@ class LinkControllerInteractorTest {
             interactor.onLinkActivityResult(
                 LinkActivityResult.Canceled(
                     reason = LinkActivityResult.Canceled.Reason.BackPressed,
-                    linkAccountUpdate = LinkAccountUpdate.Value(null)
+                    linkAccountUpdate = LinkAccountUpdate.Value(null),
+                    confirmationRequestId = null,
                 )
             )
             assertThat(awaitItem()).isEqualTo(LinkController.PresentPaymentMethodsResult.Canceled)

@@ -173,7 +173,8 @@ internal class WalletViewModel(
                             dismissWithResult(
                                 LinkActivityResult.Failed(
                                     error = NoPaymentMethodOptionsAvailable(),
-                                    linkAccountUpdate = linkAccountManager.linkAccountUpdate
+                                    linkAccountUpdate = linkAccountManager.linkAccountUpdate,
+                                    confirmationRequestId = null,
                                 )
                             )
                         }
@@ -226,7 +227,8 @@ internal class WalletViewModel(
         dismissWithResult(
             LinkActivityResult.Failed(
                 error = fatalError,
-                linkAccountUpdate = linkAccountManager.linkAccountUpdate
+                linkAccountUpdate = linkAccountManager.linkAccountUpdate,
+                confirmationRequestId = null,
             )
         )
     }
@@ -371,7 +373,8 @@ internal class WalletViewModel(
         dismissWithResult(
             LinkActivityResult.Canceled(
                 reason = LinkActivityResult.Canceled.Reason.PayAnotherWay,
-                linkAccountUpdate = linkAccountManager.linkAccountUpdate
+                linkAccountUpdate = linkAccountManager.linkAccountUpdate,
+                confirmationRequestId = null,
             )
         )
     }
@@ -541,7 +544,8 @@ internal class WalletViewModel(
                     if (uiState.value.paymentDetailsList.isEmpty()) {
                         dismissWithResult(
                             LinkActivityResult.Canceled(
-                                linkAccountUpdate = linkAccountManager.linkAccountUpdate
+                                linkAccountUpdate = linkAccountManager.linkAccountUpdate,
+                                confirmationRequestId = null,
                             )
                         )
                     }

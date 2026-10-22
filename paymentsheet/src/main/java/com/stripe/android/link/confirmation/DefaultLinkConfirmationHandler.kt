@@ -1,6 +1,7 @@
 package com.stripe.android.link.confirmation
 
 import com.stripe.android.core.Logger
+import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkPaymentDetails
@@ -85,24 +86,38 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
                 msg = "DefaultLinkConfirmationHandler: Failed to confirm payment",
                 t = error
             )
-            Result.Failed(R.string.stripe_something_went_wrong.resolvableString)
+            Result.Failed(
+                message = R.string.stripe_something_went_wrong.resolvableString,
+                confirmationRequestId = (error as? StripeException)?.requestId,
+            )
         }
     }
 
     private fun transformResult(result: ConfirmationHandler.Result?): Result {
         return when (result) {
-            is ConfirmationHandler.Result.Canceled -> Result.Canceled
+            is ConfirmationHandler.Result.Canceled -> Result.Canceled(
+                confirmationRequestId = result.confirmationRequestId,
+            )
             is ConfirmationHandler.Result.Failed -> {
                 logger.error(
                     msg = "DefaultLinkConfirmationHandler: Failed to confirm payment",
                     t = result.cause
                 )
-                Result.Failed(result.message)
+                Result.Failed(
+                    message = result.message,
+                    confirmationRequestId = result.confirmationRequestId
+                        ?: (result.cause as? StripeException)?.requestId,
+                )
             }
-            is ConfirmationHandler.Result.Succeeded -> Result.Succeeded
+            is ConfirmationHandler.Result.Succeeded -> Result.Succeeded(
+                confirmationRequestId = result.confirmationRequestId,
+            )
             null -> {
                 logger.error("DefaultLinkConfirmationHandler: Payment confirmation returned null")
-                Result.Failed(R.string.stripe_something_went_wrong.resolvableString)
+                Result.Failed(
+                    message = R.string.stripe_something_went_wrong.resolvableString,
+                    confirmationRequestId = null,
+                )
             }
         }
     }

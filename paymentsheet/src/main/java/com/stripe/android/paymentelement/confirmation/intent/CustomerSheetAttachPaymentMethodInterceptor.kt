@@ -38,6 +38,7 @@ internal class DefaultCustomerSheetAttachPaymentMethodInterceptor(
                     ConfirmationDefinition.Action.Complete(
                         intent = intent.copy(paymentMethod = paymentMethod),
                         completedFullPaymentFlow = true,
+                        confirmationRequestId = null,
                     )
                 },
                 onFailure = { cause, displayMessage ->
@@ -50,6 +51,7 @@ internal class DefaultCustomerSheetAttachPaymentMethodInterceptor(
                         cause = cause,
                         message = displayMessage?.resolvableString ?: cause.stripeErrorMessage(),
                         errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                        confirmationRequestId = null,
                     )
                 }
             )

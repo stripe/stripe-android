@@ -154,7 +154,7 @@ internal class CheckoutConfirmationPerformerTest {
         performer.confirm()
         assertRejection("Cannot confirm checkout while a payment flow is presented.")
         confirmationHandler.state.value = ConfirmationHandler.State.Complete(
-            ConfirmationHandler.Result.Succeeded(PaymentIntentFixtures.PI_SUCCEEDED)
+            ConfirmationHandler.Result.Succeeded(PaymentIntentFixtures.PI_SUCCEEDED, confirmationRequestId = null)
         )
         testScheduler.runCurrent()
         analyticsRequestExecutor.requestTurbine.expectNoEvents()
@@ -199,7 +199,7 @@ internal class CheckoutConfirmationPerformerTest {
         assertThat(operationCoordinator.isUpdating.value).isTrue()
 
         confirmationHandler.state.value = ConfirmationHandler.State.Complete(
-            ConfirmationHandler.Result.Succeeded(PaymentIntentFixtures.PI_SUCCEEDED)
+            ConfirmationHandler.Result.Succeeded(PaymentIntentFixtures.PI_SUCCEEDED, confirmationRequestId = null)
         )
         val request = analyticsRequestExecutor.requestTurbine.awaitItem().params
         assertThat(request).containsAtLeastEntriesIn(
@@ -279,7 +279,7 @@ internal class CheckoutConfirmationPerformerTest {
         performer.confirm()
         confirmationHandler.startTurbine.awaitItem()
         confirmationHandler.state.value = ConfirmationHandler.State.Complete(
-            ConfirmationHandler.Result.Succeeded(PaymentIntentFixtures.PI_SUCCEEDED)
+            ConfirmationHandler.Result.Succeeded(PaymentIntentFixtures.PI_SUCCEEDED, confirmationRequestId = null)
         )
 
         val request = analyticsRequestExecutor.requestTurbine.awaitItem().params

@@ -2,10 +2,10 @@ package com.stripe.android.paymentelement.confirmation.intent
 
 import android.content.Context
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
-import com.stripe.android.checkout.analytics.CheckoutConfirmationContextHolder
 import com.stripe.android.checkout.toCheckoutAddress
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.exception.LocalStripeException
+import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
@@ -52,7 +52,6 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
     private val stripeRepository: StripeRepository,
     private val checkoutSessionRepository: CheckoutSessionRepository,
     private val checkoutSessionTaxRegionUpdater: CheckoutSessionTaxRegionUpdater,
-    private val confirmationContextHolder: CheckoutConfirmationContextHolder,
     private val requestOptions: ApiRequest.Options,
 ) : IntentConfirmationInterceptor {
 
@@ -84,6 +83,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
                     cause = error,
                     message = error.stripeErrorMessage(),
                     errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                    confirmationRequestId = null,
                 )
             }
         )
@@ -102,6 +102,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
                 cause = error,
                 message = error.stripeErrorMessage(),
                 errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                confirmationRequestId = null,
             )
         }
 
@@ -172,14 +173,17 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
             params = params,
         ).fold(
             onSuccess = { (requestId, response) ->
-                confirmationContextHolder.setRequestId(requestId)
-                handleConfirmResponse(response)
+                handleConfirmResponse(
+                    response = response,
+                    confirmationRequestId = requestId,
+                )
             },
             onFailure = { error ->
                 ConfirmationDefinition.Action.Fail(
                     cause = error,
                     message = error.stripeErrorMessage(),
                     errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                    confirmationRequestId = (error as? StripeException)?.requestId,
                 )
             }
         )
@@ -187,6 +191,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
 
     private fun handleConfirmResponse(
         response: CheckoutSessionResponse,
+        confirmationRequestId: String?,
     ): ConfirmationDefinition.Action<Args> {
         val intent: StripeIntent = response.paymentIntent ?: response.setupIntent
             ?: run {
@@ -197,6 +202,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
                     cause = exception,
                     message = exception.stripeErrorMessage(),
                     errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                    confirmationRequestId = confirmationRequestId,
                 )
             }
 
@@ -209,6 +215,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
                         set(CheckoutSessionResponseKey, response)
                     },
                     completedFullPaymentFlow = true,
+                    confirmationRequestId = confirmationRequestId,
                 )
             }
             intent.requiresAction() -> {
@@ -218,6 +225,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
                         deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
                     ),
                     receivesResultInProcess = false,
+                    confirmationRequestId = confirmationRequestId,
                 )
             }
             else -> {
@@ -226,6 +234,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
                     cause = exception,
                     message = exception.stripeErrorMessage(),
                     errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                    confirmationRequestId = confirmationRequestId,
                 )
             }
         }

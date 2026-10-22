@@ -102,6 +102,7 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
                     cause = error,
                     message = error.stripeErrorMessage(),
                     errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                    confirmationRequestId = null,
                 )
             }
         )
@@ -155,6 +156,7 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
                             set(DeferredIntentConfirmationTypeKey, DeferredIntentConfirmationType.None)
                         },
                         completedFullPaymentFlow = true,
+                        confirmationRequestId = null,
                     )
                 } else {
                     handleDeferredIntentCreationSuccess(
@@ -176,6 +178,7 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
                     message = result.displayMessage?.resolvableString
                         ?: exception.stripeErrorMessage(),
                     errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                    confirmationRequestId = null,
                 )
             }
         }
@@ -213,6 +216,7 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
                 cause = error,
                 message = error.stripeErrorMessage(),
                 errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                confirmationRequestId = null,
             )
         }
     }
@@ -228,6 +232,7 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
                 set(DeferredIntentConfirmationTypeKey, DeferredIntentConfirmationType.Server)
             },
             completedFullPaymentFlow = true,
+            confirmationRequestId = null,
         )
     }
 
@@ -243,12 +248,14 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
                     deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
                 ),
                 receivesResultInProcess = false,
+                confirmationRequestId = null,
             )
         }.getOrElse {
             ConfirmationDefinition.Action.Fail(
                 cause = InvalidDeferredIntentUsageException(),
                 message = resolvableString(R.string.stripe_paymentsheet_invalid_deferred_intent_usage),
                 errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                confirmationRequestId = null,
             )
         }
     }

@@ -66,13 +66,15 @@ internal class PassiveChallengeConfirmationDefinition @Inject constructor(
             is PassiveChallengeActivityResult.Failed -> {
                 ConfirmationDefinition.Result.NextStep(
                     confirmationOption = confirmationOption.attachToken(null),
-                    arguments = confirmationArgs
+                    arguments = confirmationArgs,
+                    confirmationRequestId = null,
                 )
             }
             is PassiveChallengeActivityResult.Success -> {
                 ConfirmationDefinition.Result.NextStep(
                     confirmationOption = confirmationOption.attachToken(result.token),
-                    arguments = confirmationArgs
+                    arguments = confirmationArgs,
+                    confirmationRequestId = null,
                 )
             }
         }
@@ -109,6 +111,7 @@ internal class PassiveChallengeConfirmationDefinition @Inject constructor(
                     productUsage = productUsage
                 ),
                 receivesResultInProcess = false,
+                confirmationRequestId = null,
             )
         }
 
@@ -121,7 +124,8 @@ internal class PassiveChallengeConfirmationDefinition @Inject constructor(
         return ConfirmationDefinition.Action.Fail(
             cause = error,
             message = "Passive challenge params are null".resolvableString,
-            errorType = ConfirmationHandler.Result.Failed.ErrorType.Internal
+            errorType = ConfirmationHandler.Result.Failed.ErrorType.Internal,
+            confirmationRequestId = null,
         )
     }
 

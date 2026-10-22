@@ -50,6 +50,7 @@ internal class SharedPaymentTokenConfirmationInterceptor @AssistedInject constru
                     cause = error,
                     message = error.stripeErrorMessage(),
                     errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                    confirmationRequestId = null,
                 )
             }
         )
@@ -84,12 +85,14 @@ internal class SharedPaymentTokenConfirmationInterceptor @AssistedInject constru
                     set(DeferredIntentConfirmationTypeKey, DeferredIntentConfirmationType.None)
                 },
                 completedFullPaymentFlow = false,
+                confirmationRequestId = null,
             )
         } catch (@Suppress("TooGenericExceptionCaught") exception: Exception) {
             ConfirmationDefinition.Action.Fail(
                 cause = exception,
                 message = exception.errorMessage,
                 errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                confirmationRequestId = null,
             )
         }
     }

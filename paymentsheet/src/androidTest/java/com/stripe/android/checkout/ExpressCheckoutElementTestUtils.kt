@@ -149,7 +149,7 @@ internal fun assertGooglePayCalledWithRequiredBillingAddress() {
 
 internal fun enqueueSuccessfulNativeLinkPayment() {
     enqueueNativeLinkPaymentResult(
-        LinkActivityResult.Completed(LinkAccountUpdate.None)
+        LinkActivityResult.Completed(LinkAccountUpdate.None, confirmationRequestId = null)
     )
 }
 
@@ -196,6 +196,7 @@ internal fun enqueueFailedNativeLinkPayment(error: Throwable) {
         LinkActivityResult.Failed(
             error = error,
             linkAccountUpdate = LinkAccountUpdate.None,
+            confirmationRequestId = null,
         )
     )
 }

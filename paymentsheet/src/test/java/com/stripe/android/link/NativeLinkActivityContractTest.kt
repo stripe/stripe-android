@@ -104,7 +104,8 @@ class NativeLinkActivityContractTest {
         assertThat(result)
             .isEqualTo(
                 LinkActivityResult.Canceled(
-                    linkAccountUpdate = LinkAccountUpdate.None
+                    linkAccountUpdate = LinkAccountUpdate.None,
+                    confirmationRequestId = null,
                 )
             )
     }
@@ -121,7 +122,8 @@ class NativeLinkActivityContractTest {
         assertThat(result)
             .isEqualTo(
                 LinkActivityResult.Canceled(
-                    linkAccountUpdate = LinkAccountUpdate.None
+                    linkAccountUpdate = LinkAccountUpdate.None,
+                    confirmationRequestId = null,
                 )
             )
     }
@@ -138,7 +140,8 @@ class NativeLinkActivityContractTest {
         assertThat(result)
             .isEqualTo(
                 LinkActivityResult.Canceled(
-                    linkAccountUpdate = LinkAccountUpdate.None
+                    linkAccountUpdate = LinkAccountUpdate.None,
+                    confirmationRequestId = null,
                 )
             )
     }

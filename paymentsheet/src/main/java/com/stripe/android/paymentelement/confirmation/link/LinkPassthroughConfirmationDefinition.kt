@@ -38,6 +38,7 @@ internal class LinkPassthroughConfirmationDefinition @Inject constructor(
                 ConfirmationDefinition.Action.Launch(
                     launcherArguments = LauncherArguments(nextConfirmationOption),
                     receivesResultInProcess = true,
+                    confirmationRequestId = null,
                 )
             },
             onFailure = { error ->
@@ -45,6 +46,7 @@ internal class LinkPassthroughConfirmationDefinition @Inject constructor(
                     cause = error,
                     message = resolvableString(R.string.stripe_something_went_wrong),
                     errorType = ConfirmationHandler.Result.Failed.ErrorType.Internal,
+                    confirmationRequestId = null,
                 )
             },
         )
@@ -76,6 +78,7 @@ internal class LinkPassthroughConfirmationDefinition @Inject constructor(
         return ConfirmationDefinition.Result.NextStep(
             confirmationOption = result.nextConfirmationOption,
             arguments = confirmationArgs,
+            confirmationRequestId = null,
         )
     }
 

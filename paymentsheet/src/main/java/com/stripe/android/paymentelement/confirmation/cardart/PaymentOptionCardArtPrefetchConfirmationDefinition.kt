@@ -43,6 +43,7 @@ internal class PaymentOptionCardArtPrefetchConfirmationDefinition @Inject constr
             cause = error,
             message = "CardArtPrefetchConfirmationDefinition should not be used for confirmation".resolvableString,
             errorType = ConfirmationHandler.Result.Failed.ErrorType.Internal,
+            confirmationRequestId = null,
         )
     }
 
@@ -71,6 +72,7 @@ internal class PaymentOptionCardArtPrefetchConfirmationDefinition @Inject constr
         return ConfirmationDefinition.Result.NextStep(
             confirmationOption = confirmationOption,
             arguments = confirmationArgs,
+            confirmationRequestId = null,
         )
     }
 

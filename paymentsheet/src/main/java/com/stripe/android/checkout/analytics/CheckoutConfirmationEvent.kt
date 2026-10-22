@@ -15,12 +15,13 @@ internal sealed class CheckoutConfirmationEvent : AnalyticsEvent {
 
     class Succeeded(
         confirmationContext: CheckoutConfirmationContext,
+        confirmationRequestId: String?,
         analyticsMetadata: AnalyticsMetadata,
         duration: Duration?,
     ) : CheckoutConfirmationEvent() {
         override val eventName: String = "checkout_elements.confirm.succeeded"
         override val params: Map<String, Any> = buildMap {
-            putAll(confirmationParams(confirmationContext))
+            putAll(confirmationParams(confirmationContext, confirmationRequestId))
             putAll(analyticsMetadata.paramsMap)
             putAll(duration.mapOfDurationInSeconds())
         }
@@ -28,6 +29,7 @@ internal sealed class CheckoutConfirmationEvent : AnalyticsEvent {
 
     class Failed(
         confirmationContext: CheckoutConfirmationContext,
+        confirmationRequestId: String?,
         analyticsMetadata: AnalyticsMetadata,
         duration: Duration?,
         error: PaymentSheetConfirmationError,
@@ -37,8 +39,12 @@ internal sealed class CheckoutConfirmationEvent : AnalyticsEvent {
             val stripeException = error.cause as? StripeException
             put("error_type", stripeException?.stripeError?.type ?: error.analyticsValue)
             error.errorCode?.let { put("error_code", it) }
-            stripeException?.requestId?.let { put("request_id", it) }
-            putAll(confirmationParams(confirmationContext))
+            putAll(
+                confirmationParams(
+                    confirmationContext = confirmationContext,
+                    confirmationRequestId = confirmationRequestId ?: stripeException?.requestId,
+                )
+            )
             putAll(analyticsMetadata.paramsMap)
             putAll(duration.mapOfDurationInSeconds())
         }
@@ -47,13 +53,14 @@ internal sealed class CheckoutConfirmationEvent : AnalyticsEvent {
     private companion object {
         fun confirmationParams(
             confirmationContext: CheckoutConfirmationContext,
+            confirmationRequestId: String?,
         ): Map<String, Any> = buildMap {
             put("selected_lpm", confirmationContext.paymentSelection.code())
             put("is_saved_payment_method", confirmationContext.paymentSelection.isSaved)
             confirmationContext.paymentSelection.linkContext()?.let { put("link_context", it) }
             put("invocation_source", confirmationContext.invocationSource.code)
             put("active_link_session", confirmationContext.activeLinkSession)
-            confirmationContext.requestId?.let { put("request_id", it) }
+            confirmationRequestId?.let { put("request_id", it) }
         }
     }
 }

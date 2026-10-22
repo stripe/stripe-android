@@ -528,7 +528,10 @@ internal class WalletScreenTest {
             ConsumerPaymentDetails(paymentDetails = listOf(cardRequiringCvc))
         )
         val linkConfirmationHandler = FakeLinkConfirmationHandler()
-        linkConfirmationHandler.confirmResult = LinkConfirmationResult.Failed("oops".resolvableString)
+        linkConfirmationHandler.confirmResult = LinkConfirmationResult.Failed(
+            message = "oops".resolvableString,
+            confirmationRequestId = null,
+        )
 
         val viewModel = createViewModel(
             linkAccountManager = linkAccountManager,

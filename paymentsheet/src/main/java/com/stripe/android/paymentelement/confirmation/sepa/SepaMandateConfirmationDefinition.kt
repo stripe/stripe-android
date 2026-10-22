@@ -43,6 +43,7 @@ internal class SepaMandateConfirmationDefinition @Inject constructor() : Confirm
                 appearance = confirmationArgs.paymentMethodMetadata.appearance,
             ),
             receivesResultInProcess = true,
+            confirmationRequestId = null,
         )
     }
 
@@ -77,9 +78,11 @@ internal class SepaMandateConfirmationDefinition @Inject constructor() : Confirm
             SepaMandateResult.Acknowledged -> ConfirmationDefinition.Result.NextStep(
                 confirmationOption = confirmationOption.copy(hasAcknowledgedSepaMandate = true),
                 arguments = confirmationArgs,
+                confirmationRequestId = null,
             )
             SepaMandateResult.Canceled -> ConfirmationDefinition.Result.Canceled(
                 action = ConfirmationHandler.Result.Canceled.Action.InformCancellation,
+                confirmationRequestId = null,
             )
         }
     }

@@ -46,6 +46,7 @@ class ExternalPaymentMethodConfirmationFlowTest {
         launcherArgs = EmptyConfirmationLauncherArgs,
         definitionResult = ConfirmationDefinition.Result.Succeeded(
             intent = PAYMENT_INTENT,
+            confirmationRequestId = null,
         )
     )
 

@@ -250,6 +250,7 @@ internal class DefaultFlowControllerTest {
             ConfirmationHandler.Result.Succeeded(
                 intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                 completedFullPaymentFlow = false,
+                confirmationRequestId = null,
             )
         )
 
@@ -327,6 +328,7 @@ internal class DefaultFlowControllerTest {
                     cause = InvalidDeferredIntentUsageException(),
                     message = "An error occurred!".resolvableString,
                     type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                    confirmationRequestId = null,
                 )
             )
 
@@ -377,6 +379,7 @@ internal class DefaultFlowControllerTest {
                 cause = InvalidDeferredIntentUsageException(),
                 message = "An error occurred!".resolvableString,
                 type = ConfirmationHandler.Result.Failed.ErrorType.GooglePay(errorCode),
+                confirmationRequestId = null,
             )
         )
 
@@ -682,7 +685,8 @@ internal class DefaultFlowControllerTest {
         flowController.onLinkResultFromFlowController(
             LinkActivityResult.Canceled(
                 reason = Reason.BackPressed,
-                linkAccountUpdate = LinkAccountUpdate.Value(verificationStartedAccount)
+                linkAccountUpdate = LinkAccountUpdate.Value(verificationStartedAccount),
+                confirmationRequestId = null,
             )
         )
 
@@ -745,7 +749,8 @@ internal class DefaultFlowControllerTest {
         flowController.onLinkResultFromFlowController(
             LinkActivityResult.Canceled(
                 reason = Reason.LoggedOut,
-                linkAccountUpdate = LinkAccountUpdate.Value(null)
+                linkAccountUpdate = LinkAccountUpdate.Value(null),
+                confirmationRequestId = null,
             )
         )
 
@@ -797,7 +802,8 @@ internal class DefaultFlowControllerTest {
             flowController.onLinkResultFromFlowController(
                 LinkActivityResult.Canceled(
                     reason = Reason.LoggedOut,
-                    linkAccountUpdate = LinkAccountUpdate.Value(null)
+                    linkAccountUpdate = LinkAccountUpdate.Value(null),
+                    confirmationRequestId = null,
                 )
             )
 
@@ -1444,6 +1450,7 @@ internal class DefaultFlowControllerTest {
         confirmationState.value = ConfirmationHandler.State.Complete(
             ConfirmationHandler.Result.Canceled(
                 action = ConfirmationHandler.Result.Canceled.Action.InformCancellation,
+                confirmationRequestId = null,
             )
         )
 
@@ -1484,6 +1491,7 @@ internal class DefaultFlowControllerTest {
                 cause = IllegalStateException("Failed!"),
                 message = "Failed!".resolvableString,
                 type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                confirmationRequestId = null,
             )
         )
 
@@ -1756,6 +1764,7 @@ internal class DefaultFlowControllerTest {
         confirmationState.value = ConfirmationHandler.State.Complete(
             ConfirmationHandler.Result.Succeeded(
                 intent = PaymentIntentFixtures.PI_SUCCEEDED,
+                confirmationRequestId = null,
             )
         )
 
@@ -1786,6 +1795,7 @@ internal class DefaultFlowControllerTest {
                 cause = Exception("something went wrong"),
                 message = "something went wrong".resolvableString,
                 type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                confirmationRequestId = null,
             )
         )
 
@@ -1959,6 +1969,7 @@ internal class DefaultFlowControllerTest {
         confirmationState.value = ConfirmationHandler.State.Complete(
             ConfirmationHandler.Result.Succeeded(
                 intent = PaymentIntentFixtures.PI_SUCCEEDED,
+                confirmationRequestId = null,
             )
         )
 
@@ -1992,6 +2003,7 @@ internal class DefaultFlowControllerTest {
                     metadata = MutableConfirmationMetadata().apply {
                         set(DeferredIntentConfirmationTypeKey, DeferredIntentConfirmationType.Client)
                     },
+                    confirmationRequestId = null,
                 )
             )
 
@@ -2025,6 +2037,7 @@ internal class DefaultFlowControllerTest {
                     metadata = MutableConfirmationMetadata().apply {
                         set(DeferredIntentConfirmationTypeKey, DeferredIntentConfirmationType.Server)
                     },
+                    confirmationRequestId = null,
                 )
             )
 
@@ -2243,6 +2256,7 @@ internal class DefaultFlowControllerTest {
                 cause = Exception("An error!"),
                 message = "An error!".resolvableString,
                 type = ConfirmationHandler.Result.Failed.ErrorType.ExternalPaymentMethod,
+                confirmationRequestId = null,
             )
         )
 

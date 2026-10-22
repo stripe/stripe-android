@@ -916,7 +916,12 @@ internal class PaymentOptionsViewModelTest {
         val viewModel = createViewModel()
         val linkAccountUpdate = LinkAccountUpdate.None
         viewModel.paymentOptionsActivityResult.test {
-            viewModel.onLinkAuthenticationResult(LinkActivityResult.Canceled(linkAccountUpdate = linkAccountUpdate))
+            viewModel.onLinkAuthenticationResult(
+                LinkActivityResult.Canceled(
+                    linkAccountUpdate = linkAccountUpdate,
+                    confirmationRequestId = null,
+                )
+            )
             expectNoEvents()
         }
     }
@@ -931,7 +936,8 @@ internal class PaymentOptionsViewModelTest {
             viewModel.onLinkAuthenticationResult(
                 LinkActivityResult.Failed(
                     error = error,
-                    linkAccountUpdate = linkAccountUpdate
+                    linkAccountUpdate = linkAccountUpdate,
+                    confirmationRequestId = null,
                 )
             )
             assertThat(awaitItem()).isNotNull()
@@ -943,7 +949,8 @@ internal class PaymentOptionsViewModelTest {
         val linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT)
         val result = LinkActivityResult.Completed(
             linkAccountUpdate = linkAccountUpdate,
-            selectedPayment = null
+            selectedPayment = null,
+            confirmationRequestId = null,
         )
         val viewModel = createViewModel(
             linkState = LinkState(

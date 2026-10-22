@@ -122,6 +122,7 @@ class GooglePayConfirmationFlowTest {
                 originatedFromWallet = true,
             ),
             arguments = CONFIRMATION_PARAMETERS,
+            confirmationRequestId = null,
         )
     )
 

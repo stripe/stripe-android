@@ -102,7 +102,11 @@ internal class CheckoutLinkPaymentOptionsPresenterTest {
 
         dispatchResult(
             launch = launch,
-            result = LinkActivityResult.Completed(LinkAccountUpdate.None, selectedPayment = updatedPayment)
+            result = LinkActivityResult.Completed(
+                LinkAccountUpdate.None,
+                selectedPayment = updatedPayment,
+                confirmationRequestId = null,
+            ),
         )
 
         assertThat(stateHolder.state?.paymentSelection)
@@ -121,6 +125,7 @@ internal class CheckoutLinkPaymentOptionsPresenterTest {
             result = LinkActivityResult.Canceled(
                 reason = LinkActivityResult.Canceled.Reason.LoggedOut,
                 linkAccountUpdate = LinkAccountUpdate.None,
+                confirmationRequestId = null,
             )
         )
 
@@ -140,6 +145,7 @@ internal class CheckoutLinkPaymentOptionsPresenterTest {
             result = LinkActivityResult.Canceled(
                 reason = LinkActivityResult.Canceled.Reason.PayAnotherWay,
                 linkAccountUpdate = LinkAccountUpdate.None,
+                confirmationRequestId = null,
             )
         )
 
@@ -158,6 +164,7 @@ internal class CheckoutLinkPaymentOptionsPresenterTest {
             result = LinkActivityResult.Canceled(
                 reason = LinkActivityResult.Canceled.Reason.BackPressed,
                 linkAccountUpdate = LinkAccountUpdate.None,
+                confirmationRequestId = null,
             )
         )
 
@@ -174,6 +181,7 @@ internal class CheckoutLinkPaymentOptionsPresenterTest {
             result = LinkActivityResult.Canceled(
                 reason = LinkActivityResult.Canceled.Reason.BackPressed,
                 linkAccountUpdate = LinkAccountUpdate.None,
+                confirmationRequestId = null,
             )
         )
 
@@ -190,6 +198,7 @@ internal class CheckoutLinkPaymentOptionsPresenterTest {
             result = LinkActivityResult.Failed(
                 error = Throwable("failure"),
                 linkAccountUpdate = LinkAccountUpdate.Value(null),
+                confirmationRequestId = null,
             )
         )
 
@@ -216,6 +225,7 @@ internal class CheckoutLinkPaymentOptionsPresenterTest {
                 result = LinkActivityResult.Canceled(
                     reason = LinkActivityResult.Canceled.Reason.BackPressed,
                     linkAccountUpdate = LinkAccountUpdate.Value(verifyingAccount),
+                    confirmationRequestId = null,
                 )
             )
 
@@ -240,7 +250,11 @@ internal class CheckoutLinkPaymentOptionsPresenterTest {
 
         activityResultRegistry.dispatchResult(
             launch.requestCode,
-            LinkActivityResult.Completed(LinkAccountUpdate.None, selectedPayment = selectedPayment),
+            LinkActivityResult.Completed(
+                LinkAccountUpdate.None,
+                selectedPayment = selectedPayment,
+                confirmationRequestId = null,
+            ),
         )
 
         assertThat(sheetStateHolder.sheetIsOpen).isTrue()
