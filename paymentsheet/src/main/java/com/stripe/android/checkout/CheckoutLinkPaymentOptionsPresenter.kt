@@ -48,6 +48,7 @@ internal class CheckoutLinkPaymentOptionsPresenter @Inject constructor(
     }
 
     override fun present() {
+        // TODO: I think we should update this function to return earlier if state or PMM is null.
         if (lifecycleOwner.lifecycle.currentState == Lifecycle.State.DESTROYED) return
         if (sheetStateHolder.sheetIsOpen) return
         val state = stateHolder.state
@@ -55,12 +56,17 @@ internal class CheckoutLinkPaymentOptionsPresenter @Inject constructor(
             defaultPresenter.present()
             return
         }
+        val paymentMethodMetadata = state.paymentMethodMetadata
+        if (paymentMethodMetadata == null) {
+            defaultPresenter.present()
+            return
+        }
 
         sheetStateHolder.sheetIsOpen = true
         val didLaunch = selectionLauncher.launchIfEligible(
             selection = state.paymentSelection,
-            configuration = state.paymentMethodMetadata.linkState?.configuration,
-            paymentMethodMetadata = state.paymentMethodMetadata,
+            configuration = paymentMethodMetadata.linkState?.configuration,
+            paymentMethodMetadata = paymentMethodMetadata,
             hasUserDeclinedVerification = state.linkEagerPresentationSuppressed,
         )
         if (!didLaunch) {
@@ -70,7 +76,8 @@ internal class CheckoutLinkPaymentOptionsPresenter @Inject constructor(
 
     private fun onLinkResult(result: LinkActivityResult) {
         val state = stateHolder.state
-        if (state == null) {
+        val paymentMethodMetadata = state?.paymentMethodMetadata
+        if (state == null || paymentMethodMetadata == null) {
             sheetStateHolder.sheetIsOpen = false
             return
         }
@@ -78,7 +85,7 @@ internal class CheckoutLinkPaymentOptionsPresenter @Inject constructor(
             result = result,
             selection = state.paymentSelection,
             customerState = customerStateHolder.customer.value,
-            paymentMethodMetadata = state.paymentMethodMetadata,
+            paymentMethodMetadata = paymentMethodMetadata,
             currentLinkAccountInfo = linkAccountHolder.linkAccountInfo.value,
         ).forEach(::applyOutcome)
     }

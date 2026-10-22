@@ -3,7 +3,6 @@ package com.stripe.android.checkout.injection
 import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.checkout.CheckoutLinkPaymentOptionsPresenter
 import com.stripe.android.checkout.CheckoutSheetLauncher
-import com.stripe.android.elements.PaymentElement
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.LinkPaymentMethodSelectionLauncher
@@ -62,22 +61,17 @@ internal interface PaymentElementModule {
     @OptIn(CheckoutSessionPreview::class)
     companion object {
         @Provides
-        fun providePaymentElementConfiguration(
-            stateHolder: CheckoutControllerStateHolder,
-        ): PaymentElement.Configuration.State {
-            return requireNotNull(stateHolder.state).configuration.paymentElementConfiguration
-        }
-
-        @Provides
         fun provideEmbeddedContentState(
             stateHolder: CheckoutControllerStateHolder,
         ): StateFlow<EmbeddedContentHelperStateHolder.State?> {
             return stateHolder.stateFlow.mapAsStateFlow { state ->
                 state?.let {
+                    val paymentMethodMetadata = it.paymentMethodMetadata ?: return@let null
+                    val embeddedConfiguration = it.embeddedConfiguration ?: return@let null
                     EmbeddedContentHelperStateHolder.State(
-                        paymentMethodMetadata = it.paymentMethodMetadata,
-                        embeddedViewDisplaysMandateText = it.embeddedConfiguration.embeddedViewDisplaysMandateText,
-                        configuration = it.embeddedConfiguration,
+                        paymentMethodMetadata = paymentMethodMetadata,
+                        embeddedViewDisplaysMandateText = embeddedConfiguration.embeddedViewDisplaysMandateText,
+                        configuration = embeddedConfiguration,
                     )
                 }
             }

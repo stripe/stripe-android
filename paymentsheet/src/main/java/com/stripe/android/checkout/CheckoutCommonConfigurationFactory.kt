@@ -18,16 +18,19 @@ internal class CheckoutCommonConfigurationFactory @Inject constructor(
         configuration: CheckoutController.Configuration.State,
         checkoutSessionResponse: CheckoutSessionResponse,
         collectedDetails: CheckoutCollectedDetails,
-    ): CommonConfiguration = createCommonConfiguration(
-        configuration = configuration,
-        checkoutSessionResponse = checkoutSessionResponse,
-        collectedDetails = collectedDetails,
-        googlePayConfiguration =
-            configuration.toPaymentElementGooglePayConfiguration(checkoutSessionResponse),
-        linkConfiguration = configuration.paymentElementConfiguration.linkConfiguration.asPaymentSheet(),
-        billingDetailsCollectionConfiguration =
-            checkoutSessionResponse.toBillingDetailsCollectionConfiguration(),
-    )
+    ): CommonConfiguration? {
+        val paymentElementConfiguration = configuration.paymentElementConfiguration ?: return null
+        return createCommonConfiguration(
+            configuration = configuration,
+            checkoutSessionResponse = checkoutSessionResponse,
+            collectedDetails = collectedDetails,
+            googlePayConfiguration =
+                configuration.toPaymentElementGooglePayConfiguration(checkoutSessionResponse),
+            linkConfiguration = paymentElementConfiguration.linkConfiguration.asPaymentSheet(),
+            billingDetailsCollectionConfiguration =
+                checkoutSessionResponse.toBillingDetailsCollectionConfiguration(),
+        )
+    }
 
     fun createForExpressCheckoutElement(
         configuration: CheckoutController.Configuration.State,
@@ -64,15 +67,18 @@ internal class CheckoutCommonConfigurationFactory @Inject constructor(
         configuration: CheckoutController.Configuration.State,
         checkoutSessionResponse: CheckoutSessionResponse,
         collectedDetails: CheckoutCollectedDetails,
-    ): CommonConfiguration = createCommonConfiguration(
-        configuration = configuration,
-        checkoutSessionResponse = checkoutSessionResponse,
-        collectedDetails = collectedDetails,
-        googlePayConfiguration = configuration.toPaymentElementGooglePayConfiguration(checkoutSessionResponse),
-        linkConfiguration = configuration.paymentElementConfiguration.linkConfiguration.asPaymentSheet(),
-        billingDetailsCollectionConfiguration =
-            checkoutSessionResponse.toBillingDetailsCollectionConfiguration(),
-    )
+    ): CommonConfiguration? {
+        val paymentElementConfiguration = configuration.paymentElementConfiguration ?: return null
+        return createCommonConfiguration(
+            configuration = configuration,
+            checkoutSessionResponse = checkoutSessionResponse,
+            collectedDetails = collectedDetails,
+            googlePayConfiguration = configuration.toPaymentElementGooglePayConfiguration(checkoutSessionResponse),
+            linkConfiguration = paymentElementConfiguration.linkConfiguration.asPaymentSheet(),
+            billingDetailsCollectionConfiguration =
+                checkoutSessionResponse.toBillingDetailsCollectionConfiguration(),
+        )
+    }
 
     private fun createCommonConfiguration(
         configuration: CheckoutController.Configuration.State,
@@ -81,31 +87,38 @@ internal class CheckoutCommonConfigurationFactory @Inject constructor(
         googlePayConfiguration: PaymentSheet.GooglePayConfiguration?,
         linkConfiguration: PaymentSheet.LinkConfiguration,
         billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
-    ): CommonConfiguration = CommonConfiguration(
-        merchantDisplayName = configuration.resolveMerchantDisplayName(checkoutSessionResponse, appName),
-        customer = ConfigurationDefaults.customer,
-        googlePay = googlePayConfiguration,
-        link = linkConfiguration,
-        defaultBillingDetails = configuration.toBillingDetails(
-            checkoutSessionResponse = checkoutSessionResponse,
-            collectedEmail = collectedDetails.email,
-        ),
-        shippingDetails = collectedDetails.toShippingDetails(),
-        allowsDelayedPaymentMethods = true,
-        allowsPaymentMethodsRequiringShippingAddress = true,
-        billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
-        preferredNetworks = configuration.paymentElementConfiguration.preferredNetworks,
-        allowsRemovalOfLastSavedPaymentMethod = ConfigurationDefaults.allowsRemovalOfLastSavedPaymentMethod,
-        paymentMethodOrder = configuration.paymentElementConfiguration.paymentMethodOrder,
-        externalPaymentMethods = ConfigurationDefaults.externalPaymentMethods,
-        cardBrandAcceptance = configuration.paymentElementConfiguration.cardBrandAcceptance.asPaymentSheet(),
-        allowedCardFundingTypes = ConfigurationDefaults.allowedCardFundingTypes,
-        customPaymentMethods = ConfigurationDefaults.customPaymentMethods,
-        googlePlacesApiKey = null,
-        termsDisplay = configuration.paymentElementConfiguration.termsDisplay.asPaymentSheet(),
-        walletButtons = null,
-        opensCardScannerAutomatically = configuration.paymentElementConfiguration.opensCardScannerAutomatically,
-        userOverrideCountry = ConfigurationDefaults.userOverrideCountry,
-        appearance = configuration.paymentElementConfiguration.appearance.asPaymentSheet(),
-    )
+    ): CommonConfiguration {
+        return CommonConfiguration(
+            merchantDisplayName = configuration.resolveMerchantDisplayName(checkoutSessionResponse, appName),
+            customer = ConfigurationDefaults.customer,
+            googlePay = googlePayConfiguration,
+            link = linkConfiguration,
+            defaultBillingDetails = configuration.toBillingDetails(
+                checkoutSessionResponse = checkoutSessionResponse,
+                collectedEmail = collectedDetails.email,
+            ),
+            shippingDetails = collectedDetails.toShippingDetails(),
+            allowsDelayedPaymentMethods = true,
+            allowsPaymentMethodsRequiringShippingAddress = true,
+            billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+            preferredNetworks = configuration.paymentElementConfiguration?.preferredNetworks
+                ?: ConfigurationDefaults.preferredNetworks,
+            allowsRemovalOfLastSavedPaymentMethod = ConfigurationDefaults.allowsRemovalOfLastSavedPaymentMethod,
+            paymentMethodOrder = configuration.paymentElementConfiguration?.paymentMethodOrder
+                ?: ConfigurationDefaults.paymentMethodOrder,
+            externalPaymentMethods = ConfigurationDefaults.externalPaymentMethods,
+            cardBrandAcceptance = configuration.paymentElementConfiguration?.cardBrandAcceptance?.asPaymentSheet()
+                ?: ConfigurationDefaults.cardBrandAcceptance,
+            allowedCardFundingTypes = ConfigurationDefaults.allowedCardFundingTypes,
+            customPaymentMethods = ConfigurationDefaults.customPaymentMethods,
+            googlePlacesApiKey = null,
+            termsDisplay = configuration.paymentElementConfiguration?.termsDisplay?.asPaymentSheet() ?: emptyMap(),
+            walletButtons = null,
+            opensCardScannerAutomatically = configuration.paymentElementConfiguration?.opensCardScannerAutomatically
+                ?: ConfigurationDefaults.opensCardScannerAutomatically,
+            userOverrideCountry = ConfigurationDefaults.userOverrideCountry,
+            appearance = configuration.paymentElementConfiguration?.appearance?.asPaymentSheet()
+                ?: ConfigurationDefaults.appearance,
+        )
+    }
 }

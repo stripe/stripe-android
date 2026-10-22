@@ -11,7 +11,9 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.CardFundingFilteringPrivatePreview
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import org.junit.Test
 import com.stripe.android.elements.PaymentElement.Configuration.GooglePayConfiguration as PaymentElementGooglePayConfiguration
@@ -26,9 +28,21 @@ import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConf
 internal class CheckoutEmbeddedConfigurationFactoryTest {
 
     @Test
+    fun `returns null when payment element is not configured`() {
+        val result = CheckoutEmbeddedConfigurationFactory(appName = "Test App").create(
+            configuration = CheckoutController.Configuration().build(),
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+            collectedDetails = collectedDetails(),
+        )
+
+        assertThat(result).isNull()
+    }
+
+    @Test
     fun `uses the provided merchant display name`() {
         val configuration = CheckoutController.Configuration()
             .merchantDisplayName("Acme Corp")
+            .paymentElement(PaymentElement.Configuration())
             .build()
 
         val result = factory().create(
@@ -318,6 +332,7 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
     fun `populates billing details from configuration defaults`() {
         val result = factory().create(
             configuration = CheckoutController.Configuration()
+                .paymentElement(PaymentElement.Configuration())
                 .defaults(
                     CheckoutController.Configuration.Defaults().phone("+15555551234").billingDetails(
                         CheckoutController.Configuration.Defaults.ContactDetails()
@@ -395,6 +410,7 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
         val defaults = CheckoutController.Configuration.Defaults().phone("+15555551234")
         assertThat(defaults.build().phone).isEqualTo("+15555551234")
         val configuration = CheckoutController.Configuration()
+            .paymentElement(PaymentElement.Configuration())
             .defaults(defaults.phone(null))
             .build()
 
@@ -407,7 +423,25 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
         assertThat(result.defaultBillingDetails?.phone).isNull()
     }
 
-    private fun factory(appName: String = "Test App") = CheckoutEmbeddedConfigurationFactory(appName)
+    private fun factory(appName: String = "Test App") = TestFactory(appName)
+
+    private class TestFactory(appName: String) {
+        private val factory = CheckoutEmbeddedConfigurationFactory(appName)
+
+        fun create(
+            configuration: CheckoutController.Configuration.State,
+            checkoutSessionResponse: CheckoutSessionResponse,
+            collectedDetails: CheckoutCollectedDetails,
+        ): EmbeddedPaymentElement.Configuration {
+            return requireNotNull(
+                factory.create(
+                    configuration = configuration,
+                    checkoutSessionResponse = checkoutSessionResponse,
+                    collectedDetails = collectedDetails,
+                )
+            )
+        }
+    }
 
     private fun controllerConfiguration(
         embeddedViewDisplaysMandateText: Boolean = true,

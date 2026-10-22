@@ -72,19 +72,23 @@ internal class CheckoutStateLoaderTest {
     }
 
     @Test
-    fun `loadInitial loads ECE payment method metadata when ECE is configured`() = runScenario(
+    fun `loadInitial loads only ECE metadata when payment element is not configured`() = runScenario(
         configuration = CheckoutController.Configuration()
             .expressCheckoutElement(ExpressCheckoutElement.Configuration())
             .build(),
     ) {
         val state = loadInitial().state
 
+        assertThat(state.paymentMethodMetadata).isNull()
+        assertThat(state.embeddedConfiguration).isNull()
+        assertThat(state.paymentSelection).isNull()
         assertThat(state.expressCheckoutElementPaymentMethodMetadata).isNotNull()
     }
 
     @Test
     fun `loadInitial loads payment element and ECE in parallel`() = runScenario(
         configuration = CheckoutController.Configuration()
+            .paymentElement(PaymentElement.Configuration())
             .expressCheckoutElement(ExpressCheckoutElement.Configuration())
             .build(),
         paymentElementLoaderDelay = 1.seconds,
@@ -139,13 +143,14 @@ internal class CheckoutStateLoaderTest {
     ) {
         val state = loadInitial().state
 
-        assertThat(state.paymentMethodMetadata.paymentMethodOrder)
+        assertThat(state.paymentMethodMetadata?.paymentMethodOrder)
             .isEqualTo(listOf("klarna", "card"))
     }
 
     @Test
     fun `loadInitial keeps only mutable configuration defaults in collected details`() = runScenario(
         configuration = CheckoutController.Configuration()
+            .paymentElement(PaymentElement.Configuration())
             .defaults(
                 CheckoutController.Configuration.Defaults()
                     .shippingDetails(
@@ -170,6 +175,7 @@ internal class CheckoutStateLoaderTest {
     @Test
     fun `loadInitial clears an invalid shipping default from collected details`() = runScenario(
         configuration = CheckoutController.Configuration()
+            .paymentElement(PaymentElement.Configuration())
             .shippingAddressElement(ShippingAddressElement.Configuration())
             .defaults(
                 CheckoutController.Configuration.Defaults().shippingDetails(
@@ -472,7 +478,9 @@ internal class CheckoutStateLoaderTest {
             internalRowSelectionCallback = { null },
         )
 
-    private fun defaultConfiguration() = CheckoutController.Configuration().build()
+    private fun defaultConfiguration() = CheckoutController.Configuration()
+        .paymentElement(PaymentElement.Configuration())
+        .build()
 
     private fun response(
         merchantCountry: String? = "US",
@@ -498,7 +506,7 @@ internal class CheckoutStateLoaderTest {
         checkoutSessionResponse: CheckoutSessionResponse = CheckoutSessionResponseFactory.create(),
         linkEagerPresentationSuppressed: Boolean = false,
     ) = CheckoutControllerState(
-        configuration = CheckoutController.Configuration().build(),
+        configuration = defaultConfiguration(),
         checkoutSessionResponse = checkoutSessionResponse,
         flagImages = null,
         collectedDetails = CheckoutCollectedDetails(email = null),

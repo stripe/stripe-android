@@ -3,6 +3,7 @@ package com.stripe.android.checkout
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutController.Address
 import com.stripe.android.common.configuration.ConfigurationDefaults
+import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.elements.ExpressCheckoutElement.Configuration.GooglePayConfiguration
@@ -14,6 +15,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.CardFundingFilteringPrivatePreview
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import org.junit.Test
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic as PSAutomatic
@@ -25,6 +27,28 @@ import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConf
     CardFundingFilteringPrivatePreview::class,
 )
 internal class CheckoutCommonConfigurationFactoryTest {
+
+    @Test
+    fun `create returns null when payment element is not configured`() {
+        val result = CheckoutCommonConfigurationFactory(appName = "Test App").create(
+            configuration = CheckoutController.Configuration().build(),
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+            collectedDetails = collectedDetails(),
+        )
+
+        assertThat(result).isNull()
+    }
+
+    @Test
+    fun `createForPaymentElement returns null when payment element is not configured`() {
+        val result = CheckoutCommonConfigurationFactory(appName = "Test App").createForPaymentElement(
+            configuration = CheckoutController.Configuration().build(),
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+            collectedDetails = collectedDetails(),
+        )
+
+        assertThat(result).isNull()
+    }
 
     @Test
     fun `matches the common configuration derived from the embedded configuration`() {
@@ -52,8 +76,10 @@ internal class CheckoutCommonConfigurationFactoryTest {
             shippingAddress = address(),
         )
 
-        val expected = CheckoutEmbeddedConfigurationFactory(appName = "Test App")
-            .create(configuration, checkoutSessionResponse, collectedDetails)
+        val expected = requireNotNull(
+            CheckoutEmbeddedConfigurationFactory(appName = "Test App")
+                .create(configuration, checkoutSessionResponse, collectedDetails)
+        )
             .asCommonConfiguration()
         val actual = factory()
             .create(configuration, checkoutSessionResponse, collectedDetails)
@@ -65,6 +91,7 @@ internal class CheckoutCommonConfigurationFactoryTest {
     fun `uses the provided merchant display name`() {
         val configuration = CheckoutController.Configuration()
             .merchantDisplayName("Acme Corp")
+            .paymentElement(PaymentElement.Configuration())
             .build()
 
         val result = factory().create(
@@ -306,6 +333,7 @@ internal class CheckoutCommonConfigurationFactoryTest {
     @Test
     fun `maps configured billing defaults to payment element and express checkout element`() {
         val configuration = CheckoutController.Configuration()
+            .paymentElement(PaymentElement.Configuration())
             .defaults(
                 CheckoutController.Configuration.Defaults().phone("+15555551234").billingDetails(
                     CheckoutController.Configuration.Defaults.ContactDetails()
@@ -526,6 +554,7 @@ internal class CheckoutCommonConfigurationFactoryTest {
         val defaults = CheckoutController.Configuration.Defaults().phone("+15555551234")
         assertThat(defaults.build().phone).isEqualTo("+15555551234")
         val configuration = CheckoutController.Configuration()
+            .paymentElement(PaymentElement.Configuration())
             .defaults(defaults.phone(null))
             .expressCheckoutElement(ExpressCheckoutElement.Configuration())
             .build()
@@ -540,7 +569,52 @@ internal class CheckoutCommonConfigurationFactoryTest {
         assertThat(expressConfiguration.defaultBillingDetails?.phone).isNull()
     }
 
-    private fun factory(appName: String = "Test App") = CheckoutCommonConfigurationFactory(appName)
+    private fun factory(appName: String = "Test App") = TestFactory(appName)
+
+    // TODO: we definitely will not be doing this.
+    private class TestFactory(appName: String) {
+        private val factory = CheckoutCommonConfigurationFactory(appName)
+
+        fun create(
+            configuration: CheckoutController.Configuration.State,
+            checkoutSessionResponse: CheckoutSessionResponse,
+            collectedDetails: CheckoutCollectedDetails,
+        ): CommonConfiguration {
+            return requireNotNull(
+                factory.create(
+                    configuration = configuration,
+                    checkoutSessionResponse = checkoutSessionResponse,
+                    collectedDetails = collectedDetails,
+                )
+            )
+        }
+
+        fun createForPaymentElement(
+            configuration: CheckoutController.Configuration.State,
+            checkoutSessionResponse: CheckoutSessionResponse,
+            collectedDetails: CheckoutCollectedDetails,
+        ): CommonConfiguration {
+            return requireNotNull(
+                factory.createForPaymentElement(
+                    configuration = configuration,
+                    checkoutSessionResponse = checkoutSessionResponse,
+                    collectedDetails = collectedDetails,
+                )
+            )
+        }
+
+        fun createForExpressCheckoutElement(
+            configuration: CheckoutController.Configuration.State,
+            checkoutSessionResponse: CheckoutSessionResponse,
+            collectedDetails: CheckoutCollectedDetails,
+        ): CommonConfiguration? {
+            return factory.createForExpressCheckoutElement(
+                configuration = configuration,
+                checkoutSessionResponse = checkoutSessionResponse,
+                collectedDetails = collectedDetails,
+            )
+        }
+    }
 
     private fun controllerConfiguration(
         appearance: PaymentElement.Configuration.Appearance = PaymentElement.Configuration.Appearance(),
