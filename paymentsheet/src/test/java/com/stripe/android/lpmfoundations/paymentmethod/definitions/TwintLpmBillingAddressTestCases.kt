@@ -258,7 +258,7 @@ internal val twintTestCases = listOf(
             termsDisplay = PaymentSheet.TermsDisplay.NEVER,
         ),
         rawValues = twintRawValues,
-        expectedParams = twintTypeOnlyWithMandateExpectedParams,
+        expectedParams = twintTypeOnlyExpectedParams,
     ),
     LpmBillingAddressFormValuesToParamsTestCase(
         name = "Twint AutomaticWithoutTax SetupIntent never terms",
@@ -269,6 +269,6 @@ internal val twintTestCases = listOf(
             termsDisplay = PaymentSheet.TermsDisplay.NEVER,
         ),
         rawValues = twintRawValues,
-        expectedParams = twintTypeOnlyWithMandateExpectedParams,
+        expectedParams = twintTypeOnlyExpectedParams,
     ),
 )
