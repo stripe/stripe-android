@@ -257,7 +257,7 @@ internal class CheckoutAnalyticsPerformerTest {
     @Test
     fun `confirmation response provides completed session fields`() = runScenario {
         val elementsSession = ElementsSession.createFromFallback(
-            stripeIntent = requireNotNull(stateHolder.state).paymentMethodMetadata.stripeIntent,
+            stripeIntent = requireNotNull(stateHolder.state?.paymentMethodMetadata).stripeIntent,
             sessionsError = null,
         ).copy(elementsSessionConfigId = "cfg_elements_initial")
         val initialResponse = CheckoutSessionResponseFactory.create(
