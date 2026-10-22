@@ -81,7 +81,9 @@ internal class CheckoutStateLoader @Inject constructor(
         val flagImages = flagImageResolver.resolve(response, cached = carryForward.cachedFlagImages)
 
         val embeddedConfig = embeddedConfigurationFactory.create(
-            configuration = configuration,
+            paymentElementConfiguration = configuration.paymentElementConfiguration,
+            merchantDisplayName = configuration.merchantDisplayName,
+            defaults = configuration.defaults,
             checkoutSessionResponse = response,
             collectedDetails = collectedDetails,
         )

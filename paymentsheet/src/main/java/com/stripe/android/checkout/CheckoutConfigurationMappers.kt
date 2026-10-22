@@ -1,5 +1,6 @@
 package com.stripe.android.checkout
 
+import com.stripe.android.elements.PaymentElement
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -19,7 +20,8 @@ internal fun CheckoutSessionResponse.toBillingDetailsCollectionConfiguration():
 )
 
 @OptIn(CheckoutSessionPreview::class)
-internal fun CheckoutController.Configuration.State.resolveMerchantDisplayName(
+internal fun resolveMerchantDisplayName(
+    merchantDisplayName: String?,
     checkoutSessionResponse: CheckoutSessionResponse,
     appName: String,
 ): String = merchantDisplayName ?: checkoutSessionResponse.businessName ?: appName
@@ -39,10 +41,10 @@ internal fun CheckoutController.Configuration.State.toExpressCheckoutElementGoog
     }
 
 @OptIn(CheckoutSessionPreview::class)
-internal fun CheckoutController.Configuration.State.toPaymentElementGooglePayConfiguration(
+internal fun PaymentElement.Configuration.State.toPaymentElementGooglePayConfiguration(
     checkoutSessionResponse: CheckoutSessionResponse,
 ): PaymentSheet.GooglePayConfiguration? =
-    paymentElementConfiguration.googlePayConfiguration
+    googlePayConfiguration
         .takeIf { it.display == GooglePayDisplay.Automatic }
         ?.let { configuration ->
             checkoutSessionResponse.merchantCountry?.let { merchantCountry ->
@@ -55,14 +57,14 @@ internal fun CheckoutController.Configuration.State.toPaymentElementGooglePayCon
         }
 
 @OptIn(CheckoutSessionPreview::class)
-internal fun CheckoutController.Configuration.State.toBillingDetails(
+internal fun CheckoutController.Configuration.Defaults.State.toBillingDetails(
     checkoutSessionResponse: CheckoutSessionResponse,
     collectedEmail: String?,
 ): PaymentSheet.BillingDetails = PaymentSheet.BillingDetails(
-    address = defaults.billingDetails?.address?.asPaymentSheet(),
+    address = billingDetails?.address?.asPaymentSheet(),
     email = collectedEmail ?: checkoutSessionResponse.customerEmail,
-    name = defaults.billingDetails?.name,
-    phone = defaults.phone,
+    name = billingDetails?.name,
+    phone = phone,
 )
 
 @OptIn(CheckoutSessionPreview::class)

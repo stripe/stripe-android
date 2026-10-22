@@ -1,6 +1,7 @@
 package com.stripe.android.checkout
 
 import com.stripe.android.checkout.injection.AppName
+import com.stripe.android.elements.PaymentElement
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
@@ -11,30 +12,36 @@ internal class CheckoutEmbeddedConfigurationFactory @Inject constructor(
     @AppName private val appName: String,
 ) {
     fun create(
-        configuration: CheckoutController.Configuration.State,
+        paymentElementConfiguration: PaymentElement.Configuration.State,
+        merchantDisplayName: String?,
+        defaults: CheckoutController.Configuration.Defaults.State,
         checkoutSessionResponse: CheckoutSessionResponse,
         collectedDetails: CheckoutCollectedDetails,
     ): EmbeddedPaymentElement.Configuration {
-        val merchantDisplayName = configuration.resolveMerchantDisplayName(checkoutSessionResponse, appName)
-        return EmbeddedPaymentElement.Configuration.Builder(merchantDisplayName)
+        val resolvedMerchantDisplayName = resolveMerchantDisplayName(
+            merchantDisplayName = merchantDisplayName,
+            checkoutSessionResponse = checkoutSessionResponse,
+            appName = appName,
+        )
+        return EmbeddedPaymentElement.Configuration.Builder(resolvedMerchantDisplayName)
             .embeddedViewDisplaysMandateText(
-                configuration.paymentElementConfiguration.embeddedViewDisplaysMandateText
+                paymentElementConfiguration.embeddedViewDisplaysMandateText
             )
             .billingDetailsCollectionConfiguration(
                 checkoutSessionResponse.toBillingDetailsCollectionConfiguration()
             )
-            .preferredNetworks(configuration.paymentElementConfiguration.preferredNetworks)
-            .paymentMethodOrder(configuration.paymentElementConfiguration.paymentMethodOrder)
-            .cardBrandAcceptance(configuration.paymentElementConfiguration.cardBrandAcceptance.asPaymentSheet())
+            .preferredNetworks(paymentElementConfiguration.preferredNetworks)
+            .paymentMethodOrder(paymentElementConfiguration.paymentMethodOrder)
+            .cardBrandAcceptance(paymentElementConfiguration.cardBrandAcceptance.asPaymentSheet())
             .opensCardScannerAutomatically(
-                configuration.paymentElementConfiguration.opensCardScannerAutomatically
+                paymentElementConfiguration.opensCardScannerAutomatically
             )
-            .termsDisplay(configuration.paymentElementConfiguration.termsDisplay.asPaymentSheet())
-            .appearance(configuration.paymentElementConfiguration.appearance.asPaymentSheet())
-            .googlePay(configuration.toPaymentElementGooglePayConfiguration(checkoutSessionResponse))
-            .link(configuration.paymentElementConfiguration.linkConfiguration.asPaymentSheet())
+            .termsDisplay(paymentElementConfiguration.termsDisplay.asPaymentSheet())
+            .appearance(paymentElementConfiguration.appearance.asPaymentSheet())
+            .googlePay(paymentElementConfiguration.toPaymentElementGooglePayConfiguration(checkoutSessionResponse))
+            .link(paymentElementConfiguration.linkConfiguration.asPaymentSheet())
             .defaultBillingDetails(
-                configuration.toBillingDetails(
+                defaults.toBillingDetails(
                     checkoutSessionResponse = checkoutSessionResponse,
                     collectedEmail = collectedDetails.email,
                 ),

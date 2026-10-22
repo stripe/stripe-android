@@ -23,7 +23,7 @@ internal class CheckoutCommonConfigurationFactory @Inject constructor(
         checkoutSessionResponse = checkoutSessionResponse,
         collectedDetails = collectedDetails,
         googlePayConfiguration =
-            configuration.toPaymentElementGooglePayConfiguration(checkoutSessionResponse),
+            configuration.paymentElementConfiguration.toPaymentElementGooglePayConfiguration(checkoutSessionResponse),
         linkConfiguration = configuration.paymentElementConfiguration.linkConfiguration.asPaymentSheet(),
         billingDetailsCollectionConfiguration =
             checkoutSessionResponse.toBillingDetailsCollectionConfiguration(),
@@ -68,7 +68,8 @@ internal class CheckoutCommonConfigurationFactory @Inject constructor(
         configuration = configuration,
         checkoutSessionResponse = checkoutSessionResponse,
         collectedDetails = collectedDetails,
-        googlePayConfiguration = configuration.toPaymentElementGooglePayConfiguration(checkoutSessionResponse),
+        googlePayConfiguration =
+            configuration.paymentElementConfiguration.toPaymentElementGooglePayConfiguration(checkoutSessionResponse),
         linkConfiguration = configuration.paymentElementConfiguration.linkConfiguration.asPaymentSheet(),
         billingDetailsCollectionConfiguration =
             checkoutSessionResponse.toBillingDetailsCollectionConfiguration(),
@@ -82,11 +83,15 @@ internal class CheckoutCommonConfigurationFactory @Inject constructor(
         linkConfiguration: PaymentSheet.LinkConfiguration,
         billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
     ): CommonConfiguration = CommonConfiguration(
-        merchantDisplayName = configuration.resolveMerchantDisplayName(checkoutSessionResponse, appName),
+        merchantDisplayName = resolveMerchantDisplayName(
+            merchantDisplayName = configuration.merchantDisplayName,
+            checkoutSessionResponse = checkoutSessionResponse,
+            appName = appName,
+        ),
         customer = ConfigurationDefaults.customer,
         googlePay = googlePayConfiguration,
         link = linkConfiguration,
-        defaultBillingDetails = configuration.toBillingDetails(
+        defaultBillingDetails = configuration.defaults.toBillingDetails(
             checkoutSessionResponse = checkoutSessionResponse,
             collectedEmail = collectedDetails.email,
         ),

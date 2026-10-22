@@ -29,6 +29,12 @@ internal class CheckoutCommonConfigurationFactoryTest {
     @Test
     fun `matches the common configuration derived from the embedded configuration`() {
         val configuration = CheckoutController.Configuration()
+            .merchantDisplayName("Acme Corp")
+            .defaults(
+                CheckoutController.Configuration.Defaults()
+                    .phone("+15555551234")
+                    .billingDetails(CheckoutController.Configuration.Defaults.ContactDetails().name("Jane Billing"))
+            )
             .paymentElement(
                 PaymentElement.Configuration()
                     .embeddedViewDisplaysMandateText(false)
@@ -53,7 +59,13 @@ internal class CheckoutCommonConfigurationFactoryTest {
         )
 
         val expected = CheckoutEmbeddedConfigurationFactory(appName = "Test App")
-            .create(configuration, checkoutSessionResponse, collectedDetails)
+            .create(
+                paymentElementConfiguration = configuration.paymentElementConfiguration,
+                merchantDisplayName = configuration.merchantDisplayName,
+                defaults = configuration.defaults,
+                checkoutSessionResponse = checkoutSessionResponse,
+                collectedDetails = collectedDetails,
+            )
             .asCommonConfiguration()
         val actual = factory()
             .create(configuration, checkoutSessionResponse, collectedDetails)
