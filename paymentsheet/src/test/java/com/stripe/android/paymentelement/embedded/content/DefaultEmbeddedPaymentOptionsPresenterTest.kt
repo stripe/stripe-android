@@ -23,12 +23,11 @@ import kotlin.test.Test
 
 internal class DefaultEmbeddedPaymentOptionsPresenterTest {
     @Test
-    fun `present reports error when state is null`() = runScenario {
+    fun `present does nothing when state is null`() = runScenario {
         presenter.present()
 
-        assertThat(errorReporter.getLoggedErrors()).containsExactly(
-            "unexpected_error.embedded.present_payment_options.not_configured"
-        )
+        assertThat(errorReporter.getLoggedErrors()).isEmpty()
+        assertThat(sheetStateHolder.sheetIsOpen).isFalse()
     }
 
     @Test
