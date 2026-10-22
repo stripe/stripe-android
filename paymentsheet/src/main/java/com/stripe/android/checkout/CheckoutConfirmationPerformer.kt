@@ -22,6 +22,8 @@ internal class CheckoutConfirmationPerformer @Inject constructor(
     @Named(STATUS_BAR_COLOR) private val statusBarColor: Int?,
     @ViewModelScope private val viewModelScope: CoroutineScope,
 ) {
+    // TODO: we will need to update the error msging in here to reflect that calling confirm doesn't work if you haven't
+    // configured PE.
     fun confirm() {
         lateinit var paymentSelection: PaymentSelection
         val arguments = operationCoordinator.tryBeginConfirmation {
@@ -58,6 +60,7 @@ internal class CheckoutConfirmationPerformer @Inject constructor(
         state: CheckoutControllerState,
         paymentSelection: PaymentSelection,
     ): ConfirmationHandler.Args? {
+        val paymentMethodMetadata = state.paymentMethodMetadata ?: return null
         val configuration = commonConfigurationFactory.createForPaymentElement(
             configuration = state.configuration,
             checkoutSessionResponse = state.checkoutSessionResponse,
@@ -65,8 +68,8 @@ internal class CheckoutConfirmationPerformer @Inject constructor(
         )
         val confirmationOption = paymentSelection.toConfirmationOption(
             configuration = configuration,
-            linkConfiguration = state.paymentMethodMetadata.linkState?.configuration,
-            cardFundingFilter = state.paymentMethodMetadata.cardFundingFilter,
+            linkConfiguration = paymentMethodMetadata.linkState?.configuration,
+            cardFundingFilter = paymentMethodMetadata.cardFundingFilter,
         )?.withSepaMandateAcknowledgement(
             hasAcknowledgedSepaMandate = paymentSelection.hasAcknowledgedSepaMandate ||
                 !state.embeddedConfiguration.embeddedViewDisplaysMandateText,
@@ -74,7 +77,7 @@ internal class CheckoutConfirmationPerformer @Inject constructor(
 
         return ConfirmationHandler.Args(
             confirmationOption = confirmationOption,
-            paymentMethodMetadata = state.paymentMethodMetadata,
+            paymentMethodMetadata = paymentMethodMetadata,
             statusBarColor = statusBarColor,
         )
     }

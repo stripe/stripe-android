@@ -81,6 +81,7 @@ import kotlin.coroutines.EmptyCoroutineContext
 @Suppress("LargeClass")
 internal class CheckoutControllerTest {
 
+    // TODO:  we shouldn't use requireNotNull in tests, it's just not necessary.
     private val applicationContext = ApplicationProvider.getApplicationContext<Application>()
     private val networkRule = NetworkRule()
 
@@ -947,7 +948,7 @@ internal class CheckoutControllerTest {
     @Test
     fun `applyPromotionCode sends promotion code and reloads on success`() = runMutationScenario {
         assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isNotEqualTo(4099.0)
-        assertThat((committedState().paymentMethodMetadata.stripeIntent as PaymentIntent).amount)
+        assertThat((requireNotNull(committedState().paymentMethodMetadata).stripeIntent as PaymentIntent).amount)
             .isNotEqualTo(4099L)
         networkRule.checkoutUpdate(
             bodyPart("promotion_code", "10OFF"),
@@ -967,7 +968,7 @@ internal class CheckoutControllerTest {
         result.getOrThrow()
         assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isEqualTo(4099.0)
         assertThat(committedState().checkoutSessionResponse.amount).isEqualTo(4099L)
-        assertThat((committedState().paymentMethodMetadata.stripeIntent as PaymentIntent).amount)
+        assertThat((requireNotNull(committedState().paymentMethodMetadata).stripeIntent as PaymentIntent).amount)
             .isEqualTo(4099L)
     }
 
@@ -1049,10 +1050,9 @@ internal class CheckoutControllerTest {
         assertThat(controller.session.value?.email).isEqualTo("background@example.com")
         assertThat(committedState().embeddedConfiguration.defaultBillingDetails?.email)
             .isEqualTo("background@example.com")
-        assertThat(
-            (committedState().paymentMethodMetadata.integrationMetadata as IntegrationMetadata.CheckoutSession)
-                .collectedEmail
-        ).isEqualTo("background@example.com")
+        val integrationMetadata = requireNotNull(committedState().paymentMethodMetadata).integrationMetadata
+            as IntegrationMetadata.CheckoutSession
+        assertThat(integrationMetadata.collectedEmail).isEqualTo("background@example.com")
     }
 
     @Test
@@ -1064,19 +1064,17 @@ internal class CheckoutControllerTest {
         assertThat(committedState().embeddedConfiguration.defaultBillingDetails?.email)
             .isEqualTo("local@example.com")
 
-        assertThat(
-            (committedState().paymentMethodMetadata.integrationMetadata as IntegrationMetadata.CheckoutSession)
-                .collectedEmail
-        ).isEqualTo("local@example.com")
+        val integrationMetadataAfterUpdate = requireNotNull(committedState().paymentMethodMetadata).integrationMetadata
+            as IntegrationMetadata.CheckoutSession
+        assertThat(integrationMetadataAfterUpdate.collectedEmail).isEqualTo("local@example.com")
         val result = controller.updateEmail(null)
 
         result.getOrThrow()
         assertThat(controller.session.value?.email).isNull()
         assertThat(committedState().embeddedConfiguration.defaultBillingDetails?.email).isNull()
-        assertThat(
-            (committedState().paymentMethodMetadata.integrationMetadata as IntegrationMetadata.CheckoutSession)
-                .collectedEmail
-        ).isNull()
+        val integrationMetadataAfterClear = requireNotNull(committedState().paymentMethodMetadata).integrationMetadata
+            as IntegrationMetadata.CheckoutSession
+        assertThat(integrationMetadataAfterClear.collectedEmail).isNull()
     }
 
     @Test
@@ -1415,8 +1413,8 @@ internal class CheckoutControllerTest {
             assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isEqualTo(6000.0)
             assertThat(state.collectedDetails.shippingName).isEqualTo("John")
             assertThat(state.collectedDetails.shippingAddress).isEqualTo(address)
-            assertThat(state.paymentMethodMetadata.shippingDetails?.name).isEqualTo("John")
-            assertThat(state.paymentMethodMetadata.shippingDetails?.address).isEqualTo(
+            assertThat(state.paymentMethodMetadata?.shippingDetails?.name).isEqualTo("John")
+            assertThat(state.paymentMethodMetadata?.shippingDetails?.address).isEqualTo(
                 address.asPaymentSheet()
             )
         }

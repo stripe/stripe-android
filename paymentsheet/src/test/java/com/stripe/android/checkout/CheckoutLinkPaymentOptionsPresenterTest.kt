@@ -76,6 +76,18 @@ internal class CheckoutLinkPaymentOptionsPresenterTest {
         verifyLinkWasNotPresented()
     }
 
+    // TODO: we'll need to update test when we update behavior.
+    @Test
+    fun `missing payment method metadata delegates to default presenter`() = runScenario {
+        stateHolder.state = requireNotNull(stateHolder.state).copy(paymentMethodMetadata = null)
+
+        presenter.present()
+
+        assertThat(sheetLauncher.paymentOptionsCalls.awaitItem().paymentMethodMetadata)
+            .isEqualTo(paymentMethodMetadata)
+        verifyLinkWasNotPresented()
+    }
+
     @Test
     fun `eligible Link launches with exact arguments and keeps sheet open`() = runScenario {
         presenter.present()
@@ -293,7 +305,9 @@ internal class CheckoutLinkPaymentOptionsPresenterTest {
         val sheetStateHolder = SheetStateHolder(savedStateHandle).apply { this.sheetLauncher = sheetLauncher }
         val defaultPresenter = DefaultEmbeddedPaymentOptionsPresenter(
             state = stateFlowOf(
-                EmbeddedContentHelperStateFactory.create(paymentMethodMetadata = state.paymentMethodMetadata)
+                EmbeddedContentHelperStateFactory.create(
+                    paymentMethodMetadata = requireNotNull(state.paymentMethodMetadata)
+                )
             ),
             sheetStateHolder = sheetStateHolder,
             customerStateHolder = customerStateHolder,
@@ -350,7 +364,7 @@ internal class CheckoutLinkPaymentOptionsPresenterTest {
             sheetStateHolder = sheetStateHolder,
             linkAccountHolder = linkAccountHolder,
             linkAccountInfo = linkAccountInfo,
-            paymentMethodMetadata = state.paymentMethodMetadata,
+            paymentMethodMetadata = requireNotNull(state.paymentMethodMetadata),
         ).block()
 
         activityResultRegistry.launchCalls.ensureAllEventsConsumed()

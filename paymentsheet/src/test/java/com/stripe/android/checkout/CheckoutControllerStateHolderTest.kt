@@ -99,6 +99,19 @@ internal class CheckoutControllerStateHolderTest {
     }
 
     @Test
+    fun `session has no payment option when payment method metadata is unavailable`() = testScenario(
+        paymentOptionFactory = { _, _ -> error("Payment option factory should not be called") },
+    ) {
+        stateHolder.state = committedState(
+            paymentSelection = PaymentSelection.GooglePay,
+            paymentMethodMetadata = null,
+        )
+
+        assertThat(stateHolder.session.value).isNotNull()
+        assertThat(stateHolder.session.value?.paymentOption).isNull()
+    }
+
+    @Test
     fun `session builds payment element and express checkout element data with their respective metadata`() {
         val paymentElementMetadata = PaymentMethodMetadataFactory.create(
             paymentMethodOrder = listOf("card"),
@@ -353,7 +366,7 @@ internal class CheckoutControllerStateHolderTest {
         paymentSelection: PaymentSelection? = null,
         temporarySelection: String? = null,
         previousNewSelections: Bundle = Bundle(),
-        paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+        paymentMethodMetadata: PaymentMethodMetadata? = PaymentMethodMetadataFactory.create(),
         expressCheckoutElementPaymentMethodMetadata: PaymentMethodMetadata? = PaymentMethodMetadataFactory.create(),
         requiresShippingAddress: Boolean = false,
     ) = CheckoutControllerState(
