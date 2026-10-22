@@ -341,7 +341,11 @@ internal sealed class FinancialConnectionsAnalyticsEvent(
         extraMessage: String? = null,
     ) : FinancialConnectionsAnalyticsEvent(
         name = when (exception) {
-            is AppInitializationError,
+            is AppInitializationError -> when (exception.reason) {
+                AppInitializationError.Reason.BROWSER_UNAVAILABLE -> "error.expected"
+                AppInitializationError.Reason.UNKNOWN -> "error.unexpected"
+            }
+
             is FinancialConnectionsError,
             is WebAuthFlowFailedException,
             is OTPError -> "error.expected"
