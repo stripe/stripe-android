@@ -31,6 +31,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
+import kotlin.time.Duration
 
 @Suppress("LargeClass", "TooManyFunctions")
 @OptIn(ExperimentalAnalyticEventCallbackApi::class)
@@ -52,6 +53,10 @@ internal class DefaultEventReporter @Inject internal constructor(
         clientId = CLIENT_ID,
         origin = ORIGIN,
     )
+
+    override fun onLoadToFirstFrame(duration: Duration) {
+        fireEvent(PaymentSheetEvent.LoadToFirstFrame(duration))
+    }
 
     override fun onLoadStarted(initializedViaCompose: Boolean, publishableKey: String) {
         durationProvider.start(DurationProvider.Key.Loading)

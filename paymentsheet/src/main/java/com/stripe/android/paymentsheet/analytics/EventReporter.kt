@@ -11,6 +11,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormViewModel
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.ui.core.cardscan.CardScanEventsReporter
+import kotlin.time.Duration
 
 internal interface LoadingEventReporter {
     /**
@@ -40,6 +41,13 @@ internal interface LoadingEventReporter {
 
 @Suppress("TooManyFunctions")
 internal interface EventReporter : CardScanEventsReporter {
+
+    /**
+     * The first loaded PaymentSheet content has finished issuing its draw commands.
+     * [duration] starts when the loader returns successfully; it excludes network loading.
+     * This does not measure GPU completion or display presentation.
+     */
+    fun onLoadToFirstFrame(duration: Duration)
 
     /**
      * PaymentSheet has been dismissed by pressing the close button.

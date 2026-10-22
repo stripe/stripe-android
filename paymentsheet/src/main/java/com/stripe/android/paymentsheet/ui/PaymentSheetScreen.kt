@@ -34,9 +34,11 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
@@ -202,7 +204,20 @@ internal fun PaymentSheetScreenContent(
         currentScreen.title(isCompleteFlow = type == Complete, isWalletEnabled = actualWalletsState != null)
     }.collectAsState()
 
-    Column(modifier) {
+    val view = LocalView.current
+    val contentModifier = if (viewModel is PaymentSheetViewModel && currentScreen != PaymentSheetScreen.Loading) {
+        modifier.drawWithContent {
+            drawContent()
+            viewModel.takeLoadToFirstFrameDuration()?.let { duration ->
+                // Capture the endpoint after drawing, but keep analytics work out of this draw.
+                view.post { viewModel.eventReporter.onLoadToFirstFrame(duration) }
+            }
+        }
+    } else {
+        modifier
+    }
+
+    Column(contentModifier) {
         PaymentSheetContent(
             viewModel = viewModel,
             headerText = headerText,
