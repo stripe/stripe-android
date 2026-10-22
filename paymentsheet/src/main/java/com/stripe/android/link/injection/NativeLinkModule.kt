@@ -7,6 +7,7 @@ import com.stripe.android.BuildConfig
 import com.stripe.android.Stripe
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
+import com.stripe.android.checkout.analytics.CheckoutConfirmationContextHolder
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ENABLE_LOGGING
@@ -152,6 +153,15 @@ internal interface NativeLinkModule {
 
     @SuppressWarnings("TooManyFunctions")
     companion object {
+        @Provides
+        @NativeLinkScope
+        fun providesCheckoutConfirmationContextHolder(
+            savedStateHandle: SavedStateHandle,
+        ): CheckoutConfirmationContextHolder = CheckoutConfirmationContextHolder(
+            savedStateHandle = savedStateHandle,
+            uiContext = Dispatchers.Main,
+        )
+
         @Provides
         @NativeLinkScope
         fun providesLinkAccountHolder(
