@@ -10,11 +10,9 @@ import kotlin.test.Test
 @Config(sdk = [30])
 class FraudDetectionDataParamsUtilsTest {
 
-    private val fraudDetectionDataParamsUtils = FraudDetectionDataParamsUtils()
-
     @Test
     fun addUidParamsToPaymentIntent_withSource_addsParamsAtRightLevel() {
-        val updatedParams = fraudDetectionDataParamsUtils.addFraudDetectionData(
+        val updatedParams = FraudDetectionDataParamsUtils.addFraudDetectionData(
             params = mapOf(
                 "source_data" to mapOf(
                     "some_field" to 1,
@@ -38,7 +36,7 @@ class FraudDetectionDataParamsUtilsTest {
 
     @Test
     fun addUidParamsToPaymentIntent_withPaymentMethodParams_addsUidAtRightLevel() {
-        val updatedParams = fraudDetectionDataParamsUtils.addFraudDetectionData(
+        val updatedParams = FraudDetectionDataParamsUtils.addFraudDetectionData(
             params = mapOf(
                 "payment_method_data" to mapOf(
                     "some_field" to 1,

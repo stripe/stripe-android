@@ -12,7 +12,6 @@ import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.frauddetection.FraudDetectionData
-import com.stripe.android.core.frauddetection.FraudDetectionDataParamsUtils
 import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import com.stripe.android.core.model.StripeFileParams
 import com.stripe.android.core.model.StripeFilePurpose
@@ -3050,7 +3049,7 @@ internal class StripeApiRepositoryTest {
     }
 
     @Test
-    fun createConfirmationToken_withAttribution_setsCorrectPaymentUserAgent() = runTest {
+    fun createConfirmationToken_withAttribution_includesPaymentMethodAndFraudData() = runTest {
         val stripeResponse = StripeResponse(
             200,
             "",
@@ -3061,10 +3060,18 @@ internal class StripeApiRepositoryTest {
 
         val productUsage = "TestProductUsage"
         val attribution = "example_product_usage"
+        val fraudDetectionData = FraudDetectionData(
+            guid = "guid",
+            muid = "muid",
+            sid = "sid",
+        )
+        whenever(fraudDetectionDataRepository.getCached()).thenReturn(fraudDetectionData)
+
+        val paymentMethodData = PaymentMethodCreateParamsFixtures.DEFAULT_CARD.copy(
+            productUsage = setOf(attribution)
+        )
         val confirmationTokenParams = ConfirmationTokenParams(
-            paymentMethodData = PaymentMethodCreateParamsFixtures.DEFAULT_CARD.copy(
-                productUsage = setOf(attribution)
-            ),
+            paymentMethodData = paymentMethodData,
             returnUrl = "https://example.com/return"
         )
 
@@ -3076,9 +3083,14 @@ internal class StripeApiRepositoryTest {
         verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
         val apiRequest = apiRequestArgumentCaptor.firstValue
         val paymentMethodDataParams =
-            apiRequest.params?.get("payment_method_data") as Map<*, *>
-        assertThat(paymentMethodDataParams["payment_user_agent"])
-            .isEqualTo("stripe-android/${StripeSdkVersion.VERSION_NAME};$productUsage;$attribution")
+            apiRequest.params?.get(ConfirmStripeIntentParams.PARAM_PAYMENT_METHOD_DATA) as Map<*, *>
+        assertThat(paymentMethodDataParams).containsAtLeastEntriesIn(
+            paymentMethodData.toParamMap()
+                .plus(fraudDetectionData.params)
+                .plus(
+                    "payment_user_agent" to "stripe-android/${StripeSdkVersion.VERSION_NAME};$productUsage;$attribution"
+                )
+        )
 
         verifyAnalyticsRequest(
             event = PaymentAnalyticsEvent.ConfirmationTokenCreate,
@@ -3387,8 +3399,7 @@ internal class StripeApiRepositoryTest {
             productUsageTokens = productUsage,
             stripeNetworkClient = stripeNetworkClient,
             analyticsRequestExecutor = analyticsRequestExecutor,
-            fraudDetectionDataRepository = fraudDetectionDataRepository,
-            fraudDetectionDataParamsUtils = FraudDetectionDataParamsUtils()
+            fraudDetectionDataRepository = fraudDetectionDataRepository
         )
     }
 

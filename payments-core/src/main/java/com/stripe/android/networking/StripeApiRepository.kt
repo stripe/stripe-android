@@ -23,7 +23,6 @@ import com.stripe.android.core.exception.RateLimitException
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.exception.safeAnalyticsMessage
 import com.stripe.android.core.frauddetection.FraudDetectionData
-import com.stripe.android.core.frauddetection.FraudDetectionDataParamsUtils
 import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.model.StripeFile
@@ -50,7 +49,6 @@ import com.stripe.android.model.CancelCaptchaChallengeParams
 import com.stripe.android.model.CardMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
-import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CLIENT_SECRET
 import com.stripe.android.model.ConfirmationToken
 import com.stripe.android.model.ConfirmationTokenParams
@@ -158,7 +156,6 @@ class StripeApiRepository @JvmOverloads internal constructor(
         ),
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory =
         PaymentAnalyticsRequestFactory(context, publishableKeyProvider, productUsageTokens),
-    private val fraudDetectionDataParamsUtils: FraudDetectionDataParamsUtils = FraudDetectionDataParamsUtils(),
     betas: Set<StripeApiBeta> = emptySet(),
     apiVersion: String = ApiVersion(betas = betas.map { it.code }.toSet()).code,
     sdkVersion: String = StripeSdkVersion.VERSION
@@ -256,16 +253,15 @@ class StripeApiRepository @JvmOverloads internal constructor(
         options: ApiRequest.Options,
         expandFields: List<String>
     ): Result<PaymentIntent> {
-        val params = fraudDetectionDataParamsUtils.addFraudDetectionData(
-            // Add payment_user_agent if the Payment Method is being created on this call
-            maybeAddPaymentUserAgent(
-                confirmPaymentIntentParams.toParamMap()
-                    // Omit client_secret with user key auth.
-                    .let { if (options.apiKeyIsUserKey) it.minus(PARAM_CLIENT_SECRET) else it },
-                confirmPaymentIntentParams.paymentMethodCreateParams,
-                confirmPaymentIntentParams.sourceParams
-            ).plus(createExpandParam(expandFields)),
-            fraudDetectionData
+        val params = ConfirmationParamsUtils.prepareConfirmationParams(
+            confirmPaymentIntentParams.toParamMap()
+                // Omit client_secret with user key auth.
+                .let { if (options.apiKeyIsUserKey) it.minus(PARAM_CLIENT_SECRET) else it }
+                .plus(createExpandParam(expandFields)),
+            confirmPaymentIntentParams.paymentMethodCreateParams,
+            sourceParams = confirmPaymentIntentParams.sourceParams,
+            fraudDetectionData = fraudDetectionData,
+            productUsageTokens = productUsageTokens,
         )
 
         val paymentIntentId = runCatching {
@@ -465,15 +461,15 @@ class StripeApiRepository @JvmOverloads internal constructor(
             apiRequestFactory.createPost(
                 getConfirmSetupIntentUrl(setupIntentId),
                 options,
-                fraudDetectionDataParamsUtils.addFraudDetectionData(
-                    // Add payment_user_agent if the Payment Method is being created on this call
-                    maybeAddPaymentUserAgent(
-                        confirmSetupIntentParams.toParamMap()
-                            // Omit client_secret with user key auth.
-                            .let { if (options.apiKeyIsUserKey) it.minus(PARAM_CLIENT_SECRET) else it },
-                        confirmSetupIntentParams.paymentMethodCreateParams
-                    ).plus(createExpandParam(expandFields)),
-                    fraudDetectionData
+                ConfirmationParamsUtils.prepareConfirmationParams(
+                    confirmSetupIntentParams.toParamMap()
+                        // Omit client_secret with user key auth.
+                        .let { if (options.apiKeyIsUserKey) it.minus(PARAM_CLIENT_SECRET) else it }
+                        .plus(createExpandParam(expandFields)),
+                    confirmSetupIntentParams.paymentMethodCreateParams,
+                    sourceParams = null,
+                    fraudDetectionData = fraudDetectionData,
+                    productUsageTokens = productUsageTokens,
                 )
             ),
             SetupIntentJsonParser()
@@ -734,13 +730,18 @@ class StripeApiRepository @JvmOverloads internal constructor(
         confirmationTokenParams: ConfirmationTokenParams,
         options: ApiRequest.Options
     ): Result<ConfirmationToken> {
+        fireFraudDetectionDataRequest()
+
         return fetchStripeModelResult(
             apiRequestFactory.createPost(
                 confirmationTokensUrl,
                 options,
-                maybeAddPaymentUserAgent(
+                ConfirmationParamsUtils.prepareConfirmationParams(
                     confirmationTokenParams.toParamMap(),
-                    confirmationTokenParams.paymentMethodData
+                    confirmationTokenParams.paymentMethodData,
+                    sourceParams = null,
+                    fraudDetectionData = fraudDetectionData,
+                    productUsageTokens = productUsageTokens,
                 )
             ),
             ConfirmationTokenJsonParser()
@@ -1925,34 +1926,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
         PAYMENT_USER_AGENT to buildPaymentUserAgent(attribution)
 
     override fun buildPaymentUserAgent(attribution: Set<String>): String {
-        return setOf("stripe-android/${StripeSdkVersion.VERSION_NAME}")
-            .plus(productUsageTokens)
-            .plus(attribution)
-            .joinToString(";")
+        return ConfirmationParamsUtils.buildPaymentUserAgent(productUsageTokens, attribution)
     }
-
-    /**
-     *  Add payment_user_agent to the map if it contains Payment Method data,
-     *  including attribution from [paymentMethodCreateParams] or [sourceParams].
-     */
-    private fun maybeAddPaymentUserAgent(
-        params: Map<String, Any>,
-        paymentMethodCreateParams: PaymentMethodCreateParams?,
-        sourceParams: SourceParams? = null
-    ): Map<String, Any> =
-        (params[ConfirmStripeIntentParams.PARAM_PAYMENT_METHOD_DATA] as? Map<*, *>)?.let {
-            params.plus(
-                ConfirmStripeIntentParams.PARAM_PAYMENT_METHOD_DATA to it.plus(
-                    buildPaymentUserAgentPair(paymentMethodCreateParams?.attribution ?: emptySet())
-                )
-            )
-        } ?: (params[ConfirmPaymentIntentParams.PARAM_SOURCE_DATA] as? Map<*, *>)?.let {
-            params.plus(
-                ConfirmPaymentIntentParams.PARAM_SOURCE_DATA to it.plus(
-                    buildPaymentUserAgentPair(sourceParams?.attribution ?: emptySet())
-                )
-            )
-        } ?: params
 
     private suspend fun ConfirmPaymentIntentParams.maybeForDashboard(
         options: ApiRequest.Options
