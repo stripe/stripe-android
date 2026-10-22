@@ -11,7 +11,9 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.CardFundingFilteringPrivatePreview
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import org.junit.Test
 import com.stripe.android.elements.PaymentElement.Configuration.GooglePayConfiguration as PaymentElementGooglePayConfiguration
@@ -407,7 +409,25 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
         assertThat(result.defaultBillingDetails?.phone).isNull()
     }
 
-    private fun factory(appName: String = "Test App") = CheckoutEmbeddedConfigurationFactory(appName)
+    private fun factory(appName: String = "Test App") = TestFactory(appName)
+
+    private class TestFactory(appName: String) {
+        private val factory = CheckoutEmbeddedConfigurationFactory(appName)
+
+        fun create(
+            configuration: CheckoutController.Configuration.State,
+            checkoutSessionResponse: CheckoutSessionResponse,
+            collectedDetails: CheckoutCollectedDetails,
+        ): EmbeddedPaymentElement.Configuration {
+            return requireNotNull(
+                factory.create(
+                    configuration = configuration,
+                    checkoutSessionResponse = checkoutSessionResponse,
+                    collectedDetails = collectedDetails,
+                )
+            )
+        }
+    }
 
     private fun controllerConfiguration(
         embeddedViewDisplaysMandateText: Boolean = true,

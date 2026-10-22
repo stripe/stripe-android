@@ -52,8 +52,10 @@ internal class CheckoutCommonConfigurationFactoryTest {
             shippingAddress = address(),
         )
 
-        val expected = CheckoutEmbeddedConfigurationFactory(appName = "Test App")
-            .create(configuration, checkoutSessionResponse, collectedDetails)
+        val expected = requireNotNull(
+            CheckoutEmbeddedConfigurationFactory(appName = "Test App")
+                .create(configuration, checkoutSessionResponse, collectedDetails)
+        )
             .asCommonConfiguration()
         val actual = factory()
             .create(configuration, checkoutSessionResponse, collectedDetails)
