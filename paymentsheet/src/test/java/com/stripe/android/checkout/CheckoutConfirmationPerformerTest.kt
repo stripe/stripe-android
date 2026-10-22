@@ -93,6 +93,18 @@ internal class CheckoutConfirmationPerformerTest {
     }
 
     @Test
+    fun `confirm fails when embedded configuration is unavailable`() = runScenario(
+        state = CheckoutControllerStateFactory.create(
+            embeddedConfiguration = null,
+            paymentSelection = PaymentSelection.GooglePay,
+        ),
+    ) {
+        performer.confirm()
+        assertRejection("Cannot confirm checkout because the selected payment option cannot be confirmed.")
+        assertThat(operationCoordinator.isUpdating.value).isFalse()
+    }
+
+    @Test
     fun `confirm fails when the selection cannot be converted to a confirmation option`() = runScenario(
         state = CheckoutControllerStateFactory.create(
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(merchantCountry = null),

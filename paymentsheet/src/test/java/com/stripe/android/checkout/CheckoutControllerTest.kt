@@ -754,7 +754,7 @@ internal class CheckoutControllerTest {
         )
         val state = recreated.stateHolder.state
         assertThat(state).isNotNull()
-        assertThat(state!!.embeddedConfiguration.merchantDisplayName)
+        assertThat(requireNotNull(state!!.embeddedConfiguration).merchantDisplayName)
             .isEqualTo(expectedMerchantDisplayName)
     }
 
@@ -1048,7 +1048,7 @@ internal class CheckoutControllerTest {
 
         result.getOrThrow()
         assertThat(controller.session.value?.email).isEqualTo("background@example.com")
-        assertThat(committedState().embeddedConfiguration.defaultBillingDetails?.email)
+        assertThat(requireNotNull(committedState().embeddedConfiguration).defaultBillingDetails?.email)
             .isEqualTo("background@example.com")
         val integrationMetadata = requireNotNull(committedState().paymentMethodMetadata).integrationMetadata
             as IntegrationMetadata.CheckoutSession
@@ -1061,7 +1061,7 @@ internal class CheckoutControllerTest {
     ) {
         controller.updateEmail("local@example.com").getOrThrow()
         assertThat(controller.session.value?.email).isEqualTo("local@example.com")
-        assertThat(committedState().embeddedConfiguration.defaultBillingDetails?.email)
+        assertThat(requireNotNull(committedState().embeddedConfiguration).defaultBillingDetails?.email)
             .isEqualTo("local@example.com")
 
         val integrationMetadataAfterUpdate = requireNotNull(committedState().paymentMethodMetadata).integrationMetadata
@@ -1071,7 +1071,7 @@ internal class CheckoutControllerTest {
 
         result.getOrThrow()
         assertThat(controller.session.value?.email).isNull()
-        assertThat(committedState().embeddedConfiguration.defaultBillingDetails?.email).isNull()
+        assertThat(requireNotNull(committedState().embeddedConfiguration).defaultBillingDetails?.email).isNull()
         val integrationMetadataAfterClear = requireNotNull(committedState().paymentMethodMetadata).integrationMetadata
             as IntegrationMetadata.CheckoutSession
         assertThat(integrationMetadataAfterClear.collectedEmail).isNull()

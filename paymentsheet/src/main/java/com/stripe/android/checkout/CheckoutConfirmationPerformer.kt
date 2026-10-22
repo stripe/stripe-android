@@ -61,6 +61,7 @@ internal class CheckoutConfirmationPerformer @Inject constructor(
         paymentSelection: PaymentSelection,
     ): ConfirmationHandler.Args? {
         val paymentMethodMetadata = state.paymentMethodMetadata ?: return null
+        val embeddedConfiguration = state.embeddedConfiguration ?: return null
         val configuration = commonConfigurationFactory.createForPaymentElement(
             configuration = state.configuration,
             checkoutSessionResponse = state.checkoutSessionResponse,
@@ -72,7 +73,7 @@ internal class CheckoutConfirmationPerformer @Inject constructor(
             cardFundingFilter = paymentMethodMetadata.cardFundingFilter,
         )?.withSepaMandateAcknowledgement(
             hasAcknowledgedSepaMandate = paymentSelection.hasAcknowledgedSepaMandate ||
-                !state.embeddedConfiguration.embeddedViewDisplaysMandateText,
+                !embeddedConfiguration.embeddedViewDisplaysMandateText,
         ) ?: return null
 
         return ConfirmationHandler.Args(
