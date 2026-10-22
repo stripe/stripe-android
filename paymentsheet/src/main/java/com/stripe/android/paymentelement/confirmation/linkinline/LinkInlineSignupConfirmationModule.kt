@@ -25,7 +25,7 @@ internal object LinkInlineSignupConfirmationModule {
         return LinkInlineSignupConfirmationDefinition(
             linkStore = linkStore,
             linkConfigurationCoordinator = linkConfigurationCoordinator,
-            linkAnalyticsHelper = linkAnalyticsComponentFactory.create().linkAnalyticsHelper,
+            linkAnalyticsHelper = lazy { linkAnalyticsComponentFactory.create().linkAnalyticsHelper },
         )
     }
 }

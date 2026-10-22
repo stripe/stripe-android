@@ -64,6 +64,28 @@ import org.mockito.kotlin.mock
 
 internal class LinkInlineSignupConfirmationDefinitionTest {
     @Test
+    fun `registering a launcher does not create analytics dependencies`() {
+        val creations = Turbine<Unit>()
+        val definition = LinkInlineSignupConfirmationDefinition(
+            linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
+            linkAnalyticsHelper = lazy {
+                creations.add(Unit)
+                FakeLinkAnalyticsHelper()
+            },
+            linkStore = RecordingLinkStore.noOp(),
+        )
+
+        assertThat(definition.key).isEqualTo("LinkInlineSignup")
+        definition.createLauncher(
+            activityResultCaller = DummyActivityResultCaller.noOp(),
+            lifecycleOwner = fakeLifecycleOwner(),
+            onResult = {},
+        )
+
+        creations.ensureAllEventsConsumed()
+    }
+
+    @Test
     fun `'key' should be 'LinkInlineSignup'`() {
         val definition = createLinkInlineSignupConfirmationDefinition()
 
@@ -755,7 +777,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
     ): LinkInlineSignupConfirmationDefinition {
         return LinkInlineSignupConfirmationDefinition(
             linkConfigurationCoordinator = linkConfigurationCoordinator,
-            linkAnalyticsHelper = linkAnalyticsHelper,
+            linkAnalyticsHelper = lazyOf(linkAnalyticsHelper),
             linkStore = linkStore,
         )
     }

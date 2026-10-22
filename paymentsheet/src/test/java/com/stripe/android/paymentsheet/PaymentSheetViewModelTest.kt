@@ -8,6 +8,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.lifecycle.viewModelScope
 import androidx.test.core.app.ApplicationProvider
+import app.cash.turbine.Turbine
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
@@ -138,6 +139,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -196,6 +199,26 @@ internal class PaymentSheetViewModelTest {
     @AfterTest
     fun cleanup() {
         Dispatchers.resetMain()
+    }
+
+    @Test
+    fun `loader is only created when worker dispatch executes`() = runTest {
+        Dispatchers.setMain(testDispatcher)
+        val workerDispatcher = StandardTestDispatcher(testScheduler)
+        val loaderCreations = Turbine<Unit>()
+        createViewModel(
+            lazyPaymentElementLoader = dagger.Lazy {
+                loaderCreations.add(Unit)
+                FakePaymentElementLoader()
+            },
+            workContext = workerDispatcher,
+        )
+        loaderCreations.expectNoEvents()
+
+        workerDispatcher.scheduler.runCurrent()
+
+        assertThat(loaderCreations.awaitItem()).isEqualTo(Unit)
+        loaderCreations.ensureAllEventsConsumed()
     }
 
     @Test
@@ -3505,6 +3528,8 @@ internal class PaymentSheetViewModelTest {
             validationError = validationError,
             experimentsData = experimentsData,
         ),
+        lazyPaymentElementLoader: dagger.Lazy<PaymentElementLoader> = dagger.Lazy { paymentElementLoader },
+        workContext: TestDispatcher = testDispatcher,
         errorReporter: ErrorReporter = FakeErrorReporter(),
         eventReporter: EventReporter = this.eventReporter,
         cvcRecollectionHandler: CvcRecollectionHandler = this.cvcRecollectionHandler,
@@ -3520,10 +3545,10 @@ internal class PaymentSheetViewModelTest {
             PaymentSheetViewModel(
                 args = args,
                 eventReporter = eventReporter,
-                paymentElementLoader = paymentElementLoader,
+                paymentElementLoader = lazyPaymentElementLoader,
                 savedPaymentMethodRepository = savedPaymentMethodRepository,
                 logger = Logger.noop(),
-                workContext = testDispatcher,
+                workContext = workContext,
                 savedStateHandle = thisSavedStateHandle,
                 linkHandler = linkHandler,
                 confirmationHandlerFactory = confirmationHandlerFactory ?: ConfirmationHandler.Factory {

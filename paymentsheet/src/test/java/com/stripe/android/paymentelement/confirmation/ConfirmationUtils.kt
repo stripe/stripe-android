@@ -232,7 +232,7 @@ internal fun createTestConfirmationHandlerFactory(
                 LinkInlineSignupConfirmationDefinition(
                     linkConfigurationCoordinator = linkConfigurationCoordinator,
                     linkStore = RecordingLinkStore.noOp(),
-                    linkAnalyticsHelper = FakeLinkAnalyticsHelper(),
+                    linkAnalyticsHelper = lazy { FakeLinkAnalyticsHelper() },
                 ),
                 CvcRecollectionConfirmationDefinition(
                     factory = cvcRecollectionLauncherFactory,

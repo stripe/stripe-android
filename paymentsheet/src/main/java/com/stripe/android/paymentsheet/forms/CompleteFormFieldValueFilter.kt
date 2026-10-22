@@ -14,7 +14,6 @@ import kotlinx.coroutines.flow.combine
 internal class CompleteFormFieldValueFilter(
     private val currentFieldValueMap: Flow<Map<FormFieldId, FormFieldEntry>>,
     private val hiddenIdentifiers: Flow<Set<FormFieldId>>,
-    private val userRequestedReuse: Flow<PaymentSelection.CustomerRequestedSave>,
     private val defaultValues: Map<FormFieldId, String>,
 ) {
     /**
@@ -24,13 +23,19 @@ internal class CompleteFormFieldValueFilter(
     fun filterFlow() = combine(
         currentFieldValueMap,
         hiddenIdentifiers,
-        userRequestedReuse,
-    ) { idFieldSnapshotMap, hiddenIdentifiers, userRequestedReuse ->
+    ) { idFieldSnapshotMap, hiddenIdentifiers ->
         filterFlow(
             idFieldSnapshotMap,
             hiddenIdentifiers,
-            userRequestedReuse,
-            defaultValues,
+            userRequestedReuse = when (val save = idFieldSnapshotMap[FormFieldId.SaveForFutureUse]) {
+                null -> PaymentSelection.CustomerRequestedSave.NoRequest
+                else -> if (save.value.toBoolean()) {
+                    PaymentSelection.CustomerRequestedSave.RequestReuse
+                } else {
+                    PaymentSelection.CustomerRequestedSave.RequestNoReuse
+                }
+            },
+            defaultValues = defaultValues,
         )
     }
 

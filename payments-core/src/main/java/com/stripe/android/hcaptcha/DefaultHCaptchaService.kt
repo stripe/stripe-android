@@ -21,7 +21,8 @@ import kotlin.time.Duration.Companion.seconds
 
 internal class DefaultHCaptchaService(
     private val hCaptchaProvider: HCaptchaProvider,
-    private val captchaEventsReporter: CaptchaEventsReporter
+    private val captchaEventsReporter: CaptchaEventsReporter,
+    private val prepareWebView: suspend (FragmentActivity) -> Unit,
 ) : HCaptchaService {
     private val cachedResult = MutableStateFlow<CachedResult>(CachedResult.Idle)
 
@@ -113,6 +114,9 @@ internal class DefaultHCaptchaService(
         val hCaptcha = hCaptchaProvider.get()
         captchaEventsReporter.init(siteKey)
         val result = runCatching {
+            // Creating the CAPTCHA view implicitly starts Chromium on Main unless startup
+            // has finished. Wait for asynchronous startup before touching WebView APIs.
+            prepareWebView(activity)
             startVerification(
                 activity = activity,
                 siteKey = siteKey,

@@ -2,9 +2,11 @@ package com.stripe.android.paymentsheet.forms
 
 import androidx.annotation.StringRes
 import androidx.compose.ui.autofill.ContentType
+import app.cash.turbine.Turbine
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.model.CountryUtils
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.ContactInformationCollectionMode
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -25,6 +27,7 @@ import com.stripe.android.ui.core.elements.StaticTextElement
 import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.AddressFieldsElement
 import com.stripe.android.uicore.elements.AddressInputMode
+import com.stripe.android.uicore.elements.Controller
 import com.stripe.android.uicore.elements.CountryConfig
 import com.stripe.android.uicore.elements.CountryElement
 import com.stripe.android.uicore.elements.DropdownFieldController
@@ -41,6 +44,8 @@ import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
@@ -66,6 +71,23 @@ internal class FormViewModelTest {
         .around(coroutineScopeCleanupRule)
 
     private val coroutineScope = coroutineScopeCleanupRule.track(CoroutineScope(Dispatchers.Unconfined))
+
+    @Test
+    fun `form completion only subscribes to field values once`() = runTest {
+        val element = FakeFormValueElement()
+        val viewModel = createViewModel(
+            arguments = COMPOSE_FRAGMENT_ARGS,
+            formElements = listOf(element),
+        )
+
+        element.valueFlowRequests.awaitItem()
+        element.valueFlowRequests.expectNoEvents()
+        viewModel.completeFormValues.test {
+            assertThat(awaitItem()).isNotNull()
+            assertThat(element.values.subscriptionCount.value).isEqualTo(1)
+        }
+        element.valueFlowRequests.ensureAllEventsConsumed()
+    }
 
     @Test
     fun `Verify completeFormValues is not null when no elements exist`() = runTest {
@@ -930,6 +952,21 @@ internal class FormViewModelTest {
             stringResId = R.string.stripe_sepa_mandate,
             args = listOf(""),
         )
+    }
+
+    private class FakeFormValueElement : FormElement {
+        override val identifier = FormFieldId.Generic("tracked")
+        override val controller: Controller? = null
+        override val allowsUserInteraction = false
+        override val mandateText: ResolvableString? = null
+
+        val values = MutableStateFlow(listOf(FormFieldId.Name to FormFieldEntry("Jane", true)))
+        val valueFlowRequests = Turbine<Unit>()
+
+        override fun getFormFieldValueFlow(): StateFlow<List<Pair<FormFieldId, FormFieldEntry>>> {
+            valueFlowRequests.add(Unit)
+            return values
+        }
     }
 
     private fun createViewModel(

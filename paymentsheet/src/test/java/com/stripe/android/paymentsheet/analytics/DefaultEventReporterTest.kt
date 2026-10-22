@@ -34,6 +34,8 @@ import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormViewModel
 import com.stripe.android.paymentsheet.state.WalletsState
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -54,6 +56,62 @@ class DefaultEventReporterTest {
             mapOf("example_from_test" to AnalyticsMetadata.Value.SimpleBoolean(true))
         )
     )
+
+    @Test
+    fun `analytics dependencies are only created when worker dispatch executes`() {
+        val dispatcher = StandardTestDispatcher()
+        val dependencyCreations = Turbine<String>()
+        runScenario(
+            testDispatcher = dispatcher,
+            onDependencyCreated = { dependencyCreations.add(it) },
+        ) {
+            dependencyCreations.expectNoEvents()
+            paymentMethodMetadataStack.push(null)
+            eventReporter.onAnalyticsEvent(object : AnalyticsEvent {
+                override val eventName = "test_analytics_event"
+            })
+            dependencyCreations.expectNoEvents()
+
+            dispatcher.scheduler.runCurrent()
+
+            assertThat(dependencyCreations.awaitItem()).isEqualTo("requestFactory")
+            assertThat(analyticsRequestExecutor.requestTurbine.awaitItem().params)
+                .containsEntry("event", "test_analytics_event")
+        }
+        dependencyCreations.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `V2 executor is only created when worker dispatch executes`() {
+        val dispatcher = StandardTestDispatcher()
+        val dependencyCreations = Turbine<String>()
+        runScenario(
+            testDispatcher = dispatcher,
+            onDependencyCreated = { dependencyCreations.add(it) },
+        ) {
+            paymentMethodMetadataStack.push(null)
+            eventReporter.onExperimentExposure(
+                LoggableExperiment.ConnectionsFCLiteVsNative(
+                    arbId = "arb_123",
+                    group = "treatment",
+                    experiment = ExperimentAssignment.LINK_GLOBAL_HOLD_BACK,
+                    elementsSessionId = "elements_session_123",
+                    mobileSessionId = "mobile_session_123",
+                    mobileSdkVersion = "1.0.0",
+                    fcSdkAvailability = "available",
+                    availableLpms = "us_bank_account",
+                )
+            )
+            dependencyCreations.expectNoEvents()
+
+            dispatcher.scheduler.runCurrent()
+
+            assertThat(dependencyCreations.awaitItem()).isEqualTo("v2Executor")
+            assertThat(analyticsRequestV2Executor.enqueueCalls.awaitItem().eventName)
+                .isEqualTo("elements.experiment_exposure")
+        }
+        dependencyCreations.ensureAllEventsConsumed()
+    }
 
     @Test
     fun `onExperimentExposure enqueues V2 event`() = runScenario {
@@ -1513,10 +1571,11 @@ class DefaultEventReporterTest {
 
     private fun runScenario(
         throwInAnalyticsCallback: Boolean = false,
+        testDispatcher: TestDispatcher = UnconfinedTestDispatcher(),
+        onDependencyCreated: (String) -> Unit = {},
         block: suspend Scenario.() -> Unit
     ) = runTest {
         val context = ApplicationProvider.getApplicationContext<Context>()
-        val testDispatcher = UnconfinedTestDispatcher()
         val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
         val analyticsRequestV2Executor = FakeAnalyticsRequestV2Executor()
         val paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
@@ -1549,8 +1608,14 @@ class DefaultEventReporterTest {
             context = context,
             mode = EventReporter.Mode.Complete,
             analyticsRequestExecutor = analyticsRequestExecutor,
-            analyticsRequestV2Executor = analyticsRequestV2Executor,
-            paymentAnalyticsRequestFactory = paymentAnalyticsRequestFactory,
+            analyticsRequestV2Executor = dagger.Lazy {
+                onDependencyCreated("v2Executor")
+                analyticsRequestV2Executor
+            },
+            paymentAnalyticsRequestFactory = dagger.Lazy {
+                onDependencyCreated("requestFactory")
+                paymentAnalyticsRequestFactory
+            },
             durationProvider = durationProvider,
             analyticEventCallbackProvider = analyticEventCallbackProvider,
             workContext = testDispatcher,

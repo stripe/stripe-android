@@ -44,13 +44,12 @@ import androidx.compose.ui.semantics.contentType
 import androidx.compose.ui.semantics.onAutofillText
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.uicore.LocalTextFieldInsets
 import com.stripe.android.uicore.R
-import com.stripe.android.uicore.elements.compat.CompatTextField
+import com.stripe.android.uicore.elements.compat.CompatTextFieldDisplay
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.utils.collectAsState
@@ -106,8 +105,7 @@ fun DropDown(
 
     var expanded by remember { mutableStateOf(false) }
     val error by controller.validationMessage.collectAsState()
-    val selectedItemIndex by controller.selectedIndex.collectAsState()
-    val selectedItemLabel = remember(selectedItemIndex) {
+    val selectedItemLabel = remember(controller, selectedIndex) {
         controller.getSelectedItemLabel(selectedIndex)
     }
 
@@ -226,11 +224,8 @@ private fun LargeDropdownLabel(
 ) {
     val textFieldInsets = LocalTextFieldInsets.current
 
-    CompatTextField(
-        value = TextFieldValue(selectedItemLabel ?: ""),
-        enabled = false,
-        onValueChange = {},
-        errorMessage = null,
+    CompatTextFieldDisplay(
+        value = selectedItemLabel ?: "",
         isError = isError,
         label = {
             FormLabel(label.resolve())

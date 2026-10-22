@@ -302,23 +302,22 @@ object CountryUtils {
         return CARD_POSTAL_CODE_COUNTRIES.contains(countryCode.value)
     }
 
+    // Publish the locale and its countries together when initialization runs on a worker thread.
     @Volatile
-    private var cachedCountriesLocale: Locale? = null
-
-    @Volatile
-    private var cachedOrderedLocalizedCountries: List<Country> = emptyList()
+    private var cachedCountries: Pair<Locale, List<Country>>? = null
 
     /**
      * Load, sort and cache the list of localized countries, putting the current locale's country
      * at the top of the list.
      */
     private fun getSortedLocalizedCountries(currentLocale: Locale): List<Country> {
-        return if (currentLocale == cachedCountriesLocale) {
-            cachedOrderedLocalizedCountries
+        val cached = cachedCountries
+        return if (cached != null && currentLocale == cached.first) {
+            cached.second
         } else {
             val localizedCountries = localizedCountries(currentLocale)
             val collator = Collator.getInstance(currentLocale)
-            cachedOrderedLocalizedCountries = listOfNotNull(
+            val orderedCountries = listOfNotNull(
                 localizedCountries.firstOrNull {
                     it.code == currentLocale.getCountryCode()
                 }
@@ -328,9 +327,8 @@ object CountryUtils {
                     .sortedWith { c1, c2 -> collator.compare(c1.name, c2.name) }
             )
 
-            cachedCountriesLocale = currentLocale
-
-            cachedOrderedLocalizedCountries
+            cachedCountries = currentLocale to orderedCountries
+            orderedCountries
         }
     }
 }

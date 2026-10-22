@@ -1,0 +1,16 @@
+# First PaymentSheet presentation: activity, form composition, and field layout.
+# Includes nested classes and generated Compose/coroutine callbacks for these paths.
+# Keep these library rules scoped to first-presentation code; see paymentsheet/PERFORMANCE.md.
+
+Lcom/stripe/android/ui/core/FormUIKt**;
+HSPLcom/stripe/android/ui/core/FormUIKt**->**(**)**
+Lcom/stripe/android/ui/core/elements/BillingAddressElement**;
+HSPLcom/stripe/android/ui/core/elements/BillingAddressElement**->**(**)**
+Lcom/stripe/android/ui/core/elements/CardDetails**;
+HSPLcom/stripe/android/ui/core/elements/CardDetails**->**(**)**
+Lcom/stripe/android/ui/core/elements/CardNumber**;
+HSPLcom/stripe/android/ui/core/elements/CardNumber**->**(**)**
+Lcom/stripe/android/ui/core/elements/Cvc**;
+HSPLcom/stripe/android/ui/core/elements/Cvc**->**(**)**
+Lcom/stripe/android/ui/core/elements/DefaultCardNumberController**;
+HSPLcom/stripe/android/ui/core/elements/DefaultCardNumberController**->**(**)**

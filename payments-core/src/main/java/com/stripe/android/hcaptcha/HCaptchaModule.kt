@@ -27,7 +27,11 @@ object HCaptchaModule {
         captchaEventsReporter: CaptchaEventsReporter
     ): HCaptchaService {
         return hCaptchaService ?: synchronized(this) {
-            hCaptchaService ?: DefaultHCaptchaService(hCaptchaProvider, captchaEventsReporter)
+            hCaptchaService ?: DefaultHCaptchaService(
+                hCaptchaProvider = hCaptchaProvider,
+                captchaEventsReporter = captchaEventsReporter,
+                prepareWebView = { activity -> HCaptchaWebViewStartup.awaitReady(activity.applicationContext) },
+            )
                 .also { hCaptchaService = it }
         }
     }

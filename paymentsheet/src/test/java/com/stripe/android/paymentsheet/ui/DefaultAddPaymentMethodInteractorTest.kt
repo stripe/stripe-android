@@ -122,6 +122,26 @@ class DefaultAddPaymentMethodInteractorTest {
     }
 
     @Test
+    fun initialForm_isNotRecreatedWhenCollectionStarts() {
+        val formCreations = Turbine<PaymentMethodCode>()
+        runScenario(
+            initiallySelectedPaymentMethodType = PaymentMethod.Type.Card.code,
+            formElementsForCode = { code ->
+                formCreations.add(code)
+                emptyList()
+            },
+        ) {
+            assertThat(formCreations.awaitItem()).isEqualTo(PaymentMethod.Type.Card.code)
+
+            dispatcher.scheduler.advanceUntilIdle()
+
+            assertThat(clearErrorMessagesTurbine.awaitItem()).isEqualTo(Unit)
+            formCreations.expectNoEvents()
+        }
+        formCreations.ensureAllEventsConsumed()
+    }
+
+    @Test
     fun initialState_isCorrect() {
         val expectedSelectedPaymentMethodCode = PaymentMethod.Type.CashAppPay.code
         val expectedSelection = PaymentSelection.Saved(
