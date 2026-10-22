@@ -165,6 +165,22 @@ internal class CheckoutControllerStateHolderTest {
     }
 
     @Test
+    fun `state without embedded configuration survives process death`() = runTest {
+        val savedStateHandle = SavedStateHandle()
+        val stateHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle)
+        stateHolder.state = CheckoutControllerStateFactory.create(embeddedConfiguration = null)
+
+        val restoredStateHolder = CheckoutControllerStateFactory.createStateHolder(
+            savedStateHandle = savedStateHandle.simulateProcessDeath(),
+        )
+
+        val restoredState = requireNotNull(restoredStateHolder.state)
+        assertThat(restoredState.embeddedConfiguration).isNull()
+        assertThat(restoredState.checkoutSessionResponse.id)
+            .isEqualTo(requireNotNull(stateHolder.state).checkoutSessionResponse.id)
+    }
+
+    @Test
     fun `restored pending saved selection is reset to idle`() = runTest {
         val savedStateHandle = SavedStateHandle()
         val stateHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle)
