@@ -65,13 +65,15 @@ internal interface PaymentElementModule {
             stateHolder: CheckoutControllerStateHolder,
         ): StateFlow<EmbeddedContentHelperStateHolder.State?> {
             return stateHolder.stateFlow.mapAsStateFlow { state ->
-                state?.let {
-                    EmbeddedContentHelperStateHolder.State(
-                        paymentMethodMetadata = it.paymentMethodMetadata,
-                        embeddedViewDisplaysMandateText = it.embeddedConfiguration.embeddedViewDisplaysMandateText,
-                        configuration = it.embeddedConfiguration,
-                    )
+                val embeddedConfiguration = state?.embeddedConfiguration
+                if (state == null || embeddedConfiguration == null) {
+                    return@mapAsStateFlow null
                 }
+                EmbeddedContentHelperStateHolder.State(
+                    paymentMethodMetadata = state.paymentMethodMetadata,
+                    embeddedViewDisplaysMandateText = state.embeddedConfiguration.embeddedViewDisplaysMandateText,
+                    configuration = state.embeddedConfiguration,
+                )
             }
         }
 
