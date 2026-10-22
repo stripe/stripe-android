@@ -569,10 +569,12 @@ internal class CheckoutCommonConfigurationFactoryTest {
             checkoutSessionResponse: CheckoutSessionResponse,
             collectedDetails: CheckoutCollectedDetails,
         ): CommonConfiguration {
-            return factory.createForPaymentElement(
-                configuration = configuration,
-                checkoutSessionResponse = checkoutSessionResponse,
-                collectedDetails = collectedDetails,
+            return requireNotNull(
+                factory.createForPaymentElement(
+                    configuration = configuration,
+                    checkoutSessionResponse = checkoutSessionResponse,
+                    collectedDetails = collectedDetails,
+                )
             )
         }
 

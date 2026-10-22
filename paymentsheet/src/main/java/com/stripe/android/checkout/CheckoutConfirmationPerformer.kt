@@ -66,7 +66,7 @@ internal class CheckoutConfirmationPerformer @Inject constructor(
             configuration = state.configuration,
             checkoutSessionResponse = state.checkoutSessionResponse,
             collectedDetails = state.collectedDetails,
-        )
+        ) ?: return null
         val confirmationOption = paymentSelection.toConfirmationOption(
             configuration = configuration,
             linkConfiguration = paymentMethodMetadata.linkState?.configuration,
