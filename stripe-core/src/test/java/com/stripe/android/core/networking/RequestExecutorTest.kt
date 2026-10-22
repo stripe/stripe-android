@@ -144,7 +144,7 @@ internal class RequestExecutorTest {
     }
 
     @Test
-    fun `executeRequestWithResultParser maps parsed model with transport response`() = runTest {
+    fun `executeRequestWithResultParser passes transport response to response parser`() = runTest {
         whenever(mockNetworkClient.executeRequest(testRequest)).thenReturn(successResponse)
         whenever(mockModelParser.parse(any())).thenReturn(TestStripeModel("test_data"))
 
@@ -152,9 +152,10 @@ internal class RequestExecutorTest {
             stripeNetworkClient = mockNetworkClient,
             stripeErrorJsonParser = mockErrorParser,
             request = testRequest,
-            responseJsonParser = mockModelParser,
-            responseMapper = { parsedModel, response ->
-                TestStripeModel("${parsedModel.data}-${response.requestId?.value}")
+            responseParser = { response ->
+                mockModelParser.parse(response.responseJson())?.let { parsedModel ->
+                    TestStripeModel("${parsedModel.data}-${response.requestId?.value}")
+                }
             },
         )
 
@@ -181,16 +182,17 @@ internal class RequestExecutorTest {
     }
 
     @Test
-    fun `executeRequestWithResultParser preserves failures when response mapper is provided`() = runTest {
+    fun `executeRequestWithResultParser preserves failures when response parser is provided`() = runTest {
         whenever(mockNetworkClient.executeRequest(testRequest)).thenReturn(errorResponse)
         whenever(mockErrorParser.parse(any())).thenReturn(testStripeError)
 
-        val result = executeRequestWithResultParser(
+        val result = executeRequestWithResultParser<TestStripeModel>(
             stripeNetworkClient = mockNetworkClient,
             stripeErrorJsonParser = mockErrorParser,
             request = testRequest,
-            responseJsonParser = mockModelParser,
-            responseMapper = { _, _ -> error("Response mapper should not run for an error response") },
+            responseParser = { _: StripeResponse<String> ->
+                error("Response parser should not run for an error response")
+            },
         )
 
         assertThat(result.isFailure).isTrue()

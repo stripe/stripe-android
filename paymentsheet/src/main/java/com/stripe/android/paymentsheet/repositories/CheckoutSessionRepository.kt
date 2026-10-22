@@ -7,8 +7,8 @@ import com.stripe.android.core.model.parsers.StripeErrorJsonParser
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
-import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.core.networking.executeRequestWithResultParser
+import com.stripe.android.core.networking.responseJson
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
@@ -37,16 +37,6 @@ internal class CheckoutSessionRepository @Inject constructor(
     private suspend fun executePost(
         url: String,
         params: Map<String, *>,
-    ): Result<CheckoutSessionResponse> = executePost(
-        url = url,
-        params = params,
-        responseMapper = { parsedResponse, _ -> parsedResponse },
-    )
-
-    private suspend fun executePost(
-        url: String,
-        params: Map<String, *>,
-        responseMapper: (CheckoutSessionResponse, StripeResponse<String>) -> CheckoutSessionResponse,
     ): Result<CheckoutSessionResponse> {
         val options = apiRequestOptionsProvider.get()
         return executeRequestWithResultParser(
@@ -57,8 +47,12 @@ internal class CheckoutSessionRepository @Inject constructor(
                 options = options,
                 params = params,
             ),
-            responseJsonParser = CheckoutSessionResponseJsonParser,
-            responseMapper = responseMapper,
+            responseParser = { response ->
+                CheckoutSessionResponseJsonParser.parse(
+                    json = response.responseJson(),
+                    requestId = response.requestId?.value,
+                )
+            },
         )
     }
 
@@ -83,14 +77,9 @@ internal class CheckoutSessionRepository @Inject constructor(
     suspend fun confirm(
         id: String,
         params: ConfirmCheckoutSessionParams,
-        onRequestId: (String?) -> Unit,
     ): Result<CheckoutSessionResponse> = executePost(
         url = confirmUrl(id),
         params = params.toParamMap().plus(Pair("elements_session_client[is_aggregation_expected]", "true")),
-        responseMapper = { parsedResponse, response ->
-            onRequestId(response.requestId?.value)
-            parsedResponse
-        },
     )
 
     suspend fun detachPaymentMethod(

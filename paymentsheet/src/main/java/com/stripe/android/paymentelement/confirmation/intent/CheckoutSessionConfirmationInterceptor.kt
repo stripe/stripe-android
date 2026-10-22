@@ -165,13 +165,11 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
     private suspend fun confirmCheckoutSession(
         params: ConfirmCheckoutSessionParams,
     ): ConfirmationDefinition.Action<Args> {
-        var requestId: String? = null
         return checkoutSessionRepository.confirm(
             id = integrationMetadata.id,
             params = params,
-            onRequestId = { requestId = it },
         ).fold(
-            onSuccess = { response -> handleConfirmResponse(response, requestId) },
+            onSuccess = ::handleConfirmResponse,
             onFailure = { error ->
                 ConfirmationDefinition.Action.Fail(
                     cause = error,
@@ -184,7 +182,6 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
 
     private fun handleConfirmResponse(
         response: CheckoutSessionResponse,
-        requestId: String?,
     ): ConfirmationDefinition.Action<Args> {
         val intent: StripeIntent = response.paymentIntent ?: response.setupIntent
             ?: run {
@@ -205,7 +202,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
                     metadata = MutableConfirmationMetadata().apply {
                         set(DeferredIntentConfirmationTypeKey, DeferredIntentConfirmationType.Server)
                         set(CheckoutSessionResponseKey, response)
-                        requestId?.let { set(CheckoutSessionRequestIdKey, it) }
+                        response.requestId?.let { set(CheckoutSessionRequestIdKey, it) }
                     },
                     completedFullPaymentFlow = true,
                 )

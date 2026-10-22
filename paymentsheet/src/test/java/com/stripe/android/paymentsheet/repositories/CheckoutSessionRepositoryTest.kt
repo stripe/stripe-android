@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.repositories
 
 import androidx.test.core.app.ApplicationProvider
-import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutConfirm
@@ -77,7 +76,6 @@ class CheckoutSessionRepositoryTest {
     @Test
     fun `confirm reports request id from successful response header`() = runTest {
         val requestId = "req_checkout_confirm"
-        val requestIds = Turbine<String?>()
         networkRule.checkoutConfirm { response ->
             response.testBodyFromFile("checkout-session-confirm.json")
             response.setHeader("Request-Id", requestId)
@@ -86,17 +84,14 @@ class CheckoutSessionRepositoryTest {
         val result = repository.confirm(
             id = DEFAULT_CHECKOUT_SESSION_ID,
             params = confirmParams(),
-            onRequestId = requestIds::add,
         ).getOrThrow()
 
         assertThat(result.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
-        assertThat(requestIds.awaitItem()).isEqualTo(requestId)
-        requestIds.ensureAllEventsConsumed()
+        assertThat(result.requestId).isEqualTo(requestId)
     }
 
     @Test
     fun `confirm request id is null when successful response has no request id header`() = runTest {
-        val requestIds = Turbine<String?>()
         networkRule.checkoutConfirm { response ->
             response.testBodyFromFile("checkout-session-confirm.json")
             response.removeHeader("request-id")
@@ -105,12 +100,10 @@ class CheckoutSessionRepositoryTest {
         val result = repository.confirm(
             id = DEFAULT_CHECKOUT_SESSION_ID,
             params = confirmParams(),
-            onRequestId = requestIds::add,
         ).getOrThrow()
 
         assertThat(result.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
-        assertThat(requestIds.awaitItem()).isNull()
-        requestIds.ensureAllEventsConsumed()
+        assertThat(result.requestId).isNull()
     }
 
     @Test

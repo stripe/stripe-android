@@ -48,6 +48,7 @@ class CheckoutSessionResponseJsonParserTest {
 
         assertThat(result).isNotNull()
         assertThat(result?.id).isEqualTo("cs_test_abc123")
+        assertThat(result?.requestId).isNull()
         assertThat(result?.paymentStatus).isEqualTo(CheckoutSessionResponse.PaymentStatus.UNPAID)
         assertThat(result?.requiresShippingAddress).isFalse()
         assertThat(result?.checkoutItems).hasSize(1)
@@ -55,6 +56,15 @@ class CheckoutSessionResponseJsonParserTest {
         assertThat(group.key).isEqualTo("group_1")
         assertThat(group.oneTimePrice.items.single().innerItemKey).isEqualTo("item_1")
         assertThat(group.oneTimePrice.items.single().subtotal).isEqualTo(5099)
+    }
+
+    @Test
+    fun `retains request id provided by transport`() {
+        val requestId = "req_checkout_response"
+
+        val result = requireNotNull(CheckoutSessionResponseJsonParser.parse(base(), requestId))
+
+        assertThat(result.requestId).isEqualTo(requestId)
     }
 
     @Test
