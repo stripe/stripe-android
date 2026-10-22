@@ -117,7 +117,6 @@ internal class CheckoutSessionTaxRegionUpdaterTest {
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val checkoutSessionRepository = CheckoutSessionRepository(
-            productUsageTokens = emptySet(),
             fraudDetectionDataRepository = FakeFraudDetectionDataRepository.create(),
             stripeNetworkClient = DefaultStripeNetworkClient(),
             analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),

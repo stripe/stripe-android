@@ -14,18 +14,15 @@ import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.networking.ConfirmationParamsUtils
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentelement.CheckoutSessionPreview
-import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
 import java.util.TimeZone
 import java.util.UUID
 import javax.inject.Inject
-import javax.inject.Named
 import javax.inject.Provider
 
 @OptIn(CheckoutSessionPreview::class)
 internal class CheckoutSessionRepository @Inject constructor(
     private val stripeNetworkClient: StripeNetworkClient,
-    @Named(PRODUCT_USAGE) private val productUsageTokens: Set<String>,
     private val fraudDetectionDataRepository: FraudDetectionDataRepository,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
@@ -78,17 +75,14 @@ internal class CheckoutSessionRepository @Inject constructor(
         id: String,
         params: ConfirmCheckoutSessionParams,
     ): Result<CheckoutSessionResponse> {
-        // ID-based confirmations have no new payment method data to attach fraud signals to.
-        if (params.paymentMethodData != null) {
-            fraudDetectionDataRepository.refresh()
-        }
+        fraudDetectionDataRepository.refresh()
 
         val requestParams = ConfirmationParamsUtils.prepareConfirmationParams(
             params.toParamMap(),
             params.paymentMethodData,
             sourceParams = null,
             fraudDetectionData = fraudDetectionDataRepository.getCached(),
-            productUsageTokens = productUsageTokens,
+            productUsageTokens = setOf("checkout_elements"),
         )
         return executePost(
             url = confirmUrl(id),

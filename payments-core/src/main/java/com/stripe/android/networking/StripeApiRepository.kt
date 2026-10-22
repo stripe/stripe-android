@@ -188,7 +188,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
             apiConfigurationProvider = apiConfigurationProvider,
         ),
         paymentAnalyticsRequestFactory = paymentAnalyticsRequestFactory,
-        analyticsRequestExecutor = analyticsRequestExecutor,
+        analyticsRequestExecutor = analyticsRequestExecutor
     )
 
     private val apiRequestFactory = ApiRequest.Factory(

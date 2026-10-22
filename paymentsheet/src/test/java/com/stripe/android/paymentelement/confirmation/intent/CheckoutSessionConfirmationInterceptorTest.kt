@@ -32,6 +32,7 @@ import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networktesting.NetworkRule
+import com.stripe.android.networktesting.RequestMatcher
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.doesNotContainBodyPartsWithPrefix
 import com.stripe.android.networktesting.RequestMatchers.hasBodyPart
@@ -100,30 +101,12 @@ class CheckoutSessionConfirmationInterceptorTest {
             else -> error("Unexpected test type: $type")
         }
 
-        val paymentMethodMatchers = if (saved) {
-            listOf(bodyPart("payment_method", paymentMethod.id))
-        } else {
-            listOf(
-                when (type) {
-                    PaymentMethod.Type.Card -> bodyPart("payment_method_data[card][number]", "4242424242424242")
-                    PaymentMethod.Type.Link -> bodyPart(
-                        "payment_method_data[link][payment_details_id]",
-                        "payment_details_123",
-                    )
-                    PaymentMethod.Type.SepaDebit -> bodyPart("payment_method_data[sepa_debit][iban]", "my_iban")
-                    else -> error("Unexpected test type: $type")
-                },
-                bodyPart(
-                    "payment_method_data[payment_user_agent]",
-                    setOf("stripe-android/${StripeSdkVersion.VERSION_NAME}")
-                        .plus(createParams.attribution)
-                        .joinToString(";"),
-                ),
-                bodyPart("payment_method_data[guid]", "test_guid"),
-                bodyPart("payment_method_data[muid]", "test_muid"),
-                bodyPart("payment_method_data[sid]", "test_sid"),
-            )
-        }
+        val paymentMethodMatchers = createPaymentMethodMatchers(
+            saved = saved,
+            type = type,
+            paymentMethod = paymentMethod,
+            createParams = createParams,
+        )
 
         runScenario {
             networkRule.checkoutConfirm(
@@ -935,7 +918,6 @@ class CheckoutSessionConfirmationInterceptorTest {
         block: suspend Scenario.() -> Unit,
     ) {
         val checkoutSessionRepository = CheckoutSessionRepository(
-            productUsageTokens = emptySet(),
             fraudDetectionDataRepository = FakeFraudDetectionDataRepository.create(),
             stripeNetworkClient = DefaultStripeNetworkClient(),
             analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
@@ -977,6 +959,36 @@ class CheckoutSessionConfirmationInterceptorTest {
 
             scenario.block()
         }
+    }
+
+    private fun createPaymentMethodMatchers(
+        saved: Boolean,
+        type: PaymentMethod.Type,
+        paymentMethod: PaymentMethod,
+        createParams: PaymentMethodCreateParams,
+    ): List<RequestMatcher> = if (saved) {
+        listOf(bodyPart("payment_method", paymentMethod.id))
+    } else {
+        listOf(
+            when (type) {
+                PaymentMethod.Type.Card -> bodyPart("payment_method_data[card][number]", "4242424242424242")
+                PaymentMethod.Type.Link -> bodyPart(
+                    "payment_method_data[link][payment_details_id]",
+                    "payment_details_123",
+                )
+                PaymentMethod.Type.SepaDebit -> bodyPart("payment_method_data[sepa_debit][iban]", "my_iban")
+                else -> error("Unexpected test type: $type")
+            },
+            bodyPart(
+                "payment_method_data[payment_user_agent]",
+                setOf("stripe-android/${StripeSdkVersion.VERSION_NAME}", "checkout_elements")
+                    .plus(createParams.attribution)
+                    .joinToString(";"),
+            ),
+            bodyPart("payment_method_data[guid]", "test_guid"),
+            bodyPart("payment_method_data[muid]", "test_muid"),
+            bodyPart("payment_method_data[sid]", "test_sid"),
+        )
     }
 
     private data class Scenario(

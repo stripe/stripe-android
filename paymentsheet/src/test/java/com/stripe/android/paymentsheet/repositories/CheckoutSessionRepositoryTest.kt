@@ -35,7 +35,6 @@ class CheckoutSessionRepositoryTest {
     private val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
 
     private val repository = CheckoutSessionRepository(
-        productUsageTokens = emptySet(),
         fraudDetectionDataRepository = FakeFraudDetectionDataRepository.create(),
         stripeNetworkClient = DefaultStripeNetworkClient(),
         analyticsRequestExecutor = analyticsRequestExecutor,
