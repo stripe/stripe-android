@@ -142,69 +142,6 @@ internal class CheckoutAnalyticsPerformerTest {
     }
 
     @Test
-    fun `adaptive pricing is inactive when presentment and integration currencies match`() = runScenario {
-        stateHolder.state = stateHolder.state!!.copy(
-            checkoutSessionResponse = CheckoutSessionResponseFactory.create(
-                adaptivePricingInfo = CheckoutSessionResponse.AdaptivePricingInfo(
-                    activePresentmentCurrency = "usd",
-                    integrationAmount = 1000L,
-                    integrationCurrency = "usd",
-                    localCurrencyOptions = emptyList(),
-                ),
-            ),
-        )
-        startReporting()
-        performer.onPaymentElementConfirmationStarted(PaymentSelection.GooglePay)
-
-        confirmationHandler.state.value = ConfirmationHandler.State.Complete(successfulResult())
-
-        analyticsRequestExecutor.awaitAndAssertConfirmationRequest(
-            ExpectedEvent(
-                event = "checkout_elements.confirm.succeeded",
-                publishableKey = DEFAULT_METADATA_PUBLISHABLE_KEY,
-                params = mapOf("adaptive_pricing_active" to false),
-            ),
-        )
-    }
-
-    @Test
-    fun `adaptive pricing is active when the presentment currency differs`() = runScenario {
-        stateHolder.state = stateHolder.state!!.copy(
-            checkoutSessionResponse = CheckoutSessionResponseFactory.create(
-                amount = 1400L,
-                currency = "cad",
-                adaptivePricingInfo = CheckoutSessionResponse.AdaptivePricingInfo(
-                    activePresentmentCurrency = "cad",
-                    integrationAmount = 1000L,
-                    integrationCurrency = "usd",
-                    localCurrencyOptions = listOf(
-                        CheckoutSessionResponse.LocalCurrencyOption(
-                            amount = 1400L,
-                            conversionMarkupBps = 150,
-                            currency = "cad",
-                            presentmentExchangeRate = "1.4",
-                        ),
-                    ),
-                ),
-            ),
-        )
-        startReporting()
-        performer.onPaymentElementConfirmationStarted(PaymentSelection.GooglePay)
-
-        confirmationHandler.state.value = ConfirmationHandler.State.Complete(
-            successfulResult().copy(intent = PaymentIntentFixtures.PI_SUCCEEDED.copy(amount = 1400L, currency = "cad"))
-        )
-
-        analyticsRequestExecutor.awaitAndAssertConfirmationRequest(
-            ExpectedEvent(
-                event = "checkout_elements.confirm.succeeded",
-                publishableKey = DEFAULT_METADATA_PUBLISHABLE_KEY,
-                params = mapOf("adaptive_pricing_active" to true),
-            ),
-        )
-    }
-
-    @Test
     fun `internal failure is filtered from confirmation analytics`() = assertFailureNotReported(
         ConfirmationHandler.Result.Failed.ErrorType.Internal,
     )
@@ -363,37 +300,6 @@ internal class CheckoutAnalyticsPerformerTest {
                 ),
             ),
         )
-    }
-
-    @Test
-    fun `initial config id is retained when confirmation response omits it`() = runScenario {
-        val initialResponse = CheckoutSessionResponseFactory.create(configId = "cfg_initial_confirmation")
-        stateHolder.state = stateHolder.state!!.copy(checkoutSessionResponse = initialResponse)
-        startReporting()
-        performer.onPaymentElementConfirmationStarted(PaymentSelection.GooglePay)
-        val confirmationResponse = initialResponse.copy(
-            status = CheckoutSessionResponse.Status.COMPLETE,
-            paymentStatus = CheckoutSessionResponse.PaymentStatus.PAID,
-            configId = null,
-        )
-        val resultWithResponse = successfulResult().copy(
-            metadata = MutableConfirmationMetadata().apply {
-                set(CheckoutSessionResponseKey, confirmationResponse)
-            }
-        )
-
-        confirmationHandler.state.value = ConfirmationHandler.State.Complete(resultWithResponse)
-
-        val request = analyticsRequestExecutor.awaitAndAssertConfirmationRequest(
-            ExpectedEvent(
-                event = "checkout_elements.confirm.succeeded",
-                publishableKey = DEFAULT_METADATA_PUBLISHABLE_KEY,
-                params = paymentElementConfirmationParams,
-            ),
-        )
-        assertThat(request).containsEntry("checkout_session_id", initialResponse.id)
-        assertThat(request).containsEntry("session_status", "complete")
-        assertThat(request).containsEntry("checkout_config_id", "cfg_initial_confirmation")
     }
 
     private fun assertFailureNotReported(type: ConfirmationHandler.Result.Failed.ErrorType) = runScenario {

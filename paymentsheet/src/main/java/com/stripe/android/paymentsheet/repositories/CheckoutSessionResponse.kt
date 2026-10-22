@@ -168,16 +168,3 @@ internal fun CheckoutSessionResponse.validateShippingCountry(country: String): R
         Result.failure(IllegalArgumentException("Country code '$country' is not in allowedShippingCountries"))
     }
 }
-
-internal fun CheckoutSessionResponse.checkoutAnalyticsParams(): Map<String, Any> = buildMap<String, Any> {
-    put("checkout_session_id", id)
-    configId?.let { put("checkout_config_id", it) }
-    put("currency", currency)
-    put("session_status", status.name.lowercase())
-    put("payment_status", paymentStatus.name.lowercase())
-    elementsSession?.elementsSessionConfigId
-        ?.takeIf { it.isNotEmpty() }
-        ?.let { put("elements_session_config_id", it) }
-    put("adaptive_pricing_active", adaptivePricingInfo?.isActive == true)
-    put("automatic_tax_enabled", automaticTaxEnabled)
-}

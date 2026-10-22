@@ -16,6 +16,7 @@ import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.intent.CheckoutSessionResponseKey
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.state.DefaultAnalyticsMetadataFactory
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.utils.toConfirmationError
 import kotlinx.coroutines.CoroutineScope
@@ -72,12 +73,13 @@ internal class CheckoutAnalyticsPerformer @Inject constructor(
         val confirmationResponse = (result as? ConfirmationHandler.Result.Succeeded)
             ?.metadata?.get(CheckoutSessionResponseKey)
         val response = confirmationResponse ?: stateHolder.state?.checkoutSessionResponse
+        val analyticsMetadata = DefaultAnalyticsMetadataFactory.create(response)
 
         when (result) {
             is ConfirmationHandler.Result.Succeeded -> reportEvent(
                 CheckoutConfirmationEvent.Succeeded(
                     confirmationContext = confirmationContext,
-                    response = response,
+                    analyticsMetadata = analyticsMetadata,
                     duration = durationProvider.end(DurationProvider.Key.Checkout),
                 )
             )
@@ -85,7 +87,7 @@ internal class CheckoutAnalyticsPerformer @Inject constructor(
                 reportEvent(
                     CheckoutConfirmationEvent.Failed(
                         confirmationContext = confirmationContext,
-                        response = response,
+                        analyticsMetadata = analyticsMetadata,
                         duration = durationProvider.end(DurationProvider.Key.Checkout),
                         error = error,
                     )
@@ -123,7 +125,6 @@ internal class CheckoutAnalyticsPerformer @Inject constructor(
             invocationSource = invocationSource,
             activeLinkSession = linkAccountHolder.linkAccountInfo.value.account?.isVerified
                 ?: (metadata?.linkState?.loginState == LinkState.LoginState.LoggedIn),
-            checkoutConfigId = state?.checkoutSessionResponse?.configId,
         )
     }
 
