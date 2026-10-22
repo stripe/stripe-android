@@ -75,6 +75,7 @@ internal class CheckoutPresenterInitializerTest {
                 activityResultCaller = mock(),
                 lifecycleOwner = TestLifecycleOwner(),
                 sheetLauncher = FakeEmbeddedSheetLauncher(),
+                shippingAddressElementProvider = { error("Shipping Address Element is not configured") },
                 sheetStateHolder = SheetStateHolder(SavedStateHandle()),
                 stateHolder = CheckoutControllerStateFactory.createStateHolder(
                     SavedStateHandle(mapOf(CheckoutControllerStateHolder.STATE_KEY to restoredState))
@@ -104,6 +105,7 @@ internal class CheckoutPresenterInitializerTest {
             activityResultCaller = activityResultCaller,
             lifecycleOwner = lifecycleOwner,
             sheetLauncher = sheetLauncher,
+            shippingAddressElementProvider = { error("Shipping Address Element is not configured") },
             sheetStateHolder = sheetStateHolder,
             stateHolder = stateHolder,
         )
