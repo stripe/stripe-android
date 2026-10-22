@@ -39,3 +39,6 @@ include ':crypto-onramp'
 include ':crypto-onramp-example'
 include ':payment-method-messaging-example'
 include ':tap-to-add-testing'
+
+include ':paymentsheet-benchmark-app'
+include ':paymentsheet-benchmark'

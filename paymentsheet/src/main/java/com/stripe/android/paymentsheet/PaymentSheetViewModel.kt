@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet
 
-import android.os.SystemClock
 import androidx.activity.result.ActivityResultCaller
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LifecycleOwner
@@ -47,7 +46,7 @@ import com.stripe.android.paymentsheet.addresselement.StripeAutocompleteReposito
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
-import com.stripe.android.paymentsheet.analytics.PaymentSheetFirstFrameTimer
+import com.stripe.android.paymentsheet.analytics.PaymentSheetFirstFrameTrace
 import com.stripe.android.paymentsheet.analytics.persistBillingAnalytics
 import com.stripe.android.paymentsheet.analytics.reportBillingAddressCompleted
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
@@ -89,7 +88,6 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
-import kotlin.time.Duration
 
 @Suppress("LargeClass")
 @Singleton
@@ -260,7 +258,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
-    private val firstFrameTimer = PaymentSheetFirstFrameTimer(SystemClock::elapsedRealtimeNanos)
+    private val firstFrameTrace = PaymentSheetFirstFrameTrace()
 
     private val confirmationHandler = confirmationHandlerFactory.create(viewModelScope)
 
@@ -317,7 +315,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 )
             ).also { result ->
                 if (result.isSuccess) {
-                    firstFrameTimer.onLoadComplete()
+                    firstFrameTrace.onLoadComplete()
                 }
             }
         }
@@ -328,7 +326,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         )
     }
 
-    internal fun takeLoadToFirstFrameDuration(): Duration? = firstFrameTimer.takeDuration()
+    internal fun onFirstContentDrawn() = firstFrameTrace.onDrawn()
 
     private fun handlePaymentSheetStateLoadFailure(error: Throwable) {
         setPaymentMethodMetadata(null)

@@ -199,21 +199,6 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `successful load starts a single first frame measurement`() = runTest {
-        val viewModel = createViewModel()
-
-        assertThat(viewModel.takeLoadToFirstFrameDuration()).isNotNull()
-        assertThat(viewModel.takeLoadToFirstFrameDuration()).isNull()
-    }
-
-    @Test
-    fun `failed load does not start a first frame measurement`() = runTest {
-        val viewModel = createViewModel(shouldFailLoad = true)
-
-        assertThat(viewModel.takeLoadToFirstFrameDuration()).isNull()
-    }
-
-    @Test
     fun `creating viewmodel should regenerate analytics session ID`() {
         val beforeSessionId = AnalyticsRequestFactory.sessionId
         createViewModel()

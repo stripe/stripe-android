@@ -120,6 +120,8 @@ apiValidation {
             "payment-element-test-pages",
             "payments-core-testing",
             "paymentsheet-example",
+            "paymentsheet-benchmark-app",
+            "paymentsheet-benchmark",
             "stripecardscan-example",
             "connect-example",
             "screenshot-testing",

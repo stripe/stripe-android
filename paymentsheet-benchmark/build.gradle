@@ -1,0 +1,51 @@
+apply plugin: 'com.android.test'
+apply plugin: 'kotlin-android'
+apply from: rootProject.file('build-configuration/detekt.gradle')
+
+android {
+    namespace STRIPE_ANDROID_NAMESPACE
+    compileSdkVersion rootProject.ext.compileSdkVersion
+    targetProjectPath = ':paymentsheet-benchmark-app'
+    experimentalProperties['android.experimental.self-instrumenting'] = true
+
+    defaultConfig {
+        minSdkVersion 31
+        targetSdkVersion rootProject.ext.compileSdkVersion
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+    }
+    buildTypes {
+        debug {
+            debuggable true
+            matchingFallbacks = ['release']
+        }
+    }
+    testOptions {
+        animationsDisabled = false
+        managedDevices {
+            localDevices {
+                register('pixel2api33') {
+                    device = 'Pixel 2'
+                    apiLevel = 33
+                    // ATD uses software UI rendering and omits app surface FrameTimeline data.
+                    systemImageSource = 'google_apis'
+                }
+            }
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+    kotlin {
+        compilerOptions {
+            jvmTarget.set('JVM_11')
+        }
+    }
+}
+
+dependencies {
+    implementation testLibs.macrobenchmark
+    implementation testLibs.androidx.junit
+    implementation testLibs.androidx.testRunner
+    implementation testLibs.androidx.uiAutomator
+}

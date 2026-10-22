@@ -86,19 +86,6 @@ class DefaultEventReporterTest {
     }
 
     @Test
-    fun `load to first frame reports seconds and current integration metadata`() = runScenario {
-        paymentMethodMetadataStack.push(paymentMethodMetadataWithTestAnalyticsMetadata)
-
-        eventReporter.onLoadToFirstFrame(125.milliseconds)
-
-        val request = analyticsRequestExecutor.requestTurbine.awaitItem()
-        assertThat(request.params).containsEntry("event", "mc_load_to_first_frame")
-        assertThat(request.params).containsEntry("duration", 0.125f)
-        assertThat(request.params).containsEntry("example_from_test", true)
-        assertThat(request.params).containsEntry("payment_method_orientation", "horizontal")
-    }
-
-    @Test
     fun `onLoadStarted fires event`() = runScenario {
         durationProvider.startCalls.push(
             FakeDurationProvider.StartCall(

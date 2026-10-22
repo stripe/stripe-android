@@ -1,9 +1,6 @@
 package com.stripe.android.paymentsheet
 
-import android.app.Activity
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.Canvas
 import android.os.Build
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultCaller
@@ -34,7 +31,6 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
 import androidx.test.espresso.Espresso.pressBack
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import app.cash.turbine.Turbine
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
@@ -137,7 +133,6 @@ import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.robolectric.annotation.Config
-import org.robolectric.annotation.GraphicsMode
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import kotlin.test.AfterTest
@@ -219,39 +214,6 @@ internal class PaymentSheetActivityTest {
     fun cleanup() {
         WeakMapInjectorRegistry.clear()
         Dispatchers.resetMain()
-    }
-
-    @Test
-    @GraphicsMode(GraphicsMode.Mode.NATIVE)
-    fun `first frame timing waits for loaded content and is not repeated on navigation`() = runTest(testDispatcher) {
-        val firstFrameReporter = FakeFirstFrameEventReporter(eventReporter)
-        val viewModel = createViewModel(
-            loadDelay = 200.milliseconds,
-            eventReporter = firstFrameReporter,
-        )
-        val scenario = activityScenario(viewModel)
-
-        scenario.launch(intent).use {
-            scenario.onActivity { activity ->
-                composeTestRule.waitForIdle()
-                assertThat(viewModel.navigationHandler.currentScreen.value).isEqualTo(PaymentSheetScreen.Loading)
-                drawFrame(activity)
-                firstFrameReporter.durations.expectNoEvents()
-
-                testDispatcher.scheduler.advanceTimeBy(250)
-                composeTestRule.waitForIdle()
-                drawFrame(activity)
-            }
-
-            assertThat(firstFrameReporter.durations.awaitItem()).isAtLeast(Duration.ZERO)
-
-            scenario.onActivity { activity ->
-                viewModel.transitionToAddPaymentScreen()
-                composeTestRule.waitForIdle()
-                drawFrame(activity)
-            }
-            firstFrameReporter.durations.ensureAllEventsConsumed()
-        }
     }
 
     @Test
@@ -1295,7 +1257,6 @@ internal class PaymentSheetActivityTest {
     @Suppress("LongMethod")
     private fun createViewModel(
         paymentIntent: PaymentIntent = PAYMENT_INTENT,
-        eventReporter: EventReporter = this.eventReporter,
         paymentMethods: List<PaymentMethod> = PAYMENT_METHODS,
         loadDelay: Duration = Duration.ZERO,
         isGooglePayAvailable: Boolean = false,
@@ -1427,26 +1388,6 @@ internal class PaymentSheetActivityTest {
                 .isNotEmpty()
         }
         composeTestRule.onNodeWithTag(PAYMENT_SHEET_EDIT_BUTTON_TEST_TAG).performClick()
-    }
-
-    private fun drawFrame(activity: Activity) {
-        val view = activity.window.decorView
-        val bitmap = Bitmap.createBitmap(view.width, view.height, Bitmap.Config.ARGB_8888)
-        try {
-            // Robolectric can reach Compose idleness without drawing the View hierarchy.
-            view.draw(Canvas(bitmap))
-        } finally {
-            bitmap.recycle()
-        }
-        Espresso.onIdle()
-    }
-
-    private class FakeFirstFrameEventReporter(delegate: EventReporter) : EventReporter by delegate {
-        val durations = Turbine<Duration>()
-
-        override fun onLoadToFirstFrame(duration: Duration) {
-            durations.add(duration)
-        }
     }
 
     private companion object {

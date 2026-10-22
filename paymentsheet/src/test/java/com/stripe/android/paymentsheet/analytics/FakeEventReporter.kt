@@ -10,7 +10,6 @@ import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfi
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormViewModel
 import com.stripe.android.paymentsheet.state.WalletsState
-import kotlin.time.Duration
 
 @Suppress("EmptyFunctionBlock")
 internal class FakeEventReporter : EventReporter {
@@ -143,9 +142,6 @@ internal class FakeEventReporter : EventReporter {
         _billingAddressCompletedCalls.ensureAllEventsConsumed()
         _pmmPromotionsFetched.ensureAllEventsConsumed()
         _pmmPromotionsDisplayed.ensureAllEventsConsumed()
-    }
-
-    override fun onLoadToFirstFrame(duration: Duration) {
     }
 
     override fun onDismiss() {

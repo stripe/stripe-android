@@ -38,7 +38,6 @@ import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
@@ -204,14 +203,10 @@ internal fun PaymentSheetScreenContent(
         currentScreen.title(isCompleteFlow = type == Complete, isWalletEnabled = actualWalletsState != null)
     }.collectAsState()
 
-    val view = LocalView.current
     val contentModifier = if (viewModel is PaymentSheetViewModel && currentScreen != PaymentSheetScreen.Loading) {
         modifier.drawWithContent {
             drawContent()
-            viewModel.takeLoadToFirstFrameDuration()?.let { duration ->
-                // Capture the endpoint after drawing, but keep analytics work out of this draw.
-                view.post { viewModel.eventReporter.onLoadToFirstFrame(duration) }
-            }
+            viewModel.onFirstContentDrawn()
         }
     } else {
         modifier

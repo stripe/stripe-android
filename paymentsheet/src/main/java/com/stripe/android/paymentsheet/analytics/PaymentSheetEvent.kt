@@ -53,11 +53,6 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
             }
     }
 
-    class LoadToFirstFrame(duration: Duration) : PaymentSheetEvent() {
-        override val eventName: String = "mc_load_to_first_frame"
-        override val params: Map<String, Any?> = duration.mapOfDurationInSeconds()
-    }
-
     class LoadFailed(
         duration: Duration?,
         error: Throwable,
