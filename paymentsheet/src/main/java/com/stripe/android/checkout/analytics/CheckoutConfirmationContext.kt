@@ -7,4 +7,11 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 internal data class CheckoutConfirmationContext(
     val paymentSelection: PaymentSelection,
-) : Parcelable
+    val invocationSource: InvocationSource,
+    val activeLinkSession: Boolean,
+) : Parcelable {
+    enum class InvocationSource(val code: String) {
+        Merchant("merchant"),
+        ExpressCheckoutElement("express_checkout_element"),
+    }
+}

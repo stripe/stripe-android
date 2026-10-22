@@ -1,19 +1,23 @@
+@file:OptIn(com.stripe.android.paymentelement.CheckoutSessionPreview::class)
+
 package com.stripe.android.checkout
 
 import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.checkout.analytics.CheckoutConfirmationContext
+import com.stripe.android.checkout.analytics.CheckoutConfirmationContext.InvocationSource
 import com.stripe.android.checkout.analytics.CheckoutConfirmationEvent
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.utils.DurationProvider
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
-import com.stripe.android.lpmfoundations.paymentmethod.defaultAnalyticsParams
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
-import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationTypeKey
+import com.stripe.android.paymentelement.confirmation.intent.CheckoutSessionResponseKey
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.state.DefaultAnalyticsMetadataFactory
+import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.utils.toConfirmationError
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -26,10 +30,11 @@ import kotlin.coroutines.CoroutineContext
 internal class CheckoutAnalyticsPerformer @Inject constructor(
     private val confirmationHandler: ConfirmationHandler,
     private val savedStateHandle: SavedStateHandle,
+    private val stateHolder: CheckoutControllerStateHolder,
+    private val linkAccountHolder: LinkAccountHolder,
     context: Context,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val durationProvider: DurationProvider,
-    private val paymentMethodMetadataProvider: Provider<PaymentMethodMetadata?>,
     private val apiConfigurationProvider: Provider<ApiConfiguration.State>,
     @IOContext private val workContext: CoroutineContext,
 ) {
@@ -40,15 +45,11 @@ internal class CheckoutAnalyticsPerformer @Inject constructor(
     )
 
     fun onPaymentElementConfirmationStarted(paymentSelection: PaymentSelection) {
-        savedStateHandle[CONFIRMATION_CONTEXT_KEY] = CheckoutConfirmationContext(
-            paymentSelection = paymentSelection,
-        )
+        saveConfirmation(InvocationSource.Merchant, paymentSelection)
     }
 
     fun onExpressCheckoutElementConfirmationStarted(paymentSelection: PaymentSelection) {
-        savedStateHandle[CONFIRMATION_CONTEXT_KEY] = CheckoutConfirmationContext(
-            paymentSelection = paymentSelection,
-        )
+        saveConfirmation(InvocationSource.ExpressCheckoutElement, paymentSelection)
     }
 
     suspend fun reportConfirmationResults() {
@@ -69,19 +70,24 @@ internal class CheckoutAnalyticsPerformer @Inject constructor(
         result: ConfirmationHandler.Result,
         confirmationContext: CheckoutConfirmationContext,
     ) {
+        val confirmationResponse = (result as? ConfirmationHandler.Result.Succeeded)
+            ?.metadata?.get(CheckoutSessionResponseKey)
+        val response = confirmationResponse ?: stateHolder.state?.checkoutSessionResponse
+        val analyticsMetadata = DefaultAnalyticsMetadataFactory.create(response)
+
         when (result) {
             is ConfirmationHandler.Result.Succeeded -> reportEvent(
                 CheckoutConfirmationEvent.Succeeded(
                     confirmationContext = confirmationContext,
+                    analyticsMetadata = analyticsMetadata,
                     duration = durationProvider.end(DurationProvider.Key.Checkout),
-                    deferredIntentConfirmationType = result.metadata[DeferredIntentConfirmationTypeKey],
-                    intentId = result.intent.id,
                 )
             )
             is ConfirmationHandler.Result.Failed -> result.toConfirmationError()?.let { error ->
                 reportEvent(
                     CheckoutConfirmationEvent.Failed(
                         confirmationContext = confirmationContext,
+                        analyticsMetadata = analyticsMetadata,
                         duration = durationProvider.end(DurationProvider.Key.Checkout),
                         error = error,
                     )
@@ -92,18 +98,34 @@ internal class CheckoutAnalyticsPerformer @Inject constructor(
     }
 
     private fun reportEvent(event: CheckoutConfirmationEvent) {
-        val metadata = paymentMethodMetadataProvider.get()
-        val publishableKey = metadata?.apiConfiguration?.publishableKey
+        val publishableKey = stateHolder.state?.paymentMethodMetadata?.apiConfiguration?.publishableKey
             ?: apiConfigurationProvider.get().publishableKey
         CoroutineScope(workContext).launch {
             analyticsRequestExecutor.executeAsync(
                 analyticsRequestFactory.createRequest(
                     event = event,
-                    additionalParams = metadata.defaultAnalyticsParams() + event.params,
+                    additionalParams = event.params,
                     publishableKeyOverride = publishableKey,
                 )
             )
         }
+    }
+
+    private fun saveConfirmation(
+        invocationSource: InvocationSource,
+        paymentSelection: PaymentSelection,
+    ) {
+        val state = stateHolder.state
+        val metadata = when (invocationSource) {
+            InvocationSource.Merchant -> state?.paymentMethodMetadata
+            InvocationSource.ExpressCheckoutElement -> state?.expressCheckoutElementPaymentMethodMetadata
+        }
+        savedStateHandle[CONFIRMATION_CONTEXT_KEY] = CheckoutConfirmationContext(
+            paymentSelection = paymentSelection,
+            invocationSource = invocationSource,
+            activeLinkSession = linkAccountHolder.linkAccountInfo.value.account?.isVerified
+                ?: (metadata?.linkState?.loginState == LinkState.LoginState.LoggedIn),
+        )
     }
 
     private companion object {
