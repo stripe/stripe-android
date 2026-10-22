@@ -149,7 +149,7 @@ internal class CheckoutConfirmationPerformerTest {
         state = googlePayState(paymentSelection = PaymentSelection.GooglePay).copy(embeddedConfiguration = null),
     ) {
         performer.confirm()
-        assertRejection("Cannot confirm checkout with providing a PaymentElement configuration.")
+        assertRejection("Cannot confirm checkout without providing a PaymentElement configuration.")
 
         stateHolder.state = googlePayState(paymentSelection = PaymentSelection.GooglePay)
         performer.confirm()
