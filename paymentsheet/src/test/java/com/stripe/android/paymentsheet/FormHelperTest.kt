@@ -669,6 +669,58 @@ internal class FormHelperTest {
     }
 
     @Test
+    fun `classifying a displayed form does not recreate its controllers`() = runTest {
+        val selectionRequests = Turbine<PaymentMethodCode>()
+        val formHelper = createFormHelper(
+            newPaymentSelectionProvider = { code ->
+                selectionRequests.add(code)
+                null
+            },
+        )
+        formHelper.formElementsForCode("card")
+        assertThat(selectionRequests.awaitItem()).isEqualTo("card")
+
+        assertThat(formHelper.formTypeForCode("card")).isEqualTo(FormHelper.FormType.UserInteractionRequired)
+        assertThat(formHelper.formTypeForCode("card")).isEqualTo(FormHelper.FormType.UserInteractionRequired)
+
+        selectionRequests.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `classifying a card form does not create its controllers`() = runTest {
+        val selectionRequests = Turbine<PaymentMethodCode>()
+        val formHelper = createFormHelper(
+            newPaymentSelectionProvider = { code ->
+                selectionRequests.add(code)
+                null
+            },
+        )
+
+        assertThat(formHelper.formTypeForCode("card")).isEqualTo(FormHelper.FormType.UserInteractionRequired)
+        selectionRequests.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `reopening a form reads the latest selection`() = runTest {
+        val selectionRequests = Turbine<PaymentMethodCode>()
+        val formHelper = createFormHelper(
+            newPaymentSelectionProvider = { code ->
+                selectionRequests.add(code)
+                null
+            },
+        )
+        val firstElements = formHelper.formElementsForCode("card")
+        assertThat(selectionRequests.awaitItem()).isEqualTo("card")
+        formHelper.formTypeForCode("card")
+
+        val secondElements = formHelper.formElementsForCode("card")
+
+        assertThat(selectionRequests.awaitItem()).isEqualTo("card")
+        assertThat(secondElements).isNotSameInstanceAs(firstElements)
+        selectionRequests.ensureAllEventsConsumed()
+    }
+
+    @Test
     fun `formTypeForCode returns Empty for an LPM with no fields`() = runTest {
         val formHelper = createFormHelper(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(

@@ -1281,20 +1281,22 @@ internal class PaymentSheetActivityTest {
                 args = args,
                 customViewModelScope = coroutineScopeCleanupRule.track(CoroutineScope(Dispatchers.Unconfined)),
                 eventReporter = eventReporter,
-                paymentElementLoader = FakePaymentElementLoader(
-                    stripeIntent = paymentIntent,
-                    customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(paymentMethods = paymentMethods),
-                    isGooglePayAvailable = isGooglePayAvailable,
-                    linkState = LinkState(
-                        configuration = TestFactory.LINK_CONFIGURATION_WITH_INSTANT_DEBITS_ONBOARDING,
-                        loginState = LinkState.LoginState.LoggedOut,
-                        signupMode = null,
-                    ).takeIf { isLinkAvailable },
-                    delay = loadDelay,
-                    paymentSelection = initialPaymentSelection,
-                    cbcEligibility = cbcEligibility,
-                    integrationMetadata = integrationMetadata,
-                ),
+                paymentElementLoader = dagger.Lazy {
+                    FakePaymentElementLoader(
+                        stripeIntent = paymentIntent,
+                        customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(paymentMethods = paymentMethods),
+                        isGooglePayAvailable = isGooglePayAvailable,
+                        linkState = LinkState(
+                            configuration = TestFactory.LINK_CONFIGURATION_WITH_INSTANT_DEBITS_ONBOARDING,
+                            loginState = LinkState.LoginState.LoggedOut,
+                            signupMode = null,
+                        ).takeIf { isLinkAvailable },
+                        delay = loadDelay,
+                        paymentSelection = initialPaymentSelection,
+                        cbcEligibility = cbcEligibility,
+                        integrationMetadata = integrationMetadata,
+                    )
+                },
                 savedPaymentMethodRepository = FakeSavedPaymentMethodRepository(paymentMethods),
                 logger = Logger.noop(),
                 workContext = testDispatcher,

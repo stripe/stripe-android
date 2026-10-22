@@ -4,7 +4,6 @@ import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.ui.core.elements.BillingAddressElement
 import com.stripe.android.uicore.elements.AddressFieldsElement
@@ -86,25 +85,10 @@ internal class FormViewModel(
         externalHiddenIdentifiers.plus(cardBillingIdentifiers)
     }
 
-    // This will convert the save for future use value into a CustomerRequestedSave operation
-    private val userRequestedReuse = currentFieldValues().map { currentFieldValues ->
-        currentFieldValues.filter { it.first == FormFieldId.SaveForFutureUse }
-            .map { it.second.value.toBoolean() }
-            .map { saveForFutureUse ->
-                if (saveForFutureUse) {
-                    PaymentSelection.CustomerRequestedSave.RequestReuse
-                } else {
-                    PaymentSelection.CustomerRequestedSave.RequestNoReuse
-                }
-            }
-            .firstOrNull() ?: PaymentSelection.CustomerRequestedSave.NoRequest
-    }
-
     val completeFormValues =
         CompleteFormFieldValueFilter(
             currentFieldValues().map { it.toMap() },
             hiddenIdentifiers,
-            userRequestedReuse,
             formArguments.defaultFormValues,
         ).filterFlow()
 

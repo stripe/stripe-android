@@ -5,6 +5,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.model.Customer
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodUpdateParams
+import dagger.Lazy
 import javax.inject.Inject
 import javax.inject.Provider
 
@@ -37,8 +38,8 @@ internal interface SavedPaymentMethodRepository {
 }
 
 internal class DefaultSavedPaymentMethodRepository @Inject constructor(
-    private val customerRepository: CustomerRepository,
-    private val checkoutSessionRepository: CheckoutSessionRepository,
+    private val customerRepository: Lazy<CustomerRepository>,
+    private val checkoutSessionRepository: Lazy<CheckoutSessionRepository>,
     private val elementsSessionClientParams: ElementsSessionClientParams,
     private val apiConfigurationProvider: Provider<ApiConfiguration.State>,
 ) : SavedPaymentMethodRepository {
@@ -48,7 +49,7 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
         paymentMethodId: String,
     ): Result<PaymentMethod> = when (customerMetadata) {
         is CustomerMetadata.CheckoutSession -> {
-            checkoutSessionRepository.detachPaymentMethod(
+            checkoutSessionRepository.get().detachPaymentMethod(
                 sessionId = customerMetadata.sessionId,
                 paymentMethodId = paymentMethodId,
                 clientParams = elementsSessionClientParams,
@@ -57,7 +58,7 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
             }
         }
         is CustomerMetadata.CustomerSession -> {
-            customerRepository.detachPaymentMethodAndDuplicates(
+            customerRepository.get().detachPaymentMethodAndDuplicates(
                 customerId = customerMetadata.id,
                 ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
                 customerSessionClientSecret = customerMetadata.customerSessionClientSecret,
@@ -66,7 +67,7 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
             )
         }
         is CustomerMetadata.LegacyEphemeralKey -> {
-            customerRepository.detachPaymentMethod(
+            customerRepository.get().detachPaymentMethod(
                 customerId = customerMetadata.id,
                 ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
                 paymentMethodId = paymentMethodId,
@@ -81,7 +82,7 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
         params: PaymentMethodUpdateParams,
     ): Result<PaymentMethod> = when (customerMetadata) {
         is CustomerMetadata.CheckoutSession -> {
-            checkoutSessionRepository.updatePaymentMethod(
+            checkoutSessionRepository.get().updatePaymentMethod(
                 sessionId = customerMetadata.sessionId,
                 paymentMethodId = paymentMethodId,
                 params = params,
@@ -91,7 +92,7 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
             }
         }
         is CustomerMetadata.CustomerSession -> {
-            customerRepository.updatePaymentMethod(
+            customerRepository.get().updatePaymentMethod(
                 customerId = customerMetadata.id,
                 ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
                 paymentMethodId = paymentMethodId,
@@ -100,7 +101,7 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
             )
         }
         is CustomerMetadata.LegacyEphemeralKey -> {
-            customerRepository.updatePaymentMethod(
+            customerRepository.get().updatePaymentMethod(
                 customerId = customerMetadata.id,
                 ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
                 paymentMethodId = paymentMethodId,
@@ -118,7 +119,7 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
             Result.failure(NotImplementedError("Checkout sessions do not support setting default payment methods"))
         }
         is CustomerMetadata.CustomerSession -> {
-            customerRepository.setDefaultPaymentMethod(
+            customerRepository.get().setDefaultPaymentMethod(
                 customerId = customerMetadata.id,
                 ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
                 paymentMethodId = paymentMethodId,
@@ -126,7 +127,7 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
             )
         }
         is CustomerMetadata.LegacyEphemeralKey -> {
-            customerRepository.setDefaultPaymentMethod(
+            customerRepository.get().setDefaultPaymentMethod(
                 customerId = customerMetadata.id,
                 ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
                 paymentMethodId = paymentMethodId,
@@ -145,7 +146,7 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
             )
         }
         is CustomerMetadata.CustomerSession -> {
-            customerRepository.retrievePaymentMethod(
+            customerRepository.get().retrievePaymentMethod(
                 customerId = customerMetadata.id,
                 ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
                 paymentMethodId = paymentMethodId,
@@ -153,7 +154,7 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
             )
         }
         is CustomerMetadata.LegacyEphemeralKey -> {
-            customerRepository.retrievePaymentMethod(
+            customerRepository.get().retrievePaymentMethod(
                 customerId = customerMetadata.id,
                 ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
                 paymentMethodId = paymentMethodId,

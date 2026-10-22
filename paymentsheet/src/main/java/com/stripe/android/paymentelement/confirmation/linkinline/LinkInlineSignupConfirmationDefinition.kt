@@ -22,7 +22,7 @@ import kotlinx.parcelize.Parcelize
 
 internal class LinkInlineSignupConfirmationDefinition(
     private val linkConfigurationCoordinator: LinkConfigurationCoordinator,
-    private val linkAnalyticsHelper: LinkAnalyticsHelper,
+    private val linkAnalyticsHelper: Lazy<LinkAnalyticsHelper>,
     private val linkStore: LinkStore,
 ) : ConfirmationDefinition<
     LinkInlineSignupConfirmationOption,
@@ -109,7 +109,7 @@ internal class LinkInlineSignupConfirmationDefinition(
             )
             AccountStatus.VerificationStarted,
             is AccountStatus.NeedsVerification -> {
-                linkAnalyticsHelper.onLinkPopupSkipped()
+                linkAnalyticsHelper.value.onLinkPopupSkipped()
 
                 linkInlineSignupConfirmationOption.toOption()
             }
@@ -137,7 +137,7 @@ internal class LinkInlineSignupConfirmationDefinition(
         userInput: UserInput,
     ): PaymentMethodConfirmationOption {
         if (userInput is UserInput.SignIn) {
-            linkAnalyticsHelper.onLinkPopupSkipped()
+            linkAnalyticsHelper.value.onLinkPopupSkipped()
 
             return linkInlineSignupConfirmationOption.toOption()
         }

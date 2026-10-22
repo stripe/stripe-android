@@ -3,6 +3,9 @@
 NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
 
+### PaymentSheet
+* [Fixed] Reduced main-thread work during the first PaymentSheet presentation.
+
 ## 23.25.0 - 2026-10-21
 
 ### PaymentSheet

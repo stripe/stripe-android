@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.repositories
 
 import androidx.test.core.app.ApplicationProvider
+import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.core.networking.ApiRequest
@@ -37,6 +38,31 @@ class DefaultSavedPaymentMethodRepositoryTest {
         mobileAppId = "com.stripe.android.paymentsheet.test",
         mobileSessionIdProvider = { "test-session-id" },
     )
+
+    @Test
+    fun `constructing the repository does not resolve either backend`() {
+        val creations = Turbine<String>()
+        runScenario(onRepositoryCreated = creations::add) {
+            creations.expectNoEvents()
+        }
+        creations.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `customer operation only resolves the customer backend`() {
+        val creations = Turbine<String>()
+        runScenario(onRepositoryCreated = creations::add) {
+            repository.detachPaymentMethod(
+                customerMetadata = customerMetadata,
+                paymentMethodId = "pm_123",
+            )
+
+            assertThat(creations.awaitItem()).isEqualTo("customer")
+            assertThat(customerRepository.detachRequests.awaitItem().paymentMethodId).isEqualTo("pm_123")
+            customerRepository.ensureAllEventsConsumed()
+        }
+        creations.ensureAllEventsConsumed()
+    }
 
     @Test
     fun `detach routes to checkout session repository when customer is CheckoutSession`() = runScenario(
@@ -327,6 +353,7 @@ class DefaultSavedPaymentMethodRepositoryTest {
     private fun runScenario(
         customerMetadata: CustomerMetadata = SESSION_METADATA,
         retrievePaymentMethodResult: Result<PaymentMethod> = Result.failure(NotImplementedError()),
+        onRepositoryCreated: (String) -> Unit = {},
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val customerRepository = FakeCustomerRepository(
@@ -356,8 +383,14 @@ class DefaultSavedPaymentMethodRepositoryTest {
             },
         )
         val repository = DefaultSavedPaymentMethodRepository(
-            customerRepository = customerRepository,
-            checkoutSessionRepository = checkoutSessionRepository,
+            customerRepository = dagger.Lazy {
+                onRepositoryCreated("customer")
+                customerRepository
+            },
+            checkoutSessionRepository = dagger.Lazy {
+                onRepositoryCreated("checkoutSession")
+                checkoutSessionRepository
+            },
             elementsSessionClientParams = clientParams,
             apiConfigurationProvider = { DEFAULT_API_CONFIG },
         )

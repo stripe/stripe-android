@@ -222,7 +222,7 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
             PaymentSheetViewModel(
                 args = ARGS_CUSTOMER_WITH_GOOGLEPAY,
                 eventReporter = FakeEventReporter(),
-                paymentElementLoader = paymentElementLoader,
+                paymentElementLoader = dagger.Lazy { paymentElementLoader },
                 savedPaymentMethodRepository = FakeSavedPaymentMethodRepository(
                     customer?.paymentMethods ?: emptyList()
                 ),

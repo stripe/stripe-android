@@ -1,0 +1,30 @@
+# First PaymentSheet presentation: activity, form composition, and field layout.
+# Includes nested classes and generated Compose/coroutine callbacks for these paths.
+# Keep these library rules scoped to first-presentation code; see paymentsheet/PERFORMANCE.md.
+
+Lcom/stripe/android/uicore/elements/AddressElement**;
+HSPLcom/stripe/android/uicore/elements/AddressElement**->**(**)**
+Lcom/stripe/android/uicore/elements/Country**;
+HSPLcom/stripe/android/uicore/elements/Country**->**(**)**
+Lcom/stripe/android/uicore/elements/Dropdown**;
+HSPLcom/stripe/android/uicore/elements/Dropdown**->**(**)**
+Lcom/stripe/android/uicore/elements/SectionElementUIKt**;
+HSPLcom/stripe/android/uicore/elements/SectionElementUIKt**->**(**)**
+Lcom/stripe/android/uicore/elements/SectionFieldElementUIKt**;
+HSPLcom/stripe/android/uicore/elements/SectionFieldElementUIKt**->**(**)**
+Lcom/stripe/android/uicore/elements/SectionUIKt**;
+HSPLcom/stripe/android/uicore/elements/SectionUIKt**->**(**)**
+Lcom/stripe/android/uicore/elements/SimpleTextFieldController**;
+HSPLcom/stripe/android/uicore/elements/SimpleTextFieldController**->**(**)**
+Lcom/stripe/android/uicore/elements/TextFieldUIKt**;
+HSPLcom/stripe/android/uicore/elements/TextFieldUIKt**->**(**)**
+Lcom/stripe/android/uicore/elements/bottomsheet/StripeBottomSheet**;
+HSPLcom/stripe/android/uicore/elements/bottomsheet/StripeBottomSheet**->**(**)**
+Lcom/stripe/android/uicore/elements/compat/CompatTextFieldKt**;
+HSPLcom/stripe/android/uicore/elements/compat/CompatTextFieldKt**->**(**)**
+Lcom/stripe/android/uicore/elements/compat/TextFieldLayoutKt**;
+HSPLcom/stripe/android/uicore/elements/compat/TextFieldLayoutKt**->**(**)**
+Lcom/stripe/android/uicore/elements/compat/TextFieldTransitionScope**;
+HSPLcom/stripe/android/uicore/elements/compat/TextFieldTransitionScope**->**(**)**
+Lcom/stripe/android/uicore/utils/StateFlow**;
+HSPLcom/stripe/android/uicore/utils/StateFlow**->**(**)**

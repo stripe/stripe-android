@@ -71,11 +71,16 @@ internal class DefaultFormDefinitionFactory(
     private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper?,
     private val isNfcScanningAvailable: IsNfcScanningAvailable?,
 ) : FormDefinitionFactory {
+    // Classification is reusable; controllers must still be created with the latest selection.
+    private val formTypes = mutableMapOf<PaymentMethodCode, FormHelper.FormType>()
+
     override fun formElementsForCode(code: PaymentMethodCode): List<FormElement> {
-        return paymentMethodMetadata.formElementsForCode(
+        val elements = paymentMethodMetadata.formElementsForCode(
             code = code,
             uiDefinitionFactoryArgumentsFactory = createArgumentsFactory(code),
         ) ?: emptyList()
+        formTypes[code] = formTypeForCode(code, elements)
+        return elements
     }
 
     override fun createFormArguments(paymentMethodCode: PaymentMethodCode): FormArguments {
@@ -96,8 +101,14 @@ internal class DefaultFormDefinitionFactory(
     }
 
     override fun formTypeForCode(paymentMethodCode: PaymentMethodCode): FormHelper.FormType {
-        val formElements = formElementsForCode(paymentMethodCode)
-        return formTypeForCode(paymentMethodCode, formElements)
+        return formTypes[paymentMethodCode] ?: when {
+            paymentMethodCode == PaymentMethod.Type.USBankAccount.code ||
+                paymentMethodCode == PaymentMethod.Type.Link.code -> FormHelper.FormType.UserInteractionRequired
+            paymentMethodCode == PaymentMethod.Type.Card.code &&
+                paymentMethodMetadata.supportedPaymentMethodForCode(paymentMethodCode) != null ->
+                FormHelper.FormType.UserInteractionRequired
+            else -> formTypeForCode(paymentMethodCode, formElementsForCode(paymentMethodCode))
+        }.also { formTypes[paymentMethodCode] = it }
     }
 
     private fun createArgumentsFactory(code: PaymentMethodCode): UiDefinitionFactory.Arguments.Factory {

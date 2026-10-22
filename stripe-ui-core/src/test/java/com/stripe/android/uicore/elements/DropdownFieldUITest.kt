@@ -14,6 +14,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.text.AnnotatedString
 import com.google.common.truth.Truth.assertThat
@@ -31,6 +32,22 @@ class DropdownFieldUITest {
 
     @get:Rule
     val composeCleanupRule = createComposeCleanupRule()
+
+    @Test
+    fun `country selection uses a display without an embedded text editor`() {
+        val controller = countryController(setOf("AT", "IT"), Locale.US)
+
+        runScenario(controller) {
+            composeTestRule.onAllNodes(
+                SemanticsMatcher.keyIsDefined(SemanticsProperties.EditableText),
+                useUnmergedTree = true,
+            ).assertCountEquals(0)
+            composeTestRule.onNodeWithTag("DropDown:normal").performClick()
+            composeTestRule.onNodeWithText("Italy", substring = true).performClick()
+            assertThat(controller.rawFieldValue.value).isEqualTo("IT")
+            composeTestRule.onNodeWithText("Italy").assertIsDisplayed()
+        }
+    }
 
     @Test
     fun `country code autofill updates selection and canonical value`() {

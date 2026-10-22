@@ -33,7 +33,6 @@ class CompleteFormFieldValueFilterTest {
     private val transformElementToFormFieldValueFlow = CompleteFormFieldValueFilter(
         fieldFlow,
         hiddenIdentifersFlow,
-        userRequestedReuse = MutableStateFlow(PaymentSelection.CustomerRequestedSave.NoRequest),
         defaultValues = emptyMap(),
     )
 
@@ -50,6 +49,49 @@ class CompleteFormFieldValueFilterTest {
                     listOf(emailController)
                 )
             )
+        }
+    }
+
+    @Test
+    fun `save preference and field values come from the same snapshot`() = runTest {
+        fieldFlow.value = mapOf(FormFieldId.SaveForFutureUse to FormFieldEntry("true", true))
+
+        transformElementToFormFieldValueFlow.filterFlow().test {
+            val optedIn = requireNotNull(awaitItem())
+            assertThat(optedIn.userRequestedReuse).isEqualTo(PaymentSelection.CustomerRequestedSave.RequestReuse)
+            assertThat(optedIn.fieldValuePairs[FormFieldId.SaveForFutureUse]?.value).isEqualTo("true")
+
+            fieldFlow.value = mapOf(FormFieldId.SaveForFutureUse to FormFieldEntry("false", true))
+
+            val optedOut = requireNotNull(awaitItem())
+            assertThat(optedOut.userRequestedReuse).isEqualTo(PaymentSelection.CustomerRequestedSave.RequestNoReuse)
+            assertThat(optedOut.fieldValuePairs[FormFieldId.SaveForFutureUse]?.value).isEqualTo("false")
+            expectNoEvents()
+        }
+    }
+
+    @Test
+    fun `hidden save field still determines save preference`() = runTest {
+        fieldFlow.value = mapOf(FormFieldId.SaveForFutureUse to FormFieldEntry("true", true))
+        hiddenIdentifersFlow.value = setOf(FormFieldId.SaveForFutureUse)
+
+        transformElementToFormFieldValueFlow.filterFlow().test {
+            val values = requireNotNull(awaitItem())
+            assertThat(values.userRequestedReuse).isEqualTo(PaymentSelection.CustomerRequestedSave.RequestReuse)
+            assertThat(values.fieldValuePairs).doesNotContainKey(FormFieldId.SaveForFutureUse)
+        }
+    }
+
+    @Test
+    fun `absent save field preserves no preference regardless of defaults`() = runTest {
+        val filter = CompleteFormFieldValueFilter(
+            currentFieldValueMap = MutableStateFlow(emptyMap()),
+            hiddenIdentifiers = hiddenIdentifersFlow,
+            defaultValues = mapOf(FormFieldId.SaveForFutureUse to "true"),
+        )
+
+        filter.filterFlow().test {
+            assertThat(awaitItem()?.userRequestedReuse).isEqualTo(PaymentSelection.CustomerRequestedSave.NoRequest)
         }
     }
 
@@ -121,7 +163,6 @@ class CompleteFormFieldValueFilterTest {
         val formFieldValueFilter = CompleteFormFieldValueFilter(
             fieldFlow,
             hiddenIdentifersFlow,
-            userRequestedReuse = MutableStateFlow(PaymentSelection.CustomerRequestedSave.NoRequest),
             defaultValues = mapOf(
                 FormFieldId.Name to "Jane Doe",
                 FormFieldId.Email to "foo@bar.com",
@@ -148,7 +189,6 @@ class CompleteFormFieldValueFilterTest {
         val formFieldValueFilter = CompleteFormFieldValueFilter(
             fieldFlow,
             hiddenIdentifersFlow,
-            userRequestedReuse = MutableStateFlow(PaymentSelection.CustomerRequestedSave.NoRequest),
             defaultValues = mapOf(
                 FormFieldId.Name to "Jane Doe",
                 FormFieldId.Email to "foo@bar.com",

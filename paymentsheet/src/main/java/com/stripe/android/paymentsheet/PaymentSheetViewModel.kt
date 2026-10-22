@@ -23,6 +23,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.ViewModelScope
+import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
@@ -73,8 +74,10 @@ import com.stripe.android.paymentsheet.viewmodels.PrimaryButtonUiStateMapper
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
+import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -84,6 +87,7 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
@@ -93,7 +97,7 @@ import kotlin.coroutines.CoroutineContext
 internal class PaymentSheetViewModel @Inject internal constructor(
     internal val args: PaymentSheetContract.Args,
     eventReporter: EventReporter,
-    private val paymentElementLoader: PaymentElementLoader,
+    private val paymentElementLoader: Lazy<PaymentElementLoader>,
     savedPaymentMethodRepository: SavedPaymentMethodRepository,
     private val logger: Logger,
     @IOContext workContext: CoroutineContext,
@@ -303,14 +307,18 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     private suspend fun loadPaymentSheetState() {
         val result = withContext(workContext) {
-            paymentElementLoader.load(
-                initializationMode = args.initializationMode,
-                integrationConfiguration = PaymentElementLoader.Configuration.PaymentSheet(args.config),
-                metadata = PaymentElementLoader.Metadata(
-                    isReloadingAfterProcessDeath = confirmationHandler.hasReloadedFromProcessDeath,
-                    initializedViaCompose = args.initializedViaCompose,
+            coroutineScope {
+                // Prepare localized country dropdown data before building the form on Main.
+                launch { CountryUtils.getOrderedCountries(Locale.getDefault()) }
+                paymentElementLoader.get().load(
+                    initializationMode = args.initializationMode,
+                    integrationConfiguration = PaymentElementLoader.Configuration.PaymentSheet(args.config),
+                    metadata = PaymentElementLoader.Metadata(
+                        isReloadingAfterProcessDeath = confirmationHandler.hasReloadedFromProcessDeath,
+                        initializedViaCompose = args.initializedViaCompose,
+                    )
                 )
-            )
+            }
         }
 
         result.fold(

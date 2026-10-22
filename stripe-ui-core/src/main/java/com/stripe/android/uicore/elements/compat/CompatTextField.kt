@@ -79,6 +79,39 @@ import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.R as ComposeUiR
 
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+internal fun CompatTextFieldDisplay(
+    value: String,
+    label: @Composable () -> Unit,
+    trailingIcon: @Composable (() -> Unit)?,
+    isError: Boolean,
+    colors: TextFieldColors,
+    contentPadding: PaddingValues,
+    modifier: Modifier,
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val textStyle = LocalTextStyle.current
+    val textColor = textStyle.color.takeOrElse { colors.textColor(false).value }
+    Box(
+        modifier
+            .indicatorLine(false, isError, interactionSource, colors)
+            .errorSemanticsWithDefault(isError, null)
+    ) {
+        InsetDecorationBox(
+            value = value,
+            innerTextField = { Text(value, style = textStyle.merge(TextStyle(color = textColor))) },
+            enabled = false,
+            label = label,
+            trailingIcon = trailingIcon,
+            isError = isError,
+            interactionSource = interactionSource,
+            colors = colors,
+            contentPadding = contentPadding,
+        )
+    }
+}
+
 /**
  * Custom filled [TextField] composable for Stripe purposes.
  *
