@@ -33,7 +33,9 @@ internal class CheckoutConfirmationPerformer @Inject constructor(
                 IllegalStateException("Cannot confirm checkout without a selected payment option.")
             )
             val embeddedConfiguration = state.embeddedConfiguration ?: return@tryBeginConfirmation Result.failure(
-                IllegalStateException("Cannot confirm checkout with providing a PaymentElement configuration.")
+                IllegalStateException(
+                    "Cannot confirm checkout without providing a PaymentElement configuration."
+                )
             )
             val args = confirmationArgs(
                 state = state,

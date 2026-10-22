@@ -86,7 +86,7 @@ internal class CheckoutConfirmationPerformerTest {
     ) {
         performer.confirm()
 
-        assertRejection("Cannot confirm checkout with providing a PaymentElement configuration.")
+        assertRejection("Cannot confirm checkout without providing a PaymentElement configuration.")
         assertThat(operationCoordinator.isUpdating.value).isFalse()
     }
 

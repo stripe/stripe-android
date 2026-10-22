@@ -753,7 +753,7 @@ internal class CheckoutControllerTest {
         )
         val state = recreated.stateHolder.state
         assertThat(state).isNotNull()
-        assertThat(requireNotNull(state?.embeddedConfiguration).merchantDisplayName)
+        assertThat(state!!.embeddedConfiguration?.merchantDisplayName)
             .isEqualTo(expectedMerchantDisplayName)
     }
 
@@ -1047,7 +1047,7 @@ internal class CheckoutControllerTest {
 
         result.getOrThrow()
         assertThat(controller.session.value?.email).isEqualTo("background@example.com")
-        assertThat(requireNotNull(committedState().embeddedConfiguration).defaultBillingDetails?.email)
+        assertThat(committedState().embeddedConfiguration?.defaultBillingDetails?.email)
             .isEqualTo("background@example.com")
         assertThat(
             (committedState().paymentMethodMetadata.integrationMetadata as IntegrationMetadata.CheckoutSession)
@@ -1061,7 +1061,7 @@ internal class CheckoutControllerTest {
     ) {
         controller.updateEmail("local@example.com").getOrThrow()
         assertThat(controller.session.value?.email).isEqualTo("local@example.com")
-        assertThat(requireNotNull(committedState().embeddedConfiguration).defaultBillingDetails?.email)
+        assertThat(committedState().embeddedConfiguration?.defaultBillingDetails?.email)
             .isEqualTo("local@example.com")
 
         assertThat(
@@ -1072,7 +1072,7 @@ internal class CheckoutControllerTest {
 
         result.getOrThrow()
         assertThat(controller.session.value?.email).isNull()
-        assertThat(requireNotNull(committedState().embeddedConfiguration).defaultBillingDetails?.email).isNull()
+        assertThat(committedState().embeddedConfiguration?.defaultBillingDetails?.email).isNull()
         assertThat(
             (committedState().paymentMethodMetadata.integrationMetadata as IntegrationMetadata.CheckoutSession)
                 .collectedEmail
