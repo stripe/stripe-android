@@ -19,7 +19,9 @@ internal object TouchNGoDefinition : PaymentMethodDefinition {
         hasIntentToSetup: Boolean
     ): Set<AddPaymentMethodRequirement> = emptySet()
 
-    override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = metadata.hasIntentToSetup(type.code)
+    override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean {
+        return metadata.hasIntentToSetup(type.code) && metadata.mandateAllowed(type)
+    }
 
     override fun uiDefinitionFactory(
         metadata: PaymentMethodMetadata
@@ -39,13 +41,11 @@ private object TouchNGoUiDefinitionFactory : UiDefinitionFactory.Simple() {
         arguments: UiDefinitionFactory.Arguments,
         builder: FormElementsBuilder,
     ) {
-        if (TouchNGoDefinition.requiresMandate(metadata) && metadata.mandateAllowed(PaymentMethod.Type.TouchNGo)) {
-            builder.footer(
-                MandateTextElement(
-                    stringResId = R.string.stripe_touch_n_go_mandate,
-                    args = listOf(arguments.merchantName),
-                )
-            )
-        }
+        builder.addMandateIfAllowed(
+            formElement = MandateTextElement(
+                stringResId = R.string.stripe_touch_n_go_mandate,
+                args = listOf(arguments.merchantName),
+            ),
+        )
     }
 }

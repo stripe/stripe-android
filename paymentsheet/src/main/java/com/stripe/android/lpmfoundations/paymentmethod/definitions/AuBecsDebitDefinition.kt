@@ -33,7 +33,7 @@ internal object AuBecsDebitDefinition : PaymentMethodDefinition {
         AddPaymentMethodRequirement.MerchantSupportsDelayedPaymentMethods,
     )
 
-    override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = true
+    override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = metadata.mandateAllowed(type)
 
     override fun uiDefinitionFactory(
         metadata: PaymentMethodMetadata
@@ -99,15 +99,11 @@ private object AuBecsDebitUiDefinitionFactory : UiDefinitionFactory.Simple() {
                     ),
                 )
             )
-            .apply {
-                if (metadata.mandateAllowed(AuBecsDebitDefinition.type)) {
-                    footer(
-                        AuBecsDebitMandateTextElement(
-                            identifier = FormFieldId.Generic("au_becs_mandate"),
-                            merchantName = arguments.merchantName,
-                        )
-                    )
-                }
-            }
+            .addMandateIfAllowed(
+                formElement = AuBecsDebitMandateTextElement(
+                    identifier = FormFieldId.Generic("au_becs_mandate"),
+                    merchantName = arguments.merchantName,
+                )
+            )
     }
 }

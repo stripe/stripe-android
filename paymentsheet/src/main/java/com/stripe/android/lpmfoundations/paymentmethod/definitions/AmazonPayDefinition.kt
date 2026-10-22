@@ -44,14 +44,12 @@ private object AmazonPayUiDefinitionFactory : UiDefinitionFactory.Simple() {
         arguments: UiDefinitionFactory.Arguments,
         builder: FormElementsBuilder,
     ) {
-        if (AmazonPayDefinition.requiresMandate(metadata)) {
-            builder.footer(
-                MandateTextElement(
-                    identifier = FormFieldId.Generic("mandate"),
-                    stringResId = R.string.stripe_amazon_pay_mandate,
-                    args = listOf(arguments.merchantName)
-                )
-            )
-        }
+        builder.addMandateIfAllowed(
+            formElement = MandateTextElement(
+                identifier = FormFieldId.Generic("mandate"),
+                stringResId = R.string.stripe_amazon_pay_mandate,
+                args = listOf(arguments.merchantName)
+            ),
+        )
     }
 }

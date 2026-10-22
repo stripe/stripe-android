@@ -41,13 +41,11 @@ private object RevolutPayUiDefinitionFactory : UiDefinitionFactory.Simple() {
         arguments: UiDefinitionFactory.Arguments,
         builder: FormElementsBuilder
     ) {
-        if (RevolutPayDefinition.requiresMandate(metadata)) {
-            builder.footer(
-                MandateTextElement(
-                    stringResId = R.string.stripe_revolut_mandate,
-                    args = listOf(arguments.merchantName)
-                )
-            )
-        }
+        builder.addMandateIfAllowed(
+            formElement = MandateTextElement(
+                stringResId = R.string.stripe_revolut_mandate,
+                args = listOf(arguments.merchantName)
+            ),
+        )
     }
 }
