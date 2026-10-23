@@ -146,6 +146,35 @@ class AddressElementTest {
     }
 
     @Test
+    fun `returning to a country reuses edited fields`() = runTest {
+        val addressElement = AddressElement(
+            FormFieldId.Generic("address"),
+            rawValuesMap = mapOf(FormFieldId.Country to "US"),
+            countryCodes = setOf("US", "CA"),
+            sameAsShippingElement = null,
+            shippingValuesMap = null,
+        )
+        val formValues = addressElement.getFormFieldValueFlow()
+        val usController = addressElement.fields.postalCodeController()
+        usController.onValueChange("10001")
+        assertThat(formValues.value.toMap()[FormFieldId.PostalCode])
+            .isEqualTo(FormFieldEntry("10001", true))
+
+        addressElement.countryElement.controller.onRawValueChange("CA")
+        val caController = addressElement.fields.postalCodeController()
+        assertThat(caController).isNotSameInstanceAs(usController)
+        caController.onValueChange("A1B2C3")
+        assertThat(formValues.value.toMap()[FormFieldId.PostalCode])
+            .isEqualTo(FormFieldEntry("A1B2C3", true))
+
+        addressElement.countryElement.controller.onRawValueChange("US")
+
+        assertThat(addressElement.fields.postalCodeController()).isSameInstanceAs(usController)
+        assertThat(formValues.value.toMap()[FormFieldId.PostalCode])
+            .isEqualTo(FormFieldEntry("10001", true))
+    }
+
+    @Test
     fun `changing country rebuilds form values`() = runTest {
         val addressElement = AddressElement(
             FormFieldId.Generic("address"),
