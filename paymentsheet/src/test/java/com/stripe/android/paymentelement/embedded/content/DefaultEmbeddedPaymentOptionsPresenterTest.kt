@@ -23,10 +23,12 @@ import kotlin.test.Test
 
 internal class DefaultEmbeddedPaymentOptionsPresenterTest {
     @Test
-    fun `present does nothing when state is null`() = runScenario {
+    fun `present reports error when state is null`() = runScenario {
         presenter.present()
 
-        assertThat(errorReporter.getLoggedErrors()).isEmpty()
+        assertThat(errorReporter.awaitCall().errorEvent.eventName).isEqualTo(
+            "unexpected_error.embedded.present_payment_options.not_configured"
+        )
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
     }
 
@@ -36,7 +38,7 @@ internal class DefaultEmbeddedPaymentOptionsPresenterTest {
     ) {
         presenter.present()
 
-        assertThat(errorReporter.getLoggedErrors()).containsExactly(
+        assertThat(errorReporter.awaitCall().errorEvent.eventName).isEqualTo(
             "unexpected_error.embedded.present_payment_options.no_launcher"
         )
     }
@@ -96,6 +98,8 @@ internal class DefaultEmbeddedPaymentOptionsPresenterTest {
         )
 
         Scenario(presenter, sheetStateHolder, errorReporter).block()
+
+        errorReporter.ensureAllEventsConsumed()
     }
 
     private data class Scenario(

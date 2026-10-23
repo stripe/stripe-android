@@ -41,6 +41,7 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedPaymentOptionsPresenter
 import com.stripe.android.paymentelement.embedded.content.EmbeddedSheetLauncher
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.createCustomerState
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -82,7 +83,9 @@ internal class CheckoutLinkPaymentOptionsPresenterTest {
 
         presenter.present()
 
-        assertThat(errorReporter.getLoggedErrors()).isEmpty()
+        assertThat(errorReporter.awaitCall().errorEvent).isEqualTo(
+            ErrorReporter.UnexpectedErrorEvent.EMBEDDED_PRESENT_PAYMENT_OPTIONS_NOT_CONFIGURED
+        )
         verifyLinkWasNotPresented()
         sheetLauncher.paymentOptionsCalls.expectNoEvents()
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()

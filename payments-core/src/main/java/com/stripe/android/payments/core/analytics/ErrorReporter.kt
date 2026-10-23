@@ -311,6 +311,9 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         EMBEDDED_SHEET_LAUNCHER_EMBEDDED_STATE_IS_NULL(
             partialEventName = "embedded.embedded_sheet_launcher.embedded_state_is_null"
         ),
+        EMBEDDED_PRESENT_PAYMENT_OPTIONS_NOT_CONFIGURED(
+            partialEventName = "embedded.present_payment_options.not_configured"
+        ),
         EMBEDDED_PRESENT_PAYMENT_OPTIONS_NO_LAUNCHER(
             partialEventName = "embedded.present_payment_options.no_launcher"
         ),
