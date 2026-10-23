@@ -361,7 +361,11 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             launch { integrityRequestManager.prepare() }
         }
 
-        fetchPaymentMethodMessaging(elementsSession, apiConfiguration)
+        val isPaymentMethodMessagingEnabled =
+            initializationMode !is PaymentElementLoader.InitializationMode.CheckoutSession
+        if (isPaymentMethodMessagingEnabled) {
+            fetchPaymentMethodMessaging(elementsSession, apiConfiguration)
+        }
 
         val isGooglePayReady = isGooglePayReady(
             configuration = configuration,
@@ -479,7 +483,9 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             state = state
         )
 
-        logPaymentMethodMessagingExposure(pmMetadata)
+        if (isPaymentMethodMessagingEnabled) {
+            logPaymentMethodMessagingExposure(pmMetadata)
+        }
 
         reportSuccessfulLoad(
             elementsSession = elementsSession,

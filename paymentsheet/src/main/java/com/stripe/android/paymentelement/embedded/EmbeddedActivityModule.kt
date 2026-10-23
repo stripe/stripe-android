@@ -19,6 +19,7 @@ import com.stripe.android.core.utils.RealUserFacingLogger
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.checkoutSessionResponse
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
@@ -57,6 +58,7 @@ import com.stripe.android.paymentsheet.addresselement.analytics.DefaultAddressLa
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.repositories.NoOpPromotionsHelper
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.repositories.PrefetchedPaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
@@ -293,11 +295,15 @@ internal interface EmbeddedActivityModule {
         @Provides
         fun providesPaymentMethodMessagePromotionHelper(
             promotions: List<PaymentMethodMessagePromotion>,
-            eventReporter: EventReporter
-        ): PaymentMethodMessagePromotionsHelper = PrefetchedPaymentMethodMessagePromotionsHelper(
-            promotions,
-            eventReporter
-        )
+            eventReporter: EventReporter,
+            paymentMethodMetadata: PaymentMethodMetadata,
+        ): PaymentMethodMessagePromotionsHelper {
+            return if (paymentMethodMetadata.checkoutSessionResponse != null) {
+                NoOpPromotionsHelper()
+            } else {
+                PrefetchedPaymentMethodMessagePromotionsHelper(promotions, eventReporter)
+            }
+        }
     }
 }
 

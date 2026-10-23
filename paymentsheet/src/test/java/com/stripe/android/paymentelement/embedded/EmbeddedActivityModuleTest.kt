@@ -2,8 +2,14 @@ package com.stripe.android.paymentelement.embedded
 
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.ElementsSession
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.model.PaymentMethodMessageLearnMore
+import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.embedded.manage.ManageLaunchSavedPaymentMethodSelector
 import com.stripe.android.paymentelement.embedded.sheet.SheetTaxRegionUpdater
@@ -12,7 +18,10 @@ import com.stripe.android.paymentsheet.addresselement.BillingInlineAutocompleteA
 import com.stripe.android.paymentsheet.addresselement.FakeStripeAutocompleteRepository
 import com.stripe.android.paymentsheet.addresselement.PaymentElementAutocompleteAddressInteractor
 import com.stripe.android.paymentsheet.addresselement.analytics.FakeAddressLauncherEventReporter
+import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
+import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -81,6 +90,33 @@ internal class EmbeddedActivityModuleTest {
         }
     }
 
+    @Test
+    fun `checkout sheets do not provide promotions or report promotion displays`() = runPromotionsScenario(
+        integrationMetadata = IntegrationMetadata.CheckoutSession(
+            id = "cs_123",
+            instancesKey = "checkout",
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+            collectedEmail = null,
+        ),
+    ) { helper ->
+        assertThat(helper.getPromotions()).isNull()
+        assertThat(helper.getPromotionIfAvailableForCode(PaymentMethod.Type.Affirm.code, metadata)).isNull()
+        assertThat(helper.getPromotionProvider(PaymentMethod.Type.Affirm.code, metadata)).isNull()
+        helper.reportPromotionDisplayed(PaymentMethod.Type.Affirm.code, metadata)
+        eventReporter.pmmPromotionsDisplayed.expectNoEvents()
+    }
+
+    @Test
+    fun `standalone embedded sheets continue to provide promotions and report displays`() = runPromotionsScenario(
+        integrationMetadata = IntegrationMetadata.IntentFirst("secret"),
+    ) { helper ->
+        assertThat(helper.getPromotions()).containsExactly(promotion)
+        assertThat(helper.getPromotionIfAvailableForCode(PaymentMethod.Type.Affirm.code, metadata)).isEqualTo(promotion)
+        assertThat(helper.getPromotionProvider(PaymentMethod.Type.Affirm.code, metadata)?.invoke()).isEqualTo(promotion)
+        helper.reportPromotionDisplayed(PaymentMethod.Type.Affirm.code, metadata)
+        assertThat(eventReporter.pmmPromotionsDisplayed.awaitItem()).isTrue()
+    }
+
     private fun runScenario(
         shouldUseAutocompleteProxyEndpoints: Boolean,
         block: suspend Scenario.() -> Unit,
@@ -103,4 +139,40 @@ internal class EmbeddedActivityModuleTest {
     private data class Scenario(
         val interactor: AutocompleteAddressInteractor,
     )
+
+    private fun runPromotionsScenario(
+        integrationMetadata: IntegrationMetadata,
+        block: suspend PromotionsScenario.(PaymentMethodMessagePromotionsHelper) -> Unit,
+    ) = runTest {
+        val eventReporter = FakeEventReporter()
+        val metadata = PaymentMethodMetadataFactory.create(
+            integrationMetadata = integrationMetadata,
+            experimentsData = ElementsSession.ExperimentsData(
+                arbId = "arb_123",
+                experimentAssignments = mapOf(
+                    ElementsSession.ExperimentAssignment.OCS_MOBILE_PAYMENT_METHOD_MESSAGING_PROMOTIONS to "treatment"
+                ),
+            ),
+        )
+        val helper = EmbeddedActivityModule.providesPaymentMethodMessagePromotionHelper(
+            promotions = listOf(promotion),
+            eventReporter = eventReporter,
+            paymentMethodMetadata = metadata,
+        )
+        PromotionsScenario(metadata, eventReporter).block(helper)
+        eventReporter.validate()
+    }
+
+    private data class PromotionsScenario(
+        val metadata: PaymentMethodMetadata,
+        val eventReporter: FakeEventReporter,
+    )
+
+    private companion object {
+        val promotion = PaymentMethodMessagePromotion(
+            paymentMethodType = PaymentMethod.Type.Affirm.code,
+            message = "Promotion",
+            learnMore = PaymentMethodMessageLearnMore(message = "Learn more", url = "https://example.com"),
+        )
+    }
 }
