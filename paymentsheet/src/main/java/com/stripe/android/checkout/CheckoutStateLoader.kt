@@ -85,7 +85,7 @@ internal class CheckoutStateLoader @Inject constructor(
             checkoutSessionResponse = response,
             collectedDetails = collectedDetails,
         )
-        embeddedConfig.appearance.parseAppearance()
+        embeddedConfig?.appearance?.parseAppearance()
 
         val commonConfiguration = commonConfigurationFactory.create(
             configuration = configuration,
@@ -140,9 +140,11 @@ internal class CheckoutStateLoader @Inject constructor(
         loadResults: LoadResults,
         carryForward: CarryForward,
         commonConfiguration: CommonConfiguration,
-        embeddedConfig: EmbeddedPaymentElement.Configuration,
+        embeddedConfig: EmbeddedPaymentElement.Configuration?,
     ): PaymentSelection? {
-        return loadResults.paymentMethodMetadata?.let {
+        return if (loadResults.paymentMethodMetadata == null || embeddedConfig == null) {
+            null
+        } else {
             // Preserve the customer's existing selection across reloads when it's still valid, rather
             // than blindly adopting the loader's recomputed selection (reuses the embedded logic). The
             // previous selection comes from the incoming state, not a separate holder. An empty
@@ -162,7 +164,7 @@ internal class CheckoutStateLoader @Inject constructor(
 
     private suspend fun loadPaymentElements(
         initializationMode: PaymentElementLoader.InitializationMode,
-        embeddedConfiguration: EmbeddedPaymentElement.Configuration,
+        embeddedConfiguration: EmbeddedPaymentElement.Configuration?,
         paymentMethodLayout: PaymentSheet.PaymentMethodLayout,
         expressCheckoutElementConfiguration: CommonConfiguration?,
     ): LoadResults = coroutineScope {
@@ -170,16 +172,18 @@ internal class CheckoutStateLoader @Inject constructor(
             isReloadingAfterProcessDeath = false,
             initializedViaCompose = false,
         )
-        val paymentElementStateDeferred = async {
-            paymentElementLoader.load(
-                initializationMode = initializationMode,
-                integrationConfiguration = PaymentElementLoader.Configuration.Embedded(
-                    isRowSelectionImmediateAction = internalRowSelectionCallback.get() != null,
-                    configuration = embeddedConfiguration,
-                    paymentMethodLayout = paymentMethodLayout,
-                ),
-                metadata = metadata,
-            ).getOrThrow()
+        val paymentElementStateDeferred = embeddedConfiguration?.let {
+            async {
+                paymentElementLoader.load(
+                    initializationMode = initializationMode,
+                    integrationConfiguration = PaymentElementLoader.Configuration.Embedded(
+                        isRowSelectionImmediateAction = internalRowSelectionCallback.get() != null,
+                        configuration = embeddedConfiguration,
+                        paymentMethodLayout = paymentMethodLayout,
+                    ),
+                    metadata = metadata,
+                ).getOrThrow()
+            }
         }
         val expressCheckoutElementStateDeferred = expressCheckoutElementConfiguration?.let { configuration ->
             async {
@@ -193,13 +197,13 @@ internal class CheckoutStateLoader @Inject constructor(
             }
         }
 
-        val paymentElementResult = paymentElementStateDeferred.await()
+        val paymentElementResult = paymentElementStateDeferred?.await()
         val expressCheckoutElementResult = expressCheckoutElementStateDeferred?.await()
         LoadResults(
-            paymentMethodMetadata = paymentElementResult.paymentMethodMetadata,
+            paymentMethodMetadata = paymentElementResult?.paymentMethodMetadata,
             expressCheckoutElementPaymentMethodMetadata = expressCheckoutElementResult?.paymentMethodMetadata,
-            customer = paymentElementResult.customer,
-            paymentSelection = paymentElementResult.paymentSelection,
+            customer = paymentElementResult?.customer,
+            paymentSelection = paymentElementResult?.paymentSelection,
         )
     }
 
