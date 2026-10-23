@@ -6,6 +6,7 @@ import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.hcaptcha.analytics.CaptchaEventsReporter
 import com.stripe.android.hcaptcha.analytics.DefaultCaptchaEventsReporter
+import com.stripe.android.hcaptcha.analytics.ObservableCaptchaEventsReporter
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import dagger.Module
 import dagger.Provides
@@ -13,8 +14,8 @@ import dagger.Provides
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Module
 object HCaptchaModule {
-    @Volatile
-    private var hCaptchaService: HCaptchaService? = null
+    private val observableCaptchaEventsReporter = ObservableCaptchaEventsReporter()
+    private val hCaptchaService = HCaptchaService.create(observableCaptchaEventsReporter)
 
     @Provides
     internal fun provideHCaptchaProvider(): HCaptchaProvider {
@@ -28,17 +29,13 @@ object HCaptchaModule {
 
     @Provides
     internal fun provideHCaptchaService(
-        hCaptchaProvider: HCaptchaProvider,
         captchaEventsReporter: CaptchaEventsReporter,
-        webViewStarter: WebViewStarter
     ): HCaptchaService {
-        return hCaptchaService ?: synchronized(this) {
-            hCaptchaService ?: DefaultHCaptchaService(
-                hCaptchaProvider = hCaptchaProvider,
-                captchaEventsReporter = captchaEventsReporter,
-                webViewStarter = webViewStarter
-            ).also { hCaptchaService = it }
-        }
+        return ReportingHCaptchaService(
+            service = hCaptchaService,
+            observableCaptchaEventsReporter = observableCaptchaEventsReporter,
+            captchaEventsReporter = captchaEventsReporter,
+        )
     }
 
     @Provides
