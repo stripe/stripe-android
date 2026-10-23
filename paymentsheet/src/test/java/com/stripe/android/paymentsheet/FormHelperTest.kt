@@ -669,6 +669,29 @@ internal class FormHelperTest {
     }
 
     @Test
+    fun `classifying a supported card does not create form elements`() = runTest {
+        val formHelper = createFormHelper(
+            newPaymentSelectionProvider = { error("Card classification must not read the current selection") },
+        )
+
+        assertThat(formHelper.formTypeForCode("card")).isEqualTo(FormHelper.FormType.UserInteractionRequired)
+    }
+
+    @Test
+    fun `classifying an unsupported card returns Empty`() = runTest {
+        val formHelper = createFormHelper(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    paymentMethodTypes = listOf("cashapp"),
+                ),
+            ),
+            newPaymentSelectionProvider = { null },
+        )
+
+        assertThat(formHelper.formTypeForCode("card")).isEqualTo(FormHelper.FormType.Empty)
+    }
+
+    @Test
     fun `formTypeForCode returns Empty for an LPM with no fields`() = runTest {
         val formHelper = createFormHelper(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(

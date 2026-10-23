@@ -96,6 +96,14 @@ internal class DefaultFormDefinitionFactory(
     }
 
     override fun formTypeForCode(paymentMethodCode: PaymentMethodCode): FormHelper.FormType {
+        // Supported card forms always collect card details, so classification needs no controllers.
+        if (
+            paymentMethodCode == PaymentMethod.Type.Card.code &&
+            paymentMethodMetadata.supportedPaymentMethodForCode(paymentMethodCode) != null
+        ) {
+            return FormHelper.FormType.UserInteractionRequired
+        }
+
         val formElements = formElementsForCode(paymentMethodCode)
         return formTypeForCode(paymentMethodCode, formElements)
     }
