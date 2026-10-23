@@ -50,6 +50,7 @@ internal class CheckoutSessionRepository @Inject constructor(
                 params = params,
             ),
             responseJsonParser = CheckoutSessionResponseJsonParser,
+            withRequestId = { response, requestId -> response.copy(requestId = requestId?.value) },
         )
     }
 

@@ -42,6 +42,25 @@ suspend fun <Response : StripeModel> executeRequestWithResultParser(
     stripeErrorJsonParser: StripeErrorJsonParser,
     request: StripeRequest,
     responseJsonParser: ModelJsonParser<Response>,
+): Result<Response> = executeRequestWithResultParser(
+    stripeNetworkClient = stripeNetworkClient,
+    stripeErrorJsonParser = stripeErrorJsonParser,
+    request = request,
+    responseJsonParser = responseJsonParser,
+    withRequestId = { response, _ -> response },
+)
+
+/**
+ * Same as above, but lets the caller attach the response's [RequestId] to the parsed model, which keeps
+ * [ModelJsonParser] body-only.
+ */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+suspend fun <Response : StripeModel> executeRequestWithResultParser(
+    stripeNetworkClient: StripeNetworkClient,
+    stripeErrorJsonParser: StripeErrorJsonParser,
+    request: StripeRequest,
+    responseJsonParser: ModelJsonParser<Response>,
+    withRequestId: (Response, RequestId?) -> Response,
 ): Result<Response> {
     return runCatching {
         stripeNetworkClient.executeRequest(request)
@@ -55,7 +74,7 @@ suspend fun <Response : StripeModel> executeRequestWithResultParser(
                 }.getOrNull()
 
                 if (parsedResponse != null) {
-                    Result.success(parsedResponse)
+                    Result.success(withRequestId(parsedResponse, response.requestId))
                 } else {
                     Result.failure(
                         APIException(message = "$responseJsonParser returns null for ${response.responseJson()}")
