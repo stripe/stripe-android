@@ -110,19 +110,12 @@ internal class CheckoutStateLoader @Inject constructor(
             expressCheckoutElementConfiguration = expressCheckoutElementConfiguration,
         )
 
-        // Preserve the customer's existing selection across reloads when it's still valid, rather
-        // than blindly adopting the loader's recomputed selection (reuses the embedded logic). The
-        // previous selection comes from the incoming state, not a separate holder. An empty
-        // selection on reload must stay empty until the customer selects again or reconfigures.
-        val selection = selectionChooser.choose(
-            paymentMethodMetadata = loadResults.paymentMethodMetadata,
-            paymentMethods = loadResults.customer?.paymentMethods,
-            previousSelection = carryForward.previousSelection,
-            newSelection = loadResults.paymentSelection.takeIf {
-                carryForward.isInitialLoad || carryForward.previousSelection != null
-            },
-            newConfiguration = commonConfiguration,
-            formSheetAction = embeddedConfig.formSheetAction,
+        val selection = getSelection(
+            selectionChooser = selectionChooser,
+            loadResults = loadResults,
+            carryForward = carryForward,
+            commonConfiguration = commonConfiguration,
+            embeddedConfig = embeddedConfig,
         )
 
         val state = CheckoutControllerState(
@@ -140,6 +133,31 @@ internal class CheckoutStateLoader @Inject constructor(
             linkEagerPresentationSuppressed = carryForward.linkEagerPresentationSuppressed,
         )
         return LoadedState(state = state, customer = loadResults.customer)
+    }
+
+    private fun getSelection(
+        selectionChooser: EmbeddedSelectionChooser,
+        loadResults: LoadResults,
+        carryForward: CarryForward,
+        commonConfiguration: CommonConfiguration,
+        embeddedConfig: EmbeddedPaymentElement.Configuration,
+    ): PaymentSelection? {
+        return loadResults.paymentMethodMetadata?.let {
+            // Preserve the customer's existing selection across reloads when it's still valid, rather
+            // than blindly adopting the loader's recomputed selection (reuses the embedded logic). The
+            // previous selection comes from the incoming state, not a separate holder. An empty
+            // selection on reload must stay empty until the customer selects again or reconfigures.
+            selectionChooser.choose(
+                paymentMethodMetadata = loadResults.paymentMethodMetadata,
+                paymentMethods = loadResults.customer?.paymentMethods,
+                previousSelection = carryForward.previousSelection,
+                newSelection = loadResults.paymentSelection.takeIf {
+                    carryForward.isInitialLoad || carryForward.previousSelection != null
+                },
+                newConfiguration = commonConfiguration,
+                formSheetAction = embeddedConfig.formSheetAction,
+            )
+        }
     }
 
     private suspend fun loadPaymentElements(
@@ -191,7 +209,7 @@ internal class CheckoutStateLoader @Inject constructor(
     )
 
     private data class LoadResults(
-        val paymentMethodMetadata: PaymentMethodMetadata,
+        val paymentMethodMetadata: PaymentMethodMetadata?,
         val expressCheckoutElementPaymentMethodMetadata: PaymentMethodMetadata?,
         val customer: CustomerState?,
         val paymentSelection: PaymentSelection?,
