@@ -18,6 +18,7 @@ internal class NewPaymentMethodVerticalLayoutUIScreenshotTest {
     private val paymentMethods: List<DisplayablePaymentMethod> by lazy {
         MockPaymentMethodsFactory.create().map {
             it.asDisplayablePaymentMethod(
+                isExpanded = false,
                 customerSavedPaymentMethods = emptyList(),
                 incentive = null,
                 onClick = {},
@@ -45,6 +46,7 @@ internal class NewPaymentMethodVerticalLayoutUIScreenshotTest {
             iconResource = R.drawable.stripe_ic_paymentsheet_pm_bank,
             iconRequiresTinting = true
         ).asDisplayablePaymentMethod(
+            isExpanded = false,
             customerSavedPaymentMethods = emptyList(),
             incentive = null,
             onClick = {},
@@ -81,6 +83,7 @@ internal class NewPaymentMethodVerticalLayoutUIScreenshotTest {
             ExternalPaymentMethodUiDefinitionFactory(
                 PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC
             ).createSupportedPaymentMethod(PaymentMethodMetadataFactory.create()).asDisplayablePaymentMethod(
+                isExpanded = false,
                 customerSavedPaymentMethods = emptyList(),
                 incentive = null,
                 onClick = {},
@@ -101,6 +104,7 @@ internal class NewPaymentMethodVerticalLayoutUIScreenshotTest {
         val paymentMethods = listOf(
             DisplayablePaymentMethod(
                 code = "example_pm",
+                isExpanded = false,
                 displayName = R.string.stripe_paymentsheet_payment_method_affirm.resolvableString,
                 iconResource = 0,
                 iconResourceNight = 0,
