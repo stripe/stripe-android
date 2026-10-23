@@ -32,6 +32,13 @@ internal class PaymentElementModuleTest {
     }
 
     @Test
+    fun `embedded content is null when there is no payment method metadata`() = runScenario(
+        state = CheckoutControllerStateFactory.create(paymentMethodMetadata = null),
+    ) {
+        assertThat(embeddedContentState.value).isNull()
+    }
+
+    @Test
     fun `embedded content uses the configured metadata and mandate setting`() = runScenario(
         state = CheckoutControllerStateFactory.create(
             embeddedConfiguration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.")
@@ -92,6 +99,35 @@ internal class PaymentElementModuleTest {
             assertThat(awaitItem()).isNotNull()
 
             stateHolder.state = null
+
+            assertThat(awaitItem()).isNull()
+            ensureAllEventsConsumed()
+        }
+    }
+
+    @Test
+    fun `embedded content emits when payment method metadata becomes available`() = runScenario(
+        state = CheckoutControllerStateFactory.create(paymentMethodMetadata = null),
+    ) {
+        embeddedContentState.test {
+            assertThat(awaitItem()).isNull()
+
+            val state = CheckoutControllerStateFactory.create()
+            stateHolder.state = state
+
+            val content = requireNotNull(awaitItem())
+            assertThat(content.paymentMethodMetadata).isSameInstanceAs(state.paymentMethodMetadata)
+            assertThat(content.configuration).isSameInstanceAs(state.embeddedConfiguration)
+            ensureAllEventsConsumed()
+        }
+    }
+
+    @Test
+    fun `embedded content is cleared when payment method metadata is removed`() = runScenario {
+        embeddedContentState.test {
+            assertThat(awaitItem()).isNotNull()
+
+            stateHolder.state = requireNotNull(stateHolder.state).copy(paymentMethodMetadata = null)
 
             assertThat(awaitItem()).isNull()
             ensureAllEventsConsumed()

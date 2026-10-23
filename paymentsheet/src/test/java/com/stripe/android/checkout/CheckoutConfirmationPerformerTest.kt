@@ -91,6 +91,19 @@ internal class CheckoutConfirmationPerformerTest {
     }
 
     @Test
+    fun `confirm fails when there is no payment method metadata`() = runScenario(
+        state = CheckoutControllerStateFactory.create(
+            paymentMethodMetadata = null,
+            paymentSelection = PaymentSelection.GooglePay,
+        ),
+    ) {
+        performer.confirm()
+
+        assertRejection("Cannot confirm checkout without providing a PaymentElement configuration.")
+        assertThat(operationCoordinator.isUpdating.value).isFalse()
+    }
+
+    @Test
     fun `confirm fails when the selection cannot be converted to a confirmation option`() = runScenario(
         state = CheckoutControllerStateFactory.create(
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(merchantCountry = null),
@@ -174,6 +187,22 @@ internal class CheckoutConfirmationPerformerTest {
     }
 
     @Test
+    fun `confirm can retry after payment method metadata becomes available`() = runScenario(
+        state = googlePayState(paymentSelection = PaymentSelection.GooglePay).copy(paymentMethodMetadata = null),
+    ) {
+        performer.confirm()
+        assertRejection("Cannot confirm checkout without providing a PaymentElement configuration.")
+
+        val state = googlePayState(paymentSelection = PaymentSelection.GooglePay)
+        stateHolder.state = state
+        performer.confirm()
+
+        val args = confirmationHandler.startTurbine.awaitItem()
+        assertThat(args.confirmationOption).isInstanceOf<GooglePayConfirmationOption>()
+        assertThat(args.paymentMethodMetadata).isSameInstanceAs(state.paymentMethodMetadata)
+    }
+
+    @Test
     fun `rejected confirmation does not record confirmation analytics`() = runScenario(
         state = googlePayState(paymentSelection = PaymentSelection.GooglePay),
         sheetIsOpen = true,
@@ -246,7 +275,7 @@ internal class CheckoutConfirmationPerformerTest {
             val response = state.checkoutSessionResponse.copy(customerEmail = "checkout@example.com")
             state.copy(
                 checkoutSessionResponse = response,
-                paymentMethodMetadata = state.paymentMethodMetadata.copy(
+                paymentMethodMetadata = requireNotNull(state.paymentMethodMetadata).copy(
                     integrationMetadata = IntegrationMetadata.CheckoutSession(
                         id = response.id,
                         instancesKey = "test",

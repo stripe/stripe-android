@@ -66,7 +66,8 @@ internal interface PaymentElementModule {
         ): StateFlow<EmbeddedContentHelperStateHolder.State?> {
             return stateHolder.stateFlow.mapAsStateFlow { state ->
                 val embeddedConfiguration = state?.embeddedConfiguration
-                if (state == null || embeddedConfiguration == null) {
+                val paymentMethodMetadata = state?.paymentMethodMetadata
+                if (state == null || embeddedConfiguration == null || paymentMethodMetadata == null) {
                     return@mapAsStateFlow null
                 }
                 EmbeddedContentHelperStateHolder.State(

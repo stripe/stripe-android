@@ -51,7 +51,7 @@ internal class CheckoutLinkPaymentOptionsPresenter @Inject constructor(
         if (lifecycleOwner.lifecycle.currentState == Lifecycle.State.DESTROYED) return
         if (sheetStateHolder.sheetIsOpen) return
         val state = stateHolder.state
-        if (state == null) {
+        if (state == null || state.paymentMethodMetadata == null) {
             defaultPresenter.present()
             return
         }
@@ -70,7 +70,7 @@ internal class CheckoutLinkPaymentOptionsPresenter @Inject constructor(
 
     private fun onLinkResult(result: LinkActivityResult) {
         val state = stateHolder.state
-        if (state == null) {
+        if (state == null || state.paymentMethodMetadata == null) {
             sheetStateHolder.sheetIsOpen = false
             return
         }
