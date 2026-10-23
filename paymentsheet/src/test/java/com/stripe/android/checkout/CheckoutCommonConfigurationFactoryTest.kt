@@ -27,6 +27,28 @@ import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConf
 internal class CheckoutCommonConfigurationFactoryTest {
 
     @Test
+    fun `create returns null when payment element is not configured`() {
+        val result = CheckoutCommonConfigurationFactory(appName = "Test App").create(
+            configuration = CheckoutController.Configuration().build(),
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+            collectedDetails = collectedDetails(),
+        )
+
+        assertThat(result).isNull()
+    }
+
+    @Test
+    fun `createForPaymentElement returns null when payment element is not configured`() {
+        val result = CheckoutCommonConfigurationFactory(appName = "Test App").createForPaymentElement(
+            configuration = CheckoutController.Configuration().build(),
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+            collectedDetails = collectedDetails(),
+        )
+
+        assertThat(result).isNull()
+    }
+
+    @Test
     fun `matches the common configuration derived from the embedded configuration`() {
         val configuration = CheckoutController.Configuration()
             .paymentElement(

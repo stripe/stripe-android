@@ -15,6 +15,8 @@ internal class CheckoutEmbeddedConfigurationFactory @Inject constructor(
         checkoutSessionResponse: CheckoutSessionResponse,
         collectedDetails: CheckoutCollectedDetails,
     ): EmbeddedPaymentElement.Configuration? {
+        configuration.paymentElementConfiguration ?: return null
+
         val merchantDisplayName = configuration.resolveMerchantDisplayName(checkoutSessionResponse, appName)
         return EmbeddedPaymentElement.Configuration.Builder(merchantDisplayName)
             .embeddedViewDisplaysMandateText(

@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.os.Bundle
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.elements.ExpressCheckoutElement
+import com.stripe.android.elements.PaymentElement
 import com.stripe.android.elements.ece.AvailableExpressButtonTypesFactory
 import com.stripe.android.elements.ece.FakeAvailableExpressButtonTypesFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -21,6 +22,7 @@ import com.stripe.android.testing.FakeErrorReporter
 internal object CheckoutControllerStateFactory {
     fun create(
         configuration: CheckoutController.Configuration.State = CheckoutController.Configuration()
+            .paymentElement(PaymentElement.Configuration())
             .expressCheckoutElement(ExpressCheckoutElement.Configuration())
             .build(),
         checkoutSessionResponse: CheckoutSessionResponse = CheckoutSessionResponseFactory.create(),
