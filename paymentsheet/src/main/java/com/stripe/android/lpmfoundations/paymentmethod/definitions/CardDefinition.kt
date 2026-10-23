@@ -164,10 +164,10 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Custom {
                 if (showSave) {
                     add(savePaymentOptionDefinition(metadata))
                 }
-                // Link signup and its mandate share the runtime signup mode.
+                // Link signup and its mandate share the runtime signup mode and dependencies.
                 add(
                     FormElementDefinition(
-                        allowsUserInteraction = metadata.linkState?.signupMode != null,
+                        allowsUserInteraction = true,
                         mandateText = mandate?.text,
                         createFormElements = { arguments ->
                             createLinkAndMandateElements(metadata, arguments, canChangeSaveForFutureUsage, mandate)
