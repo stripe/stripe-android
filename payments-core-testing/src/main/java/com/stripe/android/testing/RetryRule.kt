@@ -6,20 +6,14 @@ import org.junit.AssumptionViolatedException
 import org.junit.rules.TestRule
 import org.junit.runner.Description
 import org.junit.runners.model.Statement
-import org.junit.runners.model.TestTimedOutException
 
-class RetryRule internal constructor(
-    private val attempts: Int,
-    private val isRunningInCi: Boolean,
-) : TestRule {
-    constructor(attempts: Int) : this(attempts, BuildConfig.IS_RUNNING_IN_CI)
-
+class RetryRule(private val attempts: Int) : TestRule {
     override fun apply(base: Statement, description: Description): Statement {
         val logTag = description.className
         return object : Statement() {
             @Throws
             override fun evaluate() {
-                if (isRunningInCi) {
+                if (BuildConfig.IS_RUNNING_IN_CI) {
                     for (attempt in 1..attempts) {
                         val isLast = attempts == attempt
                         runCatching {
@@ -27,12 +21,7 @@ class RetryRule internal constructor(
                         }.onSuccess {
                             return
                         }.onFailure { error ->
-                            // A timed-out worker may still have an Espresso wait running on the main thread.
-                            // Starting another attempt can re-enter Espresso before that wait has finished.
-                            if (
-                                isLast || error is AssumptionViolatedException ||
-                                error is NoLeakAssertionFailedError || error is TestTimedOutException
-                            ) {
+                            if (isLast || error is AssumptionViolatedException || error is NoLeakAssertionFailedError) {
                                 throw error
                             }
                             Log.d(logTag, "Failed attempt $attempt out of $attempts with error")
