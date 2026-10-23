@@ -32,6 +32,7 @@ internal data class CheckoutSessionResponse(
     val requiresBillingAddress: Boolean,
     val merchantCountry: String?,
     val businessName: String?,
+    val requestId: String?,
 ) : StripeModel {
     val fixedEmail: String?
         get() = customerEmail ?: customer?.email

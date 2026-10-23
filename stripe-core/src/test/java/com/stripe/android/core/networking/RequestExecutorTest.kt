@@ -143,6 +143,22 @@ internal class RequestExecutorTest {
     }
 
     @Test
+    fun `executeRequestWithResultParser passes the response request id to withRequestId`() = runTest {
+        whenever(mockNetworkClient.executeRequest(testRequest)).thenReturn(successResponse)
+        whenever(mockModelParser.parse(any())).thenReturn(TestStripeModel("test_data"))
+
+        val result = executeRequestWithResultParser(
+            stripeNetworkClient = mockNetworkClient,
+            stripeErrorJsonParser = mockErrorParser,
+            request = testRequest,
+            responseJsonParser = mockModelParser,
+            withRequestId = { model, requestId -> model.copy(data = "${model.data}:$requestId") },
+        )
+
+        assertEquals(TestStripeModel("test_data:req_test"), result.getOrThrow())
+    }
+
+    @Test
     fun `executeRequestWithResultParser should return failure result on error response`() = runTest {
         whenever(mockNetworkClient.executeRequest(testRequest)).thenReturn(errorResponse)
         whenever(mockErrorParser.parse(any())).thenReturn(testStripeError)
