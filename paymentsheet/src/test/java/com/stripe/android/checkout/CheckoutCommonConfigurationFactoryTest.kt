@@ -297,10 +297,10 @@ internal class CheckoutCommonConfigurationFactoryTest {
             checkoutSessionResponse = checkoutSessionResponse,
             collectedDetails = collectedDetails,
         )
-        assertThat(result.googlePay?.label).isEqualTo("PE total")
-        assertThat(result.googlePay?.buttonType).isEqualTo(PaymentSheet.GooglePayConfiguration.ButtonType.Buy)
-        assertThat(result.link.display).isEqualTo(PaymentSheet.LinkConfiguration.Display.Never)
-        assertThat(result.billingDetailsCollectionConfiguration.address).isEqualTo(PSAutomatic)
+        assertThat(result?.googlePay?.label).isEqualTo("PE total")
+        assertThat(result?.googlePay?.buttonType).isEqualTo(PaymentSheet.GooglePayConfiguration.ButtonType.Buy)
+        assertThat(result?.link?.display).isEqualTo(PaymentSheet.LinkConfiguration.Display.Never)
+        assertThat(result?.billingDetailsCollectionConfiguration?.address).isEqualTo(PSAutomatic)
     }
 
     @Test
@@ -330,7 +330,7 @@ internal class CheckoutCommonConfigurationFactoryTest {
             configuration = configuration,
             checkoutSessionResponse = checkoutSessionResponse,
             collectedDetails = collectedDetails,
-        ).defaultBillingDetails
+        )?.defaultBillingDetails
         val expressCheckoutElementDefaults = requireNotNull(
             factory().createForExpressCheckoutElement(
                 configuration = configuration,
@@ -532,7 +532,7 @@ internal class CheckoutCommonConfigurationFactoryTest {
         val response = CheckoutSessionResponseFactory.create()
         val details = collectedDetails()
 
-        assertThat(factory().createForPaymentElement(configuration, response, details).defaultBillingDetails?.phone)
+        assertThat(factory().createForPaymentElement(configuration, response, details)?.defaultBillingDetails?.phone)
             .isNull()
         val expressConfiguration = requireNotNull(
             factory().createForExpressCheckoutElement(configuration, response, details)
