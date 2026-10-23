@@ -312,13 +312,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         integrationConfiguration: PaymentElementLoader.Configuration,
         metadata: PaymentElementLoader.Metadata,
     ): Result<PaymentElementLoader.State> = runWithApiConfiguration(
-        configuration = integrationConfiguration.commonConfiguration,
-        reportLoadingAnalytics =
-            initializationMode !is PaymentElementLoader.InitializationMode.CheckoutSession,
+        integrationConfiguration.commonConfiguration
     ) { configuration, apiConfiguration ->
-        val reportLoadingAnalytics =
-            initializationMode !is PaymentElementLoader.InitializationMode.CheckoutSession
-
         // Validate configuration before loading
         initializationMode.validate()
         configuration.validate(
@@ -328,9 +323,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             isTapToAddSupported = tapToAddConnectionStarter.isSupported(apiConfiguration),
         )
 
-        if (reportLoadingAnalytics) {
-            eventReporter.onLoadStarted(metadata.initializedViaCompose, apiConfiguration.publishableKey)
-        }
+        eventReporter.onLoadStarted(metadata.initializedViaCompose, apiConfiguration.publishableKey)
         tapToAddConnectionStarter.start(
             configuration,
             apiConfiguration,
@@ -494,7 +487,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             isReloadingAfterProcessDeath = metadata.isReloadingAfterProcessDeath,
             paymentMethodMetadata = state.paymentMethodMetadata,
             publishableKey = apiConfiguration.publishableKey,
-            reportLoadingAnalytics = reportLoadingAnalytics,
         )
 
         state
@@ -502,18 +494,11 @@ internal class DefaultPaymentElementLoader @Inject constructor(
 
     private suspend fun runWithApiConfiguration(
         configuration: CommonConfiguration,
-        reportLoadingAnalytics: Boolean,
         block: suspend CoroutineScope.(CommonConfiguration, ApiConfiguration.State) -> PaymentElementLoader.State,
     ): Result<PaymentElementLoader.State> {
         val apiConfiguration = apiConfigurationResolver.resolve(configuration.apiConfiguration)
         return workContext.runCatching(
-            onFailure = { error ->
-                reportFailedLoad(
-                    error = error,
-                    publishableKey = apiConfiguration.publishableKey,
-                    reportLoadingAnalytics = reportLoadingAnalytics,
-                )
-            },
+            onFailure = { error -> reportFailedLoad(error, apiConfiguration.publishableKey) },
             task = { block(configuration, apiConfiguration) },
         )
     }
@@ -895,39 +880,29 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         isReloadingAfterProcessDeath: Boolean,
         paymentMethodMetadata: PaymentMethodMetadata,
         publishableKey: String,
-        reportLoadingAnalytics: Boolean,
     ) {
-        if (reportLoadingAnalytics) {
-            elementsSession.sessionsError?.let { sessionsError ->
-                eventReporter.onElementsSessionLoadFailed(sessionsError)
-            }
+        elementsSession.sessionsError?.let { sessionsError ->
+            eventReporter.onElementsSessionLoadFailed(sessionsError)
         }
 
         val treatValidationErrorAsFailure = !state.stripeIntent.isConfirmed || isReloadingAfterProcessDeath
 
         if (state.validationError != null && treatValidationErrorAsFailure) {
-            if (reportLoadingAnalytics) {
-                eventReporter.onLoadFailed(state.validationError, publishableKey)
-            }
-        } else if (reportLoadingAnalytics) {
+            eventReporter.onLoadFailed(state.validationError, publishableKey)
+        } else {
             eventReporter.onLoadSucceeded(
                 paymentSelection = state.paymentSelection,
                 paymentMethodMetadata = paymentMethodMetadata,
             )
-        } else {
-            durationProvider.start(DurationProvider.Key.Checkout)
         }
     }
 
     private fun reportFailedLoad(
         error: Throwable,
         publishableKey: String,
-        reportLoadingAnalytics: Boolean,
     ) {
         logger.error("Failure loading PaymentSheetState", error)
-        if (reportLoadingAnalytics) {
-            eventReporter.onLoadFailed(error, publishableKey)
-        }
+        eventReporter.onLoadFailed(error, publishableKey)
     }
 
     private fun logIfMissingExternalPaymentMethods(
