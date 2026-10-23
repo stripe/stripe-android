@@ -42,8 +42,8 @@ internal fun CheckoutController.Configuration.State.toExpressCheckoutElementGoog
 internal fun CheckoutController.Configuration.State.toPaymentElementGooglePayConfiguration(
     checkoutSessionResponse: CheckoutSessionResponse,
 ): PaymentSheet.GooglePayConfiguration? =
-    paymentElementConfiguration.googlePayConfiguration
-        .takeIf { it.display == GooglePayDisplay.Automatic }
+    paymentElementConfiguration?.googlePayConfiguration
+        ?.takeIf { it.display == GooglePayDisplay.Automatic }
         ?.let { configuration ->
             checkoutSessionResponse.merchantCountry?.let { merchantCountry ->
                 configuration.asPaymentSheet(

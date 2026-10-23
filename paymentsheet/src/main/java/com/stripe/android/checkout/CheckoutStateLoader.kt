@@ -9,7 +9,6 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentelement.embedded.content.EmbeddedSelectionChooser
 import com.stripe.android.paymentsheet.CustomerStateHolder
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
@@ -80,18 +79,13 @@ internal class CheckoutStateLoader @Inject constructor(
         // reused when the currencies haven't changed.
         val flagImages = flagImageResolver.resolve(response, cached = carryForward.cachedFlagImages)
 
-        val embeddedConfig = embeddedConfigurationFactory.create(
+        val paymentElementConfigs = getPaymentElementConfigs(
             configuration = configuration,
-            checkoutSessionResponse = response,
+            response = response,
             collectedDetails = collectedDetails,
         )
-        embeddedConfig?.appearance?.parseAppearance()
 
-        val commonConfiguration = commonConfigurationFactory.create(
-            configuration = configuration,
-            checkoutSessionResponse = response,
-            collectedDetails = collectedDetails,
-        )
+        paymentElementConfigs?.embeddedConfig?.appearance?.parseAppearance()
 
         val expressCheckoutElementConfiguration = commonConfigurationFactory.createForExpressCheckoutElement(
             configuration = configuration,
@@ -105,8 +99,7 @@ internal class CheckoutStateLoader @Inject constructor(
                 checkoutSessionResponse = response,
                 collectedEmail = collectedDetails.email,
             ),
-            embeddedConfiguration = embeddedConfig,
-            paymentMethodLayout = configuration.paymentElementConfiguration.paymentMethodLayout.asPaymentSheet(),
+            paymentElementLoaderConfig = paymentElementConfigs?.paymentElementLoaderConfig,
             expressCheckoutElementConfiguration = expressCheckoutElementConfiguration,
         )
 
@@ -114,8 +107,8 @@ internal class CheckoutStateLoader @Inject constructor(
             selectionChooser = selectionChooser,
             loadResults = loadResults,
             carryForward = carryForward,
-            commonConfiguration = commonConfiguration,
-            embeddedConfig = embeddedConfig,
+            commonConfiguration = paymentElementConfigs?.commonConfiguration,
+            embeddedConfig = paymentElementConfigs?.embeddedConfig,
         )
 
         val state = CheckoutControllerState(
@@ -125,7 +118,7 @@ internal class CheckoutStateLoader @Inject constructor(
             collectedDetails = collectedDetails,
             paymentMethodMetadata = loadResults.paymentMethodMetadata,
             expressCheckoutElementPaymentMethodMetadata = loadResults.expressCheckoutElementPaymentMethodMetadata,
-            embeddedConfiguration = embeddedConfig,
+            embeddedConfiguration = paymentElementConfigs?.embeddedConfig,
             paymentSelection = selection,
             savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Idle,
             temporarySelection = carryForward.temporarySelection,
@@ -164,23 +157,18 @@ internal class CheckoutStateLoader @Inject constructor(
 
     private suspend fun loadPaymentElements(
         initializationMode: PaymentElementLoader.InitializationMode,
-        embeddedConfiguration: EmbeddedPaymentElement.Configuration?,
-        paymentMethodLayout: PaymentSheet.PaymentMethodLayout,
+        paymentElementLoaderConfig: PaymentElementLoader.Configuration.Embedded?,
         expressCheckoutElementConfiguration: CommonConfiguration?,
     ): LoadResults = coroutineScope {
         val metadata = PaymentElementLoader.Metadata(
             isReloadingAfterProcessDeath = false,
             initializedViaCompose = false,
         )
-        val paymentElementStateDeferred = embeddedConfiguration?.let {
+        val paymentElementStateDeferred = paymentElementLoaderConfig?.let {
             async {
                 paymentElementLoader.load(
                     initializationMode = initializationMode,
-                    integrationConfiguration = PaymentElementLoader.Configuration.Embedded(
-                        isRowSelectionImmediateAction = internalRowSelectionCallback.get() != null,
-                        configuration = embeddedConfiguration,
-                        paymentMethodLayout = paymentMethodLayout,
-                    ),
+                    integrationConfiguration = paymentElementLoaderConfig,
                     metadata = metadata,
                 ).getOrThrow()
             }
@@ -207,6 +195,48 @@ internal class CheckoutStateLoader @Inject constructor(
         )
     }
 
+    private fun getPaymentElementConfigs(
+        configuration: CheckoutController.Configuration.State,
+        response: CheckoutSessionResponse,
+        collectedDetails: CheckoutCollectedDetails,
+    ): PaymentElementConfigurations? {
+        val paymentElementConfiguration = configuration.paymentElementConfiguration ?: return null
+
+        val embeddedConfig = embeddedConfigurationFactory.create(
+            configuration = configuration,
+            checkoutSessionResponse = response,
+            collectedDetails = collectedDetails,
+        )
+
+        val commonConfiguration = commonConfigurationFactory.create(
+            configuration = configuration,
+            checkoutSessionResponse = response,
+            collectedDetails = collectedDetails,
+        )
+
+        if (embeddedConfig == null) {
+            // Unexpected missing configuration; error reporting is not implemented yet.
+            return null
+        }
+
+        if (commonConfiguration == null) {
+            // Unexpected missing configuration; error reporting is not implemented yet.
+            return null
+        }
+
+        val paymentElementLoaderConfig = PaymentElementLoader.Configuration.Embedded(
+            isRowSelectionImmediateAction = internalRowSelectionCallback.get() != null,
+            configuration = embeddedConfig,
+            paymentMethodLayout = paymentElementConfiguration.paymentMethodLayout.asPaymentSheet(),
+        )
+
+        return PaymentElementConfigurations(
+            embeddedConfig = embeddedConfig,
+            commonConfiguration = commonConfiguration,
+            paymentElementLoaderConfig = paymentElementLoaderConfig,
+        )
+    }
+
     data class LoadedState(
         val state: CheckoutControllerState,
         val customer: CustomerState?,
@@ -217,6 +247,12 @@ internal class CheckoutStateLoader @Inject constructor(
         val expressCheckoutElementPaymentMethodMetadata: PaymentMethodMetadata?,
         val customer: CustomerState?,
         val paymentSelection: PaymentSelection?,
+    )
+
+    private data class PaymentElementConfigurations(
+        val commonConfiguration: CommonConfiguration,
+        val embeddedConfig: EmbeddedPaymentElement.Configuration,
+        val paymentElementLoaderConfig: PaymentElementLoader.Configuration.Embedded,
     )
 
     /**
