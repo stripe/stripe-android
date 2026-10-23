@@ -42,7 +42,7 @@ internal sealed class CheckoutConfirmationEvent : AnalyticsEvent {
             putAll(
                 confirmationParams(
                     confirmationContext = confirmationContext,
-                    confirmationRequestId = confirmationRequestId ?: stripeException?.requestId,
+                    confirmationRequestId = stripeException?.requestId ?: confirmationRequestId,
                 )
             )
             putAll(analyticsMetadata.paramsMap)

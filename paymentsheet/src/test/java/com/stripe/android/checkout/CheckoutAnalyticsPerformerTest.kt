@@ -362,7 +362,7 @@ internal class CheckoutAnalyticsPerformerTest {
     }
 
     @Test
-    fun `confirm request id takes precedence over next action error request id`() = runScenario {
+    fun `next action error request id takes precedence over confirm request id`() = runScenario {
         startReporting()
         performer.onPaymentElementConfirmationStarted(PaymentSelection.GooglePay)
         savedStateHandle.checkoutConfirmationRequestId = "req_confirm_before_next_action"
@@ -378,7 +378,7 @@ internal class CheckoutAnalyticsPerformerTest {
             ExpectedEvent(
                 event = "checkout_elements.confirm.failed",
                 publishableKey = DEFAULT_METADATA_PUBLISHABLE_KEY,
-                params = mapOf("request_id" to "req_confirm_before_next_action"),
+                params = mapOf("request_id" to "req_next_action"),
             ),
         )
     }
