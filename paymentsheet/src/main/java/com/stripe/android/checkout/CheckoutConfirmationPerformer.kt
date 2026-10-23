@@ -2,6 +2,7 @@ package com.stripe.android.checkout
 
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
@@ -31,9 +32,15 @@ internal class CheckoutConfirmationPerformer @Inject constructor(
             paymentSelection = state.paymentSelection ?: return@tryBeginConfirmation Result.failure(
                 IllegalStateException("Cannot confirm checkout without a selected payment option.")
             )
+            val embeddedConfiguration = state.embeddedConfiguration ?: return@tryBeginConfirmation Result.failure(
+                IllegalStateException(
+                    "Cannot confirm checkout without providing a PaymentElement configuration."
+                )
+            )
             val args = confirmationArgs(
                 state = state,
                 paymentSelection = paymentSelection,
+                embeddedConfiguration = embeddedConfiguration,
             ) ?: return@tryBeginConfirmation Result.failure(
                 IllegalStateException(
                     "Cannot confirm checkout because the selected payment option cannot be confirmed."
@@ -56,6 +63,7 @@ internal class CheckoutConfirmationPerformer @Inject constructor(
     @OptIn(CheckoutSessionPreview::class)
     private fun confirmationArgs(
         state: CheckoutControllerState,
+        embeddedConfiguration: EmbeddedPaymentElement.Configuration,
         paymentSelection: PaymentSelection,
     ): ConfirmationHandler.Args? {
         val configuration = commonConfigurationFactory.createForPaymentElement(
@@ -69,7 +77,7 @@ internal class CheckoutConfirmationPerformer @Inject constructor(
             cardFundingFilter = state.paymentMethodMetadata.cardFundingFilter,
         )?.withSepaMandateAcknowledgement(
             hasAcknowledgedSepaMandate = paymentSelection.hasAcknowledgedSepaMandate ||
-                !state.embeddedConfiguration.embeddedViewDisplaysMandateText,
+                !embeddedConfiguration.embeddedViewDisplaysMandateText,
         ) ?: return null
 
         return ConfirmationHandler.Args(

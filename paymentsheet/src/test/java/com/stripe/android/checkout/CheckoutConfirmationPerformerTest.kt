@@ -78,6 +78,19 @@ internal class CheckoutConfirmationPerformerTest {
     }
 
     @Test
+    fun `confirm fails when there is no embedded configuration`() = runScenario(
+        state = CheckoutControllerStateFactory.create(
+            embeddedConfiguration = null,
+            paymentSelection = PaymentSelection.GooglePay,
+        ),
+    ) {
+        performer.confirm()
+
+        assertRejection("Cannot confirm checkout without providing a PaymentElement configuration.")
+        assertThat(operationCoordinator.isUpdating.value).isFalse()
+    }
+
+    @Test
     fun `confirm fails when the selection cannot be converted to a confirmation option`() = runScenario(
         state = CheckoutControllerStateFactory.create(
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(merchantCountry = null),
@@ -129,6 +142,20 @@ internal class CheckoutConfirmationPerformerTest {
         stateHolder.state = googlePayState(paymentSelection = PaymentSelection.GooglePay)
         performer.confirm()
         confirmationHandler.startTurbine.awaitItem()
+    }
+
+    @Test
+    fun `confirm can retry after an embedded configuration becomes available`() = runScenario(
+        state = googlePayState(paymentSelection = PaymentSelection.GooglePay).copy(embeddedConfiguration = null),
+    ) {
+        performer.confirm()
+        assertRejection("Cannot confirm checkout without providing a PaymentElement configuration.")
+
+        stateHolder.state = googlePayState(paymentSelection = PaymentSelection.GooglePay)
+        performer.confirm()
+
+        assertThat(confirmationHandler.startTurbine.awaitItem().confirmationOption)
+            .isInstanceOf<GooglePayConfirmationOption>()
     }
 
     @Test
