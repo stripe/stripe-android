@@ -1,5 +1,6 @@
 package com.stripe.android.checkout
 
+import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -24,6 +25,7 @@ internal class CheckoutConfirmationPerformer @Inject constructor(
     @Named(STATUS_BAR_COLOR) private val statusBarColor: Int?,
     @ViewModelScope private val viewModelScope: CoroutineScope,
 ) {
+    @OptIn(CheckoutSessionPreview::class)
     fun confirm() {
         lateinit var paymentSelection: PaymentSelection
         val arguments = operationCoordinator.tryBeginConfirmation {
@@ -35,7 +37,12 @@ internal class CheckoutConfirmationPerformer @Inject constructor(
             )
             val embeddedConfiguration = state.embeddedConfiguration
             val paymentMethodMetadata = state.paymentMethodMetadata
-            if (embeddedConfiguration == null || paymentMethodMetadata == null) {
+            val configuration = commonConfigurationFactory.createForPaymentElement(
+                configuration = state.configuration,
+                checkoutSessionResponse = state.checkoutSessionResponse,
+                collectedDetails = state.collectedDetails,
+            )
+            if (embeddedConfiguration == null || paymentMethodMetadata == null || configuration == null) {
                 return@tryBeginConfirmation Result.failure(
                     IllegalStateException(
                         "Cannot confirm checkout without providing a PaymentElement configuration."
@@ -43,10 +50,10 @@ internal class CheckoutConfirmationPerformer @Inject constructor(
                 )
             }
             val args = confirmationArgs(
-                state = state,
                 paymentSelection = paymentSelection,
                 embeddedConfiguration = embeddedConfiguration,
                 paymentMethodMetadata = paymentMethodMetadata,
+                configuration = configuration,
             ) ?: return@tryBeginConfirmation Result.failure(
                 IllegalStateException(
                     "Cannot confirm checkout because the selected payment option cannot be confirmed."
@@ -68,16 +75,11 @@ internal class CheckoutConfirmationPerformer @Inject constructor(
 
     @OptIn(CheckoutSessionPreview::class)
     private fun confirmationArgs(
-        state: CheckoutControllerState,
         embeddedConfiguration: EmbeddedPaymentElement.Configuration,
         paymentMethodMetadata: PaymentMethodMetadata,
         paymentSelection: PaymentSelection,
+        configuration: CommonConfiguration,
     ): ConfirmationHandler.Args? {
-        val configuration = commonConfigurationFactory.createForPaymentElement(
-            configuration = state.configuration,
-            checkoutSessionResponse = state.checkoutSessionResponse,
-            collectedDetails = state.collectedDetails,
-        )
         val confirmationOption = paymentSelection.toConfirmationOption(
             configuration = configuration,
             linkConfiguration = paymentMethodMetadata.linkState?.configuration,
