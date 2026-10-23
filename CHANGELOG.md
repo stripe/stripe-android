@@ -3,12 +3,14 @@
 NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
 
+### PaymentSheet
+* [FIXED][15100](https://github.com/stripe/stripe-android/pull/15100) Fixed an issue where error messages could disappear from the PaymentSheet after returning from Link.
+
 ## 23.25.0 - 2026-10-21
 
 ### PaymentSheet
 * [ADDED][14589](https://github.com/stripe/stripe-android/pull/14589) Added Touch 'n Go API bindings and PaymentSheet support for payments and setup.
 * [ADDED][14590](https://github.com/stripe/stripe-android/pull/14590) Added TrueMoney API bindings and PaymentSheet support.
-* [FIXED][15100](https://github.com/stripe/stripe-android/pull/15100) Fixed an issue where error messages could disappear from the PaymentSheet after returning from Link.
 
 ### AddressElement
 * [Changed] Address Element asks for confirmation before discarding unsaved address changes.
