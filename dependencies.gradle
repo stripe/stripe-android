@@ -28,6 +28,7 @@ ext.versions = [
         binaryCompatibilityValidator: '0.18.1',
         cameraX                     : '1.5.3',
         dagger                      : '2.58',
+        dejavu                      : '0.3.1',
         detekt                      : '2.0.0-alpha.2',
         diskLruCache                : '2.0.2',
         dokka                       : '2.1.0',
@@ -220,6 +221,7 @@ ext.testLibs = [
                 uiAutomator: "androidx.test.uiautomator:uiautomator:${versions.uiAutomator}",
                 workManager: "androidx.work:work-testing:${versions.workManager}",
         ],
+        dejavu               : "me.mmckenna.dejavu:dejavu:${versions.dejavu}",
         espresso             : [
                 accessibility : "androidx.test.espresso:espresso-accessibility:${versions.espresso}",
                 core          : "androidx.test.espresso:espresso-core:${versions.espresso}",
