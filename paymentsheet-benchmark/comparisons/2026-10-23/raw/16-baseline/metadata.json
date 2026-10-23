@@ -1,0 +1,9 @@
+{
+  "workload": "captcha",
+  "baseCommit": "008a103e5301811cebd29a84a99e95684d62c606",
+  "sourcePatchSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "apkSha256": "7f91ce220b22753611afa8d3f96356fc17cd347225efb5b74935b35baf3b99f1",
+  "collectedAtEpoch": 1792759806.13836,
+  "compilationMode": "Partial(BaselineProfileMode.Require)",
+  "iterations": 10
+}

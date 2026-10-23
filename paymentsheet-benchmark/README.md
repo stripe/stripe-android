@@ -109,3 +109,6 @@ host/device drift. Do not add the individual deltas: the fixes overlap.
 
 See [the independent 16-fix comparison report](comparisons/2026-10-22/README.md)
 for measured samples, source patches, APK identities, and uncertainty.
+
+See [the verification of fixes 2, 4, and 16](comparisons/2026-10-23/README.md)
+for reverse-order reruns with build cooldowns and preserved APKs.

@@ -20,6 +20,10 @@ There are **320 initial measured cold launches (16 × 2 × 10), plus 20 launches
 for the targeted ID 14 repeat**. All 34 managed benchmark invocations passed.
 No production fixes are applied by this report or the harness PR.
 
+**Follow-up:** [Fresh reverse-order verification of IDs 2, 4, and 16](../2026-10-23/README.md)
+adds 60 cold launches with build cooldowns and archived APKs. Keep the new
+observations separate from these original selected estimates.
+
 ## Workload and boundaries
 
 Each arm runs ten fresh target processes of a separately installed, minified,

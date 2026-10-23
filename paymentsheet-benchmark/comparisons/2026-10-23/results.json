@@ -1,0 +1,449 @@
+[
+  {
+    "comparison": "02",
+    "id": 2,
+    "workload": "hidden",
+    "metrics": {
+      "loadToFirstDrawMs": {
+        "baselineMedian": 154.64362549999998,
+        "fixMedian": 132.4119165,
+        "reductionMs": 22.231708999999995,
+        "bootstrap95CI": [
+          -65.33245850000003,
+          55.59758350000004
+        ],
+        "baselineRange": [
+          101.954666,
+          1225.073043
+        ],
+        "fixRange": [
+          106.941292,
+          270.1185
+        ]
+      },
+      "loadToFirstPresentedFrameMs": {
+        "baselineMedian": 234.34535449999998,
+        "fixMedian": 218.43212549999998,
+        "reductionMs": 15.913229000000001,
+        "bootstrap95CI": [
+          -57.90354199999996,
+          61.193040999999994
+        ],
+        "baselineRange": [
+          176.137291,
+          1279.990626
+        ],
+        "fixRange": [
+          158.587291,
+          448.903709
+        ]
+      },
+      "presentToLoadMs": {
+        "baselineMedian": 416.10193749999996,
+        "fixMedian": 397.1673755,
+        "reductionMs": 18.93456199999997,
+        "bootstrap95CI": [
+          -177.08989600000007,
+          210.74620849999997
+        ],
+        "baselineRange": [
+          247.072208,
+          996.18275
+        ],
+        "fixRange": [
+          265.007959,
+          701.838709
+        ]
+      },
+      "presentToFirstDrawMs": {
+        "baselineMedian": 572.2908339999999,
+        "fixMedian": 563.6004795,
+        "reductionMs": 8.690354499999899,
+        "bootstrap95CI": [
+          -156.464834,
+          296.1456455
+        ],
+        "baselineRange": [
+          401.187125,
+          1906.14421
+        ],
+        "fixRange": [
+          400.699459,
+          919.922751
+        ]
+      },
+      "presentToFirstPresentedFrameMs": {
+        "baselineMedian": 669.4173965,
+        "fixMedian": 630.6806045000001,
+        "reductionMs": 38.73679199999992,
+        "bootstrap95CI": [
+          -227.88804399999998,
+          316.39068700000007
+        ],
+        "baselineRange": [
+          444.266834,
+          1961.061793
+        ],
+        "fixRange": [
+          457.574042,
+          960.018543
+        ]
+      },
+      "firstPresentedFrameOverrunMs": {
+        "baselineMedian": 193.92125349999998,
+        "fixMedian": 188.12360999999999,
+        "reductionMs": 5.797643499999992,
+        "bootstrap95CI": [
+          -57.556651500000015,
+          73.08727849999998
+        ],
+        "baselineRange": [
+          72.901868,
+          1125.438954
+        ],
+        "fixRange": [
+          108.029568,
+          355.308077
+        ]
+      }
+    },
+    "journeyFrameTiming": {
+      "baseline": {
+        "medianFrameCount": 40.0,
+        "frameOverrunP50Ms": 19.848509,
+        "frameOverrunP90Ms": 95.47003059999999,
+        "frameOverrunP95Ms": 167.79971959999995,
+        "medianPositiveOverrunFraction": 0.9883720930232558,
+        "positiveOverrunFractions": [
+          0.9767441860465116,
+          0.94,
+          1.0,
+          1.0,
+          0.9433962264150944,
+          1.0,
+          1.0,
+          1.0,
+          0.9302325581395349,
+          0.8846153846153846
+        ]
+      },
+      "fix": {
+        "medianFrameCount": 40.5,
+        "frameOverrunP50Ms": 26.906375,
+        "frameOverrunP90Ms": 97.34753150000003,
+        "frameOverrunP95Ms": 143.91352794999986,
+        "medianPositiveOverrunFraction": 1.0,
+        "positiveOverrunFractions": [
+          0.9782608695652174,
+          0.918918918918919,
+          0.95,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    }
+  },
+  {
+    "comparison": "04",
+    "id": 4,
+    "workload": "full",
+    "metrics": {
+      "loadToFirstDrawMs": {
+        "baselineMedian": 173.568792,
+        "fixMedian": 128.142792,
+        "reductionMs": 45.426000000000016,
+        "bootstrap95CI": [
+          1.1819585000000075,
+          71.849625
+        ],
+        "baselineRange": [
+          149.973458,
+          297.414292
+        ],
+        "fixRange": [
+          95.671167,
+          273.85775
+        ]
+      },
+      "loadToFirstPresentedFrameMs": {
+        "baselineMedian": 264.3035005,
+        "fixMedian": 192.5022705,
+        "reductionMs": 71.80122999999998,
+        "bootstrap95CI": [
+          3.4946674999999914,
+          159.34466650000002
+        ],
+        "baselineRange": [
+          203.769334,
+          475.989834
+        ],
+        "fixRange": [
+          144.082584,
+          388.612792
+        ]
+      },
+      "presentToLoadMs": {
+        "baselineMedian": 399.62545850000004,
+        "fixMedian": 404.170896,
+        "reductionMs": -4.545437499999991,
+        "bootstrap95CI": [
+          -71.54458299999999,
+          198.16595850000004
+        ],
+        "baselineRange": [
+          339.478708,
+          669.926416
+        ],
+        "fixRange": [
+          325.936917,
+          662.636792
+        ]
+      },
+      "presentToFirstDrawMs": {
+        "baselineMedian": 551.063625,
+        "fixMedian": 520.8158335,
+        "reductionMs": 30.24779149999995,
+        "bootstrap95CI": [
+          -68.26604199999997,
+          281.01462549999997
+        ],
+        "baselineRange": [
+          497.484709,
+          909.517209
+        ],
+        "fixRange": [
+          454.055084,
+          851.753583
+        ]
+      },
+      "presentToFirstPresentedFrameMs": {
+        "baselineMedian": 758.532792,
+        "fixMedian": 592.8164165000001,
+        "reductionMs": 165.7163754999999,
+        "bootstrap95CI": [
+          -75.18285449999996,
+          323.0623125000001
+        ],
+        "baselineRange": [
+          543.920126,
+          1088.092751
+        ],
+        "fixRange": [
+          495.055667,
+          891.879583
+        ]
+      },
+      "firstPresentedFrameOverrunMs": {
+        "baselineMedian": 187.65851750000002,
+        "fixMedian": 167.6511745,
+        "reductionMs": 20.00734300000002,
+        "bootstrap95CI": [
+          -0.04509199999998259,
+          142.2650385
+        ],
+        "baselineRange": [
+          152.326133,
+          430.374706
+        ],
+        "fixRange": [
+          77.234147,
+          304.79357
+        ]
+      }
+    },
+    "journeyFrameTiming": {
+      "baseline": {
+        "medianFrameCount": 27.5,
+        "frameOverrunP50Ms": 50.67338,
+        "frameOverrunP90Ms": 140.5943774000001,
+        "frameOverrunP95Ms": 193.7859999999999,
+        "medianPositiveOverrunFraction": 1.0,
+        "positiveOverrunFractions": [
+          1.0,
+          1.0,
+          1.0,
+          0.9512195121951219,
+          0.9642857142857143,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "fix": {
+        "medianFrameCount": 37.5,
+        "frameOverrunP50Ms": 18.784551999999998,
+        "frameOverrunP90Ms": 89.06694770000007,
+        "frameOverrunP95Ms": 137.80661964999996,
+        "medianPositiveOverrunFraction": 1.0,
+        "positiveOverrunFractions": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          0.9512195121951219,
+          0.975,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    }
+  },
+  {
+    "comparison": "16",
+    "id": 16,
+    "workload": "captcha",
+    "metrics": {
+      "loadToFirstDrawMs": {
+        "baselineMedian": 162.0821665,
+        "fixMedian": 164.4195215,
+        "reductionMs": -2.3373550000000023,
+        "bootstrap95CI": [
+          -85.99475049999998,
+          53.9552085
+        ],
+        "baselineRange": [
+          81.098625,
+          212.205958
+        ],
+        "fixRange": [
+          102.345375,
+          387.148958
+        ]
+      },
+      "loadToFirstPresentedFrameMs": {
+        "baselineMedian": 245.065229,
+        "fixMedian": 230.69104199999998,
+        "reductionMs": 14.374187000000006,
+        "bootstrap95CI": [
+          -117.2251675,
+          125.121083
+        ],
+        "baselineRange": [
+          130.117917,
+          366.403167
+        ],
+        "fixRange": [
+          136.874958,
+          685.38225
+        ]
+      },
+      "presentToLoadMs": {
+        "baselineMedian": 441.77225,
+        "fixMedian": 438.67558399999996,
+        "reductionMs": 3.0966660000000275,
+        "bootstrap95CI": [
+          -94.11245899999994,
+          178.9828745000001
+        ],
+        "baselineRange": [
+          242.793292,
+          1095.872959
+        ],
+        "fixRange": [
+          251.661791,
+          1125.333125
+        ]
+      },
+      "presentToFirstDrawMs": {
+        "baselineMedian": 578.818084,
+        "fixMedian": 582.7990215,
+        "reductionMs": -3.980937499999982,
+        "bootstrap95CI": [
+          -235.8852915,
+          186.017583
+        ],
+        "baselineRange": [
+          358.49325,
+          1250.237375
+        ],
+        "fixRange": [
+          405.848125,
+          1330.381709
+        ]
+      },
+      "presentToFirstPresentedFrameMs": {
+        "baselineMedian": 695.6344584999999,
+        "fixMedian": 644.262667,
+        "reductionMs": 51.37179149999997,
+        "bootstrap95CI": [
+          -342.33970850000003,
+          264.99070800000004
+        ],
+        "baselineRange": [
+          372.911209,
+          1446.339001
+        ],
+        "fixRange": [
+          513.103,
+          1397.045292
+        ]
+      },
+      "firstPresentedFrameOverrunMs": {
+        "baselineMedian": 203.479893,
+        "fixMedian": 197.93246299999998,
+        "reductionMs": 5.54743000000002,
+        "bootstrap95CI": [
+          -123.94611350000002,
+          121.57963050000001
+        ],
+        "baselineRange": [
+          112.177181,
+          349.263789
+        ],
+        "fixRange": [
+          98.489766,
+          645.84555
+        ]
+      }
+    },
+    "journeyFrameTiming": {
+      "baseline": {
+        "medianFrameCount": 24.0,
+        "frameOverrunP50Ms": 54.9821565,
+        "frameOverrunP90Ms": 202.63159220000017,
+        "frameOverrunP95Ms": 279.05619335,
+        "medianPositiveOverrunFraction": 1.0,
+        "positiveOverrunFractions": [
+          0.9166666666666666,
+          1.0,
+          0.9642857142857143,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "fix": {
+        "medianFrameCount": 19.0,
+        "frameOverrunP50Ms": 66.301922,
+        "frameOverrunP90Ms": 207.3632788,
+        "frameOverrunP95Ms": 245.74561769999994,
+        "medianPositiveOverrunFraction": 1.0,
+        "positiveOverrunFractions": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    }
+  }
+]
