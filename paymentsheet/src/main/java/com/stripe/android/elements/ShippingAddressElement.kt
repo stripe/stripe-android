@@ -17,6 +17,7 @@ import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.checkout.ShippingAddressElementStateHolder
 import com.stripe.android.checkout.asPaymentSheet
+import com.stripe.android.checkout.injection.CheckoutPresenterScope
 import com.stripe.android.checkout.toCheckoutAddress
 import com.stripe.android.checkout.toShippingDetails
 import com.stripe.android.core.ApiConfiguration
@@ -47,6 +48,7 @@ internal fun interface CommitShippingAddress {
 
 @CheckoutSessionPreview
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@CheckoutPresenterScope
 class ShippingAddressElement internal constructor(
     activityResultCaller: ActivityResultCaller,
     lifecycleOwner: LifecycleOwner,

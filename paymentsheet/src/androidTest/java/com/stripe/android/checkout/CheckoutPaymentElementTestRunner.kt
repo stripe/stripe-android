@@ -11,6 +11,10 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
+import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.runner.lifecycle.ActivityLifecycleCallback
+import androidx.test.runner.lifecycle.ActivityLifecycleMonitorRegistry
+import androidx.test.runner.lifecycle.Stage
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.checkouttesting.checkoutInit
@@ -53,6 +57,36 @@ internal class CheckoutPaymentElementScenario(
             renderPaymentElementContent = renderPaymentElementContent,
         )
         scenario.moveToState(Lifecycle.State.RESUMED)
+    }
+
+    /**
+     * Recreates the host while another Activity, such as the shipping address sheet, is on top.
+     * [ActivityScenario.recreate] first resumes the host, which never happens while it is covered,
+     * so recreate the Activity directly and rebuild the presenter at the end of the new instance's
+     * `onCreate`, as an app creating its presenter there would.
+     */
+    fun recreateHostUnderSheet() {
+        lateinit var previousActivity: MainActivity
+        scenario.onActivity { previousActivity = it }
+
+        val recreated = CountDownLatch(1)
+        val callback = ActivityLifecycleCallback { activity, stage ->
+            if (stage == Stage.CREATED && activity is MainActivity && activity !== previousActivity) {
+                presenter = activity.createCheckoutPresenter(
+                    controller = controller,
+                    renderPaymentElementContent = renderPaymentElementContent,
+                )
+                recreated.countDown()
+            }
+        }
+        val monitor = ActivityLifecycleMonitorRegistry.getInstance()
+        monitor.addLifecycleCallback(callback)
+        try {
+            InstrumentationRegistry.getInstrumentation().runOnMainSync { previousActivity.recreate() }
+            check(recreated.await(10, TimeUnit.SECONDS)) { "Timed out waiting for the host to be recreated." }
+        } finally {
+            monitor.removeLifecycleCallback(callback)
+        }
     }
 
     /**
@@ -140,13 +174,21 @@ private fun ActivityScenario<MainActivity>.createCheckoutPresenter(
 ): CheckoutPresenter {
     lateinit var presenter: CheckoutPresenter
     onActivity { activity ->
-        presenter = controller.createPresenter(activity)
-        if (renderPaymentElementContent) {
-            val paymentElement = presenter.paymentElement()
-            activity.setContent {
-                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                    paymentElement.Content()
-                }
+        presenter = activity.createCheckoutPresenter(controller, renderPaymentElementContent)
+    }
+    return presenter
+}
+
+private fun MainActivity.createCheckoutPresenter(
+    controller: CheckoutController,
+    renderPaymentElementContent: Boolean,
+): CheckoutPresenter {
+    val presenter = controller.createPresenter(this)
+    if (renderPaymentElementContent) {
+        val paymentElement = presenter.paymentElement()
+        setContent {
+            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                paymentElement.Content()
             }
         }
     }
