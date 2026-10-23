@@ -138,6 +138,7 @@ internal class FormHelperTest {
     @Test
     fun `formElementsForCode returns klarna form elements using current selection values`() = runTest {
         enableKlarnaFormRemovalRule.setEnabled(true)
+        var email = "example@email.com"
         val formHelper = createFormHelper(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
@@ -156,7 +157,7 @@ internal class FormHelperTest {
                         lightThemeIconUrl = null,
                         darkThemeIconUrl = null,
                         paymentMethodCreateParams = PaymentMethodCreateParams.createKlarna(
-                            billingDetails = PaymentMethod.BillingDetails(email = "example@email.com")
+                            billingDetails = PaymentMethod.BillingDetails(email = email)
                         ),
                         customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
                         paymentMethodOptionsParams = null,
@@ -169,6 +170,11 @@ internal class FormHelperTest {
         assertThat(formElements).hasSize(1)
         assertThat(formElements[0].getFormFieldValueFlow().value[0].first.v1).isEqualTo("billing_details[email]")
         assertThat(formElements[0].getFormFieldValueFlow().value[0].second.value).isEqualTo("example@email.com")
+
+        assertThat(formHelper.formTypeForCode("klarna")).isEqualTo(FormHelper.FormType.UserInteractionRequired)
+        email = "updated@email.com"
+        val reopenedElements = formHelper.formElementsForCode("klarna")
+        assertThat(reopenedElements[0].getFormFieldValueFlow().value[0].second.value).isEqualTo(email)
         enableKlarnaFormRemovalRule.setEnabled(false)
     }
 
@@ -669,16 +675,67 @@ internal class FormHelperTest {
     }
 
     @Test
+    fun `classifying a card form does not create its controllers`() = runTest {
+        val formHelper = createFormHelper()
+
+        assertThat(formHelper.formTypeForCode("card")).isEqualTo(FormHelper.FormType.UserInteractionRequired)
+    }
+
+    @Test
+    fun `classifying an unsupported card returns Empty`() = runTest {
+        val formHelper = createFormHelper(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    paymentMethodTypes = listOf("cashapp"),
+                ),
+            ),
+            newPaymentSelectionProvider = { null },
+        )
+
+        assertThat(formHelper.formTypeForCode("card")).isEqualTo(FormHelper.FormType.Empty)
+    }
+
+    @Test
+    fun `classifying a displayed form does not recreate its controllers`() = runTest {
+        val selectionRequests = Turbine<PaymentMethodCode>()
+        val formHelper = createFormHelper(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    paymentMethodTypes = listOf("card", "cashapp"),
+                ),
+            ),
+            newPaymentSelectionProvider = { code ->
+                selectionRequests.add(code)
+                null
+            },
+        )
+        formHelper.formElementsForCode("cashapp")
+        assertThat(selectionRequests.awaitItem()).isEqualTo("cashapp")
+
+        assertThat(formHelper.formTypeForCode("cashapp")).isEqualTo(FormHelper.FormType.Empty)
+        assertThat(formHelper.formTypeForCode("cashapp")).isEqualTo(FormHelper.FormType.Empty)
+
+        selectionRequests.ensureAllEventsConsumed()
+    }
+
+    @Test
     fun `formTypeForCode returns Empty for an LPM with no fields`() = runTest {
+        val selectionRequests = Turbine<PaymentMethodCode>()
         val formHelper = createFormHelper(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                     paymentMethodTypes = listOf("card", "cashapp"),
                 )
             ),
-            newPaymentSelectionProvider = { null },
+            newPaymentSelectionProvider = { code ->
+                selectionRequests.add(code)
+                null
+            },
         )
         assertThat(formHelper.formTypeForCode("cashapp")).isEqualTo(FormHelper.FormType.Empty)
+        assertThat(selectionRequests.awaitItem()).isEqualTo("cashapp")
+        assertThat(formHelper.formTypeForCode("cashapp")).isEqualTo(FormHelper.FormType.Empty)
+        selectionRequests.ensureAllEventsConsumed()
     }
 
     @Test
@@ -726,9 +783,7 @@ internal class FormHelperTest {
 
     @Test
     fun `formTypeForCode returns UserInteractionRequired for non form field based LPM us_bank_account`() = runTest {
-        val formHelper = createFormHelper(
-            newPaymentSelectionProvider = { null },
-        )
+        val formHelper = createFormHelper()
         assertThat(formHelper.formTypeForCode("us_bank_account")).isEqualTo(FormHelper.FormType.UserInteractionRequired)
         assertThat(formHelper.formTypeForCode("link")).isEqualTo(FormHelper.FormType.UserInteractionRequired)
     }
