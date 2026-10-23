@@ -19,6 +19,16 @@ import com.stripe.android.connect.example.R
 
 @Composable
 fun BetaBadge() {
+    PreviewBadge(label = stringResource(R.string.beta_all_caps))
+}
+
+@Composable
+fun ExperimentalBadge() {
+    PreviewBadge(label = stringResource(R.string.experimental_all_caps))
+}
+
+@Composable
+private fun PreviewBadge(label: String) {
     val shape = RoundedCornerShape(4.dp)
     val labelMediumEmphasized = TextStyle.Default.copy(
         fontSize = 14.sp,
@@ -41,7 +51,7 @@ fun BetaBadge() {
         fontSize = 12.sp,
         lineHeight = 16.sp,
         style = labelMediumEmphasized,
-        text = stringResource(R.string.beta_all_caps)
+        text = label
     )
 }
 

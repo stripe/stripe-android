@@ -3,6 +3,7 @@ package com.stripe.android.connect
 import com.stripe.android.connect.webview.serialization.SetOnLoadError
 import com.stripe.android.connect.webview.serialization.SetOnLoaderStart
 import com.stripe.android.connect.webview.serialization.SetterFunctionCalledMessage
+import kotlinx.serialization.json.JsonObject
 
 interface StripeEmbeddedComponentListener {
     /**
@@ -29,6 +30,10 @@ internal open class ComponentListenerDelegate<Listener : StripeEmbeddedComponent
 
     fun delegate(listener: Listener, event: ComponentEvent) {
         when (event) {
+            is ComponentEvent.ContentHeightChanged,
+            is ComponentEvent.OpenNotificationBannerTask -> {
+                // Handled by components that support these events.
+            }
             is ComponentEvent.LoadError -> {
                 listener.onLoadError(event.error)
             }
@@ -53,6 +58,8 @@ internal open class ComponentListenerDelegate<Listener : StripeEmbeddedComponent
 }
 
 internal sealed interface ComponentEvent {
+    data class ContentHeightChanged(val height: Int) : ComponentEvent
     data class LoadError(val error: Throwable) : ComponentEvent
     data class Message(val message: SetterFunctionCalledMessage) : ComponentEvent
+    data class OpenNotificationBannerTask(val task: JsonObject) : ComponentEvent
 }

@@ -50,6 +50,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 
 /**
@@ -79,6 +80,7 @@ internal class StripeConnectWebViewContainerViewModel(
     private val clock: Clock,
     private val embeddedComponentManager: EmbeddedComponentManager,
     private val embeddedComponent: StripeEmbeddedComponent,
+    private val webViewLayout: StripeConnectWebViewLayout,
     private val analyticsService: ComponentAnalyticsService,
     private val logger: Logger,
     private val stripeIntentLauncher: StripeIntentLauncher = StripeIntentLauncherImpl(),
@@ -183,6 +185,9 @@ internal class StripeConnectWebViewContainerViewModel(
         }
 
         override fun onPageFinished(url: String) {
+            if (webViewLayout == StripeConnectWebViewLayout.SIZES_TO_CONTENT) {
+                webView.startObservingContentHeight()
+            }
             val timeToLoad = clock.millis() - (stateFlow.value.didBeginLoadingMillis ?: 0)
             analyticsService.track(ConnectAnalyticsEvent.WebPageLoaded(timeToLoad))
         }
@@ -342,6 +347,14 @@ internal class StripeConnectWebViewContainerViewModel(
             )
         }
 
+        override fun onReceivedOpenNotificationBannerForm(task: JsonObject) {
+            _eventFlow.tryEmit(ComponentEvent.OpenNotificationBannerTask(task))
+        }
+
+        override fun onContentHeightChanged(height: Int) {
+            _eventFlow.tryEmit(ComponentEvent.ContentHeightChanged(height))
+        }
+
         override suspend fun onOpenFinancialConnections(
             activity: Activity,
             message: OpenFinancialConnectionsMessage,
@@ -417,6 +430,16 @@ internal class StripeConnectWebViewContainerViewModel(
         webView.returnedFromAuthenticatedWebView(message.url)
     }
 
+    fun requestContentHeightUpdate() {
+        if (webViewLayout == StripeConnectWebViewLayout.SIZES_TO_CONTENT) {
+            webView.requestContentHeightUpdate()
+        }
+    }
+
+    fun callSetterWithSerializableValue(setter: String, value: JsonElement) {
+        webView.callSetterWithSerializableValue(setter, value)
+    }
+
     private inline fun updateState(
         update: StripeConnectWebViewContainerState.() -> StripeConnectWebViewContainerState
     ) {
@@ -441,6 +464,7 @@ internal class StripeConnectWebViewContainerViewModel(
                     clock = baseDependencies.clock,
                     embeddedComponentManager = baseDependencies.embeddedComponentManager,
                     embeddedComponent = baseDependencies.embeddedComponent,
+                    webViewLayout = baseDependencies.webViewLayout,
                     stripeIntentLauncher = baseDependencies.stripeIntentLauncher,
                     logger = baseDependencies.logger,
                 )
@@ -452,6 +476,7 @@ internal class StripeConnectWebViewContainerViewModel(
         val clock: Clock,
         val embeddedComponentManager: EmbeddedComponentManager,
         val embeddedComponent: StripeEmbeddedComponent,
+        val webViewLayout: StripeConnectWebViewLayout,
         val stripeIntentLauncher: StripeIntentLauncher = StripeIntentLauncherImpl(),
         val logger: Logger = StripeConnectComponent.instance.logger,
     ) {
