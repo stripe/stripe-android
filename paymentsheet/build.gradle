@@ -8,11 +8,6 @@ apply plugin: 'app.cash.paparazzi'
 apply plugin: 'dev.drewhamilton.poko'
 
 android {
-    sourceSets {
-        test.java.srcDir 'src/testShared/java'
-        androidTest.java.srcDir 'src/testShared/java'
-    }
-
     testOptions {
         managedDevices {
             localDevices {

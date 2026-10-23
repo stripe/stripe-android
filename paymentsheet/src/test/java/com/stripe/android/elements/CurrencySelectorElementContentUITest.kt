@@ -14,7 +14,6 @@ import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutController
-import com.stripe.android.checkout.getOrThrow
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.checkouttesting.checkoutUpdate
@@ -104,7 +103,7 @@ internal class CurrencySelectorElementContentUITest {
             .assertContentDescriptionContains("50.99")
 
         enqueueCheckoutInit()
-        controller.configure(
+        val result = controller.configure(
             DEFAULT_CLIENT_SECRET,
             CheckoutController.Configuration().currencySelectorElement(
                 CurrencySelectorElement.Configuration().appearance(
@@ -112,7 +111,8 @@ internal class CurrencySelectorElementContentUITest {
                         .labelContent(CurrencySelectorElement.Configuration.Appearance.LabelContent.CURRENCY_CODE)
                 )
             ),
-        ).getOrThrow()
+        )
+        assertThat(result).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
 
         composeRule.onNodeWithTag("${TEST_TAG_CURRENCY_OPTION_PREFIX}USD")
             .assertContentDescriptionContains("USD")
@@ -173,7 +173,8 @@ internal class CurrencySelectorElementContentUITest {
             ).build()
         )
 
-        controller.configure(DEFAULT_CLIENT_SECRET, configuration).getOrThrow()
+        assertThat(controller.configure(DEFAULT_CLIENT_SECRET, configuration))
+            .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
 
         val element = controller.createPresenter(composeRule.activity).currencySelectorElement()
         if (setContent) {
