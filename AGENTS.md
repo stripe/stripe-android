@@ -36,14 +36,6 @@ Multi-module Android library for payment processing and financial services.
 
 Prefer one function with a default parameter when an overload would only forward the same arguments and supply an unambiguous value that preserves existing behavior. Do not add a forwarding overload solely to avoid a default. Check source and binary compatibility before removing an existing overload.
 
-For example, `executeRequestWithResultParser` can declare its optional response transform as:
-
-```kotlin
-withRequestId: (Response, RequestId?) -> Response = { response, _ -> response },
-```
-
-Callers that attach a request ID pass their transform explicitly; other callers keep the parsed response unchanged. This replaces an overload whose only purpose is supplying the identity transform, as in [this review example](https://github.com/stripe/stripe-android/pull/15115#discussion_r4363160291).
-
 Keep internal model fields and parameters that encode caller-specific policy explicit. A nullable or boolean type alone does not justify a default.
 
 **Instrumentation test device** — Use `pixel2api33DebugAndroidTest` by default for instrumentation tests in this working directory. Use `pixel2api33imeDebugAndroidTest` when a test specifically requires the IME-enabled managed device. Do not use `connectedAndroidTest`, other connected-device test tasks, or the user's running emulator unless the user explicitly requests it. If the managed-device task is unavailable or fails, report the issue rather than falling back to the user's emulator.
