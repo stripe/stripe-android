@@ -170,6 +170,9 @@ class DefaultConfirmationHandlerTest {
             cause = IllegalStateException("Failed!"),
             message = R.string.stripe_something_went_wrong.resolvableString,
             errorType = ConfirmationHandler.Result.Failed.ErrorType.Internal,
+            metadata = MutableConfirmationMetadata().apply {
+                set(SomeStringMetadataKey, "something")
+            },
         )
     ) {
         confirmationHandler.state.test {
@@ -187,6 +190,7 @@ class DefaultConfirmationHandlerTest {
             assertThat(failedResult.cause.message).isEqualTo("Failed!")
             assertThat(failedResult.message).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
             assertThat(failedResult.type).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Internal)
+            assertThat(failedResult.metadata[SomeStringMetadataKey]).isEqualTo("something")
 
             confirmationHandler.assertAwaitResultCallReceivesSameResult(completeState)
         }
@@ -335,6 +339,9 @@ class DefaultConfirmationHandlerTest {
             cause = IllegalStateException("Failed!"),
             message = R.string.stripe_something_went_wrong.resolvableString,
             type = ConfirmationHandler.Result.Failed.ErrorType.Internal,
+            metadata = MutableConfirmationMetadata().apply {
+                set(SomeStringMetadataKey, "something")
+            },
         ),
     ) { completeState ->
         val failedResult = completeState.result.assertFailed()
@@ -343,6 +350,7 @@ class DefaultConfirmationHandlerTest {
         assertThat(failedResult.cause.message).isEqualTo("Failed!")
         assertThat(failedResult.message).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
         assertThat(failedResult.type).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Internal)
+        assertThat(failedResult.metadata[SomeStringMetadataKey]).isEqualTo("something")
     }
 
     @Test

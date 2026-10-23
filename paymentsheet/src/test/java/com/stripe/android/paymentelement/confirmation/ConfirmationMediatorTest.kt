@@ -222,6 +222,9 @@ class ConfirmationMediatorTest {
             cause = IllegalStateException("Failed!"),
             message = R.string.stripe_something_went_wrong.resolvableString,
             errorType = ConfirmationHandler.Result.Failed.ErrorType.Fatal,
+            metadata = MutableConfirmationMetadata().apply {
+                set(SomeStringMetadataKey, "something")
+            },
         ),
     ) {
         val mediator = ConfirmationMediator(
@@ -247,6 +250,7 @@ class ConfirmationMediatorTest {
         assertThat(failAction.cause.message).isEqualTo("Failed!")
         assertThat(failAction.message).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
         assertThat(failAction.errorType).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Fatal)
+        assertThat(failAction.metadata[SomeStringMetadataKey]).isEqualTo("something")
     }
 
     @Test
@@ -633,6 +637,8 @@ class ConfirmationMediatorTest {
 
     @Parcelize
     private object InvalidTestConfirmationOption : ConfirmationHandler.Option
+
+    private data object SomeStringMetadataKey : ConfirmationMetadata.Key<String>
 
     private companion object {
         private val INTENT = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD

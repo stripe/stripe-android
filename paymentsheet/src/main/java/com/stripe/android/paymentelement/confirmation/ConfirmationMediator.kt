@@ -98,6 +98,7 @@ internal class ConfirmationMediator<
                 ),
                 message = R.string.stripe_something_went_wrong.resolvableString,
                 errorType = ConfirmationHandler.Result.Failed.ErrorType.Internal,
+                metadata = MutableConfirmationMetadata(),
             )
 
         return when (val action = definition.action(confirmationOption, arguments)) {
@@ -129,6 +130,7 @@ internal class ConfirmationMediator<
                         cause = exception,
                         message = exception.stripeErrorMessage(),
                         errorType = ConfirmationHandler.Result.Failed.ErrorType.Fatal,
+                        metadata = MutableConfirmationMetadata(),
                     )
                 }
             }
@@ -144,6 +146,7 @@ internal class ConfirmationMediator<
                     cause = action.cause,
                     message = action.message,
                     errorType = action.errorType,
+                    metadata = action.metadata,
                 )
             }
         }
@@ -159,6 +162,7 @@ internal class ConfirmationMediator<
             val cause: Throwable,
             val message: ResolvableString,
             val errorType: ConfirmationHandler.Result.Failed.ErrorType,
+            val metadata: ConfirmationMetadata,
         ) : Action
 
         data class Complete(

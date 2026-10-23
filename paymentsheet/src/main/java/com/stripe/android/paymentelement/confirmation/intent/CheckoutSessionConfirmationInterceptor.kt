@@ -171,6 +171,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
                     cause = exception,
                     message = exception.stripeErrorMessage(),
                     errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                    metadata = response.confirmRequestIdMetadata(),
                 )
             }
 
@@ -190,6 +191,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
                     launcherArguments = Args.NextAction(
                         intent = intent,
                         deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
+                        confirmRequestId = response.requestId,
                     ),
                     receivesResultInProcess = false,
                 )
@@ -200,6 +202,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
                     cause = exception,
                     message = exception.stripeErrorMessage(),
                     errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                    metadata = response.confirmRequestIdMetadata(),
                 )
             }
         }
@@ -213,6 +216,10 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
             clientAttributionMetadata: ClientAttributionMetadata,
         ): CheckoutSessionConfirmationInterceptor
     }
+}
+
+private fun CheckoutSessionResponse.confirmRequestIdMetadata() = MutableConfirmationMetadata().apply {
+    requestId?.let { set(ConfirmRequestIdKey, it) }
 }
 
 private fun ShippingInformation?.toCheckoutSessionShipping(): ConfirmCheckoutSessionParams.Shipping? {

@@ -29,6 +29,7 @@ internal sealed class CheckoutConfirmationEvent : AnalyticsEvent {
 
     class Failed(
         confirmationContext: CheckoutConfirmationContext,
+        confirmRequestId: String?,
         analyticsMetadata: AnalyticsMetadata,
         duration: Duration?,
         error: PaymentSheetConfirmationError,
@@ -38,7 +39,7 @@ internal sealed class CheckoutConfirmationEvent : AnalyticsEvent {
             val stripeException = error.cause as? StripeException
             put("error_type", stripeException?.stripeError?.type ?: error.analyticsValue)
             error.errorCode?.let { put("error_code", it) }
-            putAll(confirmationParams(confirmationContext, stripeException?.requestId))
+            putAll(confirmationParams(confirmationContext, stripeException?.requestId ?: confirmRequestId))
             putAll(analyticsMetadata.paramsMap)
             putAll(duration.mapOfDurationInSeconds())
         }

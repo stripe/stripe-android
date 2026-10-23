@@ -111,6 +111,8 @@ internal class IntentConfirmationDefinition(
         launcherArgs: Args,
         result: InternalPaymentResult
     ): ConfirmationDefinition.Result {
+        val confirmRequestId = (launcherArgs as? Args.NextAction)?.confirmRequestId
+
         return when (result) {
             is InternalPaymentResult.Completed -> ConfirmationDefinition.Result.Succeeded(
                 intent = result.intent,
@@ -118,12 +120,16 @@ internal class IntentConfirmationDefinition(
                     launcherArgs.deferredIntentConfirmationType?.let {
                         set(DeferredIntentConfirmationTypeKey, it)
                     }
+                    confirmRequestId?.let { set(ConfirmRequestIdKey, it) }
                 }
             )
             is InternalPaymentResult.Failed -> ConfirmationDefinition.Result.Failed(
                 cause = result.throwable,
                 message = result.throwable.stripeErrorMessage(),
                 type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                metadata = MutableConfirmationMetadata().apply {
+                    confirmRequestId?.let { set(ConfirmRequestIdKey, it) }
+                },
             )
             is InternalPaymentResult.Canceled -> ConfirmationDefinition.Result.Canceled(
                 action = ConfirmationHandler.Result.Canceled.Action.InformCancellation,
@@ -152,6 +158,7 @@ internal class IntentConfirmationDefinition(
         data class NextAction(
             val intent: StripeIntent,
             override val deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+            val confirmRequestId: String?,
         ) : Args
 
         @Parcelize

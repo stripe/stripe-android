@@ -174,6 +174,7 @@ internal interface ConfirmationHandler {
             val cause: Throwable,
             val message: ResolvableString,
             val type: ErrorType,
+            val metadata: ConfirmationMetadata = MutableConfirmationMetadata(),
         ) : Result {
             override fun log(logger: Logger) {
                 logger.error("ConfirmationHandler.Result.Failed", cause)
