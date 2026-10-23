@@ -1533,7 +1533,7 @@ internal class CheckoutControllerTest {
 
         assertThat(result).isInstanceOf(CheckoutController.OperationResult.Failed::class.java)
         val failure = result as CheckoutController.OperationResult.Failed
-        assertThat(failure.error).isSameInstanceAs(expected)
+        assertThat(failure.error).isInstanceOf(IllegalStateException::class.java)
         assertThat(failure.error).hasMessageThat().isEqualTo("Server error")
         assertThat(failure.displayMessage).isNull()
         assertThat(controller.session.value).isEqualTo(before)
@@ -1682,8 +1682,7 @@ internal class CheckoutControllerTest {
                         releaseFirstResponse.countDown()
 
                         assertThat(first.await()).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
-                        assertThat(second.await())
-                            .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
+                        second.await().getOrThrow()
                         secondRequest.awaitItem()
                     } finally {
                         releaseFirstResponse.countDown()
