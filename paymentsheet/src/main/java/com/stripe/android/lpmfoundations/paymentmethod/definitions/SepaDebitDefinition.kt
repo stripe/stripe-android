@@ -2,7 +2,6 @@ package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import androidx.compose.ui.unit.dp
 import com.stripe.android.lpmfoundations.ContactInformationCollectionMode
-import com.stripe.android.lpmfoundations.FormElementDefinition
 import com.stripe.android.lpmfoundations.FormElementsBuilder
 import com.stripe.android.lpmfoundations.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.isSaveForFutureUseValueChangeable
@@ -10,7 +9,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequireme
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
-import com.stripe.android.lpmfoundations.savePaymentOptionDefinition
+import com.stripe.android.lpmfoundations.savePaymentOptionFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.IbanConfig
@@ -51,32 +50,28 @@ private object SepaDebitUiDefinitionFactory : UiDefinitionFactory.Simple() {
             .requireContactInformationIfAllowed(ContactInformationCollectionMode.Email)
             .overrideContactInformationPosition(ContactInformationCollectionMode.Email)
             .overrideContactInformationPosition(ContactInformationCollectionMode.Phone)
-            .element(
-                FormElementDefinition.interactive { arguments ->
-                    SectionElement.wrap(
-                        sectionFieldElement = SimpleTextElement(
-                            identifier = ibanIdentifier,
-                            controller = SimpleTextFieldController(
-                                textFieldConfig = IbanConfig(),
-                                initialValue = arguments.initialValues[ibanIdentifier]
-                            )
+            .interactiveElement { arguments ->
+                SectionElement.wrap(
+                    sectionFieldElement = SimpleTextElement(
+                        identifier = ibanIdentifier,
+                        controller = SimpleTextFieldController(
+                            textFieldConfig = IbanConfig(),
+                            initialValue = arguments.initialValues[ibanIdentifier]
                         )
                     )
-                }
-            )
+                )
+            }
             .requireBillingAddressIfAllowed()
             .apply {
                 if (isSaveForFutureUseValueChangeable(SepaDebitDefinition.type.code, metadata)) {
-                    footer(savePaymentOptionDefinition(metadata))
+                    interactiveFooter(savePaymentOptionFactory(metadata))
                 }
             }
             .addMandateIfAllowed(
-                formElement = FormElementDefinition.mandate(
-                    identifier = FormFieldId.Generic("mandate"),
-                    stringResId = R.string.stripe_sepa_mandate,
-                    args = listOf(metadata.merchantName),
-                    topPadding = 8.dp,
-                )
+                identifier = FormFieldId.Generic("mandate"),
+                stringResId = R.string.stripe_sepa_mandate,
+                args = listOf(metadata.merchantName),
+                topPadding = 8.dp,
             )
     }
 

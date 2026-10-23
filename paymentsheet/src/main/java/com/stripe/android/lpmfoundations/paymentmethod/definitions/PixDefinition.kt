@@ -4,7 +4,6 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.strings.transformations.Replace
 import com.stripe.android.lpmfoundations.ContactInformationCollectionMode
-import com.stripe.android.lpmfoundations.FormElementDefinition
 import com.stripe.android.lpmfoundations.FormElementsBuilder
 import com.stripe.android.lpmfoundations.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
@@ -67,16 +66,12 @@ private object PixUiDefinitionFactory : UiDefinitionFactory.Simple() {
         builder
             .requireContactInformationIfAllowed(ContactInformationCollectionMode.Name)
             .requireContactInformationIfAllowed(ContactInformationCollectionMode.Email)
-            .element(
-                FormElementDefinition.interactive { arguments ->
-                    SectionElement.wrap(taxIdElement(arguments))
-                }
-            )
-            .footer(
-                FormElementDefinition(false, pixInternationalDisclosureText) {
-                    listOf(PixInternationalDisclosureElement())
-                }
-            )
+            .interactiveElement { arguments ->
+                SectionElement.wrap(taxIdElement(arguments))
+            }
+            .nonInteractiveFooter(mandateText = pixInternationalDisclosureText) {
+                PixInternationalDisclosureElement()
+            }
     }
 }
 

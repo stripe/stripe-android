@@ -1,6 +1,5 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
-import com.stripe.android.lpmfoundations.FormElementDefinition
 import com.stripe.android.lpmfoundations.FormElementsBuilder
 import com.stripe.android.lpmfoundations.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
@@ -51,10 +50,8 @@ private object BlikUiDefinitionFactory : UiDefinitionFactory.Simple() {
                 initialValue = arguments.initialValues[FormFieldId.BlikCode],
             ),
         )
-        builder.element(
-            FormElementDefinition.interactive { arguments ->
-                SectionElement.wrap(blikElement(arguments))
-            }
-        )
+        builder.interactiveElement { arguments ->
+            SectionElement.wrap(blikElement(arguments))
+        }
     }
 }

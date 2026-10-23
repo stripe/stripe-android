@@ -2,7 +2,6 @@ package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.ContactInformationCollectionMode
-import com.stripe.android.lpmfoundations.FormElementDefinition
 import com.stripe.android.lpmfoundations.FormElementsBuilder
 import com.stripe.android.lpmfoundations.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
@@ -83,11 +82,9 @@ private object AfterpayClearpayUiDefinitionFactory : UiDefinitionFactory.Simple(
         }
 
         builder
-            .header(
-                FormElementDefinition.nonInteractive { arguments ->
-                    header(arguments)
-                }
-            )
+            .nonInteractiveHeader { arguments ->
+                header(arguments)
+            }
             .requireContactInformationIfAllowed(ContactInformationCollectionMode.Email)
     }
 }

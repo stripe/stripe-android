@@ -35,16 +35,6 @@ internal class FormElementDefinition(
         fun nonInteractive(factory: (UiDefinitionFactory.Arguments) -> FormElement): FormElementDefinition {
             return FormElementDefinition(false, null) { listOf(factory(it)) }
         }
-
-        fun mandate(
-            stringResId: Int,
-            args: List<String>,
-            identifier: FormFieldId,
-            topPadding: Dp,
-        ): FormElementDefinition {
-            val mandate = MandateDefinition(identifier, stringResId, args)
-            return FormElementDefinition(false, mandate.text) { listOf(mandate.createElement(topPadding)) }
-        }
     }
 }
 

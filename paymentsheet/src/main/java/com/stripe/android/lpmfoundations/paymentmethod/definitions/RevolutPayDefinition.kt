@@ -1,7 +1,6 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import androidx.compose.ui.unit.dp
-import com.stripe.android.lpmfoundations.FormElementDefinition
 import com.stripe.android.lpmfoundations.FormElementsBuilder
 import com.stripe.android.lpmfoundations.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
@@ -43,12 +42,10 @@ private object RevolutPayUiDefinitionFactory : UiDefinitionFactory.Simple() {
         builder: FormElementsBuilder
     ) {
         builder.addMandateIfAllowed(
-            formElement = FormElementDefinition.mandate(
-                identifier = FormFieldId.Generic("mandate"),
-                stringResId = R.string.stripe_revolut_mandate,
-                args = listOf(metadata.merchantName),
-                topPadding = 8.dp,
-            ),
+            identifier = FormFieldId.Generic("mandate"),
+            stringResId = R.string.stripe_revolut_mandate,
+            args = listOf(metadata.merchantName),
+            topPadding = 8.dp,
         )
     }
 }

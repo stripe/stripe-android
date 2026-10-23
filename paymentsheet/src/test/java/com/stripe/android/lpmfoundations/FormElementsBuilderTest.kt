@@ -3,6 +3,7 @@ package com.stripe.android.lpmfoundations
 import android.app.Application
 import androidx.compose.ui.unit.dp
 import androidx.test.core.app.ApplicationProvider
+import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
@@ -28,6 +29,7 @@ import com.stripe.android.uicore.elements.SectionFieldElement
 import com.stripe.android.uicore.elements.SimpleTextElement
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -43,15 +45,19 @@ class FormElementsBuilderTest {
 
     @Test
     fun `required mandate follows billing fields`() {
-        val mandate = FormElementDefinition.mandate(
+        val mandate = MandateDefinition(
+            identifier = FormFieldId.Generic("mandate"),
             stringResId = R.string.stripe_gcash_mandate,
             args = listOf("Example Inc."),
-            identifier = FormFieldId.Generic("mandate"),
-            topPadding = 8.dp,
         )
         val formElements = formElementsBuilder(arguments(requiresMandate = true))
-            .addMandateIfAllowed(formElement = mandate)
-            .element(testElement(FormFieldId.Generic("element")))
+            .addMandateIfAllowed(
+                stringResId = R.string.stripe_gcash_mandate,
+                args = listOf("Example Inc."),
+                identifier = FormFieldId.Generic("mandate"),
+                topPadding = 8.dp,
+            )
+            .interactiveElement(testElement(FormFieldId.Generic("element")))
             .requireBillingAddressIfAllowed()
             .build().createFormElements(runtimeArguments)
 
@@ -60,23 +66,69 @@ class FormElementsBuilderTest {
             "billing_details[address]_section",
             "mandate",
         ).inOrder()
-        assertThat(formElements.last().mandateText).isEqualTo(mandate.mandateText)
+        assertThat(formElements.last().mandateText).isEqualTo(mandate.text)
     }
 
     @Test
     fun `mandate is omitted when not required`() {
         val formElements = formElementsBuilder(arguments(requiresMandate = false))
             .addMandateIfAllowed(
-                formElement = FormElementDefinition.mandate(
-                    stringResId = R.string.stripe_gcash_mandate,
-                    args = listOf("Example Inc."),
-                    identifier = FormFieldId.Generic("mandate"),
-                    topPadding = 8.dp,
-                ),
+                stringResId = R.string.stripe_gcash_mandate,
+                args = listOf("Example Inc."),
+                identifier = FormFieldId.Generic("mandate"),
+                topPadding = 8.dp,
             )
             .build().createFormElements(runtimeArguments)
 
         assertThat(formElements).isEmpty()
+    }
+
+    @Test
+    fun `interactive form classification defers factories until materialization`() = runTest {
+        val calls = Turbine<UiDefinitionFactory.Arguments>()
+        val definition = formElementsBuilder(arguments())
+            .interactiveElement {
+                calls.add(it)
+                ContactInformationCollectionMode.Email.formElement(it.initialValues)
+            }
+            .build()
+
+        assertThat(definition.allowsUserInteraction).isTrue()
+        assertThat(definition.mandateText).isNull()
+        calls.expectNoEvents()
+
+        val first = definition.createFormElements(runtimeArguments)
+        assertThat(calls.awaitItem()).isSameInstanceAs(runtimeArguments)
+        val second = definition.createFormElements(runtimeArguments)
+        assertThat(calls.awaitItem()).isSameInstanceAs(runtimeArguments)
+        assertThat(first.single()).isNotSameInstanceAs(second.single())
+        calls.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `non interactive form classification defers header and footer factories`() = runTest {
+        val calls = Turbine<String>()
+        val mandateText = resolvableString("Mandate")
+        val definition = formElementsBuilder(arguments())
+            .nonInteractiveHeader {
+                calls.add("header")
+                testElement(FormFieldId.Generic("header"))(it)
+            }
+            .nonInteractiveFooter(mandateText) {
+                calls.add("footer")
+                testElement(FormFieldId.Generic("footer"))(it)
+            }
+            .build()
+
+        assertThat(definition.allowsUserInteraction).isFalse()
+        assertThat(definition.mandateText).isEqualTo(mandateText)
+        calls.expectNoEvents()
+
+        assertThat(definition.createFormElements(runtimeArguments).map { it.identifier.v1 })
+            .containsExactly("header", "footer").inOrder()
+        assertThat(calls.awaitItem()).isEqualTo("header")
+        assertThat(calls.awaitItem()).isEqualTo("footer")
+        calls.ensureAllEventsConsumed()
     }
 
     @Test
@@ -100,9 +152,9 @@ class FormElementsBuilderTest {
     @Test
     fun `build orders fields correctly`() {
         val formElements = formElementsBuilder(arguments())
-            .element(testElement(FormFieldId(v1 = "element")))
-            .header(testElement(FormFieldId(v1 = "header")))
-            .footer(testElement(FormFieldId(v1 = "footer")))
+            .interactiveElement(testElement(FormFieldId(v1 = "element")))
+            .nonInteractiveHeader(testElement(FormFieldId(v1 = "header")))
+            .nonInteractiveFooter(mandateText = null, factory = testElement(FormFieldId(v1 = "footer")))
             .requireBillingAddressIfAllowed()
             .requireContactInformationIfAllowed(ContactInformationCollectionMode.Name)
             .build().createFormElements(runtimeArguments)
@@ -117,8 +169,8 @@ class FormElementsBuilderTest {
     @Test
     fun `build orders country requirement after ordinary elements and before footers`() {
         val formElements = formElementsBuilder(arguments())
-            .element(testElement(FormFieldId(v1 = "element")))
-            .footer(testElement(FormFieldId(v1 = "footer")))
+            .interactiveElement(testElement(FormFieldId(v1 = "element")))
+            .nonInteractiveFooter(mandateText = null, factory = testElement(FormFieldId(v1 = "footer")))
             .requireCountry(
                 allowedCountryCodes = setOf("US", "CA"),
                 initialValue = { "US" },
@@ -139,8 +191,8 @@ class FormElementsBuilderTest {
                 requiresBillingAddressForAutomaticTax = true,
             ),
         )
-            .element(testElement(FormFieldId.Generic("element")))
-            .footer(testElement(FormFieldId.Generic("footer")))
+            .interactiveElement(testElement(FormFieldId.Generic("element")))
+            .nonInteractiveFooter(mandateText = null, factory = testElement(FormFieldId.Generic("footer")))
             .build().createFormElements(runtimeArguments)
 
         assertThat(formElements.map { it.identifier.v1 }).containsExactly(
@@ -173,12 +225,12 @@ class FormElementsBuilderTest {
     @Test
     fun `build returns fields in the order they were added`() {
         val formElements = formElementsBuilder(arguments())
-            .element(testElement(FormFieldId(v1 = "element1")))
-            .element(testElement(FormFieldId(v1 = "element2")))
-            .footer(testElement(FormFieldId(v1 = "footer1")))
-            .footer(testElement(FormFieldId(v1 = "footer2")))
-            .header(testElement(FormFieldId(v1 = "header1")))
-            .header(testElement(FormFieldId(v1 = "header2")))
+            .interactiveElement(testElement(FormFieldId(v1 = "element1")))
+            .interactiveElement(testElement(FormFieldId(v1 = "element2")))
+            .nonInteractiveFooter(mandateText = null, factory = testElement(FormFieldId(v1 = "footer1")))
+            .nonInteractiveFooter(mandateText = null, factory = testElement(FormFieldId(v1 = "footer2")))
+            .nonInteractiveHeader(testElement(FormFieldId(v1 = "header1")))
+            .nonInteractiveHeader(testElement(FormFieldId(v1 = "header2")))
             .build().createFormElements(runtimeArguments)
         assertThat(formElements).hasSize(6)
         assertThat(formElements[0].identifier.v1).isEqualTo("header1")
@@ -197,7 +249,7 @@ class FormElementsBuilderTest {
             )
         )
         val formElements = formElementsBuilder(arguments)
-            .element(testElement(FormFieldId(v1 = "element")))
+            .interactiveElement(testElement(FormFieldId(v1 = "element")))
             .ignoreBillingAddressRequirements()
             .build().createFormElements(runtimeArguments)
         assertThat(formElements).hasSize(1)
@@ -214,7 +266,7 @@ class FormElementsBuilderTest {
             )
         )
         val formElements = formElementsBuilder(arguments)
-            .element(testElement(FormFieldId(v1 = "element")))
+            .interactiveElement(testElement(FormFieldId(v1 = "element")))
             .ignoreContactInformationRequirements()
             .build().createFormElements(runtimeArguments)
         assertThat(formElements).hasSize(1)
@@ -301,8 +353,8 @@ class FormElementsBuilderTest {
         return formElements[position] as SectionElement
     }
 
-    private fun testElement(identifier: FormFieldId): FormElementDefinition {
-        return FormElementDefinition.nonInteractive {
+    private fun testElement(identifier: FormFieldId): (UiDefinitionFactory.Arguments) -> FormElement {
+        return {
             StaticTextElement(
                 identifier = identifier,
                 text = resolvableString("Test element"),

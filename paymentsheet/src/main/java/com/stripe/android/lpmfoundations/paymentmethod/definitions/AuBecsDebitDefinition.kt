@@ -4,7 +4,6 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.ContactInformationCollectionMode
-import com.stripe.android.lpmfoundations.FormElementDefinition
 import com.stripe.android.lpmfoundations.FormElementsBuilder
 import com.stripe.android.lpmfoundations.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
@@ -64,7 +63,7 @@ private object AuBecsDebitUiDefinitionFactory : UiDefinitionFactory.Simple() {
             .requireContactInformationIfAllowed(ContactInformationCollectionMode.Name)
             .overrideContactInformationPosition(
                 type = ContactInformationCollectionMode.Name,
-                formElement = FormElementDefinition.interactive { arguments ->
+                factory = { arguments ->
                     SectionElement.wrap(
                         SimpleTextElement(
                             identifier = FormFieldId.Name,
@@ -84,42 +83,31 @@ private object AuBecsDebitUiDefinitionFactory : UiDefinitionFactory.Simple() {
             .requireContactInformationIfAllowed(ContactInformationCollectionMode.Email)
             .overrideContactInformationPosition(ContactInformationCollectionMode.Email)
             .overrideContactInformationPosition(ContactInformationCollectionMode.Phone)
-            .element(
-                FormElementDefinition.interactive { arguments ->
-                    BsbElement(
-                        formFieldId = bsbNumberIdentifier,
-                        initialValue = arguments.initialValues[bsbNumberIdentifier],
-                    )
-                }
-            )
-            .element(
-                FormElementDefinition.interactive { arguments ->
-                    SectionElement.wrap(
-                        SimpleTextElement(
-                            identifier = accountNumberIdentifier,
-                            controller = SimpleTextFieldController(
-                                textFieldConfig = AuBankAccountNumberConfig(),
-                                initialValue = arguments.initialValues[accountNumberIdentifier],
-                            ),
+            .interactiveElement { arguments ->
+                BsbElement(
+                    formFieldId = bsbNumberIdentifier,
+                    initialValue = arguments.initialValues[bsbNumberIdentifier],
+                )
+            }
+            .interactiveElement { arguments ->
+                SectionElement.wrap(
+                    SimpleTextElement(
+                        identifier = accountNumberIdentifier,
+                        controller = SimpleTextFieldController(
+                            textFieldConfig = AuBankAccountNumberConfig(),
+                            initialValue = arguments.initialValues[accountNumberIdentifier],
                         ),
-                    )
-                }
-            )
-            .addMandateIfAllowed(mandateDefinition(metadata.merchantName))
-    }
-
-    private fun mandateDefinition(merchantName: String): FormElementDefinition {
-        return FormElementDefinition(
-            allowsUserInteraction = false,
-            mandateText = resolvableString(StripeR.string.stripe_au_becs_mandate, merchantName),
-            createFormElements = {
-                listOf(
+                    ),
+                )
+            }
+            .addMandateIfAllowed(
+                mandateText = resolvableString(StripeR.string.stripe_au_becs_mandate, metadata.merchantName),
+                factory = {
                     AuBecsDebitMandateTextElement(
                         identifier = FormFieldId.Generic("au_becs_mandate"),
-                        merchantName = merchantName,
+                        merchantName = metadata.merchantName,
                     )
-                )
-            },
-        )
+                },
+            )
     }
 }

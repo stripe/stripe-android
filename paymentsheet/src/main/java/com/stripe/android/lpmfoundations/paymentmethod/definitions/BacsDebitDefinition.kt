@@ -2,7 +2,6 @@ package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.ContactInformationCollectionMode
-import com.stripe.android.lpmfoundations.FormElementDefinition
 import com.stripe.android.lpmfoundations.FormElementsBuilder
 import com.stripe.android.lpmfoundations.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
@@ -63,48 +62,44 @@ private object BacsDebitUiDefinitionFactory : UiDefinitionFactory.Simple() {
             .requireContactInformationIfAllowed(ContactInformationCollectionMode.Email)
             .overrideContactInformationPosition(ContactInformationCollectionMode.Email)
             .overrideContactInformationPosition(ContactInformationCollectionMode.Phone)
-            .element(
-                FormElementDefinition.interactive { arguments ->
-                    SectionElement.wrap(
-                        sectionFieldElements = listOf(
-                            SimpleTextElement(
-                                identifier = sortCodeIdentifier,
-                                controller = SimpleTextFieldController(
-                                    textFieldConfig = BacsDebitSortCodeConfig(),
-                                    initialValue = arguments.initialValues[sortCodeIdentifier],
-                                ),
-                            ),
-                            SimpleTextElement(
-                                identifier = accountNumberIdentifier,
-                                controller = SimpleTextFieldController(
-                                    textFieldConfig = BacsDebitAccountNumberConfig(),
-                                    initialValue = arguments.initialValues[accountNumberIdentifier],
-                                ),
+            .interactiveElement { arguments ->
+                SectionElement.wrap(
+                    sectionFieldElements = listOf(
+                        SimpleTextElement(
+                            identifier = sortCodeIdentifier,
+                            controller = SimpleTextFieldController(
+                                textFieldConfig = BacsDebitSortCodeConfig(),
+                                initialValue = arguments.initialValues[sortCodeIdentifier],
                             ),
                         ),
-                        label = resolvableString(R.string.stripe_bacs_bank_account_title),
-                    )
-                }
-            )
+                        SimpleTextElement(
+                            identifier = accountNumberIdentifier,
+                            controller = SimpleTextFieldController(
+                                textFieldConfig = BacsDebitAccountNumberConfig(),
+                                initialValue = arguments.initialValues[accountNumberIdentifier],
+                            ),
+                        ),
+                    ),
+                    label = resolvableString(R.string.stripe_bacs_bank_account_title),
+                )
+            }
             .apply {
                 if (!metadata.requiresBillingAddressForAutomaticTax) {
                     requireBillingAddressIfAllowed()
                 }
             }
-            .addMandateIfAllowed(
-                formElement = FormElementDefinition.interactive { arguments ->
-                    CheckboxFieldElement(
-                        identifier = FormFieldId.BacsDebitConfirmed,
-                        controller = CheckboxFieldController(
-                            labelResource = CheckboxFieldController.LabelResource(
-                                R.string.stripe_bacs_confirm_mandate_label,
-                                metadata.merchantName,
-                            ),
-                            debugTag = "BACS_MANDATE_CHECKBOX",
-                            initialValue = arguments.initialValues[FormFieldId.BacsDebitConfirmed].toBoolean(),
+            .interactiveMandateIfAllowed { arguments ->
+                CheckboxFieldElement(
+                    identifier = FormFieldId.BacsDebitConfirmed,
+                    controller = CheckboxFieldController(
+                        labelResource = CheckboxFieldController.LabelResource(
+                            R.string.stripe_bacs_confirm_mandate_label,
+                            metadata.merchantName,
                         ),
-                    )
-                }
-            )
+                        debugTag = "BACS_MANDATE_CHECKBOX",
+                        initialValue = arguments.initialValues[FormFieldId.BacsDebitConfirmed].toBoolean(),
+                    ),
+                )
+            }
     }
 }

@@ -25,7 +25,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.lpmfoundations.paymentmethod.link.LinkFormElement
-import com.stripe.android.lpmfoundations.savePaymentOptionDefinition
+import com.stripe.android.lpmfoundations.savePaymentOptionFactory
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -162,7 +162,7 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Custom {
                     )
                 }
                 if (showSave) {
-                    add(savePaymentOptionDefinition(metadata))
+                    add(FormElementDefinition(true, null, savePaymentOptionFactory(metadata)))
                 }
                 // Link signup and its mandate share the runtime signup mode and dependencies.
                 add(

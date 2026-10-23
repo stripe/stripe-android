@@ -1,8 +1,13 @@
 package com.stripe.android.lpmfoundations
 
+import androidx.compose.ui.unit.Dp
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.uicore.elements.FormElement
+import com.stripe.android.uicore.elements.FormFieldId
 
+/** Registers deferred factories; building and inspecting a form never resolves its elements. */
 @Suppress("TooManyFunctions") // Keep the form-building operations together in the builder API.
 internal class FormElementsBuilder(
     private val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
@@ -39,8 +44,8 @@ internal class FormElementsBuilder(
         }
     }
 
-    fun header(formElement: FormElementDefinition): FormElementsBuilder = apply {
-        headerFormElements += formElement
+    fun nonInteractiveHeader(factory: (UiDefinitionFactory.Arguments) -> FormElement): FormElementsBuilder = apply {
+        headerFormElements += FormElementDefinition.nonInteractive(factory)
     }
 
     fun ignoreContactInformationRequirements() = apply {
@@ -56,23 +61,23 @@ internal class FormElementsBuilder(
     fun overrideContactInformationPosition(type: ContactInformationCollectionMode): FormElementsBuilder {
         return overrideContactInformationPosition(
             type = type,
-            formElement = FormElementDefinition.interactive { type.formElement(it.initialValues) },
+            factory = { type.formElement(it.initialValues) },
         )
     }
 
     fun overrideContactInformationPosition(
         type: ContactInformationCollectionMode,
-        formElement: FormElementDefinition,
+        factory: (UiDefinitionFactory.Arguments) -> FormElement,
     ): FormElementsBuilder = apply {
         if (type in requiredContactInformationCollectionModes) {
             overriddenContactInformationCollectionModes += type
 
-            uiFormElements += formElement
+            uiFormElements += FormElementDefinition.interactive(factory)
         }
     }
 
-    fun element(formElement: FormElementDefinition): FormElementsBuilder = apply {
-        uiFormElements += formElement
+    fun interactiveElement(factory: (UiDefinitionFactory.Arguments) -> FormElement): FormElementsBuilder = apply {
+        uiFormElements += FormElementDefinition.interactive(factory)
     }
 
     fun ignoreBillingAddressRequirements() = apply {
@@ -102,15 +107,54 @@ internal class FormElementsBuilder(
     }
 
     fun addMandateIfAllowed(
-        formElement: FormElementDefinition,
+        stringResId: Int,
+        args: List<String>,
+        identifier: FormFieldId,
+        topPadding: Dp,
     ): FormElementsBuilder = apply {
         if (requiresMandate) {
-            footer(formElement)
+            mandateFooter(stringResId, args, identifier, topPadding)
         }
     }
 
-    fun footer(formElement: FormElementDefinition): FormElementsBuilder = apply {
-        footerFormElements += formElement
+    fun addMandateIfAllowed(
+        mandateText: ResolvableString,
+        factory: (UiDefinitionFactory.Arguments) -> FormElement,
+    ): FormElementsBuilder = apply {
+        if (requiresMandate) {
+            nonInteractiveFooter(mandateText, factory)
+        }
+    }
+
+    fun interactiveMandateIfAllowed(
+        factory: (UiDefinitionFactory.Arguments) -> FormElement,
+    ): FormElementsBuilder = apply {
+        if (requiresMandate) {
+            interactiveFooter { listOf(factory(it)) }
+        }
+    }
+
+    fun mandateFooter(
+        stringResId: Int,
+        args: List<String>,
+        identifier: FormFieldId,
+        topPadding: Dp,
+    ): FormElementsBuilder = apply {
+        val mandate = MandateDefinition(identifier, stringResId, args)
+        nonInteractiveFooter(mandate.text) { mandate.createElement(topPadding) }
+    }
+
+    fun nonInteractiveFooter(
+        mandateText: ResolvableString?,
+        factory: (UiDefinitionFactory.Arguments) -> FormElement,
+    ): FormElementsBuilder = apply {
+        footerFormElements += FormElementDefinition(false, mandateText) { listOf(factory(it)) }
+    }
+
+    fun interactiveFooter(
+        factory: (UiDefinitionFactory.Arguments) -> List<FormElement>,
+    ): FormElementsBuilder = apply {
+        footerFormElements += FormElementDefinition(true, null, factory)
     }
 
     fun build(): FormDefinition {

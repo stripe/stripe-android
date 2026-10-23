@@ -1,7 +1,6 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.lpmfoundations.FormElementDefinition
 import com.stripe.android.lpmfoundations.FormElementsBuilder
 import com.stripe.android.lpmfoundations.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
@@ -51,22 +50,20 @@ private object FpxUiDefinitionFactory : UiDefinitionFactory.Simple() {
         builder: FormElementsBuilder
     ) {
         builder
-            .element(
-                formElement = FormElementDefinition.interactive { arguments ->
-                    SectionElement.wrap(
-                        sectionFieldElement = SimpleDropdownElement(
-                            identifier = fpsIdentifier,
-                            controller = DropdownFieldController(
-                                config = SimpleDropdownConfig(
-                                    label = R.string.stripe_fpx_bank.resolvableString,
-                                    items = items,
-                                ),
-                                initialValue = arguments.initialValues[fpsIdentifier],
+            .interactiveElement { arguments ->
+                SectionElement.wrap(
+                    sectionFieldElement = SimpleDropdownElement(
+                        identifier = fpsIdentifier,
+                        controller = DropdownFieldController(
+                            config = SimpleDropdownConfig(
+                                label = R.string.stripe_fpx_bank.resolvableString,
+                                items = items,
                             ),
+                            initialValue = arguments.initialValues[fpsIdentifier],
                         ),
-                    )
-                },
-            )
+                    ),
+                )
+            }
     }
 
     private val items = listOf(

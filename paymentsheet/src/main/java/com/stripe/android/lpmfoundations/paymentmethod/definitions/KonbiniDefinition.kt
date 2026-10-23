@@ -4,7 +4,6 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.ContactInformationCollectionMode
-import com.stripe.android.lpmfoundations.FormElementDefinition
 import com.stripe.android.lpmfoundations.FormElementsBuilder
 import com.stripe.android.lpmfoundations.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
@@ -65,10 +64,8 @@ private object KonbiniUiDefinitionFactory : UiDefinitionFactory.Simple() {
         builder
             .requireContactInformationIfAllowed(ContactInformationCollectionMode.Name)
             .requireContactInformationIfAllowed(ContactInformationCollectionMode.Email)
-            .element(
-                FormElementDefinition.interactive { arguments ->
-                    SectionElement.wrap(confirmationNumberElement(arguments))
-                }
-            )
+            .interactiveElement { arguments ->
+                SectionElement.wrap(confirmationNumberElement(arguments))
+            }
     }
 }

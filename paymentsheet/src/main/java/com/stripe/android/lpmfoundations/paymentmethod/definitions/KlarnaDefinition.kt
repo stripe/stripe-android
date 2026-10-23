@@ -4,7 +4,6 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.lpmfoundations.ContactInformationCollectionMode
-import com.stripe.android.lpmfoundations.FormElementDefinition
 import com.stripe.android.lpmfoundations.FormElementsBuilder
 import com.stripe.android.lpmfoundations.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
@@ -56,11 +55,9 @@ private object KlarnaUiDefinitionFactory : UiDefinitionFactory.Simple() {
         builder: FormElementsBuilder,
     ) {
         builder
-            .header(
-                FormElementDefinition.nonInteractive { arguments ->
-                    getKlarnaHeader(arguments, metadata)
-                }
-            )
+            .nonInteractiveHeader { arguments ->
+                getKlarnaHeader(arguments, metadata)
+            }
             .overrideContactInformationPosition(ContactInformationCollectionMode.Name)
             .requireContactInformationIfAllowed(ContactInformationCollectionMode.Email)
             .overrideContactInformationPosition(ContactInformationCollectionMode.Email)
@@ -70,12 +67,10 @@ private object KlarnaUiDefinitionFactory : UiDefinitionFactory.Simple() {
                 initialValue = { arguments -> arguments.initialValues[FormFieldId.Country] },
             )
             .addMandateIfAllowed(
-                formElement = FormElementDefinition.mandate(
-                    identifier = FormFieldId.Generic("mandate"),
-                    stringResId = R.string.stripe_klarna_mandate,
-                    args = listOf(metadata.merchantName, metadata.merchantName),
-                    topPadding = 8.dp,
-                ),
+                identifier = FormFieldId.Generic("mandate"),
+                stringResId = R.string.stripe_klarna_mandate,
+                args = listOf(metadata.merchantName, metadata.merchantName),
+                topPadding = 8.dp,
             )
     }
 
@@ -119,14 +114,12 @@ private object KlarnaRemovedFormUiDefinitionFactory : UiDefinitionFactory.Simple
             PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
         ) {
             builder
-                .header(
-                    FormElementDefinition.nonInteractive {
-                        StaticTextElement(
-                            FormFieldId.Generic("klarna_header_text"),
-                            stringResId = R.string.stripe_klarna_buy_now_pay_later
-                        )
-                    }
-                )
+                .nonInteractiveHeader {
+                    StaticTextElement(
+                        FormFieldId.Generic("klarna_header_text"),
+                        stringResId = R.string.stripe_klarna_buy_now_pay_later
+                    )
+                }
                 .requireCountry(
                     allowedCountryCodes = metadata.billingDetailsCollectionConfiguration.allowedBillingCountries,
                     initialValue = { arguments ->
@@ -136,12 +129,10 @@ private object KlarnaRemovedFormUiDefinitionFactory : UiDefinitionFactory.Simple
         }
 
         builder.addMandateIfAllowed(
-            formElement = FormElementDefinition.mandate(
-                identifier = FormFieldId.Generic("mandate"),
-                stringResId = R.string.stripe_klarna_mandate,
-                args = listOf(metadata.merchantName, metadata.merchantName),
-                topPadding = 8.dp,
-            ),
+            identifier = FormFieldId.Generic("mandate"),
+            stringResId = R.string.stripe_klarna_mandate,
+            args = listOf(metadata.merchantName, metadata.merchantName),
+            topPadding = 8.dp,
         )
     }
 }

@@ -2,7 +2,6 @@ package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.ContactInformationCollectionMode
-import com.stripe.android.lpmfoundations.FormElementDefinition
 import com.stripe.android.lpmfoundations.FormElementsBuilder
 import com.stripe.android.lpmfoundations.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
@@ -55,22 +54,20 @@ private object EpsUiDefinitionFactory : UiDefinitionFactory.Simple() {
             .overrideContactInformationPosition(ContactInformationCollectionMode.Name)
             .overrideContactInformationPosition(ContactInformationCollectionMode.Email)
             .overrideContactInformationPosition(ContactInformationCollectionMode.Phone)
-            .element(
-                formElement = FormElementDefinition.interactive { arguments ->
-                    SectionElement.wrap(
-                        sectionFieldElement = SimpleDropdownElement(
-                            identifier = epsIdentifier,
-                            controller = DropdownFieldController(
-                                config = SimpleDropdownConfig(
-                                    label = R.string.stripe_eps_bank.resolvableString,
-                                    items = items,
-                                ),
-                                initialValue = arguments.initialValues[epsIdentifier],
+            .interactiveElement { arguments ->
+                SectionElement.wrap(
+                    sectionFieldElement = SimpleDropdownElement(
+                        identifier = epsIdentifier,
+                        controller = DropdownFieldController(
+                            config = SimpleDropdownConfig(
+                                label = R.string.stripe_eps_bank.resolvableString,
+                                items = items,
                             ),
+                            initialValue = arguments.initialValues[epsIdentifier],
                         ),
-                    )
-                },
-            )
+                    ),
+                )
+            }
     }
 
     private val items = listOf(

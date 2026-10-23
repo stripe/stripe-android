@@ -10,6 +10,7 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SetAsDefaultPaymentMethodElement
+import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.FormFieldId
 
 internal fun isSaveForFutureUseValueChangeable(
@@ -55,10 +56,12 @@ internal fun isSaveForFutureUseValueChangeable(
     }
 }
 
-internal fun savePaymentOptionDefinition(metadata: PaymentMethodMetadata): FormElementDefinition {
+internal fun savePaymentOptionFactory(
+    metadata: PaymentMethodMetadata,
+): (UiDefinitionFactory.Arguments) -> List<FormElement> {
     val isSetAsDefaultPaymentMethodEnabled = metadata.customerMetadata?.isPaymentMethodSetAsDefaultEnabled
         ?: IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE
-    return FormElementDefinition(true, null) { arguments ->
+    return { arguments ->
         buildList {
             val saveForFutureUseElement = SaveForFutureUseElement(
                 initialValue = arguments.saveForFutureUseInitialValue,
