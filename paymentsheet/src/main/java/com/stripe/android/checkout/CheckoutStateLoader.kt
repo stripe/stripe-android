@@ -139,10 +139,10 @@ internal class CheckoutStateLoader @Inject constructor(
         selectionChooser: EmbeddedSelectionChooser,
         loadResults: LoadResults,
         carryForward: CarryForward,
-        commonConfiguration: CommonConfiguration,
+        commonConfiguration: CommonConfiguration?,
         embeddedConfig: EmbeddedPaymentElement.Configuration?,
     ): PaymentSelection? {
-        return if (loadResults.paymentMethodMetadata == null || embeddedConfig == null) {
+        return if (loadResults.paymentMethodMetadata == null || embeddedConfig == null || commonConfiguration == null) {
             null
         } else {
             // Preserve the customer's existing selection across reloads when it's still valid, rather
