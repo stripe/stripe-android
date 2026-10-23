@@ -21,7 +21,8 @@ import kotlin.time.Duration.Companion.seconds
 
 internal class DefaultHCaptchaService(
     private val hCaptchaProvider: HCaptchaProvider,
-    private val captchaEventsReporter: CaptchaEventsReporter
+    private val captchaEventsReporter: CaptchaEventsReporter,
+    private val webViewStarter: WebViewStarter
 ) : HCaptchaService {
     private val cachedResult = MutableStateFlow<CachedResult>(CachedResult.Idle)
 
@@ -113,6 +114,7 @@ internal class DefaultHCaptchaService(
         val hCaptcha = hCaptchaProvider.get()
         captchaEventsReporter.init(siteKey)
         val result = runCatching {
+            webViewStarter.awaitStartUp(activity)
             startVerification(
                 activity = activity,
                 siteKey = siteKey,

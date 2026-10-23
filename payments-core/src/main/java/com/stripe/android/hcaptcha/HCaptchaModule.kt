@@ -22,13 +22,22 @@ object HCaptchaModule {
     }
 
     @Provides
-    fun provideHCaptchaService(
+    internal fun provideWebViewStarter(): WebViewStarter {
+        return DefaultWebViewStarter
+    }
+
+    @Provides
+    internal fun provideHCaptchaService(
         hCaptchaProvider: HCaptchaProvider,
-        captchaEventsReporter: CaptchaEventsReporter
+        captchaEventsReporter: CaptchaEventsReporter,
+        webViewStarter: WebViewStarter
     ): HCaptchaService {
         return hCaptchaService ?: synchronized(this) {
-            hCaptchaService ?: DefaultHCaptchaService(hCaptchaProvider, captchaEventsReporter)
-                .also { hCaptchaService = it }
+            hCaptchaService ?: DefaultHCaptchaService(
+                hCaptchaProvider = hCaptchaProvider,
+                captchaEventsReporter = captchaEventsReporter,
+                webViewStarter = webViewStarter
+            ).also { hCaptchaService = it }
         }
     }
 
