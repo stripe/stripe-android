@@ -66,17 +66,15 @@ internal fun runExpressCheckoutElementScenario(
         }.build()
 
         runBlocking {
-            assertThat(
-                controller.configure(
-                    DEFAULT_CLIENT_SECRET,
-                    configuration = CheckoutController.Configuration()
-                        .expressCheckoutElement(
-                            configurationUpdates(
-                                ExpressCheckoutElement.Configuration()
-                            )
+            controller.configure(
+                DEFAULT_CLIENT_SECRET,
+                configuration = CheckoutController.Configuration()
+                    .expressCheckoutElement(
+                        configurationUpdates(
+                            ExpressCheckoutElement.Configuration()
                         )
-                )
-            ).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
+                    )
+            ).getOrThrow()
         }
         assertions(controller)
 

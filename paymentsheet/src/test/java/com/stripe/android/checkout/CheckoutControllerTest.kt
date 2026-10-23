@@ -2189,23 +2189,6 @@ internal class CheckoutControllerTest {
             get() = (stateHolder.state?.paymentSelection as? PaymentSelection.Saved)?.paymentMethod?.id
     }
 
-    private val CheckoutController.OperationResult.isSuccess: Boolean
-        get() = this is CheckoutController.OperationResult.Succeeded
-
-    private val CheckoutController.OperationResult.isFailure: Boolean
-        get() = this is CheckoutController.OperationResult.Failed
-
-    private fun CheckoutController.OperationResult.getOrThrow() {
-        when (this) {
-            is CheckoutController.OperationResult.Succeeded -> Unit
-            is CheckoutController.OperationResult.Failed -> throw error
-        }
-    }
-
-    private fun CheckoutController.OperationResult.exceptionOrNull(): Throwable? {
-        return (this as? CheckoutController.OperationResult.Failed)?.error
-    }
-
     // Configures a controller from a fresh init, seeds the requested scenario state, then hands it
     // to [block] alongside an isUpdating Turbine.
     //

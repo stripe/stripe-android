@@ -9,7 +9,6 @@ import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutControllerState
 import com.stripe.android.checkout.CheckoutControllerStateFactory
 import com.stripe.android.checkout.CheckoutControllerStateHolder
-import com.stripe.android.checkout.CheckoutErrorMapper
 import com.stripe.android.checkout.CheckoutOperationCoordinator
 import com.stripe.android.checkout.FakeCheckoutSessionRefresher
 import com.stripe.android.checkout.TestCheckoutAnalyticsPerformerFactory
@@ -266,7 +265,6 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
             sheetStateHolder = SheetStateHolder(savedStateHandle),
             sessionRefresher = sessionRefresher,
             logger = Logger.noop(),
-            checkoutErrorMapper = CheckoutErrorMapper(),
             resultCallback = results::add,
             viewModelScope = backgroundScope,
         )

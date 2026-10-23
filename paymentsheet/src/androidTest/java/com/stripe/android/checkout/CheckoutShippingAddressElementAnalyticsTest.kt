@@ -156,8 +156,7 @@ internal class CheckoutShippingAddressElementAnalyticsTest {
             renderPaymentElementContent = false,
             setup = { configuredController ->
                 validateCheckoutLoadRequests()
-                assertThat(configuredController.configure(DEFAULT_CLIENT_SECRET, configuration))
-                    .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
+                configuredController.configure(DEFAULT_CLIENT_SECRET, configuration).getOrThrow()
             },
             block = block,
         )

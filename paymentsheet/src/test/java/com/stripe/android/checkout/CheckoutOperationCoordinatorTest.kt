@@ -894,7 +894,6 @@ internal class CheckoutOperationCoordinatorTest {
             sheetStateHolder = sheetStateHolder,
             sessionRefresher = sessionRefresher,
             logger = logger,
-            checkoutErrorMapper = CheckoutErrorMapper(),
             resultCallback = resultCallback ?: CheckoutController.ResultCallback(resultTurbine::add),
             viewModelScope = backgroundScope,
         )

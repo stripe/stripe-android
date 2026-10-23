@@ -126,8 +126,7 @@ internal class CheckoutPaymentElementSavedSepaTest {
             checkoutInitResponse = checkoutInitResponse(paymentMethods),
             renderPaymentElementContent = renderPaymentElementContent,
             setup = { controller ->
-                assertThat(controller.configure(DEFAULT_CLIENT_SECRET, configuration))
-                    .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
+                controller.configure(DEFAULT_CLIENT_SECRET, configuration).getOrThrow()
             },
             block = block,
         )

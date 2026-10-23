@@ -9,58 +9,48 @@ import com.stripe.android.core.model.parsers.StripeErrorJsonParser
 import org.junit.Test
 import java.io.IOException
 
-internal class CheckoutErrorMapperTest {
-    private val mapper = CheckoutErrorMapper()
-
+internal class CheckoutDisplayMessageTest {
     @Test
     fun `uses local display message`() {
-        val result = mapper.displayMessage(LocalStripeException("Local display message", null))
+        val result = LocalStripeException("Local display message", null).checkoutDisplayMessage()
 
         assertThat(result).isEqualTo("Local display message")
     }
 
     @Test
     fun `uses server message for non-card errors`() {
-        val result = mapper.displayMessage(
-            APIException(
-                stripeError = StripeError(type = "api_error", message = "Server display message"),
-            ),
-        )
+        val result = APIException(
+            stripeError = StripeError(type = "api_error", message = "Server display message"),
+        ).checkoutDisplayMessage()
 
         assertThat(result).isEqualTo("Server display message")
     }
 
     @Test
     fun `uses server message when error type is missing`() {
-        val result = mapper.displayMessage(
-            APIException(
-                stripeError = StripeError(message = "Untyped server display message"),
-            ),
-        )
+        val result = APIException(
+            stripeError = StripeError(message = "Untyped server display message"),
+        ).checkoutDisplayMessage()
 
         assertThat(result).isEqualTo("Untyped server display message")
     }
 
     @Test
     fun `returns null when server response is malformed`() {
-        val result = mapper.displayMessage(
-            APIException(
-                stripeError = StripeError(message = StripeErrorJsonParser.MALFORMED_RESPONSE_MESSAGE),
-                message = StripeErrorJsonParser.MALFORMED_RESPONSE_MESSAGE,
-            ),
-        )
+        val result = APIException(
+            stripeError = StripeError(message = StripeErrorJsonParser.MALFORMED_RESPONSE_MESSAGE),
+            message = StripeErrorJsonParser.MALFORMED_RESPONSE_MESSAGE,
+        ).checkoutDisplayMessage()
 
         assertThat(result).isNull()
     }
 
     @Test
     fun `returns null when typed server error has no display message`() {
-        val result = mapper.displayMessage(
-            APIException(
-                stripeError = StripeError(type = "api_error"),
-                message = "Request failed with status code 400 and non-JSON error body.",
-            ),
-        )
+        val result = APIException(
+            stripeError = StripeError(type = "api_error"),
+            message = "Request failed with status code 400 and non-JSON error body.",
+        ).checkoutDisplayMessage()
 
         assertThat(result).isNull()
     }
@@ -69,6 +59,6 @@ internal class CheckoutErrorMapperTest {
     fun `returns null for network errors`() {
         val error = APIConnectionException.create(IOException("connection diagnostic"))
 
-        assertThat(mapper.displayMessage(error)).isNull()
+        assertThat(error.checkoutDisplayMessage()).isNull()
     }
 }

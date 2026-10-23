@@ -59,8 +59,7 @@ internal class CheckoutPaymentElementTest {
         runCheckoutPaymentElementScenario(
             networkRule = networkRule,
             setup = { controller ->
-                assertThat(controller.configure(DEFAULT_CLIENT_SECRET))
-                    .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
+                controller.configure(DEFAULT_CLIENT_SECRET).getOrThrow()
             },
         ) {
             // Open the card form, then back out without entering any details.
@@ -92,8 +91,7 @@ internal class CheckoutPaymentElementTest {
             networkRule = networkRule,
             resultCallback = { result -> checkoutResult = result },
             setup = { controller ->
-                assertThat(controller.configure(DEFAULT_CLIENT_SECRET))
-                    .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
+                controller.configure(DEFAULT_CLIENT_SECRET).getOrThrow()
             },
         ) {
             networkRule.checkoutConfirm(
@@ -121,8 +119,7 @@ internal class CheckoutPaymentElementTest {
         runCheckoutPaymentElementScenario(
             networkRule = networkRule,
             setup = { controller ->
-                assertThat(controller.configure(DEFAULT_CLIENT_SECRET))
-                    .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
+                controller.configure(DEFAULT_CLIENT_SECRET).getOrThrow()
             },
         ) {
             coroutineScope {
@@ -151,8 +148,7 @@ internal class CheckoutPaymentElementTest {
                     holdResponse.countDown()
                 }
 
-                assertThat(update.await())
-                    .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
+                assertThat(update.await().isSuccess).isTrue()
                 testRules.compose.waitUntilWithIdle {
                     !controller.isUpdating.value
                 }
@@ -209,8 +205,7 @@ internal class CheckoutPaymentElementTest {
             networkRule = networkRule,
             checkoutInitResponse = checkoutInitResponse,
             setup = { controller ->
-                assertThat(controller.configure(DEFAULT_CLIENT_SECRET, configuration))
-                    .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
+                controller.configure(DEFAULT_CLIENT_SECRET, configuration).getOrThrow()
             },
         ) {
             contentPage.clickOnLpm("link")
@@ -225,8 +220,7 @@ internal class CheckoutPaymentElementTest {
             verticalModePage.waitUntilMissing()
 
             networkRule.checkoutInit(responseFactory = checkoutInitResponse)
-            assertThat(controller.configure(DEFAULT_CLIENT_SECRET, configuration))
-                .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
+            controller.configure(DEFAULT_CLIENT_SECRET, configuration).getOrThrow()
             markTestSucceeded()
         }
     }
@@ -281,8 +275,7 @@ internal class CheckoutPaymentElementTest {
             networkRule = networkRule,
             checkoutInitResponse = checkoutInitResponse,
             setup = { controller ->
-                assertThat(controller.configure(DEFAULT_CLIENT_SECRET, configuration))
-                    .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
+                controller.configure(DEFAULT_CLIENT_SECRET, configuration).getOrThrow()
             },
         ) {
             // Just testing loading events, mark test succeeded once that has completed.

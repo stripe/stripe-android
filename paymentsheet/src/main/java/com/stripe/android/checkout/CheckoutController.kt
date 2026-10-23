@@ -74,7 +74,6 @@ class CheckoutController @Inject internal constructor(
     private val stateHolder: CheckoutControllerStateHolder,
     private val sheetStateHolder: SheetStateHolder,
     private val operationCoordinator: CheckoutOperationCoordinator,
-    private val checkoutErrorMapper: CheckoutErrorMapper,
     private val checkoutPresenterSubcomponentFactory: CheckoutPresenterSubcomponent.Factory,
     @PaymentElementCallbackIdentifier internal val paymentElementCallbackIdentifier: String,
     private val savedState: CheckoutControllerSavedState,
@@ -395,7 +394,7 @@ class CheckoutController @Inject internal constructor(
         onFailure = { error ->
             OperationResult.Failed(
                 error = error,
-                displayMessage = checkoutErrorMapper.displayMessage(error),
+                displayMessage = error.checkoutDisplayMessage(),
             )
         },
     )

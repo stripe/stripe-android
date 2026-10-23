@@ -401,7 +401,6 @@ internal class CheckoutConfirmationPerformerTest {
             sheetStateHolder = SheetStateHolder(savedStateHandle).apply { this.sheetIsOpen = sheetIsOpen },
             sessionRefresher = sessionRefresher,
             logger = Logger.noop(),
-            checkoutErrorMapper = CheckoutErrorMapper(),
             resultCallback = {
                 results.add(it)
                 resultThreads.add(Thread.currentThread())
