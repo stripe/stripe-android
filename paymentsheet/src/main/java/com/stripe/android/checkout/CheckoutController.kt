@@ -1145,7 +1145,7 @@ class CheckoutController @Inject internal constructor(
     class Configuration {
         private var merchantDisplayName: String? = null
         private var defaults: Defaults = Defaults()
-        private var paymentElementConfiguration: PaymentElement.Configuration = PaymentElement.Configuration()
+        private var paymentElementConfiguration: PaymentElement.Configuration? = null
         private var currencySelectorElementConfiguration: CurrencySelectorElement.Configuration? = null
         private var shippingAddressElementConfiguration: ShippingAddressElement.Configuration? = null
         private var expressCheckoutElementConfiguration: ExpressCheckoutElement.Configuration? = null
@@ -1220,7 +1220,7 @@ class CheckoutController @Inject internal constructor(
         internal data class State(
             val merchantDisplayName: String?,
             val defaults: Defaults.State,
-            val paymentElementConfiguration: PaymentElement.Configuration.State,
+            val paymentElementConfiguration: PaymentElement.Configuration.State?,
             val currencySelectorElementConfiguration: CurrencySelectorElement.Configuration.State?,
             val shippingAddressElementConfiguration: ShippingAddressElement.Configuration.State?,
             val expressCheckoutElementConfiguration: ExpressCheckoutElement.Configuration.State?,
@@ -1230,7 +1230,7 @@ class CheckoutController @Inject internal constructor(
             val defaultsState = defaults.build()
             return State(
                 merchantDisplayName = merchantDisplayName,
-                paymentElementConfiguration = paymentElementConfiguration.build(),
+                paymentElementConfiguration = paymentElementConfiguration?.build(),
                 currencySelectorElementConfiguration = currencySelectorElementConfiguration?.build(),
                 shippingAddressElementConfiguration = shippingAddressElementConfiguration?.build(),
                 expressCheckoutElementConfiguration = expressCheckoutElementConfiguration?.build(),
