@@ -8,6 +8,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performScrollTo
+import androidx.core.os.BundleCompat
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.initializer
@@ -17,6 +18,7 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.intent.Intents.assertNoUnverifiedIntents
 import androidx.test.espresso.intent.rule.IntentsRule
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkout.checkoutConfirmationRequestId
 import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkAccountManager
@@ -43,6 +45,7 @@ import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.Shadows
 import kotlin.test.AfterTest
 
 @RunWith(RobolectricTestRunner::class)
@@ -77,6 +80,32 @@ internal class LinkActivityTest {
         assertThat(scenario.result.resultCode)
             .isEqualTo(Activity.RESULT_CANCELED)
         assertNoUnverifiedIntents()
+    }
+
+    @Test
+    fun `includes confirmation request ID with the cancelled result`() = runTest {
+        val activity = setupActivityController(
+            linkLaunchMode = LinkLaunchMode.Full(showSecondaryButton = true),
+        )
+        val viewModel = checkNotNull(activity.viewModel)
+        val requestId = "req_native_link"
+        val expectedResult = LinkActivityResult.Canceled(linkAccountUpdate = LinkAccountUpdate.None)
+        viewModel.savedStateHandle.checkoutConfirmationRequestId = requestId
+
+        viewModel.handleWebActivityResult(expectedResult)
+
+        dispatcher.scheduler.advanceUntilIdle()
+        composeTestRule.waitForIdle()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        val shadowActivity = Shadows.shadowOf(activity)
+        val resultIntent = shadowActivity.resultIntent
+        val result = resultIntent.extras?.let {
+            BundleCompat.getParcelable(it, LinkActivityContract.EXTRA_RESULT, LinkActivityResult::class.java)
+        }
+        assertThat(shadowActivity.resultCode).isEqualTo(LinkActivity.RESULT_COMPLETE)
+        assertThat(resultIntent.getStringExtra(LinkActivity.EXTRA_CONFIRMATION_REQUEST_ID)).isEqualTo(requestId)
+        assertThat(result).isEqualTo(expectedResult)
     }
 
     @Test

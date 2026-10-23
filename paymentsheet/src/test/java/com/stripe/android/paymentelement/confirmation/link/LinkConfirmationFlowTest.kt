@@ -127,7 +127,6 @@ class LinkConfirmationFlowTest {
                     originatedFromWallet = true,
                 ),
                 arguments = CONFIRMATION_PARAMETERS,
-                confirmationRequestId = null,
             )
         )
     }

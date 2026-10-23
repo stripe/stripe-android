@@ -39,7 +39,6 @@ internal class DefaultEmbeddedConfirmationHelperTest {
                 cause = exception,
                 message = "Error".resolvableString,
                 type = ConfirmationHandler.Result.Failed.ErrorType.Internal,
-                confirmationRequestId = null,
             )
         )
         assertThat(callbackHelper.callbackTurbine.awaitItem()).isEqualTo(
@@ -55,7 +54,6 @@ internal class DefaultEmbeddedConfirmationHelperTest {
         confirmationHandler.state.value = ConfirmationHandler.State.Complete(
             ConfirmationHandler.Result.Succeeded(
                 intent = PaymentIntentFixtures.PI_SUCCEEDED,
-                confirmationRequestId = null,
             )
         )
         assertThat(callbackHelper.stateHelper.stateTurbine.awaitItem()).isNull()
@@ -67,10 +65,7 @@ internal class DefaultEmbeddedConfirmationHelperTest {
         assertThat(confirmationStateHolder.state).isNotNull()
         assertThat(callbackHelper.stateHelper.stateTurbine.expectMostRecentItem()).isNotNull()
         confirmationHandler.state.value = ConfirmationHandler.State.Complete(
-            ConfirmationHandler.Result.Canceled(
-                ConfirmationHandler.Result.Canceled.Action.InformCancellation,
-                confirmationRequestId = null,
-            )
+            ConfirmationHandler.Result.Canceled(ConfirmationHandler.Result.Canceled.Action.InformCancellation)
         )
         assertThat(callbackHelper.callbackTurbine.awaitItem()).isInstanceOf<EmbeddedPaymentElement.Result.Canceled>()
         assertThat(confirmationStateHolder.state).isNotNull()

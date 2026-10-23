@@ -38,7 +38,6 @@ internal class ConfirmActionHelper(private val isLiveMode: Boolean) {
                 deferredIntentConfirmationType = DeferredIntentConfirmationType.Client.takeIf { isDeferred }
             ),
             receivesResultInProcess = false,
-            confirmationRequestId = null,
         )
     }
 
@@ -54,7 +53,6 @@ internal class ConfirmActionHelper(private val isLiveMode: Boolean) {
                 message.resolvableString
             },
             errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
-            confirmationRequestId = null,
         )
     }
 }

@@ -64,7 +64,6 @@ internal class DefaultCustomerSheetSetupIntentInterceptor(
                         cause = cause,
                         message = displayMessage?.resolvableString ?: cause.stripeErrorMessage(),
                         errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
-                        confirmationRequestId = null,
                     )
                 }
             )

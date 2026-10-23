@@ -48,13 +48,11 @@ internal class WebLinkActivityContract @Inject internal constructor(
                 if (exception != null) {
                     LinkActivityResult.Failed(
                         error = exception,
-                        linkAccountUpdate = LinkAccountUpdate.None,
-                        confirmationRequestId = null,
+                        linkAccountUpdate = LinkAccountUpdate.None
                     )
                 } else {
                     LinkActivityResult.Canceled(
-                        linkAccountUpdate = LinkAccountUpdate.None,
-                        confirmationRequestId = null,
+                        linkAccountUpdate = LinkAccountUpdate.None
                     )
                 }
             }
@@ -65,14 +63,12 @@ internal class WebLinkActivityContract @Inject internal constructor(
 
             Activity.RESULT_CANCELED -> {
                 LinkActivityResult.Canceled(
-                    linkAccountUpdate = LinkAccountUpdate.None,
-                    confirmationRequestId = null,
+                    linkAccountUpdate = LinkAccountUpdate.None
                 )
             }
             else -> {
                 LinkActivityResult.Canceled(
-                    linkAccountUpdate = LinkAccountUpdate.None,
-                    confirmationRequestId = null,
+                    linkAccountUpdate = LinkAccountUpdate.None
                 )
             }
         }
@@ -80,8 +76,7 @@ internal class WebLinkActivityContract @Inject internal constructor(
 
     private fun handleCompleteResult(intent: Intent?): LinkActivityResult {
         val redirectUri = intent?.data ?: return LinkActivityResult.Canceled(
-            linkAccountUpdate = LinkAccountUpdate.None,
-            confirmationRequestId = null,
+            linkAccountUpdate = LinkAccountUpdate.None
         )
         return when (redirectUri.getQueryParameter("link_status")) {
             "complete" -> {
@@ -89,8 +84,7 @@ internal class WebLinkActivityContract @Inject internal constructor(
                     ?.parsePaymentMethod()
                 if (paymentMethod == null) {
                     LinkActivityResult.Canceled(
-                        linkAccountUpdate = LinkAccountUpdate.None,
-                        confirmationRequestId = null,
+                        linkAccountUpdate = LinkAccountUpdate.None
                     )
                 } else {
                     LinkActivityResult.PaymentMethodObtained(paymentMethod)
@@ -100,15 +94,13 @@ internal class WebLinkActivityContract @Inject internal constructor(
             "logout" -> {
                 LinkActivityResult.Canceled(
                     reason = LinkActivityResult.Canceled.Reason.LoggedOut,
-                    linkAccountUpdate = LinkAccountUpdate.None,
-                    confirmationRequestId = null,
+                    linkAccountUpdate = LinkAccountUpdate.None
                 )
             }
 
             else -> {
                 LinkActivityResult.Canceled(
-                    linkAccountUpdate = LinkAccountUpdate.None,
-                    confirmationRequestId = null,
+                    linkAccountUpdate = LinkAccountUpdate.None
                 )
             }
         }

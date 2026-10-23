@@ -487,9 +487,7 @@ internal class WalletScreenTest {
             ConsumerPaymentDetails(paymentDetails = listOf(cardRequiringCvc))
         )
         val linkConfirmationHandler = FakeLinkConfirmationHandler()
-        linkConfirmationHandler.confirmResult = com.stripe.android.link.confirmation.Result.Succeeded(
-            confirmationRequestId = null,
-        )
+        linkConfirmationHandler.confirmResult = com.stripe.android.link.confirmation.Result.Succeeded
 
         val viewModel = createViewModel(
             linkAccountManager = linkAccountManager,
@@ -530,10 +528,7 @@ internal class WalletScreenTest {
             ConsumerPaymentDetails(paymentDetails = listOf(cardRequiringCvc))
         )
         val linkConfirmationHandler = FakeLinkConfirmationHandler()
-        linkConfirmationHandler.confirmResult = LinkConfirmationResult.Failed(
-            message = "oops".resolvableString,
-            confirmationRequestId = null,
-        )
+        linkConfirmationHandler.confirmResult = LinkConfirmationResult.Failed("oops".resolvableString)
 
         val viewModel = createViewModel(
             linkAccountManager = linkAccountManager,

@@ -1,10 +1,12 @@
 package com.stripe.android.paymentelement.confirmation.intent
 
 import android.app.Application
+import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
+import com.stripe.android.checkout.checkoutConfirmationRequestId
 import com.stripe.android.checkouttesting.checkoutConfirm
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.core.exception.APIException
@@ -46,6 +48,7 @@ import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.testing.AbsFakeStripeRepository
+import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.testing.PaymentIntentFactory
@@ -69,6 +72,7 @@ class CheckoutSessionConfirmationInterceptorTest {
     val ruleChain: RuleChain = RuleChain
         .outerRule(networkRule)
         .around(PaymentConfigurationTestRule(applicationContext))
+        .around(CoroutineTestRule())
 
     @Test
     fun `confirmation sends actual payment method type`(
@@ -275,7 +279,7 @@ class CheckoutSessionConfirmationInterceptorTest {
             .isEqualTo(DeferredIntentConfirmationType.Server)
         assertThat(completeAction.metadata[CheckoutSessionResponseKey]?.status)
             .isEqualTo(CheckoutSessionResponse.Status.COMPLETE)
-        assertThat(completeAction.confirmationRequestId).isEqualTo(requestId)
+        assertThat(savedStateHandle.checkoutConfirmationRequestId).isEqualTo(requestId)
         assertThat(completeAction.completedFullPaymentFlow).isTrue()
     }
 
@@ -298,7 +302,7 @@ class CheckoutSessionConfirmationInterceptorTest {
         assertThat(nextAction.deferredIntentConfirmationType)
             .isEqualTo(DeferredIntentConfirmationType.Server)
         assertThat(launchAction.receivesResultInProcess).isFalse()
-        assertThat(launchAction.confirmationRequestId).isEqualTo(requestId)
+        assertThat(savedStateHandle.checkoutConfirmationRequestId).isEqualTo(requestId)
     }
 
     @Test
@@ -315,7 +319,7 @@ class CheckoutSessionConfirmationInterceptorTest {
             val failAction = result as ConfirmationDefinition.Action.Fail
             assertThat(failAction.cause).isEqualTo(error)
             assertThat(failAction.errorType).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Payment)
-            assertThat(failAction.confirmationRequestId).isNull()
+            assertThat(savedStateHandle.checkoutConfirmationRequestId).isNull()
         }
     }
 
@@ -336,7 +340,7 @@ class CheckoutSessionConfirmationInterceptorTest {
 
         val failAction = result as ConfirmationDefinition.Action.Fail
         assertThat(failAction.errorType).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Payment)
-        assertThat(failAction.confirmationRequestId).isEqualTo(requestId)
+        assertThat(savedStateHandle.checkoutConfirmationRequestId).isEqualTo(requestId)
         assertThat(failAction.cause).isInstanceOf<APIException>()
         assertThat((failAction.cause as APIException).requestId).isEqualTo(requestId)
     }
@@ -434,11 +438,12 @@ class CheckoutSessionConfirmationInterceptorTest {
         val failAction = result as ConfirmationDefinition.Action.Fail
         assertThat(failAction.cause).isInstanceOf<IllegalStateException>()
         assertThat(failAction.errorType).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Payment)
-        assertThat(failAction.confirmationRequestId).isEqualTo(requestId)
+        assertThat(savedStateHandle.checkoutConfirmationRequestId).isEqualTo(requestId)
     }
 
     @Test
     fun `intercept with succeeded setup intent returns Complete action`() = runScenario {
+        savedStateHandle.checkoutConfirmationRequestId = "req_previous_confirm"
         networkRule.checkoutConfirm { response ->
             response.testBodyFromFile("checkout-session-confirm-setup.json")
         }
@@ -451,6 +456,7 @@ class CheckoutSessionConfirmationInterceptorTest {
         assertThat(completeAction.intent).isInstanceOf<SetupIntent>()
         assertThat((completeAction.intent as SetupIntent).status).isEqualTo(StripeIntent.Status.Succeeded)
         assertThat(completeAction.completedFullPaymentFlow).isTrue()
+        assertThat(savedStateHandle.checkoutConfirmationRequestId).isNull()
     }
 
     @Test
@@ -964,6 +970,7 @@ class CheckoutSessionConfirmationInterceptorTest {
             },
         )
 
+        val savedStateHandle = SavedStateHandle()
         val interceptor = CheckoutSessionConfirmationInterceptor(
             integrationMetadata = IntegrationMetadata.CheckoutSession(
                 collectedEmail = collectedEmail,
@@ -983,11 +990,13 @@ class CheckoutSessionConfirmationInterceptorTest {
             checkoutSessionRepository = checkoutSessionRepository,
             checkoutSessionTaxRegionUpdater = CheckoutSessionTaxRegionUpdater(checkoutSessionRepository),
             requestOptions = ApiRequest.Options(apiKey = "pk_test_123", stripeAccount = "acct_123"),
+            savedStateHandle = savedStateHandle,
         )
 
         runTest {
             val scenario = Scenario(
                 interceptor = interceptor,
+                savedStateHandle = savedStateHandle,
             )
 
             scenario.block()
@@ -996,6 +1005,7 @@ class CheckoutSessionConfirmationInterceptorTest {
 
     private data class Scenario(
         val interceptor: CheckoutSessionConfirmationInterceptor,
+        val savedStateHandle: SavedStateHandle,
     ) {
         suspend fun interceptNewPm(
             shouldSave: Boolean = false,

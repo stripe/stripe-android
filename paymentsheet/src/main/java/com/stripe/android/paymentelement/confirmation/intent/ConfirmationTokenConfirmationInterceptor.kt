@@ -98,7 +98,6 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                     cause = error,
                     message = error.stripeErrorMessage(),
                     errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
-                    confirmationRequestId = null,
                 )
             }
         )
@@ -140,7 +139,6 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                     cause = error,
                     message = error.stripeErrorMessage(),
                     errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
-                    confirmationRequestId = null,
                 )
             }
         )
@@ -164,7 +162,6 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                             set(DeferredIntentConfirmationTypeKey, DeferredIntentConfirmationType.None)
                         },
                         completedFullPaymentFlow = true,
-                        confirmationRequestId = null,
                     )
                 } else {
                     handleDeferredIntentCreationSuccess(
@@ -184,7 +181,6 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                     message = result.displayMessage?.resolvableString
                         ?: exception.stripeErrorMessage(),
                     errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
-                    confirmationRequestId = null,
                 )
             }
         }
@@ -208,7 +204,6 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                         set(DeferredIntentConfirmationTypeKey, DeferredIntentConfirmationType.Server)
                     },
                     completedFullPaymentFlow = true,
-                    confirmationRequestId = null,
                 )
             } else if (intent.requiresAction()) {
                 ConfirmationDefinition.Action.Launch<Args>(
@@ -217,7 +212,6 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                         deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
                     ),
                     receivesResultInProcess = false,
-                    confirmationRequestId = null,
                 )
             } else {
                 confirmActionHelper.createConfirmAction(
@@ -241,7 +235,6 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                 cause = error,
                 message = error.stripeErrorMessage(),
                 errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
-                confirmationRequestId = null,
             )
         }
     }

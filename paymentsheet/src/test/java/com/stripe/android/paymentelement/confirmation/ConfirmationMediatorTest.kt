@@ -159,7 +159,6 @@ class ConfirmationMediatorTest {
     @Test
     fun `On complete confirmation action, should return mediator complete action`() = test(
         action = ConfirmationDefinition.Action.Complete(
-            confirmationRequestId = "req_confirm",
             intent = INTENT,
             completedFullPaymentFlow = true,
         ),
@@ -183,7 +182,6 @@ class ConfirmationMediatorTest {
 
         val completeAction = action.asComplete()
 
-        assertThat(completeAction.confirmationRequestId).isEqualTo("req_confirm")
         assertThat(completeAction.intent).isEqualTo(INTENT)
         assertThat(completeAction.completedFullPaymentFlow).isTrue()
     }
@@ -191,7 +189,6 @@ class ConfirmationMediatorTest {
     @Test
     fun `On complete confirmation action with uncompleted flow, should return expected action`() = test(
         action = ConfirmationDefinition.Action.Complete(
-            confirmationRequestId = null,
             intent = INTENT,
             completedFullPaymentFlow = false,
         ),
@@ -222,7 +219,6 @@ class ConfirmationMediatorTest {
     @Test
     fun `On failed confirmation action, should return mediator fail action`() = test(
         action = ConfirmationDefinition.Action.Fail(
-            confirmationRequestId = "req_confirm",
             cause = IllegalStateException("Failed!"),
             message = R.string.stripe_something_went_wrong.resolvableString,
             errorType = ConfirmationHandler.Result.Failed.ErrorType.Fatal,
@@ -247,7 +243,6 @@ class ConfirmationMediatorTest {
 
         val failAction = action.asFail()
 
-        assertThat(failAction.confirmationRequestId).isEqualTo("req_confirm")
         assertThat(failAction.cause).isInstanceOf(IllegalStateException::class.java)
         assertThat(failAction.cause.message).isEqualTo("Failed!")
         assertThat(failAction.message).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
@@ -257,7 +252,6 @@ class ConfirmationMediatorTest {
     @Test
     fun `On launch action, should call definition launch and persist parameters`() = test(
         action = ConfirmationDefinition.Action.Launch(
-            confirmationRequestId = "req_confirm",
             launcherArguments = TestConfirmationDefinition.LauncherArgs,
             receivesResultInProcess = false,
         ),
@@ -291,7 +285,6 @@ class ConfirmationMediatorTest {
 
         val launchAction = action.asLaunch()
 
-        assertThat(launchAction.confirmationRequestId).isEqualTo("req_confirm")
         assertThat(launchAction.receivesResultInProcess).isFalse()
 
         launchAction.launch()
@@ -322,7 +315,6 @@ class ConfirmationMediatorTest {
     fun `On launch definition action where result is received in process, 'receivesResultInProcess' should be true`() =
         test(
             action = ConfirmationDefinition.Action.Launch(
-                confirmationRequestId = null,
                 launcherArguments = TestConfirmationDefinition.LauncherArgs,
                 receivesResultInProcess = true,
             ),
@@ -360,7 +352,6 @@ class ConfirmationMediatorTest {
     @Test
     fun `On confirmation action without registering, should return fail action`() = test(
         action = ConfirmationDefinition.Action.Launch(
-            confirmationRequestId = "req_confirm",
             launcherArguments = TestConfirmationDefinition.LauncherArgs,
             receivesResultInProcess = false,
         ),
@@ -384,7 +375,6 @@ class ConfirmationMediatorTest {
 
         val failAction = action.asFail()
 
-        assertThat(failAction.confirmationRequestId).isEqualTo("req_confirm")
         assertThat(failAction.cause).isInstanceOf(IllegalStateException::class.java)
         assertThat(failAction.cause.message).isEqualTo(
             "No launcher for RecordingConfirmationDefinition was found, did you call register?"
@@ -396,7 +386,6 @@ class ConfirmationMediatorTest {
     @Test
     fun `On confirmation action after un-registering, should return fail action`() = test(
         action = ConfirmationDefinition.Action.Launch(
-            confirmationRequestId = null,
             launcherArguments = TestConfirmationDefinition.LauncherArgs,
             receivesResultInProcess = false,
         ),
@@ -441,12 +430,10 @@ class ConfirmationMediatorTest {
     @Test
     fun `On result, should attempt to convert launcher result to confirmation result and return it`() = test(
         action = ConfirmationDefinition.Action.Launch(
-            confirmationRequestId = null,
             launcherArguments = TestConfirmationDefinition.LauncherArgs,
             receivesResultInProcess = false,
         ),
         result = ConfirmationDefinition.Result.Succeeded(
-            confirmationRequestId = null,
             intent = INTENT,
         ),
     ) {
@@ -575,13 +562,11 @@ class ConfirmationMediatorTest {
     private fun test(
         action: ConfirmationDefinition.Action<TestConfirmationDefinition.LauncherArgs> =
             ConfirmationDefinition.Action.Fail(
-                confirmationRequestId = null,
                 cause = IllegalStateException("Failed!"),
                 message = R.string.stripe_something_went_wrong.resolvableString,
                 errorType = ConfirmationHandler.Result.Failed.ErrorType.Internal,
             ),
         result: ConfirmationDefinition.Result = ConfirmationDefinition.Result.Canceled(
-            confirmationRequestId = null,
             action = ConfirmationHandler.Result.Canceled.Action.InformCancellation,
         ),
         isConfirmable: Boolean = true,

@@ -1,6 +1,8 @@
 package com.stripe.android.link.confirmation
 
+import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkout.checkoutConfirmationRequestId
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.model.CountryCode
@@ -28,6 +30,7 @@ import com.stripe.android.paymentelement.confirmation.link.LinkPassthroughConfir
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.testing.FakeLogger
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -39,6 +42,7 @@ import org.junit.Test
 @Suppress("LargeClass")
 internal class DefaultLinkConfirmationHandlerTest {
     private val dispatcher = UnconfinedTestDispatcher()
+    private val savedStateHandle = SavedStateHandle()
 
     @Before
     fun setup() {
@@ -62,7 +66,6 @@ internal class DefaultLinkConfirmationHandlerTest {
         confirmationHandler.awaitResultTurbine.add(
             item = ConfirmationHandler.Result.Succeeded(
                 intent = configuration.stripeIntent,
-                confirmationRequestId = "req_success",
             )
         )
 
@@ -73,7 +76,7 @@ internal class DefaultLinkConfirmationHandlerTest {
             billingPhone = null
         )
 
-        assertThat(result).isEqualTo(Result.Succeeded(confirmationRequestId = "req_success"))
+        assertThat(result).isEqualTo(Result.Succeeded)
         confirmationHandler.startTurbine.awaitItem().assertConfirmationArgs(
             configuration = configuration,
             linkAccount = TestFactory.LINK_ACCOUNT,
@@ -90,6 +93,31 @@ internal class DefaultLinkConfirmationHandlerTest {
     }
 
     @Test
+    fun `new confirmation clears a previous request ID`() = runTest(dispatcher) {
+        val configuration = TestFactory.LINK_CONFIGURATION
+        val confirmationHandler = FakeConfirmationHandler()
+        val handler = createHandler(
+            confirmationHandler = confirmationHandler,
+            configuration = configuration
+        )
+        savedStateHandle.checkoutConfirmationRequestId = "req_previous"
+        confirmationHandler.awaitResultTurbine.add(
+            item = ConfirmationHandler.Result.Succeeded(intent = configuration.stripeIntent)
+        )
+
+        val result = handler.confirm(
+            paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
+            linkAccount = TestFactory.LINK_ACCOUNT,
+            cvc = CVC,
+            billingPhone = null
+        )
+
+        assertThat(result).isEqualTo(Result.Succeeded)
+        assertThat(savedStateHandle.checkoutConfirmationRequestId).isNull()
+        assertThat(confirmationHandler.startTurbine.awaitItem().intent).isEqualTo(configuration.stripeIntent)
+    }
+
+    @Test
     fun `confirm forwards statusBarColor to confirmation args`() = runTest(dispatcher) {
         val configuration = TestFactory.LINK_CONFIGURATION
         val confirmationHandler = FakeConfirmationHandler()
@@ -102,7 +130,6 @@ internal class DefaultLinkConfirmationHandlerTest {
         confirmationHandler.awaitResultTurbine.add(
             item = ConfirmationHandler.Result.Succeeded(
                 intent = configuration.stripeIntent,
-                confirmationRequestId = null,
             )
         )
 
@@ -130,7 +157,6 @@ internal class DefaultLinkConfirmationHandlerTest {
         confirmationHandler.awaitResultTurbine.add(
             item = ConfirmationHandler.Result.Succeeded(
                 intent = configuration.stripeIntent,
-                confirmationRequestId = null,
             )
         )
 
@@ -141,7 +167,7 @@ internal class DefaultLinkConfirmationHandlerTest {
             billingPhone = null
         )
 
-        assertThat(result).isEqualTo(Result.Succeeded(confirmationRequestId = null))
+        assertThat(result).isEqualTo(Result.Succeeded)
         confirmationHandler.startTurbine.awaitItem().assertConfirmationArgs(
             configuration = configuration,
             linkAccount = TestFactory.LINK_ACCOUNT,
@@ -159,8 +185,7 @@ internal class DefaultLinkConfirmationHandlerTest {
 
     @Test
     fun `failed confirmation yields failed result`() = runTest(dispatcher) {
-        val error = APIException(requestId = "req_exception")
-        val confirmationRequestId = "req_confirmation"
+        val error = APIException(requestId = "req_failure")
         val errorMessage = "Something went wrong".resolvableString
 
         val confirmationHandler = FakeConfirmationHandler()
@@ -174,8 +199,7 @@ internal class DefaultLinkConfirmationHandlerTest {
             item = ConfirmationHandler.Result.Failed(
                 cause = error,
                 message = errorMessage,
-                type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
-                confirmationRequestId = confirmationRequestId,
+                type = ConfirmationHandler.Result.Failed.ErrorType.Payment
             )
         )
 
@@ -186,46 +210,51 @@ internal class DefaultLinkConfirmationHandlerTest {
             billingPhone = null
         )
 
-        assertThat(result).isEqualTo(
-            Result.Failed(
-                message = errorMessage,
-                confirmationRequestId = confirmationRequestId,
-            )
-        )
+        assertThat(result).isEqualTo(Result.Failed(errorMessage))
         assertThat(logger.errorLogs)
             .containsExactly("DefaultLinkConfirmationHandler: Failed to confirm payment" to error)
+        assertThat(savedStateHandle.checkoutConfirmationRequestId).isEqualTo("req_failure")
+        confirmationHandler.startTurbine.awaitItem()
     }
 
     @Test
-    fun `failed confirmation falls back to StripeException request ID`() = runTest(dispatcher) {
-        val error = APIException(requestId = "req_exception")
-        val errorMessage = "Something went wrong".resolvableString
-        val confirmationHandler = FakeConfirmationHandler()
-        val handler = createHandler(confirmationHandler = confirmationHandler)
-
-        confirmationHandler.awaitResultTurbine.add(
-            item = ConfirmationHandler.Result.Failed(
-                cause = error,
-                message = errorMessage,
-                type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
-                confirmationRequestId = null,
+    fun `in-flight confirmation preserves its request ID when a failure has another ID`() =
+        runTest(dispatcher) {
+            val requestId = "req_confirm"
+            savedStateHandle.checkoutConfirmationRequestId = requestId
+            val confirmationHandler = FakeConfirmationHandler(
+                state = MutableStateFlow(
+                    ConfirmationHandler.State.Confirming(
+                        LinkPassthroughConfirmationOption(
+                            paymentDetailsId = "payment_details_id",
+                            expectedPaymentMethodType = null,
+                            cvc = null,
+                            billingPhone = null,
+                        )
+                    )
+                )
             )
-        )
-
-        val result = handler.confirm(
-            paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
-            linkAccount = TestFactory.LINK_ACCOUNT,
-            cvc = CVC,
-            billingPhone = null
-        )
-
-        assertThat(result).isEqualTo(
-            Result.Failed(
-                message = errorMessage,
-                confirmationRequestId = "req_exception",
+            val handler = createHandler(confirmationHandler = confirmationHandler)
+            val errorMessage = "Something went wrong".resolvableString
+            confirmationHandler.awaitResultTurbine.add(
+                item = ConfirmationHandler.Result.Failed(
+                    cause = APIException(requestId = "req_other"),
+                    message = errorMessage,
+                    type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                )
             )
-        )
-    }
+
+            val result = handler.confirm(
+                paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
+                linkAccount = TestFactory.LINK_ACCOUNT,
+                cvc = CVC,
+                billingPhone = null
+            )
+
+            assertThat(result).isEqualTo(Result.Failed(errorMessage))
+            assertThat(savedStateHandle.checkoutConfirmationRequestId).isEqualTo(requestId)
+            confirmationHandler.startTurbine.awaitItem()
+        }
 
     @Test
     fun `canceled confirmation yields canceled result`() = runTest(dispatcher) {
@@ -235,10 +264,7 @@ internal class DefaultLinkConfirmationHandlerTest {
         )
 
         confirmationHandler.awaitResultTurbine.add(
-            item = ConfirmationHandler.Result.Canceled(
-                action = ConfirmationHandler.Result.Canceled.Action.None,
-                confirmationRequestId = "req_canceled",
-            )
+            item = ConfirmationHandler.Result.Canceled(ConfirmationHandler.Result.Canceled.Action.None)
         )
 
         val result = handler.confirm(
@@ -248,7 +274,7 @@ internal class DefaultLinkConfirmationHandlerTest {
             billingPhone = null
         )
 
-        assertThat(result).isEqualTo(Result.Canceled(confirmationRequestId = "req_canceled"))
+        assertThat(result).isEqualTo(Result.Canceled)
     }
 
     @Test
@@ -269,12 +295,7 @@ internal class DefaultLinkConfirmationHandlerTest {
             billingPhone = null
         )
 
-        assertThat(result).isEqualTo(
-            Result.Failed(
-                message = R.string.stripe_something_went_wrong.resolvableString,
-                confirmationRequestId = null,
-            )
-        )
+        assertThat(result).isEqualTo(Result.Failed(R.string.stripe_something_went_wrong.resolvableString))
         assertThat(logger.errorLogs)
             .containsExactly("DefaultLinkConfirmationHandler: Payment confirmation returned null" to null)
     }
@@ -291,7 +312,6 @@ internal class DefaultLinkConfirmationHandlerTest {
         confirmationHandler.awaitResultTurbine.add(
             item = ConfirmationHandler.Result.Succeeded(
                 intent = configuration.stripeIntent,
-                confirmationRequestId = null,
             )
         )
 
@@ -302,7 +322,7 @@ internal class DefaultLinkConfirmationHandlerTest {
             billingPhone = null
         )
 
-        assertThat(result).isEqualTo(Result.Succeeded(confirmationRequestId = null))
+        assertThat(result).isEqualTo(Result.Succeeded)
         confirmationHandler.startTurbine.awaitItem().assertConfirmationArgs(
             configuration = configuration,
             linkAccount = TestFactory.LINK_ACCOUNT,
@@ -330,7 +350,6 @@ internal class DefaultLinkConfirmationHandlerTest {
         confirmationHandler.awaitResultTurbine.add(
             item = ConfirmationHandler.Result.Succeeded(
                 intent = configuration.stripeIntent,
-                confirmationRequestId = null,
             )
         )
 
@@ -342,7 +361,7 @@ internal class DefaultLinkConfirmationHandlerTest {
             billingPhone = null
         )
 
-        assertThat(result).isEqualTo(Result.Succeeded(confirmationRequestId = null))
+        assertThat(result).isEqualTo(Result.Succeeded)
         confirmationHandler.startTurbine.awaitItem().assertSavedConfirmationArgs(
             configuration = configuration,
             paymentDetails = TestFactory.LINK_PASSTHROUGH_PAYMENT_DETAILS,
@@ -362,7 +381,6 @@ internal class DefaultLinkConfirmationHandlerTest {
         confirmationHandler.awaitResultTurbine.add(
             item = ConfirmationHandler.Result.Succeeded(
                 intent = configuration.stripeIntent,
-                confirmationRequestId = null,
             )
         )
 
@@ -374,7 +392,7 @@ internal class DefaultLinkConfirmationHandlerTest {
             billingPhone = null
         )
 
-        assertThat(result).isEqualTo(Result.Succeeded(confirmationRequestId = null))
+        assertThat(result).isEqualTo(Result.Succeeded)
         val args = confirmationHandler.startTurbine.awaitItem()
 
         val option = args.confirmationOption as PaymentMethodConfirmationOption.Saved
@@ -394,7 +412,6 @@ internal class DefaultLinkConfirmationHandlerTest {
         confirmationHandler.awaitResultTurbine.add(
             item = ConfirmationHandler.Result.Succeeded(
                 intent = configuration.stripeIntent,
-                confirmationRequestId = null,
             )
         )
 
@@ -405,7 +422,7 @@ internal class DefaultLinkConfirmationHandlerTest {
             billingPhone = null
         )
 
-        assertThat(result).isEqualTo(Result.Succeeded(confirmationRequestId = null))
+        assertThat(result).isEqualTo(Result.Succeeded)
         confirmationHandler.startTurbine.awaitItem().assertSavedConfirmationArgs(
             configuration = configuration,
             paymentDetails = TestFactory.LINK_PASSTHROUGH_PAYMENT_DETAILS,
@@ -426,7 +443,6 @@ internal class DefaultLinkConfirmationHandlerTest {
             confirmationHandler.awaitResultTurbine.add(
                 item = ConfirmationHandler.Result.Succeeded(
                     intent = configuration.stripeIntent,
-                    confirmationRequestId = null,
                 )
             )
 
@@ -437,7 +453,7 @@ internal class DefaultLinkConfirmationHandlerTest {
                 billingPhone = null
             )
 
-            assertThat(result).isEqualTo(Result.Succeeded(confirmationRequestId = null))
+            assertThat(result).isEqualTo(Result.Succeeded)
 
             val args = confirmationHandler.startTurbine.awaitItem()
             assertThat(args.intent).isEqualTo(configuration.stripeIntent)
@@ -460,7 +476,6 @@ internal class DefaultLinkConfirmationHandlerTest {
             confirmationHandler.awaitResultTurbine.add(
                 item = ConfirmationHandler.Result.Succeeded(
                     intent = configuration.stripeIntent,
-                    confirmationRequestId = null,
                 )
             )
 
@@ -471,7 +486,7 @@ internal class DefaultLinkConfirmationHandlerTest {
                 billingPhone = null
             )
 
-            assertThat(result).isEqualTo(Result.Succeeded(confirmationRequestId = null))
+            assertThat(result).isEqualTo(Result.Succeeded)
 
             val args = confirmationHandler.startTurbine.awaitItem()
             assertThat(args.intent).isEqualTo(configuration.stripeIntent)
@@ -496,7 +511,6 @@ internal class DefaultLinkConfirmationHandlerTest {
         confirmationHandler.awaitResultTurbine.add(
             item = ConfirmationHandler.Result.Succeeded(
                 intent = configuration.stripeIntent,
-                confirmationRequestId = null,
             )
         )
 
@@ -509,7 +523,7 @@ internal class DefaultLinkConfirmationHandlerTest {
             billingPhone = null
         )
 
-        assertThat(result).isEqualTo(Result.Succeeded(confirmationRequestId = null))
+        assertThat(result).isEqualTo(Result.Succeeded)
 
         val args = confirmationHandler.startTurbine.awaitItem()
         assertThat(args.intent).isEqualTo(configuration.stripeIntent)
@@ -538,7 +552,6 @@ internal class DefaultLinkConfirmationHandlerTest {
             confirmationHandler.awaitResultTurbine.add(
                 item = ConfirmationHandler.Result.Succeeded(
                     intent = configuration.stripeIntent,
-                    confirmationRequestId = null,
                 )
             )
 
@@ -551,7 +564,7 @@ internal class DefaultLinkConfirmationHandlerTest {
                 billingPhone = null
             )
 
-            assertThat(result).isEqualTo(Result.Succeeded(confirmationRequestId = null))
+            assertThat(result).isEqualTo(Result.Succeeded)
 
             val args = confirmationHandler.startTurbine.awaitItem()
             assertThat(args.intent).isEqualTo(configuration.stripeIntent)
@@ -574,7 +587,6 @@ internal class DefaultLinkConfirmationHandlerTest {
             confirmationHandler.awaitResultTurbine.add(
                 item = ConfirmationHandler.Result.Succeeded(
                     intent = configuration.stripeIntent,
-                    confirmationRequestId = null,
                 )
             )
 
@@ -587,7 +599,7 @@ internal class DefaultLinkConfirmationHandlerTest {
                 billingPhone = null
             )
 
-            assertThat(result).isEqualTo(Result.Succeeded(confirmationRequestId = null))
+            assertThat(result).isEqualTo(Result.Succeeded)
 
             val args = confirmationHandler.startTurbine.awaitItem()
             assertThat(args.intent).isEqualTo(configuration.stripeIntent)
@@ -610,7 +622,6 @@ internal class DefaultLinkConfirmationHandlerTest {
             confirmationHandler.awaitResultTurbine.add(
                 item = ConfirmationHandler.Result.Succeeded(
                     intent = configuration.stripeIntent,
-                    confirmationRequestId = null,
                 )
             )
 
@@ -634,7 +645,7 @@ internal class DefaultLinkConfirmationHandlerTest {
                 billingPhone = "+15555555555",
             )
 
-            assertThat(result).isEqualTo(Result.Succeeded(confirmationRequestId = null))
+            assertThat(result).isEqualTo(Result.Succeeded)
 
             val args = confirmationHandler.startTurbine.awaitItem()
             assertThat(args.intent).isEqualTo(configuration.stripeIntent)
@@ -671,7 +682,6 @@ internal class DefaultLinkConfirmationHandlerTest {
             confirmationHandler.awaitResultTurbine.add(
                 item = ConfirmationHandler.Result.Succeeded(
                     intent = configuration.stripeIntent,
-                    confirmationRequestId = null,
                 )
             )
 
@@ -682,7 +692,7 @@ internal class DefaultLinkConfirmationHandlerTest {
                 billingPhone = null
             )
 
-            assertThat(result).isEqualTo(Result.Succeeded(confirmationRequestId = null))
+            assertThat(result).isEqualTo(Result.Succeeded)
             confirmationHandler.startTurbine.awaitItem().assertConfirmationArgs(
                 configuration = configuration,
                 linkAccount = TestFactory.LINK_ACCOUNT,
@@ -713,7 +723,6 @@ internal class DefaultLinkConfirmationHandlerTest {
             confirmationHandler.awaitResultTurbine.add(
                 item = ConfirmationHandler.Result.Succeeded(
                     intent = configuration.stripeIntent,
-                    confirmationRequestId = null,
                 )
             )
 
@@ -725,7 +734,7 @@ internal class DefaultLinkConfirmationHandlerTest {
                 billingPhone = null
             )
 
-            assertThat(result).isEqualTo(Result.Succeeded(confirmationRequestId = null))
+            assertThat(result).isEqualTo(Result.Succeeded)
             confirmationHandler.startTurbine.awaitItem().assertSavedConfirmationArgs(
                 configuration = configuration,
                 paymentDetails = TestFactory.LINK_PASSTHROUGH_PAYMENT_DETAILS,
@@ -755,7 +764,6 @@ internal class DefaultLinkConfirmationHandlerTest {
         confirmationHandler.awaitResultTurbine.add(
             item = ConfirmationHandler.Result.Succeeded(
                 intent = configuration.stripeIntent,
-                confirmationRequestId = null,
             )
         )
 
@@ -769,7 +777,7 @@ internal class DefaultLinkConfirmationHandlerTest {
             billingPhone = null
         )
 
-        assertThat(result).isEqualTo(Result.Succeeded(confirmationRequestId = null))
+        assertThat(result).isEqualTo(Result.Succeeded)
         confirmationHandler.startTurbine.awaitItem().assertSavedConfirmationArgs(
             configuration = configuration,
             paymentDetails = savedPaymentDetails,
@@ -839,6 +847,7 @@ internal class DefaultLinkConfirmationHandlerTest {
             logger = logger,
             paymentMethodMetadata = paymentMethodMetadata,
             statusBarColor = statusBarColor,
+            savedStateHandle = savedStateHandle,
         )
         assertThat(confirmationHandler.bootstrapTurbine.awaitItem().paymentMethodMetadata)
             .isEqualTo(paymentMethodMetadata)

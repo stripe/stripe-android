@@ -14,6 +14,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.R
+import com.stripe.android.checkout.checkoutConfirmationRequestId
 import com.stripe.android.core.Logger
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentsheet.BuildConfig
@@ -77,8 +78,9 @@ internal class LinkActivity : ComponentActivity() {
 
             LaunchedEffect(Unit) {
                 vm.result.collect { result ->
+                    val confirmationRequestId = vm.savedStateHandle.checkoutConfirmationRequestId
                     bottomSheetState.hide()
-                    dismissWithResult(result)
+                    dismissWithResult(result, confirmationRequestId)
                 }
             }
 
@@ -109,13 +111,17 @@ internal class LinkActivity : ComponentActivity() {
         onBackPressedDispatcher.addCallback { viewModel?.handleBackPressed() }
     }
 
-    private fun dismissWithResult(result: LinkActivityResult) {
+    private fun dismissWithResult(result: LinkActivityResult, confirmationRequestId: String?) {
         val bundle = bundleOf(
             LinkActivityContract.EXTRA_RESULT to result
         )
+        val resultIntent = Intent().putExtras(bundle)
+        confirmationRequestId?.let {
+            resultIntent.putExtra(EXTRA_CONFIRMATION_REQUEST_ID, it)
+        }
         this@LinkActivity.setResult(
             RESULT_COMPLETE,
-            Intent().putExtras(bundle)
+            resultIntent
         )
         this@LinkActivity.finish()
     }
@@ -151,6 +157,7 @@ internal class LinkActivity : ComponentActivity() {
 
     companion object {
         internal const val EXTRA_ARGS = "native_link_args"
+        internal const val EXTRA_CONFIRMATION_REQUEST_ID = "native_link_confirmation_request_id"
         internal const val RESULT_COMPLETE = 73563
 
         internal fun createIntent(

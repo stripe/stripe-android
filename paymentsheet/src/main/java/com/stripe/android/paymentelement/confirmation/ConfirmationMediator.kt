@@ -67,7 +67,6 @@ internal class ConfirmationMediator<
                     cause = exception,
                     message = exception.stripeErrorMessage(),
                     type = ConfirmationHandler.Result.Failed.ErrorType.Internal,
-                    confirmationRequestId = null,
                 )
             }
 
@@ -99,7 +98,6 @@ internal class ConfirmationMediator<
                 ),
                 message = R.string.stripe_something_went_wrong.resolvableString,
                 errorType = ConfirmationHandler.Result.Failed.ErrorType.Internal,
-                confirmationRequestId = null,
             )
 
         return when (val action = definition.action(confirmationOption, arguments)) {
@@ -121,7 +119,6 @@ internal class ConfirmationMediator<
                             )
                         },
                         receivesResultInProcess = action.receivesResultInProcess,
-                        confirmationRequestId = action.confirmationRequestId,
                     )
                 } ?: run {
                     val exception = IllegalStateException(
@@ -132,7 +129,6 @@ internal class ConfirmationMediator<
                         cause = exception,
                         message = exception.stripeErrorMessage(),
                         errorType = ConfirmationHandler.Result.Failed.ErrorType.Fatal,
-                        confirmationRequestId = action.confirmationRequestId,
                     )
                 }
             }
@@ -141,7 +137,6 @@ internal class ConfirmationMediator<
                     intent = action.intent,
                     metadata = action.metadata,
                     completedFullPaymentFlow = action.completedFullPaymentFlow,
-                    confirmationRequestId = action.confirmationRequestId,
                 )
             }
             is ConfirmationDefinition.Action.Fail -> {
@@ -149,33 +144,27 @@ internal class ConfirmationMediator<
                     cause = action.cause,
                     message = action.message,
                     errorType = action.errorType,
-                    confirmationRequestId = action.confirmationRequestId,
                 )
             }
         }
     }
 
     sealed interface Action {
-        val confirmationRequestId: String?
-
         class Launch(
             val launch: () -> Unit,
             val receivesResultInProcess: Boolean,
-            override val confirmationRequestId: String?,
         ) : Action
 
         data class Fail(
             val cause: Throwable,
             val message: ResolvableString,
             val errorType: ConfirmationHandler.Result.Failed.ErrorType,
-            override val confirmationRequestId: String?,
         ) : Action
 
         data class Complete(
             val intent: StripeIntent,
             val metadata: ConfirmationMetadata,
             val completedFullPaymentFlow: Boolean,
-            override val confirmationRequestId: String?,
         ) : Action
     }
 

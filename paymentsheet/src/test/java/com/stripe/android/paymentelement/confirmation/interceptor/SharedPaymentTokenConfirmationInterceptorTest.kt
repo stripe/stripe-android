@@ -68,7 +68,6 @@ class SharedPaymentTokenConfirmationInterceptorTest {
                         set(DeferredIntentConfirmationTypeKey, DeferredIntentConfirmationType.None)
                     },
                     completedFullPaymentFlow = false,
-                    confirmationRequestId = null,
                 )
             )
 
@@ -109,7 +108,6 @@ class SharedPaymentTokenConfirmationInterceptorTest {
                         set(DeferredIntentConfirmationTypeKey, DeferredIntentConfirmationType.None)
                     },
                     completedFullPaymentFlow = false,
-                    confirmationRequestId = null,
                 )
             )
 

@@ -3,7 +3,6 @@
 package com.stripe.android.checkout
 
 import android.content.Context
-import androidx.annotation.MainThread
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.checkout.analytics.CheckoutConfirmationContext
 import com.stripe.android.checkout.analytics.CheckoutConfirmationContext.InvocationSource
@@ -45,18 +44,6 @@ internal class CheckoutAnalyticsPerformer @Inject constructor(
         apiConfigurationProvider = apiConfigurationProvider,
     )
 
-    @get:MainThread
-    @set:MainThread
-    private var confirmationContext: CheckoutConfirmationContext?
-        get() = savedStateHandle[CONFIRMATION_CONTEXT_KEY]
-        set(value) {
-            if (value == null) {
-                savedStateHandle.remove<CheckoutConfirmationContext>(CONFIRMATION_CONTEXT_KEY)
-            } else {
-                savedStateHandle[CONFIRMATION_CONTEXT_KEY] = value
-            }
-        }
-
     fun onPaymentElementConfirmationStarted(paymentSelection: PaymentSelection) {
         saveConfirmation(InvocationSource.Merchant, paymentSelection)
     }
@@ -68,13 +55,14 @@ internal class CheckoutAnalyticsPerformer @Inject constructor(
     suspend fun reportConfirmationResults() {
         confirmationHandler.state.collect { state ->
             if (state is ConfirmationHandler.State.Complete) {
-                val savedConfirmationContext = confirmationContext
+                val confirmationContext = savedStateHandle.get<CheckoutConfirmationContext>(CONFIRMATION_CONTEXT_KEY)
 
-                if (savedConfirmationContext != null) {
-                    reportConfirmationResult(state.result, savedConfirmationContext)
+                if (confirmationContext != null) {
+                    reportConfirmationResult(state.result, confirmationContext)
                 }
 
-                confirmationContext = null
+                savedStateHandle.remove<CheckoutConfirmationContext>(CONFIRMATION_CONTEXT_KEY)
+                savedStateHandle.checkoutConfirmationRequestId = null
             }
         }
     }
@@ -92,7 +80,7 @@ internal class CheckoutAnalyticsPerformer @Inject constructor(
             is ConfirmationHandler.Result.Succeeded -> reportEvent(
                 CheckoutConfirmationEvent.Succeeded(
                     confirmationContext = confirmationContext,
-                    confirmationRequestId = result.confirmationRequestId,
+                    confirmationRequestId = savedStateHandle.checkoutConfirmationRequestId,
                     analyticsMetadata = analyticsMetadata,
                     duration = durationProvider.end(DurationProvider.Key.Checkout),
                 )
@@ -101,7 +89,7 @@ internal class CheckoutAnalyticsPerformer @Inject constructor(
                 reportEvent(
                     CheckoutConfirmationEvent.Failed(
                         confirmationContext = confirmationContext,
-                        confirmationRequestId = result.confirmationRequestId,
+                        confirmationRequestId = savedStateHandle.checkoutConfirmationRequestId,
                         analyticsMetadata = analyticsMetadata,
                         duration = durationProvider.end(DurationProvider.Key.Checkout),
                         error = error,
@@ -130,12 +118,13 @@ internal class CheckoutAnalyticsPerformer @Inject constructor(
         invocationSource: InvocationSource,
         paymentSelection: PaymentSelection,
     ) {
+        savedStateHandle.checkoutConfirmationRequestId = null
         val state = stateHolder.state
         val metadata = when (invocationSource) {
             InvocationSource.Merchant -> state?.paymentMethodMetadata
             InvocationSource.ExpressCheckoutElement -> state?.expressCheckoutElementPaymentMethodMetadata
         }
-        confirmationContext = CheckoutConfirmationContext(
+        savedStateHandle[CONFIRMATION_CONTEXT_KEY] = CheckoutConfirmationContext(
             paymentSelection = paymentSelection,
             invocationSource = invocationSource,
             activeLinkSession = linkAccountHolder.linkAccountInfo.value.account?.isVerified

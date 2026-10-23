@@ -44,7 +44,6 @@ class BacsConfirmationFlowTest {
                 extraParams = null,
             ),
             arguments = CONFIRMATION_PARAMETERS,
-            confirmationRequestId = null,
         ),
     )
 

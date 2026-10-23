@@ -35,7 +35,6 @@ internal class BacsConfirmationDefinition @Inject constructor(
             ConfirmationDefinition.Action.Launch(
                 launcherArguments = data,
                 receivesResultInProcess = true,
-                confirmationRequestId = null,
             )
         } ?: run {
             ConfirmationDefinition.Action.Fail(
@@ -43,8 +42,7 @@ internal class BacsConfirmationDefinition @Inject constructor(
                     "Given confirmation option does not have expected Bacs data!"
                 ),
                 message = R.string.stripe_something_went_wrong.resolvableString,
-                errorType = ConfirmationHandler.Result.Failed.ErrorType.Internal,
-                confirmationRequestId = null,
+                errorType = ConfirmationHandler.Result.Failed.ErrorType.Internal
             )
         }
     }
@@ -92,16 +90,13 @@ internal class BacsConfirmationDefinition @Inject constructor(
                 ConfirmationDefinition.Result.NextStep(
                     confirmationOption = nextConfirmationOption,
                     arguments = confirmationArgs,
-                    confirmationRequestId = null,
                 )
             }
             is BacsMandateConfirmationResult.ModifyDetails -> ConfirmationDefinition.Result.Canceled(
                 action = ConfirmationHandler.Result.Canceled.Action.ModifyPaymentDetails,
-                confirmationRequestId = null,
             )
             is BacsMandateConfirmationResult.Cancelled -> ConfirmationDefinition.Result.Canceled(
                 action = ConfirmationHandler.Result.Canceled.Action.None,
-                confirmationRequestId = null,
             )
         }
     }

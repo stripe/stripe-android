@@ -89,7 +89,6 @@ class EmbeddedConfirmationStarterTest {
             confirmationState = ConfirmationHandler.State.Complete(
                 result = ConfirmationHandler.Result.Succeeded(
                     intent = intent,
-                    confirmationRequestId = null,
                 ),
             ),
         ) {
@@ -114,8 +113,7 @@ class EmbeddedConfirmationStarterTest {
         test(
             confirmationState = ConfirmationHandler.State.Complete(
                 result = ConfirmationHandler.Result.Canceled(
-                    action = ConfirmationHandler.Result.Canceled.Action.InformCancellation,
-                    confirmationRequestId = null,
+                    action = ConfirmationHandler.Result.Canceled.Action.InformCancellation
                 ),
             ),
         ) {

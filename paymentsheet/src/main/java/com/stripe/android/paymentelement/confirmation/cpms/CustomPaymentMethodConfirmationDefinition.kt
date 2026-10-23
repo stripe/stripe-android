@@ -53,13 +53,11 @@ internal class CustomPaymentMethodConfirmationDefinition @Inject constructor(
                 cause = error,
                 message = error.stripeErrorMessage(),
                 errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
-                confirmationRequestId = null,
             )
         } else {
             ConfirmationDefinition.Action.Launch(
                 launcherArguments = EmptyConfirmationLauncherArgs,
                 receivesResultInProcess = false,
-                confirmationRequestId = null,
             )
         }
     }
@@ -106,17 +104,14 @@ internal class CustomPaymentMethodConfirmationDefinition @Inject constructor(
         return when (result) {
             is InternalCustomPaymentMethodResult.Completed -> ConfirmationDefinition.Result.Succeeded(
                 intent = confirmationArgs.intent,
-                confirmationRequestId = null,
             )
             is InternalCustomPaymentMethodResult.Failed -> ConfirmationDefinition.Result.Failed(
                 cause = result.throwable,
                 message = result.throwable.stripeErrorMessage(),
                 type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
-                confirmationRequestId = null,
             )
             is InternalCustomPaymentMethodResult.Canceled -> ConfirmationDefinition.Result.Canceled(
                 action = ConfirmationHandler.Result.Canceled.Action.None,
-                confirmationRequestId = null,
             )
         }
     }

@@ -22,8 +22,7 @@ class ConfirmationReportingUtilsTest {
         val epmError = ConfirmationHandler.Result.Failed(
             cause = Exception(),
             message = "Something went wrong".resolvableString,
-            type = ConfirmationHandler.Result.Failed.ErrorType.ExternalPaymentMethod,
-            confirmationRequestId = null,
+            type = ConfirmationHandler.Result.Failed.ErrorType.ExternalPaymentMethod
         )
 
         val confirmationError = epmError.toConfirmationError()
@@ -40,8 +39,7 @@ class ConfirmationReportingUtilsTest {
                 )
             ),
             message = "Something went wrong".resolvableString,
-            type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
-            confirmationRequestId = null,
+            type = ConfirmationHandler.Result.Failed.ErrorType.Payment
         )
 
         val confirmationError = stripeError.toConfirmationError()
@@ -55,8 +53,7 @@ class ConfirmationReportingUtilsTest {
         val googlePayError = ConfirmationHandler.Result.Failed(
             cause = Exception(),
             message = "Something went wrong".resolvableString,
-            type = ConfirmationHandler.Result.Failed.ErrorType.GooglePay(12),
-            confirmationRequestId = null,
+            type = ConfirmationHandler.Result.Failed.ErrorType.GooglePay(12)
         )
 
         val confirmationError = googlePayError.toConfirmationError()
@@ -70,8 +67,7 @@ class ConfirmationReportingUtilsTest {
         val merchantError = ConfirmationHandler.Result.Failed(
             cause = Exception(),
             message = "Something went wrong".resolvableString,
-            type = ConfirmationHandler.Result.Failed.ErrorType.MerchantIntegration,
-            confirmationRequestId = null,
+            type = ConfirmationHandler.Result.Failed.ErrorType.MerchantIntegration
         )
 
         val confirmationError = merchantError.toConfirmationError()
@@ -86,7 +82,6 @@ class ConfirmationReportingUtilsTest {
             metadata = MutableConfirmationMetadata().apply {
                 set(DeferredIntentConfirmationTypeKey, DeferredIntentConfirmationType.Client)
             },
-            confirmationRequestId = null,
         )
 
         eventReporter.reportPaymentResult(result, PaymentSelection.GooglePay)
@@ -103,8 +98,7 @@ class ConfirmationReportingUtilsTest {
         val result = ConfirmationHandler.Result.Failed(
             cause = Exception(),
             message = "Something went wrong".resolvableString,
-            type = ConfirmationHandler.Result.Failed.ErrorType.GooglePay(12),
-            confirmationRequestId = null,
+            type = ConfirmationHandler.Result.Failed.ErrorType.GooglePay(12)
         )
 
         eventReporter.reportPaymentResult(result, PaymentSelection.GooglePay)

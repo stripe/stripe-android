@@ -54,7 +54,6 @@ import com.stripe.android.uicore.navigation.NavBackStackEntryUpdate
 import com.stripe.android.uicore.navigation.NavigationManager
 import com.stripe.android.uicore.navigation.PopUpToBehavior
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -101,8 +100,7 @@ internal class LinkActivityViewModelTest {
             vm.handleViewAction(LinkAction.BackPressed)
             assertThat(awaitItem()).isEqualTo(
                 LinkActivityResult.Canceled(
-                    linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
-                    confirmationRequestId = null,
+                    linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT)
                 )
             )
         }
@@ -264,8 +262,7 @@ internal class LinkActivityViewModelTest {
         linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
 
         val confirmationHandler = FakeLinkConfirmationHandler()
-        confirmationHandler.confirmResult =
-            LinkConfirmationResult.Succeeded(confirmationRequestId = "req_activity_success")
+        confirmationHandler.confirmWithLinkPaymentDetailsResult = LinkConfirmationResult.Succeeded
 
         val vm = createViewModel(
             linkLaunchMode = LinkLaunchMode.Confirmation(selectedPayment = selectedPayment),
@@ -275,8 +272,7 @@ internal class LinkActivityViewModelTest {
 
         vm.result.test {
             vm.onCreate(mock())
-            val result = awaitItem() as LinkActivityResult.Completed
-            assertThat(result.confirmationRequestId).isEqualTo("req_activity_success")
+            assertThat(awaitItem()).isInstanceOf(LinkActivityResult.Completed::class.java)
         }
     }
 
@@ -293,10 +289,9 @@ internal class LinkActivityViewModelTest {
         linkAccountManager.setAccountStatus(AccountStatus.SignedOut)
 
         val linkConfirmationHandler = FakeLinkConfirmationHandler()
-        linkConfirmationHandler.confirmResult = LinkConfirmationResult.Failed(
-            message = "something went wrong".resolvableString,
-            confirmationRequestId = "req_activity_failure",
-        )
+        linkConfirmationHandler.confirmWithLinkPaymentDetailsResult =
+            LinkConfirmationResult.Failed("something went wrong".resolvableString)
+        linkConfirmationHandler.confirmResult = LinkConfirmationResult.Failed("something went wrong".resolvableString)
 
         val vm = createViewModel(
             linkLaunchMode = LinkLaunchMode.Confirmation(selectedPayment = selectedPayment),
@@ -308,238 +303,7 @@ internal class LinkActivityViewModelTest {
 
         vm.result.test {
             vm.onCreate(mock())
-            val result = awaitItem() as LinkActivityResult.Failed
-            assertThat(result.confirmationRequestId).isEqualTo("req_activity_failure")
-        }
-    }
-
-    @Test
-    fun `onCreate emits canceled result with confirmation request ID`() = runTest {
-        val selectedPayment = LinkPaymentMethod.ConsumerPaymentDetails(
-            details = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
-            collectedCvc = null,
-            billingPhone = null
-        )
-        val linkAccountManager = FakeLinkAccountManager().apply {
-            setLinkAccount(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
-        }
-        val linkConfirmationHandler = FakeLinkConfirmationHandler().apply {
-            confirmResult = LinkConfirmationResult.Canceled(confirmationRequestId = "req_activity_canceled")
-        }
-        val vm = createViewModel(
-            linkLaunchMode = LinkLaunchMode.Confirmation(selectedPayment = selectedPayment),
-            linkAccountManager = linkAccountManager,
-            linkConfirmationHandler = linkConfirmationHandler,
-        )
-
-        vm.result.test {
-            vm.onCreate(mock())
-            val result = awaitItem() as LinkActivityResult.Canceled
-            assertThat(result.confirmationRequestId).isEqualTo("req_activity_canceled")
-        }
-    }
-
-    @Test
-    fun `Back pressed carries request ID from completed inline failure`() = runTest(dispatcher) {
-        val confirmationHandler = FakeConfirmationHandler(
-            state = MutableStateFlow(
-                ConfirmationHandler.State.Complete(
-                    failedConfirmationResult(confirmationRequestId = "req_inline_failure")
-                )
-            )
-        )
-        val viewModel = createViewModel(confirmationHandler = confirmationHandler)
-
-        viewModel.result.test {
-            viewModel.handleViewAction(LinkAction.BackPressed)
-
-            val result = awaitItem() as LinkActivityResult.Canceled
-            assertThat(result.confirmationRequestId).isEqualTo("req_inline_failure")
-        }
-    }
-
-    @Test
-    fun `Back pressed carries request ID from a returned canceled inner attempt`() = runTest(dispatcher) {
-        val confirmationHandler = FakeConfirmationHandler(
-            state = MutableStateFlow(
-                ConfirmationHandler.State.Complete(
-                    failedConfirmationResult(confirmationRequestId = "req_previous_attempt")
-                )
-            )
-        )
-        val viewModel = createViewModel(confirmationHandler = confirmationHandler)
-        confirmationHandler.state.value = ConfirmationHandler.State.Confirming(
-            option = mock<ConfirmationHandler.Option>()
-        )
-        confirmationHandler.state.value = ConfirmationHandler.State.Complete(
-            ConfirmationHandler.Result.Canceled(
-                action = ConfirmationHandler.Result.Canceled.Action.ModifyPaymentDetails,
-                confirmationRequestId = "req_inner_canceled",
-            )
-        )
-
-        viewModel.result.test {
-            viewModel.handleViewAction(LinkAction.BackPressed)
-
-            val result = awaitItem() as LinkActivityResult.Canceled
-            assertThat(result.confirmationRequestId).isEqualTo("req_inner_canceled")
-        }
-    }
-
-    @Test
-    fun `Back pressed uses retry state before confirmation state collector advances`() = runTest {
-        val queuedDispatcher = StandardTestDispatcher(testScheduler)
-        Dispatchers.setMain(queuedDispatcher)
-
-        try {
-            val confirmationHandler = FakeConfirmationHandler(
-                state = MutableStateFlow(
-                    ConfirmationHandler.State.Complete(
-                        failedConfirmationResult(confirmationRequestId = "req_previous_attempt")
-                    )
-                )
-            )
-            val viewModel = createViewModel(confirmationHandler = confirmationHandler)
-            runCurrent()
-
-            viewModel.result.test {
-                confirmationHandler.state.value = ConfirmationHandler.State.Confirming(
-                    option = mock<ConfirmationHandler.Option>()
-                )
-                viewModel.handleViewAction(LinkAction.BackPressed)
-                runCurrent()
-
-                val result = awaitItem() as LinkActivityResult.Canceled
-                assertThat(result.confirmationRequestId).isNull()
-            }
-        } finally {
-            Dispatchers.setMain(dispatcher)
-        }
-    }
-
-    @Test
-    fun `completed retry without request ID clears previous request ID`() = runTest {
-        val queuedDispatcher = StandardTestDispatcher(testScheduler)
-        Dispatchers.setMain(queuedDispatcher)
-
-        try {
-            val confirmationHandler = FakeConfirmationHandler(
-                state = MutableStateFlow(
-                    ConfirmationHandler.State.Complete(
-                        failedConfirmationResult(confirmationRequestId = "req_previous_attempt")
-                    )
-                )
-            )
-            val viewModel = createViewModel(confirmationHandler = confirmationHandler)
-            runCurrent()
-
-            confirmationHandler.state.value = ConfirmationHandler.State.Confirming(
-                option = mock<ConfirmationHandler.Option>()
-            )
-            confirmationHandler.state.value = ConfirmationHandler.State.Complete(
-                failedConfirmationResult(confirmationRequestId = null)
-            )
-
-            viewModel.result.test {
-                viewModel.handleViewAction(LinkAction.BackPressed)
-                runCurrent()
-
-                val result = awaitItem() as LinkActivityResult.Canceled
-                assertThat(result.confirmationRequestId).isNull()
-            }
-        } finally {
-            Dispatchers.setMain(dispatcher)
-        }
-    }
-
-    @Test
-    fun `restored idle ViewModel reuses saved terminal request ID`() = runTest {
-        val queuedDispatcher = StandardTestDispatcher(testScheduler)
-        Dispatchers.setMain(queuedDispatcher)
-
-        try {
-            val savedStateHandle = SavedStateHandle()
-            createViewModel(
-                confirmationHandler = FakeConfirmationHandler(
-                    state = MutableStateFlow(
-                        ConfirmationHandler.State.Complete(
-                            failedConfirmationResult(confirmationRequestId = "req_restored")
-                        )
-                    )
-                ),
-                savedStateHandle = savedStateHandle,
-            )
-            val restoredViewModel = createViewModel(
-                confirmationHandler = FakeConfirmationHandler(
-                    state = MutableStateFlow(ConfirmationHandler.State.Idle)
-                ),
-                savedStateHandle = savedStateHandle,
-            )
-
-            restoredViewModel.result.test {
-                restoredViewModel.handleViewAction(LinkAction.BackPressed)
-                runCurrent()
-
-                val result = awaitItem() as LinkActivityResult.Canceled
-                assertThat(result.confirmationRequestId).isEqualTo("req_restored")
-            }
-        } finally {
-            Dispatchers.setMain(dispatcher)
-        }
-    }
-
-    @Test
-    fun `restored confirming state clears stale request ID`() = runTest(dispatcher) {
-        val savedStateHandle = SavedStateHandle()
-        createViewModel(
-            confirmationHandler = FakeConfirmationHandler(
-                state = MutableStateFlow(
-                    ConfirmationHandler.State.Complete(
-                        failedConfirmationResult(confirmationRequestId = "req_stale")
-                    )
-                )
-            ),
-            savedStateHandle = savedStateHandle,
-        )
-        val restoredViewModel = createViewModel(
-            confirmationHandler = FakeConfirmationHandler(
-                state = MutableStateFlow(
-                    ConfirmationHandler.State.Confirming(option = mock<ConfirmationHandler.Option>())
-                )
-            ),
-            savedStateHandle = savedStateHandle,
-        )
-
-        restoredViewModel.result.test {
-            restoredViewModel.handleViewAction(LinkAction.BackPressed)
-
-            val result = awaitItem() as LinkActivityResult.Canceled
-            assertThat(result.confirmationRequestId).isNull()
-        }
-    }
-
-    @Test
-    fun `explicit activity result request ID takes precedence over saved terminal ID`() = runTest(dispatcher) {
-        val viewModel = createViewModel(
-            confirmationHandler = FakeConfirmationHandler(
-                state = MutableStateFlow(
-                    ConfirmationHandler.State.Complete(
-                        failedConfirmationResult(confirmationRequestId = "req_cached")
-                    )
-                )
-            )
-        )
-
-        viewModel.result.test {
-            viewModel.handleWebActivityResult(
-                LinkActivityResult.Canceled(
-                    linkAccountUpdate = LinkAccountUpdate.None,
-                    confirmationRequestId = "req_activity_result",
-                )
-            )
-
-            val result = awaitItem() as LinkActivityResult.Canceled
-            assertThat(result.confirmationRequestId).isEqualTo("req_activity_result")
+            assertThat(awaitItem()).isInstanceOf(LinkActivityResult.Failed::class.java)
         }
     }
 
@@ -850,10 +614,7 @@ internal class LinkActivityViewModelTest {
             vm.onDismissVerificationClicked()
 
             assertThat(awaitItem()).isEqualTo(
-                LinkActivityResult.Canceled(
-                    linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
-                    confirmationRequestId = null,
-                )
+                LinkActivityResult.Canceled(linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
             )
         }
     }
@@ -994,8 +755,7 @@ internal class LinkActivityViewModelTest {
             assertThat(awaitItem()).isEqualTo(
                 LinkActivityResult.Canceled(
                     reason = LinkActivityResult.Canceled.Reason.LoggedOut,
-                    linkAccountUpdate = LinkAccountUpdate.Value(null, LoggedOut),
-                    confirmationRequestId = null,
+                    linkAccountUpdate = LinkAccountUpdate.Value(null, LoggedOut)
                 )
             )
         }
@@ -1019,8 +779,7 @@ internal class LinkActivityViewModelTest {
             assertThat(awaitItem()).isEqualTo(
                 LinkActivityResult.Canceled(
                     reason = LinkActivityResult.Canceled.Reason.LoggedOut,
-                    linkAccountUpdate = LinkAccountUpdate.Value(null, LoggedOut),
-                    confirmationRequestId = null,
+                    linkAccountUpdate = LinkAccountUpdate.Value(null, LoggedOut)
                 )
             )
         }
@@ -1208,8 +967,7 @@ internal class LinkActivityViewModelTest {
             viewModel.dismissSheet()
             assertThat(awaitItem()).isEqualTo(
                 LinkActivityResult.Canceled(
-                    linkAccountUpdate = LinkAccountUpdate.Value(null),
-                    confirmationRequestId = null,
+                    linkAccountUpdate = LinkAccountUpdate.Value(null)
                 )
             )
         }
@@ -1473,15 +1231,6 @@ internal class LinkActivityViewModelTest {
             this.launchWebFlow = launchWeb
         }.also { viewModelStoreRule.track(it) }
     }
-
-    private fun failedConfirmationResult(
-        confirmationRequestId: String?,
-    ) = ConfirmationHandler.Result.Failed(
-        cause = IllegalStateException("Test confirmation failure"),
-        message = "Test confirmation failure".resolvableString,
-        type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
-        confirmationRequestId = confirmationRequestId,
-    )
 
     private fun creationExtras(): CreationExtras {
         val mockOwner = mock<SavedStateRegistryOwner>()

@@ -38,7 +38,7 @@ internal class CompleteLinkFlowTest {
     @Test
     fun `invoke with ConsumerPaymentDetails on Full mode - success`() = runTest {
         val linkConfirmationHandler = FakeLinkConfirmationHandler().apply {
-            confirmResult = LinkConfirmationResult.Succeeded(confirmationRequestId = "req_full_success")
+            confirmResult = LinkConfirmationResult.Succeeded
         }
         val linkAccountManager = FakeLinkAccountManager()
 
@@ -66,13 +66,12 @@ internal class CompleteLinkFlowTest {
         val activityResult = completedResult.linkActivityResult as LinkActivityResult.Completed
         assertThat(activityResult.selectedPayment).isNull()
         assertThat(activityResult.linkAccountUpdate).isInstanceOf(LinkAccountUpdate.Value::class.java)
-        assertThat(activityResult.confirmationRequestId).isEqualTo("req_full_success")
     }
 
     @Test
     fun `invoke with ConsumerPaymentDetails on Confirmation mode - success`() = runTest {
         val linkConfirmationHandler = FakeLinkConfirmationHandler().apply {
-            confirmResult = LinkConfirmationResult.Succeeded(confirmationRequestId = null)
+            confirmResult = LinkConfirmationResult.Succeeded
         }
 
         val completeLinkFlow = DefaultCompleteLinkFlow(
@@ -130,10 +129,7 @@ internal class CompleteLinkFlowTest {
     fun `invoke with ConsumerPaymentDetails on Full mode - failure`() = runTest {
         val errorMessage = "Payment failed".resolvableString
         val linkConfirmationHandler = FakeLinkConfirmationHandler().apply {
-            confirmResult = LinkConfirmationResult.Failed(
-                message = errorMessage,
-                confirmationRequestId = null,
-            )
+            confirmResult = LinkConfirmationResult.Failed(errorMessage)
         }
         val linkAccountManager = FakeLinkAccountManager()
 
@@ -160,7 +156,7 @@ internal class CompleteLinkFlowTest {
     @Test
     fun `invoke with ConsumerPaymentDetails on Full mode - canceled`() = runTest {
         val linkConfirmationHandler = FakeLinkConfirmationHandler().apply {
-            confirmResult = LinkConfirmationResult.Canceled(confirmationRequestId = null)
+            confirmResult = LinkConfirmationResult.Canceled
         }
         val linkAccountManager = FakeLinkAccountManager()
 
@@ -185,7 +181,7 @@ internal class CompleteLinkFlowTest {
     @Test
     fun `invoke with LinkPaymentDetails on Full mode - success`() = runTest {
         val linkConfirmationHandler = FakeLinkConfirmationHandler().apply {
-            confirmWithLinkPaymentDetailsResult = LinkConfirmationResult.Succeeded(confirmationRequestId = null)
+            confirmWithLinkPaymentDetailsResult = LinkConfirmationResult.Succeeded
         }
         val linkAccountManager = FakeLinkAccountManager()
 
@@ -245,7 +241,7 @@ internal class CompleteLinkFlowTest {
     @Test
     fun `invoke with null cvc works correctly`() = runTest {
         val linkConfirmationHandler = FakeLinkConfirmationHandler().apply {
-            confirmResult = LinkConfirmationResult.Succeeded(confirmationRequestId = null)
+            confirmResult = LinkConfirmationResult.Succeeded
         }
         val linkAccountManager = FakeLinkAccountManager()
 

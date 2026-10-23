@@ -169,6 +169,7 @@ internal suspend fun createIntentConfirmationInterceptor(
                     checkoutSessionRepository = checkoutSessionRepository,
                     checkoutSessionTaxRegionUpdater = CheckoutSessionTaxRegionUpdater(checkoutSessionRepository),
                     requestOptions = requestOptions,
+                    savedStateHandle = SavedStateHandle(),
                 )
             }
         },

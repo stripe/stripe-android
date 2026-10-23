@@ -32,11 +32,7 @@ internal class LinkPaymentMethodSelectionOutcomeTest {
         val updatedPayment = selectedPayment.copy(collectedCvc = "123")
 
         val outcomes = handle(
-            LinkActivityResult.Completed(
-                linkAccountUpdate = LinkAccountUpdate.None,
-                selectedPayment = updatedPayment,
-                confirmationRequestId = null,
-            )
+            LinkActivityResult.Completed(LinkAccountUpdate.None, selectedPayment = updatedPayment)
         )
 
         assertThat(outcomes).containsExactly(
@@ -53,11 +49,7 @@ internal class LinkPaymentMethodSelectionOutcomeTest {
         val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
 
         val outcomes = handle(
-            result = LinkActivityResult.Canceled(
-                reason = Reason.LoggedOut,
-                linkAccountUpdate = LinkAccountUpdate.None,
-                confirmationRequestId = null,
-            ),
+            result = LinkActivityResult.Canceled(Reason.LoggedOut, LinkAccountUpdate.None),
             customerState = createCustomerState(paymentMethods = listOf(paymentMethod)),
         )
 
@@ -80,11 +72,7 @@ internal class LinkPaymentMethodSelectionOutcomeTest {
         )
 
         val outcomes = handle(
-            result = LinkActivityResult.Canceled(
-                reason = Reason.LoggedOut,
-                linkAccountUpdate = LinkAccountUpdate.None,
-                confirmationRequestId = null,
-            ),
+            result = LinkActivityResult.Canceled(Reason.LoggedOut, LinkAccountUpdate.None),
             customerState = createCustomerState(
                 paymentMethods = listOf(first, default),
                 defaultPaymentMethodId = default.id,
@@ -99,11 +87,7 @@ internal class LinkPaymentMethodSelectionOutcomeTest {
     @Test
     fun `back shows payment options when Link has no usable payment`() {
         val outcomes = handle(
-            result = LinkActivityResult.Canceled(
-                reason = Reason.BackPressed,
-                linkAccountUpdate = LinkAccountUpdate.None,
-                confirmationRequestId = null,
-            ),
+            result = LinkActivityResult.Canceled(Reason.BackPressed, LinkAccountUpdate.None),
             selection = linkSelection.copy(selectedPayment = null),
         )
 
@@ -113,11 +97,7 @@ internal class LinkPaymentMethodSelectionOutcomeTest {
     @Test
     fun `back dismisses when Link has a usable payment`() {
         val outcomes = handle(
-            LinkActivityResult.Canceled(
-                reason = Reason.BackPressed,
-                linkAccountUpdate = LinkAccountUpdate.None,
-                confirmationRequestId = null,
-            )
+            LinkActivityResult.Canceled(Reason.BackPressed, LinkAccountUpdate.None)
         )
 
         assertThat(outcomes).containsExactly(LinkPaymentMethodSelectionOutcome.Dismiss)
@@ -126,11 +106,7 @@ internal class LinkPaymentMethodSelectionOutcomeTest {
     @Test
     fun `pay another way shows payment options`() {
         val outcomes = handle(
-            LinkActivityResult.Canceled(
-                reason = Reason.PayAnotherWay,
-                linkAccountUpdate = LinkAccountUpdate.None,
-                confirmationRequestId = null,
-            )
+            LinkActivityResult.Canceled(Reason.PayAnotherWay, LinkAccountUpdate.None)
         )
 
         assertThat(outcomes).containsExactly(LinkPaymentMethodSelectionOutcome.ShowPaymentOptions)
@@ -138,13 +114,7 @@ internal class LinkPaymentMethodSelectionOutcomeTest {
 
     @Test
     fun `failure dismisses`() {
-        val outcomes = handle(
-            LinkActivityResult.Failed(
-                error = Throwable("failure"),
-                linkAccountUpdate = LinkAccountUpdate.None,
-                confirmationRequestId = null,
-            )
-        )
+        val outcomes = handle(LinkActivityResult.Failed(Throwable("failure"), LinkAccountUpdate.None))
 
         assertThat(outcomes).containsExactly(LinkPaymentMethodSelectionOutcome.Dismiss)
     }
@@ -161,7 +131,7 @@ internal class LinkPaymentMethodSelectionOutcomeTest {
         val accountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT)
 
         val outcomes = handle(
-            result = LinkActivityResult.Failed(Throwable("failure"), accountInfo, confirmationRequestId = null),
+            result = LinkActivityResult.Failed(Throwable("failure"), accountInfo),
             metadata = metadata,
         )
 
@@ -182,7 +152,6 @@ internal class LinkPaymentMethodSelectionOutcomeTest {
             result = LinkActivityResult.Canceled(
                 Reason.BackPressed,
                 LinkAccountUpdate.Value(account),
-                confirmationRequestId = null,
             )
         )
 

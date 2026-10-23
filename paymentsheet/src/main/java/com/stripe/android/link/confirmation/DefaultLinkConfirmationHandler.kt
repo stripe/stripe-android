@@ -1,5 +1,7 @@
 package com.stripe.android.link.confirmation
 
+import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.checkout.checkoutConfirmationRequestId
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.strings.resolvableString
@@ -24,6 +26,8 @@ import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationO
 import com.stripe.android.paymentelement.confirmation.link.LinkPassthroughConfirmationOption
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.R
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -33,6 +37,7 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
     private val statusBarColor: Int?,
     private val logger: Logger,
     private val confirmationHandler: ConfirmationHandler,
+    private val savedStateHandle: SavedStateHandle,
 ) : LinkConfirmationHandler {
 
     init {
@@ -76,49 +81,48 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
     private suspend fun confirm(
         createArgs: () -> ConfirmationHandler.Args
     ): Result {
-        return runCatching {
-            val args = createArgs()
-            confirmationHandler.start(args)
-            val result = confirmationHandler.awaitResult()
-            transformResult(result)
-        }.getOrElse { error ->
-            logger.error(
-                msg = "DefaultLinkConfirmationHandler: Failed to confirm payment",
-                t = error
-            )
-            Result.Failed(
-                message = R.string.stripe_something_went_wrong.resolvableString,
-                confirmationRequestId = (error as? StripeException)?.requestId,
-            )
+        return withContext(Dispatchers.Main.immediate) {
+            runCatching {
+                val args = createArgs()
+                if (confirmationHandler.state.value !is ConfirmationHandler.State.Confirming) {
+                    savedStateHandle.checkoutConfirmationRequestId = null
+                }
+                confirmationHandler.start(args)
+                val result = confirmationHandler.awaitResult()
+                transformResult(result)
+            }.getOrElse { error ->
+                captureRequestIdIfMissing(error)
+                logger.error(
+                    msg = "DefaultLinkConfirmationHandler: Failed to confirm payment",
+                    t = error
+                )
+                Result.Failed(R.string.stripe_something_went_wrong.resolvableString)
+            }
         }
     }
 
     private fun transformResult(result: ConfirmationHandler.Result?): Result {
         return when (result) {
-            is ConfirmationHandler.Result.Canceled -> Result.Canceled(
-                confirmationRequestId = result.confirmationRequestId,
-            )
+            is ConfirmationHandler.Result.Canceled -> Result.Canceled
             is ConfirmationHandler.Result.Failed -> {
+                captureRequestIdIfMissing(result.cause)
                 logger.error(
                     msg = "DefaultLinkConfirmationHandler: Failed to confirm payment",
                     t = result.cause
                 )
-                Result.Failed(
-                    message = result.message,
-                    confirmationRequestId = result.confirmationRequestId
-                        ?: (result.cause as? StripeException)?.requestId,
-                )
+                Result.Failed(result.message)
             }
-            is ConfirmationHandler.Result.Succeeded -> Result.Succeeded(
-                confirmationRequestId = result.confirmationRequestId,
-            )
+            is ConfirmationHandler.Result.Succeeded -> Result.Succeeded
             null -> {
                 logger.error("DefaultLinkConfirmationHandler: Payment confirmation returned null")
-                Result.Failed(
-                    message = R.string.stripe_something_went_wrong.resolvableString,
-                    confirmationRequestId = null,
-                )
+                Result.Failed(R.string.stripe_something_went_wrong.resolvableString)
             }
+        }
+    }
+
+    private fun captureRequestIdIfMissing(error: Throwable) {
+        if (savedStateHandle.checkoutConfirmationRequestId == null) {
+            savedStateHandle.checkoutConfirmationRequestId = (error as? StripeException)?.requestId
         }
     }
 
@@ -245,6 +249,7 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
         private val paymentMethodMetadata: PaymentMethodMetadata,
         @Named(STATUS_BAR_COLOR) private val statusBarColor: Int?,
         private val logger: Logger,
+        private val savedStateHandle: SavedStateHandle,
     ) : LinkConfirmationHandler.Factory {
         override fun create(confirmationHandler: ConfirmationHandler): LinkConfirmationHandler {
             return DefaultLinkConfirmationHandler(
@@ -253,6 +258,7 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
                 configuration = configuration,
                 paymentMethodMetadata = paymentMethodMetadata,
                 statusBarColor = statusBarColor,
+                savedStateHandle = savedStateHandle,
             )
         }
     }

@@ -123,9 +123,6 @@ internal interface ConfirmationDefinition<
      * The general result a [ConfirmationDefinition] may return after launching into a confirmation flow
      */
     sealed interface Result {
-        /** The confirmation request ID, retained through subsequent authentication steps. */
-        val confirmationRequestId: String?
-
         /**
          * Indicates that customer exited the confirmation flow manually without completing it.
          */
@@ -134,7 +131,6 @@ internal interface ConfirmationDefinition<
              * The action that the consumer should take if the customer manually cancels.
              */
             val action: ConfirmationHandler.Result.Canceled.Action,
-            override val confirmationRequestId: String?,
         ) : Result
 
         /**
@@ -155,7 +151,6 @@ internal interface ConfirmationDefinition<
              * complete and require no action by Stripe flows afterwards.
              */
             val completedFullPaymentFlow: Boolean = true,
-            override val confirmationRequestId: String?,
         ) : Result
 
         /**
@@ -173,7 +168,6 @@ internal interface ConfirmationDefinition<
              * user
              */
             val arguments: ConfirmationHandler.Args,
-            override val confirmationRequestId: String?,
         ) : Result
 
         /**
@@ -193,7 +187,6 @@ internal interface ConfirmationDefinition<
              * The error type that occurred during the confirmation flow run.
              */
             val type: ConfirmationHandler.Result.Failed.ErrorType,
-            override val confirmationRequestId: String?,
         ) : Result
     }
 
@@ -201,9 +194,6 @@ internal interface ConfirmationDefinition<
      * The possible actions that can be taken by the confirmation flow.
      */
     sealed interface Action<TLauncherArgs> {
-        /** The confirmation request ID, retained through subsequent authentication steps. */
-        val confirmationRequestId: String?
-
         /**
          * A complete action indicating that the confirmation flow was able to be completed when determining on an
          * action. Returning this action will avoid launching the confirmation flow and complete the confirmation
@@ -224,7 +214,6 @@ internal interface ConfirmationDefinition<
              * complete and require no action by Stripe flows afterwards.
              */
             val completedFullPaymentFlow: Boolean,
-            override val confirmationRequestId: String?,
         ) : Action<TLauncherArgs>
 
         /**
@@ -243,7 +232,6 @@ internal interface ConfirmationDefinition<
              * The error type that occurred during the confirmation flow run.
              */
             val errorType: ConfirmationHandler.Result.Failed.ErrorType,
-            override val confirmationRequestId: String?,
         ) : Action<TLauncherArgs>
 
         /**
@@ -266,7 +254,6 @@ internal interface ConfirmationDefinition<
              * covers the merchant's application (ie. the Google Pay or Bacs Mandate sheets).
              */
             val receivesResultInProcess: Boolean,
-            override val confirmationRequestId: String?,
         ) : Action<TLauncherArgs>
     }
 }

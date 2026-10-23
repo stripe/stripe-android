@@ -82,12 +82,6 @@ internal class LinkActivityViewModel @Inject constructor(
     val confirmationHandler = confirmationHandlerFactory.create(viewModelScope)
     val linkConfirmationHandler = linkConfirmationHandlerFactory.create(confirmationHandler)
 
-    private var confirmationRequestId: String?
-        get() = savedStateHandle[CONFIRMATION_REQUEST_ID_KEY]
-        set(value) {
-            savedStateHandle[CONFIRMATION_REQUEST_ID_KEY] = value
-        }
-
     private val _linkAppBarState = MutableStateFlow(
         LinkAppBarState.initial(linkConfiguration.effectiveLinkBrand(linkAccount))
     )
@@ -101,10 +95,6 @@ internal class LinkActivityViewModel @Inject constructor(
     }
 
     init {
-        updateConfirmationRequestId(confirmationHandler.state.value)
-        viewModelScope.launch {
-            confirmationHandler.state.collect(::updateConfirmationRequestId)
-        }
         viewModelScope.launch {
             linkAccountManager.linkAccountInfo.collect { accountUpdate ->
                 val linkBrand = linkConfiguration.effectiveLinkBrand(accountUpdate.account)
@@ -150,8 +140,7 @@ internal class LinkActivityViewModel @Inject constructor(
     fun onDismissVerificationClicked() {
         dismissWithResult(
             LinkActivityResult.Canceled(
-                linkAccountUpdate = linkAccountManager.linkAccountUpdate,
-                confirmationRequestId = null,
+                linkAccountUpdate = linkAccountManager.linkAccountUpdate
             )
         )
     }
@@ -170,8 +159,7 @@ internal class LinkActivityViewModel @Inject constructor(
         if (canDismissSheet) {
             dismissWithResult(
                 LinkActivityResult.Canceled(
-                    linkAccountUpdate = linkAccountManager.linkAccountUpdate,
-                    confirmationRequestId = null,
+                    linkAccountUpdate = linkAccountManager.linkAccountUpdate
                 )
             )
         }
@@ -200,8 +188,7 @@ internal class LinkActivityViewModel @Inject constructor(
             dismissWithResult(
                 LinkActivityResult.Canceled(
                     reason = LinkActivityResult.Canceled.Reason.LoggedOut,
-                    linkAccountUpdate = LinkAccountUpdate.Value(null, LoggedOut),
-                    confirmationRequestId = null,
+                    linkAccountUpdate = LinkAccountUpdate.Value(null, LoggedOut)
                 )
             )
         } else {
@@ -235,15 +222,13 @@ internal class LinkActivityViewModel @Inject constructor(
             is LinkLaunchMode.Authentication -> dismissWithResult(
                 LinkActivityResult.Failed(
                     error = error,
-                    linkAccountUpdate = LinkAccountUpdate.None,
-                    confirmationRequestId = null,
+                    linkAccountUpdate = LinkAccountUpdate.None
                 )
             )
             is LinkLaunchMode.Authorization -> dismissWithResult(
                 LinkActivityResult.Failed(
                     error = IllegalStateException("Authorization mode is not supported in web"),
-                    linkAccountUpdate = LinkAccountUpdate.None,
-                    confirmationRequestId = null,
+                    linkAccountUpdate = LinkAccountUpdate.None
                 )
             )
             // Payment selection flows -> dismiss selecting Link with no selected payment method.
@@ -251,8 +236,7 @@ internal class LinkActivityViewModel @Inject constructor(
                 LinkActivityResult.Completed(
                     linkAccountUpdate = LinkAccountUpdate.None,
                     selectedPayment = null,
-                    shippingAddress = null,
-                    confirmationRequestId = null,
+                    shippingAddress = null
                 )
             )
             // Flows that end up in confirmation -> we can launch the web flow.
@@ -271,8 +255,7 @@ internal class LinkActivityViewModel @Inject constructor(
     fun handleBackPressed() {
         dismissWithResult(
             LinkActivityResult.Canceled(
-                linkAccountUpdate = linkAccountManager.linkAccountUpdate,
-                confirmationRequestId = null,
+                linkAccountUpdate = linkAccountManager.linkAccountUpdate
             )
         )
     }
@@ -399,19 +382,16 @@ internal class LinkActivityViewModel @Inject constructor(
     }.onSuccess { confirmResult ->
         dismissWithResult(
             when (confirmResult) {
-                is LinkConfirmationResult.Canceled -> LinkActivityResult.Canceled(
+                LinkConfirmationResult.Canceled -> LinkActivityResult.Canceled(
                     reason = LinkActivityResult.Canceled.Reason.BackPressed,
-                    linkAccountUpdate = LinkAccountUpdate.None,
-                    confirmationRequestId = confirmResult.confirmationRequestId,
+                    linkAccountUpdate = LinkAccountUpdate.None
                 )
                 is LinkConfirmationResult.Failed -> LinkActivityResult.Failed(
                     IllegalStateException("Failed to confirm Link payment: ${confirmResult.message}"),
-                    linkAccountUpdate = LinkAccountUpdate.None,
-                    confirmationRequestId = confirmResult.confirmationRequestId,
+                    linkAccountUpdate = LinkAccountUpdate.None
                 )
-                is LinkConfirmationResult.Succeeded -> LinkActivityResult.Completed(
-                    linkAccountUpdate = LinkAccountUpdate.Value(null, PaymentConfirmed),
-                    confirmationRequestId = confirmResult.confirmationRequestId,
+                LinkConfirmationResult.Succeeded -> LinkActivityResult.Completed(
+                    linkAccountUpdate = LinkAccountUpdate.Value(null, PaymentConfirmed)
                 )
             }
         )
@@ -419,8 +399,7 @@ internal class LinkActivityViewModel @Inject constructor(
         dismissWithResult(
             LinkActivityResult.Failed(
                 error,
-                linkAccountUpdate = LinkAccountUpdate.None,
-                confirmationRequestId = null,
+                linkAccountUpdate = LinkAccountUpdate.None
             )
         )
     }
@@ -451,8 +430,7 @@ internal class LinkActivityViewModel @Inject constructor(
                     dismissWithResult(
                         LinkActivityResult.Failed(
                             error = error ?: NoLinkAccountFoundException(),
-                            linkAccountUpdate = LinkAccountUpdate.None,
-                            confirmationRequestId = null,
+                            linkAccountUpdate = LinkAccountUpdate.None
                         )
                     )
                     return
@@ -499,12 +477,7 @@ internal class LinkActivityViewModel @Inject constructor(
         return when (linkLaunchMode) {
             is LinkLaunchMode.Authentication -> {
                 if (accountStatus.meetsMinimumAuthenticationLevel) {
-                    dismissWithResult(
-                        LinkActivityResult.Completed(
-                            linkAccountUpdate = linkAccountManager.linkAccountUpdate,
-                            confirmationRequestId = null,
-                        )
-                    )
+                    dismissWithResult(LinkActivityResult.Completed(linkAccountManager.linkAccountUpdate))
                     return null
                 }
                 // Handle edge case where status is "verified" but don't have a verified SMS session.
@@ -515,12 +488,7 @@ internal class LinkActivityViewModel @Inject constructor(
                 if (consumerSessionRefresh == null) {
                     // Prompting for consent _after verification_ is only supported for full screen consent.
                     if (accountStatus.consentPresentation !is ConsentPresentation.FullScreen) {
-                        dismissWithResult(
-                            LinkActivityResult.Completed(
-                                linkAccountUpdate = linkAccountManager.linkAccountUpdate,
-                                confirmationRequestId = null,
-                            )
-                        )
+                        dismissWithResult(LinkActivityResult.Completed(linkAccountManager.linkAccountUpdate))
                         return null
                     }
                     ScreenState.FullScreen(LinkScreen.OAuthConsent)
@@ -566,8 +534,7 @@ internal class LinkActivityViewModel @Inject constructor(
                 dismissWithResult(
                     LinkActivityResult.Completed(
                         linkAccountUpdate = linkAccountManager.linkAccountUpdate,
-                        authorizationConsentGranted = true,
-                        confirmationRequestId = null,
+                        authorizationConsentGranted = true
                     )
                 )
                 null
@@ -576,8 +543,7 @@ internal class LinkActivityViewModel @Inject constructor(
                 dismissWithResult(
                     LinkActivityResult.Completed(
                         linkAccountUpdate = linkAccountManager.linkAccountUpdate,
-                        authorizationConsentGranted = false,
-                        confirmationRequestId = null,
+                        authorizationConsentGranted = false
                     )
                 )
                 null
@@ -589,8 +555,7 @@ internal class LinkActivityViewModel @Inject constructor(
                         linkAccountUpdate = linkAccountManager.linkAccountUpdate,
                         error = IllegalStateException(
                             "Unexpected LAI status when account is verified: ${status.name}"
-                        ),
-                        confirmationRequestId = null,
+                        )
                     )
                 )
                 null
@@ -600,12 +565,7 @@ internal class LinkActivityViewModel @Inject constructor(
             null, LinkAuthIntent.Status.Authenticated -> {
                 // Prompting for consent _after verification_ is only supported for full screen consent.
                 if (accountStatus.consentPresentation !is ConsentPresentation.FullScreen) {
-                    dismissWithResult(
-                        LinkActivityResult.Completed(
-                            linkAccountUpdate = linkAccountManager.linkAccountUpdate,
-                            confirmationRequestId = null,
-                        )
-                    )
+                    dismissWithResult(LinkActivityResult.Completed(linkAccountManager.linkAccountUpdate))
                     null
                 } else {
                     ScreenState.FullScreen(LinkScreen.OAuthConsent)
@@ -628,32 +588,13 @@ internal class LinkActivityViewModel @Inject constructor(
         updateScreenState(withAnimationDelay = true)
     }
 
-    private fun updateConfirmationRequestId(state: ConfirmationHandler.State) {
-        when (state) {
-            ConfirmationHandler.State.Idle -> Unit
-            is ConfirmationHandler.State.Confirming -> confirmationRequestId = null
-            is ConfirmationHandler.State.Complete -> confirmationRequestId = state.result.confirmationRequestId
-        }
-    }
-
     private fun dismissWithResult(result: LinkActivityResult) {
-        // Dismissal can precede the state collector after an attempt finishes or restarts.
-        updateConfirmationRequestId(confirmationHandler.state.value)
-        val requestId = result.confirmationRequestId ?: confirmationRequestId
-        val activityResult = when (result) {
-            is LinkActivityResult.Completed -> result.copy(confirmationRequestId = requestId)
-            is LinkActivityResult.Failed -> result.copy(confirmationRequestId = requestId)
-            is LinkActivityResult.Canceled -> result.copy(confirmationRequestId = requestId)
-            is LinkActivityResult.PaymentMethodObtained -> result
-        }
         viewModelScope.launch {
-            _result.emit(activityResult)
+            _result.emit(result)
         }
     }
 
     companion object {
-        private const val CONFIRMATION_REQUEST_ID_KEY = "LinkActivityViewModel.confirmationRequestId"
-
         fun factory(savedStateHandle: SavedStateHandle? = null): ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 val handle: SavedStateHandle = savedStateHandle ?: createSavedStateHandle()

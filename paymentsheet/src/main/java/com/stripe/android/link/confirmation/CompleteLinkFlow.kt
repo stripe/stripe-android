@@ -93,13 +93,12 @@ internal class DefaultCompleteLinkFlow @Inject constructor(
             is LinkLaunchMode.Confirmation -> {
                 val result = dismissalCoordinator.withDismissalDisabled { confirmPayment() }
                 when (result) {
-                    is LinkConfirmationResult.Canceled -> Result.Canceled
+                    LinkConfirmationResult.Canceled -> Result.Canceled
                     is LinkConfirmationResult.Failed -> Result.Failed(result.message)
-                    is LinkConfirmationResult.Succeeded -> Result.Completed(
+                    LinkConfirmationResult.Succeeded -> Result.Completed(
                         linkActivityResult = LinkActivityResult.Completed(
                             linkAccountUpdate = LinkAccountUpdate.Value(null, PaymentConfirmed),
                             selectedPayment = null,
-                            confirmationRequestId = result.confirmationRequestId,
                         )
                     )
                 }
@@ -109,7 +108,6 @@ internal class DefaultCompleteLinkFlow @Inject constructor(
                     linkAccountUpdate = linkAccountManager.linkAccountUpdate,
                     selectedPayment = paymentMethodSelection,
                     shippingAddress = linkAccountManager.loadDefaultShippingAddress(),
-                    confirmationRequestId = null,
                 )
             )
             is LinkLaunchMode.Authentication,
@@ -118,7 +116,6 @@ internal class DefaultCompleteLinkFlow @Inject constructor(
                     linkAccountUpdate = linkAccountManager.linkAccountUpdate,
                     selectedPayment = null,
                     shippingAddress = null,
-                    confirmationRequestId = null,
                 )
             )
         }

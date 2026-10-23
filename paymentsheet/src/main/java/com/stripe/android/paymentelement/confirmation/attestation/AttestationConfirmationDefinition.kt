@@ -86,15 +86,13 @@ internal class AttestationConfirmationDefinition @Inject constructor(
             is AttestationActivityResult.Failed -> {
                 ConfirmationDefinition.Result.NextStep(
                     confirmationOption = confirmationOption.attachToken(null),
-                    arguments = confirmationArgs,
-                    confirmationRequestId = null,
+                    arguments = confirmationArgs
                 )
             }
             is AttestationActivityResult.Success -> {
                 ConfirmationDefinition.Result.NextStep(
                     confirmationOption = confirmationOption.attachToken(result.token),
-                    arguments = confirmationArgs,
-                    confirmationRequestId = null,
+                    arguments = confirmationArgs
                 )
             }
             AttestationActivityResult.NoResult -> {
@@ -103,8 +101,7 @@ internal class AttestationConfirmationDefinition @Inject constructor(
                 )
                 ConfirmationDefinition.Result.NextStep(
                     confirmationOption = confirmationOption.attachToken(null),
-                    arguments = confirmationArgs,
-                    confirmationRequestId = null,
+                    arguments = confirmationArgs
                 )
             }
         }
@@ -138,7 +135,6 @@ internal class AttestationConfirmationDefinition @Inject constructor(
                     productUsage = productUsage
                 ),
                 receivesResultInProcess = false,
-                confirmationRequestId = null,
             )
         }
 
@@ -151,8 +147,7 @@ internal class AttestationConfirmationDefinition @Inject constructor(
         return ConfirmationDefinition.Action.Fail(
             cause = error,
             message = "Attestation is not enabled on intent confirmation".resolvableString,
-            errorType = ConfirmationHandler.Result.Failed.ErrorType.Internal,
-            confirmationRequestId = null,
+            errorType = ConfirmationHandler.Result.Failed.ErrorType.Internal
         )
     }
 

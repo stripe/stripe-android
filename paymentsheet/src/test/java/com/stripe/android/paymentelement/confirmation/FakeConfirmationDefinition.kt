@@ -17,11 +17,9 @@ internal abstract class FakeConfirmationDefinition<
         cause = IllegalStateException("Failed!"),
         message = R.string.stripe_something_went_wrong.resolvableString,
         errorType = ConfirmationHandler.Result.Failed.ErrorType.Internal,
-        confirmationRequestId = null,
     ),
     private val result: ConfirmationDefinition.Result = ConfirmationDefinition.Result.Canceled(
         action = ConfirmationHandler.Result.Canceled.Action.InformCancellation,
-        confirmationRequestId = null,
     ),
 ) : ConfirmationDefinition<
     TConfirmationOption,

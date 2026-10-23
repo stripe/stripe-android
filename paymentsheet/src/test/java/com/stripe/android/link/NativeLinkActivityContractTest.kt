@@ -4,9 +4,11 @@ import android.app.Activity
 import android.content.Intent
 import androidx.core.os.BundleCompat
 import androidx.core.os.bundleOf
+import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.checkout.checkoutConfirmationRequestId
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.model.PaymentMethodFixtures
@@ -19,6 +21,7 @@ import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class NativeLinkActivityContractTest {
+    private val savedStateHandle = SavedStateHandle()
 
     @Before
     fun before() {
@@ -36,6 +39,7 @@ class NativeLinkActivityContractTest {
     @Test
     fun `intent is created correctly`() {
         val contract = NativeLinkActivityContract(
+            savedStateHandle = savedStateHandle,
             paymentElementCallbackIdentifier = LINK_CALLBACK_TEST_IDENTIFIER,
             requestSurface = REQUEST_SURFACE
         )
@@ -76,10 +80,7 @@ class NativeLinkActivityContractTest {
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
         )
 
-        val contract = NativeLinkActivityContract(
-            paymentElementCallbackIdentifier = LINK_CALLBACK_TEST_IDENTIFIER,
-            requestSurface = REQUEST_SURFACE
-        )
+        val contract = createContract()
 
         val result = contract.parseResult(
             resultCode = LinkActivity.RESULT_COMPLETE,
@@ -90,61 +91,119 @@ class NativeLinkActivityContractTest {
     }
 
     @Test
-    fun `complete with canceled result when result not found`() {
-        val contract = NativeLinkActivityContract(
-            paymentElementCallbackIdentifier = LINK_CALLBACK_TEST_IDENTIFIER,
-            requestSurface = REQUEST_SURFACE
+    fun `complete result without request ID preserves caller request ID`() {
+        val expectedResult = LinkActivityResult.PaymentMethodObtained(
+            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
         )
+        val contract = createContract()
+        savedStateHandle.checkoutConfirmationRequestId = "req_existing"
+        val resultWithoutRequestId = contract.parseResult(
+            resultCode = LinkActivity.RESULT_COMPLETE,
+            intent = intent(expectedResult)
+        )
+        assertThat(resultWithoutRequestId).isEqualTo(expectedResult)
+        assertThat(savedStateHandle.checkoutConfirmationRequestId).isEqualTo("req_existing")
+    }
+
+    @Test
+    fun `complete with canceled result when result not found`() {
+        val contract = createContract()
+        savedStateHandle.checkoutConfirmationRequestId = "req_existing"
 
         val result = contract.parseResult(
             resultCode = LinkActivity.RESULT_COMPLETE,
-            intent = Intent()
+            intent = Intent().putExtra(LinkActivity.EXTRA_CONFIRMATION_REQUEST_ID, "req_returned")
         )
 
         assertThat(result)
             .isEqualTo(
                 LinkActivityResult.Canceled(
-                    linkAccountUpdate = LinkAccountUpdate.None,
-                    confirmationRequestId = null,
+                    linkAccountUpdate = LinkAccountUpdate.None
                 )
             )
+        assertThat(savedStateHandle.checkoutConfirmationRequestId).isEqualTo("req_existing")
     }
 
     @Test
     fun `unknown result code results in canceled`() {
-        val contract = NativeLinkActivityContract(
-            paymentElementCallbackIdentifier = LINK_CALLBACK_TEST_IDENTIFIER,
-            requestSurface = REQUEST_SURFACE
-        )
+        val contract = createContract()
+        savedStateHandle.checkoutConfirmationRequestId = "req_existing"
 
-        val result = contract.parseResult(42, Intent())
+        val result = contract.parseResult(
+            42,
+            Intent().putExtra(LinkActivity.EXTRA_CONFIRMATION_REQUEST_ID, "req_returned")
+        )
 
         assertThat(result)
             .isEqualTo(
                 LinkActivityResult.Canceled(
-                    linkAccountUpdate = LinkAccountUpdate.None,
-                    confirmationRequestId = null,
+                    linkAccountUpdate = LinkAccountUpdate.None
                 )
             )
+        assertThat(savedStateHandle.checkoutConfirmationRequestId).isEqualTo("req_existing")
     }
 
     @Test
     fun `canceled result code is handled correctly`() {
-        val contract = NativeLinkActivityContract(
-            paymentElementCallbackIdentifier = LINK_CALLBACK_TEST_IDENTIFIER,
-            requestSurface = REQUEST_SURFACE
-        )
+        val contract = createContract()
+        savedStateHandle.checkoutConfirmationRequestId = "req_existing"
 
-        val result = contract.parseResult(Activity.RESULT_CANCELED, Intent())
+        val result = contract.parseResult(
+            Activity.RESULT_CANCELED,
+            Intent().putExtra(LinkActivity.EXTRA_CONFIRMATION_REQUEST_ID, "req_returned")
+        )
 
         assertThat(result)
             .isEqualTo(
                 LinkActivityResult.Canceled(
-                    linkAccountUpdate = LinkAccountUpdate.None,
-                    confirmationRequestId = null,
+                    linkAccountUpdate = LinkAccountUpdate.None
                 )
             )
+        assertThat(savedStateHandle.checkoutConfirmationRequestId).isEqualTo("req_existing")
     }
+
+    @Test
+    fun `complete canceled result transfers request ID`() {
+        verifyRequestIdTransferred(
+            LinkActivityResult.Canceled(linkAccountUpdate = LinkAccountUpdate.None)
+        )
+    }
+
+    @Test
+    fun `complete success result transfers request ID`() {
+        verifyRequestIdTransferred(
+            LinkActivityResult.Completed(linkAccountUpdate = LinkAccountUpdate.None)
+        )
+    }
+
+    @Test
+    fun `complete failure result transfers request ID`() {
+        verifyRequestIdTransferred(
+            LinkActivityResult.Failed(
+                error = Throwable("failure"),
+                linkAccountUpdate = LinkAccountUpdate.None,
+            )
+        )
+    }
+
+    private fun verifyRequestIdTransferred(expectedResult: LinkActivityResult) {
+        val requestId = "req_native_link"
+        val contract = createContract()
+
+        val actualResult = contract.parseResult(
+            resultCode = LinkActivity.RESULT_COMPLETE,
+            intent = intent(expectedResult, requestId)
+        )
+
+        assertThat(actualResult).isEqualTo(expectedResult)
+        assertThat(savedStateHandle.checkoutConfirmationRequestId).isEqualTo(requestId)
+    }
+
+    private fun createContract(): NativeLinkActivityContract = NativeLinkActivityContract(
+        savedStateHandle = savedStateHandle,
+        paymentElementCallbackIdentifier = LINK_CALLBACK_TEST_IDENTIFIER,
+        requestSurface = REQUEST_SURFACE,
+    )
 
     private fun intent(result: LinkActivityResult): Intent {
         val bundle = bundleOf(
@@ -154,6 +213,9 @@ class NativeLinkActivityContractTest {
             putExtras(bundle)
         }
     }
+
+    private fun intent(result: LinkActivityResult, requestId: String): Intent =
+        intent(result).putExtra(LinkActivity.EXTRA_CONFIRMATION_REQUEST_ID, requestId)
 
     private companion object {
         const val LINK_CALLBACK_TEST_IDENTIFIER = "LinkTestIdentifier"

@@ -9,7 +9,6 @@ import kotlinx.parcelize.Parcelize
 internal sealed class LinkActivityResult : Parcelable {
 
     abstract val linkAccountUpdate: LinkAccountUpdate?
-    abstract val confirmationRequestId: String?
 
     /**
      * Indicates that the flow was completed successfully.
@@ -20,7 +19,6 @@ internal sealed class LinkActivityResult : Parcelable {
         val selectedPayment: LinkPaymentMethod? = null,
         val shippingAddress: ConsumerShippingAddress? = null,
         val authorizationConsentGranted: Boolean? = null,
-        override val confirmationRequestId: String?,
     ) : LinkActivityResult()
 
     /**
@@ -33,9 +31,6 @@ internal sealed class LinkActivityResult : Parcelable {
 
         override val linkAccountUpdate: LinkAccountUpdate?
             get() = null
-
-        override val confirmationRequestId: String?
-            get() = null
     }
 
     /**
@@ -44,8 +39,7 @@ internal sealed class LinkActivityResult : Parcelable {
     @Parcelize
     internal data class Canceled(
         val reason: Reason = Reason.BackPressed,
-        override val linkAccountUpdate: LinkAccountUpdate,
-        override val confirmationRequestId: String?,
+        override val linkAccountUpdate: LinkAccountUpdate
     ) : LinkActivityResult() {
         enum class Reason {
             BackPressed,
@@ -60,8 +54,7 @@ internal sealed class LinkActivityResult : Parcelable {
     @Parcelize
     internal data class Failed(
         val error: Throwable,
-        override val linkAccountUpdate: LinkAccountUpdate,
-        override val confirmationRequestId: String?,
+        override val linkAccountUpdate: LinkAccountUpdate
     ) : LinkActivityResult()
 }
 

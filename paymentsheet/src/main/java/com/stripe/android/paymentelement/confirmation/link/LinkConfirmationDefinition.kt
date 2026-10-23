@@ -51,7 +51,6 @@ internal class LinkConfirmationDefinition @Inject constructor(
         return ConfirmationDefinition.Action.Launch(
             launcherArguments = EmptyConfirmationLauncherArgs,
             receivesResultInProcess = false,
-            confirmationRequestId = null,
         )
     }
 
@@ -94,7 +93,6 @@ internal class LinkConfirmationDefinition @Inject constructor(
                         originatedFromWallet = true,
                     ),
                     arguments = confirmationArgs,
-                    confirmationRequestId = result.confirmationRequestId,
                 )
             }
             is LinkActivityResult.Failed -> {
@@ -103,21 +101,18 @@ internal class LinkConfirmationDefinition @Inject constructor(
                     cause = result.error,
                     message = result.error.stripeErrorMessage(),
                     type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
-                    confirmationRequestId = result.confirmationRequestId,
                 )
             }
             is LinkActivityResult.Canceled -> {
                 result.linkAccountUpdate.updateLinkAccount()
                 ConfirmationDefinition.Result.Canceled(
                     action = ConfirmationHandler.Result.Canceled.Action.InformCancellation,
-                    confirmationRequestId = result.confirmationRequestId,
                 )
             }
             is LinkActivityResult.Completed -> {
                 result.linkAccountUpdate.updateLinkAccount()
                 ConfirmationDefinition.Result.Succeeded(
                     intent = confirmationArgs.intent,
-                    confirmationRequestId = result.confirmationRequestId,
                 )
             }
         }

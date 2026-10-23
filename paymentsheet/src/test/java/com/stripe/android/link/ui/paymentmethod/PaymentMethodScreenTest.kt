@@ -119,10 +119,7 @@ internal class PaymentMethodScreenTest {
         fillCardDetails()
 
         linkConfirmationHandler.confirmWithLinkPaymentDetailsResult =
-            LinkConfirmationResult.Failed(
-                message = "oops".resolvableString,
-                confirmationRequestId = null,
-            )
+            LinkConfirmationResult.Failed("oops".resolvableString)
 
         onPayButton()
             .scrollToAndAssertDisplayed()

@@ -197,7 +197,6 @@ internal class VerificationViewModel @Inject constructor(
             dismissWithResult(
                 LinkActivityResult.Completed(
                     linkAccountUpdate = linkAccountManager.linkAccountUpdate,
-                    confirmationRequestId = null,
                 )
             )
         } else if (completedAuthorization) {
@@ -205,7 +204,6 @@ internal class VerificationViewModel @Inject constructor(
                 LinkActivityResult.Completed(
                     linkAccountUpdate = linkAccountManager.linkAccountUpdate,
                     authorizationConsentGranted = true,
-                    confirmationRequestId = null,
                 )
             )
         } else {
@@ -260,8 +258,7 @@ internal class VerificationViewModel @Inject constructor(
                 dismissWithResult(
                     LinkActivityResult.Failed(
                         error = result.error,
-                        linkAccountUpdate = LinkAccountUpdate.None,
-                        confirmationRequestId = null,
+                        linkAccountUpdate = LinkAccountUpdate.None
                     )
                 )
             }
@@ -307,10 +304,7 @@ internal class VerificationViewModel @Inject constructor(
                     // Cancel so user can try again.
                     if (account.webviewOpenUrl == null) {
                         dismissWithResult(
-                            LinkActivityResult.Canceled(
-                                linkAccountUpdate = linkAccountManager.linkAccountUpdate,
-                                confirmationRequestId = null,
-                            )
+                            LinkActivityResult.Canceled(linkAccountUpdate = linkAccountManager.linkAccountUpdate)
                         )
                         return@fold
                     }
@@ -324,8 +318,7 @@ internal class VerificationViewModel @Inject constructor(
                     dismissWithResult(
                         LinkActivityResult.Failed(
                             error = error,
-                            linkAccountUpdate = LinkAccountUpdate.None,
-                            confirmationRequestId = null,
+                            linkAccountUpdate = LinkAccountUpdate.None
                         )
                     )
                 }
@@ -406,8 +399,7 @@ internal class VerificationViewModel @Inject constructor(
                             dismissWithResult(
                                 LinkActivityResult.Failed(
                                     error = it,
-                                    linkAccountUpdate = LinkAccountUpdate.None,
-                                    confirmationRequestId = null,
+                                    linkAccountUpdate = LinkAccountUpdate.None
                                 )
                             )
                         }
@@ -420,8 +412,7 @@ internal class VerificationViewModel @Inject constructor(
                     dismissWithResult(
                         LinkActivityResult.Failed(
                             error = result.error,
-                            linkAccountUpdate = LinkAccountUpdate.None,
-                            confirmationRequestId = null,
+                            linkAccountUpdate = LinkAccountUpdate.None
                         )
                     )
                 }

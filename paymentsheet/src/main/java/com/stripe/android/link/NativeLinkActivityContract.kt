@@ -5,6 +5,8 @@ import android.content.Context
 import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.os.BundleCompat
+import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.checkout.checkoutConfirmationRequestId
 import com.stripe.android.networking.RequestSurface
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import javax.inject.Inject
@@ -13,6 +15,7 @@ import javax.inject.Inject
  * Contract used to explicitly launch Link natively.
  */
 internal class NativeLinkActivityContract @Inject constructor(
+    private val savedStateHandle: SavedStateHandle,
     @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
     private val requestSurface: RequestSurface,
 ) :
@@ -38,8 +41,7 @@ internal class NativeLinkActivityContract @Inject constructor(
         return when (resultCode) {
             Activity.RESULT_CANCELED -> {
                 LinkActivityResult.Canceled(
-                    linkAccountUpdate = LinkAccountUpdate.None,
-                    confirmationRequestId = null,
+                    linkAccountUpdate = LinkAccountUpdate.None
                 )
             }
 
@@ -47,16 +49,19 @@ internal class NativeLinkActivityContract @Inject constructor(
                 val result = intent?.extras?.let {
                     BundleCompat.getParcelable(it, LinkActivityContract.EXTRA_RESULT, LinkActivityResult::class.java)
                 }
+                if (result != null) {
+                    intent?.getStringExtra(LinkActivity.EXTRA_CONFIRMATION_REQUEST_ID)?.let {
+                        savedStateHandle.checkoutConfirmationRequestId = it
+                    }
+                }
                 return result ?: LinkActivityResult.Canceled(
-                    linkAccountUpdate = LinkAccountUpdate.None,
-                    confirmationRequestId = null,
+                    linkAccountUpdate = LinkAccountUpdate.None
                 )
             }
 
             else -> {
                 LinkActivityResult.Canceled(
-                    linkAccountUpdate = LinkAccountUpdate.None,
-                    confirmationRequestId = null,
+                    linkAccountUpdate = LinkAccountUpdate.None
                 )
             }
         }

@@ -112,7 +112,6 @@ class ConfirmationTokenConfirmationInterceptorTest {
                 cause = invalidRequestException,
                 message = "Your card is not supported.".resolvableString,
                 errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
-                confirmationRequestId = null,
             )
         )
     }
@@ -155,7 +154,6 @@ class ConfirmationTokenConfirmationInterceptorTest {
                 cause = apiException,
                 message = resolvableString(R.string.stripe_something_went_wrong),
                 errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
-                confirmationRequestId = null,
             )
         )
     }
@@ -181,7 +179,6 @@ class ConfirmationTokenConfirmationInterceptorTest {
                 cause = CreateIntentWithConfirmationTokenCallbackFailureException(TestException("that didn't work…")),
                 message = resolvableString("that didn't work…"),
                 errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
-                confirmationRequestId = null,
             )
         )
     }
@@ -204,7 +201,6 @@ class ConfirmationTokenConfirmationInterceptorTest {
                 cause = CreateIntentWithConfirmationTokenCallbackFailureException(TestException()),
                 message = resolvableString(R.string.stripe_something_went_wrong),
                 errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
-                confirmationRequestId = null,
             )
         )
     }
@@ -282,7 +278,6 @@ class ConfirmationTokenConfirmationInterceptorTest {
                     set(DeferredIntentConfirmationTypeKey, DeferredIntentConfirmationType.Server)
                 },
                 completedFullPaymentFlow = true,
-                confirmationRequestId = null,
             )
         )
     }
@@ -326,7 +321,6 @@ class ConfirmationTokenConfirmationInterceptorTest {
                         deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
                     ),
                     receivesResultInProcess = false,
-                    confirmationRequestId = null,
                 )
             )
         }
@@ -360,7 +354,6 @@ class ConfirmationTokenConfirmationInterceptorTest {
                     set(DeferredIntentConfirmationTypeKey, DeferredIntentConfirmationType.None)
                 },
                 completedFullPaymentFlow = true,
-                confirmationRequestId = null,
             )
         )
     }
@@ -517,7 +510,6 @@ class ConfirmationTokenConfirmationInterceptorTest {
                         set(DeferredIntentConfirmationTypeKey, DeferredIntentConfirmationType.Server)
                     },
                     completedFullPaymentFlow = true,
-                    confirmationRequestId = null,
                 )
             )
         }
@@ -561,7 +553,6 @@ class ConfirmationTokenConfirmationInterceptorTest {
                         set(DeferredIntentConfirmationTypeKey, DeferredIntentConfirmationType.Server)
                     },
                     completedFullPaymentFlow = true,
-                    confirmationRequestId = null,
                 )
             )
         }
@@ -603,7 +594,6 @@ class ConfirmationTokenConfirmationInterceptorTest {
                 cause = invalidRequestException,
                 message = "Your card is not supported.".resolvableString,
                 errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
-                confirmationRequestId = null,
             )
         )
     }

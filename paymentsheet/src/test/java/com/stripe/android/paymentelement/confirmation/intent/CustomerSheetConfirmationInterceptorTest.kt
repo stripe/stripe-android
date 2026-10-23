@@ -155,7 +155,6 @@ class CustomerSheetConfirmationInterceptorTest {
         setupInterceptAction = ConfirmationDefinition.Action.Complete(
             intent = SetupIntentFactory.create().copy(paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD),
             completedFullPaymentFlow = true,
-            confirmationRequestId = null,
         ),
     ) {
         val setupIntent = SetupIntentFactory.create()
@@ -191,7 +190,6 @@ class CustomerSheetConfirmationInterceptorTest {
         attachInterceptAction = ConfirmationDefinition.Action.Complete(
             intent = SetupIntentFactory.create().copy(paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD),
             completedFullPaymentFlow = true,
-            confirmationRequestId = null,
         ),
     ) {
         val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
@@ -275,7 +273,6 @@ class CustomerSheetConfirmationInterceptorTest {
             cause = Exception("Failed to create setup intent"),
             message = "Unable to create setup intent".resolvableString,
             errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
-            confirmationRequestId = null,
         ),
     ) {
         val result = interceptor.intercept(
@@ -308,7 +305,6 @@ class CustomerSheetConfirmationInterceptorTest {
             cause = Exception("Failed to attach payment method"),
             message = "Unable to attach payment method to customer".resolvableString,
             errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
-            confirmationRequestId = null,
         ),
     ) {
         val result = interceptor.intercept(
@@ -341,15 +337,13 @@ class CustomerSheetConfirmationInterceptorTest {
             ConfirmationDefinition.Action.Fail(
                 cause = IllegalStateException("No action!"),
                 errorType = ConfirmationHandler.Result.Failed.ErrorType.Internal,
-                message = "No action!".resolvableString,
-                confirmationRequestId = null,
+                message = "No action!".resolvableString
             ),
         attachInterceptAction: ConfirmationDefinition.Action<IntentConfirmationDefinition.Args> =
             ConfirmationDefinition.Action.Fail(
                 cause = IllegalStateException("No action!"),
                 errorType = ConfirmationHandler.Result.Failed.ErrorType.Internal,
-                message = "No action!".resolvableString,
-                confirmationRequestId = null,
+                message = "No action!".resolvableString
             ),
         logger: Logger = FakeLogger(),
         block: suspend Scenario.() -> Unit,

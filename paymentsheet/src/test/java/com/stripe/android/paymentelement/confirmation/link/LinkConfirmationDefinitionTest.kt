@@ -214,7 +214,6 @@ internal class LinkConfirmationDefinitionTest {
 
         assertThat(nextStepResult.confirmationOption).isInstanceOf<PaymentMethodConfirmationOption.Saved>()
         assertThat(nextStepResult.arguments).isEqualTo(CONFIRMATION_PARAMETERS)
-        assertThat(nextStepResult.confirmationRequestId).isNull()
 
         val savedOption = nextStepResult.confirmationOption.asSaved()
 
@@ -234,15 +233,13 @@ internal class LinkConfirmationDefinitionTest {
             confirmationArgs = CONFIRMATION_PARAMETERS,
             launcherArgs = EmptyConfirmationLauncherArgs,
             result = LinkActivityResult.Completed(
-                linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
-                confirmationRequestId = "req_definition_success",
+                linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT)
             ),
         )
 
         assertThat(result).isEqualTo(
             ConfirmationDefinition.Result.Succeeded(
                 intent = CONFIRMATION_PARAMETERS.intent,
-                confirmationRequestId = "req_definition_success",
             )
         )
         assertThat(storeScenario.markAsUsedCalls.awaitItem()).isNotNull()
@@ -265,8 +262,7 @@ internal class LinkConfirmationDefinitionTest {
             launcherArgs = EmptyConfirmationLauncherArgs,
             result = LinkActivityResult.Failed(
                 error = exception,
-                linkAccountUpdate = LinkAccountUpdate.Value(null),
-                confirmationRequestId = "req_definition_failure",
+                linkAccountUpdate = LinkAccountUpdate.Value(null)
             )
         )
 
@@ -277,7 +273,6 @@ internal class LinkConfirmationDefinitionTest {
         assertThat(failedResult.cause).isEqualTo(exception)
         assertThat(failedResult.message).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
         assertThat(failedResult.type).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Payment)
-        assertThat(failedResult.confirmationRequestId).isEqualTo("req_definition_failure")
 
         assertThat(storeScenario.markAsUsedCalls.awaitItem()).isNotNull()
         linkAccountHolder.set(LinkAccountUpdate.Value(null))
@@ -298,8 +293,7 @@ internal class LinkConfirmationDefinitionTest {
             launcherArgs = EmptyConfirmationLauncherArgs,
             result = LinkActivityResult.Canceled(
                 reason = LinkActivityResult.Canceled.Reason.LoggedOut,
-                linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
-                confirmationRequestId = "req_definition_logged_out",
+                linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT)
             ),
         )
 
@@ -308,7 +302,6 @@ internal class LinkConfirmationDefinitionTest {
         val failedResult = result.asCanceled()
 
         assertThat(failedResult.action).isEqualTo(ConfirmationHandler.Result.Canceled.Action.InformCancellation)
-        assertThat(failedResult.confirmationRequestId).isEqualTo("req_definition_logged_out")
 
         assertThat(storeScenario.markAsUsedCalls.awaitItem()).isNotNull()
         verify(linkAccountHolder).set(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
@@ -328,8 +321,7 @@ internal class LinkConfirmationDefinitionTest {
             launcherArgs = EmptyConfirmationLauncherArgs,
             result = LinkActivityResult.Canceled(
                 reason = LinkActivityResult.Canceled.Reason.BackPressed,
-                linkAccountUpdate = LinkAccountUpdate.None,
-                confirmationRequestId = null,
+                linkAccountUpdate = LinkAccountUpdate.None
             )
         )
 
@@ -338,7 +330,6 @@ internal class LinkConfirmationDefinitionTest {
         val failedResult = result.asCanceled()
 
         assertThat(failedResult.action).isEqualTo(ConfirmationHandler.Result.Canceled.Action.InformCancellation)
-        assertThat(failedResult.confirmationRequestId).isNull()
         verify(linkAccountHolder, times(0)).set(any())
     }
 
