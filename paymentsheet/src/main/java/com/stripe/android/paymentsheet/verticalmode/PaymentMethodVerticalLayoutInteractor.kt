@@ -412,7 +412,10 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                     code = supportedPaymentMethod.code,
                     metadata = paymentMethodMetadata
                 ),
-                shouldExpandOnClick = shouldExpandOnClick(supportedPaymentMethod.code)
+                shouldExpandOnClick = {
+                    PromotionSupportedPaymentMethods.supportedPaymentMethods.contains(supportedPaymentMethod.code) &&
+                        !shouldTransitionToFormScreen(supportedPaymentMethod.code)
+                },
             ) {
                 handleViewAction(ViewAction.PaymentMethodSelected(supportedPaymentMethod.code))
             }
@@ -444,6 +447,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             lightThemeIconUrl = null,
             darkThemeIconUrl = null,
             iconRequiresTinting = false,
+            shouldExpandOnClick = { false },
             subtitle = null,
             onClick = {
                 verticalPaymentSelectionHandler.select(PaymentSelection.GooglePay, false)
@@ -466,6 +470,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             lightThemeIconUrl = null,
             darkThemeIconUrl = null,
             iconRequiresTinting = false,
+            shouldExpandOnClick = { false },
             subtitle = subtitle,
             onClick = {
                 verticalPaymentSelectionHandler.select(PaymentSelection.Link(brand = link.linkBrand), false)
@@ -683,11 +688,6 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         val formType = formTypeForCode(paymentMethodCode)
         val displayFormForMandate = displaysMandatesInFormScreen && formType is FormType.MandateOnly
         return formType == FormType.UserInteractionRequired || displayFormForMandate
-    }
-
-    private fun shouldExpandOnClick(paymentMethodCode: PaymentMethodCode): Boolean {
-        return PromotionSupportedPaymentMethods.supportedPaymentMethods.contains(paymentMethodCode) &&
-            !shouldTransitionToFormScreen(paymentMethodCode)
     }
 
     override fun close() {

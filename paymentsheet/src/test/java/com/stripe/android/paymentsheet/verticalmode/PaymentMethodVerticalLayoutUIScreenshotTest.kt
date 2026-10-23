@@ -20,6 +20,7 @@ internal class PaymentMethodVerticalLayoutUIScreenshotTest {
     private val paymentMethods: List<DisplayablePaymentMethod> by lazy {
         MockPaymentMethodsFactory.create().map {
             it.asDisplayablePaymentMethod(
+                shouldExpandOnClick = { false },
                 customerSavedPaymentMethods = emptyList(),
                 incentive = null,
                 onClick = {},

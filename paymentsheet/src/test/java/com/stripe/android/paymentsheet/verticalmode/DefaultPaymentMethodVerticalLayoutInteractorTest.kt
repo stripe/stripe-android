@@ -1964,43 +1964,179 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     }
 
     @Test
-    fun `shouldExpandOnClick is false when form type is UserInteractionRequired`() {
-        val metadata = PaymentMethodMetadataFactory.create(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = listOf("card", "klarna")
-            )
-        )
+    fun `unselected promotion rows do not look up form types`() {
+        val formTypeCalls = Turbine<String>()
         runScenario(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    paymentMethodTypes = listOf("card", "ideal", "klarna", "affirm", "afterpay_clearpay")
+                )
+            ),
             promotionsHelper = FakePaymentMethodMessagePromotionsHelper.Factory.create(),
-            paymentMethodMetadata = metadata,
-            formTypeForCode = { FormHelper.FormType.UserInteractionRequired }
+            formTypeForCode = { code ->
+                formTypeCalls.add(code)
+                FormHelper.FormType.Empty
+            },
         ) {
+            assertThat(interactor.state.value.displayablePaymentMethods).hasSize(5)
             interactor.state.test {
                 val paymentMethods = awaitItem().displayablePaymentMethods
-                val pm = paymentMethods.first { it.code == "klarna" }
-                assertThat(pm.shouldExpandOnClick).isFalse()
+                assertThat(paymentMethods.map { it.code })
+                    .containsExactly("card", "ideal", "klarna", "affirm", "afterpay_clearpay")
+                paymentMethodsSource.value = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+                val rebuiltPaymentMethods = expectMostRecentItem().displayablePaymentMethods
+                assertThat(rebuiltPaymentMethods.single { it.code == "card" }.displayName)
+                    .isEqualTo(PaymentSheetR.string.stripe_paymentsheet_new_card.resolvableString)
+                processingSource.value = true
+                assertThat(expectMostRecentItem().isProcessing).isTrue()
             }
+            formTypeCalls.expectNoEvents()
         }
+        formTypeCalls.ensureAllEventsConsumed()
     }
 
     @Test
-    fun `shouldExpandOnClick is true when form type is not UserInteractionRequired`() {
-        val metadata = PaymentMethodMetadataFactory.create(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = listOf("card", "affirm")
-            )
-        )
+    fun `promotion form type lookup is deferred until click`() {
+        val formTypeCalls = Turbine<String>()
+        val promotionsHelper = FakePaymentMethodMessagePromotionsHelper()
         runScenario(
-            promotionsHelper = FakePaymentMethodMessagePromotionsHelper.Factory.create(),
-            paymentMethodMetadata = metadata,
-            formTypeForCode = { FormHelper.FormType.Empty }
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    paymentMethodTypes = listOf("card", "klarna", "affirm", "afterpay_clearpay")
+                )
+            ),
+            promotionsHelper = promotionsHelper,
+            displaysMandatesInFormScreen = true,
+            formTypeForCode = { code ->
+                formTypeCalls.add(code)
+                FormHelper.FormType.Empty
+            },
         ) {
             interactor.state.test {
-                val paymentMethods = awaitItem().displayablePaymentMethods
-                val pm = paymentMethods.first { it.code == "affirm" }
-                assertThat(pm.shouldExpandOnClick).isTrue()
+                awaitItem()
+                formTypeCalls.expectNoEvents()
+
+                interactor.handleViewAction(ViewAction.PaymentMethodSelected("klarna"))
+                assertThat(formTypeCalls.awaitItem()).isEqualTo("klarna")
+                assertThat(reportPaymentMethodTypeSelectedTurbine.awaitItem()).isEqualTo("klarna")
+                assertThat(promotionsHelper.reportPromotionDisplayedCalls.awaitItem().first).isEqualTo("klarna")
+                assertThat(onFormFieldValuesChangedTurbine.awaitItem().second).isEqualTo("klarna")
+
+                temporarySelectionSource.value = "klarna"
+                assertThat(awaitItem().displayablePaymentMethods.single { it.code == "klarna" }.code)
+                    .isEqualTo("klarna")
+                formTypeCalls.expectNoEvents()
             }
         }
+        formTypeCalls.ensureAllEventsConsumed()
+        promotionsHelper.validate()
+        promotionsHelper.reportPromotionDisplayedCalls.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `clicking promotion method requiring interaction opens form`() {
+        val formTypeCalls = Turbine<String>()
+        val promotionsHelper = FakePaymentMethodMessagePromotionsHelper()
+        runScenario(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    paymentMethodTypes = listOf("card", "klarna")
+                )
+            ),
+            promotionsHelper = promotionsHelper,
+            formTypeForCode = { code ->
+                formTypeCalls.add(code)
+                FormHelper.FormType.UserInteractionRequired
+            },
+        ) {
+            interactor.state.test {
+                awaitItem()
+                formTypeCalls.expectNoEvents()
+
+                interactor.handleViewAction(ViewAction.PaymentMethodSelected("klarna"))
+                assertThat(formTypeCalls.awaitItem()).isEqualTo("klarna")
+                assertThat(reportPaymentMethodTypeSelectedTurbine.awaitItem()).isEqualTo("klarna")
+                assertThat(promotionsHelper.reportPromotionDisplayedCalls.awaitItem().first).isEqualTo("klarna")
+                assertThat(reportFormShownTurbine.awaitItem()).isEqualTo("klarna")
+                assertThat(transitionToFormScreenTurbine.awaitItem()).isEqualTo("klarna")
+                onFormFieldValuesChangedTurbine.expectNoEvents()
+                expectNoEvents()
+                formTypeCalls.expectNoEvents()
+            }
+        }
+        formTypeCalls.ensureAllEventsConsumed()
+        promotionsHelper.validate()
+        promotionsHelper.reportPromotionDisplayedCalls.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `promotion with interactive form stays collapsed`() = runExpansionScenario(
+        paymentMethodCode = "klarna",
+        formType = FormHelper.FormType.UserInteractionRequired,
+        displaysMandatesInFormScreen = false,
+        expectedExpansion = false,
+    )
+
+    @Test
+    fun `promotion with empty form expands`() = runExpansionScenario(
+        paymentMethodCode = "affirm",
+        formType = FormHelper.FormType.Empty,
+        displaysMandatesInFormScreen = false,
+        expectedExpansion = true,
+    )
+
+    @Test
+    fun `mandate-only promotion expands when mandate is inline`() = runExpansionScenario(
+        paymentMethodCode = "klarna",
+        formType = FormHelper.FormType.MandateOnly("Mandate".resolvableString),
+        displaysMandatesInFormScreen = false,
+        expectedExpansion = true,
+    )
+
+    @Test
+    fun `mandate-only promotion stays collapsed when mandate requires form`() = runExpansionScenario(
+        paymentMethodCode = "klarna",
+        formType = FormHelper.FormType.MandateOnly("Mandate".resolvableString),
+        displaysMandatesInFormScreen = true,
+        expectedExpansion = false,
+    )
+
+    @Test
+    fun `method without promotion support stays collapsed`() = runExpansionScenario(
+        paymentMethodCode = "card",
+        formType = FormHelper.FormType.Empty,
+        displaysMandatesInFormScreen = false,
+        expectedExpansion = false,
+    )
+
+    private fun runExpansionScenario(
+        paymentMethodCode: String,
+        formType: FormHelper.FormType,
+        displaysMandatesInFormScreen: Boolean,
+        expectedExpansion: Boolean,
+    ) {
+        val formTypeCalls = Turbine<String>()
+        runScenario(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    paymentMethodTypes = listOf(paymentMethodCode)
+                )
+            ),
+            displaysMandatesInFormScreen = displaysMandatesInFormScreen,
+            formTypeForCode = { code ->
+                formTypeCalls.add(code)
+                formType
+            },
+        ) {
+            val row = interactor.state.value.displayablePaymentMethods.single()
+            formTypeCalls.expectNoEvents()
+            assertThat(row.shouldExpandOnClick()).isEqualTo(expectedExpansion)
+            if (paymentMethodCode != "card") {
+                assertThat(formTypeCalls.awaitItem()).isEqualTo(paymentMethodCode)
+            }
+            formTypeCalls.expectNoEvents()
+        }
+        formTypeCalls.ensureAllEventsConsumed()
     }
 
     private val linkAndGooglePayWalletState = WalletsState(

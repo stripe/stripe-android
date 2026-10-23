@@ -102,7 +102,7 @@ internal data class SupportedPaymentMethod(
         customerSavedPaymentMethods: List<PaymentMethod>,
         incentive: PaymentMethodIncentive?,
         promotionProvider: (() -> PaymentMethodMessagePromotion?)? = null,
-        shouldExpandOnClick: Boolean = false,
+        shouldExpandOnClick: () -> Boolean,
         onClick: () -> Unit,
     ): DisplayablePaymentMethod {
         fun isTypeAndHasCustomerSavedPaymentMethodsOfType(type: PaymentMethod.Type): Boolean {

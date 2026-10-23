@@ -27,6 +27,7 @@ internal class FakePaymentMethodVerticalLayoutInteractor(
             val displayablePaymentMethods = paymentMethodMetadata.sortedSupportedPaymentMethods()
                 .map { supportedPaymentMethod ->
                     supportedPaymentMethod.asDisplayablePaymentMethod(
+                        shouldExpandOnClick = { false },
                         customerSavedPaymentMethods = emptyList(),
                         incentive = null,
                         onClick = { throw AssertionError("Not expected.") },
