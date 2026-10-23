@@ -77,19 +77,20 @@ internal class CustomPaymentMethodUiDefinitionFactoryTest {
         createParams: PaymentMethodCreateParams? = null,
         isValidating: Boolean = false,
     ) {
+        val metadata = PaymentMethodMetadataFactory.create(
+            billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+        )
         FormUI(
             hiddenIdentifiers = emptySet(),
             enabled = true,
             elements = CustomPaymentMethodUiDefinitionFactory(
                 displayableCustomPaymentMethod = displayableCustomPaymentMethod,
             ).createFormElements(
-                metadata = PaymentMethodMetadataFactory.create(),
+                metadata = metadata,
                 arguments = TestUiDefinitionFactoryArgumentsFactory.create(
                     paymentMethodCreateParams = createParams,
                 ).create(
-                    metadata = PaymentMethodMetadataFactory.create(
-                        billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
-                    ),
+                    metadata = metadata,
                     requiresMandate = false
                 )
             ).onEach { element ->
