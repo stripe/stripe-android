@@ -418,7 +418,12 @@ internal class PlaygroundTestDriver(
         val targetCardSelector = UiSelector()
             .className("android.widget.TextView")
             .textContains("4242")
-        val cardList = UiScrollable(UiSelector().className("android.widget.ScrollView"))
+        val cardList = object : UiScrollable(UiSelector().className("android.widget.ScrollView")) {
+            override fun scrollForward(): Boolean = scrollForward(GOOGLE_PAY_SCROLL_STEPS)
+
+            override fun scrollToBeginning(maxSwipes: Int): Boolean =
+                scrollToBeginning(maxSwipes, GOOGLE_PAY_SCROLL_STEPS)
+        }
         check(cardList.scrollIntoView(targetCardSelector)) { "Google Pay card ending in 4242 not found" }
         device.findObject(targetCardSelector).click()
     }
@@ -1945,6 +1950,7 @@ internal class PlaygroundTestDriver(
     }
 
     private companion object {
+        const val GOOGLE_PAY_SCROLL_STEPS = 20
         // Generous upper bound on activity transitions (activity resume is fast; this only bounds the
         // failure path). Kept well under the 90s per-test Timeout so a hang surfaces a clear message.
         val ACTIVITY_TRANSITION_TIMEOUT: Duration = 45.seconds
