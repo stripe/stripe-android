@@ -39,7 +39,6 @@ import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.UiObjectNotFoundException
 import androidx.test.uiautomator.UiScrollable
 import androidx.test.uiautomator.UiSelector
-import androidx.test.uiautomator.Until
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.customersheet.ui.CUSTOMER_SHEET_CONFIRM_BUTTON_TEST_TAG
 import com.stripe.android.customersheet.ui.CUSTOMER_SHEET_SAVE_BUTTON_TEST_TAG
@@ -406,17 +405,22 @@ internal class PlaygroundTestDriver(
     }
 
     private fun selectGooglePayCard() {
-        val paymentMethodSelector = device.wait(
-            Until.findObject(By.descContains("Change payment method")),
-            DEFAULT_UI_TIMEOUT.inWholeMilliseconds
+        val paymentMethodSelectorArrow = device.findObject(
+            UiSelector()
+                .className("android.widget.ImageView")
+                .descriptionContains("Show list of payment methods")
         )
-        requireNotNull(paymentMethodSelector) { "Google Pay payment method selector not found" }.click()
+        check(paymentMethodSelectorArrow.waitForExists(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)) {
+            "Google Pay payment method selector not found"
+        }
+        paymentMethodSelectorArrow.click()
 
-        val card = device.wait(
-            Until.findObject(By.textContains("4242")),
-            DEFAULT_UI_TIMEOUT.inWholeMilliseconds
-        )
-        requireNotNull(card) { "Google Pay card ending in 4242 not found" }.click()
+        val targetCardSelector = UiSelector()
+            .className("android.widget.TextView")
+            .textContains("4242")
+        val cardList = UiScrollable(UiSelector().className("android.widget.ScrollView"))
+        check(cardList.scrollIntoView(targetCardSelector)) { "Google Pay card ending in 4242 not found" }
+        device.findObject(targetCardSelector).click()
     }
 
     private fun pressMultiStepSelect() {
