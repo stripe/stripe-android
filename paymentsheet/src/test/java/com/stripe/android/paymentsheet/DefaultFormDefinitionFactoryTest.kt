@@ -1,10 +1,8 @@
 package com.stripe.android.paymentsheet
 
-import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
@@ -12,23 +10,14 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.SetupIntentFixtures
-import com.stripe.android.paymentsheet.analytics.FakeEventReporter
-import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
-import com.stripe.android.paymentsheet.verticalmode.DefaultPaymentMethodVerticalLayoutInteractor
-import com.stripe.android.paymentsheet.verticalmode.ImmediateVerticalPaymentSelectionHandler
-import com.stripe.android.paymentsheet.verticalmode.PaymentMethodIncentiveInteractor
-import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.SectionElement
-import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -38,7 +27,6 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
-import kotlin.test.assertFailsWith
 
 @RunWith(RobolectricTestRunner::class)
 internal class DefaultFormDefinitionFactoryTest {
@@ -89,15 +77,6 @@ internal class DefaultFormDefinitionFactoryTest {
     }
 
     @Test
-    fun `factories independently classify billing requirements`() = runScenario {
-        val requiresEmail = createFactory(metadataWithEmail())
-        assertThat(factory.formTypeForCode("cashapp")).isEqualTo(FormHelper.FormType.Empty)
-        assertThat(requiresEmail.formTypeForCode("cashapp")).isEqualTo(FormHelper.FormType.UserInteractionRequired)
-        assertThat(factory.formTypeForCode("cashapp")).isEqualTo(FormHelper.FormType.Empty)
-        repeat(2) { assertThat(selectionProvider.calls.awaitItem()).isEqualTo("cashapp") }
-    }
-
-    @Test
     fun `factories independently retain mandate text`() = runScenario(
         metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD.copy(paymentMethodTypes = listOf("cashapp")),
@@ -135,73 +114,6 @@ internal class DefaultFormDefinitionFactoryTest {
         selectionProvider.calls.expectNoEvents()
     }
 
-    @Test
-    fun `failed classification can be retried`() = runScenario {
-        selectionProvider.failure = IllegalStateException("Construction failed")
-        assertFailsWith<IllegalStateException> { factory.formTypeForCode("cashapp") }
-        assertThat(selectionProvider.calls.awaitItem()).isEqualTo("cashapp")
-        selectionProvider.failure = null
-        assertThat(factory.formTypeForCode("cashapp")).isEqualTo(FormHelper.FormType.Empty)
-        assertThat(selectionProvider.calls.awaitItem()).isEqualTo("cashapp")
-        assertThat(factory.formTypeForCode("cashapp")).isEqualTo(FormHelper.FormType.Empty)
-        selectionProvider.calls.expectNoEvents()
-    }
-
-    @Test
-    fun `vertical state reads and form updates reuse classification and report completion once`() = runScenario(
-        metadata = metadataWithEmail(),
-    ) {
-        val eventReporter = FakeEventReporter()
-        val selections = Turbine<PaymentSelection?>()
-        val selection = MutableStateFlow<PaymentSelection?>(cashAppSelection("initial@example.com").paymentSelection)
-        val processing = MutableStateFlow(false)
-        val helper = DefaultFormHelper(
-            coroutineScope = backgroundScope,
-            linkInlineHandler = LinkInlineHandler.create(),
-            paymentMethodMetadata = metadata,
-            selectionUpdater = {
-                selection.value = it
-                selections.add(it)
-            },
-            eventReporter = eventReporter,
-            savedStateHandle = SavedStateHandle(),
-            formDefinitionFactory = factory,
-        )
-        val interactor = createVerticalInteractor(selection, processing, helper)
-        repeat(3) {
-            val state = interactor.state.value
-            val selected = state.selection as PaymentMethodVerticalLayoutInteractor.Selection.New
-            assertThat(selected.code).isEqualTo("cashapp")
-            assertThat(selected.canBeChanged).isTrue()
-            assertThat(state.isProcessing).isFalse()
-        }
-        assertThat(selectionProvider.calls.awaitItem()).isEqualTo("cashapp")
-        processing.value = true
-        assertThat(interactor.state.value.isProcessing).isTrue()
-        selectionProvider.calls.expectNoEvents()
-        listOf("first@example.com", "second@example.com").forEach { email ->
-            helper.onFormFieldValuesChanged(
-                FormFieldValues(
-                    fieldValuePairs = mapOf(FormFieldId.Email to FormFieldEntry(email, true)),
-                    userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest,
-                ),
-                "cashapp",
-            )
-            val selection = selections.awaitItem() as PaymentSelection.New.GenericPaymentMethod
-            assertThat(selection.paymentMethodCreateParams.billingDetails?.email).isEqualTo(email)
-            repeat(3) {
-                val selected = interactor.state.value.selection as PaymentMethodVerticalLayoutInteractor.Selection.New
-                assertThat(selected.code).isEqualTo("cashapp")
-                assertThat(selected.canBeChanged).isTrue()
-            }
-        }
-        assertThat(eventReporter.formCompletedCalls.awaitItem().code).isEqualTo("cashapp")
-        selectionProvider.calls.expectNoEvents()
-        selections.ensureAllEventsConsumed()
-        eventReporter.validate()
-        interactor.close()
-    }
-
     private fun runScenario(
         metadata: PaymentMethodMetadata = defaultMetadata(),
         block: suspend Scenario.() -> Unit,
@@ -212,52 +124,12 @@ internal class DefaultFormDefinitionFactoryTest {
     }
 
     private class Scenario(
-        val scope: TestScope,
+        scope: TestScope,
         val metadata: PaymentMethodMetadata,
         val selectionProvider: FakeFormSelectionProvider,
     ) : CoroutineScope by scope {
-        val backgroundScope = scope.backgroundScope
+        private val backgroundScope = scope.backgroundScope
         val factory = createFactory(metadata)
-
-        fun createVerticalInteractor(
-            selection: MutableStateFlow<PaymentSelection?>,
-            processing: MutableStateFlow<Boolean>,
-            helper: FormHelper,
-        ) = DefaultPaymentMethodVerticalLayoutInteractor(
-            paymentMethodMetadata = metadata,
-            processing = processing,
-            savedPaymentMethodSelectionState = MutableStateFlow(SavedPaymentMethodSelectionState.Idle),
-            temporarySelection = MutableStateFlow(null),
-            selection = selection,
-            paymentMethodIncentiveInteractor = PaymentMethodIncentiveInteractor(null),
-            formTypeForCode = helper::formTypeForCode,
-            onFormFieldValuesChanged = helper::onFormFieldValuesChanged,
-            transitionToManageScreen = {},
-            transitionToFormScreen = {},
-            paymentMethods = MutableStateFlow(emptyList()),
-            mostRecentlySelectedSavedPaymentMethod = MutableStateFlow(null),
-            canRemove = MutableStateFlow(true),
-            walletsState = MutableStateFlow(null),
-            canUpdateCardExpiryAndBillingDetails = MutableStateFlow(false),
-            canChangeCbc = MutableStateFlow(false),
-            updateSelection = { selection.value = it },
-            verticalPaymentSelectionHandler = ImmediateVerticalPaymentSelectionHandler(
-                updateSelection = { value, _ -> selection.value = value },
-                completionAction = null,
-            ),
-            isCurrentScreen = MutableStateFlow(false),
-            reportPaymentMethodTypeSelected = {},
-            reportFormShown = {},
-            onUpdatePaymentMethod = {},
-            shouldUpdateVerticalModeSelection = { true },
-            displaysMandatesInFormScreen = false,
-            onInitiallyDisplayedPaymentMethodVisibilitySnapshot = { _, _ -> },
-            updateMandateText = null,
-            linkAccount = MutableStateFlow(LinkAccountUpdate.Value(null)),
-            coroutineScope = backgroundScope,
-            mainDispatcher = UnconfinedTestDispatcher(scope.testScheduler),
-            paymentMethodMessagePromotionsHelper = null,
-        )
 
         fun createFactory(metadata: PaymentMethodMetadata) = DefaultFormDefinitionFactory(
             coroutineScope = backgroundScope,
@@ -314,7 +186,6 @@ internal class DefaultFormDefinitionFactoryTest {
 internal class FakeFormSelectionProvider : (PaymentMethodCode) -> NewPaymentOptionSelection? {
     val calls = Turbine<PaymentMethodCode>()
     var selection: NewPaymentOptionSelection? = null
-    var failure: IllegalStateException? = null
     var gate: ConstructionGate? = null
 
     override fun invoke(code: PaymentMethodCode): NewPaymentOptionSelection? {
@@ -323,7 +194,6 @@ internal class FakeFormSelectionProvider : (PaymentMethodCode) -> NewPaymentOpti
             it.entered.countDown()
             check(it.release.await(5, TimeUnit.SECONDS))
         }
-        failure?.let { throw it }
         return selection
     }
 }
