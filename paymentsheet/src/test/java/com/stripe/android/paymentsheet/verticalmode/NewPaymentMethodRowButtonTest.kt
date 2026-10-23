@@ -12,7 +12,6 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.AffirmDefinition
 import com.stripe.android.model.PaymentMethodMessagePromotion
@@ -41,18 +40,19 @@ internal class NewPaymentMethodRowButtonTest {
     val coroutineTestRule = CoroutineTestRule(UnconfinedTestDispatcher())
 
     @Test
-    fun `initially selected row stays collapsed until clicked`() = runScenario {
+    fun `selected collapsed row stays collapsed until state changes`() = runScenario {
         promotion().assertIsNotDisplayed()
-        calls.expectNoEvents()
 
         row().performClick()
+        assertThat(calls.awaitItem()).isEqualTo("selection")
+        promotion().assertIsNotDisplayed()
 
-        assertClickCalls()
+        composeRule.runOnIdle { paymentMethod.value = paymentMethod.value.copy(isExpanded = true) }
         promotion().assertIsDisplayed()
     }
 
     @Test
-    fun `disabled click does not evaluate expansion or select row`() = runScenario(isEnabled = false) {
+    fun `disabled click does not select row`() = runScenario(isEnabled = false) {
         row().assertIsNotEnabled().performClick()
 
         calls.expectNoEvents()
@@ -60,32 +60,21 @@ internal class NewPaymentMethodRowButtonTest {
     }
 
     @Test
-    fun `rebuilding the same row preserves expansion without evaluating callback`() = runScenario {
-        row().performClick()
-        assertClickCalls()
+    fun `expanded row stays expanded after leaving composition and returning`() = runScenario {
+        composeRule.runOnIdle { paymentMethod.value = paymentMethod.value.copy(isExpanded = true) }
         promotion().assertIsDisplayed()
 
-        composeRule.runOnIdle {
-            expansionResult.value = false
-            paymentMethod.value = paymentMethod.value.copy(displayName = "Updated title".resolvableString)
-        }
+        composeRule.runOnIdle { isVisible.value = false }
+        row().assertDoesNotExist()
+        composeRule.runOnIdle { isVisible.value = true }
 
-        composeRule.onNodeWithText("Updated title").assertIsDisplayed()
         promotion().assertIsDisplayed()
         calls.expectNoEvents()
-
-        row().performClick()
-
-        assertClickCalls()
-        promotion().assertIsNotDisplayed()
     }
 
     @Test
-    fun `unselected row hides expansion and retains it when selected again`() = runScenario {
-        row().performClick()
-        assertClickCalls()
+    fun `unselected row hides expansion and retains it when selected again`() = runScenario(isExpanded = true) {
         promotion().assertIsDisplayed()
-
         composeRule.runOnIdle { isSelected.value = false }
         promotion().assertIsNotDisplayed()
         composeRule.runOnIdle { isSelected.value = true }
@@ -94,61 +83,26 @@ internal class NewPaymentMethodRowButtonTest {
     }
 
     @Test
-    fun `changing synthetic code resets expansion without evaluating callback`() = runScenario {
-        row().performClick()
-        assertClickCalls()
-        promotion().assertIsDisplayed()
-
-        composeRule.runOnIdle {
-            paymentMethod.value = paymentMethod.value.copy(syntheticCode = "another_affirm")
-        }
-
-        promotion().assertIsNotDisplayed()
-        calls.expectNoEvents()
-    }
-
-    @Test
-    fun `successful expansion falls back to subtitle when promotion is unavailable`() = runScenario(
+    fun `expanded row falls back to subtitle when promotion is unavailable`() = runScenario(
+        isExpanded = true,
         promotion = null,
     ) {
-        subtitle().assertIsNotDisplayed()
-
-        row().performClick()
-
-        assertClickCalls()
         subtitle().assertIsDisplayed()
     }
 
     @Test
-    fun `false expansion decision keeps promotion and subtitle collapsed`() = runScenario(
-        expansionResult = false,
-    ) {
-        row().performClick()
-
-        assertClickCalls()
-        promotion().assertIsNotDisplayed()
-        subtitle().assertIsNotDisplayed()
-    }
-
-    @Test
-    fun `false expansion decision keeps fallback subtitle collapsed`() = runScenario(
-        expansionResult = false,
-        promotion = null,
-    ) {
-        row().performClick()
-
-        assertClickCalls()
+    fun `collapsed row hides fallback subtitle`() = runScenario(promotion = null) {
         subtitle().assertIsNotDisplayed()
     }
 
     private fun runScenario(
         isEnabled: Boolean = true,
-        expansionResult: Boolean = true,
+        isExpanded: Boolean = false,
         promotion: PaymentMethodMessagePromotion? = FakePaymentMethodMessagePromotionsHelper.affirmPromotion,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val calls = Turbine<String>()
-        val expansionResultState = mutableStateOf(expansionResult)
+        val isVisible = mutableStateOf(true)
         val isEnabledState = mutableStateOf(isEnabled)
         val isSelectedState = mutableStateOf(true)
         val metadata = PaymentMethodMetadataFactory.create()
@@ -158,23 +112,22 @@ internal class NewPaymentMethodRowButtonTest {
                     customerSavedPaymentMethods = emptyList(),
                     incentive = null,
                     promotionProvider = { promotion },
-                    shouldExpandOnClick = {
-                        calls.add("expansion")
-                        expansionResultState.value
-                    },
+                    isExpanded = isExpanded,
                     onClick = { calls.add("selection") },
                 )
         )
         val imageLoader = FakeStripeImageLoader()
         composeRule.setContent {
-            NewPaymentMethodRowButton(
-                isEnabled = isEnabledState.value,
-                isSelected = isSelectedState.value,
-                displayablePaymentMethod = paymentMethod.value,
-                imageLoader = imageLoader,
-            )
+            if (isVisible.value) {
+                NewPaymentMethodRowButton(
+                    isEnabled = isEnabledState.value,
+                    isSelected = isSelectedState.value,
+                    displayablePaymentMethod = paymentMethod.value,
+                    imageLoader = imageLoader,
+                )
+            }
         }
-        Scenario(paymentMethod, isSelectedState, expansionResultState, calls).block()
+        Scenario(paymentMethod, isSelectedState, isVisible, calls).block()
         calls.ensureAllEventsConsumed()
         imageLoader.ensureAllEventsConsumed()
     }
@@ -188,13 +141,7 @@ internal class NewPaymentMethodRowButtonTest {
     private data class Scenario(
         val paymentMethod: MutableState<DisplayablePaymentMethod>,
         val isSelected: MutableState<Boolean>,
-        val expansionResult: MutableState<Boolean>,
+        val isVisible: MutableState<Boolean>,
         val calls: Turbine<String>,
-    ) {
-        suspend fun assertClickCalls() {
-            assertThat(calls.awaitItem()).isEqualTo("expansion")
-            assertThat(calls.awaitItem()).isEqualTo("selection")
-            calls.expectNoEvents()
-        }
-    }
+    )
 }

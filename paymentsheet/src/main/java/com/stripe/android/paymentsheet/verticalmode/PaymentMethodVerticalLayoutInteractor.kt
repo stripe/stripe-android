@@ -43,6 +43,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 import com.stripe.android.R as PaymentsCoreR
@@ -263,12 +264,15 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         )
     }
 
+    private val expandedPaymentMethods = MutableStateFlow<Set<PaymentMethodCode>>(emptySet())
+
     private val displayablePaymentMethods = combineAsStateFlow(
         paymentMethods,
         walletsState,
         paymentMethodIncentiveInteractor.displayedIncentive,
-    ) { paymentMethods, walletsState, incentive ->
-        getDisplayablePaymentMethods(paymentMethods, walletsState, incentive)
+        expandedPaymentMethods,
+    ) { paymentMethods, walletsState, incentive, expandedPaymentMethods ->
+        getDisplayablePaymentMethods(paymentMethods, walletsState, incentive, expandedPaymentMethods)
     }
 
     private val expectedItemsForVisibilityTracking = combineAsStateFlow(
@@ -402,6 +406,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         paymentMethods: List<PaymentMethod>,
         walletsState: WalletsState?,
         incentive: PaymentMethodIncentive?,
+        expandedPaymentMethods: Set<PaymentMethodCode>,
     ): List<DisplayablePaymentMethod> {
         val lpms = supportedPaymentMethods.map { supportedPaymentMethod ->
             val paymentMethodIncentive = incentive?.takeIfMatches(supportedPaymentMethod.code)
@@ -412,10 +417,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                     code = supportedPaymentMethod.code,
                     metadata = paymentMethodMetadata
                 ),
-                shouldExpandOnClick = {
-                    PromotionSupportedPaymentMethods.supportedPaymentMethods.contains(supportedPaymentMethod.code) &&
-                        !shouldTransitionToFormScreen(supportedPaymentMethod.code)
-                },
+                isExpanded = supportedPaymentMethod.code in expandedPaymentMethods,
             ) {
                 handleViewAction(ViewAction.PaymentMethodSelected(supportedPaymentMethod.code))
             }
@@ -447,7 +449,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             lightThemeIconUrl = null,
             darkThemeIconUrl = null,
             iconRequiresTinting = false,
-            shouldExpandOnClick = { false },
+            isExpanded = false,
             subtitle = null,
             onClick = {
                 verticalPaymentSelectionHandler.select(PaymentSelection.GooglePay, false)
@@ -470,7 +472,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             lightThemeIconUrl = null,
             darkThemeIconUrl = null,
             iconRequiresTinting = false,
-            shouldExpandOnClick = { false },
+            isExpanded = false,
             subtitle = subtitle,
             onClick = {
                 verticalPaymentSelectionHandler.select(PaymentSelection.Link(brand = link.linkBrand), false)
@@ -586,7 +588,17 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                     viewAction.selectedPaymentMethodCode,
                     paymentMethodMetadata
                 )
-                if (shouldTransitionToFormScreen(viewAction.selectedPaymentMethodCode)) {
+                val shouldTransition = shouldTransitionToFormScreen(viewAction.selectedPaymentMethodCode)
+                expandedPaymentMethods.update { expanded ->
+                    if (!shouldTransition &&
+                        viewAction.selectedPaymentMethodCode in PromotionSupportedPaymentMethods.supportedPaymentMethods
+                    ) {
+                        expanded + viewAction.selectedPaymentMethodCode
+                    } else {
+                        expanded - viewAction.selectedPaymentMethodCode
+                    }
+                }
+                if (shouldTransition) {
                     reportFormShown(viewAction.selectedPaymentMethodCode)
                     transitionToFormScreen(viewAction.selectedPaymentMethodCode)
                 } else {

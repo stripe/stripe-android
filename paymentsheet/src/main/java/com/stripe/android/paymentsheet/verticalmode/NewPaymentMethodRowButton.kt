@@ -5,10 +5,6 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -32,8 +28,6 @@ internal fun NewPaymentMethodRowButton(
     trailingContent: (@Composable RowScope.() -> Unit)? = null,
     appearance: Embedded = Embedded(Embedded.RowStyle.FloatingButton.default)
 ) {
-    var isExpanded by remember(displayablePaymentMethod.syntheticCode) { mutableStateOf(false) }
-
     NewPaymentMethodRowButton(
         isEnabled = isEnabled,
         isSelected = isSelected,
@@ -44,17 +38,14 @@ internal fun NewPaymentMethodRowButton(
         subtitle = displayablePaymentMethod.subtitle?.resolve(),
         promoText = displayablePaymentMethod.promoBadge,
         iconRequiresTinting = displayablePaymentMethod.iconRequiresTinting,
-        onClick = {
-            isExpanded = displayablePaymentMethod.shouldExpandOnClick()
-            displayablePaymentMethod.onClick()
-        },
+        onClick = displayablePaymentMethod.onClick,
         modifier = modifier.testTag(
             "${TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON}_${displayablePaymentMethod.syntheticCode}"
         ),
         appearance = appearance,
         trailingContent = trailingContent,
         promotionProvider = displayablePaymentMethod.promotionProvider,
-        isExpanded = isExpanded
+        isExpanded = displayablePaymentMethod.isExpanded
     )
 }
 

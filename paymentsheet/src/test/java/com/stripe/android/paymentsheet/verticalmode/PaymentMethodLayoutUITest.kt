@@ -134,7 +134,7 @@ internal class PaymentMethodLayoutUITest(
                         metadata = metadata,
                     )
                         .asDisplayablePaymentMethod(
-                            shouldExpandOnClick = { false },
+                            isExpanded = false,
                             customerSavedPaymentMethods = emptyList(),
                             incentive = null,
                             onClick = { onClickCalled = true },
@@ -151,7 +151,7 @@ internal class PaymentMethodLayoutUITest(
     }
 
     @Test
-    fun clickingOnBnpL_with_promotion_shows_promotion() {
+    fun expandedBnpl_with_promotion_shows_promotion() {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("card", "affirm")
@@ -165,7 +165,7 @@ internal class PaymentMethodLayoutUITest(
                         metadata = metadata,
                     )
                         .asDisplayablePaymentMethod(
-                            shouldExpandOnClick = { true },
+                            isExpanded = true,
                             customerSavedPaymentMethods = emptyList(),
                             incentive = null,
                             onClick = { onClickCalled = true },
@@ -177,7 +177,7 @@ internal class PaymentMethodLayoutUITest(
             )
         ) {
             assertThat(onClickCalled).isFalse()
-            composeRule.onNodeWithText("This is a message", substring = true).assertIsNotDisplayed()
+            composeRule.onNodeWithText("This is a message", substring = true).assertIsDisplayed()
             composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_affirm").performClick()
             assertThat(onClickCalled).isTrue()
             assertThat(viewActionRecorder.viewActions).isEmpty()
@@ -186,7 +186,7 @@ internal class PaymentMethodLayoutUITest(
     }
 
     @Test
-    fun clickingOnBnpL_falls_back_to_subtitle_if_promotion_not_available() {
+    fun expandedBnpl_falls_back_to_subtitle_if_promotion_not_available() {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("card", "affirm")
@@ -204,7 +204,7 @@ internal class PaymentMethodLayoutUITest(
                             incentive = null,
                             onClick = { onClickCalled = true },
                             promotionProvider = { null },
-                            shouldExpandOnClick = { true }
+                            isExpanded = true
                         ),
                 ),
                 selection = Selection.New("affirm"),
@@ -212,7 +212,7 @@ internal class PaymentMethodLayoutUITest(
             )
         ) {
             assertThat(onClickCalled).isFalse()
-            composeRule.onNodeWithText("Pay over time with Affirm").assertIsNotDisplayed()
+            composeRule.onNodeWithText("Pay over time with Affirm").assertIsDisplayed()
             composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_affirm").performClick()
             assertThat(onClickCalled).isTrue()
             assertThat(viewActionRecorder.viewActions).isEmpty()
@@ -221,7 +221,7 @@ internal class PaymentMethodLayoutUITest(
     }
 
     @Test
-    fun does_not_expand_if_shouldExpandOnClick_is_false() {
+    fun collapsedBnpl_does_not_show_promotion() {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("card", "klarna")
@@ -238,7 +238,7 @@ internal class PaymentMethodLayoutUITest(
                             customerSavedPaymentMethods = emptyList(),
                             incentive = null,
                             onClick = { onClickCalled = true },
-                            shouldExpandOnClick = { false },
+                            isExpanded = false,
                             promotionProvider = {
                                 PaymentMethodMessagePromotion(
                                     paymentMethodType = "klarna",
@@ -279,7 +279,7 @@ internal class PaymentMethodLayoutUITest(
                         metadata = metadata,
                     )
                         .asDisplayablePaymentMethod(
-                            shouldExpandOnClick = { false },
+                            isExpanded = false,
                             customerSavedPaymentMethods = emptyList(),
                             incentive = null,
                             onClick = { onClickCalled = true },
@@ -325,7 +325,7 @@ internal class PaymentMethodLayoutUITest(
                 )
             ).sortedSupportedPaymentMethods().map {
                 it.asDisplayablePaymentMethod(
-                    shouldExpandOnClick = { false },
+                    isExpanded = false,
                     customerSavedPaymentMethods = emptyList(),
                     incentive = null,
                     onClick = {},
@@ -356,7 +356,7 @@ internal class PaymentMethodLayoutUITest(
                 )
             ).sortedSupportedPaymentMethods().map {
                 it.asDisplayablePaymentMethod(
-                    shouldExpandOnClick = { false },
+                    isExpanded = false,
                     customerSavedPaymentMethods = emptyList(),
                     incentive = null,
                     onClick = {},
@@ -394,7 +394,7 @@ internal class PaymentMethodLayoutUITest(
             initialState = createState(
                 displayablePaymentMethods = supportedPaymentMethods.map {
                     it.asDisplayablePaymentMethod(
-                        shouldExpandOnClick = { false },
+                        isExpanded = false,
                         customerSavedPaymentMethods = emptyList(),
                         incentive = null,
                         onClick = {},
