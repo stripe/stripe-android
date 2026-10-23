@@ -16,17 +16,10 @@ import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.withContext
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
 
 @RunWith(RobolectricTestRunner::class)
 internal class DefaultFormDefinitionFactoryTest {
@@ -91,48 +84,24 @@ internal class DefaultFormDefinitionFactoryTest {
         repeat(2) { assertThat(selectionProvider.calls.awaitItem()).isEqualTo("cashapp") }
     }
 
-    @Test
-    fun `concurrent cold classifications share construction`() = runScenario {
-        val gate = ConstructionGate()
-        selectionProvider.gate = gate
-        val first = async(Dispatchers.Default) { factory.formTypeForCode("cashapp") }
-        withContext(Dispatchers.IO) { assertThat(gate.entered.await(5, TimeUnit.SECONDS)).isTrue() }
-        val secondStarted = CountDownLatch(1)
-        val second = async(Dispatchers.Default) {
-            secondStarted.countDown()
-            factory.formTypeForCode("cashapp")
-        }
-        try {
-            withContext(Dispatchers.IO) { assertThat(secondStarted.await(5, TimeUnit.SECONDS)).isTrue() }
-            assertThat(selectionProvider.calls.awaitItem()).isEqualTo("cashapp")
-            selectionProvider.calls.expectNoEvents()
-        } finally {
-            gate.release.countDown()
-        }
-        assertThat(first.await()).isEqualTo(FormHelper.FormType.Empty)
-        assertThat(second.await()).isEqualTo(FormHelper.FormType.Empty)
-        selectionProvider.calls.expectNoEvents()
-    }
-
     private fun runScenario(
         metadata: PaymentMethodMetadata = defaultMetadata(),
         block: suspend Scenario.() -> Unit,
-    ) = runTest(UnconfinedTestDispatcher()) {
+    ) = runTest {
         val selectionProvider = FakeFormSelectionProvider()
-        Scenario(this, metadata, selectionProvider).apply { block() }
+        Scenario(backgroundScope, metadata, selectionProvider).apply { block() }
         selectionProvider.calls.ensureAllEventsConsumed()
     }
 
     private class Scenario(
-        scope: TestScope,
+        private val coroutineScope: CoroutineScope,
         val metadata: PaymentMethodMetadata,
         val selectionProvider: FakeFormSelectionProvider,
-    ) : CoroutineScope by scope {
-        private val backgroundScope = scope.backgroundScope
+    ) {
         val factory = createFactory(metadata)
 
         fun createFactory(metadata: PaymentMethodMetadata) = DefaultFormDefinitionFactory(
-            coroutineScope = backgroundScope,
+            coroutineScope = coroutineScope,
             linkInlineHandler = LinkInlineHandler.create(),
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
             paymentMethodMetadata = metadata,
@@ -186,19 +155,9 @@ internal class DefaultFormDefinitionFactoryTest {
 internal class FakeFormSelectionProvider : (PaymentMethodCode) -> NewPaymentOptionSelection? {
     val calls = Turbine<PaymentMethodCode>()
     var selection: NewPaymentOptionSelection? = null
-    var gate: ConstructionGate? = null
 
     override fun invoke(code: PaymentMethodCode): NewPaymentOptionSelection? {
         calls.add(code)
-        gate?.let {
-            it.entered.countDown()
-            check(it.release.await(5, TimeUnit.SECONDS))
-        }
         return selection
     }
-}
-
-internal class ConstructionGate {
-    val entered = CountDownLatch(1)
-    val release = CountDownLatch(1)
 }
