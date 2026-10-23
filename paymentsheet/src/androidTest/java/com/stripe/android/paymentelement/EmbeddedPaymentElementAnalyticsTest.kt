@@ -113,7 +113,6 @@ internal class EmbeddedPaymentElementAnalyticsTest {
         )
 
         validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
-        validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
         validateAnalyticsRequest(eventName = "mc_form_interacted")
         validateAnalyticsRequest(eventName = "mc_card_number_completed")
 
@@ -213,7 +212,6 @@ internal class EmbeddedPaymentElementAnalyticsTest {
         validateAnalyticsRequest(eventName = "mc_cardscan_api_check_failed")
         validateAnalyticsRequest(eventName = "mc_initial_displayed_payment_methods")
 
-        validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
         validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
         validateAnalyticsRequest(eventName = "mc_form_interacted")
         validateAnalyticsRequest(eventName = "mc_card_number_completed")

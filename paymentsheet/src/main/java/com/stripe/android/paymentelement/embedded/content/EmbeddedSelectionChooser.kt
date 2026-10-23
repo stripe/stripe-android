@@ -10,7 +10,6 @@ import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.paymentsheet.LinkInlineHandler
-import com.stripe.android.paymentsheet.formTypeForCode
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.paymentMethodType
 import com.stripe.android.ui.core.elements.FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE
@@ -166,7 +165,7 @@ internal class DefaultEmbeddedSelectionChooser @Inject constructor(
             linkInlineHandler = LinkInlineHandler.create(),
         )
         val newFormElements = newFormDefinitionFactory.formElementsForCode(previousSelection.paymentMethodType)
-        val newFormType = formTypeForCode(previousSelection.paymentMethodType, newFormElements)
+        val newFormType = paymentMethodMetadata.formTypeForCode(previousSelection.paymentMethodType) { newFormElements }
         if (newFormType != FormHelper.FormType.UserInteractionRequired) {
             return true
         }

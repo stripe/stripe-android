@@ -11,7 +11,6 @@ import com.stripe.android.paymentelement.embedded.sheet.SheetActivityStateHolder
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher.Companion.HOSTED_SURFACE_PAYMENT_ELEMENT
 import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.formTypeForCode
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
@@ -72,7 +71,7 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
         )
 
         val formElements = formHelper.formElementsForCode(paymentMethodCode)
-        val formType = formTypeForCode(paymentMethodCode, formElements)
+        val formType = paymentMethodMetadata.formTypeForCode(paymentMethodCode) { formElements }
         val formArguments = formHelper.createFormArguments(paymentMethodCode)
         if (formType is FormHelper.FormType.MandateOnly) {
             embeddedSelectionHolder.setSelection(
