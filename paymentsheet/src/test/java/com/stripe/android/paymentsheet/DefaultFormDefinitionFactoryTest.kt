@@ -4,7 +4,6 @@ import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -21,7 +20,6 @@ import com.stripe.android.paymentsheet.verticalmode.DefaultPaymentMethodVertical
 import com.stripe.android.paymentsheet.verticalmode.ImmediateVerticalPaymentSelectionHandler
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodIncentiveInteractor
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor
-import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.SectionElement
@@ -35,7 +33,6 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withContext
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -45,27 +42,24 @@ import kotlin.test.assertFailsWith
 
 @RunWith(RobolectricTestRunner::class)
 internal class DefaultFormDefinitionFactoryTest {
-    @get:Rule
-    val klarnaFormRemovalRule = FeatureFlagTestRule(FeatureFlags.enableKlarnaFormRemoval, false)
-
     @Test
     fun `classification constructs elements once per code`() = runScenario {
         repeat(3) {
             assertThat(factory.formTypeForCode("cashapp")).isEqualTo(FormHelper.FormType.Empty)
-            assertThat(factory.formTypeForCode("klarna")).isEqualTo(FormHelper.FormType.UserInteractionRequired)
+            assertThat(factory.formTypeForCode("card")).isEqualTo(FormHelper.FormType.UserInteractionRequired)
         }
         assertThat(selectionProvider.calls.awaitItem()).isEqualTo("cashapp")
-        assertThat(selectionProvider.calls.awaitItem()).isEqualTo("klarna")
+        assertThat(selectionProvider.calls.awaitItem()).isEqualTo("card")
     }
 
     @Test
     fun `real form seeds classification cache`() = runScenario {
-        val elements = factory.formElementsForCode("klarna")
+        val elements = factory.formElementsForCode("card")
         assertThat(elements).isNotEmpty()
-        assertThat(selectionProvider.calls.awaitItem()).isEqualTo("klarna")
+        assertThat(selectionProvider.calls.awaitItem()).isEqualTo("card")
 
         repeat(3) {
-            assertThat(factory.formTypeForCode("klarna")).isEqualTo(formTypeForCode("klarna", elements))
+            assertThat(factory.formTypeForCode("card")).isEqualTo(formTypeForCode("card", elements))
         }
         selectionProvider.calls.expectNoEvents()
     }
@@ -116,31 +110,6 @@ internal class DefaultFormDefinitionFactoryTest {
         assertThat(factory.formTypeForCode("cashapp")).isEqualTo(first)
         assertThat(other.formTypeForCode("cashapp")).isEqualTo(second)
         repeat(2) { assertThat(selectionProvider.calls.awaitItem()).isEqualTo("cashapp") }
-    }
-
-    @Test
-    fun `Klarna removal flag changes classification in the same factory`() = runScenario {
-        assertThat(factory.formTypeForCode("klarna")).isEqualTo(FormHelper.FormType.UserInteractionRequired)
-        assertThat(selectionProvider.calls.awaitItem()).isEqualTo("klarna")
-        klarnaFormRemovalRule.setEnabled(true)
-        assertThat(factory.formTypeForCode("klarna")).isEqualTo(FormHelper.FormType.Empty)
-        assertThat(selectionProvider.calls.awaitItem()).isEqualTo("klarna")
-        klarnaFormRemovalRule.setEnabled(false)
-        assertThat(factory.formTypeForCode("klarna")).isEqualTo(FormHelper.FormType.UserInteractionRequired)
-        selectionProvider.calls.expectNoEvents()
-    }
-
-    @Test
-    fun `real Klarna form seeds only the current flag classification`() = runScenario {
-        factory.formElementsForCode("klarna")
-        selectionProvider.calls.awaitItem()
-        klarnaFormRemovalRule.setEnabled(true)
-        assertThat(factory.formElementsForCode("klarna")).isEmpty()
-        selectionProvider.calls.awaitItem()
-        assertThat(factory.formTypeForCode("klarna")).isEqualTo(FormHelper.FormType.Empty)
-        klarnaFormRemovalRule.setEnabled(false)
-        assertThat(factory.formTypeForCode("klarna")).isEqualTo(FormHelper.FormType.UserInteractionRequired)
-        selectionProvider.calls.expectNoEvents()
     }
 
     @Test
@@ -337,7 +306,7 @@ internal class DefaultFormDefinitionFactoryTest {
 
     private fun defaultMetadata() = PaymentMethodMetadataFactory.create(
         stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-            paymentMethodTypes = listOf("cashapp", "klarna"),
+            paymentMethodTypes = listOf("cashapp", "card"),
         ),
     )
 }
