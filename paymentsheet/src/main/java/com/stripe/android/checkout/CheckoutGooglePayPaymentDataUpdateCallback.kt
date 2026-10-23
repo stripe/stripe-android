@@ -1,6 +1,7 @@
 package com.stripe.android.checkout
 
 import android.content.Context
+import android.util.Log
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.googlepaylauncher.GooglePayPaymentDataError
 import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdate
@@ -24,6 +25,7 @@ internal class CheckoutGooglePayPaymentDataUpdateCallback @Inject constructor(
     override suspend fun onPaymentDataChanged(
         paymentDataUpdate: GooglePayPaymentDataUpdate,
     ): GooglePayPaymentDataUpdateResponse {
+        Log.d("xkcd", "received callback from trigger: ${paymentDataUpdate.callbackTrigger?.name}")
         val currentState = stateHolder.state ?: run {
             return notConfiguredResponse()
         }
@@ -31,9 +33,32 @@ internal class CheckoutGooglePayPaymentDataUpdateCallback @Inject constructor(
         val countryCode = currentState.checkoutSessionResponse.merchantCountry
 
         return when (val trigger = paymentDataUpdate.callbackTrigger) {
-            GooglePayPaymentDataUpdate.CallbackTrigger.Initialize,
+            GooglePayPaymentDataUpdate.CallbackTrigger.Initialize -> {
+                updateAddresses(
+                    countryCode = countryCode,
+                    currentState = currentState,
+                    paymentDataUpdate = paymentDataUpdate,
+                    addressSources = listOf(
+                        CheckoutSessionResponse.TaxAddressSource.SHIPPING,
+                        CheckoutSessionResponse.TaxAddressSource.BILLING,
+                    ),
+                )
+            }
             GooglePayPaymentDataUpdate.CallbackTrigger.ShippingAddress -> {
-                updateShippingAddress(countryCode, currentState, paymentDataUpdate)
+                updateAddresses(
+                    countryCode = countryCode,
+                    currentState = currentState,
+                    paymentDataUpdate = paymentDataUpdate,
+                    addressSources = listOf(CheckoutSessionResponse.TaxAddressSource.SHIPPING),
+                )
+            }
+            GooglePayPaymentDataUpdate.CallbackTrigger.PaymentMethod -> {
+                updateAddresses(
+                    countryCode = countryCode,
+                    currentState = currentState,
+                    paymentDataUpdate = paymentDataUpdate,
+                    addressSources = listOf(CheckoutSessionResponse.TaxAddressSource.BILLING),
+                )
             }
             GooglePayPaymentDataUpdate.CallbackTrigger.ShippingOption,
             GooglePayPaymentDataUpdate.CallbackTrigger.Offer,
@@ -55,42 +80,55 @@ internal class CheckoutGooglePayPaymentDataUpdateCallback @Inject constructor(
         }
     }
 
-    private suspend fun updateShippingAddress(
+    private suspend fun updateAddresses(
         countryCode: String?,
         currentState: CheckoutControllerState,
         paymentDataUpdate: GooglePayPaymentDataUpdate,
+        addressSources: List<CheckoutSessionResponse.TaxAddressSource>,
     ): GooglePayPaymentDataUpdateResponse {
-        val address = when (val result = addressBuilder.build(paymentDataUpdate)) {
-            is CheckoutGooglePayPaymentDataUpdateAddressBuilder.Result.Unavailable -> {
-                return mapToResponse(
-                    countryCode = countryCode,
-                    response = currentState.checkoutSessionResponse,
-                    paymentDataUpdate = paymentDataUpdate,
-                )
+        var response = currentState.checkoutSessionResponse
+
+        for (addressSource in addressSources) {
+            val address = when (val result = addressBuilder.build(paymentDataUpdate, addressSource)) {
+                is CheckoutGooglePayPaymentDataUpdateAddressBuilder.Result.Unavailable -> continue
+                is CheckoutGooglePayPaymentDataUpdateAddressBuilder.Result.Available -> result.address
             }
-            is CheckoutGooglePayPaymentDataUpdateAddressBuilder.Result.Available -> {
-                result.address
+
+            Log.d("xkcd", "updating address: $addressSource: in ${address.city}, ${address.country}")
+
+            response = taxRegionUpdater.updateServerStateIfNeeded(
+                checkoutSessionResponse = response,
+                addressSource = addressSource,
+                address = address,
+            ).getOrElse { error ->
+                return addressUpdateErrorResponse(addressSource, error)
             }
         }
 
-        return taxRegionUpdater.updateServerStateIfNeeded(
-            checkoutSessionResponse = currentState.checkoutSessionResponse,
-            addressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
-            address = address,
-        ).fold(
-            onSuccess = { response ->
-                mapToResponse(countryCode, response, paymentDataUpdate)
-            },
-            onFailure = { error ->
-                GooglePayPaymentDataUpdateResponse(
-                    newTransactionInfo = null,
-                    error = GooglePayPaymentDataError(
-                        reason = GooglePayPaymentDataError.Reason.ShippingAddressInvalid,
-                        message = error.stripeErrorMessage(context),
-                        intent = GooglePayPaymentDataError.Intent.ShippingAddress,
-                    ),
-                )
-            },
+        return mapToResponse(countryCode, response, paymentDataUpdate)
+    }
+
+    private fun addressUpdateErrorResponse(
+        addressSource: CheckoutSessionResponse.TaxAddressSource,
+        error: Throwable,
+    ): GooglePayPaymentDataUpdateResponse {
+        return GooglePayPaymentDataUpdateResponse(
+            newTransactionInfo = null,
+            error = GooglePayPaymentDataError(
+                reason = when (addressSource) {
+                    CheckoutSessionResponse.TaxAddressSource.SHIPPING ->
+                        GooglePayPaymentDataError.Reason.ShippingAddressInvalid
+                    CheckoutSessionResponse.TaxAddressSource.BILLING ->
+                        GooglePayPaymentDataError.Reason.OtherError
+                },
+                message = error.stripeErrorMessage(context),
+                intent = when (addressSource) {
+                    CheckoutSessionResponse.TaxAddressSource.SHIPPING ->
+                        GooglePayPaymentDataError.Intent.ShippingAddress
+                    CheckoutSessionResponse.TaxAddressSource.BILLING ->
+                        GooglePayPaymentDataError.Intent.PaymentMethod
+                },
+            ),
         )
     }
 

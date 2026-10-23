@@ -11,13 +11,15 @@ import org.json.JSONObject
  * Represents an update in the Google Pay sheet that requires a response on how to change the sheet
  *
  * @param callbackTrigger represents what change to the sheet caused a callback trigger
- * @param shippingAddress represents the shipping address selected in teh sheet
+ * @param shippingAddress represents the shipping address selected in the sheet
+ * @param billingAddress represents the billing address associated with the selected payment method
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Poko
 class GooglePayPaymentDataUpdate(
     val callbackTrigger: CallbackTrigger?,
-    val shippingAddress: ShippingAddress?,
+    val shippingAddress: GooglePayAddress?,
+    val billingAddress: GooglePayAddress?,
 ) {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     enum class CallbackTrigger {
@@ -32,6 +34,11 @@ class GooglePayPaymentDataUpdate(
         ShippingAddress,
 
         /**
+         * Callback is called when the payment method changes in the sheet
+         */
+        PaymentMethod,
+
+        /**
          * Callback is called when the shipping option changes in the sheet
          */
         ShippingOption,
@@ -43,7 +50,7 @@ class GooglePayPaymentDataUpdate(
     }
 
     /**
-     * Represents an update in the Google Pay sheet that requires a response on how to change the sheet
+     * Represents an address supplied by the Google Pay sheet
      *
      * @param administrativeArea country subdivision, such as a state or province
      * @param countryCode ISO 3166-1 alpha-2 country code
@@ -51,11 +58,11 @@ class GooglePayPaymentDataUpdate(
      * @param postalCode The redacted postal code based on the country. For Canada and the UK, this contains
      *   only the first three characters. For US, this contains the first five digits.
      * @param iso3166AdministrativeArea ISO 3166-2 administrative area code corresponding to administrativeArea.
-     *   Only present if the shipping address format is FULL-ISO3166.
+     *   Only present if the address format is FULL-ISO3166.
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Poko
-    class ShippingAddress(
+    class GooglePayAddress(
         val administrativeArea: String,
         val countryCode: String,
         val locality: String,
@@ -108,22 +115,31 @@ class GooglePayPaymentDataUpdate(
                         }
                     },
                 shippingAddress = json.optJSONObject(FIELD_SHIPPING_ADDRESS)?.let { addressJson ->
-                    ShippingAddress(
-                        administrativeArea = optString(addressJson, FIELD_ADMINISTRATIVE_AREA)
-                            .orEmpty(),
-                        countryCode = optString(addressJson, FIELD_COUNTRY_CODE).orEmpty(),
-                        locality = optString(addressJson, FIELD_LOCALITY).orEmpty(),
-                        postalCode = optString(addressJson, FIELD_POSTAL_CODE).orEmpty(),
-                        iso3166AdministrativeArea =
-                            optString(addressJson, FIELD_IOS_3166_ADMINISTRATIVE_AREA)
-                                ?.takeIf { it.isNotEmpty() },
-                    )
+                    addressJson.toAddress()
                 },
+                billingAddress = json.optJSONObject(FIELD_PAYMENT_METHOD_DATA)
+                    ?.optJSONObject(FIELD_INTERMEDIATE_CARD_INFO)
+                    ?.optJSONObject(FIELD_BILLING_ADDRESS)
+                    ?.toAddress(),
+            )
+        }
+
+        private fun JSONObject.toAddress(): GooglePayAddress {
+            return GooglePayAddress(
+                administrativeArea = optString(this, FIELD_ADMINISTRATIVE_AREA).orEmpty(),
+                countryCode = optString(this, FIELD_COUNTRY_CODE).orEmpty(),
+                locality = optString(this, FIELD_LOCALITY).orEmpty(),
+                postalCode = optString(this, FIELD_POSTAL_CODE).orEmpty(),
+                iso3166AdministrativeArea = optString(this, FIELD_IOS_3166_ADMINISTRATIVE_AREA)
+                    ?.takeIf { it.isNotEmpty() },
             )
         }
 
         private const val FIELD_CALLBACK_TRIGGER = "callbackTrigger"
         private const val FIELD_SHIPPING_ADDRESS = "shippingAddress"
+        private const val FIELD_PAYMENT_METHOD_DATA = "paymentMethodData"
+        private const val FIELD_INTERMEDIATE_CARD_INFO = "info"
+        private const val FIELD_BILLING_ADDRESS = "billingAddress"
         private const val FIELD_COUNTRY_CODE = "countryCode"
         private const val FIELD_ADMINISTRATIVE_AREA = "administrativeArea"
         private const val FIELD_LOCALITY = "locality"

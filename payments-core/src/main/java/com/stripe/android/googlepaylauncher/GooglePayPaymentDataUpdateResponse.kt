@@ -57,6 +57,7 @@ class GooglePayPaymentDataError(
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     enum class Intent(val code: String) {
         ShippingAddress("SHIPPING_ADDRESS"),
+        PaymentMethod("PAYMENT_METHOD"),
         Offer("OFFER"),
         ShippingOption("SHIPPING_OPTION"),
     }
