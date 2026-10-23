@@ -5,7 +5,6 @@ import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
 import com.stripe.android.checkout.toCheckoutAddress
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.exception.LocalStripeException
-import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
@@ -15,7 +14,6 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -32,15 +30,7 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 
 /**
- * Confirmation interceptor for checkout sessions.
- *
- * This interceptor handles the confirmation flow for checkout sessions by:
- * 1. For new PMs: Creating a payment method, then calling confirm
- * 2. For saved PMs: Directly calling confirm with the existing PM ID
- * 3. Handling the response (complete, requires action, or error)
- *
- * The `/v1/payment_pages/{checkoutSessionId}/confirm` API accepts both newly created
- * and existing payment method IDs.
+ * Confirms checkout sessions with new payment method data or an existing payment method ID.
  */
 @OptIn(CheckoutSessionPreview::class)
 internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructor(
@@ -48,10 +38,8 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
     @Assisted private val customerMetadata: CustomerMetadata?,
     @Assisted private val clientAttributionMetadata: ClientAttributionMetadata,
     context: Context,
-    private val stripeRepository: StripeRepository,
     private val checkoutSessionRepository: CheckoutSessionRepository,
     private val checkoutSessionTaxRegionUpdater: CheckoutSessionTaxRegionUpdater,
-    private val requestOptions: ApiRequest.Options,
 ) : IntentConfirmationInterceptor {
 
     private val returnUrl: String = DefaultReturnUrl.create(context).value
@@ -64,27 +52,13 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
         confirmationOption: PaymentMethodConfirmationOption.New,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
     ): ConfirmationDefinition.Action<Args> {
-        return stripeRepository.createPaymentMethod(
-            paymentMethodCreateParams = confirmationOption.createParams,
-            options = requestOptions,
-        ).fold(
-            onSuccess = { paymentMethod ->
-                val params = createConfirmParams(
-                    intent = intent,
-                    paymentMethod = paymentMethod,
-                    savePaymentMethod = confirmationOption.shouldSave.takeIf { isSaveEnabled },
-                    shipping = shippingValues.toCheckoutSessionShipping(),
-                )
-                confirmCheckoutSession(params)
-            },
-            onFailure = { error ->
-                ConfirmationDefinition.Action.Fail(
-                    cause = error,
-                    message = error.stripeErrorMessage(),
-                    errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
-                )
-            }
+        val params = createConfirmParams(
+            intent = intent,
+            confirmationOption = confirmationOption,
+            savePaymentMethod = confirmationOption.shouldSave.takeIf { isSaveEnabled },
+            shipping = shippingValues.toCheckoutSessionShipping(),
         )
+        return confirmCheckoutSession(params)
     }
 
     override suspend fun intercept(
@@ -105,7 +79,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
 
         val params = createConfirmParams(
             intent = intent,
-            paymentMethod = confirmationOption.paymentMethod,
+            confirmationOption = confirmationOption,
             savePaymentMethod = null,
             // ECE Google Pay returns the buyer's final shipping address after confirmation starts.
             // It cannot be reconciled with the earlier shippingValues snapshot, so use it for this
@@ -146,12 +120,17 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
 
     private fun createConfirmParams(
         intent: StripeIntent,
-        paymentMethod: PaymentMethod,
+        confirmationOption: PaymentMethodConfirmationOption,
         savePaymentMethod: Boolean?,
         shipping: ConfirmCheckoutSessionParams.Shipping?,
     ): ConfirmCheckoutSessionParams = ConfirmCheckoutSessionParams(
-        paymentMethodId = paymentMethod.id,
-        expectedPaymentMethodType = paymentMethod.type?.code,
+        paymentMethodId = (confirmationOption as? PaymentMethodConfirmationOption.Saved)?.paymentMethod?.id,
+        paymentMethodData = (confirmationOption as? PaymentMethodConfirmationOption.New)?.createParams,
+        expectedPaymentMethodType = when (confirmationOption) {
+            is PaymentMethodConfirmationOption.New ->
+                PaymentMethod.Type.fromCode(confirmationOption.createParams.typeCode)?.code
+            is PaymentMethodConfirmationOption.Saved -> confirmationOption.paymentMethod.type?.code
+        },
         clientAttributionMetadata = clientAttributionMetadata,
         returnUrl = returnUrl,
         expectedAmount = integrationMetadata.checkoutSessionResponse.amount,

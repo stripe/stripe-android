@@ -10,6 +10,7 @@ import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.core.exception.LocalStripeException
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
+import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
@@ -31,6 +32,7 @@ import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networktesting.NetworkRule
+import com.stripe.android.networktesting.RequestMatcher
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.doesNotContainBodyPartsWithPrefix
 import com.stripe.android.networktesting.RequestMatchers.hasBodyPart
@@ -44,11 +46,11 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
-import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.SetupIntentFactory
+import com.stripe.android.utils.FakeFraudDetectionDataRepository
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -82,7 +84,9 @@ class CheckoutSessionConfirmationInterceptorTest {
             else -> error("Unexpected test type: $type")
         }
         val createParams = when (type) {
-            PaymentMethod.Type.Card -> PaymentMethodCreateParamsFixtures.DEFAULT_CARD
+            PaymentMethod.Type.Card -> PaymentMethodCreateParamsFixtures.DEFAULT_CARD.copy(
+                card = PaymentMethodCreateParamsFixtures.CARD_WITH_ATTRIBUTION,
+            )
             PaymentMethod.Type.Link -> PaymentMethodCreateParams.createLink(
                 paymentDetailsId = "payment_details_123",
                 consumerSessionClientSecret = "consumer_session_secret",
@@ -97,9 +101,16 @@ class CheckoutSessionConfirmationInterceptorTest {
             else -> error("Unexpected test type: $type")
         }
 
-        runScenario(createPaymentMethodResult = Result.success(paymentMethod)) {
+        val paymentMethodMatchers = createPaymentMethodMatchers(
+            saved = saved,
+            type = type,
+            paymentMethod = paymentMethod,
+            createParams = createParams,
+        )
+
+        runScenario {
             networkRule.checkoutConfirm(
-                bodyPart("payment_method", paymentMethod.id),
+                *paymentMethodMatchers.toTypedArray(),
                 bodyPart("expected_payment_method_type", type.code),
             ) { response ->
                 response.testBodyFromFile(
@@ -172,8 +183,7 @@ class CheckoutSessionConfirmationInterceptorTest {
     }
 
     @Test
-    fun `confirmation completes without expected type when unavailable`(
-        @TestParameter saved: Boolean,
+    fun `saved payment method confirmation completes without expected type when unavailable`(
         @TestParameter unrecognized: Boolean,
     ) {
         val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(
@@ -181,7 +191,7 @@ class CheckoutSessionConfirmationInterceptorTest {
             code = if (unrecognized) "unrecognized_payment_method" else null,
         )
 
-        runScenario(createPaymentMethodResult = Result.success(paymentMethod)) {
+        runScenario {
             networkRule.checkoutConfirm(
                 bodyPart("payment_method", paymentMethod.id),
                 not(hasBodyPart("expected_payment_method_type")),
@@ -189,15 +199,11 @@ class CheckoutSessionConfirmationInterceptorTest {
                 response.testBodyFromFile("checkout-session-confirm.json")
             }
 
-            val result = if (saved) {
-                interceptor.intercept(
-                    intent = PaymentIntentFactory.create(),
-                    confirmationOption = SAVED_PM_OPTION.copy(paymentMethod = paymentMethod),
-                    shippingValues = null,
-                )
-            } else {
-                interceptNewPm()
-            }
+            val result = interceptor.intercept(
+                intent = PaymentIntentFactory.create(),
+                confirmationOption = SAVED_PM_OPTION.copy(paymentMethod = paymentMethod),
+                shippingValues = null,
+            )
 
             assertThat(result)
                 .isInstanceOf<ConfirmationDefinition.Action.Complete<IntentConfirmationDefinition.Args>>()
@@ -292,23 +298,6 @@ class CheckoutSessionConfirmationInterceptorTest {
         assertThat(nextAction.deferredIntentConfirmationType)
             .isEqualTo(DeferredIntentConfirmationType.Server)
         assertThat(launchAction.receivesResultInProcess).isFalse()
-    }
-
-    @Test
-    fun `intercept fails when payment method creation fails`() {
-        val error = RuntimeException("Payment method creation failed")
-
-        runScenario(
-            createPaymentMethodResult = Result.failure(error),
-        ) {
-            val result = interceptNewPm()
-
-            assertThat(result).isInstanceOf<ConfirmationDefinition.Action.Fail<IntentConfirmationDefinition.Args>>()
-
-            val failAction = result as ConfirmationDefinition.Action.Fail
-            assertThat(failAction.cause).isEqualTo(error)
-            assertThat(failAction.errorType).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Payment)
-        }
     }
 
     @Test
@@ -923,17 +912,13 @@ class CheckoutSessionConfirmationInterceptorTest {
     }
 
     private fun runScenario(
-        createPaymentMethodResult: Result<PaymentMethod> = Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
         customerMetadata: CustomerMetadata? = null,
         collectedEmail: String? = null,
         checkoutSessionResponse: CheckoutSessionResponse = CheckoutSessionResponseFactory.create(),
         block: suspend Scenario.() -> Unit,
     ) {
-        val stripeRepository = FakeCreatePaymentMethodRepository(
-            createPaymentMethodResult = createPaymentMethodResult,
-        )
-
         val checkoutSessionRepository = CheckoutSessionRepository(
+            fraudDetectionDataRepository = FakeFraudDetectionDataRepository.create(),
             stripeNetworkClient = DefaultStripeNetworkClient(),
             analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
             paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
@@ -963,10 +948,8 @@ class CheckoutSessionConfirmationInterceptorTest {
                 checkoutSessionId = null,
             ),
             context = applicationContext,
-            stripeRepository = stripeRepository,
             checkoutSessionRepository = checkoutSessionRepository,
             checkoutSessionTaxRegionUpdater = CheckoutSessionTaxRegionUpdater(checkoutSessionRepository),
-            requestOptions = ApiRequest.Options(apiKey = "pk_test_123", stripeAccount = "acct_123"),
         )
 
         runTest {
@@ -976,6 +959,36 @@ class CheckoutSessionConfirmationInterceptorTest {
 
             scenario.block()
         }
+    }
+
+    private fun createPaymentMethodMatchers(
+        saved: Boolean,
+        type: PaymentMethod.Type,
+        paymentMethod: PaymentMethod,
+        createParams: PaymentMethodCreateParams,
+    ): List<RequestMatcher> = if (saved) {
+        listOf(bodyPart("payment_method", paymentMethod.id))
+    } else {
+        listOf(
+            when (type) {
+                PaymentMethod.Type.Card -> bodyPart("payment_method_data[card][number]", "4242424242424242")
+                PaymentMethod.Type.Link -> bodyPart(
+                    "payment_method_data[link][payment_details_id]",
+                    "payment_details_123",
+                )
+                PaymentMethod.Type.SepaDebit -> bodyPart("payment_method_data[sepa_debit][iban]", "my_iban")
+                else -> error("Unexpected test type: $type")
+            },
+            bodyPart(
+                "payment_method_data[payment_user_agent]",
+                setOf("stripe-android/${StripeSdkVersion.VERSION_NAME}", "checkout_elements")
+                    .plus(createParams.attribution)
+                    .joinToString(";"),
+            ),
+            bodyPart("payment_method_data[guid]", "test_guid"),
+            bodyPart("payment_method_data[muid]", "test_muid"),
+            bodyPart("payment_method_data[sid]", "test_sid"),
+        )
     }
 
     private data class Scenario(
@@ -1003,19 +1016,6 @@ class CheckoutSessionConfirmationInterceptorTest {
                 ),
                 shippingValues = shippingValues,
             )
-    }
-
-    private class FakeCreatePaymentMethodRepository(
-        private val createPaymentMethodResult: Result<PaymentMethod> =
-            Result.failure(NotImplementedError()),
-    ) : AbsFakeStripeRepository() {
-
-        override suspend fun createPaymentMethod(
-            paymentMethodCreateParams: PaymentMethodCreateParams,
-            options: ApiRequest.Options
-        ): Result<PaymentMethod> {
-            return createPaymentMethodResult
-        }
     }
 
     private companion object {
