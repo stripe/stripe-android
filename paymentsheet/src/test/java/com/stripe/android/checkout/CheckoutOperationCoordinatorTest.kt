@@ -7,6 +7,8 @@ import app.cash.turbine.Turbine
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
+import com.stripe.android.core.StripeError
+import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.PaymentIntentFixtures
@@ -228,7 +230,9 @@ internal class CheckoutOperationCoordinatorTest {
         assertThat(arguments).isNull()
         val result = resultTurbine.awaitItem()
         assertThat(result).isInstanceOf<CheckoutController.Result.Failed>()
-        assertThat((result as CheckoutController.Result.Failed).error).isSameInstanceAs(expected)
+        val failedResult = result as CheckoutController.Result.Failed
+        assertThat(failedResult.error).isSameInstanceAs(expected)
+        assertThat(failedResult.displayMessage).isNull()
         resultTurbine.expectNoEvents()
         refreshCalls.expectNoEvents()
         assertThat(coordinator.isUpdating.value).isFalse()
@@ -506,15 +510,17 @@ internal class CheckoutOperationCoordinatorTest {
     }
 
     @Test
-    fun `failed confirmation preserves its cause`() = runScenario {
-        val expected = IllegalStateException("Confirmation failed")
+    fun `failed confirmation preserves its cause and server display message`() = runScenario {
+        val expected = APIException(
+            stripeError = StripeError(type = "api_error", message = "Server confirmation message"),
+        )
         coordinator.tryBeginConfirmation { Result.success(CONFIRMATION_PARAMETERS) }
 
         enqueueRefreshAction {}
         confirmationState.value = ConfirmationHandler.State.Complete(
             ConfirmationHandler.Result.Failed(
                 cause = expected,
-                message = "Confirmation failed".resolvableString,
+                message = "Confirmation fallback message".resolvableString,
                 type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
             )
         )
@@ -522,7 +528,9 @@ internal class CheckoutOperationCoordinatorTest {
         assertThat(refreshCalls.awaitItem()).isEqualTo(FakeCheckoutSessionRefresher.Call.Fetch)
         val result = resultTurbine.awaitItem()
         assertThat(result).isInstanceOf<CheckoutController.Result.Failed>()
-        assertThat((result as CheckoutController.Result.Failed).error).isSameInstanceAs(expected)
+        val failedResult = result as CheckoutController.Result.Failed
+        assertThat(failedResult.error).isSameInstanceAs(expected)
+        assertThat(failedResult.displayMessage).isEqualTo("Server confirmation message")
         assertThat(coordinator.isUpdating.value).isFalse()
     }
 
@@ -537,7 +545,9 @@ internal class CheckoutOperationCoordinatorTest {
         refreshCalls.awaitItem()
         val result = resultTurbine.awaitItem()
         assertThat(result).isInstanceOf<CheckoutController.Result.Failed>()
-        assertThat((result as CheckoutController.Result.Failed).error).isSameInstanceAs(expected)
+        val failedResult = result as CheckoutController.Result.Failed
+        assertThat(failedResult.error).isSameInstanceAs(expected)
+        assertThat(failedResult.displayMessage).isNull()
         assertThat(coordinator.isUpdating.value).isFalse()
     }
 
