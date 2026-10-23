@@ -84,8 +84,13 @@ internal class LinkActivityTest {
 
     @Test
     fun `includes confirmation request ID with the cancelled result`() = runTest {
+        val linkAccountManager = FakeLinkAccountManager()
+        linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
+        linkAccountManager.setAccountStatus(AccountStatus.Verified(consentPresentation = null))
+
         val activity = setupActivityController(
             linkLaunchMode = LinkLaunchMode.Full(showSecondaryButton = true),
+            linkAccountManager = linkAccountManager,
         )
         val viewModel = checkNotNull(activity.viewModel)
         val requestId = "req_native_link"

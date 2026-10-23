@@ -446,6 +446,7 @@ class CheckoutSessionConfirmationInterceptorTest {
         savedStateHandle.checkoutConfirmationRequestId = "req_previous_confirm"
         networkRule.checkoutConfirm { response ->
             response.testBodyFromFile("checkout-session-confirm-setup.json")
+            response.removeHeader("request-id")
         }
 
         val result = interceptNewPm()
