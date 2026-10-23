@@ -101,6 +101,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
             performer.confirm(expressButton)
 
             val args = confirmationHandler.startTurbine.awaitItem()
+            awaitAnalyticsEvent()
             assertThat(args.confirmationOption).isInstanceOf<GooglePayConfirmationOption>()
             val option = args.confirmationOption as GooglePayConfirmationOption
             assertThat(option.config.shippingAddressParameters).isNull()
@@ -125,6 +126,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
             performer.confirm(expressButton)
 
             val args = confirmationHandler.startTurbine.awaitItem()
+            awaitAnalyticsEvent()
             val option = args.confirmationOption as GooglePayConfirmationOption
             assertThat(option.config.shippingAddressParameters).isEqualTo(
                 GooglePayJsonFactory.ShippingAddressParameters(
@@ -148,6 +150,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
             performer.confirm(expressButton)
 
             val args = confirmationHandler.startTurbine.awaitItem()
+            awaitAnalyticsEvent()
             val option = args.confirmationOption as GooglePayConfirmationOption
             val billingDetails = option.config.billingDetailsCollectionConfiguration
             assertThat(billingDetails.name).isEqualTo(
@@ -179,6 +182,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
             performer.confirm(expressButton)
 
             val args = confirmationHandler.startTurbine.awaitItem()
+            awaitAnalyticsEvent()
             val option = args.confirmationOption as GooglePayConfirmationOption
             assertThat(option.config.billingDetailsCollectionConfiguration.address).isEqualTo(
                 PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
@@ -208,6 +212,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
             performer.confirm(expressButton)
 
             val args = confirmationHandler.startTurbine.awaitItem()
+            awaitAnalyticsEvent()
             assertThat(args.confirmationOption).isInstanceOf<LinkConfirmationOption>()
             val option = args.confirmationOption as LinkConfirmationOption
             assertThat(option.linkLaunchMode).isEqualTo(
@@ -297,6 +302,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
             stateHolder = stateHolder,
             expressButton = expressButton,
             results = results,
+            analyticsRequestExecutor = analyticsRequestExecutor,
         ).block()
 
         results.ensureAllEventsConsumed()
@@ -314,5 +320,11 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
         val stateHolder: CheckoutControllerStateHolder,
         val expressButton: ExpressButton,
         val results: Turbine<CheckoutController.Result>,
-    )
+        val analyticsRequestExecutor: FakeAnalyticsRequestExecutor,
+    ) {
+        suspend fun awaitAnalyticsEvent() {
+            val params = analyticsRequestExecutor.requestTurbine.awaitItem().params
+            assertThat(params["event"]).isEqualTo("checkout_elements.confirm.started")
+        }
+    }
 }

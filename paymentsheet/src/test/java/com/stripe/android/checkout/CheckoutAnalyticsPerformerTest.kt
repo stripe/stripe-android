@@ -9,7 +9,6 @@ import com.stripe.android.core.ApiConfigurationPreview
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.LinkAccountHolder
@@ -52,11 +51,15 @@ internal class CheckoutAnalyticsPerformerTest {
     @Test
     fun `payment element confirmation reports success only once`() = runScenario {
         val selection = PaymentSelection.GooglePay
-        performer.onPaymentElementConfirmationStarted(selection)
-
-        analyticsRequestExecutor.requestTurbine.expectNoEvents()
-
         startReporting()
+        performer.onPaymentElementConfirmationStarted(selection)
+        analyticsRequestExecutor.awaitAndAssertConfirmationRequest(
+            ExpectedEvent(
+                event = "checkout_elements.confirm.started",
+                publishableKey = DEFAULT_METADATA_PUBLISHABLE_KEY,
+                params = paymentElementConfirmationParams,
+            ),
+        )
 
         val success = successfulResult()
         confirmationHandler.state.value = ConfirmationHandler.State.Complete(success)
@@ -81,6 +84,13 @@ internal class CheckoutAnalyticsPerformerTest {
     fun `payment failure reports safe fields`() = runScenario {
         startReporting()
         performer.onExpressCheckoutElementConfirmationStarted(PaymentSelection.GooglePay)
+        analyticsRequestExecutor.awaitAndAssertConfirmationRequest(
+            ExpectedEvent(
+                event = "checkout_elements.confirm.started",
+                publishableKey = DEFAULT_METADATA_PUBLISHABLE_KEY,
+                params = paymentElementConfirmationParams + ("invocation_source" to "express_checkout_element"),
+            ),
+        )
         val privateMessage = "private payment details"
         val error = APIException(
             stripeError = StripeError(
@@ -118,6 +128,13 @@ internal class CheckoutAnalyticsPerformerTest {
     fun `Google Pay failure preserves its analytics error classification`() = runScenario {
         startReporting()
         performer.onPaymentElementConfirmationStarted(PaymentSelection.GooglePay)
+        analyticsRequestExecutor.awaitAndAssertConfirmationRequest(
+            ExpectedEvent(
+                event = "checkout_elements.confirm.started",
+                publishableKey = DEFAULT_METADATA_PUBLISHABLE_KEY,
+                params = paymentElementConfirmationParams,
+            ),
+        )
         val privateMessage = "private Google Pay details"
         confirmationHandler.state.value = ConfirmationHandler.State.Complete(
             ConfirmationHandler.Result.Failed(
@@ -142,38 +159,97 @@ internal class CheckoutAnalyticsPerformerTest {
     }
 
     @Test
-    fun `internal failure is filtered from confirmation analytics`() = assertFailureNotReported(
+    fun `internal failure reports a confirmation event`() = assertFailureReported(
         ConfirmationHandler.Result.Failed.ErrorType.Internal,
     )
 
     @Test
-    fun `merchant integration failure is filtered from confirmation analytics`() = assertFailureNotReported(
+    fun `merchant integration failure reports a confirmation event`() = assertFailureReported(
         ConfirmationHandler.Result.Failed.ErrorType.MerchantIntegration,
     )
 
     @Test
-    fun `fatal failure is filtered from confirmation analytics`() = assertFailureNotReported(
+    fun `fatal failure reports a confirmation event`() = assertFailureReported(
         ConfirmationHandler.Result.Failed.ErrorType.Fatal,
     )
 
     @Test
-    fun `canceled confirmation does not report a terminal event`() = runScenario {
+    fun `canceled confirmation reports canceled without error fields`() = runScenario {
         startReporting()
         performer.onPaymentElementConfirmationStarted(PaymentSelection.GooglePay)
+        analyticsRequestExecutor.awaitAndAssertConfirmationRequest(
+            ExpectedEvent(
+                event = "checkout_elements.confirm.started",
+                publishableKey = DEFAULT_METADATA_PUBLISHABLE_KEY,
+                params = paymentElementConfirmationParams,
+            ),
+        )
         confirmationHandler.state.value = ConfirmationHandler.State.Complete(
             ConfirmationHandler.Result.Canceled(
                 ConfirmationHandler.Result.Canceled.Action.InformCancellation
             )
         )
 
+        val request = analyticsRequestExecutor.awaitAndAssertConfirmationRequest(
+            ExpectedEvent(
+                event = "checkout_elements.confirm.canceled",
+                publishableKey = DEFAULT_METADATA_PUBLISHABLE_KEY,
+                params = paymentElementConfirmationParams + ("duration" to 2f),
+            ),
+        )
+        assertThat(request).doesNotContainKey("error_type")
+        assertThat(request).doesNotContainKey("error_code")
+    }
+
+    @Test
+    fun `restored cancellation reports canceled once without error fields`() = runScenario {
+        performer.onPaymentElementConfirmationStarted(PaymentSelection.GooglePay)
+        analyticsRequestExecutor.awaitAndAssertConfirmationRequest(
+            ExpectedEvent(
+                event = "checkout_elements.confirm.started",
+                publishableKey = DEFAULT_METADATA_PUBLISHABLE_KEY,
+                params = paymentElementConfirmationParams,
+            ),
+        )
+
+        val restoredPerformer = recreatePerformer()
+        startReporting(restoredPerformer)
+        confirmationHandler.state.value = ConfirmationHandler.State.Complete(
+            ConfirmationHandler.Result.Canceled(
+                action = ConfirmationHandler.Result.Canceled.Action.None,
+            )
+        )
+
+        val request = analyticsRequestExecutor.awaitAndAssertConfirmationRequest(
+            ExpectedEvent(
+                event = "checkout_elements.confirm.canceled",
+                publishableKey = DEFAULT_METADATA_PUBLISHABLE_KEY,
+                params = paymentElementConfirmationParams + ("duration" to 2f),
+            ),
+        )
+        assertThat(request).doesNotContainKey("error_type")
+        assertThat(request).doesNotContainKey("error_code")
+
+        confirmationHandler.state.value = ConfirmationHandler.State.Idle
+        confirmationHandler.state.value = ConfirmationHandler.State.Complete(
+            ConfirmationHandler.Result.Canceled(
+                action = ConfirmationHandler.Result.Canceled.Action.None,
+            )
+        )
         analyticsRequestExecutor.requestTurbine.expectNoEvents()
-        assertThat(durationProvider.has(FakeDurationProvider.Call.End(DurationProvider.Key.Checkout))).isFalse()
     }
 
     @Test
     fun `express checkout confirmation context survives performer recreation`() = runScenario {
         val selection = PaymentSelection.Link(brand = LinkBrand.Link)
         performer.onExpressCheckoutElementConfirmationStarted(selection)
+        analyticsRequestExecutor.awaitAndAssertConfirmationRequest(
+            ExpectedEvent(
+                event = "checkout_elements.confirm.started",
+                publishableKey = DEFAULT_METADATA_PUBLISHABLE_KEY,
+                params = expressCheckoutConfirmationParams,
+            ),
+        )
 
         val restoredPerformer = recreatePerformer()
         startReporting(restoredPerformer)
@@ -202,6 +278,13 @@ internal class CheckoutAnalyticsPerformerTest {
         )
         startReporting()
         performer.onExpressCheckoutElementConfirmationStarted(PaymentSelection.Link(brand = LinkBrand.Link))
+        analyticsRequestExecutor.awaitAndAssertConfirmationRequest(
+            ExpectedEvent(
+                event = "checkout_elements.confirm.started",
+                publishableKey = DEFAULT_METADATA_PUBLISHABLE_KEY,
+                params = expressCheckoutConfirmationParams + ("active_link_session" to true),
+            ),
+        )
 
         confirmationHandler.state.value = ConfirmationHandler.State.Complete(successfulResult())
 
@@ -220,6 +303,17 @@ internal class CheckoutAnalyticsPerformerTest {
         stateHolder.state = stateHolder.state!!.copy(paymentSelection = selection)
         startReporting()
         performer.onPaymentElementConfirmationStarted(selection)
+        analyticsRequestExecutor.awaitAndAssertConfirmationRequest(
+            ExpectedEvent(
+                event = "checkout_elements.confirm.started",
+                publishableKey = DEFAULT_METADATA_PUBLISHABLE_KEY,
+                params = mapOf(
+                    "selected_lpm" to "card",
+                    "is_saved_payment_method" to true,
+                    "invocation_source" to "merchant",
+                ),
+            ),
+        )
 
         confirmationHandler.state.value = ConfirmationHandler.State.Complete(successfulResult())
 
@@ -242,6 +336,13 @@ internal class CheckoutAnalyticsPerformerTest {
         linkAccountHolder.set(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
         startReporting()
         performer.onPaymentElementConfirmationStarted(PaymentSelection.GooglePay)
+        analyticsRequestExecutor.awaitAndAssertConfirmationRequest(
+            ExpectedEvent(
+                event = "checkout_elements.confirm.started",
+                publishableKey = DEFAULT_METADATA_PUBLISHABLE_KEY,
+                params = paymentElementConfirmationParams + ("active_link_session" to true),
+            ),
+        )
 
         confirmationHandler.state.value = ConfirmationHandler.State.Complete(successfulResult())
 
@@ -268,6 +369,13 @@ internal class CheckoutAnalyticsPerformerTest {
         stateHolder.state = stateHolder.state!!.copy(checkoutSessionResponse = initialResponse)
         startReporting()
         performer.onPaymentElementConfirmationStarted(PaymentSelection.GooglePay)
+        analyticsRequestExecutor.awaitAndAssertConfirmationRequest(
+            ExpectedEvent(
+                event = "checkout_elements.confirm.started",
+                publishableKey = DEFAULT_METADATA_PUBLISHABLE_KEY,
+                params = paymentElementConfirmationParams,
+            ),
+        )
         val confirmationResponse = initialResponse.copy(
             status = CheckoutSessionResponse.Status.COMPLETE,
             paymentStatus = CheckoutSessionResponse.PaymentStatus.PAID,
@@ -302,9 +410,16 @@ internal class CheckoutAnalyticsPerformerTest {
         )
     }
 
-    private fun assertFailureNotReported(type: ConfirmationHandler.Result.Failed.ErrorType) = runScenario {
+    private fun assertFailureReported(type: ConfirmationHandler.Result.Failed.ErrorType) = runScenario {
         startReporting()
         performer.onPaymentElementConfirmationStarted(PaymentSelection.GooglePay)
+        analyticsRequestExecutor.awaitAndAssertConfirmationRequest(
+            ExpectedEvent(
+                event = "checkout_elements.confirm.started",
+                publishableKey = DEFAULT_METADATA_PUBLISHABLE_KEY,
+                params = paymentElementConfirmationParams,
+            ),
+        )
 
         confirmationHandler.state.value = ConfirmationHandler.State.Complete(
             ConfirmationHandler.Result.Failed(
@@ -314,8 +429,17 @@ internal class CheckoutAnalyticsPerformerTest {
             )
         )
 
-        analyticsRequestExecutor.requestTurbine.expectNoEvents()
-        assertThat(durationProvider.has(FakeDurationProvider.Call.End(DurationProvider.Key.Checkout))).isFalse()
+        val request = analyticsRequestExecutor.awaitAndAssertConfirmationRequest(
+            ExpectedEvent(
+                event = "checkout_elements.confirm.failed",
+                publishableKey = DEFAULT_METADATA_PUBLISHABLE_KEY,
+                params = paymentElementConfirmationParams + mapOf(
+                    "error_type" to "java.lang.IllegalStateException",
+                    "duration" to 2f,
+                ),
+            ),
+        )
+        assertThat(request.toString()).doesNotContain("private failure details")
     }
 
     private fun linkMetadata(loginState: LinkState.LoginState): PaymentMethodMetadata =
