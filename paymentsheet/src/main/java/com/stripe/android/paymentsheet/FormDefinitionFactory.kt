@@ -4,6 +4,7 @@ import androidx.lifecycle.viewModelScope
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.common.nfcscan.IsNfcScanningAvailable
 import com.stripe.android.common.taptoadd.TapToAddHelper
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
@@ -71,7 +72,18 @@ internal class DefaultFormDefinitionFactory(
     private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper?,
     private val isNfcScanningAvailable: IsNfcScanningAvailable?,
 ) : FormDefinitionFactory {
+    private val formTypes = mutableMapOf<FormTypeCacheKey, FormHelper.FormType>()
+
     override fun formElementsForCode(code: PaymentMethodCode): List<FormElement> {
+        return synchronized(formTypes) {
+            val key = formTypeCacheKey(code)
+            createFormElements(code).also { elements ->
+                formTypes[key] = formTypeForCode(code, elements)
+            }
+        }
+    }
+
+    private fun createFormElements(code: PaymentMethodCode): List<FormElement> {
         return paymentMethodMetadata.formElementsForCode(
             code = code,
             uiDefinitionFactoryArgumentsFactory = createArgumentsFactory(code),
@@ -96,9 +108,25 @@ internal class DefaultFormDefinitionFactory(
     }
 
     override fun formTypeForCode(paymentMethodCode: PaymentMethodCode): FormHelper.FormType {
-        val formElements = formElementsForCode(paymentMethodCode)
-        return formTypeForCode(paymentMethodCode, formElements)
+        return synchronized(formTypes) {
+            formTypes.getOrPut(formTypeCacheKey(paymentMethodCode)) {
+                formTypeForCode(paymentMethodCode, createFormElements(paymentMethodCode))
+            }
+        }
     }
+
+    private fun formTypeCacheKey(code: PaymentMethodCode): FormTypeCacheKey {
+        return FormTypeCacheKey(
+            code = code,
+            klarnaFormRemoved = code == PaymentMethod.Type.Klarna.code &&
+                FeatureFlags.enableKlarnaFormRemoval.isEnabled,
+        )
+    }
+
+    private data class FormTypeCacheKey(
+        val code: PaymentMethodCode,
+        val klarnaFormRemoved: Boolean,
+    )
 
     private fun createArgumentsFactory(code: PaymentMethodCode): UiDefinitionFactory.Arguments.Factory {
         val currentSelection = newPaymentSelectionProvider(code)?.takeIf { it.getType() == code }
