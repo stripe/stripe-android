@@ -96,6 +96,7 @@ class DeferredIntentConfirmationInterceptorTest {
                 cause = invalidRequestException,
                 message = "Your card is not supported.".resolvableString,
                 errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                confirmationRequestId = null,
             )
         )
     }
@@ -133,6 +134,7 @@ class DeferredIntentConfirmationInterceptorTest {
                 cause = apiException,
                 message = resolvableString(R.string.stripe_something_went_wrong),
                 errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                confirmationRequestId = null,
             )
         )
     }
@@ -157,6 +159,7 @@ class DeferredIntentConfirmationInterceptorTest {
                 cause = CreateIntentCallbackFailureException(TestException("that didn't work…")),
                 message = resolvableString("that didn't work…"),
                 errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                confirmationRequestId = null,
             )
         )
     }
@@ -178,6 +181,7 @@ class DeferredIntentConfirmationInterceptorTest {
                 cause = CreateIntentCallbackFailureException(TestException()),
                 message = resolvableString(R.string.stripe_something_went_wrong),
                 errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                confirmationRequestId = null,
             )
         )
     }
@@ -239,6 +243,7 @@ class DeferredIntentConfirmationInterceptorTest {
                     set(DeferredIntentConfirmationTypeKey, DeferredIntentConfirmationType.Server)
                 },
                 completedFullPaymentFlow = true,
+                confirmationRequestId = null,
             )
         )
     }
@@ -281,6 +286,7 @@ class DeferredIntentConfirmationInterceptorTest {
                         deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
                     ),
                     receivesResultInProcess = false,
+                    confirmationRequestId = null,
                 )
             )
         }
@@ -354,6 +360,7 @@ class DeferredIntentConfirmationInterceptorTest {
                     set(DeferredIntentConfirmationTypeKey, DeferredIntentConfirmationType.None)
                 },
                 completedFullPaymentFlow = true,
+                confirmationRequestId = null,
             )
         )
     }

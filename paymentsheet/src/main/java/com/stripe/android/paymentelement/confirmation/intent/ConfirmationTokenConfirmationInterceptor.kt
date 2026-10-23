@@ -217,6 +217,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                         deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
                     ),
                     receivesResultInProcess = false,
+                    confirmationRequestId = null,
                 )
             } else {
                 confirmActionHelper.createConfirmAction(
