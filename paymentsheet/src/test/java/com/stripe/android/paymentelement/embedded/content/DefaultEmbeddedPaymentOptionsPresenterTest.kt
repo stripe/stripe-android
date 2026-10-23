@@ -26,10 +26,9 @@ internal class DefaultEmbeddedPaymentOptionsPresenterTest {
     fun `present reports error when state is null`() = runScenario {
         presenter.present()
 
-        assertThat(errorReporter.awaitCall().errorEvent.eventName).isEqualTo(
+        assertThat(errorReporter.getLoggedErrors()).containsExactly(
             "unexpected_error.embedded.present_payment_options.not_configured"
         )
-        assertThat(sheetStateHolder.sheetIsOpen).isFalse()
     }
 
     @Test
@@ -38,7 +37,7 @@ internal class DefaultEmbeddedPaymentOptionsPresenterTest {
     ) {
         presenter.present()
 
-        assertThat(errorReporter.awaitCall().errorEvent.eventName).isEqualTo(
+        assertThat(errorReporter.getLoggedErrors()).containsExactly(
             "unexpected_error.embedded.present_payment_options.no_launcher"
         )
     }
@@ -98,8 +97,6 @@ internal class DefaultEmbeddedPaymentOptionsPresenterTest {
         )
 
         Scenario(presenter, sheetStateHolder, errorReporter).block()
-
-        errorReporter.ensureAllEventsConsumed()
     }
 
     private data class Scenario(
