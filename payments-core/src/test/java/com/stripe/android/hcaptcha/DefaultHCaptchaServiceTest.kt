@@ -6,6 +6,7 @@ import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.hcaptcha.DefaultHCaptchaServiceTest.FakeHCaptchaProvider.HCaptchaHandler
 import com.stripe.android.hcaptcha.analytics.CaptchaEventsReporter
+import com.stripe.android.isInstanceOf
 import com.stripe.hcaptcha.HCaptcha
 import com.stripe.hcaptcha.HCaptchaError
 import com.stripe.hcaptcha.HCaptchaException
@@ -14,7 +15,9 @@ import com.stripe.hcaptcha.config.HCaptchaConfig
 import com.stripe.hcaptcha.config.HCaptchaSize
 import com.stripe.hcaptcha.task.OnFailureListener
 import com.stripe.hcaptcha.task.OnSuccessListener
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
@@ -22,16 +25,99 @@ import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.atLeastOnce
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.shadows.ShadowSystemClock
 import java.util.concurrent.TimeUnit
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 internal class DefaultHCaptchaServiceTest {
+    @Test
+    fun `performPassiveHCaptcha waits for WebView startup before setup`() = runTest {
+        TestContext.test(webViewStarter = FakeWebViewStarter(completeImmediately = false)) {
+            hCaptchaProvider.hCaptchaHandler = SetupSuccessfulHCaptcha()
+            val result = async {
+                service.performPassiveHCaptcha(activity, TEST_SITE_KEY, null, null)
+            }
+
+            val startup = webViewStarter.awaitCall()
+            val hCaptcha = hCaptchaProvider.awaitCall()
+            assertThat(startup.context).isSameInstanceAs(activity)
+
+            verify(hCaptcha, never()).setup(any(), any())
+
+            startup.continuation.resume(Unit)
+
+            assertThat(result.await()).isEqualTo(HCaptchaService.Result.Success("token"))
+            verify(hCaptcha).setup(any(), any())
+        }
+    }
+
+    @Test
+    fun `warmUp waits for WebView startup before setup`() = runTest {
+        TestContext.test(webViewStarter = FakeWebViewStarter(completeImmediately = false)) {
+            hCaptchaProvider.hCaptchaHandler = SetupSuccessfulHCaptcha()
+            val job = launch {
+                service.warmUp(activity, TEST_SITE_KEY, null)
+            }
+
+            val startup = webViewStarter.awaitCall()
+            val hCaptcha = hCaptchaProvider.awaitCall()
+            verify(hCaptcha, never()).setup(any(), any())
+
+            startup.continuation.resume(Unit)
+            job.join()
+
+            verify(hCaptcha).setup(any(), any())
+        }
+    }
+
+    @Test
+    fun `cancellation during WebView startup prevents setup after startup completes`() = runTest {
+        TestContext.test(webViewStarter = FakeWebViewStarter(completeImmediately = false)) {
+            val job = launch {
+                service.performPassiveHCaptcha(activity, TEST_SITE_KEY, null, null)
+            }
+
+            val startup = webViewStarter.awaitCall()
+            val hCaptcha = hCaptchaProvider.awaitCall()
+            job.cancel()
+            job.join()
+
+            startup.continuation.resume(Unit)
+            runCurrent()
+
+            verify(hCaptcha, never()).setup(any(), any())
+            verify(hCaptcha).reset()
+        }
+    }
+
+    @Test
+    fun `WebView startup failure returns failure without setting up HCaptcha`() = runTest {
+        TestContext.test(webViewStarter = FakeWebViewStarter(completeImmediately = false)) {
+            val result = async {
+                service.performPassiveHCaptcha(activity, TEST_SITE_KEY, null, null)
+            }
+
+            val startup = webViewStarter.awaitCall()
+            val hCaptcha = hCaptchaProvider.awaitCall()
+            val exception = IllegalStateException("WebView startup failed")
+            startup.continuation.resumeWithException(exception)
+
+            val failure = result.await() as HCaptchaService.Result.Failure
+            assertThat(failure.error).isInstanceOf<IllegalStateException>()
+            assertThat(failure.error.message).isEqualTo(exception.message)
+
+            verify(hCaptcha, never()).setup(any(), any())
+            verify(hCaptcha).reset()
+        }
+    }
 
     @Test
     fun `performPassiveHCaptcha calls hCaptchaProvider`() = runTest {
@@ -44,7 +130,7 @@ internal class DefaultHCaptchaServiceTest {
                 rqData = null,
                 tokenTimeoutSeconds = null
             )
-
+            assertThat(webViewStarter.awaitCall()).isNotNull()
             hCaptchaProvider.awaitCall()
         }
     }
@@ -60,6 +146,7 @@ internal class DefaultHCaptchaServiceTest {
                 rqData = TEST_RQ_DATA,
                 tokenTimeoutSeconds = null
             )
+            assertThat(webViewStarter.awaitCall()).isNotNull()
 
             val configCaptor = argumentCaptor<HCaptchaConfig>()
             verify(hCaptchaProvider.awaitCall()).setup(any(), configCaptor.capture())
@@ -86,6 +173,7 @@ internal class DefaultHCaptchaServiceTest {
                 rqData = null,
                 tokenTimeoutSeconds = null
             )
+            assertThat(webViewStarter.awaitCall()).isNotNull()
 
             assertThat(captchaEventsReporter.awaitCall())
                 .isEqualTo(FakeCaptchaEventsReporter.Call.AttachStart)
@@ -117,6 +205,7 @@ internal class DefaultHCaptchaServiceTest {
                 rqData = null,
                 tokenTimeoutSeconds = null
             )
+            assertThat(webViewStarter.awaitCall()).isNotNull()
 
             assertThat(captchaEventsReporter.awaitCall())
                 .isEqualTo(FakeCaptchaEventsReporter.Call.AttachStart)
@@ -147,6 +236,7 @@ internal class DefaultHCaptchaServiceTest {
                 rqData = null,
                 tokenTimeoutSeconds = null
             )
+            webViewStarter.awaitCall()
             verify(hCaptchaProvider.awaitCall()).reset()
         }
     }
@@ -163,6 +253,7 @@ internal class DefaultHCaptchaServiceTest {
                 rqData = null,
                 tokenTimeoutSeconds = null
             )
+            assertThat(webViewStarter.awaitCall()).isNotNull()
 
             verify(hCaptchaProvider.awaitCall()).reset()
         }
@@ -183,6 +274,7 @@ internal class DefaultHCaptchaServiceTest {
             }
 
             val hCaptcha = hCaptchaProvider.awaitCall()
+            assertThat(webViewStarter.awaitCall()).isNotNull()
             job.cancel()
             job.join()
 
@@ -202,6 +294,7 @@ internal class DefaultHCaptchaServiceTest {
                 rqData = null,
                 tokenTimeoutSeconds = null
             )
+            assertThat(webViewStarter.awaitCall()).isNotNull()
 
             assertThat(captchaEventsReporter.awaitCall())
                 .isEqualTo(FakeCaptchaEventsReporter.Call.AttachStart)
@@ -231,6 +324,7 @@ internal class DefaultHCaptchaServiceTest {
                 siteKey = TEST_SITE_KEY,
                 rqData = null
             )
+            assertThat(webViewStarter.awaitCall()).isNotNull()
             hCaptchaProvider.awaitCall()
 
             // Perform the passive hCaptcha which should clear cache
@@ -248,6 +342,7 @@ internal class DefaultHCaptchaServiceTest {
                 siteKey = TEST_SITE_KEY,
                 rqData = null
             )
+            assertThat(webViewStarter.awaitCall()).isNotNull()
             hCaptchaProvider.awaitCall() // This would not be called if cache wasn't cleared
 
             hCaptchaProvider.ensureAllEventsConsumed()
@@ -266,6 +361,7 @@ internal class DefaultHCaptchaServiceTest {
                 siteKey = TEST_SITE_KEY,
                 rqData = null
             )
+            webViewStarter.awaitCall()
             hCaptchaProvider.awaitCall()
 
             // Perform the passive hCaptcha which should clear cache
@@ -283,6 +379,7 @@ internal class DefaultHCaptchaServiceTest {
                 siteKey = TEST_SITE_KEY,
                 rqData = null
             )
+            assertThat(webViewStarter.awaitCall()).isNotNull()
             hCaptchaProvider.awaitCall() // This would not be called if cache wasn't cleared
 
             hCaptchaProvider.ensureAllEventsConsumed()
@@ -302,6 +399,7 @@ internal class DefaultHCaptchaServiceTest {
                 rqData = null,
                 tokenTimeoutSeconds = null
             )
+            assertThat(webViewStarter.awaitCall()).isNotNull()
 
             assertThat(result).isInstanceOf(HCaptchaService.Result.Failure::class.java)
 
@@ -312,6 +410,7 @@ internal class DefaultHCaptchaServiceTest {
                 siteKey = TEST_SITE_KEY,
                 rqData = null
             )
+            assertThat(webViewStarter.awaitCall()).isNotNull()
             hCaptchaProvider.awaitCall() // This would not be called if cache wasn't cleared
         }
     }
@@ -327,6 +426,7 @@ internal class DefaultHCaptchaServiceTest {
                 siteKey = TEST_SITE_KEY,
                 rqData = TEST_RQ_DATA
             )
+            assertThat(webViewStarter.awaitCall()).isNotNull()
 
             hCaptchaProvider.awaitCall()
 
@@ -367,6 +467,7 @@ internal class DefaultHCaptchaServiceTest {
                 siteKey = TEST_SITE_KEY,
                 rqData = null
             )
+            assertThat(webViewStarter.awaitCall()).isNotNull()
 
             hCaptchaProvider.awaitCall()
 
@@ -425,6 +526,7 @@ internal class DefaultHCaptchaServiceTest {
             hCaptchaProvider.hCaptchaHandler = SetupSuccessfulHCaptcha(warmUpToken)
 
             service.warmUp(activity, siteKey = TEST_SITE_KEY, rqData = null)
+            webViewStarter.awaitCall()
             hCaptchaProvider.awaitCall()
 
             hCaptchaProvider.hCaptchaHandler = SetupSuccessfulHCaptcha(freshToken)
@@ -438,6 +540,7 @@ internal class DefaultHCaptchaServiceTest {
             )
 
             if (shouldFetchNewToken) {
+                webViewStarter.awaitCall()
                 hCaptchaProvider.awaitCall()
             }
 
@@ -464,6 +567,7 @@ internal class DefaultHCaptchaServiceTest {
             }
 
             val firstHCaptcha = hCaptchaProvider.awaitCall()
+            assertThat(webViewStarter.awaitCall()).isNotNull()
 
             service.warmUp(
                 activity,
@@ -490,6 +594,7 @@ internal class DefaultHCaptchaServiceTest {
                 siteKey = TEST_SITE_KEY,
                 rqData = null
             )
+            assertThat(webViewStarter.awaitCall()).isNotNull()
 
             hCaptchaProvider.awaitCall()
 
@@ -514,6 +619,7 @@ internal class DefaultHCaptchaServiceTest {
                 siteKey = TEST_SITE_KEY,
                 rqData = null
             )
+            assertThat(webViewStarter.awaitCall()).isNotNull()
 
             hCaptchaProvider.awaitCall()
 
@@ -524,6 +630,7 @@ internal class DefaultHCaptchaServiceTest {
                 siteKey = TEST_SITE_KEY,
                 rqData = null
             )
+            assertThat(webViewStarter.awaitCall()).isNotNull()
 
             val secondHCaptcha = hCaptchaProvider.awaitCall()
             verify(secondHCaptcha).verifyWithHCaptcha(any())
@@ -588,7 +695,8 @@ internal class DefaultHCaptchaServiceTest {
         val activity: FragmentActivity,
         val hCaptchaProvider: FakeHCaptchaProvider,
         val service: DefaultHCaptchaService,
-        val captchaEventsReporter: FakeCaptchaEventsReporter
+        val captchaEventsReporter: FakeCaptchaEventsReporter,
+        val webViewStarter: FakeWebViewStarter
     ) {
 
         companion object {
@@ -596,15 +704,23 @@ internal class DefaultHCaptchaServiceTest {
                 activity: FragmentActivity = mock(),
                 hCaptchaProvider: FakeHCaptchaProvider = FakeHCaptchaProvider(),
                 captchaEventsReporter: FakeCaptchaEventsReporter = FakeCaptchaEventsReporter(),
-                service: DefaultHCaptchaService = DefaultHCaptchaService(hCaptchaProvider, captchaEventsReporter),
+                webViewStarter: FakeWebViewStarter = FakeWebViewStarter(),
+                service: DefaultHCaptchaService = DefaultHCaptchaService(
+                    hCaptchaProvider,
+                    captchaEventsReporter,
+                    webViewStarter
+                ),
                 block: suspend TestContext.() -> Unit
             ) {
                 TestContext(
                     activity = activity,
                     hCaptchaProvider = hCaptchaProvider,
                     service = service,
-                    captchaEventsReporter = captchaEventsReporter
+                    captchaEventsReporter = captchaEventsReporter,
+                    webViewStarter = webViewStarter
                 ).apply { block(this) }
+
+                webViewStarter.ensureAllEventsConsumed()
             }
         }
     }
