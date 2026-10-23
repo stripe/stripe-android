@@ -39,6 +39,7 @@ import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.UiObjectNotFoundException
 import androidx.test.uiautomator.UiScrollable
 import androidx.test.uiautomator.UiSelector
+import androidx.test.uiautomator.Until
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.customersheet.ui.CUSTOMER_SHEET_CONFIRM_BUTTON_TEST_TAG
 import com.stripe.android.customersheet.ui.CUSTOMER_SHEET_SAVE_BUTTON_TEST_TAG
@@ -388,6 +389,7 @@ internal class PlaygroundTestDriver(
         selectors.googlePayButton.click()
 
         selectors.googlePaySheet.waitFor()
+        selectGooglePayCard()
         selectors.googlePayCheckoutButton.click()
 
         composeTestRule.waitForIdle()
@@ -401,6 +403,20 @@ internal class PlaygroundTestDriver(
         composeTestRule.waitForIdle()
 
         teardown()
+    }
+
+    private fun selectGooglePayCard() {
+        val paymentMethodSelector = device.wait(
+            Until.findObject(By.descContains("Change payment method")),
+            DEFAULT_UI_TIMEOUT.inWholeMilliseconds
+        )
+        requireNotNull(paymentMethodSelector) { "Google Pay payment method selector not found" }.click()
+
+        val card = device.wait(
+            Until.findObject(By.textContains("4242")),
+            DEFAULT_UI_TIMEOUT.inWholeMilliseconds
+        )
+        requireNotNull(card) { "Google Pay card ending in 4242 not found" }.click()
     }
 
     private fun pressMultiStepSelect() {
