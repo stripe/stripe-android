@@ -7,7 +7,6 @@ import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
-import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
@@ -33,27 +32,6 @@ internal interface FormDefinitionFactory {
     ): PaymentMethodCreateParams?
 
     fun formTypeForCode(paymentMethodCode: PaymentMethodCode): FormHelper.FormType
-}
-
-internal fun formTypeForCode(
-    paymentMethodCode: PaymentMethodCode,
-    formElements: List<FormElement>,
-): FormHelper.FormType {
-    val userInteractionAllowed = formElements.any { it.allowsUserInteraction }
-    val requiresFormScreen = userInteractionAllowed ||
-        paymentMethodCode == PaymentMethod.Type.USBankAccount.code ||
-        paymentMethodCode == PaymentMethod.Type.Link.code
-
-    return if (requiresFormScreen) {
-        FormHelper.FormType.UserInteractionRequired
-    } else {
-        val mandate = formElements.firstNotNullOfOrNull { it.mandateText }
-        if (mandate == null) {
-            FormHelper.FormType.Empty
-        } else {
-            FormHelper.FormType.MandateOnly(mandate)
-        }
-    }
 }
 
 internal class DefaultFormDefinitionFactory(
@@ -96,8 +74,9 @@ internal class DefaultFormDefinitionFactory(
     }
 
     override fun formTypeForCode(paymentMethodCode: PaymentMethodCode): FormHelper.FormType {
-        val formElements = formElementsForCode(paymentMethodCode)
-        return formTypeForCode(paymentMethodCode, formElements)
+        return paymentMethodMetadata.formTypeForCode(paymentMethodCode) {
+            formElementsForCode(paymentMethodCode)
+        }
     }
 
     private fun createArgumentsFactory(code: PaymentMethodCode): UiDefinitionFactory.Arguments.Factory {

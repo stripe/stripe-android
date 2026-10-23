@@ -669,6 +669,29 @@ internal class FormHelperTest {
     }
 
     @Test
+    fun `card classification skips form construction and selection lookup`() = runTest {
+        val formHelper = createFormHelper(
+            newPaymentSelectionProvider = { error("Form construction should not look up the selection") },
+        )
+
+        assertThat(formHelper.formTypeForCode("card")).isEqualTo(FormHelper.FormType.UserInteractionRequired)
+    }
+
+    @Test
+    fun `formTypeForCode returns Empty for an unavailable simple payment method`() = runTest {
+        val formHelper = createFormHelper(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    paymentMethodTypes = listOf("card"),
+                ),
+            ),
+            newPaymentSelectionProvider = { null },
+        )
+
+        assertThat(formHelper.formTypeForCode("afterpay_clearpay")).isEqualTo(FormHelper.FormType.Empty)
+    }
+
+    @Test
     fun `formTypeForCode returns Empty for an LPM with no fields`() = runTest {
         val formHelper = createFormHelper(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(

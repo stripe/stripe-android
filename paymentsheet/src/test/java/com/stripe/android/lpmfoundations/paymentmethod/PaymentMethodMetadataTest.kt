@@ -30,6 +30,7 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
+import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
@@ -70,6 +71,100 @@ internal class PaymentMethodMetadataTest {
         featureFlag = FeatureFlags.disableNfcScanning,
         isEnabled = false,
     )
+
+    @Test
+    fun `unknown code is empty without constructing form elements`() {
+        val metadata = PaymentMethodMetadataFactory.create()
+
+        assertThat(metadata.formTypeForCode("unknown") { error("Unknown code has no form") })
+            .isEqualTo(FormHelper.FormType.Empty)
+    }
+
+    @Test
+    fun `unavailable US bank account requires interaction without constructing form elements`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(paymentMethodTypes = listOf("card")),
+        )
+
+        assertThat(metadata.supportedPaymentMethodForCode("us_bank_account")).isNull()
+        assertThat(metadata.formTypeForCode("us_bank_account") { error("Form should not be constructed") })
+            .isEqualTo(FormHelper.FormType.UserInteractionRequired)
+    }
+
+    @Test
+    fun `unavailable Link requires interaction without constructing form elements`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(paymentMethodTypes = listOf("card")),
+        )
+
+        assertThat(metadata.supportedPaymentMethodForCode("link")).isNull()
+        assertThat(metadata.formTypeForCode("link") { error("Form should not be constructed") })
+            .isEqualTo(FormHelper.FormType.UserInteractionRequired)
+    }
+
+    @Test
+    fun `external payment method is empty without billing fields`() {
+        val method = PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC
+        val metadata = PaymentMethodMetadataFactory.create(
+            externalPaymentMethodSpecs = listOf(method),
+        )
+
+        val formType = metadata.formTypeForCode(method.type) {
+            metadata.formElementsForCode(method.type, TestUiDefinitionFactoryArgumentsFactory.create()).orEmpty()
+        }
+
+        assertThat(formType).isEqualTo(FormHelper.FormType.Empty)
+    }
+
+    @Test
+    fun `external payment method requires interaction when billing is required`() {
+        val method = PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC
+        val metadata = PaymentMethodMetadataFactory.create(
+            externalPaymentMethodSpecs = listOf(method),
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            ),
+        )
+
+        val formType = metadata.formTypeForCode(method.type) {
+            metadata.formElementsForCode(method.type, TestUiDefinitionFactoryArgumentsFactory.create()).orEmpty()
+        }
+
+        assertThat(formType).isEqualTo(FormHelper.FormType.UserInteractionRequired)
+    }
+
+    @Test
+    fun `custom payment method is empty without billing fields`() {
+        val method = PaymentMethodFixtures.PAYPAL_CUSTOM_PAYMENT_METHOD
+        val metadata = PaymentMethodMetadataFactory.create(
+            displayableCustomPaymentMethods = listOf(method),
+        )
+
+        val formType = metadata.formTypeForCode(method.id) {
+            metadata.formElementsForCode(method.id, TestUiDefinitionFactoryArgumentsFactory.create()).orEmpty()
+        }
+
+        assertThat(formType).isEqualTo(FormHelper.FormType.Empty)
+    }
+
+    @Test
+    fun `custom payment method requires interaction when billing is required`() {
+        val method = PaymentMethodFixtures.PAYPAL_CUSTOM_PAYMENT_METHOD.copy(
+            doesNotCollectBillingDetails = false,
+        )
+        val metadata = PaymentMethodMetadataFactory.create(
+            displayableCustomPaymentMethods = listOf(method),
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            ),
+        )
+
+        val formType = metadata.formTypeForCode(method.id) {
+            metadata.formElementsForCode(method.id, TestUiDefinitionFactoryArgumentsFactory.create()).orEmpty()
+        }
+
+        assertThat(formType).isEqualTo(FormHelper.FormType.UserInteractionRequired)
+    }
 
     @Test
     fun `hasIntentToSetup returns true for setup_intent`() {
