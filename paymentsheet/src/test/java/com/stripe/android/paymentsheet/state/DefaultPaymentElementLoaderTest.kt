@@ -283,8 +283,7 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `load with CheckoutSession mode and non-null customer returns failure`() = runScenario {
-        val durationProvider = FakeDurationProvider()
-        val result = createPaymentElementLoader(durationProvider = durationProvider).load(
+        val result = createPaymentElementLoader().load(
             initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
                 collectedEmail = null,
                 instancesKey = "DefaultPaymentElementLoaderTest",
@@ -308,8 +307,7 @@ internal class DefaultPaymentElementLoaderTest {
                 "Customer information is provided by the checkout session."
         )
 
-        expectNoLoadingEvents()
-        assertThat(durationProvider.has(FakeDurationProvider.Call.Start(DurationProvider.Key.Checkout, true))).isFalse()
+        assertThat(eventReporter.loadFailedTurbine.awaitItem()).isNotNull()
     }
 
     @Test
@@ -364,9 +362,8 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `CheckoutSession Express Checkout Element load does not report loading analytics`() = runScenario {
-        val durationProvider = FakeDurationProvider()
-        val result = createPaymentElementLoader(durationProvider = durationProvider).load(
+    fun `CheckoutSession Express Checkout Element load reports loading lifecycle events`() = runScenario {
+        val result = createPaymentElementLoader().load(
             initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
                 collectedEmail = null,
                 instancesKey = "DefaultPaymentElementLoaderTest",
@@ -380,8 +377,13 @@ internal class DefaultPaymentElementLoaderTest {
 
         assertThat(result.isSuccess).isTrue()
         consumeLoadingEvents()
-        expectNoLoadingEvents()
-        assertThat(durationProvider.has(FakeDurationProvider.Call.Start(DurationProvider.Key.Checkout, true))).isTrue()
+
+        val loadStarted = eventReporter.loadStartedTurbine.awaitItem()
+        assertThat(loadStarted.initializedViaCompose).isFalse()
+
+        val loadSucceeded = eventReporter.loadSucceededTurbine.awaitItem()
+        assertThat(loadSucceeded.paymentMethodMetadata.integrationMetadata)
+            .isInstanceOf(IntegrationMetadata.CheckoutSession::class.java)
     }
 
     @Test
@@ -423,7 +425,8 @@ internal class DefaultPaymentElementLoaderTest {
 
         consumeLoadingEvents()
 
-        expectNoLoadingEvents()
+        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
+        assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
     }
 
     @Test
@@ -499,7 +502,8 @@ internal class DefaultPaymentElementLoaderTest {
 
         consumeLoadingEvents()
 
-        expectNoLoadingEvents()
+        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
+        assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
     }
 
     @Test
@@ -3213,7 +3217,8 @@ internal class DefaultPaymentElementLoaderTest {
             assertThat(state.paymentMethodMetadata.customerMetadata?.canRemoveLastPaymentMethod)
                 .isEqualTo(true)
 
-            expectNoLoadingEvents()
+            assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
+            assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
         }
     }
 
@@ -5058,13 +5063,6 @@ internal class DefaultPaymentElementLoaderTest {
     private suspend fun Scenario.consumeLoadingEvents() {
         customerRepository.getPaymentMethodsRequests.cancelAndIgnoreRemainingEvents()
         customerRepository.retrieveCustomerRequests.cancelAndIgnoreRemainingEvents()
-    }
-
-    private suspend fun Scenario.expectNoLoadingEvents() {
-        eventReporter.loadStartedTurbine.expectNoEvents()
-        eventReporter.loadSucceededTurbine.expectNoEvents()
-        eventReporter.loadFailedTurbine.expectNoEvents()
-        eventReporter.elementsSessionLoadFailedTurbine.expectNoEvents()
     }
 
     private fun Scenario.createPaymentElementLoader(
