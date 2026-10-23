@@ -2,9 +2,7 @@
 
 package com.stripe.android.checkout
 
-import android.app.Application
 import androidx.lifecycle.SavedStateHandle
-import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.Turbine
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
@@ -20,7 +18,6 @@ import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.MutableConfirmationMetadata
 import com.stripe.android.paymentelement.confirmation.intent.CheckoutSessionResponseKey
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
-import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.testing.CoroutineTestRule
@@ -39,19 +36,14 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import kotlin.concurrent.thread
 import kotlin.test.assertFailsWith
 
-@RunWith(RobolectricTestRunner::class)
 @Suppress("LargeClass")
 internal class CheckoutOperationCoordinatorTest {
-
-    private val application = ApplicationProvider.getApplicationContext<Application>()
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule()
@@ -238,7 +230,9 @@ internal class CheckoutOperationCoordinatorTest {
         assertThat(arguments).isNull()
         val result = resultTurbine.awaitItem()
         assertThat(result).isInstanceOf<CheckoutController.Result.Failed>()
-        assertThat((result as CheckoutController.Result.Failed).error).isSameInstanceAs(expected)
+        val failedResult = result as CheckoutController.Result.Failed
+        assertThat(failedResult.error).isSameInstanceAs(expected)
+        assertThat(failedResult.displayMessage).isNull()
         resultTurbine.expectNoEvents()
         refreshCalls.expectNoEvents()
         assertThat(coordinator.isUpdating.value).isFalse()
@@ -553,8 +547,7 @@ internal class CheckoutOperationCoordinatorTest {
         assertThat(result).isInstanceOf<CheckoutController.Result.Failed>()
         val failedResult = result as CheckoutController.Result.Failed
         assertThat(failedResult.error).isSameInstanceAs(expected)
-        assertThat(failedResult.displayMessage)
-            .isEqualTo(application.getString(R.string.stripe_something_went_wrong))
+        assertThat(failedResult.displayMessage).isNull()
         assertThat(coordinator.isUpdating.value).isFalse()
     }
 
@@ -901,7 +894,7 @@ internal class CheckoutOperationCoordinatorTest {
             sheetStateHolder = sheetStateHolder,
             sessionRefresher = sessionRefresher,
             logger = logger,
-            checkoutErrorMapper = CheckoutErrorMapper(application),
+            checkoutErrorMapper = CheckoutErrorMapper(),
             resultCallback = resultCallback ?: CheckoutController.ResultCallback(resultTurbine::add),
             viewModelScope = backgroundScope,
         )

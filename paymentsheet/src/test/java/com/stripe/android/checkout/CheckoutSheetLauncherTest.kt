@@ -1307,7 +1307,7 @@ internal class CheckoutSheetLauncherTest {
             sheetStateHolder = sheetStateHolder,
             sessionRefresher = sessionRefresher,
             logger = logger,
-            checkoutErrorMapper = CheckoutErrorMapper(applicationContext),
+            checkoutErrorMapper = CheckoutErrorMapper(),
             resultCallback = {},
             viewModelScope = backgroundScope,
         )

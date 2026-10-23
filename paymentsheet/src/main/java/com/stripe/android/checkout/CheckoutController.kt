@@ -1418,6 +1418,7 @@ class CheckoutController @Inject internal constructor(
     sealed interface OperationResult {
         /**
          * The operation succeeded.
+         * The updated session is available through the [CheckoutController.session] state flow.
          */
         @CheckoutSessionPreview
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

@@ -678,7 +678,7 @@ internal class CheckoutControllerTest {
     }
 
     @Test
-    fun `configure uses generic display message when server error has no message`() = runConfigureScenario(
+    fun `configure returns null display message when server error has no message`() = runConfigureScenario(
         networkSetup = {
             networkRule.checkoutInit { response ->
                 response.setResponseCode(500)
@@ -688,12 +688,11 @@ internal class CheckoutControllerTest {
     ) {
         val failure = result as CheckoutController.OperationResult.Failed
 
-        assertThat(failure.displayMessage)
-            .isEqualTo(applicationContext.getString(R.string.stripe_something_went_wrong))
+        assertThat(failure.displayMessage).isNull()
     }
 
     @Test
-    fun `configure uses generic display message when server error is malformed`() = runConfigureScenario(
+    fun `configure returns null display message when server error is malformed`() = runConfigureScenario(
         networkSetup = {
             networkRule.checkoutInit { response ->
                 response.setResponseCode(500)
@@ -705,8 +704,7 @@ internal class CheckoutControllerTest {
 
         assertThat((failure.error as APIException).stripeError?.message)
             .isEqualTo(StripeErrorJsonParser.MALFORMED_RESPONSE_MESSAGE)
-        assertThat(failure.displayMessage)
-            .isEqualTo(applicationContext.getString(R.string.stripe_something_went_wrong))
+        assertThat(failure.displayMessage).isNull()
     }
 
     @Test
@@ -1516,8 +1514,7 @@ internal class CheckoutControllerTest {
         val failure = result as CheckoutController.OperationResult.Failed
         assertThat(failure.error).isSameInstanceAs(expected)
         assertThat(failure.error).hasMessageThat().isEqualTo("Server error")
-        assertThat(failure.displayMessage)
-            .isEqualTo(applicationContext.getString(R.string.stripe_something_went_wrong))
+        assertThat(failure.displayMessage).isNull()
         assertThat(controller.session.value).isEqualTo(before)
     }
 
@@ -1531,8 +1528,7 @@ internal class CheckoutControllerTest {
         assertThat(result.isFailure).isTrue()
         val failure = result as CheckoutController.OperationResult.Failed
         assertThat(failure.error).isSameInstanceAs(expected)
-        assertThat(failure.displayMessage)
-            .isEqualTo(applicationContext.getString(R.string.stripe_something_went_wrong))
+        assertThat(failure.displayMessage).isNull()
     }
 
     @Test

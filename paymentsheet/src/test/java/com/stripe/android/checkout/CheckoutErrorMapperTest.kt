@@ -1,23 +1,16 @@
 package com.stripe.android.checkout
 
-import android.app.Application
-import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.exception.LocalStripeException
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
-import com.stripe.android.paymentsheet.R
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 import java.io.IOException
 
-@RunWith(RobolectricTestRunner::class)
 internal class CheckoutErrorMapperTest {
-    private val application = ApplicationProvider.getApplicationContext<Application>()
-    private val mapper = CheckoutErrorMapper(application)
+    private val mapper = CheckoutErrorMapper()
 
     @Test
     fun `uses local display message`() {
@@ -27,7 +20,7 @@ internal class CheckoutErrorMapperTest {
     }
 
     @Test
-    fun `uses typed server message for every stripe error type`() {
+    fun `uses server message for non-card errors`() {
         val result = mapper.displayMessage(
             APIException(
                 stripeError = StripeError(type = "api_error", message = "Server display message"),
@@ -49,7 +42,7 @@ internal class CheckoutErrorMapperTest {
     }
 
     @Test
-    fun `uses generic message when server response is malformed`() {
+    fun `returns null when server response is malformed`() {
         val result = mapper.displayMessage(
             APIException(
                 stripeError = StripeError(message = StripeErrorJsonParser.MALFORMED_RESPONSE_MESSAGE),
@@ -57,11 +50,11 @@ internal class CheckoutErrorMapperTest {
             ),
         )
 
-        assertThat(result).isEqualTo(application.getString(R.string.stripe_something_went_wrong))
+        assertThat(result).isNull()
     }
 
     @Test
-    fun `uses generic message when typed server error has no display message`() {
+    fun `returns null when typed server error has no display message`() {
         val result = mapper.displayMessage(
             APIException(
                 stripeError = StripeError(type = "api_error"),
@@ -69,14 +62,13 @@ internal class CheckoutErrorMapperTest {
             ),
         )
 
-        assertThat(result).isEqualTo(application.getString(R.string.stripe_something_went_wrong))
+        assertThat(result).isNull()
     }
 
     @Test
-    fun `uses localized network fallback`() {
+    fun `returns null for network errors`() {
         val error = APIConnectionException.create(IOException("connection diagnostic"))
 
-        assertThat(mapper.displayMessage(error))
-            .isEqualTo(application.getString(R.string.stripe_network_error_message))
+        assertThat(mapper.displayMessage(error)).isNull()
     }
 }

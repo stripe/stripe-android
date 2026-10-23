@@ -103,7 +103,7 @@ internal class CurrencySelectorElementContentUITest {
             .assertContentDescriptionContains("50.99")
 
         enqueueCheckoutInit()
-        controller.configure(
+        val result = controller.configure(
             DEFAULT_CLIENT_SECRET,
             CheckoutController.Configuration().currencySelectorElement(
                 CurrencySelectorElement.Configuration().appearance(
@@ -111,7 +111,8 @@ internal class CurrencySelectorElementContentUITest {
                         .labelContent(CurrencySelectorElement.Configuration.Appearance.LabelContent.CURRENCY_CODE)
                 )
             ),
-        ).getOrThrow()
+        )
+        assertThat(result).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
 
         composeRule.onNodeWithTag("${TEST_TAG_CURRENCY_OPTION_PREFIX}USD")
             .assertContentDescriptionContains("USD")

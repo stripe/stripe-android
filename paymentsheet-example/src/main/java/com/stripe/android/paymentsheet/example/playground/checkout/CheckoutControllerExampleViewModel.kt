@@ -13,7 +13,6 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.core.networking.ApiRequest
-import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutCustomer
 import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutPlaygroundDefinitions
 import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutPlaygroundSettings
@@ -31,10 +30,9 @@ import kotlinx.coroutines.launch
 internal class CheckoutControllerExampleViewModel(
     private val repository: CheckoutControllerExampleBackendRepository,
     private val savedStateHandle: SavedStateHandle,
-    private val application: Application,
+    application: Application,
 ) : ViewModel() {
     val settings = CheckoutPlaygroundSettings.create(application)
-    private val genericErrorMessage = application.getString(R.string.stripe_something_went_wrong)
 
     val controller = CheckoutController.Builder(
         application = application,
@@ -146,10 +144,7 @@ internal class CheckoutControllerExampleViewModel(
                             _status.value = Status.Configured
                         }
                         is CheckoutController.OperationResult.Failed -> {
-                            Log.e(TAG, "Failed to configure", configurationResult.error)
-                            _status.value = Status.Error(
-                                configurationResult.displayMessage ?: genericErrorMessage
-                            )
+                            showError("Failed to configure", configurationResult.error)
                         }
                     }
                 },
@@ -165,10 +160,7 @@ internal class CheckoutControllerExampleViewModel(
         viewModelScope.launch {
             _operationMessage.value = when (val result = operation()) {
                 is CheckoutController.OperationResult.Succeeded -> successMessage
-                is CheckoutController.OperationResult.Failed -> {
-                    Log.e(TAG, "Checkout operation failed", result.error)
-                    result.displayMessage ?: genericErrorMessage
-                }
+                is CheckoutController.OperationResult.Failed -> result.displayMessage ?: "Operation failed"
             }
         }
     }
@@ -182,15 +174,14 @@ internal class CheckoutControllerExampleViewModel(
             }
             is CheckoutController.Result.Canceled -> "Confirmation canceled"
             is CheckoutController.Result.Failed -> {
-                Log.e(TAG, "Checkout confirmation failed", result.error)
-                "Confirmation failed: ${result.displayMessage ?: genericErrorMessage}"
+                result.displayMessage?.let { "Confirmation failed: $it" } ?: "Confirmation failed"
             }
         }
     }
 
     private fun showError(prefix: String, error: Throwable) {
         Log.e(TAG, prefix, error)
-        _status.value = Status.Error(genericErrorMessage)
+        _status.value = Status.Error(error.message ?: prefix)
     }
 
     private fun clearMessages() {
