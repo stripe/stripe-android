@@ -123,11 +123,11 @@ internal fun SessionSummary(
             modifier = Modifier.padding(bottom = 8.dp)
         )
         Text(
-            text = "Network Fee: ${response.transactionDetails.fees.networkFeeAmount}",
+            text = "Network Fee: ${response.transactionDetails.fees?.networkFeeAmount ?: "Not available"}",
             modifier = Modifier.padding(bottom = 8.dp)
         )
         Text(
-            text = "Transaction Fee: ${response.transactionDetails.fees.transactionFeeAmount}",
+            text = "Transaction Fee: ${response.transactionDetails.fees?.transactionFeeAmount ?: "Not available"}",
             modifier = Modifier.padding(bottom = 16.dp)
         )
     } ?: Spacer(modifier = Modifier.height(16.dp))
