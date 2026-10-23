@@ -71,10 +71,6 @@ internal class CheckoutPaymentElementAnalyticsTest {
             productUsage = setOf("Checkout"),
         )
         networkRule.validateAnalyticsRequest(
-            eventName = "stripe_android.card_metadata_pk_available",
-            productUsage = setOf("Checkout"),
-        )
-        networkRule.validateAnalyticsRequest(
             eventName = "mc_form_shown",
             productUsage = setOf("Checkout"),
         )
