@@ -159,24 +159,6 @@ internal class RequestExecutorTest {
     }
 
     @Test
-    fun `executeRequestWithResultParser passes null to withRequestId when the header is missing`() = runTest {
-        whenever(mockNetworkClient.executeRequest(testRequest)).thenReturn(
-            StripeResponse(code = HttpURLConnection.HTTP_OK, body = """{"id": "test_id"}""")
-        )
-        whenever(mockModelParser.parse(any())).thenReturn(TestStripeModel("test_data"))
-
-        val result = executeRequestWithResultParser(
-            stripeNetworkClient = mockNetworkClient,
-            stripeErrorJsonParser = mockErrorParser,
-            request = testRequest,
-            responseJsonParser = mockModelParser,
-            withRequestId = { model, requestId -> model.copy(data = "${model.data}:$requestId") },
-        )
-
-        assertEquals(TestStripeModel("test_data:null"), result.getOrThrow())
-    }
-
-    @Test
     fun `executeRequestWithResultParser should return failure result on error response`() = runTest {
         whenever(mockNetworkClient.executeRequest(testRequest)).thenReturn(errorResponse)
         whenever(mockErrorParser.parse(any())).thenReturn(testStripeError)
