@@ -59,7 +59,10 @@ internal class CheckoutPaymentElementTest {
         runCheckoutPaymentElementScenario(
             networkRule = networkRule,
             setup = { controller ->
-                controller.configure(DEFAULT_CLIENT_SECRET).getOrThrow()
+                controller.configure(
+                    DEFAULT_CLIENT_SECRET,
+                    CheckoutController.Configuration().paymentElement(PaymentElement.Configuration()),
+                ).getOrThrow()
             },
         ) {
             // Open the card form, then back out without entering any details.
@@ -91,7 +94,10 @@ internal class CheckoutPaymentElementTest {
             networkRule = networkRule,
             resultCallback = { result -> checkoutResult = result },
             setup = { controller ->
-                controller.configure(DEFAULT_CLIENT_SECRET).getOrThrow()
+                controller.configure(
+                    DEFAULT_CLIENT_SECRET,
+                    CheckoutController.Configuration().paymentElement(PaymentElement.Configuration()),
+                ).getOrThrow()
             },
         ) {
             networkRule.checkoutConfirm(
@@ -119,7 +125,10 @@ internal class CheckoutPaymentElementTest {
         runCheckoutPaymentElementScenario(
             networkRule = networkRule,
             setup = { controller ->
-                controller.configure(DEFAULT_CLIENT_SECRET).getOrThrow()
+                controller.configure(
+                    DEFAULT_CLIENT_SECRET,
+                    CheckoutController.Configuration().paymentElement(PaymentElement.Configuration()),
+                ).getOrThrow()
             },
         ) {
             coroutineScope {

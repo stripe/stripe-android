@@ -112,7 +112,10 @@ internal class CheckoutControllerComposeTest {
         ).checkoutController
         try {
             networkRule.checkoutInit { response -> successResponse(response) {} }
-            controller.configure("${DEFAULT_CHECKOUT_SESSION_ID}_secret_example").getOrThrow()
+            controller.configure(
+                "${DEFAULT_CHECKOUT_SESSION_ID}_secret_example",
+                CheckoutController.Configuration().paymentElement(PaymentElement.Configuration()),
+            ).getOrThrow()
             CheckoutControllerStateFactory.createStateHolder(savedState.handle)
                 .setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
             assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isNotEqualTo(4099.0)

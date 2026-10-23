@@ -215,12 +215,12 @@ internal class CheckoutStateLoader @Inject constructor(
         )
 
         if (embeddedConfig == null) {
-            // TODO: report unexpected error
+            // Unexpected missing configuration; error reporting is not implemented yet.
             return null
         }
 
         if (commonConfiguration == null) {
-            // TODO: report unexpected error
+            // Unexpected missing configuration; error reporting is not implemented yet.
             return null
         }
 
