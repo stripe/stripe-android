@@ -21,31 +21,38 @@ import com.stripe.android.uicore.elements.SameAsShippingElement
 import com.stripe.android.uicore.elements.SectionElement
 
 internal class BillingAddressFormElementsBuilder(
-    private val arguments: UiDefinitionFactory.Arguments,
+    private val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
+    private val requiresBillingAddressForAutomaticTax: Boolean,
     private val supportsAutomaticTaxBillingAddress: Boolean,
     private val requireBillingAddressCollection: Boolean,
     private val fallbackCountryCodes: Set<String>,
-    private val countryRequirement: CountryRequirement?,
+    private val countryRequirement: CountryRequirementDefinition?,
 ) {
-    private val resolvedInitialValues = countryRequirement?.applyTo(arguments.initialValues) ?: arguments.initialValues
     private val fullAddressCountryCodes = countryRequirement?.allowedCountryCodes ?: fallbackCountryCodes
     private val automaticTaxCountryCodes = countryRequirement?.allowedCountryCodes
-        ?: arguments.billingDetailsCollectionConfiguration.allowedBillingCountries
+        ?: billingDetailsCollectionConfiguration.allowedBillingCountries
 
-    fun build(): List<FormElement> {
-        return when {
-            requireBillingAddressCollection -> createAddressElements()
-            shouldCollectAutomaticTaxBillingAddress() -> createAutomaticTaxBillingAddressElements()
-            countryRequirement != null -> listOf(createCountryElement(countryRequirement))
-            else -> emptyList()
+    fun build(): List<FormElementDefinition> {
+        val factory: ((UiDefinitionFactory.Arguments) -> List<FormElement>) = when {
+            requireBillingAddressCollection -> ::createAddressElements
+            shouldCollectAutomaticTaxBillingAddress() -> ::createAutomaticTaxBillingAddressElements
+            countryRequirement != null -> { arguments ->
+                listOf(createCountryElement(countryRequirement.resolve(arguments)))
+            }
+            else -> return emptyList()
         }
+        return listOf(FormElementDefinition(true, null, factory))
+    }
+
+    private fun resolvedInitialValues(arguments: UiDefinitionFactory.Arguments): Map<FormFieldId, String?> {
+        return countryRequirement?.resolve(arguments)?.applyTo(arguments.initialValues) ?: arguments.initialValues
     }
 
     private fun shouldCollectAutomaticTaxBillingAddress(): Boolean {
         return supportsAutomaticTaxBillingAddress &&
-            arguments.billingDetailsCollectionConfiguration.address ==
+            billingDetailsCollectionConfiguration.address ==
             PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic &&
-            arguments.requiresBillingAddressForAutomaticTax &&
+            requiresBillingAddressForAutomaticTax &&
             !requireBillingAddressCollection
     }
 
@@ -61,7 +68,7 @@ internal class BillingAddressFormElementsBuilder(
         )
     }
 
-    private fun createAddressElements(): List<FormElement> {
+    private fun createAddressElements(arguments: UiDefinitionFactory.Arguments): List<FormElement> {
         val sameAsShippingElement = arguments.shippingValues
             ?.get(FormFieldId.SameAsShipping)
             ?.toBooleanStrictOrNull()
@@ -74,7 +81,7 @@ internal class BillingAddressFormElementsBuilder(
         val addressElement = arguments.autocompleteAddressInteractorFactory?.let { interactorFactory ->
             AutocompleteAddressElement(
                 identifier = FormFieldId.BillingAddress,
-                initialValues = resolvedInitialValues,
+                initialValues = resolvedInitialValues(arguments),
                 countryCodes = fullAddressCountryCodes,
                 sameAsShippingElement = sameAsShippingElement,
                 shippingValuesMap = arguments.shippingValues,
@@ -83,7 +90,7 @@ internal class BillingAddressFormElementsBuilder(
             )
         } ?: AddressElement(
             _identifier = FormFieldId.BillingAddress,
-            rawValuesMap = resolvedInitialValues,
+            rawValuesMap = resolvedInitialValues(arguments),
             countryCodes = fullAddressCountryCodes,
             addressInputMode = AddressInputMode.NoAutocomplete(),
             sameAsShippingElement = sameAsShippingElement,
@@ -97,7 +104,7 @@ internal class BillingAddressFormElementsBuilder(
         )
     }
 
-    private fun createAutomaticTaxBillingAddressElements(): List<FormElement> {
+    private fun createAutomaticTaxBillingAddressElements(arguments: UiDefinitionFactory.Arguments): List<FormElement> {
         val sameAsShippingElement = arguments.shippingValues
             ?.get(FormFieldId.SameAsShipping)
             ?.toBooleanStrictOrNull()
@@ -109,7 +116,7 @@ internal class BillingAddressFormElementsBuilder(
             }
         val billingAddressElement = BillingAddressElement(
             identifier = FormFieldId.BillingAddress,
-            rawValuesMap = resolvedInitialValues,
+            rawValuesMap = resolvedInitialValues(arguments),
             countryCodes = automaticTaxCountryCodes,
             autocompleteAddressInteractorFactory = arguments.autocompleteAddressInteractorFactory,
             sameAsShippingElement = sameAsShippingElement,
@@ -132,5 +139,14 @@ internal data class CountryRequirement(
 ) {
     fun applyTo(initialValues: Map<FormFieldId, String?>): Map<FormFieldId, String?> {
         return initialValues + (FormFieldId.Country to initialValue)
+    }
+}
+
+internal data class CountryRequirementDefinition(
+    val allowedCountryCodes: Set<String>,
+    val initialValue: (UiDefinitionFactory.Arguments) -> String?,
+) {
+    fun resolve(arguments: UiDefinitionFactory.Arguments): CountryRequirement {
+        return CountryRequirement(allowedCountryCodes, initialValue(arguments))
     }
 }

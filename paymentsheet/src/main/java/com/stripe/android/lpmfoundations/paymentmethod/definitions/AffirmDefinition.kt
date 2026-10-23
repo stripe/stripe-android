@@ -1,6 +1,7 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.lpmfoundations.FormElementDefinition
 import com.stripe.android.lpmfoundations.FormElementsBuilder
 import com.stripe.android.lpmfoundations.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
@@ -10,6 +11,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.ui.core.elements.AffirmHeaderElement
 import com.stripe.android.ui.core.elements.PaymentMethodMessageHeaderElement
+import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.R as StripeR
 import com.stripe.android.ui.core.R as UiCoreR
@@ -45,23 +47,29 @@ private object AffirmUiDefinitionFactory : UiDefinitionFactory.Simple() {
 
     override fun buildFormElements(
         metadata: PaymentMethodMetadata,
-        arguments: UiDefinitionFactory.Arguments,
         builder: FormElementsBuilder,
     ) {
-        val message = arguments.paymentMethodMessagingPromotionsHelper?.getPromotionIfAvailableForCode(
-            PaymentMethod.Type.Affirm.code,
-            metadata
-        )
-        val header = if (message != null) {
-            PaymentMethodMessageHeaderElement(
-                identifier = FormFieldId.Generic("affirm_promotion"),
-                promotion = message
+        fun header(arguments: UiDefinitionFactory.Arguments): FormElement {
+            val message = arguments.paymentMethodMessagingPromotionsHelper?.getPromotionIfAvailableForCode(
+                PaymentMethod.Type.Affirm.code,
+                metadata
             )
-        } else {
-            AffirmHeaderElement(
-                identifier = FormFieldId.Generic("affirm_header")
-            )
+            return if (message != null) {
+                PaymentMethodMessageHeaderElement(
+                    identifier = FormFieldId.Generic("affirm_promotion"),
+                    promotion = message
+                )
+            } else {
+                AffirmHeaderElement(
+                    identifier = FormFieldId.Generic("affirm_header")
+                )
+            }
         }
-        builder.header(header)
+
+        builder.header(
+            FormElementDefinition.nonInteractive { arguments ->
+                header(arguments)
+            }
+        )
     }
 }

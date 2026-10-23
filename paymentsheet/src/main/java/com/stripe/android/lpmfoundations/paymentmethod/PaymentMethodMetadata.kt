@@ -11,6 +11,7 @@ import com.stripe.android.core.strings.orEmpty
 import com.stripe.android.core.utils.FeatureFlags.disableNfcScanning
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.link.model.LinkAccount
+import com.stripe.android.lpmfoundations.FormDefinition
 import com.stripe.android.lpmfoundations.FormHeaderInformation
 import com.stripe.android.lpmfoundations.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.CustomPaymentMethodUiDefinitionFactory
@@ -336,6 +337,17 @@ internal data class PaymentMethodMetadata(
                 customerHasSavedPaymentMethods = customerHasSavedPaymentMethods,
                 incentive = paymentMethodIncentive,
             )
+        }
+    }
+
+    fun formDefinitionForCode(code: String): FormDefinition? {
+        return if (isExternalPaymentMethod(code)) {
+            getUiDefinitionFactoryForExternalPaymentMethod(code)?.createFormDefinition(this, requiresMandate = false)
+        } else if (isCustomPaymentMethod(code)) {
+            getUiDefinitionFactoryForCustomPaymentMethod(code)?.createFormDefinition(this, requiresMandate = false)
+        } else {
+            val definition = supportedPaymentMethodDefinitions().firstOrNull { it.type.code == code } ?: return null
+            definition.uiDefinitionFactory(this).createFormDefinition(this, definition.requiresMandate(this))
         }
     }
 

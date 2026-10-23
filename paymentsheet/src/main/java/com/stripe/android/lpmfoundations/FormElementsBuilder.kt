@@ -2,16 +2,17 @@ package com.stripe.android.lpmfoundations
 
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.uicore.elements.FormElement
 
 @Suppress("TooManyFunctions") // Keep the form-building operations together in the builder API.
 internal class FormElementsBuilder(
-    private val arguments: UiDefinitionFactory.Arguments,
+    private val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
+    private val requiresBillingAddressForAutomaticTax: Boolean,
+    private val requiresMandate: Boolean,
     private val supportsAutomaticTaxBillingAddress: Boolean,
 ) {
-    private val headerFormElements: MutableList<FormElement> = mutableListOf()
-    private val uiFormElements: MutableList<FormElement> = mutableListOf()
-    private val footerFormElements: MutableList<FormElement> = mutableListOf()
+    private val headerFormElements: MutableList<FormElementDefinition> = mutableListOf()
+    private val uiFormElements: MutableList<FormElementDefinition> = mutableListOf()
+    private val footerFormElements: MutableList<FormElementDefinition> = mutableListOf()
 
     private val requiredContactInformationCollectionModes: MutableSet<ContactInformationCollectionMode> = mutableSetOf()
     private val overriddenContactInformationCollectionModes: MutableSet<ContactInformationCollectionMode> =
@@ -19,26 +20,26 @@ internal class FormElementsBuilder(
 
     private var requireBillingAddressCollection: Boolean = false
     private var availableCountries: Set<String> =
-        arguments.billingDetailsCollectionConfiguration.allowedBillingCountries
-    private var countryRequirement: CountryRequirement? = null
+        billingDetailsCollectionConfiguration.allowedBillingCountries
+    private var countryRequirement: CountryRequirementDefinition? = null
 
     init {
         // Setup the required contact information fields based on the merchant billingDetailsCollectionConfiguration.
         for (value in ContactInformationCollectionMode.entries) {
-            if (value.isRequired(arguments.billingDetailsCollectionConfiguration)) {
+            if (value.isRequired(billingDetailsCollectionConfiguration)) {
                 requireContactInformationIfAllowed(value)
             }
         }
 
         // Setup the required billing fields section based on the merchant billingDetailsCollectionConfiguration.
-        if (arguments.billingDetailsCollectionConfiguration.address
+        if (billingDetailsCollectionConfiguration.address
             == PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
         ) {
             requireBillingAddressIfAllowed()
         }
     }
 
-    fun header(formElement: FormElement): FormElementsBuilder = apply {
+    fun header(formElement: FormElementDefinition): FormElementsBuilder = apply {
         headerFormElements += formElement
     }
 
@@ -47,7 +48,7 @@ internal class FormElementsBuilder(
     }
 
     fun requireContactInformationIfAllowed(type: ContactInformationCollectionMode): FormElementsBuilder = apply {
-        if (type.isAllowed(arguments.billingDetailsCollectionConfiguration)) {
+        if (type.isAllowed(billingDetailsCollectionConfiguration)) {
             requiredContactInformationCollectionModes += type
         }
     }
@@ -55,13 +56,13 @@ internal class FormElementsBuilder(
     fun overrideContactInformationPosition(type: ContactInformationCollectionMode): FormElementsBuilder {
         return overrideContactInformationPosition(
             type = type,
-            formElement = type.formElement(arguments.initialValues),
+            formElement = FormElementDefinition.interactive { type.formElement(it.initialValues) },
         )
     }
 
     fun overrideContactInformationPosition(
         type: ContactInformationCollectionMode,
-        formElement: FormElement,
+        formElement: FormElementDefinition,
     ): FormElementsBuilder = apply {
         if (type in requiredContactInformationCollectionModes) {
             overriddenContactInformationCollectionModes += type
@@ -70,7 +71,7 @@ internal class FormElementsBuilder(
         }
     }
 
-    fun element(formElement: FormElement): FormElementsBuilder = apply {
+    fun element(formElement: FormElementDefinition): FormElementsBuilder = apply {
         uiFormElements += formElement
     }
 
@@ -81,7 +82,7 @@ internal class FormElementsBuilder(
     fun requireBillingAddressIfAllowed(
         availableCountries: Set<String> = this.availableCountries,
     ): FormElementsBuilder = apply {
-        if (arguments.billingDetailsCollectionConfiguration.address
+        if (billingDetailsCollectionConfiguration.address
             != PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
         ) {
             requireBillingAddressCollection = true
@@ -92,49 +93,52 @@ internal class FormElementsBuilder(
 
     fun requireCountry(
         allowedCountryCodes: Set<String>,
-        initialValue: String?,
+        initialValue: (UiDefinitionFactory.Arguments) -> String?,
     ): FormElementsBuilder = apply {
-        countryRequirement = CountryRequirement(
+        countryRequirement = CountryRequirementDefinition(
             allowedCountryCodes = allowedCountryCodes,
             initialValue = initialValue,
         )
     }
 
     fun addMandateIfAllowed(
-        formElement: FormElement,
+        formElement: FormElementDefinition,
     ): FormElementsBuilder = apply {
-        if (arguments.requiresMandate) {
+        if (requiresMandate) {
             footer(formElement)
         }
     }
 
-    fun footer(formElement: FormElement): FormElementsBuilder = apply {
+    fun footer(formElement: FormElementDefinition): FormElementsBuilder = apply {
         footerFormElements += formElement
     }
 
-    fun build(): List<FormElement> {
-        return buildList {
-            addAll(headerFormElements) // Order headers first.
+    fun build(): FormDefinition {
+        return FormDefinition(
+            buildList {
+                addAll(headerFormElements) // Order headers first.
 
-            for (collectionMode in requiredContactInformationCollectionModes) {
-                if (collectionMode !in overriddenContactInformationCollectionModes) {
-                    add(collectionMode.formElement(arguments.initialValues))
+                for (collectionMode in requiredContactInformationCollectionModes) {
+                    if (collectionMode !in overriddenContactInformationCollectionModes) {
+                        add(FormElementDefinition.interactive { collectionMode.formElement(it.initialValues) })
+                    }
                 }
+
+                addAll(uiFormElements)
+
+                addAll(
+                    BillingAddressFormElementsBuilder(
+                        billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+                        requiresBillingAddressForAutomaticTax = requiresBillingAddressForAutomaticTax,
+                        supportsAutomaticTaxBillingAddress = supportsAutomaticTaxBillingAddress,
+                        requireBillingAddressCollection = requireBillingAddressCollection,
+                        fallbackCountryCodes = availableCountries,
+                        countryRequirement = countryRequirement,
+                    ).build()
+                )
+
+                addAll(footerFormElements) // Order footers last.
             }
-
-            addAll(uiFormElements)
-
-            addAll(
-                BillingAddressFormElementsBuilder(
-                    arguments = arguments,
-                    supportsAutomaticTaxBillingAddress = supportsAutomaticTaxBillingAddress,
-                    requireBillingAddressCollection = requireBillingAddressCollection,
-                    fallbackCountryCodes = availableCountries,
-                    countryRequirement = countryRequirement,
-                ).build()
-            )
-
-            addAll(footerFormElements) // Order footers last.
-        }
+        )
     }
 }

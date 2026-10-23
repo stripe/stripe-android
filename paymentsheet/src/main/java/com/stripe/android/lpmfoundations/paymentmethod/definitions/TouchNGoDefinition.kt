@@ -1,5 +1,7 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
+import androidx.compose.ui.unit.dp
+import com.stripe.android.lpmfoundations.FormElementDefinition
 import com.stripe.android.lpmfoundations.FormElementsBuilder
 import com.stripe.android.lpmfoundations.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
@@ -8,7 +10,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.ui.core.R
-import com.stripe.android.ui.core.elements.MandateTextElement
+import com.stripe.android.uicore.elements.FormFieldId
 
 internal object TouchNGoDefinition : PaymentMethodDefinition {
     override val type: PaymentMethod.Type = PaymentMethod.Type.TouchNGo
@@ -38,13 +40,14 @@ private object TouchNGoUiDefinitionFactory : UiDefinitionFactory.Simple() {
 
     override fun buildFormElements(
         metadata: PaymentMethodMetadata,
-        arguments: UiDefinitionFactory.Arguments,
         builder: FormElementsBuilder,
     ) {
         builder.addMandateIfAllowed(
-            formElement = MandateTextElement(
+            formElement = FormElementDefinition.mandate(
+                identifier = FormFieldId.Generic("mandate"),
                 stringResId = R.string.stripe_touch_n_go_mandate,
-                args = listOf(arguments.merchantName),
+                args = listOf(metadata.merchantName),
+                topPadding = 8.dp,
             ),
         )
     }

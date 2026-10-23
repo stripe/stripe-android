@@ -39,7 +39,6 @@ private object MultibancoUiDefinitionFactory : UiDefinitionFactory.Simple() {
 
     override fun buildFormElements(
         metadata: PaymentMethodMetadata,
-        arguments: UiDefinitionFactory.Arguments,
         builder: FormElementsBuilder
     ) {
         builder.requireContactInformationIfAllowed(ContactInformationCollectionMode.Email)

@@ -1,5 +1,6 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
+import com.stripe.android.lpmfoundations.FormElementDefinition
 import com.stripe.android.lpmfoundations.FormElementsBuilder
 import com.stripe.android.lpmfoundations.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
@@ -42,15 +43,18 @@ private object BlikUiDefinitionFactory : UiDefinitionFactory.Simple() {
 
     override fun buildFormElements(
         metadata: PaymentMethodMetadata,
-        arguments: UiDefinitionFactory.Arguments,
         builder: FormElementsBuilder,
     ) {
-        val blikElement = BlikElement(
+        fun blikElement(arguments: UiDefinitionFactory.Arguments) = BlikElement(
             controller = SimpleTextFieldController(
                 textFieldConfig = BlikConfig(),
                 initialValue = arguments.initialValues[FormFieldId.BlikCode],
             ),
         )
-        builder.element(SectionElement.wrap(blikElement))
+        builder.element(
+            FormElementDefinition.interactive { arguments ->
+                SectionElement.wrap(blikElement(arguments))
+            }
+        )
     }
 }

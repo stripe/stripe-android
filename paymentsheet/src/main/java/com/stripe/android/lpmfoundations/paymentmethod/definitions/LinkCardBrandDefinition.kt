@@ -1,5 +1,6 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
+import com.stripe.android.lpmfoundations.FormDefinition
 import com.stripe.android.lpmfoundations.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
@@ -7,7 +8,6 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.ui.core.R
-import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.ui.core.R as PaymentsUiCoreR
 
 internal object LinkCardBrandDefinition : PaymentMethodDefinition {
@@ -49,10 +49,10 @@ private object LinkCardBrandDefinitionFactory : UiDefinitionFactory.Custom {
     }
 
     // Link Card Brand uses its own mechanism, not these form elements.
-    override fun createFormElements(
+    override fun createFormDefinition(
         metadata: PaymentMethodMetadata,
-        arguments: UiDefinitionFactory.Arguments,
-    ): List<FormElement> {
-        return emptyList()
+        requiresMandate: Boolean,
+    ): FormDefinition {
+        return FormDefinition(emptyList())
     }
 }

@@ -38,7 +38,6 @@ private object BizumUiDefinitionFactory : UiDefinitionFactory.Simple() {
 
     override fun buildFormElements(
         metadata: PaymentMethodMetadata,
-        arguments: UiDefinitionFactory.Arguments,
         builder: FormElementsBuilder,
     ) {
         builder

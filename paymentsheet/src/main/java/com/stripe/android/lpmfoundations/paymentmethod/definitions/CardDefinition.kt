@@ -14,15 +14,18 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.link.ui.replaceHyperlinks
+import com.stripe.android.lpmfoundations.FormDefinition
+import com.stripe.android.lpmfoundations.FormElementDefinition
 import com.stripe.android.lpmfoundations.FormHeaderInformation
+import com.stripe.android.lpmfoundations.MandateDefinition
 import com.stripe.android.lpmfoundations.SupportedPaymentMethod
-import com.stripe.android.lpmfoundations.addSavePaymentOptionElements
 import com.stripe.android.lpmfoundations.isSaveForFutureUseValueChangeable
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.lpmfoundations.paymentmethod.link.LinkFormElement
+import com.stripe.android.lpmfoundations.savePaymentOptionDefinition
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -33,7 +36,6 @@ import com.stripe.android.ui.core.elements.CardDetailsAction
 import com.stripe.android.ui.core.elements.CardDetailsSectionElement
 import com.stripe.android.ui.core.elements.CardScanAction
 import com.stripe.android.ui.core.elements.Mandate
-import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.RenderableFormElement
 import com.stripe.android.ui.core.elements.cardBillingAddressCollectionMode
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
@@ -116,92 +118,130 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Custom {
         )
     }
 
-    override fun createFormElements(
+    override fun createFormDefinition(
+        metadata: PaymentMethodMetadata,
+        requiresMandate: Boolean,
+    ): FormDefinition {
+        val billing = metadata.billingDetailsCollectionConfiguration
+        val canChangeSaveForFutureUsage = isSaveForFutureUseValueChangeable(
+            code = PaymentMethod.Type.Card.code,
+            metadata = metadata,
+        )
+        val collectBilling = billing.address !=
+            PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never ||
+            billing.collectsEmail || billing.collectsPhone
+        val showSave = canChangeSaveForFutureUsage && !metadata.forceSetupFutureUseBehaviorAndNewMandate
+        val mandate = if (
+            !metadata.forceSetupFutureUseBehaviorAndNewMandate &&
+            metadata.hasIntentToSetup(CardDefinition.type.code) && metadata.mandateAllowed(CardDefinition.type)
+        ) {
+            MandateDefinition(
+                identifier = FormFieldId.Generic("card_mandate"),
+                stringResId = PaymentSheetR.string.stripe_paymentsheet_card_mandate,
+                args = listOf(metadata.merchantName),
+            )
+        } else {
+            null
+        }
+
+        return FormDefinition(
+            buildList {
+                add(cardDetailsDefinition(metadata))
+                if (collectBilling) {
+                    add(
+                        FormElementDefinition(true, null) { arguments ->
+                            cardBillingElements(
+                                billing.allowedBillingCountries,
+                                billing.toInternal(),
+                                arguments.autocompleteAddressInteractorFactory,
+                                arguments.initialValues,
+                                arguments.shippingValues,
+                                metadata.requiresBillingAddressForAutomaticTax,
+                            )
+                        }
+                    )
+                }
+                if (showSave) {
+                    add(savePaymentOptionDefinition(metadata))
+                }
+                // Link signup and its mandate share the runtime signup mode.
+                add(
+                    FormElementDefinition(
+                        allowsUserInteraction = metadata.linkState?.signupMode != null,
+                        mandateText = mandate?.text,
+                        createFormElements = { arguments ->
+                            createLinkAndMandateElements(metadata, arguments, canChangeSaveForFutureUsage, mandate)
+                        },
+                    )
+                )
+            }
+        )
+    }
+
+    private fun cardDetailsDefinition(metadata: PaymentMethodMetadata): FormElementDefinition {
+        val collectName = metadata.billingDetailsCollectionConfiguration.collectsName
+        return FormElementDefinition.interactive { arguments ->
+            CardDetailsSectionElement(
+                coroutineScope = arguments.coroutineScope,
+                cardAccountRangeRepositoryFactory = arguments.cardAccountRangeRepositoryFactory,
+                initialValues = arguments.initialValues,
+                identifier = FormFieldId.Generic("card_details"),
+                collectName = collectName,
+                cbcEligibility = arguments.cbcEligibility,
+                cardBrandFilter = arguments.cardBrandFilter,
+                cardFundingFilter = arguments.cardFundingFilter,
+                cardDetailsAction = createCardDetailsAction(metadata, arguments),
+            )
+        }
+    }
+
+    private fun createLinkAndMandateElements(
         metadata: PaymentMethodMetadata,
         arguments: UiDefinitionFactory.Arguments,
-    ): List<FormElement> {
-        val billingDetailsCollectionConfiguration = metadata.billingDetailsCollectionConfiguration
-
-        return buildList {
+        canChangeSaveForFutureUsage: Boolean,
+        mandate: MandateDefinition?,
+    ): List<FormElement> = buildList {
+        val signupMode = if (
+            metadata.linkState?.signupMode != null && arguments.linkConfigurationCoordinator != null
+        ) {
             add(
-                CardDetailsSectionElement(
-                    coroutineScope = arguments.coroutineScope,
-                    cardAccountRangeRepositoryFactory = arguments.cardAccountRangeRepositoryFactory,
-                    initialValues = arguments.initialValues,
-                    identifier = FormFieldId.Generic("card_details"),
-                    collectName = billingDetailsCollectionConfiguration.collectsName,
-                    cbcEligibility = arguments.cbcEligibility,
-                    cardBrandFilter = arguments.cardBrandFilter,
-                    cardFundingFilter = arguments.cardFundingFilter,
-                    cardDetailsAction = createCardDetailsAction(metadata, arguments)
+                LinkFormElement(
+                    signupMode = metadata.linkState.signupMode,
+                    configuration = metadata.linkState.configuration,
+                    linkConfigurationCoordinator = arguments.linkConfigurationCoordinator,
+                    initialLinkUserInput = arguments.initialLinkUserInput,
+                    onLinkInlineSignupStateChanged = arguments.onLinkInlineSignupStateChanged,
+                    previousLinkSignupCheckboxSelection = arguments.previousLinkSignupCheckboxSelection,
                 )
             )
-
-            addCardBillingElements(
-                arguments = arguments,
-                billingDetailsCollectionConfiguration = metadata.billingDetailsCollectionConfiguration,
+            metadata.linkState.signupMode
+        } else {
+            null
+        }
+        if (metadata.forceSetupFutureUseBehaviorAndNewMandate) {
+            val linkBrand = metadata.linkState?.configuration?.linkBrand ?: return@buildList
+            add(
+                CombinedLinkMandateElement(
+                    identifier = FormFieldId.Generic("card_mandate"),
+                    merchantName = metadata.merchantName,
+                    linkBrand = linkBrand,
+                    signupMode = signupMode,
+                    isLinkUI = arguments.isLinkUI,
+                    canChangeSaveForFutureUse = canChangeSaveForFutureUsage,
+                    linkSignupStateFlow = arguments.linkInlineHandler?.linkInlineState ?: stateFlowOf(null),
+                )
             )
-
-            val canChangeSaveForFutureUsage = isSaveForFutureUseValueChangeable(
-                code = PaymentMethod.Type.Card.code,
-                metadata = metadata
+        } else if (mandate != null) {
+            add(
+                mandate.createElement(
+                    topPadding = when {
+                        signupMode == LinkSignupMode.AlongsideSaveForFutureUse -> 0.dp
+                        signupMode == LinkSignupMode.InsteadOfSaveForFutureUse -> 4.dp
+                        canChangeSaveForFutureUsage -> 6.dp
+                        else -> 2.dp
+                    },
+                )
             )
-
-            if (canChangeSaveForFutureUsage && metadata.forceSetupFutureUseBehaviorAndNewMandate.not()) {
-                addSavePaymentOptionElements(
-                    metadata = metadata,
-                    arguments = arguments,
-                )
-            }
-
-            val signupMode = if (
-                metadata.linkState?.signupMode != null && arguments.linkConfigurationCoordinator != null
-            ) {
-                add(
-                    LinkFormElement(
-                        signupMode = metadata.linkState.signupMode,
-                        configuration = metadata.linkState.configuration,
-                        linkConfigurationCoordinator = arguments.linkConfigurationCoordinator,
-                        initialLinkUserInput = arguments.initialLinkUserInput,
-                        onLinkInlineSignupStateChanged = arguments.onLinkInlineSignupStateChanged,
-                        previousLinkSignupCheckboxSelection = arguments.previousLinkSignupCheckboxSelection,
-                    )
-                )
-
-                metadata.linkState.signupMode
-            } else {
-                null
-            }
-
-            val mandateAllowed = metadata.mandateAllowed(CardDefinition.type)
-            if (metadata.forceSetupFutureUseBehaviorAndNewMandate) {
-                val linkBrand = metadata.linkState?.configuration?.linkBrand ?: return@buildList
-                add(
-                    CombinedLinkMandateElement(
-                        identifier = FormFieldId.Generic("card_mandate"),
-                        merchantName = metadata.merchantName,
-                        linkBrand = linkBrand,
-                        signupMode = signupMode,
-                        isLinkUI = arguments.isLinkUI,
-                        canChangeSaveForFutureUse = canChangeSaveForFutureUsage,
-                        linkSignupStateFlow = arguments.linkInlineHandler?.linkInlineState ?: stateFlowOf(null)
-                    )
-                )
-            } else if (metadata.hasIntentToSetup(CardDefinition.type.code) && mandateAllowed) {
-                add(
-                    MandateTextElement(
-                        identifier = FormFieldId.Generic("card_mandate"),
-                        stringResId = PaymentSheetR.string.stripe_paymentsheet_card_mandate,
-                        topPadding = when {
-                            signupMode == LinkSignupMode.AlongsideSaveForFutureUse -> 0.dp
-                            signupMode == LinkSignupMode.InsteadOfSaveForFutureUse -> 4.dp
-                            canChangeSaveForFutureUsage -> 6.dp
-                            else -> 2.dp
-                        },
-                        args = listOf(metadata.merchantName),
-                    )
-                )
-            }
         }
     }
 
@@ -237,29 +277,6 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Custom {
                 nfcScanningAvailability is NfcScanningAvailability.Available
             },
         )
-    }
-
-    private fun MutableList<FormElement>.addCardBillingElements(
-        arguments: UiDefinitionFactory.Arguments,
-        billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
-    ) {
-        if (
-            billingDetailsCollectionConfiguration.address !=
-            PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never ||
-            billingDetailsCollectionConfiguration.collectsEmail ||
-            billingDetailsCollectionConfiguration.collectsPhone
-        ) {
-            addAll(
-                cardBillingElements(
-                    billingDetailsCollectionConfiguration.allowedBillingCountries,
-                    billingDetailsCollectionConfiguration.toInternal(),
-                    arguments.autocompleteAddressInteractorFactory,
-                    arguments.initialValues,
-                    arguments.shippingValues,
-                    arguments.requiresBillingAddressForAutomaticTax,
-                )
-            )
-        }
     }
 }
 

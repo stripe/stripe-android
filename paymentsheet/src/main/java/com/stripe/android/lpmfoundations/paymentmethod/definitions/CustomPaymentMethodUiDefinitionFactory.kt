@@ -1,6 +1,7 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.lpmfoundations.FormElementDefinition
 import com.stripe.android.lpmfoundations.FormElementsBuilder
 import com.stripe.android.lpmfoundations.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.DisplayableCustomPaymentMethod
@@ -29,15 +30,16 @@ internal class CustomPaymentMethodUiDefinitionFactory(
 
     override fun buildFormElements(
         metadata: PaymentMethodMetadata,
-        arguments: UiDefinitionFactory.Arguments,
         builder: FormElementsBuilder,
     ) {
         displayableCustomPaymentMethod.subtitle?.let { subtitle ->
             builder.header(
-                StaticTextElement(
-                    identifier = FormFieldId.Generic("CustomPaymentMethodHeader"),
-                    text = subtitle,
-                )
+                FormElementDefinition.nonInteractive {
+                    StaticTextElement(
+                        identifier = FormFieldId.Generic("CustomPaymentMethodHeader"),
+                        text = subtitle,
+                    )
+                }
             )
         }
 

@@ -669,6 +669,67 @@ internal class FormHelperTest {
     }
 
     @Test
+    fun `classification does not read selection and reopening reads updated values`() = runTest {
+        val selections = Turbine<String>()
+        var email = "first@example.com"
+        val helper = createFormHelper(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                ),
+            ),
+            newPaymentSelectionProvider = { code ->
+                selections.add(code)
+                NewPaymentOptionSelection.New(
+                    PaymentSelection.New.Card(
+                        paymentMethodCreateParams = PaymentMethodCreateParams.create(
+                            card = PaymentMethodCreateParams.Card(number = "4242424242424242"),
+                            billingDetails = PaymentMethod.BillingDetails(email = email),
+                        ),
+                        brand = CardBrand.Visa,
+                        customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
+                        paymentMethodOptionsParams = null,
+                    )
+                )
+            },
+        )
+        assertThat(helper.formTypeForCode("card")).isEqualTo(FormHelper.FormType.UserInteractionRequired)
+        selections.expectNoEvents()
+        val first = helper.formElementsForCode("card")
+        assertThat(selections.awaitItem()).isEqualTo("card")
+        assertThat(
+            first.flatMap { it.getFormFieldValueFlow().value }
+                .first { it.first == FormFieldId.Email }.second.value
+        ).isEqualTo(email)
+
+        email = "updated@example.com"
+        assertThat(helper.formTypeForCode("card")).isEqualTo(FormHelper.FormType.UserInteractionRequired)
+        selections.expectNoEvents()
+        val reopened = helper.formElementsForCode("card")
+        assertThat(selections.awaitItem()).isEqualTo("card")
+        assertThat(reopened.first()).isNotSameInstanceAs(first.first())
+        assertThat(
+            reopened.flatMap { it.getFormFieldValueFlow().value }
+                .first { it.first == FormFieldId.Email }.second.value
+        ).isEqualTo(email)
+        selections.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `classification respects unsupported card and unknown codes without reading selection`() = runTest {
+        val helper = createFormHelper(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    paymentMethodTypes = listOf("cashapp"),
+                ),
+            ),
+            newPaymentSelectionProvider = { error("Classification must not read selection") },
+        )
+        assertThat(helper.formTypeForCode("card")).isEqualTo(FormHelper.FormType.Empty)
+        assertThat(helper.formTypeForCode("unknown")).isEqualTo(FormHelper.FormType.Empty)
+    }
+
+    @Test
     fun `formTypeForCode returns Empty for an LPM with no fields`() = runTest {
         val formHelper = createFormHelper(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(

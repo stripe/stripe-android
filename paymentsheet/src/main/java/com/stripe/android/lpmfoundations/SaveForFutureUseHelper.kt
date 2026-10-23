@@ -10,7 +10,6 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SetAsDefaultPaymentMethodElement
-import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.FormFieldId
 
 internal fun isSaveForFutureUseValueChangeable(
@@ -56,33 +55,27 @@ internal fun isSaveForFutureUseValueChangeable(
     }
 }
 
-internal fun MutableList<FormElement>.addSavePaymentOptionElements(
-    metadata: PaymentMethodMetadata,
-    arguments: UiDefinitionFactory.Arguments,
-): Boolean {
-    val saveForFutureUseElement =
-        SaveForFutureUseElement(
-            initialValue = arguments.saveForFutureUseInitialValue,
-            merchantName = arguments.merchantName
-        )
-
-    val isSaveForFutureUseCheckedFlow = saveForFutureUseElement.controller.saveForFutureUse
+internal fun savePaymentOptionDefinition(metadata: PaymentMethodMetadata): FormElementDefinition {
     val isSetAsDefaultPaymentMethodEnabled = metadata.customerMetadata?.isPaymentMethodSetAsDefaultEnabled
         ?: IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE
-
-    add(saveForFutureUseElement)
-
-    if (isSetAsDefaultPaymentMethodEnabled) {
-        add(
-            SetAsDefaultPaymentMethodElement(
-                initialValue = getSetAsDefaultInitialValueFromArguments(arguments),
-                saveForFutureUseCheckedFlow = isSaveForFutureUseCheckedFlow,
-                setAsDefaultMatchesSaveForFutureUse = arguments.setAsDefaultMatchesSaveForFutureUse,
+    return FormElementDefinition(true, null) { arguments ->
+        buildList {
+            val saveForFutureUseElement = SaveForFutureUseElement(
+                initialValue = arguments.saveForFutureUseInitialValue,
+                merchantName = metadata.merchantName,
             )
-        )
+            add(saveForFutureUseElement)
+            if (isSetAsDefaultPaymentMethodEnabled) {
+                add(
+                    SetAsDefaultPaymentMethodElement(
+                        initialValue = getSetAsDefaultInitialValueFromArguments(arguments),
+                        saveForFutureUseCheckedFlow = saveForFutureUseElement.controller.saveForFutureUse,
+                        setAsDefaultMatchesSaveForFutureUse = arguments.setAsDefaultMatchesSaveForFutureUse,
+                    )
+                )
+            }
+        }
     }
-
-    return true
 }
 
 private fun getSetAsDefaultInitialValueFromArguments(

@@ -1,8 +1,10 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
+import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.lpmfoundations.ContactInformationCollectionMode
+import com.stripe.android.lpmfoundations.FormElementDefinition
 import com.stripe.android.lpmfoundations.FormElementsBuilder
 import com.stripe.android.lpmfoundations.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
@@ -13,7 +15,6 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.ui.core.R
-import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.PaymentMethodMessageHeaderElement
 import com.stripe.android.ui.core.elements.StaticTextElement
 import com.stripe.android.uicore.elements.FormElement
@@ -52,23 +53,28 @@ private object KlarnaUiDefinitionFactory : UiDefinitionFactory.Simple() {
 
     override fun buildFormElements(
         metadata: PaymentMethodMetadata,
-        arguments: UiDefinitionFactory.Arguments,
         builder: FormElementsBuilder,
     ) {
         builder
-            .header(formElement = getKlarnaHeader(arguments, metadata))
+            .header(
+                FormElementDefinition.nonInteractive { arguments ->
+                    getKlarnaHeader(arguments, metadata)
+                }
+            )
             .overrideContactInformationPosition(ContactInformationCollectionMode.Name)
             .requireContactInformationIfAllowed(ContactInformationCollectionMode.Email)
             .overrideContactInformationPosition(ContactInformationCollectionMode.Email)
             .overrideContactInformationPosition(ContactInformationCollectionMode.Phone)
             .requireCountry(
                 allowedCountryCodes = metadata.billingDetailsCollectionConfiguration.allowedBillingCountries,
-                initialValue = arguments.initialValues[FormFieldId.Country],
+                initialValue = { arguments -> arguments.initialValues[FormFieldId.Country] },
             )
             .addMandateIfAllowed(
-                formElement = MandateTextElement(
+                formElement = FormElementDefinition.mandate(
+                    identifier = FormFieldId.Generic("mandate"),
                     stringResId = R.string.stripe_klarna_mandate,
-                    args = listOf(arguments.merchantName, arguments.merchantName)
+                    args = listOf(metadata.merchantName, metadata.merchantName),
+                    topPadding = 8.dp,
                 ),
             )
     }
@@ -106,31 +112,35 @@ private object KlarnaRemovedFormUiDefinitionFactory : UiDefinitionFactory.Simple
 
     override fun buildFormElements(
         metadata: PaymentMethodMetadata,
-        arguments: UiDefinitionFactory.Arguments,
         builder: FormElementsBuilder
     ) {
         if (metadata.stripeIntent is SetupIntent &&
-            arguments.billingDetailsCollectionConfiguration.address !=
+            metadata.billingDetailsCollectionConfiguration.address !=
             PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
         ) {
             builder
                 .header(
-                    StaticTextElement(
-                        FormFieldId.Generic("klarna_header_text"),
-                        stringResId = R.string.stripe_klarna_buy_now_pay_later
-                    )
+                    FormElementDefinition.nonInteractive {
+                        StaticTextElement(
+                            FormFieldId.Generic("klarna_header_text"),
+                            stringResId = R.string.stripe_klarna_buy_now_pay_later
+                        )
+                    }
                 )
                 .requireCountry(
-                    allowedCountryCodes = arguments.billingDetailsCollectionConfiguration.allowedBillingCountries,
-                    initialValue = arguments.initialValues[FormFieldId.Country]
-                        ?: metadata.stripeIntent.countryCode,
+                    allowedCountryCodes = metadata.billingDetailsCollectionConfiguration.allowedBillingCountries,
+                    initialValue = { arguments ->
+                        arguments.initialValues[FormFieldId.Country] ?: metadata.stripeIntent.countryCode
+                    },
                 )
         }
 
         builder.addMandateIfAllowed(
-            formElement = MandateTextElement(
+            formElement = FormElementDefinition.mandate(
+                identifier = FormFieldId.Generic("mandate"),
                 stringResId = R.string.stripe_klarna_mandate,
-                args = listOf(arguments.merchantName, arguments.merchantName)
+                args = listOf(metadata.merchantName, metadata.merchantName),
+                topPadding = 8.dp,
             ),
         )
     }

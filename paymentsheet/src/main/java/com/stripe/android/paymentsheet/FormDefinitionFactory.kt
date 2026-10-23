@@ -96,8 +96,13 @@ internal class DefaultFormDefinitionFactory(
     }
 
     override fun formTypeForCode(paymentMethodCode: PaymentMethodCode): FormHelper.FormType {
-        val formElements = formElementsForCode(paymentMethodCode)
-        return formTypeForCode(paymentMethodCode, formElements)
+        val definition = paymentMethodMetadata.formDefinitionForCode(paymentMethodCode)
+        return when {
+            definition?.allowsUserInteraction == true ||
+                paymentMethodCode == PaymentMethod.Type.USBankAccount.code ||
+                paymentMethodCode == PaymentMethod.Type.Link.code -> FormHelper.FormType.UserInteractionRequired
+            else -> definition?.mandateText?.let { FormHelper.FormType.MandateOnly(it) } ?: FormHelper.FormType.Empty
+        }
     }
 
     private fun createArgumentsFactory(code: PaymentMethodCode): UiDefinitionFactory.Arguments.Factory {

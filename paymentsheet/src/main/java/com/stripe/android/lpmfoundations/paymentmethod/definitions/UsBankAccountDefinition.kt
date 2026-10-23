@@ -1,6 +1,7 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.lpmfoundations.FormDefinition
 import com.stripe.android.lpmfoundations.FormHeaderInformation
 import com.stripe.android.lpmfoundations.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
@@ -10,7 +11,6 @@ import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.ui.core.R
-import com.stripe.android.uicore.elements.FormElement
 
 internal object UsBankAccountDefinition : PaymentMethodDefinition {
     override val type: PaymentMethod.Type = PaymentMethod.Type.USBankAccount
@@ -58,8 +58,8 @@ private object UsBankAccountUiDefinitionFactory : UiDefinitionFactory.Custom {
     }
 
     // US Bank Account uses it's own mechanism, not these form elements.
-    override fun createFormElements(
+    override fun createFormDefinition(
         metadata: PaymentMethodMetadata,
-        arguments: UiDefinitionFactory.Arguments,
-    ): List<FormElement> = emptyList()
+        requiresMandate: Boolean,
+    ): FormDefinition = FormDefinition(emptyList())
 }

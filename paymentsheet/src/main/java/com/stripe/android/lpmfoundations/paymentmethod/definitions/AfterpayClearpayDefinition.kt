@@ -2,6 +2,7 @@ package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.ContactInformationCollectionMode
+import com.stripe.android.lpmfoundations.FormElementDefinition
 import com.stripe.android.lpmfoundations.FormElementsBuilder
 import com.stripe.android.lpmfoundations.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
@@ -13,6 +14,7 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.ui.core.elements.AfterpayClearpayHeaderElement
 import com.stripe.android.ui.core.elements.PaymentMethodMessageHeaderElement
+import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.ui.core.R as UiCoreR
 
@@ -59,28 +61,33 @@ private object AfterpayClearpayUiDefinitionFactory : UiDefinitionFactory.Simple(
 
     override fun buildFormElements(
         metadata: PaymentMethodMetadata,
-        arguments: UiDefinitionFactory.Arguments,
         builder: FormElementsBuilder,
     ) {
-        val promotion = arguments.paymentMethodMessagingPromotionsHelper?.getPromotionIfAvailableForCode(
-            PaymentMethod.Type.AfterpayClearpay.code,
-            metadata
-        )
+        fun header(arguments: UiDefinitionFactory.Arguments): FormElement {
+            val promotion = arguments.paymentMethodMessagingPromotionsHelper?.getPromotionIfAvailableForCode(
+                PaymentMethod.Type.AfterpayClearpay.code,
+                metadata
+            )
 
-        val header = if (promotion != null) {
-            PaymentMethodMessageHeaderElement(
-                identifier = FormFieldId.Generic("afterpay_promotion"),
-                promotion = promotion
-            )
-        } else {
-            AfterpayClearpayHeaderElement(
-                identifier = FormFieldId.Generic("afterpay_header"),
-                currency = metadata.stripeIntent.currency
-            )
+            return if (promotion != null) {
+                PaymentMethodMessageHeaderElement(
+                    identifier = FormFieldId.Generic("afterpay_promotion"),
+                    promotion = promotion
+                )
+            } else {
+                AfterpayClearpayHeaderElement(
+                    identifier = FormFieldId.Generic("afterpay_header"),
+                    currency = metadata.stripeIntent.currency
+                )
+            }
         }
 
         builder
-            .header(header)
+            .header(
+                FormElementDefinition.nonInteractive { arguments ->
+                    header(arguments)
+                }
+            )
             .requireContactInformationIfAllowed(ContactInformationCollectionMode.Email)
     }
 }

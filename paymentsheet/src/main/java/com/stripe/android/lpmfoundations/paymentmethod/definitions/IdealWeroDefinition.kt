@@ -1,6 +1,8 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
+import androidx.compose.ui.unit.dp
 import com.stripe.android.lpmfoundations.ContactInformationCollectionMode
+import com.stripe.android.lpmfoundations.FormElementDefinition
 import com.stripe.android.lpmfoundations.FormElementsBuilder
 import com.stripe.android.lpmfoundations.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
@@ -9,7 +11,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.ui.core.R
-import com.stripe.android.ui.core.elements.MandateTextElement
+import com.stripe.android.uicore.elements.FormFieldId
 
 internal object IdealWeroDefinition : PaymentMethodDefinition {
     override val type: PaymentMethod.Type = PaymentMethod.Type.Ideal
@@ -42,7 +44,6 @@ private object IdealWeroUiDefinitionFactory : UiDefinitionFactory.Simple() {
 
     override fun buildFormElements(
         metadata: PaymentMethodMetadata,
-        arguments: UiDefinitionFactory.Arguments,
         builder: FormElementsBuilder
     ) {
         builder
@@ -56,9 +57,11 @@ private object IdealWeroUiDefinitionFactory : UiDefinitionFactory.Simple() {
             .overrideContactInformationPosition(ContactInformationCollectionMode.Email)
             .overrideContactInformationPosition(ContactInformationCollectionMode.Phone)
             .addMandateIfAllowed(
-                formElement = MandateTextElement(
+                formElement = FormElementDefinition.mandate(
+                    identifier = FormFieldId.Generic("mandate"),
                     stringResId = R.string.stripe_sepa_mandate,
-                    args = listOf(arguments.merchantName)
+                    args = listOf(metadata.merchantName),
+                    topPadding = 8.dp,
                 )
             )
     }

@@ -4,6 +4,7 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.strings.transformations.Replace
 import com.stripe.android.lpmfoundations.ContactInformationCollectionMode
+import com.stripe.android.lpmfoundations.FormElementDefinition
 import com.stripe.android.lpmfoundations.FormElementsBuilder
 import com.stripe.android.lpmfoundations.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
@@ -48,7 +49,6 @@ private object PixUiDefinitionFactory : UiDefinitionFactory.Simple() {
 
     override fun buildFormElements(
         metadata: PaymentMethodMetadata,
-        arguments: UiDefinitionFactory.Arguments,
         builder: FormElementsBuilder,
     ) {
         if (metadata.stripeIntent.countryCode.equals("BR", ignoreCase = true)) {
@@ -56,7 +56,7 @@ private object PixUiDefinitionFactory : UiDefinitionFactory.Simple() {
         }
 
         val taxIdFieldId = FormFieldId.Generic("billing_details[tax_id]")
-        val taxIdElement = SimpleTextElement(
+        fun taxIdElement(arguments: UiDefinitionFactory.Arguments) = SimpleTextElement(
             identifier = taxIdFieldId,
             controller = SimpleTextFieldController(
                 textFieldConfig = PixTaxIdConfig(),
@@ -67,8 +67,16 @@ private object PixUiDefinitionFactory : UiDefinitionFactory.Simple() {
         builder
             .requireContactInformationIfAllowed(ContactInformationCollectionMode.Name)
             .requireContactInformationIfAllowed(ContactInformationCollectionMode.Email)
-            .element(SectionElement.wrap(taxIdElement))
-            .footer(PixInternationalDisclosureElement())
+            .element(
+                FormElementDefinition.interactive { arguments ->
+                    SectionElement.wrap(taxIdElement(arguments))
+                }
+            )
+            .footer(
+                FormElementDefinition(false, pixInternationalDisclosureText) {
+                    listOf(PixInternationalDisclosureElement())
+                }
+            )
     }
 }
 
@@ -76,16 +84,7 @@ private class PixInternationalDisclosureElement : FormElement {
     override val identifier = FormFieldId.Generic("pix_international_disclosure")
     override val controller: InputController? = null
     override val allowsUserInteraction: Boolean = false
-    override val mandateText: ResolvableString = resolvableString(
-        id = R.string.stripe_pix_international_disclosure,
-        transformations = listOf(
-            Replace(
-                original = "<terms>",
-                replacement = "<a href=\"$EBANX_TERMS_URL\">",
-            ),
-            Replace(original = "</terms>", replacement = "</a>"),
-        ),
-    )
+    override val mandateText: ResolvableString = pixInternationalDisclosureText
 
     override fun getFormFieldValueFlow(): StateFlow<List<Pair<FormFieldId, FormFieldEntry>>> =
         stateFlowOf(emptyList())
@@ -93,3 +92,14 @@ private class PixInternationalDisclosureElement : FormElement {
 
 private const val EBANX_TERMS_URL =
     "https://www.ebanx.com/pt-br/legal/consumidores/brasil/termos-para-processar-pagamentos/"
+
+private val pixInternationalDisclosureText = resolvableString(
+    id = R.string.stripe_pix_international_disclosure,
+    transformations = listOf(
+        Replace(
+            original = "<terms>",
+            replacement = "<a href=\"$EBANX_TERMS_URL\">",
+        ),
+        Replace(original = "</terms>", replacement = "</a>"),
+    ),
+)

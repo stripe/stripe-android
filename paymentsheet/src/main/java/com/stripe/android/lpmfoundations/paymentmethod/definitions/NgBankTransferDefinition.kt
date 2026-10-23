@@ -1,5 +1,7 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
+import androidx.compose.ui.unit.dp
+import com.stripe.android.lpmfoundations.FormElementDefinition
 import com.stripe.android.lpmfoundations.FormElementsBuilder
 import com.stripe.android.lpmfoundations.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
@@ -8,7 +10,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.ui.core.R
-import com.stripe.android.ui.core.elements.MandateTextElement
+import com.stripe.android.uicore.elements.FormFieldId
 
 internal object NgBankTransferDefinition : PaymentMethodDefinition {
     override val type: PaymentMethod.Type = PaymentMethod.Type.NgBankTransfer
@@ -36,13 +38,14 @@ private object NgBankTransferUiDefinitionFactory : UiDefinitionFactory.Simple() 
 
     override fun buildFormElements(
         metadata: PaymentMethodMetadata,
-        arguments: UiDefinitionFactory.Arguments,
         builder: FormElementsBuilder,
     ) {
         builder.footer(
-            MandateTextElement(
+            FormElementDefinition.mandate(
+                identifier = FormFieldId.Generic("mandate"),
                 stringResId = R.string.stripe_ng_payment_mor_notice,
                 args = listOf(NIGERIAN_PAYMENT_METHOD_TERMS_URL),
+                topPadding = 8.dp,
             )
         )
     }

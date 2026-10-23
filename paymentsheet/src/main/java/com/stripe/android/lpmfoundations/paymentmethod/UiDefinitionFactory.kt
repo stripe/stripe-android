@@ -8,6 +8,7 @@ import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.link.ui.inline.UserInput
+import com.stripe.android.lpmfoundations.FormDefinition
 import com.stripe.android.lpmfoundations.FormElementsBuilder
 import com.stripe.android.lpmfoundations.FormHeaderInformation
 import com.stripe.android.lpmfoundations.InitialValuesFactory
@@ -44,7 +45,12 @@ internal sealed interface UiDefinitionFactory {
     fun createFormElements(
         metadata: PaymentMethodMetadata,
         arguments: Arguments,
-    ): List<FormElement>
+    ): List<FormElement> = createFormDefinition(metadata, arguments.requiresMandate).createFormElements(arguments)
+
+    fun createFormDefinition(
+        metadata: PaymentMethodMetadata,
+        requiresMandate: Boolean,
+    ): FormDefinition
 
     data class Arguments(
         val coroutineScope: CoroutineScope,
@@ -159,23 +165,24 @@ internal sealed interface UiDefinitionFactory {
             return createSupportedPaymentMethod(metadata).asFormHeaderInformation(incentive)
         }
 
-        final override fun createFormElements(
+        final override fun createFormDefinition(
             metadata: PaymentMethodMetadata,
-            arguments: Arguments,
-        ): List<FormElement> {
+            requiresMandate: Boolean,
+        ): FormDefinition {
             val builder = FormElementsBuilder(
-                arguments = arguments,
+                billingDetailsCollectionConfiguration = metadata.billingDetailsCollectionConfiguration,
+                requiresBillingAddressForAutomaticTax = metadata.requiresBillingAddressForAutomaticTax,
+                requiresMandate = requiresMandate,
                 supportsAutomaticTaxBillingAddress = supportsAutomaticTaxBillingAddress,
             )
 
-            buildFormElements(metadata, arguments, builder)
+            buildFormElements(metadata, builder)
 
             return builder.build()
         }
 
         protected open fun buildFormElements(
             metadata: PaymentMethodMetadata,
-            arguments: Arguments,
             builder: FormElementsBuilder,
         ) {}
     }

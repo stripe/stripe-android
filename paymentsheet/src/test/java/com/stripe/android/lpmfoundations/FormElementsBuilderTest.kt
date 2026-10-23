@@ -1,6 +1,7 @@
 package com.stripe.android.lpmfoundations
 
 import android.app.Application
+import androidx.compose.ui.unit.dp
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
@@ -14,7 +15,6 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.BillingAddressElement
-import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.StaticTextElement
 import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
@@ -34,41 +34,47 @@ import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class FormElementsBuilderTest {
+    private lateinit var runtimeArguments: UiDefinitionFactory.Arguments
+
     @Test
     fun `build returns an emptyList`() {
-        assertThat(formElementsBuilder(arguments()).build()).isEmpty()
+        assertThat(formElementsBuilder(arguments()).build().createFormElements(runtimeArguments)).isEmpty()
     }
 
     @Test
     fun `required mandate follows billing fields`() {
-        val mandate = MandateTextElement(
+        val mandate = FormElementDefinition.mandate(
             stringResId = R.string.stripe_gcash_mandate,
             args = listOf("Example Inc."),
+            identifier = FormFieldId.Generic("mandate"),
+            topPadding = 8.dp,
         )
         val formElements = formElementsBuilder(arguments(requiresMandate = true))
             .addMandateIfAllowed(formElement = mandate)
             .element(testElement(FormFieldId.Generic("element")))
             .requireBillingAddressIfAllowed()
-            .build()
+            .build().createFormElements(runtimeArguments)
 
         assertThat(formElements.map { it.identifier.v1 }).containsExactly(
             "element",
             "billing_details[address]_section",
-            mandate.identifier.v1,
+            "mandate",
         ).inOrder()
-        assertThat(formElements.last()).isSameInstanceAs(mandate)
+        assertThat(formElements.last().mandateText).isEqualTo(mandate.mandateText)
     }
 
     @Test
     fun `mandate is omitted when not required`() {
         val formElements = formElementsBuilder(arguments(requiresMandate = false))
             .addMandateIfAllowed(
-                formElement = MandateTextElement(
+                formElement = FormElementDefinition.mandate(
                     stringResId = R.string.stripe_gcash_mandate,
                     args = listOf("Example Inc."),
+                    identifier = FormFieldId.Generic("mandate"),
+                    topPadding = 8.dp,
                 ),
             )
-            .build()
+            .build().createFormElements(runtimeArguments)
 
         assertThat(formElements).isEmpty()
     }
@@ -83,7 +89,7 @@ class FormElementsBuilderTest {
                 address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
             )
         )
-        val formElements = formElementsBuilder(arguments).build()
+        val formElements = formElementsBuilder(arguments).build().createFormElements(runtimeArguments)
         assertThat(formElements).hasSize(4)
         assertThat(formElements[0].identifier.v1).isEqualTo("billing_details[name]_section")
         assertThat(formElements[1].identifier.v1).isEqualTo("billing_details[phone]_section")
@@ -99,7 +105,7 @@ class FormElementsBuilderTest {
             .footer(testElement(FormFieldId(v1 = "footer")))
             .requireBillingAddressIfAllowed()
             .requireContactInformationIfAllowed(ContactInformationCollectionMode.Name)
-            .build()
+            .build().createFormElements(runtimeArguments)
         assertThat(formElements).hasSize(5)
         assertThat(formElements[0].identifier.v1).isEqualTo("header")
         assertThat(formElements[1].identifier.v1).isEqualTo("billing_details[name]_section")
@@ -115,9 +121,9 @@ class FormElementsBuilderTest {
             .footer(testElement(FormFieldId(v1 = "footer")))
             .requireCountry(
                 allowedCountryCodes = setOf("US", "CA"),
-                initialValue = "US",
+                initialValue = { "US" },
             )
-            .build()
+            .build().createFormElements(runtimeArguments)
 
         assertThat(formElements).hasSize(3)
         assertThat(formElements[0].identifier.v1).isEqualTo("element")
@@ -135,7 +141,7 @@ class FormElementsBuilderTest {
         )
             .element(testElement(FormFieldId.Generic("element")))
             .footer(testElement(FormFieldId.Generic("footer")))
-            .build()
+            .build().createFormElements(runtimeArguments)
 
         assertThat(formElements.map { it.identifier.v1 }).containsExactly(
             "element",
@@ -160,7 +166,7 @@ class FormElementsBuilderTest {
             .requireContactInformationIfAllowed(ContactInformationCollectionMode.Name)
             .requireContactInformationIfAllowed(ContactInformationCollectionMode.Phone)
             .requireContactInformationIfAllowed(ContactInformationCollectionMode.Email)
-            .build()
+            .build().createFormElements(runtimeArguments)
         assertThat(formElements).isEmpty()
     }
 
@@ -173,7 +179,7 @@ class FormElementsBuilderTest {
             .footer(testElement(FormFieldId(v1 = "footer2")))
             .header(testElement(FormFieldId(v1 = "header1")))
             .header(testElement(FormFieldId(v1 = "header2")))
-            .build()
+            .build().createFormElements(runtimeArguments)
         assertThat(formElements).hasSize(6)
         assertThat(formElements[0].identifier.v1).isEqualTo("header1")
         assertThat(formElements[1].identifier.v1).isEqualTo("header2")
@@ -193,7 +199,7 @@ class FormElementsBuilderTest {
         val formElements = formElementsBuilder(arguments)
             .element(testElement(FormFieldId(v1 = "element")))
             .ignoreBillingAddressRequirements()
-            .build()
+            .build().createFormElements(runtimeArguments)
         assertThat(formElements).hasSize(1)
         assertThat(formElements[0].identifier.v1).isEqualTo("element")
     }
@@ -210,7 +216,7 @@ class FormElementsBuilderTest {
         val formElements = formElementsBuilder(arguments)
             .element(testElement(FormFieldId(v1 = "element")))
             .ignoreContactInformationRequirements()
-            .build()
+            .build().createFormElements(runtimeArguments)
         assertThat(formElements).hasSize(1)
         assertThat(formElements[0].identifier.v1).isEqualTo("element")
     }
@@ -230,7 +236,7 @@ class FormElementsBuilderTest {
             .overrideContactInformationPosition(ContactInformationCollectionMode.Phone)
             .overrideContactInformationPosition(ContactInformationCollectionMode.Name)
             .overrideContactInformationPosition(ContactInformationCollectionMode.Email)
-            .build()
+            .build().createFormElements(runtimeArguments)
 
         assertThat(formElements).hasSize(3)
 
@@ -258,7 +264,7 @@ class FormElementsBuilderTest {
         val formElements = formElementsBuilder(arguments)
             .overrideContactInformationPosition(ContactInformationCollectionMode.Phone)
             .overrideContactInformationPosition(ContactInformationCollectionMode.Name)
-            .build()
+            .build().createFormElements(runtimeArguments)
 
         assertThat(formElements).hasSize(3)
 
@@ -295,11 +301,13 @@ class FormElementsBuilderTest {
         return formElements[position] as SectionElement
     }
 
-    private fun testElement(identifier: FormFieldId): FormElement {
-        return StaticTextElement(
-            identifier = identifier,
-            text = resolvableString("Test element"),
-        )
+    private fun testElement(identifier: FormFieldId): FormElementDefinition {
+        return FormElementDefinition.nonInteractive {
+            StaticTextElement(
+                identifier = identifier,
+                text = resolvableString("Test element"),
+            )
+        }
     }
 
     private fun arguments(
@@ -341,8 +349,11 @@ class FormElementsBuilderTest {
         arguments: UiDefinitionFactory.Arguments,
         supportsAutomaticTaxBillingAddress: Boolean = true,
     ): FormElementsBuilder {
+        runtimeArguments = arguments
         return FormElementsBuilder(
-            arguments = arguments,
+            billingDetailsCollectionConfiguration = arguments.billingDetailsCollectionConfiguration,
+            requiresBillingAddressForAutomaticTax = arguments.requiresBillingAddressForAutomaticTax,
+            requiresMandate = arguments.requiresMandate,
             supportsAutomaticTaxBillingAddress = supportsAutomaticTaxBillingAddress,
         )
     }

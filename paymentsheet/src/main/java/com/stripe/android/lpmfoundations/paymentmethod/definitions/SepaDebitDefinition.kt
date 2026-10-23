@@ -1,19 +1,19 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
+import androidx.compose.ui.unit.dp
 import com.stripe.android.lpmfoundations.ContactInformationCollectionMode
+import com.stripe.android.lpmfoundations.FormElementDefinition
 import com.stripe.android.lpmfoundations.FormElementsBuilder
 import com.stripe.android.lpmfoundations.SupportedPaymentMethod
-import com.stripe.android.lpmfoundations.addSavePaymentOptionElements
 import com.stripe.android.lpmfoundations.isSaveForFutureUseValueChangeable
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
+import com.stripe.android.lpmfoundations.savePaymentOptionDefinition
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.IbanConfig
-import com.stripe.android.ui.core.elements.MandateTextElement
-import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SimpleTextElement
@@ -43,7 +43,6 @@ private object SepaDebitUiDefinitionFactory : UiDefinitionFactory.Simple() {
 
     override fun buildFormElements(
         metadata: PaymentMethodMetadata,
-        arguments: UiDefinitionFactory.Arguments,
         builder: FormElementsBuilder
     ) {
         builder
@@ -53,38 +52,30 @@ private object SepaDebitUiDefinitionFactory : UiDefinitionFactory.Simple() {
             .overrideContactInformationPosition(ContactInformationCollectionMode.Email)
             .overrideContactInformationPosition(ContactInformationCollectionMode.Phone)
             .element(
-                SectionElement.wrap(
-                    sectionFieldElement = SimpleTextElement(
-                        identifier = ibanIdentifier,
-                        controller = SimpleTextFieldController(
-                            textFieldConfig = IbanConfig(),
-                            initialValue = arguments.initialValues[ibanIdentifier]
+                FormElementDefinition.interactive { arguments ->
+                    SectionElement.wrap(
+                        sectionFieldElement = SimpleTextElement(
+                            identifier = ibanIdentifier,
+                            controller = SimpleTextFieldController(
+                                textFieldConfig = IbanConfig(),
+                                initialValue = arguments.initialValues[ibanIdentifier]
+                            )
                         )
                     )
-                )
+                }
             )
             .requireBillingAddressIfAllowed()
             .apply {
-                val elements = mutableListOf<FormElement>()
-
-                val canSave = isSaveForFutureUseValueChangeable(
-                    code = SepaDebitDefinition.type.code,
-                    metadata = metadata,
-                )
-
-                if (canSave) {
-                    elements.addSavePaymentOptionElements(
-                        metadata = metadata,
-                        arguments = arguments,
-                    )
+                if (isSaveForFutureUseValueChangeable(SepaDebitDefinition.type.code, metadata)) {
+                    footer(savePaymentOptionDefinition(metadata))
                 }
-
-                elements.forEach(::footer)
             }
             .addMandateIfAllowed(
-                formElement = MandateTextElement(
+                formElement = FormElementDefinition.mandate(
+                    identifier = FormFieldId.Generic("mandate"),
                     stringResId = R.string.stripe_sepa_mandate,
-                    args = listOf(arguments.merchantName)
+                    args = listOf(metadata.merchantName),
+                    topPadding = 8.dp,
                 )
             )
     }

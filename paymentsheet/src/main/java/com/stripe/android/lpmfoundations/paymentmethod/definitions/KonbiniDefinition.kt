@@ -4,6 +4,7 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.ContactInformationCollectionMode
+import com.stripe.android.lpmfoundations.FormElementDefinition
 import com.stripe.android.lpmfoundations.FormElementsBuilder
 import com.stripe.android.lpmfoundations.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
@@ -47,10 +48,9 @@ private object KonbiniUiDefinitionFactory : UiDefinitionFactory.Simple() {
 
     override fun buildFormElements(
         metadata: PaymentMethodMetadata,
-        arguments: UiDefinitionFactory.Arguments,
         builder: FormElementsBuilder,
     ) {
-        val confirmationNumberElement = SimpleTextElement(
+        fun confirmationNumberElement(arguments: UiDefinitionFactory.Arguments) = SimpleTextElement(
             identifier = FormFieldId.KonbiniConfirmationNumber,
             controller = SimpleTextFieldController(
                 textFieldConfig = SimpleTextFieldConfig(
@@ -65,6 +65,10 @@ private object KonbiniUiDefinitionFactory : UiDefinitionFactory.Simple() {
         builder
             .requireContactInformationIfAllowed(ContactInformationCollectionMode.Name)
             .requireContactInformationIfAllowed(ContactInformationCollectionMode.Email)
-            .element(SectionElement.wrap(confirmationNumberElement))
+            .element(
+                FormElementDefinition.interactive { arguments ->
+                    SectionElement.wrap(confirmationNumberElement(arguments))
+                }
+            )
     }
 }

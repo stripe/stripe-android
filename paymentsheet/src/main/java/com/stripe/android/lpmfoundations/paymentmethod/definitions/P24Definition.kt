@@ -2,6 +2,7 @@ package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.ContactInformationCollectionMode
+import com.stripe.android.lpmfoundations.FormElementDefinition
 import com.stripe.android.lpmfoundations.FormElementsBuilder
 import com.stripe.android.lpmfoundations.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
@@ -47,7 +48,6 @@ private object P24UiDefinitionFactory : UiDefinitionFactory.Simple() {
 
     override fun buildFormElements(
         metadata: PaymentMethodMetadata,
-        arguments: UiDefinitionFactory.Arguments,
         builder: FormElementsBuilder
     ) {
         builder
@@ -57,18 +57,20 @@ private object P24UiDefinitionFactory : UiDefinitionFactory.Simple() {
             .overrideContactInformationPosition(ContactInformationCollectionMode.Email)
             .overrideContactInformationPosition(ContactInformationCollectionMode.Phone)
             .element(
-                formElement = SectionElement.wrap(
-                    sectionFieldElement = SimpleDropdownElement(
-                        identifier = p24BankIdentifier,
-                        controller = DropdownFieldController(
-                            config = SimpleDropdownConfig(
-                                label = R.string.stripe_p24_bank.resolvableString,
-                                items = items,
+                formElement = FormElementDefinition.interactive { arguments ->
+                    SectionElement.wrap(
+                        sectionFieldElement = SimpleDropdownElement(
+                            identifier = p24BankIdentifier,
+                            controller = DropdownFieldController(
+                                config = SimpleDropdownConfig(
+                                    label = R.string.stripe_p24_bank.resolvableString,
+                                    items = items,
+                                ),
+                                initialValue = arguments.initialValues[p24BankIdentifier],
                             ),
-                            initialValue = arguments.initialValues[p24BankIdentifier],
                         ),
-                    ),
-                ),
+                    )
+                },
             )
     }
 

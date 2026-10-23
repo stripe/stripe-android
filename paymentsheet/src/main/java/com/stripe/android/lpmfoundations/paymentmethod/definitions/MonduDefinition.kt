@@ -1,5 +1,6 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
+import com.stripe.android.lpmfoundations.FormElementDefinition
 import com.stripe.android.lpmfoundations.FormElementsBuilder
 import com.stripe.android.lpmfoundations.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
@@ -37,15 +38,16 @@ private object MonduUiDefinitionFactory : UiDefinitionFactory.Simple() {
 
     override fun buildFormElements(
         metadata: PaymentMethodMetadata,
-        arguments: UiDefinitionFactory.Arguments,
         builder: FormElementsBuilder,
     ) {
         builder.footer(
-            StaticTextElement(
-                identifier = FormFieldId.Generic("mondu_buyer_message"),
-                stringResId = R.string.stripe_mondu_buyer_message,
-                controller = null,
-            )
+            FormElementDefinition.nonInteractive {
+                StaticTextElement(
+                    identifier = FormFieldId.Generic("mondu_buyer_message"),
+                    stringResId = R.string.stripe_mondu_buyer_message,
+                    controller = null,
+                )
+            }
         )
     }
 }

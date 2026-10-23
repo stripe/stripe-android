@@ -1,6 +1,8 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
+import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.lpmfoundations.FormElementDefinition
 import com.stripe.android.lpmfoundations.FormElementsBuilder
 import com.stripe.android.lpmfoundations.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
@@ -10,7 +12,6 @@ import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.DropdownItem
-import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.SimpleDropdownConfig
 import com.stripe.android.ui.core.elements.SimpleDropdownElement
 import com.stripe.android.uicore.elements.DropdownFieldController
@@ -47,28 +48,31 @@ private object NaverPayUiDefinitionFactory : UiDefinitionFactory.Simple() {
 
     override fun buildFormElements(
         metadata: PaymentMethodMetadata,
-        arguments: UiDefinitionFactory.Arguments,
         builder: FormElementsBuilder,
     ) {
         builder.element(
-            SectionElement.wrap(
-                SimpleDropdownElement(
-                    identifier = fundingIdentifier,
-                    controller = DropdownFieldController(
-                        config = SimpleDropdownConfig(
-                            label = R.string.stripe_naver_pay_funding_label.resolvableString,
-                            items = fundingItems,
+            FormElementDefinition.interactive { arguments ->
+                SectionElement.wrap(
+                    SimpleDropdownElement(
+                        identifier = fundingIdentifier,
+                        controller = DropdownFieldController(
+                            config = SimpleDropdownConfig(
+                                label = R.string.stripe_naver_pay_funding_label.resolvableString,
+                                items = fundingItems,
+                            ),
+                            initialValue = arguments.initialValues[fundingIdentifier],
                         ),
-                        initialValue = arguments.initialValues[fundingIdentifier],
                     ),
-                ),
-            ),
+                )
+            }
         )
 
         builder.addMandateIfAllowed(
-            formElement = MandateTextElement(
+            formElement = FormElementDefinition.mandate(
+                identifier = FormFieldId.Generic("mandate"),
                 stringResId = R.string.stripe_kr_card_mandate,
-                args = listOf(arguments.merchantName),
+                args = listOf(metadata.merchantName),
+                topPadding = 8.dp,
             ),
         )
     }

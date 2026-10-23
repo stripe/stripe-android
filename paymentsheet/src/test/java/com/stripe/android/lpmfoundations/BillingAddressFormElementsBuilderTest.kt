@@ -30,6 +30,8 @@ import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class BillingAddressFormElementsBuilderTest {
+    private lateinit var runtimeArguments: UiDefinitionFactory.Arguments
+
     @Test
     fun `full address takes precedence over automatic tax`() {
         val formElements = billingAddressFormElementsBuilder(
@@ -40,7 +42,7 @@ class BillingAddressFormElementsBuilderTest {
                 requiresBillingAddressForAutomaticTax = true,
             ),
             requireBillingAddressCollection = true,
-        ).build()
+        ).build().flatMap { it.createFormElements(runtimeArguments) }
 
         val addressField = formElements.addressElement()
         assertThat(addressField).isNotInstanceOf(BillingAddressElement::class.java)
@@ -54,7 +56,7 @@ class BillingAddressFormElementsBuilderTest {
                 requiresBillingAddressForAutomaticTax = true,
             ),
             requireBillingAddressCollection = true,
-        ).build()
+        ).build().flatMap { it.createFormElements(runtimeArguments) }
 
         val addressField = formElements.addressElement()
         assertThat(addressField).isNotInstanceOf(BillingAddressElement::class.java)
@@ -70,7 +72,7 @@ class BillingAddressFormElementsBuilderTest {
                 requiresBillingAddressForAutomaticTax = true,
                 initialValues = mapOf(FormFieldId.Country to "US"),
             ),
-        ).build().billingAddressElement()
+        ).build().flatMap { it.createFormElements(runtimeArguments) }.billingAddressElement()
 
         assertThat(billingAddressElement.hiddenIdentifiers.value).contains(FormFieldId.Line2)
         assertThat(billingAddressElement.hiddenIdentifiers.value).containsNoneOf(
@@ -89,7 +91,7 @@ class BillingAddressFormElementsBuilderTest {
                 requiresBillingAddressForAutomaticTax = true,
             ),
             supportsAutomaticTaxBillingAddress = false,
-        ).build()
+        ).build().flatMap { it.createFormElements(runtimeArguments) }
 
         assertThat(formElements).isEmpty()
     }
@@ -105,7 +107,7 @@ class BillingAddressFormElementsBuilderTest {
                 allowedCountryCodes = setOf("US"),
                 initialValue = "US",
             ),
-        ).build()
+        ).build().flatMap { it.createFormElements(runtimeArguments) }
 
         assertThat(formElements.countryElement().controller.rawFieldValue.value).isEqualTo("US")
     }
@@ -119,7 +121,7 @@ class BillingAddressFormElementsBuilderTest {
                 ),
                 requiresBillingAddressForAutomaticTax = true,
             ),
-        ).build()
+        ).build().flatMap { it.createFormElements(runtimeArguments) }
 
         assertThat(formElements).isEmpty()
     }
@@ -132,7 +134,7 @@ class BillingAddressFormElementsBuilderTest {
                 allowedCountryCodes = setOf("CA"),
                 initialValue = "CA",
             ),
-        ).build().countryElement()
+        ).build().flatMap { it.createFormElements(runtimeArguments) }.countryElement()
 
         assertThat(countryElement.controller.displayItems).containsExactly("🇨🇦 Canada")
         assertThat(countryElement.controller.rawFieldValue.value).isEqualTo("CA")
@@ -142,6 +144,7 @@ class BillingAddressFormElementsBuilderTest {
     fun `no requirement returns empty output`() {
         assertThat(
             billingAddressFormElementsBuilder(arguments = arguments()).build()
+                .flatMap { it.createFormElements(runtimeArguments) }
         ).isEmpty()
     }
 
@@ -157,7 +160,7 @@ class BillingAddressFormElementsBuilderTest {
                 allowedCountryCodes = setOf("BS", "CA"),
                 initialValue = "BS",
             ),
-        ).build().addressElement()
+        ).build().flatMap { it.createFormElements(runtimeArguments) }.addressElement()
 
         assertThat(addressElement.countryElement.controller.displayItems).containsExactly(
             "🇧🇸 Bahamas",
@@ -178,7 +181,7 @@ class BillingAddressFormElementsBuilderTest {
                 allowedCountryCodes = linkedSetOf("CA", "DE"),
                 initialValue = null,
             ),
-        ).build().addressElement()
+        ).build().flatMap { it.createFormElements(runtimeArguments) }.addressElement()
 
         assertThat(addressElement.countryElement.controller.rawFieldValue.value).isEqualTo("CA")
     }
@@ -197,7 +200,7 @@ class BillingAddressFormElementsBuilderTest {
                 allowedCountryCodes = setOf("DE", "FR"),
                 initialValue = "FR",
             ),
-        ).build().billingAddressElement().countryElement
+        ).build().flatMap { it.createFormElements(runtimeArguments) }.billingAddressElement().countryElement
 
         assertThat(countryElement.controller.displayItems).containsExactly(
             "🇫🇷 France",
@@ -217,7 +220,7 @@ class BillingAddressFormElementsBuilderTest {
             ),
             requireBillingAddressCollection = true,
             fallbackCountryCodes = setOf("CA"),
-        ).build().addressElement()
+        ).build().flatMap { it.createFormElements(runtimeArguments) }.addressElement()
 
         assertThat(addressElement.countryElement.controller.displayItems).containsExactly("🇨🇦 Canada")
         assertThat(addressElement.countryElement.controller.rawFieldValue.value).isEqualTo("CA")
@@ -228,7 +231,7 @@ class BillingAddressFormElementsBuilderTest {
         val addressElement = billingAddressFormElementsBuilder(
             arguments = arguments(),
             requireBillingAddressCollection = true,
-        ).build().addressElement()
+        ).build().flatMap { it.createFormElements(runtimeArguments) }.addressElement()
 
         assertThat(addressElement.countryElement.controller.displayItems)
             .hasSize(CountryUtils.supportedBillingCountries.size)
@@ -245,7 +248,7 @@ class BillingAddressFormElementsBuilderTest {
                 initialValues = mapOf(FormFieldId.Country to "CA"),
             ),
             fallbackCountryCodes = setOf("BS"),
-        ).build().billingAddressElement().countryElement
+        ).build().flatMap { it.createFormElements(runtimeArguments) }.billingAddressElement().countryElement
 
         assertThat(countryElement.controller.displayItems).containsExactly(
             "🇺🇸 United States",
@@ -262,7 +265,7 @@ class BillingAddressFormElementsBuilderTest {
                 requiresBillingAddressForAutomaticTax = true,
                 shippingValues = mapOf(FormFieldId.SameAsShipping to "true"),
             ),
-        ).build()
+        ).build().flatMap { it.createFormElements(runtimeArguments) }
 
         val sameAsShippingElement = formElements.last() as SameAsShippingElement
         assertThat(sameAsShippingElement.controller.value.value).isTrue()
@@ -278,7 +281,7 @@ class BillingAddressFormElementsBuilderTest {
                     TestAutocompleteAddressInteractor.noOp()
                 },
             ),
-        ).build().billingAddressElement()
+        ).build().flatMap { it.createFormElements(runtimeArguments) }.billingAddressElement()
 
         assertThat(billingAddressElement.addressElement).isInstanceOf<AddressElement>()
     }
@@ -292,7 +295,7 @@ class BillingAddressFormElementsBuilderTest {
                 },
             ),
             requireBillingAddressCollection = true,
-        ).build()
+        ).build().flatMap { it.createFormElements(runtimeArguments) }
 
         assertThat((formElements.single() as SectionElement).fields.single())
             .isInstanceOf<AutocompleteAddressElement>()
@@ -306,12 +309,16 @@ class BillingAddressFormElementsBuilderTest {
             arguments.billingDetailsCollectionConfiguration.allowedBillingCountries,
         countryRequirement: CountryRequirement? = null,
     ): BillingAddressFormElementsBuilder {
+        runtimeArguments = arguments
         return BillingAddressFormElementsBuilder(
-            arguments = arguments,
+            billingDetailsCollectionConfiguration = arguments.billingDetailsCollectionConfiguration,
+            requiresBillingAddressForAutomaticTax = arguments.requiresBillingAddressForAutomaticTax,
             supportsAutomaticTaxBillingAddress = supportsAutomaticTaxBillingAddress,
             requireBillingAddressCollection = requireBillingAddressCollection,
             fallbackCountryCodes = fallbackCountryCodes,
-            countryRequirement = countryRequirement,
+            countryRequirement = countryRequirement?.let { requirement ->
+                CountryRequirementDefinition(requirement.allowedCountryCodes) { requirement.initialValue }
+            },
         )
     }
 
