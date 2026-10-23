@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
 import com.stripe.android.common.ui.DelegateDrawable
 import com.stripe.android.crypto.onramp.ExperimentalCryptoOnramp
+import com.stripe.android.model.CardFunding
 import com.stripe.android.uicore.image.rememberDrawablePainter
 import dev.drewhamilton.poko.Poko
 
@@ -53,7 +54,12 @@ class PaymentMethodDisplayData internal constructor(
     /**
      * The type of payment being displayed.
      */
-    val type: Type
+    val type: Type,
+    /**
+     * Card funding, when available. Null when card funding is unavailable or not applicable.
+     * An available card object with missing or unrecognized funding maps to Unknown.
+     */
+    val cardFunding: CardFunding?
 ) {
     @ExperimentalCryptoOnramp
     enum class Type {

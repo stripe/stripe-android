@@ -9,8 +9,6 @@ import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ViewModelScope
-import com.stripe.android.core.strings.ResolvableString
-import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.flatMapCatching
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkAuthResult
@@ -24,11 +22,11 @@ import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.toLoginState
 import com.stripe.android.link.theme.isDarkTheme
 import com.stripe.android.link.ui.inline.SignUpConsentAction
-import com.stripe.android.link.ui.wallet.displayName
-import com.stripe.android.link.ui.wallet.makeFallbackCardName
+import com.stripe.android.link.ui.wallet.paymentOptionLabel
 import com.stripe.android.link.utils.isLinkAuthorizationError
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.CardFunding
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.EmailSource
 import com.stripe.android.model.PaymentMethod
@@ -157,7 +155,8 @@ internal class LinkControllerInteractor @Inject constructor(
                 context = application,
                 iconLoader = cachedIconLoader,
                 reduceLinkBranding = state.linkConfiguration?.linkAppearance?.reduceLinkBranding ?: false,
-                isDarkTheme = isDarkTheme
+                isDarkTheme = isDarkTheme,
+                cardFunding = state.selectedPaymentMethod?.cardFunding,
             )
         }
 
@@ -173,7 +172,8 @@ internal class LinkControllerInteractor @Inject constructor(
                         context = context,
                         iconLoader = cachedIconLoader,
                         reduceLinkBranding = state.linkConfiguration?.linkAppearance?.reduceLinkBranding ?: false,
-                        isDarkTheme = isDarkTheme
+                        isDarkTheme = isDarkTheme,
+                        cardFunding = state.selectedPaymentMethod?.cardFunding,
                     ),
                 createdPaymentMethod = state.createdPaymentMethod,
             )
@@ -834,25 +834,7 @@ internal fun PaymentMethodPreviewDetails.toPreview(
     val label = context.getString(com.stripe.android.R.string.stripe_link)
     val isDarkTheme = context.isSystemDarkTheme()
     val drawableResourceId = getIconDrawableRes(this, isDarkTheme)
-    val sublabel = buildString {
-        val name: ResolvableString
-        val last4: String
-
-        when (this@toPreview) {
-            is PaymentMethodPreviewDetails.Card -> {
-                name = makeFallbackCardName(funding, brand.displayName)
-                last4 = this@toPreview.last4
-            }
-            is PaymentMethodPreviewDetails.BankAccount -> {
-                name = bankName?.resolvableString
-                    ?: com.stripe.android.ui.core.R.string.stripe_payment_method_bank.resolvableString
-                last4 = this@toPreview.last4
-            }
-        }
-        append(name.resolve(context))
-        append(" •••• ")
-        append(last4)
-    }
+    val sublabel = paymentOptionLabel.resolve(context)
 
     val type = when (this@toPreview) {
         is PaymentMethodPreviewDetails.Card -> {
@@ -875,7 +857,8 @@ internal fun PaymentMethodPreviewDetails.toPreview(
         },
         label = label,
         sublabel = sublabel,
-        type = type
+        type = type,
+        cardFunding = (this as? PaymentMethodPreviewDetails.Card)?.let { CardFunding.fromCode(it.funding) },
     )
 }
 
@@ -884,16 +867,10 @@ internal fun ConsumerPaymentDetails.PaymentDetails.toPreview(
     iconLoader: PaymentSelection.IconLoader,
     reduceLinkBranding: Boolean,
     isDarkTheme: Boolean,
+    cardFunding: CardFunding?,
 ): LinkController.PaymentMethodPreview {
     val label = context.getString(com.stripe.android.R.string.stripe_link)
-    val sublabel = buildString {
-        // It should never be `Passthrough`, but handling it here just in case.
-        if (this@toPreview !is ConsumerPaymentDetails.Passthrough) {
-            append(displayName.resolve(context))
-        }
-        append(" •••• ")
-        append(last4)
-    }
+    val sublabel = paymentOptionLabel.resolve(context)
     val drawableResourceId = if (reduceLinkBranding) {
         getIconDrawableRes(isDarkTheme)
     } else {
@@ -924,7 +901,8 @@ internal fun ConsumerPaymentDetails.PaymentDetails.toPreview(
         },
         label = label,
         sublabel = sublabel,
-        type = type
+        type = type,
+        cardFunding = cardFunding,
     )
 }
 

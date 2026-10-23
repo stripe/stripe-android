@@ -4,9 +4,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.LinkAccountHolder
+import com.stripe.android.link.ui.LinkButtonState
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
@@ -24,6 +27,7 @@ import com.stripe.android.paymentelement.embedded.form.EmbeddedFormInteractorFac
 import com.stripe.android.paymentelement.embedded.form.OnClickDelegateOverrideImpl
 import com.stripe.android.paymentsheet.FakeCustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInteractor
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
@@ -39,7 +43,6 @@ import com.stripe.android.paymentsheet.verticalmode.FakeSavedPaymentMethodConfir
 import com.stripe.android.paymentsheet.verticalmode.ManageScreenInteractor
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.testing.CoroutineTestRule
-import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.FakeIsNfcScanningAvailable
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
@@ -99,6 +102,7 @@ internal class EmbeddedNavigatorScreenScreenshotTest {
         snapshot(
             screen = screen,
             previousScreen = createVerticalPaymentOptionsScreen(),
+            walletsState = createWalletsState(),
         )
     }
 
@@ -126,19 +130,44 @@ internal class EmbeddedNavigatorScreenScreenshotTest {
     }
 
     @Test
+    fun displaysVerticalPaymentOptionsWithWalletHeader() {
+        val screen = createVerticalPaymentOptionsScreen()
+        val walletsState = createWalletsState()
+
+        snapshot(
+            screen = screen,
+            previousScreen = null,
+            walletsState = walletsState,
+        )
+    }
+
+    @Test
     fun displaysHorizontalPaymentOptions() {
+        snapshot(createHorizontalPaymentOptionsScreen())
+    }
+
+    @Test
+    fun displaysRootFormWithWalletHeader() {
+        val screen = createFormScreen()
+        val walletsState = createWalletsState()
+
+        snapshot(
+            screen = screen,
+            previousScreen = null,
+            walletsState = walletsState,
+        )
+    }
+
+    private fun createHorizontalPaymentOptionsScreen(): EmbeddedNavigator.Screen.HorizontalPaymentOptions {
         val metadata = createPaymentOptionsMetadata(PaymentSheet.PaymentMethodLayout.Horizontal)
-        val screen = EmbeddedNavigator.Screen.HorizontalPaymentOptions(
+        return EmbeddedNavigator.Screen.HorizontalPaymentOptions(
             interactor = FakeAddPaymentMethodInteractor(
                 initialState = FakeAddPaymentMethodInteractor.createState(metadata),
             ),
-            walletsState = stateFlowOf(null),
             sheetActivityState = createSheetActivityStateHolder().state,
             onContinueClick = {},
             onPrimaryButtonDisabledClick = {},
         )
-
-        snapshot(screen)
     }
 
     @Test
@@ -168,13 +197,12 @@ internal class EmbeddedNavigatorScreenScreenshotTest {
             interactor = FakeAddPaymentMethodInteractor(
                 initialState = FakeAddPaymentMethodInteractor.createState(metadata),
             ),
-            walletsState = stateFlowOf(walletsState),
             sheetActivityState = createSheetActivityStateHolder().state,
             onContinueClick = {},
             onPrimaryButtonDisabledClick = {},
         )
 
-        snapshot(screen)
+        snapshot(screen, walletsState = walletsState)
     }
 
     private fun createFormScreen(): EmbeddedNavigator.Screen.Form {
@@ -241,6 +269,23 @@ internal class EmbeddedNavigatorScreenScreenshotTest {
         return card.copy(card = card.card?.copy(last4 = last4))
     }
 
+    private fun createWalletsState(): WalletsState {
+        return WalletsState(
+            link = WalletsState.Link(
+                state = LinkButtonState.Default,
+                linkBrand = LinkBrand.Link,
+            ),
+            googlePay = null,
+            walletsAllowedInHeader = listOf(WalletType.Link),
+            buttonsEnabled = true,
+            dividerTextResource = R.string.stripe_paymentsheet_or_pay_using,
+            cardFundingFilter = DefaultCardFundingFilter,
+            cardBrandFilter = DefaultCardBrandFilter,
+            onGooglePayPressed = { error("Not expected") },
+            onLinkPressed = { error("Not expected") },
+        )
+    }
+
     private fun createSheetActivityStateHolder(
         metadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         selectionHolder: DefaultEmbeddedSelectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle()),
@@ -265,6 +310,7 @@ internal class EmbeddedNavigatorScreenScreenshotTest {
     private fun snapshot(
         screen: EmbeddedNavigator.Screen,
         previousScreen: EmbeddedNavigator.Screen? = null,
+        walletsState: WalletsState? = null,
     ) {
         val eventReporter = FakeEventReporter()
         val navigator = EmbeddedNavigator(
@@ -276,7 +322,16 @@ internal class EmbeddedNavigatorScreenScreenshotTest {
         paparazziRule.snapshot {
             ViewModelStoreOwnerContext {
                 EventReporterProvider(eventReporter) {
-                    EmbeddedSheetScreenContent(navigator, screen)
+                    EmbeddedSheetScreenContent(
+                        navigator = navigator,
+                        screen = screen,
+                        walletsHeaderState = walletsHeaderState(
+                            launchMode = EmbeddedLaunchMode.PaymentOptions,
+                            screen = screen,
+                            canGoBack = navigator.canGoBack,
+                            walletsState = walletsState,
+                        ),
+                    )
                 }
             }
         }

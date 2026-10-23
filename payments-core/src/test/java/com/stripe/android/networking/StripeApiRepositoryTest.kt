@@ -12,7 +12,6 @@ import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.frauddetection.FraudDetectionData
-import com.stripe.android.core.frauddetection.FraudDetectionDataParamsUtils
 import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import com.stripe.android.core.model.StripeFileParams
 import com.stripe.android.core.model.StripeFilePurpose
@@ -1933,109 +1932,6 @@ internal class StripeApiRepositoryTest {
         }
 
     @Test
-    fun `createSavedPaymentMethodRadarSession() with FraudDetectionData should return expected value`() =
-        runTest {
-            val responseBody = """
-                {
-                    "id": "rse_123",
-                    "passive_captcha_site_key": "1234",
-                    "passive_captcha_rqdata": "123456789"
-                }
-            """.trimIndent()
-
-            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>())).thenReturn(
-                StripeResponse(
-                    200,
-                    responseBody,
-                    emptyMap()
-                )
-            )
-
-            val stripeRepository = StripeApiRepository(
-                context = context,
-                publishableKeyProvider = { DEFAULT_OPTIONS.apiKey },
-                requestSurface = StripeRepository.DEFAULT_REQUEST_SURFACE,
-                stripeNetworkClient = stripeNetworkClient,
-                analyticsRequestExecutor = analyticsRequestExecutor,
-                fraudDetectionDataRepository = FakeFraudDetectionDataRepository(
-                    FraudDetectionData(
-                        guid = "8ae65368-76c5-4dd5-81b9-279f61efa591c80a51",
-                        muid = "ac3febde-f658-41b5-8c4d-94905501c7a6f4ca3c",
-                        sid = "02892cd4-183a-4074-bca2-5dc0647dd816ce4cbf",
-                    )
-                ),
-                workContext = testDispatcher
-            )
-            val radarSession = stripeRepository.createSavedPaymentMethodRadarSession(
-                paymentMethodId = "pm_123",
-                requestOptions = DEFAULT_OPTIONS,
-            ).getOrThrow()
-
-            assertThat(radarSession.id).isEqualTo("rse_123")
-            assertThat(radarSession.passiveCaptchaSiteKey).isEqualTo("1234")
-            assertThat(radarSession.passiveCaptchaRqdata).isEqualTo("123456789")
-
-            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
-
-            val apiRequest = apiRequestArgumentCaptor.firstValue
-            val params = requireNotNull(apiRequest.params)
-
-            with(params) {
-                assertThat(this["guid"]).isEqualTo("8ae65368-76c5-4dd5-81b9-279f61efa591c80a51")
-                assertThat(this["muid"]).isEqualTo("ac3febde-f658-41b5-8c4d-94905501c7a6f4ca3c")
-                assertThat(this["sid"]).isEqualTo("02892cd4-183a-4074-bca2-5dc0647dd816ce4cbf")
-                assertThat(this["payment_method"]).isEqualTo("pm_123")
-            }
-
-            assertThat(apiRequest.baseUrl)
-                .isEqualTo("https://api.stripe.com/v1/radar/saved_payment_method_session")
-
-            verifyAnalyticsRequest(PaymentAnalyticsEvent.RadarSessionCreate)
-        }
-
-    @Test
-    fun `createSavedPaymentMethodRadarSession() with null FraudDetectionData should throw an exception`() =
-        runTest {
-            val stripeRepository = StripeApiRepository(
-                context = context,
-                publishableKeyProvider = { DEFAULT_OPTIONS.apiKey },
-                requestSurface = StripeRepository.DEFAULT_REQUEST_SURFACE,
-                fraudDetectionDataRepository = FakeFraudDetectionDataRepository(
-                    null
-                ),
-                workContext = testDispatcher
-            )
-
-            val invalidRequestException = stripeRepository.createSavedPaymentMethodRadarSession(
-                paymentMethodId = "pm_123",
-                requestOptions = DEFAULT_OPTIONS,
-            ).exceptionOrNull()
-
-            assertThat(invalidRequestException).isInstanceOf(InvalidRequestException::class.java)
-            assertThat(invalidRequestException?.message)
-                .isEqualTo("Could not obtain fraud data required to create a Radar Session.")
-        }
-
-    @Test
-    fun `createSavedPaymentMethodRadarSession() with advancedFraudSignalsEnabled as false should throw exception`() =
-        runTest {
-            verifyNoInteractions(fraudDetectionDataRepository)
-            Stripe.advancedFraudSignalsEnabled = false
-
-            val stripeRepository = create()
-            val invalidRequestException = stripeRepository.createSavedPaymentMethodRadarSession(
-                paymentMethodId = "pm_123",
-                requestOptions = DEFAULT_OPTIONS,
-            ).exceptionOrNull()
-
-            assertThat(invalidRequestException).isInstanceOf(InvalidRequestException::class.java)
-            assertThat(invalidRequestException?.message)
-                .isEqualTo(
-                    "Stripe.advancedFraudSignalsEnabled must be set to 'true' to create a Radar Session."
-                )
-        }
-
-    @Test
     fun `retrieveStripeIntent() with invalid client secret should throw exception`() =
         runTest {
             val error = stripeApiRepository.retrieveStripeIntent(
@@ -3153,7 +3049,7 @@ internal class StripeApiRepositoryTest {
     }
 
     @Test
-    fun createConfirmationToken_withAttribution_setsCorrectPaymentUserAgent() = runTest {
+    fun createConfirmationToken_withAttribution_includesPaymentMethodAndFraudData() = runTest {
         val stripeResponse = StripeResponse(
             200,
             "",
@@ -3164,10 +3060,18 @@ internal class StripeApiRepositoryTest {
 
         val productUsage = "TestProductUsage"
         val attribution = "example_product_usage"
+        val fraudDetectionData = FraudDetectionData(
+            guid = "guid",
+            muid = "muid",
+            sid = "sid",
+        )
+        whenever(fraudDetectionDataRepository.getCached()).thenReturn(fraudDetectionData)
+
+        val paymentMethodData = PaymentMethodCreateParamsFixtures.DEFAULT_CARD.copy(
+            productUsage = setOf(attribution)
+        )
         val confirmationTokenParams = ConfirmationTokenParams(
-            paymentMethodData = PaymentMethodCreateParamsFixtures.DEFAULT_CARD.copy(
-                productUsage = setOf(attribution)
-            ),
+            paymentMethodData = paymentMethodData,
             returnUrl = "https://example.com/return"
         )
 
@@ -3179,9 +3083,14 @@ internal class StripeApiRepositoryTest {
         verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
         val apiRequest = apiRequestArgumentCaptor.firstValue
         val paymentMethodDataParams =
-            apiRequest.params?.get("payment_method_data") as Map<*, *>
-        assertThat(paymentMethodDataParams["payment_user_agent"])
-            .isEqualTo("stripe-android/${StripeSdkVersion.VERSION_NAME};$productUsage;$attribution")
+            apiRequest.params?.get(ConfirmStripeIntentParams.PARAM_PAYMENT_METHOD_DATA) as Map<*, *>
+        assertThat(paymentMethodDataParams).containsAtLeastEntriesIn(
+            paymentMethodData.toParamMap()
+                .plus(fraudDetectionData.params)
+                .plus(
+                    "payment_user_agent" to "stripe-android/${StripeSdkVersion.VERSION_NAME};$productUsage;$attribution"
+                )
+        )
 
         verifyAnalyticsRequest(
             event = PaymentAnalyticsEvent.ConfirmationTokenCreate,
@@ -3490,8 +3399,7 @@ internal class StripeApiRepositoryTest {
             productUsageTokens = productUsage,
             stripeNetworkClient = stripeNetworkClient,
             analyticsRequestExecutor = analyticsRequestExecutor,
-            fraudDetectionDataRepository = fraudDetectionDataRepository,
-            fraudDetectionDataParamsUtils = FraudDetectionDataParamsUtils()
+            fraudDetectionDataRepository = fraudDetectionDataRepository
         )
     }
 

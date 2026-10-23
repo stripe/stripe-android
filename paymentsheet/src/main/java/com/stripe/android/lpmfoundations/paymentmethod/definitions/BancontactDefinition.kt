@@ -54,15 +54,11 @@ private object BancontactUiDefinitionFactory : UiDefinitionFactory.Simple() {
             }
             .overrideContactInformationPosition(ContactInformationCollectionMode.Email)
             .overrideContactInformationPosition(ContactInformationCollectionMode.Phone)
-            .apply {
-                if (BancontactDefinition.requiresMandate(metadata)) {
-                    footer(
-                        MandateTextElement(
-                            stringResId = R.string.stripe_sepa_mandate,
-                            args = listOf(arguments.merchantName)
-                        )
-                    )
-                }
-            }
+            .addMandateIfAllowed(
+                formElement = MandateTextElement(
+                    stringResId = R.string.stripe_sepa_mandate,
+                    args = listOf(arguments.merchantName)
+                )
+            )
     }
 }

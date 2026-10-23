@@ -3,6 +3,7 @@ package com.stripe.android.checkout
 import androidx.test.espresso.intent.rule.IntentsRule
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.checkouttesting.CheckoutInitResponseFactory
+import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutConfirm
 import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.checkouttesting.checkoutUpdate
@@ -58,8 +59,8 @@ internal class ExpressCheckoutElementAnalyticsTest {
                 response.testBodyFromFile("checkout-session-confirm.json")
             }
 
-            validateAnalyticsRequest(
-                eventName = "mc_embedded_payment_success",
+            validateConfirmationAnalyticsRequest(
+                eventName = "checkout_elements.confirm.succeeded",
                 analyticsPayloadField("selected_lpm", "google_pay"),
             )
 
@@ -83,8 +84,8 @@ internal class ExpressCheckoutElementAnalyticsTest {
 
             validateAnalyticsRequest(eventName = "link.popup.show")
             validateAnalyticsRequest(eventName = "link.popup.success")
-            validateAnalyticsRequest(
-                eventName = "mc_embedded_payment_success",
+            validateConfirmationAnalyticsRequest(
+                eventName = "checkout_elements.confirm.succeeded",
                 analyticsPayloadField("selected_lpm", "link"),
                 analyticsPayloadField("link_context", "wallet"),
             )
@@ -106,10 +107,10 @@ internal class ExpressCheckoutElementAnalyticsTest {
             enqueueFailedGooglePayPayment(IllegalStateException("Google Pay failed"))
 
             networkRule.checkoutInit()
-            validateAnalyticsRequest(
-                eventName = "mc_embedded_payment_failure",
+            validateConfirmationAnalyticsRequest(
+                eventName = "checkout_elements.confirm.failed",
                 analyticsPayloadField("selected_lpm", "google_pay"),
-                analyticsPayloadField("error_message", "googlePay_1"),
+                analyticsPayloadField("error_type", "googlePay_1"),
                 analyticsPayloadField("error_code", "1"),
             )
 
@@ -133,11 +134,11 @@ internal class ExpressCheckoutElementAnalyticsTest {
                 eventName = "link.popup.error",
                 analyticsPayloadField("error_message", "unknown"),
             )
-            validateAnalyticsRequest(
-                eventName = "mc_embedded_payment_failure",
+            validateConfirmationAnalyticsRequest(
+                eventName = "checkout_elements.confirm.failed",
                 analyticsPayloadField("selected_lpm", "link"),
                 analyticsPayloadField("link_context", "wallet"),
-                analyticsPayloadField("error_message", "java.lang.IllegalStateException"),
+                analyticsPayloadField("error_type", "java.lang.IllegalStateException"),
             )
 
             // We re-load after confirmation fails, which triggers another two loads: one for ECE, one for PE.
@@ -198,8 +199,8 @@ internal class ExpressCheckoutElementAnalyticsTest {
             ) { response ->
                 response.testBodyFromFile("checkout-session-confirm.json")
             }
-            validateAnalyticsRequest(
-                eventName = "mc_embedded_payment_success",
+            validateConfirmationAnalyticsRequest(
+                eventName = "checkout_elements.confirm.succeeded",
                 analyticsPayloadField("selected_lpm", "google_pay"),
             )
 
@@ -246,8 +247,8 @@ internal class ExpressCheckoutElementAnalyticsTest {
             ) { response ->
                 response.testBodyFromFile("checkout-session-confirm.json")
             }
-            validateAnalyticsRequest(
-                eventName = "mc_embedded_payment_success",
+            validateConfirmationAnalyticsRequest(
+                eventName = "checkout_elements.confirm.succeeded",
                 analyticsPayloadField("selected_lpm", "google_pay"),
             )
 
@@ -282,10 +283,10 @@ internal class ExpressCheckoutElementAnalyticsTest {
             networkRule.checkoutInit(
                 responseFactory = CheckoutInitResponseFactory::createWithRequiredBillingAddressForAutomaticTax,
             )
-            validateAnalyticsRequest(
-                eventName = "mc_embedded_payment_failure",
+            validateConfirmationAnalyticsRequest(
+                eventName = "checkout_elements.confirm.failed",
                 analyticsPayloadField("selected_lpm", "google_pay"),
-                analyticsPayloadField("error_message", "checkoutSessionTotalChanged"),
+                analyticsPayloadField("error_type", "checkoutSessionTotalChanged"),
                 analyticsPayloadField("error_code", "checkout_session_total_changed"),
             )
 
@@ -333,6 +334,19 @@ internal class ExpressCheckoutElementAnalyticsTest {
     private fun validateLoadingAnalyticsRequests() {
         validateAnalyticsRequest(eventName = "mc_load_started")
         validateAnalyticsRequest(eventName = "mc_load_succeeded")
+    }
+
+    private fun validateConfirmationAnalyticsRequest(
+        eventName: String,
+        vararg requestMatchers: RequestMatcher,
+    ) {
+        networkRule.validateAnalyticsRequest(
+            eventName = eventName,
+            productUsage = setOf("checkout_elements"),
+            analyticsPayloadField("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID),
+            analyticsPayloadField("invocation_source", "express_checkout_element"),
+            *requestMatchers,
+        )
     }
 
     private fun validateLinkAccountLookupAnalyticsRequest() {

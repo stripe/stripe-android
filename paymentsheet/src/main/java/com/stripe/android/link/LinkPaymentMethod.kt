@@ -1,6 +1,7 @@
 package com.stripe.android.link
 
 import android.os.Parcelable
+import com.stripe.android.model.CardFunding
 import kotlinx.parcelize.Parcelize
 import com.stripe.android.model.ConsumerPaymentDetails as ConsumerPaymentDetailsModel
 
@@ -13,6 +14,18 @@ internal sealed class LinkPaymentMethod(
     open val collectedCvc: String?,
     open val billingPhone: String?
 ) : Parcelable {
+
+    val cardFunding: CardFunding?
+        get() = when (val selectedDetails = details) {
+            is ConsumerPaymentDetailsModel.Card -> selectedDetails.funding.cardFunding
+            is ConsumerPaymentDetailsModel.Passthrough -> {
+                val retainedDetails = (this as? LinkPaymentDetails)?.linkPaymentDetails
+                val card = (retainedDetails as? com.stripe.android.link.LinkPaymentDetails.Passthrough)
+                    ?.paymentMethod?.card
+                CardFunding.fromCode(card?.funding)
+            }
+            else -> null
+        }
 
     internal fun readyForConfirmation(): Boolean = when (val currentDetails = details) {
         is ConsumerPaymentDetailsModel.BankAccount -> true

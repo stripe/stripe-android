@@ -4,26 +4,42 @@ import android.app.Activity
 import android.app.Application
 import android.content.Intent
 import android.os.Bundle
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performSemanticsAction
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.ViewModelProvider
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.common.ui.PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.networktesting.NetworkRule
+import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.addresselement.AddressElementResultStateHolder.State
+import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.testing.createComposeCleanupRule
+import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.paymentelementtestpages.AddressElementPage
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
+@OptIn(AppearanceAPIAdditionsPreview::class, ExperimentalMaterialApi::class)
 internal class AddressElementActivityTest {
     private val applicationContext = ApplicationProvider.getApplicationContext<Application>()
     private val composeTestRule = createEmptyComposeRule()
@@ -187,6 +203,48 @@ internal class AddressElementActivityTest {
     }
 
     @Test
+    @Config(qualifiers = "notnight")
+    fun `always dark appearance is applied to autocomplete text on a light system`() {
+        val expectedPrimary = Color(0xFF654321)
+        val appearance = PaymentSheet.Appearance(
+            colorsDark = PaymentSheet.Colors.configureDefaultDark(primary = expectedPrimary),
+            themeMode = PaymentSheet.ThemeMode.AlwaysDark,
+        )
+        val previousPlacesClientOverride = PlacesClientProxy.override
+
+        try {
+            PlacesClientProxy.override = mock()
+            runScenario(
+                args = AddressElementActivityContract.Args.Standalone(
+                    apiConfiguration = DEFAULT_API_CONFIG,
+                    config = AddressLauncher.Configuration.Builder()
+                        .appearance(appearance)
+                        .build(),
+                ),
+            ) {
+                composeTestRule.waitForIdle()
+                activityScenario.onActivity { activity ->
+                    ViewModelProvider(activity)[AddressElementViewModel::class.java]
+                        .navigator
+                        .navigateTo(AddressElementScreen.Autocomplete(country = "US"))
+                }
+                composeTestRule.waitForIdle()
+
+                val textLayoutResults = mutableListOf<TextLayoutResult>()
+                composeTestRule.onNodeWithText(
+                    applicationContext.getString(R.string.stripe_paymentsheet_enter_address_manually)
+                ).performSemanticsAction(SemanticsActions.GetTextLayoutResult) { action ->
+                    action(textLayoutResults)
+                }
+                assertThat(textLayoutResults.single().layoutInput.style.color).isEqualTo(expectedPrimary)
+            }
+        } finally {
+            PlacesClientProxy.override = previousPlacesClientOverride
+            PaymentSheet.Appearance().parseAppearance()
+        }
+    }
+
+    @Test
     fun `standalone shipping returns the entered address without a tax update`() = runScenario(
         args = AddressElementActivityContract.Args.Standalone(
             apiConfiguration = DEFAULT_API_CONFIG,
@@ -207,7 +265,7 @@ internal class AddressElementActivityTest {
     }
 
     @Test
-    fun `standalone shipping can be canceled with close before saving`() = runScenario(
+    fun `unchanged input can be canceled with close before saving`() = runScenario(
         args = AddressElementActivityContract.Args.Standalone(
             apiConfiguration = DEFAULT_API_CONFIG,
             config = AddressLauncher.Configuration.Builder()
@@ -218,6 +276,7 @@ internal class AddressElementActivityTest {
         addressPage.assertReadyToSave()
         addressPage.clickClose()
 
+        addressPage.assertDiscardConfirmationNotDisplayed()
         assertThat(awaitStandaloneResult()).isEqualTo(AddressLauncherResult.Canceled())
     }
 
@@ -262,6 +321,8 @@ internal class AddressElementActivityTest {
             addressPage.assertErrorNotDisplayed(expectedError)
             addressPage.assertReadyToSave()
             addressPage.clickClose()
+            addressPage.assertDiscardConfirmation(PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG)
+            addressPage.discardChanges()
 
             assertThat(awaitResult()).isEqualTo(AddressElementActivityContract.Result.Canceled)
         } finally {
@@ -270,23 +331,71 @@ internal class AddressElementActivityTest {
     }
 
     @Test
-    fun `checkout shipping can be canceled with back before saving`() = runScenario {
+    fun `unchanged input can be canceled with root back without popping input`() = runScenario {
         addressPage.assertReadyToSave()
 
         activityScenario.onActivity { activity ->
+            val viewModel = ViewModelProvider(activity)[AddressElementViewModel::class.java]
+            val navController = requireNotNull(viewModel.navigator.navigationController)
+            val inputEntry = navController.getBackStackEntry(AddressElementScreen.InputAddress.route)
+
             activity.onBackPressedDispatcher.onBackPressed()
+
+            assertThat(navController.getBackStackEntry(AddressElementScreen.InputAddress.route))
+                .isSameInstanceAs(inputEntry)
         }
 
         assertThat(awaitResult()).isEqualTo(AddressElementActivityContract.Result.Canceled)
     }
 
     @Test
-    fun `checkout shipping can be canceled with scrim accessibility action before saving`() = runScenario {
+    fun `unchanged input can be canceled with scrim accessibility action`() = runScenario {
         addressPage.assertReadyToSave()
-
         addressPage.dismissViaScrimAccessibilityAction()
 
         assertThat(awaitResult()).isEqualTo(AddressElementActivityContract.Result.Canceled)
+    }
+
+    @Test
+    fun `close confirms edited input and cancel preserves the form`() = runScenario {
+        assertDirtyDismissal(editedName = EDITED_NAME) { addressPage.clickClose() }
+    }
+
+    @Test
+    fun `root back confirms edited input and cancel preserves the form`() = runScenario {
+        assertDirtyDismissal(editedName = EDITED_NAME) {
+            activityScenario.onActivity { activity ->
+                activity.onBackPressedDispatcher.onBackPressed()
+            }
+        }
+    }
+
+    @Test
+    fun `scrim confirms edited input and cancel preserves the form`() = runScenario {
+        assertDirtyDismissal(editedName = EDITED_NAME) {
+            addressPage.dismissViaScrimAccessibilityAction()
+        }
+    }
+
+    @Test
+    fun `finished cancellation allows the sheet to hide without requesting confirmation again`() = runScenario {
+        addressPage.assertReadyToSave()
+        addressPage.editName(EDITED_NAME)
+
+        activityScenario.onActivity { activity ->
+            val stateHolder = ViewModelProvider(activity)[AddressElementViewModel::class.java].resultStateHolder
+
+            assertThat(activity.confirmValueChange(ModalBottomSheetValue.Hidden)).isFalse()
+            assertThat(stateHolder.state.value).isEqualTo(State.ConfirmingCancellation)
+
+            stateHolder.onDiscardChanges()
+            stateHolder.onCancelCompleted()
+
+            assertThat(activity.confirmValueChange(ModalBottomSheetValue.Hidden)).isTrue()
+            assertThat(stateHolder.state.value).isEqualTo(
+                State.Finished(AddressElementActivityContract.Result.Canceled)
+            )
+        }
     }
 
     @Test
@@ -376,6 +485,70 @@ internal class AddressElementActivityTest {
         }
     }
 
+    @Test
+    fun `reverted edits cancel immediately`() = runScenario(
+        args = standaloneArgs(SHIPPING_ADDRESS),
+    ) {
+        addressPage.assertReadyToSave()
+        addressPage.editName(EDITED_NAME)
+        addressPage.editName(requireNotNull(SHIPPING_ADDRESS.name))
+        addressPage.assertName(requireNotNull(SHIPPING_ADDRESS.name))
+
+        addressPage.clickClose()
+
+        addressPage.assertDiscardConfirmationNotDisplayed()
+        assertThat(awaitStandaloneResult()).isEqualTo(AddressLauncherResult.Canceled())
+    }
+
+    @Test
+    fun `edited input still requires confirmation after recreation`() = runScenario(
+        args = standaloneArgs(SHIPPING_ADDRESS),
+    ) {
+        addressPage.assertReadyToSave()
+        addressPage.editName(EDITED_NAME)
+        activityScenario.recreate()
+        activityScenario.onActivity { activity = it }
+        composeTestRule.waitForIdle()
+        addressPage.assertName(EDITED_NAME)
+
+        addressPage.clickClose()
+        addressPage.assertDiscardConfirmation(PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG)
+        addressPage.discardChanges()
+
+        assertThat(awaitStandaloneResult()).isEqualTo(AddressLauncherResult.Canceled())
+    }
+
+    @Test
+    fun `discard confirmation survives recreation and keep editing preserves input`() = runScenario(
+        args = standaloneArgs(SHIPPING_ADDRESS),
+    ) {
+        addressPage.assertReadyToSave()
+        addressPage.editName(EDITED_NAME)
+        addressPage.clickClose()
+        addressPage.assertDiscardConfirmation(PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG)
+
+        activityScenario.recreate()
+        activityScenario.onActivity { activity = it }
+        composeTestRule.waitForIdle()
+
+        addressPage.assertDiscardConfirmation(PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG)
+        addressPage.keepEditing()
+        addressPage.assertDiscardConfirmationNotDisplayed()
+        addressPage.assertName(EDITED_NAME)
+        addressPage.assertReadyToSave()
+
+        addressPage.clickClose()
+        addressPage.assertDiscardConfirmation(PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG)
+        addressPage.discardChanges()
+
+        assertThat(awaitStandaloneResult()).isEqualTo(AddressLauncherResult.Canceled())
+    }
+
+    private fun standaloneArgs(address: AddressDetails) = AddressElementActivityContract.Args.Standalone(
+        apiConfiguration = DEFAULT_API_CONFIG,
+        config = AddressLauncher.Configuration.Builder().address(address).build(),
+    )
+
     private fun runScenario(
         args: AddressElementActivityContract.Args = AddressElementActivityContract.Args.CheckoutShipping(
             apiConfiguration = DEFAULT_API_CONFIG,
@@ -391,6 +564,7 @@ internal class AddressElementActivityTest {
     ) = activityTestRunner.run(args, block)
 
     private companion object {
+        const val EDITED_NAME = "Jenny Rosen Updated"
         val SHIPPING_ADDRESS = AddressDetails(
             name = "Jenny Rosen",
             address = PaymentSheet.Address(

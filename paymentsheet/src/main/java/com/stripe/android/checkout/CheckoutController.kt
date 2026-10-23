@@ -1094,7 +1094,7 @@ class CheckoutController @Inject internal constructor(
             PaymentElement.RowSelectionBehavior.default()
 
         /**
-         * Sets the [ResultCallback] invoked when a payment flow finishes.
+         * Sets the [ResultCallback] invoked when a payment flow finishes or confirmation cannot start.
          */
         fun resultCallback(
             resultCallback: ResultCallback
@@ -1459,9 +1459,10 @@ class CheckoutController @Inject internal constructor(
         class Canceled internal constructor() : Result
 
         /**
-         * The payment flow failed with [error].
+         * The payment flow failed with [error], or confirmation could not start.
          *
-         * @property error Diagnostic details for the payment flow failure.
+         * @property error The error that caused the payment flow to fail, or an [IllegalStateException]
+         * explaining why confirmation could not start.
          * @property displayMessage A user-facing message, or `null` when no display message is available.
          */
         @Poko
@@ -1474,13 +1475,16 @@ class CheckoutController @Inject internal constructor(
     }
 
     /**
-     * Callback invoked with the [Result] of a checkout payment flow.
+     * Callback invoked with the [Result] of a checkout payment flow, including failures before
+     * confirmation starts. Each rejected [CheckoutPresenter.confirm] call delivers [Result.Failed]
+     * with an [IllegalStateException] explaining the reason. An active confirmation continues and
+     * delivers its own result.
      */
     @CheckoutSessionPreview
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun interface ResultCallback {
         /**
-         * Called when the payment flow finishes with [result].
+         * Called when the payment flow finishes or confirmation cannot start, with [result].
          */
         fun onResult(result: Result)
     }

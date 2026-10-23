@@ -771,9 +771,9 @@ internal class EmbeddedNavigatorTest {
         )
 
         // The saved payment method is not a card, so the derivation resolves to false and the interactor
-        // uses the "Add card" header instead of "Add new card".
+        // uses the "Add a card" header instead of "Add new card".
         assertThat(screen.formInteractor.state.value.headerInformation?.displayName)
-            .isEqualTo(PaymentsUiCoreR.string.stripe_paymentsheet_add_card.resolvableString)
+            .isEqualTo(PaymentsUiCoreR.string.stripe_paymentsheet_add_a_card.resolvableString)
     }
 
     @Test
@@ -814,9 +814,9 @@ internal class EmbeddedNavigatorTest {
         )
 
         // With no saved payment methods the derivation resolves to false, so the interactor uses the
-        // "Add card" header rather than "Add new card".
+        // "Add a card" header rather than "Add new card".
         assertThat(screen.formInteractor.state.value.headerInformation?.displayName)
-            .isEqualTo(PaymentsUiCoreR.string.stripe_paymentsheet_add_card.resolvableString)
+            .isEqualTo(PaymentsUiCoreR.string.stripe_paymentsheet_add_a_card.resolvableString)
     }
 
     private fun createFormFactory(
@@ -841,12 +841,13 @@ internal class EmbeddedNavigatorTest {
             paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
             autocompleteAddressInteractorFactory = TestAutocompleteAddressInteractor.noOpFactory(),
         )
+        val customerStateHolder = FakeCustomerStateHolder(paymentMethods = savedPaymentMethods)
         return EmbeddedNavigator.Screen.Form.Factory(
             interactorFactory = interactorFactory,
             sheetActivityStateHolder = FakeSheetActivityStateHolder(),
             confirmationHelper = FakeSheetActivityConfirmationHelper(),
             embeddedSelectionHolder = selectionHolder,
-            customerStateHolder = FakeCustomerStateHolder(paymentMethods = savedPaymentMethods),
+            customerStateHolder = customerStateHolder,
             linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
         )
     }
@@ -879,7 +880,6 @@ internal class EmbeddedNavigatorTest {
     ): EmbeddedNavigator.Screen.HorizontalPaymentOptions {
         return EmbeddedNavigator.Screen.HorizontalPaymentOptions(
             interactor = interactor,
-            walletsState = stateFlowOf(null),
             sheetActivityState = stateFlowOf(
                 SheetActivityStateHolder.State(
                     primaryButtonLabel = "".resolvableString,

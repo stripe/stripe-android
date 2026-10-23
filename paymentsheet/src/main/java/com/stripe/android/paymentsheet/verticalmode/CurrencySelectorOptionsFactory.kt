@@ -58,7 +58,7 @@ internal object CurrencySelectorOptionsFactory {
 
         val selectedCode = adaptivePricingInfo.activePresentmentCurrency.uppercase()
 
-        val exchangeRateText = if (selectedCode != integrationCode) {
+        val exchangeRateText = if (adaptivePricingInfo.isActive) {
             "1 $integrationCode = ${localOption.presentmentExchangeRate} $localCode"
         } else {
             null

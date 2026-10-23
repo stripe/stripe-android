@@ -21,6 +21,7 @@ internal interface ExpressCheckoutElementInteractor {
     data class State(
         val expressButtons: List<ExpressButton>,
         val buttonLayout: ExpressCheckoutElement.Configuration.Appearance.ButtonLayout.State,
+        val cornerRadiusDp: Float,
         val enabled: Boolean,
     )
 
@@ -60,6 +61,7 @@ internal class DefaultExpressCheckoutElementInteractor @Inject constructor(
             return@combineAsStateFlow ExpressCheckoutElementInteractor.State(
                 expressButtons = emptyList(),
                 buttonLayout = ExpressCheckoutElement.Configuration.Appearance.ButtonLayout().build(),
+                cornerRadiusDp = ExpressCheckoutElement.Configuration.Appearance().build().cornerRadiusDp,
                 enabled = !isUpdating,
             )
         }
@@ -70,7 +72,6 @@ internal class DefaultExpressCheckoutElementInteractor @Inject constructor(
                     ExpressButtonType.Link -> ExpressButton.Link.create(
                         paymentMethodMetadata = paymentMethodMetadata,
                         linkAccountInfo = linkAccountInfo,
-                        buttonTheme = configuration.appearance.buttonTheme,
                     )
                     is ExpressButtonType.GooglePay -> ExpressButton.GooglePay.create(
                         paymentMethodMetadata = paymentMethodMetadata,
@@ -81,6 +82,7 @@ internal class DefaultExpressCheckoutElementInteractor @Inject constructor(
                 }
             },
             buttonLayout = configuration.appearance.buttonLayout,
+            cornerRadiusDp = configuration.appearance.cornerRadiusDp,
             enabled = !isUpdating,
         )
     }

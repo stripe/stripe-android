@@ -23,6 +23,7 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
         require(json.requiredString("ui_mode") == "mobile_elements")
         require(json.requiredString("mode") == "modeless")
         val id = json.requiredString("session_id")
+        val configId = json.optionalString("config_id")
         val currency = json.requiredString("currency")
         val paymentStatus = when (json.requiredString("payment_status")) {
             "paid" -> CheckoutSessionResponse.PaymentStatus.PAID
@@ -62,6 +63,7 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
 
         CheckoutSessionResponse(
             id = id,
+            configId = configId,
             currency = currency,
             paymentStatus = paymentStatus,
             status = status,

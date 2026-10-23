@@ -29,9 +29,10 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.ui.GooglePayButton
 import com.stripe.android.paymentsheet.ui.GooglePayButtonTheme
 import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.paymentsheet.ui.PrimaryButtonShape
+import com.stripe.android.paymentsheet.ui.PrimaryButtonTheme
 import com.stripe.android.uicore.stripeThemeIsDark
 import com.stripe.android.uicore.utils.collectAsState
-import kotlin.math.min
 
 @Composable
 internal fun ExpressCheckoutElementContent(
@@ -70,48 +71,45 @@ internal fun ExpressCheckoutElementContent(
         interactor.handleViewAction(ExpressCheckoutElementInteractor.ViewAction.OnDisplayed)
     }
 
-    val visibleButtonCount = calculateVisibleButtonCount(
-        buttonCount = state.expressButtons.size,
-        maxColumns = state.buttonLayout.maxColumns,
-        maxRows = state.buttonLayout.maxRows,
-    )
-
     val columnCount = calculateColumnCount(
-        buttonCount = visibleButtonCount,
+        buttonCount = state.expressButtons.size,
         maxRows = state.buttonLayout.maxRows,
     )
 
-    val visibleButtons = state.expressButtons.take(visibleButtonCount)
-
-    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-        val buttonWidth = ((maxWidth - ButtonSpacing * (columnCount - 1)) / columnCount)
-            .coerceAtLeast(0.dp)
-        Column(
-            verticalArrangement = Arrangement.spacedBy(ButtonSpacing),
-        ) {
-            visibleButtons.chunked(columnCount).forEach { rowButtons ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(IntrinsicSize.Min),
-                    horizontalArrangement = Arrangement.spacedBy(
-                        space = ButtonSpacing,
-                        alignment = Alignment.CenterHorizontally,
-                    ),
-                ) {
-                    rowButtons.forEach { button ->
-                        Box(
-                            modifier = Modifier
-                                .width(buttonWidth)
-                                .fillMaxHeight()
-                        ) {
-                            ExpressButtonContent(
-                                button = button,
-                                enabled = state.enabled,
-                                interactor = interactor,
-                                buttonWidth = buttonWidth,
-                                googlePayButton = googlePayButton,
-                            )
+    PrimaryButtonTheme(
+        shape = PrimaryButtonShape(cornerRadius = state.cornerRadiusDp.dp),
+    ) {
+        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+            val buttonWidth = ((maxWidth - ButtonSpacing * (columnCount - 1)) / columnCount)
+                .coerceAtLeast(0.dp)
+            Column(
+                verticalArrangement = Arrangement.spacedBy(ButtonSpacing),
+            ) {
+                state.expressButtons.chunked(columnCount).forEach { rowButtons ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(IntrinsicSize.Min),
+                        horizontalArrangement = Arrangement.spacedBy(
+                            space = ButtonSpacing,
+                            alignment = Alignment.CenterHorizontally,
+                        ),
+                    ) {
+                        rowButtons.forEach { button ->
+                            Box(
+                                modifier = Modifier
+                                    .width(buttonWidth)
+                                    .fillMaxHeight()
+                            ) {
+                                ExpressButtonContent(
+                                    button = button,
+                                    enabled = state.enabled,
+                                    interactor = interactor,
+                                    buttonWidth = buttonWidth,
+                                    cornerRadius = state.cornerRadiusDp.dp,
+                                    googlePayButton = googlePayButton,
+                                )
+                            }
                         }
                     }
                 }
@@ -121,24 +119,6 @@ internal fun ExpressCheckoutElementContent(
 }
 
 private val ButtonSpacing = 12.dp
-
-@VisibleForTesting
-internal fun calculateVisibleButtonCount(
-    buttonCount: Int,
-    maxColumns: Int?,
-    maxRows: Int?,
-): Int {
-    if (maxColumns == null || maxRows == null) {
-        return buttonCount
-    }
-
-    val displayableInGrid = maxRows * maxColumns
-
-    return min(
-        displayableInGrid,
-        buttonCount,
-    )
-}
 
 @VisibleForTesting
 internal fun calculateColumnCount(
@@ -151,8 +131,7 @@ internal fun calculateColumnCount(
 
     // We prefer to use one column but we are forced to have multiple columns if maxRows is less than buttonCount
     return if (maxRows != null && maxRows < buttonCount) {
-        // It's safe to do this without checking maxColumns, because we've already updated the total button count to
-        // ensure we won't overflow our bounds.
+        // The available button list is already limited to the configured grid capacity.
         (buttonCount + maxRows - 1) / maxRows
     } else {
         1
@@ -165,6 +144,7 @@ private fun ExpressButtonContent(
     enabled: Boolean,
     interactor: ExpressCheckoutElementInteractor,
     buttonWidth: Dp,
+    cornerRadius: Dp,
     googlePayButton: @Composable (ExpressButton.GooglePay, Boolean, () -> Unit) -> Unit,
 ) {
     key(button) {
@@ -179,10 +159,11 @@ private fun ExpressButtonContent(
             is ExpressButton.Link -> LinkButton(
                 state = button.state,
                 enabled = enabled,
-                theme = button.buttonTheme.toLinkButtonTheme(),
+                theme = PaymentSheet.ButtonThemes.LinkButtonTheme.DEFAULT,
                 linkBrand = button.linkBrand,
                 containerWidth = buttonWidth,
                 modifier = Modifier.fillMaxSize(),
+                cornerRadius = cornerRadius,
                 onClick = {
                     interactor.handleViewAction(
                         ExpressCheckoutElementInteractor.ViewAction.OnWalletTapped(
@@ -191,19 +172,6 @@ private fun ExpressButtonContent(
                     )
                 },
             )
-        }
-    }
-}
-
-@Composable
-private fun ButtonTheme.toLinkButtonTheme(): PaymentSheet.ButtonThemes.LinkButtonTheme {
-    return when (this) {
-        ButtonTheme.Light -> PaymentSheet.ButtonThemes.LinkButtonTheme.WHITE
-        ButtonTheme.Dark -> PaymentSheet.ButtonThemes.LinkButtonTheme.DEFAULT
-        ButtonTheme.Automatic -> if (MaterialTheme.stripeThemeIsDark) {
-            PaymentSheet.ButtonThemes.LinkButtonTheme.WHITE
-        } else {
-            PaymentSheet.ButtonThemes.LinkButtonTheme.DEFAULT
         }
     }
 }

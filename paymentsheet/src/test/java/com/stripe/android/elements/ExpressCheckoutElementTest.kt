@@ -1,11 +1,18 @@
 package com.stripe.android.elements
 
+import android.content.Context
+import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.R
+import com.stripe.android.uicore.StripeThemeDefaults
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
 @OptIn(CheckoutSessionPreview::class)
+@RunWith(RobolectricTestRunner::class)
 internal class ExpressCheckoutElementTest {
     @Test
     fun `configuration builds default values`() {
@@ -22,12 +29,13 @@ internal class ExpressCheckoutElementTest {
             PaymentSheet.GooglePayConfiguration.ButtonType.Pay
         )
         assertThat(state.googlePayConfiguration.additionalEnabledNetworks).isEmpty()
-        assertThat(state.paymentMethodOrder).isEmpty()
         assertThat(state.appearance.buttonLayout.maxColumns).isNull()
         assertThat(state.appearance.buttonLayout.maxRows).isNull()
         assertThat(state.appearance.buttonTheme).isEqualTo(
             ExpressCheckoutElement.Configuration.Appearance.ButtonTheme.Automatic
         )
+        assertThat(state.appearance.cornerRadiusDp)
+            .isEqualTo(StripeThemeDefaults.shapes.cornerRadius)
     }
 
     @Test
@@ -60,34 +68,6 @@ internal class ExpressCheckoutElementTest {
     }
 
     @Test
-    fun `configuration builds payment method order`() {
-        val state = ExpressCheckoutElement.Configuration()
-            .paymentMethodOrder(
-                listOf(
-                    "link",
-                    "google_pay",
-                )
-            )
-            .build()
-
-        assertThat(state.paymentMethodOrder).containsExactly(
-            ExpressCheckoutElement.Configuration.PaymentMethodType.Link,
-            ExpressCheckoutElement.Configuration.PaymentMethodType.GooglePay,
-        ).inOrder()
-    }
-
-    @Test
-    fun `configuration ignores invalid payment methods in payment method order`() {
-        val state = ExpressCheckoutElement.Configuration()
-            .paymentMethodOrder(listOf("invalid", "link"))
-            .build()
-
-        assertThat(state.paymentMethodOrder).containsExactly(
-            ExpressCheckoutElement.Configuration.PaymentMethodType.Link,
-        )
-    }
-
-    @Test
     fun `configuration builds requested appearance`() {
         val state = ExpressCheckoutElement.Configuration()
             .appearance(
@@ -98,6 +78,7 @@ internal class ExpressCheckoutElementTest {
                             .maxRows(1)
                     )
                     .buttonTheme(ExpressCheckoutElement.Configuration.Appearance.ButtonTheme.Light)
+                    .cornerRadiusDp(12f)
             )
             .build()
 
@@ -106,6 +87,18 @@ internal class ExpressCheckoutElementTest {
         assertThat(state.appearance.buttonTheme).isEqualTo(
             ExpressCheckoutElement.Configuration.Appearance.ButtonTheme.Light
         )
+        assertThat(state.appearance.cornerRadiusDp).isEqualTo(12f)
+    }
+
+    @Test
+    fun `appearance builds corner radius from dimension resource`() {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+
+        val state = ExpressCheckoutElement.Configuration.Appearance()
+            .cornerRadiusDp(context, R.dimen.stripe_paymentsheet_outer_spacing_top)
+            .build()
+
+        assertThat(state.cornerRadiusDp).isEqualTo(10f)
     }
 
     @Test

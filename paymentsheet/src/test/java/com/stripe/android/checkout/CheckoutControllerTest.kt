@@ -791,7 +791,7 @@ internal class CheckoutControllerTest {
         )
         val state = recreated.stateHolder.state
         assertThat(state).isNotNull()
-        assertThat(state!!.embeddedConfiguration.merchantDisplayName)
+        assertThat(state!!.embeddedConfiguration?.merchantDisplayName)
             .isEqualTo(expectedMerchantDisplayName)
     }
 
@@ -985,7 +985,7 @@ internal class CheckoutControllerTest {
     @Test
     fun `applyPromotionCode sends promotion code and reloads on success`() = runMutationScenario {
         assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isNotEqualTo(4099.0)
-        assertThat((committedState().paymentMethodMetadata.stripeIntent as PaymentIntent).amount)
+        assertThat((committedState().paymentMethodMetadata?.stripeIntent as? PaymentIntent)?.amount)
             .isNotEqualTo(4099L)
         networkRule.checkoutUpdate(
             bodyPart("promotion_code", "10OFF"),
@@ -1005,7 +1005,7 @@ internal class CheckoutControllerTest {
         result.getOrThrow()
         assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isEqualTo(4099.0)
         assertThat(committedState().checkoutSessionResponse.amount).isEqualTo(4099L)
-        assertThat((committedState().paymentMethodMetadata.stripeIntent as PaymentIntent).amount)
+        assertThat((committedState().paymentMethodMetadata?.stripeIntent as? PaymentIntent)?.amount)
             .isEqualTo(4099L)
     }
 
@@ -1089,11 +1089,13 @@ internal class CheckoutControllerTest {
 
         result.getOrThrow()
         assertThat(controller.session.value?.email).isEqualTo("background@example.com")
-        assertThat(committedState().embeddedConfiguration.defaultBillingDetails?.email)
+        assertThat(committedState().embeddedConfiguration?.defaultBillingDetails?.email)
             .isEqualTo("background@example.com")
         assertThat(
-            (committedState().paymentMethodMetadata.integrationMetadata as IntegrationMetadata.CheckoutSession)
-                .collectedEmail
+            (
+                committedState().paymentMethodMetadata?.integrationMetadata
+                    as? IntegrationMetadata.CheckoutSession
+                )?.collectedEmail
         ).isEqualTo("background@example.com")
     }
 
@@ -1103,21 +1105,25 @@ internal class CheckoutControllerTest {
     ) {
         controller.updateEmail("local@example.com").getOrThrow()
         assertThat(controller.session.value?.email).isEqualTo("local@example.com")
-        assertThat(committedState().embeddedConfiguration.defaultBillingDetails?.email)
+        assertThat(committedState().embeddedConfiguration?.defaultBillingDetails?.email)
             .isEqualTo("local@example.com")
 
         assertThat(
-            (committedState().paymentMethodMetadata.integrationMetadata as IntegrationMetadata.CheckoutSession)
-                .collectedEmail
+            (
+                committedState().paymentMethodMetadata?.integrationMetadata
+                    as? IntegrationMetadata.CheckoutSession
+                )?.collectedEmail
         ).isEqualTo("local@example.com")
         val result = controller.updateEmail(null)
 
         result.getOrThrow()
         assertThat(controller.session.value?.email).isNull()
-        assertThat(committedState().embeddedConfiguration.defaultBillingDetails?.email).isNull()
+        assertThat(committedState().embeddedConfiguration?.defaultBillingDetails?.email).isNull()
         assertThat(
-            (committedState().paymentMethodMetadata.integrationMetadata as IntegrationMetadata.CheckoutSession)
-                .collectedEmail
+            (
+                committedState().paymentMethodMetadata?.integrationMetadata
+                    as? IntegrationMetadata.CheckoutSession
+                )?.collectedEmail
         ).isNull()
     }
 
@@ -1457,8 +1463,8 @@ internal class CheckoutControllerTest {
             assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isEqualTo(6000.0)
             assertThat(state.collectedDetails.shippingName).isEqualTo("John")
             assertThat(state.collectedDetails.shippingAddress).isEqualTo(address)
-            assertThat(state.paymentMethodMetadata.shippingDetails?.name).isEqualTo("John")
-            assertThat(state.paymentMethodMetadata.shippingDetails?.address).isEqualTo(
+            assertThat(state.paymentMethodMetadata?.shippingDetails?.name).isEqualTo("John")
+            assertThat(state.paymentMethodMetadata?.shippingDetails?.address).isEqualTo(
                 address.asPaymentSheet()
             )
         }

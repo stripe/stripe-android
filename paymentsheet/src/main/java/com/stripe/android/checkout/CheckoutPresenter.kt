@@ -68,6 +68,10 @@ class CheckoutPresenter @Inject internal constructor(
      *
      * The result is delivered to the [CheckoutController.ResultCallback] supplied when building the
      * [CheckoutController].
+     * If confirmation cannot start because checkout is not ready or another operation is in progress,
+     * the callback receives [CheckoutController.Result.Failed] with an [IllegalStateException]
+     * explaining the reason. Each rejected call delivers its own failure without interrupting an
+     * active payment flow.
      *
      * May be called from any thread. Calls from a background thread are dispatched to the main thread.
      */

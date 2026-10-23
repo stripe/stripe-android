@@ -42,14 +42,12 @@ private object CashAppPayUiDefinitionFactory : UiDefinitionFactory.Simple() {
         arguments: UiDefinitionFactory.Arguments,
         builder: FormElementsBuilder
     ) {
-        if (CashAppPayDefinition.requiresMandate(metadata)) {
-            builder.footer(
-                MandateTextElement(
-                    identifier = FormFieldId.Generic("cashapp_mandate"),
-                    stringResId = R.string.stripe_cash_app_pay_mandate,
-                    args = listOf(arguments.merchantName, arguments.merchantName)
-                )
-            )
-        }
+        builder.addMandateIfAllowed(
+            formElement = MandateTextElement(
+                identifier = FormFieldId.Generic("cashapp_mandate"),
+                stringResId = R.string.stripe_cash_app_pay_mandate,
+                args = listOf(arguments.merchantName, arguments.merchantName)
+            ),
+        )
     }
 }

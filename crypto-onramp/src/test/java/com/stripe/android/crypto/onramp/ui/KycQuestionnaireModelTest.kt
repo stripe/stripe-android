@@ -1,8 +1,8 @@
 package com.stripe.android.crypto.onramp.ui
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.crypto.onramp.model.AdditionalKycQuestion
-import com.stripe.android.crypto.onramp.model.AdditionalKycQuestionnaire
+import com.stripe.android.crypto.onramp.model.KycQuestion
+import com.stripe.android.crypto.onramp.model.KycQuestionnaire
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -46,11 +46,37 @@ internal class KycQuestionnaireModelTest {
         assertThat(model.createSubmission()).isNull()
     }
 
+    @Test
+    fun `each question uses its backend limit for input and submission`() {
+        val model = KycQuestionnaireModel(
+            KycQuestionnaire(
+                listOf(
+                    KycQuestion("required", "Purpose", "free_text", true, 3),
+                    KycQuestion("optional", "Details", "free_text", false, 1),
+                )
+            )
+        )
+        model.updateAnswer("required", "😀abcd")
+        model.updateAnswer("optional", "ab")
+        assertThat(model.state.map { it.answer }).containsExactly("😀ab", "a").inOrder()
+        assertThat(model.createSubmission()?.answers?.map { it.value }).containsExactly("😀ab", "a").inOrder()
+        assertThat(model.hasMissingAnswers).isFalse()
+    }
+
+    @Test
+    fun `custom limit preserves composed character boundaries`() {
+        val model = KycQuestionnaireModel(
+            KycQuestionnaire(listOf(KycQuestion("required", "Purpose", "free_text", true, 2)))
+        )
+        model.updateAnswer("required", "ae\u0301")
+        assertThat(model.state.single().answer).isEqualTo("a")
+    }
+
     private fun model() = KycQuestionnaireModel(
-        AdditionalKycQuestionnaire(
+        KycQuestionnaire(
             listOf(
-                AdditionalKycQuestion("required", "Source of funds", "free_text", true),
-                AdditionalKycQuestion("optional", "Details", "free_text", false),
+                KycQuestion("required", "Source of funds", "free_text", true, 5_000),
+                KycQuestion("optional", "Details", "free_text", false, 5_000),
             )
         )
     )

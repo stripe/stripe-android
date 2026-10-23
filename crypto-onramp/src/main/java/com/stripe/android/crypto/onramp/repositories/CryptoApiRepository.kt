@@ -16,7 +16,6 @@ import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.core.networking.responseJson
 import com.stripe.android.core.networking.toMap
 import com.stripe.android.core.version.StripeSdkVersion
-import com.stripe.android.crypto.onramp.model.AdditionalKycRequirementSubmissionRequest
 import com.stripe.android.crypto.onramp.model.ConfirmPartnerTermsRequest
 import com.stripe.android.crypto.onramp.model.CreatePaymentTokenRequest
 import com.stripe.android.crypto.onramp.model.CreatePaymentTokenResponse
@@ -33,12 +32,13 @@ import com.stripe.android.crypto.onramp.model.GetPlatformSettingsResponse
 import com.stripe.android.crypto.onramp.model.KycCollectionRequest
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.KycRefreshRequest
+import com.stripe.android.crypto.onramp.model.KycRequirementSubmissionRequest
 import com.stripe.android.crypto.onramp.model.KycRetrieveResponse
 import com.stripe.android.crypto.onramp.model.PartnerDeclarationType
 import com.stripe.android.crypto.onramp.model.PartnerTerms
 import com.stripe.android.crypto.onramp.model.PartnerTermsResponse
 import com.stripe.android.crypto.onramp.model.RefreshKycInfo
-import com.stripe.android.crypto.onramp.model.RetrieveAdditionalKycRequirementsResponse
+import com.stripe.android.crypto.onramp.model.RetrieveKycRequirementsResponse
 import com.stripe.android.crypto.onramp.model.RetrievePartnerTermsRequest
 import com.stripe.android.crypto.onramp.model.SamsungPayTokenParams
 import com.stripe.android.crypto.onramp.model.StartIdentityVerificationRequest
@@ -120,23 +120,23 @@ internal class CryptoApiRepository @Inject constructor(
     }
 
     /**
-     * Retrieves the current additional KYC requirements.
+     * Retrieves the current KYC requirements.
      */
-    suspend fun retrieveAdditionalKycRequirements(
+    suspend fun retrieveKycRequirements(
         consumerSessionClientSecret: String,
-    ): Result<RetrieveAdditionalKycRequirementsResponse> {
+    ): Result<RetrieveKycRequirementsResponse> {
         return executeConsumerAuthenticatedGet(
-            url = additionalKycRequirementsUrl,
+            url = kycRequirementsUrl,
             consumerSessionClientSecret = consumerSessionClientSecret,
-            responseSerializer = RetrieveAdditionalKycRequirementsResponse.serializer(),
+            responseSerializer = RetrieveKycRequirementsResponse.serializer(),
         )
     }
 
     /**
-     * Submits the data collected for an additional KYC requirement.
+     * Submits the data collected for a KYC requirement.
      */
     suspend fun fulfillKycRequirements(
-        requirements: Map<String, AdditionalKycRequirementSubmissionRequest>,
+        requirements: Map<String, KycRequirementSubmissionRequest>,
         linkSessionKey: String,
     ): Result<Unit> {
         val request = FulfillKycRequirementsRequest(
@@ -158,9 +158,9 @@ internal class CryptoApiRepository @Inject constructor(
     }
 
     /**
-     * Uploads a document for an additional KYC requirement.
+     * Uploads a document for a KYC requirement.
      */
-    suspend fun uploadAdditionalKycDocument(file: File, linkSessionKey: String): Result<StripeFile> {
+    suspend fun uploadKycDocument(file: File, linkSessionKey: String): Result<StripeFile> {
         return execute(
             request = OnrampFileUploadRequest(
                 file = file,
@@ -715,7 +715,7 @@ internal class CryptoApiRepository @Inject constructor(
         /**
          * @return `https://api.stripe.com/v1/crypto/internal/kyc_requirements`
          */
-        internal val additionalKycRequirementsUrl: String
+        internal val kycRequirementsUrl: String
             get() = getApiUrl("crypto/internal/kyc_requirements")
 
         /**

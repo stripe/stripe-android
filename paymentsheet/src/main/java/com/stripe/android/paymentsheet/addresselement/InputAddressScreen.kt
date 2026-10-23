@@ -16,16 +16,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.common.ui.PrimaryButton
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.injection.InputAddressViewModelSubcomponent
+import com.stripe.android.paymentsheet.addresselement.AddressElementResultStateHolder.State
 import com.stripe.android.paymentsheet.ui.AddressOptionsAppBar
 import com.stripe.android.paymentsheet.ui.ErrorMessage
-import com.stripe.android.paymentsheet.ui.PaymentElementTheme
 import com.stripe.android.ui.core.FormUI
 import com.stripe.android.uicore.elements.CheckboxElementUI
 import com.stripe.android.uicore.getOuterFormInsets
@@ -33,11 +30,9 @@ import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeFormInsets
 import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.uicore.utils.stateFlowOf
-import javax.inject.Provider
 
 @Composable
 internal fun InputAddressScreen(
-    appearance: PaymentSheet.Appearance,
     primaryButtonEnabled: Boolean,
     primaryButtonLoading: Boolean,
     closeButtonEnabled: Boolean,
@@ -52,63 +47,61 @@ internal fun InputAddressScreen(
     saveError: ResolvableString?,
 ) {
     val focusManager = LocalFocusManager.current
-    PaymentElementTheme(appearance = appearance) {
-        Scaffold(
-            modifier = Modifier
-                .fillMaxHeight()
-                .imePadding(),
-            backgroundColor = MaterialTheme.colors.surface,
-            contentColor = MaterialTheme.colors.onSurface,
-            topBar = {
-                AddressOptionsAppBar(
-                    isRootScreen = true,
-                    isEnabled = closeButtonEnabled,
-                    onButtonClick = {
-                        focusManager.clearFocus()
-                        onCloseClick()
-                    }
-                )
-            }
+    Scaffold(
+        modifier = Modifier
+            .fillMaxHeight()
+            .imePadding(),
+        backgroundColor = MaterialTheme.colors.surface,
+        contentColor = MaterialTheme.colors.onSurface,
+        topBar = {
+            AddressOptionsAppBar(
+                isRootScreen = true,
+                isEnabled = closeButtonEnabled,
+                onButtonClick = {
+                    focusManager.clearFocus()
+                    onCloseClick()
+                }
+            )
+        }
+    ) {
+        ScrollableColumn(
+            modifier = Modifier.padding(it)
         ) {
-            ScrollableColumn(
-                modifier = Modifier.padding(it)
+            Column(
+                Modifier
+                    .padding(MaterialTheme.stripeFormInsets.getOuterFormInsets())
+                    .padding(top = MaterialTheme.stripeFormInsets.top.dp)
+                    .padding(bottom = MaterialTheme.stripeFormInsets.bottom.dp)
             ) {
-                Column(
-                    Modifier
-                        .padding(MaterialTheme.stripeFormInsets.getOuterFormInsets())
-                        .padding(top = MaterialTheme.stripeFormInsets.top.dp)
-                        .padding(bottom = MaterialTheme.stripeFormInsets.bottom.dp)
-                ) {
-                    Text(
-                        title,
-                        style = MaterialTheme.typography.h4,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
-                    topContent()
-                    formContent()
-                    bottomContent()
-                    saveError?.let {
-                        ErrorMessage(
-                            error = it.resolve(),
-                            modifier = Modifier.padding(top = 2.dp),
-                        )
-                    }
-                    PrimaryButton(
-                        isEnabled = primaryButtonEnabled,
-                        isLoading = primaryButtonLoading,
-                        label = primaryButtonText,
-                        onButtonClick = {
-                            focusManager.clearFocus()
-                            onPrimaryButtonClick()
-                        },
-                        canClickWhileDisabled = !primaryButtonLoading,
-                        onDisabledButtonClick = {
-                            focusManager.clearFocus()
-                            onDisabledButtonClick()
-                        },
-                        modifier = Modifier.padding(vertical = 16.dp),
+                Text(
+                    title,
+                    style = MaterialTheme.typography.h4,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+                topContent()
+                formContent()
+                bottomContent()
+                saveError?.let {
+                    ErrorMessage(
+                        error = it.resolve(),
+                        modifier = Modifier.padding(top = 2.dp),
                     )
                 }
+                PrimaryButton(
+                    isEnabled = primaryButtonEnabled,
+                    isLoading = primaryButtonLoading,
+                    label = primaryButtonText,
+                    onButtonClick = {
+                        focusManager.clearFocus()
+                        onPrimaryButtonClick()
+                    },
+                    canClickWhileDisabled = !primaryButtonLoading,
+                    onDisabledButtonClick = {
+                        focusManager.clearFocus()
+                        onDisabledButtonClick()
+                    },
+                    modifier = Modifier.padding(vertical = 16.dp),
+                )
             }
         }
     }
@@ -116,13 +109,9 @@ internal fun InputAddressScreen(
 
 @Composable
 internal fun InputAddressScreen(
-    inputAddressViewModelSubcomponentFactoryProvider: Provider<InputAddressViewModelSubcomponent.Factory>
+    viewModel: InputAddressViewModel,
+    onCloseClick: () -> Unit,
 ) {
-    val viewModel: InputAddressViewModel = viewModel(
-        factory = InputAddressViewModel.Factory(
-            inputAddressViewModelSubcomponentFactoryProvider
-        )
-    )
     LaunchedEffect(Unit) {
         viewModel.onScreenShown()
     }
@@ -137,14 +126,14 @@ internal fun InputAddressScreen(
         R.string.stripe_paymentsheet_address_element_shipping_address
     )
     val formEnabled by viewModel.formEnabled.collectAsState()
+    val resultState by viewModel.resultStateHolder.state.collectAsState()
     val saveError by viewModel.saveError.collectAsState()
     val checkboxChecked by viewModel.checkboxChecked.collectAsState()
     val billingSameAsShippingState by viewModel.shippingSameAsBillingState.collectAsState()
 
     InputAddressScreen(
-        appearance = viewModel.args.config?.appearance ?: PaymentSheet.Appearance(),
         primaryButtonEnabled = completeValues != null && formEnabled,
-        primaryButtonLoading = !formEnabled,
+        primaryButtonLoading = resultState == State.Saving,
         closeButtonEnabled = formEnabled,
         primaryButtonText = buttonText,
         title = titleText,
@@ -160,7 +149,7 @@ internal fun InputAddressScreen(
                 checkboxChecked = checkboxChecked
             )
         },
-        onCloseClick = viewModel.resultStateHolder::onUserCancel,
+        onCloseClick = onCloseClick,
         topContent = {
             val currentState = billingSameAsShippingState
 

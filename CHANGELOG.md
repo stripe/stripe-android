@@ -1,14 +1,32 @@
 # CHANGELOG
 
-NEXT_VERSION_BUMP: MINOR
+NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
+
+## 23.25.0 - 2026-10-21
+
+### PaymentSheet
+* [ADDED][14589](https://github.com/stripe/stripe-android/pull/14589) Added Touch 'n Go API bindings and PaymentSheet support for payments and setup.
+* [ADDED][14590](https://github.com/stripe/stripe-android/pull/14590) Added TrueMoney API bindings and PaymentSheet support.
+
+### AddressElement
+* [Changed] Address Element asks for confirmation before discarding unsaved address changes.
+
+## 23.24.0 - 2026-10-19
+
+### Crypto Onramp
+* [Changed] Google Pay and Samsung Pay card sublabels now include the funding type (Credit, Debit, or Prepaid), falling back to Card when unavailable, matching Link's formatting.
 
 ### Payments
 * [Fixed] Address country dropdowns now support autofill from saved addresses.
 
 ### PaymentSheet
+* [ADDED] Added native support for email OTP and multi-factor authentication (MFA) accounts to the Link authentication flow.
 * [CHANGED][15002](https://github.com/stripe/stripe-android/pull/15002) Moved `ApiConfigurationPreview` from the `paymentsheet` module to `stripe-core`. Update preview opt-in imports to `com.stripe.android.core.ApiConfigurationPreview`.
 * [ADDED][14586](https://github.com/stripe/stripe-android/pull/14586) Added Naira bank transfer API bindings and PaymentSheet support for PaymentIntents.
+* [ADDED][14830](https://github.com/stripe/stripe-android/pull/14830) Added Naira USSD API bindings and PaymentSheet support for PaymentIntents.
+* [ADDED][14831](https://github.com/stripe/stripe-android/pull/14831) Added Naira Wallet API bindings and PaymentSheet support for PaymentIntents.
+* [ADDED][14832](https://github.com/stripe/stripe-android/pull/14832) Added Mondu API bindings and PaymentSheet support for PaymentIntents.
 
 ### Identity
 * [ADDED] Added test mode support to Stripe Identity, uploading bundled test document and selfie images for test-mode verification sessions.
@@ -127,6 +145,8 @@ NEXT_VERSION_BUMP: MINOR
 
 ### Identity
 * [ADDED][13176](https://github.com/stripe/stripe-android/pull/13176) Added guided 3D selfie capture for supported verification sessions, including left and right pose collection.
+* [ADDED][13176](https://github.com/stripe/stripe-android/pull/13176) Added optional `IdentityVerificationSheet.Configuration.brandColor` to customize the native verification flow's primary action button color.
+* [CHANGED][13176](https://github.com/stripe/stripe-android/pull/13176) Stripe Identity and Crypto Onramp now require Android API 24 or later to support MediaPipe-based 3D selfie capture.
 
 ## 23.16.0 - 2026-08-18
 
@@ -153,9 +173,6 @@ NEXT_VERSION_BUMP: MINOR
 ### CryptoOnramp
 * [ADDED][13623](https://github.com/stripe/stripe-android/pull/13623) Added optional Samsung Pay support to Crypto Onramp, including availability checks, payment credential collection, and developer-facing error details. Integrators must provide the Samsung Pay SDK in their application.
 
-### Identity
-* [CHANGED][13176](https://github.com/stripe/stripe-android/pull/13176) Stripe Identity and Crypto Onramp now require Android API 24 or later to support MediaPipe-based 3D selfie capture.
-
 ## 23.14.0 - 2026-08-03
 
 ### CryptoOnramp
@@ -163,6 +180,9 @@ NEXT_VERSION_BUMP: MINOR
 
 ### PaymentSheet
 * [ADDED] `LinkController` now supports appearance customization via `LinkAppearance` (private preview).
+
+### Identity
+* [FIXED][13684](https://github.com/stripe/stripe-android/pull/13684) Enabled manual document capture when live capture is required.
 
 ## 23.13.1 - 2026-07-23
 
@@ -260,6 +280,10 @@ Added support for [Onelink](https://support.stripe.com/questions/what-is-onelink
 * [FIXED][12965](https://github.com/stripe/stripe-android/issues/12965) Fixed an issue where a white screen would briefly appear during payment confirmation, hiding the bottom sheet.
 * [FIXED][12973](https://github.com/stripe/stripe-android/pull/12973) Fixed an issue where `FlowController` would bypass mandate display when `setupFutureUsage` was added via `configureWithIntentConfiguration()` after the user had already entered card details.
 * [CHANGED][12975](https://github.com/stripe/stripe-android/pull/12975) When `paymentMethodLayout` is set to `Automatic`, the layout is now horizontal when there are 2 or fewer payment methods available.
+
+### Identity
+* [FIXED][12753](https://github.com/stripe/stripe-android/pull/12753) Fixed crashes when preparing document or selfie images for upload.
+* [FIXED][12753](https://github.com/stripe/stripe-android/pull/12753) Fixed privacy policy links that open in-app bottom sheets on the consent and individual welcome screens.
 
 ## 23.6.0 - 2026-04-27
 ### PaymentSheet

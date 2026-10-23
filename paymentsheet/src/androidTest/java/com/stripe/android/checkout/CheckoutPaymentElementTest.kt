@@ -6,8 +6,8 @@ import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutConfirm
 import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.checkouttesting.checkoutUpdate
-import com.stripe.android.checkouttesting.createPaymentMethod
 import com.stripe.android.core.utils.FeatureFlags
+import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.elements.PaymentElement
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.link.ui.wallet.LinkWalletPage
@@ -96,8 +96,14 @@ internal class CheckoutPaymentElementTest {
                     .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
             },
         ) {
-            networkRule.createPaymentMethod()
-            networkRule.checkoutConfirm { response ->
+            networkRule.checkoutConfirm(
+                bodyPart("payment_method_data[type]", "card"),
+                bodyPart("payment_method_data[card][number]", "4242424242424242"),
+                bodyPart(
+                    "payment_method_data[payment_user_agent]",
+                    "stripe-android/${StripeSdkVersion.VERSION_NAME};checkout_elements",
+                ),
+            ) { response ->
                 response.testBodyFromFile("checkout-session-confirm.json")
             }
 

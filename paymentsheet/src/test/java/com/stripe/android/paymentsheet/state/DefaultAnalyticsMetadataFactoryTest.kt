@@ -37,6 +37,8 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandlerImpl
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.PaymentElementLoader.InitializationMode
 import org.junit.Test
 import javax.inject.Provider
@@ -75,6 +77,96 @@ class DefaultAnalyticsMetadataFactoryTest {
         val mpeConfig = resultMap["mpe_config"] as? Map<*, *>
         val appearance = mpeConfig?.get("appearance") as? Map<*, *>
         assertThat(appearance).doesNotContainKey("embedded_payment_element")
+    }
+
+    @Test
+    fun `create adds Checkout Session id to Payment Element analytics`() = runScenario {
+        val elementsSession = createElementsSession()
+        val response = CheckoutSessionResponseFactory.create(elementsSession = elementsSession)
+        val initializationMode = InitializationMode.CheckoutSession(
+            instancesKey = "instances_key",
+            checkoutSessionResponse = response,
+            collectedEmail = null,
+        )
+
+        val resultMap = createAnalyticsMetadata(
+            initializationMode = initializationMode,
+            integrationMetadata = initializationMode.integrationMetadata(paymentElementCallbacks = null),
+            elementsSession = elementsSession,
+        )
+
+        assertThat(resultMap["checkout_session_id"]).isEqualTo(response.id)
+    }
+
+    @Test
+    fun `create returns Checkout Session analytics metadata`() {
+        val elementsSession = createElementsSession().copy(elementsSessionConfigId = "cfg_elements")
+        val response = CheckoutSessionResponseFactory.create(
+            configId = "cfg_checkout",
+            elementsSession = elementsSession,
+            automaticTaxEnabled = true,
+        )
+
+        val resultMap = DefaultAnalyticsMetadataFactory.create(response).paramsMap
+
+        assertThat(resultMap).containsAtLeastEntriesIn(
+            mapOf(
+                "checkout_session_id" to response.id,
+                "checkout_config_id" to "cfg_checkout",
+                "elements_session_config_id" to "cfg_elements",
+                "currency" to "usd",
+                "session_status" to "open",
+                "payment_status" to "unpaid",
+                "adaptive_pricing_active" to false,
+                "automatic_tax_enabled" to true,
+            )
+        )
+    }
+
+    @Test
+    fun `adaptive pricing is inactive when presentment and integration currencies match`() {
+        val response = CheckoutSessionResponseFactory.create(
+            elementsSession = createElementsSession(),
+            adaptivePricingInfo = CheckoutSessionResponse.AdaptivePricingInfo(
+                activePresentmentCurrency = "usd",
+                integrationAmount = 1000L,
+                integrationCurrency = "usd",
+                localCurrencyOptions = emptyList(),
+            ),
+        )
+
+        val resultMap = DefaultAnalyticsMetadataFactory.create(response).paramsMap
+
+        assertThat(resultMap["adaptive_pricing_active"]).isEqualTo(false)
+    }
+
+    @Test
+    fun `adaptive pricing is active when the presentment currency differs`() {
+        val response = CheckoutSessionResponseFactory.create(
+            amount = 1400L,
+            currency = "cad",
+            elementsSession = createElementsSession(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(amount = 1400L, currency = "cad"),
+            ),
+            adaptivePricingInfo = CheckoutSessionResponse.AdaptivePricingInfo(
+                activePresentmentCurrency = "cad",
+                integrationAmount = 1000L,
+                integrationCurrency = "usd",
+                localCurrencyOptions = listOf(
+                    CheckoutSessionResponse.LocalCurrencyOption(
+                        amount = 1400L,
+                        conversionMarkupBps = 150,
+                        currency = "cad",
+                        presentmentExchangeRate = "1.4",
+                    ),
+                ),
+            ),
+        )
+
+        val resultMap = DefaultAnalyticsMetadataFactory.create(response).paramsMap
+
+        assertThat(resultMap["adaptive_pricing_active"]).isEqualTo(true)
+        assertThat(resultMap["currency"]).isEqualTo("cad")
     }
 
     @Test

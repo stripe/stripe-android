@@ -33,6 +33,20 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header_default_opt_in">保存我的資訊，用 Link 更快結帳</string>
   <string name="stripe_inline_sign_up_header_default_opt_in_with_brand">儲存資訊，以便用 %s 更快結帳</string>
   <string name="stripe_inline_sign_up_toggle_with_brand">透過 %s 建立帳戶，在各個網上平台享受更快捷的結帳體驗</string>
+  <!-- Link authentication cannot continue with the available verification methods. -->
+  <string name="stripe_link_auth_blocked">我們無法驗證您的帳戶。請關閉此視窗並重試。</string>
+  <!-- Menu option that sends a Link login code to the user's email instead of their phone. -->
+  <string name="stripe_link_auth_email_code">電子郵件驗證碼</string>
+  <!-- Label for a button that shows more ways to receive a Link login code. -->
+  <string name="stripe_link_auth_more_options">更多選項</string>
+  <!-- Explains why the user must enter their full phone number before a Link login code is emailed. %s is the last two digits of their phone number. -->
+  <string name="stripe_link_auth_phone_match_message">在我們透過電子郵件向您傳送驗證碼前，我們需要驗證您的其他資訊。請輸入您尾號為 ••%s 的電話號碼。</string>
+  <!-- Explains why the user must enter their full phone number before a Link login code is emailed. -->
+  <string name="stripe_link_auth_phone_match_message_no_hint">在我們透過電子郵件向您傳送驗證碼前，我們需要驗證您的其他資訊。請輸入您 Link 帳戶的電話號碼。</string>
+  <!-- Heading of the screen where the user confirms their full phone number before a Link login code is emailed. -->
+  <string name="stripe_link_auth_phone_match_title">驗證您的電話號碼</string>
+  <!-- Label shown in place of the resend button while the user must wait. %d is the number of seconds remaining. -->
+  <string name="stripe_link_auth_resend_countdown">%d 秒後重新傳送代碼</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">%1$s 信用卡</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->

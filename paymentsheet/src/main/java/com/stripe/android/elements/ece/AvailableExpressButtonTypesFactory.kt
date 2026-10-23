@@ -1,12 +1,14 @@
 @file:OptIn(CheckoutSessionPreview::class)
 package com.stripe.android.elements.ece
 
+import androidx.annotation.VisibleForTesting
 import com.stripe.android.elements.CheckoutGooglePayConfiguration
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import javax.inject.Inject
+import kotlin.math.min
 
 internal fun interface AvailableExpressButtonTypesFactory {
     fun create(
@@ -41,25 +43,41 @@ internal class DefaultAvailableExpressButtonTypesFactory @Inject internal constr
             }
         }
 
-        val paymentMethodOrder = expressCheckoutElementConfiguration.paymentMethodOrder
-        if (paymentMethodOrder.isEmpty()) {
+        val buttonLayout = expressCheckoutElementConfiguration.appearance.buttonLayout
+        val visibleButtonCount = calculateVisibleButtonCount(
+            buttonCount = availableExpressButtonTypes.size,
+            maxColumns = buttonLayout.maxColumns,
+            maxRows = buttonLayout.maxRows,
+        )
+
+        if (visibleButtonCount >= availableExpressButtonTypes.size) {
             return availableExpressButtonTypes
         }
 
-        return availableExpressButtonTypes.sortedBy { expressButtonType ->
-            paymentMethodOrder.indexOfFirst { paymentMethod ->
-                paymentMethod.matches(expressButtonType)
-            }.takeIf { it >= 0 } ?: Int.MAX_VALUE
+        val googlePayButton = availableExpressButtonTypes.find { it is ExpressButtonType.GooglePay }
+        val naivelyTruncatedAvailableButtons = availableExpressButtonTypes.take(visibleButtonCount)
+        return if (googlePayButton != null && !naivelyTruncatedAvailableButtons.contains(googlePayButton)) {
+            naivelyTruncatedAvailableButtons.subList(0, visibleButtonCount - 1).plus(googlePayButton)
+        } else {
+            naivelyTruncatedAvailableButtons
         }
+    }
+}
+
+@VisibleForTesting
+internal fun calculateVisibleButtonCount(
+    buttonCount: Int,
+    maxColumns: Int?,
+    maxRows: Int?,
+): Int {
+    if (maxColumns == null || maxRows == null) {
+        return buttonCount
     }
 
-    private fun ExpressCheckoutElement.Configuration.PaymentMethodType.matches(
-        expressButtonType: ExpressButtonType,
-    ): Boolean {
-        return when (this) {
-            ExpressCheckoutElement.Configuration.PaymentMethodType.GooglePay ->
-                expressButtonType is ExpressButtonType.GooglePay
-            ExpressCheckoutElement.Configuration.PaymentMethodType.Link -> expressButtonType is ExpressButtonType.Link
-        }
-    }
+    val displayableInGrid = maxRows * maxColumns
+
+    return min(
+        displayableInGrid,
+        buttonCount,
+    )
 }

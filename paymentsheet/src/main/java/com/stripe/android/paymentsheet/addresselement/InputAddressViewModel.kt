@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Named
@@ -132,6 +133,14 @@ internal class InputAddressViewModel @Inject constructor(
     private val _checkboxChecked = MutableStateFlow(false)
     val checkboxChecked: StateFlow<Boolean> = _checkboxChecked
 
+    private val initialCheckboxChecked = unparsedInitialShippingAddress?.isCheckboxSelected ?: false
+
+    fun hasChanges(): Boolean {
+        val checkboxChanged = args.config?.additionalFields?.checkboxLabel != null &&
+            checkboxChecked.value != initialCheckboxChecked
+        return addressFormController.hasChanges() || checkboxChanged
+    }
+
     fun onScreenShown() {
         eventReporter.onShown(
             country = getCurrentAddress().address?.country,
@@ -139,6 +148,15 @@ internal class InputAddressViewModel @Inject constructor(
     }
 
     init {
+
+        viewModelScope.launch {
+            resultStateHolder.state.first { it == State.Canceling }
+            eventReporter.onCanceled(
+                addressDetails = getCurrentAddress(),
+                autocompleteAddressDetails = autocompleteSelectedAddressDetails(),
+            )
+            resultStateHolder.onCancelCompleted()
+        }
 
         viewModelScope.launch {
             navigator.getResultFlow<AddressElementNavigator.AutocompleteEvent?>(

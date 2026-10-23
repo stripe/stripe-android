@@ -1,0 +1,734 @@
+package com.stripe.android.crypto.onramp.ui
+
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.assertContentDescriptionContains
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsFocused
+import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.junit4.StateRestorationTester
+import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performTextReplacement
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import com.google.common.truth.Truth.assertThat
+import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.testing.createComposeCleanupRule
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import org.junit.Rule
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+
+@RunWith(RobolectricTestRunner::class)
+internal class KycScreenTest {
+    @get:Rule
+    val composeRule = createComposeRule()
+
+    @get:Rule
+    val composeCleanupRule = createComposeCleanupRule()
+
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule(UnconfinedTestDispatcher())
+
+    @Test
+    fun `empty source overview offers adding documents without upload slots`() = runScenario(
+        state = screenState(
+            page = KycCollectionPage.DocumentOverview,
+            document = documentState(slots = emptyList(), editingSlotIndex = null),
+        ),
+    ) {
+        composeRule.onNodeWithTag(KYC_ADD_DOCUMENTS_TAG).assertIsDisplayed().performClick()
+        assertThat(addDocuments).isTrue()
+        composeRule.onNodeWithTag("PrimaryButtonTag").assertIsNotEnabled()
+    }
+
+    @Test
+    fun `document type selector remains open after state restoration`() = runScenario(
+        state = screenState(page = KycCollectionPage.DocumentEditor),
+    ) {
+        composeRule.onNodeWithTag(kycSubtypePickerTag(0)).performClick()
+        composeRule.onNodeWithText("Utility provider document description").assertIsDisplayed()
+        restorationTester.emulateSavedInstanceStateRestore()
+        composeRule.onNodeWithText("Utility provider document description").assertIsDisplayed()
+        composeRule.onNodeWithText("Utility bill").performClick()
+        assertThat(selectedSubtype).isEqualTo(0 to "utility_bill")
+    }
+
+    @Test
+    fun `proof of address falls back to localized collection prompt`() = runScenario(
+        state = screenState(
+            page = KycCollectionPage.DocumentEditor,
+            requirementType = KycRequirementType.ProofOfAddress,
+        ),
+    ) {
+        composeRule.onNodeWithText("Make sure your document meets following requirements.").assertIsDisplayed()
+    }
+
+    @Test
+    fun `source of funds falls back to localized collection prompt`() = runScenario(
+        state = screenState(page = KycCollectionPage.DocumentOverview),
+    ) {
+        composeRule.onNodeWithText(
+            "How are you funding your transactions on Swapped? Please list all of your sources. " +
+                "For example, salary, savings, investment earnings, etc."
+        ).assertIsDisplayed()
+    }
+
+    @Test
+    fun `proof of address displays backend collection prompt`() = runScenario(
+        state = screenState(
+            page = KycCollectionPage.DocumentEditor,
+            requirementType = KycRequirementType.ProofOfAddress,
+            document = documentState().copy(documentCollectionPrompt = "Backend address instructions"),
+        ),
+    ) {
+        composeRule.onNodeWithText("Backend address instructions").assertIsDisplayed()
+    }
+
+    @Test
+    fun `source of funds displays backend collection prompt`() = runScenario(
+        state = screenState(
+            page = KycCollectionPage.DocumentOverview,
+            document = documentState().copy(documentCollectionPrompt = "Backend funding instructions"),
+        ),
+    ) {
+        composeRule.onNodeWithText("Backend funding instructions").assertIsDisplayed()
+    }
+
+    @Test
+    fun `forward navigation retains the outgoing page until the slide finishes`() = runScenario(
+        state = screenState(page = KycCollectionPage.Context),
+    ) {
+        composeRule.mainClock.autoAdvance = false
+        composeRule.runOnIdle {
+            currentState = screenState(
+                page = KycCollectionPage.Questionnaire,
+                questions = listOf(question("purpose", "Why are you purchasing cryptocurrency?")),
+            )
+        }
+        composeRule.mainClock.advanceTimeByFrame()
+        composeRule.waitForIdle()
+        composeRule.mainClock.advanceTimeBy(100)
+
+        composeRule.onNodeWithText("We may request source of funds for larger transactions.").assertExists()
+        val questionBounds = composeRule.onNodeWithTag(kycQuestionTag("purpose"))
+            .fetchSemanticsNode().boundsInRoot
+
+        composeRule.mainClock.advanceTimeBy(400)
+        composeRule.onNodeWithText("We may request source of funds for larger transactions.").assertDoesNotExist()
+        val settledBounds = composeRule.onNodeWithTag(kycQuestionTag("purpose"))
+            .assertIsDisplayed().fetchSemanticsNode().boundsInRoot
+        assertThat(questionBounds.left).isGreaterThan(settledBounds.left)
+        composeRule.mainClock.autoAdvance = true
+    }
+
+    @Test
+    fun `back navigation slides the questionnaire out to the right`() = runScenario(
+        state = screenState(
+            page = KycCollectionPage.Questionnaire,
+            questions = listOf(question("purpose", "Why are you purchasing cryptocurrency?")),
+        ),
+    ) {
+        val initialBounds = composeRule.onNodeWithTag(kycQuestionTag("purpose"))
+            .fetchSemanticsNode().boundsInRoot
+        composeRule.mainClock.autoAdvance = false
+        composeRule.runOnIdle { currentState = screenState(page = KycCollectionPage.Context) }
+        composeRule.mainClock.advanceTimeByFrame()
+        composeRule.waitForIdle()
+        composeRule.mainClock.advanceTimeBy(100)
+
+        val outgoingBounds = composeRule.onNodeWithTag(kycQuestionTag("purpose"))
+            .fetchSemanticsNode().boundsInRoot
+        assertThat(outgoingBounds.left).isGreaterThan(initialBounds.left)
+
+        composeRule.mainClock.advanceTimeBy(400)
+        composeRule.onNodeWithTag(kycQuestionTag("purpose")).assertDoesNotExist()
+        composeRule.onNodeWithText("We may request source of funds for larger transactions.").assertIsDisplayed()
+        composeRule.mainClock.autoAdvance = true
+    }
+
+    @Test
+    fun `upload control is hidden at the per source limit`() = runScenario(
+        state = screenState(
+            page = KycCollectionPage.DocumentEditor,
+            requirementType = KycRequirementType.SourceOfFunds,
+            document = documentState(
+                slots = listOf(documentSlot(0, "first.pdf"), documentSlot(1)),
+                editingSlotIndex = 1,
+            ).copy(maxFilesPerDocumentType = 1),
+        ),
+    ) {
+        composeRule.onNodeWithTag(kycChooseFileTag(1)).assertDoesNotExist()
+        composeRule.onNodeWithTag(kycRemoveFileTag(0)).assertExists()
+    }
+
+    @Test
+    fun `choosing a document does not show upload progress`() = runScenario(
+        state = screenState(
+            page = KycCollectionPage.DocumentEditor,
+        ).copy(selectingFileSlot = 0),
+    ) {
+        composeRule.onNodeWithTag(kycChooseFileTag(0)).performScrollTo().assertIsNotEnabled()
+        composeRule.onNodeWithTag(KYC_FILE_PROGRESS_TAG).assertDoesNotExist()
+        composeRule.onNodeWithText("Uploading…").assertDoesNotExist()
+        composeRule.onNodeWithText("Upload document").assertIsDisplayed()
+    }
+
+    @Test
+    fun `preparing a document does not show upload progress`() = runScenario(
+        state = screenState(
+            page = KycCollectionPage.DocumentEditor,
+        ).copy(selectingFileSlot = 0, selectingFileName = "electricity-bill.pdf"),
+    ) {
+        composeRule.onNodeWithTag(kycChooseFileTag(0)).performScrollTo().assertIsNotEnabled()
+        composeRule.onNodeWithTag(KYC_FILE_PROGRESS_TAG).assertDoesNotExist()
+        composeRule.onNodeWithText("Uploading…").assertDoesNotExist()
+        composeRule.onNodeWithText("Upload document").assertIsDisplayed()
+    }
+
+    @Test
+    fun `uploading document shows accessible progress and cannot be removed`() = runScenario(
+        state = screenState(
+            page = KycCollectionPage.DocumentEditor,
+        ).copy(selectingFileSlot = 0, selectingFileName = "electricity-bill.pdf", uploadingFileSlot = 0),
+    ) {
+        composeRule.onNodeWithTag(kycChooseFileTag(0)).performScrollTo()
+        composeRule.onNodeWithTag(KYC_FILE_PROGRESS_TAG)
+            .assertIsDisplayed()
+            .assert(SemanticsMatcher.keyIsDefined(SemanticsProperties.ProgressBarRangeInfo))
+        composeRule.onNodeWithText("electricity-bill.pdf").assertIsDisplayed()
+        composeRule.onNodeWithText("Uploading…").assertIsDisplayed()
+        composeRule.onNodeWithTag(kycRemoveFileTag(0)).assertDoesNotExist()
+        composeRule.onNodeWithTag(kycChooseFileTag(0)).assertIsNotEnabled()
+    }
+
+    @Test
+    fun `uploaded file removal identifies the file and forwards its slot`() = runScenario(
+        state = screenState(
+            page = KycCollectionPage.DocumentEditor,
+            requirementType = KycRequirementType.ProofOfAddress,
+            document = documentState(slots = listOf(documentSlot(fileName = "electricity-bill.pdf"))),
+        ),
+    ) {
+        composeRule.onNodeWithTag(kycRemoveFileTag(0))
+            .performScrollTo()
+            .assertContentDescriptionContains("Remove, electricity-bill.pdf")
+            .performClick()
+        assertThat(removedFileSlot).isEqualTo(0)
+    }
+
+    @Test
+    fun `failed file can be removed with large text`() = runScenario(
+        state = screenState(
+            page = KycCollectionPage.DocumentEditor,
+            validationError = KycValidationError.UnsupportedFileType,
+            validationFileName = "electricity-bill.docx",
+        ),
+        fontScale = 2f,
+        screenHeight = 500.dp,
+    ) {
+        composeRule.onNodeWithTag(kycRemoveFileTag(0))
+            .performScrollTo()
+            .assertIsDisplayed()
+            .performClick()
+        assertThat(removedFileSlot).isEqualTo(0)
+    }
+
+    @Test
+    fun `answer field exposes its question and accepts focus`() = runScenario(
+        state = screenState(
+            page = KycCollectionPage.Questionnaire,
+            questions = listOf(question("purpose", "Why are you purchasing cryptocurrency?")),
+        ),
+    ) {
+        composeRule.onNodeWithTag(kycQuestionTag("purpose"))
+            .assertContentDescriptionContains("Why are you purchasing cryptocurrency?")
+            .performClick()
+            .assertIsFocused()
+            .performTextReplacement("For investment")
+        assertThat(changedAnswer).isEqualTo("purpose" to "For investment")
+    }
+
+    @Test
+    fun `source groups with duplicate filenames retain distinct edit targets`() = runScenario(
+        state = screenState(
+            page = KycCollectionPage.DocumentOverview,
+            document = documentState(
+                slots = listOf(
+                    documentSlot(index = 0, fileName = "statement.pdf"),
+                    documentSlot(index = 1, fileName = "statement.pdf").copy(
+                        selectedSubtypeId = "company_profits",
+                        selectedSubtypeLabel = "Company profits",
+                    ),
+                ),
+                editingSlotIndex = null,
+            ),
+        ),
+    ) {
+        composeRule.onNodeWithTag(kycDocumentGroupTag(1)).performScrollTo().performClick()
+        assertThat(editedDocumentSlot).isEqualTo(1)
+        composeRule.onNodeWithTag(kycDocumentGroupTag(0)).performScrollTo().performClick()
+        assertThat(editedDocumentSlot).isEqualTo(0)
+    }
+
+    @Test
+    fun `proof of address displays server instructions`() = runScenario(
+        state = screenState(
+            page = KycCollectionPage.DocumentEditor,
+            requirementType = KycRequirementType.ProofOfAddress,
+            document = documentState().copy(
+                instructions = listOf("Upload the original PDF from your utility provider."),
+            ),
+        ),
+    ) {
+        composeRule.onNodeWithText("Upload the original PDF from your utility provider.")
+            .performScrollTo()
+            .assertIsDisplayed()
+    }
+
+    @Test
+    fun `source of funds displays server instructions for salary documents`() = runScenario(
+        state = screenState(
+            page = KycCollectionPage.DocumentEditor,
+            requirementType = KycRequirementType.SourceOfFunds,
+            document = documentState().copy(
+                instructions = listOf("Documents must include your name and a balance or financial value."),
+            ),
+        ),
+    ) {
+        composeRule.onNodeWithText("Documents must include your name and a balance or financial value.")
+            .performScrollTo()
+            .assertIsDisplayed()
+    }
+
+    @Test
+    fun `proof of address context matches first collection screen`() = runScenario(
+        state = screenState(
+            page = KycCollectionPage.Context,
+            requirementType = KycRequirementType.ProofOfAddress,
+        ),
+    ) {
+        composeRule.onNodeWithText("Upload your proof of address").assertIsDisplayed()
+        composeRule.onNodeWithText(
+            "We may request proof of address for larger transactions."
+        ).assertIsDisplayed()
+        composeRule.onNodeWithTag(KYC_CANCEL_BUTTON_TAG).assertIsDisplayed()
+        composeRule.onNodeWithTag(KYC_BACK_BUTTON_TAG).assertDoesNotExist()
+        composeRule.onNodeWithText("Continue").performClick()
+
+        assertThat(continued).isTrue()
+    }
+
+    @Test
+    fun `questionnaire includes funding sources and forwards answers`() = runScenario(
+        state = screenState(
+            page = KycCollectionPage.Questionnaire,
+            questions = listOf(
+                question("purchase_purpose", "Why are you purchasing cryptocurrency through swapped.com?"),
+                question("third_party_advised", "Has anyone advised you to purchase cryptocurrency?"),
+                question("funding_sources", "How are you funding your transactions?"),
+            ),
+            canContinue = false,
+        ),
+    ) {
+        composeRule.onNodeWithTag(kycQuestionTag("purchase_purpose"))
+            .performTextReplacement("For investment")
+        composeRule.onNodeWithTag(kycQuestionTag("funding_sources")).assertExists()
+        composeRule.onNodeWithTag("PrimaryButtonTag").assertIsNotEnabled()
+
+        assertThat(changedAnswer).isEqualTo("purchase_purpose" to "For investment")
+    }
+
+    @Test
+    fun `proof of address editor selects type and chooses a file`() = runScenario(
+        state = screenState(
+            page = KycCollectionPage.DocumentEditor,
+            requirementType = KycRequirementType.ProofOfAddress,
+        ),
+    ) {
+        composeRule.onNodeWithText("PDF, JPEG, or PNG, up to 5 MB per file.")
+            .performScrollTo()
+            .assertIsDisplayed()
+        composeRule.onNodeWithTag(kycSubtypePickerTag(0)).performClick()
+        composeRule.onNodeWithText("Document type").assertIsDisplayed()
+        composeRule.onNodeWithTag(kycSubtypeOptionTag(0, "salary")).assertIsDisplayed()
+        composeRule.onNodeWithText("Document description").assertDoesNotExist()
+        composeRule.onNodeWithText("Utility provider document description").assertIsDisplayed()
+        composeRule.onNodeWithTag(kycSubtypeOptionTag(0, "utility_bill")).performClick()
+        composeRule.onNodeWithTag(kycChooseFileTag(0))
+            .performScrollTo()
+            .performClick()
+
+        assertThat(selectedSubtype).isEqualTo(0 to "utility_bill")
+        assertThat(chosenFileSlot).isEqualTo(0)
+    }
+
+    @Test
+    fun `uploaded proof of address hides upload action and enables submit`() = runScenario(
+        state = screenState(
+            page = KycCollectionPage.DocumentEditor,
+            requirementType = KycRequirementType.ProofOfAddress,
+            document = documentState(
+                slots = listOf(documentSlot(index = 0, fileName = "electricity-bill.pdf")),
+                editingSlotIndex = 0,
+            ),
+            canSubmit = true,
+            completedDocumentCount = 1,
+        ),
+    ) {
+        composeRule.onNodeWithTag(kycFileNameTag(0)).assertIsDisplayed()
+        composeRule.onNodeWithTag(kycChooseFileTag(0)).assertDoesNotExist()
+        composeRule.onNodeWithText("Submit").performClick()
+
+        assertThat(submitted).isTrue()
+    }
+
+    @Test
+    fun `source overview hides add documents at the type limit and keeps groups editable`() = runScenario(
+        state = screenState(
+            page = KycCollectionPage.DocumentOverview,
+            document = documentState(
+                slots = listOf(
+                    documentSlot(index = 0, fileName = "salary.pdf"),
+                    documentSlot(index = 1, fileName = "bank.pdf").copy(
+                        selectedSubtypeId = "bank_statement",
+                        selectedSubtypeLabel = "Bank statement",
+                    ),
+                ),
+                editingSlotIndex = null,
+            ).copy(maxDocumentTypes = 2, canAddDocuments = false),
+            canSubmit = true,
+            completedDocumentCount = 2,
+        ),
+    ) {
+        composeRule.onNodeWithTag(KYC_ADD_DOCUMENTS_TAG).assertDoesNotExist()
+        composeRule.onNodeWithText("salary.pdf").assertIsDisplayed()
+        composeRule.onNodeWithText("bank.pdf").assertIsDisplayed()
+        composeRule.onNodeWithTag(kycDocumentGroupTag(0)).performClick()
+        assertThat(editedDocumentSlot).isEqualTo(0)
+        composeRule.onNodeWithTag(kycDocumentGroupTag(1)).performClick()
+        assertThat(editedDocumentSlot).isEqualTo(1)
+    }
+
+    @Test
+    fun `source overview groups documents and forwards add and edit`() = runScenario(
+        state = screenState(
+            page = KycCollectionPage.DocumentOverview,
+            document = documentState(
+                slots = listOf(
+                    documentSlot(index = 0, fileName = "payslip-feb.pdf"),
+                    documentSlot(index = 1, fileName = "payslip-mar.pdf"),
+                ),
+                editingSlotIndex = null,
+            ).copy(maxDocumentTypes = 2),
+            canSubmit = true,
+            completedDocumentCount = 2,
+        ),
+    ) {
+        composeRule.onNodeWithText("payslip-feb.pdf", substring = true).assertIsDisplayed()
+        composeRule.onNodeWithTag(kycDocumentGroupTag(0)).performClick()
+        composeRule.onNodeWithTag(KYC_ADD_DOCUMENTS_TAG).performClick()
+
+        assertThat(editedDocumentSlot).isEqualTo(0)
+        assertThat(addDocuments).isTrue()
+    }
+
+    @Test
+    fun `unsupported proof document renders inline error card`() = runScenario(
+        state = screenState(
+            page = KycCollectionPage.DocumentEditor,
+            requirementType = KycRequirementType.ProofOfAddress,
+            validationError = KycValidationError.UnsupportedFileType,
+            validationFileName = "electricity-bill.docx",
+            canSubmit = false,
+        ),
+    ) {
+        composeRule.onNodeWithTag(KYC_VALIDATION_ERROR_TAG)
+            .performScrollTo()
+            .assertIsDisplayed()
+        composeRule.onNodeWithText("electricity-bill.docx").assertIsDisplayed()
+        composeRule.onNodeWithText(
+            "This file type isn’t supported. Choose a file in one of the accepted formats."
+        ).assertIsDisplayed()
+    }
+
+    @Test
+    fun `submitted screen renders review copy and done action`() = runScenario(
+        state = screenState(
+            page = KycCollectionPage.Submitted,
+            requirementType = KycRequirementType.SourceOfFunds,
+            submissionState = KycSubmissionState.Submitted,
+        ),
+    ) {
+        composeRule.onNodeWithTag(KYC_SUBMITTED_TITLE_TAG).assertIsDisplayed()
+        composeRule.onNodeWithText(
+            "We’re reviewing your documents. We’ll let you know when verification is complete."
+        ).assertIsDisplayed()
+        composeRule.onNodeWithText("Done").performClick()
+
+        assertThat(continued).isTrue()
+    }
+
+    @Test
+    fun `document submission shows success and continues on done`() = runScenario(
+        state = screenState(
+            page = KycCollectionPage.Submitted,
+            requirementType = KycRequirementType.ProofOfAddress,
+            submissionState = KycSubmissionState.Submitted,
+            completedDocumentCount = 1,
+        ),
+    ) {
+        composeRule.onNodeWithText("Document uploaded successfully").assertIsDisplayed()
+        composeRule.onNodeWithText(
+            "You can continue while we verify your document in the background."
+        ).assertIsDisplayed()
+        composeRule.onNodeWithText("Submitted for review").assertDoesNotExist()
+        composeRule.onNodeWithText("Done").performClick()
+        assertThat(continued).isTrue()
+        assertThat(closed).isFalse()
+    }
+
+    @Test
+    fun `submitted source of funds shows review confirmation and continues`() = runScenario(
+        state = screenState(page = KycCollectionPage.Submitted),
+    ) {
+        composeRule.onNodeWithText("Submitted for review").assertIsDisplayed()
+        composeRule.onNodeWithText(
+            "We’re reviewing your documents. We’ll let you know when verification is complete."
+        ).assertIsDisplayed()
+        composeRule.onNodeWithText("Document uploaded successfully").assertDoesNotExist()
+        composeRule.onNodeWithText("Done").performClick()
+        assertThat(closed).isFalse()
+        assertThat(continued).isTrue()
+    }
+
+    @Test
+    fun `submitting blocks editing and shows progress`() = runScenario(
+        state = screenState(
+            page = KycCollectionPage.DocumentEditor,
+            submissionState = KycSubmissionState.Submitting,
+            canSubmit = false,
+        ),
+    ) {
+        composeRule.onNodeWithTag("PrimaryButtonTag").assertIsNotEnabled()
+        composeRule.onNodeWithTag(
+            testTag = "CircularProgressIndicator",
+            useUnmergedTree = true,
+        ).assertIsDisplayed()
+    }
+
+    @Test
+    fun `unavailable action closes instead of offering support`() = runScenario(
+        state = screenState(page = KycCollectionPage.Unavailable),
+    ) {
+        composeRule.onNodeWithText("Contact support").assertDoesNotExist()
+        composeRule.onNodeWithText("Close").performClick()
+        assertThat(closed).isTrue()
+        assertThat(submitted).isFalse()
+    }
+
+    @Test
+    fun `large text introduction scrolls while continue remains visible`() = runScenario(
+        state = screenState(page = KycCollectionPage.Context),
+        fontScale = 2f,
+        screenHeight = 500.dp,
+    ) {
+        composeRule.onNodeWithText("Tell us about your source of funds")
+            .assert(SemanticsMatcher.keyIsDefined(SemanticsProperties.Heading))
+        composeRule.onNodeWithText(
+            "We may request source of funds for larger transactions."
+        ).performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithText("Continue").assertIsDisplayed().performClick()
+        assertThat(continued).isTrue()
+    }
+
+    @Test
+    fun `large text upload success message scrolls while done remains visible`() = runScenario(
+        state = screenState(
+            page = KycCollectionPage.Submitted,
+            requirementType = KycRequirementType.ProofOfAddress,
+            completedDocumentCount = 1,
+        ),
+        fontScale = 2f,
+        screenHeight = 500.dp,
+    ) {
+        composeRule.onNodeWithText("Document uploaded successfully")
+            .assert(SemanticsMatcher.keyIsDefined(SemanticsProperties.Heading))
+        composeRule.onNodeWithText(
+            "You can continue while we verify your document in the background."
+        ).performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithText("Done").assertIsDisplayed()
+    }
+
+    @Test
+    fun `large text error message scrolls while close remains visible`() = runScenario(
+        state = screenState(page = KycCollectionPage.Unavailable),
+        fontScale = 2f,
+        screenHeight = 500.dp,
+    ) {
+        composeRule.onNodeWithText("Something went wrong")
+            .assert(SemanticsMatcher.keyIsDefined(SemanticsProperties.Heading))
+        composeRule.onNodeWithText("Please try again later.").performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithText("Close").assertIsDisplayed()
+    }
+
+    private fun runScenario(
+        state: KycScreenState,
+        fontScale: Float = 1f,
+        screenHeight: Dp = Dp.Infinity,
+        block: TestScenario.() -> Unit,
+    ) {
+        val restorationTester = StateRestorationTester(composeRule)
+        val scenario = TestScenario(state, restorationTester)
+        restorationTester.setContent {
+            val density = LocalDensity.current
+            CompositionLocalProvider(LocalDensity provides Density(density.density, fontScale)) {
+                Box {
+                    Box(Modifier.heightIn(max = screenHeight)) {
+                        KycScreen(
+                            appearance = null,
+                            state = scenario.currentState,
+                            onClose = { scenario.closed = true },
+                            onBack = { scenario.wentBack = true },
+                            onQuestionAnswerChanged = { questionId, answer ->
+                                scenario.changedAnswer = questionId to answer
+                            },
+                            onDocumentSubtypeSelected = { slotIndex, subtypeId ->
+                                scenario.selectedSubtype = slotIndex to subtypeId
+                            },
+                            onChooseFile = { scenario.chosenFileSlot = it },
+                            onRemoveFile = { scenario.removedFileSlot = it },
+                            onAddDocuments = { scenario.addDocuments = true },
+                            onEditDocuments = { scenario.editedDocumentSlot = it },
+                            onSubmit = { scenario.submitted = true },
+                            onContinue = { scenario.continued = true },
+                        )
+                    }
+                }
+            }
+        }
+        scenario.block()
+    }
+
+    private class TestScenario(
+        state: KycScreenState,
+        val restorationTester: StateRestorationTester,
+        var closed: Boolean = false,
+        var wentBack: Boolean = false,
+        var changedAnswer: Pair<String, String>? = null,
+        var selectedSubtype: Pair<Int, String>? = null,
+        var chosenFileSlot: Int? = null,
+        var removedFileSlot: Int? = null,
+        var addDocuments: Boolean = false,
+        var editedDocumentSlot: Int? = null,
+        var submitted: Boolean = false,
+        var continued: Boolean = false,
+    ) {
+        var currentState by mutableStateOf(state)
+    }
+
+    private companion object {
+        fun screenState(
+            page: KycCollectionPage,
+            requirementType: KycRequirementType = KycRequirementType.SourceOfFunds,
+            questions: List<KycQuestionState> = emptyList(),
+            document: KycDocumentState? = documentState(),
+            validationError: KycValidationError? = null,
+            validationFileName: String? = null,
+            canSubmit: Boolean = false,
+            canContinue: Boolean = true,
+            submissionState: KycSubmissionState = KycSubmissionState.Collecting,
+            completedDocumentCount: Int = 0,
+        ): KycScreenState {
+            return KycScreenState(
+                page = page,
+                requirementType = requirementType,
+                errorMessages = emptyList(),
+                questions = questions,
+                document = document,
+                validationError = validationError,
+                validationFileName = validationFileName,
+                selectingFileSlot = null,
+                selectingFileName = null,
+                uploadingFileSlot = null,
+                canSubmit = canSubmit,
+                canContinue = canContinue,
+                isCollectionAvailable = true,
+                submissionState = submissionState,
+                currentRequirement = 1,
+                totalRequirements = 1,
+                hasMoreRequirements = false,
+                completedDocumentCount = completedDocumentCount,
+            )
+        }
+
+        fun question(id: String, prompt: String): KycQuestionState {
+            return KycQuestionState(
+                id = id,
+                prompt = prompt,
+                answer = "",
+                required = true,
+            )
+        }
+
+        fun documentState(
+            slots: List<KycDocumentSlotState> = listOf(documentSlot()),
+            editingSlotIndex: Int? = 0,
+        ): KycDocumentState {
+            return KycDocumentState(
+                acceptedFormats = listOf("pdf", "jpeg", "png"),
+                fileRequirements = "PDF, JPEG, or PNG, up to 5 MB per file.",
+                instructions = listOf("Upload documents that support your transaction activity"),
+                maxFileSizeMegabytes = 5,
+                minDocumentTypes = 1,
+                maxDocumentTypes = 10,
+                maxFilesPerDocumentType = 10,
+                canAddDocuments = true,
+                editingSlotIndex = editingSlotIndex,
+                slots = slots,
+                documentCollectionPrompt = null,
+            )
+        }
+
+        fun documentSlot(
+            index: Int = 0,
+            fileName: String? = null,
+        ): KycDocumentSlotState {
+            return KycDocumentSlotState(
+                index = index,
+                subtypes = listOf(
+                    KycDocumentSubtypeState(
+                        id = "salary",
+                        label = "Salary",
+                        description = null,
+                        isEnabled = true,
+                    ),
+                    KycDocumentSubtypeState(
+                        id = "utility_bill",
+                        label = "Utility bill",
+                        description = "Utility provider document description",
+                        isEnabled = true,
+                    ),
+                ),
+                selectedSubtypeId = "salary",
+                selectedSubtypeLabel = "Salary",
+                fileName = fileName,
+            )
+        }
+    }
+}

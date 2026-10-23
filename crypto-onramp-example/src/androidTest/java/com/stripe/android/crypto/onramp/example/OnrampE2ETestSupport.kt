@@ -390,6 +390,8 @@ internal class OnrampE2EPage(
 
     private fun enterLinkOtp() {
         waitForTag("OTP-0")
+        // Code entry stays disabled until the verification code has been sent.
+        waitForNode(hasTestTag("OTP-0").and(isEnabled()))
         for (index in 0..5) {
             composeRule.onNodeWithTag("OTP-$index").slowType("0")
         }

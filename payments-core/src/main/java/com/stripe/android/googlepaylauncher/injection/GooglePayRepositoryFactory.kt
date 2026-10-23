@@ -7,7 +7,6 @@ import com.stripe.android.CardFundingFilter
 import com.stripe.android.GooglePayConfig
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.core.Logger
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.googlepaylauncher.DefaultGooglePayRepository
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
@@ -40,8 +39,7 @@ class DefaultGooglePayRepositoryFactory @Inject constructor(
             appContext,
             environment,
             GooglePayJsonFactory.BillingAddressParameters(),
-            existingPaymentMethodRequired =
-                !FeatureFlags.allowNoExistingPaymentMethodForGooglePay.isEnabled,
+            existingPaymentMethodRequired = environment == GooglePayEnvironment.Production,
             allowCreditCards = true,
             errorReporter = errorReporter,
             logger = logger,

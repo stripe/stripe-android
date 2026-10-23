@@ -55,6 +55,7 @@ dependencies {
     testImplementation testLibs.mockito.inline
     testImplementation testLibs.mockito.kotlin
     testImplementation testLibs.robolectric
+    testImplementation testLibs.testParameterInjector
     testImplementation testLibs.truth
     testImplementation testLibs.turbine
 }

@@ -45,7 +45,7 @@ internal fun prepareKycCameraImage(source: File, format: String, maximumBytes: L
                 return destination
             }
             if (format == "png" || minOf(bitmap.width, bitmap.height) <= 1) {
-                throw AdditionalKycFileTooLargeException()
+                throw KycFileTooLargeException()
             }
             if (quality > MINIMUM_JPEG_QUALITY) {
                 quality -= JPEG_QUALITY_STEP

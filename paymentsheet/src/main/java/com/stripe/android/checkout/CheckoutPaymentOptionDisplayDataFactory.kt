@@ -26,7 +26,7 @@ import javax.inject.Inject
 internal fun interface CheckoutPaymentOptionDisplayDataFactory {
     fun create(
         selection: PaymentSelection?,
-        paymentMethodMetadata: PaymentMethodMetadata,
+        paymentMethodMetadata: PaymentMethodMetadata?,
     ): PaymentOptionDisplayData?
 }
 
@@ -39,9 +39,9 @@ internal class DefaultCheckoutPaymentOptionDisplayDataFactory @Inject constructo
 ) : CheckoutPaymentOptionDisplayDataFactory {
     override fun create(
         selection: PaymentSelection?,
-        paymentMethodMetadata: PaymentMethodMetadata,
+        paymentMethodMetadata: PaymentMethodMetadata?,
     ): PaymentOptionDisplayData? {
-        if (selection == null) {
+        if (selection == null || paymentMethodMetadata == null) {
             return null
         }
 

@@ -11,8 +11,10 @@ import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.BillingAddressElement
+import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.StaticTextElement
 import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
@@ -35,6 +37,40 @@ class FormElementsBuilderTest {
     @Test
     fun `build returns an emptyList`() {
         assertThat(formElementsBuilder(arguments()).build()).isEmpty()
+    }
+
+    @Test
+    fun `required mandate follows billing fields`() {
+        val mandate = MandateTextElement(
+            stringResId = R.string.stripe_gcash_mandate,
+            args = listOf("Example Inc."),
+        )
+        val formElements = formElementsBuilder(arguments(requiresMandate = true))
+            .addMandateIfAllowed(formElement = mandate)
+            .element(testElement(FormFieldId.Generic("element")))
+            .requireBillingAddressIfAllowed()
+            .build()
+
+        assertThat(formElements.map { it.identifier.v1 }).containsExactly(
+            "element",
+            "billing_details[address]_section",
+            mandate.identifier.v1,
+        ).inOrder()
+        assertThat(formElements.last()).isSameInstanceAs(mandate)
+    }
+
+    @Test
+    fun `mandate is omitted when not required`() {
+        val formElements = formElementsBuilder(arguments(requiresMandate = false))
+            .addMandateIfAllowed(
+                formElement = MandateTextElement(
+                    stringResId = R.string.stripe_gcash_mandate,
+                    args = listOf("Example Inc."),
+                ),
+            )
+            .build()
+
+        assertThat(formElements).isEmpty()
     }
 
     @Test
@@ -273,6 +309,7 @@ class FormElementsBuilderTest {
         initialValues: Map<FormFieldId, String?> = emptyMap(),
         shippingValues: Map<FormFieldId, String?>? = emptyMap(),
         requiresBillingAddressForAutomaticTax: Boolean = false,
+        requiresMandate: Boolean = false,
     ): UiDefinitionFactory.Arguments {
         val context = ApplicationProvider.getApplicationContext<Application>()
         return UiDefinitionFactory.Arguments(
@@ -289,7 +326,7 @@ class FormElementsBuilderTest {
             cbcEligibility = CardBrandChoiceEligibility.Ineligible,
             billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
             requiresBillingAddressForAutomaticTax = requiresBillingAddressForAutomaticTax,
-            requiresMandate = false,
+            requiresMandate = requiresMandate,
             linkConfigurationCoordinator = null,
             onLinkInlineSignupStateChanged = { throw AssertionError("Not implemented") },
             cardBrandFilter = DefaultCardBrandFilter,

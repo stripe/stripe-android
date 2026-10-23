@@ -23,6 +23,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.SharePaymentDetails
+import com.stripe.android.model.VerificationType
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -84,6 +85,19 @@ internal open class FakeLinkAccountManager(
     var lookupConsumerByLinkAuthTokenResult: Result<LinkAccount?> = Result.success(TestFactory.LINK_ACCOUNT)
     var startVerificationResult: Result<LinkAccount> = Result.success(TestFactory.LINK_ACCOUNT)
     var confirmVerificationResult: Result<LinkAccount> = Result.success(TestFactory.LINK_ACCOUNT)
+    var recoverSessionResult: Result<LinkAccount> = Result.success(TestFactory.LINK_ACCOUNT)
+    var startVerificationResultProvider: suspend (StartVerificationCall) -> Result<LinkAccount> = {
+        startVerificationResult
+    }
+    var confirmVerificationResultProvider: suspend (ConfirmVerificationCall) -> Result<LinkAccount> = {
+        confirmVerificationResult
+    }
+
+    /**
+     * When true, successful verification and session recovery results replace the current account, like
+     * the real implementation does.
+     */
+    var setsAccountOnVerification: Boolean = false
     var postConsentUpdateResult: Result<Unit> = Result.success(Unit)
     var signInWithUserInputResult: Result<LinkAccount> = Result.success(TestFactory.LINK_ACCOUNT)
     var logOutResult: Result<ConsumerSession> = Result.success(ConsumerSession("", "", "", ""))
@@ -133,7 +147,8 @@ internal open class FakeLinkAccountManager(
     private val lookupByLinkAuthTokenTurbine = Turbine<LookupCallByLinkAuthToken>()
 
     private val updateCardDetailsTurbine = Turbine<ConsumerPaymentDetailsUpdateParams>()
-    private val startVerificationTurbine = Turbine<Boolean>()
+    private val startVerificationTurbine = Turbine<StartVerificationCall>()
+    private val recoverSessionTurbine = Turbine<Unit>()
     private val createPaymentDetailsFromPaymentMethodTurbine = Turbine<CreatePaymentDetailsFromPaymentMethodCall>()
 
     internal data class CreatePaymentDetailsFromPaymentMethodCall(
@@ -141,7 +156,7 @@ internal open class FakeLinkAccountManager(
         val paymentMethod: PaymentMethod,
     )
 
-    val confirmVerificationTurbine = Turbine<String>()
+    val confirmVerificationTurbine = Turbine<ConfirmVerificationCall>()
 
     private val logoutCall = Turbine<LinkAccount?>()
 
@@ -274,14 +289,35 @@ internal open class FakeLinkAccountManager(
         return createPaymentMethodResultProvider()
     }
 
-    override suspend fun startVerification(isResendSmsCode: Boolean): Result<LinkAccount> {
-        startVerificationTurbine.add(isResendSmsCode)
-        return startVerificationResult
+    override suspend fun startVerification(
+        type: VerificationType,
+        accountPhoneNumber: String?,
+        isResend: Boolean,
+    ): Result<LinkAccount> {
+        val call = StartVerificationCall(type = type, accountPhoneNumber = accountPhoneNumber, isResend = isResend)
+        startVerificationTurbine.add(call)
+        return startVerificationResultProvider(call).onSuccess(::onVerificationAccount)
     }
 
-    override suspend fun confirmVerification(code: String, consentGranted: Boolean?): Result<LinkAccount> {
-        confirmVerificationTurbine.add(code)
-        return confirmVerificationResult
+    override suspend fun confirmVerification(
+        code: String,
+        type: VerificationType,
+        consentGranted: Boolean?,
+    ): Result<LinkAccount> {
+        val call = ConfirmVerificationCall(code = code, type = type, consentGranted = consentGranted)
+        confirmVerificationTurbine.add(call)
+        return confirmVerificationResultProvider(call).onSuccess(::onVerificationAccount)
+    }
+
+    override suspend fun recoverSession(): Result<LinkAccount> {
+        recoverSessionTurbine.add(Unit)
+        return recoverSessionResult.onSuccess(::onVerificationAccount)
+    }
+
+    private fun onVerificationAccount(account: LinkAccount) {
+        if (setsAccountOnVerification) {
+            linkAccountHolder.set(LinkAccountUpdate.Value(account))
+        }
     }
 
     override suspend fun postConsentUpdate(consentGranted: Boolean): Result<Unit> {
@@ -320,12 +356,22 @@ internal open class FakeLinkAccountManager(
         return lookupByAuthIntentTurbine.awaitItem()
     }
 
-    suspend fun awaitStartVerificationCall(): Boolean {
+    suspend fun awaitStartVerificationCall(): StartVerificationCall {
         return startVerificationTurbine.awaitItem()
     }
 
-    suspend fun awaitConfirmVerificationCall(): String {
+    suspend fun awaitConfirmVerificationCall(): ConfirmVerificationCall {
         return confirmVerificationTurbine.awaitItem()
+    }
+
+    suspend fun awaitRecoverSessionCall() {
+        recoverSessionTurbine.awaitItem()
+    }
+
+    fun ensureVerificationEventsConsumed() {
+        startVerificationTurbine.ensureAllEventsConsumed()
+        confirmVerificationTurbine.ensureAllEventsConsumed()
+        recoverSessionTurbine.ensureAllEventsConsumed()
     }
 
     suspend fun awaitCreatePaymentDetailsFromPaymentMethodTurbineCall(): CreatePaymentDetailsFromPaymentMethodCall {
@@ -353,6 +399,18 @@ internal open class FakeLinkAccountManager(
                 billingPhone = null
             )
         }
+
+    data class StartVerificationCall(
+        val type: VerificationType,
+        val accountPhoneNumber: String?,
+        val isResend: Boolean,
+    )
+
+    data class ConfirmVerificationCall(
+        val code: String,
+        val type: VerificationType,
+        val consentGranted: Boolean?,
+    )
 
     data class LookupCallByAuthIntent(
         val linkAuthIntentId: String?,

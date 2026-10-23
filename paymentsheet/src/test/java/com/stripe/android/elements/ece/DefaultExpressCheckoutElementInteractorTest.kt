@@ -51,7 +51,6 @@ internal class DefaultExpressCheckoutElementInteractorTest {
             ExpressButton.Link.create(
                 paymentMethodMetadata = paymentMethodMetadata,
                 linkAccountInfo = LinkAccountUpdate.Value(null),
-                buttonTheme = ExpressCheckoutElement.Configuration.Appearance.ButtonTheme.Automatic,
             ),
             ExpressButton.GooglePay.create(
                 paymentMethodMetadata = paymentMethodMetadata,
@@ -91,6 +90,17 @@ internal class DefaultExpressCheckoutElementInteractorTest {
     }
 
     @Test
+    fun `state contains configured corner radius`() = runScenario(
+        configuration = ExpressCheckoutElement.Configuration()
+            .appearance(
+                ExpressCheckoutElement.Configuration.Appearance()
+                    .cornerRadiusDp(12f)
+            ),
+    ) {
+        assertThat(interactor.state.value.cornerRadiusDp).isEqualTo(12f)
+    }
+
+    @Test
     fun `state has no buttons when ECE configuration is absent`() = runScenario(
         configuration = null,
     ) {
@@ -98,7 +108,7 @@ internal class DefaultExpressCheckoutElementInteractorTest {
     }
 
     @Test
-    fun `state contains configured button theme`() = runScenario(
+    fun `state applies configured button theme to Google Pay`() = runScenario(
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             availableWallets = listOf(WalletType.Link, WalletType.GooglePay),
         ),
@@ -108,10 +118,12 @@ internal class DefaultExpressCheckoutElementInteractorTest {
                     .buttonTheme(ExpressCheckoutElement.Configuration.Appearance.ButtonTheme.Light)
             ),
     ) {
-        assertThat(interactor.state.value.expressButtons.map { it.buttonTheme }).containsExactly(
-            ExpressCheckoutElement.Configuration.Appearance.ButtonTheme.Light,
-            ExpressCheckoutElement.Configuration.Appearance.ButtonTheme.Light,
-        )
+        val googlePayButton = interactor.state.value.expressButtons
+            .filterIsInstance<ExpressButton.GooglePay>()
+            .single()
+
+        assertThat(googlePayButton.buttonTheme)
+            .isEqualTo(ExpressCheckoutElement.Configuration.Appearance.ButtonTheme.Light)
     }
 
     @Test
@@ -155,7 +167,6 @@ internal class DefaultExpressCheckoutElementInteractorTest {
                 ExpressButton.Link.create(
                     paymentMethodMetadata = paymentMethodMetadata,
                     linkAccountInfo = LinkAccountUpdate.Value(null),
-                    buttonTheme = ExpressCheckoutElement.Configuration.Appearance.ButtonTheme.Automatic,
                 ),
             )
 
@@ -165,7 +176,6 @@ internal class DefaultExpressCheckoutElementInteractorTest {
                 ExpressButton.Link.create(
                     paymentMethodMetadata = paymentMethodMetadata,
                     linkAccountInfo = LinkAccountUpdate.Value(linkAccount),
-                    buttonTheme = ExpressCheckoutElement.Configuration.Appearance.ButtonTheme.Automatic,
                 ),
             )
 

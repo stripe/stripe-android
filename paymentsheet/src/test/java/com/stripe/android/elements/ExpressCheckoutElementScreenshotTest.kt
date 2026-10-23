@@ -4,7 +4,6 @@ package com.stripe.android.elements
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -17,11 +16,11 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.stripe.android.elements.ExpressCheckoutElement.Configuration.Appearance.ButtonTheme
 import com.stripe.android.elements.ece.ExpressButton
 import com.stripe.android.elements.ece.ExpressCheckoutElementContent
 import com.stripe.android.elements.ece.ExpressCheckoutElementInteractor
 import com.stripe.android.elements.ece.ExpressCheckoutElementInteractorStateFactory
+import com.stripe.android.paymentsheet.ui.PrimaryButtonTheme
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
 import com.stripe.android.uicore.utils.stateFlowOf
@@ -56,6 +55,20 @@ internal class ExpressCheckoutElementScreenshotTest {
                     ),
                 ),
                 googlePayButton = { _, enabled, _ -> FakeGooglePayButton(enabled) },
+            )
+        }
+    }
+
+    @Test
+    fun rendersGooglePayAndLinkButtonsWithCustomCornerRadius() {
+        paparazziRule.snapshot {
+            ExpressCheckoutElementContent(
+                interactor = FakeExpressCheckoutElementInteractor(
+                    state = stateFlowOf(
+                        ExpressCheckoutElementInteractorStateFactory.create(cornerRadiusDp = 24f)
+                    ),
+                ),
+                googlePayButton = { _, _, _ -> FakeGooglePayButton() },
             )
         }
     }
@@ -127,42 +140,6 @@ internal class ExpressCheckoutElementScreenshotTest {
         }
     }
 
-    @Test
-    fun rendersLinkButtonThemes() {
-        val linkButton = ExpressCheckoutElementInteractorStateFactory.create().expressButtons
-            .filterIsInstance<ExpressButton.Link>()
-            .single()
-
-        paparazziRule.snapshot {
-            Column {
-                ExpressCheckoutElementContent(
-                    interactor = FakeExpressCheckoutElementInteractor(
-                        state = stateFlowOf(
-                            ExpressCheckoutElementInteractorStateFactory.create(
-                                expressButtons = listOf(
-                                    linkButton.copy(buttonTheme = ButtonTheme.Light)
-                                ),
-                            )
-                        ),
-                    ),
-                    googlePayButton = { _, _, _ -> FakeGooglePayButton() },
-                )
-                ExpressCheckoutElementContent(
-                    interactor = FakeExpressCheckoutElementInteractor(
-                        state = stateFlowOf(
-                            ExpressCheckoutElementInteractorStateFactory.create(
-                                expressButtons = listOf(
-                                    linkButton.copy(buttonTheme = ButtonTheme.Dark)
-                                ),
-                            )
-                        ),
-                    ),
-                    googlePayButton = { _, _, _ -> FakeGooglePayButton() },
-                )
-            }
-        }
-    }
-
     @Composable
     private fun FakeGooglePayButton(
         enabled: Boolean = true,
@@ -176,7 +153,7 @@ internal class ExpressCheckoutElementScreenshotTest {
                 .alpha(if (enabled) 1f else 0.5f)
                 .background(
                     color = Color.Black,
-                    shape = RoundedCornerShape(6.dp),
+                    shape = RoundedCornerShape(PrimaryButtonTheme.shape.cornerRadius),
                 ),
             contentAlignment = Alignment.Center,
         ) {

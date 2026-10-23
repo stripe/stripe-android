@@ -93,7 +93,10 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.identity.IdentityVerificationSheet.VerificationFlowResult
 import com.stripe.android.link.LinkAppearance
 import com.stripe.android.link.LinkController
+import com.stripe.android.link.PaymentMethodPreviewDetails
 import com.stripe.android.link.exceptions.LinkUnavailableException
+import com.stripe.android.model.CardBrand
+import com.stripe.android.model.CardFunding
 import com.stripe.android.model.DateOfBirth
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
@@ -106,6 +109,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.AdditionalAnswers.delegatesTo
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.doReturn
@@ -367,6 +371,8 @@ class OnrampInteractorTest {
         )
 
         assertThat(result).isInstanceOf(OnrampCollectPaymentMethodResult.Completed::class.java)
+        assertThat((result as OnrampCollectPaymentMethodResult.Completed).displayData.sublabel)
+            .isEqualTo("Visa Card \u2066•••• 4242\u2069")
         val selected = interactor.state.value.selectedPaymentSource as SelectedPaymentSource.GooglePay
         assertThat(selected.paymentMethodId).isEqualTo(paymentMethod.id)
         assertThat(selected.platformPublishableKey).isNull()
@@ -441,6 +447,73 @@ class OnrampInteractorTest {
     }
 
     @Test
+    fun `Google Pay collection exposes debit`() = runTest {
+        assertPlatformPayFunding("debit", CardFunding.Debit, samsungPay = false)
+    }
+
+    @Test
+    fun `Google Pay collection exposes credit`() = runTest {
+        assertPlatformPayFunding("credit", CardFunding.Credit, samsungPay = false)
+    }
+
+    @Test
+    fun `Google Pay collection exposes prepaid`() = runTest {
+        assertPlatformPayFunding("prepaid", CardFunding.Prepaid, samsungPay = false)
+    }
+
+    @Test
+    fun `Google Pay collection exposes unrecognized funding`() = runTest {
+        assertPlatformPayFunding("future", CardFunding.Unknown, samsungPay = false)
+    }
+
+    @Test
+    fun `Google Pay collection exposes missing funding`() = runTest {
+        assertPlatformPayFunding(null, CardFunding.Unknown, samsungPay = false)
+    }
+
+    @Test
+    fun `Samsung Pay collection exposes debit`() = runTest {
+        assertPlatformPayFunding("debit", CardFunding.Debit, samsungPay = true)
+    }
+
+    @Test
+    fun `Samsung Pay collection exposes credit`() = runTest {
+        assertPlatformPayFunding("credit", CardFunding.Credit, samsungPay = true)
+    }
+
+    @Test
+    fun `Samsung Pay collection exposes prepaid`() = runTest {
+        assertPlatformPayFunding("prepaid", CardFunding.Prepaid, samsungPay = true)
+    }
+
+    @Test
+    fun `Samsung Pay collection exposes unrecognized funding`() = runTest {
+        assertPlatformPayFunding("future", CardFunding.Unknown, samsungPay = true)
+    }
+
+    @Test
+    fun `Samsung Pay collection exposes missing funding`() = runTest {
+        assertPlatformPayFunding(null, CardFunding.Unknown, samsungPay = true)
+    }
+
+    private suspend fun assertPlatformPayFunding(funding: String?, expected: CardFunding, samsungPay: Boolean) {
+        val paymentMethod = createCardPaymentMethod().copy(card = PaymentMethod.Card(funding = funding))
+        val result = if (samsungPay) {
+            whenever(cryptoApiRepository.createSamsungPayPaymentMethod("credential", "pk_platform"))
+                .thenReturn(Result.success(paymentMethod))
+            interactor.handleSamsungPayPaymentResult(
+                SamsungPayResult.Completed("credential", kycInfo = null), "pk_platform"
+            )
+        } else {
+            interactor.onGooglePayPresented("pk_platform")
+            interactor.handleGooglePayPaymentResult(GooglePayPaymentMethodLauncher.Result.Completed(paymentMethod))
+        } as OnrampCollectPaymentMethodResult.Completed
+
+        assertThat(result.displayData.cardFunding).isEqualTo(expected)
+        verify(cryptoApiRepository, never()).createPaymentToken(any(), any(), anyOrNull())
+    }
+
+    @Test
     fun `Google Pay returns contact fields before authentication`() {
         interactor.onGooglePayPresented("pk_platform")
         val paymentMethod = PaymentMethod(
@@ -461,6 +534,7 @@ class OnrampInteractorTest {
         ) as OnrampCollectPaymentMethodResult.Completed
 
         assertThat(interactor.state.value.cryptoCustomerId).isNull()
+        assertThat(result.displayData.cardFunding).isNull()
         assertThat(result.kycInfo?.email).isEqualTo("user@example.com")
         assertThat(result.kycInfo?.phone).isEqualTo("+12125551234")
         assertThat(result.kycInfo?.rawPhone).isEqualTo("(212) 555-1234")
@@ -483,6 +557,7 @@ class OnrampInteractorTest {
             SamsungPayResult.Completed("credential", kycInfo = null), "pk_platform"
         ) as OnrampCollectPaymentMethodResult.Completed
 
+        assertThat(result.displayData.cardFunding).isNull()
         assertThat(result.kycInfo?.email).isEqualTo("user@example.com")
     }
 
@@ -1631,7 +1706,7 @@ class OnrampInteractorTest {
         assertThat((collectionResult as OnrampCollectPaymentMethodResult.Completed).displayData.type)
             .isEqualTo(PaymentMethodDisplayData.Type.SamsungPay)
         assertThat(collectionResult.displayData.label).isEqualTo("Samsung Pay")
-        assertThat(collectionResult.displayData.sublabel).isEqualTo("4242")
+        assertThat(collectionResult.displayData.sublabel).isEqualTo("Visa Card \u2066•••• 4242\u2069")
         assertThat(interactor.state.value.selectedPaymentSource)
             .isEqualTo(SelectedPaymentSource.SamsungPay(paymentMethod.id, "pk_platform_123"))
         assertThat(tokenResult).isInstanceOf(OnrampCreateCryptoPaymentTokenResult.Completed::class.java)
@@ -1821,6 +1896,30 @@ class OnrampInteractorTest {
     }
 
     @Test
+    fun `Link collection exposes debit funding`() = assertLinkFunding("DEBIT", CardFunding.Debit)
+
+    @Test
+    fun `Link collection exposes credit funding`() = assertLinkFunding("CREDIT", CardFunding.Credit)
+
+    @Test
+    fun `Link collection preserves unknown funding`() = assertLinkFunding("UNKNOWN", CardFunding.Unknown)
+
+    private fun assertLinkFunding(funding: String, expected: CardFunding) {
+        val context = RuntimeEnvironment.getApplication()
+        val preview = LinkController.PaymentMethodPreview.create(
+            context, PaymentMethodPreviewDetails.Card(CardBrand.Visa, funding, "4242")
+        )
+        whenever(linkController.state(any())).thenReturn(
+            MutableStateFlow(LinkController.State(selectedPaymentMethodPreview = preview))
+        )
+        val result = interactor.handlePresentPaymentMethodsResult(
+            LinkController.PresentPaymentMethodsResult.Success, context
+        ) as OnrampCollectPaymentMethodResult.Completed
+
+        assertThat(result.displayData.cardFunding).isEqualTo(expected)
+    }
+
+    @Test
     fun testHandlePresentPaymentMethodsResultSuccess() {
         val context = RuntimeEnvironment.getApplication()
         val paymentMethodPreview = mockCardPaymentMethodPreview()
@@ -1839,7 +1938,8 @@ class OnrampInteractorTest {
             LinkController.PresentPaymentMethodsResult.Success,
             context
         )
-        assert(result is OnrampCollectPaymentMethodResult.Completed)
+        assertThat(result).isInstanceOf(OnrampCollectPaymentMethodResult.Completed::class.java)
+        assertThat((result as OnrampCollectPaymentMethodResult.Completed).displayData.cardFunding).isNull()
 
         testAnalyticsService.assertContainsEvent(OnrampAnalyticsEvent.CollectPaymentMethodCompleted(null))
     }
@@ -2516,7 +2616,8 @@ class OnrampInteractorTest {
             },
             label = "Visa",
             sublabel = "•••• 4242",
-            type = LinkController.PaymentMethodType.Card
+            type = LinkController.PaymentMethodType.Card,
+            cardFunding = null,
         )
 
     private fun mockLinkAccount(
@@ -2590,7 +2691,7 @@ class OnrampInteractorTest {
     ): Application {
         val runtimeApplication = RuntimeEnvironment.getApplication()
 
-        return mock {
+        return mock(defaultAnswer = delegatesTo(runtimeApplication)) {
             on { applicationContext } doReturn runtimeApplication
             on { packageName } doReturn runtimeApplication.packageName
             on { getString(R.string.stripe_onramp_platform_pay_account_changed) } doReturn

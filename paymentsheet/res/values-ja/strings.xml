@@ -36,6 +36,20 @@ to be saved and used in future checkout sessions. -->
 to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_toggle">Link でアカウントを作成すると、ウェブ上で決済を迅速化できます</string>
   <string name="stripe_inline_sign_up_toggle_with_brand">%s でアカウントを作成して、ウェブ全体でより迅速に決済</string>
+  <!-- Link authentication cannot continue with the available verification methods. -->
+  <string name="stripe_link_auth_blocked">アカウントを確認できませんでした。このウィンドウを閉じて、もう一度お試しください。</string>
+  <!-- Menu option that sends a Link login code to the user's email instead of their phone. -->
+  <string name="stripe_link_auth_email_code">メールコード</string>
+  <!-- Label for a button that shows more ways to receive a Link login code. -->
+  <string name="stripe_link_auth_more_options">その他のオプション</string>
+  <!-- Explains why the user must enter their full phone number before a Link login code is emailed. %s is the last two digits of their phone number. -->
+  <string name="stripe_link_auth_phone_match_message">メールアドレスにコードを送信する前に、お客様に関する追加情報の確認が必要です。末尾が •%s の電話番号を入力してください。</string>
+  <!-- Explains why the user must enter their full phone number before a Link login code is emailed. -->
+  <string name="stripe_link_auth_phone_match_message_no_hint">メールアドレスにコードを送信する前に、お客様に関する追加情報の確認が必要です。末尾が Link アカウントの電話番号を入力してください。</string>
+  <!-- Heading of the screen where the user confirms their full phone number before a Link login code is emailed. -->
+  <string name="stripe_link_auth_phone_match_title">電話番号を確認</string>
+  <!-- Label shown in place of the resend button while the user must wait. %d is the number of seconds remaining. -->
+  <string name="stripe_link_auth_resend_countdown">コードを %d 秒後に再送信</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">%1$s クレジット</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->

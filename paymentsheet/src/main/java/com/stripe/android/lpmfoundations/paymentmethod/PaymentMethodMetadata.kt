@@ -532,3 +532,12 @@ internal data class PaymentMethodMetadata(
         }
     }
 }
+
+internal fun PaymentMethodMetadata?.defaultAnalyticsParams(): Map<String, Any> {
+    return if (this != null) {
+        analyticsMetadata.paramsMap +
+            ("payment_method_orientation" to paymentMethodOrientation().name.lowercase())
+    } else {
+        emptyMap()
+    }
+}

@@ -13,9 +13,9 @@ import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsEvent
 import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsEvent.ErrorOccurred.Operation
 import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsService
 import com.stripe.android.crypto.onramp.exception.LinkAccountNotVerifiedException
-import com.stripe.android.crypto.onramp.exception.MissingAdditionalKycFileIdException
 import com.stripe.android.crypto.onramp.exception.MissingConsumerSecretException
 import com.stripe.android.crypto.onramp.exception.MissingCryptoCustomerException
+import com.stripe.android.crypto.onramp.exception.MissingKycFileIdException
 import com.stripe.android.crypto.onramp.exception.MissingLinkSessionKeyException
 import com.stripe.android.crypto.onramp.exception.MissingPaymentMethodException
 import com.stripe.android.crypto.onramp.exception.OnrampErrorLogger
@@ -27,16 +27,15 @@ import com.stripe.android.crypto.onramp.exception.StripeCryptoOnrampError
 import com.stripe.android.crypto.onramp.exception.UnexpectedException
 import com.stripe.android.crypto.onramp.exception.createDiagnosticContext
 import com.stripe.android.crypto.onramp.exception.toCryptoOnrampError
-import com.stripe.android.crypto.onramp.model.AdditionalKycCollectionSubmissionRequest
-import com.stripe.android.crypto.onramp.model.AdditionalKycDocumentSubmission
-import com.stripe.android.crypto.onramp.model.AdditionalKycDocumentSubmissionRequest
-import com.stripe.android.crypto.onramp.model.AdditionalKycQuestionnaireAnswerRequest
-import com.stripe.android.crypto.onramp.model.AdditionalKycQuestionnaireSubmissionRequest
-import com.stripe.android.crypto.onramp.model.AdditionalKycRequirementSubmissionRequest
-import com.stripe.android.crypto.onramp.model.AdditionalKycRequirements
-import com.stripe.android.crypto.onramp.model.AdditionalKycSubmission
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
+import com.stripe.android.crypto.onramp.model.KycCollectionSubmissionRequest
+import com.stripe.android.crypto.onramp.model.KycDocumentSubmissionRequest
 import com.stripe.android.crypto.onramp.model.KycInfo
+import com.stripe.android.crypto.onramp.model.KycQuestionnaireAnswerRequest
+import com.stripe.android.crypto.onramp.model.KycQuestionnaireSubmissionRequest
+import com.stripe.android.crypto.onramp.model.KycRequirementSubmissionRequest
+import com.stripe.android.crypto.onramp.model.KycRequirements
+import com.stripe.android.crypto.onramp.model.KycSubmission
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampAttachKycInfoResult
 import com.stripe.android.crypto.onramp.model.OnrampAuthorizeResult
@@ -81,6 +80,8 @@ import com.stripe.android.crypto.onramp.ui.VerifyKycActivityResult
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.link.LinkController
+import com.stripe.android.link.ui.wallet.paymentOptionLabel
+import com.stripe.android.model.CardFunding
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
@@ -436,53 +437,53 @@ internal class OnrampInteractor @Inject constructor(
             )
     }
 
-    fun onAdditionalKycFlowStarted() {
+    fun onKycFlowStarted() {
         analyticsService?.track(OnrampAnalyticsEvent.KycRequirementFulfillmentStarted)
     }
 
-    fun onAdditionalKycFlowCompleted() {
+    fun onKycFlowCompleted() {
         analyticsService?.track(OnrampAnalyticsEvent.KycRequirementFulfillmentCompleted)
     }
 
-    suspend fun retrieveAdditionalKycRequirements(): Result<AdditionalKycRequirements> {
+    suspend fun retrieveKycRequirements(): Result<KycRequirements> {
         val storedLinkAccount = _state.value.linkControllerState?.internalLinkAccount
         val linkAccount = storedLinkAccount?.takeIf { it.consumerSessionClientSecret != null }
             ?: linkController.state(application).value.internalLinkAccount
         val secret = linkAccount?.consumerSessionClientSecret
         if (secret == null) {
             val error = mapError(
-                operation = Operation.RetrieveAdditionalKycRequirements,
+                operation = Operation.RetrieveKycRequirements,
                 error = MissingConsumerSecretException(),
             )
-            trackError(Operation.RetrieveAdditionalKycRequirements, error)
+            trackError(Operation.RetrieveKycRequirements, error)
             return Result.failure(error)
         }
 
         if (linkAccount.sessionState != LinkController.SessionState.LoggedIn) {
             val error = mapError(
-                operation = Operation.RetrieveAdditionalKycRequirements,
+                operation = Operation.RetrieveKycRequirements,
                 error = LinkAccountNotVerifiedException(),
             )
-            trackError(Operation.RetrieveAdditionalKycRequirements, error)
+            trackError(Operation.RetrieveKycRequirements, error)
             return Result.failure(error)
         }
 
-        return cryptoApiRepository.retrieveAdditionalKycRequirements(
+        return cryptoApiRepository.retrieveKycRequirements(
             consumerSessionClientSecret = secret,
         ).fold(
             onSuccess = { response ->
-                Result.success(response.requirements.toAdditionalKycRequirements())
+                Result.success(response.requirements.toKycRequirements())
             },
             onFailure = { error ->
-                val mappedError = mapError(Operation.RetrieveAdditionalKycRequirements, error)
-                trackError(Operation.RetrieveAdditionalKycRequirements, mappedError)
+                val mappedError = mapError(Operation.RetrieveKycRequirements, error)
+                trackError(Operation.RetrieveKycRequirements, mappedError)
                 Result.failure(mappedError)
             }
         )
     }
 
     suspend fun fulfillKycRequirements(
-        submission: AdditionalKycSubmission,
+        submission: KycSubmission,
     ): Result<Unit> {
         val storedLinkAccount = _state.value.linkControllerState?.internalLinkAccount
         val linkAccount = storedLinkAccount?.takeIf { !it.linkSessionKey.isNullOrBlank() }
@@ -495,14 +496,18 @@ internal class OnrampInteractor @Inject constructor(
         }
 
         val requirements = submission.requirements.mapValues { (_, requirement) ->
-            val documents = uploadAdditionalKycDocuments(requirement.documents, linkSessionKey)
-                .getOrElse { error -> return fulfillKycRequirementsFailure(error) }
+            val documents = requirement.documents.map { document ->
+                KycDocumentSubmissionRequest(
+                    documentSubtype = document.documentSubtype,
+                    fileIds = document.uploadedFileIds,
+                )
+            }
 
-            val additionalRequirements = requirement.questionnaire?.let { questionnaire ->
-                AdditionalKycCollectionSubmissionRequest(
-                    questionnaire = AdditionalKycQuestionnaireSubmissionRequest(
+            val collectionRequirements = requirement.questionnaire?.let { questionnaire ->
+                KycCollectionSubmissionRequest(
+                    questionnaire = KycQuestionnaireSubmissionRequest(
                         answers = questionnaire.answers.map { answer ->
-                            AdditionalKycQuestionnaireAnswerRequest(
+                            KycQuestionnaireAnswerRequest(
                                 questionId = answer.questionId,
                                 value = answer.value,
                             )
@@ -511,10 +516,10 @@ internal class OnrampInteractor @Inject constructor(
                 )
             }
 
-            AdditionalKycRequirementSubmissionRequest(
+            KycRequirementSubmissionRequest(
                 requestedBy = requirement.requestedBy,
                 documents = documents,
-                additionalRequirements = additionalRequirements,
+                collectionRequirements = collectionRequirements,
             )
         }
 
@@ -527,7 +532,7 @@ internal class OnrampInteractor @Inject constructor(
         )
     }
 
-    suspend fun uploadAdditionalKycDocument(file: File): Result<String> {
+    suspend fun uploadKycDocument(file: File): Result<String> {
         val account = _state.value.linkControllerState?.internalLinkAccount
             ?.takeIf { !it.linkSessionKey.isNullOrBlank() }
             ?: linkController.state(application).value.internalLinkAccount
@@ -536,37 +541,13 @@ internal class OnrampInteractor @Inject constructor(
         if (account.sessionState != LinkController.SessionState.LoggedIn) {
             return fulfillKycRequirementsFailure(LinkAccountNotVerifiedException())
         }
-        return cryptoApiRepository.uploadAdditionalKycDocument(file, key).fold(
+        return cryptoApiRepository.uploadKycDocument(file, key).fold(
             onSuccess = { uploaded ->
                 uploaded.id?.takeIf { it.isNotBlank() }?.let { Result.success(it) }
-                    ?: fulfillKycRequirementsFailure(MissingAdditionalKycFileIdException())
+                    ?: fulfillKycRequirementsFailure(MissingKycFileIdException())
             },
             onFailure = { fulfillKycRequirementsFailure(it) },
         )
-    }
-
-    private suspend fun uploadAdditionalKycDocuments(
-        documents: List<AdditionalKycDocumentSubmission>,
-        linkSessionKey: String,
-    ): Result<List<AdditionalKycDocumentSubmissionRequest>> {
-        val requests = mutableListOf<AdditionalKycDocumentSubmissionRequest>()
-        for (document in documents) {
-            val fileIds = document.uploadedFileIds.toMutableList()
-            for (file in document.files) {
-                val uploadedFile = cryptoApiRepository.uploadAdditionalKycDocument(file, linkSessionKey)
-                    .getOrElse { error -> return Result.failure(error) }
-                val fileId = uploadedFile.id
-                    ?: return Result.failure(MissingAdditionalKycFileIdException())
-
-                fileIds += fileId
-            }
-            requests += AdditionalKycDocumentSubmissionRequest(
-                documentSubtype = document.documentSubtype,
-                fileIds = fileIds,
-            )
-        }
-
-        return Result.success(requests)
     }
 
     private fun <T> fulfillKycRequirementsFailure(error: Throwable): Result<T> {
@@ -917,9 +898,10 @@ internal class OnrampInteractor @Inject constructor(
                         imageLoader = it.imageLoader,
                         label = it.label,
                         sublabel = it.sublabel,
-                        type = it.type.toDisplayType()
+                        type = it.type.toDisplayType(),
+                        cardFunding = it.cardFunding,
                     ),
-                    kycInfo = null
+                    kycInfo = null,
                 )
             } ?: run {
                 collectPaymentMethodFailure(MissingPaymentMethodException())
@@ -942,7 +924,10 @@ internal class OnrampInteractor @Inject constructor(
             is GooglePayPaymentMethodLauncher.Result.Completed -> {
                 val kycInfo = result.paymentMethod.platformPayKycInfo()
                 handleGooglePayPaymentMethod(result.paymentMethod, platformPublishableKey) { displayData ->
-                    OnrampCollectPaymentMethodResult.Completed(displayData, kycInfo)
+                    OnrampCollectPaymentMethodResult.Completed(
+                        displayData = displayData,
+                        kycInfo = kycInfo,
+                    )
                 }
             }
             is GooglePayPaymentMethodLauncher.Result.Failed -> collectPaymentMethodFailure(result.error)
@@ -976,7 +961,8 @@ internal class OnrampInteractor @Inject constructor(
                     onSuccess = { paymentMethod ->
                         handleSamsungPayPaymentMethod(paymentMethod, platformPublishableKey) { displayData ->
                             OnrampCollectPaymentMethodResult.Completed(
-                                displayData, kycInfo = result.kycInfo ?: paymentMethod.platformPayKycInfo()
+                                displayData = displayData,
+                                kycInfo = result.kycInfo ?: paymentMethod.platformPayKycInfo(),
                             )
                         }
                     },
@@ -1152,8 +1138,9 @@ internal class OnrampInteractor @Inject constructor(
                 )!!
             },
             label = "Google Pay",
-            sublabel = paymentMethod.card?.last4,
-            type = PaymentMethodDisplayData.Type.GooglePay
+            sublabel = paymentMethod.card?.paymentOptionLabel()?.resolve(application),
+            type = PaymentMethodDisplayData.Type.GooglePay,
+            cardFunding = paymentMethod.card?.let { CardFunding.fromCode(it.funding) },
         )
     }
 
@@ -1166,8 +1153,9 @@ internal class OnrampInteractor @Inject constructor(
                 )!!
             },
             label = "Samsung Pay",
-            sublabel = paymentMethod.card?.last4,
+            sublabel = paymentMethod.card?.paymentOptionLabel()?.resolve(application),
             type = PaymentMethodDisplayData.Type.SamsungPay,
+            cardFunding = paymentMethod.card?.let { CardFunding.fromCode(it.funding) },
         )
     }
 
