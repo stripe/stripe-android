@@ -195,6 +195,7 @@ internal class DefaultConfirmationHandler(
                         cause = action.cause,
                         message = action.message,
                         type = action.errorType,
+                        metadata = action.metadata,
                     )
                 )
             }
@@ -234,6 +235,7 @@ internal class DefaultConfirmationHandler(
                 cause = result.cause,
                 type = result.type,
                 message = result.message,
+                metadata = result.metadata,
             )
             is ConfirmationDefinition.Result.Canceled -> ConfirmationHandler.Result.Canceled(
                 action = result.action,

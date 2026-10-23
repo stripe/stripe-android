@@ -24,6 +24,7 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.MutableConfirmationMetadata
 import com.stripe.android.paymentelement.confirmation.intent.CheckoutSessionResponseKey
+import com.stripe.android.paymentelement.confirmation.intent.ConfirmRequestIdKey
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationTypeKey
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -323,6 +324,77 @@ internal class CheckoutAnalyticsPerformerTest {
             ),
         )
         assertThat(params).doesNotContainKey("request_id")
+    }
+
+    @Test
+    fun `success after a next action reports the confirm request id`() = runScenario {
+        startReporting()
+        performer.onPaymentElementConfirmationStarted(PaymentSelection.GooglePay)
+        val result = successfulResult().copy(
+            metadata = MutableConfirmationMetadata().apply {
+                set(ConfirmRequestIdKey, "req_confirm")
+            }
+        )
+
+        confirmationHandler.state.value = ConfirmationHandler.State.Complete(result)
+
+        analyticsRequestExecutor.awaitAndAssertConfirmationRequest(
+            ExpectedEvent(
+                event = "checkout_elements.confirm.succeeded",
+                publishableKey = DEFAULT_METADATA_PUBLISHABLE_KEY,
+                params = mapOf("request_id" to "req_confirm"),
+            ),
+        )
+    }
+
+    @Test
+    fun `local failure after confirm reports the confirm request id`() = runScenario {
+        startReporting()
+        performer.onPaymentElementConfirmationStarted(PaymentSelection.GooglePay)
+
+        confirmationHandler.state.value = ConfirmationHandler.State.Complete(
+            ConfirmationHandler.Result.Failed(
+                cause = IllegalStateException("Intent has not attempted confirm."),
+                message = "Unable to confirm".resolvableString,
+                type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                metadata = MutableConfirmationMetadata().apply {
+                    set(ConfirmRequestIdKey, "req_confirm")
+                },
+            )
+        )
+
+        analyticsRequestExecutor.awaitAndAssertConfirmationRequest(
+            ExpectedEvent(
+                event = "checkout_elements.confirm.failed",
+                publishableKey = DEFAULT_METADATA_PUBLISHABLE_KEY,
+                params = mapOf("request_id" to "req_confirm"),
+            ),
+        )
+    }
+
+    @Test
+    fun `failing request id takes precedence over the confirm request id`() = runScenario {
+        startReporting()
+        performer.onPaymentElementConfirmationStarted(PaymentSelection.GooglePay)
+
+        confirmationHandler.state.value = ConfirmationHandler.State.Complete(
+            ConfirmationHandler.Result.Failed(
+                cause = APIException(requestId = "req_failing", message = "Failed"),
+                message = "Unable to confirm".resolvableString,
+                type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                metadata = MutableConfirmationMetadata().apply {
+                    set(ConfirmRequestIdKey, "req_confirm")
+                },
+            )
+        )
+
+        analyticsRequestExecutor.awaitAndAssertConfirmationRequest(
+            ExpectedEvent(
+                event = "checkout_elements.confirm.failed",
+                publishableKey = DEFAULT_METADATA_PUBLISHABLE_KEY,
+                params = mapOf("request_id" to "req_failing"),
+            ),
+        )
     }
 
     private fun assertFailureNotReported(type: ConfirmationHandler.Result.Failed.ErrorType) = runScenario {

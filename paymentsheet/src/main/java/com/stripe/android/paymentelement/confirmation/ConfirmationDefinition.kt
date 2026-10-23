@@ -187,6 +187,10 @@ internal interface ConfirmationDefinition<
              * The error type that occurred during the confirmation flow run.
              */
             val type: ConfirmationHandler.Result.Failed.ErrorType,
+            /**
+             * Metadata associated with the failed confirmation result
+             */
+            val metadata: ConfirmationMetadata = MutableConfirmationMetadata(),
         ) : Result
     }
 
@@ -232,6 +236,10 @@ internal interface ConfirmationDefinition<
              * The error type that occurred during the confirmation flow run.
              */
             val errorType: ConfirmationHandler.Result.Failed.ErrorType,
+            /**
+             * Metadata associated with the failed confirmation result
+             */
+            val metadata: ConfirmationMetadata = MutableConfirmationMetadata(),
         ) : Action<TLauncherArgs>
 
         /**

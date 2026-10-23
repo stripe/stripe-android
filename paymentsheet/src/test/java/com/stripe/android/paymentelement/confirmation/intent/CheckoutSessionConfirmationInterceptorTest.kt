@@ -287,6 +287,7 @@ class CheckoutSessionConfirmationInterceptorTest {
             response.testBodyFromFile("checkout-session-confirm.json") { json ->
                 json.getJSONObject("payment_intent").put("status", "requires_action")
             }
+            response.setHeader("Request-Id", "req_confirm")
         }
 
         val result = interceptNewPm()
@@ -297,6 +298,7 @@ class CheckoutSessionConfirmationInterceptorTest {
         val nextAction = launchAction.launcherArguments as IntentConfirmationDefinition.Args.NextAction
         assertThat(nextAction.deferredIntentConfirmationType)
             .isEqualTo(DeferredIntentConfirmationType.Server)
+        assertThat(nextAction.confirmRequestId).isEqualTo("req_confirm")
         assertThat(launchAction.receivesResultInProcess).isFalse()
     }
 
@@ -399,6 +401,7 @@ class CheckoutSessionConfirmationInterceptorTest {
     fun `intercept fails when confirm response has no intent`() = runScenario {
         networkRule.checkoutConfirm { response ->
             response.testBodyFromFile("checkout-session-init.json")
+            response.setHeader("Request-Id", "req_confirm")
         }
 
         val result = interceptNewPm()
@@ -408,6 +411,25 @@ class CheckoutSessionConfirmationInterceptorTest {
         val failAction = result as ConfirmationDefinition.Action.Fail
         assertThat(failAction.cause).isInstanceOf<IllegalStateException>()
         assertThat(failAction.errorType).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Payment)
+        assertThat(failAction.metadata[ConfirmRequestIdKey]).isEqualTo("req_confirm")
+    }
+
+    @Test
+    fun `intercept fails when confirm response intent has not attempted confirm`() = runScenario {
+        networkRule.checkoutConfirm { response ->
+            response.testBodyFromFile("checkout-session-confirm.json") { json ->
+                json.getJSONObject("payment_intent").put("status", "requires_payment_method")
+            }
+            response.setHeader("Request-Id", "req_confirm")
+        }
+
+        val result = interceptNewPm()
+
+        assertThat(result).isInstanceOf<ConfirmationDefinition.Action.Fail<IntentConfirmationDefinition.Args>>()
+
+        val failAction = result as ConfirmationDefinition.Action.Fail
+        assertThat(failAction.cause).isInstanceOf<IllegalStateException>()
+        assertThat(failAction.metadata[ConfirmRequestIdKey]).isEqualTo("req_confirm")
     }
 
     @Test
