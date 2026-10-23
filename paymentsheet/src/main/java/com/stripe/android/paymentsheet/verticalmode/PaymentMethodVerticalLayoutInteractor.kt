@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.verticalmode
 
 import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
@@ -43,7 +44,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 import com.stripe.android.R as PaymentsCoreR
@@ -97,6 +97,7 @@ internal interface PaymentMethodVerticalLayoutInteractor {
 }
 
 internal class DefaultPaymentMethodVerticalLayoutInteractor(
+    private val savedStateHandle: SavedStateHandle,
     private val paymentMethodMetadata: PaymentMethodMetadata,
     processing: StateFlow<Boolean>,
     savedPaymentMethodSelectionState: StateFlow<SavedPaymentMethodSelectionState>,
@@ -130,6 +131,8 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
 ) : PaymentMethodVerticalLayoutInteractor {
 
     companion object {
+        private const val EXPANDED_PAYMENT_METHODS_KEY = "expanded_payment_methods"
+
         fun create(
             viewModel: BaseSheetViewModel,
             paymentMethodMetadata: PaymentMethodMetadata,
@@ -150,6 +153,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 it is PaymentSheetScreen.VerticalMode
             }
             return DefaultPaymentMethodVerticalLayoutInteractor(
+                savedStateHandle = viewModel.savedStateHandle,
                 paymentMethodMetadata = paymentMethodMetadata,
                 processing = viewModel.processing,
                 savedPaymentMethodSelectionState = stateFlowOf(SavedPaymentMethodSelectionState.Idle),
@@ -264,7 +268,10 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         )
     }
 
-    private val expandedPaymentMethods = MutableStateFlow<Set<PaymentMethodCode>>(emptySet())
+    private val expandedPaymentMethods = savedStateHandle.getStateFlow(
+        EXPANDED_PAYMENT_METHODS_KEY,
+        arrayListOf<PaymentMethodCode>(),
+    ).mapAsStateFlow { it.toSet() }
 
     private val displayablePaymentMethods = combineAsStateFlow(
         paymentMethods,
@@ -589,7 +596,8 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                     paymentMethodMetadata
                 )
                 val shouldTransition = shouldTransitionToFormScreen(viewAction.selectedPaymentMethodCode)
-                expandedPaymentMethods.update { expanded ->
+                val expanded = expandedPaymentMethods.value
+                savedStateHandle[EXPANDED_PAYMENT_METHODS_KEY] = ArrayList(
                     if (!shouldTransition &&
                         viewAction.selectedPaymentMethodCode in PromotionSupportedPaymentMethods.supportedPaymentMethods
                     ) {
@@ -597,7 +605,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                     } else {
                         expanded - viewAction.selectedPaymentMethodCode
                     }
-                }
+                )
                 if (shouldTransition) {
                     reportFormShown(viewAction.selectedPaymentMethodCode)
                     transitionToFormScreen(viewAction.selectedPaymentMethodCode)
