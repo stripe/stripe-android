@@ -46,6 +46,7 @@ import com.stripe.android.paymentsheet.addresselement.StripeAutocompleteReposito
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
+import com.stripe.android.paymentsheet.analytics.PaymentSheetFirstFrameTrace
 import com.stripe.android.paymentsheet.analytics.persistBillingAnalytics
 import com.stripe.android.paymentsheet.analytics.reportBillingAddressCompleted
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
@@ -257,6 +258,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
+    private val firstFrameTrace = PaymentSheetFirstFrameTrace()
+
     private val confirmationHandler = confirmationHandlerFactory.create(viewModelScope)
 
     internal val contentVisible: StateFlow<Boolean> = confirmationHandler.state.mapAsStateFlow { it.contentVisible }
@@ -310,7 +313,11 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     isReloadingAfterProcessDeath = confirmationHandler.hasReloadedFromProcessDeath,
                     initializedViaCompose = args.initializedViaCompose,
                 )
-            )
+            ).also { result ->
+                if (result.isSuccess) {
+                    firstFrameTrace.onLoadComplete()
+                }
+            }
         }
 
         result.fold(
@@ -318,6 +325,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             onFailure = { handlePaymentSheetStateLoadFailure(it) },
         )
     }
+
+    internal fun onFirstContentDrawn() = firstFrameTrace.onDrawn()
 
     private fun handlePaymentSheetStateLoadFailure(error: Throwable) {
         setPaymentMethodMetadata(null)

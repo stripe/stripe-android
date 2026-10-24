@@ -1,0 +1,30 @@
+diff --git a/paymentsheet/src/main/java/com/stripe/android/paymentsheet/PaymentSheetViewModel.kt b/paymentsheet/src/main/java/com/stripe/android/paymentsheet/PaymentSheetViewModel.kt
+index dcdfe575e5..e3c66b38d8 100644
+--- a/paymentsheet/src/main/java/com/stripe/android/paymentsheet/PaymentSheetViewModel.kt
++++ b/paymentsheet/src/main/java/com/stripe/android/paymentsheet/PaymentSheetViewModel.kt
+@@ -74,6 +74,7 @@ import com.stripe.android.paymentsheet.viewmodels.PrimaryButtonUiStateMapper
+ import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
+ import com.stripe.android.uicore.utils.combineAsStateFlow
+ import com.stripe.android.uicore.utils.mapAsStateFlow
++import dagger.Lazy
+ import kotlinx.coroutines.CoroutineScope
+ import kotlinx.coroutines.Dispatchers
+ import kotlinx.coroutines.flow.MutableSharedFlow
+@@ -94,7 +95,7 @@ import kotlin.coroutines.CoroutineContext
+ internal class PaymentSheetViewModel @Inject internal constructor(
+     internal val args: PaymentSheetContract.Args,
+     eventReporter: EventReporter,
+-    private val paymentElementLoader: PaymentElementLoader,
++    private val paymentElementLoader: Lazy<PaymentElementLoader>,
+     savedPaymentMethodRepository: SavedPaymentMethodRepository,
+     private val logger: Logger,
+     @IOContext workContext: CoroutineContext,
+@@ -306,7 +307,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
+ 
+     private suspend fun loadPaymentSheetState() {
+         val result = withContext(workContext) {
+-            paymentElementLoader.load(
++            paymentElementLoader.get().load(
+                 initializationMode = args.initializationMode,
+                 integrationConfiguration = PaymentElementLoader.Configuration.PaymentSheet(args.config),
+                 metadata = PaymentElementLoader.Metadata(

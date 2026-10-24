@@ -1,0 +1,14 @@
+diff --git a/stripe-ui-core/src/main/java/com/stripe/android/uicore/elements/DropdownFieldUI.kt b/stripe-ui-core/src/main/java/com/stripe/android/uicore/elements/DropdownFieldUI.kt
+index 1c1ecf3abe..1d712e4f27 100644
+--- a/stripe-ui-core/src/main/java/com/stripe/android/uicore/elements/DropdownFieldUI.kt
++++ b/stripe-ui-core/src/main/java/com/stripe/android/uicore/elements/DropdownFieldUI.kt
+@@ -106,8 +106,7 @@ fun DropDown(
+ 
+     var expanded by remember { mutableStateOf(false) }
+     val error by controller.validationMessage.collectAsState()
+-    val selectedItemIndex by controller.selectedIndex.collectAsState()
+-    val selectedItemLabel = remember(selectedItemIndex) {
++    val selectedItemLabel = remember(controller, selectedIndex) {
+         controller.getSelectedItemLabel(selectedIndex)
+     }
+ 

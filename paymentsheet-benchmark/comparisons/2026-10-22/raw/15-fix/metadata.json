@@ -1,0 +1,9 @@
+{
+  "workload": "full",
+  "baseCommit": "008a103e5301811cebd29a84a99e95684d62c606",
+  "sourcePatchSha256": "b2c54fe037799443475029e054bb2da5a9ca9fd3783806e534f8547b64034310",
+  "apkSha256": "4840c293f087b919ab26a364496a30c151e2b9d8ebe87c4adcb796d2c81c9c76",
+  "collectedAtEpoch": 1792699358.006597,
+  "compilationMode": "Partial(BaselineProfileMode.Require)",
+  "iterations": 10
+}

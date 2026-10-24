@@ -1,0 +1,118 @@
+diff --git a/payments-ui-core/src/main/baseline-prof.txt b/payments-ui-core/src/main/baseline-prof.txt
+new file mode 100644
+index 0000000000..2be85ee58e
+--- /dev/null
++++ b/payments-ui-core/src/main/baseline-prof.txt
+@@ -0,0 +1,16 @@
++# First PaymentSheet presentation: activity, form composition, and field layout.
++# Includes nested classes and generated Compose/coroutine callbacks for these paths.
++# Keep these library rules scoped to first-presentation code; see paymentsheet/PERFORMANCE.md.
++
++Lcom/stripe/android/ui/core/FormUIKt**;
++HSPLcom/stripe/android/ui/core/FormUIKt**->**(**)**
++Lcom/stripe/android/ui/core/elements/BillingAddressElement**;
++HSPLcom/stripe/android/ui/core/elements/BillingAddressElement**->**(**)**
++Lcom/stripe/android/ui/core/elements/CardDetails**;
++HSPLcom/stripe/android/ui/core/elements/CardDetails**->**(**)**
++Lcom/stripe/android/ui/core/elements/CardNumber**;
++HSPLcom/stripe/android/ui/core/elements/CardNumber**->**(**)**
++Lcom/stripe/android/ui/core/elements/Cvc**;
++HSPLcom/stripe/android/ui/core/elements/Cvc**->**(**)**
++Lcom/stripe/android/ui/core/elements/DefaultCardNumberController**;
++HSPLcom/stripe/android/ui/core/elements/DefaultCardNumberController**->**(**)**
+diff --git a/paymentsheet/src/main/baseline-prof.txt b/paymentsheet/src/main/baseline-prof.txt
+new file mode 100644
+index 0000000000..764cdb7752
+--- /dev/null
++++ b/paymentsheet/src/main/baseline-prof.txt
+@@ -0,0 +1,54 @@
++# First PaymentSheet presentation: activity, form composition, and field layout.
++# Includes nested classes and generated Compose/coroutine callbacks for these paths.
++# Keep these library rules scoped to first-presentation code; see paymentsheet/PERFORMANCE.md.
++
++Lcom/stripe/android/common/ui/ElementsBottomSheetLayoutKt**;
++HSPLcom/stripe/android/common/ui/ElementsBottomSheetLayoutKt**->**(**)**
++Lcom/stripe/android/link/ui/LinkButtonKt**;
++HSPLcom/stripe/android/link/ui/LinkButtonKt**->**(**)**
++Lcom/stripe/android/link/ui/inline/LinkInlineSignupKt**;
++HSPLcom/stripe/android/link/ui/inline/LinkInlineSignupKt**->**(**)**
++Lcom/stripe/android/lpmfoundations/paymentmethod/PaymentMethodMetadata**;
++HSPLcom/stripe/android/lpmfoundations/paymentmethod/PaymentMethodMetadata**->**(**)**
++Lcom/stripe/android/lpmfoundations/paymentmethod/definitions/CardUiDefinitionFactory**;
++HSPLcom/stripe/android/lpmfoundations/paymentmethod/definitions/CardUiDefinitionFactory**->**(**)**
++Lcom/stripe/android/paymentsheet/DefaultFormDefinitionFactory**;
++HSPLcom/stripe/android/paymentsheet/DefaultFormDefinitionFactory**->**(**)**
++Lcom/stripe/android/paymentsheet/DefaultFormHelper**;
++HSPLcom/stripe/android/paymentsheet/DefaultFormHelper**->**(**)**
++Lcom/stripe/android/paymentsheet/LinkHandler**;
++HSPLcom/stripe/android/paymentsheet/LinkHandler**->**(**)**
++Lcom/stripe/android/paymentsheet/PaymentSheetActivity**;
++HSPLcom/stripe/android/paymentsheet/PaymentSheetActivity**->**(**)**
++Lcom/stripe/android/paymentsheet/PaymentSheetViewModel**;
++HSPLcom/stripe/android/paymentsheet/PaymentSheetViewModel**->**(**)**
++Lcom/stripe/android/paymentsheet/forms/CompleteFormFieldValueFilter**;
++HSPLcom/stripe/android/paymentsheet/forms/CompleteFormFieldValueFilter**->**(**)**
++Lcom/stripe/android/paymentsheet/forms/FormViewModel**;
++HSPLcom/stripe/android/paymentsheet/forms/FormViewModel**->**(**)**
++Lcom/stripe/android/paymentsheet/injection/DaggerPaymentSheetLauncherComponent**;
++HSPLcom/stripe/android/paymentsheet/injection/DaggerPaymentSheetLauncherComponent**->**(**)**
++Lcom/stripe/android/paymentsheet/navigation/PaymentSheetScreen**;
++HSPLcom/stripe/android/paymentsheet/navigation/PaymentSheetScreen**->**(**)**
++Lcom/stripe/android/paymentsheet/ui/AddPaymentMethodKt**;
++HSPLcom/stripe/android/paymentsheet/ui/AddPaymentMethodKt**->**(**)**
++Lcom/stripe/android/paymentsheet/ui/BaseSheetActivity**;
++HSPLcom/stripe/android/paymentsheet/ui/BaseSheetActivity**->**(**)**
++Lcom/stripe/android/paymentsheet/ui/DefaultAddPaymentMethodInteractor**;
++HSPLcom/stripe/android/paymentsheet/ui/DefaultAddPaymentMethodInteractor**->**(**)**
++Lcom/stripe/android/paymentsheet/ui/NewPaymentMethodTabLayoutUIKt**;
++HSPLcom/stripe/android/paymentsheet/ui/NewPaymentMethodTabLayoutUIKt**->**(**)**
++Lcom/stripe/android/paymentsheet/ui/PaymentElementKt**;
++HSPLcom/stripe/android/paymentsheet/ui/PaymentElementKt**->**(**)**
++Lcom/stripe/android/paymentsheet/ui/PaymentElementThemeKt**;
++HSPLcom/stripe/android/paymentsheet/ui/PaymentElementThemeKt**->**(**)**
++Lcom/stripe/android/paymentsheet/ui/PaymentMethodFormKt**;
++HSPLcom/stripe/android/paymentsheet/ui/PaymentMethodFormKt**->**(**)**
++Lcom/stripe/android/paymentsheet/ui/PaymentMethodIconKt**;
++HSPLcom/stripe/android/paymentsheet/ui/PaymentMethodIconKt**->**(**)**
++Lcom/stripe/android/paymentsheet/ui/PaymentSheetScreenKt**;
++HSPLcom/stripe/android/paymentsheet/ui/PaymentSheetScreenKt**->**(**)**
++Lcom/stripe/android/paymentsheet/ui/PrimaryButtonNewKt**;
++HSPLcom/stripe/android/paymentsheet/ui/PrimaryButtonNewKt**->**(**)**
++Lcom/stripe/android/paymentsheet/viewmodels/BaseSheetViewModel**;
++HSPLcom/stripe/android/paymentsheet/viewmodels/BaseSheetViewModel**->**(**)**
+diff --git a/stripe-ui-core/src/main/baseline-prof.txt b/stripe-ui-core/src/main/baseline-prof.txt
+new file mode 100644
+index 0000000000..b1942bfb25
+--- /dev/null
++++ b/stripe-ui-core/src/main/baseline-prof.txt
+@@ -0,0 +1,30 @@
++# First PaymentSheet presentation: activity, form composition, and field layout.
++# Includes nested classes and generated Compose/coroutine callbacks for these paths.
++# Keep these library rules scoped to first-presentation code; see paymentsheet/PERFORMANCE.md.
++
++Lcom/stripe/android/uicore/elements/AddressElement**;
++HSPLcom/stripe/android/uicore/elements/AddressElement**->**(**)**
++Lcom/stripe/android/uicore/elements/Country**;
++HSPLcom/stripe/android/uicore/elements/Country**->**(**)**
++Lcom/stripe/android/uicore/elements/Dropdown**;
++HSPLcom/stripe/android/uicore/elements/Dropdown**->**(**)**
++Lcom/stripe/android/uicore/elements/SectionElementUIKt**;
++HSPLcom/stripe/android/uicore/elements/SectionElementUIKt**->**(**)**
++Lcom/stripe/android/uicore/elements/SectionFieldElementUIKt**;
++HSPLcom/stripe/android/uicore/elements/SectionFieldElementUIKt**->**(**)**
++Lcom/stripe/android/uicore/elements/SectionUIKt**;
++HSPLcom/stripe/android/uicore/elements/SectionUIKt**->**(**)**
++Lcom/stripe/android/uicore/elements/SimpleTextFieldController**;
++HSPLcom/stripe/android/uicore/elements/SimpleTextFieldController**->**(**)**
++Lcom/stripe/android/uicore/elements/TextFieldUIKt**;
++HSPLcom/stripe/android/uicore/elements/TextFieldUIKt**->**(**)**
++Lcom/stripe/android/uicore/elements/bottomsheet/StripeBottomSheet**;
++HSPLcom/stripe/android/uicore/elements/bottomsheet/StripeBottomSheet**->**(**)**
++Lcom/stripe/android/uicore/elements/compat/CompatTextFieldKt**;
++HSPLcom/stripe/android/uicore/elements/compat/CompatTextFieldKt**->**(**)**
++Lcom/stripe/android/uicore/elements/compat/TextFieldLayoutKt**;
++HSPLcom/stripe/android/uicore/elements/compat/TextFieldLayoutKt**->**(**)**
++Lcom/stripe/android/uicore/elements/compat/TextFieldTransitionScope**;
++HSPLcom/stripe/android/uicore/elements/compat/TextFieldTransitionScope**->**(**)**
++Lcom/stripe/android/uicore/utils/StateFlow**;
++HSPLcom/stripe/android/uicore/utils/StateFlow**->**(**)**

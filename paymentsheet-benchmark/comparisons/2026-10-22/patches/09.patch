@@ -1,0 +1,44 @@
+diff --git a/paymentsheet/src/main/java/com/stripe/android/paymentelement/confirmation/linkinline/LinkInlineSignupConfirmationDefinition.kt b/paymentsheet/src/main/java/com/stripe/android/paymentelement/confirmation/linkinline/LinkInlineSignupConfirmationDefinition.kt
+index 16c8e14183..fa11c3c6c3 100644
+--- a/paymentsheet/src/main/java/com/stripe/android/paymentelement/confirmation/linkinline/LinkInlineSignupConfirmationDefinition.kt
++++ b/paymentsheet/src/main/java/com/stripe/android/paymentelement/confirmation/linkinline/LinkInlineSignupConfirmationDefinition.kt
+@@ -22,7 +22,7 @@ import kotlinx.parcelize.Parcelize
+ 
+ internal class LinkInlineSignupConfirmationDefinition(
+     private val linkConfigurationCoordinator: LinkConfigurationCoordinator,
+-    private val linkAnalyticsHelper: LinkAnalyticsHelper,
++    private val linkAnalyticsHelper: Lazy<LinkAnalyticsHelper>,
+     private val linkStore: LinkStore,
+ ) : ConfirmationDefinition<
+     LinkInlineSignupConfirmationOption,
+@@ -109,7 +109,7 @@ internal class LinkInlineSignupConfirmationDefinition(
+             )
+             AccountStatus.VerificationStarted,
+             is AccountStatus.NeedsVerification -> {
+-                linkAnalyticsHelper.onLinkPopupSkipped()
++                linkAnalyticsHelper.value.onLinkPopupSkipped()
+ 
+                 linkInlineSignupConfirmationOption.toOption()
+             }
+@@ -137,7 +137,7 @@ internal class LinkInlineSignupConfirmationDefinition(
+         userInput: UserInput,
+     ): PaymentMethodConfirmationOption {
+         if (userInput is UserInput.SignIn) {
+-            linkAnalyticsHelper.onLinkPopupSkipped()
++            linkAnalyticsHelper.value.onLinkPopupSkipped()
+ 
+             return linkInlineSignupConfirmationOption.toOption()
+         }
+diff --git a/paymentsheet/src/main/java/com/stripe/android/paymentelement/confirmation/linkinline/LinkInlineSignupConfirmationModule.kt b/paymentsheet/src/main/java/com/stripe/android/paymentelement/confirmation/linkinline/LinkInlineSignupConfirmationModule.kt
+index 40bd875d0a..73a3f30d6b 100644
+--- a/paymentsheet/src/main/java/com/stripe/android/paymentelement/confirmation/linkinline/LinkInlineSignupConfirmationModule.kt
++++ b/paymentsheet/src/main/java/com/stripe/android/paymentelement/confirmation/linkinline/LinkInlineSignupConfirmationModule.kt
+@@ -25,7 +25,7 @@ internal object LinkInlineSignupConfirmationModule {
+         return LinkInlineSignupConfirmationDefinition(
+             linkStore = linkStore,
+             linkConfigurationCoordinator = linkConfigurationCoordinator,
+-            linkAnalyticsHelper = linkAnalyticsComponentFactory.create().linkAnalyticsHelper,
++            linkAnalyticsHelper = lazy { linkAnalyticsComponentFactory.create().linkAnalyticsHelper },
+         )
+     }
+ }

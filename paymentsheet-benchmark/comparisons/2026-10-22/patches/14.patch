@@ -1,0 +1,35 @@
+diff --git a/stripe-ui-core/src/main/java/com/stripe/android/uicore/utils/StateFlowsCompose.kt b/stripe-ui-core/src/main/java/com/stripe/android/uicore/utils/StateFlowsCompose.kt
+index 526a3b93ff..4a413d2d49 100644
+--- a/stripe-ui-core/src/main/java/com/stripe/android/uicore/utils/StateFlowsCompose.kt
++++ b/stripe-ui-core/src/main/java/com/stripe/android/uicore/utils/StateFlowsCompose.kt
+@@ -47,17 +47,6 @@ private fun <T> produceState(
+ fun <T> StateFlow<T>.collectAsState(
+     context: CoroutineContext = EmptyCoroutineContext
+ ): State<T> {
+-    val exception = remember(this) {
+-        if (BuildConfig.DEBUG) {
+-            // Need the stack trace of where it was originally instantiated to better debug.
+-            // Because compose can re-enter composable functions from anywhere,
+-            // it can be hard to figure out what StateFlow is being emitted off the main thread.
+-            AssertionError()
+-        } else {
+-            // Exceptions are expensive to create. Only do so when it might be used.
+-            null
+-        }
+-    }
+     return produceState(
+         produceInitialValue = remember(this) { { value } },
+         key = this
+@@ -65,7 +54,11 @@ fun <T> StateFlow<T>.collectAsState(
+         if (context == EmptyCoroutineContext) {
+             collect {
+                 if (Looper.getMainLooper() != Looper.myLooper() && BuildConfig.DEBUG) {
+-                    throw AssertionError("Updates must be made on the main thread.", exception)
++                    // Capture a stack only on failure. A form subscribes to many field flows;
++                    // eagerly capturing a stack adds a stack walk to every initial subscription.
++                    throw AssertionError(
++                        "Updates must be made on the main thread. Flow: ${this@collectAsState.javaClass.name}"
++                    )
+                 }
+                 value = it
+             }

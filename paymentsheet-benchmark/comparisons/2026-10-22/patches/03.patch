@@ -1,0 +1,14 @@
+diff --git a/paymentsheet/src/main/java/com/stripe/android/paymentsheet/ui/AddPaymentMethodInteractor.kt b/paymentsheet/src/main/java/com/stripe/android/paymentsheet/ui/AddPaymentMethodInteractor.kt
+index 8c37355335..3175057956 100644
+--- a/paymentsheet/src/main/java/com/stripe/android/paymentsheet/ui/AddPaymentMethodInteractor.kt
++++ b/paymentsheet/src/main/java/com/stripe/android/paymentsheet/ui/AddPaymentMethodInteractor.kt
+@@ -176,6 +176,9 @@ internal class DefaultAddPaymentMethodInteractor(
+ 
+         coroutineScope.launch {
+             selectedPaymentMethodCode.collect { newSelectedPaymentMethodCode ->
++                if (newSelectedPaymentMethodCode == _state.value.selectedPaymentMethodCode) {
++                    return@collect
++                }
+                 val newFormArguments = createFormArguments(newSelectedPaymentMethodCode)
+                 val newFormElements = formElementsForCode(newSelectedPaymentMethodCode)
+                 val newUsBankAccountFormArguments = createUSBankAccountFormArguments(newSelectedPaymentMethodCode)

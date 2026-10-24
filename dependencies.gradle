@@ -25,6 +25,8 @@ ext.versions = [
         androidxPreference          : '1.2.1',
         androidxRecyclerview        : '1.4.0',
         androidxWebkit              : '1.15.0',
+        benchmark                   : '1.5.0',
+        profileInstaller            : '1.4.1',
         binaryCompatibilityValidator: '0.18.1',
         cameraX                     : '1.5.3',
         dagger                      : '2.58',
@@ -204,6 +206,7 @@ ext.libs = [
 ]
 
 ext.testLibs = [
+        macrobenchmark              : "androidx.benchmark:benchmark-macro-junit4:${versions.benchmark}",
         androidx             : [
                 archCore   : "androidx.arch.core:core-testing:${versions.androidxArchCore}",
                 junit      : "androidx.test.ext:junit:${versions.androidTestJunit}",

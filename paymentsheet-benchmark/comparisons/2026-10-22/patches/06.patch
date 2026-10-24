@@ -1,0 +1,104 @@
+diff --git a/paymentsheet/src/main/java/com/stripe/android/paymentsheet/PaymentSheetViewModel.kt b/paymentsheet/src/main/java/com/stripe/android/paymentsheet/PaymentSheetViewModel.kt
+index dcdfe575e5..0cb6480297 100644
+--- a/paymentsheet/src/main/java/com/stripe/android/paymentsheet/PaymentSheetViewModel.kt
++++ b/paymentsheet/src/main/java/com/stripe/android/paymentsheet/PaymentSheetViewModel.kt
+@@ -23,6 +23,7 @@ import com.stripe.android.core.Logger
+ import com.stripe.android.core.exception.StripeException
+ import com.stripe.android.core.injection.IOContext
+ import com.stripe.android.core.injection.ViewModelScope
++import com.stripe.android.core.model.CountryUtils
+ import com.stripe.android.core.strings.ResolvableString
+ import com.stripe.android.core.utils.requireApplication
+ import com.stripe.android.googlepaylauncher.GooglePayEnvironment
+@@ -76,6 +77,7 @@ import com.stripe.android.uicore.utils.combineAsStateFlow
+ import com.stripe.android.uicore.utils.mapAsStateFlow
+ import kotlinx.coroutines.CoroutineScope
+ import kotlinx.coroutines.Dispatchers
++import kotlinx.coroutines.coroutineScope
+ import kotlinx.coroutines.flow.MutableSharedFlow
+ import kotlinx.coroutines.flow.MutableStateFlow
+ import kotlinx.coroutines.flow.SharedFlow
+@@ -85,6 +87,7 @@ import kotlinx.coroutines.flow.filterNotNull
+ import kotlinx.coroutines.flow.first
+ import kotlinx.coroutines.launch
+ import kotlinx.coroutines.withContext
++import java.util.Locale
+ import javax.inject.Inject
+ import javax.inject.Singleton
+ import kotlin.coroutines.CoroutineContext
+@@ -306,16 +309,19 @@ internal class PaymentSheetViewModel @Inject internal constructor(
+ 
+     private suspend fun loadPaymentSheetState() {
+         val result = withContext(workContext) {
+-            paymentElementLoader.load(
+-                initializationMode = args.initializationMode,
+-                integrationConfiguration = PaymentElementLoader.Configuration.PaymentSheet(args.config),
+-                metadata = PaymentElementLoader.Metadata(
+-                    isReloadingAfterProcessDeath = confirmationHandler.hasReloadedFromProcessDeath,
+-                    initializedViaCompose = args.initializedViaCompose,
+-                )
+-            ).also { result ->
+-                if (result.isSuccess) {
+-                    firstFrameTrace.onLoadComplete()
++            coroutineScope {
++                launch { CountryUtils.getOrderedCountries(Locale.getDefault()) }
++                paymentElementLoader.load(
++                    initializationMode = args.initializationMode,
++                    integrationConfiguration = PaymentElementLoader.Configuration.PaymentSheet(args.config),
++                    metadata = PaymentElementLoader.Metadata(
++                        isReloadingAfterProcessDeath = confirmationHandler.hasReloadedFromProcessDeath,
++                        initializedViaCompose = args.initializedViaCompose,
++                    )
++                ).also { result ->
++                    if (result.isSuccess) {
++                        firstFrameTrace.onLoadComplete()
++                    }
+                 }
+             }
+         }
+diff --git a/stripe-core/src/main/java/com/stripe/android/core/model/CountryUtils.kt b/stripe-core/src/main/java/com/stripe/android/core/model/CountryUtils.kt
+index 77e6515529..d6ff203f62 100644
+--- a/stripe-core/src/main/java/com/stripe/android/core/model/CountryUtils.kt
++++ b/stripe-core/src/main/java/com/stripe/android/core/model/CountryUtils.kt
+@@ -302,23 +302,22 @@ object CountryUtils {
+         return CARD_POSTAL_CODE_COUNTRIES.contains(countryCode.value)
+     }
+ 
++    // Publish the locale and its countries together when initialization runs on a worker thread.
+     @Volatile
+-    private var cachedCountriesLocale: Locale? = null
+-
+-    @Volatile
+-    private var cachedOrderedLocalizedCountries: List<Country> = emptyList()
++    private var cachedCountries: Pair<Locale, List<Country>>? = null
+ 
+     /**
+      * Load, sort and cache the list of localized countries, putting the current locale's country
+      * at the top of the list.
+      */
+     private fun getSortedLocalizedCountries(currentLocale: Locale): List<Country> {
+-        return if (currentLocale == cachedCountriesLocale) {
+-            cachedOrderedLocalizedCountries
++        val cached = cachedCountries
++        return if (cached != null && currentLocale == cached.first) {
++            cached.second
+         } else {
+             val localizedCountries = localizedCountries(currentLocale)
+             val collator = Collator.getInstance(currentLocale)
+-            cachedOrderedLocalizedCountries = listOfNotNull(
++            val orderedCountries = listOfNotNull(
+                 localizedCountries.firstOrNull {
+                     it.code == currentLocale.getCountryCode()
+                 }
+@@ -328,9 +327,8 @@ object CountryUtils {
+                     .sortedWith { c1, c2 -> collator.compare(c1.name, c2.name) }
+             )
+ 
+-            cachedCountriesLocale = currentLocale
+-
+-            cachedOrderedLocalizedCountries
++            cachedCountries = currentLocale to orderedCountries
++            orderedCountries
+         }
+     }
+ }

@@ -1,0 +1,23 @@
+apply from: configs.androidApplication
+
+android {
+    defaultConfig {
+        applicationId 'com.stripe.android.paymentsheet.benchmarkapp'
+        minSdkVersion 31
+        versionCode 1
+    }
+    // Preserve system animations for frame measurements.
+    testOptions.animationsDisabled = false
+}
+
+androidComponents {
+    beforeVariants(selector().withBuildType('debug')) { variant ->
+        variant.enable = false
+    }
+}
+
+dependencies {
+    implementation project(':paymentsheet')
+    implementation libs.androidx.activity
+    implementation "androidx.profileinstaller:profileinstaller:${versions.profileInstaller}"
+}

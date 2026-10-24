@@ -34,6 +34,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
@@ -202,7 +203,16 @@ internal fun PaymentSheetScreenContent(
         currentScreen.title(isCompleteFlow = type == Complete, isWalletEnabled = actualWalletsState != null)
     }.collectAsState()
 
-    Column(modifier) {
+    val contentModifier = if (viewModel is PaymentSheetViewModel && currentScreen != PaymentSheetScreen.Loading) {
+        modifier.drawWithContent {
+            drawContent()
+            viewModel.onFirstContentDrawn()
+        }
+    } else {
+        modifier
+    }
+
+    Column(contentModifier) {
         PaymentSheetContent(
             viewModel = viewModel,
             headerText = headerText,

@@ -1,0 +1,584 @@
+[
+  {
+    "label": "02-fix",
+    "workload": "hidden",
+    "apkSha256": "8e537b65b03969a461bb874f53e16a443851e364eeff09586c2a69d69fc812e6",
+    "archiveFiles": [
+      {
+        "path": "02-fix/benchmarkData.json",
+        "bytes": 41900,
+        "sha256": "6b34ed4aa709ea860a0225b9b6f60bd44229462ef2aef7a09aaa4d5d77170fe6"
+      },
+      {
+        "path": "02-fix/metadata.json",
+        "bytes": 384,
+        "sha256": "1233cd0842519fd16bf42ee2d5a7ff0982205da0b3928d9baba4e6b16b830484"
+      },
+      {
+        "path": "02-fix/target.apk",
+        "bytes": 9482632,
+        "sha256": "8e537b65b03969a461bb874f53e16a443851e364eeff09586c2a69d69fc812e6"
+      },
+      {
+        "path": "02-fix/production.patch",
+        "bytes": 6259,
+        "sha256": "780e2e4b32ffc0e14ed2ac49071d2fbb0acfa57bcb5989f94fb3fb462453569c"
+      },
+      {
+        "path": "02-fix/gradle.log",
+        "bytes": 48505,
+        "sha256": "9196bb52b83294ee4574e5d6f2b69ed3d06bcd2d6c7fa7416384670685d94886"
+      },
+      {
+        "path": "02-fix/build.log",
+        "bytes": 46461,
+        "sha256": "99fdfaaaa33ac76381b18c9c75d7fa10644bc70f4485dde5be1ac28b7870c71b"
+      },
+      {
+        "path": "02-fix/FirstPresentationBenchmark_coldWithBaselineProfile_iter000_2026-10-23-12-30-14.perfetto-trace",
+        "bytes": 1753790,
+        "sha256": "76a402ff5efb6cdbb5cc9fd8e1f045f08cabd25c11deb24cdc286c00c72c5bc9"
+      },
+      {
+        "path": "02-fix/FirstPresentationBenchmark_coldWithBaselineProfile_iter001_2026-10-23-12-30-17.perfetto-trace",
+        "bytes": 1184384,
+        "sha256": "7bbc6b39cb607ec3d2bedfdbdff103fb65256accf76d3cdd2c43f9eec397d748"
+      },
+      {
+        "path": "02-fix/FirstPresentationBenchmark_coldWithBaselineProfile_iter002_2026-10-23-12-30-21.perfetto-trace",
+        "bytes": 1173514,
+        "sha256": "7af5a9a9183ef79e9a13d787f414bca052b2d3176590dbd3e668b57e820d9030"
+      },
+      {
+        "path": "02-fix/FirstPresentationBenchmark_coldWithBaselineProfile_iter003_2026-10-23-12-30-25.perfetto-trace",
+        "bytes": 1835141,
+        "sha256": "a4575b3b39336e815a97fc52e102cf42980959785a38585108331267fa8c296f"
+      },
+      {
+        "path": "02-fix/FirstPresentationBenchmark_coldWithBaselineProfile_iter004_2026-10-23-12-30-29.perfetto-trace",
+        "bytes": 1770898,
+        "sha256": "acccbafe5f8c7301b105eca8bfe1b42f02bc51b5b1c418856c35a2fab57bb448"
+      },
+      {
+        "path": "02-fix/FirstPresentationBenchmark_coldWithBaselineProfile_iter005_2026-10-23-12-30-33.perfetto-trace",
+        "bytes": 1486577,
+        "sha256": "40e813d42edb25ff0352d93b7d00124e6e30ea44cd2a637cb95e919dffcb4d29"
+      },
+      {
+        "path": "02-fix/FirstPresentationBenchmark_coldWithBaselineProfile_iter006_2026-10-23-12-30-37.perfetto-trace",
+        "bytes": 1406721,
+        "sha256": "d75f20ce067aa56a4e1f048655e903d991a9083a9d6045bf828f5f83c5b378f0"
+      },
+      {
+        "path": "02-fix/FirstPresentationBenchmark_coldWithBaselineProfile_iter007_2026-10-23-12-30-40.perfetto-trace",
+        "bytes": 1380960,
+        "sha256": "e1adecb127918ad682b33327efdcdee1e2398de8b6521aecb446736193a653be"
+      },
+      {
+        "path": "02-fix/FirstPresentationBenchmark_coldWithBaselineProfile_iter008_2026-10-23-12-30-43.perfetto-trace",
+        "bytes": 1236636,
+        "sha256": "a685fab673e12f513ba5de223594fb6fb9b03329cc4fa738b7fe2ad286c3f088"
+      },
+      {
+        "path": "02-fix/FirstPresentationBenchmark_coldWithBaselineProfile_iter009_2026-10-23-12-30-47.perfetto-trace",
+        "bytes": 1081972,
+        "sha256": "07aa180528bca9335e870d125bf924cd2a7270eed9dccb3fe2ad5df631f176b3"
+      },
+      {
+        "path": "02-fix/logcat-com.stripe.android.paymentsheet.benchmark.FirstPresentationBenchmark-coldWithBaselineProfile.txt",
+        "bytes": 1050820,
+        "sha256": "81e011882078d3207ecaa53383d08c69fa20e59f62ff704dc41550f2c6672e3a"
+      },
+      {
+        "path": "02-fix/TEST-pixel2api33-_paymentsheet-benchmark-.xml",
+        "bytes": 588,
+        "sha256": "9ebbbf9f65beccdefc78aeef627e8064c549c8eb8190922043c9fd856cbf40f5"
+      }
+    ]
+  },
+  {
+    "label": "02-baseline",
+    "workload": "hidden",
+    "apkSha256": "77e0f286dd4793ee21ee5e426ad0548c5a535fe6009eda351a7dc3506581c6d1",
+    "archiveFiles": [
+      {
+        "path": "02-baseline/benchmarkData.json",
+        "bytes": 41394,
+        "sha256": "f070fa376587dd1db077e930f574f9b7876572bcd5a3e703cc6f2fb52522670f"
+      },
+      {
+        "path": "02-baseline/metadata.json",
+        "bytes": 384,
+        "sha256": "74e014d8b65681274ed1e080f20eb6a32802e680ad79ef1224fcd1dc14493199"
+      },
+      {
+        "path": "02-baseline/target.apk",
+        "bytes": 9482632,
+        "sha256": "77e0f286dd4793ee21ee5e426ad0548c5a535fe6009eda351a7dc3506581c6d1"
+      },
+      {
+        "path": "02-baseline/production.patch",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "02-baseline/gradle.log",
+        "bytes": 46814,
+        "sha256": "242d1b2780cec11260d2fe1d7c101bcbba8f297ed9d04eddc3e3de070dccdbf3"
+      },
+      {
+        "path": "02-baseline/build.log",
+        "bytes": 46400,
+        "sha256": "7715d5ae44901ead24ee1a44c21c871154bd4ac640fc05d4c20ed6bb2189f347"
+      },
+      {
+        "path": "02-baseline/FirstPresentationBenchmark_coldWithBaselineProfile_iter000_2026-10-23-12-33-33.perfetto-trace",
+        "bytes": 1594720,
+        "sha256": "ba95c312a437a08604b36d376ad15fafe964d20c15ec1246403e453b1c27304e"
+      },
+      {
+        "path": "02-baseline/FirstPresentationBenchmark_coldWithBaselineProfile_iter001_2026-10-23-12-33-37.perfetto-trace",
+        "bytes": 1500365,
+        "sha256": "edcecbb4cbc569828d44baeeeb81f41d70e8629bebef0552259a720c9d91d67e"
+      },
+      {
+        "path": "02-baseline/FirstPresentationBenchmark_coldWithBaselineProfile_iter002_2026-10-23-12-33-39.perfetto-trace",
+        "bytes": 1282583,
+        "sha256": "3268cf0b12e6960f70b96d6fd204753e851b123be948045e6460a0a8b7d7bf3e"
+      },
+      {
+        "path": "02-baseline/FirstPresentationBenchmark_coldWithBaselineProfile_iter003_2026-10-23-12-33-43.perfetto-trace",
+        "bytes": 2398194,
+        "sha256": "d594006e418e2ed819591d15cdb1225ef302cdcc802c37de562a363202ef9129"
+      },
+      {
+        "path": "02-baseline/FirstPresentationBenchmark_coldWithBaselineProfile_iter004_2026-10-23-12-33-48.perfetto-trace",
+        "bytes": 2143032,
+        "sha256": "f772de6b0ffa7abf08f95a64d7c7fe9a26e1eb18b8f6cccad51d0f703d41babe"
+      },
+      {
+        "path": "02-baseline/FirstPresentationBenchmark_coldWithBaselineProfile_iter005_2026-10-23-12-33-52.perfetto-trace",
+        "bytes": 1155030,
+        "sha256": "d4ae32179092d86930e14ba71ddf80c846a1f236902ad2d1803fbf332ec41cbb"
+      },
+      {
+        "path": "02-baseline/FirstPresentationBenchmark_coldWithBaselineProfile_iter006_2026-10-23-12-33-55.perfetto-trace",
+        "bytes": 1207710,
+        "sha256": "3b8667ba65e8523f7877c703d005de9ab85af1bd7c003855da68d58376e54af2"
+      },
+      {
+        "path": "02-baseline/FirstPresentationBenchmark_coldWithBaselineProfile_iter007_2026-10-23-12-34-00.perfetto-trace",
+        "bytes": 1399835,
+        "sha256": "2f92e34e9b20a4214b233db6378e3a8ad9253836b4b0761bb623baedfff69f36"
+      },
+      {
+        "path": "02-baseline/FirstPresentationBenchmark_coldWithBaselineProfile_iter008_2026-10-23-12-34-04.perfetto-trace",
+        "bytes": 1236443,
+        "sha256": "6aca3c5d626db2ba99a036347ae56ca3afda8edb56acbb334c3d5e2894aeaf03"
+      },
+      {
+        "path": "02-baseline/FirstPresentationBenchmark_coldWithBaselineProfile_iter009_2026-10-23-12-34-08.perfetto-trace",
+        "bytes": 1492046,
+        "sha256": "256ae744cee1db2adf1acc0b4b062148b660dc515c14fa4da7f107e16f577146"
+      },
+      {
+        "path": "02-baseline/logcat-com.stripe.android.paymentsheet.benchmark.FirstPresentationBenchmark-coldWithBaselineProfile.txt",
+        "bytes": 1047736,
+        "sha256": "219ebe1557ac52af520e6d745f8162a4339896f277e214922a918c8c5d761c79"
+      },
+      {
+        "path": "02-baseline/TEST-pixel2api33-_paymentsheet-benchmark-.xml",
+        "bytes": 588,
+        "sha256": "70f180f6e5aef75ad8bce7a0952553c32efe67461f475b898b0b7f85ce04f2d7"
+      }
+    ]
+  },
+  {
+    "label": "04-fix",
+    "workload": "full",
+    "apkSha256": "e8a8593f958371d412bbd8e78712f14f9baf43dde33c5447353a6086fefead03",
+    "archiveFiles": [
+      {
+        "path": "04-fix/benchmarkData.json",
+        "bytes": 39370,
+        "sha256": "347651606e907cd3a788fae8adc0cd024009cdf789f14355e219831ea1646f03"
+      },
+      {
+        "path": "04-fix/metadata.json",
+        "bytes": 381,
+        "sha256": "b36fd3eba8c14b2ca053205d96fe6d277140d096cd4c3d251313e708e062f71d"
+      },
+      {
+        "path": "04-fix/target.apk",
+        "bytes": 9482632,
+        "sha256": "e8a8593f958371d412bbd8e78712f14f9baf43dde33c5447353a6086fefead03"
+      },
+      {
+        "path": "04-fix/production.patch",
+        "bytes": 2401,
+        "sha256": "563275639fd9d12276b77982106557d8d42854a3e9bc6ea25a59184f3511ee5a"
+      },
+      {
+        "path": "04-fix/gradle.log",
+        "bytes": 48221,
+        "sha256": "f6d4e3c22a8c6ec25cec9d7d1b28d8bb8d8bda0a6518a37ee6a1a0f666ffdb97"
+      },
+      {
+        "path": "04-fix/build.log",
+        "bytes": 46487,
+        "sha256": "790fab4b260e3c12d01afc4c4335fdb7b280bc6614ac97aff396b533a5080089"
+      },
+      {
+        "path": "04-fix/FirstPresentationBenchmark_coldWithBaselineProfile_iter000_2026-10-23-12-37-31.perfetto-trace",
+        "bytes": 1601767,
+        "sha256": "2f74254a9ec82a4246f84686210920bfc6158cb3cb524e18f6a1cde56f1e31b6"
+      },
+      {
+        "path": "04-fix/FirstPresentationBenchmark_coldWithBaselineProfile_iter001_2026-10-23-12-37-34.perfetto-trace",
+        "bytes": 1258338,
+        "sha256": "b6bbe03d14248a92ce50cab8578b5d7b800d31aad9921c0227926d54ddd12cd3"
+      },
+      {
+        "path": "04-fix/FirstPresentationBenchmark_coldWithBaselineProfile_iter002_2026-10-23-12-37-38.perfetto-trace",
+        "bytes": 1184967,
+        "sha256": "7405cf51bd2d54715b6d217717a2f3b128dc4cc735abfd6e0a5ea6d0f6da69ec"
+      },
+      {
+        "path": "04-fix/FirstPresentationBenchmark_coldWithBaselineProfile_iter003_2026-10-23-12-37-42.perfetto-trace",
+        "bytes": 2045867,
+        "sha256": "36f786678e7fea009ce4cc474f87c1f8226cbd4b7f01c34b2db3e4f0f94e3c9e"
+      },
+      {
+        "path": "04-fix/FirstPresentationBenchmark_coldWithBaselineProfile_iter004_2026-10-23-12-37-46.perfetto-trace",
+        "bytes": 1469340,
+        "sha256": "2d15169f4e366614e824f1b3c9693caa6d4b3ad4910bbad1573fb43d33992faf"
+      },
+      {
+        "path": "04-fix/FirstPresentationBenchmark_coldWithBaselineProfile_iter005_2026-10-23-12-37-49.perfetto-trace",
+        "bytes": 1228299,
+        "sha256": "d9705ae0d13fb2334bd0630662526f23137e196285b669a068c4064d42096cfb"
+      },
+      {
+        "path": "04-fix/FirstPresentationBenchmark_coldWithBaselineProfile_iter006_2026-10-23-12-37-52.perfetto-trace",
+        "bytes": 1213997,
+        "sha256": "607e9a2aaeb39e5e15d0a9149be555fc1fe18af02f3ffa31309babf154d78097"
+      },
+      {
+        "path": "04-fix/FirstPresentationBenchmark_coldWithBaselineProfile_iter007_2026-10-23-12-37-56.perfetto-trace",
+        "bytes": 1238102,
+        "sha256": "1ca53cc4effe5a806f0dd5a4e1be3b1c54063ad5663eba116cd3f7f46102dfb0"
+      },
+      {
+        "path": "04-fix/FirstPresentationBenchmark_coldWithBaselineProfile_iter008_2026-10-23-12-37-59.perfetto-trace",
+        "bytes": 1247464,
+        "sha256": "d475af25019b24e51db16376d937525422be96997022574e730d4a98fe9b1d06"
+      },
+      {
+        "path": "04-fix/FirstPresentationBenchmark_coldWithBaselineProfile_iter009_2026-10-23-12-38-03.perfetto-trace",
+        "bytes": 1200784,
+        "sha256": "74add2d07d6c02c81607f870d999ef25b19a8def9465f58a59408af15c2e226a"
+      },
+      {
+        "path": "04-fix/logcat-com.stripe.android.paymentsheet.benchmark.FirstPresentationBenchmark-coldWithBaselineProfile.txt",
+        "bytes": 1057939,
+        "sha256": "542c43346cca20d75d0fb13c69186db749cabff5828d0b9a3ef37e62bb60b98f"
+      },
+      {
+        "path": "04-fix/TEST-pixel2api33-_paymentsheet-benchmark-.xml",
+        "bytes": 588,
+        "sha256": "2c514d3afc1f2d91f97986563c81d349c9c746db10f54750835f1efe08aea383"
+      }
+    ]
+  },
+  {
+    "label": "04-baseline",
+    "workload": "full",
+    "apkSha256": "77e0f286dd4793ee21ee5e426ad0548c5a535fe6009eda351a7dc3506581c6d1",
+    "archiveFiles": [
+      {
+        "path": "04-baseline/benchmarkData.json",
+        "bytes": 33148,
+        "sha256": "a5be9fff1dc1110653e291bfa76762b55eacbe5d7c2a98d9c8b48f81d5f2f452"
+      },
+      {
+        "path": "04-baseline/metadata.json",
+        "bytes": 381,
+        "sha256": "4becd153fa0e01efb9e83cda2097f16aebaca43a059f5b3f8e83d8a7e51ab749"
+      },
+      {
+        "path": "04-baseline/target.apk",
+        "bytes": 9482632,
+        "sha256": "77e0f286dd4793ee21ee5e426ad0548c5a535fe6009eda351a7dc3506581c6d1"
+      },
+      {
+        "path": "04-baseline/production.patch",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "04-baseline/gradle.log",
+        "bytes": 46814,
+        "sha256": "8c65feed3d72024a9b13561005a897cf194298d78f10769e6d369aa48ead10d3"
+      },
+      {
+        "path": "04-baseline/build.log",
+        "bytes": 46487,
+        "sha256": "43aa7803f6b6b73402ca43c42633973320f622d26f043be88f4523353a835a9c"
+      },
+      {
+        "path": "04-baseline/FirstPresentationBenchmark_coldWithBaselineProfile_iter000_2026-10-23-12-41-55.perfetto-trace",
+        "bytes": 1322704,
+        "sha256": "586eee899d6ef810c233e29ddb4cf23553e13d84f7d2fa3b79aac3158842bf79"
+      },
+      {
+        "path": "04-baseline/FirstPresentationBenchmark_coldWithBaselineProfile_iter001_2026-10-23-12-41-58.perfetto-trace",
+        "bytes": 1213833,
+        "sha256": "7bad69f466e8edd4331a7a4a5b1532c0331cf7744ed2bd66a5ea497f28d5f838"
+      },
+      {
+        "path": "04-baseline/FirstPresentationBenchmark_coldWithBaselineProfile_iter002_2026-10-23-12-42-02.perfetto-trace",
+        "bytes": 1280510,
+        "sha256": "ba9ac7af6b7149e3b1a3bc0e590d4c6592c8f195b89e1b9d8fa1f9ec487277bd"
+      },
+      {
+        "path": "04-baseline/FirstPresentationBenchmark_coldWithBaselineProfile_iter003_2026-10-23-12-42-06.perfetto-trace",
+        "bytes": 2027879,
+        "sha256": "10042973480e8ab1d728c1ad20de634b8628905e75f5356435f7d8805eb6cced"
+      },
+      {
+        "path": "04-baseline/FirstPresentationBenchmark_coldWithBaselineProfile_iter004_2026-10-23-12-42-11.perfetto-trace",
+        "bytes": 2394255,
+        "sha256": "fd4a50c5fba5ddc563d5c755489add431761c5ea73dbf7a8512630afe3cacfc1"
+      },
+      {
+        "path": "04-baseline/FirstPresentationBenchmark_coldWithBaselineProfile_iter005_2026-10-23-12-42-14.perfetto-trace",
+        "bytes": 1139295,
+        "sha256": "bf2caca10021ec4e3c00874ab1ab7fc966c9c03001d6051594f2d95a899962a4"
+      },
+      {
+        "path": "04-baseline/FirstPresentationBenchmark_coldWithBaselineProfile_iter006_2026-10-23-12-42-18.perfetto-trace",
+        "bytes": 1290073,
+        "sha256": "193a7ab9ff9226b2bb258e21158a4c32b44fc06bf93e6d2347232367042dc85c"
+      },
+      {
+        "path": "04-baseline/FirstPresentationBenchmark_coldWithBaselineProfile_iter007_2026-10-23-12-42-22.perfetto-trace",
+        "bytes": 1339162,
+        "sha256": "4673e1f9f46f64ebc3521b8e94e435558d2fd9770fc8a3407996b0f9420bfc01"
+      },
+      {
+        "path": "04-baseline/FirstPresentationBenchmark_coldWithBaselineProfile_iter008_2026-10-23-12-42-26.perfetto-trace",
+        "bytes": 1254862,
+        "sha256": "33f689ec7fcab31a61307a992c5d30453ab719baa85ce18e273e1e6cea7c1b24"
+      },
+      {
+        "path": "04-baseline/FirstPresentationBenchmark_coldWithBaselineProfile_iter009_2026-10-23-12-42-30.perfetto-trace",
+        "bytes": 1357750,
+        "sha256": "1688acf98691cd320e46b8075d9818691c5109fc21ac6d6b9cab989fd21758ee"
+      },
+      {
+        "path": "04-baseline/logcat-com.stripe.android.paymentsheet.benchmark.FirstPresentationBenchmark-coldWithBaselineProfile.txt",
+        "bytes": 1047411,
+        "sha256": "30d3af1abcfa547435c9ffc39cd0f71417988740e110a79b2115e65c83cdf637"
+      },
+      {
+        "path": "04-baseline/TEST-pixel2api33-_paymentsheet-benchmark-.xml",
+        "bytes": 588,
+        "sha256": "20d6ccb6d9896c8cece357422288c39626cb5f3b9094b0fb2405fbdbe40a11b0"
+      }
+    ]
+  },
+  {
+    "label": "16-fix",
+    "workload": "captcha",
+    "apkSha256": "c9148ca9093ce22050c8669280f597f5ec405f904e7570ed3d51eb20e177a28c",
+    "archiveFiles": [
+      {
+        "path": "16-fix/benchmarkData.json",
+        "bytes": 25041,
+        "sha256": "853a83844105c46160b7313b021ae363fd7f2843a3110948b60695576422c0b3"
+      },
+      {
+        "path": "16-fix/metadata.json",
+        "bytes": 385,
+        "sha256": "d58108ab97a954b89d70cb988a237b6d6a6ae037009a1458ae25d3285e3533ca"
+      },
+      {
+        "path": "16-fix/target.apk",
+        "bytes": 9482632,
+        "sha256": "c9148ca9093ce22050c8669280f597f5ec405f904e7570ed3d51eb20e177a28c"
+      },
+      {
+        "path": "16-fix/production.patch",
+        "bytes": 4862,
+        "sha256": "ff1cd277eee35b9f4aef9e132e12d68d1943275e522fb94ce7d995a3d2d3ac09"
+      },
+      {
+        "path": "16-fix/gradle.log",
+        "bytes": 48450,
+        "sha256": "7cf93c51a9499d10da70744096f7357cab037c2d6947a9939eeb99bb2e0ca669"
+      },
+      {
+        "path": "16-fix/build.log",
+        "bytes": 47232,
+        "sha256": "602ac96461dbe15df3628eaafcd2ff7952eaa965b56d4ece271eb92259c0851e"
+      },
+      {
+        "path": "16-fix/FirstPresentationBenchmark_coldWithBaselineProfile_iter000_2026-10-23-12-45-46.perfetto-trace",
+        "bytes": 1557772,
+        "sha256": "a16682d8eb7b9b310207dd1b10af816e6c869df77d3ea2da380ab3267ea7e827"
+      },
+      {
+        "path": "16-fix/FirstPresentationBenchmark_coldWithBaselineProfile_iter001_2026-10-23-12-45-51.perfetto-trace",
+        "bytes": 1711199,
+        "sha256": "48c804bbd34c45abcecc6061a7356e009b293de1694e9fdd66eb823a5295a335"
+      },
+      {
+        "path": "16-fix/FirstPresentationBenchmark_coldWithBaselineProfile_iter002_2026-10-23-12-45-55.perfetto-trace",
+        "bytes": 1303672,
+        "sha256": "80b04862cd26cfc124cded905bf5ec28fd0f04ddbdc09c266364384e063cd9b1"
+      },
+      {
+        "path": "16-fix/FirstPresentationBenchmark_coldWithBaselineProfile_iter003_2026-10-23-12-45-59.perfetto-trace",
+        "bytes": 1269421,
+        "sha256": "0aad3838d22a26a74aa7bd3a4ae5860886397d99bce3377e50b84342bc5f54ed"
+      },
+      {
+        "path": "16-fix/FirstPresentationBenchmark_coldWithBaselineProfile_iter004_2026-10-23-12-46-04.perfetto-trace",
+        "bytes": 1680959,
+        "sha256": "8c0241e7f982e4310828eccbf7c2f78f337fdd96163565b2a99cbe45877468c6"
+      },
+      {
+        "path": "16-fix/FirstPresentationBenchmark_coldWithBaselineProfile_iter005_2026-10-23-12-46-08.perfetto-trace",
+        "bytes": 1407095,
+        "sha256": "64599e969e6332a43d5aac3eec3350ae9077645133cea3da9f2e767da884f89e"
+      },
+      {
+        "path": "16-fix/FirstPresentationBenchmark_coldWithBaselineProfile_iter006_2026-10-23-12-46-11.perfetto-trace",
+        "bytes": 1373143,
+        "sha256": "c7cd6bab39419a4ba5e4e0fc78d4e6046d2cbc81b375b20f4e15a0b266dcd8b2"
+      },
+      {
+        "path": "16-fix/FirstPresentationBenchmark_coldWithBaselineProfile_iter007_2026-10-23-12-46-15.perfetto-trace",
+        "bytes": 1367319,
+        "sha256": "66a720e8ae050eeab0acb5969d652166ddf3db88ac94e0c145f24537779837a4"
+      },
+      {
+        "path": "16-fix/FirstPresentationBenchmark_coldWithBaselineProfile_iter008_2026-10-23-12-46-20.perfetto-trace",
+        "bytes": 1778004,
+        "sha256": "e8c85cb96c6983d79dbfd24a5b059f47b13d12e062c6dbdfde6ce14b1bb31b2b"
+      },
+      {
+        "path": "16-fix/FirstPresentationBenchmark_coldWithBaselineProfile_iter009_2026-10-23-12-46-24.perfetto-trace",
+        "bytes": 1422560,
+        "sha256": "2e9c18d1c9356f06adf35b55625ba9a7c5de1abef99fc7a4be17d91f6e4245f1"
+      },
+      {
+        "path": "16-fix/logcat-com.stripe.android.paymentsheet.benchmark.FirstPresentationBenchmark-coldWithBaselineProfile.txt",
+        "bytes": 1326850,
+        "sha256": "d2e46538eeff41728f8c3b5e19af41a398dbb0f652528568474de59f38082061"
+      },
+      {
+        "path": "16-fix/TEST-pixel2api33-_paymentsheet-benchmark-.xml",
+        "bytes": 588,
+        "sha256": "b9b58a9fb1d737bd5990f6fc7f571969064a6450399aee0c897f6d993d232919"
+      }
+    ]
+  },
+  {
+    "label": "16-baseline",
+    "workload": "captcha",
+    "apkSha256": "7f91ce220b22753611afa8d3f96356fc17cd347225efb5b74935b35baf3b99f1",
+    "archiveFiles": [
+      {
+        "path": "16-baseline/benchmarkData.json",
+        "bytes": 28252,
+        "sha256": "243a2e673d320208b8d51b51c16f54bfd0c6b943d0b5c791bd02f97c85e8d5dc"
+      },
+      {
+        "path": "16-baseline/metadata.json",
+        "bytes": 383,
+        "sha256": "ed0e86b5adc777e2693e13390a415f5a5f017b74d7d948e97282f7661e4dc3d3"
+      },
+      {
+        "path": "16-baseline/target.apk",
+        "bytes": 9482632,
+        "sha256": "7f91ce220b22753611afa8d3f96356fc17cd347225efb5b74935b35baf3b99f1"
+      },
+      {
+        "path": "16-baseline/production.patch",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "16-baseline/gradle.log",
+        "bytes": 48400,
+        "sha256": "03b661687baab3090dc566cc7904ff2e56e72212a6f841531e4f6262d8ca02c8"
+      },
+      {
+        "path": "16-baseline/build.log",
+        "bytes": 47232,
+        "sha256": "4d94789a80708b6f27cb897f6bfaf9e2e314c8270c0d12a6d881dfd4a72df7b9"
+      },
+      {
+        "path": "16-baseline/FirstPresentationBenchmark_coldWithBaselineProfile_iter000_2026-10-23-12-49-18.perfetto-trace",
+        "bytes": 1679405,
+        "sha256": "61bccf945a1b636cc8891c3f7aec3226836a8667de1d7c76a8e3163fc463b58b"
+      },
+      {
+        "path": "16-baseline/FirstPresentationBenchmark_coldWithBaselineProfile_iter001_2026-10-23-12-49-21.perfetto-trace",
+        "bytes": 1438548,
+        "sha256": "7aeacab11ec9b93d3c3b3d54680eeeb9ba218acb90b6283d8716d8790dbae96e"
+      },
+      {
+        "path": "16-baseline/FirstPresentationBenchmark_coldWithBaselineProfile_iter002_2026-10-23-12-49-24.perfetto-trace",
+        "bytes": 1511691,
+        "sha256": "436c5785fb27cf860ddee3b616c57e01d12ca44b9201e02bf17a6c365d318a3f"
+      },
+      {
+        "path": "16-baseline/FirstPresentationBenchmark_coldWithBaselineProfile_iter003_2026-10-23-12-49-28.perfetto-trace",
+        "bytes": 2097692,
+        "sha256": "fe49565cd1a865456a5f20883157759f928c47cfb876daf5276b71c2a96e8ef3"
+      },
+      {
+        "path": "16-baseline/FirstPresentationBenchmark_coldWithBaselineProfile_iter004_2026-10-23-12-49-32.perfetto-trace",
+        "bytes": 2828939,
+        "sha256": "5afb6080115f6ae920e67695f7710ca3da1b2a2dd93d7314c0e37e82f0f4a447"
+      },
+      {
+        "path": "16-baseline/FirstPresentationBenchmark_coldWithBaselineProfile_iter005_2026-10-23-12-49-36.perfetto-trace",
+        "bytes": 1678056,
+        "sha256": "7eb15e5b031306abd5aa2363a7b4a0746be0dd53b54cc95dc588eac530838c4b"
+      },
+      {
+        "path": "16-baseline/FirstPresentationBenchmark_coldWithBaselineProfile_iter006_2026-10-23-12-49-42.perfetto-trace",
+        "bytes": 1582215,
+        "sha256": "c9ac359560eeca4a3a9ab79482503b20e8246958ca935f280df26b68ffa49516"
+      },
+      {
+        "path": "16-baseline/FirstPresentationBenchmark_coldWithBaselineProfile_iter007_2026-10-23-12-49-45.perfetto-trace",
+        "bytes": 1528418,
+        "sha256": "3bca4a89c298de138167af0fbdc702c302b430926ff3d109d637b2338d2d477e"
+      },
+      {
+        "path": "16-baseline/FirstPresentationBenchmark_coldWithBaselineProfile_iter008_2026-10-23-12-49-48.perfetto-trace",
+        "bytes": 1513794,
+        "sha256": "aab699e8aa3ff0a2ae7f441b89dd8d37dc19c8a4075f986410267cfcf2da6bb0"
+      },
+      {
+        "path": "16-baseline/FirstPresentationBenchmark_coldWithBaselineProfile_iter009_2026-10-23-12-49-53.perfetto-trace",
+        "bytes": 1434013,
+        "sha256": "b38e6fbd3db92392bd060ae8e3d37af4cdfd4b4dc3162ca4bbb6dcf5a822bfed"
+      },
+      {
+        "path": "16-baseline/logcat-com.stripe.android.paymentsheet.benchmark.FirstPresentationBenchmark-coldWithBaselineProfile.txt",
+        "bytes": 1225150,
+        "sha256": "08aaf1414352d9cb3243eccb4870ab7f7b8c605c3cdd3c7f8ec379f0aaabc7de"
+      },
+      {
+        "path": "16-baseline/TEST-pixel2api33-_paymentsheet-benchmark-.xml",
+        "bytes": 587,
+        "sha256": "79b61ee6e04d999d33e28028646d73e8da8e025eeb4b3098c695812c0fd3a016"
+      }
+    ]
+  }
+]
