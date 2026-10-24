@@ -90,6 +90,7 @@ dependencies {
     testImplementation testLibs.androidx.junitKtx
     testImplementation testLibs.androidx.lifecycle
     testImplementation testLibs.androidx.testRules
+    testImplementation testLibs.dejavu
     testImplementation testLibs.hamcrest
     testImplementation testLibs.junit
     testImplementation testLibs.json
