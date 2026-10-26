@@ -2,26 +2,36 @@
 
 package com.stripe.android.elements.ece
 
+import android.content.Context
 import com.stripe.android.checkout.CheckoutControllerStateHolder
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
-import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.elements.CheckoutGooglePayConfiguration
 import com.stripe.android.elements.ExpressCheckoutElement
+import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import javax.inject.Inject
+import javax.inject.Provider
 
 internal interface ExpressCheckoutElementEventReporter {
     fun onEceDisplayed()
 }
 
 internal class DefaultExpressCheckoutElementEventReporter @Inject constructor(
+    context: Context,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
-    private val analyticsRequestFactory: AnalyticsRequestFactory,
     private val durationProvider: DurationProvider,
     private val stateHolder: CheckoutControllerStateHolder,
+    apiConfigurationProvider: Provider<ApiConfiguration.State>,
 ) : ExpressCheckoutElementEventReporter {
+    private val analyticsRequestFactory = PaymentAnalyticsRequestFactory(
+        context = context,
+        defaultProductUsageTokens = setOf("ExpressCheckoutElement"),
+        apiConfigurationProvider = apiConfigurationProvider,
+    )
+
     override fun onEceDisplayed() {
         durationProvider.start(DurationProvider.Key.ExpressCheckoutElement)
         fireEvent(

@@ -1,22 +1,27 @@
 @file:OptIn(CheckoutSessionPreview::class)
 package com.stripe.android.elements.ece
 
+import android.content.Context
 import androidx.lifecycle.SavedStateHandle
+import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutControllerStateFactory
-import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.elements.ExpressCheckoutElement.Configuration.GooglePayConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.AnalyticsMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.android.utils.FakeDurationProvider
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
+@RunWith(RobolectricTestRunner::class)
 internal class DefaultExpressCheckoutElementEventReporterTest {
     @Test
     fun `onEceDisplayed fires event with default params`() = runScenario {
@@ -24,6 +29,7 @@ internal class DefaultExpressCheckoutElementEventReporterTest {
 
         val loggedParams = executor.getExecutedRequests().single().params
         assertThat(loggedParams).containsEntry("event", "elements.express_checkout_element.init")
+        assertThat(loggedParams).containsEntry("product_usage", "ExpressCheckoutElement")
         assertThat(loggedParams).containsEntry("example_analytics_metadata", true)
         assertThat(loggedParams).containsEntry("ordered_lpms", "link,google_pay")
         assertThat(loggedParams).containsEntry(
@@ -96,17 +102,11 @@ internal class DefaultExpressCheckoutElementEventReporterTest {
             expressCheckoutElementPaymentMethodMetadata = paymentMethodMetadata,
         )
         val reporter = DefaultExpressCheckoutElementEventReporter(
+            context = ApplicationProvider.getApplicationContext<Context>(),
             analyticsRequestExecutor = analyticsRequestExecutor,
-            analyticsRequestFactory = AnalyticsRequestFactory(
-                packageManager = null,
-                packageInfo = null,
-                packageName = "",
-                publishableKeyProvider = { "" },
-                networkTypeProvider = { "" },
-                pluginTypeProvider = { null },
-            ),
             durationProvider = durationProvider,
             stateHolder = stateHolder,
+            apiConfigurationProvider = { PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG },
         )
 
         block(
