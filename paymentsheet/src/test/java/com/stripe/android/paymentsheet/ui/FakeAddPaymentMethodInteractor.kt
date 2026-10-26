@@ -60,14 +60,17 @@ internal class FakeAddPaymentMethodInteractor(
                 paymentMethodExtraParams = previousPaymentMethodExtraParams,
             )
 
+            val formElements = metadata.formElementsForCode(
+                code = paymentMethodCode,
+                uiDefinitionFactoryArgumentsFactory = uiDefinitionArgumentsFactory,
+            ).orEmpty()
+            formElements.forEach { it.onValidationStateChanged(isValidating) }
+
             return AddPaymentMethodInteractor.State(
                 selectedPaymentMethodCode = paymentMethodCode,
                 supportedPaymentMethods = metadata.sortedSupportedPaymentMethods(),
                 arguments = formArguments,
-                formElements = metadata.formElementsForCode(
-                    code = paymentMethodCode,
-                    uiDefinitionFactoryArgumentsFactory = uiDefinitionArgumentsFactory,
-                ) ?: emptyList(),
+                formUiElements = formElements,
                 paymentSelection = null,
                 processing = false,
                 usBankAccountFormArguments = mock(),

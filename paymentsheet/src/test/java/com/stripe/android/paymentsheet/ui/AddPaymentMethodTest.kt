@@ -676,7 +676,7 @@ internal class AddPaymentMethodTest {
                 hasIntentToSetup = false,
                 paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
             ),
-            formElements = listOf(
+            formUiElements = listOf(
                 CheckboxFieldElement(
                     identifier = FormFieldId.SameAsShipping,
                 )

@@ -58,6 +58,271 @@ class DefaultAddPaymentMethodInteractorTest {
         .around(cleanupRule)
 
     @Test
+    fun `starting collectors applies validation once without recreating the form`() {
+        val formElement = FakeFormElement()
+        runScenario(formElementsByCode = mapOf(PaymentMethod.Type.Card.code to listOf(formElement))) {
+            val initialState = interactor.state.value
+            formElement.validationStateChanges.expectNoEvents()
+
+            interactor.state.test {
+                assertThat(awaitItem()).isSameInstanceAs(initialState)
+
+                dispatcher.scheduler.advanceUntilIdle()
+
+                expectNoEvents()
+                assertThat(interactor.state.value).isSameInstanceAs(initialState)
+            }
+            assertThat(formElement.validationStateChanges.awaitItem()).isFalse()
+            assertThat(clearErrorMessagesTurbine.awaitItem()).isEqualTo(Unit)
+        }
+    }
+
+    @Test
+    fun `creating and copying state does not change form validation`() {
+        val formElement = FakeFormElement()
+        runScenario(formElementsByCode = mapOf(PaymentMethod.Type.Card.code to listOf(formElement))) {
+            val initialState = interactor.state.value
+
+            val copy = initialState.copy(validating = true)
+
+            assertThat(copy.validating).isTrue()
+            assertThat(copy.formUiElements).isSameInstanceAs(initialState.formUiElements)
+            assertThat(initialState.validating).isFalse()
+        }
+    }
+
+    @Test
+    fun `validation collector synchronizes latest state without UI subscribers`() {
+        val initialFormElement = FakeFormElement()
+        val replacementFormElement = FakeFormElement()
+        val replacementCode = PaymentMethod.Type.CashAppPay.code
+        val uiDispatcher = StandardTestDispatcher()
+        runScenario(
+            formElementsByCode = mapOf(
+                PaymentMethod.Type.Card.code to listOf(initialFormElement),
+                replacementCode to listOf(replacementFormElement),
+            ),
+            dispatcher = UnconfinedTestDispatcher(),
+            uiDispatcher = uiDispatcher,
+        ) {
+            validationRequestedSource.emit(Unit)
+            interactor.handleViewAction(
+                AddPaymentMethodInteractor.ViewAction.OnPaymentMethodSelected(replacementCode)
+            )
+
+            assertThat(interactor.state.value.validating).isTrue()
+            assertThat(interactor.state.value.formUiElements).containsExactly(replacementFormElement)
+            initialFormElement.validationStateChanges.expectNoEvents()
+            replacementFormElement.validationStateChanges.expectNoEvents()
+
+            uiDispatcher.scheduler.advanceUntilIdle()
+
+            assertThat(replacementFormElement.validationStateChanges.awaitItem()).isTrue()
+            assertThat(reportPaymentMethodTypeSelectedTurbine.awaitItem()).isEqualTo(replacementCode)
+            assertThat(clearErrorMessagesTurbine.awaitItem()).isEqualTo(Unit)
+        }
+    }
+
+    @Test
+    fun `closing interactor cancels pending validation`() {
+        val formElement = FakeFormElement()
+        val uiDispatcher = StandardTestDispatcher()
+        runScenario(
+            formElementsByCode = mapOf(PaymentMethod.Type.Card.code to listOf(formElement)),
+            dispatcher = UnconfinedTestDispatcher(),
+            uiDispatcher = uiDispatcher,
+        ) {
+            uiDispatcher.scheduler.advanceUntilIdle()
+            assertThat(formElement.validationStateChanges.awaitItem()).isFalse()
+
+            validationRequestedSource.emit(Unit)
+            assertThat(interactor.state.value.validating).isTrue()
+            formElement.validationStateChanges.expectNoEvents()
+
+            interactor.close()
+            uiDispatcher.scheduler.advanceUntilIdle()
+
+            assertThat(clearErrorMessagesTurbine.awaitItem()).isEqualTo(Unit)
+        }
+    }
+
+    @Test
+    fun `selection updates do not reapply validation`() {
+        val formElement = FakeFormElement()
+        val selection = MutableStateFlow<PaymentSelection?>(null)
+        runScenario(
+            selection = selection,
+            formElementsByCode = mapOf(PaymentMethod.Type.Card.code to listOf(formElement)),
+            dispatcher = UnconfinedTestDispatcher(),
+        ) {
+            assertThat(formElement.validationStateChanges.awaitItem()).isFalse()
+            assertThat(clearErrorMessagesTurbine.awaitItem()).isEqualTo(Unit)
+            interactor.state.test {
+                assertThat(awaitItem().paymentSelection).isNull()
+
+                val newSelection = PaymentSelection.Saved(PaymentMethodFactory.usBankAccount())
+                selection.value = newSelection
+
+                assertThat(awaitItem().paymentSelection).isEqualTo(newSelection)
+            }
+            assertThat(clearErrorMessagesTurbine.awaitItem()).isEqualTo(Unit)
+        }
+    }
+
+    @Test
+    fun `processing updates after validation do not reapply validation`() {
+        val formElement = FakeFormElement()
+        val processing = MutableStateFlow(false)
+        runScenario(
+            processing = processing,
+            formElementsByCode = mapOf(PaymentMethod.Type.Card.code to listOf(formElement)),
+            dispatcher = UnconfinedTestDispatcher(),
+        ) {
+            assertThat(formElement.validationStateChanges.awaitItem()).isFalse()
+            interactor.state.test {
+                assertThat(awaitItem().processing).isFalse()
+
+                validationRequestedSource.emit(Unit)
+                assertThat(awaitItem().validating).isTrue()
+                assertThat(formElement.validationStateChanges.awaitItem()).isTrue()
+
+                processing.value = true
+                assertThat(awaitItem().processing).isTrue()
+
+                processing.value = false
+                assertThat(awaitItem().processing).isFalse()
+            }
+            assertThat(clearErrorMessagesTurbine.awaitItem()).isEqualTo(Unit)
+        }
+    }
+
+    @Test
+    fun `incentive updates do not reapply validation`() {
+        val formElement = FakeFormElement()
+        val incentive = MutableStateFlow<PaymentMethodIncentive?>(null)
+        runScenario(
+            incentive = incentive,
+            formElementsByCode = mapOf(PaymentMethod.Type.Card.code to listOf(formElement)),
+            dispatcher = UnconfinedTestDispatcher(),
+        ) {
+            assertThat(formElement.validationStateChanges.awaitItem()).isFalse()
+            interactor.state.test {
+                assertThat(awaitItem().incentive).isNull()
+
+                val newIncentive = PaymentMethodIncentive("link_instant_debits", "$5")
+                incentive.value = newIncentive
+
+                assertThat(awaitItem().incentive).isEqualTo(newIncentive)
+            }
+            assertThat(clearErrorMessagesTurbine.awaitItem()).isEqualTo(Unit)
+        }
+    }
+
+    @Test
+    fun `repeated validation requests only apply validation once`() {
+        val formElement = FakeFormElement()
+        runScenario(
+            formElementsByCode = mapOf(PaymentMethod.Type.Card.code to listOf(formElement)),
+            dispatcher = UnconfinedTestDispatcher(),
+        ) {
+            assertThat(formElement.validationStateChanges.awaitItem()).isFalse()
+            interactor.state.test {
+                assertThat(awaitItem().validating).isFalse()
+
+                validationRequestedSource.emit(Unit)
+
+                assertThat(awaitItem().validating).isTrue()
+                assertThat(formElement.validationStateChanges.awaitItem()).isTrue()
+
+                validationRequestedSource.emit(Unit)
+
+                expectNoEvents()
+            }
+            assertThat(clearErrorMessagesTurbine.awaitItem()).isEqualTo(Unit)
+        }
+    }
+
+    @Test
+    fun `replacement form receives the initial validation mode`() {
+        val initialFormElement = FakeFormElement()
+        val replacementFormElement = FakeFormElement()
+        val replacementCode = PaymentMethod.Type.CashAppPay.code
+        runScenario(
+            formElementsByCode = mapOf(
+                PaymentMethod.Type.Card.code to listOf(initialFormElement),
+                replacementCode to listOf(replacementFormElement),
+            ),
+            dispatcher = UnconfinedTestDispatcher(),
+        ) {
+            assertThat(initialFormElement.validationStateChanges.awaitItem()).isFalse()
+            replacementFormElement.validationStateChanges.expectNoEvents()
+            interactor.state.test {
+                assertThat(awaitItem().formUiElements).containsExactly(initialFormElement)
+
+                interactor.handleViewAction(
+                    AddPaymentMethodInteractor.ViewAction.OnPaymentMethodSelected(replacementCode)
+                )
+
+                val replacementState = awaitItem()
+                assertThat(replacementState.selectedPaymentMethodCode).isEqualTo(replacementCode)
+                assertThat(replacementState.formUiElements).containsExactly(replacementFormElement)
+                assertThat(replacementState.validating).isFalse()
+                assertThat(replacementFormElement.validationStateChanges.awaitItem()).isFalse()
+            }
+            assertThat(reportPaymentMethodTypeSelectedTurbine.awaitItem()).isEqualTo(replacementCode)
+            assertThat(clearErrorMessagesTurbine.awaitItem()).isEqualTo(Unit)
+        }
+    }
+
+    @Test
+    fun `switching away and back preserves validation mode`() {
+        val initialFormElement = FakeFormElement()
+        val replacementFormElement = FakeFormElement()
+        val initialCode = PaymentMethod.Type.Card.code
+        val replacementCode = PaymentMethod.Type.CashAppPay.code
+        runScenario(
+            formElementsByCode = mapOf(
+                initialCode to listOf(initialFormElement),
+                replacementCode to listOf(replacementFormElement),
+            ),
+            dispatcher = UnconfinedTestDispatcher(),
+        ) {
+            assertThat(initialFormElement.validationStateChanges.awaitItem()).isFalse()
+            interactor.state.test {
+                val initialState = awaitItem()
+                assertThat(initialState.formUiElements).containsExactly(initialFormElement)
+
+                validationRequestedSource.emit(Unit)
+                assertThat(awaitItem().validating).isTrue()
+                assertThat(initialFormElement.validationStateChanges.awaitItem()).isTrue()
+
+                interactor.handleViewAction(
+                    AddPaymentMethodInteractor.ViewAction.OnPaymentMethodSelected(replacementCode)
+                )
+
+                val replacementState = awaitItem()
+                assertThat(replacementState.formUiElements).containsExactly(replacementFormElement)
+                assertThat(replacementState.validating).isTrue()
+                assertThat(replacementFormElement.validationStateChanges.awaitItem()).isTrue()
+                assertThat(reportPaymentMethodTypeSelectedTurbine.awaitItem()).isEqualTo(replacementCode)
+
+                interactor.handleViewAction(
+                    AddPaymentMethodInteractor.ViewAction.OnPaymentMethodSelected(initialCode)
+                )
+
+                val returnedState = awaitItem()
+                assertThat(returnedState.formUiElements).containsExactly(initialFormElement)
+                assertThat(returnedState.validating).isTrue()
+                assertThat(returnedState.usBankAccountFormArguments)
+                    .isNotSameInstanceAs(initialState.usBankAccountFormArguments)
+                assertThat(initialFormElement.validationStateChanges.awaitItem()).isTrue()
+                assertThat(reportPaymentMethodTypeSelectedTurbine.awaitItem()).isEqualTo(initialCode)
+            }
+            assertThat(clearErrorMessagesTurbine.awaitItem()).isEqualTo(Unit)
+        }
+    }
+
+    @Test
     fun handleViewAction_ReportFieldInteraction_reportsFieldInteraction() {
         runScenario {
             val expectedCode = PaymentMethod.Type.CashAppPay.code
@@ -388,10 +653,12 @@ class DefaultAddPaymentMethodInteractorTest {
                 paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
             )
         },
-        formElementsForCode: (PaymentMethodCode) -> List<FormElement> = { emptyList() },
+        formElementsByCode: Map<PaymentMethodCode, List<FormElement>> = emptyMap(),
+        formElementsForCode: (PaymentMethodCode) -> List<FormElement> = { formElementsByCode[it].orEmpty() },
         createUSBankAccountFormArguments: (PaymentMethodCode) -> USBankAccountFormArguments = { mock() },
         reportPromotionDisplayed: (PaymentMethodCode) -> Unit = {},
         dispatcher: TestDispatcher = StandardTestDispatcher(TestCoroutineScheduler()),
+        uiDispatcher: TestDispatcher = dispatcher,
         testBlock: suspend TestParams.() -> Unit
     ) {
         val validationRequestedSource = MutableSharedFlow<Unit>()
@@ -425,7 +692,7 @@ class DefaultAddPaymentMethodInteractorTest {
             createUSBankAccountFormArguments = createUSBankAccountFormArguments,
             coroutineScope = CoroutineScope(dispatcher),
             validationRequested = validationRequestedSource,
-            uiContext = dispatcher,
+            uiContext = uiDispatcher,
             onInitiallyDisplayedPaymentMethodVisibilitySnapshot = { visible, hidden ->
                 initialVisibilityTrackerTurbine.add(Pair(visible, hidden))
             }
@@ -446,6 +713,21 @@ class DefaultAddPaymentMethodInteractorTest {
                 testBlock()
             }
             ensureAllEventsConsumed()
+        }
+        formElementsByCode.values.flatten().filterIsInstance<FakeFormElement>().forEach {
+            it.ensureAllEventsConsumed()
+        }
+    }
+
+    internal class FakeFormElement : FormElement by SectionElement.wrap(EmailElement()) {
+        val validationStateChanges = Turbine<Boolean>()
+
+        override fun onValidationStateChanged(isValidating: Boolean) {
+            validationStateChanges.add(isValidating)
+        }
+
+        fun ensureAllEventsConsumed() {
+            validationStateChanges.ensureAllEventsConsumed()
         }
     }
 

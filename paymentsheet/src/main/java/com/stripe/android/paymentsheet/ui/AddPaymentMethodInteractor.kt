@@ -23,8 +23,9 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 
 internal interface AddPaymentMethodInteractor {
@@ -38,17 +39,13 @@ internal interface AddPaymentMethodInteractor {
         val selectedPaymentMethodCode: PaymentMethodCode,
         val supportedPaymentMethods: List<SupportedPaymentMethod>,
         val arguments: FormArguments,
-        private val formElements: List<FormElement>,
+        val formUiElements: List<FormElement>,
         val paymentSelection: PaymentSelection?,
         val processing: Boolean,
-        private val validating: Boolean,
+        val validating: Boolean,
         val incentive: PaymentMethodIncentive?,
         val usBankAccountFormArguments: USBankAccountFormArguments,
-    ) {
-        val formUiElements = formElements.onEach { element ->
-            element.onValidationStateChanged(validating)
-        }
-    }
+    )
 
     sealed class ViewAction {
         data class OnPaymentMethodSelected(val code: PaymentMethodCode) : ViewAction()
@@ -158,7 +155,7 @@ internal class DefaultAddPaymentMethodInteractor(
             selectedPaymentMethodCode = selectedPaymentMethodCode,
             supportedPaymentMethods = supportedPaymentMethods,
             arguments = createFormArguments(selectedPaymentMethodCode),
-            formElements = formElementsForCode(selectedPaymentMethodCode),
+            formUiElements = formElementsForCode(selectedPaymentMethodCode),
             paymentSelection = selection.value,
             processing = processing.value,
             incentive = incentive.value,
@@ -168,6 +165,15 @@ internal class DefaultAddPaymentMethodInteractor(
     }
 
     init {
+        coroutineScope.launch(uiContext) {
+            state
+                .map { it.formUiElements to it.validating }
+                .distinctUntilChanged()
+                .collect { (elements, validating) ->
+                    elements.forEach { it.onValidationStateChanged(validating) }
+                }
+        }
+
         coroutineScope.launch {
             selection.collect {
                 clearErrorMessages()
@@ -176,6 +182,10 @@ internal class DefaultAddPaymentMethodInteractor(
 
         coroutineScope.launch {
             selectedPaymentMethodCode.collect { newSelectedPaymentMethodCode ->
+                if (_state.value.selectedPaymentMethodCode == newSelectedPaymentMethodCode) {
+                    return@collect
+                }
+
                 val newFormArguments = createFormArguments(newSelectedPaymentMethodCode)
                 val newFormElements = formElementsForCode(newSelectedPaymentMethodCode)
                 val newUsBankAccountFormArguments = createUSBankAccountFormArguments(newSelectedPaymentMethodCode)
@@ -183,7 +193,7 @@ internal class DefaultAddPaymentMethodInteractor(
                 _state.value = _state.value.copy(
                     selectedPaymentMethodCode = newSelectedPaymentMethodCode,
                     arguments = newFormArguments,
-                    formElements = newFormElements,
+                    formUiElements = newFormElements,
                     usBankAccountFormArguments = newUsBankAccountFormArguments
                 )
             }
@@ -215,11 +225,7 @@ internal class DefaultAddPaymentMethodInteractor(
 
         coroutineScope.launch {
             validationRequested.collect {
-                withContext(uiContext) {
-                    _state.value = _state.value.copy(
-                        validating = true
-                    )
-                }
+                _state.value = _state.value.copy(validating = true)
             }
         }
     }
