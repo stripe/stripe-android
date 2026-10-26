@@ -58,12 +58,13 @@ class DefaultAddPaymentMethodInteractorTest {
         .around(cleanupRule)
 
     @Test
-    fun `starting collectors does not recreate the initial form`() {
+    fun `starting collectors does not recreate the initial form or reapply validation`() {
         val formElementsForCodeCalls = Turbine<PaymentMethodCode>()
+        val formElement = FakeFormElement()
         runScenario(
             formElementsForCode = {
                 formElementsForCodeCalls.add(it)
-                emptyList()
+                listOf(formElement)
             },
         ) {
             val initialState = interactor.state.value
@@ -76,9 +77,52 @@ class DefaultAddPaymentMethodInteractorTest {
                 assertThat(interactor.state.value).isSameInstanceAs(initialState)
             }
             assertThat(formElementsForCodeCalls.awaitItem()).isEqualTo(PaymentMethod.Type.Card.code)
+            assertThat(formElement.validationStateChanges.awaitItem()).isFalse()
             assertThat(clearErrorMessagesTurbine.awaitItem()).isEqualTo(Unit)
         }
         formElementsForCodeCalls.ensureAllEventsConsumed()
+        formElement.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `source updates before collectors start are reflected in state`() {
+        val selection = MutableStateFlow<PaymentSelection?>(null)
+        val processing = MutableStateFlow(false)
+        val incentive = MutableStateFlow<PaymentMethodIncentive?>(null)
+        runScenario(selection = selection, processing = processing, incentive = incentive) {
+            val expectedSelection = PaymentSelection.Saved(PaymentMethodFactory.usBankAccount())
+            val expectedIncentive = PaymentMethodIncentive("link_instant_debits", "$5")
+            selection.value = expectedSelection
+            processing.value = true
+            incentive.value = expectedIncentive
+
+            dispatcher.scheduler.advanceUntilIdle()
+
+            interactor.state.test {
+                val state = awaitItem()
+                assertThat(state.paymentSelection).isEqualTo(expectedSelection)
+                assertThat(state.processing).isTrue()
+                assertThat(state.incentive).isEqualTo(expectedIncentive)
+            }
+            assertThat(clearErrorMessagesTurbine.awaitItem()).isEqualTo(Unit)
+        }
+    }
+
+    @Test
+    fun `processing updates can return to the initial value`() {
+        val processing = MutableStateFlow(false)
+        runScenario(processing = processing, dispatcher = UnconfinedTestDispatcher()) {
+            interactor.state.test {
+                assertThat(awaitItem().processing).isFalse()
+
+                processing.value = true
+                assertThat(awaitItem().processing).isTrue()
+
+                processing.value = false
+                assertThat(awaitItem().processing).isFalse()
+            }
+            assertThat(clearErrorMessagesTurbine.awaitItem()).isEqualTo(Unit)
+        }
     }
 
     @Test
@@ -513,6 +557,18 @@ class DefaultAddPaymentMethodInteractorTest {
                 testBlock()
             }
             ensureAllEventsConsumed()
+        }
+    }
+
+    internal class FakeFormElement : FormElement by SectionElement.wrap(EmailElement()) {
+        val validationStateChanges = Turbine<Boolean>()
+
+        override fun onValidationStateChanged(isValidating: Boolean) {
+            validationStateChanges.add(isValidating)
+        }
+
+        fun ensureAllEventsConsumed() {
+            validationStateChanges.ensureAllEventsConsumed()
         }
     }
 

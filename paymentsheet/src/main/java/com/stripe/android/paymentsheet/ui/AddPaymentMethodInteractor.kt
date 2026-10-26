@@ -195,25 +195,25 @@ internal class DefaultAddPaymentMethodInteractor(
 
         coroutineScope.launch {
             selection.collect {
-                _state.value = _state.value.copy(
-                    paymentSelection = it
-                )
+                if (_state.value.paymentSelection != it) {
+                    _state.value = _state.value.copy(paymentSelection = it)
+                }
             }
         }
 
         coroutineScope.launch {
             processing.collect {
-                _state.value = _state.value.copy(
-                    processing = it
-                )
+                if (_state.value.processing != it) {
+                    _state.value = _state.value.copy(processing = it)
+                }
             }
         }
 
         coroutineScope.launch {
             incentive.collect {
-                _state.value = _state.value.copy(
-                    incentive = it
-                )
+                if (_state.value.incentive != it) {
+                    _state.value = _state.value.copy(incentive = it)
+                }
             }
         }
 
