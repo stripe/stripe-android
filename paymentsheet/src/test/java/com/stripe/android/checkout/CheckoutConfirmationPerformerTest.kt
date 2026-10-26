@@ -59,6 +59,7 @@ internal class CheckoutConfirmationPerformerTest {
             assertThat(performerProvider.getCalls.awaitItem()).isSameInstanceAs(Looper.getMainLooper().thread)
             assertThat(confirmationHandler.startTurbine.awaitItem().confirmationOption)
                 .isInstanceOf<GooglePayConfirmationOption>()
+            awaitAnalyticsEvent("checkout_elements.confirm.started")
         }
 
     @Test
@@ -141,8 +142,7 @@ internal class CheckoutConfirmationPerformerTest {
         assertRejection("Cannot confirm checkout before it is configured.")
 
         stateHolder.state = googlePayState(paymentSelection = PaymentSelection.GooglePay)
-        performer.confirm()
-        confirmationHandler.startTurbine.awaitItem()
+        confirmAndAwaitStart()
     }
 
     @Test
@@ -153,8 +153,7 @@ internal class CheckoutConfirmationPerformerTest {
         assertRejection("Cannot confirm checkout without a selected payment option.")
 
         stateHolder.state = googlePayState(paymentSelection = PaymentSelection.GooglePay)
-        performer.confirm()
-        confirmationHandler.startTurbine.awaitItem()
+        confirmAndAwaitStart()
     }
 
     @Test
@@ -165,10 +164,8 @@ internal class CheckoutConfirmationPerformerTest {
         assertRejection("Cannot confirm checkout without providing a PaymentElement configuration.")
 
         stateHolder.state = googlePayState(paymentSelection = PaymentSelection.GooglePay)
-        performer.confirm()
 
-        assertThat(confirmationHandler.startTurbine.awaitItem().confirmationOption)
-            .isInstanceOf<GooglePayConfirmationOption>()
+        assertThat(confirmAndAwaitStart().confirmationOption).isInstanceOf<GooglePayConfirmationOption>()
     }
 
     @Test
@@ -182,8 +179,7 @@ internal class CheckoutConfirmationPerformerTest {
         assertRejection("Cannot confirm checkout because the selected payment option cannot be confirmed.")
 
         stateHolder.state = googlePayState(paymentSelection = PaymentSelection.GooglePay)
-        performer.confirm()
-        confirmationHandler.startTurbine.awaitItem()
+        confirmAndAwaitStart()
     }
 
     @Test
@@ -195,9 +191,8 @@ internal class CheckoutConfirmationPerformerTest {
 
         val state = googlePayState(paymentSelection = PaymentSelection.GooglePay)
         stateHolder.state = state
-        performer.confirm()
 
-        val args = confirmationHandler.startTurbine.awaitItem()
+        val args = confirmAndAwaitStart()
         assertThat(args.confirmationOption).isInstanceOf<GooglePayConfirmationOption>()
         assertThat(args.paymentMethodMetadata).isSameInstanceAs(state.paymentMethodMetadata)
     }
@@ -238,16 +233,14 @@ internal class CheckoutConfirmationPerformerTest {
         mutation.await()
         testScheduler.runCurrent()
         assertThat(operationCoordinator.isUpdating.value).isFalse()
-        performer.confirm()
-        confirmationHandler.startTurbine.awaitItem()
+        confirmAndAwaitStart()
     }
 
     @Test
     fun `rejected repeat confirmation preserves the original payment selection analytics`() = runScenario(
         state = googlePayState(paymentSelection = PaymentSelection.GooglePay),
     ) {
-        performer.confirm()
-        confirmationHandler.startTurbine.awaitItem()
+        confirmAndAwaitStart()
         stateHolder.state = linkState()
 
         performer.confirm()
@@ -257,7 +250,7 @@ internal class CheckoutConfirmationPerformerTest {
         confirmationHandler.state.value = ConfirmationHandler.State.Complete(
             ConfirmationHandler.Result.Succeeded(PaymentIntentFixtures.PI_SUCCEEDED)
         )
-        val request = analyticsRequestExecutor.requestTurbine.awaitItem().params
+        val request = awaitAnalyticsEvent("checkout_elements.confirm.succeeded")
         assertThat(request).containsAtLeastEntriesIn(
             mapOf(
                 "event" to "checkout_elements.confirm.succeeded",
@@ -286,9 +279,8 @@ internal class CheckoutConfirmationPerformerTest {
             )
         },
     ) {
-        performer.confirm()
+        val args = confirmAndAwaitStart()
 
-        val args = confirmationHandler.startTurbine.awaitItem()
         assertThat(args.confirmationOption).isInstanceOf<GooglePayConfirmationOption>()
         assertThat((args.confirmationOption as GooglePayConfirmationOption).config.billingEmailOverride).isNull()
         assertThat(args.paymentMethodMetadata)
@@ -300,9 +292,8 @@ internal class CheckoutConfirmationPerformerTest {
     fun `confirm starts confirmation with a Link option`() = runScenario(
         state = linkState(),
     ) {
-        performer.confirm()
+        val args = confirmAndAwaitStart()
 
-        val args = confirmationHandler.startTurbine.awaitItem()
         assertThat(args.confirmationOption).isInstanceOf<LinkConfirmationOption>()
     }
 
@@ -310,10 +301,8 @@ internal class CheckoutConfirmationPerformerTest {
     fun `confirm keeps saved SEPA unacknowledged when embedded view displays mandate text`() = runScenario(
         state = savedSepaState(embeddedViewDisplaysMandateText = true),
     ) {
-        performer.confirm()
+        val option = confirmAndAwaitStart().confirmationOption as PaymentMethodConfirmationOption.Saved
 
-        val option = confirmationHandler.startTurbine.awaitItem().confirmationOption
-            as PaymentMethodConfirmationOption.Saved
         assertThat(option.hasAcknowledgedSepaMandate).isFalse()
     }
 
@@ -321,10 +310,8 @@ internal class CheckoutConfirmationPerformerTest {
     fun `confirm acknowledges saved SEPA when embedded view omits mandate text`() = runScenario(
         state = savedSepaState(embeddedViewDisplaysMandateText = false),
     ) {
-        performer.confirm()
+        val option = confirmAndAwaitStart().confirmationOption as PaymentMethodConfirmationOption.Saved
 
-        val option = confirmationHandler.startTurbine.awaitItem().confirmationOption
-            as PaymentMethodConfirmationOption.Saved
         assertThat(option.hasAcknowledgedSepaMandate).isTrue()
     }
 
@@ -332,13 +319,12 @@ internal class CheckoutConfirmationPerformerTest {
     fun `confirm records the payment selection for analytics`() = runScenario(
         state = googlePayState(paymentSelection = PaymentSelection.GooglePay),
     ) {
-        performer.confirm()
-        confirmationHandler.startTurbine.awaitItem()
+        confirmAndAwaitStart()
         confirmationHandler.state.value = ConfirmationHandler.State.Complete(
             ConfirmationHandler.Result.Succeeded(PaymentIntentFixtures.PI_SUCCEEDED)
         )
 
-        val request = analyticsRequestExecutor.requestTurbine.awaitItem().params
+        val request = awaitAnalyticsEvent("checkout_elements.confirm.succeeded")
         assertThat(request).containsAtLeastEntriesIn(
             mapOf(
                 "event" to "checkout_elements.confirm.succeeded",
@@ -492,6 +478,19 @@ internal class CheckoutConfirmationPerformerTest {
         private val testScope: TestScope,
     ) : CoroutineScope by testScope {
         val testScheduler = testScope.testScheduler
+
+        suspend fun awaitAnalyticsEvent(expectedEvent: String): Map<String, *> {
+            val params = analyticsRequestExecutor.requestTurbine.awaitItem().params
+            assertThat(params["event"]).isEqualTo(expectedEvent)
+            return params
+        }
+
+        suspend fun confirmAndAwaitStart(): ConfirmationHandler.Args {
+            performer.confirm()
+            val args = confirmationHandler.startTurbine.awaitItem()
+            awaitAnalyticsEvent("checkout_elements.confirm.started")
+            return args
+        }
 
         suspend fun assertRejection(message: String) {
             testScheduler.runCurrent()
