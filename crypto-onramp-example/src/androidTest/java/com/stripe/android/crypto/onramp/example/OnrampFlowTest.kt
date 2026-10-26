@@ -1,7 +1,6 @@
 package com.stripe.android.crypto.onramp.example
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -53,7 +52,6 @@ internal class OnrampFlowTest {
     }
 
     @Test
-    @Ignore("magenta-custom")
     fun freshUserKycCanBeCollectedAndVerifiedAfterCancellation() {
         val user = page.registerAndAuthenticateFreshUser(country = "US")
 
@@ -63,7 +61,6 @@ internal class OnrampFlowTest {
     }
 
     @Test
-    @Ignore("magenta-custom")
     fun freshUserCanCompleteIdentityVerificationAndCheckout() {
         val user = page.registerAndAuthenticateFreshUser(country = "US")
 
@@ -78,7 +75,6 @@ internal class OnrampFlowTest {
     }
 
     @Test
-    @Ignore("magenta-custom")
     fun freshUserIdentityVerificationCanFailAndBeRetried() {
         val user = page.registerAndAuthenticateFreshUser(country = "US")
 
@@ -90,7 +86,6 @@ internal class OnrampFlowTest {
     }
 
     @Test
-    @Ignore("magenta-custom")
     fun freshUserAttestationCanBeCanceledAndConfirmed() {
         val user = page.registerAndAuthenticateFreshUser(country = "MT")
 
@@ -102,7 +97,6 @@ internal class OnrampFlowTest {
     }
 
     @Test
-    @Ignore("magenta-custom")
     fun freshUserTaxIdentifiersCanBeValidatedAndSubmitted() {
         val user = page.registerAndAuthenticateFreshUser(country = "MT")
 
