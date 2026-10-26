@@ -3,6 +3,8 @@
 NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
 
+## 23.25.1 - 2026-10-26
+
 ### PaymentSheet
 * [FIXED][15100](https://github.com/stripe/stripe-android/pull/15100) Fixed an issue where error messages could disappear from the PaymentSheet after returning from Link.
 
