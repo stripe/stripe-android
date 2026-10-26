@@ -98,7 +98,6 @@ import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState.UserErrorMessage
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddAnotherPaymentMethod
-import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPaymentMethod
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.Args
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcCompletionState
@@ -113,7 +112,7 @@ import com.stripe.android.paymentsheet.state.PaymentSheetLoadingException.Paymen
 import com.stripe.android.paymentsheet.state.WalletLocation
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.ui.CardBrandChoice
-import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_FORM_TEST_TAG
+import com.stripe.android.paymentsheet.ui.FORM_ELEMENT_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PaymentSheetScreen
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
@@ -1561,7 +1560,7 @@ internal class PaymentSheetViewModelTest {
         val viewModel = createViewModel(customer = EMPTY_CUSTOMER_STATE)
         viewModel.savedStateHandle[SAVE_PROCESSING] = true
         viewModel.navigationHandler.currentScreen.test {
-            assertThat(awaitItem()).isInstanceOf<AddFirstPaymentMethod>()
+            assertThat(awaitItem()).isInstanceOf<PaymentSheetScreen.VerticalModeForm>()
             viewModel.handleBackPressed()
         }
     }
@@ -1570,7 +1569,7 @@ internal class PaymentSheetViewModelTest {
     fun `handleBackPressed delivers cancelled when pressing back on last screen`() = runTest {
         val viewModel = createViewModel(customer = EMPTY_CUSTOMER_STATE)
         viewModel.navigationHandler.currentScreen.test {
-            assertThat(awaitItem()).isInstanceOf<AddFirstPaymentMethod>()
+            assertThat(awaitItem()).isInstanceOf<PaymentSheetScreen.VerticalModeForm>()
             viewModel.paymentSheetResult.test {
                 viewModel.handleBackPressed()
                 assertThat(awaitItem()).isEqualTo(PaymentSheetResult.Canceled())
@@ -1594,11 +1593,49 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `current screen is AddFirstPaymentMethod if payment methods is empty`() = runTest {
+    fun `current screen is VerticalModeForm if only card is supported and payment methods is empty`() = runTest {
         val viewModel = createViewModel(customer = EMPTY_CUSTOMER_STATE)
 
         viewModel.navigationHandler.currentScreen.test {
-            assertThat(awaitItem()).isInstanceOf<AddFirstPaymentMethod>()
+            assertThat(awaitItem()).isInstanceOf<PaymentSheetScreen.VerticalModeForm>()
+        }
+    }
+
+    @Test
+    fun `single non-card payment method uses vertical form without saved methods in automatic`() = runTest {
+        val viewModel = createViewModel(
+            args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
+                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.newBuilder()
+                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Automatic)
+                    .build(),
+            ),
+            stripeIntent = PAYMENT_INTENT.copy(paymentMethodTypes = listOf("cashapp")),
+            customer = EMPTY_CUSTOMER_STATE,
+        )
+
+        assertThat(viewModel.supportedPaymentMethodTypes).containsExactly("cashapp")
+
+        viewModel.navigationHandler.currentScreen.test {
+            assertThat(awaitItem()).isInstanceOf<PaymentSheetScreen.VerticalModeForm>()
+        }
+    }
+
+    @Test
+    fun `single non-card payment method uses vertical form without saved methods in horizontal`() = runTest {
+        val viewModel = createViewModel(
+            args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
+                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.newBuilder()
+                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
+                    .build(),
+            ),
+            stripeIntent = PAYMENT_INTENT.copy(paymentMethodTypes = listOf("cashapp")),
+            customer = EMPTY_CUSTOMER_STATE,
+        )
+
+        assertThat(viewModel.supportedPaymentMethodTypes).containsExactly("cashapp")
+
+        viewModel.navigationHandler.currentScreen.test {
+            assertThat(awaitItem()).isInstanceOf<PaymentSheetScreen.VerticalModeForm>()
         }
     }
 
@@ -1683,7 +1720,7 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `Sends correct event when navigating to AddFirstPaymentMethod screen`() = runTest {
+    fun `Sends correct event when navigating to initial form screen`() = runTest {
         val viewModel = createViewModel(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             customer = null,
@@ -1699,7 +1736,7 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `Sends correct event when navigating to AddFirstPaymentMethod screen with Link enabled`() = runTest {
+    fun `Sends correct event when navigating to initial form screen with Link enabled`() = runTest {
         val viewModel = createViewModel(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             linkState = LinkState(
@@ -1728,7 +1765,7 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `Sends correct event when navigating to AddFirstPaymentMethod screen with active Link session`() = runTest {
+    fun `Sends correct event when navigating to initial form screen with active Link session`() = runTest {
         val viewModel = createViewModel(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             linkState = LinkState(
@@ -2076,7 +2113,7 @@ internal class PaymentSheetViewModelTest {
         val initialScreen = viewModel.navigationHandler.currentScreen.value
         composeRule.setContent { PaymentSheetScreen(viewModel) }
         composeRule.waitForIdle()
-        composeRule.onNodeWithTag(PAYMENT_SHEET_FORM_TEST_TAG).assertIsDisplayed()
+        composeRule.onNodeWithTag(FORM_ELEMENT_TEST_TAG).assertIsDisplayed()
         assertThat(viewModel.selection.value).isNull()
         returnFromWebLinkWithWallet(viewModel)
 
@@ -2098,7 +2135,7 @@ internal class PaymentSheetViewModelTest {
         assertThat(viewModel.navigationHandler.currentScreen.value).isSameInstanceAs(initialScreen)
         assertThat(viewModel.selection.value).isNull()
         assertThat(viewModel.walletsProcessingState.value).isEqualTo(WalletsProcessingState.Idle(message))
-        composeRule.onNodeWithTag(PAYMENT_SHEET_FORM_TEST_TAG).assertIsDisplayed()
+        composeRule.onNodeWithTag(FORM_ELEMENT_TEST_TAG).assertIsDisplayed()
         composeRule.onNodeWithText("We don't accept this card").assertIsDisplayed()
 
         viewModel.updateSelection(CARD_PAYMENT_SELECTION)
@@ -2141,7 +2178,7 @@ internal class PaymentSheetViewModelTest {
         confirmationState.value = ConfirmationHandler.State.Confirming(linkOption)
         assertThat(viewModel.contentVisible.value).isFalse()
         composeRule.waitForIdle()
-        composeRule.onNodeWithTag(PAYMENT_SHEET_FORM_TEST_TAG).assertDoesNotExist()
+        composeRule.onNodeWithTag(FORM_ELEMENT_TEST_TAG).assertDoesNotExist()
 
         val walletPaymentMethod = CARD_PAYMENT_METHOD.copy(
             card = CARD_PAYMENT_METHOD.card?.copy(wallet = Wallet.LinkWallet("4242")),
