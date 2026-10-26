@@ -143,17 +143,17 @@ internal class CheckoutAnalyticsPerformerTest {
     }
 
     @Test
-    fun `internal failure is filtered from confirmation analytics`() = assertFailureNotReported(
+    fun `internal failure reports a confirmation event`() = assertFailureReported(
         ConfirmationHandler.Result.Failed.ErrorType.Internal,
     )
 
     @Test
-    fun `merchant integration failure is filtered from confirmation analytics`() = assertFailureNotReported(
+    fun `merchant integration failure reports a confirmation event`() = assertFailureReported(
         ConfirmationHandler.Result.Failed.ErrorType.MerchantIntegration,
     )
 
     @Test
-    fun `fatal failure is filtered from confirmation analytics`() = assertFailureNotReported(
+    fun `fatal failure reports a confirmation event`() = assertFailureReported(
         ConfirmationHandler.Result.Failed.ErrorType.Fatal,
     )
 
@@ -303,7 +303,7 @@ internal class CheckoutAnalyticsPerformerTest {
         )
     }
 
-    private fun assertFailureNotReported(type: ConfirmationHandler.Result.Failed.ErrorType) = runScenario {
+    private fun assertFailureReported(type: ConfirmationHandler.Result.Failed.ErrorType) = runScenario {
         startReporting()
         performer.onPaymentElementConfirmationStarted(PaymentSelection.GooglePay)
 
@@ -315,8 +315,18 @@ internal class CheckoutAnalyticsPerformerTest {
             )
         )
 
-        analyticsRequestExecutor.requestTurbine.expectNoEvents()
-        assertThat(durationProvider.has(FakeDurationProvider.Call.End(DurationProvider.Key.Checkout))).isFalse()
+        val request = analyticsRequestExecutor.awaitAndAssertConfirmationRequest(
+            ExpectedEvent(
+                event = "checkout_elements.confirm.failed",
+                publishableKey = DEFAULT_METADATA_PUBLISHABLE_KEY,
+                params = mapOf(
+                    "selected_lpm" to "google_pay",
+                    "error_type" to "java.lang.IllegalStateException",
+                    "duration" to 2f,
+                ),
+            ),
+        )
+        assertThat(request.toString()).doesNotContain("private failure details")
     }
 
     private fun linkMetadata(loginState: LinkState.LoginState): PaymentMethodMetadata =
