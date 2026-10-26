@@ -43,9 +43,13 @@ import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.forms.FormFieldEntry
+import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -66,6 +70,111 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     @get:Rule
     val ruleChain: RuleChain = RuleChain.emptyRuleChain()
         .around(closeInteractorRule)
+
+    @Test
+    fun `initial state and payment method rows are shared by readers and collectors`() {
+        val formTypeCalls = Turbine<String>()
+        val mandateCalls = Turbine<Pair<ResolvableString?, Boolean>>()
+        runScenario(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    paymentMethodTypes = listOf("card", "klarna"),
+                ),
+            ),
+            formTypeForCode = {
+                formTypeCalls.add(it)
+                FormHelper.FormType.Empty
+            },
+            updateMandateText = { mandate, showAbove -> mandateCalls.add(mandate to showAbove) },
+            walletsStateOverride = stateFlowOf(linkAndGooglePayWalletState).mapAsStateFlow { wallets ->
+                // Production wallet state creates fresh callbacks on each read and collection.
+                wallets.copy(
+                    onGooglePayPressed = { wallets.onGooglePayPressed() },
+                    onLinkPressed = { wallets.onLinkPressed() },
+                )
+            },
+            dispatcher = StandardTestDispatcher(testDispatcher.scheduler),
+        ) {
+            val initialState = interactor.state.value
+            assertThat(interactor.state.value).isSameInstanceAs(initialState)
+
+            interactor.state.test {
+                assertThat(awaitItem()).isSameInstanceAs(initialState)
+                testScope.testScheduler.advanceUntilIdle()
+                expectNoEvents()
+
+                interactor.state.test {
+                    assertThat(awaitItem()).isSameInstanceAs(initialState)
+
+                    processingSource.value = true
+                    testScope.testScheduler.advanceUntilIdle()
+
+                    val updatedState = awaitItem()
+                    assertThat(updatedState.isProcessing).isTrue()
+                    assertThat(updatedState.displayablePaymentMethods)
+                        .isSameInstanceAs(initialState.displayablePaymentMethods)
+                    assertThat(updatedState).isSameInstanceAs(interactor.state.value)
+                }
+
+                assertThat(awaitItem()).isSameInstanceAs(interactor.state.value)
+            }
+
+            assertThat(formTypeCalls.awaitItem()).isEqualTo("klarna")
+            assertThat(mandateCalls.awaitItem()).isEqualTo(null to true)
+        }
+        formTypeCalls.ensureAllEventsConsumed()
+        mandateCalls.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `source updates before collectors start are reflected in state`() {
+        runScenario(dispatcher = StandardTestDispatcher(testDispatcher.scheduler)) {
+            assertThat(interactor.state.value.isProcessing).isFalse()
+            assertThat(interactor.state.value.displayedSavedPaymentMethod).isNull()
+
+            processingSource.value = true
+            paymentMethodsSource.value = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+            mostRecentlySelectedSavedPaymentMethodSource.value = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+
+            testScope.testScheduler.advanceUntilIdle()
+
+            interactor.state.test {
+                val state = awaitItem()
+                assertThat(state.isProcessing).isTrue()
+                assertThat(state.displayedSavedPaymentMethod?.paymentMethod)
+                    .isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+            }
+        }
+    }
+
+    @Test
+    fun `inline wallet updates refresh the row and its click action`() {
+        val walletsState = MutableStateFlow(
+            linkAndGooglePayWalletState.copy(walletsAllowedInHeader = emptyList())
+        )
+        runScenario(walletsStateOverride = walletsState) {
+            interactor.state.test {
+                val initialLinkRow = awaitItem().displayablePaymentMethods.first { it.code == "link" }
+                assertThat(initialLinkRow.subtitle).isEqualTo("email@email.com".resolvableString)
+
+                walletsState.value = walletsState.value.copy(
+                    link = WalletsState.Link(
+                        state = LinkButtonState.Email("updated@email.com"),
+                        linkBrand = LinkBrand.Onelink,
+                    )
+                )
+
+                val updatedLinkRow = awaitItem().displayablePaymentMethods.first { it.code == "link" }
+                assertThat(updatedLinkRow.subtitle).isEqualTo("updated@email.com".resolvableString)
+                updatedLinkRow.onClick()
+
+                assertThat(awaitItem().selection)
+                    .isEqualTo(PaymentMethodVerticalLayoutInteractor.Selection.New("link"))
+                assertThat(selectionSource.value).isEqualTo(PaymentSelection.Link(brand = LinkBrand.Onelink))
+                assertThat(updateSelectionTurbine.awaitItem()).isFalse()
+            }
+        }
+    }
 
     @Test
     fun state_updatesWhenProcessingUpdates() = runScenario(
@@ -95,14 +204,18 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                 PaymentMethodFixtures.CARD_PAYMENT_METHOD.id,
             )
 
-            // Emits twice: once through displayedSavedPaymentMethod, then from the selection state itself.
-            assertThat(awaitItem().displayedSavedPaymentMethod?.isSelectionPending).isTrue()
-            assertThat(awaitItem().displayedSavedPaymentMethod?.isSelectionPending).isTrue()
+            val pendingState = awaitItem()
+            assertThat(pendingState.displayedSavedPaymentMethod?.isSelectionPending).isTrue()
+            assertThat(pendingState.savedPaymentMethodSelectionState)
+                .isEqualTo(savedPaymentMethodSelectionStateSource.value)
+            expectNoEvents()
 
             savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Idle
 
-            assertThat(awaitItem().displayedSavedPaymentMethod?.isSelectionPending).isFalse()
-            assertThat(awaitItem().displayedSavedPaymentMethod?.isSelectionPending).isFalse()
+            val idleState = awaitItem()
+            assertThat(idleState.displayedSavedPaymentMethod?.isSelectionPending).isFalse()
+            assertThat(idleState.savedPaymentMethodSelectionState).isEqualTo(SavedPaymentMethodSelectionState.Idle)
+            expectNoEvents()
         }
     }
 
@@ -123,15 +236,15 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                 PaymentMethodFixtures.CARD_PAYMENT_METHOD.id,
             )
 
-            // Entering or leaving Pending emits twice: once through displayedSavedPaymentMethod, then
-            // from the selection state itself.
-            assertThat(awaitItem().displayedSavedPaymentMethod?.isSelectionPending).isTrue()
-            assertThat(awaitItem().savedPaymentMethodSelectionState.error).isNull()
+            val pendingState = awaitItem()
+            assertThat(pendingState.displayedSavedPaymentMethod?.isSelectionPending).isTrue()
+            assertThat(pendingState.savedPaymentMethodSelectionState.error).isNull()
 
             savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Failed(error)
 
-            assertThat(awaitItem().displayedSavedPaymentMethod?.isSelectionPending).isFalse()
-            assertThat(awaitItem().savedPaymentMethodSelectionState.error).isEqualTo(error)
+            val failedState = awaitItem()
+            assertThat(failedState.displayedSavedPaymentMethod?.isSelectionPending).isFalse()
+            assertThat(failedState.savedPaymentMethodSelectionState.error).isEqualTo(error)
 
             savedPaymentMethodSelectionStateSource.value = SavedPaymentMethodSelectionState.Idle
 
@@ -2062,6 +2175,8 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         displaysMandatesInFormScreen: Boolean = false,
         updateMandateText: ((mandateText: ResolvableString?, showAbove: Boolean) -> Unit)? = null,
         promotionsHelper: PaymentMethodMessagePromotionsHelper? = null,
+        dispatcher: TestDispatcher = testDispatcher,
+        walletsStateOverride: StateFlow<WalletsState?>? = null,
         testBlock: suspend TestParams.() -> Unit
     ) {
         val processing: MutableStateFlow<Boolean> = MutableStateFlow(initialProcessing)
@@ -2116,7 +2231,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             paymentMethods = paymentMethods,
             mostRecentlySelectedSavedPaymentMethod = mostRecentlySelectedSavedPaymentMethod,
             canRemove = canRemove,
-            walletsState = walletsState,
+            walletsState = walletsStateOverride ?: walletsState,
             canUpdateCardExpiryAndBillingDetails = stateFlowOf(canUpdateCardExpiryAndBillingDetails),
             canChangeCbc = stateFlowOf(canChangeCbc),
             updateSelection = { paymentSelection ->
@@ -2134,8 +2249,8 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                 onUpdatePaymentMethodTurbine.add(paymentMethod)
             },
             shouldUpdateVerticalModeSelection = shouldUpdateVerticalModeSelection,
-            coroutineScope = TestScope(testDispatcher),
-            mainDispatcher = testDispatcher,
+            coroutineScope = TestScope(dispatcher),
+            mainDispatcher = dispatcher,
             displaysMandatesInFormScreen = displaysMandatesInFormScreen,
             onInitiallyDisplayedPaymentMethodVisibilitySnapshot = { visibleItems, hiddenItems ->
                 visibilitySnapshotTurbine.add(

@@ -230,46 +230,51 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
 
     private val supportedPaymentMethods = paymentMethodMetadata.sortedSupportedPaymentMethods()
 
-    private val displayedSavedPaymentMethod = combineAsStateFlow(
+    private val savedPaymentMethodState = combineAsStateFlow(
         paymentMethods,
         mostRecentlySelectedSavedPaymentMethod,
         savedPaymentMethodSelectionState,
-    ) { paymentMethods, mostRecentlySelectedSavedPaymentMethod, selectionState ->
-        getDisplayedSavedPaymentMethod(
+        canRemove,
+        canUpdateCardExpiryAndBillingDetails,
+        canChangeCbc,
+    ) { paymentMethods, mostRecentlySelectedSavedPaymentMethod, selectionState,
+        canRemove, canUpdateCardExpiryAndBillingDetails, canChangeCbc ->
+        val displayedSavedPaymentMethod = getDisplayedSavedPaymentMethod(
             paymentMethods = paymentMethods,
             paymentMethodMetadata = paymentMethodMetadata,
             mostRecentlySelectedSavedPaymentMethod = mostRecentlySelectedSavedPaymentMethod,
             selectionState = selectionState,
         )
-    }
-
-    private val availableSavedPaymentMethodAction = combineAsStateFlow(
-        paymentMethods,
-        displayedSavedPaymentMethod,
-        canRemove,
-        canUpdateCardExpiryAndBillingDetails,
-        canChangeCbc,
-    ) { paymentMethods,
-        displayedSavedPaymentMethod,
-        canRemove,
-        canUpdateCardExpiryAndBillingDetails,
-        canChangeCbc ->
-        getAvailableSavedPaymentMethodAction(
-            paymentMethods = paymentMethods,
-            savedPaymentMethod = displayedSavedPaymentMethod,
-            canRemove = canRemove,
-            canUpdateCardExpiryAndBillingDetails = canUpdateCardExpiryAndBillingDetails,
-            canChangeCbc = canChangeCbc,
+        SavedPaymentMethodState(
+            displayedSavedPaymentMethod = displayedSavedPaymentMethod,
+            selectionState = selectionState,
+            action = getAvailableSavedPaymentMethodAction(
+                paymentMethods = paymentMethods,
+                savedPaymentMethod = displayedSavedPaymentMethod,
+                canRemove = canRemove,
+                canUpdateCardExpiryAndBillingDetails = canUpdateCardExpiryAndBillingDetails,
+                canChangeCbc = canChangeCbc,
+            ),
         )
     }
 
-    private val displayablePaymentMethods = combineAsStateFlow(
+    private val displayablePaymentMethodInputs = combineAsStateFlow(
         paymentMethods,
         walletsState,
         paymentMethodIncentiveInteractor.displayedIncentive,
     ) { paymentMethods, walletsState, incentive ->
-        getDisplayablePaymentMethods(paymentMethods, walletsState, incentive)
+        DisplayablePaymentMethodInputs(
+            paymentMethods = paymentMethods,
+            inlineWallets = walletsState?.wallets(WalletLocation.INLINE).orEmpty(),
+            incentive = incentive,
+        )
     }
+    private val initialDisplayablePaymentMethodInputs = displayablePaymentMethodInputs.value
+
+    // Rows contain callbacks, so rebuilding identical inputs would also produce unequal state.
+    private val displayablePaymentMethods = MutableStateFlow(
+        getDisplayablePaymentMethods(initialDisplayablePaymentMethodInputs)
+    )
 
     private val expectedItemsForVisibilityTracking = combineAsStateFlow(
         paymentMethods,
@@ -283,17 +288,20 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         )
     }
 
-    override val state: StateFlow<PaymentMethodVerticalLayoutInteractor.State> = combineAsStateFlow(
+    private val stateInputs = combineAsStateFlow(
         displayablePaymentMethods,
         processing,
         verticalModeScreenSelection,
-        displayedSavedPaymentMethod,
-        savedPaymentMethodSelectionState,
-        availableSavedPaymentMethodAction,
+        savedPaymentMethodState,
         temporarySelection,
         linkAccount,
-    ) { displayablePaymentMethods, isProcessing, mostRecentSelection, displayedSavedPaymentMethod,
-        savedPaymentMethodSelectionState, action, temporarySelectionCode, linkAccount ->
+        ::StateInputs,
+    )
+    private val initialStateInputs = stateInputs.value
+    private val _state = MutableStateFlow(createState(initialStateInputs))
+    override val state: StateFlow<PaymentMethodVerticalLayoutInteractor.State> = _state
+
+    private fun createState(inputs: StateInputs): PaymentMethodVerticalLayoutInteractor.State = with(inputs) {
         val temporarySelection = if (temporarySelectionCode != null) {
             val changeDetails = if (temporarySelectionCode == mostRecentSelection?.code()) {
                 (mostRecentSelection as? PaymentSelection.New?)?.changeDetails()
@@ -312,9 +320,9 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             displayablePaymentMethods = displayablePaymentMethods,
             isProcessing = isProcessing,
             selection = temporarySelection ?: mostRecentSelection?.asVerticalSelection(),
-            displayedSavedPaymentMethod = displayedSavedPaymentMethod,
-            savedPaymentMethodSelectionState = savedPaymentMethodSelectionState,
-            availableSavedPaymentMethodAction = action,
+            displayedSavedPaymentMethod = savedPaymentMethodState.displayedSavedPaymentMethod,
+            savedPaymentMethodSelectionState = savedPaymentMethodState.selectionState,
+            availableSavedPaymentMethodAction = savedPaymentMethodState.action,
             mandate = getMandate(temporarySelectionCode, mostRecentSelection),
             linkBrand = paymentMethodMetadata.effectiveLinkBrand(linkAccount.account),
         )
@@ -325,6 +333,27 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     }
 
     init {
+        coroutineScope.launch(mainDispatcher) {
+            // Collection replays the inputs used to build the initial rows. Only transform changed inputs.
+            var previousInputs = initialDisplayablePaymentMethodInputs
+            displayablePaymentMethodInputs.collect { inputs ->
+                if (inputs != previousInputs) {
+                    previousInputs = inputs
+                    displayablePaymentMethods.value = getDisplayablePaymentMethods(inputs)
+                }
+            }
+        }
+
+        coroutineScope.launch(mainDispatcher) {
+            var previousInputs = initialStateInputs
+            stateInputs.collect { inputs ->
+                if (inputs != previousInputs) {
+                    previousInputs = inputs
+                    _state.value = createState(inputs)
+                }
+            }
+        }
+
         coroutineScope.launch(mainDispatcher) {
             selection.collect { currentSelection ->
                 if (currentSelection == null && !isCurrentScreen.value) {
@@ -399,10 +428,8 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     }
 
     private fun getDisplayablePaymentMethods(
-        paymentMethods: List<PaymentMethod>,
-        walletsState: WalletsState?,
-        incentive: PaymentMethodIncentive?,
-    ): List<DisplayablePaymentMethod> {
+        inputs: DisplayablePaymentMethodInputs,
+    ): List<DisplayablePaymentMethod> = with(inputs) {
         val lpms = supportedPaymentMethods.map { supportedPaymentMethod ->
             val paymentMethodIncentive = incentive?.takeIfMatches(supportedPaymentMethod.code)
             supportedPaymentMethod.asDisplayablePaymentMethod(
@@ -418,21 +445,41 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             }
         }
 
-        val wallets = getInlineWalletDisplayablePaymentMethods(walletsState)
+        val wallets = getInlineWalletDisplayablePaymentMethods(inlineWallets)
 
-        return wallets + lpms
+        wallets + lpms
     }
 
+    private data class DisplayablePaymentMethodInputs(
+        val paymentMethods: List<PaymentMethod>,
+        val inlineWallets: List<WalletsState.Wallet>,
+        val incentive: PaymentMethodIncentive?,
+    )
+
+    private data class StateInputs(
+        val displayablePaymentMethods: List<DisplayablePaymentMethod>,
+        val isProcessing: Boolean,
+        val mostRecentSelection: PaymentSelection?,
+        val savedPaymentMethodState: SavedPaymentMethodState,
+        val temporarySelectionCode: PaymentMethodCode?,
+        val linkAccount: LinkAccountUpdate.Value,
+    )
+
+    private data class SavedPaymentMethodState(
+        val displayedSavedPaymentMethod: DisplayableSavedPaymentMethod?,
+        val selectionState: SavedPaymentMethodSelectionState,
+        val action: PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction,
+    )
+
     private fun getInlineWalletDisplayablePaymentMethods(
-        walletsState: WalletsState?,
+        wallets: List<WalletsState.Wallet>,
     ): List<DisplayablePaymentMethod> {
-        return walletsState?.wallets(WalletLocation.INLINE)
-            ?.map { wallet ->
-                when (wallet) {
-                    is WalletsState.GooglePay -> createGooglePayDisplayablePaymentMethod()
-                    is WalletsState.Link -> createLinkDisplayablePaymentMethod(wallet)
-                }
-            } ?: emptyList()
+        return wallets.map { wallet ->
+            when (wallet) {
+                is WalletsState.GooglePay -> createGooglePayDisplayablePaymentMethod()
+                is WalletsState.Link -> createLinkDisplayablePaymentMethod(wallet)
+            }
+        }
     }
 
     private fun createGooglePayDisplayablePaymentMethod(): DisplayablePaymentMethod {
