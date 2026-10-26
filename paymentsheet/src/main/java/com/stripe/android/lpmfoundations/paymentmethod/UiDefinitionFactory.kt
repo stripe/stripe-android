@@ -17,6 +17,7 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.setupFutureUsage
+import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.paymentsheet.LinkInlineHandler
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
@@ -45,6 +46,20 @@ internal sealed interface UiDefinitionFactory {
         metadata: PaymentMethodMetadata,
         arguments: Arguments,
     ): List<FormElement>
+
+    fun formType(formElementsProvider: () -> List<FormElement>): FormHelper.FormType {
+        val formElements = formElementsProvider()
+        return if (formElements.any { it.allowsUserInteraction }) {
+            FormHelper.FormType.UserInteractionRequired
+        } else {
+            val mandate = formElements.firstNotNullOfOrNull { it.mandateText }
+            if (mandate == null) {
+                FormHelper.FormType.Empty
+            } else {
+                FormHelper.FormType.MandateOnly(mandate)
+            }
+        }
+    }
 
     data class Arguments(
         val coroutineScope: CoroutineScope,
@@ -181,6 +196,10 @@ internal sealed interface UiDefinitionFactory {
     }
 
     interface Custom : UiDefinitionFactory {
+        override fun formType(formElementsProvider: () -> List<FormElement>): FormHelper.FormType {
+            return FormHelper.FormType.UserInteractionRequired
+        }
+
         override fun createFormHeaderInformation(
             metadata: PaymentMethodMetadata,
             customerHasSavedPaymentMethods: Boolean,

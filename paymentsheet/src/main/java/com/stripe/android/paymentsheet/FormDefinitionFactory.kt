@@ -7,7 +7,6 @@ import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
-import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
@@ -35,27 +34,6 @@ internal interface FormDefinitionFactory {
     fun formTypeForCode(paymentMethodCode: PaymentMethodCode): FormHelper.FormType
 }
 
-internal fun formTypeForCode(
-    paymentMethodCode: PaymentMethodCode,
-    formElements: List<FormElement>,
-): FormHelper.FormType {
-    val userInteractionAllowed = formElements.any { it.allowsUserInteraction }
-    val requiresFormScreen = userInteractionAllowed ||
-        paymentMethodCode == PaymentMethod.Type.USBankAccount.code ||
-        paymentMethodCode == PaymentMethod.Type.Link.code
-
-    return if (requiresFormScreen) {
-        FormHelper.FormType.UserInteractionRequired
-    } else {
-        val mandate = formElements.firstNotNullOfOrNull { it.mandateText }
-        if (mandate == null) {
-            FormHelper.FormType.Empty
-        } else {
-            FormHelper.FormType.MandateOnly(mandate)
-        }
-    }
-}
-
 internal class DefaultFormDefinitionFactory(
     private val coroutineScope: CoroutineScope,
     private val linkInlineHandler: LinkInlineHandler,
@@ -76,7 +54,7 @@ internal class DefaultFormDefinitionFactory(
     override fun formElementsForCode(code: PaymentMethodCode): List<FormElement> {
         return synchronized(formTypes) {
             createFormElements(code).also { elements ->
-                formTypes[code] = formTypeForCode(code, elements)
+                formTypes[code] = paymentMethodMetadata.formTypeForCode(code) { elements }
             }
         }
     }
@@ -108,7 +86,9 @@ internal class DefaultFormDefinitionFactory(
     override fun formTypeForCode(paymentMethodCode: PaymentMethodCode): FormHelper.FormType {
         return synchronized(formTypes) {
             formTypes.getOrPut(paymentMethodCode) {
-                formTypeForCode(paymentMethodCode, createFormElements(paymentMethodCode))
+                paymentMethodMetadata.formTypeForCode(paymentMethodCode) {
+                    createFormElements(paymentMethodCode)
+                }
             }
         }
     }

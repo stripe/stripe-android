@@ -30,17 +30,19 @@ internal class DefaultFormDefinitionFactoryTest {
             assertThat(factory.formTypeForCode("card")).isEqualTo(FormHelper.FormType.UserInteractionRequired)
         }
         assertThat(selectionProvider.calls.awaitItem()).isEqualTo("cashapp")
-        assertThat(selectionProvider.calls.awaitItem()).isEqualTo("card")
+        selectionProvider.calls.expectNoEvents()
     }
 
     @Test
-    fun `real form seeds classification cache`() = runScenario {
-        val elements = factory.formElementsForCode("card")
+    fun `real form seeds classification cache`() = runScenario(
+        metadata = metadataWithEmail(),
+    ) {
+        val elements = factory.formElementsForCode("cashapp")
         assertThat(elements).isNotEmpty()
-        assertThat(selectionProvider.calls.awaitItem()).isEqualTo("card")
+        assertThat(selectionProvider.calls.awaitItem()).isEqualTo("cashapp")
 
         repeat(3) {
-            assertThat(factory.formTypeForCode("card")).isEqualTo(formTypeForCode("card", elements))
+            assertThat(factory.formTypeForCode("cashapp")).isEqualTo(FormHelper.FormType.UserInteractionRequired)
         }
         selectionProvider.calls.expectNoEvents()
     }
