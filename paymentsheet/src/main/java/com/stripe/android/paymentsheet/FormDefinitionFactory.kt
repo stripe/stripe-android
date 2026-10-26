@@ -71,7 +71,17 @@ internal class DefaultFormDefinitionFactory(
     private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper?,
     private val isNfcScanningAvailable: IsNfcScanningAvailable?,
 ) : FormDefinitionFactory {
+    private val formTypes = mutableMapOf<String, FormHelper.FormType>()
+
     override fun formElementsForCode(code: PaymentMethodCode): List<FormElement> {
+        return synchronized(formTypes) {
+            createFormElements(code).also { elements ->
+                formTypes[code] = formTypeForCode(code, elements)
+            }
+        }
+    }
+
+    private fun createFormElements(code: PaymentMethodCode): List<FormElement> {
         return paymentMethodMetadata.formElementsForCode(
             code = code,
             uiDefinitionFactoryArgumentsFactory = createArgumentsFactory(code),
@@ -96,8 +106,11 @@ internal class DefaultFormDefinitionFactory(
     }
 
     override fun formTypeForCode(paymentMethodCode: PaymentMethodCode): FormHelper.FormType {
-        val formElements = formElementsForCode(paymentMethodCode)
-        return formTypeForCode(paymentMethodCode, formElements)
+        return synchronized(formTypes) {
+            formTypes.getOrPut(paymentMethodCode) {
+                formTypeForCode(paymentMethodCode, createFormElements(paymentMethodCode))
+            }
+        }
     }
 
     private fun createArgumentsFactory(code: PaymentMethodCode): UiDefinitionFactory.Arguments.Factory {
