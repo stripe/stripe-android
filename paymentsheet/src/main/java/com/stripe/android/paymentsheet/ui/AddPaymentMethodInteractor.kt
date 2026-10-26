@@ -176,6 +176,10 @@ internal class DefaultAddPaymentMethodInteractor(
 
         coroutineScope.launch {
             selectedPaymentMethodCode.collect { newSelectedPaymentMethodCode ->
+                if (_state.value.selectedPaymentMethodCode == newSelectedPaymentMethodCode) {
+                    return@collect
+                }
+
                 val newFormArguments = createFormArguments(newSelectedPaymentMethodCode)
                 val newFormElements = formElementsForCode(newSelectedPaymentMethodCode)
                 val newUsBankAccountFormArguments = createUSBankAccountFormArguments(newSelectedPaymentMethodCode)

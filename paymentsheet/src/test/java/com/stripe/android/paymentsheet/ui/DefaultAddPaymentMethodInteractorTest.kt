@@ -58,6 +58,30 @@ class DefaultAddPaymentMethodInteractorTest {
         .around(cleanupRule)
 
     @Test
+    fun `starting collectors does not recreate the initial form`() {
+        val formElementsForCodeCalls = Turbine<PaymentMethodCode>()
+        runScenario(
+            formElementsForCode = {
+                formElementsForCodeCalls.add(it)
+                emptyList()
+            },
+        ) {
+            val initialState = interactor.state.value
+            interactor.state.test {
+                assertThat(awaitItem()).isSameInstanceAs(initialState)
+
+                dispatcher.scheduler.advanceUntilIdle()
+
+                expectNoEvents()
+                assertThat(interactor.state.value).isSameInstanceAs(initialState)
+            }
+            assertThat(formElementsForCodeCalls.awaitItem()).isEqualTo(PaymentMethod.Type.Card.code)
+            assertThat(clearErrorMessagesTurbine.awaitItem()).isEqualTo(Unit)
+        }
+        formElementsForCodeCalls.ensureAllEventsConsumed()
+    }
+
+    @Test
     fun handleViewAction_ReportFieldInteraction_reportsFieldInteraction() {
         runScenario {
             val expectedCode = PaymentMethod.Type.CashAppPay.code
