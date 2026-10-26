@@ -59,26 +59,26 @@ allprojects { project ->
     project.plugins.withId('com.android.library', configureAndroidTestOrchestratorResolution)
     project.plugins.withId('com.android.application', configureAndroidTestOrchestratorResolution)
 
-    // if (load.status != 'OK') {
-    //     return
-    // }
+    if (load.status != 'OK') {
+        return
+    }
 
-    // def excludedInstrumentationTestClasses = load.cases
-    //     .collect { testCase -> "${testCase.className}#${testCase.testCaseName}" }
-    //     .join(",")
+    def excludedInstrumentationTestClasses = load.cases
+        .collect { testCase -> "${testCase.className}#${testCase.testCaseName}" }
+        .join(",")
 
-    // if (excludedInstrumentationTestClasses.isEmpty()) {
-    //     return
-    // }
+    if (excludedInstrumentationTestClasses.isEmpty()) {
+        return
+    }
 
-    // def configureAndroidTestExclusions = {
-    //     project.android.defaultConfig.testInstrumentationRunnerArguments.put(
-    //         'notClass',
-    //         excludedInstrumentationTestClasses
-    //     )
-    // }
+    def configureAndroidTestExclusions = {
+        project.android.defaultConfig.testInstrumentationRunnerArguments.put(
+            'notClass',
+            excludedInstrumentationTestClasses
+        )
+    }
 
-    // project.plugins.withId("com.android.application", configureAndroidTestExclusions)
-    // project.plugins.withId("com.android.library", configureAndroidTestExclusions)
-    // project.plugins.withId("com.android.test", configureAndroidTestExclusions)
+    project.plugins.withId("com.android.application", configureAndroidTestExclusions)
+    project.plugins.withId("com.android.library", configureAndroidTestExclusions)
+    project.plugins.withId("com.android.test", configureAndroidTestExclusions)
 }
