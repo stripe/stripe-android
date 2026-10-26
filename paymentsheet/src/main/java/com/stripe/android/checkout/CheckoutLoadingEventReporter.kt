@@ -5,6 +5,7 @@ import com.stripe.android.paymentsheet.analytics.LoadingEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import javax.inject.Inject
 
+// Checkout Elements report loading through Checkout operation events, not mc_load_* events.
 internal class CheckoutLoadingEventReporter @Inject constructor() : LoadingEventReporter {
     override fun onLoadStarted(initializedViaCompose: Boolean, publishableKey: String) = Unit
 

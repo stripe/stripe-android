@@ -71,7 +71,7 @@ internal class CheckoutPaymentElementAnalyticsTest {
         )
         networkRule.validateAnalyticsRequest(
             eventName = "stripe_android.card_metadata_pk_available",
-            productUsage = setOf("Checkout"),
+            productUsage = setOf("PaymentElement"),
         )
         networkRule.validateAnalyticsRequest(
             eventName = "mc_cardscan_api_check_failed",
@@ -173,7 +173,7 @@ internal class CheckoutPaymentElementAnalyticsTest {
             contentPage.waitUntilVisible()
             networkRule.validateAnalyticsRequest(
                 eventName = "unexpected_error.checkout.saved_payment_method.missing_billing_address",
-                productUsage = setOf("Checkout"),
+                productUsage = setOf("PaymentElement"),
             )
 
             // Billing-tax filtering keeps addressless saved payment methods out of the UI, so

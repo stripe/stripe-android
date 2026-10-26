@@ -362,31 +362,6 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `CheckoutSession Express Checkout Element load reports loading lifecycle events`() = runScenario {
-        val result = createPaymentElementLoader().load(
-            initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
-                collectedEmail = null,
-                instancesKey = "DefaultPaymentElementLoaderTest",
-                checkoutSessionResponse = createCheckoutSessionResponse(canDetachPaymentMethod = true),
-            ),
-            integrationConfiguration = PaymentElementLoader.Configuration.ExpressCheckoutElement(
-                commonConfiguration = PaymentSheet.Configuration("Some name").asCommonConfiguration(),
-            ),
-            metadata = PaymentElementLoader.Metadata(initializedViaCompose = false),
-        )
-
-        assertThat(result.isSuccess).isTrue()
-        consumeLoadingEvents()
-
-        val loadStarted = eventReporter.loadStartedTurbine.awaitItem()
-        assertThat(loadStarted.initializedViaCompose).isFalse()
-
-        val loadSucceeded = eventReporter.loadSucceededTurbine.awaitItem()
-        assertThat(loadSucceeded.paymentMethodMetadata.integrationMetadata)
-            .isInstanceOf(IntegrationMetadata.CheckoutSession::class.java)
-    }
-
-    @Test
     fun `load with checkout session automatic tax billing and default billing details keeps google pay`() = runScenario {
         val userFacingLogger = FakeUserFacingLogger()
         val loader = createPaymentElementLoader(

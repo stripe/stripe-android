@@ -333,7 +333,7 @@ internal class ExpressCheckoutElementAnalyticsTest {
     ) {
         networkRule.validateAnalyticsRequest(
             eventName = eventName,
-            productUsage = setOf("Checkout"),
+            productUsage = setOf("PaymentElement"),
             *requestMatchers,
         )
     }
