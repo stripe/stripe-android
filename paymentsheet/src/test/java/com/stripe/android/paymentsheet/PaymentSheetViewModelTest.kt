@@ -3,6 +3,10 @@ package com.stripe.android.paymentsheet
 import android.app.Application
 import android.os.Build
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
@@ -60,6 +64,7 @@ import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.model.wallets.Wallet
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.MutableConfirmationMetadata
@@ -108,6 +113,8 @@ import com.stripe.android.paymentsheet.state.PaymentSheetLoadingException.Paymen
 import com.stripe.android.paymentsheet.state.WalletLocation
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.ui.CardBrandChoice
+import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_FORM_TEST_TAG
+import com.stripe.android.paymentsheet.ui.PaymentSheetScreen
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.cardParamsUpdateAction
@@ -122,6 +129,7 @@ import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.ResetMockRule
 import com.stripe.android.testing.SessionTestRule
+import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.forms.FormFieldEntry
@@ -178,6 +186,12 @@ internal class PaymentSheetViewModelTest {
     private val viewModelStoreRule = ViewModelStoreTestRule()
 
     private val coroutineScopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
+
+    @get:Rule
+    val composeRule = createComposeRule()
+
+    @get:Rule
+    val composeCleanupRule = createComposeCleanupRule()
 
     @get:Rule
     val rule = RuleChain.emptyRuleChain()
@@ -2052,6 +2066,95 @@ internal class PaymentSheetViewModelTest {
 
             assertThat(awaitItem()).isEqualTo(PaymentSheetViewState.Reset(UserErrorMessage(error.resolvableString)))
         }
+    }
+
+    @Test
+    fun `Web Link wallet failure survives replay of unchanged card form selection`() = confirmationTest {
+        Dispatchers.setMain(testDispatcher)
+        val viewModel = createWebLinkDeferredSetupViewModel()
+
+        val initialScreen = viewModel.navigationHandler.currentScreen.value
+        composeRule.setContent { PaymentSheetScreen(viewModel) }
+        composeRule.waitForIdle()
+        composeRule.onNodeWithTag(PAYMENT_SHEET_FORM_TEST_TAG).assertIsDisplayed()
+        assertThat(viewModel.selection.value).isNull()
+        returnFromWebLinkWithWallet(viewModel)
+
+        val message = "We don't accept this card".resolvableString
+        viewModel.viewState.test {
+            awaitItem()
+            confirmationState.value = ConfirmationHandler.State.Complete(
+                ConfirmationHandler.Result.Failed(
+                    cause = IllegalStateException("Deferred setup failed"),
+                    message = message,
+                    type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                )
+            )
+            assertThat(awaitItem()).isEqualTo(PaymentSheetViewState.Reset(UserErrorMessage(message)))
+            composeRule.waitForIdle()
+            cancelAndIgnoreRemainingEvents()
+        }
+
+        assertThat(viewModel.navigationHandler.currentScreen.value).isSameInstanceAs(initialScreen)
+        assertThat(viewModel.selection.value).isNull()
+        assertThat(viewModel.walletsProcessingState.value).isEqualTo(WalletsProcessingState.Idle(message))
+        composeRule.onNodeWithTag(PAYMENT_SHEET_FORM_TEST_TAG).assertIsDisplayed()
+        composeRule.onNodeWithText("We don't accept this card").assertIsDisplayed()
+
+        viewModel.updateSelection(CARD_PAYMENT_SELECTION)
+        composeRule.waitForIdle()
+        assertThat(viewModel.walletsProcessingState.value).isEqualTo(WalletsProcessingState.Idle(null))
+        composeRule.onNodeWithText("We don't accept this card").assertDoesNotExist()
+    }
+
+    private fun FakeConfirmationHandler.Scenario.createWebLinkDeferredSetupViewModel(): PaymentSheetViewModel {
+        val intentConfiguration = PaymentSheet.IntentConfiguration(
+            mode = PaymentSheet.IntentConfiguration.Mode.Setup(
+                setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OnSession,
+            ),
+        )
+        return createViewModel(
+            args = ARGS_DEFERRED_INTENT.copy(
+                initializationMode = InitializationMode.DeferredIntent(intentConfiguration),
+            ),
+            stripeIntent = SETUP_INTENT.copy(
+                id = null,
+                clientSecret = null,
+                paymentMethodTypes = listOf("card"),
+            ),
+            customer = EMPTY_CUSTOMER_STATE,
+            initialPaymentSelection = null,
+            linkState = LinkState(
+                configuration = LINK_CONFIG,
+                loginState = LinkState.LoginState.LoggedOut,
+                signupMode = null,
+            ),
+            confirmationHandlerFactory = { handler },
+        )
+    }
+
+    private suspend fun FakeConfirmationHandler.Scenario.returnFromWebLinkWithWallet(
+        viewModel: PaymentSheetViewModel,
+    ) {
+        viewModel.checkoutWithLink(LinkBrand.Link)
+        val linkOption = startTurbine.awaitItem().confirmationOption
+        confirmationState.value = ConfirmationHandler.State.Confirming(linkOption)
+        assertThat(viewModel.contentVisible.value).isFalse()
+        composeRule.waitForIdle()
+        composeRule.onNodeWithTag(PAYMENT_SHEET_FORM_TEST_TAG).assertDoesNotExist()
+
+        val walletPaymentMethod = CARD_PAYMENT_METHOD.copy(
+            card = CARD_PAYMENT_METHOD.card?.copy(wallet = Wallet.LinkWallet("4242")),
+        )
+        confirmationState.value = ConfirmationHandler.State.Confirming(
+            PaymentMethodConfirmationOption.Saved(
+                shippingInformation = null,
+                paymentMethod = walletPaymentMethod,
+                optionsParams = null,
+                originatedFromWallet = true,
+            )
+        )
+        assertThat(viewModel.contentVisible.value).isTrue()
     }
 
     @Test
