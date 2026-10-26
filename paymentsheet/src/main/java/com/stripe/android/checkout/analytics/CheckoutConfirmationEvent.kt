@@ -15,13 +15,12 @@ internal sealed class CheckoutConfirmationEvent : AnalyticsEvent {
 
     class Succeeded(
         confirmationContext: CheckoutConfirmationContext,
-        requestId: String?,
         analyticsMetadata: AnalyticsMetadata,
         duration: Duration?,
     ) : CheckoutConfirmationEvent() {
         override val eventName: String = "checkout_elements.confirm.succeeded"
         override val params: Map<String, Any> = buildMap {
-            putAll(confirmationParams(confirmationContext, requestId))
+            putAll(confirmationParams(confirmationContext))
             putAll(analyticsMetadata.paramsMap)
             putAll(duration.mapOfDurationInSeconds())
         }
@@ -38,7 +37,8 @@ internal sealed class CheckoutConfirmationEvent : AnalyticsEvent {
             val stripeException = error.cause as? StripeException
             put("error_type", stripeException?.stripeError?.type ?: error.analyticsValue)
             error.errorCode?.let { put("error_code", it) }
-            putAll(confirmationParams(confirmationContext, stripeException?.requestId))
+            stripeException?.requestId?.let { put("request_id", it) }
+            putAll(confirmationParams(confirmationContext))
             putAll(analyticsMetadata.paramsMap)
             putAll(duration.mapOfDurationInSeconds())
         }
@@ -47,14 +47,12 @@ internal sealed class CheckoutConfirmationEvent : AnalyticsEvent {
     private companion object {
         fun confirmationParams(
             confirmationContext: CheckoutConfirmationContext,
-            requestId: String?,
         ): Map<String, Any> = buildMap {
             put("selected_lpm", confirmationContext.paymentSelection.code())
             put("is_saved_payment_method", confirmationContext.paymentSelection.isSaved)
             confirmationContext.paymentSelection.linkContext()?.let { put("link_context", it) }
             put("invocation_source", confirmationContext.invocationSource.code)
             put("active_link_session", confirmationContext.activeLinkSession)
-            requestId?.let { put("request_id", it) }
         }
     }
 }

@@ -34,7 +34,6 @@ internal object CheckoutSessionResponseFactory {
         merchantCountry: String? = "US",
         businessName: String? = "Example, Inc.",
         configId: String? = null,
-        requestId: String? = null,
     ) = CheckoutSessionResponse(
         id = id,
         configId = configId,
@@ -59,7 +58,6 @@ internal object CheckoutSessionResponseFactory {
         requiresBillingAddress = requiresBillingAddress,
         merchantCountry = merchantCountry,
         businessName = businessName,
-        requestId = requestId,
     )
 
     fun checkoutItem(

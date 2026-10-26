@@ -92,8 +92,6 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
             requiresBillingAddress = json.optString("billing_address_collection") == "required",
             merchantCountry = merchantCountry,
             businessName = StripeJsonUtils.optString(elementsJson, "business_name"),
-            // The request ID is an HTTP header, so the repository attaches it after parsing.
-            requestId = null,
         )
     }.getOrNull()
 

@@ -36,17 +36,12 @@ suspend fun <Response : StripeModel> executeRequestWithModelJsonParser(
     )
 }
 
-/**
- * [withRequestId] lets the caller attach the response's [RequestId] to the parsed model, which keeps
- * [ModelJsonParser] body-only.
- */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 suspend fun <Response : StripeModel> executeRequestWithResultParser(
     stripeNetworkClient: StripeNetworkClient,
     stripeErrorJsonParser: StripeErrorJsonParser,
     request: StripeRequest,
     responseJsonParser: ModelJsonParser<Response>,
-    withRequestId: (Response, RequestId?) -> Response = { response, _ -> response },
 ): Result<Response> {
     return runCatching {
         stripeNetworkClient.executeRequest(request)
@@ -60,7 +55,7 @@ suspend fun <Response : StripeModel> executeRequestWithResultParser(
                 }.getOrNull()
 
                 if (parsedResponse != null) {
-                    Result.success(withRequestId(parsedResponse, response.requestId))
+                    Result.success(parsedResponse)
                 } else {
                     Result.failure(
                         APIException(message = "$responseJsonParser returns null for ${response.responseJson()}")
