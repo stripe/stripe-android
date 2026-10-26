@@ -53,6 +53,11 @@ internal class CheckoutAnalyticsPerformerTest {
     fun `payment element confirmation reports success only once`() = runScenario {
         val selection = PaymentSelection.GooglePay
         performer.onPaymentElementConfirmationStarted(selection)
+        assertThat(
+            durationProvider.has(
+                FakeDurationProvider.Call.Start(DurationProvider.Key.Checkout, reset = true)
+            )
+        ).isTrue()
 
         analyticsRequestExecutor.requestTurbine.expectNoEvents()
 
@@ -60,6 +65,7 @@ internal class CheckoutAnalyticsPerformerTest {
 
         val success = successfulResult()
         confirmationHandler.state.value = ConfirmationHandler.State.Complete(success)
+        assertThat(durationProvider.has(FakeDurationProvider.Call.End(DurationProvider.Key.Checkout))).isTrue()
 
         analyticsRequestExecutor.awaitAndAssertConfirmationRequest(
             ExpectedEvent(
@@ -81,6 +87,11 @@ internal class CheckoutAnalyticsPerformerTest {
     fun `payment failure reports safe fields`() = runScenario {
         startReporting()
         performer.onExpressCheckoutElementConfirmationStarted(PaymentSelection.GooglePay)
+        assertThat(
+            durationProvider.has(
+                FakeDurationProvider.Call.Start(DurationProvider.Key.Checkout, reset = true)
+            )
+        ).isTrue()
         val privateMessage = "private payment details"
         val error = APIException(
             stripeError = StripeError(
@@ -98,6 +109,8 @@ internal class CheckoutAnalyticsPerformerTest {
                 type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
             )
         )
+
+        assertThat(durationProvider.has(FakeDurationProvider.Call.End(DurationProvider.Key.Checkout))).isTrue()
 
         val request = analyticsRequestExecutor.awaitAndAssertConfirmationRequest(
             ExpectedEvent(
@@ -168,7 +181,7 @@ internal class CheckoutAnalyticsPerformerTest {
         )
 
         analyticsRequestExecutor.requestTurbine.expectNoEvents()
-        assertThat(durationProvider.has(FakeDurationProvider.Call.End(DurationProvider.Key.Checkout))).isFalse()
+        assertThat(durationProvider.has(FakeDurationProvider.Call.End(DurationProvider.Key.Checkout))).isTrue()
     }
 
     @Test
@@ -316,7 +329,7 @@ internal class CheckoutAnalyticsPerformerTest {
         )
 
         analyticsRequestExecutor.requestTurbine.expectNoEvents()
-        assertThat(durationProvider.has(FakeDurationProvider.Call.End(DurationProvider.Key.Checkout))).isFalse()
+        assertThat(durationProvider.has(FakeDurationProvider.Call.End(DurationProvider.Key.Checkout))).isTrue()
     }
 
     private fun linkMetadata(loginState: LinkState.LoginState): PaymentMethodMetadata =

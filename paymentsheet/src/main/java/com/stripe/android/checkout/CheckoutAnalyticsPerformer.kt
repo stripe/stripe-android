@@ -74,13 +74,14 @@ internal class CheckoutAnalyticsPerformer @Inject constructor(
             ?.metadata?.get(CheckoutSessionResponseKey)
         val response = confirmationResponse ?: stateHolder.state?.checkoutSessionResponse
         val analyticsMetadata = DefaultAnalyticsMetadataFactory.create(response)
+        val duration = durationProvider.end(DurationProvider.Key.Checkout)
 
         when (result) {
             is ConfirmationHandler.Result.Succeeded -> reportEvent(
                 CheckoutConfirmationEvent.Succeeded(
                     confirmationContext = confirmationContext,
                     analyticsMetadata = analyticsMetadata,
-                    duration = durationProvider.end(DurationProvider.Key.Checkout),
+                    duration = duration,
                 )
             )
             is ConfirmationHandler.Result.Failed -> result.toConfirmationError()?.let { error ->
@@ -88,7 +89,7 @@ internal class CheckoutAnalyticsPerformer @Inject constructor(
                     CheckoutConfirmationEvent.Failed(
                         confirmationContext = confirmationContext,
                         analyticsMetadata = analyticsMetadata,
-                        duration = durationProvider.end(DurationProvider.Key.Checkout),
+                        duration = duration,
                         error = error,
                     )
                 )
@@ -126,6 +127,7 @@ internal class CheckoutAnalyticsPerformer @Inject constructor(
             activeLinkSession = linkAccountHolder.linkAccountInfo.value.account?.isVerified
                 ?: (metadata?.linkState?.loginState == LinkState.LoginState.LoggedIn),
         )
+        durationProvider.start(DurationProvider.Key.Checkout, reset = true)
     }
 
     private companion object {
