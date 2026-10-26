@@ -82,6 +82,49 @@ class DefaultAddPaymentMethodInteractorTest {
     }
 
     @Test
+    fun `switching away and back recreates the form for each selected payment method`() {
+        val formElementsForCodeCalls = Turbine<PaymentMethodCode>()
+        runScenario(
+            formElementsForCode = {
+                formElementsForCodeCalls.add(it)
+                emptyList()
+            },
+        ) {
+            dispatcher.scheduler.advanceUntilIdle()
+            assertThat(clearErrorMessagesTurbine.awaitItem()).isEqualTo(Unit)
+            assertThat(formElementsForCodeCalls.awaitItem()).isEqualTo(PaymentMethod.Type.Card.code)
+
+            interactor.state.test {
+                val initialState = awaitItem()
+                assertThat(initialState.selectedPaymentMethodCode).isEqualTo(PaymentMethod.Type.Card.code)
+
+                interactor.handleViewAction(
+                    AddPaymentMethodInteractor.ViewAction.OnPaymentMethodSelected(PaymentMethod.Type.CashAppPay.code)
+                )
+                dispatcher.scheduler.advanceUntilIdle()
+
+                assertThat(awaitItem().selectedPaymentMethodCode).isEqualTo(PaymentMethod.Type.CashAppPay.code)
+                assertThat(formElementsForCodeCalls.awaitItem()).isEqualTo(PaymentMethod.Type.CashAppPay.code)
+                assertThat(reportPaymentMethodTypeSelectedTurbine.awaitItem())
+                    .isEqualTo(PaymentMethod.Type.CashAppPay.code)
+
+                interactor.handleViewAction(
+                    AddPaymentMethodInteractor.ViewAction.OnPaymentMethodSelected(PaymentMethod.Type.Card.code)
+                )
+                dispatcher.scheduler.advanceUntilIdle()
+
+                val returnedState = awaitItem()
+                assertThat(returnedState.selectedPaymentMethodCode).isEqualTo(PaymentMethod.Type.Card.code)
+                assertThat(returnedState.usBankAccountFormArguments)
+                    .isNotSameInstanceAs(initialState.usBankAccountFormArguments)
+                assertThat(formElementsForCodeCalls.awaitItem()).isEqualTo(PaymentMethod.Type.Card.code)
+                assertThat(reportPaymentMethodTypeSelectedTurbine.awaitItem()).isEqualTo(PaymentMethod.Type.Card.code)
+            }
+        }
+        formElementsForCodeCalls.ensureAllEventsConsumed()
+    }
+
+    @Test
     fun handleViewAction_ReportFieldInteraction_reportsFieldInteraction() {
         runScenario {
             val expectedCode = PaymentMethod.Type.CashAppPay.code
