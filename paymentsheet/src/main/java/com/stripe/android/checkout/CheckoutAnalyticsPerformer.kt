@@ -79,7 +79,6 @@ internal class CheckoutAnalyticsPerformer @Inject constructor(
             is ConfirmationHandler.Result.Succeeded -> reportEvent(
                 CheckoutConfirmationEvent.Succeeded(
                     confirmationContext = confirmationContext,
-                    requestId = confirmationResponse?.requestId,
                     analyticsMetadata = analyticsMetadata,
                     duration = durationProvider.end(DurationProvider.Key.Checkout),
                 )

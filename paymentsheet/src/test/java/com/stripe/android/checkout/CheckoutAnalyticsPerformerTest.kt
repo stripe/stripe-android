@@ -273,7 +273,6 @@ internal class CheckoutAnalyticsPerformerTest {
             status = CheckoutSessionResponse.Status.COMPLETE,
             paymentStatus = CheckoutSessionResponse.PaymentStatus.PAID,
             configId = "cfg_confirmed",
-            requestId = "req_confirm",
             elementsSession = elementsSession.copy(
                 stripeIntent = PaymentIntentFixtures.PI_SUCCEEDED,
                 elementsSessionConfigId = "cfg_elements_confirmed",
@@ -299,30 +298,9 @@ internal class CheckoutAnalyticsPerformerTest {
                     "elements_session_config_id" to "cfg_elements_confirmed",
                     "currency" to "usd",
                     "automatic_tax_enabled" to true,
-                    "request_id" to "req_confirm",
                 ),
             ),
         )
-    }
-
-    @Test
-    fun `success without a confirmation response does not report the session request id`() = runScenario {
-        stateHolder.state = stateHolder.state!!.copy(
-            checkoutSessionResponse = CheckoutSessionResponseFactory.create(requestId = "req_init"),
-        )
-        startReporting()
-        performer.onPaymentElementConfirmationStarted(PaymentSelection.GooglePay)
-
-        confirmationHandler.state.value = ConfirmationHandler.State.Complete(successfulResult())
-
-        val params = analyticsRequestExecutor.awaitAndAssertConfirmationRequest(
-            ExpectedEvent(
-                event = "checkout_elements.confirm.succeeded",
-                publishableKey = DEFAULT_METADATA_PUBLISHABLE_KEY,
-                params = emptyMap(),
-            ),
-        )
-        assertThat(params).doesNotContainKey("request_id")
     }
 
     private fun assertFailureNotReported(type: ConfirmationHandler.Result.Failed.ErrorType) = runScenario {
