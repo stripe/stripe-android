@@ -74,6 +74,7 @@ internal class CheckoutGooglePayPaymentDataUpdateCallback @Inject constructor(
         }
 
         return taxRegionUpdater.updateServerStateIfNeeded(
+            clientSecret = currentState.clientSecret,
             checkoutSessionResponse = currentState.checkoutSessionResponse,
             addressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
             address = address,

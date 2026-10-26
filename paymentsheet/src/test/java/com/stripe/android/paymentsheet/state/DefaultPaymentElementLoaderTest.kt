@@ -7,6 +7,7 @@ import com.stripe.android.CardFundingFilter
 import com.stripe.android.GooglePayConfig
 import com.stripe.android.LinkDisallowFundingSourceCreationPreview
 import com.stripe.android.SharedPaymentTokenSessionPreview
+import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.common.analytics.experiment.DefaultPaymentMethodMessagePromotionsExperimentHandler
 import com.stripe.android.common.analytics.experiment.LogFcLiteExperiment
@@ -285,6 +286,7 @@ internal class DefaultPaymentElementLoaderTest {
     fun `load with CheckoutSession mode and non-null customer returns failure`() = runScenario {
         val result = createPaymentElementLoader().load(
             initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+                clientSecret = DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET,
                 collectedEmail = null,
                 instancesKey = "DefaultPaymentElementLoaderTest",
                 checkoutSessionResponse = createCheckoutSessionResponse(canDetachPaymentMethod = true),
@@ -379,6 +381,7 @@ internal class DefaultPaymentElementLoaderTest {
         assertThat(
             loader.load(
                 initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+                    clientSecret = DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET,
                     collectedEmail = null,
                     instancesKey = "DefaultPaymentElementLoaderTest",
                     checkoutSessionResponse = checkoutSessionResponse,
@@ -421,6 +424,7 @@ internal class DefaultPaymentElementLoaderTest {
                 .asCommonConfiguration(),
             elementsSession = requireNotNull(checkoutSessionResponse.elementsSession),
             initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+                clientSecret = DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET,
                 collectedEmail = null,
                 instancesKey = "DefaultPaymentElementLoaderTest",
                 checkoutSessionResponse = checkoutSessionResponse,
@@ -454,6 +458,7 @@ internal class DefaultPaymentElementLoaderTest {
         assertThat(
             loader.load(
                 initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+                    clientSecret = DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET,
                     collectedEmail = null,
                     instancesKey = "DefaultPaymentElementLoaderTest",
                     checkoutSessionResponse = checkoutSessionResponse,
@@ -1857,6 +1862,7 @@ internal class DefaultPaymentElementLoaderTest {
     @Test
     fun `CheckoutSession validate is a no-op`() = runScenario {
         PaymentElementLoader.InitializationMode.CheckoutSession(
+            clientSecret = DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET,
             collectedEmail = null,
             instancesKey = "DefaultPaymentElementLoaderTest",
             checkoutSessionResponse = createCheckoutSessionResponse(canDetachPaymentMethod = true),
@@ -1866,6 +1872,7 @@ internal class DefaultPaymentElementLoaderTest {
     @Test
     fun `CheckoutSession id property returns id from response`() = runScenario {
         val checkoutSession = PaymentElementLoader.InitializationMode.CheckoutSession(
+            clientSecret = DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET,
             collectedEmail = null,
             instancesKey = "DefaultPaymentElementLoaderTest",
             checkoutSessionResponse = createCheckoutSessionResponse(canDetachPaymentMethod = true),
@@ -1876,6 +1883,7 @@ internal class DefaultPaymentElementLoaderTest {
     @Test
     fun `integrationMetadata returns checkout session with id from response`() = runScenario {
         val checkoutSession = PaymentElementLoader.InitializationMode.CheckoutSession(
+            clientSecret = DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET,
             collectedEmail = null,
             instancesKey = "DefaultPaymentElementLoaderTest",
             checkoutSessionResponse = createCheckoutSessionResponse(canDetachPaymentMethod = true),
@@ -1883,6 +1891,7 @@ internal class DefaultPaymentElementLoaderTest {
         assertThat(checkoutSession.integrationMetadata(null))
             .isEqualTo(
                 IntegrationMetadata.CheckoutSession(
+                    clientSecret = DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET,
                     collectedEmail = null,
                     id = checkoutSession.checkoutSessionResponse.id,
                     instancesKey = "DefaultPaymentElementLoaderTest",
@@ -3172,6 +3181,7 @@ internal class DefaultPaymentElementLoaderTest {
 
             val state = loader.load(
                 initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+                    clientSecret = DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET,
                     collectedEmail = null,
                     instancesKey = "DefaultPaymentElementLoaderTest",
                     checkoutSessionResponse = checkoutSessionResponse,
@@ -4346,6 +4356,7 @@ internal class DefaultPaymentElementLoaderTest {
 
         val state = loader.load(
             initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+                clientSecret = DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET,
                 instancesKey = "DefaultPaymentElementLoaderTest",
                 checkoutSessionResponse = response.copy(
                     elementsSession = requireNotNull(response.elementsSession).copy(experimentsData = experimentsData),

@@ -2,6 +2,7 @@ package com.stripe.android.lpmfoundations.paymentmethod
 
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
+import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -98,6 +99,7 @@ internal class AutomaticTaxPaymentMethodRegistryTest {
             externalPaymentMethodSpecs = externalPaymentMethodSpecs,
             displayableCustomPaymentMethods = displayableCustomPaymentMethods,
             integrationMetadata = IntegrationMetadata.CheckoutSession(
+                clientSecret = DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET,
                 collectedEmail = null,
                 id = checkoutSessionResponse.id,
                 instancesKey = "key",

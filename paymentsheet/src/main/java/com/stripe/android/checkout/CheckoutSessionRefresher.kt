@@ -19,7 +19,7 @@ internal interface CheckoutSessionRefresher {
 @OptIn(CheckoutSessionPreview::class)
 internal class DefaultCheckoutSessionRefresher internal constructor(
     private val stateHolder: CheckoutControllerStateHolder,
-    private val fetchResponse: suspend (String, Boolean) -> Result<CheckoutSessionResponse>,
+    private val fetchResponse: suspend (FetchParams) -> Result<CheckoutSessionResponse>,
     private val reloadState: suspend (CheckoutControllerState) -> Unit,
 ) : CheckoutSessionRefresher {
 
@@ -31,11 +31,12 @@ internal class DefaultCheckoutSessionRefresher internal constructor(
         checkoutStateLoader: CheckoutStateLoader,
     ) : this(
         stateHolder = stateHolder,
-        fetchResponse = { sessionId, adaptivePricingAllowed ->
+        fetchResponse = { params ->
             checkoutSessionRepository.init(
                 clientParams = elementsSessionClientParams,
-                sessionId = sessionId,
-                adaptivePricingAllowed = adaptivePricingAllowed,
+                sessionId = params.sessionId,
+                clientSecret = params.clientSecret,
+                adaptivePricingAllowed = params.adaptivePricingAllowed,
             )
         },
         reloadState = checkoutStateLoader::reload,
@@ -44,12 +45,21 @@ internal class DefaultCheckoutSessionRefresher internal constructor(
     override suspend fun refresh() {
         val state = stateHolder.state ?: return
         val response = fetchResponse(
-            state.checkoutSessionResponse.id,
-            state.configuration.currencySelectorElementConfiguration != null,
+            FetchParams(
+                sessionId = state.checkoutSessionResponse.id,
+                clientSecret = state.clientSecret,
+                adaptivePricingAllowed = state.configuration.currencySelectorElementConfiguration != null,
+            )
         ).getOrThrow()
 
         refresh(response)
     }
+
+    data class FetchParams(
+        val sessionId: String,
+        val clientSecret: String,
+        val adaptivePricingAllowed: Boolean,
+    )
 
     override suspend fun refresh(response: CheckoutSessionResponse) {
         val state = stateHolder.state ?: return

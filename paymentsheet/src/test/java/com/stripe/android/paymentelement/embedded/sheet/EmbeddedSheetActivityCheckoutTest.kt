@@ -9,6 +9,7 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.link.LinkAccountUpdate
@@ -291,6 +292,7 @@ internal class EmbeddedSheetActivityCheckoutTest {
                 address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
             ),
             integrationMetadata = IntegrationMetadata.CheckoutSession(
+                clientSecret = DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET,
                 id = checkoutSessionResponse.id,
                 instancesKey = "test_instances_key",
                 checkoutSessionResponse = checkoutSessionResponse,
@@ -298,6 +300,7 @@ internal class EmbeddedSheetActivityCheckoutTest {
             ),
         ).copy(
             customerMetadata = CustomerMetadata.CheckoutSession(
+                clientSecret = DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET,
                 sessionId = checkoutSessionResponse.id,
                 customerId = requireNotNull(selectedCard.customerId),
                 removePaymentMethod = PaymentMethodRemovePermission.Full,

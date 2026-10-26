@@ -3,6 +3,7 @@ package com.stripe.android.checkout
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutController.Address
+import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.core.networking.ApiRequest
@@ -54,6 +55,7 @@ internal class CheckoutSessionTaxRegionUpdaterTest {
     @Test
     fun `updateServerStateIfNeeded updates tax region when automatic tax address source matches`() = runScenario {
         networkRule.checkoutUpdate(
+            bodyPart("client_secret", DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET),
             bodyPart("tax_region[country]", "US"),
             bodyPart("tax_region[line1]", "510 Townsend St"),
             bodyPart("tax_region[city]", "San Francisco"),
@@ -64,6 +66,7 @@ internal class CheckoutSessionTaxRegionUpdaterTest {
         }
 
         val result = updater.updateServerStateIfNeeded(
+            clientSecret = DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET,
             checkoutSessionResponse = checkoutSessionResponse,
             addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
             address = ADDRESS,
@@ -77,6 +80,7 @@ internal class CheckoutSessionTaxRegionUpdaterTest {
         automaticTaxEnabled = false,
     ) {
         val result = updater.updateServerStateIfNeeded(
+            clientSecret = DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET,
             checkoutSessionResponse = checkoutSessionResponse,
             addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
             address = ADDRESS,
@@ -88,6 +92,7 @@ internal class CheckoutSessionTaxRegionUpdaterTest {
     @Test
     fun `updateServerStateIfNeeded returns original response when address source does not match`() = runScenario {
         val result = updater.updateServerStateIfNeeded(
+            clientSecret = DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET,
             checkoutSessionResponse = checkoutSessionResponse,
             addressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
             address = ADDRESS,
@@ -104,6 +109,7 @@ internal class CheckoutSessionTaxRegionUpdaterTest {
         }
 
         val result = updater.updateServerStateIfNeeded(
+            clientSecret = DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET,
             checkoutSessionResponse = checkoutSessionResponse,
             addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
             address = ADDRESS,

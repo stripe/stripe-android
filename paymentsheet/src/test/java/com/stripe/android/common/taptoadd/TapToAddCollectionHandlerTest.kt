@@ -4,6 +4,7 @@ import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardBrandFilter
+import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.common.taptoadd.ui.createTapToAddUxConfiguration
 import com.stripe.android.core.networking.ApiRequest
@@ -218,6 +219,7 @@ class TapToAddCollectionHandlerTest {
             hasCustomerConfiguration = true,
         ).copy(
             customerMetadata = CustomerMetadata.CheckoutSession(
+                clientSecret = DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET,
                 sessionId = "cs_123",
                 customerId = "cus_123",
                 removePaymentMethod = PaymentMethodRemovePermission.Full,

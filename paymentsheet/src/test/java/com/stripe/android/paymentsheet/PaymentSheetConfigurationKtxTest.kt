@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet
 
 import android.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
@@ -360,6 +361,7 @@ class PaymentSheetConfigurationKtxTest {
     fun `'validate' should fail when using CheckoutSession mode with non-null customer`() {
         val configWithCustomer = configuration.asCommonConfiguration()
         val checkoutSessionMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+            clientSecret = DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET,
             collectedEmail = null,
             instancesKey = "PaymentSheetConfigurationKtxTest",
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(
@@ -389,6 +391,7 @@ class PaymentSheetConfigurationKtxTest {
             .build()
             .asCommonConfiguration()
         val checkoutSessionMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+            clientSecret = DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET,
             collectedEmail = null,
             instancesKey = "PaymentSheetConfigurationKtxTest",
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(
@@ -413,6 +416,7 @@ class PaymentSheetConfigurationKtxTest {
             .build()
             .asCommonConfiguration()
         val checkoutSessionMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+            clientSecret = DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET,
             collectedEmail = null,
             instancesKey = "PaymentSheetConfigurationKtxTest",
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(
@@ -437,6 +441,7 @@ class PaymentSheetConfigurationKtxTest {
             .build()
             .asCommonConfiguration()
         val checkoutSessionMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+            clientSecret = DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET,
             collectedEmail = null,
             instancesKey = "PaymentSheetConfigurationKtxTest",
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(
@@ -475,6 +480,7 @@ class PaymentSheetConfigurationKtxTest {
             .build()
             .asCommonConfiguration()
         val checkoutSessionMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+            clientSecret = DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET,
             collectedEmail = null,
             instancesKey = "PaymentSheetConfigurationKtxTest",
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(

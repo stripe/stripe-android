@@ -4,7 +4,7 @@ import app.cash.turbine.Turbine
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 
 internal class FakeCheckoutSessionRefreshActions {
-    val fetchCalls = Turbine<FetchCall>()
+    val fetchCalls = Turbine<DefaultCheckoutSessionRefresher.FetchParams>()
     val reloadCalls = Turbine<CheckoutControllerState>()
     private val fetchResponses = Turbine<() -> Result<CheckoutSessionResponse>>()
 
@@ -13,10 +13,9 @@ internal class FakeCheckoutSessionRefreshActions {
     }
 
     suspend fun fetch(
-        sessionId: String,
-        adaptivePricingAllowed: Boolean,
+        params: DefaultCheckoutSessionRefresher.FetchParams,
     ): Result<CheckoutSessionResponse> {
-        fetchCalls.add(FetchCall(sessionId, adaptivePricingAllowed))
+        fetchCalls.add(params)
         return fetchResponses.awaitItem().invoke()
     }
 
@@ -29,9 +28,4 @@ internal class FakeCheckoutSessionRefreshActions {
         reloadCalls.ensureAllEventsConsumed()
         fetchResponses.ensureAllEventsConsumed()
     }
-
-    data class FetchCall(
-        val sessionId: String,
-        val adaptivePricingAllowed: Boolean,
-    )
 }

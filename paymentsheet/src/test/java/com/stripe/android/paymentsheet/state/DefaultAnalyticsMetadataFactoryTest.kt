@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.state
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.SharedPaymentTokenSessionPreview
+import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.core.ApiConfiguration
@@ -84,6 +85,7 @@ class DefaultAnalyticsMetadataFactoryTest {
         val elementsSession = createElementsSession()
         val response = CheckoutSessionResponseFactory.create(elementsSession = elementsSession)
         val initializationMode = InitializationMode.CheckoutSession(
+            clientSecret = DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET,
             instancesKey = "instances_key",
             checkoutSessionResponse = response,
             collectedEmail = null,

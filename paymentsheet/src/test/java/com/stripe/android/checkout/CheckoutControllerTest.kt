@@ -204,7 +204,11 @@ internal class CheckoutControllerTest {
         clientSecret = "cs_test_custom_secret_example",
         networkSetup = {
             // The request must hit the path for the parsed session id, not the response's id.
-            networkRule.checkoutInit(sessionId = "cs_test_custom", responseFactory = ::successResponse)
+            networkRule.checkoutInit(
+                bodyPart("client_secret", "cs_test_custom_secret_example"),
+                sessionId = "cs_test_custom",
+                responseFactory = ::successResponse,
+            )
         },
     ) {
         assertThat(result.isSuccess).isTrue()
@@ -215,7 +219,10 @@ internal class CheckoutControllerTest {
         result.getOrThrow()
         val state = committedState
         assertThat(state).isNotNull()
-        assertThat(state!!.paymentMethodMetadata).isNotNull()
+        assertThat(state!!.clientSecret).isEqualTo(DEFAULT_CLIENT_SECRET)
+        val integrationMetadata =
+            state.paymentMethodMetadata?.integrationMetadata as IntegrationMetadata.CheckoutSession
+        assertThat(integrationMetadata.clientSecret).isEqualTo(DEFAULT_CLIENT_SECRET)
     }
 
     @Test
@@ -298,6 +305,7 @@ internal class CheckoutControllerTest {
             ),
             networkSetup = {
                 networkRule.checkoutUpdate(
+                    bodyPart("client_secret", DEFAULT_CLIENT_SECRET),
                     bodyPart("tax_region[country]", "US"),
                     bodyPart("tax_region[city]", "Seattle"),
                     bodyPart("tax_region[state]", "WA"),
@@ -472,6 +480,7 @@ internal class CheckoutControllerTest {
             initModifier = automaticTaxFor("shipping"),
             networkSetup = {
                 networkRule.checkoutUpdate(
+                    bodyPart("client_secret", DEFAULT_CLIENT_SECRET),
                     bodyPart("tax_region[country]", "CA"),
                     bodyPart("tax_region[postal_code]", "M5V 3L9"),
                     not(hasBodyPart("tax_region[city]")),
@@ -736,6 +745,13 @@ internal class CheckoutControllerTest {
         val recreated = createController(savedStateHandle.simulateProcessDeath())
 
         assertThat(recreated.session.value?.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
+
+        networkRule.checkoutUpdate(
+            bodyPart("client_secret", DEFAULT_CLIENT_SECRET),
+            bodyPart("promotion_code", "10OFF"),
+            responseFactory = successResponseFactory(),
+        )
+        recreated.applyPromotionCode("10OFF").getOrThrow()
     }
 
     @Test
@@ -753,7 +769,8 @@ internal class CheckoutControllerTest {
         )
         val state = recreated.stateHolder.state
         assertThat(state).isNotNull()
-        assertThat(state!!.embeddedConfiguration?.merchantDisplayName)
+        assertThat(state!!.clientSecret).isEqualTo(DEFAULT_CLIENT_SECRET)
+        assertThat(state.embeddedConfiguration?.merchantDisplayName)
             .isEqualTo(expectedMerchantDisplayName)
     }
 
@@ -827,6 +844,7 @@ internal class CheckoutControllerTest {
             controller.clearPaymentOption().getOrThrow()
             expectNoEvents()
             networkRule.checkoutUpdate(
+                bodyPart("client_secret", DEFAULT_CLIENT_SECRET),
                 bodyPart("promotion_code", "10OFF"),
                 responseFactory = successResponseFactory(inventory),
             )
@@ -872,6 +890,7 @@ internal class CheckoutControllerTest {
         runMutationScenario(paymentSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION) {
             val holdResponse = CountDownLatch(1)
             networkRule.checkoutUpdate(
+                bodyPart("client_secret", DEFAULT_CLIENT_SECRET),
                 bodyPart("promotion_code", "10OFF"),
             ) { response ->
                 holdResponse.await(10, TimeUnit.SECONDS)
@@ -950,6 +969,7 @@ internal class CheckoutControllerTest {
         assertThat((committedState().paymentMethodMetadata?.stripeIntent as? PaymentIntent)?.amount)
             .isNotEqualTo(4099L)
         networkRule.checkoutUpdate(
+            bodyPart("client_secret", DEFAULT_CLIENT_SECRET),
             bodyPart("promotion_code", "10OFF"),
             responseFactory = successResponseFactory(
                 combine(
@@ -974,6 +994,7 @@ internal class CheckoutControllerTest {
     @Test
     fun `applyPromotionCode trims whitespace from promotion code`() = runMutationScenario {
         networkRule.checkoutUpdate(
+            bodyPart("client_secret", DEFAULT_CLIENT_SECRET),
             bodyPart("promotion_code", "10OFF"),
             responseFactory = successResponseFactory(),
         )
@@ -1001,6 +1022,7 @@ internal class CheckoutControllerTest {
     fun `removePromotionCode sends empty promotion code on success`() = runMutationScenario {
         assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isNotEqualTo(8000.0)
         networkRule.checkoutUpdate(
+            bodyPart("client_secret", DEFAULT_CLIENT_SECRET),
             bodyPart("promotion_code", ""),
             responseFactory = successResponseFactory(withTotal(8000)),
         )
@@ -1014,6 +1036,7 @@ internal class CheckoutControllerTest {
     @Test
     fun `updateCurrency sends updated_currency and updates session on success`() = runMutationScenario {
         networkRule.checkoutUpdate(
+            bodyPart("client_secret", DEFAULT_CLIENT_SECRET),
             bodyPart("updated_currency", "usd"),
             responseFactory = successResponseFactory(withTotal(5099)),
         )
@@ -1233,6 +1256,7 @@ internal class CheckoutControllerTest {
     fun `updateShippingAddress sends tax_region and stores address when automatic tax targets shipping`() =
         runMutationScenario(initModifier = automaticTaxFor("shipping")) {
             networkRule.checkoutUpdate(
+                bodyPart("client_secret", DEFAULT_CLIENT_SECRET),
                 bodyPart("tax_region[country]", "US"),
                 bodyPart("tax_region[city]", "Denver"),
                 bodyPart("tax_region[state]", "CO"),
@@ -1258,6 +1282,7 @@ internal class CheckoutControllerTest {
     fun `updateShippingAddress omits empty fields from tax_region request`() =
         runMutationScenario(initModifier = automaticTaxFor("shipping")) {
             networkRule.checkoutUpdate(
+                bodyPart("client_secret", DEFAULT_CLIENT_SECRET),
                 bodyPart("tax_region[country]", "US"),
                 bodyPart("tax_region[postal_code]", "80202"),
                 not(hasBodyPart("tax_region[city]")),
@@ -1309,6 +1334,7 @@ internal class CheckoutControllerTest {
     fun `updateShippingAddress sends country only when clearing shipping tax`() =
         runMutationScenario(initModifier = automaticTaxFor("shipping")) {
             networkRule.checkoutUpdate(
+                bodyPart("client_secret", DEFAULT_CLIENT_SECRET),
                 bodyPart("tax_region[country]", "US"),
                 bodyPart("tax_region[city]", "Denver"),
                 bodyPart("tax_region[state]", "CO"),
@@ -1321,6 +1347,7 @@ internal class CheckoutControllerTest {
             assertThat(committedState().collectedDetails.shippingAddress).isEqualTo(fullAddress.build())
 
             networkRule.checkoutUpdate(
+                bodyPart("client_secret", DEFAULT_CLIENT_SECRET),
                 bodyPart("tax_region[country]", "US"),
                 not(hasBodyPart("tax_region[city]")),
                 not(hasBodyPart("tax_region[state]")),
@@ -1342,6 +1369,7 @@ internal class CheckoutControllerTest {
     fun `updateShippingAddress keeps details when clearing tax fails`() =
         runMutationScenario(initModifier = automaticTaxFor("shipping")) {
             networkRule.checkoutUpdate(
+                bodyPart("client_secret", DEFAULT_CLIENT_SECRET),
                 bodyPart("tax_region[country]", "US"),
                 bodyPart("tax_region[city]", "Denver"),
                 bodyPart("tax_region[state]", "CO"),
@@ -1353,6 +1381,7 @@ internal class CheckoutControllerTest {
             controller.updateShippingAddress(name = "John", address = fullAddress).getOrThrow()
 
             networkRule.checkoutUpdate(
+                bodyPart("client_secret", DEFAULT_CLIENT_SECRET),
                 bodyPart("tax_region[country]", "US"),
                 not(hasBodyPart("tax_region[city]")),
                 not(hasBodyPart("tax_region[state]")),
@@ -1431,6 +1460,7 @@ internal class CheckoutControllerTest {
     fun `runServerUpdate refreshes the session after serverUpdate completes`() = runMutationScenario {
         assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isNotEqualTo(8000.0)
         networkRule.checkoutInit(
+            bodyPart("client_secret", DEFAULT_CLIENT_SECRET),
             responseFactory = successResponseFactory(withTotal(8000)),
         )
 
@@ -1574,6 +1604,7 @@ internal class CheckoutControllerTest {
             val secondRequest = Turbine<Unit>()
             val releaseFirstResponse = CountDownLatch(1)
             networkRule.checkoutUpdate(
+                bodyPart("client_secret", DEFAULT_CLIENT_SECRET),
                 bodyPart("promotion_code", "10OFF"),
             ) { response ->
                 firstRequest.add(Unit)
@@ -1585,6 +1616,7 @@ internal class CheckoutControllerTest {
             // The second mutation must target the session id produced by the first, proving the
             // mutex serialized them (an unserialized call would hit the original id and fail).
             networkRule.checkoutUpdate(
+                bodyPart("client_secret", DEFAULT_CLIENT_SECRET),
                 bodyPart("updated_currency", "eur"),
                 sessionId = "cs_test_after_promo",
             ) { response ->
@@ -1627,6 +1659,7 @@ internal class CheckoutControllerTest {
         runMutationScenario(assertLoadingConsumed = true) {
             val holdMutation = CountDownLatch(1)
             networkRule.checkoutUpdate(
+                bodyPart("client_secret", DEFAULT_CLIENT_SECRET),
                 bodyPart("promotion_code", "10OFF"),
             ) { response ->
                 holdMutation.await(10, TimeUnit.SECONDS)
@@ -1660,6 +1693,7 @@ internal class CheckoutControllerTest {
             initModifier = combine(allowedShippingCountries(listOf("US", "CA")), automaticTaxFor("shipping")),
         ) {
             networkRule.checkoutUpdate(
+                bodyPart("client_secret", DEFAULT_CLIENT_SECRET),
                 bodyPart("tax_region[country]", "US"),
                 bodyPart("elements_session_client[is_aggregation_expected]", "true"),
                 responseFactory = successResponseFactory(
@@ -1757,7 +1791,10 @@ internal class CheckoutControllerTest {
     private fun NetworkRule.enqueueSuccessfulInit(
         jsonModifier: (JSONObject) -> Unit = {},
     ) {
-        checkoutInit(responseFactory = successResponseFactory(jsonModifier))
+        checkoutInit(
+            bodyPart("client_secret", DEFAULT_CLIENT_SECRET),
+            responseFactory = successResponseFactory(jsonModifier),
+        )
     }
 
     private fun NetworkRule.defaultInit() {
@@ -1778,6 +1815,7 @@ internal class CheckoutControllerTest {
 
     private fun NetworkRule.taxRegionUpdate(responseFactory: (MockResponse) -> Unit) {
         checkoutUpdate(
+            bodyPart("client_secret", DEFAULT_CLIENT_SECRET),
             bodyPart("tax_region[country]", "US"),
             bodyPart("tax_region[city]", "San Francisco"),
             bodyPart("tax_region[state]", "CA"),
@@ -1796,6 +1834,7 @@ internal class CheckoutControllerTest {
 
     private fun NetworkRule.defaultBillingAddressTaxUpdate(responseFactory: (MockResponse) -> Unit) {
         checkoutUpdate(
+            bodyPart("client_secret", DEFAULT_CLIENT_SECRET),
             bodyPart("tax_region[country]", "US"),
             bodyPart("tax_region[city]", "San Francisco"),
             bodyPart("tax_region[state]", "CA"),
@@ -1809,6 +1848,7 @@ internal class CheckoutControllerTest {
 
     private fun NetworkRule.defaultShippingAddressTaxUpdate(responseFactory: (MockResponse) -> Unit) {
         checkoutUpdate(
+            bodyPart("client_secret", DEFAULT_CLIENT_SECRET),
             bodyPart("tax_region[country]", "US"),
             bodyPart("tax_region[city]", "Denver"),
             bodyPart("tax_region[state]", "CO"),

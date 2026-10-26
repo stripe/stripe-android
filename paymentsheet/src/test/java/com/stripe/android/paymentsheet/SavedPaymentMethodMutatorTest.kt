@@ -5,6 +5,7 @@ import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.model.LinkAccount
@@ -252,6 +253,7 @@ class SavedPaymentMethodMutatorTest {
     @Test
     fun `removePaymentMethod with CheckoutSession metadata passes CheckoutSession to repository`() {
         val checkoutSessionMetadata = CustomerMetadata.CheckoutSession(
+            clientSecret = DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET,
             sessionId = "cs_test_123",
             customerId = "cus_123",
             removePaymentMethod = PaymentMethodRemovePermission.Full,

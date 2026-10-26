@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.embedded.manage
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -247,7 +248,7 @@ internal class ManageLaunchSavedPaymentMethodSelectorTest {
             setSelection(INITIAL_SELECTION)
         }
         val selector = ManageLaunchSavedPaymentMethodSelector(
-            taxRegionUpdater = SheetTaxRegionUpdater(updateTaxRegion = { _, _, _ -> updateTaxRegion() }),
+            taxRegionUpdater = SheetTaxRegionUpdater(updateTaxRegion = { _, _, _, _ -> updateTaxRegion() }),
             paymentMethodMetadata = paymentMethodMetadata,
             selectionHolder = selectionHolder,
         )
@@ -272,6 +273,7 @@ internal class ManageLaunchSavedPaymentMethodSelectorTest {
 
         val CHECKOUT_SESSION_METADATA = PaymentMethodMetadataFactory.create(
             integrationMetadata = IntegrationMetadata.CheckoutSession(
+                clientSecret = DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET,
                 collectedEmail = null,
                 id = "cs_test_123",
                 instancesKey = "test_instances_key",

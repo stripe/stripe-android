@@ -7,6 +7,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.core.strings.resolvableString
@@ -498,6 +499,7 @@ internal class CheckoutStateLoaderTest {
         checkoutSessionResponse: CheckoutSessionResponse = CheckoutSessionResponseFactory.create(),
         linkEagerPresentationSuppressed: Boolean = false,
     ) = CheckoutControllerState(
+        clientSecret = DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET,
         configuration = CheckoutController.Configuration().build(),
         checkoutSessionResponse = checkoutSessionResponse,
         flagImages = null,
@@ -615,6 +617,7 @@ internal class CheckoutStateLoaderTest {
             checkoutSessionResponse: CheckoutSessionResponse = defaultCheckoutSessionResponse(),
         ): CheckoutStateLoader.LoadedState {
             return loader.loadInitial(
+                clientSecret = DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET,
                 configuration = configuration,
                 checkoutSessionResponse = checkoutSessionResponse,
             )

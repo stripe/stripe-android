@@ -2,6 +2,7 @@ package com.stripe.android.lpmfoundations.paymentmethod
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
@@ -2317,11 +2318,13 @@ internal class PaymentMethodMetadataTest {
         )
         val metadata = createPaymentElementMetadata(
             initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+                clientSecret = DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET,
                 collectedEmail = null,
                 instancesKey = "key",
                 checkoutSessionResponse = checkoutSessionResponse,
             ),
             integrationMetadata = IntegrationMetadata.CheckoutSession(
+                clientSecret = DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET,
                 collectedEmail = null,
                 id = "cs_123",
                 instancesKey = "key",
@@ -2340,11 +2343,13 @@ internal class PaymentMethodMetadataTest {
         )
         val metadata = createPaymentElementMetadata(
             initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+                clientSecret = DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET,
                 collectedEmail = null,
                 instancesKey = "key",
                 checkoutSessionResponse = checkoutSessionResponse,
             ),
             integrationMetadata = IntegrationMetadata.CheckoutSession(
+                clientSecret = DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET,
                 collectedEmail = null,
                 id = "cs_123",
                 instancesKey = "key",
@@ -2363,11 +2368,13 @@ internal class PaymentMethodMetadataTest {
         )
         val metadata = createPaymentElementMetadata(
             initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+                clientSecret = DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET,
                 collectedEmail = null,
                 instancesKey = "key",
                 checkoutSessionResponse = checkoutSessionResponse,
             ),
             integrationMetadata = IntegrationMetadata.CheckoutSession(
+                clientSecret = DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET,
                 collectedEmail = null,
                 id = "cs_123",
                 instancesKey = "key",
@@ -2386,11 +2393,13 @@ internal class PaymentMethodMetadataTest {
         )
         val metadata = createPaymentElementMetadata(
             initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+                clientSecret = DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET,
                 collectedEmail = null,
                 instancesKey = "key",
                 checkoutSessionResponse = checkoutSessionResponse,
             ),
             integrationMetadata = IntegrationMetadata.CheckoutSession(
+                clientSecret = DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET,
                 collectedEmail = null,
                 id = "cs_123",
                 instancesKey = "key",

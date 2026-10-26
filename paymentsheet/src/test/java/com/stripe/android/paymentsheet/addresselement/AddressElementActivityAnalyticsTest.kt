@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET
 import com.stripe.android.common.ui.PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.ApiRequest
@@ -257,6 +258,7 @@ internal class AddressElementActivityAnalyticsTest {
         )
         activityTestRunner.run(
             args = AddressElementActivityContract.Args.CheckoutShipping(
+                clientSecret = DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET,
                 apiConfiguration = DEFAULT_API_CONFIG,
                 config = AddressLauncher.Configuration.Builder()
                     .address(SHIPPING_ADDRESS)

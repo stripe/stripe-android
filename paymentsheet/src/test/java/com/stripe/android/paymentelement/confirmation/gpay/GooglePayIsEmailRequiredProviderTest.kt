@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.confirmation.gpay
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET
 import com.stripe.android.common.model.CommonConfigurationFactory
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -104,6 +105,7 @@ class GooglePayIsEmailRequiredProviderTest {
     private fun checkoutSessionMetadata(): IntegrationMetadata.CheckoutSession {
         val checkoutSessionResponse = CheckoutSessionResponseFactory.create()
         return IntegrationMetadata.CheckoutSession(
+            clientSecret = DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET,
             collectedEmail = null,
             id = checkoutSessionResponse.id,
             instancesKey = "checkout_instances_123",

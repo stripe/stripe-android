@@ -35,8 +35,9 @@ internal class DefaultCheckoutSessionRefresherTest {
         refresher.refresh()
 
         assertThat(refreshActions.fetchCalls.awaitItem()).isEqualTo(
-            FakeCheckoutSessionRefreshActions.FetchCall(
+            DefaultCheckoutSessionRefresher.FetchParams(
                 sessionId = initialState.checkoutSessionResponse.id,
+                clientSecret = initialState.clientSecret,
                 adaptivePricingAllowed = false,
             )
         )

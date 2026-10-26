@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.state
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardFundingFilter
+import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.common.model.asCommonConfiguration
@@ -97,6 +98,7 @@ internal class DefaultCreateLinkStateTest {
         val createLinkState = createLinkStateFactory()
         val elementsSession = createElementsSession()
         val initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+            clientSecret = DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET,
             collectedEmail = null,
             instancesKey = "DefaultCreateLinkStateTest",
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(
@@ -203,12 +205,14 @@ internal class DefaultCreateLinkStateTest {
         val createLinkState = createLinkStateFactory()
         val elementsSession = createElementsSession()
         val customerMetadata = CustomerMetadata.CheckoutSession(
+            clientSecret = DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET,
             sessionId = "cs_test_123",
             customerId = "cus_123",
             removePaymentMethod = PaymentMethodRemovePermission.None,
             saveConsent = PaymentMethodSaveConsentBehavior.Enabled,
         )
         val initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+            clientSecret = DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET,
             collectedEmail = null,
             instancesKey = "DefaultCreateLinkStateTest",
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(elementsSession = elementsSession),
@@ -368,6 +372,7 @@ internal class DefaultCreateLinkStateTest {
         customerEmail: String?,
     ): PaymentElementLoader.InitializationMode.CheckoutSession {
         return PaymentElementLoader.InitializationMode.CheckoutSession(
+            clientSecret = DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET,
             collectedEmail = null,
             instancesKey = "DefaultCreateLinkStateTest",
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(

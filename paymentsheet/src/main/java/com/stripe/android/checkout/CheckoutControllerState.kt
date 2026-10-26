@@ -17,6 +17,7 @@ import kotlinx.parcelize.Parcelize
 @OptIn(CheckoutSessionPreview::class)
 @Parcelize
 internal data class CheckoutControllerState(
+    val clientSecret: String,
     val configuration: CheckoutController.Configuration.State,
     val checkoutSessionResponse: CheckoutSessionResponse,
     val flagImages: Map<String, Bitmap>?,

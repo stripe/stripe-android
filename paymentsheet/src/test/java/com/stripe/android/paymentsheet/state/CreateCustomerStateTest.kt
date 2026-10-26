@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.state
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
@@ -36,6 +37,7 @@ internal class CreateCustomerStateTest {
             customer = customer,
         )
         val initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+            clientSecret = DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET,
             collectedEmail = null,
             instancesKey = "instances_key",
             checkoutSessionResponse = checkoutSessionResponse,
@@ -44,6 +46,7 @@ internal class CreateCustomerStateTest {
         val result = createCustomerState(
             initializationMode = initializationMode,
             customerMetadata = CustomerMetadata.CheckoutSession(
+                clientSecret = DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET,
                 sessionId = checkoutSessionResponse.id,
                 customerId = "cus_checkout_123",
                 removePaymentMethod = PaymentMethodRemovePermission.None,
@@ -66,6 +69,7 @@ internal class CreateCustomerStateTest {
         )
         val checkoutSessionResponse = CheckoutSessionResponseFactory.create(customer = customer)
         val initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+            clientSecret = DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET,
             collectedEmail = null,
             instancesKey = "instances_key",
             checkoutSessionResponse = checkoutSessionResponse,
@@ -74,6 +78,7 @@ internal class CreateCustomerStateTest {
         val result = createCustomerState(
             initializationMode = initializationMode,
             customerMetadata = CustomerMetadata.CheckoutSession(
+                clientSecret = DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET,
                 sessionId = checkoutSessionResponse.id,
                 customerId = "cus_checkout_empty",
                 removePaymentMethod = PaymentMethodRemovePermission.None,
@@ -116,6 +121,7 @@ internal class CreateCustomerStateTest {
 
         val result = createCustomerState(
             initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+                clientSecret = DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET,
                 collectedEmail = null,
                 instancesKey = "instances_key",
                 checkoutSessionResponse = checkoutSessionResponse,
@@ -161,6 +167,7 @@ internal class CreateCustomerStateTest {
         checkoutSessionResponse: CheckoutSessionResponse,
     ) = PaymentMethodMetadataFactory.create(
         integrationMetadata = IntegrationMetadata.CheckoutSession(
+            clientSecret = DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET,
             collectedEmail = null,
             id = checkoutSessionResponse.id,
             instancesKey = "instances_key",
@@ -168,6 +175,7 @@ internal class CreateCustomerStateTest {
         ),
     ).copy(
         customerMetadata = CustomerMetadata.CheckoutSession(
+            clientSecret = DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET,
             sessionId = checkoutSessionResponse.id,
             customerId = "cus_checkout_automatic_tax",
             removePaymentMethod = PaymentMethodRemovePermission.None,

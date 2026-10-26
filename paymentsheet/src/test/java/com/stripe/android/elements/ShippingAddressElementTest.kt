@@ -102,6 +102,7 @@ internal class ShippingAddressElementTest {
         val launch = activityLauncher.launchCalls.awaitItem()
         assertThat(launch.thread).isSameInstanceAs(mainThread)
         assertThat(launch.input.apiConfiguration).isEqualTo(DEFAULT_API_CONFIG)
+        assertThat(launch.input.clientSecret).isEqualTo(requireNotNull(stateHolder.state).clientSecret)
         assertThat(launch.input.checkoutSessionResponse)
             .isSameInstanceAs(requireNotNull(stateHolder.state).checkoutSessionResponse)
 

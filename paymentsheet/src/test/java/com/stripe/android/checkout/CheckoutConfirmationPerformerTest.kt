@@ -4,6 +4,7 @@ import android.os.Looper
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET
 import com.stripe.android.core.Logger
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
@@ -277,6 +278,7 @@ internal class CheckoutConfirmationPerformerTest {
                 checkoutSessionResponse = response,
                 paymentMethodMetadata = requireNotNull(state.paymentMethodMetadata).copy(
                     integrationMetadata = IntegrationMetadata.CheckoutSession(
+                        clientSecret = DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET,
                         id = response.id,
                         instancesKey = "test",
                         checkoutSessionResponse = response,

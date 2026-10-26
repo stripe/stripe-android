@@ -4,6 +4,7 @@ import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
+import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.networking.AnalyticsRequestFactory
@@ -117,6 +118,7 @@ class AddressElementViewModelModuleTest {
                 assertThat(awaitItem()).isEqualTo(State.Idle)
 
                 networkRule.checkoutUpdate(
+                    bodyPart("client_secret", DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET),
                     bodyPart("tax_region[country]", "US"),
                     bodyPart("tax_region[line1]", "510 Townsend St"),
                     bodyPart("tax_region[line2]", "Floor 2"),
@@ -259,6 +261,7 @@ class AddressElementViewModelModuleTest {
         val checkoutSessionResponse = CheckoutSessionResponseFactory.create()
         val eventReporter = module.provideAddressElementEventReporter(
             args = AddressElementActivityContract.Args.CheckoutShipping(
+                clientSecret = DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET,
                 apiConfiguration = DEFAULT_API_CONFIG,
                 config = AddressLauncher.Configuration(),
                 checkoutSessionResponse = checkoutSessionResponse,
@@ -329,6 +332,7 @@ class AddressElementViewModelModuleTest {
         )
         runScenario(
             args = AddressElementActivityContract.Args.CheckoutShipping(
+                clientSecret = DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET,
                 apiConfiguration = DEFAULT_API_CONFIG,
                 config = AddressLauncher.Configuration(),
                 checkoutSessionResponse = checkoutSessionResponse,

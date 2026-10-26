@@ -50,6 +50,7 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
         is CustomerMetadata.CheckoutSession -> {
             checkoutSessionRepository.detachPaymentMethod(
                 sessionId = customerMetadata.sessionId,
+                clientSecret = customerMetadata.clientSecret,
                 paymentMethodId = paymentMethodId,
                 clientParams = elementsSessionClientParams,
             ).map {
@@ -83,6 +84,7 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
         is CustomerMetadata.CheckoutSession -> {
             checkoutSessionRepository.updatePaymentMethod(
                 sessionId = customerMetadata.sessionId,
+                clientSecret = customerMetadata.clientSecret,
                 paymentMethodId = paymentMethodId,
                 params = params,
             ).mapCatching { response ->
