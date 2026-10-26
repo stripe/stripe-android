@@ -39,7 +39,7 @@ internal class DefaultEventReporter @Inject internal constructor(
     private val mode: EventReporter.Mode,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val analyticsRequestV2Executor: AnalyticsRequestV2Executor,
-    @PaymentElementAnalytics private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
+    private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
     private val durationProvider: DurationProvider,
     private val analyticEventCallbackProvider: Provider<AnalyticEventCallback?>,
     @IOContext private val workContext: CoroutineContext,

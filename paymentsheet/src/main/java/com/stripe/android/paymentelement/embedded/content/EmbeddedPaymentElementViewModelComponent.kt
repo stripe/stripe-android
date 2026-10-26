@@ -14,7 +14,6 @@ import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.injection.PaymentsIntegrityModule
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
-import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -31,7 +30,6 @@ import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PrefsRepository
-import com.stripe.android.paymentsheet.analytics.PaymentElementAnalytics
 import com.stripe.android.paymentsheet.injection.ApiConfigurationResolverModule
 import com.stripe.android.paymentsheet.injection.LinkHoldbackExposureModule
 import com.stripe.android.paymentsheet.injection.PaymentMethodMessagePromotionsExperimentHandlerModule
@@ -214,12 +212,6 @@ internal interface EmbeddedPaymentElementViewModelModule {
 
     @Suppress("TooManyFunctions")
     companion object {
-        @Provides
-        @PaymentElementAnalytics
-        fun provideEventReporterAnalyticsRequestFactory(
-            factory: PaymentAnalyticsRequestFactory,
-        ): PaymentAnalyticsRequestFactory = factory
-
         @Provides
         fun provideVerticalPaymentSelectionHandler(
             selectionHolder: EmbeddedSelectionHolder,

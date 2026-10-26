@@ -45,7 +45,6 @@ import com.stripe.android.paymentsheet.addresselement.analytics.DefaultAddressLa
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.LoadingEventReporter
-import com.stripe.android.paymentsheet.analytics.PaymentElementAnalytics
 import com.stripe.android.paymentsheet.flowcontroller.DefaultPaymentSelectionUpdater
 import com.stripe.android.paymentsheet.flowcontroller.PaymentSelectionUpdater
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionInteractor
@@ -195,12 +194,6 @@ internal abstract class PaymentSheetCommonModule {
 
     @Suppress("TooManyFunctions")
     companion object {
-        @Provides
-        @PaymentElementAnalytics
-        fun provideEventReporterAnalyticsRequestFactory(
-            factory: PaymentAnalyticsRequestFactory,
-        ): PaymentAnalyticsRequestFactory = factory
-
         @Provides
         @Singleton
         fun providesLinkAccountHolder(savedStateHandle: SavedStateHandle): LinkAccountHolder {

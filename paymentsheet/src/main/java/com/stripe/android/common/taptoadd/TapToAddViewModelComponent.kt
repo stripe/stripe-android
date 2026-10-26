@@ -66,7 +66,6 @@ import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.analytics.PaymentElementAnalytics
 import com.stripe.android.paymentsheet.injection.ApiConfigurationModule
 import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
@@ -208,12 +207,6 @@ internal interface TapToAddViewModelModule {
     ): TapToAddConfirmationInteractor.Factory
 
     companion object {
-        @Provides
-        @PaymentElementAnalytics
-        fun provideEventReporterAnalyticsRequestFactory(
-            factory: PaymentAnalyticsRequestFactory,
-        ): PaymentAnalyticsRequestFactory = factory
-
         @Provides
         @Named(ENABLE_LOGGING)
         fun provideEnabledLogging(): Boolean = BuildConfig.DEBUG

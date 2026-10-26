@@ -15,7 +15,11 @@ import com.stripe.android.common.taptoadd.DefaultTapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddMode
 import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.ViewModelScope
+import com.stripe.android.core.networking.AnalyticsRequestExecutor
+import com.stripe.android.core.networking.AnalyticsRequestV2Executor
+import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.RealUserFacingLogger
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.link.account.LinkAccountHolder
@@ -25,7 +29,9 @@ import com.stripe.android.lpmfoundations.paymentmethod.checkoutSessionResponse
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
+import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
+import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.embedded.form.OnClickDelegateOverrideImpl
 import com.stripe.android.paymentelement.embedded.form.OnClickOverrideDelegate
@@ -59,8 +65,8 @@ import com.stripe.android.paymentsheet.addresselement.PaymentElementAutocomplete
 import com.stripe.android.paymentsheet.addresselement.StripeAutocompleteRepository
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.paymentsheet.addresselement.analytics.DefaultAddressLauncherEventReporter
+import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.analytics.PaymentElementAnalytics
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.NoOpPromotionsHelper
@@ -82,6 +88,7 @@ import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Named
 import javax.inject.Provider
 import javax.inject.Singleton
+import kotlin.coroutines.CoroutineContext
 
 @Suppress("TooManyFunctions")
 @Module
@@ -151,21 +158,40 @@ internal interface EmbeddedActivityModule {
     @Suppress("TooManyFunctions")
     companion object {
         @Provides
-        @PaymentElementAnalytics
-        fun provideEventReporterAnalyticsRequestFactory(
+        @OptIn(ExperimentalAnalyticEventCallbackApi::class)
+        fun provideEventReporter(
             context: Context,
+            mode: EventReporter.Mode,
+            analyticsRequestExecutor: AnalyticsRequestExecutor,
+            analyticsRequestV2Executor: AnalyticsRequestV2Executor,
+            durationProvider: DurationProvider,
+            analyticEventCallbackProvider: Provider<AnalyticEventCallback?>,
+            @IOContext workContext: CoroutineContext,
+            logger: UserFacingLogger,
             paymentMethodMetadata: PaymentMethodMetadata,
+            paymentMethodMetadataProvider: Provider<PaymentMethodMetadata?>,
             @Named(PRODUCT_USAGE) productUsage: Set<String>,
             apiConfigurationProvider: Provider<ApiConfiguration.State>,
-        ): PaymentAnalyticsRequestFactory {
+        ): DefaultEventReporter {
             val eventProductUsage = when (paymentMethodMetadata.integrationMetadata) {
                 is IntegrationMetadata.CheckoutSession -> setOf("PaymentElement")
                 else -> productUsage
             }
-            return PaymentAnalyticsRequestFactory(
+            return DefaultEventReporter(
                 context = context,
-                defaultProductUsageTokens = eventProductUsage,
-                apiConfigurationProvider = apiConfigurationProvider,
+                mode = mode,
+                analyticsRequestExecutor = analyticsRequestExecutor,
+                analyticsRequestV2Executor = analyticsRequestV2Executor,
+                paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
+                    context = context,
+                    defaultProductUsageTokens = eventProductUsage,
+                    apiConfigurationProvider = apiConfigurationProvider,
+                ),
+                durationProvider = durationProvider,
+                analyticEventCallbackProvider = analyticEventCallbackProvider,
+                workContext = workContext,
+                logger = logger,
+                paymentMethodMetadataProvider = paymentMethodMetadataProvider,
             )
         }
 
