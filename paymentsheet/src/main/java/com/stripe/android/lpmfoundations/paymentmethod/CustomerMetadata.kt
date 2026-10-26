@@ -49,6 +49,7 @@ internal sealed class CustomerMetadata : Parcelable {
 
     @Parcelize
     data class CheckoutSession(
+        val clientSecret: String,
         val sessionId: String,
         val customerId: String,
         override val removePaymentMethod: PaymentMethodRemovePermission,

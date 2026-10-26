@@ -99,6 +99,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
         val billingAddress = billingDetails?.address?.toCheckoutAddress()
         val updatedCheckoutSessionResponse = if (billingAddress != null) {
             checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
+                clientSecret = integrationMetadata.clientSecret,
                 checkoutSessionResponse = checkoutSessionResponse,
                 addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
                 address = billingAddress,
@@ -146,6 +147,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
     ): ConfirmationDefinition.Action<Args> {
         return checkoutSessionRepository.confirm(
             id = integrationMetadata.id,
+            clientSecret = integrationMetadata.clientSecret,
             params = params,
         ).fold(
             onSuccess = ::handleConfirmResponse,

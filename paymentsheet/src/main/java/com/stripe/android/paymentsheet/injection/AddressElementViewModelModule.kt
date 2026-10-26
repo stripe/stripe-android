@@ -60,6 +60,7 @@ internal class AddressElementViewModelModule {
         }
         is AddressElementActivityContract.Args.CheckoutShipping -> {
             CheckoutShippingPrimaryButtonAction(
+                clientSecret = args.clientSecret,
                 checkoutSessionResponse = args.checkoutSessionResponse,
                 taxRegionUpdater = taxRegionUpdater,
             )
@@ -160,6 +161,7 @@ private object StandalonePrimaryButtonAction : AddressElementPrimaryButtonAction
 
 @OptIn(CheckoutSessionPreview::class)
 private class CheckoutShippingPrimaryButtonAction(
+    private val clientSecret: String,
     private val checkoutSessionResponse: CheckoutSessionResponse,
     private val taxRegionUpdater: CheckoutSessionTaxRegionUpdater,
 ) : AddressElementPrimaryButtonAction {
@@ -170,6 +172,7 @@ private class CheckoutShippingPrimaryButtonAction(
             ?: return Result.failure(IllegalArgumentException("Country is required."))
 
         return taxRegionUpdater.updateServerStateIfNeeded(
+            clientSecret = clientSecret,
             checkoutSessionResponse = checkoutSessionResponse,
             addressSource = TaxAddressSource.SHIPPING,
             address = address,

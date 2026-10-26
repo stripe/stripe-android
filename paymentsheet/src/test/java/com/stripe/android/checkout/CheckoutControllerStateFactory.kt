@@ -3,6 +3,7 @@ package com.stripe.android.checkout
 import android.graphics.Bitmap
 import android.os.Bundle
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.elements.ece.AvailableExpressButtonTypesFactory
 import com.stripe.android.elements.ece.FakeAvailableExpressButtonTypesFactory
@@ -38,6 +39,7 @@ internal object CheckoutControllerStateFactory {
         linkEagerPresentationSuppressed: Boolean = false,
     ): CheckoutControllerState {
         return CheckoutControllerState(
+            clientSecret = DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET,
             configuration = configuration,
             checkoutSessionResponse = checkoutSessionResponse,
             flagImages = flagImages,

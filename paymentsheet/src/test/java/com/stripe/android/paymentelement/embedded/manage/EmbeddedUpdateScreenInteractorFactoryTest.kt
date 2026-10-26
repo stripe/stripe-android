@@ -51,7 +51,7 @@ internal class EmbeddedUpdateScreenInteractorFactoryTest {
             customerStateHolder = customerStateHolder,
             selectionHolder = selectionHolder,
             savedPaymentMethodSelector = ManageLaunchSavedPaymentMethodSelector(
-                taxRegionUpdater = SheetTaxRegionUpdater { _, _, _ -> error("Not expected") },
+                taxRegionUpdater = SheetTaxRegionUpdater { _, _, _, _ -> error("Not expected") },
                 paymentMethodMetadata = paymentMethodMetadata,
                 selectionHolder = selectionHolder,
             ),

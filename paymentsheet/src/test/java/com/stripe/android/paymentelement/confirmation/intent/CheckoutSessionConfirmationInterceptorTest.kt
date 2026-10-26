@@ -5,6 +5,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
+import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET
 import com.stripe.android.checkouttesting.checkoutConfirm
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.core.exception.LocalStripeException
@@ -110,6 +111,7 @@ class CheckoutSessionConfirmationInterceptorTest {
 
         runScenario {
             networkRule.checkoutConfirm(
+                bodyPart("client_secret", DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET),
                 *paymentMethodMatchers.toTypedArray(),
                 bodyPart("expected_payment_method_type", type.code),
             ) { response ->
@@ -193,6 +195,7 @@ class CheckoutSessionConfirmationInterceptorTest {
 
         runScenario {
             networkRule.checkoutConfirm(
+                bodyPart("client_secret", DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET),
                 bodyPart("payment_method", paymentMethod.id),
                 not(hasBodyPart("expected_payment_method_type")),
             ) { response ->
@@ -524,6 +527,7 @@ class CheckoutSessionConfirmationInterceptorTest {
             customerMetadata = SAVE_ENABLED_CUSTOMER_METADATA,
         ) {
             networkRule.checkoutConfirm(
+                bodyPart("client_secret", DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET),
                 bodyPart("save_payment_method", "true"),
             ) { response ->
                 response.testBodyFromFile("checkout-session-confirm.json")
@@ -538,6 +542,7 @@ class CheckoutSessionConfirmationInterceptorTest {
             customerMetadata = SAVE_ENABLED_CUSTOMER_METADATA,
         ) {
             networkRule.checkoutConfirm(
+                bodyPart("client_secret", DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET),
                 bodyPart("save_payment_method", "false"),
             ) { response ->
                 response.testBodyFromFile("checkout-session-confirm.json")
@@ -870,6 +875,7 @@ class CheckoutSessionConfirmationInterceptorTest {
     fun `intercept with saved payment method prefers option shipping over controller shipping`() =
         runScenario {
             networkRule.checkoutConfirm(
+                bodyPart("client_secret", DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET),
                 bodyPart("shipping[name]", "Jenny Rosen"),
                 bodyPart("shipping[address][line1]", "510 Townsend St"),
                 bodyPart("shipping[address][line2]", "Floor 3"),
@@ -935,6 +941,7 @@ class CheckoutSessionConfirmationInterceptorTest {
 
         val interceptor = CheckoutSessionConfirmationInterceptor(
             integrationMetadata = IntegrationMetadata.CheckoutSession(
+                clientSecret = DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET,
                 collectedEmail = collectedEmail,
                 id = checkoutSessionResponse.id,
                 instancesKey = "test_key",

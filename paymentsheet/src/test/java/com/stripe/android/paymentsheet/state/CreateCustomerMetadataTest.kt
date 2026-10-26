@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.state
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.common.model.asCommonConfiguration
@@ -26,6 +27,7 @@ internal class CreateCustomerMetadataTest {
         ),
     ) {
         val result = result as CustomerMetadata.CheckoutSession
+        assertThat(result.clientSecret).isEqualTo(DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET)
         assertThat(result.sessionId).isEqualTo("cs_test_123")
         assertThat(result.customerId).isEqualTo("cus_checkout_1")
     }
@@ -260,6 +262,7 @@ internal class CreateCustomerMetadataTest {
             savedPaymentMethodsOfferSave: CheckoutSessionResponse.SavedPaymentMethodsOfferSave? = null,
         ): PaymentElementLoader.InitializationMode.CheckoutSession {
             return PaymentElementLoader.InitializationMode.CheckoutSession(
+                clientSecret = DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET,
                 collectedEmail = null,
                 instancesKey = "instances_test",
                 checkoutSessionResponse = CheckoutSessionResponseFactory.create(

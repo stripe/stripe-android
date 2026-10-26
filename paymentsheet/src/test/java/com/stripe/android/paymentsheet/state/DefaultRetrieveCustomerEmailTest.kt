@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.state
 
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.common.model.asCommonConfiguration
@@ -180,6 +181,7 @@ internal class DefaultRetrieveCustomerEmailTest {
         )
 
         val CHECKOUT_SESSION_METADATA = CustomerMetadata.CheckoutSession(
+            clientSecret = DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET,
             sessionId = "cs_test_123",
             customerId = "cus_test_123",
             removePaymentMethod = PaymentMethodRemovePermission.None,

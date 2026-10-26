@@ -123,9 +123,11 @@ class CheckoutController @Inject internal constructor(
             checkoutSessionRepository.init(
                 clientParams = elementsSessionClientParams,
                 sessionId = sessionId,
+                clientSecret = clientSecret,
                 adaptivePricingAllowed = configurationState.currencySelectorElementConfiguration != null,
             ).mapCatching { response ->
                 val initialLoad = checkoutStateLoader.loadInitial(
+                    clientSecret = clientSecret,
                     configuration = configurationState,
                     checkoutSessionResponse = response,
                 )
@@ -140,6 +142,7 @@ class CheckoutController @Inject internal constructor(
                 }
                 if (taxAddress != null && addressSource != null && response.automaticTaxEnabled) {
                     val updatedResponse = checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
+                        clientSecret = clientSecret,
                         checkoutSessionResponse = response,
                         addressSource = addressSource,
                         address = taxAddress,
@@ -161,14 +164,22 @@ class CheckoutController @Inject internal constructor(
     suspend fun applyPromotionCode(
         promotionCode: String,
     ): kotlin.Result<Unit> = withCheckoutState { sessionId ->
-        checkoutSessionRepository.applyPromotionCode(sessionId, promotionCode.trim())
+        checkoutSessionRepository.applyPromotionCode(
+            sessionId = sessionId,
+            clientSecret = clientSecret,
+            promotionCode = promotionCode.trim(),
+        )
     }
 
     /**
      * Removes the currently applied promotion code from the checkout session.
      */
     suspend fun removePromotionCode(): kotlin.Result<Unit> = withCheckoutState { sessionId ->
-        checkoutSessionRepository.applyPromotionCode(sessionId, "")
+        checkoutSessionRepository.applyPromotionCode(
+            sessionId = sessionId,
+            clientSecret = clientSecret,
+            promotionCode = "",
+        )
     }
 
     /**
@@ -263,6 +274,7 @@ class CheckoutController @Inject internal constructor(
                 return@withCheckoutState kotlin.Result.success(checkoutSessionResponse)
             }
             checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
+                clientSecret = clientSecret,
                 checkoutSessionResponse = checkoutSessionResponse,
                 addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
                 address = address,
@@ -300,6 +312,7 @@ class CheckoutController @Inject internal constructor(
                     checkoutSessionRepository.init(
                         clientParams = elementsSessionClientParams,
                         sessionId = sessionId,
+                        clientSecret = clientSecret,
                         adaptivePricingAllowed = configuration.currencySelectorElementConfiguration != null,
                     )
                 },
@@ -318,6 +331,7 @@ class CheckoutController @Inject internal constructor(
             additionalStateMutations = { mutation(built) },
         ) {
             checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
+                clientSecret = clientSecret,
                 checkoutSessionResponse = checkoutSessionResponse,
                 addressSource = addressType,
                 address = built,
@@ -343,6 +357,7 @@ class CheckoutController @Inject internal constructor(
             // Follow-up tracked in MOBILESDK-4944: https://jira.corp.stripe.com/browse/MOBILESDK-4944
             // Send null once CheckoutClient supports clearing tax_region on the server.
             checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
+                clientSecret = clientSecret,
                 checkoutSessionResponse = checkoutSessionResponse,
                 addressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
                 address = Address().country(previousAddress.country).build(),
@@ -395,7 +410,11 @@ class CheckoutController @Inject internal constructor(
 
     internal suspend fun updateCurrency(currency: String): kotlin.Result<Unit> {
         return withCheckoutState { sessionId ->
-            checkoutSessionRepository.updateCurrency(sessionId, currency)
+            checkoutSessionRepository.updateCurrency(
+                sessionId = sessionId,
+                clientSecret = clientSecret,
+                currencyCode = currency,
+            )
         }
     }
 

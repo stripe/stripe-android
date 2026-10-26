@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
+import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.common.exception.stripeErrorMessage
@@ -18,6 +19,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixt
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networktesting.NetworkRule
+import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
@@ -60,7 +62,9 @@ internal class DefaultSheetActivityContinueCoordinatorTest {
 
     @Test
     fun `successful tax region update returns updated response`() {
-        networkRule.checkoutUpdate { response ->
+        networkRule.checkoutUpdate(
+            bodyPart("client_secret", DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET),
+        ) { response ->
             response.testBodyFromFile("checkout-session-init.json")
         }
 
@@ -185,6 +189,7 @@ internal class DefaultSheetActivityContinueCoordinatorTest {
         val LAUNCH_MODE = EmbeddedLaunchMode.PaymentOptions
         val CHECKOUT_SESSION_METADATA = PaymentMethodMetadataFactory.create(
             integrationMetadata = IntegrationMetadata.CheckoutSession(
+                clientSecret = DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET,
                 collectedEmail = null,
                 id = "cs_test_123",
                 instancesKey = "test_instances_key",

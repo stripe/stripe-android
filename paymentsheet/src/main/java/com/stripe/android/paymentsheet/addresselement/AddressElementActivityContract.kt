@@ -72,6 +72,7 @@ internal object AddressElementActivityContract {
 
         @Parcelize
         data class CheckoutShipping internal constructor(
+            val clientSecret: String,
             override val apiConfiguration: ApiConfiguration.State,
             override val config: AddressLauncher.Configuration?,
             val checkoutSessionResponse: CheckoutSessionResponse,

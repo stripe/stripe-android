@@ -147,6 +147,7 @@ class ShippingAddressElement internal constructor(
             shippingAddressElementStateHolder.isPresenting = true
             activityLauncher.launch(
                 AddressElementActivityContract.Args.CheckoutShipping(
+                    clientSecret = state.clientSecret,
                     apiConfiguration = apiConfigurationProvider.get(),
                     checkoutSessionResponse = state.checkoutSessionResponse,
                     config = AddressLauncher.Configuration(

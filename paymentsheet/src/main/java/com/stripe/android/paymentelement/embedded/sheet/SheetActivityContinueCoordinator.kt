@@ -3,8 +3,8 @@ package com.stripe.android.paymentelement.embedded.sheet
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.link.account.LinkAccountHolder
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
-import com.stripe.android.lpmfoundations.paymentmethod.checkoutSessionResponse
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
@@ -33,7 +33,7 @@ internal class DefaultSheetActivityContinueCoordinator @Inject constructor(
     override fun onContinue() {
         val selection = selectionHolder.selection.value
         val taxRegionUpdate = taxRegionUpdater.prepareUpdate(
-            checkoutSessionResponse = paymentMethodMetadata.checkoutSessionResponse,
+            checkoutSession = paymentMethodMetadata.integrationMetadata as? IntegrationMetadata.CheckoutSession,
             selection = selection,
         )
         if (taxRegionUpdate == null) {

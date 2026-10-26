@@ -32,6 +32,7 @@ internal class CreateCustomerMetadata @Inject constructor(
         if (initializationMode is PaymentElementLoader.InitializationMode.CheckoutSession) {
             val customer = initializationMode.checkoutSessionResponse.customer ?: return null
             return CustomerMetadata.CheckoutSession(
+                clientSecret = initializationMode.clientSecret,
                 sessionId = initializationMode.checkoutSessionResponse.id,
                 customerId = customer.id,
                 removePaymentMethod = if (customer.canDetachPaymentMethod) {

@@ -9,6 +9,7 @@ import com.stripe.android.networktesting.testBodyFromFile
 import okhttp3.mockwebserver.MockResponse
 
 const val DEFAULT_CHECKOUT_SESSION_ID = "cs_test_abc123"
+const val DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET = "${DEFAULT_CHECKOUT_SESSION_ID}_secret_test"
 
 fun NetworkRule.createPaymentMethod(
     vararg requestMatchers: RequestMatcher,

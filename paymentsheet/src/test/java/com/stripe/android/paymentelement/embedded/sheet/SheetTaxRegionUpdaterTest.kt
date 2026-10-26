@@ -3,10 +3,12 @@ package com.stripe.android.paymentelement.embedded.sheet
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
+import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
@@ -43,7 +45,7 @@ internal class SheetTaxRegionUpdaterTest {
         ),
     ) {
         val update = updater.prepareUpdate(
-            checkoutSessionResponse = response,
+            checkoutSession = checkoutSession,
             selection = selectionWithAddress(ADDRESS),
         )
 
@@ -55,7 +57,7 @@ internal class SheetTaxRegionUpdaterTest {
         response = null,
     ) {
         val update = updater.prepareUpdate(
-            checkoutSessionResponse = response,
+            checkoutSession = checkoutSession,
             selection = selectionWithAddress(ADDRESS),
         )
 
@@ -70,7 +72,7 @@ internal class SheetTaxRegionUpdaterTest {
         ),
     ) {
         val update = updater.prepareUpdate(
-            checkoutSessionResponse = response,
+            checkoutSession = checkoutSession,
             selection = selectionWithAddress(ADDRESS),
         )
 
@@ -80,6 +82,7 @@ internal class SheetTaxRegionUpdaterTest {
     @Test
     fun `prepared update sends the selection billing address and returns the updated response`() = runScenario {
         networkRule.checkoutUpdate(
+            bodyPart("client_secret", DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET),
             bodyPart("tax_region[country]", "US"),
             bodyPart("tax_region[line1]", "510 Townsend St"),
             bodyPart("tax_region[line2]", "Suite 100"),
@@ -92,7 +95,7 @@ internal class SheetTaxRegionUpdaterTest {
 
         val result = requireNotNull(
             updater.prepareUpdate(
-                checkoutSessionResponse = response,
+                checkoutSession = checkoutSession,
                 selection = selectionWithAddress(ADDRESS),
             )
         ).invoke()
@@ -103,7 +106,7 @@ internal class SheetTaxRegionUpdaterTest {
     @Test
     fun `prepareUpdate returns null when selection is null`() = runScenario {
         val update = updater.prepareUpdate(
-            checkoutSessionResponse = response,
+            checkoutSession = checkoutSession,
             selection = null,
         )
 
@@ -119,7 +122,7 @@ internal class SheetTaxRegionUpdaterTest {
         )
 
         val update = updater.prepareUpdate(
-            checkoutSessionResponse = response,
+            checkoutSession = checkoutSession,
             selection = selection,
         )
 
@@ -129,7 +132,7 @@ internal class SheetTaxRegionUpdaterTest {
     @Test
     fun `prepareUpdate returns null when billing address has no country`() = runScenario {
         val update = updater.prepareUpdate(
-            checkoutSessionResponse = response,
+            checkoutSession = checkoutSession,
             selection = selectionWithAddress(ADDRESS.copy(country = null)),
         )
 
@@ -145,7 +148,7 @@ internal class SheetTaxRegionUpdaterTest {
 
         val result = requireNotNull(
             updater.prepareUpdate(
-                checkoutSessionResponse = response,
+                checkoutSession = checkoutSession,
                 selection = selectionWithAddress(ADDRESS),
             )
         ).invoke()
@@ -173,7 +176,15 @@ internal class SheetTaxRegionUpdaterTest {
 
         Scenario(
             updater = updater,
-            response = response,
+            checkoutSession = response?.let {
+                IntegrationMetadata.CheckoutSession(
+                    clientSecret = DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET,
+                    id = it.id,
+                    instancesKey = it.id,
+                    checkoutSessionResponse = it,
+                    collectedEmail = null,
+                )
+            },
         ).block()
     }
 
@@ -207,7 +218,7 @@ internal class SheetTaxRegionUpdaterTest {
 
     private data class Scenario(
         val updater: SheetTaxRegionUpdater,
-        val response: CheckoutSessionResponse?,
+        val checkoutSession: IntegrationMetadata.CheckoutSession?,
     )
 
     private companion object {

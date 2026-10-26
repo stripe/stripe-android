@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.embedded
 
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -55,7 +56,7 @@ internal class EmbeddedActivityModuleTest {
     fun `Manage launch provides the Manage launch selector`() {
         val selectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle())
         val manageLaunchSelector = ManageLaunchSavedPaymentMethodSelector(
-            taxRegionUpdater = SheetTaxRegionUpdater { _, _, _ ->
+            taxRegionUpdater = SheetTaxRegionUpdater { _, _, _, _ ->
                 error("Tax update is not invoked by this selector test")
             },
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
@@ -93,6 +94,7 @@ internal class EmbeddedActivityModuleTest {
     @Test
     fun `checkout sheets do not provide promotions or report promotion displays`() = runPromotionsScenario(
         integrationMetadata = IntegrationMetadata.CheckoutSession(
+            clientSecret = DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET,
             id = "cs_123",
             instancesKey = "checkout",
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(),

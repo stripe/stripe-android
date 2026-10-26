@@ -1,6 +1,7 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.PaymentIntentCreationFlow
 import com.stripe.android.model.PaymentMethodSelectionFlow
@@ -92,6 +93,7 @@ class ClientAttributionMetadataKtxTest {
     @Test
     fun `payment intent creation flow is null for checkout session`() {
         val initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+            clientSecret = DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET,
             collectedEmail = null,
             instancesKey = "instances_key",
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(id = "cs_test_456"),
@@ -107,6 +109,7 @@ class ClientAttributionMetadataKtxTest {
     @Test
     fun `checkout session ID is set for checkout session`() {
         val initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+            clientSecret = DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET,
             collectedEmail = null,
             instancesKey = "instances_key",
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(id = "cs_test_456"),

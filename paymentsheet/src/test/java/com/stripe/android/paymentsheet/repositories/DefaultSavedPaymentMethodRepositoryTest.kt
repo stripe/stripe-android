@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.repositories
 
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
@@ -46,6 +47,7 @@ class DefaultSavedPaymentMethodRepositoryTest {
         networkRule.enqueue(
             method("POST"),
             path("/v1/payment_pages/cs_123"),
+            bodyPart("client_secret", DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET),
             bodyPart("payment_method_to_detach", "pm_123"),
             bodyPart("elements_session_client[is_aggregation_expected]", "true"),
             bodyPart("elements_session_client[locale]", clientParams.locale),
@@ -122,6 +124,7 @@ class DefaultSavedPaymentMethodRepositoryTest {
         networkRule.enqueue(
             method("POST"),
             path("/v1/payment_pages/cs_123"),
+            bodyPart("client_secret", DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET),
             bodyPart("payment_method_to_update[payment_method_id]", "pm_123"),
             bodyPart("payment_method_to_update[expiry_details][exp_month]", "12"),
             bodyPart("payment_method_to_update[expiry_details][exp_year]", "2030"),
@@ -157,6 +160,7 @@ class DefaultSavedPaymentMethodRepositoryTest {
         networkRule.enqueue(
             method("POST"),
             path("/v1/payment_pages/cs_123"),
+            bodyPart("client_secret", DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET),
             bodyPart("payment_method_to_update[payment_method_id]", "pm_123"),
         ) { response ->
             response.testBodyFromFile("checkout-session-init.json")
@@ -311,6 +315,7 @@ class DefaultSavedPaymentMethodRepositoryTest {
         networkRule.enqueue(
             method("POST"),
             path("/v1/payment_pages/cs_123"),
+            bodyPart("client_secret", DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET),
             bodyPart("payment_method_to_detach", "pm_123"),
         ) { response ->
             response.setResponseCode(400)
@@ -379,6 +384,7 @@ class DefaultSavedPaymentMethodRepositoryTest {
 
     companion object {
         private val CHECKOUT_SESSION_METADATA = CustomerMetadata.CheckoutSession(
+            clientSecret = DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET,
             sessionId = "cs_123",
             customerId = "cus_123",
             removePaymentMethod = PaymentMethodRemovePermission.Full,

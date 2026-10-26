@@ -17,6 +17,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET
 import com.stripe.android.common.ui.PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.networktesting.NetworkRule
@@ -90,6 +91,7 @@ internal class AddressElementActivityTest {
     @Test
     fun `checkout shipping contract creates intent with checkout shipping args`() {
         val args = AddressElementActivityContract.Args.CheckoutShipping(
+            clientSecret = DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET,
             apiConfiguration = DEFAULT_API_CONFIG,
             config = null,
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
@@ -551,6 +553,7 @@ internal class AddressElementActivityTest {
 
     private fun runScenario(
         args: AddressElementActivityContract.Args = AddressElementActivityContract.Args.CheckoutShipping(
+            clientSecret = DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET,
             apiConfiguration = DEFAULT_API_CONFIG,
             config = AddressLauncher.Configuration.Builder()
                 .address(SHIPPING_ADDRESS)

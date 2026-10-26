@@ -38,10 +38,12 @@ internal class CheckoutStateLoader @Inject constructor(
      * its tax update before the session becomes observable.
      */
     suspend fun loadInitial(
+        clientSecret: String,
         configuration: CheckoutController.Configuration.State,
         checkoutSessionResponse: CheckoutSessionResponse,
     ): LoadedState {
         return load(
+            clientSecret = clientSecret,
             configuration = configuration,
             response = checkoutSessionResponse,
             collectedDetails = configuration.asInitialCollectedDetails(checkoutSessionResponse),
@@ -52,6 +54,7 @@ internal class CheckoutStateLoader @Inject constructor(
     suspend fun reload(state: CheckoutControllerState) {
         publish(
             load(
+                clientSecret = state.clientSecret,
                 configuration = state.configuration,
                 response = state.checkoutSessionResponse,
                 collectedDetails = state.collectedDetails,
@@ -71,6 +74,7 @@ internal class CheckoutStateLoader @Inject constructor(
     }
 
     private suspend fun load(
+        clientSecret: String,
         configuration: CheckoutController.Configuration.State,
         response: CheckoutSessionResponse,
         collectedDetails: CheckoutCollectedDetails,
@@ -101,6 +105,7 @@ internal class CheckoutStateLoader @Inject constructor(
 
         val loadResults = loadPaymentElements(
             initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+                clientSecret = clientSecret,
                 instancesKey = response.id,
                 checkoutSessionResponse = response,
                 collectedEmail = collectedDetails.email,
@@ -119,6 +124,7 @@ internal class CheckoutStateLoader @Inject constructor(
         )
 
         val state = CheckoutControllerState(
+            clientSecret = clientSecret,
             configuration = configuration,
             checkoutSessionResponse = response,
             flagImages = flagImages,

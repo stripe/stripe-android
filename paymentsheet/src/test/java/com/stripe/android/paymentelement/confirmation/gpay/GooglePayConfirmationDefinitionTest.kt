@@ -9,6 +9,7 @@ import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.SharedPaymentTokenSessionPreview
+import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
@@ -559,6 +560,7 @@ class GooglePayConfirmationDefinitionTest {
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                     stripeIntent = PAYMENT_INTENT.copy(currency = "USD"),
                     integrationMetadata = IntegrationMetadata.CheckoutSession(
+                        clientSecret = DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET,
                         collectedEmail = null,
                         id = checkoutSessionResponse.id,
                         instancesKey = "GooglePayConfirmationDefinitionTest",

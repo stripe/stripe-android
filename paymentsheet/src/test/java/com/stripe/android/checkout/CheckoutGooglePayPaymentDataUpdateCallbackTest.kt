@@ -218,6 +218,7 @@ internal class CheckoutGooglePayPaymentDataUpdateCallbackTest {
             assertThat(buildCall.shippingAddress).isEqualTo(SHIPPING_ADDRESS)
 
             val updateCall = taxRegionUpdater.updateServerStateIfNeededCalls.awaitItem()
+            assertThat(updateCall.clientSecret).isEqualTo(providedState?.clientSecret)
             assertThat(updateCall.addressSource).isEqualTo(CheckoutSessionResponse.TaxAddressSource.SHIPPING)
             assertThat(updateCall.address).isEqualTo(ADDRESS)
             assertThat(updateCall.checkoutSessionResponse).isEqualTo(providedState?.checkoutSessionResponse)
@@ -305,6 +306,7 @@ internal class CheckoutGooglePayPaymentDataUpdateCallbackTest {
         init {
             whenever {
                 mocked.updateServerStateIfNeeded(
+                    clientSecret = any(),
                     checkoutSessionResponse = any(),
                     addressSource = any(),
                     address = any()
@@ -312,9 +314,10 @@ internal class CheckoutGooglePayPaymentDataUpdateCallbackTest {
             } doAnswer { invocation ->
                 updateServerStateIfNeededCalls.add(
                     UpdateServerStateIfNeededCall(
-                        checkoutSessionResponse = invocation.component1(),
-                        addressSource = invocation.component2(),
-                        address = invocation.component3(),
+                        clientSecret = invocation.component1(),
+                        checkoutSessionResponse = invocation.component2(),
+                        addressSource = invocation.component3(),
+                        address = invocation.component4(),
                     )
                 )
 
@@ -327,6 +330,7 @@ internal class CheckoutGooglePayPaymentDataUpdateCallbackTest {
         }
 
         data class UpdateServerStateIfNeededCall(
+            val clientSecret: String,
             val checkoutSessionResponse: CheckoutSessionResponse,
             val addressSource: CheckoutSessionResponse.TaxAddressSource,
             val address: CheckoutController.Address.State,

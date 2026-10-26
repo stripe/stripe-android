@@ -38,6 +38,7 @@ internal class CheckoutSessionRepository @Inject constructor(
 
     private suspend fun executePost(
         url: String,
+        clientSecret: String,
         params: Map<String, *>,
     ): Result<CheckoutSessionResponse> {
         val options = apiRequestOptionsProvider.get()
@@ -47,7 +48,7 @@ internal class CheckoutSessionRepository @Inject constructor(
             request = apiRequestFactory.createPost(
                 url = url,
                 options = options,
-                params = params,
+                params = params + ("client_secret" to clientSecret),
             ),
             responseJsonParser = CheckoutSessionResponseJsonParser,
             withRequestId = { response, requestId -> response.copy(requestId = requestId?.value) },
@@ -57,10 +58,12 @@ internal class CheckoutSessionRepository @Inject constructor(
     suspend fun init(
         clientParams: ElementsSessionClientParams,
         sessionId: String,
+        clientSecret: String,
         adaptivePricingAllowed: Boolean,
     ): Result<CheckoutSessionResponse> {
         return executePost(
             url = initUrl(sessionId),
+            clientSecret = clientSecret,
             params = mapOf(
                 "browser_locale" to clientParams.locale,
                 "browser_timezone" to TimeZone.getDefault().id,
@@ -74,6 +77,7 @@ internal class CheckoutSessionRepository @Inject constructor(
 
     suspend fun confirm(
         id: String,
+        clientSecret: String,
         params: ConfirmCheckoutSessionParams,
     ): Result<CheckoutSessionResponse> {
         fraudDetectionDataRepository.refresh()
@@ -87,16 +91,19 @@ internal class CheckoutSessionRepository @Inject constructor(
         )
         return executePost(
             url = confirmUrl(id),
+            clientSecret = clientSecret,
             params = requestParams.plus("elements_session_client[is_aggregation_expected]" to "true"),
         )
     }
 
     suspend fun detachPaymentMethod(
         sessionId: String,
+        clientSecret: String,
         paymentMethodId: String,
         clientParams: ElementsSessionClientParams,
     ): Result<CheckoutSessionResponse> = executePost(
         url = updateUrl(sessionId),
+        clientSecret = clientSecret,
         params = mapOf(
             "payment_method_to_detach" to paymentMethodId,
             "elements_session_client" to clientParams.toCheckoutSessionMap(),
@@ -105,6 +112,7 @@ internal class CheckoutSessionRepository @Inject constructor(
 
     suspend fun updatePaymentMethod(
         sessionId: String,
+        clientSecret: String,
         paymentMethodId: String,
         params: PaymentMethodUpdateParams,
     ): Result<CheckoutSessionResponse> {
@@ -119,6 +127,7 @@ internal class CheckoutSessionRepository @Inject constructor(
         return if (updateParams.hasSupportedUpdates) {
             executePost(
                 url = updateUrl(sessionId),
+                clientSecret = clientSecret,
                 params = updateParams.toParamMap(),
             )
         } else {
@@ -128,9 +137,11 @@ internal class CheckoutSessionRepository @Inject constructor(
 
     suspend fun applyPromotionCode(
         sessionId: String,
+        clientSecret: String,
         promotionCode: String,
     ): Result<CheckoutSessionResponse> = executePost(
         url = updateUrl(sessionId),
+        clientSecret = clientSecret,
         params = mapOf(
             "promotion_code" to promotionCode,
             "elements_session_client[is_aggregation_expected]" to "true",
@@ -139,9 +150,11 @@ internal class CheckoutSessionRepository @Inject constructor(
 
     suspend fun updateTaxRegion(
         sessionId: String,
+        clientSecret: String,
         address: Address.State,
     ): Result<CheckoutSessionResponse> = executePost(
         url = updateUrl(sessionId),
+        clientSecret = clientSecret,
         params = buildMap {
             putIfNotEmpty("tax_region[country]", address.country)
             putIfNotEmpty("tax_region[line1]", address.line1)
@@ -155,9 +168,11 @@ internal class CheckoutSessionRepository @Inject constructor(
 
     suspend fun updateCurrency(
         sessionId: String,
+        clientSecret: String,
         currencyCode: String,
     ): Result<CheckoutSessionResponse> = executePost(
         url = updateUrl(sessionId),
+        clientSecret = clientSecret,
         params = mapOf(
             "updated_currency" to currencyCode,
             "elements_session_client[is_aggregation_expected]" to "true",

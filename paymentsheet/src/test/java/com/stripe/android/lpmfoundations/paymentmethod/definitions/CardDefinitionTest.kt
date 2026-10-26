@@ -2,6 +2,7 @@ package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET
 import com.stripe.android.common.nfcscan.IsNfcScanningAvailable
 import com.stripe.android.common.nfcscan.NfcScanningAction
 import com.stripe.android.common.nfcscan.NfcScanningAvailability
@@ -829,6 +830,7 @@ class CardDefinitionTest {
     ): BillingAddressElement {
         val integrationMetadata = checkoutSessionResponse?.let { response ->
             IntegrationMetadata.CheckoutSession(
+                clientSecret = DEFAULT_CHECKOUT_SESSION_CLIENT_SECRET,
                 collectedEmail = null,
                 id = response.id,
                 instancesKey = "CardDefinitionTest",

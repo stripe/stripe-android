@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.embedded.sheet
 import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
 import com.stripe.android.checkout.toCheckoutAddress
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.billingDetails
@@ -13,6 +14,7 @@ internal typealias SheetTaxRegionUpdate = suspend () -> Result<CheckoutSessionRe
 
 @OptIn(CheckoutSessionPreview::class)
 internal typealias TaxRegionUpdate = suspend (
+    String,
     CheckoutSessionResponse,
     CheckoutSessionResponse.TaxAddressSource,
     CheckoutController.Address.State,
@@ -28,10 +30,10 @@ internal class SheetTaxRegionUpdater internal constructor(
     )
 
     fun prepareUpdate(
-        checkoutSessionResponse: CheckoutSessionResponse?,
+        checkoutSession: IntegrationMetadata.CheckoutSession?,
         selection: PaymentSelection?,
     ): SheetTaxRegionUpdate? {
-        val initialResponse = checkoutSessionResponse
+        val initialResponse = checkoutSession?.checkoutSessionResponse
             ?.takeIf { it.collectsTaxFromBillingAddress }
             ?: return null
         val address = selection?.billingDetails?.address?.toCheckoutAddress()
@@ -39,6 +41,7 @@ internal class SheetTaxRegionUpdater internal constructor(
 
         return {
             updateTaxRegion(
+                checkoutSession.clientSecret,
                 initialResponse,
                 CheckoutSessionResponse.TaxAddressSource.BILLING,
                 address,

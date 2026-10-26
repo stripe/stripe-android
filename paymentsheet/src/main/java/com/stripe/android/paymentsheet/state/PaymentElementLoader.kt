@@ -224,6 +224,7 @@ internal interface PaymentElementLoader {
 
         @Parcelize
         data class CheckoutSession(
+            val clientSecret: String,
             val instancesKey: String,
             val checkoutSessionResponse: CheckoutSessionResponse,
             val collectedEmail: String?,
@@ -234,6 +235,7 @@ internal interface PaymentElementLoader {
 
             override fun integrationMetadata(paymentElementCallbacks: PaymentElementCallbacks?): IntegrationMetadata {
                 return IntegrationMetadata.CheckoutSession(
+                    clientSecret = clientSecret,
                     id = checkoutSessionResponse.id,
                     instancesKey = instancesKey,
                     checkoutSessionResponse = checkoutSessionResponse,
