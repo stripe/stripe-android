@@ -2,6 +2,7 @@ package com.stripe.android.googlepaylauncher
 
 import android.content.Context
 import android.os.Parcelable
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
@@ -281,6 +282,8 @@ class GooglePayPaymentMethodLauncher internal constructor(
         val apiConfig = publishableKey?.let {
             apiConfiguration.copy(publishableKey = it)
         } ?: apiConfiguration
+
+        Log.d("xkcd", "transaction id: $transactionId")
 
         internalLauncher.present(
             currencyCode = currencyCode,

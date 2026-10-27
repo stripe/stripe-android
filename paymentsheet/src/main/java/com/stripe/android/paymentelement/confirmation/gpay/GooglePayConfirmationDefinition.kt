@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.confirmation.gpay
 
 import android.content.Context
+import android.util.Log
 import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.core.strings.resolvableString
@@ -95,6 +96,8 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
     ) {
         val config = confirmationOption.config
         val intent = confirmationArgs.intent
+
+        Log.d("xkcd", "transaction id: ${intent.id}")
 
         launcher.present(
             currencyCode = intent.asPaymentIntent()?.currency
