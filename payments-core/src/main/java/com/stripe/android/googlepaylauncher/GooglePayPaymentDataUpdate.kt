@@ -11,13 +11,13 @@ import org.json.JSONObject
  * Represents an update in the Google Pay sheet that requires a response on how to change the sheet
  *
  * @param callbackTrigger represents what change to the sheet caused a callback trigger
- * @param shippingAddress represents the shipping address selected in teh sheet
+ * @param shippingAddress represents the shipping address selected in the sheet
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Poko
 class GooglePayPaymentDataUpdate(
     val callbackTrigger: CallbackTrigger?,
-    val shippingAddress: ShippingAddress?,
+    val shippingAddress: GooglePayAddress?,
 ) {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     enum class CallbackTrigger {
@@ -43,7 +43,7 @@ class GooglePayPaymentDataUpdate(
     }
 
     /**
-     * Represents an update in the Google Pay sheet that requires a response on how to change the sheet
+     * Represents an address supplied by the Google Pay sheet
      *
      * @param administrativeArea country subdivision, such as a state or province
      * @param countryCode ISO 3166-1 alpha-2 country code
@@ -51,11 +51,11 @@ class GooglePayPaymentDataUpdate(
      * @param postalCode The redacted postal code based on the country. For Canada and the UK, this contains
      *   only the first three characters. For US, this contains the first five digits.
      * @param iso3166AdministrativeArea ISO 3166-2 administrative area code corresponding to administrativeArea.
-     *   Only present if the shipping address format is FULL-ISO3166.
+     *   Only present if the address format is FULL-ISO3166.
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Poko
-    class ShippingAddress(
+    class GooglePayAddress(
         val administrativeArea: String,
         val countryCode: String,
         val locality: String,
@@ -108,7 +108,7 @@ class GooglePayPaymentDataUpdate(
                         }
                     },
                 shippingAddress = json.optJSONObject(FIELD_SHIPPING_ADDRESS)?.let { addressJson ->
-                    ShippingAddress(
+                    GooglePayAddress(
                         administrativeArea = optString(addressJson, FIELD_ADMINISTRATIVE_AREA)
                             .orEmpty(),
                         countryCode = optString(addressJson, FIELD_COUNTRY_CODE).orEmpty(),
