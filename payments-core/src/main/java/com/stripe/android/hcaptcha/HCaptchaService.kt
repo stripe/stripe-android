@@ -2,6 +2,7 @@ package com.stripe.android.hcaptcha
 
 import androidx.annotation.RestrictTo
 import androidx.fragment.app.FragmentActivity
+import com.stripe.android.hcaptcha.analytics.CaptchaEventsReporter
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 interface HCaptchaService {
@@ -25,5 +26,18 @@ interface HCaptchaService {
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         data class Failure(val error: Throwable) : Result
+    }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    companion object {
+        fun create(
+            reporter: CaptchaEventsReporter,
+        ): HCaptchaService {
+            return DefaultHCaptchaService(
+                hCaptchaProvider = DefaultHCaptchaProvider(),
+                captchaEventsReporter = reporter,
+                webViewStarter = DefaultWebViewStarter
+            )
+        }
     }
 }
