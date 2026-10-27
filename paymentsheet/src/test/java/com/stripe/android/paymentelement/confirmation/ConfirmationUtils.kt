@@ -51,6 +51,7 @@ import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.android.testing.FakeErrorReporter
+import com.stripe.android.utils.FakeFraudDetectionDataRepository
 import com.stripe.android.utils.RecordingLinkStore
 import kotlinx.coroutines.Dispatchers
 import javax.inject.Provider
@@ -147,6 +148,7 @@ internal suspend fun createIntentConfirmationInterceptor(
                 clientAttributionMetadata: ClientAttributionMetadata,
             ): CheckoutSessionConfirmationInterceptor {
                 val checkoutSessionRepository = CheckoutSessionRepository(
+                    fraudDetectionDataRepository = FakeFraudDetectionDataRepository.create(),
                     stripeNetworkClient = DefaultStripeNetworkClient(),
                     analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
                     paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
@@ -165,10 +167,8 @@ internal suspend fun createIntentConfirmationInterceptor(
                     customerMetadata = customerMetadata,
                     clientAttributionMetadata = clientAttributionMetadata,
                     context = ApplicationProvider.getApplicationContext(),
-                    stripeRepository = stripeRepository,
                     checkoutSessionRepository = checkoutSessionRepository,
                     checkoutSessionTaxRegionUpdater = CheckoutSessionTaxRegionUpdater(checkoutSessionRepository),
-                    requestOptions = requestOptions,
                 )
             }
         },

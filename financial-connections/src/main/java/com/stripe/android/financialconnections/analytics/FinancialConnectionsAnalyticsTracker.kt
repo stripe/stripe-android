@@ -60,23 +60,18 @@ private fun FinancialConnectionsAnalyticsTracker.emitPublicClientErrorEventIfNee
 
     // only emit events for client errors.
     if (isStripeErrorWithEvents.not()) {
-        when (error) {
+        val errorCode = when {
             // client-specific error: flow was launched without a browser installed.
-            is AppInitializationError -> emitEvent(
-                name = FinancialConnectionsEvent.Name.ERROR,
-                metadata = FinancialConnectionsEvent.Metadata(
-                    errorCode = ErrorCode.WEB_BROWSER_UNAVAILABLE
-                )
-            )
+            error is AppInitializationError && error.reason == AppInitializationError.Reason.BROWSER_UNAVAILABLE ->
+                ErrorCode.WEB_BROWSER_UNAVAILABLE
 
             // any non-backend error should be emitted as an unexpected error.
-            else -> emitEvent(
-                name = FinancialConnectionsEvent.Name.ERROR,
-                metadata = FinancialConnectionsEvent.Metadata(
-                    errorCode = ErrorCode.UNEXPECTED_ERROR
-                )
-            )
+            else -> ErrorCode.UNEXPECTED_ERROR
         }
+        emitEvent(
+            name = FinancialConnectionsEvent.Name.ERROR,
+            metadata = FinancialConnectionsEvent.Metadata(errorCode = errorCode)
+        )
     }
 }
 

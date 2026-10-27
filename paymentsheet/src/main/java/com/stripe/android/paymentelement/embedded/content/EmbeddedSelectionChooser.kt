@@ -164,7 +164,8 @@ internal class DefaultEmbeddedSelectionChooser @Inject constructor(
             autocompleteAddressInteractorFactory = null,
             linkInlineHandler = LinkInlineHandler.create(),
         )
-        val newFormType = newFormDefinitionFactory.formTypeForCode(previousSelection.paymentMethodType)
+        val newFormElements = newFormDefinitionFactory.formElementsForCode(previousSelection.paymentMethodType)
+        val newFormType = paymentMethodMetadata.formTypeForCode(previousSelection.paymentMethodType) { newFormElements }
         if (newFormType != FormHelper.FormType.UserInteractionRequired) {
             return true
         }
@@ -183,7 +184,6 @@ internal class DefaultEmbeddedSelectionChooser @Inject constructor(
             )
             val previousFormElements =
                 previousFormDefinitionFactory.formElementsForCode(previousSelection.paymentMethodType)
-            val newFormElements = newFormDefinitionFactory.formElementsForCode(previousSelection.paymentMethodType)
             previousFormElements.size >= newFormElements.size
         } == true
     }

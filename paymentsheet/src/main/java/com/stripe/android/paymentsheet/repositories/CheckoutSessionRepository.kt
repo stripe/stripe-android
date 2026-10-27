@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.repositories
 import com.stripe.android.Stripe
 import com.stripe.android.checkout.CheckoutController.Address
 import com.stripe.android.core.exception.safeAnalyticsMessage
+import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.ApiRequest
@@ -10,6 +11,7 @@ import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.executeRequestWithResultParser
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.model.PaymentMethodUpdateParams
+import com.stripe.android.networking.ConfirmationParamsUtils
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
@@ -21,6 +23,7 @@ import javax.inject.Provider
 @OptIn(CheckoutSessionPreview::class)
 internal class CheckoutSessionRepository @Inject constructor(
     private val stripeNetworkClient: StripeNetworkClient,
+    private val fraudDetectionDataRepository: FraudDetectionDataRepository,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
     private val apiRequestOptionsProvider: Provider<ApiRequest.Options>,
@@ -71,10 +74,21 @@ internal class CheckoutSessionRepository @Inject constructor(
     suspend fun confirm(
         id: String,
         params: ConfirmCheckoutSessionParams,
-    ): Result<CheckoutSessionResponse> = executePost(
-        url = confirmUrl(id),
-        params = params.toParamMap().plus(Pair("elements_session_client[is_aggregation_expected]", "true")),
-    )
+    ): Result<CheckoutSessionResponse> {
+        fraudDetectionDataRepository.refresh()
+
+        val requestParams = ConfirmationParamsUtils.prepareConfirmationParams(
+            params.toParamMap(),
+            params.paymentMethodData,
+            sourceParams = null,
+            fraudDetectionData = fraudDetectionDataRepository.getCached(),
+            productUsageTokens = setOf("checkout_elements"),
+        )
+        return executePost(
+            url = confirmUrl(id),
+            params = requestParams.plus("elements_session_client[is_aggregation_expected]" to "true"),
+        )
+    }
 
     suspend fun detachPaymentMethod(
         sessionId: String,

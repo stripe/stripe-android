@@ -139,7 +139,7 @@ internal class CheckoutStateLoaderTest {
     ) {
         val state = loadInitial().state
 
-        assertThat(state.paymentMethodMetadata.paymentMethodOrder)
+        assertThat(state.paymentMethodMetadata?.paymentMethodOrder)
             .isEqualTo(listOf("klarna", "card"))
     }
 

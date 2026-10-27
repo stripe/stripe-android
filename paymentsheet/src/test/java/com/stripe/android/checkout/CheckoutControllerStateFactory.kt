@@ -26,9 +26,9 @@ internal object CheckoutControllerStateFactory {
         checkoutSessionResponse: CheckoutSessionResponse = CheckoutSessionResponseFactory.create(),
         flagImages: Map<String, Bitmap>? = null,
         collectedDetails: CheckoutCollectedDetails = CheckoutCollectedDetails(email = null),
-        paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+        paymentMethodMetadata: PaymentMethodMetadata? = PaymentMethodMetadataFactory.create(),
         expressCheckoutElementPaymentMethodMetadata: PaymentMethodMetadata? = PaymentMethodMetadataFactory.create(),
-        embeddedConfiguration: EmbeddedPaymentElement.Configuration =
+        embeddedConfiguration: EmbeddedPaymentElement.Configuration? =
             EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
         paymentSelection: PaymentSelection? = null,
         savedPaymentMethodSelectionState: SavedPaymentMethodSelectionState =

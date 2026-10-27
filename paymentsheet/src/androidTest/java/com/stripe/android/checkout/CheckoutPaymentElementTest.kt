@@ -6,8 +6,8 @@ import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutConfirm
 import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.checkouttesting.checkoutUpdate
-import com.stripe.android.checkouttesting.createPaymentMethod
 import com.stripe.android.core.utils.FeatureFlags
+import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.elements.PaymentElement
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.link.ui.wallet.LinkWalletPage
@@ -59,7 +59,8 @@ internal class CheckoutPaymentElementTest {
         runCheckoutPaymentElementScenario(
             networkRule = networkRule,
             setup = { controller ->
-                controller.configure(DEFAULT_CLIENT_SECRET).getOrThrow()
+                assertThat(controller.configure(DEFAULT_CLIENT_SECRET))
+                    .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
             },
         ) {
             // Open the card form, then back out without entering any details.
@@ -91,11 +92,18 @@ internal class CheckoutPaymentElementTest {
             networkRule = networkRule,
             resultCallback = { result -> checkoutResult = result },
             setup = { controller ->
-                controller.configure(DEFAULT_CLIENT_SECRET).getOrThrow()
+                assertThat(controller.configure(DEFAULT_CLIENT_SECRET))
+                    .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
             },
         ) {
-            networkRule.createPaymentMethod()
-            networkRule.checkoutConfirm { response ->
+            networkRule.checkoutConfirm(
+                bodyPart("payment_method_data[type]", "card"),
+                bodyPart("payment_method_data[card][number]", "4242424242424242"),
+                bodyPart(
+                    "payment_method_data[payment_user_agent]",
+                    "stripe-android/${StripeSdkVersion.VERSION_NAME};checkout_elements",
+                ),
+            ) { response ->
                 response.testBodyFromFile("checkout-session-confirm.json")
             }
 
@@ -113,7 +121,8 @@ internal class CheckoutPaymentElementTest {
         runCheckoutPaymentElementScenario(
             networkRule = networkRule,
             setup = { controller ->
-                controller.configure(DEFAULT_CLIENT_SECRET).getOrThrow()
+                assertThat(controller.configure(DEFAULT_CLIENT_SECRET))
+                    .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
             },
         ) {
             coroutineScope {
@@ -142,7 +151,8 @@ internal class CheckoutPaymentElementTest {
                     holdResponse.countDown()
                 }
 
-                assertThat(update.await().isSuccess).isTrue()
+                assertThat(update.await())
+                    .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
                 testRules.compose.waitUntilWithIdle {
                     !controller.isUpdating.value
                 }
@@ -199,7 +209,8 @@ internal class CheckoutPaymentElementTest {
             networkRule = networkRule,
             checkoutInitResponse = checkoutInitResponse,
             setup = { controller ->
-                controller.configure(DEFAULT_CLIENT_SECRET, configuration).getOrThrow()
+                assertThat(controller.configure(DEFAULT_CLIENT_SECRET, configuration))
+                    .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
             },
         ) {
             contentPage.clickOnLpm("link")
@@ -214,7 +225,8 @@ internal class CheckoutPaymentElementTest {
             verticalModePage.waitUntilMissing()
 
             networkRule.checkoutInit(responseFactory = checkoutInitResponse)
-            controller.configure(DEFAULT_CLIENT_SECRET, configuration).getOrThrow()
+            assertThat(controller.configure(DEFAULT_CLIENT_SECRET, configuration))
+                .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
             markTestSucceeded()
         }
     }
@@ -269,7 +281,8 @@ internal class CheckoutPaymentElementTest {
             networkRule = networkRule,
             checkoutInitResponse = checkoutInitResponse,
             setup = { controller ->
-                controller.configure(DEFAULT_CLIENT_SECRET, configuration).getOrThrow()
+                assertThat(controller.configure(DEFAULT_CLIENT_SECRET, configuration))
+                    .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
             },
         ) {
             // Just testing loading events, mark test succeeded once that has completed.

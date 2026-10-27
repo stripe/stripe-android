@@ -53,7 +53,10 @@ internal class CheckoutShippingAddressElementTest {
             networkRule = networkRule,
             checkoutInitResponse = ::createCheckoutInitResponse,
             renderPaymentElementContent = false,
-            setup = { it.configure(DEFAULT_CLIENT_SECRET, configuration).getOrThrow() },
+            setup = { controller ->
+                assertThat(controller.configure(DEFAULT_CLIENT_SECRET, configuration))
+                    .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
+            },
         ) {
             presentShippingAddressElement()
             page.waitUntilVisible()

@@ -108,6 +108,7 @@ internal class CheckoutAnalyticsPerformerTest {
                     "duration" to 2f,
                     "error_type" to "card_error",
                     "error_code" to "card_declined",
+                    "request_id" to "req_failed_confirmation",
                 ),
             ),
         )
@@ -257,7 +258,7 @@ internal class CheckoutAnalyticsPerformerTest {
     @Test
     fun `confirmation response provides completed session fields`() = runScenario {
         val elementsSession = ElementsSession.createFromFallback(
-            stripeIntent = requireNotNull(stateHolder.state).paymentMethodMetadata.stripeIntent,
+            stripeIntent = requireNotNull(stateHolder.state?.paymentMethodMetadata).stripeIntent,
             sessionsError = null,
         ).copy(elementsSessionConfigId = "cfg_elements_initial")
         val initialResponse = CheckoutSessionResponseFactory.create(

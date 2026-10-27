@@ -74,7 +74,7 @@ import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.DefaultSavedPaymentMethodRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
-import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelperModule
+import com.stripe.android.paymentsheet.repositories.NoOpPaymentMethodMessagingPromotionHelperModule
 import com.stripe.android.paymentsheet.repositories.RealElementsSessionRepository
 import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodRepository
 import com.stripe.android.paymentsheet.state.CreateLinkState
@@ -125,7 +125,7 @@ import javax.inject.Singleton
         PaymentElementRequestSurfaceModule::class,
         EmbeddedLinkExtrasModule::class,
         LinkHoldbackExposureModule::class,
-        PaymentMethodMessagePromotionsHelperModule::class,
+        NoOpPaymentMethodMessagingPromotionHelperModule::class,
         PaymentMethodMessagePromotionsExperimentHandlerModule::class,
         NfcScanningAvailabilityModule::class,
         PaymentOptionCardArtModule::class,

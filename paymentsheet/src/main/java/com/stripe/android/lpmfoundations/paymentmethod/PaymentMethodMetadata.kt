@@ -30,6 +30,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.utils.sellerBusinessName
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.payments.financialconnections.GetFinancialConnectionsAvailability
+import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
@@ -337,6 +338,18 @@ internal data class PaymentMethodMetadata(
                 incentive = paymentMethodIncentive,
             )
         }
+    }
+
+    fun formTypeForCode(
+        code: PaymentMethodCode,
+        formElementsProvider: () -> List<FormElement>,
+    ): FormHelper.FormType {
+        val factory = when {
+            isExternalPaymentMethod(code) -> getUiDefinitionFactoryForExternalPaymentMethod(code)
+            isCustomPaymentMethod(code) -> getUiDefinitionFactoryForCustomPaymentMethod(code)
+            else -> PaymentMethodRegistry.definitionsByCode[code]?.uiDefinitionFactory(this)
+        }
+        return factory?.formType(formElementsProvider) ?: FormHelper.FormType.Empty
     }
 
     fun formElementsForCode(
