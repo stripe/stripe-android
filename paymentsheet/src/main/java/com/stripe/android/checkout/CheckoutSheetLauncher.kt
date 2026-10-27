@@ -20,7 +20,6 @@ import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedRowSelectionImmediateActionHandler
-import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.content.EmbeddedContentHelperStateHolder
 import com.stripe.android.paymentelement.embedded.content.EmbeddedSheetLauncher
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
@@ -64,7 +63,7 @@ internal class CheckoutSheetLauncherState @Inject constructor(
 internal class CheckoutSheetLauncher @Inject constructor(
     activityResultCaller: ActivityResultCaller,
     private val lifecycleOwner: LifecycleOwner,
-    private val selectionHolder: EmbeddedSelectionHolder,
+    private val selectionHolder: CheckoutControllerStateHolder,
     private val customerStateHolder: CustomerStateHolder,
     private val linkAccountHolder: LinkAccountHolder,
     private val sheetStateHolder: SheetStateHolder,
@@ -143,6 +142,9 @@ internal class CheckoutSheetLauncher @Inject constructor(
     private fun handlePaymentOptionsResult(result: EmbeddedActivityResult) {
         when (result) {
             is EmbeddedActivityResult.Complete -> {
+                (result.selection as? PaymentSelection.Saved)?.let { selection ->
+                    selectionHolder.state?.mandateState?.acknowledgeSepaMandate(selection.paymentMethod)
+                }
                 applyCompleteResult(result)
                 refreshCheckoutSession(result.checkoutSessionResponse)
             }

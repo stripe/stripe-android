@@ -2,6 +2,7 @@
 
 package com.stripe.android.checkout
 
+import android.os.Parcel
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.rememberScrollState
@@ -26,13 +27,21 @@ import java.util.concurrent.TimeUnit
 
 internal class CheckoutPaymentElementScenario(
     private var presenter: CheckoutPresenter,
-    val controller: CheckoutController,
+    controller: CheckoutController,
+    private var savedStateHandle: SavedStateHandle,
+    private val rowSelectionBehavior: PaymentElement.RowSelectionBehavior,
+    private val resultCallback: CheckoutController.ResultCallback,
     private val countDownLatch: CountDownLatch,
     private val scenario: ActivityScenario<MainActivity>,
     private val renderPaymentElementContent: Boolean,
 ) {
+    var controller: CheckoutController = controller
+        private set
+
     fun presentPaymentOptions() {
-        presenter.paymentElement().present()
+        scenario.onActivity {
+            presenter.paymentElement().present()
+        }
     }
 
     fun presentShippingAddressElement() {
@@ -48,6 +57,27 @@ internal class CheckoutPaymentElementScenario(
     fun recreateHost() {
         scenario.moveToState(Lifecycle.State.CREATED)
         scenario.recreate()
+        presenter = scenario.createCheckoutPresenter(
+            controller = controller,
+            renderPaymentElementContent = renderPaymentElementContent,
+        )
+        scenario.moveToState(Lifecycle.State.RESUMED)
+    }
+
+    // Rebuilds the controller from parcelled saved state without killing the test process.
+    fun recreateAfterSimulatedProcessDeath() {
+        scenario.moveToState(Lifecycle.State.CREATED)
+        scenario.onActivity {
+            savedStateHandle = savedStateHandle.restoreFromParcel()
+            controller.destroy()
+        }
+        scenario.recreate()
+        scenario.onActivity {
+            controller = CheckoutController.Builder(
+                application = ApplicationProvider.getApplicationContext(),
+                savedStateHandle = savedStateHandle,
+            ).rowSelectionBehavior(rowSelectionBehavior).resultCallback(resultCallback).build()
+        }
         presenter = scenario.createCheckoutPresenter(
             controller = controller,
             renderPaymentElementContent = renderPaymentElementContent,
@@ -93,13 +123,18 @@ internal fun runCheckoutPaymentElementScenario(
             TestApiKeys.PUBLISHABLE,
             TestApiKeys.ACCOUNT,
         )
-        val controller: CheckoutController = CheckoutController.Builder(
-            application = ApplicationProvider.getApplicationContext(),
-            savedStateHandle = SavedStateHandle(),
-        ).rowSelectionBehavior(rowSelectionBehavior).resultCallback { result ->
+        val onResult = CheckoutController.ResultCallback { result ->
             resultCallback.onResult(result)
             countDownLatch.countDown()
-        }.build()
+        }
+        val savedStateHandle = SavedStateHandle()
+        lateinit var controller: CheckoutController
+        scenario.onActivity {
+            controller = CheckoutController.Builder(
+                application = ApplicationProvider.getApplicationContext(),
+                savedStateHandle = savedStateHandle,
+            ).rowSelectionBehavior(rowSelectionBehavior).resultCallback(onResult).build()
+        }
 
         runBlocking {
             setup(controller)
@@ -113,24 +148,41 @@ internal fun runCheckoutPaymentElementScenario(
 
         scenario.moveToState(Lifecycle.State.RESUMED)
 
-        runBlocking {
-            block(
-                CheckoutPaymentElementScenario(
-                    presenter = presenter,
-                    controller = controller,
-                    countDownLatch = countDownLatch,
-                    scenario = scenario,
-                    renderPaymentElementContent = renderPaymentElementContent,
-                )
-            )
-        }
+        val checkoutScenario = CheckoutPaymentElementScenario(
+            presenter = presenter,
+            controller = controller,
+            savedStateHandle = savedStateHandle,
+            rowSelectionBehavior = rowSelectionBehavior,
+            resultCallback = onResult,
+            countDownLatch = countDownLatch,
+            scenario = scenario,
+            renderPaymentElementContent = renderPaymentElementContent,
+        )
+        try {
+            runBlocking {
+                block(checkoutScenario)
+            }
 
-        val didCompleteSuccessfully = countDownLatch.await(successTimeoutSeconds, TimeUnit.SECONDS)
-        networkRule.validate()
-        assertThat(didCompleteSuccessfully).isTrue()
-        scenario.onActivity {
-            controller.destroy()
+            val didCompleteSuccessfully = countDownLatch.await(successTimeoutSeconds, TimeUnit.SECONDS)
+            networkRule.validate()
+            assertThat(didCompleteSuccessfully).isTrue()
+        } finally {
+            scenario.onActivity {
+                checkoutScenario.controller.destroy()
+            }
         }
+    }
+}
+
+@Suppress("RestrictedApi")
+private fun SavedStateHandle.restoreFromParcel(): SavedStateHandle {
+    val parcel = Parcel.obtain()
+    return try {
+        parcel.writeBundle(savedStateProvider().saveState())
+        parcel.setDataPosition(0)
+        SavedStateHandle.createHandle(parcel.readBundle(CheckoutController::class.java.classLoader), null)
+    } finally {
+        parcel.recycle()
     }
 }
 
