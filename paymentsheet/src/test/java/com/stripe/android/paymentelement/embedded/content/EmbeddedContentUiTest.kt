@@ -176,6 +176,7 @@ internal class EmbeddedContentUiTest {
             sheetStateHolder = sheetStateHolder,
         )
         val verticalLayoutInteractorFactory = DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory(
+            savedStateHandle = savedStateHandle,
             eventReporter = eventReporter,
             embeddedFormHelperFactory = embeddedFormHelperFactory,
             confirmationHandler = confirmationHandler,

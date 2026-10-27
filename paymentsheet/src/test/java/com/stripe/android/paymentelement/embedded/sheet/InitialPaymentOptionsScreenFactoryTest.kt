@@ -466,6 +466,7 @@ internal class InitialPaymentOptionsScreenFactoryTest {
         )
 
         val factory = InitialPaymentOptionsScreenFactory(
+            savedStateHandle = savedStateHandle,
             paymentMethodMetadata = paymentMethodMetadata,
             customerStateHolder = customerStateHolder,
             selectionHolder = selectionHolder,

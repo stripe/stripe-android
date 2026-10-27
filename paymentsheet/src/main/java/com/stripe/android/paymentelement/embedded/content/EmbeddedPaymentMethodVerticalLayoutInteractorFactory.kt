@@ -1,5 +1,6 @@
 package com.stripe.android.paymentelement.embedded.content
 
+import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -36,6 +37,7 @@ internal fun interface EmbeddedPaymentMethodVerticalLayoutInteractorFactory {
 }
 
 internal class DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory @Inject constructor(
+    private val savedStateHandle: SavedStateHandle,
     private val eventReporter: EventReporter,
     private val embeddedFormHelperFactory: EmbeddedFormHelperFactory,
     private val confirmationHandler: ConfirmationHandler,
@@ -80,6 +82,7 @@ internal class DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory @Inje
         )
 
         return DefaultPaymentMethodVerticalLayoutInteractor(
+            savedStateHandle = savedStateHandle,
             paymentMethodMetadata = paymentMethodMetadata,
             processing = combineAsStateFlow(
                 hostProcessing,

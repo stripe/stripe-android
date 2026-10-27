@@ -74,6 +74,7 @@ internal class NewPaymentMethodRowButtonScreenshotTest {
         paparazziRule.snapshot {
             NewPaymentMethodRowButton(
                 isEnabled = true,
+                isExpanded = false,
                 isSelected = false,
                 iconRes = R.drawable.stripe_ic_paymentsheet_pm_klarna,
                 iconUrl = null,
@@ -93,6 +94,7 @@ internal class NewPaymentMethodRowButtonScreenshotTest {
         paparazziRule.snapshot {
             NewPaymentMethodRowButton(
                 isEnabled = true,
+                isExpanded = false,
                 isSelected = false,
                 iconRes = R.drawable.stripe_ic_paymentsheet_pm_klarna,
                 iconUrl = null,
@@ -113,6 +115,7 @@ internal class NewPaymentMethodRowButtonScreenshotTest {
         paparazziRule.snapshot {
             NewPaymentMethodRowButton(
                 isEnabled = true,
+                isExpanded = false,
                 isSelected = true,
                 iconRes = R.drawable.stripe_ic_paymentsheet_pm_card,
                 iconUrl = null,
@@ -137,6 +140,7 @@ internal class NewPaymentMethodRowButtonScreenshotTest {
         rule.snapshot {
             NewPaymentMethodRowButton(
                 isEnabled = state.isEnabled,
+                isExpanded = false,
                 isSelected = state.isSelected,
                 iconRes = state.iconRes,
                 iconUrl = null,
