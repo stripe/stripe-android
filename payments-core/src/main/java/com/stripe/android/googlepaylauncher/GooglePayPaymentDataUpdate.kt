@@ -12,12 +12,14 @@ import org.json.JSONObject
  *
  * @param callbackTrigger represents what change to the sheet caused a callback trigger
  * @param shippingAddress represents the shipping address selected in the sheet
+ * @param billingAddress represents the billing address associated with the selected payment method
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Poko
 class GooglePayPaymentDataUpdate(
     val callbackTrigger: CallbackTrigger?,
     val shippingAddress: GooglePayAddress?,
+    val billingAddress: GooglePayAddress?,
 ) {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     enum class CallbackTrigger {
@@ -30,6 +32,11 @@ class GooglePayPaymentDataUpdate(
          * Callback is called when the shipping address changes in the sheet
          */
         ShippingAddress,
+
+        /**
+         * Callback is called when the payment method changes in the sheet
+         */
+        PaymentMethod,
 
         /**
          * Callback is called when the shipping option changes in the sheet
@@ -108,22 +115,31 @@ class GooglePayPaymentDataUpdate(
                         }
                     },
                 shippingAddress = json.optJSONObject(FIELD_SHIPPING_ADDRESS)?.let { addressJson ->
-                    GooglePayAddress(
-                        administrativeArea = optString(addressJson, FIELD_ADMINISTRATIVE_AREA)
-                            .orEmpty(),
-                        countryCode = optString(addressJson, FIELD_COUNTRY_CODE).orEmpty(),
-                        locality = optString(addressJson, FIELD_LOCALITY).orEmpty(),
-                        postalCode = optString(addressJson, FIELD_POSTAL_CODE).orEmpty(),
-                        iso3166AdministrativeArea =
-                            optString(addressJson, FIELD_IOS_3166_ADMINISTRATIVE_AREA)
-                                ?.takeIf { it.isNotEmpty() },
-                    )
+                    addressJson.toAddress()
                 },
+                billingAddress = json.optJSONObject(FIELD_PAYMENT_METHOD_DATA)
+                    ?.optJSONObject(FIELD_INTERMEDIATE_CARD_INFO)
+                    ?.optJSONObject(FIELD_BILLING_ADDRESS)
+                    ?.toAddress(),
+            )
+        }
+
+        private fun JSONObject.toAddress(): GooglePayAddress {
+            return GooglePayAddress(
+                administrativeArea = optString(this, FIELD_ADMINISTRATIVE_AREA).orEmpty(),
+                countryCode = optString(this, FIELD_COUNTRY_CODE).orEmpty(),
+                locality = optString(this, FIELD_LOCALITY).orEmpty(),
+                postalCode = optString(this, FIELD_POSTAL_CODE).orEmpty(),
+                iso3166AdministrativeArea = optString(this, FIELD_IOS_3166_ADMINISTRATIVE_AREA)
+                    ?.takeIf { it.isNotEmpty() },
             )
         }
 
         private const val FIELD_CALLBACK_TRIGGER = "callbackTrigger"
         private const val FIELD_SHIPPING_ADDRESS = "shippingAddress"
+        private const val FIELD_PAYMENT_METHOD_DATA = "paymentMethodData"
+        private const val FIELD_INTERMEDIATE_CARD_INFO = "info"
+        private const val FIELD_BILLING_ADDRESS = "billingAddress"
         private const val FIELD_COUNTRY_CODE = "countryCode"
         private const val FIELD_ADMINISTRATIVE_AREA = "administrativeArea"
         private const val FIELD_LOCALITY = "locality"

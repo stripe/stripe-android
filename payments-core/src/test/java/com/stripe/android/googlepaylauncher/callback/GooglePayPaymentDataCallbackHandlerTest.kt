@@ -96,6 +96,42 @@ class GooglePayPaymentDataCallbackHandlerTest {
     }
 
     @Test
+    fun `payment method callback parses billing address`() = runScenario(
+        callbackResult = {
+            GooglePayPaymentDataUpdateResponse(newTransactionInfo = null, error = null)
+        }
+    ) {
+        onPaymentDataChanged(paymentMethodRequest())
+
+        val update = callback.updates.awaitItem()
+
+        assertThat(update.callbackTrigger)
+            .isEqualTo(GooglePayPaymentDataUpdate.CallbackTrigger.PaymentMethod)
+        assertThat(update.shippingAddress).isNull()
+        assertThat(update.billingAddress?.administrativeArea).isEqualTo("New York")
+        assertThat(update.billingAddress?.countryCode).isEqualTo("US")
+        assertThat(update.billingAddress?.locality).isEqualTo("New York")
+        assertThat(update.billingAddress?.postalCode).isEqualTo("10011")
+        assertThat(update.billingAddress?.iso3166AdministrativeArea).isNull()
+        assertThat(JSONObject(listener.completions.awaitItem().toJson()).length()).isEqualTo(0)
+    }
+
+    @Test
+    fun `payment method callback without address data completes without a billing address`() = runScenario(
+        callbackResult = {
+            GooglePayPaymentDataUpdateResponse(newTransactionInfo = null, error = null)
+        }
+    ) {
+        onPaymentDataChanged(request("PAYMENT_METHOD"))
+
+        val update = callback.updates.awaitItem()
+        assertThat(update.callbackTrigger).isEqualTo(GooglePayPaymentDataUpdate.CallbackTrigger.PaymentMethod)
+        assertThat(update.shippingAddress).isNull()
+        assertThat(update.billingAddress).isNull()
+        assertThat(JSONObject(listener.completions.awaitItem().toJson()).length()).isEqualTo(0)
+    }
+
+    @Test
     fun `invalid intermediate payment data reports parsing failure and stops callback`() = runScenario(
         callbackResult = { error("Should not be called!") }
     ) {
@@ -150,6 +186,13 @@ class GooglePayPaymentDataCallbackHandlerTest {
         callbackTrigger = "SHIPPING_ADDRESS",
         expectedParsedCallbackTrigger = GooglePayPaymentDataUpdate.CallbackTrigger.ShippingAddress,
         expectedIntent = "SHIPPING_ADDRESS",
+    )
+
+    @Test
+    fun `callback failure for payment method trigger returns payment method error`() = runFailureScenario(
+        callbackTrigger = "PAYMENT_METHOD",
+        expectedParsedCallbackTrigger = GooglePayPaymentDataUpdate.CallbackTrigger.PaymentMethod,
+        expectedIntent = "PAYMENT_METHOD",
     )
 
     @Test
@@ -277,6 +320,31 @@ class GooglePayPaymentDataCallbackHandlerTest {
                         "locality": "San Francisco",
                         "postalCode": "94103",
                         "iso3166AdministrativeArea": "US-CA"
+                      }
+                    }
+                    """.trimIndent()
+                )
+            }
+        }
+
+        fun paymentMethodRequest(): IntermediatePaymentData {
+            return mock<IntermediatePaymentData>().also {
+                whenever(it.toJson()).thenReturn(
+                    """
+                    {
+                      "callbackTrigger": "PAYMENT_METHOD",
+                      "paymentMethodData": {
+                        "type": "CARD",
+                        "info": {
+                          "cardNetwork": "VISA",
+                          "cardFundingSource": "CREDIT",
+                          "billingAddress": {
+                            "administrativeArea": "New York",
+                            "countryCode": "US",
+                            "locality": "New York",
+                            "postalCode": "10011"
+                          }
+                        }
                       }
                     }
                     """.trimIndent()
