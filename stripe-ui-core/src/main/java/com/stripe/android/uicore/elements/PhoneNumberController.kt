@@ -62,15 +62,15 @@ class PhoneNumberController private constructor(
         initiallySelectedCountryCode
     )
 
-    internal val phoneNumberFormatter = countryDropdownController.selectedIndex.mapAsStateFlow {
+    internal val phoneNumberFormatter = countryDropdownController.rawFieldValue.mapAsStateFlow {
         PhoneNumberFormatter.forCountry(
-            countryConfig.countries[it ?: 0].code.value
+            it.orEmpty()
         )
     }
 
-    private val phoneNumberMinimumLength = countryDropdownController.selectedIndex.mapAsStateFlow {
+    private val phoneNumberMinimumLength = countryDropdownController.rawFieldValue.mapAsStateFlow {
         PhoneNumberFormatter.lengthForCountry(
-            countryConfig.countries[it ?: 0].code.value
+            it.orEmpty()
         )
     }
 

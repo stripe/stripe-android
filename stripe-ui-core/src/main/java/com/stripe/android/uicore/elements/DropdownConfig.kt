@@ -18,6 +18,30 @@ interface DropdownConfig {
     /** This is the list of displayable items to show in the drop down **/
     val displayItems: List<String>
 
+    /** Default selection without requiring the complete display list. */
+    val defaultItem: Item?
+        get() = getItem(0)
+
+    /** Number of options without requiring their display labels. */
+    val itemCount: Int
+        get() = rawItems.size
+
+    fun getItem(index: Int): Item? = displayItems.getOrNull(index)?.let {
+        Item(rawItems.getOrNull(index), it, getSelectedItemLabel(index))
+    }
+
+    fun itemForRaw(value: String): Item? {
+        return getItem(displayItems.indexOf(convertFromRaw(value)))
+    }
+
+    fun itemForAutofill(value: String): Item? {
+        val index = displayItems.indexOfFirst { it.equals(value, ignoreCase = true) }
+        return if (index == -1) itemForRaw(value) else getItem(index)
+    }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    data class Item(val rawValue: String?, val displayText: String, val selectedLabel: String)
+
     /** Whether the dropdown menu should be shown in a small form when collapsed **/
     val mode: Mode
         get() = Mode.Full()

@@ -3,6 +3,7 @@ package com.stripe.android.ui.core.elements
 import androidx.compose.ui.autofill.ContentType
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.uicore.R
 import com.stripe.android.uicore.elements.CountryConfig
 import com.stripe.android.uicore.elements.DropdownConfig
@@ -16,6 +17,51 @@ import java.util.Locale
 class DropdownFieldControllerTest {
     private val countryConfig = CountryConfig(locale = Locale.US, autofillType = ContentType.AddressCountry)
     private val controller = DropdownFieldController(countryConfig)
+
+    @Test
+    fun `an option with a null API value is still a complete selection`() {
+        val controller = simpleController(
+            DropdownItem(displayText = "No preference", apiValue = null),
+            DropdownItem(displayText = "Other", apiValue = "other"),
+        )
+
+        assertThat(controller.rawFieldValue.value).isNull()
+        assertThat(controller.fieldValue.value).isEqualTo("No preference")
+        assertThat(controller.selectedIndex.value).isEqualTo(0)
+        assertThat(controller.isComplete.value).isTrue()
+    }
+
+    @Test
+    fun `options sharing an API value retain their selected label and index`() {
+        val controller = simpleController(
+            DropdownItem(displayText = "First", apiValue = "same"),
+            DropdownItem(displayText = "Second", apiValue = "same"),
+        )
+
+        controller.onValueChange(1)
+
+        assertThat(controller.rawFieldValue.value).isEqualTo("same")
+        assertThat(controller.selectedItemLabel.value).isEqualTo("Second")
+        assertThat(controller.selectedIndex.value).isEqualTo(1)
+    }
+
+    @Test
+    fun `raw updates and autofill retain their matching precedence`() {
+        val controller = simpleController(
+            DropdownItem(displayText = "second", apiValue = "first"),
+            DropdownItem(displayText = "Other", apiValue = "second"),
+        )
+
+        controller.onRawValueChange("second")
+        assertThat(controller.rawFieldValue.value).isEqualTo("second")
+
+        controller.onAutofillValue("SECOND")
+        assertThat(controller.rawFieldValue.value).isEqualTo("first")
+    }
+
+    private fun simpleController(vararg items: DropdownItem) = DropdownFieldController(
+        SimpleDropdownConfig(resolvableString(R.string.stripe_blank_and_required), items.toList())
+    )
 
     @Test
     fun `Verify that when the selected index changes the paymentMethod param value updates`() =

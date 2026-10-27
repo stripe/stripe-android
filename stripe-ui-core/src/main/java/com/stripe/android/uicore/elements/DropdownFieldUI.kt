@@ -97,19 +97,14 @@ fun DropDown(
     showChevron: Boolean = true
 ) {
     val label by controller.label.collectAsState()
-    val selectedIndex by controller.selectedIndex.collectAsState()
-    val items = controller.displayItems
     val shouldDisableDropdownWithSingleItem =
-        items.count() == 1 && controller.disableDropdownWithSingleElement
+        controller.itemCount == 1 && controller.disableDropdownWithSingleElement
 
     val shouldEnable = enabled && !shouldDisableDropdownWithSingleItem
 
     var expanded by remember { mutableStateOf(false) }
     val error by controller.validationMessage.collectAsState()
-    val selectedItemIndex by controller.selectedIndex.collectAsState()
-    val selectedItemLabel = remember(selectedItemIndex) {
-        controller.getSelectedItemLabel(selectedIndex)
-    }
+    val selectedItemLabel by controller.selectedItemLabel.collectAsState()
 
     val currentTextColor = if (shouldEnable) {
         MaterialTheme.stripeColors.onComponent
@@ -187,6 +182,8 @@ fun DropDown(
                 .requiredSizeIn(maxHeight = DropdownMenuItemDefaultMinHeight * 8.9f),
             scrollState = scrollState,
         ) {
+            val items = controller.displayItems
+            val selectedIndex by controller.selectedIndex.collectAsState()
             var height = 0
             items.forEachIndexed { index, displayValue ->
                 var hasUpdatedHeight: Boolean = index >= (selectedIndex ?: -1) - 1

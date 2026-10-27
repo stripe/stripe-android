@@ -14,12 +14,22 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.text.AnnotatedString
+import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.testing.createComposeCleanupRule
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.TestWatcher
+import org.junit.runner.Description
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.util.Locale
@@ -31,6 +41,66 @@ class DropdownFieldUITest {
 
     @get:Rule
     val composeCleanupRule = createComposeCleanupRule()
+
+    @get:Rule
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val coroutineTestRule = object : TestWatcher() {
+        override fun starting(description: Description) {
+            Dispatchers.setMain(UnconfinedTestDispatcher())
+        }
+
+        override fun finished(description: Description) {
+            Dispatchers.resetMain()
+        }
+    }
+
+    @Test
+    fun `country menu labels are built on opening and reused on reopening`() = runTest {
+        val mappedCountries = Turbine<String>()
+        val controller = DropdownFieldController(
+            CountryConfig(
+                onlyShowCountryCodes = setOf("US", "AT", "IT"),
+                locale = Locale.US,
+                expandedLabelMapper = {
+                    mappedCountries.add(it.code.value)
+                    "${CountryConfig.countryCodeToEmoji(it.code.value)} ${it.name}"
+                },
+                autofillType = ContentType.AddressCountry,
+            ),
+            initialValue = "AT",
+        )
+
+        assertThat(mappedCountries.awaitItem()).isEqualTo("AT")
+        runScenario(controller) { assertIsDisplayed() }
+        mappedCountries.expectNoEvents()
+        composeTestRule.onNodeWithText("Austria").assertIsDisplayed()
+
+        composeTestRule.onNodeWithTag(TEST_TAG).performClick()
+        composeTestRule.onNodeWithText("🇮🇹 Italy").assertIsDisplayed()
+        assertThat(mappedCountries.awaitItem()).isEqualTo("US")
+        assertThat(mappedCountries.awaitItem()).isEqualTo("AT")
+        assertThat(mappedCountries.awaitItem()).isEqualTo("IT")
+        assertThat(controller.rawFieldValue.value).isEqualTo("AT")
+
+        composeTestRule.onNodeWithText("🇮🇹 Italy").performClick()
+        composeTestRule.onNodeWithText("Italy").assertIsDisplayed()
+        assertThat(controller.rawFieldValue.value).isEqualTo("IT")
+
+        composeTestRule.onNodeWithTag(TEST_TAG).performClick()
+        composeTestRule.onNodeWithText("🇮🇹 Italy").assertIsDisplayed()
+        mappedCountries.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `phone formatting follows the raw country before opening its menu`() {
+        val controller = PhoneNumberController.createPhoneNumberController(initiallySelectedCountryCode = "US")
+
+        assertThat(controller.getCountryCode()).isEqualTo("US")
+        controller.countryDropdownController.onRawValueChange("gb")
+
+        assertThat(controller.getCountryCode()).isEqualTo("GB")
+        assertThat(controller.getE164PhoneNumber("7700900123")).isEqualTo("+447700900123")
+    }
 
     @Test
     fun `country code autofill updates selection and canonical value`() {

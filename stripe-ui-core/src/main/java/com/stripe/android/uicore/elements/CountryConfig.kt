@@ -3,9 +3,11 @@ package com.stripe.android.uicore.elements
 import androidx.annotation.RestrictTo
 import androidx.compose.ui.autofill.ContentType
 import com.stripe.android.core.model.Country
+import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.core.strings.resolvableString
 import java.util.Locale
+import java.util.concurrent.ConcurrentHashMap
 import com.stripe.android.core.R as CoreR
 
 /**
@@ -26,7 +28,7 @@ class CountryConfig(
     override val mode: DropdownConfig.Mode = DropdownConfig.Mode.Full(),
     override val disableDropdownWithSingleElement: Boolean = false,
     private val collapsedLabelMapper: (Country) -> String = { country -> country.name },
-    expandedLabelMapper: (Country) -> String = { country ->
+    private val expandedLabelMapper: (Country) -> String = { country ->
         "${countryCodeToEmoji(country.code.value)} ${country.name}"
     },
     override val autofillType: ContentType?,
@@ -35,24 +37,54 @@ class CountryConfig(
 
     override val label = resolvableString(CoreR.string.stripe_address_label_country_or_region)
 
-    internal val countries = CountryUtils.getOrderedCountries(locale)
-        .filter {
-            onlyShowCountryCodes.isEmpty() || onlyShowCountryCodes.contains(it.code.value)
-        }
+    private val allowedCountryCodes = CountryUtils.supportedBillingCountries.filter {
+        onlyShowCountryCodes.isEmpty() || it in onlyShowCountryCodes
+    }.toSet()
+    private val localizedCountries = ConcurrentHashMap<String, Country>()
 
-    override val rawItems = countries.map { it.code.value }
+    internal val countries by lazy {
+        CountryUtils.getOrderedCountries(locale).filter { it.code.value in allowedCountryCodes }
+    }
+    override val rawItems by lazy { countries.map { it.code.value } }
+    override val displayItems: List<String> by lazy { countries.map(expandedLabelMapper) }
+    override val itemCount: Int = allowedCountryCodes.size
 
-    override val displayItems: List<String> = countries.map(expandedLabelMapper)
+    // Preserve the existing alphabetical fallback when the locale has no allowed country.
+    private val defaultRawValue: String? by lazy {
+        locale.country.takeIf { it in allowedCountryCodes }
+            ?: allowedCountryCodes.singleOrNull()
+            ?: rawItems.firstOrNull()
+    }
 
     override fun getSelectedItemLabel(index: Int) =
         countries.getOrNull(index)?.let(collapsedLabelMapper) ?: ""
 
-    override fun convertFromRaw(rawValue: String): String {
-        val index = countries.indexOfFirst { country ->
-            country.code.value.equals(rawValue, ignoreCase = true) ||
-                country.name.equals(rawValue, ignoreCase = true)
-        }
-        return displayItems.getOrNull(index) ?: displayItems.firstOrNull() ?: ""
+    override val defaultItem: DropdownConfig.Item?
+        get() = defaultRawValue?.let(::itemForCode)
+
+    override fun itemForRaw(value: String): DropdownConfig.Item? = convertToRaw(value)?.let(::itemForCode)
+
+    override fun itemForAutofill(value: String): DropdownConfig.Item? = itemForRaw(value)
+
+    private fun convertToRaw(value: String): String? {
+        val countryCode = value.uppercase(Locale.ROOT)
+        if (countryCode in allowedCountryCodes) return countryCode
+        if (value.isBlank()) return defaultRawValue
+        return countries.firstOrNull {
+            it.name.equals(value, ignoreCase = true) || expandedLabelMapper(it).equals(value, ignoreCase = true)
+        }?.code?.value ?: defaultRawValue
+    }
+
+    override fun convertFromRaw(rawValue: String): String = itemForRaw(rawValue)?.displayText.orEmpty()
+
+    private fun itemForCode(code: String): DropdownConfig.Item {
+        val country = countryForCode(code)
+        return DropdownConfig.Item(code, expandedLabelMapper(country), collapsedLabelMapper(country))
+    }
+
+    private fun countryForCode(code: String): Country = localizedCountries.getOrPut(code) {
+        // CountryUtils.getDisplayCountry also initializes the complete localized country list.
+        Country(CountryCode.create(code), Locale("", code).getDisplayCountry(locale))
     }
 
     @Suppress("MagicNumber")
