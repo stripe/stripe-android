@@ -130,7 +130,8 @@ class ConsumerStateTest {
                 administrativeArea = "NY",
                 countryCode = CountryCode.US,
                 postalCode = "54321"
-            )
+            ),
+            display = null,
         )
         val response = ConsumerPaymentDetails(paymentDetails = listOf(newCard))
 
@@ -297,7 +298,8 @@ class ConsumerStateTest {
                 administrativeArea = "NY",
                 countryCode = CountryCode.US,
                 postalCode = "54321"
-            )
+            ),
+            display = null,
         )
 
         val result = existingState.withUpdatedPaymentDetail(

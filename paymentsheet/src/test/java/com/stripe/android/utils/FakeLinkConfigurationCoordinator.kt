@@ -41,6 +41,7 @@ internal class FakeLinkConfigurationCoordinator(
                 networks = emptyList(),
                 cvcCheck = CvcCheck.Pass,
                 funding = ConsumerPaymentDetails.Card.Funding.Credit,
+                display = null,
             ),
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
         )
@@ -66,7 +67,8 @@ internal class FakeLinkConfigurationCoordinator(
                     administrativeArea = null,
                     countryCode = CountryCode.US,
                     postalCode = "42424"
-                )
+                ),
+                display = null,
             ),
             confirmParams = mock(),
             originalParams = mock(),

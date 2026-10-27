@@ -141,7 +141,8 @@ internal object TestFactory {
             administrativeArea = null,
             countryCode = CountryCode.US,
             postalCode = "12312"
-        )
+        ),
+        display = null,
     )
 
     val CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT = ConsumerPaymentDetails.BankAccount(
@@ -153,6 +154,7 @@ internal object TestFactory {
         nickname = null,
         billingAddress = null,
         billingEmailAddress = null,
+        display = null,
     )
 
     val CONSUMER_PAYMENT_DETAILS_PASSTHROUGH = ConsumerPaymentDetails.Passthrough(

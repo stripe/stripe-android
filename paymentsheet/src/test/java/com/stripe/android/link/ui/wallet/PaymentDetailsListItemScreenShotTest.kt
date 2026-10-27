@@ -48,7 +48,8 @@ internal class PaymentDetailsListItemScreenShotTest {
                         administrativeArea = null,
                         countryCode = CountryCode.US,
                         postalCode = "12312"
-                    )
+                    ),
+                    display = null,
                 ),
                 enabled = true,
                 isSelected = false,
@@ -81,7 +82,8 @@ internal class PaymentDetailsListItemScreenShotTest {
                         administrativeArea = null,
                         countryCode = CountryCode.US,
                         postalCode = "12312"
-                    )
+                    ),
+                    display = null,
                 ),
                 enabled = true,
                 isSelected = true,
@@ -114,7 +116,8 @@ internal class PaymentDetailsListItemScreenShotTest {
                         administrativeArea = null,
                         countryCode = CountryCode.US,
                         postalCode = "12312"
-                    )
+                    ),
+                    display = null,
                 ),
                 enabled = true,
                 isSelected = false,
@@ -147,7 +150,8 @@ internal class PaymentDetailsListItemScreenShotTest {
                         administrativeArea = null,
                         countryCode = CountryCode.US,
                         postalCode = "12312"
-                    )
+                    ),
+                    display = null,
                 ),
                 enabled = false,
                 isSelected = true,
@@ -180,7 +184,8 @@ internal class PaymentDetailsListItemScreenShotTest {
                         administrativeArea = null,
                         countryCode = CountryCode.US,
                         postalCode = "12312"
-                    )
+                    ),
+                    display = null,
                 ),
                 enabled = true,
                 isSelected = true,
@@ -203,6 +208,7 @@ internal class PaymentDetailsListItemScreenShotTest {
                     nickname = null,
                     billingAddress = null,
                     billingEmailAddress = null,
+                    display = null,
                 ),
                 enabled = true,
                 isSelected = false,
@@ -225,6 +231,7 @@ internal class PaymentDetailsListItemScreenShotTest {
                     nickname = null,
                     billingAddress = null,
                     billingEmailAddress = null,
+                    display = null,
                 ),
                 enabled = true,
                 isSelected = false,

@@ -1,5 +1,6 @@
 package com.stripe.android.link.ui.wallet
 
+import androidx.annotation.DrawableRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -10,10 +11,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.RadioButton
@@ -22,6 +26,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.IntrinsicMeasurable
 import androidx.compose.ui.layout.IntrinsicMeasureScope
@@ -55,6 +60,8 @@ import com.stripe.android.model.ConsumerPaymentDetails.Generic
 import com.stripe.android.model.CvcCheck
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.getCardBrandIconForVerticalMode
+import com.stripe.android.uicore.image.LocalStripeImageLoader
+import com.stripe.android.uicore.image.StripeImage
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.R as StripeR
 
@@ -194,7 +201,8 @@ private fun PaymentDetailsListItemPreview() {
         networks = emptyList(),
         funding = Card.Funding.Credit,
         nickname = null,
-        billingAddress = null
+        billingAddress = null,
+        display = null,
     )
     val bank = BankAccount(
         id = "bank_id",
@@ -204,7 +212,8 @@ private fun PaymentDetailsListItemPreview() {
         nickname = null,
         bankAccountName = "Bank of America Checking Account",
         billingAddress = null,
-        billingEmailAddress = null
+        billingEmailAddress = null,
+        display = null,
     )
     val generic = Generic(
         id = "unknown_id",
@@ -347,6 +356,7 @@ internal fun RowScope.PaymentDetails(
                 modifier = modifier,
                 title = paymentDetails.displayName.resolve(),
                 subtitle = stringResource(R.string.stripe_link_payment_method_last4, paymentDetails.last4),
+                iconUrl = paymentDetails.display?.icon?.defaultUrl,
                 icon = paymentDetails.brand.getCardBrandIconForVerticalMode(),
             )
         }
@@ -358,6 +368,7 @@ internal fun RowScope.PaymentDetails(
                 modifier = modifier,
                 title = paymentDetails.displayName.resolve(),
                 subtitle = null,
+                iconUrl = null,
                 icon = CardBrand.Unknown.getCardBrandIconForVerticalMode(),
             )
         }
@@ -377,19 +388,28 @@ private fun RowScope.CardInfo(
     modifier: Modifier = Modifier,
     title: String,
     subtitle: String?,
-    icon: Int,
+    iconUrl: String?,
+    @DrawableRes icon: Int,
 ) {
     PaymentMethodInfo(
         modifier = modifier,
         title = title,
         subtitle = subtitle,
         icon = {
-            Image(
-                painter = painterResource(icon),
-                contentDescription = null,
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Fit,
-            )
+            // Match the 3:2 aspect ratio of the local card brand icons.
+            RemoteIcon(
+                iconUrl = iconUrl,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(CARD_ICON_ASPECT_RATIO),
+            ) {
+                Image(
+                    painter = painterResource(icon),
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Fit,
+                )
+            }
         }
     )
 }
@@ -404,9 +424,42 @@ private fun RowScope.BankAccountInfo(
         title = bankAccount.displayName.resolve(),
         subtitle = stringResource(R.string.stripe_link_payment_method_last4, bankAccount.last4),
         icon = {
-            BankIcon(bankAccount.bankIconCode)
+            RemoteIcon(
+                iconUrl = bankAccount.display?.icon?.defaultUrl,
+                modifier = Modifier.fillMaxSize(),
+            ) {
+                BankIcon(bankAccount.bankIconCode)
+            }
         }
     )
+}
+
+/**
+ * Renders the icon at [iconUrl], showing [localIcon] while it loads, if it fails to load, or if there is no URL.
+ */
+@Composable
+private fun RemoteIcon(
+    iconUrl: String?,
+    modifier: Modifier = Modifier,
+    localIcon: @Composable () -> Unit,
+) {
+    Box(modifier = modifier) {
+        if (iconUrl != null) {
+            StripeImage(
+                url = iconUrl,
+                imageLoader = LocalStripeImageLoader.current,
+                contentDescription = null,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(RoundedCornerShape(3.dp)),
+                contentScale = ContentScale.Fit,
+                errorContent = { localIcon() },
+                loadingContent = { localIcon() },
+            )
+        } else {
+            localIcon()
+        }
+    }
 }
 
 @Composable
@@ -421,7 +474,10 @@ private fun RowScope.PaymentMethodInfo(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Box(modifier = Modifier.size(24.dp)) {
+        Box(
+            modifier = Modifier.size(24.dp),
+            contentAlignment = Alignment.Center,
+        ) {
             icon()
         }
 
@@ -444,6 +500,8 @@ private fun RowScope.PaymentMethodInfo(
         }
     }
 }
+
+private const val CARD_ICON_ASPECT_RATIO = 3f / 2f
 
 internal const val WALLET_PAYMENT_DETAIL_ITEM_RADIO_BUTTON = "wallet_payment_detail_item_radio_button"
 internal const val WALLET_PAYMENT_DETAIL_ITEM_MENU_BUTTON = "wallet_payment_detail_item_menu_button"
