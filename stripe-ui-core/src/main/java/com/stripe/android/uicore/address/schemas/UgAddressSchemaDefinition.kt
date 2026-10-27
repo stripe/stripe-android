@@ -5,12 +5,9 @@ import com.stripe.android.uicore.address.CountryAddressSchema
 import com.stripe.android.uicore.address.FieldSchema
 import com.stripe.android.uicore.address.FieldType
 import com.stripe.android.uicore.address.NameType
-import kotlin.String
 import kotlin.collections.List
 
 internal object UgAddressSchemaDefinition : AddressSchemaDefinition {
-    override val countryCode: String = "UG"
-
     override fun schemaElements(): List<CountryAddressSchema> = listOf(
         CountryAddressSchema(
             type = FieldType.AddressLine1,

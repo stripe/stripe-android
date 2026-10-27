@@ -3,6 +3,7 @@ package com.stripe.android.uicore.elements
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.uicore.address.AddressSchemaDefinition
+import com.stripe.android.uicore.address.AddressSchemaRegistry
 import com.stripe.android.uicore.address.CountryAddressSchema
 import com.stripe.android.uicore.address.FieldType
 import kotlinx.coroutines.Dispatchers
@@ -17,8 +18,29 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class AddressElementUiRegistryTest {
     @Test
+    fun `construction defers schema lookup until fields are requested`() = runTest {
+        val lookups = Turbine<String?>()
+        val registry = AddressElementUiRegistry { country ->
+            lookups.add(country)
+            AddressSchemaRegistry.getDefinition(country)
+        }
+        lookups.expectNoEvents()
+
+        val fields = registry.get("US")
+        assertThat(fields).isNotEmpty()
+        assertThat(lookups.awaitItem()).isEqualTo("US")
+        assertThat(registry.get("US")).isSameInstanceAs(fields)
+        lookups.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `country lookup is case sensitive`() = runScenario {
+        assertThat(registry.get("us")).isNull()
+    }
+
+    @Test
     fun `construction does not transform any schemas`() = runScenario {
-        schemas.forEach { it.schemaElementsCalls.expectNoEvents() }
+        schemas.values.forEach { it.schemaElementsCalls.expectNoEvents() }
     }
 
     @Test
@@ -49,7 +71,9 @@ class AddressElementUiRegistryTest {
 
     @Test
     fun `separate registries have independent mutable fields`() = runScenario {
-        val otherRegistry = AddressElementUiRegistry(schemas.associateBy { it.countryCode }, defaultSchema)
+        val otherRegistry = AddressElementUiRegistry { country ->
+            if (country == null) defaultSchema else schemas[country]
+        }
         val controller = (registry.get("US")?.single() as SimpleTextElement).controller
         val otherController = (otherRegistry.get("US")?.single() as SimpleTextElement).controller
 
@@ -118,16 +142,18 @@ class AddressElementUiRegistryTest {
         val schemaElements = listOf(
             CountryAddressSchema(type = FieldType.AddressLine1, required = true, schema = null)
         )
-        val us = FakeAddressSchemaDefinition("US", schemaElements)
-        val ca = FakeAddressSchemaDefinition("CA", schemaElements)
-        val defaultSchema = FakeAddressSchemaDefinition("ZZ", schemaElements)
-        val emptySchema = FakeAddressSchemaDefinition("AQ", emptyList())
-        val schemas = listOf(us, ca, defaultSchema, emptySchema)
-        val registry = AddressElementUiRegistry(schemas.associateBy { it.countryCode }, defaultSchema)
+        val us = FakeAddressSchemaDefinition(schemaElements)
+        val ca = FakeAddressSchemaDefinition(schemaElements)
+        val defaultSchema = FakeAddressSchemaDefinition(schemaElements)
+        val emptySchema = FakeAddressSchemaDefinition(emptyList())
+        val schemas = mapOf("US" to us, "CA" to ca, "ZZ" to defaultSchema, "AQ" to emptySchema)
+        val registry = AddressElementUiRegistry { country ->
+            if (country == null) defaultSchema else schemas[country]
+        }
 
         Scenario(registry, us, ca, defaultSchema, emptySchema, schemas).block()
 
-        schemas.forEach { it.ensureAllEventsConsumed() }
+        schemas.values.forEach { it.ensureAllEventsConsumed() }
     }
 
     private data class Scenario(
@@ -136,12 +162,11 @@ class AddressElementUiRegistryTest {
         val ca: FakeAddressSchemaDefinition,
         val defaultSchema: FakeAddressSchemaDefinition,
         val emptySchema: FakeAddressSchemaDefinition,
-        val schemas: List<FakeAddressSchemaDefinition>,
+        val schemas: Map<String, FakeAddressSchemaDefinition>,
     )
 }
 
 internal class FakeAddressSchemaDefinition(
-    override val countryCode: String,
     private val elements: List<CountryAddressSchema>,
 ) : AddressSchemaDefinition {
     val schemaElementsCalls = Turbine<Unit>()

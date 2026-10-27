@@ -5,12 +5,10 @@ import com.stripe.android.uicore.address.AddressSchemaRegistry
 import com.stripe.android.uicore.address.transformToElementList
 
 internal class AddressElementUiRegistry(
-    private val schemas: Map<String, AddressSchemaDefinition>,
-    private val defaultSchema: AddressSchemaDefinition,
+    private val schemaForCountry: (String?) -> AddressSchemaDefinition?,
 ) {
     constructor(schemaRegistry: AddressSchemaRegistry) : this(
-        schemas = schemaRegistry.all,
-        defaultSchema = schemaRegistry.defaultSchema,
+        schemaForCountry = schemaRegistry::getDefinition,
     )
 
     private val elements = mutableMapOf<String?, List<SectionFieldElement>>()
@@ -18,8 +16,8 @@ internal class AddressElementUiRegistry(
     @Synchronized
     fun get(countryCode: String?): List<SectionFieldElement>? {
         return elements.getOrPut(countryCode) {
-            val schema = if (countryCode == null) defaultSchema else schemas[countryCode] ?: return null
-            schema.schemaElements().transformToElementList(countryCode ?: schema.countryCode)
+            val schema = schemaForCountry(countryCode) ?: return null
+            schema.schemaElements().transformToElementList(countryCode ?: "ZZ")
         }
     }
 }

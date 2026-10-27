@@ -39,32 +39,37 @@ class AddressElement(
     override val allowsUserInteraction: Boolean = true
     override val mandateText: ResolvableString? = null
 
+    private val initialValuesMap = rawValuesMap
     private val isValidating = MutableStateFlow(false)
-    private val emailElement = EmailElement(
-        initialValue = rawValuesMap[FormFieldId.Email]
-    )
+    private val emailElement by lazy {
+        EmailElement(initialValue = initialValuesMap[FormFieldId.Email])
+    }
 
-    private val nameElement = SimpleTextElement(
-        FormFieldId.Name,
-        SimpleTextFieldController(
-            textFieldConfig = SimpleTextFieldConfig(
-                label = resolvableString(CoreR.string.stripe_address_label_full_name),
-                optional = addressInputMode.nameConfig == AddressFieldConfiguration.OPTIONAL,
-                allowsEmojis = false,
-            ),
-            initialValue = rawValuesMap[FormFieldId.Name]
+    private val nameElement by lazy {
+        SimpleTextElement(
+            FormFieldId.Name,
+            SimpleTextFieldController(
+                textFieldConfig = SimpleTextFieldConfig(
+                    label = resolvableString(CoreR.string.stripe_address_label_full_name),
+                    optional = addressInputMode.nameConfig == AddressFieldConfiguration.OPTIONAL,
+                    allowsEmojis = false,
+                ),
+                initialValue = initialValuesMap[FormFieldId.Name]
+            )
         )
-    )
+    }
 
-    private val addressAutoCompleteElement = AddressTextFieldElement(
-        identifier = FormFieldId.OneLineAddress,
-        label = resolvableString(R.string.stripe_address_label_address),
-        addressInputMode = addressInputMode,
-        inlineAutocompleteHandler = inlineAutocompleteHandler,
-        reportsFormValue = false,
-        initialQuery = "",
-        showEnterManually = true,
-    )
+    private val addressAutoCompleteElement by lazy {
+        AddressTextFieldElement(
+            identifier = FormFieldId.OneLineAddress,
+            label = resolvableString(R.string.stripe_address_label_address),
+            addressInputMode = addressInputMode,
+            inlineAutocompleteHandler = inlineAutocompleteHandler,
+            reportsFormValue = false,
+            initialQuery = "",
+            showEnterManually = true,
+        )
+    }
 
     private val expandedAutoCompleteElement: AddressTextFieldElement? =
         if (inlineAutocompleteHandler != null && addressInputMode is AddressInputMode.NoAutocomplete) {
@@ -84,15 +89,20 @@ class AddressElement(
     val inlineQuery: StateFlow<String>
         get() = expandedAutoCompleteElement?.inlineQuery ?: addressAutoCompleteElement.inlineQuery
 
-    @VisibleForTesting
-    val phoneNumberElement = PhoneNumberElement(
-        FormFieldId.Phone,
-        PhoneNumberController.createPhoneNumberController(
-            initialValue = rawValuesMap[FormFieldId.Phone] ?: "",
-            showOptionalLabel = addressInputMode.phoneNumberConfig == AddressFieldConfiguration.OPTIONAL,
-            acceptEmptyInput = addressInputMode.phoneNumberConfig == AddressFieldConfiguration.OPTIONAL,
+    private val phoneNumberElementDelegate = lazy {
+        PhoneNumberElement(
+            FormFieldId.Phone,
+            PhoneNumberController.createPhoneNumberController(
+                initialValue = initialValuesMap[FormFieldId.Phone] ?: "",
+                showOptionalLabel = addressInputMode.phoneNumberConfig == AddressFieldConfiguration.OPTIONAL,
+                acceptEmptyInput = addressInputMode.phoneNumberConfig == AddressFieldConfiguration.OPTIONAL,
+            )
         )
-    )
+    }
+
+    @VisibleForTesting
+    val phoneNumberElement: PhoneNumberElement
+        get() = phoneNumberElementDelegate.value
 
     private val currentValuesMap = mutableMapOf<FormFieldId, String?>()
 
@@ -100,8 +110,12 @@ class AddressElement(
 
     private val otherFields = countryElement.controller.rawFieldValue
         .mapAsStateFlow { countryCode ->
-            countryCode?.let {
-                phoneNumberElement.controller.countryDropdownController.onRawValueChange(it)
+            if (addressInputMode.phoneNumberConfig != AddressFieldConfiguration.HIDDEN ||
+                phoneNumberElementDelegate.isInitialized()
+            ) {
+                countryCode?.let {
+                    phoneNumberElement.controller.countryDropdownController.onRawValueChange(it)
+                }
             }
             (elementsRegistry.get(countryCode) ?: emptyList()).onEach { field ->
                 updateLine1WithAutocompleteAffordance(
@@ -199,19 +213,18 @@ class AddressElement(
     ) { country, otherFields, _, _, isValidating ->
         val hideName = addressInputMode.nameConfig == AddressFieldConfiguration.HIDDEN
         val headerElements = listOfNotNull(
-            nameElement.takeUnless { hideName },
+            if (hideName) null else nameElement,
             countryElement.takeUnless { hideCountry },
         )
 
-        val condensed = headerElements.plus(addressAutoCompleteElement)
         val expanded = headerElements.plus(otherFields)
         val baseElements = when (addressInputMode) {
-            is AddressInputMode.AutocompleteInline -> condensed
+            is AddressInputMode.AutocompleteInline -> headerElements.plus(addressAutoCompleteElement)
             is AddressInputMode.AutocompleteCondensed -> {
                 // If the merchant has supplied Google Places API key, Google Places SDK is
                 // available, and country is supported, use autocomplete
                 if (addressInputMode.supportsAutoComplete(country, isPlacesAvailable)) {
-                    condensed
+                    headerElements.plus(addressAutoCompleteElement)
                 } else {
                     expanded
                 }

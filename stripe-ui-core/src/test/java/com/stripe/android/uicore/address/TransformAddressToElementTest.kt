@@ -3,6 +3,7 @@ package com.stripe.android.uicore.address
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.uicore.R
 import com.stripe.android.uicore.elements.AdministrativeAreaConfig
@@ -18,6 +19,11 @@ import org.junit.Test
 import com.stripe.android.core.R as CoreR
 
 class TransformAddressToElementTest {
+    // AC and the default ZZ schema are not billing-country options.
+    private val addressSchemas = (CountryUtils.supportedBillingCountries + setOf("AC", "ZZ")).map {
+        requireNotNull(AddressSchemaRegistry.get(it))
+    }
+
     private data class TestTextSpec(
         val apiPath: FormFieldId,
         val label: Int,
@@ -109,8 +115,8 @@ class TransformAddressToElementTest {
 
     @Test
     fun `Make sure name schema is not found on fields not processed`() {
-        AddressSchemaRegistry.all.forEach { (_, schema) ->
-            val invalidNameType = schema.schemaElements().filter { addressSchema ->
+        addressSchemas.forEach { schema ->
+            val invalidNameType = schema.filter { addressSchema ->
                 addressSchema.schema?.nameType != null
             }.filter {
                 it.type == FieldType.AddressLine1 || it.type == FieldType.AddressLine2
@@ -124,8 +130,8 @@ class TransformAddressToElementTest {
     @Test
     fun `Make sure sorting code and dependent locality is never required`() {
         // Sorting code and dependent locality are not actually sent to the server.
-        AddressSchemaRegistry.all.forEach { (_, schema) ->
-            val invalidNameType = schema.schemaElements().filter { addressSchema ->
+        addressSchemas.forEach { schema ->
+            val invalidNameType = schema.filter { addressSchema ->
                 addressSchema.required && (
                     addressSchema.type == FieldType.SortingCode ||
                         addressSchema.type == FieldType.DependentLocality
