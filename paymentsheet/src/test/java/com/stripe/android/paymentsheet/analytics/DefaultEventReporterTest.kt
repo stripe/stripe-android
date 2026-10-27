@@ -34,9 +34,6 @@ import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormViewModel
 import com.stripe.android.paymentsheet.state.WalletsState
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.TestCoroutineScheduler
-import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -1362,27 +1359,18 @@ class DefaultEventReporterTest {
     }
 
     @Test
-    fun `onAnalyticsEvent reads metadata before dispatch`() = runScenario(
-        workContextFactory = { scheduler -> StandardTestDispatcher(scheduler) },
-    ) {
-        paymentMethodMetadataStack.push(
-            paymentMethodMetadataWithTestAnalyticsMetadata.copy(
-                apiConfiguration = DEFAULT_API_CONFIG.copy(publishableKey = "pk_test_metadata"),
-            )
-        )
+    fun `onAnalyticsEvent fires event`() = runScenario {
+        paymentMethodMetadataStack.push(paymentMethodMetadataWithTestAnalyticsMetadata)
 
         val testEvent = object : AnalyticsEvent {
             override val eventName: String = "test_analytics_event"
         }
 
         eventReporter.onAnalyticsEvent(testEvent)
-        assertThat(paymentMethodMetadataStack).isEmpty()
-        testScheduler.advanceUntilIdle()
 
         val request = analyticsRequestExecutor.requestTurbine.awaitItem()
         assertThat(request.params).containsEntry("event", "test_analytics_event")
         assertThat(request.params).containsEntry("example_from_test", true)
-        assertThat(request.params).containsEntry("publishable_key", "pk_test_metadata")
     }
 
     @Test
@@ -1525,11 +1513,10 @@ class DefaultEventReporterTest {
 
     private fun runScenario(
         throwInAnalyticsCallback: Boolean = false,
-        workContextFactory: (TestCoroutineScheduler) -> TestDispatcher = { UnconfinedTestDispatcher() },
         block: suspend Scenario.() -> Unit
     ) = runTest {
         val context = ApplicationProvider.getApplicationContext<Context>()
-        val testDispatcher = workContextFactory(testScheduler)
+        val testDispatcher = UnconfinedTestDispatcher()
         val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
         val analyticsRequestV2Executor = FakeAnalyticsRequestV2Executor()
         val paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
@@ -1579,7 +1566,6 @@ class DefaultEventReporterTest {
             paymentMethodMetadataStack = paymentMethodMetadataStack,
             analyticsEventTurbine = analyticsEventTurbine,
             userFacingLoggerTurbine = userFacingLoggerTurbine,
-            testScheduler = testScheduler,
         )
 
         block(scenario)
@@ -1600,7 +1586,6 @@ class DefaultEventReporterTest {
         val paymentMethodMetadataStack: Stack<PaymentMethodMetadata?>,
         val analyticsEventTurbine: Turbine<AnalyticEvent>,
         val userFacingLoggerTurbine: Turbine<String>,
-        val testScheduler: TestCoroutineScheduler,
     )
 
     private class FakeDurationProvider : DurationProvider {

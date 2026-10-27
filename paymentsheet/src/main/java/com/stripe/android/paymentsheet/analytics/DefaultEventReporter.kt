@@ -497,13 +497,11 @@ internal class DefaultEventReporter @Inject internal constructor(
     }
 
     override fun onAnalyticsEvent(event: AnalyticsEvent) {
-        val paymentMethodMetadata = paymentMethodMetadataProvider.get()
         CoroutineScope(workContext).launch {
             analyticsRequestExecutor.executeAsync(
                 paymentAnalyticsRequestFactory.createRequest(
                     event = event,
-                    additionalParams = paymentMethodMetadata.defaultAnalyticsParams(),
-                    publishableKeyOverride = paymentMethodMetadata?.apiConfiguration?.publishableKey,
+                    additionalParams = paymentMethodMetadataProvider.get().defaultAnalyticsParams(),
                 )
             )
         }
