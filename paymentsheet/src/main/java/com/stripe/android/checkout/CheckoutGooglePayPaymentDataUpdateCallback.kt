@@ -101,7 +101,11 @@ internal class CheckoutGooglePayPaymentDataUpdateCallback @Inject constructor(
             }
         }
 
-        return mapToResponse(countryCode, response, paymentDataUpdate)
+        return mapToResponse(
+            countryCode = countryCode,
+            response = response,
+            paymentDataUpdate = paymentDataUpdate,
+        )
     }
 
     private fun addressUpdateErrorResponse(
