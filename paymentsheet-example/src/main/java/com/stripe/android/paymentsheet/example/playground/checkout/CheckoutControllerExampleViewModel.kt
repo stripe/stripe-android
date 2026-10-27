@@ -135,16 +135,18 @@ internal class CheckoutControllerExampleViewModel(
                     )
                     if (generation != configurationGeneration) return@launch
 
-                    configurationResult.fold(
-                        onSuccess = {
+                    when (configurationResult) {
+                        is CheckoutController.OperationResult.Succeeded -> {
                             if (snapshot[CheckoutPlaygroundDefinitions.session.customer] == CheckoutCustomer.New) {
                                 response.customerId?.let(settings::saveReturningCustomer)
                             }
                             savedStateHandle[RUN_ACTIVE_KEY] = true
                             _status.value = Status.Configured
-                        },
-                        onFailure = { error -> showError("Failed to configure", error) },
-                    )
+                        }
+                        is CheckoutController.OperationResult.Failed -> {
+                            showError("Failed to configure", configurationResult.error)
+                        }
+                    }
                 },
                 onFailure = { error -> showError("Failed to fetch checkout session", error) },
             )
@@ -153,13 +155,13 @@ internal class CheckoutControllerExampleViewModel(
 
     private fun runOperation(
         successMessage: String,
-        operation: suspend () -> Result<Unit>,
+        operation: suspend () -> CheckoutController.OperationResult,
     ) {
         viewModelScope.launch {
-            _operationMessage.value = operation().fold(
-                onSuccess = { successMessage },
-                onFailure = { it.message ?: "Operation failed" },
-            )
+            _operationMessage.value = when (val result = operation()) {
+                is CheckoutController.OperationResult.Succeeded -> successMessage
+                is CheckoutController.OperationResult.Failed -> result.displayMessage ?: "Operation failed"
+            }
         }
     }
 
@@ -172,7 +174,7 @@ internal class CheckoutControllerExampleViewModel(
             }
             is CheckoutController.Result.Canceled -> "Confirmation canceled"
             is CheckoutController.Result.Failed -> {
-                result.error.message?.let { "Confirmation failed: $it" } ?: "Confirmation failed"
+                result.displayMessage?.let { "Confirmation failed: $it" } ?: "Confirmation failed"
             }
         }
     }
