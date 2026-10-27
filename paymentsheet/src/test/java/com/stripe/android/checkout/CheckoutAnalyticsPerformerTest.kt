@@ -9,7 +9,6 @@ import com.stripe.android.core.ApiConfigurationPreview
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.LinkAccountHolder
@@ -147,7 +146,7 @@ internal class CheckoutAnalyticsPerformerTest {
         )
 
         analyticsRequestExecutor.requestTurbine.expectNoEvents()
-        assertThat(durationProvider.has(FakeDurationProvider.Call.End(DurationProvider.Key.Checkout))).isFalse()
+        durationProvider.callsTurbine.expectNoEvents()
     }
 
     @Test

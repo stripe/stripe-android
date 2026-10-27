@@ -7,6 +7,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.android.utils.FakeDurationProvider
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import kotlin.time.Duration.Companion.seconds
 
@@ -15,11 +16,8 @@ internal class DefaultNfcScanningEventReporterTest {
     fun `onNfcScanStarted starts duration and fires event`() = runScenario {
         reporter.onNfcScanStarted()
 
-        assertThat(
-            durationProvider.has(
-                FakeDurationProvider.Call.Start(DurationProvider.Key.NfcScan, reset = true)
-            )
-        ).isTrue()
+        assertThat(durationProvider.callsTurbine.awaitItem())
+            .isEqualTo(FakeDurationProvider.Call.Start(DurationProvider.Key.NfcScan, reset = true))
 
         val loggedParams = executor.getExecutedRequests().single().params
         assertThat(loggedParams).containsEntry("event", "mc_nfc_scan_started")
@@ -35,15 +33,10 @@ internal class DefaultNfcScanningEventReporterTest {
 
     @Test
     fun `onNfcScanSucceeded ends duration and fires event with duration and number of attempts`() = runScenario {
-        durationProvider.start(DurationProvider.Key.NfcScan)
-
         reporter.onNfcScanSucceeded(numberOfAttempts = 2)
 
-        assertThat(
-            durationProvider.has(
-                FakeDurationProvider.Call.End(DurationProvider.Key.NfcScan)
-            )
-        ).isTrue()
+        assertThat(durationProvider.callsTurbine.awaitItem())
+            .isEqualTo(FakeDurationProvider.Call.End(DurationProvider.Key.NfcScan))
 
         val loggedParams = executor.getExecutedRequests().single().params
         assertThat(loggedParams).containsEntry("event", "mc_nfc_scan_success")
@@ -55,11 +48,8 @@ internal class DefaultNfcScanningEventReporterTest {
     fun `onNfcScanAttemptStarted starts duration and fires event`() = runScenario {
         reporter.onNfcScanAttemptStarted()
 
-        assertThat(
-            durationProvider.has(
-                FakeDurationProvider.Call.Start(DurationProvider.Key.NfcScanAttempt, reset = true)
-            )
-        ).isTrue()
+        assertThat(durationProvider.callsTurbine.awaitItem())
+            .isEqualTo(FakeDurationProvider.Call.Start(DurationProvider.Key.NfcScanAttempt, reset = true))
 
         val loggedParams = executor.getExecutedRequests().single().params
         assertThat(loggedParams).containsEntry("event", "mc_nfc_scan_attempt_started")
@@ -70,13 +60,10 @@ internal class DefaultNfcScanningEventReporterTest {
 
     @Test
     fun `onNfcScanAttemptSucceeded ends duration and fires event with duration`() = runScenario {
-        durationProvider.start(DurationProvider.Key.NfcScanAttempt)
-
         reporter.onNfcScanAttemptSucceeded()
 
-        assertThat(
-            durationProvider.has(FakeDurationProvider.Call.End(DurationProvider.Key.NfcScanAttempt))
-        ).isTrue()
+        assertThat(durationProvider.callsTurbine.awaitItem())
+            .isEqualTo(FakeDurationProvider.Call.End(DurationProvider.Key.NfcScanAttempt))
 
         val loggedParams = executor.getExecutedRequests().single().params
         assertThat(loggedParams).containsEntry("event", "mc_nfc_scan_attempt_succeeded")
@@ -88,8 +75,6 @@ internal class DefaultNfcScanningEventReporterTest {
 
     @Test
     fun `onNfcScanAttemptFailed ends duration and fires event with duration and error code`() = runScenario {
-        durationProvider.start(DurationProvider.Key.NfcScanAttempt)
-
         reporter.onNfcScanAttemptFailed(
             error = GenericNfcScanningError(
                 errorCode = "expiredCard",
@@ -97,8 +82,8 @@ internal class DefaultNfcScanningEventReporterTest {
             ),
         )
 
-        assertThat(durationProvider.has(FakeDurationProvider.Call.End(DurationProvider.Key.NfcScanAttempt)))
-            .isTrue()
+        assertThat(durationProvider.callsTurbine.awaitItem())
+            .isEqualTo(FakeDurationProvider.Call.End(DurationProvider.Key.NfcScanAttempt))
 
         val loggedParams = executor.getExecutedRequests().single().params
         assertThat(loggedParams).containsEntry("event", "mc_nfc_scan_attempt_failed")
@@ -111,8 +96,6 @@ internal class DefaultNfcScanningEventReporterTest {
 
     @Test
     fun `onNfcScanAttemptFailed includes parameters in analytics event`() = runScenario {
-        durationProvider.start(DurationProvider.Key.NfcScanAttempt)
-
         reporter.onNfcScanAttemptFailed(
             error = GenericNfcScanningError(
                 errorCode = "nfcCardReadFailed",
@@ -123,6 +106,9 @@ internal class DefaultNfcScanningEventReporterTest {
                 ),
             ),
         )
+
+        assertThat(durationProvider.callsTurbine.awaitItem())
+            .isEqualTo(FakeDurationProvider.Call.End(DurationProvider.Key.NfcScanAttempt))
 
         val loggedParams = executor.getExecutedRequests().single().params
         assertThat(loggedParams).containsEntry("error_code", "nfcCardReadFailed")
@@ -138,9 +124,8 @@ internal class DefaultNfcScanningEventReporterTest {
                 numberOfAttempts = 3,
             )
 
-            assertThat(
-                durationProvider.has(FakeDurationProvider.Call.End(DurationProvider.Key.NfcScan))
-            ).isTrue()
+            assertThat(durationProvider.callsTurbine.awaitItem())
+                .isEqualTo(FakeDurationProvider.Call.End(DurationProvider.Key.NfcScan))
 
             val loggedParams = executor.getExecutedRequests().single().params
             assertThat(loggedParams).containsEntry("event", "mc_nfc_scan_canceled")
@@ -157,8 +142,8 @@ internal class DefaultNfcScanningEventReporterTest {
 
     private fun runScenario(
         duration: kotlin.time.Duration = 1.seconds,
-        block: Scenario.() -> Unit,
-    ) {
+        block: suspend Scenario.() -> Unit,
+    ) = runTest {
         val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
         val durationProvider = FakeDurationProvider(duration = duration)
         val reporter = DefaultNfcScanningEventReporter(
@@ -185,5 +170,7 @@ internal class DefaultNfcScanningEventReporterTest {
                 executor = analyticsRequestExecutor,
             )
         )
+
+        durationProvider.validate()
     }
 }
