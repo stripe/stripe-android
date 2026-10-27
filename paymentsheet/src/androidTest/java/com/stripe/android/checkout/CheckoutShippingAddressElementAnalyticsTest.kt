@@ -258,7 +258,7 @@ internal class CheckoutShippingAddressElementAnalyticsTest {
         const val PICKED_STATE = "CA"
         const val PICKED_POSTAL_CODE = "94103"
         val ADDRESS_ELEMENT_PRODUCT_USAGE = setOf("PaymentSheet.AddressController")
-        val CHECKOUT_PRODUCT_USAGE = setOf("Checkout")
+        val CHECKOUT_PRODUCT_USAGE = setOf("checkout_elements")
         val AUTOCOMPLETE_RESPONSE = """
             {
               "source": "google",

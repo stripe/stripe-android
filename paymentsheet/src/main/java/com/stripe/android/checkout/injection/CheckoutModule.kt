@@ -24,7 +24,7 @@ internal object CheckoutModule {
 
     @Provides
     @Named(PRODUCT_USAGE)
-    fun provideProductUsageTokens(): Set<String> = setOf("Checkout")
+    fun provideProductUsageTokens(): Set<String> = setOf("checkout_elements")
 
     @Provides
     fun provideStripeImageLoader(context: Context): StripeImageLoader = DefaultStripeImageLoader(context)

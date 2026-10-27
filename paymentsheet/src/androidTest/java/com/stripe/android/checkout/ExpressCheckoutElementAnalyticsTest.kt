@@ -309,7 +309,7 @@ internal class ExpressCheckoutElementAnalyticsTest {
         enqueueLoadingRequests(linkEnabled = linkEnabled)
         networkRule.validateAnalyticsRequest(
             eventName = "elements.express_checkout_element.init",
-            productUsage = setOf("ExpressCheckoutElement"),
+            productUsage = setOf("checkout_elements"),
         )
 
         runExpressCheckoutElementScenario(
@@ -362,7 +362,7 @@ internal class ExpressCheckoutElementAnalyticsTest {
     ) {
         networkRule.validateAnalyticsRequest(
             eventName = eventName,
-            productUsage = setOf("Checkout"),
+            productUsage = setOf("checkout_elements"),
             *requestMatchers,
         )
     }

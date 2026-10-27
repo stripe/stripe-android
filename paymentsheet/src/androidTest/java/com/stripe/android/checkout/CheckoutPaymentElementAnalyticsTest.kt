@@ -48,20 +48,21 @@ internal class CheckoutPaymentElementAnalyticsTest {
     private val formPage = EmbeddedFormPage(testRules.compose)
 
     @Test
-    fun testSheetAnalyticsUsesCheckoutProductUsage() = runCheckoutPaymentElementScenario(
+    fun testSheetAnalyticsUsesCheckoutElementsProductUsageAndCheckoutSessionId() = runCheckoutPaymentElementScenario(
         networkRule = networkRule,
         setup = { controller ->
             networkRule.validateAnalyticsRequest(
                 eventName = "mc_load_started",
-                productUsage = setOf("Checkout"),
+                productUsage = setOf("checkout_elements"),
             )
             networkRule.validateAnalyticsRequest(
                 eventName = "mc_load_succeeded",
-                productUsage = setOf("Checkout"),
+                productUsage = setOf("checkout_elements"),
             )
             networkRule.validateAnalyticsRequest(
                 eventName = "mc_initial_displayed_payment_methods",
-                productUsage = setOf("Checkout"),
+                productUsage = setOf("checkout_elements"),
+                analyticsPayloadField("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID),
             )
             assertThat(controller.configure(DEFAULT_CLIENT_SECRET))
                 .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
@@ -69,19 +70,22 @@ internal class CheckoutPaymentElementAnalyticsTest {
     ) {
         networkRule.validateAnalyticsRequest(
             eventName = "mc_carousel_payment_method_tapped",
-            productUsage = setOf("Checkout"),
+            productUsage = setOf("checkout_elements"),
+            analyticsPayloadField("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID),
         )
         networkRule.validateAnalyticsRequest(
             eventName = "mc_form_shown",
-            productUsage = setOf("Checkout"),
+            productUsage = setOf("checkout_elements"),
+            analyticsPayloadField("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID),
         )
         networkRule.validateAnalyticsRequest(
             eventName = "stripe_android.card_metadata_pk_available",
-            productUsage = setOf("Checkout"),
+            productUsage = setOf("checkout_elements"),
         )
         networkRule.validateAnalyticsRequest(
             eventName = "mc_cardscan_api_check_failed",
-            productUsage = setOf("Checkout"),
+            productUsage = setOf("checkout_elements"),
+            analyticsPayloadField("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID),
         )
 
         contentPage.clickOnLpm("card")
@@ -89,7 +93,8 @@ internal class CheckoutPaymentElementAnalyticsTest {
 
         networkRule.validateAnalyticsRequest(
             eventName = "mc_dismiss",
-            productUsage = setOf("Checkout"),
+            productUsage = setOf("checkout_elements"),
+            analyticsPayloadField("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID),
         )
         Espresso.pressBack()
         formPage.waitUntilMissing()
@@ -109,15 +114,16 @@ internal class CheckoutPaymentElementAnalyticsTest {
             setup = { controller ->
                 networkRule.validateAnalyticsRequest(
                     eventName = "mc_load_started",
-                    productUsage = setOf("Checkout"),
+                    productUsage = setOf("checkout_elements"),
                 )
                 networkRule.validateAnalyticsRequest(
                     eventName = "mc_load_succeeded",
-                    productUsage = setOf("Checkout"),
+                    productUsage = setOf("checkout_elements"),
                 )
                 networkRule.validateAnalyticsRequest(
                     eventName = "mc_initial_displayed_payment_methods",
-                    productUsage = setOf("Checkout"),
+                    productUsage = setOf("checkout_elements"),
+                    analyticsPayloadField("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID),
                 )
                 assertThat(controller.configure(DEFAULT_CLIENT_SECRET))
                     .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
@@ -153,11 +159,11 @@ internal class CheckoutPaymentElementAnalyticsTest {
             // The Checkout Session is refreshed after confirmation fails.
             networkRule.validateAnalyticsRequest(
                 eventName = "mc_load_started",
-                productUsage = setOf("Checkout"),
+                productUsage = setOf("checkout_elements"),
             )
             networkRule.validateAnalyticsRequest(
                 eventName = "mc_load_succeeded",
-                productUsage = setOf("Checkout"),
+                productUsage = setOf("checkout_elements"),
             )
 
             contentPage.clickOnLpm("google_pay")
@@ -185,15 +191,16 @@ internal class CheckoutPaymentElementAnalyticsTest {
             setup = { controller ->
                 networkRule.validateAnalyticsRequest(
                     eventName = "mc_load_started",
-                    productUsage = setOf("Checkout"),
+                    productUsage = setOf("checkout_elements"),
                 )
                 networkRule.validateAnalyticsRequest(
                     eventName = "mc_load_succeeded",
-                    productUsage = setOf("Checkout"),
+                    productUsage = setOf("checkout_elements"),
                 )
                 networkRule.validateAnalyticsRequest(
                     eventName = "mc_initial_displayed_payment_methods",
-                    productUsage = setOf("Checkout"),
+                    productUsage = setOf("checkout_elements"),
+                    analyticsPayloadField("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID),
                 )
                 assertThat(controller.configure(DEFAULT_CLIENT_SECRET))
                     .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
@@ -202,16 +209,16 @@ internal class CheckoutPaymentElementAnalyticsTest {
             contentPage.waitUntilVisible()
             networkRule.validateAnalyticsRequest(
                 eventName = "unexpected_error.checkout.saved_payment_method.missing_billing_address",
-                productUsage = setOf("Checkout"),
+                productUsage = setOf("checkout_elements"),
             )
             // Changing the selection reloads the payment element.
             networkRule.validateAnalyticsRequest(
                 eventName = "mc_load_started",
-                productUsage = setOf("Checkout"),
+                productUsage = setOf("checkout_elements"),
             )
             networkRule.validateAnalyticsRequest(
                 eventName = "mc_load_succeeded",
-                productUsage = setOf("Checkout"),
+                productUsage = setOf("checkout_elements"),
             )
 
             // Billing-tax filtering keeps addressless saved payment methods out of the UI, so
