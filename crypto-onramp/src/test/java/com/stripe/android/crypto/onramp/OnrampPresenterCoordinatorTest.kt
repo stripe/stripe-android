@@ -7,8 +7,12 @@ import androidx.core.os.BundleCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import app.cash.turbine.Turbine
+import com.google.android.gms.wallet.IsReadyToPayRequest
+import com.google.android.gms.wallet.PaymentsClient
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.crypto.onramp.CheckoutState.Status
+import com.stripe.android.crypto.onramp.exception.GooglePayNotConfiguredException
 import com.stripe.android.crypto.onramp.model.KycQuestion
 import com.stripe.android.crypto.onramp.model.KycQuestionnaire
 import com.stripe.android.crypto.onramp.model.KycQuestionnaireAnswer
@@ -51,6 +55,10 @@ import com.stripe.android.crypto.onramp.ui.HTMLConfirmationContent
 import com.stripe.android.crypto.onramp.ui.HTMLConfirmationResult
 import com.stripe.android.crypto.onramp.ui.KycActivity
 import com.stripe.android.crypto.onramp.ui.KycScreenAction
+import com.stripe.android.googlepaylauncher.GooglePayAvailabilityClient
+import com.stripe.android.googlepaylauncher.GooglePayEnvironment
+import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
+import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.link.LinkController
 import com.stripe.android.model.CardBrand
@@ -292,6 +300,89 @@ class OnrampPresenterCoordinatorTest {
             .throwable
         assertThat(error.message).isEqualTo("No ephemeral key found.")
         assertThat(callbackResult).isSameInstanceAs(expectedResult)
+    }
+
+    @Test
+    fun `Google Pay configured before presenter creation reports readiness and launches`() = runTest {
+        val factoryCalls = Turbine<Unit>()
+        val readinessRequests = Turbine<IsReadyToPayRequest>()
+        val readinessResults = Turbine<Boolean>()
+        PaymentConfiguration.init(activity, "pk_test_123")
+        GooglePayRepository.googlePayAvailabilityClientFactory = object : GooglePayAvailabilityClient.Factory {
+            override fun create(paymentsClient: PaymentsClient): GooglePayAvailabilityClient {
+                factoryCalls.add(Unit)
+                return object : GooglePayAvailabilityClient {
+                    override suspend fun isReady(request: IsReadyToPayRequest): Boolean {
+                        readinessRequests.add(request)
+                        return true
+                    }
+                }
+            }
+        }
+        try {
+            val configuration = OnrampConfiguration()
+                .merchantDisplayName("Stripe merchant")
+                .publishableKey("pk_test_123")
+                .googlePayConfig(
+                    GooglePayPaymentMethodLauncher.Config(GooglePayEnvironment.Test, "US", "Stripe merchant")
+                )
+                .build()
+            val state = MutableStateFlow(OnrampState(configurationState = configuration))
+            val coordinator = createCoordinator(
+                onrampStateFlow = state,
+                googlePayIsReadyCallback = readinessResults::add,
+            )
+            testScope.testScheduler.advanceUntilIdle()
+            factoryCalls.awaitItem()
+            readinessRequests.awaitItem()
+            assertThat(readinessResults.awaitItem()).isTrue()
+
+            // Unrelated state updates must not recreate the launcher or repeat readiness callbacks.
+            state.value = state.value.copy(cryptoCustomerId = "cc_123")
+            testScope.testScheduler.advanceUntilIdle()
+            factoryCalls.expectNoEvents()
+            readinessResults.expectNoEvents()
+
+            whenever(interactor.getOrFetchPlatformKey()).thenReturn(Result.success("pk_test_platform"))
+            coordinator.collectPaymentMethod(PaymentMethodSelection.GooglePay("usd", 1099))
+            testScope.testScheduler.advanceUntilIdle()
+
+            assertThat(shadowOf(activity).nextStartedActivityForResult.intent.component?.className)
+                .isEqualTo("com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherActivity")
+            verify(interactor).onGooglePayPresented("pk_test_platform")
+            factoryCalls.ensureAllEventsConsumed()
+            readinessRequests.ensureAllEventsConsumed()
+            readinessResults.ensureAllEventsConsumed()
+        } finally {
+            GooglePayRepository.resetFactory()
+        }
+    }
+
+    @Test
+    fun `Google Pay without configuration returns a failure`() = runTest {
+        val results = Turbine<OnrampCollectPaymentMethodResult>()
+        val expectedResult = OnrampCollectPaymentMethodResult.Failed(IllegalStateException("Not configured"))
+        whenever(interactor.getOrFetchPlatformKey()).thenReturn(Result.success("pk_test_platform"))
+        whenever(interactor.collectPaymentMethodFailure(any())).thenReturn(expectedResult)
+        val coordinator = createCoordinator(collectPaymentCallback = results::add)
+
+        coordinator.collectPaymentMethod(PaymentMethodSelection.GooglePay("usd", 1099))
+        testScope.testScheduler.advanceUntilIdle()
+
+        assertThat(results.awaitItem()).isSameInstanceAs(expectedResult)
+        val error = argumentCaptor<Throwable>()
+        verify(interactor).collectPaymentMethodFailure(error.capture())
+        assertThat(error.firstValue).isInstanceOf(GooglePayNotConfiguredException::class.java)
+        val configurationError = error.firstValue as GooglePayNotConfiguredException
+        assertThat(configurationError.code).isEqualTo("google_pay_not_configured")
+        assertThat(configurationError.userMessage).isEqualTo(
+            activity.getString(R.string.stripe_onramp_google_pay_not_configured)
+        )
+        assertThat(configurationError.developerMessage).contains("OnrampConfiguration.googlePayConfig")
+        assertThat(configurationError.developerMessage).contains("before creating the presenter")
+        verify(interactor, never()).onGooglePayPresented(any())
+        assertThat(shadowOf(activity).nextStartedActivityForResult).isNull()
+        results.ensureAllEventsConsumed()
     }
 
     @Test
@@ -744,6 +835,7 @@ class OnrampPresenterCoordinatorTest {
     private fun createCoordinator(
         onrampStateFlow: MutableStateFlow<OnrampState> = MutableStateFlow(OnrampState()),
         linkStateFlow: MutableStateFlow<LinkController.State> = MutableStateFlow(createFakeLinkState()),
+        googlePayIsReadyCallback: ((Boolean) -> Unit)? = null,
         samsungPayIsReadyCallback: ((Boolean, SamsungPayAvailabilityResult) -> Unit)? = null,
         collectPaymentCallback: OnrampCollectPaymentMethodCallback = OnrampCollectPaymentMethodCallback {},
         kycCallback: OnrampKycCallback? = null,
@@ -778,6 +870,7 @@ class OnrampPresenterCoordinatorTest {
             .verifyKycCallback {}
             .onrampSessionClientSecretProvider(onrampSessionClientSecretProvider)
 
+        googlePayIsReadyCallback?.let(callbacks::googlePayIsReadyCallback)
         samsungPayIsReadyCallback?.let(callbacks::samsungPayIsReadyCallback)
         kycCallback?.let(callbacks::kycCallback)
         termsAndConditionsCallback?.let(callbacks::termsAndConditionsCallback)
