@@ -26,6 +26,7 @@ import com.stripe.android.paymentsheet.model.isSaved
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormViewModel
 import com.stripe.android.paymentsheet.state.WalletLocation
 import com.stripe.android.paymentsheet.state.WalletsState
+import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -38,7 +39,7 @@ internal class DefaultEventReporter @Inject internal constructor(
     context: Context,
     private val mode: EventReporter.Mode,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
-    private val analyticsRequestV2Executor: AnalyticsRequestV2Executor,
+    private val analyticsRequestV2Executor: Lazy<AnalyticsRequestV2Executor>,
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
     private val durationProvider: DurationProvider,
     private val analyticEventCallbackProvider: Provider<AnalyticEventCallback?>,
@@ -47,11 +48,14 @@ internal class DefaultEventReporter @Inject internal constructor(
     private val paymentMethodMetadataProvider: Provider<PaymentMethodMetadata?>,
 ) : EventReporter, LoadingEventReporter {
 
-    private val analyticsRequestV2Factory = AnalyticsRequestV2Factory(
-        context,
-        clientId = CLIENT_ID,
-        origin = ORIGIN,
-    )
+    private val applicationContext = context.applicationContext
+    private val analyticsRequestV2Factory by lazy {
+        AnalyticsRequestV2Factory(
+            applicationContext,
+            clientId = CLIENT_ID,
+            origin = ORIGIN,
+        )
+    }
 
     override fun onLoadStarted(initializedViaCompose: Boolean, publishableKey: String) {
         durationProvider.start(DurationProvider.Key.Loading)
@@ -624,13 +628,14 @@ internal class DefaultEventReporter @Inject internal constructor(
     }
 
     private fun fireV2Event(event: PaymentSheetEvent) {
-        val executor = analyticsRequestV2Executor
-        val request = analyticsRequestV2Factory.createRequest(
-            eventName = event.eventName,
-            additionalParams = paymentMethodMetadataProvider.get().defaultAnalyticsParams() + event.params,
-        )
-
+        val eventName = event.eventName
+        val params = paymentMethodMetadataProvider.get().defaultAnalyticsParams() + event.params
         CoroutineScope(workContext).launch {
+            val executor = analyticsRequestV2Executor.get()
+            val request = analyticsRequestV2Factory.createRequest(
+                eventName = eventName,
+                additionalParams = params,
+            )
             executor.enqueue(request)
         }
     }

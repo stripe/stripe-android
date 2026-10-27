@@ -9,6 +9,7 @@ import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.common.analytics.experiment.LoggableExperiment
 import com.stripe.android.core.exception.LocalStripeException
 import com.stripe.android.core.networking.AnalyticsEvent
+import com.stripe.android.core.networking.AnalyticsRequestV2Executor
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.link.ui.LinkButtonState
@@ -34,8 +35,13 @@ import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormViewModel
 import com.stripe.android.paymentsheet.state.WalletsState
+import dagger.internal.DoubleCheck
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import kotlinx.serialization.json.boolean
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -60,29 +66,61 @@ class DefaultEventReporterTest {
         paymentMethodMetadataStack.push(null)
 
         eventReporter.onExperimentExposure(
-            LoggableExperiment.LinkHoldback(
-                arbId = "arb_123",
-                group = "treatment",
-                experiment = ExperimentAssignment.LINK_GLOBAL_HOLD_BACK,
-                isReturningLinkUser = false,
-                useLinkNative = true,
-                emailRecognitionSource = null,
-                providedDefaultValues = LoggableExperiment.LinkHoldback.ProvidedDefaultValues(
-                    email = false,
-                    name = false,
-                    phone = false,
-                ),
-                spmEnabled = false,
-                integrationShape = "payment_sheet",
-                linkDisplayed = true,
-                elementsSessionId = "elements_session_123",
-                mobileSdkVersion = "1.0.0",
-                mobileSessionId = "mobile_session_123",
-            )
+            experiment()
         )
 
+        v2ResolutionCalls.awaitItem()
         val request = analyticsRequestV2Executor.enqueueCalls.awaitItem()
         assertThat(request.eventName).isEqualTo("elements.experiment_exposure")
+    }
+
+    @Test
+    fun `construction and V1 events leave V2 dependencies uninitialized`() = runScenario(queueWork = true) {
+        v2ResolutionCalls.expectNoEvents()
+        assertThat(eventReporter.v2FactoryIsInitialized()).isFalse()
+
+        paymentMethodMetadataStack.push(null)
+        eventReporter.onDismiss()
+        analyticsRequestExecutor.requestTurbine.expectNoEvents()
+        runWorker()
+
+        assertThat(analyticsRequestExecutor.requestTurbine.awaitItem().params).containsEntry("event", "mc_dismiss")
+        v2ResolutionCalls.expectNoEvents()
+        assertThat(eventReporter.v2FactoryIsInitialized()).isFalse()
+    }
+
+    @Test
+    fun `queued V2 events resolve dependencies on worker once and retain invocation metadata`() =
+        runScenario(queueWork = true) {
+            paymentMethodMetadataStack.push(paymentMethodMetadataWithTestAnalyticsMetadata)
+            eventReporter.onExperimentExposure(experiment())
+            paymentMethodMetadataStack.push(null)
+            eventReporter.onExperimentExposure(experiment())
+
+            assertThat(paymentMethodMetadataStack).isEmpty()
+            v2ResolutionCalls.expectNoEvents()
+            analyticsRequestV2Executor.enqueueCalls.expectNoEvents()
+            assertThat(eventReporter.v2FactoryIsInitialized()).isFalse()
+
+            runWorker()
+
+            v2ResolutionCalls.awaitItem()
+            val first = analyticsRequestV2Executor.enqueueCalls.awaitItem()
+            val second = analyticsRequestV2Executor.enqueueCalls.awaitItem()
+            assertThat(first.eventName).isEqualTo("elements.experiment_exposure")
+            assertThat(second.eventName).isEqualTo(first.eventName)
+            assertThat(first.params.jsonObject["example_from_test"]?.jsonPrimitive?.boolean).isTrue()
+            assertThat(second.params.jsonObject).doesNotContainKey("example_from_test")
+            assertThat(eventReporter.v2FactoryIsInitialized()).isTrue()
+            runWorker()
+            v2ResolutionCalls.expectNoEvents()
+            analyticsRequestV2Executor.enqueueCalls.expectNoEvents()
+        }
+
+    private fun DefaultEventReporter.v2FactoryIsInitialized(): Boolean {
+        val field = DefaultEventReporter::class.java.getDeclaredField("analyticsRequestV2Factory\$delegate")
+            .apply { isAccessible = true }
+        return (field.get(this) as Lazy<*>).isInitialized()
     }
 
     @Test
@@ -1511,14 +1549,50 @@ class DefaultEventReporterTest {
         assertThat(request.params).containsEntry("publishable_key", publishableKey)
     }
 
+    private fun experiment() = LoggableExperiment.LinkHoldback(
+        arbId = "arb_123",
+        group = "treatment",
+        experiment = ExperimentAssignment.LINK_GLOBAL_HOLD_BACK,
+        isReturningLinkUser = false,
+        useLinkNative = true,
+        emailRecognitionSource = null,
+        providedDefaultValues = LoggableExperiment.LinkHoldback.ProvidedDefaultValues(
+            email = false,
+            name = false,
+            phone = false,
+        ),
+        spmEnabled = false,
+        integrationShape = "payment_sheet",
+        linkDisplayed = true,
+        elementsSessionId = "elements_session_123",
+        mobileSdkVersion = "1.0.0",
+        mobileSessionId = "mobile_session_123",
+    )
+
+    private fun lazyV2Executor(
+        executor: AnalyticsRequestV2Executor,
+        resolutionCalls: Turbine<Unit>,
+    ) = DoubleCheck.lazy(
+        Provider<AnalyticsRequestV2Executor> {
+            resolutionCalls.add(Unit)
+            executor
+        }
+    )
+
     private fun runScenario(
         throwInAnalyticsCallback: Boolean = false,
+        queueWork: Boolean = false,
         block: suspend Scenario.() -> Unit
     ) = runTest {
         val context = ApplicationProvider.getApplicationContext<Context>()
-        val testDispatcher = UnconfinedTestDispatcher()
+        val testDispatcher = if (queueWork) {
+            StandardTestDispatcher(testScheduler)
+        } else {
+            UnconfinedTestDispatcher(testScheduler)
+        }
         val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
         val analyticsRequestV2Executor = FakeAnalyticsRequestV2Executor()
+        val v2ResolutionCalls = Turbine<Unit>()
         val paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
             context = context,
             publishableKey = DEFAULT_API_CONFIG.publishableKey,
@@ -1549,7 +1623,7 @@ class DefaultEventReporterTest {
             context = context,
             mode = EventReporter.Mode.Complete,
             analyticsRequestExecutor = analyticsRequestExecutor,
-            analyticsRequestV2Executor = analyticsRequestV2Executor,
+            analyticsRequestV2Executor = lazyV2Executor(analyticsRequestV2Executor, v2ResolutionCalls),
             paymentAnalyticsRequestFactory = paymentAnalyticsRequestFactory,
             durationProvider = durationProvider,
             analyticEventCallbackProvider = analyticEventCallbackProvider,
@@ -1560,6 +1634,8 @@ class DefaultEventReporterTest {
 
         val scenario = Scenario(
             eventReporter = eventReporter,
+            v2ResolutionCalls = v2ResolutionCalls,
+            runWorker = { testScheduler.runCurrent() },
             analyticsRequestExecutor = analyticsRequestExecutor,
             analyticsRequestV2Executor = analyticsRequestV2Executor,
             durationProvider = durationProvider,
@@ -1572,6 +1648,7 @@ class DefaultEventReporterTest {
 
         analyticsRequestExecutor.validate()
         analyticsRequestV2Executor.validate()
+        v2ResolutionCalls.ensureAllEventsConsumed()
         durationProvider.validate()
         assertThat(paymentMethodMetadataStack).isEmpty()
         userFacingLoggerTurbine.ensureAllEventsConsumed()
@@ -1580,6 +1657,8 @@ class DefaultEventReporterTest {
 
     private data class Scenario(
         val eventReporter: DefaultEventReporter,
+        val v2ResolutionCalls: Turbine<Unit>,
+        val runWorker: () -> Unit,
         val analyticsRequestExecutor: FakeAnalyticsRequestExecutor,
         val analyticsRequestV2Executor: FakeAnalyticsRequestV2Executor,
         val durationProvider: FakeDurationProvider,
