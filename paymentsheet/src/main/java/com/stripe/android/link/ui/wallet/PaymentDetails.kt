@@ -455,6 +455,7 @@ private fun RemoteIcon(
                 contentScale = ContentScale.Fit,
                 errorContent = { localIcon() },
                 loadingContent = { localIcon() },
+                disableAnimations = true,
             )
         } else {
             localIcon()
