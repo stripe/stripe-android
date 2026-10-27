@@ -334,7 +334,7 @@ internal class CheckoutGooglePayPaymentDataUpdateCallbackTest {
     }
 
     private companion object {
-        val SHIPPING_ADDRESS = GooglePayPaymentDataUpdate.ShippingAddress(
+        val SHIPPING_ADDRESS = GooglePayPaymentDataUpdate.GooglePayAddress(
             administrativeArea = "CA",
             countryCode = "US",
             locality = "South San Francisco",

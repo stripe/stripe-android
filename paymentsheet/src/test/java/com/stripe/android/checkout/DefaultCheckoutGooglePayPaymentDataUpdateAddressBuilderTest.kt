@@ -121,7 +121,7 @@ internal class DefaultCheckoutGooglePayPaymentDataUpdateAddressBuilderTest {
         locality: String = "",
         postalCode: String = "",
         iso3166AdministrativeArea: String? = null,
-    ) = GooglePayPaymentDataUpdate.ShippingAddress(
+    ) = GooglePayPaymentDataUpdate.GooglePayAddress(
         administrativeArea = administrativeArea,
         countryCode = countryCode,
         locality = locality,
