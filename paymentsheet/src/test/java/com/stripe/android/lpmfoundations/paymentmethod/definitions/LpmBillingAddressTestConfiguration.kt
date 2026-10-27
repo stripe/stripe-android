@@ -91,6 +91,7 @@ internal enum class LpmBillingDetailsCollectionMode {
                 id = checkoutSessionResponse.id,
                 instancesKey = "key",
                 checkoutSessionResponse = checkoutSessionResponse,
+                element = IntegrationMetadata.CheckoutSession.Element.PaymentElement,
             )
         } else {
             PaymentMethodMetadataFactory.defaultIntegrationMetadata(stripeIntent)

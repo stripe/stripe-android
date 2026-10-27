@@ -102,6 +102,7 @@ internal class AutomaticTaxPaymentMethodRegistryTest {
                 id = checkoutSessionResponse.id,
                 instancesKey = "key",
                 checkoutSessionResponse = checkoutSessionResponse,
+                element = IntegrationMetadata.CheckoutSession.Element.PaymentElement,
             ),
         )
     }

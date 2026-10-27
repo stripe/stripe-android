@@ -192,6 +192,7 @@ internal class DefaultSheetActivityContinueCoordinatorTest {
                     automaticTaxEnabled = true,
                     taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
                 ),
+                element = IntegrationMetadata.CheckoutSession.Element.PaymentElement,
             )
         )
     }

@@ -99,7 +99,7 @@ internal class CheckoutPaymentElementTest {
                 bodyPart("payment_method_data[card][number]", "4242424242424242"),
                 bodyPart(
                     "payment_method_data[payment_user_agent]",
-                    "stripe-android/${StripeSdkVersion.VERSION_NAME};checkout_elements",
+                    "stripe-android/${StripeSdkVersion.VERSION_NAME};PaymentElement",
                 ),
             ) { response ->
                 response.testBodyFromFile("checkout-session-confirm.json")

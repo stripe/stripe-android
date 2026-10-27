@@ -108,6 +108,7 @@ class GooglePayIsEmailRequiredProviderTest {
             id = checkoutSessionResponse.id,
             instancesKey = "checkout_instances_123",
             checkoutSessionResponse = checkoutSessionResponse,
+            element = IntegrationMetadata.CheckoutSession.Element.PaymentElement,
         )
     }
 

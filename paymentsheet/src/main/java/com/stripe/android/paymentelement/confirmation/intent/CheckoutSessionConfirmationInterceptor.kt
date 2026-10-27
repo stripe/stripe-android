@@ -147,6 +147,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
         return checkoutSessionRepository.confirm(
             id = integrationMetadata.id,
             params = params,
+            productUsageTokens = setOf(integrationMetadata.element.productUsageToken),
         ).fold(
             onSuccess = ::handleConfirmResponse,
             onFailure = { error ->

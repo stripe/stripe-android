@@ -97,6 +97,7 @@ internal class EmbeddedActivityModuleTest {
             instancesKey = "checkout",
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
             collectedEmail = null,
+            element = IntegrationMetadata.CheckoutSession.Element.PaymentElement,
         ),
     ) { helper ->
         assertThat(helper.getPromotions()).isNull()

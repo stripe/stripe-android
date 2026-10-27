@@ -74,6 +74,7 @@ internal class CheckoutSessionRepository @Inject constructor(
     suspend fun confirm(
         id: String,
         params: ConfirmCheckoutSessionParams,
+        productUsageTokens: Set<String>,
     ): Result<CheckoutSessionResponse> {
         fraudDetectionDataRepository.refresh()
 
@@ -82,7 +83,7 @@ internal class CheckoutSessionRepository @Inject constructor(
             params.paymentMethodData,
             sourceParams = null,
             fraudDetectionData = fraudDetectionDataRepository.getCached(),
-            productUsageTokens = setOf("checkout_elements"),
+            productUsageTokens = productUsageTokens,
         )
         return executePost(
             url = confirmUrl(id),

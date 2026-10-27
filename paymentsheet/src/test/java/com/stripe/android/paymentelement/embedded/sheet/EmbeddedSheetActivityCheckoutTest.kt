@@ -295,6 +295,7 @@ internal class EmbeddedSheetActivityCheckoutTest {
                 instancesKey = "test_instances_key",
                 checkoutSessionResponse = checkoutSessionResponse,
                 collectedEmail = null,
+                element = IntegrationMetadata.CheckoutSession.Element.PaymentElement,
             ),
         ).copy(
             customerMetadata = CustomerMetadata.CheckoutSession(

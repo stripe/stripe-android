@@ -20,6 +20,7 @@ import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetLoadingException
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import kotlinx.coroutines.delay
+import kotlin.reflect.KClass
 import kotlin.time.Duration
 
 internal class FakePaymentElementLoader(
@@ -41,6 +42,8 @@ internal class FakePaymentElementLoader(
 
     var lastIntegrationConfiguration: PaymentElementLoader.Configuration? = null
         private set
+
+    val initializationModes = mutableMapOf<KClass<*>, PaymentElementLoader.InitializationMode>()
 
     fun updateStripeIntent(intent: StripeIntent) {
         this.stripeIntent = intent
@@ -95,6 +98,7 @@ internal class FakePaymentElementLoader(
         metadata: PaymentElementLoader.Metadata,
     ): Result<PaymentElementLoader.State> {
         lastIntegrationConfiguration = integrationConfiguration
+        initializationModes[integrationConfiguration::class] = initializationMode
         delay(delay)
         return if (shouldFail) {
             Result.failure(IllegalStateException("oh no"))

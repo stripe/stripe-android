@@ -5,6 +5,7 @@ import androidx.compose.ui.graphics.toArgb
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.paymentelement.TapToAddPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
@@ -366,6 +367,7 @@ class PaymentSheetConfigurationKtxTest {
                 id = DEFAULT_CHECKOUT_SESSION_ID,
                 amount = 5099,
             ),
+            element = IntegrationMetadata.CheckoutSession.Element.PaymentElement,
         )
 
         assertFailsWith(
@@ -395,6 +397,7 @@ class PaymentSheetConfigurationKtxTest {
                 id = DEFAULT_CHECKOUT_SESSION_ID,
                 amount = 5099,
             ),
+            element = IntegrationMetadata.CheckoutSession.Element.PaymentElement,
         )
 
         // Should not throw
@@ -419,6 +422,7 @@ class PaymentSheetConfigurationKtxTest {
                 id = DEFAULT_CHECKOUT_SESSION_ID,
                 amount = 5099,
             ),
+            element = IntegrationMetadata.CheckoutSession.Element.PaymentElement,
         )
 
         configWithoutEmail.validate(
@@ -443,6 +447,7 @@ class PaymentSheetConfigurationKtxTest {
                 id = DEFAULT_CHECKOUT_SESSION_ID,
                 amount = 5099,
             ),
+            element = IntegrationMetadata.CheckoutSession.Element.PaymentElement,
         )
 
         assertFailsWith(
@@ -481,6 +486,7 @@ class PaymentSheetConfigurationKtxTest {
                 id = DEFAULT_CHECKOUT_SESSION_ID,
                 amount = 5099,
             ),
+            element = IntegrationMetadata.CheckoutSession.Element.PaymentElement,
         )
 
         assertFailsWith(

@@ -5,6 +5,7 @@ import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentIntentFixtures
@@ -280,6 +281,7 @@ internal class CreateCustomerMetadataTest {
                     taxAddressSource = null,
                     allowedShippingCountries = null,
                 ),
+                element = IntegrationMetadata.CheckoutSession.Element.PaymentElement,
             )
         }
 

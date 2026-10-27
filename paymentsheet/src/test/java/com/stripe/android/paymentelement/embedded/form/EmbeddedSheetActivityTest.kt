@@ -237,6 +237,7 @@ internal class EmbeddedSheetActivityTest {
                 id = response.id,
                 instancesKey = "test_instances_key",
                 checkoutSessionResponse = response,
+                element = IntegrationMetadata.CheckoutSession.Element.PaymentElement,
             ),
         )
     }

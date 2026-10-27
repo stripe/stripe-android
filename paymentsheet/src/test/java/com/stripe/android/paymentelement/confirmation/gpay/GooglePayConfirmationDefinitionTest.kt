@@ -563,6 +563,7 @@ class GooglePayConfirmationDefinitionTest {
                         id = checkoutSessionResponse.id,
                         instancesKey = "GooglePayConfirmationDefinitionTest",
                         checkoutSessionResponse = checkoutSessionResponse,
+                        element = IntegrationMetadata.CheckoutSession.Element.PaymentElement,
                     ),
                 ),
             ),

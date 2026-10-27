@@ -698,6 +698,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
                 id = response.id,
                 instancesKey = "test_instances_key",
                 checkoutSessionResponse = response,
+                element = IntegrationMetadata.CheckoutSession.Element.PaymentElement,
             ),
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
         )

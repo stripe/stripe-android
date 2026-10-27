@@ -227,6 +227,7 @@ internal interface PaymentElementLoader {
             val instancesKey: String,
             val checkoutSessionResponse: CheckoutSessionResponse,
             val collectedEmail: String?,
+            val element: IntegrationMetadata.CheckoutSession.Element,
         ) : InitializationMode() {
             override fun validate() {
                 // Nothing to validate — the response was already loaded successfully.
@@ -238,6 +239,7 @@ internal interface PaymentElementLoader {
                     instancesKey = instancesKey,
                     checkoutSessionResponse = checkoutSessionResponse,
                     collectedEmail = collectedEmail,
+                    element = element,
                 )
             }
         }

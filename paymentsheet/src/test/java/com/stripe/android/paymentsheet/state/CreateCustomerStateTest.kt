@@ -39,6 +39,7 @@ internal class CreateCustomerStateTest {
             collectedEmail = null,
             instancesKey = "instances_key",
             checkoutSessionResponse = checkoutSessionResponse,
+            element = IntegrationMetadata.CheckoutSession.Element.PaymentElement,
         )
 
         val result = createCustomerState(
@@ -69,6 +70,7 @@ internal class CreateCustomerStateTest {
             collectedEmail = null,
             instancesKey = "instances_key",
             checkoutSessionResponse = checkoutSessionResponse,
+            element = IntegrationMetadata.CheckoutSession.Element.PaymentElement,
         )
 
         val result = createCustomerState(
@@ -119,6 +121,7 @@ internal class CreateCustomerStateTest {
                 collectedEmail = null,
                 instancesKey = "instances_key",
                 checkoutSessionResponse = checkoutSessionResponse,
+                element = IntegrationMetadata.CheckoutSession.Element.PaymentElement,
             ),
             metadata = createAutomaticTaxCheckoutMetadata(checkoutSessionResponse),
             paymentMethodFilter = DefaultPaymentMethodFilter(),
@@ -165,6 +168,7 @@ internal class CreateCustomerStateTest {
             id = checkoutSessionResponse.id,
             instancesKey = "instances_key",
             checkoutSessionResponse = checkoutSessionResponse,
+            element = IntegrationMetadata.CheckoutSession.Element.PaymentElement,
         ),
     ).copy(
         customerMetadata = CustomerMetadata.CheckoutSession(

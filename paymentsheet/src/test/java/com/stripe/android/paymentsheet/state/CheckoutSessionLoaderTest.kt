@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.state
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
@@ -37,6 +38,7 @@ internal class CheckoutSessionLoaderTest {
             collectedEmail = null,
             instancesKey = "CheckoutSessionLoaderTest",
             checkoutSessionResponse = response,
+            element = IntegrationMetadata.CheckoutSession.Element.PaymentElement,
         )
     }
 

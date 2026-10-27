@@ -3,6 +3,7 @@ package com.stripe.android.checkout
 import android.graphics.Bitmap
 import android.os.Bundle
 import com.stripe.android.common.model.CommonConfiguration
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
@@ -100,11 +101,8 @@ internal class CheckoutStateLoader @Inject constructor(
         )
 
         val loadResults = loadPaymentElements(
-            initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
-                instancesKey = response.id,
-                checkoutSessionResponse = response,
-                collectedEmail = collectedDetails.email,
-            ),
+            checkoutSessionResponse = response,
+            collectedEmail = collectedDetails.email,
             embeddedConfiguration = embeddedConfig,
             paymentMethodLayout = configuration.paymentElementConfiguration.paymentMethodLayout.asPaymentSheet(),
             expressCheckoutElementConfiguration = expressCheckoutElementConfiguration,
@@ -163,7 +161,8 @@ internal class CheckoutStateLoader @Inject constructor(
     }
 
     private suspend fun loadPaymentElements(
-        initializationMode: PaymentElementLoader.InitializationMode,
+        checkoutSessionResponse: CheckoutSessionResponse,
+        collectedEmail: String?,
         embeddedConfiguration: EmbeddedPaymentElement.Configuration?,
         paymentMethodLayout: PaymentSheet.PaymentMethodLayout,
         expressCheckoutElementConfiguration: CommonConfiguration?,
@@ -172,10 +171,19 @@ internal class CheckoutStateLoader @Inject constructor(
             isReloadingAfterProcessDeath = false,
             initializedViaCompose = false,
         )
+        fun initializationMode(element: IntegrationMetadata.CheckoutSession.Element) =
+            PaymentElementLoader.InitializationMode.CheckoutSession(
+                instancesKey = checkoutSessionResponse.id,
+                checkoutSessionResponse = checkoutSessionResponse,
+                collectedEmail = collectedEmail,
+                element = element,
+            )
         val paymentElementStateDeferred = embeddedConfiguration?.let {
             async {
                 paymentElementLoader.load(
-                    initializationMode = initializationMode,
+                    initializationMode = initializationMode(
+                        IntegrationMetadata.CheckoutSession.Element.PaymentElement
+                    ),
                     integrationConfiguration = PaymentElementLoader.Configuration.Embedded(
                         isRowSelectionImmediateAction = internalRowSelectionCallback.get() != null,
                         configuration = embeddedConfiguration,
@@ -188,7 +196,9 @@ internal class CheckoutStateLoader @Inject constructor(
         val expressCheckoutElementStateDeferred = expressCheckoutElementConfiguration?.let { configuration ->
             async {
                 paymentElementLoader.load(
-                    initializationMode = initializationMode,
+                    initializationMode = initializationMode(
+                        IntegrationMetadata.CheckoutSession.Element.ExpressCheckoutElement
+                    ),
                     integrationConfiguration = PaymentElementLoader.Configuration.ExpressCheckoutElement(
                         commonConfiguration = configuration,
                     ),

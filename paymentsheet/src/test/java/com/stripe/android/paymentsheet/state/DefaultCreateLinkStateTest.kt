@@ -11,6 +11,7 @@ import com.stripe.android.link.gate.FakeLinkGate
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilter
@@ -104,6 +105,7 @@ internal class DefaultCreateLinkStateTest {
                 automaticTaxEnabled = true,
                 taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
             ),
+            element = IntegrationMetadata.CheckoutSession.Element.PaymentElement,
         )
 
         val result = createLinkState(
@@ -212,6 +214,7 @@ internal class DefaultCreateLinkStateTest {
             collectedEmail = null,
             instancesKey = "DefaultCreateLinkStateTest",
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(elementsSession = elementsSession),
+            element = IntegrationMetadata.CheckoutSession.Element.PaymentElement,
         )
 
         val result = createLinkState(
@@ -374,6 +377,7 @@ internal class DefaultCreateLinkStateTest {
                 elementsSession = elementsSession,
                 customerEmail = customerEmail,
             ),
+            element = IntegrationMetadata.CheckoutSession.Element.PaymentElement,
         )
     }
 

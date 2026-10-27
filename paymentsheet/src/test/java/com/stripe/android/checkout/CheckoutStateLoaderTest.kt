@@ -13,6 +13,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.elements.PaymentElement
 import com.stripe.android.elements.ShippingAddressElement
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethod
@@ -80,6 +81,25 @@ internal class CheckoutStateLoaderTest {
         val state = loadInitial().state
 
         assertThat(state.expressCheckoutElementPaymentMethodMetadata).isNotNull()
+    }
+
+    @Test
+    fun `loadInitial loads each element with its own Checkout element`() = runScenario(
+        configuration = CheckoutController.Configuration()
+            .expressCheckoutElement(ExpressCheckoutElement.Configuration())
+            .build(),
+    ) {
+        loadInitial()
+
+        val initializationModes = paymentElementLoader.initializationModes
+        val paymentElementMode = initializationModes[PaymentElementLoader.Configuration.Embedded::class]
+            as PaymentElementLoader.InitializationMode.CheckoutSession
+        val expressCheckoutElementMode =
+            initializationModes[PaymentElementLoader.Configuration.ExpressCheckoutElement::class]
+                as PaymentElementLoader.InitializationMode.CheckoutSession
+        assertThat(paymentElementMode.element).isEqualTo(IntegrationMetadata.CheckoutSession.Element.PaymentElement)
+        assertThat(expressCheckoutElementMode.element)
+            .isEqualTo(IntegrationMetadata.CheckoutSession.Element.ExpressCheckoutElement)
     }
 
     @Test

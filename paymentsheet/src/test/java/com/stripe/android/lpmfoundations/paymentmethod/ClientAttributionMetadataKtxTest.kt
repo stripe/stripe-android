@@ -95,6 +95,7 @@ class ClientAttributionMetadataKtxTest {
             collectedEmail = null,
             instancesKey = "instances_key",
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(id = "cs_test_456"),
+            element = IntegrationMetadata.CheckoutSession.Element.PaymentElement,
         )
 
         val clientAttributionMetadata = createClientAttributionMetadata(
@@ -110,6 +111,7 @@ class ClientAttributionMetadataKtxTest {
             collectedEmail = null,
             instancesKey = "instances_key",
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(id = "cs_test_456"),
+            element = IntegrationMetadata.CheckoutSession.Element.PaymentElement,
         )
 
         val clientAttributionMetadata = createClientAttributionMetadata(

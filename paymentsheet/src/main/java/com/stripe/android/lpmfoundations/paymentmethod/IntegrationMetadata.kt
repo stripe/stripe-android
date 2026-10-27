@@ -54,5 +54,15 @@ internal sealed class IntegrationMetadata : Parcelable {
         val instancesKey: String,
         val checkoutSessionResponse: CheckoutSessionResponse,
         val collectedEmail: String?,
-    ) : IntegrationMetadata()
+        val element: Element,
+    ) : IntegrationMetadata() {
+        /**
+         * The Checkout element this metadata was loaded for. Requests that identify the integration, like
+         * `payment_user_agent`, name exactly this element and never the other.
+         */
+        enum class Element(val productUsageToken: String) {
+            PaymentElement("PaymentElement"),
+            ExpressCheckoutElement("ExpressCheckoutElement"),
+        }
+    }
 }

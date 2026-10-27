@@ -281,6 +281,7 @@ internal class CheckoutConfirmationPerformerTest {
                         instancesKey = "test",
                         checkoutSessionResponse = response,
                         collectedEmail = null,
+                        element = IntegrationMetadata.CheckoutSession.Element.PaymentElement,
                     ),
                 ),
             )

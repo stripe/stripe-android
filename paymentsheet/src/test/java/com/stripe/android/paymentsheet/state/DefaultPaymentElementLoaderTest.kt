@@ -288,6 +288,7 @@ internal class DefaultPaymentElementLoaderTest {
                 collectedEmail = null,
                 instancesKey = "DefaultPaymentElementLoaderTest",
                 checkoutSessionResponse = createCheckoutSessionResponse(canDetachPaymentMethod = true),
+                element = IntegrationMetadata.CheckoutSession.Element.PaymentElement,
             ),
             paymentSheetConfiguration = PaymentSheet.Configuration(
                 merchantDisplayName = "Some name",
@@ -382,6 +383,7 @@ internal class DefaultPaymentElementLoaderTest {
                     collectedEmail = null,
                     instancesKey = "DefaultPaymentElementLoaderTest",
                     checkoutSessionResponse = checkoutSessionResponse,
+                    element = IntegrationMetadata.CheckoutSession.Element.PaymentElement,
                 ),
                 PaymentSheetFixtures.CONFIG_GOOGLEPAY.newBuilder()
                     .defaultBillingDetails(PaymentSheet.BillingDetails(email = "customer@email.com"))
@@ -424,6 +426,7 @@ internal class DefaultPaymentElementLoaderTest {
                 collectedEmail = null,
                 instancesKey = "DefaultPaymentElementLoaderTest",
                 checkoutSessionResponse = checkoutSessionResponse,
+                element = IntegrationMetadata.CheckoutSession.Element.PaymentElement,
             ),
             isGooglePaySupportedByConfiguration = CompletableDeferred(true),
         )
@@ -457,6 +460,7 @@ internal class DefaultPaymentElementLoaderTest {
                     collectedEmail = null,
                     instancesKey = "DefaultPaymentElementLoaderTest",
                     checkoutSessionResponse = checkoutSessionResponse,
+                    element = IntegrationMetadata.CheckoutSession.Element.PaymentElement,
                 ),
                 PaymentSheetFixtures.CONFIG_MINIMUM.newBuilder()
                     .defaultBillingDetails(PaymentSheet.BillingDetails(email = "customer@email.com"))
@@ -1860,6 +1864,7 @@ internal class DefaultPaymentElementLoaderTest {
             collectedEmail = null,
             instancesKey = "DefaultPaymentElementLoaderTest",
             checkoutSessionResponse = createCheckoutSessionResponse(canDetachPaymentMethod = true),
+            element = IntegrationMetadata.CheckoutSession.Element.PaymentElement,
         ).validate()
     }
 
@@ -1869,6 +1874,7 @@ internal class DefaultPaymentElementLoaderTest {
             collectedEmail = null,
             instancesKey = "DefaultPaymentElementLoaderTest",
             checkoutSessionResponse = createCheckoutSessionResponse(canDetachPaymentMethod = true),
+            element = IntegrationMetadata.CheckoutSession.Element.PaymentElement,
         )
         assertThat(checkoutSession.checkoutSessionResponse.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
     }
@@ -1879,6 +1885,7 @@ internal class DefaultPaymentElementLoaderTest {
             collectedEmail = null,
             instancesKey = "DefaultPaymentElementLoaderTest",
             checkoutSessionResponse = createCheckoutSessionResponse(canDetachPaymentMethod = true),
+            element = IntegrationMetadata.CheckoutSession.Element.PaymentElement,
         )
         assertThat(checkoutSession.integrationMetadata(null))
             .isEqualTo(
@@ -1887,6 +1894,7 @@ internal class DefaultPaymentElementLoaderTest {
                     id = checkoutSession.checkoutSessionResponse.id,
                     instancesKey = "DefaultPaymentElementLoaderTest",
                     checkoutSessionResponse = checkoutSession.checkoutSessionResponse,
+                    element = IntegrationMetadata.CheckoutSession.Element.PaymentElement,
                 )
             )
     }
@@ -3175,6 +3183,7 @@ internal class DefaultPaymentElementLoaderTest {
                     collectedEmail = null,
                     instancesKey = "DefaultPaymentElementLoaderTest",
                     checkoutSessionResponse = checkoutSessionResponse,
+                    element = IntegrationMetadata.CheckoutSession.Element.PaymentElement,
                 ),
                 paymentSheetConfiguration = PaymentSheet.Configuration.Builder(
                     merchantDisplayName = "Merchant, Inc.",
@@ -4351,6 +4360,7 @@ internal class DefaultPaymentElementLoaderTest {
                     elementsSession = requireNotNull(response.elementsSession).copy(experimentsData = experimentsData),
                 ),
                 collectedEmail = null,
+                element = IntegrationMetadata.CheckoutSession.Element.PaymentElement,
             ),
             integrationConfiguration = integrationConfiguration,
             metadata = PaymentElementLoader.Metadata(initializedViaCompose = false),

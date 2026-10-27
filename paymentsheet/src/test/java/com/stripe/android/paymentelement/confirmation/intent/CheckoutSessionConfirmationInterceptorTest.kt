@@ -900,6 +900,22 @@ class CheckoutSessionConfirmationInterceptorTest {
     }
 
     @Test
+    fun `new payment method confirmation sends payment user agent for the loaded element`(
+        @TestParameter element: IntegrationMetadata.CheckoutSession.Element,
+    ) = runScenario(element = element) {
+        networkRule.checkoutConfirm(
+            bodyPart(
+                "payment_method_data[payment_user_agent]",
+                "stripe-android/${StripeSdkVersion.VERSION_NAME};${element.productUsageToken}",
+            ),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-confirm.json")
+        }
+
+        interceptNewPm()
+    }
+
+    @Test
     fun `intercept with saved payment method omits shipping when none is provided`() = runScenario {
         networkRule.checkoutConfirm(
             not(hasBodyPart("shipping[name]")),
@@ -914,6 +930,8 @@ class CheckoutSessionConfirmationInterceptorTest {
     private fun runScenario(
         customerMetadata: CustomerMetadata? = null,
         collectedEmail: String? = null,
+        element: IntegrationMetadata.CheckoutSession.Element =
+            IntegrationMetadata.CheckoutSession.Element.PaymentElement,
         checkoutSessionResponse: CheckoutSessionResponse = CheckoutSessionResponseFactory.create(),
         block: suspend Scenario.() -> Unit,
     ) {
@@ -939,6 +957,7 @@ class CheckoutSessionConfirmationInterceptorTest {
                 id = checkoutSessionResponse.id,
                 instancesKey = "test_key",
                 checkoutSessionResponse = checkoutSessionResponse,
+                element = element,
             ),
             customerMetadata = customerMetadata,
             clientAttributionMetadata = ClientAttributionMetadata(
@@ -981,7 +1000,10 @@ class CheckoutSessionConfirmationInterceptorTest {
             },
             bodyPart(
                 "payment_method_data[payment_user_agent]",
-                setOf("stripe-android/${StripeSdkVersion.VERSION_NAME}", "checkout_elements")
+                setOf(
+                    "stripe-android/${StripeSdkVersion.VERSION_NAME}",
+                    IntegrationMetadata.CheckoutSession.Element.PaymentElement.productUsageToken,
+                )
                     .plus(createParams.attribution)
                     .joinToString(";"),
             ),

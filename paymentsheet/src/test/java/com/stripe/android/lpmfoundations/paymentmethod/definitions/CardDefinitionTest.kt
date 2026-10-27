@@ -833,6 +833,7 @@ class CardDefinitionTest {
                 id = response.id,
                 instancesKey = "CardDefinitionTest",
                 checkoutSessionResponse = response,
+                element = IntegrationMetadata.CheckoutSession.Element.PaymentElement,
             )
         } ?: IntegrationMetadata.IntentFirst("pi_123_secret_456")
         val formElements = CardDefinition.formElements(
