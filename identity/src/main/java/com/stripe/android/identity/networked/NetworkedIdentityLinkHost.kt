@@ -70,7 +70,10 @@ internal class NetworkedIdentityLinkHost(
                 LinkController.create(
                     application = application,
                     savedStateHandle = extras.createSavedStateHandle(),
-                    requestSurface = RequestSurface.IdentityProduct,
+                    // #TODO - Networked Identity [NI-Contract]: use an Identity request surface once Link's
+                    // sign-up and lookup accept "android_identity_product"; they reject it today. Crypto onramp's
+                    // surface is allowed to sign up on the non-attested endpoints.
+                    requestSurface = RequestSurface.CryptoOnramp,
                 )
             ) as T
         }
