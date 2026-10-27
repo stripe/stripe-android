@@ -71,6 +71,14 @@ internal class DefaultLinkGateTest {
     }
 
     @Test
+    fun `useNativeLink - live mode - returns true when feature flag enabled without attestation`() {
+        nativeLinkFeatureFlagTestRule.setEnabled(true)
+        val gate = gate(isLiveMode = true, useAttestationEndpoints = false)
+
+        assertThat(gate.useNativeLink).isTrue()
+    }
+
+    @Test
     fun `useNativeLink - live mode - returns attestation value when feature flag not set`() {
         nativeLinkFeatureFlagTestRule.setEnabled(null)
         attestationFeatureFlagTestRule.setEnabled(true)
