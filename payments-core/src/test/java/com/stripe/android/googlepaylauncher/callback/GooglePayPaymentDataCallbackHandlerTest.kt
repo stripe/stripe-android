@@ -113,7 +113,7 @@ class GooglePayPaymentDataCallbackHandlerTest {
         assertThat(update.billingAddress?.locality).isEqualTo("New York")
         assertThat(update.billingAddress?.postalCode).isEqualTo("10011")
         assertThat(update.billingAddress?.iso3166AdministrativeArea).isNull()
-        assertThat(JSONObject(listener.completions.awaitItem().toJson()).length()).isEqualTo(0)
+        assertThat(listener.completions.awaitItem().toJson()).isEqualTo("{}")
     }
 
     @Test
@@ -128,7 +128,7 @@ class GooglePayPaymentDataCallbackHandlerTest {
         assertThat(update.callbackTrigger).isEqualTo(GooglePayPaymentDataUpdate.CallbackTrigger.PaymentMethod)
         assertThat(update.shippingAddress).isNull()
         assertThat(update.billingAddress).isNull()
-        assertThat(JSONObject(listener.completions.awaitItem().toJson()).length()).isEqualTo(0)
+        assertThat(listener.completions.awaitItem().toJson()).isEqualTo("{}")
     }
 
     @Test

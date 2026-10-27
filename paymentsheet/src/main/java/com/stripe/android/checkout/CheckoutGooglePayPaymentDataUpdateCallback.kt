@@ -76,7 +76,11 @@ internal class CheckoutGooglePayPaymentDataUpdateCallback @Inject constructor(
     ): GooglePayPaymentDataUpdateResponse {
         val address = when (val result = addressBuilder.build(paymentDataUpdate, addressSource)) {
             is CheckoutGooglePayPaymentDataUpdateAddressBuilder.Result.Unavailable -> {
-                return mapToResponse(countryCode, currentState.checkoutSessionResponse, paymentDataUpdate)
+                return mapToResponse(
+                    countryCode = countryCode,
+                    response = currentState.checkoutSessionResponse,
+                    paymentDataUpdate = paymentDataUpdate,
+                )
             }
             is CheckoutGooglePayPaymentDataUpdateAddressBuilder.Result.Available -> result.address
         }
