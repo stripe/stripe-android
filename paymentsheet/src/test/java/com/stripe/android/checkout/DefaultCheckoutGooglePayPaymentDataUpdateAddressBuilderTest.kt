@@ -26,7 +26,7 @@ internal class DefaultCheckoutGooglePayPaymentDataUpdateAddressBuilderTest {
         val result = builder.build(
             GooglePayPaymentDataUpdate(
                 callbackTrigger = GooglePayPaymentDataUpdate.CallbackTrigger.ShippingAddress,
-                shippingAddress = shippingAddress(
+                shippingAddress = googlePayAddress(
                     administrativeArea = "CA",
                     countryCode = "US",
                     locality = "South San Francisco",
@@ -49,7 +49,7 @@ internal class DefaultCheckoutGooglePayPaymentDataUpdateAddressBuilderTest {
         val result = builder.build(
             GooglePayPaymentDataUpdate(
                 callbackTrigger = GooglePayPaymentDataUpdate.CallbackTrigger.ShippingAddress,
-                shippingAddress = shippingAddress(
+                shippingAddress = googlePayAddress(
                     administrativeArea = "California",
                     countryCode = "US",
                     iso3166AdministrativeArea = "US-ca",
@@ -67,7 +67,7 @@ internal class DefaultCheckoutGooglePayPaymentDataUpdateAddressBuilderTest {
         val result = builder.build(
             GooglePayPaymentDataUpdate(
                 callbackTrigger = GooglePayPaymentDataUpdate.CallbackTrigger.ShippingAddress,
-                shippingAddress = shippingAddress(
+                shippingAddress = googlePayAddress(
                     administrativeArea = "Ontario",
                     countryCode = "CA",
                     iso3166AdministrativeArea = "CA-ON",
@@ -85,7 +85,7 @@ internal class DefaultCheckoutGooglePayPaymentDataUpdateAddressBuilderTest {
         val result = builder.build(
             GooglePayPaymentDataUpdate(
                 callbackTrigger = GooglePayPaymentDataUpdate.CallbackTrigger.ShippingAddress,
-                shippingAddress = shippingAddress(countryCode = "US"),
+                shippingAddress = googlePayAddress(countryCode = "US"),
             )
         )
 
@@ -115,7 +115,7 @@ internal class DefaultCheckoutGooglePayPaymentDataUpdateAddressBuilderTest {
         return this as CheckoutGooglePayPaymentDataUpdateAddressBuilder.Result.Available
     }
 
-    private fun shippingAddress(
+    private fun googlePayAddress(
         administrativeArea: String = "",
         countryCode: String = "US",
         locality: String = "",
