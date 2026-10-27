@@ -307,7 +307,10 @@ internal class ExpressCheckoutElementAnalyticsTest {
         block: suspend ExpressCheckoutElementScenario.() -> Unit,
     ) {
         enqueueLoadingRequests(linkEnabled = linkEnabled)
-        validateAnalyticsRequest(eventName = "elements.express_checkout_element.init")
+        networkRule.validateAnalyticsRequest(
+            eventName = "elements.express_checkout_element.init",
+            productUsage = setOf("ExpressCheckoutElement"),
+        )
 
         runExpressCheckoutElementScenario(
             networkRule = networkRule,
