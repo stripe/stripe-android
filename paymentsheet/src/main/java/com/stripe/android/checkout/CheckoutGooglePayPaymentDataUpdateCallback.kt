@@ -31,21 +31,31 @@ internal class CheckoutGooglePayPaymentDataUpdateCallback @Inject constructor(
         val countryCode = currentState.checkoutSessionResponse.merchantCountry
 
         return when (val trigger = paymentDataUpdate.callbackTrigger) {
-            GooglePayPaymentDataUpdate.CallbackTrigger.Initialize,
-            GooglePayPaymentDataUpdate.CallbackTrigger.ShippingAddress -> {
-                updateAddress(
+            GooglePayPaymentDataUpdate.CallbackTrigger.Initialize -> {
+                updateAddresses(
                     countryCode = countryCode,
                     currentState = currentState,
                     paymentDataUpdate = paymentDataUpdate,
-                    addressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
+                    addressSources = listOf(
+                        CheckoutSessionResponse.TaxAddressSource.SHIPPING,
+                        CheckoutSessionResponse.TaxAddressSource.BILLING,
+                    ),
+                )
+            }
+            GooglePayPaymentDataUpdate.CallbackTrigger.ShippingAddress -> {
+                updateAddresses(
+                    countryCode = countryCode,
+                    currentState = currentState,
+                    paymentDataUpdate = paymentDataUpdate,
+                    addressSources = listOf(CheckoutSessionResponse.TaxAddressSource.SHIPPING),
                 )
             }
             GooglePayPaymentDataUpdate.CallbackTrigger.PaymentMethod -> {
-                updateAddress(
+                updateAddresses(
                     countryCode = countryCode,
                     currentState = currentState,
                     paymentDataUpdate = paymentDataUpdate,
-                    addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+                    addressSources = listOf(CheckoutSessionResponse.TaxAddressSource.BILLING),
                 )
             }
             GooglePayPaymentDataUpdate.CallbackTrigger.ShippingOption,
@@ -68,31 +78,30 @@ internal class CheckoutGooglePayPaymentDataUpdateCallback @Inject constructor(
         }
     }
 
-    private suspend fun updateAddress(
+    private suspend fun updateAddresses(
         countryCode: String?,
         currentState: CheckoutControllerState,
         paymentDataUpdate: GooglePayPaymentDataUpdate,
-        addressSource: CheckoutSessionResponse.TaxAddressSource,
+        addressSources: List<CheckoutSessionResponse.TaxAddressSource>,
     ): GooglePayPaymentDataUpdateResponse {
-        val address = when (val result = addressBuilder.build(paymentDataUpdate, addressSource)) {
-            is CheckoutGooglePayPaymentDataUpdateAddressBuilder.Result.Unavailable -> {
-                return mapToResponse(
-                    countryCode = countryCode,
-                    response = currentState.checkoutSessionResponse,
-                    paymentDataUpdate = paymentDataUpdate,
-                )
+        var response = currentState.checkoutSessionResponse
+
+        for (addressSource in addressSources) {
+            val address = when (val result = addressBuilder.build(paymentDataUpdate, addressSource)) {
+                is CheckoutGooglePayPaymentDataUpdateAddressBuilder.Result.Unavailable -> continue
+                is CheckoutGooglePayPaymentDataUpdateAddressBuilder.Result.Available -> result.address
             }
-            is CheckoutGooglePayPaymentDataUpdateAddressBuilder.Result.Available -> result.address
+
+            response = taxRegionUpdater.updateServerStateIfNeeded(
+                checkoutSessionResponse = response,
+                addressSource = addressSource,
+                address = address,
+            ).getOrElse { error ->
+                return addressUpdateErrorResponse(addressSource, error)
+            }
         }
 
-        return taxRegionUpdater.updateServerStateIfNeeded(
-            checkoutSessionResponse = currentState.checkoutSessionResponse,
-            addressSource = addressSource,
-            address = address,
-        ).fold(
-            onSuccess = { response -> mapToResponse(countryCode, response, paymentDataUpdate) },
-            onFailure = { error -> addressUpdateErrorResponse(addressSource, error) },
-        )
+        return mapToResponse(countryCode, response, paymentDataUpdate)
     }
 
     private fun addressUpdateErrorResponse(

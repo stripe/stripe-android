@@ -7,7 +7,8 @@ import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 
 @OptIn(CheckoutSessionPreview::class)
 internal class FakeCheckoutGooglePayPaymentDataUpdateAddressBuilder(
-    private val result: CheckoutGooglePayPaymentDataUpdateAddressBuilder.Result,
+    private val result: (CheckoutSessionResponse.TaxAddressSource) ->
+        CheckoutGooglePayPaymentDataUpdateAddressBuilder.Result,
 ) : CheckoutGooglePayPaymentDataUpdateAddressBuilder {
     val buildCalls = Turbine<BuildCall>()
 
@@ -16,7 +17,7 @@ internal class FakeCheckoutGooglePayPaymentDataUpdateAddressBuilder(
         addressSource: CheckoutSessionResponse.TaxAddressSource,
     ): CheckoutGooglePayPaymentDataUpdateAddressBuilder.Result {
         buildCalls.add(BuildCall(paymentDataUpdate, addressSource))
-        return result
+        return result(addressSource)
     }
 
     fun ensureAllEventsConsumed() {
