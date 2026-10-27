@@ -445,20 +445,16 @@ internal class NetworkedIdentityCoordinatorTest {
     }
 
     @Test
-    fun `manual capture records the skip and continues with manual capture`() = runNetworkedIdentityScenario {
+    fun `manual capture continues without recording a skip`() = runNetworkedIdentityScenario {
         startAndConfigure()
         linkSession.linkUICalls.awaitItem()
 
         coordinator.chooseManualCapture()
         runCurrent()
-        assertThat(coordinator.state.value).isEqualTo(NetworkedIdentityState.SkipPending)
-        actions.skipCalls.awaitItem().response.complete(Result.success(niActionPageData()))
-        assertThat(verificationUpdates.awaitItem()).isEqualTo(niActionPageData())
-        runCurrent()
 
         assertThat(outcomes.awaitItem()).isEqualTo(NetworkedIdentityOutcome.ManualCapture)
         assertThat(coordinator.state.value).isEqualTo(NetworkedIdentityState.Idle)
-        assertThat(coordinator.entry.value.offersReuse).isFalse()
+        actions.skipCalls.expectNoEvents()
     }
 
     @Test
@@ -486,47 +482,6 @@ internal class NetworkedIdentityCoordinatorTest {
         decline.await()
 
         assertThat(coordinator.entry.value.offersSave).isTrue()
-    }
-
-    @Test
-    fun `failed skip still continues with ordinary verification`() = runNetworkedIdentityScenario {
-        coordinator.chooseManualCapture()
-        runCurrent()
-        actions.skipCalls.awaitItem().response.complete(Result.failure(IllegalStateException("Skip failed.")))
-        runCurrent()
-
-        // The choice isn't recorded, but the user isn't blocked from verifying.
-        assertThat(outcomes.awaitItem())
-            .isEqualTo(NetworkedIdentityOutcome.Fallback)
-        assertThat(coordinator.entry.value.offersReuse).isTrue()
-    }
-
-    @Test
-    fun `manual capture waits for an issued attachment before skipping`() = runNetworkedIdentityScenario {
-        reachDocuments()
-        coordinator.shareSelectedDocument()
-        runCurrent()
-        repository.tokenCalls.awaitItem().response.complete(
-            Result.success(NetworkedIdentityAssociationToken("token_1"))
-        )
-        runCurrent()
-        val attach = actions.attachCalls.awaitItem()
-
-        coordinator.chooseManualCapture()
-        runCurrent()
-        assertThat(coordinator.state.value).isEqualTo(NetworkedIdentityState.SkipPending)
-        actions.skipCalls.expectNoEvents()
-        outcomes.expectNoEvents()
-
-        attach.response.complete(Result.success(niActionPageData()))
-        assertThat(verificationUpdates.awaitItem()).isEqualTo(niActionPageData())
-        runCurrent()
-        actions.skipCalls.awaitItem().response.complete(Result.success(niActionPageData()))
-        assertThat(verificationUpdates.awaitItem()).isEqualTo(niActionPageData())
-        runCurrent()
-
-        assertThat(outcomes.awaitItem()).isEqualTo(NetworkedIdentityOutcome.ManualCapture)
-        assertThat(coordinator.entry.value.offersSave).isFalse()
     }
 
     @Test

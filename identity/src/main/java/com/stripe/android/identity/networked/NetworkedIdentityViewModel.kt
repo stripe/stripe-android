@@ -58,7 +58,7 @@ internal class NetworkedIdentityViewModel(
     /** Records the declined save; the caller submits afterwards either way. */
     suspend fun declineSave() = coordinator.declineSave()
 
-    /** From the intro: records the choice without showing the sheet. */
+    /** From the intro: continues with manual capture without showing the sheet. */
     fun chooseManualCaptureFromIntro() {
         presentsSheet.value = false
         coordinator.chooseManualCapture()

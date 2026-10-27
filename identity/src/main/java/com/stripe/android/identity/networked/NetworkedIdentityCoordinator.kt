@@ -129,22 +129,13 @@ internal class NetworkedIdentityCoordinator(
     }
 
     fun chooseManualCapture() {
-        if (mode.value != NetworkedIdentityMode.Reuse || state.value == NetworkedIdentityState.SkipPending) return
+        if (mode.value != NetworkedIdentityMode.Reuse) return
         invalidateAttempt()
-        transition(NetworkedIdentityState.SkipPending)
-        perform(
-            operation = { mutate(NetworkedIdentityRoute.OrdinaryIdentity) { actions.skip() } },
-            onSuccess = {
-                transition(NetworkedIdentityState.Idle)
-                outcomeChannel.trySend(NetworkedIdentityOutcome.ManualCapture)
-            },
-            // Skip only records the choice. If it can't (e.g. the backend doesn't support Networked Identity
-            // for this session yet), the user still continues with ordinary verification.
-            onFailure = {
-                transition(NetworkedIdentityState.Idle)
-                outcomeChannel.trySend(NetworkedIdentityOutcome.Fallback)
-            },
-        )
+        // #TODO - Networked Identity: The design records this choice with `skip`, but the backend then rejects saving
+        // for the session (`networked_identity_restart_required`). Until that's settled, declining reuse keeps saving
+        // available.
+        transition(NetworkedIdentityState.Idle)
+        outcomeChannel.trySend(NetworkedIdentityOutcome.ManualCapture)
     }
 
     fun cancel() {

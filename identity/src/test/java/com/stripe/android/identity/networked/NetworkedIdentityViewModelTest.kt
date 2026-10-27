@@ -47,36 +47,4 @@ internal class NetworkedIdentityViewModelTest {
         repository.documentCalls.awaitItem()
         assertThat(viewModel.isSheetVisible.value).isTrue()
     }
-
-    @Test
-    fun `manual capture from the intro records the skip without showing the sheet`() =
-        runNetworkedIdentityScenario {
-            val viewModel = NetworkedIdentityViewModel(coordinator, includesSelfie = false)
-
-            viewModel.chooseManualCaptureFromIntro()
-            runCurrent()
-            assertThat(viewModel.state.value).isEqualTo(NetworkedIdentityState.SkipPending)
-            assertThat(viewModel.isSheetVisible.value).isFalse()
-            actions.skipCalls.awaitItem().response.complete(Result.success(niActionPageData()))
-            assertThat(verificationUpdates.awaitItem()).isEqualTo(niActionPageData())
-            runCurrent()
-
-            assertThat(outcomes.awaitItem()).isEqualTo(NetworkedIdentityOutcome.ManualCapture)
-        }
-
-    @Test
-    fun `manual capture from the sheet shows its progress`() = runNetworkedIdentityScenario {
-        val viewModel = NetworkedIdentityViewModel(coordinator, includesSelfie = false)
-        reachDocuments()
-
-        viewModel.screenActions().onManualCapture()
-        runCurrent()
-
-        assertThat(viewModel.state.value).isEqualTo(NetworkedIdentityState.SkipPending)
-        assertThat(viewModel.isSheetVisible.value).isTrue()
-        actions.skipCalls.awaitItem().response.complete(Result.success(niActionPageData()))
-        assertThat(verificationUpdates.awaitItem()).isEqualTo(niActionPageData())
-        runCurrent()
-        assertThat(outcomes.awaitItem()).isEqualTo(NetworkedIdentityOutcome.ManualCapture)
-    }
 }

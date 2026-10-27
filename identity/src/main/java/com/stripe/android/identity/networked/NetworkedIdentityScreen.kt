@@ -163,9 +163,6 @@ private fun NetworkedIdentityBody(
         NetworkedIdentityState.SavePending -> {
             NetworkedIdentityLoading(stringResource(R.string.stripe_identity_link_saving))
         }
-        NetworkedIdentityState.SkipPending -> {
-            NetworkedIdentityLoading(stringResource(R.string.stripe_identity_link_skipping))
-        }
         is NetworkedIdentityState.SaveFailed -> {
             BodyText(stringResource(R.string.stripe_identity_link_save_failed_body))
             state.details?.let { details ->
@@ -418,12 +415,10 @@ private fun BodyText(text: String) {
 }
 
 private val NetworkedIdentityState.offersManualCapture: Boolean
-    get() = this !is NetworkedIdentityState.SharingDocument && this !is NetworkedIdentityState.DocumentShared &&
-        this != NetworkedIdentityState.SkipPending
+    get() = this !is NetworkedIdentityState.SharingDocument && this !is NetworkedIdentityState.DocumentShared
 
 private val NetworkedIdentityState.title: Int
     get() = when (this) {
-        NetworkedIdentityState.SkipPending -> R.string.stripe_identity_link_manual
         is NetworkedIdentityState.DocumentShared -> R.string.stripe_identity_link_shared_title
         NetworkedIdentityState.SavePending -> R.string.stripe_identity_link_continue_with_link
         is NetworkedIdentityState.SaveFailed -> R.string.stripe_identity_link_save_failed_title

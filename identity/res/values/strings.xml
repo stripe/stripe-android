@@ -220,8 +220,6 @@
   <string name="stripe_identity_link_sign_in_to_reuse">Sign in to use a saved ID.</string>
   <!-- Subtitle of the Link sign-in screen when saving the user's ID to Link -->
   <string name="stripe_identity_link_sign_in_to_save">Sign in or create an account to save ID.</string>
-  <!-- Status while continuing to verify identity with a new document instead of an ID saved to Link -->
-  <string name="stripe_identity_link_skipping">Continuing with manual verification…</string>
   <!-- I'm ready button text -->
   <string name="stripe_im_ready">I\'m ready</string>
   <!-- State when a manual identity document image has been captured -->

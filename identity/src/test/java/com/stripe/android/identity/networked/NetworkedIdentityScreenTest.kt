@@ -138,14 +138,6 @@ internal class NetworkedIdentityScreenTest {
     }
 
     @Test
-    fun `skipping shows progress without offering manual capture again`() = runScenario(
-        initialState = NetworkedIdentityState.SkipPending,
-    ) {
-        composeRule.onNodeWithTag(NI_LOADING_TAG).assertExists()
-        composeRule.onNodeWithTag(NI_MANUAL_TAG).assertDoesNotExist()
-    }
-
-    @Test
     fun `manual capture remains reachable in a short viewport`() = runScenario(height = 360.dp) {
         composeRule.onNodeWithTag(NI_MANUAL_TAG).assertIsDisplayed().performClick()
         manualCapture.awaitItem()

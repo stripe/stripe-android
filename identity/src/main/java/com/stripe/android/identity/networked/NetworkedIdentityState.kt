@@ -16,7 +16,6 @@ internal sealed interface NetworkedIdentityState {
     data class DocumentShared(val document: NetworkedIdentityDocument) : NetworkedIdentityState
     data object SavePending : NetworkedIdentityState
     data object SavePrepared : NetworkedIdentityState
-    data object SkipPending : NetworkedIdentityState
 
     /** Saving failed; the sheet stays open to say so, since there's no capture to fall back to. */
     data class SaveFailed(val details: String?) : NetworkedIdentityState

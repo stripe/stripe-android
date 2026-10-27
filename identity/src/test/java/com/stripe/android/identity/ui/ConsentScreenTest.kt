@@ -19,6 +19,7 @@ import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeUp
 import androidx.lifecycle.MutableLiveData
 import androidx.navigation.NavController
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.identity.IdentityVerificationSheetContract
@@ -27,6 +28,7 @@ import com.stripe.android.identity.navigation.ConsentDestination
 import com.stripe.android.identity.networked.FakeNetworkedIdentityActions
 import com.stripe.android.identity.networked.FakeNetworkedIdentityLinkSession
 import com.stripe.android.identity.networked.FakeNetworkedIdentityRepository
+import com.stripe.android.identity.networked.NetworkedIdentityOutcome
 import com.stripe.android.identity.networked.NetworkedIdentityState
 import com.stripe.android.identity.networked.NetworkedIdentityViewModel
 import com.stripe.android.identity.networked.niConfig
@@ -328,19 +330,16 @@ class ConsentScreenTest {
     }
 
     @Test
-    fun `Manually verify instead records the skip`() {
-        val actions = FakeNetworkedIdentityActions()
-        runScenario(
-            Resource.success(verificationPage),
-            niViewModel(actions = actions, config = SAVED_ID_FOUND, handoff = niHandoff()),
-        ) {
-            scrollToEnd()
+    fun `Manually verify instead continues with manual capture`() = runNetworkedScenario { scenario ->
+        scrollToEnd()
 
-            onNodeWithTag(LINK_MANUAL_BUTTON_TAG).onChildAt(0).performClick()
+        onNodeWithTag(LINK_MANUAL_BUTTON_TAG).onChildAt(0).performClick()
 
-            runBlocking { actions.skipCalls.awaitItem() }
+        runBlocking {
+            scenario.viewModel.outcomes.test {
+                assertThat(awaitItem()).isEqualTo(NetworkedIdentityOutcome.ManualCapture)
+            }
         }
-        actions.ensureAllEventsConsumed()
     }
 
     @Test
