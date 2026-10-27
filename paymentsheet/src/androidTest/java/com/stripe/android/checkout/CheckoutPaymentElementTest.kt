@@ -150,7 +150,7 @@ internal class CheckoutPaymentElementTest {
                     holdResponse.await(10, TimeUnit.SECONDS)
                     response.testBodyFromFile("checkout-session-init.json") { json ->
                         json.put("customer_email", "checkout@example.com")
-                        json.getJSONObject("elements_session").remove("link_settings")
+                        json.remove("link_settings")
                     }
                 }
 
@@ -182,6 +182,7 @@ internal class CheckoutPaymentElementTest {
         val checkoutInitResponse: (MockResponse) -> Unit = { response ->
             response.testBodyFromFile("checkout-session-init.json") { json ->
                 json.put("customer_email", "test@stripe.com")
+                json.getJSONObject("link_settings").put("link_mode", "LINK_PAYMENT_METHOD")
             }
         }
         val configuration = CheckoutController.Configuration().paymentElement(
@@ -269,6 +270,7 @@ internal class CheckoutPaymentElementTest {
         val checkoutInitResponse: (MockResponse) -> Unit = { response ->
             response.testBodyFromFile("checkout-session-init.json") { json ->
                 json.put("customer_email", "test@stripe.com")
+                json.getJSONObject("link_settings").put("link_mode", "LINK_PAYMENT_METHOD")
             }
         }
         val configuration = CheckoutController.Configuration().paymentElement(

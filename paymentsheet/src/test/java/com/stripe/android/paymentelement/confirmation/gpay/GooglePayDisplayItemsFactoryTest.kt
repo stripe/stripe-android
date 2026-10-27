@@ -42,7 +42,7 @@ class GooglePayDisplayItemsFactoryTest {
             checkoutItems = listOf(
                 CheckoutSessionResponseFactory.checkoutItem(subtotal = 2000, total = 1950)
             ),
-            recurringDetails = null,
+            totalSummary = null,
         )
 
         val items = GooglePayDisplayItemsFactory.create(response, context)
@@ -59,7 +59,7 @@ class GooglePayDisplayItemsFactoryTest {
     }
 
     @Test
-    fun `automatic tax disabled uses subtotal and total labels and preserves discounts and taxes`() {
+    fun `automatic tax disabled uses subtotal and total labels and preserves taxes`() {
         val tax = CheckoutSessionResponse.TaxAmount(
             amount = 150,
             inclusive = false,
@@ -69,19 +69,12 @@ class GooglePayDisplayItemsFactoryTest {
                 rateType = CheckoutSessionResponse.TaxRateType.PERCENTAGE,
             ),
         )
-        val discount = CheckoutSessionResponse.DiscountAmount(
-            amount = 200,
-            displayName = "Summer",
-            coupon = CheckoutSessionResponse.Coupon("SUMMER", null, 10.0),
-            promotionCode = null,
-        )
         val response = CheckoutSessionResponseFactory.create(
             automaticTaxEnabled = false,
             checkoutItems = listOf(
                 CheckoutSessionResponseFactory.checkoutItem(subtotal = 2000, total = 1950)
             ),
-            recurringDetails = CheckoutSessionResponse.RecurringDetails(
-                totalDiscountAmounts = listOf(discount),
+            totalSummary = CheckoutSessionResponse.TotalSummary(
                 totalTaxAmounts = listOf(tax),
             ),
         )
@@ -89,13 +82,12 @@ class GooglePayDisplayItemsFactoryTest {
         val items = GooglePayDisplayItemsFactory.create(response, context)
 
         assertThat(items.map { it.label }).containsExactly(
-            "Widget", "Subtotal", "Summer", "Sales tax", "Total"
+            "Widget", "Subtotal", "Sales tax", "Total"
         ).inOrder()
-        assertThat(items.map { it.price }).containsExactly(2000L, 2000L, -200L, 150L, 1950L).inOrder()
+        assertThat(items.map { it.price }).containsExactly(2000L, 2000L, 150L, 1950L).inOrder()
         assertThat(items.map { it.type }).containsExactly(
             GooglePayJsonFactory.DisplayItem.Type.LINE_ITEM,
             GooglePayJsonFactory.DisplayItem.Type.SUBTOTAL,
-            GooglePayJsonFactory.DisplayItem.Type.DISCOUNT,
             GooglePayJsonFactory.DisplayItem.Type.TAX,
             GooglePayJsonFactory.DisplayItem.Type.LINE_ITEM,
         ).inOrder()
@@ -103,7 +95,7 @@ class GooglePayDisplayItemsFactoryTest {
 
     @Test
     fun `absent aggregate tax produces no tax row`() {
-        val response = CheckoutSessionResponseFactory.create(recurringDetails = null)
+        val response = CheckoutSessionResponseFactory.create(totalSummary = null)
 
         val items = GooglePayDisplayItemsFactory.create(response, context)
 

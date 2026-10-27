@@ -192,27 +192,20 @@ internal class CheckoutPaymentElementSavedSepaTest {
     private fun checkoutInitResponse(paymentMethods: JSONArray): (MockResponse) -> Unit = { response ->
         response.testBodyFromFile("checkout-session-init.json") { json ->
             json.put("customer_email", "checkout@example.com")
+            json.getJSONObject("saved_payment_method_options").put("payment_method_remove", "enabled")
             json.put(
                 "customer",
                 JSONObject()
                     .put("id", "cus_saved_sepa")
-                    .put("payment_methods", paymentMethods)
-                    .put("can_detach_payment_method", true),
+                    .put("payment_methods", paymentMethods),
             )
-            json.getJSONObject("elements_session").apply {
+            json.apply {
                 remove("link_settings")
                 put(
                     "ordered_payment_method_types_and_wallets",
                     JSONArray().put("card").put("sepa_debit"),
                 )
-                getJSONObject("payment_method_preference").put(
-                    "ordered_payment_method_types",
-                    JSONArray().put("card").put("sepa_debit"),
-                )
             }
-            json.getJSONObject("server_built_elements_session_params")
-                .getJSONObject("deferred_intent")
-                .put("payment_method_types", JSONArray().put("card").put("sepa_debit"))
         }
     }
 

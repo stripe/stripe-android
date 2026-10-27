@@ -61,7 +61,7 @@ internal fun CheckoutController.Configuration.State.toBillingDetails(
     collectedEmail: String?,
 ): PaymentSheet.BillingDetails = PaymentSheet.BillingDetails(
     address = defaults.billingDetails?.address?.asPaymentSheet(),
-    email = collectedEmail ?: checkoutSessionResponse.customerEmail,
+    email = checkoutSessionResponse.fixedEmail ?: collectedEmail,
     name = defaults.billingDetails?.name,
     phone = defaults.phone,
 )

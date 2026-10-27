@@ -51,6 +51,7 @@ internal class ExpressCheckoutElementAnalyticsTest {
 
             enqueueSuccessfulGooglePayPayment(paymentMethod = paymentMethod)
 
+            validateAnalyticsRequest(eventName = "stripe_android.payment_intent_retrieval")
             networkRule.checkoutConfirm(
                 bodyPart("payment_method", paymentMethod.id),
                 bodyPart("expected_amount", "5099"),
@@ -217,6 +218,7 @@ internal class ExpressCheckoutElementAnalyticsTest {
             ) { response ->
                 createCheckoutInitResponseWithRequiredShippingAddressForAutomaticTax(response)
             }
+            validateAnalyticsRequest(eventName = "stripe_android.payment_intent_retrieval")
             networkRule.checkoutConfirm(
                 bodyPart("payment_method", paymentMethod.id),
                 bodyPart("expected_amount", "5099"),
@@ -273,6 +275,7 @@ internal class ExpressCheckoutElementAnalyticsTest {
                 CheckoutInitResponseFactory
                     .createWithRequiredBillingAddressForAutomaticTax(response)
             }
+            validateAnalyticsRequest(eventName = "stripe_android.payment_intent_retrieval")
             networkRule.checkoutConfirm(
                 bodyPart("payment_method", paymentMethod.id),
                 bodyPart("expected_amount", "5099"),
@@ -308,8 +311,9 @@ internal class ExpressCheckoutElementAnalyticsTest {
             enqueueSuccessfulGooglePayPayment(paymentMethod = paymentMethod)
             networkRule.checkoutUpdate { response ->
                 response.testBodyFromFile("checkout-session-confirm.json") { json ->
-                    json.getJSONArray("checkout_items").getJSONObject(0)
+                    json.getJSONArray("items").getJSONObject(0)
                         .getJSONObject("one_time_price").getJSONArray("items").getJSONObject(0)
+                        .getJSONObject("amount_details")
                         .put("total", 5399)
                 }
             }

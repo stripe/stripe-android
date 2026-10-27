@@ -44,6 +44,7 @@ internal class CreateCustomerStateTest {
         val result = createCustomerState(
             initializationMode = initializationMode,
             customerMetadata = CustomerMetadata.CheckoutSession(
+                clientSecret = "cs_test_abc123_secret_test",
                 sessionId = checkoutSessionResponse.id,
                 customerId = "cus_checkout_123",
                 removePaymentMethod = PaymentMethodRemovePermission.None,
@@ -74,6 +75,7 @@ internal class CreateCustomerStateTest {
         val result = createCustomerState(
             initializationMode = initializationMode,
             customerMetadata = CustomerMetadata.CheckoutSession(
+                clientSecret = "cs_test_abc123_secret_test",
                 sessionId = checkoutSessionResponse.id,
                 customerId = "cus_checkout_empty",
                 removePaymentMethod = PaymentMethodRemovePermission.None,
@@ -168,6 +170,7 @@ internal class CreateCustomerStateTest {
         ),
     ).copy(
         customerMetadata = CustomerMetadata.CheckoutSession(
+            clientSecret = "cs_test_abc123_secret_test",
             sessionId = checkoutSessionResponse.id,
             customerId = "cus_checkout_automatic_tax",
             removePaymentMethod = PaymentMethodRemovePermission.None,

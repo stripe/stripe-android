@@ -14,6 +14,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.CardFundingFilteringPrivatePreview
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import org.junit.Test
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic as PSAutomatic
@@ -417,7 +418,7 @@ internal class CheckoutCommonConfigurationFactoryTest {
     }
 
     @Test
-    fun `sources the collected email over the checkout session customer email`() {
+    fun `sources the checkout session customer email over the collected email`() {
         val configuration = controllerConfiguration()
 
         val result = factory().create(
@@ -427,7 +428,29 @@ internal class CheckoutCommonConfigurationFactoryTest {
             collectedDetails = collectedDetails(email = "collected@example.com"),
         )
 
-        assertThat(result.defaultBillingDetails?.email).isEqualTo("collected@example.com")
+        assertThat(result.defaultBillingDetails?.email).isEqualTo("checkout@example.com")
+    }
+
+    @Test
+    fun `customer email supplies express billing defaults when session email is absent`() {
+        val result = factory().createForExpressCheckoutElement(
+            configuration = CheckoutController.Configuration()
+                .expressCheckoutElement(ExpressCheckoutElement.Configuration())
+                .build(),
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+                customer = CheckoutSessionResponse.Customer(
+                    id = "cus_123",
+                    email = "customer@example.com",
+                    paymentMethods = emptyList(),
+                    canDetachPaymentMethod = false,
+                ),
+            ),
+            collectedDetails = collectedDetails(email = "collected@example.com"),
+        )
+
+        assertThat(result?.defaultBillingDetails?.email).isEqualTo("customer@example.com")
+        assertThat(result?.billingDetailsCollectionConfiguration?.email)
+            .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic)
     }
 
     @Test

@@ -1,7 +1,10 @@
 {
   "customer": {
     "id": "cus_VDr7KDndDhelXY",
-    "email": "test+location_FR@example.com",
     "payment_methods": []
+  },
+  "saved_payment_method_options": {
+    "payment_method_save": "disabled",
+    "payment_method_remove": "disabled"
   }
 }

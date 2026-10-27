@@ -50,7 +50,7 @@ internal class CheckoutCommonConfigurationFactory @Inject constructor(
             linkConfiguration = expressCheckoutElementConfiguration.linkConfiguration.asPaymentSheet(),
             billingDetailsCollectionConfiguration = PaymentSheetBillingDetails(
                 email = if (
-                    checkoutSessionResponse.customerEmail == null && configuration.defaults.email == null
+                    checkoutSessionResponse.fixedEmail == null && configuration.defaults.email == null
                 ) {
                     PaymentSheetBillingDetails.CollectionMode.Always
                 } else {

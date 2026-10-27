@@ -12,6 +12,8 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixt
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
+import com.stripe.android.networktesting.RequestMatchers.hasBodyPart
+import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.android.utils.FakeFraudDetectionDataRepository
@@ -35,6 +37,8 @@ class CheckoutSessionRepositoryTest {
     private val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
 
     private val repository = CheckoutSessionRepository(
+        stripeRepository = CheckoutStripeRepositoryFactory.create(),
+        elementsSessionClientParams = CheckoutStripeRepositoryFactory.clientParams(),
         fraudDetectionDataRepository = FakeFraudDetectionDataRepository.create(),
         stripeNetworkClient = DefaultStripeNetworkClient(),
         analyticsRequestExecutor = analyticsRequestExecutor,
@@ -51,62 +55,67 @@ class CheckoutSessionRepositoryTest {
     )
 
     @Test
-    fun `init sends elements_session_client params`() = runTest {
+    fun `init sends CheckoutClient common params`() = runTest {
         val expectedSessionId = AnalyticsRequestFactory.sessionId.toString()
         networkRule.checkoutInit(
-            bodyPart("elements_session_client[is_aggregation_expected]", "true"),
-            bodyPart("elements_session_client[mobile_session_id]", expectedSessionId),
-            bodyPart("elements_session_client[mobile_app_id]", clientParams.mobileAppId),
+            bodyPart("client_secret", "cs_test_abc123_secret_test"),
+            bodyPart("adaptive_pricing[allowed]", "true"),
+            bodyPart("locale", clientParams.locale),
+            bodyPart("timezone", java.util.TimeZone.getDefault().id),
+            bodyPart("mobile_session_id", expectedSessionId),
+            bodyPart("mobile_app_id", clientParams.mobileAppId),
         ) { response ->
             response.testBodyFromFile("checkout-session-init.json")
         }
 
         val result = repository.init(
-            clientParams = clientParams,
             sessionId = DEFAULT_CHECKOUT_SESSION_ID,
+            clientSecret = "cs_test_abc123_secret_test",
             adaptivePricingAllowed = true,
         )
 
-        assertThat(result.isSuccess).isTrue()
+        assertThat(result.getOrThrow().clientSecret).isEqualTo("cs_test_abc123_secret_test")
     }
 
     @Test
-    fun `detach sends elements_session_client params`() = runTest {
+    fun `detach sends CheckoutClient common params`() = runTest {
         val expectedSessionId = AnalyticsRequestFactory.sessionId.toString()
         networkRule.checkoutUpdate(
             bodyPart("payment_method_to_detach", "pm_123"),
-            bodyPart("elements_session_client[is_aggregation_expected]", "true"),
-            bodyPart("elements_session_client[locale]", clientParams.locale),
-            bodyPart("elements_session_client[mobile_session_id]", expectedSessionId),
-            bodyPart("elements_session_client[mobile_app_id]", clientParams.mobileAppId),
+            not(hasBodyPart("timezone")),
+            bodyPart("client_secret", "cs_test_abc123_secret_test"),
+            bodyPart("locale", clientParams.locale),
+            bodyPart("mobile_session_id", expectedSessionId),
+            bodyPart("mobile_app_id", clientParams.mobileAppId),
         ) { response ->
             response.testBodyFromFile("checkout-session-init.json")
         }
 
         val result = repository.detachPaymentMethod(
             sessionId = DEFAULT_CHECKOUT_SESSION_ID,
+            clientSecret = "cs_test_abc123_secret_test",
             paymentMethodId = "pm_123",
-            clientParams = clientParams,
         )
 
-        assertThat(result.isSuccess).isTrue()
+        assertThat(result.getOrThrow().clientSecret).isEqualTo("cs_test_abc123_secret_test")
     }
 
     @Test
     fun `updateCurrency sends currency code and returns response on success`() = runTest {
         networkRule.checkoutUpdate(
-            bodyPart("updated_currency", "eur"),
-            bodyPart("elements_session_client[is_aggregation_expected]", "true"),
+            bodyPart("adaptive_pricing[currency]", "eur"),
+            bodyPart("client_secret", "cs_test_abc123_secret_test"),
         ) { response ->
             response.testBodyFromFile("checkout-session-init.json")
         }
 
         val result = repository.updateCurrency(
             sessionId = DEFAULT_CHECKOUT_SESSION_ID,
+            clientSecret = "cs_test_abc123_secret_test",
             currencyCode = "eur",
         )
 
-        assertThat(result.isSuccess).isTrue()
+        assertThat(result.getOrThrow().clientSecret).isEqualTo("cs_test_abc123_secret_test")
     }
 
     @Test
@@ -118,6 +127,7 @@ class CheckoutSessionRepositoryTest {
 
         val result = repository.updateCurrency(
             sessionId = DEFAULT_CHECKOUT_SESSION_ID,
+            clientSecret = "cs_test_abc123_secret_test",
             currencyCode = "invalid",
         )
 
@@ -132,6 +142,7 @@ class CheckoutSessionRepositoryTest {
 
         repository.updateCurrency(
             sessionId = DEFAULT_CHECKOUT_SESSION_ID,
+            clientSecret = "cs_test_abc123_secret_test",
             currencyCode = "eur",
         ).getOrThrow()
 
@@ -148,6 +159,7 @@ class CheckoutSessionRepositoryTest {
 
         val result = repository.updateCurrency(
             sessionId = DEFAULT_CHECKOUT_SESSION_ID,
+            clientSecret = "cs_test_abc123_secret_test",
             currencyCode = "invalid",
         )
 

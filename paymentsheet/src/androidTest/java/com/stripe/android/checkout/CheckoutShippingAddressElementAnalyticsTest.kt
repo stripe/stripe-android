@@ -225,7 +225,7 @@ internal class CheckoutShippingAddressElementAnalyticsTest {
 
     private fun createCheckoutInitResponse(response: MockResponse) {
         response.testBodyFromFile("checkout-session-init.json") { json ->
-            json.getJSONObject("elements_session").remove("link_settings")
+            json.remove("link_settings")
             json.put(
                 "shipping_address_collection",
                 JSONObject().put("allowed_countries", JSONArray().put("US")),

@@ -137,7 +137,7 @@ internal class CheckoutControllerTest {
 
     @Test
     fun `canceling a background server update cancels its callback and releases the mutation lock`() =
-        runMutationScenario {
+        runMutationScenario(initModifier = { it.remove("customer_email") }) {
             val callbackStarted = Turbine<Unit>()
             val callbackCanceled = Turbine<Unit>()
 
@@ -524,8 +524,8 @@ internal class CheckoutControllerTest {
             initModifier = combine(
                 automaticTaxFor("shipping"),
                 { json ->
-                    json.getJSONObject("tax_context").put("automatic_tax_enabled", false)
-                    json.getJSONObject("tax_meta").put("computation_type", "Off").put("status", JSONObject.NULL)
+                    json.getJSONObject("automatic_tax").put("enabled", false)
+                    json.getJSONObject("automatic_tax").put("status", "ready")
                 },
             ),
         ) {
@@ -616,6 +616,7 @@ internal class CheckoutControllerTest {
 
     @Test
     fun `configure seeds the default email locally`() = runConfigureScenario(
+        initModifier = { it.remove("customer_email") },
         configuration = configurationWithPaymentElement().defaults(
             CheckoutController.Configuration.Defaults().email("prefill@example.com")
         ),
@@ -739,14 +740,13 @@ internal class CheckoutControllerTest {
     }
 
     @Test
-    fun `configure returns failure when response has no elements session`() = runConfigureScenario(
+    fun `configure returns failure when response has no merchant info`() = runConfigureScenario(
         networkSetup = {
             networkRule.checkoutInit { response ->
-                // Identical to the success fixture (customer_email present) except elements_session
-                // is removed, so the failure is pinned to the missing session and nothing else.
+                // Required merchant information must be present even when all other fields are valid.
                 response.testBodyFromFile("checkout-session-init.json") { json ->
                     json.put("customer_email", "checkout@example.com")
-                    json.remove("elements_session")
+                    json.remove("merchant_info")
                 }
             }
         },
@@ -849,6 +849,47 @@ internal class CheckoutControllerTest {
     }
 
     @Test
+    fun `clearPaymentOption resets billing tax region and commits updated totals`() = runMutationScenario(
+        initModifier = automaticTaxFor("billing"),
+        paymentSelection = PaymentSelection.GooglePay,
+    ) {
+        assertThat(controller.session.value?.paymentOption).isNotNull()
+        networkRule.checkoutUpdate(
+            bodyPart("tax_region", ""),
+            not(hasBodyPart("tax_region[country]")),
+            responseFactory = successResponseFactory(combine(automaticTaxFor("billing"), withTotal(8000))),
+        )
+
+        val result = controller.clearPaymentOption()
+
+        assertThat(result).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
+        assertThat(controller.session.value?.paymentOption).isNull()
+        assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isEqualTo(8000.0)
+    }
+
+    @Test
+    fun `clearPaymentOption preserves selection when billing tax reset fails`() = runMutationScenario(
+        initModifier = automaticTaxFor("billing"),
+        paymentSelection = PaymentSelection.GooglePay,
+    ) {
+        val before = controller.session.value
+        val stateBefore = committedState()
+        assertThat(before?.paymentOption).isNotNull()
+        networkRule.checkoutUpdate(bodyPart("tax_region", "")) { response ->
+            response.setResponseCode(400)
+            response.setBody("""{"error":{"message":"Tax update failed"}}""")
+        }
+
+        val result = controller.clearPaymentOption()
+
+        assertThat(result).isInstanceOf(CheckoutController.OperationResult.Failed::class.java)
+        assertThat(controller.session.value?.paymentOption?.paymentMethodType)
+            .isEqualTo(before?.paymentOption?.paymentMethodType)
+        assertThat(controller.session.value?.totals).isEqualTo(before?.totals)
+        assertThat(committedState()).isEqualTo(stateBefore)
+    }
+
+    @Test
     fun `clear preserves single saved card inventory through updates`() =
         runSavedSelectionClearScenario(savedCustomerWithBillingAddress())
 
@@ -861,10 +902,7 @@ internal class CheckoutControllerTest {
         runSavedSelectionClearScenario(
             combine(savedCustomerWithSepaDebit(), { json ->
                 val methods = JSONArray().put("card").put("sepa_debit")
-                json.getJSONObject("elements_session").getJSONObject("payment_method_preference")
-                    .put("ordered_payment_method_types", methods)
-                json.getJSONObject("server_built_elements_session_params").getJSONObject("deferred_intent")
-                    .put("payment_method_types", methods)
+                json.put("ordered_payment_method_types_and_wallets", methods)
             }),
         )
 
@@ -1021,8 +1059,7 @@ internal class CheckoutControllerTest {
                 combine(
                     withTotal(4099),
                     { json ->
-                        json.getJSONObject("server_built_elements_session_params")
-                            .getJSONObject("deferred_intent").put("amount", 4099)
+                        json.getJSONObject("total_summary").put("due", 4099)
                     },
                 ),
             ),
@@ -1084,7 +1121,7 @@ internal class CheckoutControllerTest {
     @Test
     fun `updateCurrency sends updated_currency and updates session on success`() = runMutationScenario {
         networkRule.checkoutUpdate(
-            bodyPart("updated_currency", "usd"),
+            bodyPart("adaptive_pricing[currency]", "usd"),
             responseFactory = successResponseFactory(withTotal(5099)),
         )
 
@@ -1109,7 +1146,9 @@ internal class CheckoutControllerTest {
     }
 
     @Test
-    fun `updateEmail stores email locally without a network call`() = runMutationScenario {
+    fun `updateEmail stores email locally without a network call`() = runMutationScenario(
+        initModifier = { it.remove("customer_email") },
+    ) {
         // No checkoutUpdate is enqueued: email is client-only state and reloads from the existing
         // response, so NetworkRule will fail the test if a request is made.
         assertThat(controller.session.value?.email).isNotEqualTo("background@example.com")
@@ -1157,11 +1196,13 @@ internal class CheckoutControllerTest {
     }
 
     @Test
-    fun `updateEmail takes precedence over the session customer email`() = runMutationScenario {
+    fun `session customer email takes precedence over updateEmail`() = runMutationScenario {
         assertThat(controller.updateEmail("local@example.com"))
             .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
 
-        assertThat(controller.session.value?.email).isEqualTo("local@example.com")
+        assertThat(controller.session.value?.email).isEqualTo("checkout@example.com")
+        assertThat(committedState().embeddedConfiguration?.defaultBillingDetails?.email)
+            .isEqualTo("checkout@example.com")
     }
 
     @Test
@@ -1280,7 +1321,7 @@ internal class CheckoutControllerTest {
                 bodyPart("tax_region[postal_code]", "80202"),
                 bodyPart("tax_region[line1]", "123 Main St"),
                 bodyPart("tax_region[line2]", "Apt 4"),
-                bodyPart("elements_session_client[is_aggregation_expected]", "true"),
+                bodyPart("client_secret", DEFAULT_CLIENT_SECRET),
                 responseFactory = successResponseFactory(automaticTaxFor("shipping")),
             )
 
@@ -1348,7 +1389,7 @@ internal class CheckoutControllerTest {
         }
 
     @Test
-    fun `updateShippingAddress sends country only when clearing shipping tax`() =
+    fun `updateShippingAddress resets the tax region when clearing shipping tax`() =
         runMutationScenario(initModifier = automaticTaxFor("shipping")) {
             networkRule.checkoutUpdate(
                 bodyPart("tax_region[country]", "US"),
@@ -1364,13 +1405,14 @@ internal class CheckoutControllerTest {
             assertThat(committedState().collectedDetails.shippingAddress).isEqualTo(fullAddress.build())
 
             networkRule.checkoutUpdate(
-                bodyPart("tax_region[country]", "US"),
+                bodyPart("tax_region", ""),
+                not(hasBodyPart("tax_region[country]")),
                 not(hasBodyPart("tax_region[city]")),
                 not(hasBodyPart("tax_region[state]")),
                 not(hasBodyPart("tax_region[postal_code]")),
                 not(hasBodyPart("tax_region[line1]")),
                 not(hasBodyPart("tax_region[line2]")),
-                bodyPart("elements_session_client[is_aggregation_expected]", "true"),
+                bodyPart("client_secret", DEFAULT_CLIENT_SECRET),
                 responseFactory = successResponseFactory(automaticTaxFor("shipping")),
             )
             val result = controller.updateShippingAddress(name = null, address = null)
@@ -1397,7 +1439,8 @@ internal class CheckoutControllerTest {
                 .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
 
             networkRule.checkoutUpdate(
-                bodyPart("tax_region[country]", "US"),
+                bodyPart("tax_region", ""),
+                not(hasBodyPart("tax_region[country]")),
                 not(hasBodyPart("tax_region[city]")),
                 not(hasBodyPart("tax_region[state]")),
                 not(hasBodyPart("tax_region[postal_code]")),
@@ -1636,16 +1679,16 @@ internal class CheckoutControllerTest {
                 check(releaseFirstResponse.await(10, TimeUnit.SECONDS)) {
                     "Timed out waiting to release the first mutation response"
                 }
-                successResponseFactory { json -> json.put("session_id", "cs_test_after_promo") }.invoke(response)
+                successResponseFactory { json -> json.put("id", "cs_test_after_promo") }.invoke(response)
             }
             // The second mutation must target the session id produced by the first, proving the
             // mutex serialized them (an unserialized call would hit the original id and fail).
             networkRule.checkoutUpdate(
-                bodyPart("updated_currency", "eur"),
+                bodyPart("adaptive_pricing[currency]", "eur"),
                 sessionId = "cs_test_after_promo",
             ) { response ->
                 secondRequest.add(Unit)
-                successResponseFactory { json -> json.put("session_id", "cs_test_after_promo") }.invoke(response)
+                successResponseFactory { json -> json.put("id", "cs_test_after_promo") }.invoke(response)
             }
 
             fromBackgroundThread {
@@ -1717,7 +1760,7 @@ internal class CheckoutControllerTest {
         ) {
             networkRule.checkoutUpdate(
                 bodyPart("tax_region[country]", "US"),
-                bodyPart("elements_session_client[is_aggregation_expected]", "true"),
+                bodyPart("client_secret", DEFAULT_CLIENT_SECRET),
                 responseFactory = successResponseFactory(
                     combine(allowedShippingCountries(listOf("US", "CA")), automaticTaxFor("shipping")),
                 ),
@@ -1839,7 +1882,7 @@ internal class CheckoutControllerTest {
             bodyPart("tax_region[state]", "CA"),
             bodyPart("tax_region[postal_code]", "94111"),
             bodyPart("tax_region[line1]", "1234 Main Street"),
-            bodyPart("elements_session_client[is_aggregation_expected]", "true"),
+            bodyPart("client_secret", DEFAULT_CLIENT_SECRET),
             responseFactory = responseFactory,
         )
     }
@@ -1858,7 +1901,7 @@ internal class CheckoutControllerTest {
             bodyPart("tax_region[postal_code]", "94103"),
             bodyPart("tax_region[line1]", "510 Townsend St"),
             bodyPart("tax_region[line2]", "Suite 100"),
-            bodyPart("elements_session_client[is_aggregation_expected]", "true"),
+            bodyPart("client_secret", DEFAULT_CLIENT_SECRET),
             responseFactory = responseFactory,
         )
     }
@@ -1871,7 +1914,7 @@ internal class CheckoutControllerTest {
             bodyPart("tax_region[postal_code]", "80202"),
             bodyPart("tax_region[line1]", "123 Main St"),
             bodyPart("tax_region[line2]", "Apt 4"),
-            bodyPart("elements_session_client[is_aggregation_expected]", "true"),
+            bodyPart("client_secret", DEFAULT_CLIENT_SECRET),
             responseFactory = responseFactory,
         )
     }
@@ -1892,7 +1935,7 @@ internal class CheckoutControllerTest {
     ): (MockResponse) -> Unit = { response ->
         response.testBodyFromFile("checkout-session-init.json") { json ->
             json.put("customer_email", "checkout@example.com")
-            json.getJSONObject("elements_session").remove("link_settings")
+            json.remove("link_settings")
             jsonModifier(json)
         }
     }
@@ -1914,18 +1957,17 @@ internal class CheckoutControllerTest {
     // update sends tax_region to the server.
     private fun automaticTaxFor(source: String): (JSONObject) -> Unit = { json ->
         val addressSource = when (source) {
-            "shipping", "billing" -> "session.$source"
+            "shipping", "billing" -> source
             else -> source
         }
         json.put(
-            "tax_context",
+            "automatic_tax",
             JSONObject()
-                .put("automatic_tax_enabled", true)
-                .put("automatic_tax_address_source", addressSource),
+                .put("enabled", true)
+                .put("status", "ready")
+                .put("address_source", addressSource),
         )
-        json.getJSONObject("tax_meta")
-            .put("computation_type", "automatic")
-            .put("status", "requires_location_inputs")
+        json.getJSONObject("automatic_tax").put("status", "requires_address")
         if (source == "shipping" && !json.has("shipping_address_collection")) {
             allowedShippingCountries(listOf("US", "CA"))(json)
         }
@@ -1982,6 +2024,7 @@ internal class CheckoutControllerTest {
     }
 
     private fun savedCustomerWithBillingAddress(): (JSONObject) -> Unit = { json ->
+        json.getJSONObject("saved_payment_method_options").put("payment_method_remove", "enabled")
         json.put("customer", savedCustomerJson())
     }
 
@@ -1995,6 +2038,7 @@ internal class CheckoutControllerTest {
     }
 
     private fun savedCustomerWithoutBillingAddress(): (JSONObject) -> Unit = { json ->
+        json.getJSONObject("saved_payment_method_options").put("payment_method_remove", "enabled")
         json.put(
             "customer",
             savedCustomerJson(
@@ -2018,6 +2062,7 @@ internal class CheckoutControllerTest {
                         .put("country", "US")
                 )
             )
+        json.getJSONObject("saved_payment_method_options").put("payment_method_remove", "enabled")
         json.put(
             "customer",
             savedCustomerJson().put(
@@ -2028,6 +2073,7 @@ internal class CheckoutControllerTest {
     }
 
     private fun savedCustomerWithSepaDebit(): (JSONObject) -> Unit = { json ->
+        json.getJSONObject("saved_payment_method_options").put("payment_method_remove", "enabled")
         json.put(
             "customer",
             savedCustomerJson(
@@ -2042,7 +2088,6 @@ internal class CheckoutControllerTest {
         return JSONObject()
             .put("id", "cus_saved_customer")
             .put("payment_methods", JSONArray().put(paymentMethod))
-            .put("can_detach_payment_method", true)
     }
 
     private fun savedCardPaymentMethodJson(): JSONObject {
@@ -2126,11 +2171,11 @@ internal class CheckoutControllerTest {
         )
     }
 
-    private fun checkoutItemJson(json: JSONObject): JSONObject = json.getJSONArray("checkout_items")
+    private fun checkoutItemJson(json: JSONObject): JSONObject = json.getJSONArray("items")
         .getJSONObject(0).getJSONObject("one_time_price").getJSONArray("items").getJSONObject(0)
 
     private fun withTotal(amount: Int): (JSONObject) -> Unit = { json ->
-        checkoutItemJson(json).put("total", amount).put("subtotal", amount)
+        checkoutItemJson(json).getJSONObject("amount_details").put("total", amount).put("subtotal", amount)
     }
 
     private fun createControllerSetup(

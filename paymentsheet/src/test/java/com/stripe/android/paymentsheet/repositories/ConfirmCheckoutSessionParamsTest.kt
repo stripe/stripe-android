@@ -12,6 +12,37 @@ import kotlin.test.Test
 class ConfirmCheckoutSessionParamsTest {
 
     @Test
+    fun `serializes passive captcha token at the top level`() {
+        val params = createParams().copy(passiveCaptchaToken = "captcha_token").toParamMap()
+
+        assertThat(params["passive_captcha_token"]).isEqualTo("captcha_token")
+    }
+
+    @Test
+    fun `preserves empty passive captcha token`() {
+        val params = createParams().copy(passiveCaptchaToken = "").toParamMap()
+
+        assertThat(params["passive_captcha_token"]).isEqualTo("")
+    }
+
+    @Test
+    fun `omits absent passive captcha token`() {
+        assertThat(createParams().toParamMap()).doesNotContainKey("passive_captcha_token")
+    }
+
+    @Test
+    fun `preserves collected email alongside save choice`() {
+        val params = createParams(savePaymentMethod = false).copy(
+            collectedInformation = ConfirmCheckoutSessionParams.CollectedInformation("buyer@example.com"),
+        ).toParamMap()
+
+        assertThat(params["collected_information"]).isEqualTo(
+            mapOf("email" to "buyer@example.com", "save_payment_method" to false)
+        )
+        assertThat(params).doesNotContainKey("save_payment_method")
+    }
+
+    @Test
     fun `serializes collected information email`() {
         val params = createParams(
             collectedInformation = ConfirmCheckoutSessionParams.CollectedInformation(email = "  email@example.com  "),
@@ -77,21 +108,21 @@ class ConfirmCheckoutSessionParamsTest {
     fun `toParamMap with savePaymentMethod true includes save_payment_method true`() {
         val params = createParams(savePaymentMethod = true).toParamMap()
 
-        assertThat(params["save_payment_method"]).isEqualTo(true)
+        assertThat((params["collected_information"] as Map<*, *>)["save_payment_method"]).isEqualTo(true)
     }
 
     @Test
     fun `toParamMap with savePaymentMethod false includes save_payment_method false`() {
         val params = createParams(savePaymentMethod = false).toParamMap()
 
-        assertThat(params["save_payment_method"]).isEqualTo(false)
+        assertThat((params["collected_information"] as Map<*, *>)["save_payment_method"]).isEqualTo(false)
     }
 
     @Test
     fun `toParamMap with savePaymentMethod null omits save_payment_method`() {
         val params = createParams(savePaymentMethod = null).toParamMap()
 
-        assertThat(params).doesNotContainKey("save_payment_method")
+        assertThat(params).doesNotContainKey("collected_information")
     }
 
     @Test
@@ -130,6 +161,7 @@ class ConfirmCheckoutSessionParamsTest {
             collectedInformation = collectedInformation,
             paymentMethodId = "pm_test_123",
             paymentMethodData = null,
+            passiveCaptchaToken = null,
             expectedPaymentMethodType = PaymentMethod.Type.Card.code,
             clientAttributionMetadata = CLIENT_ATTRIBUTION_METADATA,
             returnUrl = "stripesdk://return_url",

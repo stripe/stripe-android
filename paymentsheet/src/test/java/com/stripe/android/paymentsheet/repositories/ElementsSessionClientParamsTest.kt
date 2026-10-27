@@ -14,10 +14,10 @@ class ElementsSessionClientParamsTest {
 
         val map = params.toCheckoutSessionMap()
 
-        assertThat(map).containsEntry("is_aggregation_expected", "true")
+        assertThat(map).doesNotContainKey("timezone")
         assertThat(map).containsEntry("locale", params.locale)
         assertThat(map).containsEntry("mobile_session_id", "session_123")
         assertThat(map).containsEntry("mobile_app_id", "com.example.app")
-        assertThat(map).hasSize(4)
+        assertThat(map).hasSize(3)
     }
 }

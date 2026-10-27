@@ -298,6 +298,7 @@ internal class EmbeddedSheetActivityCheckoutTest {
             ),
         ).copy(
             customerMetadata = CustomerMetadata.CheckoutSession(
+                clientSecret = "cs_test_abc123_secret_test",
                 sessionId = checkoutSessionResponse.id,
                 customerId = requireNotNull(selectedCard.customerId),
                 removePaymentMethod = PaymentMethodRemovePermission.Full,
@@ -346,30 +347,26 @@ internal class EmbeddedSheetActivityCheckoutTest {
         testBodyFromFile("checkout-session-init.json") { json ->
             json.put("customer_email", "checkout@example.com")
             json.put("account_settings", JSONObject().put("country", "US"))
+            json.getJSONObject("saved_payment_method_options").put("payment_method_remove", "enabled")
             json.put(
                 "customer",
                 JSONObject()
                     .put("id", requireNotNull(paymentMethods.first().customerId))
-                    .put("can_detach_payment_method", true)
                     .put("payment_methods", JSONArray(paymentMethods.map { it.toJsonWithBillingDetails() })),
             )
             json.put(
-                "tax_context",
+                "automatic_tax",
                 JSONObject()
-                    .put("automatic_tax_enabled", true)
-                    .put("automatic_tax_address_source", "session.billing"),
+                    .put("enabled", true)
+                    .put("status", "ready")
+                    .put("address_source", "billing"),
             )
-            json.put(
-                "tax_meta",
-                JSONObject()
-                    .put("computation_type", "automatic")
-                    .put("status", "complete"),
-            )
-            val item = json.getJSONArray("checkout_items").getJSONObject(0)
+            json.getJSONObject("automatic_tax").put("status", "ready")
+            val item = json.getJSONArray("items").getJSONObject(0)
                 .getJSONObject("one_time_price").getJSONArray("items").getJSONObject(0)
-            item.put("total", BASE_AMOUNT + taxAmount)
-            item.put("tax_exclusive", taxAmount)
-            item.put(
+            item.getJSONObject("amount_details").put("total", BASE_AMOUNT + taxAmount)
+            item.getJSONObject("amount_details").put("tax_exclusive", taxAmount)
+            item.getJSONObject("amount_details").put(
                 "tax_amounts",
                 JSONArray().apply {
                     if (taxAmount > 0) {
@@ -388,8 +385,7 @@ internal class EmbeddedSheetActivityCheckoutTest {
                     }
                 },
             )
-            json.getJSONObject("server_built_elements_session_params")
-                .getJSONObject("deferred_intent").put("amount", BASE_AMOUNT + taxAmount)
+            json.getJSONObject("total_summary").put("due", BASE_AMOUNT + taxAmount)
         }
     }
 

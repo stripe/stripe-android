@@ -8,6 +8,7 @@ import com.stripe.android.common.ui.PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
+import com.stripe.android.networktesting.AdvancedFraudSignalsTestRule
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.analyticsPayloadField
 import com.stripe.android.networktesting.RequestMatchers.hasQueryParam
@@ -48,6 +49,7 @@ internal class AddressElementActivityAnalyticsTest {
     val ruleChain: RuleChain = RuleChain
         .outerRule(composeTestRule)
         .around(createComposeCleanupRule())
+        .around(AdvancedFraudSignalsTestRule())
         .around(networkRule)
 
     @Test

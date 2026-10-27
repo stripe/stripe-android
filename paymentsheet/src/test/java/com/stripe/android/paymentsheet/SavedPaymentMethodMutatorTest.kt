@@ -252,6 +252,7 @@ class SavedPaymentMethodMutatorTest {
     @Test
     fun `removePaymentMethod with CheckoutSession metadata passes CheckoutSession to repository`() {
         val checkoutSessionMetadata = CustomerMetadata.CheckoutSession(
+            clientSecret = "cs_test_abc123_secret_test",
             sessionId = "cs_test_123",
             customerId = "cus_123",
             removePaymentMethod = PaymentMethodRemovePermission.Full,

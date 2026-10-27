@@ -2,29 +2,33 @@ package com.stripe.android.paymentsheet.repositories
 
 import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.model.parsers.ModelJsonParser
-import com.stripe.android.core.model.parsers.ModelJsonParser.Companion.jsonArrayToList
+import com.stripe.android.core.model.parsers.StripeErrorJsonParser
 import com.stripe.android.model.DeferredIntentParams
 import com.stripe.android.model.ElementsSession
-import com.stripe.android.model.ElementsSessionParams
+import com.stripe.android.model.LinkMode
+import com.stripe.android.model.PassiveCaptchaParams
+import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.model.parsers.DeferredPaymentIntentJsonParser
+import com.stripe.android.model.parsers.DeferredSetupIntentJsonParser
 import com.stripe.android.model.parsers.ElementsSessionJsonParser
-import com.stripe.android.model.parsers.PaymentIntentJsonParser
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
-import com.stripe.android.model.parsers.SetupIntentJsonParser
 import org.json.JSONArray
 import org.json.JSONObject
 
 /**
- * Strict parser for the modeless, unified Payment Pages response.
+ * Parses CheckoutClient responses without depending on the legacy Elements Session wire format.
  */
-internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSessionResponse> {
+internal class CheckoutSessionResponseJsonParser(
+    private val clientSecret: String,
+) : ModelJsonParser<CheckoutSessionResponse> {
     @Suppress("CyclomaticComplexMethod", "LongMethod")
     override fun parse(json: JSONObject): CheckoutSessionResponse? = runCatching {
         require(json.requiredString("ui_mode") == "mobile_elements")
-        require(json.requiredString("mode") == "modeless")
-        val id = json.requiredString("session_id")
-        val configId = json.optionalString("config_id")
-        val currency = json.requiredString("currency")
+        val id = json.requiredString("id")
+        val configId = json.optionalString("checkout_session_config_id")
+        val currency = json.requiredString("presentment_currency")
         val paymentStatus = when (json.requiredString("payment_status")) {
             "paid" -> CheckoutSessionResponse.PaymentStatus.PAID
             "unpaid" -> CheckoutSessionResponse.PaymentStatus.UNPAID
@@ -38,7 +42,7 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
             else -> error("Unsupported status")
         }
 
-        val checkoutItems = json.requiredArray("checkout_items").objects().map(::parseCheckoutItem)
+        val checkoutItems = json.requiredArray("items").objects().map(::parseCheckoutItem)
         require(checkoutItems.isNotEmpty())
         require(
             checkoutItems.all { group ->
@@ -47,51 +51,73 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
         )
 
         val livemode = json.requiredBoolean("livemode")
-        val elementsJson = json.requiredObject("elements_session")
+        val merchant = json.requiredObject("merchant_info")
         val elementsSession = parseElementsSession(
-            serverBuiltElementsSessionParams = json.requiredObject("server_built_elements_session_params"),
-            elementsSessionJson = elementsJson,
+            json = json,
             livemode = livemode,
             noPaymentRequired = paymentStatus == CheckoutSessionResponse.PaymentStatus.NO_PAYMENT_REQUIRED,
-        ) ?: error("Invalid Elements Session")
-        val merchantCountry = elementsSession.merchantCountry ?: error("Missing merchant country")
-        val taxContext = json.optionalObject("tax_context")
-
-        val paymentIntent = json.optionalObject("payment_intent")?.let { PaymentIntentJsonParser().parse(it) }
-        val setupIntent = json.optionalObject("setup_intent")?.let { SetupIntentJsonParser().parse(it) }
-        val confirmedIntent = paymentIntent ?: setupIntent
+            amount = checkoutItems.sumOf { group -> group.oneTimePrice.items.sumOf { it.total } },
+        )
+        val automaticTax = json.optionalObject("automatic_tax")
+        val savedOptions = json.requiredObject("saved_payment_method_options")
+        val paymentResponse = json.optionalObject("payment_response")?.let { response ->
+            CheckoutSessionResponse.PaymentResponse(
+                status = response.requiredString("status"),
+                paymentIntent = response.optionalObject("payment_intent")?.let(::parseIntentReference),
+                setupIntent = response.optionalObject("setup_intent")?.let(::parseIntentReference),
+                error = response.optionalObject("last_payment_error")?.let {
+                    StripeErrorJsonParser().parse(JSONObject().put("error", it))
+                },
+            )
+        }
 
         CheckoutSessionResponse(
             id = id,
+            clientSecret = clientSecret,
             configId = configId,
             currency = currency,
+            integrationCurrency = json.requiredString("integration_currency"),
             paymentStatus = paymentStatus,
             status = status,
             livemode = livemode,
             customerEmail = StripeJsonUtils.optString(json, "customer_email"),
-            elementsSession = if (confirmedIntent == null) {
-                elementsSession
-            } else {
-                elementsSession.copy(stripeIntent = confirmedIntent)
+            elementsSession = elementsSession,
+            paymentIntent = null,
+            setupIntent = null,
+            paymentResponse = paymentResponse,
+            customer = json.optionalObject("customer")?.let {
+                parseCustomer(it, savedOptions.optString("payment_method_remove") == "enabled")
             },
-            paymentIntent = paymentIntent,
-            setupIntent = setupIntent,
-            customer = json.optionalObject("customer")?.let(::parseCustomer),
-            savedPaymentMethodsOfferSave = json.optionalObject(
-                "customer_managed_saved_payment_methods_offer_save"
-            )?.let(::parseSavedPaymentMethodsOfferSave),
+            savedPaymentMethodsOfferSave = CheckoutSessionResponse.SavedPaymentMethodsOfferSave(
+                enabled = savedOptions.optString("payment_method_save") == "enabled",
+            ),
             checkoutItems = checkoutItems,
-            recurringDetails = json.optionalObject("recurring_details")?.let(::parseRecurringDetails),
-            adaptivePricingInfo = json.optionalObject("adaptive_pricing_info")?.let(::parseAdaptivePricingInfo),
-            taxMeta = json.optionalObject("tax_meta")?.let(::parseTaxMeta),
-            automaticTaxEnabled = taxContext?.optionalBoolean("automatic_tax_enabled") ?: false,
-            taxAddressSource = parseTaxAddressSource(taxContext),
+            totalSummary = parseTotalSummary(json.requiredObject("total_summary")),
+            adaptivePricingInfo = json.optionalObject("adaptive_pricing_info")?.let {
+                parseAdaptivePricingInfo(it, currency)
+            },
+            taxMeta = automaticTax?.let {
+                CheckoutSessionResponse.TaxMeta(
+                    computationType = if (it.requiredBoolean("enabled")) {
+                        CheckoutSessionResponse.TaxComputationType.AUTOMATIC
+                    } else {
+                        CheckoutSessionResponse.TaxComputationType.OFF
+                    },
+                    status = when (it.optionalString("status")) {
+                        "ready" -> CheckoutSessionResponse.TaxStatus.COMPLETE
+                        "requires_address" -> CheckoutSessionResponse.TaxStatus.REQUIRES_LOCATION_INPUTS
+                        else -> null
+                    },
+                )
+            },
+            automaticTaxEnabled = automaticTax?.requiredBoolean("enabled") ?: false,
+            taxAddressSource = parseTaxAddressSource(automaticTax),
             allowedShippingCountries = json.optionalObject("shipping_address_collection")
                 ?.requiredArray("allowed_countries")?.strings(),
             requiresShippingAddress = json.optionalObject("shipping_address_collection") != null,
             requiresBillingAddress = json.optString("billing_address_collection") == "required",
-            merchantCountry = merchantCountry,
-            businessName = StripeJsonUtils.optString(elementsJson, "business_name"),
+            merchantCountry = merchant.requiredString("country"),
+            businessName = merchant.optionalString("display_name"),
         )
     }.getOrNull()
 
@@ -120,7 +146,9 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
             },
         )
         val unitAmount = json.optionalLong("unit_amount")?.also { require(it >= 0) }
-        val unitAmountDecimal = json.optionalString("unit_amount_decimal")?.toDoubleOrNull()?.also {
+        val unitAmountDecimal = json.optionalString("unit_amount_decimal")?.let {
+            it.toDoubleOrNull() ?: error("Invalid unit_amount_decimal")
+        }?.also {
             require(it.isFinite() && it >= 0)
         }
         require(unitAmount != null || price.unitAmount != null || unitAmountDecimal != null)
@@ -131,49 +159,29 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
             if (enabled) require(maximum != null && minimum != null)
             CheckoutSessionResponse.AdjustableQuantity(enabled, maximum, minimum)
         }
+        val amounts = json.requiredObject("amount_details")
         return CheckoutSessionResponse.OneTimePriceItem(
             innerItemKey = json.requiredString("inner_item_key"),
             price = price,
             quantity = json.requiredInt("quantity").also { require(it >= 0) },
-            subtotal = json.requiredLong("subtotal").also { require(it >= 0) },
-            total = json.requiredLong("total").also { require(it >= 0) },
+            subtotal = amounts.requiredLong("subtotal").also { require(it >= 0) },
+            total = amounts.requiredLong("total").also { require(it >= 0) },
             unitAmount = unitAmount,
             unitAmountDecimal = unitAmountDecimal,
             unitLabel = json.optionalString("unit_label"),
-            taxAmounts = json.requiredArray("tax_amounts").objects().map(::parseTaxAmount),
-            taxInclusive = json.requiredLong("tax_inclusive").also { require(it >= 0) },
-            taxExclusive = json.requiredLong("tax_exclusive").also { require(it >= 0) },
+            taxAmounts = amounts.requiredArray("tax_amounts").objects().map(::parseTaxAmount),
+            taxInclusive = amounts.requiredLong("tax_inclusive").also { require(it >= 0) },
+            taxExclusive = amounts.requiredLong("tax_exclusive").also { require(it >= 0) },
             adjustableQuantity = adjustableQuantity,
         )
     }
 
-    private fun parseRecurringDetails(json: JSONObject): CheckoutSessionResponse.RecurringDetails {
-        val totalSummary = json.requiredObject("total_summary")
-        return CheckoutSessionResponse.RecurringDetails(
-            totalDiscountAmounts = totalSummary.requiredArray("total_discount_amounts")
-                .objects().map(::parseDiscountAmount),
-            totalTaxAmounts = totalSummary.requiredArray("total_tax_amounts").objects().map(::parseTaxAmount),
-        )
-    }
-
-    private fun parseDiscountAmount(json: JSONObject): CheckoutSessionResponse.DiscountAmount {
-        val coupon = json.requiredObject("coupon")
-        return CheckoutSessionResponse.DiscountAmount(
-            amount = json.requiredLong("amount").also { require(it >= 0) },
-            displayName = json.optionalString("display_name"),
-            coupon = CheckoutSessionResponse.Coupon(
-                code = coupon.requiredString("code"),
-                name = coupon.optionalString("name"),
-                percentOff = coupon.optionalFiniteDouble("percent_off"),
-            ),
-            promotionCode = json.optionalObject("promotion_code")?.let {
-                CheckoutSessionResponse.PromotionCode(it.optionalString("code"))
-            },
-        )
-    }
+    private fun parseTotalSummary(totalSummary: JSONObject) = CheckoutSessionResponse.TotalSummary(
+        totalTaxAmounts = totalSummary.requiredArray("total_tax_amounts").objects().map(::parseTaxAmount),
+    )
 
     private fun parseTaxAmount(json: JSONObject): CheckoutSessionResponse.TaxAmount {
-        val taxRate = json.requiredObject("tax_rate")
+        val taxRate = json.optionalObject("tax_rate") ?: json
         val rateType = when (val value = taxRate.optionalString("rate_type")) {
             null -> null
             "flat_amount" -> CheckoutSessionResponse.TaxRateType.FLAT_AMOUNT
@@ -191,41 +199,29 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
         )
     }
 
-    private fun parseTaxMeta(json: JSONObject): CheckoutSessionResponse.TaxMeta {
-        val computationType = when (json.requiredString("computation_type")) {
-            "Off" -> CheckoutSessionResponse.TaxComputationType.OFF
-            "automatic" -> CheckoutSessionResponse.TaxComputationType.AUTOMATIC
-            "extension_defined" -> CheckoutSessionResponse.TaxComputationType.EXTENSION_DEFINED
-            "manual" -> CheckoutSessionResponse.TaxComputationType.MANUAL
-            "user_defined" -> CheckoutSessionResponse.TaxComputationType.USER_DEFINED
-            else -> error("Unsupported tax computation type")
-        }
-        val status = when (val value = json.optionalString("status")) {
-            null -> null
-            "complete" -> CheckoutSessionResponse.TaxStatus.COMPLETE
-            "failed" -> CheckoutSessionResponse.TaxStatus.FAILED
-            "requires_location_inputs" -> CheckoutSessionResponse.TaxStatus.REQUIRES_LOCATION_INPUTS
-            else -> error("Unsupported tax status: $value")
-        }
-        return CheckoutSessionResponse.TaxMeta(computationType, status)
+    private fun parseAdaptivePricingInfo(
+        json: JSONObject,
+        currency: String,
+    ): CheckoutSessionResponse.AdaptivePricingInfo {
+        val integration = json.requiredObject("integration_currency_option")
+        return CheckoutSessionResponse.AdaptivePricingInfo(
+            activePresentmentCurrency = currency,
+            integrationAmount = integration.requiredLong("amount").also { require(it >= 0) },
+            integrationCurrency = integration.requiredString("currency"),
+            integrationDisclosureCaption = integration.optionalObject("disclosure")?.optionalString("caption"),
+            localCurrencyOptions = json.requiredArray("local_currency_options").objects().map { option ->
+                CheckoutSessionResponse.LocalCurrencyOption(
+                    amount = option.requiredLong("amount").also { require(it >= 0) },
+                    currency = option.requiredString("currency"),
+                    disclosureCaption = option.optionalObject("disclosure")?.optionalString("caption"),
+                    disclosureDetails = option.optionalObject("disclosure")?.optionalString("details"),
+                )
+            },
+        )
     }
 
-    private fun parseAdaptivePricingInfo(json: JSONObject) = CheckoutSessionResponse.AdaptivePricingInfo(
-        activePresentmentCurrency = json.requiredString("active_presentment_currency"),
-        integrationAmount = json.requiredLong("integration_amount").also { require(it >= 0) },
-        integrationCurrency = json.requiredString("integration_currency"),
-        localCurrencyOptions = json.requiredArray("local_currency_options").objects().map { option ->
-            CheckoutSessionResponse.LocalCurrencyOption(
-                amount = option.requiredLong("amount").also { require(it >= 0) },
-                conversionMarkupBps = option.optionalInt("conversion_markup_bps"),
-                currency = option.requiredString("currency"),
-                presentmentExchangeRate = option.requiredString("presentment_exchange_rate"),
-            )
-        },
-    )
-
     private fun parseTaxAddressSource(json: JSONObject?): CheckoutSessionResponse.TaxAddressSource? {
-        val raw = json?.optionalString("automatic_tax_address_source")?.removePrefix("session.")
+        val raw = json?.optionalString("address_source")
         return when (raw) {
             "shipping" -> CheckoutSessionResponse.TaxAddressSource.SHIPPING
             "billing" -> CheckoutSessionResponse.TaxAddressSource.BILLING
@@ -233,64 +229,119 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
         }
     }
 
-    private fun parseCustomer(json: JSONObject): CheckoutSessionResponse.Customer {
+    private fun parseCustomer(json: JSONObject, canRemove: Boolean): CheckoutSessionResponse.Customer {
         return CheckoutSessionResponse.Customer(
             id = json.requiredString("id"),
             email = StripeJsonUtils.optString(json, "email"),
             paymentMethods = json.requiredArray("payment_methods").objects().map { paymentMethod ->
                 PaymentMethodJsonParser().parse(paymentMethod) ?: error("Invalid payment method")
             },
-            canDetachPaymentMethod = json.optionalBoolean("can_detach_payment_method") ?: false,
+            canDetachPaymentMethod = canRemove,
         )
     }
 
-    private fun parseSavedPaymentMethodsOfferSave(json: JSONObject) =
-        CheckoutSessionResponse.SavedPaymentMethodsOfferSave(
-            enabled = json.requiredBoolean("enabled"),
-            status = when (json.requiredString("status")) {
-                "accepted" -> CheckoutSessionResponse.SavedPaymentMethodsOfferSave.Status.ACCEPTED
-                "not_accepted" -> CheckoutSessionResponse.SavedPaymentMethodsOfferSave.Status.NOT_ACCEPTED
-                else -> error("Unsupported saved-payment-method status")
-            },
-        )
+    private fun parseIntentReference(json: JSONObject) = CheckoutSessionResponse.IntentReference(
+        id = json.requiredString("id"),
+        clientSecret = json.requiredString("client_secret"),
+    )
 
+    @Suppress("LongMethod")
     private fun parseElementsSession(
-        serverBuiltElementsSessionParams: JSONObject,
-        elementsSessionJson: JSONObject,
+        json: JSONObject,
         livemode: Boolean,
         noPaymentRequired: Boolean,
-    ): ElementsSession? {
-        if (serverBuiltElementsSessionParams.optString("type") != "deferred_intent") return null
-        val deferred = serverBuiltElementsSessionParams.optJSONObject("deferred_intent") ?: return null
-        val params = ElementsSessionParams.DeferredIntentType(
-            locale = serverBuiltElementsSessionParams.optString("locale"),
-            deferredIntentParams = DeferredIntentParams(
-                mode = if (noPaymentRequired) {
-                    DeferredIntentParams.Mode.Setup(
-                        currency = deferred.optString("currency").takeIf { it.isNotEmpty() },
-                        setupFutureUsage = deferred.optString("setup_future_usage").let { code ->
-                            StripeIntent.Usage.entries.firstOrNull { it.code == code }
-                        } ?: StripeIntent.Usage.OffSession,
-                    )
-                } else {
-                    DeferredIntentParams.parseModeFromJson(deferred) ?: return null
-                },
-                paymentMethodTypes = jsonArrayToList(deferred.optJSONArray("payment_method_types")),
-                paymentMethodConfigurationId = deferred.optString("payment_method_configuration"),
-                onBehalfOf = deferred.optString("on_behalf_of"),
-            ),
-            customPaymentMethods = jsonArrayToList(
-                serverBuiltElementsSessionParams.optJSONArray("custom_payment_methods")
-            ),
-            externalPaymentMethods = jsonArrayToList(
-                serverBuiltElementsSessionParams.optJSONArray("external_payment_methods")
-            ),
-            savedPaymentMethodSelectionId = serverBuiltElementsSessionParams.optString("client_default_payment_method"),
-            mobileSessionId = serverBuiltElementsSessionParams.optString("mobile_session_id"),
-            appId = serverBuiltElementsSessionParams.optString("mobile_app_id"),
-            countryOverride = serverBuiltElementsSessionParams.optString("country_override"),
+        amount: Long,
+    ): ElementsSession {
+        val sessionId = json.requiredString("elements_session_id")
+        val merchant = json.requiredObject("merchant_info")
+        val orderedTypes = json.requiredArray("ordered_payment_method_types_and_wallets").strings()
+        val paymentTypes = orderedTypes.filter { PaymentMethod.Type.fromCode(it) != null }
+        val linkSettings = json.optionalObject("link_settings")
+        val fundingSources = linkSettings?.optJSONArray("link_funding_sources")
+        val intentJson = JSONObject()
+            .put("payment_method_types", JSONArray(paymentTypes))
+            .put("unactivated_payment_method_types", json.requiredArray("unactivated_payment_method_types"))
+            .put("link_funding_sources", fundingSources)
+            .put("country_code", json.optionalString("country_code"))
+        val currency = json.requiredString("presentment_currency")
+        val options = json.optionalObject("payment_method_options") ?: JSONObject()
+        json.optionalObject("setup_future_usage_for_payment_method_type")?.let { usage ->
+            usage.keys().forEach { type ->
+                val methodOptions = options.optJSONObject(type) ?: JSONObject()
+                methodOptions.put("setup_future_usage", usage.getString(type))
+                options.put(type, methodOptions)
+            }
+        }
+        val stripeIntent = if (noPaymentRequired) {
+            DeferredSetupIntentJsonParser(
+                elementsSessionId = sessionId,
+                setupMode = DeferredIntentParams.Mode.Setup(currency, StripeIntent.Usage.OffSession),
+                isLiveMode = livemode,
+                timeProvider = System::currentTimeMillis,
+            ).parse(intentJson).copy(paymentMethodOptionsJsonString = options.toString())
+        } else {
+            DeferredPaymentIntentJsonParser(
+                elementsSessionId = sessionId,
+                paymentMode = DeferredIntentParams.Mode.Payment(
+                    amount = amount,
+                    currency = currency,
+                    setupFutureUsage = null,
+                    captureMethod = PaymentIntent.CaptureMethod.Automatic,
+                    paymentMethodOptionsJsonString = options.toString(),
+                ),
+                isLiveMode = livemode,
+                timeProvider = System::currentTimeMillis,
+            ).parse(intentJson)
+        }
+        val captcha = json.optionalObject("passive_captcha")
+        val flags = json.optionalObject("flags")?.let { ElementsSessionJsonParser.parseSessionFlags(it) } ?: emptyMap()
+        return ElementsSession(
+            linkSettings = parseCheckoutLinkSettings(linkSettings, fundingSources),
+            stripeIntent = stripeIntent,
+            customer = null,
+            merchantCountry = merchant.requiredString("country"),
+            merchantLogoUrl = merchant.optionalString("logo_url"),
+            cardBrandChoice = ElementsSessionJsonParser.parseCardBrandChoice(json),
+            isGooglePayEnabled = json.optString("google_pay_preference") != "disabled",
+            externalPaymentMethodData = null,
+            customPaymentMethods = emptyList(),
+            flags = flags,
+            experimentsData = json.optionalObject("experiments_data")?.let {
+                ElementsSession.ExperimentsData(
+                    arbId = it.optString("arb_id"),
+                    experimentAssignments = it.optJSONObject("experiment_assignments")?.let { assignments ->
+                        ElementsSessionJsonParser.parseExperimentAssignments(assignments)
+                    } ?: emptyMap(),
+                )
+            },
+            orderedPaymentMethodTypesAndWallets = orderedTypes,
+            elementsSessionId = sessionId,
+            passiveCaptcha = captcha?.let {
+                PassiveCaptchaParams(
+                    siteKey = it.requiredString("site_key"),
+                    rqData = it.optionalString("rqdata"),
+                    tokenTimeoutSeconds = it.optionalInt("token_refresh_after_seconds"),
+                )
+            },
+            elementsSessionConfigId = json.optionalString("elements_session_config_id"),
+            accountId = null,
+            merchantId = null,
         )
-        return ElementsSessionJsonParser(params, isLiveMode = livemode).parse(elementsSessionJson)
+    }
+
+    private fun parseCheckoutLinkSettings(
+        json: JSONObject?,
+        fundingSources: JSONArray?,
+    ): ElementsSession.LinkSettings {
+        val settings = ElementsSessionJsonParser.parseLinkSettings(json, fundingSources)
+        return if (json?.has("link_passthrough_mode_enabled") == true) {
+            settings
+        } else {
+            settings.copy(
+                linkPassthroughModeEnabled = settings.linkMode == LinkMode.Passthrough ||
+                    settings.linkMode == LinkMode.LinkCardBrand,
+            )
+        }
     }
 
     private fun JSONObject.requiredString(name: String): String = getString(name).also { require(it.isNotEmpty()) }
@@ -301,8 +352,6 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
         if (!has(name) || isNull(name)) null else getJSONObject(name)
     private fun JSONObject.requiredArray(name: String): JSONArray = getJSONArray(name)
     private fun JSONObject.requiredBoolean(name: String): Boolean = getBoolean(name)
-    private fun JSONObject.optionalBoolean(name: String): Boolean? =
-        if (!has(name) || isNull(name)) null else getBoolean(name)
     private fun JSONObject.requiredLong(name: String): Long = getLong(name)
     private fun JSONObject.optionalLong(name: String): Long? =
         if (!has(name) || isNull(name)) null else getLong(name)
@@ -310,8 +359,6 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
     private fun JSONObject.optionalInt(name: String): Int? =
         if (!has(name) || isNull(name)) null else getInt(name)
     private fun JSONObject.requiredFiniteDouble(name: String): Double = getDouble(name).also { require(it.isFinite()) }
-    private fun JSONObject.optionalFiniteDouble(name: String): Double? =
-        if (!has(name) || isNull(name)) null else requiredFiniteDouble(name)
     private fun JSONArray.objects(): List<JSONObject> = (0 until length()).map(::getJSONObject)
     private fun JSONArray.strings(): List<String> = (0 until length()).map(::getString)
 }

@@ -20,6 +20,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
+import com.stripe.android.paymentsheet.repositories.CheckoutStripeRepositoryFactory
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.android.utils.FakeFraudDetectionDataRepository
 import kotlinx.coroutines.test.runTest
@@ -101,17 +102,21 @@ internal class SheetTaxRegionUpdaterTest {
     }
 
     @Test
-    fun `prepareUpdate returns null when selection is null`() = runScenario {
+    fun `prepared update resets tax region when selection is null`() = runScenario {
         val update = updater.prepareUpdate(
             checkoutSessionResponse = response,
             selection = null,
         )
 
-        assertThat(update).isNull()
+        networkRule.checkoutUpdate(bodyPart("tax_region", "")) { response ->
+            response.testBodyFromFile("checkout-session-init.json")
+        }
+
+        assertThat(requireNotNull(update).invoke().isSuccess).isTrue()
     }
 
     @Test
-    fun `prepareUpdate returns null when selection has no billing address`() = runScenario {
+    fun `prepared update resets tax region when selection has no billing address`() = runScenario {
         val selection = PaymentSelection.Saved(
             PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(
                 billingDetails = PaymentMethod.BillingDetails(address = null),
@@ -123,17 +128,25 @@ internal class SheetTaxRegionUpdaterTest {
             selection = selection,
         )
 
-        assertThat(update).isNull()
+        networkRule.checkoutUpdate(bodyPart("tax_region", "")) { response ->
+            response.testBodyFromFile("checkout-session-init.json")
+        }
+
+        assertThat(requireNotNull(update).invoke().isSuccess).isTrue()
     }
 
     @Test
-    fun `prepareUpdate returns null when billing address has no country`() = runScenario {
+    fun `prepared update resets tax region when billing address has no country`() = runScenario {
         val update = updater.prepareUpdate(
             checkoutSessionResponse = response,
             selection = selectionWithAddress(ADDRESS.copy(country = null)),
         )
 
-        assertThat(update).isNull()
+        networkRule.checkoutUpdate(bodyPart("tax_region", "")) { response ->
+            response.testBodyFromFile("checkout-session-init.json")
+        }
+
+        assertThat(requireNotNull(update).invoke().isSuccess).isTrue()
     }
 
     @Test
@@ -179,6 +192,8 @@ internal class SheetTaxRegionUpdaterTest {
 
     private fun checkoutSessionTaxRegionUpdater(): CheckoutSessionTaxRegionUpdater {
         val checkoutSessionRepository = CheckoutSessionRepository(
+            stripeRepository = CheckoutStripeRepositoryFactory.create(),
+            elementsSessionClientParams = CheckoutStripeRepositoryFactory.clientParams(),
             fraudDetectionDataRepository = FakeFraudDetectionDataRepository.create(),
             stripeNetworkClient = DefaultStripeNetworkClient(),
             analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),

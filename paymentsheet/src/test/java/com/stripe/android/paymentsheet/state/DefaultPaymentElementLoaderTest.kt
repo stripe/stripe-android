@@ -85,6 +85,7 @@ import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.toSavedSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseJsonParser
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
@@ -109,6 +110,8 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.json.JSONArray
+import org.json.JSONObject
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
@@ -1309,6 +1312,32 @@ internal class DefaultPaymentElementLoaderTest {
 
         assertThat(result.paymentMethodMetadata.linkState?.configuration?.shippingDetails).isNotNull()
 
+        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
+        assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
+    }
+
+    @Test
+    fun `checkout card brand Link loads passthrough configuration without Link payment method`() = runScenario {
+        val json = JSONObject(
+            requireNotNull(javaClass.classLoader?.getResource("checkout-session-init.json")).readText()
+        ).put("ordered_payment_method_types_and_wallets", JSONArray(listOf("card")))
+        json.getJSONObject("link_settings").put("link_mode", "LINK_CARD_BRAND")
+            .remove("link_passthrough_mode_enabled")
+        val response = requireNotNull(CheckoutSessionResponseJsonParser("cs_secret").parse(json))
+        assertThat(response.elementsSession?.stripeIntent?.paymentMethodTypes).doesNotContain("link")
+
+        val result = createPaymentElementLoader().load(
+            initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+                collectedEmail = null,
+                instancesKey = "DefaultPaymentElementLoaderTest",
+                checkoutSessionResponse = response,
+            ),
+            paymentSheetConfiguration = mockConfiguration(),
+            metadata = PaymentElementLoader.Metadata(initializedViaCompose = false),
+        ).getOrThrow()
+
+        assertThat(result.paymentMethodMetadata.linkState?.configuration?.passthroughModeEnabled).isTrue()
+        assertThat(result.paymentMethodMetadata.linkState?.configuration?.linkMode).isEqualTo(LinkMode.LinkCardBrand)
         assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
         assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
     }

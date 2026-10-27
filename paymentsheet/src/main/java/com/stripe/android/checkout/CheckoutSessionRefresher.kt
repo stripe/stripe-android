@@ -3,7 +3,6 @@ package com.stripe.android.checkout
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
-import com.stripe.android.paymentsheet.repositories.ElementsSessionClientParams
 import javax.inject.Inject
 
 /**
@@ -27,14 +26,13 @@ internal class DefaultCheckoutSessionRefresher internal constructor(
     internal constructor(
         stateHolder: CheckoutControllerStateHolder,
         checkoutSessionRepository: CheckoutSessionRepository,
-        elementsSessionClientParams: ElementsSessionClientParams,
         checkoutStateLoader: CheckoutStateLoader,
     ) : this(
         stateHolder = stateHolder,
-        fetchResponse = { sessionId, adaptivePricingAllowed ->
+        fetchResponse = { clientSecret, adaptivePricingAllowed ->
             checkoutSessionRepository.init(
-                clientParams = elementsSessionClientParams,
-                sessionId = sessionId,
+                sessionId = clientSecret.substringBefore("_secret_"),
+                clientSecret = clientSecret,
                 adaptivePricingAllowed = adaptivePricingAllowed,
             )
         },
@@ -44,7 +42,7 @@ internal class DefaultCheckoutSessionRefresher internal constructor(
     override suspend fun refresh() {
         val state = stateHolder.state ?: return
         val response = fetchResponse(
-            state.checkoutSessionResponse.id,
+            state.checkoutSessionResponse.clientSecret,
             state.configuration.currencySelectorElementConfiguration != null,
         ).getOrThrow()
 
