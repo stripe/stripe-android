@@ -2,12 +2,11 @@ package com.stripe.android.googlepaylauncher.callback
 
 import app.cash.turbine.Turbine
 import com.google.android.gms.wallet.callback.OnCompleteListener
-import com.google.android.gms.wallet.callback.PaymentDataRequestUpdate
 
-internal class FakeOnCompleteListener : OnCompleteListener<PaymentDataRequestUpdate> {
-    val completions = Turbine<PaymentDataRequestUpdate>()
+internal class FakeOnCompleteListener<T : Any> : OnCompleteListener<T> {
+    val completions = Turbine<T>()
 
-    override fun complete(result: PaymentDataRequestUpdate) {
+    override fun complete(result: T) {
         completions.add(result)
     }
 
