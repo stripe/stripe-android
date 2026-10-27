@@ -13,6 +13,9 @@ import com.stripe.android.financialconnections.ApiKeyFixtures.syncResponse
 import com.stripe.android.financialconnections.FinancialConnectionsSheetState.AuthFlowStatus
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.FinishWithResult
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenAuthFlowWithUrl
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ErrorCode
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Metadata
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventContext
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventReporter
 import com.stripe.android.financialconnections.browser.BrowserManager
@@ -154,8 +157,10 @@ class FinancialConnectionsSheetViewModelTest {
             require(it.viewEffect.result is Failed)
             assertThat(it.viewEffect.result.error)
                 .isInstanceOf(AppInitializationError::class.java)
+            assertThat(it.viewEffect.result.error.message)
+                .isEqualTo("No Web browser available to launch AuthFlow")
             analyticsTracker.assertContainsEvent(
-                expectedEventName = "linked_accounts.error.unexpected",
+                expectedEventName = "linked_accounts.error.expected",
                 expectedParams = mapOf(
                     "pane" to "unexpected_error",
                     "error" to "AppInitializationError",
@@ -164,7 +169,15 @@ class FinancialConnectionsSheetViewModelTest {
                         "error Launching the Auth Flow",
                 )
             )
+            assertThat(analyticsTracker.sentEvents.map { event -> event.eventName })
+                .doesNotContain("linked_accounts.error.unexpected")
         }
+        assertThat(analyticsTracker.publicEvents.awaitItem()).isEqualTo(
+            TestFinancialConnectionsAnalyticsTracker.PublicEvent(
+                name = Name.ERROR,
+                metadata = Metadata(errorCode = ErrorCode.WEB_BROWSER_UNAVAILABLE),
+            )
+        )
     }
 
     @Test

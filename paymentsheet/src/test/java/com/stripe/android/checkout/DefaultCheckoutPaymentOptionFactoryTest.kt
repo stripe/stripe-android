@@ -55,6 +55,16 @@ internal class DefaultCheckoutPaymentOptionFactoryTest {
     }
 
     @Test
+    fun `create returns null when there is no payment method metadata`() = runScenario {
+        val option = factory.create(
+            selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
+            paymentMethodMetadata = null,
+        )
+
+        assertThat(option).isNull()
+    }
+
+    @Test
     fun `create maps a Google Pay selection`() = runScenario {
         val option = factory.create(selection = PaymentSelection.GooglePay, paymentMethodMetadata = metadata)
 

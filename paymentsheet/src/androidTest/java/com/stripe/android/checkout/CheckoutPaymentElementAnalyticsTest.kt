@@ -63,15 +63,12 @@ internal class CheckoutPaymentElementAnalyticsTest {
                 eventName = "mc_initial_displayed_payment_methods",
                 productUsage = setOf("Checkout"),
             )
-            controller.configure(DEFAULT_CLIENT_SECRET).getOrThrow()
+            assertThat(controller.configure(DEFAULT_CLIENT_SECRET))
+                .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
         },
     ) {
         networkRule.validateAnalyticsRequest(
             eventName = "mc_carousel_payment_method_tapped",
-            productUsage = setOf("Checkout"),
-        )
-        networkRule.validateAnalyticsRequest(
-            eventName = "stripe_android.card_metadata_pk_available",
             productUsage = setOf("Checkout"),
         )
         networkRule.validateAnalyticsRequest(
@@ -122,7 +119,8 @@ internal class CheckoutPaymentElementAnalyticsTest {
                     eventName = "mc_initial_displayed_payment_methods",
                     productUsage = setOf("Checkout"),
                 )
-                controller.configure(DEFAULT_CLIENT_SECRET).getOrThrow()
+                assertThat(controller.configure(DEFAULT_CLIENT_SECRET))
+                    .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
             },
         ) {
             // Google Pay returns a new payment method, so its billing address is only synced to
@@ -146,8 +144,10 @@ internal class CheckoutPaymentElementAnalyticsTest {
             networkRule.validateAnalyticsRequest(
                 eventName = "checkout_elements.confirm.failed",
                 productUsage = setOf("checkout_elements"),
+                analyticsPayloadField("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID),
+                analyticsPayloadField("invocation_source", "merchant"),
                 analyticsPayloadField("selected_lpm", "google_pay"),
-                analyticsPayloadField("error_message", "checkoutSessionTotalChanged"),
+                analyticsPayloadField("error_type", "checkoutSessionTotalChanged"),
                 analyticsPayloadField("error_code", "checkout_session_total_changed"),
             )
             // The Checkout Session is refreshed after confirmation fails.
@@ -195,7 +195,8 @@ internal class CheckoutPaymentElementAnalyticsTest {
                     eventName = "mc_initial_displayed_payment_methods",
                     productUsage = setOf("Checkout"),
                 )
-                controller.configure(DEFAULT_CLIENT_SECRET).getOrThrow()
+                assertThat(controller.configure(DEFAULT_CLIENT_SECRET))
+                    .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
             },
         ) {
             contentPage.waitUntilVisible()

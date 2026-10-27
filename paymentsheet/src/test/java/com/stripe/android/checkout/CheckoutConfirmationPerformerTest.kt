@@ -1,9 +1,7 @@
 package com.stripe.android.checkout
 
-import android.content.Context
 import android.os.Looper
 import androidx.lifecycle.SavedStateHandle
-import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
@@ -27,7 +25,6 @@ import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFacto
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
 import com.stripe.android.testing.CoroutineTestRule
-import com.stripe.android.utils.FakeDurationProvider
 import dagger.Lazy
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
@@ -77,6 +74,32 @@ internal class CheckoutConfirmationPerformerTest {
     ) {
         performer.confirm()
         assertRejection("Cannot confirm checkout without a selected payment option.")
+        assertThat(operationCoordinator.isUpdating.value).isFalse()
+    }
+
+    @Test
+    fun `confirm fails when there is no embedded configuration`() = runScenario(
+        state = CheckoutControllerStateFactory.create(
+            embeddedConfiguration = null,
+            paymentSelection = PaymentSelection.GooglePay,
+        ),
+    ) {
+        performer.confirm()
+
+        assertRejection("Cannot confirm checkout without providing a PaymentElement configuration.")
+        assertThat(operationCoordinator.isUpdating.value).isFalse()
+    }
+
+    @Test
+    fun `confirm fails when there is no payment method metadata`() = runScenario(
+        state = CheckoutControllerStateFactory.create(
+            paymentMethodMetadata = null,
+            paymentSelection = PaymentSelection.GooglePay,
+        ),
+    ) {
+        performer.confirm()
+
+        assertRejection("Cannot confirm checkout without providing a PaymentElement configuration.")
         assertThat(operationCoordinator.isUpdating.value).isFalse()
     }
 
@@ -135,6 +158,20 @@ internal class CheckoutConfirmationPerformerTest {
     }
 
     @Test
+    fun `confirm can retry after an embedded configuration becomes available`() = runScenario(
+        state = googlePayState(paymentSelection = PaymentSelection.GooglePay).copy(embeddedConfiguration = null),
+    ) {
+        performer.confirm()
+        assertRejection("Cannot confirm checkout without providing a PaymentElement configuration.")
+
+        stateHolder.state = googlePayState(paymentSelection = PaymentSelection.GooglePay)
+        performer.confirm()
+
+        assertThat(confirmationHandler.startTurbine.awaitItem().confirmationOption)
+            .isInstanceOf<GooglePayConfirmationOption>()
+    }
+
+    @Test
     fun `confirm can retry after the payment option becomes confirmable`() = runScenario(
         state = CheckoutControllerStateFactory.create(
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(merchantCountry = null),
@@ -147,6 +184,22 @@ internal class CheckoutConfirmationPerformerTest {
         stateHolder.state = googlePayState(paymentSelection = PaymentSelection.GooglePay)
         performer.confirm()
         confirmationHandler.startTurbine.awaitItem()
+    }
+
+    @Test
+    fun `confirm can retry after payment method metadata becomes available`() = runScenario(
+        state = googlePayState(paymentSelection = PaymentSelection.GooglePay).copy(paymentMethodMetadata = null),
+    ) {
+        performer.confirm()
+        assertRejection("Cannot confirm checkout without providing a PaymentElement configuration.")
+
+        val state = googlePayState(paymentSelection = PaymentSelection.GooglePay)
+        stateHolder.state = state
+        performer.confirm()
+
+        val args = confirmationHandler.startTurbine.awaitItem()
+        assertThat(args.confirmationOption).isInstanceOf<GooglePayConfirmationOption>()
+        assertThat(args.paymentMethodMetadata).isSameInstanceAs(state.paymentMethodMetadata)
     }
 
     @Test
@@ -205,9 +258,14 @@ internal class CheckoutConfirmationPerformerTest {
             ConfirmationHandler.Result.Succeeded(PaymentIntentFixtures.PI_SUCCEEDED)
         )
         val request = analyticsRequestExecutor.requestTurbine.awaitItem().params
-        assertThat(request["event"]).isEqualTo("checkout_elements.confirm.succeeded")
-        assertThat(request).containsEntry("selected_lpm", "google_pay")
-        analyticsRequestExecutor.requestTurbine.expectNoEvents()
+        assertThat(request).containsAtLeastEntriesIn(
+            mapOf(
+                "event" to "checkout_elements.confirm.succeeded",
+                "selected_lpm" to "google_pay",
+                "invocation_source" to "merchant",
+                "checkout_session_id" to requireNotNull(stateHolder.state).checkoutSessionResponse.id,
+            )
+        )
     }
 
     @Test
@@ -217,7 +275,7 @@ internal class CheckoutConfirmationPerformerTest {
             val response = state.checkoutSessionResponse.copy(customerEmail = "checkout@example.com")
             state.copy(
                 checkoutSessionResponse = response,
-                paymentMethodMetadata = state.paymentMethodMetadata.copy(
+                paymentMethodMetadata = requireNotNull(state.paymentMethodMetadata).copy(
                     integrationMetadata = IntegrationMetadata.CheckoutSession(
                         id = response.id,
                         instancesKey = "test",
@@ -281,10 +339,14 @@ internal class CheckoutConfirmationPerformerTest {
         )
 
         val request = analyticsRequestExecutor.requestTurbine.awaitItem().params
-        assertThat(request["event"]).isEqualTo("checkout_elements.confirm.succeeded")
-        assertThat(request).containsEntry("selected_lpm", "google_pay")
-        assertThat(request).containsEntry("payment_method_orientation", "horizontal")
-        analyticsRequestExecutor.requestTurbine.expectNoEvents()
+        assertThat(request).containsAtLeastEntriesIn(
+            mapOf(
+                "event" to "checkout_elements.confirm.succeeded",
+                "selected_lpm" to "google_pay",
+                "invocation_source" to "merchant",
+                "checkout_session_id" to requireNotNull(stateHolder.state).checkoutSessionResponse.id,
+            )
+        )
     }
 
     private fun googlePayState(
@@ -346,17 +408,11 @@ internal class CheckoutConfirmationPerformerTest {
             viewModelScope = backgroundScope,
         )
         val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
-        val apiConfiguration = PaymentMethodMetadataFactory.create().apiConfiguration
-        val paymentMethodMetadataProvider = Provider { stateHolder.state?.paymentMethodMetadata }
-        val apiConfigurationProvider = Provider { apiConfiguration }
-        val analyticsPerformer = CheckoutAnalyticsPerformer(
+        val analyticsPerformer = TestCheckoutAnalyticsPerformerFactory.create(
             confirmationHandler = confirmationHandler,
             savedStateHandle = savedStateHandle,
-            context = ApplicationProvider.getApplicationContext<Context>(),
+            stateHolder = stateHolder,
             analyticsRequestExecutor = analyticsRequestExecutor,
-            durationProvider = FakeDurationProvider(),
-            paymentMethodMetadataProvider = paymentMethodMetadataProvider,
-            apiConfigurationProvider = apiConfigurationProvider,
             workContext = UnconfinedTestDispatcher(testScheduler),
         )
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
@@ -447,6 +503,7 @@ internal class CheckoutConfirmationPerformerTest {
             assertThat(resultThreads.awaitItem()).isSameInstanceAs(Looper.getMainLooper().thread)
             results.expectNoEvents()
             confirmationHandler.startTurbine.expectNoEvents()
+            analyticsRequestExecutor.requestTurbine.expectNoEvents()
             sessionRefresher.calls.expectNoEvents()
         }
     }

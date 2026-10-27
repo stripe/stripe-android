@@ -70,7 +70,8 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
             bankFormInteractor = bankFormInteractor,
         )
 
-        val formType = formHelper.formTypeForCode(paymentMethodCode)
+        val formElements = formHelper.formElementsForCode(paymentMethodCode)
+        val formType = paymentMethodMetadata.formTypeForCode(paymentMethodCode) { formElements }
         val formArguments = formHelper.createFormArguments(paymentMethodCode)
         if (formType is FormHelper.FormType.MandateOnly) {
             embeddedSelectionHolder.setSelection(
@@ -85,7 +86,7 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
         return DefaultVerticalModeFormInteractor(
             selectedPaymentMethodCode = paymentMethodCode,
             formArguments = formArguments,
-            formElements = formHelper.formElementsForCode(paymentMethodCode),
+            formElements = formElements,
             onFormFieldValuesChanged = formHelper::onFormFieldValuesChanged,
             usBankAccountArguments = usBankAccountFormArguments,
             reportFieldInteraction = eventReporter::onPaymentMethodFormInteraction,

@@ -1,11 +1,15 @@
 package com.stripe.android.elements
 
+import android.content.Context
 import android.os.Parcelable
+import androidx.annotation.DimenRes
 import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import com.stripe.android.elements.ece.ExpressCheckoutElementContent
 import com.stripe.android.elements.ece.ExpressCheckoutElementInteractor
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.uicore.StripeThemeDefaults
+import com.stripe.android.uicore.getRawValueFromDimenResource
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 
@@ -223,6 +227,7 @@ class ExpressCheckoutElement @Inject internal constructor(
         class Appearance {
             private var buttonLayout: ButtonLayout = ButtonLayout()
             private var buttonTheme: ButtonTheme = ButtonTheme.Automatic
+            private var cornerRadiusDp: Float = StripeThemeDefaults.shapes.cornerRadius
 
             /** Themes for express buttons. */
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -297,15 +302,35 @@ class ExpressCheckoutElement @Inject internal constructor(
                 this.buttonTheme = buttonTheme
             }
 
+            /**
+             * The corner radius used for buttons in Express Checkout Element.
+             *
+             * @param cornerRadiusDp The corner radius in dp.
+             */
+            fun cornerRadiusDp(cornerRadiusDp: Float): Appearance = apply {
+                this.cornerRadiusDp = cornerRadiusDp
+            }
+
+            /**
+             * The corner radius used for buttons in Express Checkout Element.
+             *
+             * @param cornerRadiusRes The corner radius resource ID.
+             */
+            fun cornerRadiusDp(context: Context, @DimenRes cornerRadiusRes: Int): Appearance = apply {
+                this.cornerRadiusDp = context.getRawValueFromDimenResource(cornerRadiusRes)
+            }
+
             @Parcelize
             internal data class State(
                 val buttonLayout: ButtonLayout.State,
                 val buttonTheme: ButtonTheme,
+                val cornerRadiusDp: Float,
             ) : Parcelable
 
             internal fun build(): State = State(
                 buttonLayout = buttonLayout.build(),
                 buttonTheme = buttonTheme,
+                cornerRadiusDp = cornerRadiusDp,
             )
         }
 

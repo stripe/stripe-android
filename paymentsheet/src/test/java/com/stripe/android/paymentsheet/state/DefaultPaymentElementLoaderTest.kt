@@ -4308,6 +4308,62 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
+    fun `checkout payment element does not log pmm exposure or fetch messaging`() = runScenario {
+        assertCheckoutDoesNotLoadPaymentMethodMessaging(
+            integrationConfiguration = PaymentElementLoader.Configuration.Embedded(
+                isRowSelectionImmediateAction = false,
+                configuration = EmbeddedPaymentElement.Configuration.Builder("Merchant").build(),
+                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+            ),
+        )
+    }
+
+    @Test
+    fun `express checkout element does not log pmm exposure or fetch messaging`() = runScenario {
+        assertCheckoutDoesNotLoadPaymentMethodMessaging(
+            integrationConfiguration = PaymentElementLoader.Configuration.ExpressCheckoutElement(
+                commonConfiguration = PaymentSheet.Configuration("Merchant").asCommonConfiguration(),
+            ),
+        )
+    }
+
+    private suspend fun Scenario.assertCheckoutDoesNotLoadPaymentMethodMessaging(
+        integrationConfiguration: PaymentElementLoader.Configuration,
+    ) {
+        val helper = FakePaymentMethodMessagePromotionsHelper()
+        val handler = FakePaymentMethodMessagePromotionsExperimentHandler()
+        val response = createCheckoutSessionResponse(canDetachPaymentMethod = true)
+        val experimentsData = ElementsSession.ExperimentsData(
+            arbId = "arb123",
+            experimentAssignments = mapOf(
+                ExperimentAssignment.OCS_MOBILE_PAYMENT_METHOD_MESSAGING_PROMOTIONS to "treatment"
+            ),
+        )
+        val loader = createPaymentElementLoader(
+            paymentMethodMessagePromotionsHelper = helper,
+            paymentMethodMessageExperimentHandler = handler,
+        )
+
+        val state = loader.load(
+            initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+                instancesKey = "DefaultPaymentElementLoaderTest",
+                checkoutSessionResponse = response.copy(
+                    elementsSession = requireNotNull(response.elementsSession).copy(experimentsData = experimentsData),
+                ),
+                collectedEmail = null,
+            ),
+            integrationConfiguration = integrationConfiguration,
+            metadata = PaymentElementLoader.Metadata(initializedViaCompose = false),
+        ).getOrThrow()
+
+        assertThat(state.paymentMethodMetadata.experimentsData).isEqualTo(experimentsData)
+        helper.calls.ensureAllEventsConsumed()
+        handler.logExposureCalls.ensureAllEventsConsumed()
+        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
+        assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
+    }
+
+    @Test
     fun `logs exposure and fetches messaging for pmm experiment treatment group`() = runScenario {
         val reporter = FakeEventReporter()
         val handler = DefaultPaymentMethodMessagePromotionsExperimentHandler(

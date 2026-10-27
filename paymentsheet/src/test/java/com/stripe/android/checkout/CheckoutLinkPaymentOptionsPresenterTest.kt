@@ -12,6 +12,7 @@ import androidx.lifecycle.testing.TestLifecycleOwner
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.injection.CHECKOUT_LINK_PAYMENT_METHOD_SELECTION_LAUNCHER
+import com.stripe.android.checkout.injection.PaymentElementModule
 import com.stripe.android.customersheet.FakeStripeRepository
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityContract
@@ -38,9 +39,9 @@ import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.networking.RequestSurface
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedPaymentOptionsPresenter
-import com.stripe.android.paymentelement.embedded.content.EmbeddedContentHelperStateFactory
 import com.stripe.android.paymentelement.embedded.content.EmbeddedSheetLauncher
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.createCustomerState
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -77,6 +78,20 @@ internal class CheckoutLinkPaymentOptionsPresenterTest {
     }
 
     @Test
+    fun `missing metadata delegates to default presenter without launching Link`() = runScenario {
+        stateHolder.state = requireNotNull(stateHolder.state).copy(paymentMethodMetadata = null)
+
+        presenter.present()
+
+        assertThat(errorReporter.awaitCall().errorEvent).isEqualTo(
+            ErrorReporter.UnexpectedErrorEvent.EMBEDDED_PRESENT_PAYMENT_OPTIONS_NOT_CONFIGURED
+        )
+        verifyLinkWasNotPresented()
+        sheetLauncher.paymentOptionsCalls.expectNoEvents()
+        assertThat(sheetStateHolder.sheetIsOpen).isFalse()
+    }
+
+    @Test
     fun `eligible Link launches with exact arguments and keeps sheet open`() = runScenario {
         presenter.present()
 
@@ -108,6 +123,27 @@ internal class CheckoutLinkPaymentOptionsPresenterTest {
         assertThat(stateHolder.state?.paymentSelection)
             .isEqualTo(linkSelection.copy(selectedPayment = updatedPayment))
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
+    }
+
+    @Test
+    fun `completion after metadata is removed closes without changing checkout state`() = runScenario {
+        val launch = presentLink()
+        val stateWithoutMetadata = requireNotNull(stateHolder.state).copy(paymentMethodMetadata = null)
+        stateHolder.state = stateWithoutMetadata
+        assertThat(sheetStateHolder.sheetIsOpen).isTrue()
+
+        dispatchResult(
+            launch = launch,
+            result = LinkActivityResult.Completed(
+                linkAccountUpdate = LinkAccountUpdate.Value(null),
+                selectedPayment = selectedPayment.copy(collectedCvc = "123"),
+            ),
+        )
+
+        assertThat(sheetStateHolder.sheetIsOpen).isFalse()
+        assertThat(stateHolder.state).isEqualTo(stateWithoutMetadata)
+        assertThat(linkAccountHolder.linkAccountInfo.value).isEqualTo(linkAccountInfo)
+        sheetLauncher.paymentOptionsCalls.expectNoEvents()
     }
 
     @Test
@@ -291,14 +327,13 @@ internal class CheckoutLinkPaymentOptionsPresenterTest {
         val linkAccountHolder = LinkAccountHolder(SavedStateHandle()).apply { set(linkAccountInfo) }
         val sheetLauncher = FakePaymentOptionsSheetLauncher()
         val sheetStateHolder = SheetStateHolder(savedStateHandle).apply { this.sheetLauncher = sheetLauncher }
+        val errorReporter = FakeErrorReporter()
         val defaultPresenter = DefaultEmbeddedPaymentOptionsPresenter(
-            state = stateFlowOf(
-                EmbeddedContentHelperStateFactory.create(paymentMethodMetadata = state.paymentMethodMetadata)
-            ),
+            state = PaymentElementModule.provideEmbeddedContentState(stateHolder),
             sheetStateHolder = sheetStateHolder,
             customerStateHolder = customerStateHolder,
             selectionHolder = stateHolder,
-            errorReporter = FakeErrorReporter(),
+            errorReporter = errorReporter,
         )
         val linkAnalyticsHelper = FakeCheckoutLinkAnalyticsHelper()
         val linkStore = FakeLinkStore()
@@ -350,13 +385,15 @@ internal class CheckoutLinkPaymentOptionsPresenterTest {
             sheetStateHolder = sheetStateHolder,
             linkAccountHolder = linkAccountHolder,
             linkAccountInfo = linkAccountInfo,
-            paymentMethodMetadata = state.paymentMethodMetadata,
+            paymentMethodMetadata = requireNotNull(state.paymentMethodMetadata),
+            errorReporter = errorReporter,
         ).block()
 
         activityResultRegistry.launchCalls.ensureAllEventsConsumed()
         sheetLauncher.paymentOptionsCalls.ensureAllEventsConsumed()
         linkAnalyticsHelper.ensureAllEventsConsumed()
         linkStore.ensureAllEventsConsumed()
+        errorReporter.ensureAllEventsConsumed()
     }
 
     private data class Scenario(
@@ -372,6 +409,7 @@ internal class CheckoutLinkPaymentOptionsPresenterTest {
         val linkAccountHolder: LinkAccountHolder,
         val linkAccountInfo: LinkAccountUpdate.Value,
         val paymentMethodMetadata: PaymentMethodMetadata,
+        val errorReporter: FakeErrorReporter,
     ) {
         val linkConfiguration: LinkConfiguration
             get() = requireNotNull(paymentMethodMetadata.linkState?.configuration)

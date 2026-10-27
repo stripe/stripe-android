@@ -54,7 +54,7 @@ internal class CheckoutCommonConfigurationFactoryTest {
 
         val expected = CheckoutEmbeddedConfigurationFactory(appName = "Test App")
             .create(configuration, checkoutSessionResponse, collectedDetails)
-            .asCommonConfiguration()
+            ?.asCommonConfiguration()
         val actual = factory()
             .create(configuration, checkoutSessionResponse, collectedDetails)
 
@@ -73,7 +73,7 @@ internal class CheckoutCommonConfigurationFactoryTest {
             collectedDetails = collectedDetails(),
         )
 
-        assertThat(result.merchantDisplayName).isEqualTo("Acme Corp")
+        assertThat(result?.merchantDisplayName).isEqualTo("Acme Corp")
     }
 
     @Test
@@ -84,7 +84,7 @@ internal class CheckoutCommonConfigurationFactoryTest {
             collectedDetails = collectedDetails(),
         )
 
-        assertThat(result.merchantDisplayName).isEqualTo("Session Biz")
+        assertThat(result?.merchantDisplayName).isEqualTo("Session Biz")
     }
 
     @Test
@@ -95,7 +95,7 @@ internal class CheckoutCommonConfigurationFactoryTest {
             collectedDetails = collectedDetails(),
         )
 
-        assertThat(result.merchantDisplayName).isEqualTo("My App")
+        assertThat(result?.merchantDisplayName).isEqualTo("My App")
     }
 
     @Test
@@ -109,8 +109,8 @@ internal class CheckoutCommonConfigurationFactoryTest {
             collectedDetails = collectedDetails(),
         )
 
-        assertThat(result.googlePay?.countryCode).isEqualTo("GB")
-        assertThat(result.googlePay?.environment)
+        assertThat(result?.googlePay?.countryCode).isEqualTo("GB")
+        assertThat(result?.googlePay?.environment)
             .isEqualTo(PaymentSheet.GooglePayConfiguration.Environment.Test)
     }
 
@@ -124,7 +124,7 @@ internal class CheckoutCommonConfigurationFactoryTest {
             collectedDetails = collectedDetails(),
         )
 
-        assertThat(result.googlePay).isNull()
+        assertThat(result?.googlePay).isNull()
     }
 
     @Test
@@ -141,7 +141,7 @@ internal class CheckoutCommonConfigurationFactoryTest {
             collectedDetails = collectedDetails(),
         )
 
-        assertThat(result.link.display).isEqualTo(PaymentSheet.LinkConfiguration.Display.Never)
+        assertThat(result?.link?.display).isEqualTo(PaymentSheet.LinkConfiguration.Display.Never)
     }
 
     @Test
@@ -297,10 +297,10 @@ internal class CheckoutCommonConfigurationFactoryTest {
             checkoutSessionResponse = checkoutSessionResponse,
             collectedDetails = collectedDetails,
         )
-        assertThat(result.googlePay?.label).isEqualTo("PE total")
-        assertThat(result.googlePay?.buttonType).isEqualTo(PaymentSheet.GooglePayConfiguration.ButtonType.Buy)
-        assertThat(result.link.display).isEqualTo(PaymentSheet.LinkConfiguration.Display.Never)
-        assertThat(result.billingDetailsCollectionConfiguration.address).isEqualTo(PSAutomatic)
+        assertThat(result?.googlePay?.label).isEqualTo("PE total")
+        assertThat(result?.googlePay?.buttonType).isEqualTo(PaymentSheet.GooglePayConfiguration.ButtonType.Buy)
+        assertThat(result?.link?.display).isEqualTo(PaymentSheet.LinkConfiguration.Display.Never)
+        assertThat(result?.billingDetailsCollectionConfiguration?.address).isEqualTo(PSAutomatic)
     }
 
     @Test
@@ -330,7 +330,7 @@ internal class CheckoutCommonConfigurationFactoryTest {
             configuration = configuration,
             checkoutSessionResponse = checkoutSessionResponse,
             collectedDetails = collectedDetails,
-        ).defaultBillingDetails
+        )?.defaultBillingDetails
         val expressCheckoutElementDefaults = requireNotNull(
             factory().createForExpressCheckoutElement(
                 configuration = configuration,
@@ -367,7 +367,7 @@ internal class CheckoutCommonConfigurationFactoryTest {
             collectedDetails = collectedDetails(),
         )
 
-        assertThat(result.termsDisplay)
+        assertThat(result?.termsDisplay)
             .isEqualTo(mapOf(PaymentMethod.Type.Card to PaymentSheet.TermsDisplay.NEVER))
     }
 
@@ -383,7 +383,7 @@ internal class CheckoutCommonConfigurationFactoryTest {
             collectedDetails = collectedDetails(),
         )
 
-        assertThat(result.paymentMethodOrder).isEqualTo(listOf("card", "klarna"))
+        assertThat(result?.paymentMethodOrder).isEqualTo(listOf("card", "klarna"))
     }
 
     @Test
@@ -402,7 +402,7 @@ internal class CheckoutCommonConfigurationFactoryTest {
             collectedDetails = collectedDetails(),
         )
 
-        assertThat(result.preferredNetworks)
+        assertThat(result?.preferredNetworks)
             .isEqualTo(listOf(CardBrand.CartesBancaires, CardBrand.Visa))
     }
 
@@ -418,7 +418,7 @@ internal class CheckoutCommonConfigurationFactoryTest {
             collectedDetails = collectedDetails(),
         )
 
-        assertThat(result.opensCardScannerAutomatically).isTrue()
+        assertThat(result?.opensCardScannerAutomatically).isTrue()
     }
 
     @Test
@@ -439,7 +439,7 @@ internal class CheckoutCommonConfigurationFactoryTest {
             collectedDetails = collectedDetails(),
         )
 
-        assertThat(result.cardBrandAcceptance).isEqualTo(
+        assertThat(result?.cardBrandAcceptance).isEqualTo(
             PaymentSheet.CardBrandAcceptance.disallowed(
                 listOf(PaymentSheet.CardBrandAcceptance.BrandCategory.Amex)
             )
@@ -454,7 +454,7 @@ internal class CheckoutCommonConfigurationFactoryTest {
             collectedDetails = collectedDetails(email = "collected@example.com"),
         )
 
-        assertThat(result.defaultBillingDetails?.email).isEqualTo("collected@example.com")
+        assertThat(result?.defaultBillingDetails?.email).isEqualTo("collected@example.com")
     }
 
     @Test
@@ -465,7 +465,7 @@ internal class CheckoutCommonConfigurationFactoryTest {
             collectedDetails = collectedDetails(),
         )
 
-        assertThat(result.billingDetailsCollectionConfiguration.address).isEqualTo(PSFull)
+        assertThat(result?.billingDetailsCollectionConfiguration?.address).isEqualTo(PSFull)
     }
 
     @Test
@@ -476,7 +476,7 @@ internal class CheckoutCommonConfigurationFactoryTest {
             collectedDetails = collectedDetails(),
         )
 
-        assertThat(result.billingDetailsCollectionConfiguration.address).isEqualTo(PSAutomatic)
+        assertThat(result?.billingDetailsCollectionConfiguration?.address).isEqualTo(PSAutomatic)
     }
 
     @Test
@@ -487,11 +487,11 @@ internal class CheckoutCommonConfigurationFactoryTest {
             collectedDetails = collectedDetails(),
         )
 
-        assertThat(result.customer).isEqualTo(ConfigurationDefaults.customer)
-        assertThat(result.cardBrandAcceptance).isEqualTo(ConfigurationDefaults.cardBrandAcceptance)
-        assertThat(result.customPaymentMethods).isEqualTo(ConfigurationDefaults.customPaymentMethods)
-        assertThat(result.walletButtons).isNull()
-        assertThat(result.googlePlacesApiKey).isNull()
+        assertThat(result?.customer).isEqualTo(ConfigurationDefaults.customer)
+        assertThat(result?.cardBrandAcceptance).isEqualTo(ConfigurationDefaults.cardBrandAcceptance)
+        assertThat(result?.customPaymentMethods).isEqualTo(ConfigurationDefaults.customPaymentMethods)
+        assertThat(result?.walletButtons).isNull()
+        assertThat(result?.googlePlacesApiKey).isNull()
     }
 
     @Test
@@ -513,10 +513,10 @@ internal class CheckoutCommonConfigurationFactoryTest {
             collectedDetails = collectedDetails(),
         )
 
-        assertThat(result.appearance.colorsLight.primary).isEqualTo(0xFF123456.toInt())
-        assertThat(result.appearance.typography.sizeScaleFactor).isEqualTo(1.5f)
-        assertThat(result.appearance.shapes.cornerRadiusDp).isEqualTo(12f)
-        assertThat(result.appearance.embeddedAppearance.style).isEqualTo(
+        assertThat(result?.appearance?.colorsLight?.primary).isEqualTo(0xFF123456.toInt())
+        assertThat(result?.appearance?.typography?.sizeScaleFactor).isEqualTo(1.5f)
+        assertThat(result?.appearance?.shapes?.cornerRadiusDp).isEqualTo(12f)
+        assertThat(result?.appearance?.embeddedAppearance?.style).isEqualTo(
             PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton.Builder().spacingDp(7f).build()
         )
     }
@@ -532,7 +532,7 @@ internal class CheckoutCommonConfigurationFactoryTest {
         val response = CheckoutSessionResponseFactory.create()
         val details = collectedDetails()
 
-        assertThat(factory().createForPaymentElement(configuration, response, details).defaultBillingDetails?.phone)
+        assertThat(factory().createForPaymentElement(configuration, response, details)?.defaultBillingDetails?.phone)
             .isNull()
         val expressConfiguration = requireNotNull(
             factory().createForExpressCheckoutElement(configuration, response, details)

@@ -19,7 +19,9 @@ internal object TwintDefinition : PaymentMethodDefinition {
         hasIntentToSetup: Boolean
     ): Set<AddPaymentMethodRequirement> = setOf()
 
-    override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = metadata.hasIntentToSetup(type.code)
+    override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean {
+        return metadata.hasIntentToSetup(type.code) && metadata.mandateAllowed(type)
+    }
 
     override fun uiDefinitionFactory(
         metadata: PaymentMethodMetadata
@@ -39,13 +41,11 @@ private object TwintUiDefinitionFactory : UiDefinitionFactory.Simple() {
         arguments: UiDefinitionFactory.Arguments,
         builder: FormElementsBuilder,
     ) {
-        if (TwintDefinition.requiresMandate(metadata)) {
-            builder.footer(
-                MandateTextElement(
-                    stringResId = R.string.stripe_twint_mandate,
-                    args = listOf(arguments.merchantName)
-                )
-            )
-        }
+        builder.addMandateIfAllowed(
+            formElement = MandateTextElement(
+                stringResId = R.string.stripe_twint_mandate,
+                args = listOf(arguments.merchantName)
+            ),
+        )
     }
 }

@@ -17,7 +17,10 @@ import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.link.injection.LinkMetadata
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.CardFunding
+import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -722,8 +725,115 @@ class LinkControllerInteractorTest {
 
         interactor.state(application).test {
             assertThat(awaitItem().selectedPaymentMethodPreview?.sublabel)
-                .isEqualTo("Visa Credit •••• 4242")
+                .isEqualTo("Visa Credit \u2066•••• 4242\u2069")
         }
+    }
+
+    @Test
+    fun `Link debit card exposes funding in both previews`() = runTest {
+        assertPreviewFunding(
+            TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(funding = ConsumerPaymentDetails.Card.Funding.Debit),
+            CardFunding.Debit,
+        )
+    }
+
+    @Test
+    fun `Link credit card exposes funding in both previews`() = runTest {
+        assertPreviewFunding(TestFactory.CONSUMER_PAYMENT_DETAILS_CARD, CardFunding.Credit)
+    }
+
+    @Test
+    fun `Link unknown card funding remains unknown`() = runTest {
+        assertPreviewFunding(
+            TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(funding = ConsumerPaymentDetails.Card.Funding.Unknown),
+            CardFunding.Unknown,
+        )
+    }
+
+    @Test
+    fun `Link bank account has no card funding`() = runTest {
+        assertPreviewFunding(TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT, null)
+    }
+
+    @Test
+    fun `Link passthrough without funding remains unknown`() = runTest {
+        assertPreviewFunding(TestFactory.CONSUMER_PAYMENT_DETAILS_PASSTHROUGH, CardFunding.Unknown)
+    }
+
+    private suspend fun assertPreviewFunding(details: ConsumerPaymentDetails.PaymentDetails, expected: CardFunding?) {
+        assertPreviewFunding(
+            LinkPaymentMethod.ConsumerPaymentDetails(details, collectedCvc = null, billingPhone = null), expected
+        )
+    }
+
+    private suspend fun assertPreviewFunding(selection: LinkPaymentMethod, expected: CardFunding?) {
+        val interactor = createInteractor()
+        configure(interactor)
+        interactor.updateState { it.copy(selectedPaymentMethod = selection) }
+        assertThat(interactor.selectedPaymentMethodPreview.value?.cardFunding).isEqualTo(expected)
+        assertThat(interactor.state(application).value.selectedPaymentMethodPreview?.cardFunding).isEqualTo(expected)
+        linkAccountManager.createPaymentMethodCalls.expectNoEvents()
+    }
+
+    @Test
+    fun `Link passthrough debit card uses retained funding`() = runTest {
+        assertPassthroughFunding(PaymentMethod.Card(funding = "debit"), CardFunding.Debit)
+    }
+
+    @Test
+    fun `Link passthrough credit card uses retained funding`() = runTest {
+        assertPassthroughFunding(PaymentMethod.Card(funding = "credit"), CardFunding.Credit)
+    }
+
+    @Test
+    fun `Link passthrough unrecognized funding remains unknown`() = runTest {
+        assertPassthroughFunding(PaymentMethod.Card(funding = "future"), CardFunding.Unknown)
+    }
+
+    @Test
+    fun `Link passthrough missing funding remains unknown`() = runTest {
+        assertPassthroughFunding(PaymentMethod.Card(funding = null), CardFunding.Unknown)
+    }
+
+    @Test
+    fun `Link passthrough missing retained card remains unknown`() = runTest {
+        assertPassthroughFunding(null, CardFunding.Unknown)
+    }
+
+    private suspend fun assertPassthroughFunding(card: PaymentMethod.Card?, expected: CardFunding) {
+        val paymentMethod = PaymentMethod.Builder().setId("pm_passthrough").setCard(card).build()
+        assertPreviewFunding(
+            LinkPaymentMethod.LinkPaymentDetails(
+                linkPaymentDetails = LinkPaymentDetails.Passthrough(
+                    paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_PASSTHROUGH,
+                    paymentMethod = paymentMethod,
+                    createdFromNewPaymentMethod = true,
+                ),
+                collectedCvc = null,
+                billingPhone = null,
+            ),
+            expected,
+        )
+    }
+
+    @Test
+    fun `selectedPaymentMethodPreview uses display label and sublabel for generic payment details`() = runTest {
+        val interactor = createInteractor()
+        configure(interactor)
+        interactor.updateState {
+            it.copy(
+                selectedPaymentMethod = LinkPaymentMethod.ConsumerPaymentDetails(
+                    details = TestFactory.CONSUMER_PAYMENT_DETAILS_GENERIC,
+                    collectedCvc = null,
+                    billingPhone = null,
+                )
+            )
+        }
+
+        val preview = interactor.selectedPaymentMethodPreview.first()
+
+        assertThat(preview?.sublabel).isEqualTo("Crypto 0x••••22Dd")
+        assertThat(preview?.cardFunding).isNull()
     }
 
     @Test

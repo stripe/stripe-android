@@ -31,6 +31,7 @@ internal class LinkInline2FASectionTest {
         composeRule.setContent {
             LinkInline2FASection(
                 verificationState = VerificationViewState(
+                    authFlow = null,
                     isProcessing = false,
                     requestFocus = true,
                     errorMessage = null,

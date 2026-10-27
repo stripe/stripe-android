@@ -30,6 +30,14 @@ internal class KycDocumentCollectionModel(
     val acceptedFormats: List<String> get() = document?.acceptedFormats.orEmpty()
     val maximumFileSizeBytes: Long? get() = document?.maxFileSizeBytes
     val completedDocumentCount: Int get() = documentSlots.count { it.file != null }
+    val canAddDocuments: Boolean
+        get() {
+            val document = document ?: return false
+            val selectedTypes = documentSlots.filter { it.file != null }.mapNotNull { it.subtypeId }.toSet()
+            return selectedTypes.size < document.maxDocumentTypes &&
+                document.acceptedSubtypes.any { it.id !in selectedTypes }
+        }
+
     val canContinue: Boolean
         get() = selectingFileSlot == null && documentSlots.any { slot ->
             slot.file != null && slot.subtypeId == documentSlots.firstOrNull {
@@ -341,6 +349,7 @@ internal class KycDocumentCollectionModel(
             minDocumentTypes = it.minDocumentTypes.coerceAtLeast(MINIMUM_DOCUMENT_COUNT),
             maxDocumentTypes = it.maxDocumentTypes,
             maxFilesPerDocumentType = it.maxFilesPerDocumentType,
+            canAddDocuments = canAddDocuments,
             editingSlotIndex = editingDocumentSlot,
             slots = documentSlots.map { slot ->
                 KycDocumentSlotState(

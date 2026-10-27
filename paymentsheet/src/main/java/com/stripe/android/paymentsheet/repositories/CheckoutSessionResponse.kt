@@ -10,6 +10,7 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 internal data class CheckoutSessionResponse(
     val id: String,
+    val configId: String?,
     val currency: String,
     val paymentStatus: PaymentStatus,
     val status: Status,
@@ -145,7 +146,10 @@ internal data class CheckoutSessionResponse(
         val integrationAmount: Long,
         val integrationCurrency: String,
         val localCurrencyOptions: List<LocalCurrencyOption>,
-    ) : StripeModel
+    ) : StripeModel {
+        val isActive: Boolean
+            get() = !activePresentmentCurrency.equals(integrationCurrency, ignoreCase = true)
+    }
 
     @Parcelize
     data class LocalCurrencyOption(

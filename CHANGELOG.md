@@ -1,11 +1,21 @@
 # CHANGELOG
 
-NEXT_VERSION_BUMP: MINOR
+NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
+
+## 23.25.1 - 2026-10-26
+
+### PaymentSheet
+* [FIXED][15100](https://github.com/stripe/stripe-android/pull/15100) Fixed an issue where error messages could disappear from the PaymentSheet after returning from Link.
+
+## 23.25.0 - 2026-10-21
 
 ### PaymentSheet
 * [ADDED][14589](https://github.com/stripe/stripe-android/pull/14589) Added Touch 'n Go API bindings and PaymentSheet support for payments and setup.
 * [ADDED][14590](https://github.com/stripe/stripe-android/pull/14590) Added TrueMoney API bindings and PaymentSheet support.
+
+### AddressElement
+* [Changed] Address Element asks for confirmation before discarding unsaved address changes.
 
 ## 23.24.0 - 2026-10-19
 
@@ -16,6 +26,7 @@ NEXT_VERSION_BUMP: MINOR
 * [Fixed] Address country dropdowns now support autofill from saved addresses.
 
 ### PaymentSheet
+* [ADDED] Added native support for email OTP and multi-factor authentication (MFA) accounts to the Link authentication flow.
 * [CHANGED][15002](https://github.com/stripe/stripe-android/pull/15002) Moved `ApiConfigurationPreview` from the `paymentsheet` module to `stripe-core`. Update preview opt-in imports to `com.stripe.android.core.ApiConfigurationPreview`.
 * [ADDED][14586](https://github.com/stripe/stripe-android/pull/14586) Added Naira bank transfer API bindings and PaymentSheet support for PaymentIntents.
 * [ADDED][14830](https://github.com/stripe/stripe-android/pull/14830) Added Naira USSD API bindings and PaymentSheet support for PaymentIntents.

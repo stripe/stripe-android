@@ -213,6 +213,8 @@ internal abstract class BaseSheetViewModel(
     abstract fun handlePaymentMethodSelected(selection: PaymentSelection?)
 
     fun updateSelection(selection: PaymentSelection?) {
+        val selectionChanged = this.selection.value != selection
+
         when (selection) {
             is PaymentSelection.New -> newPaymentSelection = NewPaymentOptionSelection.New(selection)
             is PaymentSelection.CustomPaymentMethod ->
@@ -225,7 +227,9 @@ internal abstract class BaseSheetViewModel(
         savedStateHandle[SAVE_SELECTION] = selection
 
         updateCvcFlows(selection)
-        clearErrorMessages()
+        if (selectionChanged) {
+            clearErrorMessages()
+        }
     }
 
     private fun updateCvcFlows(selection: PaymentSelection?) {

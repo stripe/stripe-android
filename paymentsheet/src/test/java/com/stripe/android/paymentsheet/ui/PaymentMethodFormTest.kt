@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.ui
 
 import android.os.Build
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.test.junit4.createComposeRule
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentMethod
@@ -99,5 +100,35 @@ class PaymentMethodFormTest {
         completeFormValuesFlow.value = completeValues
 
         assertThat(emissions).containsExactly(null, completeValues)
+    }
+
+    @Test
+    fun `Restoring form after Link hides it replays the current null values`() {
+        val contentVisible = mutableStateOf(true)
+        val completeFormValues = MutableStateFlow<FormFieldValues?>(null)
+        val emissions = mutableListOf<FormFieldValues?>()
+
+        composeTestRule.setContent {
+            if (contentVisible.value) {
+                PaymentMethodForm(
+                    paymentMethodCode = PaymentMethod.Type.Card.code,
+                    enabled = true,
+                    completeFormValues = completeFormValues,
+                    onFormFieldValuesChanged = { emissions.add(it) },
+                    hiddenIdentifiers = emptySet(),
+                    elements = emptyList(),
+                    lastTextFieldIdentifier = null,
+                )
+            }
+        }
+        composeTestRule.waitForIdle()
+        assertThat(emissions).containsExactly(null)
+
+        composeTestRule.runOnIdle { contentVisible.value = false }
+        composeTestRule.waitForIdle()
+        composeTestRule.runOnIdle { contentVisible.value = true }
+        composeTestRule.waitForIdle()
+
+        assertThat(emissions).containsExactly(null, null).inOrder()
     }
 }

@@ -1,12 +1,9 @@
 package com.stripe.android.elements.ece
 
-import android.content.Context
 import androidx.lifecycle.SavedStateHandle
-import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.GooglePayJsonFactory
-import com.stripe.android.checkout.CheckoutAnalyticsPerformer
 import com.stripe.android.checkout.CheckoutCommonConfigurationFactory
 import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutControllerState
@@ -14,6 +11,7 @@ import com.stripe.android.checkout.CheckoutControllerStateFactory
 import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.checkout.CheckoutOperationCoordinator
 import com.stripe.android.checkout.FakeCheckoutSessionRefresher
+import com.stripe.android.checkout.TestCheckoutAnalyticsPerformerFactory
 import com.stripe.android.core.Logger
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.elements.ExpressCheckoutElement.Configuration.Appearance.ButtonTheme
@@ -34,14 +32,12 @@ import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFacto
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
 import com.stripe.android.testing.FakeErrorReporter
-import com.stripe.android.utils.FakeDurationProvider
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import javax.inject.Provider
 
 @OptIn(CheckoutSessionPreview::class)
 @RunWith(RobolectricTestRunner::class)
@@ -273,17 +269,11 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
             viewModelScope = backgroundScope,
         )
         val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
-        val apiConfiguration = PaymentMethodMetadataFactory.create().apiConfiguration
-        val paymentMethodMetadataProvider = Provider { stateHolder.state?.paymentMethodMetadata }
-        val apiConfigurationProvider = Provider { apiConfiguration }
-        val analyticsPerformer = CheckoutAnalyticsPerformer(
+        val analyticsPerformer = TestCheckoutAnalyticsPerformerFactory.create(
             confirmationHandler = confirmationHandler,
             savedStateHandle = savedStateHandle,
-            context = ApplicationProvider.getApplicationContext<Context>(),
+            stateHolder = stateHolder,
             analyticsRequestExecutor = analyticsRequestExecutor,
-            durationProvider = FakeDurationProvider(),
-            paymentMethodMetadataProvider = paymentMethodMetadataProvider,
-            apiConfigurationProvider = apiConfigurationProvider,
             workContext = UnconfinedTestDispatcher(testScheduler),
         )
         backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {

@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.verticalmode
 
+import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import app.cash.turbine.test
@@ -1964,43 +1965,232 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     }
 
     @Test
-    fun `shouldExpandOnClick is false when form type is UserInteractionRequired`() {
-        val metadata = PaymentMethodMetadataFactory.create(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = listOf("card", "klarna")
-            )
-        )
+    fun `unselected promotion rows do not look up form types`() {
+        val formTypeCalls = Turbine<String>()
         runScenario(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    paymentMethodTypes = listOf("card", "ideal", "klarna", "affirm", "afterpay_clearpay")
+                )
+            ),
             promotionsHelper = FakePaymentMethodMessagePromotionsHelper.Factory.create(),
-            paymentMethodMetadata = metadata,
-            formTypeForCode = { FormHelper.FormType.UserInteractionRequired }
+            formTypeForCode = { code ->
+                formTypeCalls.add(code)
+                FormHelper.FormType.Empty
+            },
         ) {
+            assertThat(interactor.state.value.displayablePaymentMethods).hasSize(5)
             interactor.state.test {
                 val paymentMethods = awaitItem().displayablePaymentMethods
-                val pm = paymentMethods.first { it.code == "klarna" }
-                assertThat(pm.shouldExpandOnClick).isFalse()
+                assertThat(paymentMethods.map { it.code })
+                    .containsExactly("card", "ideal", "klarna", "affirm", "afterpay_clearpay")
+                paymentMethodsSource.value = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+                val rebuiltPaymentMethods = expectMostRecentItem().displayablePaymentMethods
+                assertThat(rebuiltPaymentMethods.single { it.code == "card" }.displayName)
+                    .isEqualTo(PaymentSheetR.string.stripe_paymentsheet_new_card.resolvableString)
+                processingSource.value = true
+                assertThat(expectMostRecentItem().isProcessing).isTrue()
+            }
+            formTypeCalls.expectNoEvents()
+        }
+        formTypeCalls.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `promotion with interactive form stays collapsed`() = runExpansionScenario(
+        paymentMethodCode = "klarna",
+        formType = FormHelper.FormType.UserInteractionRequired,
+        displaysMandatesInFormScreen = false,
+        expectedExpansion = false,
+    )
+
+    @Test
+    fun `promotion with empty form expands`() = runExpansionScenario(
+        paymentMethodCode = "affirm",
+        formType = FormHelper.FormType.Empty,
+        displaysMandatesInFormScreen = false,
+        expectedExpansion = true,
+    )
+
+    @Test
+    fun `mandate-only promotion expands when mandate is inline`() = runExpansionScenario(
+        paymentMethodCode = "klarna",
+        formType = FormHelper.FormType.MandateOnly("Mandate".resolvableString),
+        displaysMandatesInFormScreen = false,
+        expectedExpansion = true,
+    )
+
+    @Test
+    fun `mandate-only promotion stays collapsed when mandate requires form`() = runExpansionScenario(
+        paymentMethodCode = "klarna",
+        formType = FormHelper.FormType.MandateOnly("Mandate".resolvableString),
+        displaysMandatesInFormScreen = true,
+        expectedExpansion = false,
+    )
+
+    @Test
+    fun `method without promotion support stays collapsed`() = runExpansionScenario(
+        paymentMethodCode = "card",
+        formType = FormHelper.FormType.Empty,
+        displaysMandatesInFormScreen = false,
+        expectedExpansion = false,
+    )
+
+    @Test
+    fun `expanded promotion survives form navigation and rebuilding rows`() = runScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "affirm")
+            )
+        ),
+        initialIsCurrentScreen = true,
+        formTypeForCode = { code ->
+            if (code == "card") FormHelper.FormType.UserInteractionRequired else FormHelper.FormType.Empty
+        },
+    ) {
+        interactor.state.test {
+            assertThat(awaitItem().displayablePaymentMethods.single { it.code == "affirm" }.isExpanded).isFalse()
+
+            interactor.handleViewAction(ViewAction.PaymentMethodSelected("affirm"))
+            assertThat(reportPaymentMethodTypeSelectedTurbine.awaitItem()).isEqualTo("affirm")
+            assertThat(onFormFieldValuesChangedTurbine.awaitItem().second).isEqualTo("affirm")
+            assertThat(awaitItem().displayablePaymentMethods.single { it.code == "affirm" }.isExpanded).isTrue()
+
+            interactor.handleViewAction(ViewAction.PaymentMethodSelected("card"))
+            assertThat(reportPaymentMethodTypeSelectedTurbine.awaitItem()).isEqualTo("card")
+            assertThat(reportFormShownTurbine.awaitItem()).isEqualTo("card")
+            assertThat(transitionToFormScreenTurbine.awaitItem()).isEqualTo("card")
+            isCurrentScreenSource.value = false
+            paymentMethodsSource.value = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+            isCurrentScreenSource.value = true
+
+            val paymentMethods = expectMostRecentItem().displayablePaymentMethods
+            assertThat(paymentMethods.single { it.code == "card" }.displayName)
+                .isEqualTo(PaymentSheetR.string.stripe_paymentsheet_new_card.resolvableString)
+            assertThat(paymentMethods.single { it.code == "affirm" }.isExpanded).isTrue()
+        }
+    }
+
+    @Test
+    fun `expanded promotions survive interactor recreation`() {
+        val savedStateHandle = SavedStateHandle()
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "affirm", "klarna")
+            )
+        )
+        runScenario(savedStateHandle = savedStateHandle, paymentMethodMetadata = metadata) {
+            interactor.state.test {
+                assertThat(awaitItem().displayablePaymentMethods.any { it.isExpanded }).isFalse()
+                for (code in listOf("affirm", "klarna")) {
+                    interactor.handleViewAction(ViewAction.PaymentMethodSelected(code))
+                    assertThat(reportPaymentMethodTypeSelectedTurbine.awaitItem()).isEqualTo(code)
+                    assertThat(onFormFieldValuesChangedTurbine.awaitItem().second).isEqualTo(code)
+                    assertThat(awaitItem().displayablePaymentMethods.single { it.code == code }.isExpanded).isTrue()
+                }
+            }
+            interactor.close()
+        }
+
+        runScenario(
+            savedStateHandle = SavedStateHandle(
+                savedStateHandle.keys().associateWith { savedStateHandle.get<Any?>(it) }
+            ),
+            paymentMethodMetadata = metadata,
+        ) {
+            interactor.state.test {
+                val rows = awaitItem().displayablePaymentMethods
+                assertThat(rows.filter { it.isExpanded }.map { it.code }).containsExactly("affirm", "klarna")
             }
         }
     }
 
     @Test
-    fun `shouldExpandOnClick is true when form type is not UserInteractionRequired`() {
+    fun `collapsed promotion stays collapsed after interactor recreation`() {
+        val savedStateHandle = SavedStateHandle()
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = listOf("card", "affirm")
+                paymentMethodTypes = listOf("klarna")
             )
         )
+        var formType: FormHelper.FormType = FormHelper.FormType.Empty
         runScenario(
-            promotionsHelper = FakePaymentMethodMessagePromotionsHelper.Factory.create(),
+            savedStateHandle = savedStateHandle,
             paymentMethodMetadata = metadata,
-            formTypeForCode = { FormHelper.FormType.Empty }
+            formTypeForCode = { formType },
         ) {
             interactor.state.test {
-                val paymentMethods = awaitItem().displayablePaymentMethods
-                val pm = paymentMethods.first { it.code == "affirm" }
-                assertThat(pm.shouldExpandOnClick).isTrue()
+                assertThat(awaitItem().displayablePaymentMethods.single().isExpanded).isFalse()
+                interactor.handleViewAction(ViewAction.PaymentMethodSelected("klarna"))
+                assertThat(reportPaymentMethodTypeSelectedTurbine.awaitItem()).isEqualTo("klarna")
+                assertThat(onFormFieldValuesChangedTurbine.awaitItem().second).isEqualTo("klarna")
+                assertThat(awaitItem().displayablePaymentMethods.single().isExpanded).isTrue()
+
+                formType = FormHelper.FormType.UserInteractionRequired
+                interactor.handleViewAction(ViewAction.PaymentMethodSelected("klarna"))
+                assertThat(reportPaymentMethodTypeSelectedTurbine.awaitItem()).isEqualTo("klarna")
+                assertThat(reportFormShownTurbine.awaitItem()).isEqualTo("klarna")
+                assertThat(transitionToFormScreenTurbine.awaitItem()).isEqualTo("klarna")
+                assertThat(awaitItem().displayablePaymentMethods.single().isExpanded).isFalse()
+            }
+            interactor.close()
+        }
+
+        runScenario(
+            savedStateHandle = SavedStateHandle(
+                savedStateHandle.keys().associateWith { savedStateHandle.get<Any?>(it) }
+            ),
+            paymentMethodMetadata = metadata,
+        ) {
+            interactor.state.test {
+                assertThat(awaitItem().displayablePaymentMethods.single().isExpanded).isFalse()
             }
         }
+    }
+
+    private fun runExpansionScenario(
+        paymentMethodCode: String,
+        formType: FormHelper.FormType,
+        displaysMandatesInFormScreen: Boolean,
+        expectedExpansion: Boolean,
+    ) {
+        val formTypeCalls = Turbine<String>()
+        val promotionsHelper = FakePaymentMethodMessagePromotionsHelper()
+        runScenario(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    paymentMethodTypes = listOf(paymentMethodCode)
+                )
+            ),
+            promotionsHelper = promotionsHelper,
+            displaysMandatesInFormScreen = displaysMandatesInFormScreen,
+            formTypeForCode = { code ->
+                formTypeCalls.add(code)
+                formType
+            },
+        ) {
+            val row = interactor.state.value.displayablePaymentMethods.single()
+            formTypeCalls.expectNoEvents()
+            assertThat(row.isExpanded).isFalse()
+            row.onClick()
+            assertThat(formTypeCalls.awaitItem()).isEqualTo(paymentMethodCode)
+            assertThat(reportPaymentMethodTypeSelectedTurbine.awaitItem()).isEqualTo(paymentMethodCode)
+            assertThat(promotionsHelper.reportPromotionDisplayedCalls.awaitItem().first).isEqualTo(paymentMethodCode)
+            if (formType == FormHelper.FormType.UserInteractionRequired ||
+                (displaysMandatesInFormScreen && formType is FormHelper.FormType.MandateOnly)
+            ) {
+                assertThat(reportFormShownTurbine.awaitItem()).isEqualTo(paymentMethodCode)
+                assertThat(transitionToFormScreenTurbine.awaitItem()).isEqualTo(paymentMethodCode)
+            } else {
+                assertThat(onFormFieldValuesChangedTurbine.awaitItem().second).isEqualTo(paymentMethodCode)
+            }
+            assertThat(interactor.state.value.displayablePaymentMethods.single().isExpanded)
+                .isEqualTo(expectedExpansion)
+            formTypeCalls.expectNoEvents()
+        }
+        formTypeCalls.ensureAllEventsConsumed()
+        promotionsHelper.validate()
+        promotionsHelper.reportPromotionDisplayedCalls.ensureAllEventsConsumed()
     }
 
     private val linkAndGooglePayWalletState = WalletsState(
@@ -2032,6 +2222,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
 
     @Suppress("LongMethod")
     private fun runScenario(
+        savedStateHandle: SavedStateHandle = SavedStateHandle(),
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(
             cbcEligibility = CardBrandChoiceEligibility.create(
                 isEligible = true,
@@ -2097,6 +2288,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             )
 
         val interactor = DefaultPaymentMethodVerticalLayoutInteractor(
+            savedStateHandle = savedStateHandle,
             paymentMethodMetadata = paymentMethodMetadata,
             processing = processing,
             savedPaymentMethodSelectionState = savedPaymentMethodSelectionState,
@@ -2171,7 +2363,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             visibilitySnapshotTurbine = visibilitySnapshotTurbine,
             verticalPaymentSelectionHandler = defaultVerticalPaymentSelectionHandler,
         ).apply {
-            testScope.runTest {
+            TestScope(testDispatcher).runTest {
                 testBlock()
             }
             ensureAllEventsConsumed()

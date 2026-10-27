@@ -66,7 +66,9 @@ internal class AddressElementActivityAnalyticsTest {
     }
 
     @Test
-    fun `failed save reports failure and close reports cancellation`() = runTaxScenario(fails = true) { taxUpdate ->
+    fun `failed save and unchanged close report failure and cancellation`() = runTaxScenario(
+        fails = true,
+    ) { taxUpdate ->
         val failedRequest = expectShippingAnalytics(
             "elements.shipping_address.save_failed",
             analyticsPayloadField("analytics_value", "apiError"),
@@ -79,10 +81,8 @@ internal class AddressElementActivityAnalyticsTest {
         awaitAnalytics(failedRequest)
         addressPage.assertReadyToSave()
 
-        addressPage.clickClose()
-        addressPage.assertDiscardConfirmation(PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG)
         val canceledRequest = expectShippingAnalytics("elements.shipping_address.canceled")
-        addressPage.discardChanges()
+        addressPage.clickClose()
 
         assertThat(awaitResult()).isEqualTo(AddressElementActivityContract.Result.Canceled)
         awaitAnalytics(canceledRequest)
@@ -91,6 +91,7 @@ internal class AddressElementActivityAnalyticsTest {
     @Test
     fun `root back reports cancellation after discard`() = runScenario {
         addressPage.assertReadyToSave()
+        addressPage.editName(EDITED_NAME)
 
         activityScenario.onActivity { activity ->
             activity.onBackPressedDispatcher.onBackPressed()
@@ -107,6 +108,7 @@ internal class AddressElementActivityAnalyticsTest {
     @Test
     fun `close and keep editing do not report until discard uses current data`() = runScenario {
         addressPage.assertReadyToSave()
+        addressPage.editName(EDITED_NAME)
 
         addressPage.clickClose()
         addressPage.assertDiscardConfirmation(PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG)
@@ -129,6 +131,7 @@ internal class AddressElementActivityAnalyticsTest {
     @Test
     fun `scrim accessibility action reports cancellation after discard`() = runScenario {
         addressPage.assertReadyToSave()
+        addressPage.editName(EDITED_NAME)
 
         addressPage.dismissViaScrimAccessibilityAction()
         addressPage.assertDiscardConfirmation(PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG)
@@ -267,6 +270,7 @@ internal class AddressElementActivityAnalyticsTest {
     }
 
     private companion object {
+        const val EDITED_NAME = "Jenny Rosen Updated"
         val SHIPPING_ADDRESS = AddressDetails(
             name = "Jenny Rosen",
             address = PaymentSheet.Address(

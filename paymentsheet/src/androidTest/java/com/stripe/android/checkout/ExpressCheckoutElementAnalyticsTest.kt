@@ -3,6 +3,7 @@ package com.stripe.android.checkout
 import androidx.test.espresso.intent.rule.IntentsRule
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.checkouttesting.CheckoutInitResponseFactory
+import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutConfirm
 import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.checkouttesting.checkoutUpdate
@@ -109,7 +110,7 @@ internal class ExpressCheckoutElementAnalyticsTest {
             validateConfirmationAnalyticsRequest(
                 eventName = "checkout_elements.confirm.failed",
                 analyticsPayloadField("selected_lpm", "google_pay"),
-                analyticsPayloadField("error_message", "googlePay_1"),
+                analyticsPayloadField("error_type", "googlePay_1"),
                 analyticsPayloadField("error_code", "1"),
             )
 
@@ -137,7 +138,7 @@ internal class ExpressCheckoutElementAnalyticsTest {
                 eventName = "checkout_elements.confirm.failed",
                 analyticsPayloadField("selected_lpm", "link"),
                 analyticsPayloadField("link_context", "wallet"),
-                analyticsPayloadField("error_message", "java.lang.IllegalStateException"),
+                analyticsPayloadField("error_type", "java.lang.IllegalStateException"),
             )
 
             // We re-load after confirmation fails, which triggers another two loads: one for ECE, one for PE.
@@ -285,7 +286,7 @@ internal class ExpressCheckoutElementAnalyticsTest {
             validateConfirmationAnalyticsRequest(
                 eventName = "checkout_elements.confirm.failed",
                 analyticsPayloadField("selected_lpm", "google_pay"),
-                analyticsPayloadField("error_message", "checkoutSessionTotalChanged"),
+                analyticsPayloadField("error_type", "checkoutSessionTotalChanged"),
                 analyticsPayloadField("error_code", "checkout_session_total_changed"),
             )
 
@@ -342,6 +343,8 @@ internal class ExpressCheckoutElementAnalyticsTest {
         networkRule.validateAnalyticsRequest(
             eventName = eventName,
             productUsage = setOf("checkout_elements"),
+            analyticsPayloadField("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID),
+            analyticsPayloadField("invocation_source", "express_checkout_element"),
             *requestMatchers,
         )
     }

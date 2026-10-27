@@ -58,6 +58,23 @@ class CheckoutSessionResponseJsonParserTest {
     }
 
     @Test
+    fun `checkout config id is null when the response omits it`() {
+        val result = requireNotNull(parse(base()))
+
+        assertThat(result.configId).isNull()
+    }
+
+    @Test
+    fun `parses checkout config id separately from elements session config id`() {
+        val json = base().put("config_id", "cfg_checkout_123")
+        json.getJSONObject("elements_session").put("config_id", "cfg_elements_123")
+        val result = requireNotNull(parse(json))
+
+        assertThat(result.configId).isEqualTo("cfg_checkout_123")
+        assertThat(result.elementsSession?.elementsSessionConfigId).isEqualTo("cfg_elements_123")
+    }
+
+    @Test
     fun `shipping address collection requires a shipping address`() {
         val json = base().put(
             "shipping_address_collection",

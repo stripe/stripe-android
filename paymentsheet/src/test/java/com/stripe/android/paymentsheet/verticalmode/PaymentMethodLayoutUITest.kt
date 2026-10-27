@@ -8,9 +8,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertAll
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
-import androidx.compose.ui.test.isDisplayed
-import androidx.compose.ui.test.isNotDisplayed
 import androidx.compose.ui.test.isSelected
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onChildren
@@ -23,20 +22,18 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.AffirmDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinition
-import com.stripe.android.lpmfoundations.paymentmethod.definitions.KlarnaDefinition
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.model.PaymentMethodMessageLearnMore
-import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.ViewActionRecorder
 import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor.Selection
+import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.createComposeCleanupRule
-import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -56,6 +53,9 @@ internal class PaymentMethodLayoutUITest(
 
     @get:Rule
     val composeCleanupRule = createComposeCleanupRule()
+
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule(UnconfinedTestDispatcher())
 
     @Test
     fun clickingOnViewMore_transitionsToManageScreen() = runScenario(
@@ -129,6 +129,7 @@ internal class PaymentMethodLayoutUITest(
                         metadata = metadata,
                     )
                         .asDisplayablePaymentMethod(
+                            isExpanded = false,
                             customerSavedPaymentMethods = emptyList(),
                             incentive = null,
                             onClick = { onClickCalled = true },
@@ -141,116 +142,6 @@ internal class PaymentMethodLayoutUITest(
             composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_card").performClick()
             assertThat(onClickCalled).isTrue()
             assertThat(viewActionRecorder.viewActions).isEmpty()
-        }
-    }
-
-    @Test
-    fun clickingOnBnpL_with_promotion_shows_promotion() {
-        val metadata = PaymentMethodMetadataFactory.create(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = listOf("card", "affirm")
-            )
-        )
-        var onClickCalled = false
-        runScenario(
-            initialState = createState(
-                displayablePaymentMethods = listOf(
-                    AffirmDefinition.uiDefinitionFactory(metadata).createSupportedPaymentMethod(
-                        metadata = metadata,
-                    )
-                        .asDisplayablePaymentMethod(
-                            customerSavedPaymentMethods = emptyList(),
-                            incentive = null,
-                            onClick = { onClickCalled = true },
-                            promotionProvider = { FakePaymentMethodMessagePromotionsHelper.affirmPromotion }
-                        ),
-                ),
-                displayedSavedPaymentMethod = null,
-            )
-        ) {
-            assertThat(onClickCalled).isFalse()
-            composeRule.onNodeWithText("This is a message", substring = true).isNotDisplayed()
-            composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_affirm").performClick()
-            assertThat(onClickCalled).isTrue()
-            assertThat(viewActionRecorder.viewActions).isEmpty()
-            composeRule.onNodeWithText("This is a message", substring = true).isDisplayed()
-        }
-    }
-
-    @Test
-    fun clickingOnBnpL_falls_back_to_subtitle_if_promotion_not_available() {
-        val metadata = PaymentMethodMetadataFactory.create(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = listOf("card", "affirm")
-            )
-        )
-        var onClickCalled = false
-        runScenario(
-            initialState = createState(
-                displayablePaymentMethods = listOf(
-                    AffirmDefinition.uiDefinitionFactory(metadata).createSupportedPaymentMethod(
-                        metadata = metadata,
-                    )
-                        .asDisplayablePaymentMethod(
-                            customerSavedPaymentMethods = emptyList(),
-                            incentive = null,
-                            onClick = { onClickCalled = true },
-                            promotionProvider = { null },
-                            shouldExpandOnClick = true
-                        ),
-                ),
-                displayedSavedPaymentMethod = null,
-            )
-        ) {
-            assertThat(onClickCalled).isFalse()
-            composeRule.onNodeWithText("Pay over time with Affirm").isNotDisplayed()
-            composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_affirm").performClick()
-            assertThat(onClickCalled).isTrue()
-            assertThat(viewActionRecorder.viewActions).isEmpty()
-            composeRule.onNodeWithText("Pay over time with Affirm").isDisplayed()
-        }
-    }
-
-    @Test
-    fun does_not_expand_if_shouldExpandOnClick_is_false() {
-        val metadata = PaymentMethodMetadataFactory.create(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = listOf("card", "klarna")
-            )
-        )
-        var onClickCalled = false
-        runScenario(
-            initialState = createState(
-                displayablePaymentMethods = listOf(
-                    KlarnaDefinition.uiDefinitionFactory(metadata).createSupportedPaymentMethod(
-                        metadata = metadata,
-                    )
-                        .asDisplayablePaymentMethod(
-                            customerSavedPaymentMethods = emptyList(),
-                            incentive = null,
-                            onClick = { onClickCalled = true },
-                            shouldExpandOnClick = false,
-                            promotionProvider = {
-                                PaymentMethodMessagePromotion(
-                                    paymentMethodType = "klarna",
-                                    message = "This is a message",
-                                    learnMore = PaymentMethodMessageLearnMore(
-                                        message = "See plans",
-                                        url = ""
-                                    )
-                                )
-                            }
-                        ),
-                ),
-                displayedSavedPaymentMethod = null,
-            )
-        ) {
-            assertThat(onClickCalled).isFalse()
-            composeRule.onNodeWithText("This is a message").isNotDisplayed()
-            composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_klarna").performClick()
-            assertThat(onClickCalled).isTrue()
-            assertThat(viewActionRecorder.viewActions).isEmpty()
-            composeRule.onNodeWithText("This is a message").isNotDisplayed()
         }
     }
 
@@ -269,6 +160,7 @@ internal class PaymentMethodLayoutUITest(
                         metadata = metadata,
                     )
                         .asDisplayablePaymentMethod(
+                            isExpanded = false,
                             customerSavedPaymentMethods = emptyList(),
                             incentive = null,
                             onClick = { onClickCalled = true },
@@ -279,7 +171,7 @@ internal class PaymentMethodLayoutUITest(
             )
         ) {
             assertThat(onClickCalled).isFalse()
-            composeRule.onNodeWithText("Pay over time with Affirm").isDisplayed()
+            composeRule.onNodeWithText("Pay over time with Affirm").assertIsDisplayed()
         }
     }
 
@@ -314,6 +206,7 @@ internal class PaymentMethodLayoutUITest(
                 )
             ).sortedSupportedPaymentMethods().map {
                 it.asDisplayablePaymentMethod(
+                    isExpanded = false,
                     customerSavedPaymentMethods = emptyList(),
                     incentive = null,
                     onClick = {},
@@ -344,6 +237,7 @@ internal class PaymentMethodLayoutUITest(
                 )
             ).sortedSupportedPaymentMethods().map {
                 it.asDisplayablePaymentMethod(
+                    isExpanded = false,
                     customerSavedPaymentMethods = emptyList(),
                     incentive = null,
                     onClick = {},
@@ -381,6 +275,7 @@ internal class PaymentMethodLayoutUITest(
             initialState = createState(
                 displayablePaymentMethods = supportedPaymentMethods.map {
                     it.asDisplayablePaymentMethod(
+                        isExpanded = false,
                         customerSavedPaymentMethods = emptyList(),
                         incentive = null,
                         onClick = {},

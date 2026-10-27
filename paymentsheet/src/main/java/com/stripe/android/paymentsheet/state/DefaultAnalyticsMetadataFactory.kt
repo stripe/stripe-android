@@ -23,6 +23,7 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
 import com.stripe.android.paymentsheet.model.currency
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.uicore.StripeThemeDefaults
 import javax.inject.Inject
 import javax.inject.Provider
@@ -55,6 +56,9 @@ internal class DefaultAnalyticsMetadataFactory @Inject constructor(
                 stripeIntent = elementsSession.stripeIntent,
             )
         )
+        if (integrationMetadata is IntegrationMetadata.CheckoutSession) {
+            put("checkout_session_id", SimpleString(integrationMetadata.checkoutSessionResponse.id))
+        }
         putAll(
             link(
                 elementsSession = elementsSession,
@@ -242,6 +246,26 @@ internal class DefaultAnalyticsMetadataFactory @Inject constructor(
     internal fun PaymentSheet.Appearance.Embedded.analyticsMap() = buildMap<String, AnalyticsMetadata.Value> {
         put("style", SimpleBoolean(style != PaymentSheet.Appearance.Embedded.default.style))
         put("row_style", SimpleString(style.toAnalyticsValue()))
+    }
+
+    companion object {
+        fun create(
+            response: CheckoutSessionResponse?,
+        ): AnalyticsMetadata = buildMap<String, AnalyticsMetadata.Value> {
+            if (response != null) {
+                put("checkout_config_id", SimpleString(response.configId))
+                put("checkout_session_id", SimpleString(response.id))
+                put("currency", SimpleString(response.currency))
+                put("session_status", SimpleString(response.status.name.lowercase()))
+                put("payment_status", SimpleString(response.paymentStatus.name.lowercase()))
+                put(
+                    "elements_session_config_id",
+                    SimpleString(response.elementsSession?.elementsSessionConfigId?.takeIf { it.isNotEmpty() }),
+                )
+                put("adaptive_pricing_active", SimpleBoolean(response.adaptivePricingInfo?.isActive == true))
+                put("automatic_tax_enabled", SimpleBoolean(response.automaticTaxEnabled))
+            }
+        }.let { AnalyticsMetadata(it) }
     }
 }
 

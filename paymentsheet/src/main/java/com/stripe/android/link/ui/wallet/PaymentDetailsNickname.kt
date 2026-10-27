@@ -4,6 +4,7 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.plus
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.PaymentMethodPreviewDetails
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.LinkPaymentDetails
@@ -75,6 +76,17 @@ internal val ConsumerPaymentDetails.PaymentDetails.paymentOptionLabel: Resolvabl
             }
         }
         return components.joinToString(separator = " ")
+    }
+
+internal val PaymentMethodPreviewDetails.paymentOptionLabel: ResolvableString
+    get() = when (this) {
+        is PaymentMethodPreviewDetails.Card -> {
+            makeCardPaymentOptionLabel(nickname = null, funding = funding, brand = brand, last4 = last4)
+        }
+        is PaymentMethodPreviewDetails.BankAccount -> {
+            listOf(makeBankAccountDisplayName(nickname = null, bankName = bankName), maskedLast4(last4))
+                .joinToString(separator = " ")
+        }
     }
 
 internal fun makeFallbackCardName(funding: String, brand: String): ResolvableString {

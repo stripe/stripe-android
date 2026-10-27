@@ -1,10 +1,12 @@
 package com.stripe.android.elements
 
+import android.content.Context
 import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.AnyThread
 import androidx.annotation.ColorInt
+import androidx.annotation.DimenRes
 import androidx.annotation.FontRes
 import androidx.annotation.RestrictTo
 import androidx.compose.ui.graphics.Color
@@ -19,12 +21,14 @@ import com.stripe.android.checkout.toCheckoutAddress
 import com.stripe.android.checkout.toShippingDetails
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.injection.ViewModelScope
+import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.addresselement.AddressElementActivityContract
 import com.stripe.android.paymentsheet.addresselement.AddressLauncher
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.uicore.StripeThemeDefaults
+import com.stripe.android.uicore.getRawValueFromDimenResource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -203,12 +207,15 @@ class ShippingAddressElement internal constructor(
         @CheckoutSessionPreview
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Suppress("TooManyFunctions")
+        @OptIn(AppearanceAPIAdditionsPreview::class)
         class Appearance {
             private var colorsLight = Colors.light()
             private var colorsDark = Colors.dark()
             private var themeMode = ThemeMode.Automatic
             private var primaryButton = PrimaryButton()
             private var formInsetValues = Insets.defaultFormInsetValues
+            private var shapes = Shapes()
+            private var typography = Typography()
 
             /** Sets the colors used in light mode. */
             fun colorsLight(colors: Colors): Appearance = apply { colorsLight = colors }
@@ -227,6 +234,12 @@ class ShippingAddressElement internal constructor(
             /** Sets the insets used by the address form. */
             fun formInsetValues(insets: Insets): Appearance = apply { formInsetValues = insets }
 
+            /** Sets the shape of inputs and other components. */
+            fun shapes(shapes: Shapes): Appearance = apply { this.shapes = shapes }
+
+            /** Sets the typography used for form text. */
+            fun typography(typography: Typography): Appearance = apply { this.typography = typography }
+
             @Parcelize
             internal data class State(
                 val colorsLight: Colors.State,
@@ -234,6 +247,8 @@ class ShippingAddressElement internal constructor(
                 val themeMode: ThemeMode,
                 val primaryButton: PrimaryButton.State,
                 val formInsetValues: Insets.State,
+                val shapes: Shapes.State,
+                val typography: Typography.State,
             ) : Parcelable
 
             internal fun build(): State = State(
@@ -242,7 +257,176 @@ class ShippingAddressElement internal constructor(
                 themeMode = themeMode,
                 primaryButton = primaryButton.build(),
                 formInsetValues = formInsetValues.build(),
+                shapes = shapes.build(),
+                typography = typography.build(),
             )
+
+            /** Shapes used for inputs, buttons, and sheets. */
+            @CheckoutSessionPreview
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            class Shapes {
+                private var cornerRadiusDp: Float = StripeThemeDefaults.shapes.cornerRadius
+                private var borderStrokeWidthDp: Float = StripeThemeDefaults.shapes.borderStrokeWidth
+                private var bottomSheetCornerRadiusDp: Float? = null
+
+                /** Sets the component corner radius, in dp. */
+                fun cornerRadiusDp(cornerRadiusDp: Float): Shapes = apply {
+                    this.cornerRadiusDp = cornerRadiusDp
+                }
+
+                /** Sets the component corner radius from a dimension resource. */
+                fun cornerRadiusDp(context: Context, @DimenRes cornerRadiusRes: Int): Shapes = apply {
+                    this.cornerRadiusDp = context.getRawValueFromDimenResource(cornerRadiusRes)
+                }
+
+                /** Sets the component border stroke width, in dp. */
+                fun borderStrokeWidthDp(borderStrokeWidthDp: Float): Shapes = apply {
+                    this.borderStrokeWidthDp = borderStrokeWidthDp
+                }
+
+                /** Sets the component border stroke width from a dimension resource. */
+                fun borderStrokeWidthDp(context: Context, @DimenRes borderStrokeWidthRes: Int): Shapes = apply {
+                    this.borderStrokeWidthDp = context.getRawValueFromDimenResource(borderStrokeWidthRes)
+                }
+
+                /**
+                 * Sets the bottom-sheet corner radius, in dp.
+                 * Defaults to the component corner radius.
+                 */
+                fun bottomSheetCornerRadiusDp(bottomSheetCornerRadiusDp: Float): Shapes = apply {
+                    this.bottomSheetCornerRadiusDp = bottomSheetCornerRadiusDp
+                }
+
+                /**
+                 * Sets the bottom-sheet corner radius from a dimension resource.
+                 * Defaults to the component corner radius.
+                 */
+                fun bottomSheetCornerRadiusDp(
+                    context: Context,
+                    @DimenRes bottomSheetCornerRadiusRes: Int,
+                ): Shapes = apply {
+                    this.bottomSheetCornerRadiusDp = context.getRawValueFromDimenResource(bottomSheetCornerRadiusRes)
+                }
+
+                @Parcelize
+                internal data class State(
+                    val cornerRadiusDp: Float,
+                    val borderStrokeWidthDp: Float,
+                    val bottomSheetCornerRadiusDp: Float,
+                ) : Parcelable
+
+                internal fun build(): State = State(
+                    cornerRadiusDp = cornerRadiusDp,
+                    borderStrokeWidthDp = borderStrokeWidthDp,
+                    bottomSheetCornerRadiusDp = bottomSheetCornerRadiusDp ?: cornerRadiusDp,
+                )
+            }
+
+            /** Typography used for shipping address form text. */
+            @CheckoutSessionPreview
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            class Typography {
+                private var sizeScaleFactor: Float = StripeThemeDefaults.typography.fontSizeMultiplier
+
+                @FontRes
+                private var fontResId: Int? = StripeThemeDefaults.typography.fontFamily
+
+                private var custom = Custom()
+
+                /**
+                 * Sets the scale factor for form fonts.
+                 * Defaults to 1.0.
+                 */
+                fun sizeScaleFactor(sizeScaleFactor: Float): Typography = apply {
+                    this.sizeScaleFactor = sizeScaleFactor
+                }
+
+                /** Sets the font resource used for form text. */
+                fun fontResId(@FontRes fontResId: Int?): Typography = apply {
+                    this.fontResId = fontResId
+                }
+
+                /**
+                 * Sets font overrides for specific text styles.
+                 * These override the default font calculations for those styles.
+                 */
+                @OptIn(AppearanceAPIAdditionsPreview::class)
+                fun custom(custom: Custom): Typography = apply {
+                    this.custom = custom
+                }
+
+                @Parcelize
+                internal data class State(
+                    val sizeScaleFactor: Float,
+                    @FontRes val fontResId: Int?,
+                    val custom: Custom.State,
+                ) : Parcelable
+
+                internal fun build(): State = State(
+                    sizeScaleFactor = sizeScaleFactor,
+                    fontResId = fontResId,
+                    custom = custom.build(),
+                )
+
+                /** Font overrides for specific text styles. */
+                @CheckoutSessionPreview
+                @AppearanceAPIAdditionsPreview
+                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                class Custom {
+                    private var h1: Font? = null
+
+                    /** Sets the headline font override. */
+                    fun h1(font: Font?): Custom = apply { h1 = font }
+
+                    @Parcelize
+                    internal data class State(
+                        val h1: Font.State?,
+                    ) : Parcelable
+
+                    internal fun build(): State = State(
+                        h1 = h1?.build(),
+                    )
+                }
+
+                /** Font configuration for a text style. */
+                @CheckoutSessionPreview
+                @AppearanceAPIAdditionsPreview
+                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                class Font {
+                    @FontRes
+                    private var fontFamily: Int? = null
+                    private var fontSizeSp: Float? = null
+                    private var fontWeight: Int? = null
+                    private var letterSpacingSp: Float? = null
+
+                    /** Sets the font resource. */
+                    fun fontFamily(@FontRes value: Int?): Font = apply { fontFamily = value }
+
+                    /** Sets the font size, in sp. */
+                    fun fontSizeSp(value: Float?): Font = apply { fontSizeSp = value }
+
+                    /** Sets the font weight. */
+                    fun fontWeight(value: Int?): Font = apply { fontWeight = value }
+
+                    /** Sets the letter spacing, in sp. */
+                    fun letterSpacingSp(value: Float?): Font = apply { letterSpacingSp = value }
+
+                    @Parcelize
+                    internal data class State(
+                        @FontRes val fontFamily: Int?,
+                        val fontSizeSp: Float?,
+                        val fontWeight: Int?,
+                        val letterSpacingSp: Float?,
+                    ) : Parcelable
+
+                    internal fun build(): State = State(
+                        fontFamily = fontFamily,
+                        fontSizeSp = fontSizeSp,
+                        fontWeight = fontWeight,
+                        letterSpacingSp = letterSpacingSp,
+                    )
+                }
+            }
 
             /** Colors used to render the address form. */
             @CheckoutSessionPreview

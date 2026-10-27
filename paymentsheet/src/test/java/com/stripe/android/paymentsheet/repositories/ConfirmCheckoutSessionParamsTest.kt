@@ -5,6 +5,7 @@ import com.stripe.android.model.Address
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.PaymentIntentCreationFlow
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodSelectionFlow
 import kotlin.test.Test
 
@@ -31,6 +32,17 @@ class ConfirmCheckoutSessionParamsTest {
         assertThat(params["expected_payment_method_type"]).isEqualTo("card")
         assertThat(params["return_url"]).isEqualTo("stripesdk://return_url")
         assertThat(params).containsKey("client_attribution_metadata")
+    }
+
+    @Test
+    fun `serializes new payment method data`() {
+        val paymentMethodData = PaymentMethodCreateParamsFixtures.DEFAULT_CARD
+        val params = createParams().copy(
+            paymentMethodId = null,
+            paymentMethodData = paymentMethodData,
+        ).toParamMap()
+
+        assertThat(params["payment_method_data"]).isEqualTo(paymentMethodData.toParamMap())
     }
 
     @Test
@@ -117,6 +129,7 @@ class ConfirmCheckoutSessionParamsTest {
         return ConfirmCheckoutSessionParams(
             collectedInformation = collectedInformation,
             paymentMethodId = "pm_test_123",
+            paymentMethodData = null,
             expectedPaymentMethodType = PaymentMethod.Type.Card.code,
             clientAttributionMetadata = CLIENT_ATTRIBUTION_METADATA,
             returnUrl = "stripesdk://return_url",

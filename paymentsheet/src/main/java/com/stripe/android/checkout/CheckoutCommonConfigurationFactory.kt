@@ -18,7 +18,7 @@ internal class CheckoutCommonConfigurationFactory @Inject constructor(
         configuration: CheckoutController.Configuration.State,
         checkoutSessionResponse: CheckoutSessionResponse,
         collectedDetails: CheckoutCollectedDetails,
-    ): CommonConfiguration = createCommonConfiguration(
+    ): CommonConfiguration? = createCommonConfiguration(
         configuration = configuration,
         checkoutSessionResponse = checkoutSessionResponse,
         collectedDetails = collectedDetails,
@@ -64,7 +64,7 @@ internal class CheckoutCommonConfigurationFactory @Inject constructor(
         configuration: CheckoutController.Configuration.State,
         checkoutSessionResponse: CheckoutSessionResponse,
         collectedDetails: CheckoutCollectedDetails,
-    ): CommonConfiguration = createCommonConfiguration(
+    ): CommonConfiguration? = createCommonConfiguration(
         configuration = configuration,
         checkoutSessionResponse = checkoutSessionResponse,
         collectedDetails = collectedDetails,
