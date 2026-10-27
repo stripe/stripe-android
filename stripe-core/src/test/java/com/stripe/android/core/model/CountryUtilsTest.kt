@@ -16,6 +16,13 @@ import kotlin.test.Test
 class CountryUtilsTest {
 
     @Test
+    fun `reuses ordered countries for the same locale`() {
+        val countries = CountryUtils.getOrderedCountries(Locale.US)
+
+        assertThat(CountryUtils.getOrderedCountries(Locale.US)).isSameInstanceAs(countries)
+    }
+
+    @Test
     fun `doesCountryUsePostalCode() should return expected result`() {
         assertThat(CountryUtils.doesCountryUsePostalCode(CountryCode.create("US")))
             .isTrue()
