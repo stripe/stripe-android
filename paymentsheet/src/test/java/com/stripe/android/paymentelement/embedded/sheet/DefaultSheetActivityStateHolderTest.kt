@@ -33,6 +33,7 @@ import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.FakeAddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.paymentsheet.ui.PrimaryButtonIcon
 import com.stripe.android.paymentsheet.ui.PrimaryButtonProcessingState
 import com.stripe.android.paymentsheet.verticalmode.FakeManageScreenInteractor
 import com.stripe.android.paymentsheet.verticalmode.FakePaymentMethodVerticalLayoutInteractor
@@ -71,7 +72,7 @@ internal class DefaultSheetActivityStateHolderTest {
                     formatArgs = arrayOf("$10.99")
                 )
             )
-            assertThat(state.shouldDisplayLockIcon).isTrue()
+            assertThat(state.primaryButtonIcon).isEqualTo(PrimaryButtonIcon.Lock)
         }
     }
 
@@ -86,7 +87,7 @@ internal class DefaultSheetActivityStateHolderTest {
             assertThat(state.primaryButtonLabel).isEqualTo(
                 resolvableString(R.string.stripe_continue_button_label)
             )
-            assertThat(state.shouldDisplayLockIcon).isFalse()
+            assertThat(state.primaryButtonIcon).isEqualTo(PrimaryButtonIcon.None)
         }
     }
 
@@ -137,7 +138,7 @@ internal class DefaultSheetActivityStateHolderTest {
                 assertThat(state.primaryButtonLabel).isEqualTo(
                     resolvableString(R.string.stripe_continue_button_label)
                 )
-                assertThat(state.shouldDisplayLockIcon).isFalse()
+                assertThat(state.primaryButtonIcon).isEqualTo(PrimaryButtonIcon.None)
             }
         }
     }
@@ -333,7 +334,7 @@ internal class DefaultSheetActivityStateHolderTest {
                 onClick = {},
                 onDisabledClick = { validationRequested = true },
                 enabled = false,
-                lockVisible = false,
+                icon = PrimaryButtonIcon.None,
             )
         }
 
@@ -352,7 +353,7 @@ internal class DefaultSheetActivityStateHolderTest {
                     label = "Do something".resolvableString,
                     onClick = {},
                     enabled = true,
-                    lockVisible = true
+                    icon = PrimaryButtonIcon.Lock
                 )
             }
 
@@ -385,7 +386,7 @@ internal class DefaultSheetActivityStateHolderTest {
                     label = "Do something".resolvableString,
                     onClick = {},
                     enabled = true,
-                    lockVisible = true
+                    icon = PrimaryButtonIcon.Lock
                 )
             }
 
@@ -748,7 +749,7 @@ internal class DefaultSheetActivityStateHolderTest {
                     isEnabled = true,
                     processingState = PrimaryButtonProcessingState.Idle(null),
                     isProcessing = false,
-                    shouldDisplayLockIcon = false,
+                    primaryButtonIcon = PrimaryButtonIcon.None,
                 )
             ),
             onContinueClick = {},
@@ -765,7 +766,7 @@ internal class DefaultSheetActivityStateHolderTest {
                     isEnabled = true,
                     processingState = PrimaryButtonProcessingState.Idle(null),
                     isProcessing = false,
-                    shouldDisplayLockIcon = false,
+                    primaryButtonIcon = PrimaryButtonIcon.None,
                 )
             ),
             onContinueClick = {},

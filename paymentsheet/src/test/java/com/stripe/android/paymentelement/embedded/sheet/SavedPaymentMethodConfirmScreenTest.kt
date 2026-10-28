@@ -21,6 +21,7 @@ import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentsheet.FakeCustomerStateHolder
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.ui.PRIMARY_BUTTON_TEST_TAG
+import com.stripe.android.paymentsheet.ui.PrimaryButtonIcon
 import com.stripe.android.paymentsheet.ui.PrimaryButtonProcessingState
 import com.stripe.android.paymentsheet.utils.EventReporterProvider
 import com.stripe.android.paymentsheet.verticalmode.FakeSavedPaymentMethodConfirmInteractor
@@ -182,7 +183,7 @@ internal class SavedPaymentMethodConfirmScreenTest {
         isEnabled = true,
         processingState = PrimaryButtonProcessingState.Idle(null),
         isProcessing = false,
-        shouldDisplayLockIcon = true,
+        primaryButtonIcon = PrimaryButtonIcon.Lock,
     )
 
     private class FakeSoftwareKeyboardController : SoftwareKeyboardController {

@@ -5,6 +5,7 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.paymentsheet.ui.PrimaryButtonIcon
 import com.stripe.android.paymentsheet.ui.PrimaryButtonProcessingState
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,7 +20,7 @@ internal class FakeSheetActivityStateHolder(
         isEnabled = false,
         processingState = PrimaryButtonProcessingState.Idle(null),
         isProcessing = false,
-        shouldDisplayLockIcon = true,
+        primaryButtonIcon = PrimaryButtonIcon.Lock,
     ),
 ) : SheetActivityStateHolder {
     private val _state = MutableStateFlow(initialState)

@@ -15,6 +15,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentsheet.ui.ErrorMessage
 import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.paymentsheet.ui.PrimaryButtonIcon
 import com.stripe.android.paymentsheet.ui.PrimaryButtonProcessingState
 import com.stripe.android.ui.core.FormUI
 import com.stripe.android.uicore.strings.resolve
@@ -66,7 +67,7 @@ internal fun ColumnScope.TapToAddConfirmationScreen(
             PrimaryButton(
                 modifier = Modifier.testTag(TAP_TO_ADD_CONFIRMATION_PRIMARY_BUTTON),
                 label = label.resolve(),
-                locked = locked,
+                icon = if (locked) PrimaryButtonIcon.Lock else PrimaryButtonIcon.None,
                 enabled = enabled,
                 processingState = when (this@with.state) {
                     TapToAddConfirmationInteractor.State.PrimaryButton.State.Idle ->
