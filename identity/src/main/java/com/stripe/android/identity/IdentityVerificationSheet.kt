@@ -50,6 +50,34 @@ interface IdentityVerificationSheet {
         var secondaryButtonStyle: SecondaryButtonStyle? = null
 
         /**
+         * Networked Identity options for Stripe SDK modules and internal testing.
+         */
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @set:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        var networkedIdentity: NetworkedIdentityOptions? = null
+
+        /**
+         * A Link consumer session started outside Identity, e.g. by crypto onramp. It only lets the user
+         * skip signing in to Link; Networked Identity still starts from an explicit user action.
+         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @Parcelize
+        data class LinkSessionHandoff(
+            val email: String,
+            val linkSessionKey: String,
+        ) : Parcelable {
+            override fun toString(): String = "LinkSessionHandoff([redacted])"
+        }
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @Parcelize
+        data class NetworkedIdentityOptions(
+            val linkSessionHandoff: LinkSessionHandoff?,
+            /** The host's key for Link sign-in and sign-up. Without it, Networked Identity isn't offered. */
+            val merchantPublishableKey: String?,
+        ) : Parcelable
+
+        /**
          * Configuration for the biometric consent screen.
          */
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

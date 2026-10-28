@@ -12,7 +12,10 @@ import com.stripe.android.identity.networking.models.VerificationPageData
 import kotlinx.coroutines.CompletableDeferred
 import java.io.File
 
-internal class FakeIdentityHostRepository : IdentityRepository {
+internal class FakeIdentityHostRepository(
+    private val page: VerificationPage? = null,
+) : IdentityRepository {
+    val retrieveCalls = Turbine<RetrieveCall>()
     val dataCalls = Turbine<DataCall>()
     val submitCalls = Turbine<SubmitCall>()
     val unexpectedCalls = Turbine<String>()
@@ -34,8 +37,11 @@ internal class FakeIdentityHostRepository : IdentityRepository {
         return submitResponse.await()
     }
 
-    override suspend fun retrieveVerificationPage(id: String, ephemeralKey: String): VerificationPage =
-        unexpected("retrieveVerificationPage")
+    override suspend fun retrieveVerificationPage(id: String, ephemeralKey: String): VerificationPage {
+        val page = page ?: unexpected("retrieveVerificationPage")
+        retrieveCalls.add(RetrieveCall(id, ephemeralKey))
+        return page
+    }
 
     override suspend fun verifyTestVerificationSession(
         id: String,
@@ -76,6 +82,7 @@ internal class FakeIdentityHostRepository : IdentityRepository {
     }
 
     fun ensureAllEventsConsumed() {
+        retrieveCalls.ensureAllEventsConsumed()
         dataCalls.ensureAllEventsConsumed()
         submitCalls.ensureAllEventsConsumed()
         unexpectedCalls.ensureAllEventsConsumed()
@@ -88,5 +95,6 @@ internal class FakeIdentityHostRepository : IdentityRepository {
         val clearData: ClearDataParam
     )
 
+    data class RetrieveCall(val id: String, val ephemeralKey: String)
     data class SubmitCall(val id: String, val ephemeralKey: String)
 }

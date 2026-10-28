@@ -31,7 +31,9 @@ internal class DefaultLinkGate(
 
     override val useNativeLink: Boolean
         get() {
-            if (stripeIntent.isLiveMode) {
+            // #TODO - Networked Identity: The debug-only flag also applies in live mode, so the Identity example can
+            // use native Link before it's a trusted app. Revisit once it is.
+            if (stripeIntent.isLiveMode && FeatureFlags.nativeLinkEnabled.value != FeatureFlag.Flag.Enabled) {
                 return useAttestationEndpoints
             }
             return when (FeatureFlags.nativeLinkEnabled.value) {

@@ -12,15 +12,28 @@ import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onChildAt
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipeUp
 import androidx.lifecycle.MutableLiveData
 import androidx.navigation.NavController
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.identity.IdentityVerificationSheetContract
 import com.stripe.android.identity.TestApplication
 import com.stripe.android.identity.navigation.ConsentDestination
+import com.stripe.android.identity.networked.FakeNetworkedIdentityActions
+import com.stripe.android.identity.networked.FakeNetworkedIdentityLinkSession
+import com.stripe.android.identity.networked.FakeNetworkedIdentityRepository
+import com.stripe.android.identity.networked.NetworkedIdentityOutcome
+import com.stripe.android.identity.networked.NetworkedIdentityState
+import com.stripe.android.identity.networked.NetworkedIdentityViewModel
+import com.stripe.android.identity.networked.niConfig
+import com.stripe.android.identity.networked.niHandoff
+import com.stripe.android.identity.networked.niViewModel
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.Requirement
 import com.stripe.android.identity.networking.models.VerificationPage
@@ -282,6 +295,54 @@ class ConsentScreenTest {
     }
 
     @Test
+    fun `a saved ID shows its chip and offers Link once scrolled to the end`() = runNetworkedScenario {
+        onNodeWithTag(LINK_SAVED_ID_CHIP_TAG).assertIsDisplayed()
+        onNodeWithTag(LINK_CONTINUE_BUTTON_TAG).assertDoesNotExist()
+
+        scrollToEnd()
+
+        onNodeWithTag(LINK_CONTINUE_BUTTON_TAG).assertIsDisplayed()
+        onNodeWithTag(LINK_MANUAL_BUTTON_TAG).assertIsDisplayed()
+        onNodeWithTag(ACCEPT_BUTTON_TAG).assertDoesNotExist()
+    }
+
+    @Test
+    fun `dismissing the saved ID brings back Accept`() = runNetworkedScenario {
+        scrollToEnd()
+
+        onNodeWithContentDescription("Dismiss").performClick()
+
+        onNodeWithTag(LINK_SAVED_ID_CHIP_TAG).assertDoesNotExist()
+        onNodeWithTag(LINK_CONTINUE_BUTTON_TAG).assertDoesNotExist()
+        onNodeWithTag(ACCEPT_BUTTON_TAG).onChildAt(0).assertTextEquals(CONSENT_ACCEPT_TEXT.uppercase())
+    }
+
+    @Test
+    fun `Continue with Link starts reuse`() = runNetworkedScenario { scenario ->
+        scrollToEnd()
+
+        onNodeWithTag(LINK_CONTINUE_BUTTON_TAG).onChildAt(0).performClick()
+        runBlocking { scenario.linkSession.configureCalls.awaitItem() }.response.complete(Result.success(Unit))
+
+        // The handed-in session skips Link's screens; a save would record its consent instead of loading documents.
+        assertThat(scenario.viewModel.state.value).isEqualTo(NetworkedIdentityState.DocumentsPending)
+        runBlocking { scenario.repository.documentCalls.awaitItem() }
+    }
+
+    @Test
+    fun `Manually verify instead continues with manual capture`() = runNetworkedScenario { scenario ->
+        scrollToEnd()
+
+        onNodeWithTag(LINK_MANUAL_BUTTON_TAG).onChildAt(0).performClick()
+
+        runBlocking {
+            scenario.viewModel.outcomes.test {
+                assertThat(awaitItem()).isEqualTo(NetworkedIdentityOutcome.ManualCapture)
+            }
+        }
+    }
+
+    @Test
     fun `when hideDeclineButton is false decline submission is unchanged`() {
         whenever(mockVerificationArgs.biometricConsent).thenReturn(
             IdentityVerificationSheet.Configuration.BiometricConsentConfiguration(
@@ -316,17 +377,50 @@ class ConsentScreenTest {
 
     private fun runScenario(
         verificationState: Resource<VerificationPage>,
+        networkedIdentityViewModel: NetworkedIdentityViewModel? = null,
         testBlock: ComposeContentTestRule.() -> Unit = {}
     ) {
         verificationPageLiveData.postValue(verificationState)
         composeTestRule.setContent {
             ConsentScreen(
                 mockNavController,
-                mockIdentityViewModel
+                mockIdentityViewModel,
+                networkedIdentityViewModel
             )
         }
 
         with(composeTestRule, testBlock)
+    }
+
+    /** The consent screen with Networked Identity offering reuse of a found saved ID. */
+    private fun runNetworkedScenario(block: ComposeContentTestRule.(NetworkedScenario) -> Unit) {
+        val linkSession = FakeNetworkedIdentityLinkSession()
+        val repository = FakeNetworkedIdentityRepository()
+        val actions = FakeNetworkedIdentityActions()
+        val viewModel = niViewModel(
+            linkSession = linkSession,
+            repository = repository,
+            actions = actions,
+            config = SAVED_ID_FOUND,
+            handoff = niHandoff(),
+        )
+        val scenario = NetworkedScenario(viewModel, linkSession, repository)
+
+        runScenario(Resource.success(verificationPage), viewModel) { this.block(scenario) }
+
+        linkSession.ensureAllEventsConsumed()
+        repository.ensureAllEventsConsumed()
+        actions.ensureAllEventsConsumed()
+    }
+
+    private data class NetworkedScenario(
+        val viewModel: NetworkedIdentityViewModel,
+        val linkSession: FakeNetworkedIdentityLinkSession,
+        val repository: FakeNetworkedIdentityRepository,
+    )
+
+    private fun ComposeContentTestRule.scrollToEnd() {
+        onNodeWithTag(SCROLLABLE_COLUMN_TAG).performTouchInput { swipeUp() }
     }
 
     private companion object {
@@ -338,5 +432,6 @@ class ConsentScreenTest {
         const val SCROLL_TO_CONTINUE_TEXT = "scroll to continue"
         const val CONTENT_CAMERA_LINE = "content for camera line"
         const val CONTENT_CLOUD_LINE = "content for cloud line"
+        val SAVED_ID_FOUND = niConfig(savedDocumentAvailable = true)
     }
 }

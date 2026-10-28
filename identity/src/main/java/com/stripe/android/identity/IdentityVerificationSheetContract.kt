@@ -21,6 +21,7 @@ internal class IdentityVerificationSheetContract :
         val biometricConsent: IdentityVerificationSheet.Configuration.BiometricConsentConfiguration?,
         val primaryButtonStyle: IdentityVerificationSheet.Configuration.PrimaryButtonStyle?,
         val secondaryButtonStyle: IdentityVerificationSheet.Configuration.SecondaryButtonStyle?,
+        val networkedIdentity: IdentityVerificationSheet.Configuration.NetworkedIdentityOptions?,
         @InjectorKey val injectorKey: String,
         val presentTime: Long
     ) : Parcelable {

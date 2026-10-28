@@ -10,8 +10,7 @@ internal data class NetworkedIdentityDocumentRequirements(
         documents: List<NetworkedIdentityDocument>,
         currentTimeSeconds: Long
     ): List<NetworkedIdentityDocument> = documents.filter { document ->
-        document.documentType != NetworkedIdentityDocumentType.UNKNOWN &&
-            document.documentType in allowedDocumentTypes &&
+        document.documentType in allowedDocumentTypes &&
             (!requiresLiveCapture || document.liveCaptured == true) &&
             (document.expirationDate == null || document.expirationDate > currentTimeSeconds)
     }
