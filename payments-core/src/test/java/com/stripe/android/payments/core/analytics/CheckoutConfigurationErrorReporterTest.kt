@@ -17,16 +17,6 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 internal class CheckoutConfigurationErrorReporterTest {
     @Test
-    fun `reports missing embedded configuration as an unexpected error`() = runScenario {
-        errorReporter.report(
-            errorEvent = ErrorReporter.UnexpectedErrorEvent.CHECKOUT_EMBEDDED_CONFIGURATION_IS_NULL,
-        )
-
-        assertThat(analyticsRequestExecutor.requests.awaitItem().params["event"])
-            .isEqualTo("unexpected_error.checkout.embedded_configuration.is_null")
-    }
-
-    @Test
     fun `reports missing common configuration as an unexpected error`() = runScenario {
         errorReporter.report(
             errorEvent = ErrorReporter.UnexpectedErrorEvent.CHECKOUT_COMMON_CONFIGURATION_IS_NULL,

@@ -139,6 +139,7 @@ internal class CheckoutStateLoaderTest {
     fun `loadInitial loads only payment element metadata when ECE is not configured`() = runScenario {
         val state = loadInitial().state
 
+        assertThat(state.embeddedConfiguration).isNotNull()
         assertThat(state.paymentMethodMetadata).isNotNull()
         assertThat(state.expressCheckoutElementPaymentMethodMetadata).isNull()
     }
