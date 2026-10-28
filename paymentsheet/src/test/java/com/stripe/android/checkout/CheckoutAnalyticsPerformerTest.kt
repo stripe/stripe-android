@@ -116,44 +116,23 @@ internal class CheckoutAnalyticsPerformerTest {
     }
 
     @Test
-    fun `Google Pay failure preserves its analytics error classification`() = runScenario {
-        startReporting()
-        performer.onPaymentElementConfirmationStarted(PaymentSelection.GooglePay)
-        val privateMessage = "private Google Pay details"
-        confirmationHandler.state.value = ConfirmationHandler.State.Complete(
-            ConfirmationHandler.Result.Failed(
-                cause = IllegalStateException(privateMessage),
-                message = privateMessage.resolvableString,
-                type = ConfirmationHandler.Result.Failed.ErrorType.GooglePay(errorCode = 12),
-            )
-        )
-
-        val request = analyticsRequestExecutor.awaitAndAssertConfirmationRequest(
-            ExpectedEvent(
-                event = "checkout_elements.confirm.failed",
-                publishableKey = DEFAULT_METADATA_PUBLISHABLE_KEY,
-                params = mapOf(
-                    "selected_lpm" to "google_pay",
-                    "error_type" to "googlePay_12",
-                    "error_code" to "12",
-                ),
-            ),
-        )
-        assertThat(request.toString()).doesNotContain(privateMessage)
-    }
+    fun `Google Pay failure preserves its analytics error classification`() = assertFailureReported(
+        type = ConfirmationHandler.Result.Failed.ErrorType.GooglePay(errorCode = 12),
+        expectedErrorParams = mapOf("error_type" to "googlePay_12", "error_code" to "12"),
+    )
 
     @Test
-    fun `internal failure is filtered from confirmation analytics`() = assertFailureNotReported(
+    fun `internal failure reports a confirmation event`() = assertFailureReported(
         ConfirmationHandler.Result.Failed.ErrorType.Internal,
     )
 
     @Test
-    fun `merchant integration failure is filtered from confirmation analytics`() = assertFailureNotReported(
+    fun `merchant integration failure reports a confirmation event`() = assertFailureReported(
         ConfirmationHandler.Result.Failed.ErrorType.MerchantIntegration,
     )
 
     @Test
-    fun `fatal failure is filtered from confirmation analytics`() = assertFailureNotReported(
+    fun `fatal failure reports a confirmation event`() = assertFailureReported(
         ConfirmationHandler.Result.Failed.ErrorType.Fatal,
     )
 
@@ -303,7 +282,10 @@ internal class CheckoutAnalyticsPerformerTest {
         )
     }
 
-    private fun assertFailureNotReported(type: ConfirmationHandler.Result.Failed.ErrorType) = runScenario {
+    private fun assertFailureReported(
+        type: ConfirmationHandler.Result.Failed.ErrorType,
+        expectedErrorParams: Map<String, Any> = mapOf("error_type" to "java.lang.IllegalStateException"),
+    ) = runScenario {
         startReporting()
         performer.onPaymentElementConfirmationStarted(PaymentSelection.GooglePay)
 
@@ -315,8 +297,17 @@ internal class CheckoutAnalyticsPerformerTest {
             )
         )
 
-        analyticsRequestExecutor.requestTurbine.expectNoEvents()
-        assertThat(durationProvider.has(FakeDurationProvider.Call.End(DurationProvider.Key.Checkout))).isFalse()
+        val request = analyticsRequestExecutor.awaitAndAssertConfirmationRequest(
+            ExpectedEvent(
+                event = "checkout_elements.confirm.failed",
+                publishableKey = DEFAULT_METADATA_PUBLISHABLE_KEY,
+                params = mapOf(
+                    "selected_lpm" to "google_pay",
+                    "duration" to 2f,
+                ) + expectedErrorParams,
+            ),
+        )
+        assertThat(request.toString()).doesNotContain("private failure details")
     }
 
     private fun linkMetadata(loginState: LinkState.LoginState): PaymentMethodMetadata =

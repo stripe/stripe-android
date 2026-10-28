@@ -15,6 +15,7 @@ import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.intent.CheckoutSessionResponseKey
+import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.DefaultAnalyticsMetadataFactory
 import com.stripe.android.paymentsheet.state.LinkState
@@ -83,16 +84,14 @@ internal class CheckoutAnalyticsPerformer @Inject constructor(
                     duration = durationProvider.end(DurationProvider.Key.Checkout),
                 )
             )
-            is ConfirmationHandler.Result.Failed -> result.toConfirmationError()?.let { error ->
-                reportEvent(
-                    CheckoutConfirmationEvent.Failed(
-                        confirmationContext = confirmationContext,
-                        analyticsMetadata = analyticsMetadata,
-                        duration = durationProvider.end(DurationProvider.Key.Checkout),
-                        error = error,
-                    )
+            is ConfirmationHandler.Result.Failed -> reportEvent(
+                CheckoutConfirmationEvent.Failed(
+                    confirmationContext = confirmationContext,
+                    analyticsMetadata = analyticsMetadata,
+                    duration = durationProvider.end(DurationProvider.Key.Checkout),
+                    error = result.toConfirmationError() ?: PaymentSheetConfirmationError.Stripe(result.cause),
                 )
-            }
+            )
             is ConfirmationHandler.Result.Canceled -> Unit
         }
     }
