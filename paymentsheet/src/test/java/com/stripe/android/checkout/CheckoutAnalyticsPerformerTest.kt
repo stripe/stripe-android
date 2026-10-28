@@ -163,7 +163,7 @@ internal class CheckoutAnalyticsPerformerTest {
     }
 
     @Test
-    fun `express checkout confirmation context survives process death without duration`() = runScenario {
+    fun `express checkout confirmation context survives performer recreation`() = runScenario {
         val expectedParams = confirmParams(
             selectedLpm = "link",
             invocationSource = "express_checkout_element",
@@ -175,12 +175,15 @@ internal class CheckoutAnalyticsPerformerTest {
             expectedParams,
         )
 
-        val restoredPerformer = recreatePerformerAfterProcessDeath()
+        val restoredPerformer = recreatePerformer()
         startReporting(restoredPerformer)
         confirmationHandler.state.value = ConfirmationHandler.State.Complete(successfulResult())
 
-        // The confirmation start time is held in memory, so the restored event has no duration.
-        analyticsRequestExecutor.awaitConfirmationEvent(SUCCEEDED_EVENT, expectedParams)
+        analyticsRequestExecutor.awaitConfirmationEvent(
+            SUCCEEDED_EVENT,
+            expectedParams,
+            duration = CONFIRMATION_DURATION_SECONDS,
+        )
     }
 
     @Test
@@ -423,11 +426,9 @@ internal class CheckoutAnalyticsPerformerTest {
         private val backgroundScope: CoroutineScope,
         private val testScheduler: TestCoroutineScheduler,
     ) {
-        val performer: CheckoutAnalyticsPerformer = createPerformer(durationProvider)
+        val performer: CheckoutAnalyticsPerformer = createPerformer()
 
-        /** The new process keeps [savedStateHandle] but gets a duration provider without the start. */
-        fun recreatePerformerAfterProcessDeath(): CheckoutAnalyticsPerformer =
-            createPerformer(FakeDurationProvider(duration = null))
+        fun recreatePerformer(): CheckoutAnalyticsPerformer = createPerformer()
 
         fun startReporting(performer: CheckoutAnalyticsPerformer = this.performer) {
             backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
@@ -435,9 +436,7 @@ internal class CheckoutAnalyticsPerformerTest {
             }
         }
 
-        private fun createPerformer(
-            durationProvider: DurationProvider,
-        ): CheckoutAnalyticsPerformer = TestCheckoutAnalyticsPerformerFactory.create(
+        private fun createPerformer(): CheckoutAnalyticsPerformer = TestCheckoutAnalyticsPerformerFactory.create(
             confirmationHandler = confirmationHandler,
             savedStateHandle = savedStateHandle,
             stateHolder = stateHolder,
