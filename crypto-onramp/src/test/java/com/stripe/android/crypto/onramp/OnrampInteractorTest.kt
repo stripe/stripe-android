@@ -3,6 +3,7 @@ package com.stripe.android.crypto.onramp
 import android.app.Application
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
+import android.os.Parcel
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
@@ -12,6 +13,7 @@ import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsEvent
 import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsService
+import com.stripe.android.crypto.onramp.di.OnrampComponentHolder
 import com.stripe.android.crypto.onramp.exception.AppAttestationException
 import com.stripe.android.crypto.onramp.exception.AppAttestationUnavailableException
 import com.stripe.android.crypto.onramp.exception.CryptoOnrampApiException
@@ -117,6 +119,7 @@ import org.mockito.kotlin.doSuspendableAnswer
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
+import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
@@ -2183,6 +2186,68 @@ class OnrampInteractorTest {
             )
         )
         assertThat(savedStateHandle.contains("onramp_pending_checkout")).isFalse()
+    }
+
+    @Test
+    @Suppress("RestrictedApi")
+    fun `pending checkout survives reopening and process restoration`() = runTest {
+        OnrampComponentHolder.reset()
+        try {
+            val application = RuntimeEnvironment.getApplication()
+            val original = OnrampComponentHolder.getOrCreate(application, SavedStateHandle())
+            val reopenedHost = SavedStateHandle()
+            val reopened = OnrampComponentHolder.getOrCreate(application, reopenedHost)
+            assertThat(reopened).isSameInstanceAs(original)
+
+            stubCheckoutRequiresNextAction()
+            val reopenedInteractor = createInteractor(
+                cryptoApiRepository = cryptoApiRepository,
+                savedStateHandle = reopened.savedStateHandle,
+            )
+            reopenedInteractor.configure(createConfigurationState(cryptoCustomerId = "cpt_123"))
+            reopenedInteractor.startCheckout("cos_test_session_id")
+            val pending = reopenedInteractor.state.value.checkoutState?.status
+            assertThat(pending).isInstanceOf(CheckoutState.Status.RequiresNextAction::class.java)
+            assertThat((pending as CheckoutState.Status.RequiresNextAction).onrampSessionId)
+                .isEqualTo("cos_test_session_id")
+
+            // Round-trip the new host's saved state through a Parcel, including PendingCheckout.
+            val parcel = Parcel.obtain()
+            val restoredHost = try {
+                parcel.writeBundle(reopenedHost.savedStateProvider().saveState())
+                parcel.setDataPosition(0)
+                SavedStateHandle.createHandle(parcel.readBundle(OnrampInteractor::class.java.classLoader), null)
+            } finally {
+                parcel.recycle()
+            }
+            OnrampComponentHolder.reset()
+            val restored = OnrampComponentHolder.getOrCreate(application, restoredHost)
+            val restoredInteractor = createInteractor(
+                cryptoApiRepository = cryptoApiRepository,
+                savedStateHandle = restored.savedStateHandle,
+            )
+            assertThat(restored).isNotSameInstanceAs(original)
+            assertThat(restoredInteractor.state.value.cryptoCustomerId).isNull()
+            assertThat(restoredInteractor.state.value.checkoutState).isNull()
+
+            whenever(cryptoApiRepository.retrievePaymentIntent(any(), any())).thenReturn(
+                Result.success(paymentIntentRequiringCard3ds().copy(status = StripeIntent.Status.Succeeded))
+            )
+            restoredInteractor.continueCheckout()
+
+            assertThat(restoredInteractor.state.value.cryptoCustomerId).isEqualTo("cpt_123")
+            val completed = restoredInteractor.state.value.checkoutState?.status
+            assertThat(completed).isInstanceOf(CheckoutState.Status.Completed::class.java)
+            assertThat((completed as CheckoutState.Status.Completed).result)
+                .isInstanceOf(OnrampCheckoutResult.Completed::class.java)
+            verify(cryptoApiRepository, times(2)).getOnrampSession(
+                sessionId = "cos_test_session_id",
+                sessionClientSecret = "test_secret",
+            )
+            assertThat(restored.savedStateHandle.contains("onramp_pending_checkout")).isFalse()
+        } finally {
+            OnrampComponentHolder.reset()
+        }
     }
 
     @Test
