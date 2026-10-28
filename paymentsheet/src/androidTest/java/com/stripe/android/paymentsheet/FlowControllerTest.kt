@@ -1033,10 +1033,9 @@ internal class FlowControllerTest(
                 .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isNotEmpty()
         }
+        testContext.configureCallbackTurbine.expectNoEvents()
         composeTestRule.onNodeWithTag("${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_pm_67890").performClick()
 
-        testContext.configureCallbackTurbine.expectNoEvents()
-        page.clickPrimaryButton()
         testContext.consumePaymentOptionEventForFlowController("card", "4242")
         testContext.markTestSucceeded()
     }

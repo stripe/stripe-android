@@ -3,9 +3,6 @@
 NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
 
-### PaymentSheet
-* [Fixed] FlowController now completes payment option selection immediately when a saved card is selected from the Manage screen.
-
 ## 23.25.1 - 2026-10-26
 
 ### PaymentSheet
