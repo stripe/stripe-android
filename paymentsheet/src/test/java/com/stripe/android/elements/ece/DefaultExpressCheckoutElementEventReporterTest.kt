@@ -14,6 +14,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.AnalyticsMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
+import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.android.utils.FakeDurationProvider
@@ -29,7 +30,7 @@ internal class DefaultExpressCheckoutElementEventReporterTest {
 
         val loggedParams = executor.getExecutedRequests().single().params
         assertThat(loggedParams).containsEntry("event", "elements.express_checkout_element.init")
-        assertThat(loggedParams).containsEntry("product_usage", "ExpressCheckoutElement")
+        assertThat(loggedParams).containsEntry("product_usage", "checkout_elements")
         assertThat(loggedParams).containsEntry("example_analytics_metadata", true)
         assertThat(loggedParams).containsEntry("ordered_lpms", "link,google_pay")
         assertThat(loggedParams).containsEntry(
@@ -101,12 +102,16 @@ internal class DefaultExpressCheckoutElementEventReporterTest {
                 .build(),
             expressCheckoutElementPaymentMethodMetadata = paymentMethodMetadata,
         )
-        val reporter = DefaultExpressCheckoutElementEventReporter(
+        val analyticsRequestFactory = PaymentAnalyticsRequestFactory(
             context = ApplicationProvider.getApplicationContext<Context>(),
+            defaultProductUsageTokens = setOf("checkout_elements"),
+            apiConfigurationProvider = { PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG },
+        )
+        val reporter = DefaultExpressCheckoutElementEventReporter(
+            analyticsRequestFactory = analyticsRequestFactory,
             analyticsRequestExecutor = analyticsRequestExecutor,
             durationProvider = durationProvider,
             stateHolder = stateHolder,
-            apiConfigurationProvider = { PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG },
         )
 
         block(
