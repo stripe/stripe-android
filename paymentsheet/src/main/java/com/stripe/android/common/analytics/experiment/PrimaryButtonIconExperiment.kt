@@ -26,6 +26,7 @@ internal class PrimaryButtonIconExperiment(
         val icon = when (group) {
             "control", "control_test" -> PrimaryButtonIcon.Lock
             "treatment_no_padlock" -> PrimaryButtonIcon.None
+            "treatment_replace_padlock" -> PrimaryButtonIcon.ShieldCheck
             else -> return originalIcon
         }
 

@@ -46,11 +46,11 @@ class PrimaryButtonUiStateMapperTest {
     @Test
     fun `complete flow applies icon experiment and exposes once across button updates`() = runIconScenario {
         mapper.forCompleteFlow().test {
-            assertThat(awaitItem()?.icon).isEqualTo(PrimaryButtonIcon.None)
+            assertThat(awaitItem()?.icon).isEqualTo(PrimaryButtonIcon.ShieldCheck)
             assertThat(eventReporter.experimentExposureCalls.awaitItem().experiment.group)
-                .isEqualTo("treatment_no_padlock")
+                .isEqualTo("treatment_replace_padlock")
             buttonsEnabled.value = false
-            assertThat(awaitItem()?.icon).isEqualTo(PrimaryButtonIcon.None)
+            assertThat(awaitItem()?.icon).isEqualTo(PrimaryButtonIcon.ShieldCheck)
             eventReporter.experimentExposureCalls.expectNoEvents()
         }
     }
@@ -65,7 +65,7 @@ class PrimaryButtonUiStateMapperTest {
         ),
     ) {
         mapper.forCompleteFlow().test {
-            assertThat(awaitItem()?.icon).isEqualTo(PrimaryButtonIcon.None)
+            assertThat(awaitItem()?.icon).isEqualTo(PrimaryButtonIcon.ShieldCheck)
         }
         eventReporter.experimentExposureCalls.awaitItem()
     }
@@ -821,7 +821,7 @@ class PrimaryButtonUiStateMapperTest {
                         arbId = "arb_123",
                         experimentAssignments = mapOf(
                             ElementsSession.ExperimentAssignment.OCS_MOBILE_REMOVE_PRIMARY_BUTTON_PADLOCK to
-                                "treatment_no_padlock",
+                                "treatment_replace_padlock",
                         ),
                     ),
                 ),

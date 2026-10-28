@@ -261,10 +261,13 @@ private fun BoxScope.StaticIncompleteProcessing(
             color = onBackground,
             modifier = Modifier.align(Alignment.CenterEnd),
         )
-    } else if (icon == PrimaryButtonIcon.Lock) {
+    } else if (icon != PrimaryButtonIcon.None) {
         Icon(
             painter = painterResource(
-                id = R.drawable.stripe_ic_paymentsheet_googlepay_primary_button_lock
+                id = when (icon) {
+                    PrimaryButtonIcon.ShieldCheck -> R.drawable.stripe_ic_paymentsheet_primary_button_shield_check
+                    else -> R.drawable.stripe_ic_paymentsheet_googlepay_primary_button_lock
+                }
             ),
             tint = onBackground,
             contentDescription = null,

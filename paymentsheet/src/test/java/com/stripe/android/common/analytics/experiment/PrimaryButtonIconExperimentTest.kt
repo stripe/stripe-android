@@ -85,10 +85,10 @@ internal class PrimaryButtonIconExperimentTest {
 
     @Test
     fun `setup intent in complete mode also uses assignment`() = runScenario {
-        val metadata = metadata("treatment_no_padlock").copy(
+        val metadata = metadata("treatment_replace_padlock").copy(
             stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD.copy(isLiveMode = true),
         )
-        assertThat(experiment.getIcon(metadata, PrimaryButtonIcon.Lock)).isEqualTo(PrimaryButtonIcon.None)
+        assertThat(experiment.getIcon(metadata, PrimaryButtonIcon.Lock)).isEqualTo(PrimaryButtonIcon.ShieldCheck)
         eventReporter.experimentExposureCalls.awaitItem()
     }
 
@@ -120,6 +120,7 @@ internal class PrimaryButtonIconExperimentTest {
         Control("control", PrimaryButtonIcon.Lock),
         ControlTest("control_test", PrimaryButtonIcon.Lock),
         NoPadlock("treatment_no_padlock", PrimaryButtonIcon.None),
+        ReplacePadlock("treatment_replace_padlock", PrimaryButtonIcon.ShieldCheck),
     }
 
     internal enum class PayMode(val mode: EventReporter.Mode, val dimension: String) {

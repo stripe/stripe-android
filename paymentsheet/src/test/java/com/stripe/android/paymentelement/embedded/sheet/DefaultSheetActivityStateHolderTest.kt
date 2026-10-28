@@ -72,9 +72,20 @@ internal class DefaultSheetActivityStateHolderTest {
     }
 
     @Test
+    fun `confirm sheet replaces padlock for assigned treatment`() = testScenario(
+        stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(isLiveMode = true),
+        experimentsData = padlockAssignment("treatment_replace_padlock"),
+    ) {
+        assertThat(stateHolder.state.value.primaryButtonIcon).isEqualTo(PrimaryButtonIcon.ShieldCheck)
+        assertThat(eventReporter.experimentExposureCalls.awaitItem().experiment.group)
+            .isEqualTo("treatment_replace_padlock")
+        eventReporter.validate()
+    }
+
+    @Test
     fun `continue sheet ignores padlock treatment`() = testScenario(
         stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(isLiveMode = true),
-        experimentsData = padlockAssignment("treatment_no_padlock"),
+        experimentsData = padlockAssignment("treatment_replace_padlock"),
         config = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.")
             .formSheetAction(EmbeddedPaymentElement.FormSheetAction.Continue).build(),
     ) {
@@ -85,7 +96,7 @@ internal class DefaultSheetActivityStateHolderTest {
     @Test
     fun `payment options sheet ignores padlock treatment`() = testScenario(
         stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(isLiveMode = true),
-        experimentsData = padlockAssignment("treatment_no_padlock"),
+        experimentsData = padlockAssignment("treatment_replace_padlock"),
         launchMode = EmbeddedLaunchMode.PaymentOptions,
     ) {
         assertThat(stateHolder.state.value.primaryButtonIcon).isEqualTo(PrimaryButtonIcon.None)
@@ -95,7 +106,7 @@ internal class DefaultSheetActivityStateHolderTest {
     @Test
     fun `manage sheet does not expose padlock treatment`() = testScenario(
         stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(isLiveMode = true),
-        experimentsData = padlockAssignment("treatment_no_padlock"),
+        experimentsData = padlockAssignment("treatment_replace_padlock"),
         launchMode = EmbeddedLaunchMode.Manage,
     ) {
         assertThat(stateHolder.state.value.primaryButtonIcon).isEqualTo(PrimaryButtonIcon.Lock)

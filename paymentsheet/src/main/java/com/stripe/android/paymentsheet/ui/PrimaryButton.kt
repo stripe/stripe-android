@@ -4,6 +4,7 @@ import com.stripe.android.core.strings.ResolvableString
 
 internal enum class PrimaryButtonIcon {
     Lock,
+    ShieldCheck,
     None,
 }
 

@@ -34,7 +34,7 @@ class ElementsSessionJsonParserTest {
         val json = JSONObject(ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_WITH_EXPERIMENTS_DATA_JSON.toString())
         json.getJSONObject("experiments_data").put(
             "experiment_assignments",
-            JSONObject().put("ocs_mobile_remove_primary_button_padlock", "treatment_no_padlock")
+            JSONObject().put("ocs_mobile_remove_primary_button_padlock", "treatment_replace_padlock")
                 .put("unknown_experiment", "treatment"),
         )
         val session = ElementsSessionJsonParser(
@@ -49,7 +49,7 @@ class ElementsSessionJsonParserTest {
 
         assertThat(session?.experimentsData?.experimentAssignments).containsExactly(
             ElementsSession.ExperimentAssignment.OCS_MOBILE_REMOVE_PRIMARY_BUTTON_PADLOCK,
-            "treatment_no_padlock",
+            "treatment_replace_padlock",
         )
     }
 
