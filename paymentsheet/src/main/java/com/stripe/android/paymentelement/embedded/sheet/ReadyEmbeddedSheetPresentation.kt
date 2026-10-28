@@ -65,14 +65,15 @@ internal class ReadyEmbeddedSheetPresentation @AssistedInject constructor(
         }
 
         activity.onBackPressedDispatcher.addCallback {
-            if (!embeddedNavigator.screen.value.isPerformingNetworkOperation().value) {
+            if (canDismiss()) {
                 embeddedNavigator.performAction(EmbeddedNavigator.Action.Back)
             }
         }
     }
 
     override fun canDismiss(): Boolean {
-        return !embeddedNavigator.screen.value.isPerformingNetworkOperation().value
+        return !sheetActivityStateHolder.state.value.isProcessing &&
+            !embeddedNavigator.screen.value.isPerformingNetworkOperation().value
     }
 
     override fun onDismissed() {

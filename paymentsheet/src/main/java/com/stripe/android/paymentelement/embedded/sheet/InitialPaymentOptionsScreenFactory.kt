@@ -173,13 +173,15 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
                 )
             },
             onUpdatePaymentMethod = ::navigateToUpdateScreen,
-            updateSelection = { selection, _ -> selectionHolder.setSelection(selection) },
+            updateSelection = { selection, _ -> onSelection(selection) },
             linkBrand = paymentMethodMetadata.effectiveLinkBrand(linkAccount),
         )
     }
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     internal fun onContinueClick() {
+        if (sheetActivityStateHolder.state.value.isProcessing) return
+
         val onClickOverride = onClickOverrideDelegate.onClickOverride
         if (onClickOverride != null) {
             onClickOverride()
@@ -188,12 +190,18 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
         continueCoordinator.onContinue()
     }
 
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    internal fun onSelection(selection: PaymentSelection?) {
+        if (sheetActivityStateHolder.state.value.isProcessing) return
+        selectionHolder.setSelection(selection)
+    }
+
     private fun createFormHelper(coroutineScope: CoroutineScope): FormHelper {
         return embeddedFormHelperFactory.createForVerticalLayout(
             coroutineScope = coroutineScope,
             paymentMethodMetadata = paymentMethodMetadata,
             eventReporter = eventReporter,
-            selectionUpdater = { selectionHolder.setSelection(it) },
+            selectionUpdater = ::onSelection,
             paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
         )
     }
@@ -226,11 +234,9 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
             canUpdateCardExpiryAndBillingDetails = customerStateHolder.canUpdateCardExpiryAndBillingDetails,
             canChangeCbc = customerStateHolder.canChangeCbc,
             walletsState = walletsInteractor.walletsState,
-            updateSelection = { updatedSelection ->
-                selectionHolder.setSelection(updatedSelection)
-            },
+            updateSelection = ::onSelection,
             verticalPaymentSelectionHandler = ImmediateVerticalPaymentSelectionHandler(
-                updateSelection = { selection, _ -> selectionHolder.setSelection(selection) },
+                updateSelection = { selection, _ -> onSelection(selection) },
                 completionAction = null,
             ),
             isCurrentScreen = isCurrentScreen<EmbeddedNavigator.Screen.VerticalPaymentOptions>(),

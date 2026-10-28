@@ -26,6 +26,7 @@ import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInteractor
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.verticalmode.FakeManageScreenInteractor
@@ -207,6 +208,7 @@ internal class InitialPaymentOptionsScreenFactoryTest {
         ),
     ) {
         val screens = factory.createInitialScreen()
+        assertThat(sheetActivityStateHolder.updateErrorTurbine.awaitItem()).isNull()
 
         assertThat(screens).hasSize(1)
         assertThat(screens.first()).isInstanceOf<EmbeddedNavigator.Screen.HorizontalPaymentOptions>()
@@ -252,6 +254,7 @@ internal class InitialPaymentOptionsScreenFactoryTest {
     ) {
         assertThat(factory.createInitialScreen().single())
             .isInstanceOf<EmbeddedNavigator.Screen.HorizontalPaymentOptions>()
+        assertThat(sheetActivityStateHolder.updateErrorTurbine.awaitItem()).isNull()
     }
 
     @Test
@@ -266,6 +269,7 @@ internal class InitialPaymentOptionsScreenFactoryTest {
         ),
     ) {
         val screens = factory.createInitialScreen()
+        assertThat(sheetActivityStateHolder.updateErrorTurbine.awaitItem()).isNull()
 
         assertThat(screens).hasSize(1)
         assertThat(screens.first()).isInstanceOf<EmbeddedNavigator.Screen.HorizontalPaymentOptions>()
@@ -290,6 +294,7 @@ internal class InitialPaymentOptionsScreenFactoryTest {
         selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
 
         val screens = factory.createInitialScreen()
+        assertThat(sheetActivityStateHolder.updateErrorTurbine.awaitItem()).isNull()
 
         assertThat(selectionHolder.selection.value).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
         assertThat(screens).hasSize(2)
@@ -319,6 +324,7 @@ internal class InitialPaymentOptionsScreenFactoryTest {
         selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
 
         val screens = factory.createInitialScreen()
+        assertThat(sheetActivityStateHolder.updateErrorTurbine.awaitItem()).isNull()
 
         assertThat(selectionHolder.selection.value).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
         assertThat(screens).hasSize(2)
@@ -343,6 +349,7 @@ internal class InitialPaymentOptionsScreenFactoryTest {
         selectionHolder.setSelection(selection)
 
         val screens = factory.createInitialScreen()
+        assertThat(sheetActivityStateHolder.updateErrorTurbine.awaitItem()).isNull()
 
         assertThat(selectionHolder.selection.value).isEqualTo(selection)
         assertThat(screens).hasSize(2)
@@ -374,6 +381,7 @@ internal class InitialPaymentOptionsScreenFactoryTest {
         selectionHolder.setSelection(selection)
 
         val screens = factory.createInitialScreen()
+        assertThat(sheetActivityStateHolder.updateErrorTurbine.awaitItem()).isNull()
 
         assertThat(selectionHolder.selection.value).isEqualTo(selection)
         assertThat(screens).hasSize(2)
@@ -403,6 +411,7 @@ internal class InitialPaymentOptionsScreenFactoryTest {
         selectionHolder.setSelection(selection)
 
         val screens = factory.createInitialScreen()
+        assertThat(sheetActivityStateHolder.updateErrorTurbine.awaitItem()).isNull()
 
         assertThat(selectionHolder.selection.value).isEqualTo(selection)
         assertThat(screens).hasSize(2)
@@ -425,6 +434,7 @@ internal class InitialPaymentOptionsScreenFactoryTest {
         selectionHolder.setSelection(selection)
 
         val screens = factory.createInitialScreen()
+        assertThat(sheetActivityStateHolder.updateErrorTurbine.awaitItem()).isNull()
 
         assertThat(selectionHolder.selection.value).isEqualTo(selection)
         assertThat(screens).hasSize(2)
@@ -442,6 +452,7 @@ internal class InitialPaymentOptionsScreenFactoryTest {
         ),
     ) {
         val screens = factory.createInitialScreen()
+        assertThat(sheetActivityStateHolder.updateErrorTurbine.awaitItem()).isNull()
 
         assertThat(screens).hasSize(1)
         assertThat(screens.first()).isInstanceOf<EmbeddedNavigator.Screen.HorizontalPaymentOptions>()
@@ -505,6 +516,46 @@ internal class InitialPaymentOptionsScreenFactoryTest {
 
         assertThat(continueCoordinator.onContinueCalls.awaitItem()).isEqualTo(Unit)
         onClickOverrideCalls.expectNoEvents()
+    }
+
+    @Test
+    fun `continue is ignored while processing and resumes afterwards`() = testScenario {
+        sheetActivityStateHolder.updateState { it.copy(isProcessing = true) }
+        factory.onContinueClick()
+        continueCoordinator.onContinueCalls.expectNoEvents()
+
+        sheetActivityStateHolder.updateState { it.copy(isProcessing = false) }
+        factory.onContinueClick()
+        assertThat(continueCoordinator.onContinueCalls.awaitItem()).isEqualTo(Unit)
+    }
+
+    @Test
+    fun `continue override is ignored while processing and resumes afterwards`() = testScenario {
+        onClickOverrideDelegate.set { onClickOverrideCalls.add(Unit) }
+        sheetActivityStateHolder.updateState { it.copy(isProcessing = true) }
+        factory.onContinueClick()
+        onClickOverrideCalls.expectNoEvents()
+        continueCoordinator.onContinueCalls.expectNoEvents()
+
+        sheetActivityStateHolder.updateState { it.copy(isProcessing = false) }
+        factory.onContinueClick()
+        assertThat(onClickOverrideCalls.awaitItem()).isEqualTo(Unit)
+    }
+
+    @Test
+    fun `selection is ignored while processing and resumes afterwards`() = testScenario {
+        selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+        sheetActivityStateHolder.updateState { it.copy(isProcessing = true) }
+
+        factory.onSelection(PaymentSelection.GooglePay)
+        factory.onSelection(null)
+
+        assertThat(selectionHolder.selection.value).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+
+        sheetActivityStateHolder.updateState { it.copy(isProcessing = false) }
+        factory.onSelection(PaymentSelection.GooglePay)
+
+        assertThat(selectionHolder.selection.value).isEqualTo(PaymentSelection.GooglePay)
     }
 
     @Suppress("LongMethod")
@@ -657,7 +708,9 @@ internal class InitialPaymentOptionsScreenFactoryTest {
             onClickOverrideCalls = onClickOverrideCalls,
             eventReporter = eventReporter,
             testScope = testScope,
+            sheetActivityStateHolder = sheetActivityStateHolder,
         ).block()
+        sheetActivityStateHolder.validate()
         eventReporter.validate()
         continueCoordinator.validate()
         onClickOverrideCalls.ensureAllEventsConsumed()
@@ -673,6 +726,7 @@ internal class InitialPaymentOptionsScreenFactoryTest {
         val onClickOverrideCalls: Turbine<Unit>,
         val eventReporter: FakeEventReporter,
         val testScope: TestScope,
+        val sheetActivityStateHolder: FakeSheetActivityStateHolder,
     )
 }
 
