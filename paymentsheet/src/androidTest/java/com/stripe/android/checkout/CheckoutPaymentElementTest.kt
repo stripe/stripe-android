@@ -59,7 +59,12 @@ internal class CheckoutPaymentElementTest {
         runCheckoutPaymentElementScenario(
             networkRule = networkRule,
             setup = { controller ->
-                assertThat(controller.configure(DEFAULT_CLIENT_SECRET))
+                assertThat(
+                    controller.configure(
+                        DEFAULT_CLIENT_SECRET,
+                        CheckoutController.Configuration().paymentElement(PaymentElement.Configuration()),
+                    )
+                )
                     .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
             },
         ) {
@@ -92,7 +97,12 @@ internal class CheckoutPaymentElementTest {
             networkRule = networkRule,
             resultCallback = { result -> checkoutResult = result },
             setup = { controller ->
-                assertThat(controller.configure(DEFAULT_CLIENT_SECRET))
+                assertThat(
+                    controller.configure(
+                        DEFAULT_CLIENT_SECRET,
+                        CheckoutController.Configuration().paymentElement(PaymentElement.Configuration()),
+                    )
+                )
                     .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
             },
         ) {
@@ -121,7 +131,12 @@ internal class CheckoutPaymentElementTest {
         runCheckoutPaymentElementScenario(
             networkRule = networkRule,
             setup = { controller ->
-                assertThat(controller.configure(DEFAULT_CLIENT_SECRET))
+                assertThat(
+                    controller.configure(
+                        DEFAULT_CLIENT_SECRET,
+                        CheckoutController.Configuration().paymentElement(PaymentElement.Configuration()),
+                    )
+                )
                     .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
             },
         ) {
