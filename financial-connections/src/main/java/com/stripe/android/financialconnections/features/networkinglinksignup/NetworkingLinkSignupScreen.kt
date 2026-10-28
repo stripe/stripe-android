@@ -30,6 +30,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.semantics
@@ -143,7 +144,8 @@ private fun NetworkingLinkSignupLoaded(
     val emailFocusRequester = remember { FocusRequester() }
     val phoneNumberFocusRequester = remember { FocusRequester() }
 
-    if (payload.focusEmailField) {
+    // Keep previews from capturing the email field during its focus animation.
+    if (payload.focusEmailField && !LocalInspectionMode.current) {
         LaunchedEffect(Unit) {
             emailFocusRequester.requestFocus()
         }

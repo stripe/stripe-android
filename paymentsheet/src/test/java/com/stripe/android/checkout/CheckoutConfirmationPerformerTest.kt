@@ -298,7 +298,7 @@ internal class CheckoutConfirmationPerformerTest {
     }
 
     @Test
-    fun `confirm keeps saved SEPA unacknowledged when embedded view displays mandate text`() = runScenario(
+    fun `confirm requires a mandate for saved SEPA before the merchant accesses content`() = runScenario(
         state = savedSepaState(embeddedViewDisplaysMandateText = true),
     ) {
         val option = confirmAndAwaitStart().confirmationOption as PaymentMethodConfirmationOption.Saved
@@ -307,11 +307,21 @@ internal class CheckoutConfirmationPerformerTest {
     }
 
     @Test
-    fun `confirm acknowledges saved SEPA when embedded view omits mandate text`() = runScenario(
+    fun `disabling embedded mandate text does not acknowledge saved SEPA`() = runScenario(
         state = savedSepaState(embeddedViewDisplaysMandateText = false),
     ) {
         val option = confirmAndAwaitStart().confirmationOption as PaymentMethodConfirmationOption.Saved
 
+        assertThat(option.hasAcknowledgedSepaMandate).isFalse()
+    }
+
+    @Test
+    fun `content access acknowledges saved SEPA when embedded mandate text is disabled`() = runScenario(
+        state = savedSepaState(embeddedViewDisplaysMandateText = false),
+    ) {
+        requireNotNull(stateHolder.state).mandateState.recordContentAccess()
+
+        val option = confirmAndAwaitStart().confirmationOption as PaymentMethodConfirmationOption.Saved
         assertThat(option.hasAcknowledgedSepaMandate).isTrue()
     }
 

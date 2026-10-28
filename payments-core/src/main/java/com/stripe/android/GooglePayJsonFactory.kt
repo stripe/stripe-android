@@ -234,6 +234,8 @@ class GooglePayJsonFactory internal constructor(
                 if (hasDynamicCallbacks) {
                     val intents = listOfNotNull(
                         "SHIPPING_ADDRESS".takeIf { shippingAddressParameters?.isRequired == true },
+                        "PAYMENT_METHOD".takeIf { billingAddressParameters?.isRequired == true },
+                        "PAYMENT_AUTHORIZATION".takeIf { billingAddressParameters?.isRequired == true },
                     )
 
                     if (intents.isNotEmpty()) {

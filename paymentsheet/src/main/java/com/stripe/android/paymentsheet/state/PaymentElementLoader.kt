@@ -15,6 +15,7 @@ import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.FeatureFlag
 import com.stripe.android.core.utils.FeatureFlags
@@ -61,6 +62,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
+import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
@@ -328,6 +330,11 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             configuration,
             apiConfiguration,
         )
+
+        // Warm the locale cache off main before the load scope returns for form construction.
+        launch {
+            CountryUtils.getOrderedCountries(Locale.getDefault())
+        }
 
         // Give immediately available results a chance to complete before later load work checks isCompleted.
         val isGooglePaySupportedOnDevice = async(start = CoroutineStart.UNDISPATCHED) {

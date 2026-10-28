@@ -189,13 +189,14 @@ internal class ExpressCheckoutElementAnalyticsTest {
                 shippingInformation = shippingInformation,
                 paymentDataUpdate = GooglePayPaymentDataUpdate(
                     callbackTrigger = GooglePayPaymentDataUpdate.CallbackTrigger.ShippingAddress,
-                    shippingAddress = GooglePayPaymentDataUpdate.ShippingAddress(
+                    shippingAddress = GooglePayPaymentDataUpdate.GooglePayAddress(
                         administrativeArea = "California",
                         countryCode = "US",
                         locality = "San Francisco",
                         postalCode = "94103",
                         iso3166AdministrativeArea = "US-CA",
                     ),
+                    billingAddress = null,
                 ),
             )
             networkRule.checkoutUpdate(
@@ -339,7 +340,10 @@ internal class ExpressCheckoutElementAnalyticsTest {
         block: suspend ExpressCheckoutElementScenario.() -> Unit,
     ) {
         enqueueLoadingRequests(linkEnabled = linkEnabled)
-        validateAnalyticsRequest(eventName = "elements.express_checkout_element.init")
+        networkRule.validateAnalyticsRequest(
+            eventName = "elements.express_checkout_element.init",
+            productUsage = setOf("checkout_elements"),
+        )
 
         runExpressCheckoutElementScenario(
             networkRule = networkRule,
@@ -391,7 +395,7 @@ internal class ExpressCheckoutElementAnalyticsTest {
     ) {
         networkRule.validateAnalyticsRequest(
             eventName = eventName,
-            productUsage = setOf("Checkout"),
+            productUsage = setOf("checkout_elements"),
             *requestMatchers,
         )
     }

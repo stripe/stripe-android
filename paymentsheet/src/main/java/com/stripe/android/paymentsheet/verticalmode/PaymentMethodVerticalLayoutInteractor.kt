@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.verticalmode
 
 import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
@@ -96,6 +97,7 @@ internal interface PaymentMethodVerticalLayoutInteractor {
 }
 
 internal class DefaultPaymentMethodVerticalLayoutInteractor(
+    private val savedStateHandle: SavedStateHandle,
     private val paymentMethodMetadata: PaymentMethodMetadata,
     processing: StateFlow<Boolean>,
     savedPaymentMethodSelectionState: StateFlow<SavedPaymentMethodSelectionState>,
@@ -129,6 +131,8 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
 ) : PaymentMethodVerticalLayoutInteractor {
 
     companion object {
+        private const val EXPANDED_PAYMENT_METHODS_KEY = "expanded_payment_methods"
+
         fun create(
             viewModel: BaseSheetViewModel,
             paymentMethodMetadata: PaymentMethodMetadata,
@@ -149,6 +153,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 it is PaymentSheetScreen.VerticalMode
             }
             return DefaultPaymentMethodVerticalLayoutInteractor(
+                savedStateHandle = viewModel.savedStateHandle,
                 paymentMethodMetadata = paymentMethodMetadata,
                 processing = viewModel.processing,
                 savedPaymentMethodSelectionState = stateFlowOf(SavedPaymentMethodSelectionState.Idle),
@@ -263,12 +268,18 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         )
     }
 
+    private val expandedPaymentMethods = savedStateHandle.getStateFlow(
+        EXPANDED_PAYMENT_METHODS_KEY,
+        arrayListOf<PaymentMethodCode>(),
+    )
+
     private val displayablePaymentMethods = combineAsStateFlow(
         paymentMethods,
         walletsState,
         paymentMethodIncentiveInteractor.displayedIncentive,
-    ) { paymentMethods, walletsState, incentive ->
-        getDisplayablePaymentMethods(paymentMethods, walletsState, incentive)
+        expandedPaymentMethods,
+    ) { paymentMethods, walletsState, incentive, expandedPaymentMethods ->
+        getDisplayablePaymentMethods(paymentMethods, walletsState, incentive, expandedPaymentMethods)
     }
 
     private val expectedItemsForVisibilityTracking = combineAsStateFlow(
@@ -402,6 +413,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         paymentMethods: List<PaymentMethod>,
         walletsState: WalletsState?,
         incentive: PaymentMethodIncentive?,
+        expandedPaymentMethods: List<PaymentMethodCode>,
     ): List<DisplayablePaymentMethod> {
         val lpms = supportedPaymentMethods.map { supportedPaymentMethod ->
             val paymentMethodIncentive = incentive?.takeIfMatches(supportedPaymentMethod.code)
@@ -412,7 +424,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                     code = supportedPaymentMethod.code,
                     metadata = paymentMethodMetadata
                 ),
-                shouldExpandOnClick = shouldExpandOnClick(supportedPaymentMethod.code)
+                isExpanded = supportedPaymentMethod.code in expandedPaymentMethods,
             ) {
                 handleViewAction(ViewAction.PaymentMethodSelected(supportedPaymentMethod.code))
             }
@@ -444,6 +456,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             lightThemeIconUrl = null,
             darkThemeIconUrl = null,
             iconRequiresTinting = false,
+            isExpanded = false,
             subtitle = null,
             onClick = {
                 verticalPaymentSelectionHandler.select(PaymentSelection.GooglePay, false)
@@ -466,6 +479,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             lightThemeIconUrl = null,
             darkThemeIconUrl = null,
             iconRequiresTinting = false,
+            isExpanded = false,
             subtitle = subtitle,
             onClick = {
                 verticalPaymentSelectionHandler.select(PaymentSelection.Link(brand = link.linkBrand), false)
@@ -575,17 +589,25 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     override fun handleViewAction(viewAction: ViewAction) {
         when (viewAction) {
             is ViewAction.PaymentMethodSelected -> {
-                reportPaymentMethodTypeSelected(viewAction.selectedPaymentMethodCode)
+                val paymentMethodCode = viewAction.selectedPaymentMethodCode
+                reportPaymentMethodTypeSelected(paymentMethodCode)
 
                 paymentMethodMessagePromotionsHelper?.reportPromotionDisplayed(
-                    viewAction.selectedPaymentMethodCode,
+                    paymentMethodCode,
                     paymentMethodMetadata
                 )
-                if (shouldTransitionToFormScreen(viewAction.selectedPaymentMethodCode)) {
-                    reportFormShown(viewAction.selectedPaymentMethodCode)
-                    transitionToFormScreen(viewAction.selectedPaymentMethodCode)
+                val shouldTransition = shouldTransitionToFormScreen(paymentMethodCode)
+                val shouldExpand = !shouldTransition &&
+                    paymentMethodCode in PromotionSupportedPaymentMethods.supportedPaymentMethods
+                val expanded = expandedPaymentMethods.value.toSet()
+                savedStateHandle[EXPANDED_PAYMENT_METHODS_KEY] = ArrayList(
+                    if (shouldExpand) expanded + paymentMethodCode else expanded - paymentMethodCode
+                )
+                if (shouldTransition) {
+                    reportFormShown(paymentMethodCode)
+                    transitionToFormScreen(paymentMethodCode)
                 } else {
-                    updateSelectedPaymentMethod(viewAction.selectedPaymentMethodCode)
+                    updateSelectedPaymentMethod(paymentMethodCode)
                 }
             }
             is ViewAction.SavedPaymentMethodSelected -> {
@@ -683,11 +705,6 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         val formType = formTypeForCode(paymentMethodCode)
         val displayFormForMandate = displaysMandatesInFormScreen && formType is FormType.MandateOnly
         return formType == FormType.UserInteractionRequired || displayFormForMandate
-    }
-
-    private fun shouldExpandOnClick(paymentMethodCode: PaymentMethodCode): Boolean {
-        return PromotionSupportedPaymentMethods.supportedPaymentMethods.contains(paymentMethodCode) &&
-            !shouldTransitionToFormScreen(paymentMethodCode)
     }
 
     override fun close() {

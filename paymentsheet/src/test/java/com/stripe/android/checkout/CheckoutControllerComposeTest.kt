@@ -78,7 +78,8 @@ internal class CheckoutControllerComposeTest {
 
         withContext(Dispatchers.IO) {
             assertThat(Thread.currentThread()).isNotSameInstanceAs(Looper.getMainLooper().thread)
-            controller.applyPromotionCode("10OFF").getOrThrow()
+            assertThat(controller.applyPromotionCode("10OFF"))
+                .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
         }
 
         composeRule.onNodeWithTag(TOTAL_TAG).assertTextEquals("4099.0")
@@ -91,7 +92,8 @@ internal class CheckoutControllerComposeTest {
     fun `background clear updates payment option with PaymentElement Content mounted`() = runScenario { controller ->
         withContext(Dispatchers.IO) {
             assertThat(Thread.currentThread()).isNotSameInstanceAs(Looper.getMainLooper().thread)
-            controller.clearPaymentOption().getOrThrow()
+            assertThat(controller.clearPaymentOption())
+                .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
         }
 
         composeRule.onNodeWithTag(OPTION_TAG).assertTextEquals("none")
@@ -112,7 +114,8 @@ internal class CheckoutControllerComposeTest {
         ).checkoutController
         try {
             networkRule.checkoutInit { response -> successResponse(response) {} }
-            controller.configure("${DEFAULT_CHECKOUT_SESSION_ID}_secret_example").getOrThrow()
+            assertThat(controller.configure("${DEFAULT_CHECKOUT_SESSION_ID}_secret_example"))
+                .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
             CheckoutControllerStateFactory.createStateHolder(savedState.handle)
                 .setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
             assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isNotEqualTo(4099.0)

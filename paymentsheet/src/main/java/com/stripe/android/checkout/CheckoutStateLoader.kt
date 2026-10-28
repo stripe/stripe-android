@@ -131,6 +131,7 @@ internal class CheckoutStateLoader @Inject constructor(
             temporarySelection = carryForward.temporarySelection,
             previousNewSelections = carryForward.previousNewSelections,
             linkEagerPresentationSuppressed = carryForward.linkEagerPresentationSuppressed,
+            mandateState = carryForward.mandateState,
         )
         return LoadedState(state = state, customer = loadResults.customer)
     }
@@ -139,10 +140,10 @@ internal class CheckoutStateLoader @Inject constructor(
         selectionChooser: EmbeddedSelectionChooser,
         loadResults: LoadResults,
         carryForward: CarryForward,
-        commonConfiguration: CommonConfiguration,
+        commonConfiguration: CommonConfiguration?,
         embeddedConfig: EmbeddedPaymentElement.Configuration?,
     ): PaymentSelection? {
-        return if (loadResults.paymentMethodMetadata == null || embeddedConfig == null) {
+        return if (loadResults.paymentMethodMetadata == null || embeddedConfig == null || commonConfiguration == null) {
             null
         } else {
             // Preserve the customer's existing selection across reloads when it's still valid, rather
@@ -231,6 +232,7 @@ internal class CheckoutStateLoader @Inject constructor(
         val temporarySelection: String?,
         val previousNewSelections: Bundle,
         val linkEagerPresentationSuppressed: Boolean,
+        val mandateState: CheckoutMandateState,
     ) {
         companion object {
             fun initial() = CarryForward(
@@ -240,6 +242,7 @@ internal class CheckoutStateLoader @Inject constructor(
                 temporarySelection = null,
                 previousNewSelections = Bundle(),
                 linkEagerPresentationSuppressed = false,
+                mandateState = CheckoutMandateState.initial(),
             )
 
             fun from(state: CheckoutControllerState) = CarryForward(
@@ -249,6 +252,7 @@ internal class CheckoutStateLoader @Inject constructor(
                 temporarySelection = state.temporarySelection,
                 previousNewSelections = state.previousNewSelections,
                 linkEagerPresentationSuppressed = state.linkEagerPresentationSuppressed,
+                mandateState = state.mandateState,
             )
         }
     }

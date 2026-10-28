@@ -15,6 +15,8 @@ import com.stripe.android.checkout.injection.DaggerCheckoutControllerComponent
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.checkouttesting.checkoutUpdate
+import com.stripe.android.core.exception.APIException
+import com.stripe.android.core.model.parsers.StripeErrorJsonParser
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.elements.CurrencySelectorElement
 import com.stripe.android.elements.ExpressCheckoutElement
@@ -105,7 +107,7 @@ internal class CheckoutControllerTest {
 
     @Test
     fun `configure returns success`() = runConfigureScenario {
-        assertThat(result.isSuccess).isTrue()
+        assertThat(result).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
     }
 
     @Test
@@ -113,7 +115,8 @@ internal class CheckoutControllerTest {
         networkRule.defaultInit()
         val controller = createControllerSetup(SavedStateHandle(), DEFAULT_INTEGRATION_NAME).controller
 
-        fromBackgroundThread { controller.configure(DEFAULT_CLIENT_SECRET) }.getOrThrow()
+        assertThat(fromBackgroundThread { controller.configure(DEFAULT_CLIENT_SECRET) })
+            .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
 
         assertThat(controller.session.value?.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
     }
@@ -143,7 +146,8 @@ internal class CheckoutControllerTest {
 
                     callbackCanceled.awaitItem()
                     assertThat(update.isCancelled).isTrue()
-                    emailUpdate.await().getOrThrow()
+                    assertThat(emailUpdate.await())
+                        .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
                 }
             }
 
@@ -154,7 +158,7 @@ internal class CheckoutControllerTest {
 
     @Test
     fun `configure emits session with id from response`() = runConfigureScenario {
-        result.getOrThrow()
+        assertThat(result).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
         assertThat(controller.session.value?.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
     }
 
@@ -166,7 +170,8 @@ internal class CheckoutControllerTest {
         controller.session.test {
             assertThat(awaitItem()).isNull()
 
-            controller.configure(DEFAULT_CLIENT_SECRET).getOrThrow()
+            assertThat(controller.configure(DEFAULT_CLIENT_SECRET))
+                .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
 
             assertThat(awaitItem()?.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
         }
@@ -181,7 +186,7 @@ internal class CheckoutControllerTest {
             )
         },
     ) {
-        assertThat(result.isSuccess).isTrue()
+        assertThat(result).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
     }
 
     @Test
@@ -196,7 +201,7 @@ internal class CheckoutControllerTest {
             )
         },
     ) {
-        assertThat(result.isSuccess).isTrue()
+        assertThat(result).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
     }
 
     @Test
@@ -207,12 +212,12 @@ internal class CheckoutControllerTest {
             networkRule.checkoutInit(sessionId = "cs_test_custom", responseFactory = ::successResponse)
         },
     ) {
-        assertThat(result.isSuccess).isTrue()
+        assertThat(result).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
     }
 
     @Test
     fun `configure populates state with payment method metadata`() = runConfigureScenario {
-        result.getOrThrow()
+        assertThat(result).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
         val state = committedState
         assertThat(state).isNotNull()
         assertThat(state!!.paymentMethodMetadata).isNotNull()
@@ -233,7 +238,7 @@ internal class CheckoutControllerTest {
             )
         ),
     ) {
-        result.getOrThrow()
+        assertThat(result).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
 
         val billingAddress = requireNotNull(committedState?.embeddedConfiguration?.defaultBillingDetails?.address)
         assertThat(billingAddress.city).isEqualTo("San Francisco")
@@ -263,7 +268,7 @@ internal class CheckoutControllerTest {
                 )
             },
         ) {
-            result.getOrThrow()
+            assertThat(result).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
 
             assertThat(committedSavedPaymentMethodId).isEqualTo("pm_saved_card")
             assertThat(requireNotNull(committedState).checkoutSessionResponse.amount).isEqualTo(6099L)
@@ -283,7 +288,7 @@ internal class CheckoutControllerTest {
                 }
             },
         ) {
-            assertThat(result.isFailure).isTrue()
+            assertThat(result).isInstanceOf(CheckoutController.OperationResult.Failed::class.java)
             assertThat(controller.session.value).isNull()
             assertThat(committedState).isNull()
         }
@@ -312,7 +317,7 @@ internal class CheckoutControllerTest {
                 )
             },
         ) {
-            result.getOrThrow()
+            assertThat(result).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
 
             assertThat(committedSavedPaymentMethodId).isEqualTo("pm_second_card")
         }
@@ -339,7 +344,7 @@ internal class CheckoutControllerTest {
                 )
             },
         ) {
-            result.getOrThrow()
+            assertThat(result).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
 
             assertThat(requireNotNull(committedState).paymentSelection)
                 .isNotInstanceOf(PaymentSelection.Saved::class.java)
@@ -365,7 +370,7 @@ internal class CheckoutControllerTest {
                     )
                 ),
         ) {
-            result.getOrThrow()
+            assertThat(result).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
 
             assertThat(controller.session.value?.shippingAddress?.name).isEqualTo("John Shipping")
             assertThat(controller.session.value?.shippingAddress?.address?.country).isEqualTo("US")
@@ -386,7 +391,7 @@ internal class CheckoutControllerTest {
                 ),
             initModifier = allowedShippingCountries(listOf("US", "CA")),
         ) {
-            result.getOrThrow()
+            assertThat(result).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
 
             assertThat(controller.session.value?.shippingAddress).isNull()
             assertThat(committedState?.collectedDetails?.shippingName).isNull()
@@ -405,7 +410,7 @@ internal class CheckoutControllerTest {
             ),
             initModifier = allowedShippingCountries(listOf("US", "CA")),
         ) {
-            result.getOrThrow()
+            assertThat(result).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
 
             assertThat(controller.session.value?.shippingAddress?.name).isEqualTo("John Shipping")
             assertThat(controller.session.value?.shippingAddress?.address?.country).isEqualTo("DE")
@@ -421,7 +426,7 @@ internal class CheckoutControllerTest {
             )
         },
     ) {
-        assertThat(result.isSuccess).isTrue()
+        assertThat(result).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
     }
 
     @Test
@@ -436,7 +441,7 @@ internal class CheckoutControllerTest {
                 }
             },
         ) {
-            assertThat(result.isFailure).isTrue()
+            assertThat(result).isInstanceOf(CheckoutController.OperationResult.Failed::class.java)
             assertThat(controller.session.value).isNull()
             assertThat(committedState).isNull()
         }
@@ -460,7 +465,7 @@ internal class CheckoutControllerTest {
                 )
             },
         ) {
-            assertThat(result.isSuccess).isTrue()
+            assertThat(result).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
         }
 
     @Test
@@ -482,7 +487,7 @@ internal class CheckoutControllerTest {
                 )
             },
         ) {
-            assertThat(result.isSuccess).isTrue()
+            assertThat(result).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
         }
 
     @Test
@@ -493,7 +498,7 @@ internal class CheckoutControllerTest {
             ),
             initModifier = automaticTaxFor("shipping"),
         ) {
-            result.getOrThrow()
+            assertThat(result).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
 
             assertThat(controller.session.value?.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
         }
@@ -510,7 +515,7 @@ internal class CheckoutControllerTest {
                 },
             ),
         ) {
-            result.getOrThrow()
+            assertThat(result).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
 
             assertThat(controller.session.value?.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
         }
@@ -526,7 +531,7 @@ internal class CheckoutControllerTest {
                 allowedShippingCountries(listOf("US", "CA")),
             ),
         ) {
-            result.getOrThrow()
+            assertThat(result).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
 
             assertThat(controller.session.value?.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
         }
@@ -537,7 +542,7 @@ internal class CheckoutControllerTest {
             configuration = configurationWithDefaultShippingAddress(),
             initModifier = automaticTaxFor("unknown"),
         ) {
-            result.getOrThrow()
+            assertThat(result).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
 
             assertThat(controller.session.value?.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
         }
@@ -553,7 +558,7 @@ internal class CheckoutControllerTest {
                 )
             },
         ) {
-            assertThat(result.isSuccess).isTrue()
+            assertThat(result).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
         }
 
     @Test
@@ -568,7 +573,7 @@ internal class CheckoutControllerTest {
                 }
             },
         ) {
-            assertThat(result.isFailure).isTrue()
+            assertThat(result).isInstanceOf(CheckoutController.OperationResult.Failed::class.java)
             assertThat(controller.session.value).isNull()
             assertThat(committedState).isNull()
         }
@@ -576,7 +581,7 @@ internal class CheckoutControllerTest {
     @Test
     fun `reconfigure preserves the published session and state when default shipping tax update fails`() =
         runConfigureScenario {
-            result.getOrThrow()
+            assertThat(result).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
             val beforeSession = requireNotNull(controller.session.value)
             val beforeState = requireNotNull(committedState)
             networkRule.enqueueSuccessfulInit(automaticTaxFor("shipping"))
@@ -590,7 +595,7 @@ internal class CheckoutControllerTest {
                 configurationWithDefaultShippingAddress(),
             )
 
-            assertThat(reconfigureResult.isFailure).isTrue()
+            assertThat(reconfigureResult).isInstanceOf(CheckoutController.OperationResult.Failed::class.java)
             assertThat(controller.session.value).isEqualTo(beforeSession)
             assertThat(committedState).isEqualTo(beforeState)
         }
@@ -601,7 +606,7 @@ internal class CheckoutControllerTest {
             CheckoutController.Configuration.Defaults().email("prefill@example.com")
         ),
     ) {
-        result.getOrThrow()
+        assertThat(result).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
         assertThat(controller.session.value?.email).isEqualTo("prefill@example.com")
         assertThat(committedState?.embeddedConfiguration?.defaultBillingDetails?.email)
             .isEqualTo("prefill@example.com")
@@ -613,13 +618,13 @@ internal class CheckoutControllerTest {
             CheckoutController.Configuration.Defaults().email("   ")
         ),
     ) {
-        assertThat(result.isSuccess).isTrue()
+        assertThat(result).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
     }
 
     @Test
     fun `configure defaults merchant display name to the checkout session business name`() =
         runConfigureScenario {
-            result.getOrThrow()
+            assertThat(result).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
             assertThat(committedState?.embeddedConfiguration?.merchantDisplayName)
                 .isEqualTo(expectedMerchantDisplayName)
         }
@@ -629,7 +634,7 @@ internal class CheckoutControllerTest {
         runConfigureScenario(
             configuration = CheckoutController.Configuration().merchantDisplayName("Acme Corp"),
         ) {
-            result.getOrThrow()
+            assertThat(result).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
             assertThat(committedState?.embeddedConfiguration?.merchantDisplayName)
                 .isEqualTo("Acme Corp")
         }
@@ -641,7 +646,7 @@ internal class CheckoutControllerTest {
                 PaymentElement.Configuration().embeddedViewDisplaysMandateText(false)
             ),
         ) {
-            result.getOrThrow()
+            assertThat(result).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
             assertThat(committedState?.embeddedConfiguration?.embeddedViewDisplaysMandateText)
                 .isFalse()
         }
@@ -654,7 +659,7 @@ internal class CheckoutControllerTest {
             ),
             initModifier = { json -> json.put("billing_address_collection", "required") },
         ) {
-            result.getOrThrow()
+            assertThat(result).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
             assertThat(committedState?.embeddedConfiguration?.billingDetailsCollectionConfiguration?.address)
                 .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full)
         }
@@ -664,11 +669,45 @@ internal class CheckoutControllerTest {
         networkSetup = {
             networkRule.checkoutInit { response ->
                 response.setResponseCode(500)
-                response.setBody("""{"error": {"message": "Internal server error"}}""")
+                response.setBody("""{"error": {"type": "api_error", "message": "Internal server error"}}""")
             }
         },
     ) {
-        assertThat(result.isFailure).isTrue()
+        assertThat(result).isInstanceOf(CheckoutController.OperationResult.Failed::class.java)
+        val failure = result as CheckoutController.OperationResult.Failed
+        assertThat(failure.error).isInstanceOf(APIException::class.java)
+        assertThat((failure.error as APIException).stripeError?.type).isEqualTo("api_error")
+        assertThat(failure.displayMessage).isEqualTo("Internal server error")
+    }
+
+    @Test
+    fun `configure returns null display message when server error has no message`() = runConfigureScenario(
+        networkSetup = {
+            networkRule.checkoutInit { response ->
+                response.setResponseCode(500)
+                response.setBody("""{"error": {"type": "api_error"}}""")
+            }
+        },
+    ) {
+        val failure = result as CheckoutController.OperationResult.Failed
+
+        assertThat(failure.displayMessage).isNull()
+    }
+
+    @Test
+    fun `configure returns null display message when server error is malformed`() = runConfigureScenario(
+        networkSetup = {
+            networkRule.checkoutInit { response ->
+                response.setResponseCode(500)
+                response.setBody("{}")
+            }
+        },
+    ) {
+        val failure = result as CheckoutController.OperationResult.Failed
+
+        assertThat((failure.error as APIException).stripeError?.message)
+            .isEqualTo(StripeErrorJsonParser.MALFORMED_RESPONSE_MESSAGE)
+        assertThat(failure.displayMessage).isNull()
     }
 
     @Test
@@ -680,7 +719,7 @@ internal class CheckoutControllerTest {
             }
         },
     ) {
-        assertThat(result.isFailure).isTrue()
+        assertThat(result).isInstanceOf(CheckoutController.OperationResult.Failed::class.java)
         assertThat(controller.session.value).isNull()
         assertThat(committedState).isNull()
     }
@@ -698,7 +737,7 @@ internal class CheckoutControllerTest {
             }
         },
     ) {
-        assertThat(result.isFailure).isTrue()
+        assertThat(result).isInstanceOf(CheckoutController.OperationResult.Failed::class.java)
         assertThat(committedState).isNull()
     }
 
@@ -730,7 +769,8 @@ internal class CheckoutControllerTest {
         networkRule.defaultInit()
         val savedStateHandle = SavedStateHandle()
         val controller = createController(savedStateHandle)
-        controller.configure(DEFAULT_CLIENT_SECRET).getOrThrow()
+        assertThat(controller.configure(DEFAULT_CLIENT_SECRET))
+            .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
 
         // Simulate process death: persist the handle and build a new controller from the restored copy.
         val recreated = createController(savedStateHandle.simulateProcessDeath())
@@ -743,7 +783,8 @@ internal class CheckoutControllerTest {
         networkRule.defaultInit()
         val savedStateHandle = SavedStateHandle()
         val controller = createController(savedStateHandle)
-        controller.configure(DEFAULT_CLIENT_SECRET).getOrThrow()
+        assertThat(controller.configure(DEFAULT_CLIENT_SECRET))
+            .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
 
         // Persisting and restoring the handle simulates the controller being rebuilt after process
         // death: the committed state is read back from the restored namespaced child.
@@ -759,7 +800,7 @@ internal class CheckoutControllerTest {
 
     @Test
     fun `destroy clears persisted state`() = runConfigureScenario {
-        result.getOrThrow()
+        assertThat(result).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
         // Pre-condition: configure committed a non-null state so the clear is observable.
         assertThat(committedState).isNotNull()
 
@@ -782,7 +823,8 @@ internal class CheckoutControllerTest {
         controller.session.test {
             assertThat(awaitItem()?.paymentOption).isNotNull()
 
-            fromBackgroundThread { controller.clearPaymentOption() }.getOrThrow()
+            assertThat(fromBackgroundThread { controller.clearPaymentOption() })
+                .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
 
             assertThat(requireNotNull(awaitItem()).paymentOption).isNull()
         }
@@ -817,20 +859,24 @@ internal class CheckoutControllerTest {
         val savedStateHandle = SavedStateHandle()
         val setup = createControllerSetup(savedStateHandle, DEFAULT_INTEGRATION_NAME)
         val controller = setup.controller
-        controller.configure(DEFAULT_CLIENT_SECRET).getOrThrow()
+        assertThat(controller.configure(DEFAULT_CLIENT_SECRET))
+            .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
         val customer = requireNotNull(setup.savedStateHandle.get<CustomerState>(CustomerStateHolder.SAVED_CUSTOMER))
         assertThat(customer.paymentMethods).isNotEmpty()
         controller.session.test {
             assertThat(requireNotNull(awaitItem()).paymentOption).isNotNull()
-            controller.clearPaymentOption().getOrThrow()
+            assertThat(controller.clearPaymentOption())
+                .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
             assertThat(requireNotNull(awaitItem()).paymentOption).isNull()
-            controller.clearPaymentOption().getOrThrow()
+            assertThat(controller.clearPaymentOption())
+                .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
             expectNoEvents()
             networkRule.checkoutUpdate(
                 bodyPart("promotion_code", "10OFF"),
                 responseFactory = successResponseFactory(inventory),
             )
-            controller.applyPromotionCode("10OFF").getOrThrow()
+            assertThat(controller.applyPromotionCode("10OFF"))
+                .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
             assertThat(controller.session.value?.paymentOption).isNull()
             cancelAndIgnoreRemainingEvents()
         }
@@ -838,7 +884,8 @@ internal class CheckoutControllerTest {
         assertThat(setup.savedStateHandle.get<CustomerState>(CustomerStateHolder.SAVED_CUSTOMER)?.paymentMethods)
             .isEqualTo(customer.paymentMethods)
         networkRule.enqueueSuccessfulInit(inventory)
-        controller.configure(DEFAULT_CLIENT_SECRET).getOrThrow()
+        assertThat(controller.configure(DEFAULT_CLIENT_SECRET))
+            .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
         assertThat(controller.session.value?.paymentOption).isNotNull()
     }
 
@@ -848,9 +895,10 @@ internal class CheckoutControllerTest {
 
         val result = controller.clearPaymentOption()
 
-        assertThat(result.isFailure).isTrue()
-        assertThat(result.exceptionOrNull()).isInstanceOf(IllegalStateException::class.java)
-        assertThat(result.exceptionOrNull()).hasMessageThat()
+        assertThat(result).isInstanceOf(CheckoutController.OperationResult.Failed::class.java)
+        val failure = result as CheckoutController.OperationResult.Failed
+        assertThat(failure.error).isInstanceOf(IllegalStateException::class.java)
+        assertThat(failure.error).hasMessageThat()
             .isEqualTo("Cannot mutate checkout session before it is configured.")
     }
 
@@ -859,9 +907,10 @@ internal class CheckoutControllerTest {
         runMutationScenario(paymentSelection = PaymentSelection.GooglePay, sheetIsOpen = true) {
             val result = controller.clearPaymentOption()
 
-            assertThat(result.isFailure).isTrue()
-            assertThat(result.exceptionOrNull()).isInstanceOf(IllegalStateException::class.java)
-            assertThat(result.exceptionOrNull()).hasMessageThat()
+            assertThat(result).isInstanceOf(CheckoutController.OperationResult.Failed::class.java)
+            val failure = result as CheckoutController.OperationResult.Failed
+            assertThat(failure.error).isInstanceOf(IllegalStateException::class.java)
+            assertThat(failure.error).hasMessageThat()
                 .isEqualTo("Cannot mutate checkout session while a payment flow is presented.")
             // The rejected clear leaves the selection intact.
             assertThat(controller.session.value?.paymentOption).isNotNull()
@@ -885,8 +934,9 @@ internal class CheckoutControllerTest {
             assertThat(controller.session.value?.paymentOption).isNotNull()
 
             holdResponse.countDown()
-            assertThat(mutation.await().isSuccess).isTrue()
-            assertThat(clearPaymentOption.await().isSuccess).isTrue()
+            assertThat(mutation.await()).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
+            assertThat(clearPaymentOption.await())
+                .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
             assertThat(controller.session.value?.paymentOption).isNull()
         }
 
@@ -923,7 +973,8 @@ internal class CheckoutControllerTest {
             val first = createController(savedStateHandle, integrationName = "first")
             val second = createController(savedStateHandle, integrationName = "second")
 
-            first.configure(DEFAULT_CLIENT_SECRET).getOrThrow()
+            assertThat(first.configure(DEFAULT_CLIENT_SECRET))
+                .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
 
             // Both controllers share the parent handle, but each persists under its own namespace, so
             // configuring the first leaves the second's state untouched.
@@ -936,7 +987,8 @@ internal class CheckoutControllerTest {
         networkRule.defaultInit()
         val savedStateHandle = SavedStateHandle()
         val controller = createController(savedStateHandle, integrationName = "first")
-        controller.configure(DEFAULT_CLIENT_SECRET).getOrThrow()
+        assertThat(controller.configure(DEFAULT_CLIENT_SECRET))
+            .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
 
         // After process death, a controller under a different name starts from empty state.
         val recreated = createController(savedStateHandle.simulateProcessDeath(), integrationName = "second")
@@ -964,7 +1016,7 @@ internal class CheckoutControllerTest {
 
         val result = fromBackgroundThread { controller.applyPromotionCode("10OFF") }
 
-        result.getOrThrow()
+        assertThat(result).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
         assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isEqualTo(4099.0)
         assertThat(committedState().checkoutSessionResponse.amount).isEqualTo(4099L)
         assertThat((committedState().paymentMethodMetadata?.stripeIntent as? PaymentIntent)?.amount)
@@ -980,7 +1032,7 @@ internal class CheckoutControllerTest {
 
         val result = controller.applyPromotionCode("  10OFF  ")
 
-        assertThat(result.isSuccess).isTrue()
+        assertThat(result).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
     }
 
     @Test
@@ -993,7 +1045,11 @@ internal class CheckoutControllerTest {
 
         val result = controller.applyPromotionCode("INVALID")
 
-        assertThat(result.isFailure).isTrue()
+        assertThat(result).isInstanceOf(CheckoutController.OperationResult.Failed::class.java)
+        val failure = result as CheckoutController.OperationResult.Failed
+        assertThat(failure.error).isInstanceOf(APIException::class.java)
+        assertThat((failure.error as APIException).stripeError?.type).isNull()
+        assertThat(failure.displayMessage).isEqualTo("Invalid promotion code")
         assertThat(controller.session.value).isEqualTo(before)
     }
 
@@ -1007,7 +1063,7 @@ internal class CheckoutControllerTest {
 
         val result = fromBackgroundThread { controller.removePromotionCode() }
 
-        result.getOrThrow()
+        assertThat(result).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
         assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isEqualTo(8000.0)
     }
 
@@ -1045,7 +1101,7 @@ internal class CheckoutControllerTest {
         assertThat(controller.session.value?.email).isNotEqualTo("background@example.com")
         val result = fromBackgroundThread { controller.updateEmail("background@example.com") }
 
-        result.getOrThrow()
+        assertThat(result).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
         assertThat(controller.session.value?.email).isEqualTo("background@example.com")
         assertThat(committedState().embeddedConfiguration?.defaultBillingDetails?.email)
             .isEqualTo("background@example.com")
@@ -1061,7 +1117,8 @@ internal class CheckoutControllerTest {
     fun `updateEmail clears email when session has no customer email`() = runMutationScenario(
         initModifier = { it.remove("customer_email") },
     ) {
-        controller.updateEmail("local@example.com").getOrThrow()
+        assertThat(controller.updateEmail("local@example.com"))
+            .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
         assertThat(controller.session.value?.email).isEqualTo("local@example.com")
         assertThat(committedState().embeddedConfiguration?.defaultBillingDetails?.email)
             .isEqualTo("local@example.com")
@@ -1074,7 +1131,7 @@ internal class CheckoutControllerTest {
         ).isEqualTo("local@example.com")
         val result = controller.updateEmail(null)
 
-        result.getOrThrow()
+        assertThat(result).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
         assertThat(controller.session.value?.email).isNull()
         assertThat(committedState().embeddedConfiguration?.defaultBillingDetails?.email).isNull()
         assertThat(
@@ -1087,7 +1144,8 @@ internal class CheckoutControllerTest {
 
     @Test
     fun `updateEmail takes precedence over the session customer email`() = runMutationScenario {
-        controller.updateEmail("local@example.com").getOrThrow()
+        assertThat(controller.updateEmail("local@example.com"))
+            .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
 
         assertThat(controller.session.value?.email).isEqualTo("local@example.com")
     }
@@ -1143,37 +1201,6 @@ internal class CheckoutControllerTest {
             } finally {
                 releaseResponse.countDown()
             }
-        }
-
-    @Test
-    fun `selectSavedPaymentMethod acknowledges the SEPA mandate`() =
-        runMutationScenario(
-            initModifier = combine(
-                automaticTaxFor("shipping"),
-                savedCustomerWithSepaDebit(),
-                { json ->
-                    val elementsSession = json.getJSONObject("elements_session")
-                    elementsSession.getJSONArray("ordered_payment_method_types_and_wallets")
-                        .put("sepa_debit")
-                    elementsSession.getJSONObject("payment_method_preference")
-                        .getJSONArray("ordered_payment_method_types")
-                        .put("sepa_debit")
-                    json.getJSONObject("server_built_elements_session_params")
-                        .getJSONObject("deferred_intent")
-                        .getJSONArray("payment_method_types")
-                        .put("sepa_debit")
-                },
-            ),
-            paymentSelection = PaymentSelection.GooglePay,
-        ) {
-            val selection = PaymentSelection.Saved(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD)
-
-            controller.selectSavedPaymentMethod(selection).getOrThrow()
-
-            assertThat(committedState().paymentSelection).isEqualTo(selection)
-            assertThat(committedState().paymentSelection?.hasAcknowledgedSepaMandate).isTrue()
-            assertThat(committedState().savedPaymentMethodSelectionState)
-                .isEqualTo(SavedPaymentMethodSelectionState.Idle)
         }
 
     @Test
@@ -1248,7 +1275,7 @@ internal class CheckoutControllerTest {
                 controller.updateShippingAddress(name = "John", address = fullAddress)
             }
 
-            result.getOrThrow()
+            assertThat(result).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
             val state = committedState()
             assertThat(state.collectedDetails.shippingName).isEqualTo("John")
             assertThat(state.collectedDetails.shippingAddress).isEqualTo(fullAddress.build())
@@ -1270,7 +1297,7 @@ internal class CheckoutControllerTest {
             val address = Address().country("US").postalCode("80202")
             val result = controller.updateShippingAddress(name = null, address = address)
 
-            assertThat(result.isSuccess).isTrue()
+            assertThat(result).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
         }
 
     @Test
@@ -1283,7 +1310,7 @@ internal class CheckoutControllerTest {
                 controller.updateShippingAddress(name = "John", address = fullAddress)
             }
 
-            result.getOrThrow()
+            assertThat(result).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
             val state = committedState()
             assertThat(state.collectedDetails.shippingName).isEqualTo("John")
             assertThat(state.collectedDetails.shippingAddress).isEqualTo(fullAddress.build())
@@ -1292,14 +1319,15 @@ internal class CheckoutControllerTest {
     @Test
     fun `updateShippingAddress clears shipping locally when tax is disabled`() =
         runMutationScenario {
-            controller.updateShippingAddress(name = "John", address = fullAddress).getOrThrow()
+            assertThat(controller.updateShippingAddress(name = "John", address = fullAddress))
+                .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
 
             assertThat(committedState().collectedDetails.shippingAddress).isNotNull()
             val result = fromBackgroundThread {
                 controller.updateShippingAddress(name = "Ignored", address = null)
             }
 
-            result.getOrThrow()
+            assertThat(result).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
             val state = committedState()
             assertThat(state.collectedDetails.shippingName).isNull()
             assertThat(state.collectedDetails.shippingAddress).isNull()
@@ -1317,7 +1345,8 @@ internal class CheckoutControllerTest {
                 bodyPart("tax_region[line2]", "Apt 4"),
                 responseFactory = successResponseFactory(automaticTaxFor("shipping")),
             )
-            controller.updateShippingAddress(name = "John", address = fullAddress).getOrThrow()
+            assertThat(controller.updateShippingAddress(name = "John", address = fullAddress))
+                .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
             assertThat(committedState().collectedDetails.shippingAddress).isEqualTo(fullAddress.build())
 
             networkRule.checkoutUpdate(
@@ -1332,7 +1361,7 @@ internal class CheckoutControllerTest {
             )
             val result = controller.updateShippingAddress(name = null, address = null)
 
-            result.getOrThrow()
+            assertThat(result).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
             val state = committedState()
             assertThat(state.collectedDetails.shippingName).isNull()
             assertThat(state.collectedDetails.shippingAddress).isNull()
@@ -1350,7 +1379,8 @@ internal class CheckoutControllerTest {
                 bodyPart("tax_region[line2]", "Apt 4"),
                 responseFactory = successResponseFactory(automaticTaxFor("shipping")),
             )
-            controller.updateShippingAddress(name = "John", address = fullAddress).getOrThrow()
+            assertThat(controller.updateShippingAddress(name = "John", address = fullAddress))
+                .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
 
             networkRule.checkoutUpdate(
                 bodyPart("tax_region[country]", "US"),
@@ -1365,7 +1395,7 @@ internal class CheckoutControllerTest {
             }
             val result = controller.updateShippingAddress(name = null, address = null)
 
-            assertThat(result.isFailure).isTrue()
+            assertThat(result).isInstanceOf(CheckoutController.OperationResult.Failed::class.java)
             val state = committedState()
             assertThat(state.collectedDetails.shippingName).isEqualTo("John")
             assertThat(state.collectedDetails.shippingAddress).isEqualTo(fullAddress.build())
@@ -1381,7 +1411,7 @@ internal class CheckoutControllerTest {
 
             val result = controller.updateShippingAddress(name = "John", address = fullAddress)
 
-            assertThat(result.isFailure).isTrue()
+            assertThat(result).isInstanceOf(CheckoutController.OperationResult.Failed::class.java)
             val state = committedState()
             assertThat(state.collectedDetails.shippingName).isNull()
             assertThat(state.collectedDetails.shippingAddress).isNull()
@@ -1393,7 +1423,7 @@ internal class CheckoutControllerTest {
             // Automatic tax targets billing, so a shipping address update stays local: no request.
             val result = controller.updateShippingAddress(name = "John", address = fullAddress)
 
-            result.getOrThrow()
+            assertThat(result).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
             val state = committedState()
             assertThat(state.collectedDetails.shippingName).isEqualTo("John")
             assertThat(state.collectedDetails.shippingAddress).isEqualTo(fullAddress.build())
@@ -1446,7 +1476,7 @@ internal class CheckoutControllerTest {
             }
         }
 
-        result.getOrThrow()
+        assertThat(result).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
         assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isEqualTo(8000.0)
     }
 
@@ -1458,7 +1488,7 @@ internal class CheckoutControllerTest {
 
         val result = controller.runServerUpdate { Result.success(Unit) }
 
-        assertThat(result.isSuccess).isTrue()
+        assertThat(result).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
         assertThat(controller.session.value?.status)
             .isInstanceOf(CheckoutController.Session.Status.Complete::class.java)
     }
@@ -1466,22 +1496,29 @@ internal class CheckoutControllerTest {
     @Test
     fun `runServerUpdate returns failure when serverUpdate throws`() = runMutationScenario {
         val before = controller.session.value
+        val expected = IllegalStateException("Server error")
 
-        val result = controller.runServerUpdate { throw IllegalStateException("Server error") }
+        val result = controller.runServerUpdate { throw expected }
 
-        assertThat(result.isFailure).isTrue()
-        assertThat(result.exceptionOrNull()).hasMessageThat().isEqualTo("Server error")
+        assertThat(result).isInstanceOf(CheckoutController.OperationResult.Failed::class.java)
+        val failure = result as CheckoutController.OperationResult.Failed
+        assertThat(failure.error).isInstanceOf(IllegalStateException::class.java)
+        assertThat(failure.error).hasMessageThat().isEqualTo("Server error")
+        assertThat(failure.displayMessage).isNull()
         assertThat(controller.session.value).isEqualTo(before)
     }
 
     @Test
     fun `runServerUpdate returns failure when serverUpdate fails`() = runMutationScenario {
+        val expected = IllegalStateException("Server error")
         val result = controller.runServerUpdate {
-            Result.failure(IllegalStateException("Server error"))
+            Result.failure(expected)
         }
 
-        assertThat(result.isFailure).isTrue()
-        assertThat(result.exceptionOrNull()).hasMessageThat().isEqualTo("Server error")
+        assertThat(result).isInstanceOf(CheckoutController.OperationResult.Failed::class.java)
+        val failure = result as CheckoutController.OperationResult.Failed
+        assertThat(failure.error).isSameInstanceAs(expected)
+        assertThat(failure.displayMessage).isNull()
     }
 
     @Test
@@ -1494,7 +1531,7 @@ internal class CheckoutControllerTest {
 
         val result = controller.runServerUpdate { Result.success(Unit) }
 
-        assertThat(result.isFailure).isTrue()
+        assertThat(result).isInstanceOf(CheckoutController.OperationResult.Failed::class.java)
         assertThat(controller.session.value).isEqualTo(before)
     }
 
@@ -1505,8 +1542,9 @@ internal class CheckoutControllerTest {
             Result.success(Unit)
         }
 
-        assertThat(result.isFailure).isTrue()
-        assertThat(result.exceptionOrNull()).isInstanceOf(TimeoutCancellationException::class.java)
+        assertThat(result).isInstanceOf(CheckoutController.OperationResult.Failed::class.java)
+        val failure = result as CheckoutController.OperationResult.Failed
+        assertThat(failure.error).isInstanceOf(TimeoutCancellationException::class.java)
     }
 
     @Test
@@ -1515,9 +1553,10 @@ internal class CheckoutControllerTest {
 
         val result = controller.applyPromotionCode("10OFF")
 
-        assertThat(result.isFailure).isTrue()
-        assertThat(result.exceptionOrNull()).isInstanceOf(IllegalStateException::class.java)
-        assertThat(result.exceptionOrNull()).hasMessageThat()
+        assertThat(result).isInstanceOf(CheckoutController.OperationResult.Failed::class.java)
+        val failure = result as CheckoutController.OperationResult.Failed
+        assertThat(failure.error).isInstanceOf(IllegalStateException::class.java)
+        assertThat(failure.error).hasMessageThat()
             .isEqualTo("Cannot mutate checkout session before it is configured.")
     }
 
@@ -1527,9 +1566,10 @@ internal class CheckoutControllerTest {
     ) {
         val result = controller.applyPromotionCode("10OFF")
 
-        assertThat(result.isFailure).isTrue()
-        assertThat(result.exceptionOrNull()).isInstanceOf(IllegalStateException::class.java)
-        assertThat(result.exceptionOrNull()).hasMessageThat()
+        assertThat(result).isInstanceOf(CheckoutController.OperationResult.Failed::class.java)
+        val failure = result as CheckoutController.OperationResult.Failed
+        assertThat(failure.error).isInstanceOf(IllegalStateException::class.java)
+        assertThat(failure.error).hasMessageThat()
             .isEqualTo("Cannot mutate checkout session while a payment flow is presented.")
     }
 
@@ -1539,8 +1579,9 @@ internal class CheckoutControllerTest {
     ) {
         val result = controller.runServerUpdate { Result.success(Unit) }
 
-        assertThat(result.isFailure).isTrue()
-        assertThat(result.exceptionOrNull()).hasMessageThat()
+        assertThat(result).isInstanceOf(CheckoutController.OperationResult.Failed::class.java)
+        val failure = result as CheckoutController.OperationResult.Failed
+        assertThat(failure.error).hasMessageThat()
             .isEqualTo("Cannot mutate checkout session while a payment flow is presented.")
     }
 
@@ -1550,9 +1591,10 @@ internal class CheckoutControllerTest {
     ) {
         val result = controller.configure(DEFAULT_CLIENT_SECRET)
 
-        assertThat(result.isFailure).isTrue()
-        assertThat(result.exceptionOrNull()).isInstanceOf(IllegalStateException::class.java)
-        assertThat(result.exceptionOrNull()).hasMessageThat()
+        assertThat(result).isInstanceOf(CheckoutController.OperationResult.Failed::class.java)
+        val failure = result as CheckoutController.OperationResult.Failed
+        assertThat(failure.error).isInstanceOf(IllegalStateException::class.java)
+        assertThat(failure.error).hasMessageThat()
             .isEqualTo("Cannot mutate checkout session while a payment flow is presented.")
     }
 
@@ -1564,7 +1606,7 @@ internal class CheckoutControllerTest {
 
             val result = controller.configure(DEFAULT_CLIENT_SECRET)
 
-            assertThat(result.isFailure).isTrue()
+            assertThat(result).isInstanceOf(CheckoutController.OperationResult.Failed::class.java)
         }
 
     @Test
@@ -1608,7 +1650,7 @@ internal class CheckoutControllerTest {
 
                         releaseFirstResponse.countDown()
 
-                        first.await().getOrThrow()
+                        assertThat(first.await()).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
                         second.await().getOrThrow()
                         secondRequest.awaitItem()
                     } finally {
@@ -1645,8 +1687,8 @@ internal class CheckoutControllerTest {
             assertThat(configure.isCompleted).isFalse()
 
             holdMutation.countDown()
-            assertThat(mutation.await().isSuccess).isTrue()
-            assertThat(configure.await().isSuccess).isTrue()
+            assertThat(mutation.await()).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
+            assertThat(configure.await()).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
 
             // A single loading window spanned both operations, with no flicker to false in between.
             assertThat(isUpdatingTurbine.awaitItem()).isFalse()
@@ -1672,7 +1714,7 @@ internal class CheckoutControllerTest {
                 address = Address().country("US"),
             )
 
-            assertThat(result.isSuccess).isTrue()
+            assertThat(result).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
         }
 
     @Test
@@ -1691,8 +1733,8 @@ internal class CheckoutControllerTest {
                 address = Address().country("DE"),
             )
 
-            assertThat(result.isFailure).isTrue()
-            val exception = result.exceptionOrNull()
+            assertThat(result).isInstanceOf(CheckoutController.OperationResult.Failed::class.java)
+            val exception = (result as CheckoutController.OperationResult.Failed).error
             assertThat(exception).isInstanceOf(IllegalArgumentException::class.java)
             assertThat(exception).hasMessageThat().isEqualTo(
                 "Country code 'DE' is not in allowedShippingCountries"
@@ -1709,7 +1751,7 @@ internal class CheckoutControllerTest {
                 address = Address().country("DE"),
             )
 
-            assertThat(result.isSuccess).isTrue()
+            assertThat(result).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
         }
 
     @Test
@@ -1722,8 +1764,8 @@ internal class CheckoutControllerTest {
                 address = Address().country("US"),
             )
 
-            assertThat(result.isFailure).isTrue()
-            val exception = result.exceptionOrNull()
+            assertThat(result).isInstanceOf(CheckoutController.OperationResult.Failed::class.java)
+            val exception = (result as CheckoutController.OperationResult.Failed).error
             assertThat(exception).isInstanceOf(IllegalArgumentException::class.java)
             assertThat(exception).hasMessageThat().isEqualTo(
                 "Country code 'US' is not in allowedShippingCountries"
@@ -2131,7 +2173,7 @@ internal class CheckoutControllerTest {
 
     private class Scenario(
         val controller: CheckoutController,
-        val result: Result<Unit>,
+        val result: CheckoutController.OperationResult,
         val savedStateHandle: SavedStateHandle,
         private val stateHolder: CheckoutControllerStateHolder,
     ) {
@@ -2163,7 +2205,8 @@ internal class CheckoutControllerTest {
         val savedStateHandle = SavedStateHandle()
         val setup = createControllerSetup(savedStateHandle, DEFAULT_INTEGRATION_NAME)
         val controller = setup.controller
-        controller.configure(DEFAULT_CLIENT_SECRET).getOrThrow()
+        assertThat(controller.configure(DEFAULT_CLIENT_SECRET))
+            .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
         paymentSelection?.let(setup.stateHolder::setSelection)
         temporarySelection?.let(setup.stateHolder::setTemporarySelection)
         if (!previousNewSelections.isEmpty) {

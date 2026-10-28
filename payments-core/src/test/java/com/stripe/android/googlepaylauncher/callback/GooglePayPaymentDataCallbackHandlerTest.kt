@@ -1,6 +1,7 @@
 package com.stripe.android.googlepaylauncher.callback
 
 import com.google.android.gms.wallet.callback.IntermediatePaymentData
+import com.google.android.gms.wallet.callback.PaymentAuthorizationResult
 import com.google.android.gms.wallet.callback.PaymentDataRequestUpdate
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
@@ -25,6 +26,17 @@ class GooglePayPaymentDataCallbackHandlerTest {
     fun tearDown() {
         GooglePayPaymentDataUpdateCallbackRegistry.deselect()
         GooglePayPaymentDataUpdateCallbackRegistry.deregister(CALLBACK_KEY)
+    }
+
+    @Test
+    fun `payment authorization completes successfully`() = runTest {
+        val listener = FakeOnCompleteListener<PaymentAuthorizationResult>()
+
+        GooglePayPaymentDataCallbackHandler.onPaymentAuthorized(listener)
+
+        val result = JSONObject(listener.completions.awaitItem().toJson())
+        assertThat(result.getString("transactionState")).isEqualTo("SUCCESS")
+        listener.ensureAllEventsConsumed()
     }
 
     @Test
@@ -84,6 +96,42 @@ class GooglePayPaymentDataCallbackHandlerTest {
     }
 
     @Test
+    fun `payment method callback parses billing address`() = runScenario(
+        callbackResult = {
+            GooglePayPaymentDataUpdateResponse(newTransactionInfo = null, error = null)
+        }
+    ) {
+        onPaymentDataChanged(paymentMethodRequest())
+
+        val update = callback.updates.awaitItem()
+
+        assertThat(update.callbackTrigger)
+            .isEqualTo(GooglePayPaymentDataUpdate.CallbackTrigger.PaymentMethod)
+        assertThat(update.shippingAddress).isNull()
+        assertThat(update.billingAddress?.administrativeArea).isEqualTo("New York")
+        assertThat(update.billingAddress?.countryCode).isEqualTo("US")
+        assertThat(update.billingAddress?.locality).isEqualTo("New York")
+        assertThat(update.billingAddress?.postalCode).isEqualTo("10011")
+        assertThat(update.billingAddress?.iso3166AdministrativeArea).isNull()
+        assertThat(listener.completions.awaitItem().toJson()).isEqualTo("{}")
+    }
+
+    @Test
+    fun `payment method callback without address data completes without a billing address`() = runScenario(
+        callbackResult = {
+            GooglePayPaymentDataUpdateResponse(newTransactionInfo = null, error = null)
+        }
+    ) {
+        onPaymentDataChanged(request("PAYMENT_METHOD"))
+
+        val update = callback.updates.awaitItem()
+        assertThat(update.callbackTrigger).isEqualTo(GooglePayPaymentDataUpdate.CallbackTrigger.PaymentMethod)
+        assertThat(update.shippingAddress).isNull()
+        assertThat(update.billingAddress).isNull()
+        assertThat(listener.completions.awaitItem().toJson()).isEqualTo("{}")
+    }
+
+    @Test
     fun `invalid intermediate payment data reports parsing failure and stops callback`() = runScenario(
         callbackResult = { error("Should not be called!") }
     ) {
@@ -138,6 +186,13 @@ class GooglePayPaymentDataCallbackHandlerTest {
         callbackTrigger = "SHIPPING_ADDRESS",
         expectedParsedCallbackTrigger = GooglePayPaymentDataUpdate.CallbackTrigger.ShippingAddress,
         expectedIntent = "SHIPPING_ADDRESS",
+    )
+
+    @Test
+    fun `callback failure for payment method trigger returns payment method error`() = runFailureScenario(
+        callbackTrigger = "PAYMENT_METHOD",
+        expectedParsedCallbackTrigger = GooglePayPaymentDataUpdate.CallbackTrigger.PaymentMethod,
+        expectedIntent = "PAYMENT_METHOD",
     )
 
     @Test
@@ -199,7 +254,7 @@ class GooglePayPaymentDataCallbackHandlerTest {
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val callback = FakeGooglePayPaymentDataUpdateCallback(callbackResult)
-        val listener = FakeOnCompleteListener()
+        val listener = FakeOnCompleteListener<PaymentDataRequestUpdate>()
         val errorReporter = FakeErrorReporter()
 
         if (registerCallback) {
@@ -222,7 +277,7 @@ class GooglePayPaymentDataCallbackHandlerTest {
     private data class Scenario(
         val testScope: TestScope,
         val callback: FakeGooglePayPaymentDataUpdateCallback,
-        val listener: FakeOnCompleteListener,
+        val listener: FakeOnCompleteListener<PaymentDataRequestUpdate>,
         val errorReporter: FakeErrorReporter,
     ) {
         fun onPaymentDataChanged(request: IntermediatePaymentData?) {
@@ -265,6 +320,31 @@ class GooglePayPaymentDataCallbackHandlerTest {
                         "locality": "San Francisco",
                         "postalCode": "94103",
                         "iso3166AdministrativeArea": "US-CA"
+                      }
+                    }
+                    """.trimIndent()
+                )
+            }
+        }
+
+        fun paymentMethodRequest(): IntermediatePaymentData {
+            return mock<IntermediatePaymentData>().also {
+                whenever(it.toJson()).thenReturn(
+                    """
+                    {
+                      "callbackTrigger": "PAYMENT_METHOD",
+                      "paymentMethodData": {
+                        "type": "CARD",
+                        "info": {
+                          "cardNetwork": "VISA",
+                          "cardFundingSource": "CREDIT",
+                          "billingAddress": {
+                            "administrativeArea": "New York",
+                            "countryCode": "US",
+                            "locality": "New York",
+                            "postalCode": "10011"
+                          }
+                        }
                       }
                     }
                     """.trimIndent()

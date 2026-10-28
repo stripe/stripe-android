@@ -38,16 +38,14 @@ internal fun NewPaymentMethodRowButton(
         subtitle = displayablePaymentMethod.subtitle?.resolve(),
         promoText = displayablePaymentMethod.promoBadge,
         iconRequiresTinting = displayablePaymentMethod.iconRequiresTinting,
-        onClick = {
-            displayablePaymentMethod.onClick()
-        },
+        onClick = displayablePaymentMethod.onClick,
         modifier = modifier.testTag(
             "${TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON}_${displayablePaymentMethod.syntheticCode}"
         ),
         appearance = appearance,
         trailingContent = trailingContent,
         promotionProvider = displayablePaymentMethod.promotionProvider,
-        shouldExpandOnClick = displayablePaymentMethod.shouldExpandOnClick
+        isExpanded = displayablePaymentMethod.isExpanded
     )
 }
 
@@ -67,7 +65,7 @@ internal fun NewPaymentMethodRowButton(
     trailingContent: (@Composable RowScope.() -> Unit)? = null,
     appearance: Embedded = Embedded(Embedded.RowStyle.FloatingButton.default),
     promotionProvider: (() -> PaymentMethodMessagePromotion?)? = null,
-    shouldExpandOnClick: Boolean = false
+    isExpanded: Boolean
 ) {
     PaymentMethodRowButton(
         isEnabled = isEnabled,
@@ -93,6 +91,6 @@ internal fun NewPaymentMethodRowButton(
         appearance = appearance,
         trailingContent = trailingContent,
         promotionProvider = promotionProvider,
-        shouldExpandOnClick = shouldExpandOnClick
+        isExpanded = isExpanded
     )
 }

@@ -3,7 +3,10 @@
 package com.stripe.android.checkout
 
 import com.stripe.android.core.Logger
+import com.stripe.android.core.exception.LocalStripeException
+import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.ViewModelScope
+import com.stripe.android.core.model.parsers.StripeErrorJsonParser
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.intent.CheckoutSessionResponseKey
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
@@ -82,7 +85,14 @@ internal class CheckoutOperationCoordinator @Inject constructor(
             }
         }
         // Integrator callbacks may re-enter checkout, so deliver rejections outside the admission lock.
-        result.onFailure { resultCallback.onResult(CheckoutController.Result.Failed(it)) }
+        result.onFailure { error ->
+            resultCallback.onResult(
+                CheckoutController.Result.Failed(
+                    error = error,
+                    displayMessage = error.checkoutDisplayMessage(),
+                )
+            )
+        }
         return result.getOrNull()
     }
 
@@ -110,7 +120,10 @@ internal class CheckoutOperationCoordinator @Inject constructor(
     suspend fun failConfirmation(error: Throwable) {
         completeConfirmation {
             refreshSession { sessionRefresher.refresh() }
-            CheckoutController.Result.Failed(error)
+            CheckoutController.Result.Failed(
+                error = error,
+                displayMessage = error.checkoutDisplayMessage(),
+            )
         }
     }
 
@@ -170,6 +183,17 @@ private fun ConfirmationHandler.Result.asCheckoutResult(
                 CheckoutController.Result.Canceled().takeIf { confirmationWasRestored }
             ConfirmationHandler.Result.Canceled.Action.ModifyPaymentDetails -> null
         }
-        is ConfirmationHandler.Result.Failed -> CheckoutController.Result.Failed(cause)
+        is ConfirmationHandler.Result.Failed -> CheckoutController.Result.Failed(
+            error = cause,
+            displayMessage = cause.checkoutDisplayMessage(),
+        )
     }
+}
+
+internal fun Throwable.checkoutDisplayMessage(): String? {
+    (this as? LocalStripeException)?.displayMessage?.let { return it }
+
+    // Malformed responses contain a parser diagnostic, so omit that message.
+    return (this as? StripeException)?.stripeError?.message
+        ?.takeIf { it != StripeErrorJsonParser.MALFORMED_RESPONSE_MESSAGE }
 }

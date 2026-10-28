@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.embedded.sheet
 
 import androidx.annotation.VisibleForTesting
+import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.strings.orEmpty
 import com.stripe.android.link.account.LinkAccountHolder
@@ -45,6 +46,7 @@ import javax.inject.Inject
 import javax.inject.Provider
 
 internal class InitialPaymentOptionsScreenFactory @Inject constructor(
+    private val savedStateHandle: SavedStateHandle,
     private val paymentMethodMetadata: PaymentMethodMetadata,
     private val customerStateHolder: CustomerStateHolder,
     private val selectionHolder: EmbeddedSelectionHolder,
@@ -195,6 +197,7 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
         coroutineScope: CoroutineScope,
     ): PaymentMethodVerticalLayoutInteractor {
         return DefaultPaymentMethodVerticalLayoutInteractor(
+            savedStateHandle = savedStateHandle,
             paymentMethodMetadata = paymentMethodMetadata,
             processing = sheetActivityStateHolder.state.mapAsStateFlow { it.isProcessing },
             savedPaymentMethodSelectionState = stateFlowOf(SavedPaymentMethodSelectionState.Idle),

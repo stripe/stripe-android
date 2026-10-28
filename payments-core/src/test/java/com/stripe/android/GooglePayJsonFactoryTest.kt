@@ -40,6 +40,46 @@ class GooglePayJsonFactoryTest {
     }
 
     @Test
+    fun `billing address request includes payment method and authorization callback intents`() {
+        val json = factory.createPaymentDataRequest(
+            transactionInfo = GooglePayJsonFactory.TransactionInfo(
+                currencyCode = "USD",
+                totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Final,
+            ),
+            merchantInfo = GooglePayJsonFactory.MerchantInfo(),
+            billingAddressParameters = GooglePayJsonFactory.BillingAddressParameters(
+                isRequired = true,
+            ),
+            hasDynamicCallbacks = true,
+        )
+
+        assertThat(StripeJsonUtils.jsonArrayToList(json.getJSONArray("callbackIntents")))
+            .containsExactly("PAYMENT_METHOD", "PAYMENT_AUTHORIZATION")
+    }
+
+    @Test
+    fun `payment data request includes shipping, payment method, and authorization callback intents`() {
+        val json = factory.createPaymentDataRequest(
+            transactionInfo = GooglePayJsonFactory.TransactionInfo(
+                currencyCode = "USD",
+                totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Final,
+            ),
+            merchantInfo = GooglePayJsonFactory.MerchantInfo(),
+            billingAddressParameters = GooglePayJsonFactory.BillingAddressParameters(
+                isRequired = true,
+            ),
+            shippingAddressParameters = GooglePayJsonFactory.ShippingAddressParameters(
+                isRequired = true,
+            ),
+            hasDynamicCallbacks = true,
+        )
+
+        assertThat(StripeJsonUtils.jsonArrayToList(json.getJSONArray("callbackIntents")))
+            .containsExactly("SHIPPING_ADDRESS", "PAYMENT_METHOD", "PAYMENT_AUTHORIZATION")
+            .inOrder()
+    }
+
+    @Test
     fun `payment data request omits callback intents without dynamic callbacks`() {
         val json = factory.createPaymentDataRequest(
             transactionInfo = GooglePayJsonFactory.TransactionInfo(
@@ -48,6 +88,9 @@ class GooglePayJsonFactoryTest {
             ),
             merchantInfo = GooglePayJsonFactory.MerchantInfo(),
             shippingAddressParameters = GooglePayJsonFactory.ShippingAddressParameters(
+                isRequired = true,
+            ),
+            billingAddressParameters = GooglePayJsonFactory.BillingAddressParameters(
                 isRequired = true,
             ),
             hasDynamicCallbacks = false,
