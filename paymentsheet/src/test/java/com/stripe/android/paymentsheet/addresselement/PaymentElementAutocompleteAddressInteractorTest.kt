@@ -222,7 +222,7 @@ class PaymentElementAutocompleteAddressInteractorTest {
                 fetchPlaceResult = Result.success(Address()),
             ),
             stripeAutocompleteRepository = null,
-            coroutineScope = this,
+            coroutineScope = backgroundScope,
             shouldUseAutocompleteProxyEndpointsProvider = { false },
             eventReporter = FakeAddressLauncherEventReporter(),
         )
@@ -314,7 +314,7 @@ class PaymentElementAutocompleteAddressInteractorTest {
             autocompleteConfig = config,
             placesClient = null,
             stripeAutocompleteRepository = FakeStripeAutocompleteRepository(),
-            coroutineScope = this,
+            coroutineScope = backgroundScope,
             shouldUseAutocompleteProxyEndpointsProvider = { true },
             eventReporter = FakeAddressLauncherEventReporter(),
         )
