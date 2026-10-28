@@ -26,13 +26,42 @@ import org.robolectric.RobolectricTestRunner
 class InlineAutocompleteControllerTest {
 
     @Test
-    fun `initial state is Idle`() = runScenario {
+    fun `focusing a prefilled field fetches its current query`() = runScenario {
+        queryFlow.value = "123 Main"
+        delegate.observeQueryChanges(queryFlow, countryFlow)
+        advanceTimeBy(500)
+
         assertThat(delegate.inlinePredictionsState.value).isEqualTo(InlinePredictionsState.Idle)
+
+        delegate.onFocusGained()
+        advanceTimeBy(500)
+
+        assertThat(fakePlacesClient.findPredictionsCalls.awaitItem().query).isEqualTo("123 Main")
+    }
+
+    @Test
+    fun `editing after focus restarts debounce when the query returns to its original value`() = runScenario {
+        queryFlow.value = "123 Main"
+        delegate.observeQueryChanges(queryFlow, countryFlow)
+        advanceTimeBy(500)
+
+        delegate.onFocusGained()
+        advanceTimeBy(100)
+        queryFlow.value = "123 Main S"
+        advanceTimeBy(200)
+        queryFlow.value = "123 Main"
+        advanceTimeBy(200)
+
+        fakePlacesClient.findPredictionsCalls.expectNoEvents()
+
+        advanceTimeBy(300)
+        assertThat(fakePlacesClient.findPredictionsCalls.awaitItem().query).isEqualTo("123 Main")
     }
 
     @Test
     fun `query shorter than minimum chars stays Idle`() = runScenario {
         delegate.observeQueryChanges(queryFlow, countryFlow)
+        delegate.onFocusGained()
 
         queryFlow.value = "ab"
         advanceTimeBy(500)
@@ -61,6 +90,7 @@ class InlineAutocompleteControllerTest {
     ) {
         countryFlow.value = "CA"
         delegate.observeQueryChanges(queryFlow, countryFlow)
+        delegate.onFocusGained()
 
         queryFlow.value = "123 Main"
         advanceTimeBy(500)
@@ -361,6 +391,7 @@ class InlineAutocompleteControllerTest {
                 Address(line1 = "123 Main Street", country = "US")
             )
             delegate.observeQueryChanges(queryFlow, countryFlow)
+            delegate.onFocusGained()
 
             delegate.onPredictionSelected("place_1")
             advanceTimeBy(100)
@@ -442,6 +473,7 @@ class InlineAutocompleteControllerTest {
             FindAutocompletePredictionsResponse(emptyList())
         )
         delegate.observeQueryChanges(queryFlow, countryFlow)
+        delegate.onFocusGained()
 
         queryFlow.value = "123 Main"
         // Focus lost before the debounce fires — cancels observeJob
@@ -461,16 +493,17 @@ class InlineAutocompleteControllerTest {
         delegate.onSearchActivated()
 
         queryFlow.value = "123 Main"
+        advanceTimeBy(500)
+        assertThat(fakePlacesClient.findPredictionsCalls.awaitItem().query).isEqualTo("123 Main")
+
         delegate.onFocusLost()
         advanceTimeBy(500)
 
-        // Re-focus re-enables observation; isActive remains true
         delegate.onFocusGained()
-        queryFlow.value = "123 Main S"
         advanceTimeBy(500)
 
         val call = fakePlacesClient.findPredictionsCalls.awaitItem()
-        assertThat(call.query).isEqualTo("123 Main S")
+        assertThat(call.query).isEqualTo("123 Main")
     }
 
     @Test
@@ -832,7 +865,7 @@ class InlineAutocompleteControllerTest {
         }
 
     @Test
-    fun `onSearchActivated does not double-fetch when debounce catches up`() =
+    fun `focus and Search do not double-fetch when debounce catches up`() =
         runScenario {
             fakePlacesClient.findPredictionsResult = Result.success(
                 FindAutocompletePredictionsResponse(emptyList())
@@ -840,6 +873,7 @@ class InlineAutocompleteControllerTest {
             delegate.observeQueryChanges(queryFlow, countryFlow)
             queryFlow.value = "123 Main St"
 
+            delegate.onFocusGained()
             delegate.onSearchActivated()
             // Advance past the debounce window: the pending debounced emission for the
             // just-typed query must not fire a second request for the same query.
@@ -1051,6 +1085,7 @@ class InlineAutocompleteControllerTest {
                 FindAutocompletePredictionsResponse(emptyList())
             )
             delegate.observeQueryChanges(queryFlow, countryFlow)
+            delegate.onFocusGained()
 
             delegate.expandFormFromInline()
             eventCalls.awaitItem()

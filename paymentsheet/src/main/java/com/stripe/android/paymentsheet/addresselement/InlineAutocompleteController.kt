@@ -11,6 +11,7 @@ import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -36,7 +37,7 @@ internal class InlineAutocompleteController(
 
     private var activationState: ActivationState = ActivationState.ActiveByQuery
     private var lastObservedCountry: String? = null
-    private var predictionsPaused = false
+    private var predictionRequestsEnabled = false
     private var queryFlow: StateFlow<String>? = null
     private var countryFlow: StateFlow<String?>? = null
     private var observeJob: Job? = null
@@ -58,7 +59,6 @@ internal class InlineAutocompleteController(
         queryFlow = query
         countryFlow = country
         lastObservedCountry = country.value ?: ""
-        predictionsPaused = false
         observeJob = coroutineScope.launch {
             combine(query, country) { q, c -> q to (c ?: "") }
                 .onEach { queryAndCountry ->
@@ -94,25 +94,35 @@ internal class InlineAutocompleteController(
             }
             return
         }
-        requestPredictions(query, country, isExplicitSearch = false)
+        requestPredictions(query, country, isExplicitSearch = false, debounceMillis = 0)
     }
 
     fun onSearchActivated() {
-        predictionsPaused = false
+        predictionRequestsEnabled = true
         activationState = ActivationState.ActiveBySearch
         val q = queryFlow?.value ?: return
         val c = countryFlow?.value ?: ""
-        requestPredictions(q, c, isExplicitSearch = true)
+        requestPredictions(q, c, isExplicitSearch = true, debounceMillis = 0)
     }
 
-    private fun requestPredictions(query: String, country: String, isExplicitSearch: Boolean) {
+    private fun requestPredictions(
+        query: String,
+        country: String,
+        isExplicitSearch: Boolean,
+        debounceMillis: Long,
+    ) {
         if (!isQueryEligible(query, country)) return
         if (!isExplicitSearch && predictionWork?.query == (query to country)) return
         cancelPredictionWork()
         if (isExplicitSearch) {
             cancelSelectionWork()
         }
-        val job = coroutineScope.launch(start = CoroutineStart.LAZY) { fetchPredictions(query, country) }
+        val job = coroutineScope.launch(start = CoroutineStart.LAZY) {
+            delay(debounceMillis)
+            if (!isQueryEligible(query, country)) return@launch
+            if (queryFlow?.value != query || (countryFlow?.value ?: "") != country) return@launch
+            fetchPredictions(query, country)
+        }
         predictionWork = PredictionWork(job, query to country)
         job.start()
     }
@@ -168,17 +178,24 @@ internal class InlineAutocompleteController(
         // Pause prediction fetching, but keep observing the country flow so switching between
         // supported and unsupported countries still toggles the form's mode while the inline
         // field is unfocused (e.g. after the form has expanded to manual entry).
-        predictionsPaused = true
+        predictionRequestsEnabled = false
         cancelPredictionWork()
         _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
     }
 
     fun onFocusGained() {
-        predictionsPaused = false
-        if (observeJob?.isActive == true) return
+        predictionRequestsEnabled = true
         val q = queryFlow ?: return
         val c = countryFlow ?: return
-        observeQueryChanges(q, c)
+        if (observeJob?.isActive != true) {
+            observeQueryChanges(q, c)
+        }
+        requestPredictions(
+            query = q.value,
+            country = c.value ?: "",
+            isExplicitSearch = false,
+            debounceMillis = AutocompleteViewModel.SEARCH_DEBOUNCE_MS,
+        )
     }
 
     fun expandFormFromInline() {
@@ -210,7 +227,7 @@ internal class InlineAutocompleteController(
     }
 
     private fun isQueryEligible(query: String, country: String): Boolean {
-        return !predictionsPaused &&
+        return predictionRequestsEnabled &&
             activationState != ActivationState.Inactive &&
             isCountrySupported(country) &&
             query.length >= AutocompleteViewModel.MIN_CHARS_AUTOCOMPLETE
