@@ -242,27 +242,36 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
     }
 
     @Test
-    fun `restored single card form keeps its title until returning to the wallet header`() = launch(
+    fun `present reopens restored single card form and waits for Continue`() = launch(
         selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
         paymentMethodMetadata = walletMetadata(PaymentSheet.PaymentMethodLayout.Vertical),
     ) { scenario ->
         formPage.waitUntilVisible()
-        formPage.title.assertIsDisplayed()
-        composeTestRule.onNodeWithTag(LinkButtonTestTag).assertDoesNotExist()
-        composeTestRule.onNodeWithTag(GOOGLE_PAY_BUTTON_TEST_TAG).assertDoesNotExist()
+        composeTestRule.onNodeWithTag(LinkButtonTestTag).assertIsDisplayed()
+        composeTestRule.onNodeWithTag(GOOGLE_PAY_BUTTON_TEST_TAG).assertIsDisplayed()
+        scenario.onActivity { activity ->
+            assertThat(activity.isFinishing).isFalse()
+        }
 
         scenario.recreate()
 
         formPage.waitUntilVisible()
-        formPage.title.assertIsDisplayed()
-        composeTestRule.onNodeWithTag(LinkButtonTestTag).assertDoesNotExist()
-        composeTestRule.onNodeWithTag(GOOGLE_PAY_BUTTON_TEST_TAG).assertDoesNotExist()
-
-        Espresso.pressBack()
-
-        verticalModePage.waitUntilVisible()
         composeTestRule.onNodeWithTag(LinkButtonTestTag).assertIsDisplayed()
         composeTestRule.onNodeWithTag(GOOGLE_PAY_BUTTON_TEST_TAG).assertIsDisplayed()
+        scenario.onActivity { activity ->
+            assertThat(activity.isFinishing).isFalse()
+        }
+
+        formPage.fillOutCardDetails()
+        composeTestRule.onNodeWithTag(PRIMARY_BUTTON_TEST_TAG)
+            .performScrollTo()
+            .assertIsEnabled()
+            .performClick()
+
+        val result = scenario.awaitResult() as EmbeddedActivityResult.Complete
+        assertThat(result.selection).isInstanceOf<PaymentSelection.New.Card>()
+        assertThat(result.hasBeenConfirmed).isFalse()
+        assertThat(result.launchMode).isEqualTo(EmbeddedLaunchMode.PaymentOptions)
     }
 
     @Test

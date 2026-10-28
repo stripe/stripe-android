@@ -216,6 +216,7 @@ internal class EmbeddedInitialScreenFactoryTest {
         )
         navigatorEventReporter.showManageSavedPaymentMethods.awaitItem()
         val initialPaymentOptionsScreenFactory = InitialPaymentOptionsScreenFactory(
+            launchMode = launchMode,
             savedStateHandle = savedStateHandle,
             paymentMethodMetadata = paymentMethodMetadata,
             customerStateHolder = customerStateHolder,
