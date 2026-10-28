@@ -41,6 +41,7 @@ internal class EmbeddedSheetViewModel @Inject constructor(
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
             val args = argsSupplier()
+            val savedStateHandle = extras.createSavedStateHandle()
             val customViewModelScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
             val component = DaggerEmbeddedSheetComponent.factory().build(
                 paymentMethodMetadata = args.paymentMethodMetadata,
@@ -49,18 +50,25 @@ internal class EmbeddedSheetViewModel @Inject constructor(
                 productUsage = args.productUsage,
                 paymentElementCallbackIdentifier = args.paymentElementCallbackIdentifier,
                 application = extras.requireApplication(),
-                savedStateHandle = extras.createSavedStateHandle(),
+                savedStateHandle = savedStateHandle,
                 promotions = args.promotions,
                 launchMode = args.launchMode,
                 viewModelScope = customViewModelScope,
             )
 
-            component.customerStateHolder.setCustomerState(args.customerState)
-            component.linkAccountHolder.set(args.linkAccountInfo)
-            component.selectionHolder.setPreviousNewSelections(args.previousNewSelections)
-            component.selectionHolder.setSelection(args.selection)
+            if (savedStateHandle.get<Boolean>(INITIALIZED_KEY) != true) {
+                component.customerStateHolder.setCustomerState(args.customerState)
+                component.linkAccountHolder.set(args.linkAccountInfo)
+                component.selectionHolder.setPreviousNewSelections(args.previousNewSelections)
+                component.selectionHolder.setSelection(args.selection)
+                savedStateHandle[INITIALIZED_KEY] = true
+            }
 
             return component.viewModel as T
         }
+    }
+
+    private companion object {
+        const val INITIALIZED_KEY = "embedded_sheet_initialized"
     }
 }

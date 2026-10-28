@@ -180,7 +180,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
     }
 
     @Test
-    fun `continue returns the selection and previous new selections`() {
+    fun `recreated payment options waits for Continue and returns selection and previous new selections`() {
         val previousNewSelection = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION
         val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
 
@@ -190,6 +190,14 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
                 stashNewSelection(previousNewSelection)
             },
         ) { scenario ->
+            verticalModePage.waitUntilVisible()
+
+            scenario.recreate()
+            composeTestRule.waitForIdle()
+
+            scenario.onActivity { activity ->
+                assertThat(activity.isFinishing).isFalse()
+            }
             composeTestRule.onNodeWithTag(PRIMARY_BUTTON_TEST_TAG)
                 .performScrollTo()
                 .assertIsEnabled()
