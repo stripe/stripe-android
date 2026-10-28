@@ -13,6 +13,7 @@ import com.stripe.android.checkouttesting.CheckoutInitResponseFactory
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.elements.ExpressCheckoutElement
+import com.stripe.android.elements.PaymentElement
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.TestApiKeys
 import com.stripe.android.paymentsheet.MainActivity
@@ -70,6 +71,7 @@ internal fun runExpressCheckoutElementScenario(
                 controller.configure(
                     DEFAULT_CLIENT_SECRET,
                     configuration = CheckoutController.Configuration()
+                        .paymentElement(PaymentElement.Configuration())
                         .expressCheckoutElement(
                             configurationUpdates(
                                 ExpressCheckoutElement.Configuration()

@@ -395,6 +395,12 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         CHECKOUT_SELECTION_SET_BEFORE_LOAD(
             partialEventName = "checkout.selection_set_before_load"
         ),
+        CHECKOUT_EMBEDDED_CONFIGURATION_IS_NULL(
+            partialEventName = "checkout.embedded_configuration.is_null"
+        ),
+        CHECKOUT_COMMON_CONFIGURATION_IS_NULL(
+            partialEventName = "checkout.common_configuration.is_null"
+        ),
         CHECKOUT_SAVED_PAYMENT_METHOD_MISSING_BILLING_ADDRESS(
             partialEventName = "checkout.saved_payment_method.missing_billing_address"
         ),

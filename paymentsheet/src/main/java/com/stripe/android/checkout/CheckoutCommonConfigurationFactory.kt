@@ -1,5 +1,6 @@
 package com.stripe.android.checkout
 
+import com.stripe.android.checkout.CheckoutController.Configuration
 import com.stripe.android.checkout.injection.AppName
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.model.CommonConfiguration
@@ -18,16 +19,19 @@ internal class CheckoutCommonConfigurationFactory @Inject constructor(
         configuration: CheckoutController.Configuration.State,
         checkoutSessionResponse: CheckoutSessionResponse,
         collectedDetails: CheckoutCollectedDetails,
-    ): CommonConfiguration? = createCommonConfiguration(
-        configuration = configuration,
-        checkoutSessionResponse = checkoutSessionResponse,
-        collectedDetails = collectedDetails,
-        googlePayConfiguration =
-            configuration.toPaymentElementGooglePayConfiguration(checkoutSessionResponse),
-        linkConfiguration = configuration.paymentElementConfiguration.linkConfiguration.asPaymentSheet(),
-        billingDetailsCollectionConfiguration =
-            checkoutSessionResponse.toBillingDetailsCollectionConfiguration(),
-    )
+    ): CommonConfiguration? {
+        configuration.paymentElementConfiguration ?: return null
+        return createCommonConfiguration(
+            configuration = configuration,
+            checkoutSessionResponse = checkoutSessionResponse,
+            collectedDetails = collectedDetails,
+            googlePayConfiguration =
+                configuration.toPaymentElementGooglePayConfiguration(checkoutSessionResponse),
+            linkConfiguration = configuration.paymentElementConfiguration.linkConfiguration.asPaymentSheet(),
+            billingDetailsCollectionConfiguration =
+                checkoutSessionResponse.toBillingDetailsCollectionConfiguration(),
+        )
+    }
 
     fun createForExpressCheckoutElement(
         configuration: CheckoutController.Configuration.State,
@@ -64,15 +68,18 @@ internal class CheckoutCommonConfigurationFactory @Inject constructor(
         configuration: CheckoutController.Configuration.State,
         checkoutSessionResponse: CheckoutSessionResponse,
         collectedDetails: CheckoutCollectedDetails,
-    ): CommonConfiguration? = createCommonConfiguration(
-        configuration = configuration,
-        checkoutSessionResponse = checkoutSessionResponse,
-        collectedDetails = collectedDetails,
-        googlePayConfiguration = configuration.toPaymentElementGooglePayConfiguration(checkoutSessionResponse),
-        linkConfiguration = configuration.paymentElementConfiguration.linkConfiguration.asPaymentSheet(),
-        billingDetailsCollectionConfiguration =
-            checkoutSessionResponse.toBillingDetailsCollectionConfiguration(),
-    )
+    ): CommonConfiguration? {
+        configuration.paymentElementConfiguration ?: return null
+        return createCommonConfiguration(
+            configuration = configuration,
+            checkoutSessionResponse = checkoutSessionResponse,
+            collectedDetails = collectedDetails,
+            googlePayConfiguration = configuration.toPaymentElementGooglePayConfiguration(checkoutSessionResponse),
+            linkConfiguration = configuration.paymentElementConfiguration.linkConfiguration.asPaymentSheet(),
+            billingDetailsCollectionConfiguration =
+                checkoutSessionResponse.toBillingDetailsCollectionConfiguration(),
+        )
+    }
 
     private fun createCommonConfiguration(
         configuration: CheckoutController.Configuration.State,
@@ -94,18 +101,23 @@ internal class CheckoutCommonConfigurationFactory @Inject constructor(
         allowsDelayedPaymentMethods = true,
         allowsPaymentMethodsRequiringShippingAddress = true,
         billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
-        preferredNetworks = configuration.paymentElementConfiguration.preferredNetworks,
+        preferredNetworks = configuration.paymentElementConfiguration?.preferredNetworks
+            ?: ConfigurationDefaults.preferredNetworks,
         allowsRemovalOfLastSavedPaymentMethod = ConfigurationDefaults.allowsRemovalOfLastSavedPaymentMethod,
-        paymentMethodOrder = configuration.paymentElementConfiguration.paymentMethodOrder,
+        paymentMethodOrder = configuration.paymentElementConfiguration?.paymentMethodOrder
+            ?: ConfigurationDefaults.paymentMethodOrder,
         externalPaymentMethods = ConfigurationDefaults.externalPaymentMethods,
-        cardBrandAcceptance = configuration.paymentElementConfiguration.cardBrandAcceptance.asPaymentSheet(),
+        cardBrandAcceptance = configuration.paymentElementConfiguration?.cardBrandAcceptance?.asPaymentSheet()
+            ?: ConfigurationDefaults.cardBrandAcceptance,
         allowedCardFundingTypes = ConfigurationDefaults.allowedCardFundingTypes,
         customPaymentMethods = ConfigurationDefaults.customPaymentMethods,
         googlePlacesApiKey = null,
-        termsDisplay = configuration.paymentElementConfiguration.termsDisplay.asPaymentSheet(),
+        termsDisplay = configuration.paymentElementConfiguration?.termsDisplay?.asPaymentSheet() ?: emptyMap(),
         walletButtons = null,
-        opensCardScannerAutomatically = configuration.paymentElementConfiguration.opensCardScannerAutomatically,
+        opensCardScannerAutomatically = configuration.paymentElementConfiguration?.opensCardScannerAutomatically
+            ?: ConfigurationDefaults.opensCardScannerAutomatically,
         userOverrideCountry = ConfigurationDefaults.userOverrideCountry,
-        appearance = configuration.paymentElementConfiguration.appearance.asPaymentSheet(),
+        appearance = configuration.paymentElementConfiguration?.appearance?.asPaymentSheet()
+            ?: ConfigurationDefaults.appearance,
     )
 }

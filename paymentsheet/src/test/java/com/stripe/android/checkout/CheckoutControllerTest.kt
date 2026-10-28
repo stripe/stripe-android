@@ -111,6 +111,20 @@ internal class CheckoutControllerTest {
     }
 
     @Test
+    fun `configure succeeds without a payment element`() = runConfigureScenario(
+        configuration = CheckoutController.Configuration(),
+    ) {
+        assertThat(result).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
+        assertThat(controller.session.value?.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
+        val state = requireNotNull(committedState)
+        assertThat(state.configuration.paymentElementConfiguration).isNull()
+        assertThat(state.paymentMethodMetadata).isNull()
+        assertThat(state.expressCheckoutElementPaymentMethodMetadata).isNull()
+        assertThat(state.embeddedConfiguration).isNull()
+        assertThat(state.paymentSelection).isNull()
+    }
+
+    @Test
     fun `configure succeeds from a background thread`() = runTest {
         networkRule.defaultInit()
         val controller = createControllerSetup(SavedStateHandle(), DEFAULT_INTEGRATION_NAME).controller
@@ -191,7 +205,7 @@ internal class CheckoutControllerTest {
 
     @Test
     fun `configure sends adaptive_pricing allowed true when configured`() = runConfigureScenario(
-        configuration = CheckoutController.Configuration().currencySelectorElement(
+        configuration = configurationWithPaymentElement().currencySelectorElement(
             CurrencySelectorElement.Configuration(),
         ),
         networkSetup = {
@@ -225,7 +239,7 @@ internal class CheckoutControllerTest {
 
     @Test
     fun `configure prefills the default billing address`() = runConfigureScenario(
-        configuration = CheckoutController.Configuration().defaults(
+        configuration = configurationWithPaymentElement().defaults(
             CheckoutController.Configuration.Defaults().billingDetails(
                 CheckoutController.Configuration.Defaults.ContactDetails().address(
                     CheckoutController.Address()
@@ -353,7 +367,7 @@ internal class CheckoutControllerTest {
     @Test
     fun `configure keeps a valid default shipping address in session when SAE is configured`() =
         runConfigureScenario(
-            configuration = CheckoutController.Configuration()
+            configuration = configurationWithPaymentElement()
                 .shippingAddressElement(ShippingAddressElement.Configuration())
                 .defaults(
                     CheckoutController.Configuration.Defaults().shippingDetails(
@@ -380,7 +394,7 @@ internal class CheckoutControllerTest {
     @Test
     fun `configure drops a default shipping address outside allowed countries when SAE is configured`() =
         runConfigureScenario(
-            configuration = CheckoutController.Configuration()
+            configuration = configurationWithPaymentElement()
                 .shippingAddressElement(ShippingAddressElement.Configuration())
                 .defaults(
                     CheckoutController.Configuration.Defaults().shippingDetails(
@@ -401,7 +415,7 @@ internal class CheckoutControllerTest {
     @Test
     fun `configure keeps a disallowed default shipping address when SAE is not configured`() =
         runConfigureScenario(
-            configuration = CheckoutController.Configuration().defaults(
+            configuration = configurationWithPaymentElement().defaults(
                 CheckoutController.Configuration.Defaults().shippingDetails(
                     CheckoutController.Configuration.Defaults.ContactDetails()
                         .name("John Shipping")
@@ -602,7 +616,7 @@ internal class CheckoutControllerTest {
 
     @Test
     fun `configure seeds the default email locally`() = runConfigureScenario(
-        configuration = CheckoutController.Configuration().defaults(
+        configuration = configurationWithPaymentElement().defaults(
             CheckoutController.Configuration.Defaults().email("prefill@example.com")
         ),
     ) {
@@ -614,7 +628,7 @@ internal class CheckoutControllerTest {
 
     @Test
     fun `configure does not send an email update when the default email is blank`() = runConfigureScenario(
-        configuration = CheckoutController.Configuration().defaults(
+        configuration = configurationWithPaymentElement().defaults(
             CheckoutController.Configuration.Defaults().email("   ")
         ),
     ) {
@@ -632,7 +646,7 @@ internal class CheckoutControllerTest {
     @Test
     fun `configure uses the configured merchant display name over the checkout session business name`() =
         runConfigureScenario(
-            configuration = CheckoutController.Configuration().merchantDisplayName("Acme Corp"),
+            configuration = configurationWithPaymentElement().merchantDisplayName("Acme Corp"),
         ) {
             assertThat(result).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
             assertThat(committedState?.embeddedConfiguration?.merchantDisplayName)
@@ -783,7 +797,7 @@ internal class CheckoutControllerTest {
         networkRule.defaultInit()
         val savedStateHandle = SavedStateHandle()
         val controller = createController(savedStateHandle)
-        assertThat(controller.configure(DEFAULT_CLIENT_SECRET))
+        assertThat(controller.configure(DEFAULT_CLIENT_SECRET, configurationWithPaymentElement()))
             .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
 
         // Persisting and restoring the handle simulates the controller being rebuilt after process
@@ -859,7 +873,7 @@ internal class CheckoutControllerTest {
         val savedStateHandle = SavedStateHandle()
         val setup = createControllerSetup(savedStateHandle, DEFAULT_INTEGRATION_NAME)
         val controller = setup.controller
-        assertThat(controller.configure(DEFAULT_CLIENT_SECRET))
+        assertThat(controller.configure(DEFAULT_CLIENT_SECRET, configurationWithPaymentElement()))
             .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
         val customer = requireNotNull(setup.savedStateHandle.get<CustomerState>(CustomerStateHolder.SAVED_CUSTOMER))
         assertThat(customer.paymentMethods).isNotEmpty()
@@ -884,7 +898,7 @@ internal class CheckoutControllerTest {
         assertThat(setup.savedStateHandle.get<CustomerState>(CustomerStateHolder.SAVED_CUSTOMER)?.paymentMethods)
             .isEqualTo(customer.paymentMethods)
         networkRule.enqueueSuccessfulInit(inventory)
-        assertThat(controller.configure(DEFAULT_CLIENT_SECRET))
+        assertThat(controller.configure(DEFAULT_CLIENT_SECRET, configurationWithPaymentElement()))
             .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
         assertThat(controller.session.value?.paymentOption).isNotNull()
     }
@@ -973,7 +987,7 @@ internal class CheckoutControllerTest {
             val first = createController(savedStateHandle, integrationName = "first")
             val second = createController(savedStateHandle, integrationName = "second")
 
-            assertThat(first.configure(DEFAULT_CLIENT_SECRET))
+            assertThat(first.configure(DEFAULT_CLIENT_SECRET, configurationWithPaymentElement()))
                 .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
 
             // Both controllers share the parent handle, but each persists under its own namespace, so
@@ -987,7 +1001,7 @@ internal class CheckoutControllerTest {
         networkRule.defaultInit()
         val savedStateHandle = SavedStateHandle()
         val controller = createController(savedStateHandle, integrationName = "first")
-        assertThat(controller.configure(DEFAULT_CLIENT_SECRET))
+        assertThat(controller.configure(DEFAULT_CLIENT_SECRET, configurationWithPaymentElement()))
             .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
 
         // After process death, a controller under a different name starts from empty state.
@@ -1589,7 +1603,7 @@ internal class CheckoutControllerTest {
     fun `configure returns failure when a payment flow is presented`() = runMutationScenario(
         sheetIsOpen = true
     ) {
-        val result = controller.configure(DEFAULT_CLIENT_SECRET)
+        val result = controller.configure(DEFAULT_CLIENT_SECRET, configurationWithPaymentElement())
 
         assertThat(result).isInstanceOf(CheckoutController.OperationResult.Failed::class.java)
         val failure = result as CheckoutController.OperationResult.Failed
@@ -1604,7 +1618,7 @@ internal class CheckoutControllerTest {
             // The guard fast-fails before entering the coordinator, so isUpdating never flips true.
             assertThat(isUpdatingTurbine.awaitItem()).isFalse()
 
-            val result = controller.configure(DEFAULT_CLIENT_SECRET)
+            val result = controller.configure(DEFAULT_CLIENT_SECRET, configurationWithPaymentElement())
 
             assertThat(result).isInstanceOf(CheckoutController.OperationResult.Failed::class.java)
         }
@@ -1679,7 +1693,7 @@ internal class CheckoutControllerTest {
             assertThat(isUpdatingTurbine.awaitItem()).isFalse()
 
             val mutation = async { controller.applyPromotionCode("10OFF") }
-            val configure = async { controller.configure(DEFAULT_CLIENT_SECRET) }
+            val configure = async { controller.configure(DEFAULT_CLIENT_SECRET, configurationWithPaymentElement()) }
             testScheduler.advanceUntilIdle()
 
             assertThat(isUpdatingTurbine.awaitItem()).isTrue()
@@ -1927,8 +1941,11 @@ internal class CheckoutControllerTest {
         ).invoke(response)
     }
 
+    private fun configurationWithPaymentElement() = CheckoutController.Configuration()
+        .paymentElement(PaymentElement.Configuration())
+
     private fun configurationWithDefaultBillingAddress(): CheckoutController.Configuration {
-        return CheckoutController.Configuration().defaults(
+        return configurationWithPaymentElement().defaults(
             CheckoutController.Configuration.Defaults().billingDetails(
                 CheckoutController.Configuration.Defaults.ContactDetails().address(
                     CheckoutController.Address()
@@ -1961,7 +1978,7 @@ internal class CheckoutControllerTest {
                         .state("CA")
                 )
             )
-        return CheckoutController.Configuration().defaults(defaults)
+        return configurationWithPaymentElement().defaults(defaults)
     }
 
     private fun savedCustomerWithBillingAddress(): (JSONObject) -> Unit = { json ->
@@ -2154,7 +2171,7 @@ internal class CheckoutControllerTest {
 
     private fun runConfigureScenario(
         clientSecret: String = DEFAULT_CLIENT_SECRET,
-        configuration: CheckoutController.Configuration = CheckoutController.Configuration(),
+        configuration: CheckoutController.Configuration = configurationWithPaymentElement(),
         initModifier: ((JSONObject) -> Unit)? = null,
         networkSetup: (() -> Unit)? = null,
         block: suspend Scenario.() -> Unit,
@@ -2205,7 +2222,7 @@ internal class CheckoutControllerTest {
         val savedStateHandle = SavedStateHandle()
         val setup = createControllerSetup(savedStateHandle, DEFAULT_INTEGRATION_NAME)
         val controller = setup.controller
-        assertThat(controller.configure(DEFAULT_CLIENT_SECRET))
+        assertThat(controller.configure(DEFAULT_CLIENT_SECRET, configurationWithPaymentElement()))
             .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
         paymentSelection?.let(setup.stateHolder::setSelection)
         temporarySelection?.let(setup.stateHolder::setTemporarySelection)
