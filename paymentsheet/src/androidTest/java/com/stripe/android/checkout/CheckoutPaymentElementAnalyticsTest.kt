@@ -14,7 +14,6 @@ import com.stripe.android.networktesting.AdvancedFraudSignalsTestRule
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.analyticsPayloadField
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
-import com.stripe.android.networktesting.RequestMatchers.hasQueryParam
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedContentPage
@@ -148,22 +147,16 @@ internal class CheckoutPaymentElementAnalyticsTest {
                 }
             }
             networkRule.checkoutInit(responseFactory = ::billingTaxCheckoutInitResponse)
-            networkRule.validateAnalyticsRequest(
-                eventName = "checkout_elements.confirm.started",
-                productUsage = setOf("checkout_elements"),
-                analyticsPayloadField("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID),
-                analyticsPayloadField("invocation_source", "merchant"),
-                analyticsPayloadField("selected_lpm", "google_pay"),
+            networkRule.validateConfirmationStartedAnalyticsRequest(
+                invocationSource = "merchant",
+                selectedLpm = "google_pay",
             )
-            networkRule.validateAnalyticsRequest(
+            networkRule.validateConfirmationResultAnalyticsRequest(
                 eventName = "checkout_elements.confirm.failed",
-                productUsage = setOf("checkout_elements"),
-                analyticsPayloadField("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID),
-                analyticsPayloadField("invocation_source", "merchant"),
-                analyticsPayloadField("selected_lpm", "google_pay"),
+                invocationSource = "merchant",
+                selectedLpm = "google_pay",
                 analyticsPayloadField("error_type", "checkoutSessionTotalChanged"),
                 analyticsPayloadField("error_code", "checkout_session_total_changed"),
-                hasQueryParam("duration"),
             )
             // The Checkout Session is refreshed after confirmation fails.
             networkRule.validateAnalyticsRequest(

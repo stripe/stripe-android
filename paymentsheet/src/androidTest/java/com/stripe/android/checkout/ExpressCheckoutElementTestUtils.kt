@@ -97,6 +97,13 @@ internal fun enqueueFailedGooglePayPayment(error: Throwable) {
     )
 }
 
+internal fun enqueueCanceledGooglePayPayment() {
+    enqueueGooglePayPaymentResult(
+        GooglePayPaymentMethodLauncher.Result.Canceled,
+        paymentDataUpdate = null,
+    )
+}
+
 private fun enqueueGooglePayPaymentResult(
     result: GooglePayPaymentMethodLauncher.Result,
     paymentDataUpdate: GooglePayPaymentDataUpdate?,

@@ -7,7 +7,8 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
 internal class FakeDurationProvider(
-    private val duration: Duration = 1.seconds,
+    // Null models a provider that never saw the start, e.g. after process death.
+    private val duration: Duration? = 1.seconds,
 ) : DurationProvider {
     private val _callsTurbine: Turbine<Call> = Turbine<Call>()
     val callsTurbine: ReceiveTurbine<Call> = _callsTurbine
@@ -21,14 +22,14 @@ internal class FakeDurationProvider(
         }
     }
 
-    override fun elapsed(key: DurationProvider.Key): Duration {
+    override fun elapsed(key: DurationProvider.Key): Duration? {
         _callsTurbine.add(Call.Elapsed(key))
         return duration
     }
 
-    override fun end(key: DurationProvider.Key): Duration {
+    override fun end(key: DurationProvider.Key): Duration? {
         _callsTurbine.add(Call.End(key))
-        completedDurations[key] = duration
+        duration?.let { completedDurations[key] = it }
         return duration
     }
 

@@ -3,7 +3,6 @@ package com.stripe.android.checkout
 import androidx.test.espresso.intent.rule.IntentsRule
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.checkouttesting.CheckoutInitResponseFactory
-import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutConfirm
 import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.checkouttesting.checkoutUpdate
@@ -16,7 +15,6 @@ import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatcher
 import com.stripe.android.networktesting.RequestMatchers.analyticsPayloadField
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
-import com.stripe.android.networktesting.RequestMatchers.hasQueryParam
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.utils.GooglePayRepositoryTestRule
@@ -60,14 +58,10 @@ internal class ExpressCheckoutElementAnalyticsTest {
                 response.testBodyFromFile("checkout-session-confirm.json")
             }
 
-            validateConfirmationAnalyticsRequest(
-                eventName = "checkout_elements.confirm.started",
-                analyticsPayloadField("selected_lpm", "google_pay"),
-            )
-            validateConfirmationAnalyticsRequest(
+            validateConfirmationStarted(selectedLpm = "google_pay")
+            validateConfirmationResult(
                 eventName = "checkout_elements.confirm.succeeded",
-                analyticsPayloadField("selected_lpm", "google_pay"),
-                hasQueryParam("duration"),
+                selectedLpm = "google_pay",
             )
 
             // We re-load after confirm succeeds, which triggers another two loads: one for ECE, one for PE.
@@ -90,14 +84,13 @@ internal class ExpressCheckoutElementAnalyticsTest {
 
             validateAnalyticsRequest(eventName = "link.popup.show")
             validateAnalyticsRequest(eventName = "link.popup.success")
-            validateConfirmationAnalyticsRequest(
-                eventName = "checkout_elements.confirm.started",
-                analyticsPayloadField("selected_lpm", "link"),
+            validateConfirmationStarted(
+                selectedLpm = "link",
                 analyticsPayloadField("link_context", "wallet"),
             )
-            validateConfirmationAnalyticsRequest(
+            validateConfirmationResult(
                 eventName = "checkout_elements.confirm.succeeded",
-                analyticsPayloadField("selected_lpm", "link"),
+                selectedLpm = "link",
                 analyticsPayloadField("link_context", "wallet"),
             )
 
@@ -118,18 +111,36 @@ internal class ExpressCheckoutElementAnalyticsTest {
             enqueueFailedGooglePayPayment(IllegalStateException("Google Pay failed"))
 
             networkRule.checkoutInit()
-            validateConfirmationAnalyticsRequest(
-                eventName = "checkout_elements.confirm.started",
-                analyticsPayloadField("selected_lpm", "google_pay"),
-            )
-            validateConfirmationAnalyticsRequest(
+            validateConfirmationStarted(selectedLpm = "google_pay")
+            validateConfirmationResult(
                 eventName = "checkout_elements.confirm.failed",
-                analyticsPayloadField("selected_lpm", "google_pay"),
+                selectedLpm = "google_pay",
                 analyticsPayloadField("error_type", "googlePay_1"),
                 analyticsPayloadField("error_code", "1"),
             )
 
             // We re-load after confirmation fails, which triggers another two loads: one for ECE, one for PE.
+            enqueueLoadingRequests(linkEnabled = true)
+
+            page.clickGooglePayButton()
+        }
+
+        assertGooglePayCalled()
+    }
+
+    @Test
+    fun testCanceledGooglePayPayment() {
+        runExpressCheckoutElementAnalyticsTest {
+            enqueueCanceledGooglePayPayment()
+
+            networkRule.checkoutInit()
+            validateConfirmationStarted(selectedLpm = "google_pay")
+            validateConfirmationResult(
+                eventName = "checkout_elements.confirm.canceled",
+                selectedLpm = "google_pay",
+            )
+
+            // We re-load after confirmation is canceled, which triggers another two loads: one for ECE, one for PE.
             enqueueLoadingRequests(linkEnabled = true)
 
             page.clickGooglePayButton()
@@ -149,14 +160,13 @@ internal class ExpressCheckoutElementAnalyticsTest {
                 eventName = "link.popup.error",
                 analyticsPayloadField("error_message", "unknown"),
             )
-            validateConfirmationAnalyticsRequest(
-                eventName = "checkout_elements.confirm.started",
-                analyticsPayloadField("selected_lpm", "link"),
+            validateConfirmationStarted(
+                selectedLpm = "link",
                 analyticsPayloadField("link_context", "wallet"),
             )
-            validateConfirmationAnalyticsRequest(
+            validateConfirmationResult(
                 eventName = "checkout_elements.confirm.failed",
-                analyticsPayloadField("selected_lpm", "link"),
+                selectedLpm = "link",
                 analyticsPayloadField("link_context", "wallet"),
                 analyticsPayloadField("error_type", "java.lang.IllegalStateException"),
             )
@@ -220,13 +230,10 @@ internal class ExpressCheckoutElementAnalyticsTest {
             ) { response ->
                 response.testBodyFromFile("checkout-session-confirm.json")
             }
-            validateConfirmationAnalyticsRequest(
-                eventName = "checkout_elements.confirm.started",
-                analyticsPayloadField("selected_lpm", "google_pay"),
-            )
-            validateConfirmationAnalyticsRequest(
+            validateConfirmationStarted(selectedLpm = "google_pay")
+            validateConfirmationResult(
                 eventName = "checkout_elements.confirm.succeeded",
-                analyticsPayloadField("selected_lpm", "google_pay"),
+                selectedLpm = "google_pay",
             )
 
             // We re-load after confirm succeeds, which triggers another two loads: one for ECE, one for PE.
@@ -272,13 +279,10 @@ internal class ExpressCheckoutElementAnalyticsTest {
             ) { response ->
                 response.testBodyFromFile("checkout-session-confirm.json")
             }
-            validateConfirmationAnalyticsRequest(
-                eventName = "checkout_elements.confirm.started",
-                analyticsPayloadField("selected_lpm", "google_pay"),
-            )
-            validateConfirmationAnalyticsRequest(
+            validateConfirmationStarted(selectedLpm = "google_pay")
+            validateConfirmationResult(
                 eventName = "checkout_elements.confirm.succeeded",
-                analyticsPayloadField("selected_lpm", "google_pay"),
+                selectedLpm = "google_pay",
             )
 
             // We re-load after confirm succeeds, which triggers another two loads: one for ECE, one for PE.
@@ -312,13 +316,10 @@ internal class ExpressCheckoutElementAnalyticsTest {
             networkRule.checkoutInit(
                 responseFactory = CheckoutInitResponseFactory::createWithRequiredBillingAddressForAutomaticTax,
             )
-            validateConfirmationAnalyticsRequest(
-                eventName = "checkout_elements.confirm.started",
-                analyticsPayloadField("selected_lpm", "google_pay"),
-            )
-            validateConfirmationAnalyticsRequest(
+            validateConfirmationStarted(selectedLpm = "google_pay")
+            validateConfirmationResult(
                 eventName = "checkout_elements.confirm.failed",
-                analyticsPayloadField("selected_lpm", "google_pay"),
+                selectedLpm = "google_pay",
                 analyticsPayloadField("error_type", "checkoutSessionTotalChanged"),
                 analyticsPayloadField("error_code", "checkout_session_total_changed"),
             )
@@ -372,15 +373,26 @@ internal class ExpressCheckoutElementAnalyticsTest {
         validateAnalyticsRequest(eventName = "mc_load_succeeded")
     }
 
-    private fun validateConfirmationAnalyticsRequest(
-        eventName: String,
+    private fun validateConfirmationStarted(
+        selectedLpm: String,
         vararg requestMatchers: RequestMatcher,
     ) {
-        networkRule.validateAnalyticsRequest(
-            eventName = eventName,
-            productUsage = setOf("checkout_elements"),
-            analyticsPayloadField("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID),
-            analyticsPayloadField("invocation_source", "express_checkout_element"),
+        networkRule.validateConfirmationStartedAnalyticsRequest(
+            "express_checkout_element",
+            selectedLpm,
+            *requestMatchers,
+        )
+    }
+
+    private fun validateConfirmationResult(
+        eventName: String,
+        selectedLpm: String,
+        vararg requestMatchers: RequestMatcher,
+    ) {
+        networkRule.validateConfirmationResultAnalyticsRequest(
+            eventName,
+            "express_checkout_element",
+            selectedLpm,
             *requestMatchers,
         )
     }

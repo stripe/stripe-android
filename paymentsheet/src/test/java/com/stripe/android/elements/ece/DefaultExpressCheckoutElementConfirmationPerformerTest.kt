@@ -316,8 +316,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
         suspend fun confirmAndAwaitStart(): ConfirmationHandler.Args {
             performer.confirm(expressButton)
             val args = confirmationHandler.startTurbine.awaitItem()
-            val params = analyticsRequestExecutor.requestTurbine.awaitItem().params
-            assertThat(params["event"]).isEqualTo("checkout_elements.confirm.started")
+            analyticsRequestExecutor.awaitEvent("checkout_elements.confirm.started")
             return args
         }
     }

@@ -59,7 +59,7 @@ internal class CheckoutConfirmationPerformerTest {
             assertThat(performerProvider.getCalls.awaitItem()).isSameInstanceAs(Looper.getMainLooper().thread)
             assertThat(confirmationHandler.startTurbine.awaitItem().confirmationOption)
                 .isInstanceOf<GooglePayConfirmationOption>()
-            awaitAnalyticsEvent("checkout_elements.confirm.started")
+            analyticsRequestExecutor.awaitEvent("checkout_elements.confirm.started")
         }
 
     @Test
@@ -250,10 +250,9 @@ internal class CheckoutConfirmationPerformerTest {
         confirmationHandler.state.value = ConfirmationHandler.State.Complete(
             ConfirmationHandler.Result.Succeeded(PaymentIntentFixtures.PI_SUCCEEDED)
         )
-        val request = awaitAnalyticsEvent("checkout_elements.confirm.succeeded")
+        val request = analyticsRequestExecutor.awaitEvent("checkout_elements.confirm.succeeded")
         assertThat(request).containsAtLeastEntriesIn(
             mapOf(
-                "event" to "checkout_elements.confirm.succeeded",
                 "selected_lpm" to "google_pay",
                 "invocation_source" to "merchant",
                 "checkout_session_id" to requireNotNull(stateHolder.state).checkoutSessionResponse.id,
@@ -334,10 +333,9 @@ internal class CheckoutConfirmationPerformerTest {
             ConfirmationHandler.Result.Succeeded(PaymentIntentFixtures.PI_SUCCEEDED)
         )
 
-        val request = awaitAnalyticsEvent("checkout_elements.confirm.succeeded")
+        val request = analyticsRequestExecutor.awaitEvent("checkout_elements.confirm.succeeded")
         assertThat(request).containsAtLeastEntriesIn(
             mapOf(
-                "event" to "checkout_elements.confirm.succeeded",
                 "selected_lpm" to "google_pay",
                 "invocation_source" to "merchant",
                 "checkout_session_id" to requireNotNull(stateHolder.state).checkoutSessionResponse.id,
@@ -489,16 +487,10 @@ internal class CheckoutConfirmationPerformerTest {
     ) : CoroutineScope by testScope {
         val testScheduler = testScope.testScheduler
 
-        suspend fun awaitAnalyticsEvent(expectedEvent: String): Map<String, *> {
-            val params = analyticsRequestExecutor.requestTurbine.awaitItem().params
-            assertThat(params["event"]).isEqualTo(expectedEvent)
-            return params
-        }
-
         suspend fun confirmAndAwaitStart(): ConfirmationHandler.Args {
             performer.confirm()
             val args = confirmationHandler.startTurbine.awaitItem()
-            awaitAnalyticsEvent("checkout_elements.confirm.started")
+            analyticsRequestExecutor.awaitEvent("checkout_elements.confirm.started")
             return args
         }
 
