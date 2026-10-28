@@ -2,6 +2,7 @@ package com.stripe.android.googlepaylauncher.callback
 
 import com.google.android.gms.wallet.callback.IntermediatePaymentData
 import com.google.android.gms.wallet.callback.OnCompleteListener
+import com.google.android.gms.wallet.callback.PaymentAuthorizationResult
 import com.google.android.gms.wallet.callback.PaymentDataRequestUpdate
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.R
@@ -16,6 +17,18 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import kotlinx.coroutines.launch
 
 internal object GooglePayPaymentDataCallbackHandler {
+    // Payment-method callbacks in onPaymentDataChanged require an authorization callback.
+    // Complete it automatically; payment confirmation is handled after the Google Pay sheet closes.
+    fun onPaymentAuthorized(
+        onCompleteListener: OnCompleteListener<PaymentAuthorizationResult>,
+    ) {
+        onCompleteListener.complete(
+            PaymentAuthorizationResult.fromJson(
+                """{"transactionState":"SUCCESS"}"""
+            )
+        )
+    }
+
     fun onPaymentDataChanged(
         request: IntermediatePaymentData?,
         onCompleteListener: OnCompleteListener<PaymentDataRequestUpdate>,
