@@ -11,6 +11,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
@@ -59,6 +60,47 @@ internal class DefaultSheetActivityStateHolderTest {
 
     @get:Rule
     val closeFormInteractorRule = CleanupTestRule(VerticalModeFormInteractor::close)
+
+    @Test
+    fun `confirm sheet removes padlock for assigned treatment`() = testScenario(
+        stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(isLiveMode = true),
+        experimentsData = padlockAssignment("treatment_no_padlock"),
+    ) {
+        assertThat(stateHolder.state.value.primaryButtonIcon).isEqualTo(PrimaryButtonIcon.None)
+        assertThat(eventReporter.experimentExposureCalls.awaitItem().experiment.group).isEqualTo("treatment_no_padlock")
+        eventReporter.validate()
+    }
+
+    @Test
+    fun `continue sheet ignores padlock treatment`() = testScenario(
+        stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(isLiveMode = true),
+        experimentsData = padlockAssignment("treatment_no_padlock"),
+        config = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.")
+            .formSheetAction(EmbeddedPaymentElement.FormSheetAction.Continue).build(),
+    ) {
+        assertThat(stateHolder.state.value.primaryButtonIcon).isEqualTo(PrimaryButtonIcon.None)
+        eventReporter.validate()
+    }
+
+    @Test
+    fun `payment options sheet ignores padlock treatment`() = testScenario(
+        stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(isLiveMode = true),
+        experimentsData = padlockAssignment("treatment_no_padlock"),
+        launchMode = EmbeddedLaunchMode.PaymentOptions,
+    ) {
+        assertThat(stateHolder.state.value.primaryButtonIcon).isEqualTo(PrimaryButtonIcon.None)
+        eventReporter.validate()
+    }
+
+    @Test
+    fun `manage sheet does not expose padlock treatment`() = testScenario(
+        stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(isLiveMode = true),
+        experimentsData = padlockAssignment("treatment_no_padlock"),
+        launchMode = EmbeddedLaunchMode.Manage,
+    ) {
+        assertThat(stateHolder.state.value.primaryButtonIcon).isEqualTo(PrimaryButtonIcon.Lock)
+        eventReporter.validate()
+    }
 
     @Test
     fun `state initializes correctly`() = testScenario {
@@ -616,16 +658,25 @@ internal class DefaultSheetActivityStateHolderTest {
         }
     }
 
+    private fun padlockAssignment(group: String) = ElementsSession.ExperimentsData(
+        arbId = "arb_123",
+        experimentAssignments = mapOf(
+            ElementsSession.ExperimentAssignment.OCS_MOBILE_REMOVE_PRIMARY_BUTTON_PADLOCK to group,
+        ),
+    )
+
     private class Scenario(
         val selectionHolder: EmbeddedSelectionHolder,
         val stateHolder: DefaultSheetActivityStateHolder,
         val confirmationHandler: FakeConfirmationHandler,
         val onClickOverrideDelegate: OnClickOverrideDelegate,
         val navigator: EmbeddedNavigator,
+        val eventReporter: FakeEventReporter,
     )
 
     private fun testScenario(
         stripeIntent: StripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+        experimentsData: ElementsSession.ExperimentsData? = null,
         config: EmbeddedPaymentElement.Configuration = EmbeddedConfirmationStateFixtures.defaultState().configuration,
         tapToAddHelper: FakeTapToAddHelper = FakeTapToAddHelper.noOp(),
         customerStateHolder: FakeCustomerStateHolder = FakeCustomerStateHolder(),
@@ -640,7 +691,11 @@ internal class DefaultSheetActivityStateHolderTest {
             FakeSavedPaymentMethodConfirmInteractor.Factory(),
         block: suspend Scenario.() -> Unit
     ) = runTest {
-        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(stripeIntent = stripeIntent)
+        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = stripeIntent,
+            experimentsData = experimentsData,
+        )
+        val eventReporter = FakeEventReporter()
         val selectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle())
         val onClickOverrideDelegate = OnClickDelegateOverrideImpl()
         val confirmationHandler = FakeConfirmationHandler()
@@ -657,7 +712,7 @@ internal class DefaultSheetActivityStateHolderTest {
             configuration = config,
             coroutineScope = viewModelScope,
             onClickDelegate = onClickOverrideDelegate,
-            eventReporter = FakeEventReporter(),
+            eventReporter = eventReporter,
             confirmationHandler = confirmationHandler,
             tapToAddHelper = tapToAddHelper,
             customerStateHolder = customerStateHolder,
@@ -682,6 +737,7 @@ internal class DefaultSheetActivityStateHolderTest {
             confirmationHandler = confirmationHandler,
             onClickOverrideDelegate = onClickOverrideDelegate,
             navigator = navigator,
+            eventReporter = eventReporter,
         ).block()
     }
 

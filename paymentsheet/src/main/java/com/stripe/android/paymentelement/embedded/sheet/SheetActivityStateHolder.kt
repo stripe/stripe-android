@@ -1,5 +1,6 @@
 package com.stripe.android.paymentelement.embedded.sheet
 
+import com.stripe.android.common.analytics.experiment.PrimaryButtonIconExperiment
 import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddNextStep
 import com.stripe.android.core.injection.ViewModelScope
@@ -76,22 +77,31 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
     private val embeddedNavigatorProvider: Provider<EmbeddedNavigator>,
     private val savedPaymentMethodConfirmScreenFactoryProvider: Provider<SavedPaymentMethodConfirmScreenFactory>,
 ) : SheetActivityStateHolder {
+    private val primaryButtonIconExperiment = PrimaryButtonIconExperiment(eventReporter, EventReporter.Mode.Embedded)
+
     private val _state = MutableStateFlow(
         SheetActivityStateHolder.State(
             primaryButtonLabel = primaryButtonLabel(paymentMethodMetadata.stripeIntent, configuration),
             isEnabled = false,
             processingState = PrimaryButtonProcessingState.Idle(null),
             isProcessing = false,
-            primaryButtonIcon = if (launchMode !is EmbeddedLaunchMode.PaymentOptions &&
-                configuration.formSheetAction == EmbeddedPaymentElement.FormSheetAction.Confirm
-            ) {
-                PrimaryButtonIcon.Lock
-            } else {
-                PrimaryButtonIcon.None
-            },
+            primaryButtonIcon = primaryButtonIcon(),
         )
     )
     override val state: StateFlow<SheetActivityStateHolder.State> = _state
+
+    private fun primaryButtonIcon(): PrimaryButtonIcon {
+        if (launchMode is EmbeddedLaunchMode.PaymentOptions ||
+            configuration.formSheetAction != EmbeddedPaymentElement.FormSheetAction.Confirm
+        ) {
+            return PrimaryButtonIcon.None
+        }
+        return if (launchMode is EmbeddedLaunchMode.Form) {
+            primaryButtonIconExperiment.getIcon(paymentMethodMetadata, PrimaryButtonIcon.Lock)
+        } else {
+            PrimaryButtonIcon.Lock
+        }
+    }
 
     private val _result = MutableSharedFlow<EmbeddedActivityResult>()
     override val result: SharedFlow<EmbeddedActivityResult> = _result

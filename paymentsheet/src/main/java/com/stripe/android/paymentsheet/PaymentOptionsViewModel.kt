@@ -11,6 +11,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.analytics.SessionSavedStateHandler
 import com.stripe.android.cards.CardAccountRangeRepository
+import com.stripe.android.common.analytics.experiment.PrimaryButtonIconExperiment
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.common.nfcscan.IsNfcScanningAvailable
 import com.stripe.android.common.taptoadd.TapToAddHelper
@@ -108,6 +109,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
 ) {
 
     private val primaryButtonUiStateMapper = PrimaryButtonUiStateMapper(
+        primaryButtonIconExperiment = PrimaryButtonIconExperiment(eventReporter, mode),
         config = config,
         currentScreenFlow = navigationHandler.currentScreen,
         buttonsEnabledFlow = buttonsEnabled,

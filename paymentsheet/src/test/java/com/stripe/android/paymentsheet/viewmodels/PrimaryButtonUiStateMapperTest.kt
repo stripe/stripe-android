@@ -7,10 +7,12 @@ import app.cash.turbine.Turbine
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.common.analytics.experiment.PrimaryButtonIconExperiment
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
@@ -18,6 +20,8 @@ import com.stripe.android.paymentsheet.FakeCvcRecollectionInteractor
 import com.stripe.android.paymentsheet.FakeSelectSavedPaymentMethodsInteractor
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.ui.FakeAddPaymentMethodInteractor
@@ -30,6 +34,7 @@ import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.elements.CvcConfig
 import com.stripe.android.ui.core.elements.CvcController
 import com.stripe.android.uicore.utils.stateFlowOf
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -37,6 +42,80 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class PrimaryButtonUiStateMapperTest {
+
+    @Test
+    fun `complete flow applies icon experiment and exposes once across button updates`() = runIconScenario {
+        mapper.forCompleteFlow().test {
+            assertThat(awaitItem()?.icon).isEqualTo(PrimaryButtonIcon.None)
+            assertThat(eventReporter.experimentExposureCalls.awaitItem().experiment.group)
+                .isEqualTo("treatment_no_padlock")
+            buttonsEnabled.value = false
+            assertThat(awaitItem()?.icon).isEqualTo(PrimaryButtonIcon.None)
+            eventReporter.experimentExposureCalls.expectNoEvents()
+        }
+    }
+
+    @Test
+    fun `complete flow applies icon experiment to custom bank account button`() = runIconScenario(
+        customButton = PrimaryButton.UIState(
+            label = "Pay".resolvableString,
+            onClick = {},
+            enabled = true,
+            icon = PrimaryButtonIcon.Lock,
+        ),
+    ) {
+        mapper.forCompleteFlow().test {
+            assertThat(awaitItem()?.icon).isEqualTo(PrimaryButtonIcon.None)
+        }
+        eventReporter.experimentExposureCalls.awaitItem()
+    }
+
+    @Test
+    fun `custom button without icon is not exposed or changed`() = runIconScenario(
+        customButton = PrimaryButton.UIState(
+            label = "Continue".resolvableString,
+            onClick = {},
+            enabled = true,
+            icon = PrimaryButtonIcon.None,
+        ),
+    ) {
+        mapper.forCompleteFlow().test {
+            assertThat(awaitItem()?.icon).isEqualTo(PrimaryButtonIcon.None)
+        }
+    }
+
+    @Test
+    fun `hidden button is not exposed`() = runIconScenario(screen = PaymentSheetScreen.Loading) {
+        mapper.forCompleteFlow().test {
+            assertThat(awaitItem()).isNull()
+        }
+    }
+
+    @Test
+    fun `custom button remains visible when screen hides default button`() = runIconScenario(
+        screen = PaymentSheetScreen.Loading,
+        customButton = PrimaryButton.UIState(
+            label = "Continue".resolvableString,
+            onClick = {},
+            enabled = true,
+            icon = PrimaryButtonIcon.None,
+        ),
+    ) {
+        mapper.forCompleteFlow().test {
+            assertThat(awaitItem()?.label).isEqualTo("Continue".resolvableString)
+        }
+    }
+
+    @Test
+    fun `custom flow does not apply icon experiment`() = runIconScenario(
+        screen = PaymentSheetScreen.AddFirstPaymentMethod(
+            FakeAddPaymentMethodInteractor(initialState = FakeAddPaymentMethodInteractor.createState()),
+        ),
+    ) {
+        mapper.forCustomFlow().test {
+            assertThat(awaitItem()?.icon).isEqualTo(PrimaryButtonIcon.None)
+        }
+    }
 
     @Test
     fun `Chooses custom button over default one`() = runTest {
@@ -723,6 +802,45 @@ class PrimaryButtonUiStateMapperTest {
         }
     }
 
+    private fun runIconScenario(
+        screen: PaymentSheetScreen = PaymentSheetScreen.SelectSavedPaymentMethods(
+            FakeSelectSavedPaymentMethodsInteractor(),
+        ),
+        customButton: PrimaryButton.UIState? = null,
+        block: suspend IconScenario.() -> Unit,
+    ) = runTest {
+        val eventReporter = FakeEventReporter()
+        val buttonsEnabled = MutableStateFlow(true)
+        val mapper = createMapper(
+            currentScreenFlow = stateFlowOf(screen),
+            buttonsEnabledFlow = buttonsEnabled,
+            paymentMethodMetadataFlow = stateFlowOf(
+                PaymentMethodMetadataFactory.create(
+                    stripeIntent = PaymentIntentFactory.create().copy(isLiveMode = true),
+                    experimentsData = ElementsSession.ExperimentsData(
+                        arbId = "arb_123",
+                        experimentAssignments = mapOf(
+                            ElementsSession.ExperimentAssignment.OCS_MOBILE_REMOVE_PRIMARY_BUTTON_PADLOCK to
+                                "treatment_no_padlock",
+                        ),
+                    ),
+                ),
+            ),
+            selectionFlow = stateFlowOf(cardSelection()),
+            customPrimaryButtonUiStateFlow = stateFlowOf(customButton),
+            cvcFlow = stateFlowOf(true),
+            eventReporter = eventReporter,
+        )
+        IconScenario(mapper, eventReporter, buttonsEnabled).block()
+        eventReporter.validate()
+    }
+
+    private data class IconScenario(
+        val mapper: PrimaryButtonUiStateMapper,
+        val eventReporter: FakeEventReporter,
+        val buttonsEnabled: MutableStateFlow<Boolean>,
+    )
+
     private fun createMapper(
         config: PaymentSheet.Configuration = PaymentSheet.Configuration("Some Name"),
         currentScreenFlow: StateFlow<PaymentSheetScreen>,
@@ -731,9 +849,11 @@ class PrimaryButtonUiStateMapperTest {
         selectionFlow: StateFlow<PaymentSelection?>,
         customPrimaryButtonUiStateFlow: StateFlow<PrimaryButton.UIState?>,
         cvcFlow: StateFlow<Boolean>,
+        eventReporter: FakeEventReporter = FakeEventReporter(),
         onDisabledClick: () -> Unit = {},
     ): PrimaryButtonUiStateMapper {
         return PrimaryButtonUiStateMapper(
+            primaryButtonIconExperiment = PrimaryButtonIconExperiment(eventReporter, EventReporter.Mode.Complete),
             config = config,
             currentScreenFlow = currentScreenFlow,
             buttonsEnabledFlow = buttonsEnabledFlow,

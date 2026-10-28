@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.viewmodels
 
+import com.stripe.android.common.analytics.experiment.PrimaryButtonIconExperiment
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
@@ -24,6 +25,7 @@ internal class PrimaryButtonUiStateMapper(
     private val selectionFlow: StateFlow<PaymentSelection?>,
     private val customPrimaryButtonUiStateFlow: StateFlow<PrimaryButton.UIState?>,
     private val cvcCompleteFlow: StateFlow<Boolean>,
+    private val primaryButtonIconExperiment: PrimaryButtonIconExperiment,
     private val onClick: () -> Unit,
     private val onDisabledClick: () -> Unit,
 ) {
@@ -38,9 +40,12 @@ internal class PrimaryButtonUiStateMapper(
             cvcCompleteFlow,
         ) { screen, buttonsEnabled, paymentMethodMetadata, selection, customPrimaryButton, cvcComplete ->
             screen.buyButtonState.mapAsStateFlow { buyButtonState ->
+                if (!buyButtonState.visible && customPrimaryButton == null) {
+                    return@mapAsStateFlow null
+                }
                 val canClickWhenDisabled = screen.isFormScreen() && buttonsEnabled
 
-                customPrimaryButton ?: PrimaryButton.UIState(
+                val state = customPrimaryButton ?: PrimaryButton.UIState(
                     label = buyButtonState.buyButtonOverride?.label ?: buyButtonLabel(
                         paymentMethodMetadata?.amount(),
                         config.primaryButtonLabel,
@@ -60,7 +65,8 @@ internal class PrimaryButtonUiStateMapper(
                             onDisabledClick()
                         }
                     },
-                ).takeIf { buyButtonState.visible }
+                )
+                state.copy(icon = primaryButtonIconExperiment.getIcon(paymentMethodMetadata, state.icon))
             }
         }.flatMapLatestAsStateFlow { it }
     }

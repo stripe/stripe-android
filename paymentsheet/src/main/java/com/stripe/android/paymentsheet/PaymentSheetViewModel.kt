@@ -13,6 +13,7 @@ import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.analytics.SessionSavedStateHandler
 import com.stripe.android.cards.CardAccountRangeRepository
+import com.stripe.android.common.analytics.experiment.PrimaryButtonIconExperiment
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.common.nfcscan.IsNfcScanningAvailable
@@ -132,6 +133,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     addressLauncherEventReporter = addressLauncherEventReporter,
 ) {
     private val primaryButtonUiStateMapper = PrimaryButtonUiStateMapper(
+        primaryButtonIconExperiment = PrimaryButtonIconExperiment(eventReporter, mode),
         config = config,
         currentScreenFlow = navigationHandler.currentScreen,
         buttonsEnabledFlow = buttonsEnabled,
