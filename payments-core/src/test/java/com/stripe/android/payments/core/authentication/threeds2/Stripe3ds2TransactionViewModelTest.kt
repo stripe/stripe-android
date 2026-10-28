@@ -130,6 +130,8 @@ class Stripe3ds2TransactionViewModelTest {
     private companion object {
         const val ENABLE_LOGGING = false
         val PRODUCT_USAGE = setOf("TestProductUsage")
+        val NEXT_ACTION_DATA = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2.nextActionData
+            as StripeIntent.NextActionData.SdkData.Use3DS2
         val ARGS = Stripe3ds2TransactionContract.Args(
             SdkTransactionId.create(),
             PaymentAuthConfig.Stripe3ds2Config(
@@ -139,8 +141,7 @@ class Stripe3ds2TransactionViewModelTest {
                 )
             ),
             PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
-            (PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2.nextActionData
-                as StripeIntent.NextActionData.SdkData.Use3DS2).copy(
+            NEXT_ACTION_DATA.copy(
                 publishableKey = ApiKeyFixtures.CONNECTED_ACCOUNT_PUBLISHABLE_KEY,
             ),
             ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, ApiKeyFixtures.FAKE_STRIPE_ACCOUNT),

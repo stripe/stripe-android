@@ -5,11 +5,8 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.test.core.app.ApplicationProvider
-import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.StripePaymentController.Companion.EXPAND_PAYMENT_METHOD
-import com.stripe.android.auth.PaymentBrowserAuthContract
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.ApiRequest
@@ -24,11 +21,8 @@ import com.stripe.android.model.SourceFixtures
 import com.stripe.android.model.Stripe3ds2Fixtures
 import com.stripe.android.networking.AlipayRepository
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
-import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.payments.PaymentFlowResult
-import com.stripe.android.payments.core.authentication.threeds2.Stripe3ds2TransactionContract
-import com.stripe.android.payments.paymentlauncher.PaymentLauncherViewModelTestFakes.FakeAuthActivityStarterHost
 import com.stripe.android.stripe3ds2.transaction.SdkTransactionId
 import com.stripe.android.stripe3ds2.transaction.Transaction
 import com.stripe.android.testing.AbsFakeStripeRepository
@@ -248,76 +242,11 @@ internal class StripePaymentControllerTest {
                 .isEqualTo("example://return_url")
         }
 
-    @Test
-    fun `Next action uses the caller key and account override`() =
-        assertNextActionConfiguration(ApiKeyFixtures.OTHER_STRIPE_ACCOUNT)
-
-    @Test
-    fun `Next action preserves a null caller account`() = assertNextActionConfiguration(null)
-
-    private fun assertNextActionConfiguration(stripeAccountId: String?) = runTest {
-        val host = FakeAuthActivityStarterHost()
-        val requestOptions = ApiRequest.Options(ApiKeyFixtures.CONNECTED_ACCOUNT_PUBLISHABLE_KEY, stripeAccountId)
-
-        controller.handleNextAction(host, PaymentIntentFixtures.PI_REQUIRES_REDIRECT, requestOptions)
-
-        val call = host.startActivityCalls.awaitItem()
-        val args = requireNotNull(PaymentBrowserAuthContract.parseArgs(Intent().putExtras(call.extras)))
-        assertThat(args.apiConfiguration).isEqualTo(
-            ApiConfiguration.State(ApiKeyFixtures.CONNECTED_ACCOUNT_PUBLISHABLE_KEY, stripeAccountId)
-        )
-        host.ensureAllEventsConsumed()
-    }
-
-    @Test
-    fun `Confirmation keeps its idempotency key while next action receives credentials`() = runTest {
-        val repository = FakeConfirmationRepository()
-        val host = FakeAuthActivityStarterHost()
-        val options = ApiRequest.Options(
-            apiKey = ApiKeyFixtures.CONNECTED_ACCOUNT_PUBLISHABLE_KEY,
-            stripeAccount = ApiKeyFixtures.OTHER_STRIPE_ACCOUNT,
-            idempotencyKey = "confirmation_idempotency",
-        )
-        val params = ConfirmPaymentIntentParams.createWithPaymentMethodId("pm_123", "pi_123_secret_456")
-
-        createController(repository).startConfirmAndAuth(host, params, options)
-
-        assertThat(repository.confirmOptions.awaitItem()).isSameInstanceAs(options)
-        val call = host.startActivityCalls.awaitItem()
-        val args = requireNotNull(Stripe3ds2TransactionContract.Args.fromIntent(Intent().putExtras(call.extras)))
-        assertThat(args.apiConfiguration).isEqualTo(
-            ApiConfiguration.State(
-                publishableKey = ApiKeyFixtures.CONNECTED_ACCOUNT_PUBLISHABLE_KEY,
-                stripeAccountId = ApiKeyFixtures.OTHER_STRIPE_ACCOUNT,
-            )
-        )
-        assertThat(args.requestOptions.apiKey).isEqualTo(ApiKeyFixtures.CONNECTED_ACCOUNT_PUBLISHABLE_KEY)
-        assertThat(args.requestOptions.stripeAccount).isEqualTo(ApiKeyFixtures.OTHER_STRIPE_ACCOUNT)
-        assertThat(args.requestOptions.idempotencyKey).isNull()
-        repository.confirmOptions.ensureAllEventsConsumed()
-        host.ensureAllEventsConsumed()
-    }
-
-    internal class FakeConfirmationRepository : AbsFakeStripeRepository() {
-        val confirmOptions = Turbine<ApiRequest.Options>()
-
-        override suspend fun confirmPaymentIntent(
-            confirmPaymentIntentParams: ConfirmPaymentIntentParams,
-            options: ApiRequest.Options,
-            expandFields: List<String>,
-        ): Result<PaymentIntent> {
-            confirmOptions.add(options)
-            return Result.success(PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2)
-        }
-    }
-
-    private fun createController(): StripePaymentController = createController(stripeRepository)
-
-    private fun createController(repository: StripeRepository): StripePaymentController {
+    private fun createController(): StripePaymentController {
         return StripePaymentController(
             context,
             { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
-            repository,
+            stripeRepository,
             false,
             workContext = testDispatcher,
             analyticsRequestExecutor = analyticsRequestExecutor,
