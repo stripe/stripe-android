@@ -111,8 +111,11 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
 
         return buildList {
             add(createHorizontalSavedPaymentMethodsScreen())
-            if (selectionHolder.selection.value is PaymentSelection.New) {
-                add(createHorizontalScreen())
+            when (selectionHolder.selection.value) {
+                is PaymentSelection.New,
+                is PaymentSelection.CustomPaymentMethod,
+                is PaymentSelection.ExternalPaymentMethod -> add(createHorizontalScreen())
+                else -> Unit
             }
         }
     }
