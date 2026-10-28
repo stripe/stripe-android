@@ -74,6 +74,8 @@ internal class NavigationHandler<T : Any>(
         }
     }
 
+    fun isTransitioning(): Boolean = isTransitioning.get()
+
     fun transitionTo(target: T) {
         if (!isTransitioning.get()) {
             transitionToInternal(target)

@@ -14,6 +14,7 @@ import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Provider
 
 internal interface SheetActivityContinueCoordinator {
     fun onContinue()
@@ -27,11 +28,13 @@ internal class DefaultSheetActivityContinueCoordinator @Inject constructor(
     private val customerStateHolder: CustomerStateHolder,
     private val linkAccountHolder: LinkAccountHolder,
     private val launchMode: EmbeddedLaunchMode,
+    private val embeddedNavigatorProvider: Provider<EmbeddedNavigator>,
     @ViewModelScope private val coroutineScope: CoroutineScope,
 ) : SheetActivityContinueCoordinator {
 
     override fun onContinue() {
-        if (stateHolder.state.value.isProcessing) return
+        // Manage navigation is delayed for the ripple; do not start an update on the outgoing screen.
+        if (stateHolder.state.value.isProcessing || embeddedNavigatorProvider.get().isTransitioning) return
 
         val selection = selectionHolder.selection.value
         val taxRegionUpdate = taxRegionUpdater.prepareUpdate(
