@@ -222,8 +222,7 @@ internal class DefaultManageScreenInteractor(
                 toggleEdit = savedPaymentMethodMutator::toggleEditing,
                 onSelectPaymentMethod = {
                     val savedPmSelection = PaymentSelection.Saved(it.paymentMethod)
-                    viewModel.updateSelection(savedPmSelection)
-                    viewModel.eventReporter.onSelectPaymentOption(savedPmSelection)
+                    viewModel.handlePaymentMethodSelected(savedPmSelection)
                     Result.success(Unit)
                 },
                 onUpdatePaymentMethod = { savedPaymentMethodMutator.updatePaymentMethod(it) },

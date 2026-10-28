@@ -121,6 +121,8 @@ import com.stripe.android.paymentsheet.ui.cardParamsUpdateAction
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
 import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.paymentsheet.utils.prefillCreate
+import com.stripe.android.paymentsheet.verticalmode.DefaultManageScreenInteractor
+import com.stripe.android.paymentsheet.verticalmode.ManageScreenInteractor
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_PROCESSING
 import com.stripe.android.testing.CleanupTestRule
@@ -434,6 +436,50 @@ internal class PaymentSheetViewModelTest {
             )
         )
         assertThat(arguments.intent).isEqualTo(stripeIntent)
+    }
+
+    @Test
+    fun `Selecting a saved card from Manage waits for Pay`() = confirmationTest {
+        Dispatchers.setMain(testDispatcher)
+        val viewModel = createViewModel(
+            args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
+                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.newBuilder()
+                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
+                    .build(),
+            ),
+            initialPaymentSelection = null,
+        )
+        val interactor = DefaultManageScreenInteractor.create(
+            viewModel = viewModel,
+            paymentMethodMetadata = requireNotNull(viewModel.paymentMethodMetadata.value),
+            customerStateHolder = viewModel.customerStateHolder,
+            savedPaymentMethodMutator = viewModel.savedPaymentMethodMutator,
+        )
+        viewModel.navigationHandler.transitionTo(PaymentSheetScreen.ManageSavedPaymentMethods(interactor))
+        val paymentMethod = interactor.state.value.paymentMethods.single()
+
+        viewModel.paymentSheetResult.test {
+            viewModel.selection.test {
+                assertThat(awaitItem()).isNull()
+
+                interactor.handleViewAction(
+                    ManageScreenInteractor.ViewAction.SelectPaymentMethod(paymentMethod)
+                )
+
+                assertThat(awaitItem()).isEqualTo(PaymentSelection.Saved(CARD_PAYMENT_METHOD))
+            }
+            startTurbine.expectNoEvents()
+            expectNoEvents()
+
+            viewModel.checkout()
+
+            val confirmationOption = startTurbine.awaitItem().confirmationOption
+            assertThat(confirmationOption).isInstanceOf<PaymentMethodConfirmationOption.Saved>()
+            assertThat((confirmationOption as PaymentMethodConfirmationOption.Saved).paymentMethod)
+                .isEqualTo(CARD_PAYMENT_METHOD)
+        }
+
+        verify(eventReporter).onSelectPaymentOption(PaymentSelection.Saved(CARD_PAYMENT_METHOD))
     }
 
     @Test

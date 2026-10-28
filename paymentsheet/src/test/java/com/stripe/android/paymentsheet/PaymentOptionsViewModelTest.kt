@@ -66,6 +66,8 @@ import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
 import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
+import com.stripe.android.paymentsheet.verticalmode.DefaultManageScreenInteractor
+import com.stripe.android.paymentsheet.verticalmode.ManageScreenInteractor
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.DummyActivityResultCaller
@@ -643,6 +645,45 @@ internal class PaymentOptionsViewModelTest {
                 val result = awaitItem() as? PaymentOptionsActivityResult.Succeeded
                 assertThat(result?.paymentSelection).isEqualTo(PaymentSelection.Link(brand = LinkBrand.Link))
             }
+        }
+
+    @Test
+    fun `Selecting a saved card from Manage completes immediately`() = runManageScreenScenario(CARD_PAYMENT_METHOD) {
+        viewModel.paymentOptionsActivityResult.test {
+            interactor.handleViewAction(ManageScreenInteractor.ViewAction.SelectPaymentMethod(paymentMethod))
+
+            val result = awaitItem() as PaymentOptionsActivityResult.Succeeded
+            assertThat(result.paymentSelection).isEqualTo(PaymentSelection.Saved(CARD_PAYMENT_METHOD))
+            ensureAllEventsConsumed()
+        }
+
+        verify(eventReporter).onSelectPaymentOption(PaymentSelection.Saved(CARD_PAYMENT_METHOD))
+    }
+
+    @Test
+    fun `Selecting a saved bank account from Manage waits for confirmation`() =
+        runManageScreenScenario(PaymentMethodFixtures.US_BANK_ACCOUNT) {
+            val selection = PaymentSelection.Saved(PaymentMethodFixtures.US_BANK_ACCOUNT)
+
+            viewModel.paymentOptionsActivityResult.test {
+                viewModel.selection.test {
+                    assertThat(awaitItem()).isNull()
+
+                    interactor.handleViewAction(ManageScreenInteractor.ViewAction.SelectPaymentMethod(paymentMethod))
+
+                    assertThat(awaitItem()).isEqualTo(selection)
+                }
+                expectNoEvents()
+                verify(eventReporter, never()).onSelectPaymentOption(any())
+
+                viewModel.onUserSelection()
+
+                val result = awaitItem() as PaymentOptionsActivityResult.Succeeded
+                assertThat(result.paymentSelection).isEqualTo(selection)
+                ensureAllEventsConsumed()
+            }
+
+            verify(eventReporter).onSelectPaymentOption(selection)
         }
 
     @Test
@@ -1442,6 +1483,40 @@ internal class PaymentOptionsViewModelTest {
             linkConfigurationCoordinator = linkConfigurationCoordinator,
         )
     }
+
+    private fun runManageScreenScenario(
+        selectedPaymentMethod: PaymentMethod,
+        block: suspend ManageScreenScenario.() -> Unit,
+    ) = runTest {
+        Dispatchers.setMain(testDispatcher)
+        val viewModel = createViewModel(
+            args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
+                config = PAYMENT_OPTION_CONTRACT_ARGS.configuration.newBuilder()
+                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
+                    .build(),
+                paymentMethods = listOf(selectedPaymentMethod),
+            ),
+        )
+        val interactor = DefaultManageScreenInteractor.create(
+            viewModel = viewModel,
+            paymentMethodMetadata = requireNotNull(viewModel.paymentMethodMetadata.value),
+            customerStateHolder = viewModel.customerStateHolder,
+            savedPaymentMethodMutator = viewModel.savedPaymentMethodMutator,
+        )
+        viewModel.navigationHandler.transitionTo(PaymentSheetScreen.ManageSavedPaymentMethods(interactor))
+
+        ManageScreenScenario(
+            viewModel = viewModel,
+            interactor = interactor,
+            paymentMethod = interactor.state.value.paymentMethods.single(),
+        ).block()
+    }
+
+    private data class ManageScreenScenario(
+        val viewModel: PaymentOptionsViewModel,
+        val interactor: ManageScreenInteractor,
+        val paymentMethod: DisplayableSavedPaymentMethod,
+    )
 
     private fun createViewModel(
         args: PaymentOptionContract.Args = PAYMENT_OPTION_CONTRACT_ARGS,
