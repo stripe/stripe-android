@@ -51,6 +51,7 @@ internal sealed class CheckoutConfirmationEvent : AnalyticsEvent {
             put("selected_lpm", confirmationContext.paymentSelection.code())
             put("is_saved_payment_method", confirmationContext.paymentSelection.isSaved)
             confirmationContext.paymentSelection.linkContext()?.let { put("link_context", it) }
+            confirmationContext.linkUi?.let { put("link_ui", it.code) }
             put("invocation_source", confirmationContext.invocationSource.code)
             put("active_link_session", confirmationContext.activeLinkSession)
         }
