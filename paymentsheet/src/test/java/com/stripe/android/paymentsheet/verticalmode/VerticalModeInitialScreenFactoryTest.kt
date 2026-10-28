@@ -1,21 +1,27 @@
 package com.stripe.android.paymentsheet.verticalmode
 
 import androidx.lifecycle.SavedStateHandle
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.TestFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
-import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.LinkState
+import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.viewmodels.FakeBaseSheetViewModel
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.uicore.utils.stateFlowOf
@@ -41,58 +47,31 @@ class VerticalModeInitialScreenFactoryTest {
     }
 
     @Test
-    fun `showsWalletHeader is false for VerticalModeForm if no available wallets`() = runScenario(
+    fun `hides wallet header when metadata advertises wallets that will not render`() = runScenario(
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = listOf("cashapp"),
-            ),
-            availableWallets = listOf()
-        )
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(paymentMethodTypes = listOf("card")),
+            availableWallets = listOf(WalletType.GooglePay),
+            isGooglePayReady = true,
+        ),
+        walletsState = null,
     ) {
-        assertThat(screens).hasSize(1)
-        assertThat(screens[0]).isInstanceOf<PaymentSheetScreen.VerticalModeForm>()
-        assertThat(screens[0].showsWalletsHeader(false).value).isFalse()
+        screens.single().showsWalletsHeader(isCompleteFlow = false).test {
+            assertThat(awaitItem()).isFalse()
+        }
     }
 
     @Test
-    fun `showsWalletHeader is true for VerticalModeForm if available wallets exist`() = runScenario(
+    fun `shows Google Pay header when fallback metadata omits wallets`() = runScenario(
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = listOf("cashapp"),
-            ),
-            availableWallets = listOf(WalletType.Link),
-            linkState = LinkState(
-                configuration = TestFactory.LINK_CONFIGURATION,
-                loginState = LinkState.LoginState.LoggedOut,
-                signupMode = null,
-            ),
-        )
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(paymentMethodTypes = listOf("card")),
+            availableWallets = emptyList(),
+            isGooglePayReady = true,
+        ),
+        walletsState = googlePayWalletsState,
     ) {
-        assertThat(screens).hasSize(1)
-        assertThat(screens[0]).isInstanceOf<PaymentSheetScreen.VerticalModeForm>()
-        assertThat(screens[0].showsWalletsHeader(false).value).isTrue()
-    }
-
-    @Test
-    fun `showsWalletHeader is false for VerticalModeForm if only wallet is Link and WalletButtonHidden`() = runScenario(
-        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = listOf("cashapp"),
-            ),
-            availableWallets = listOf(WalletType.Link),
-            linkState = LinkState(
-                configuration = TestFactory.LINK_CONFIGURATION,
-                loginState = LinkState.LoginState.LoggedOut,
-                signupMode = null,
-            ),
-            linkConfiguration = PaymentSheet.LinkConfiguration(
-                display = PaymentSheet.LinkConfiguration.Display.WalletButtonHidden,
-            ),
-        )
-    ) {
-        assertThat(screens).hasSize(1)
-        assertThat(screens[0]).isInstanceOf<PaymentSheetScreen.VerticalModeForm>()
-        assertThat(screens[0].showsWalletsHeader(false).value).isFalse()
+        screens.single().showsWalletsHeader(isCompleteFlow = true).test {
+            assertThat(awaitItem()).isTrue()
+        }
     }
 
     @Test
@@ -169,14 +148,16 @@ class VerticalModeInitialScreenFactoryTest {
         ),
         hasSavedPaymentMethods: Boolean = false,
         selection: PaymentSelection? = null,
+        walletsState: WalletsState? = null,
         paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper? = null,
-        block: Scenario.() -> Unit,
-    ) {
+        block: suspend Scenario.() -> Unit,
+    ) = runTest {
         val fakeViewModel = FakeBaseSheetViewModel.create(
             paymentMethodMetadata = paymentMethodMetadata,
             initialScreen = PaymentSheetScreen.Loading,
             canGoBack = false,
         )
+        fakeViewModel.walletsStateSource.value = walletsState
 
         val customerStateHolder = DefaultCustomerStateHolder(
             savedStateHandle = SavedStateHandle(),
@@ -205,10 +186,28 @@ class VerticalModeInitialScreenFactoryTest {
         )
         Scenario(
             screens = screens
-        ).apply(block)
+        ).apply { block() }
     }
 
     private class Scenario(
         val screens: List<PaymentSheetScreen>,
+    )
+
+    private val googlePayWalletsState = WalletsState(
+        link = null,
+        googlePay = WalletsState.GooglePay(
+            apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
+            buttonType = GooglePayButtonType.Pay,
+            allowCreditCards = true,
+            billingAddressParameters = null,
+            additionalEnabledNetworks = emptyList(),
+        ),
+        walletsAllowedInHeader = listOf(WalletType.GooglePay),
+        buttonsEnabled = true,
+        dividerTextResource = R.string.stripe_paymentsheet_or_pay_using,
+        cardFundingFilter = DefaultCardFundingFilter,
+        cardBrandFilter = DefaultCardBrandFilter,
+        onGooglePayPressed = { throw AssertionError("Not expected") },
+        onLinkPressed = { throw AssertionError("Not expected") },
     )
 }
