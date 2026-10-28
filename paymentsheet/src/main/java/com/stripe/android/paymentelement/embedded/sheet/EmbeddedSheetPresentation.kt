@@ -1,10 +1,8 @@
 package com.stripe.android.paymentelement.embedded.sheet
 
-import android.app.Activity
 import androidx.activity.result.ActivityResultCaller
 import androidx.compose.runtime.Composable
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
-import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 
 internal interface EmbeddedSheetPresentation {
     fun register()
@@ -55,16 +53,4 @@ internal interface EmbeddedSheetPresentationFactory {
         args: EmbeddedActivityArgs,
         activityResultCaller: ActivityResultCaller,
     ): EmbeddedSheetPresentation
-}
-
-internal fun EmbeddedSheetActivity.finishWithResult(result: EmbeddedActivityResult) {
-    // Bottom-sheet dismissal can arrive after a selection has already finished the Activity.
-    if (isFinishing) {
-        return
-    }
-    setResult(
-        Activity.RESULT_OK,
-        EmbeddedActivityResult.toIntent(intent, result),
-    )
-    finish()
 }

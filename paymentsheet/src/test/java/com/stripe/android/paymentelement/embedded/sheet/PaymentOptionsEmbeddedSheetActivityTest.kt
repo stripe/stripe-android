@@ -97,10 +97,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
         Espresso.pressBack()
         onIdle()
 
-        val result = EmbeddedSheetContract.parseResult(
-            scenario.result.resultCode,
-            scenario.result.resultData,
-        ) as EmbeddedActivityResult.Cancelled
+        val result = scenario.awaitResult() as EmbeddedActivityResult.Cancelled
         assertThat(result.customerState).isEqualTo(PaymentSheetFixtures.EMPTY_CUSTOMER_STATE)
         assertThat(result.linkAccountInfo.lastUpdateReason)
             .isEqualTo(LinkAccountUpdate.Value.UpdateReason.LoggedOut)
@@ -170,8 +167,8 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
 
         onIdle()
 
+        val result = scenario.awaitResult()
         assertThat(scenario.result.resultCode).isEqualTo(Activity.RESULT_OK)
-        val result = EmbeddedSheetContract.parseResult(scenario.result.resultCode, scenario.result.resultData)
         assertThat(result).isInstanceOf<EmbeddedActivityResult.Cancelled>()
         val cancelled = result as EmbeddedActivityResult.Cancelled
         assertThat(cancelled.launchMode).isEqualTo(
@@ -196,10 +193,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
                 .performClick()
             onIdle()
 
-            val result = EmbeddedSheetContract.parseResult(
-                scenario.result.resultCode,
-                scenario.result.resultData,
-            ) as EmbeddedActivityResult.Complete
+            val result = scenario.awaitResult() as EmbeddedActivityResult.Complete
             assertThat(result.selection).isEqualTo(selection)
             assertThat(result.previousNewSelections.previousNewSelection("cashapp"))
                 .isEqualTo(previousNewSelection)
@@ -291,10 +285,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
                 .performClick()
             onIdle()
 
-            val result = EmbeddedSheetContract.parseResult(
-                scenario.result.resultCode,
-                scenario.result.resultData,
-            ) as EmbeddedActivityResult.Complete
+            val result = scenario.awaitResult() as EmbeddedActivityResult.Complete
             assertThat(result.selection).isEqualTo(PaymentSelection.Saved(paymentMethod))
         }
     }
@@ -349,10 +340,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
             .performClick()
         onIdle()
 
-        val result = EmbeddedSheetContract.parseResult(
-            scenario.result.resultCode,
-            scenario.result.resultData,
-        ) as EmbeddedActivityResult.Complete
+        val result = scenario.awaitResult() as EmbeddedActivityResult.Complete
         assertThat(result.selection).isInstanceOf<PaymentSelection.New.USBankAccount>()
         val selection = result.selection as PaymentSelection.New.USBankAccount
         assertThat(selection.screenState.linkedBankAccount?.bankName).isEqualTo("Test Bank")
@@ -407,7 +395,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
 
         onIdle()
 
-        val result = EmbeddedSheetContract.parseResult(scenario.result.resultCode, scenario.result.resultData)
+        val result = scenario.awaitResult()
         val cancelled = result as EmbeddedActivityResult.Cancelled
         assertThat(cancelled.customerState).isNotNull()
     }
@@ -480,6 +468,45 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
 
                 verticalModePage.waitUntilVisible()
                 cardRow.assertIsNotEnabled()
+            } finally {
+                responseGate.releaseResponse.countDown()
+            }
+        }
+    }
+
+    @Test
+    fun `programmatic completion finishes while processing blocks user dismissal`() {
+        val responseGate = NetworkResponseGate()
+        networkRule.checkoutUpdate { response ->
+            response.setResponseCode(400)
+            response.setBody("""{"error":{"message":"Invalid tax region"}}""")
+            responseGate.awaitRelease()
+        }
+
+        launch(
+            selection = savedSelectionWithBillingAddress(),
+            paymentMethodMetadata = checkoutPaymentMethodMetadata(),
+        ) { scenario ->
+            try {
+                composeTestRule.onNodeWithTag(PRIMARY_BUTTON_TEST_TAG)
+                    .performScrollTo()
+                    .assertIsEnabled()
+                    .performClick()
+                composeTestRule.waitUntilWithIdle {
+                    responseGate.requestReceived.count == 0L
+                }
+                composeTestRule.onNodeWithTag("${TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON}_card")
+                    .assertIsNotEnabled()
+                val terminalResult = EmbeddedActivityResult.Error(EmbeddedLaunchMode.PaymentOptions)
+
+                scenario.onActivity { activity ->
+                    activity.onBackPressedDispatcher.onBackPressed()
+                    assertThat(activity.isFinishing).isFalse()
+                    activity.finishWithResult(terminalResult)
+                    assertThat(activity.isFinishing).isFalse()
+                }
+
+                assertThat(scenario.awaitResult()).isEqualTo(terminalResult)
             } finally {
                 responseGate.releaseResponse.countDown()
             }
@@ -645,10 +672,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
                 .performScrollTo().assertIsEnabled().performClick()
             onIdle()
 
-            val result = EmbeddedSheetContract.parseResult(
-                scenario.result.resultCode,
-                scenario.result.resultData,
-            ) as EmbeddedActivityResult.Complete
+            val result = scenario.awaitResult() as EmbeddedActivityResult.Complete
             val returnedSelection = result.selection as PaymentSelection.New.USBankAccount
             assertThat(returnedSelection.input.name).isEqualTo(selection.input.name)
             assertThat(returnedSelection.input.email).isEqualTo(selection.input.email)
