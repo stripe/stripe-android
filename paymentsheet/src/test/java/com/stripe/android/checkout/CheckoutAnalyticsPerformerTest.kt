@@ -4,6 +4,7 @@ package com.stripe.android.checkout
 
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.ApiConfigurationPreview
 import com.stripe.android.core.StripeError
@@ -73,8 +74,7 @@ internal class CheckoutAnalyticsPerformerTest {
             ExpectedEvent(
                 event = "checkout_elements.confirm.succeeded",
                 publishableKey = DEFAULT_METADATA_PUBLISHABLE_KEY,
-                params = mapOf(
-                    "selected_lpm" to "google_pay",
+                params = paymentElementConfirmationParams + mapOf(
                     "duration" to 2f,
                 ),
             ),
@@ -122,8 +122,8 @@ internal class CheckoutAnalyticsPerformerTest {
             ExpectedEvent(
                 event = "checkout_elements.confirm.failed",
                 publishableKey = DEFAULT_METADATA_PUBLISHABLE_KEY,
-                params = mapOf(
-                    "selected_lpm" to "google_pay",
+                params = paymentElementConfirmationParams + mapOf(
+                    "invocation_source" to "express_checkout_element",
                     "duration" to 2f,
                     "error_type" to "card_error",
                     "error_code" to "card_declined",
@@ -245,7 +245,7 @@ internal class CheckoutAnalyticsPerformerTest {
             ExpectedEvent(
                 event = "checkout_elements.confirm.succeeded",
                 publishableKey = DEFAULT_METADATA_PUBLISHABLE_KEY,
-                params = mapOf("selected_lpm" to "link"),
+                params = expressCheckoutConfirmationParams,
             ),
         )
     }
@@ -310,6 +310,7 @@ internal class CheckoutAnalyticsPerformerTest {
                 params = mapOf(
                     "selected_lpm" to "card",
                     "is_saved_payment_method" to true,
+                    "invocation_source" to "merchant",
                 ),
             ),
         )
@@ -336,7 +337,7 @@ internal class CheckoutAnalyticsPerformerTest {
             ExpectedEvent(
                 event = "checkout_elements.confirm.succeeded",
                 publishableKey = DEFAULT_METADATA_PUBLISHABLE_KEY,
-                params = mapOf("active_link_session" to true),
+                params = paymentElementConfirmationParams + ("active_link_session" to true),
             ),
         )
     }
@@ -359,7 +360,11 @@ internal class CheckoutAnalyticsPerformerTest {
             ExpectedEvent(
                 event = "checkout_elements.confirm.started",
                 publishableKey = DEFAULT_METADATA_PUBLISHABLE_KEY,
-                params = paymentElementConfirmationParams,
+                params = paymentElementConfirmationParams + mapOf(
+                    "checkout_config_id" to "cfg_initial_confirmation",
+                    "elements_session_config_id" to "cfg_elements_initial",
+                    "automatic_tax_enabled" to true,
+                ),
             ),
         )
         val confirmationResponse = initialResponse.copy(
@@ -451,6 +456,13 @@ internal class CheckoutAnalyticsPerformerTest {
             state = CheckoutControllerStateFactory.create(
                 paymentSelection = PaymentSelection.GooglePay,
                 paymentMethodMetadata = paymentMethodMetadata,
+                checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+                    configId = "cfg_checkout",
+                    elementsSession = ElementsSession.createFromFallback(
+                        stripeIntent = paymentMethodMetadata.stripeIntent,
+                        sessionsError = null,
+                    ).copy(elementsSessionConfigId = "cfg_elements"),
+                ),
             )
         }
         val linkAccountHolder = LinkAccountHolder(savedStateHandle)
@@ -520,8 +532,23 @@ internal class CheckoutAnalyticsPerformerTest {
         assertThat(request.params).containsEntry("event", expected.event)
         assertThat(request.params).containsEntry("product_usage", "checkout_elements")
         assertThat(request.params).containsEntry("publishable_key", expected.publishableKey)
-        expected.params.forEach { (key, value) ->
+        (commonConfirmationParams + expected.params).forEach { (key, value) ->
             assertThat(request.params).containsEntry(key, value)
+        }
+        if (expected.event == "checkout_elements.confirm.started") {
+            assertThat(request.params).doesNotContainKey("duration")
+        } else {
+            assertThat(request.params).containsEntry("duration", 2f)
+        }
+        if (expected.event != "checkout_elements.confirm.failed") {
+            assertThat(request.params).doesNotContainKey("error_type")
+            assertThat(request.params).doesNotContainKey("error_code")
+        }
+        if (!expected.params.containsKey("request_id")) {
+            assertThat(request.params).doesNotContainKey("request_id")
+        }
+        if (!expected.params.containsKey("link_context")) {
+            assertThat(request.params).doesNotContainKey("link_context")
         }
         return request.params
     }
@@ -529,6 +556,18 @@ internal class CheckoutAnalyticsPerformerTest {
     private companion object {
         const val FALLBACK_PUBLISHABLE_KEY = "pk_test_checkout_analytics"
         const val DEFAULT_METADATA_PUBLISHABLE_KEY = "pk_test_checkout_metadata"
+
+        val commonConfirmationParams = mapOf(
+            "checkout_session_id" to DEFAULT_CHECKOUT_SESSION_ID,
+            "checkout_config_id" to "cfg_checkout",
+            "elements_session_config_id" to "cfg_elements",
+            "currency" to "usd",
+            "session_status" to "open",
+            "payment_status" to "unpaid",
+            "adaptive_pricing_active" to false,
+            "automatic_tax_enabled" to false,
+            "active_link_session" to false,
+        )
 
         fun successfulResult() = ConfirmationHandler.Result.Succeeded(
             intent = PaymentIntentFixtures.PI_SUCCEEDED,
