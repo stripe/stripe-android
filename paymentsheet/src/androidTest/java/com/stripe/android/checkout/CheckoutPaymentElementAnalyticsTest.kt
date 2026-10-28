@@ -9,6 +9,7 @@ import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.core.exception.LocalStripeException
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.elements.PaymentElement
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.networktesting.AdvancedFraudSignalsTestRule
 import com.stripe.android.networktesting.NetworkRule
@@ -63,7 +64,12 @@ internal class CheckoutPaymentElementAnalyticsTest {
                 eventName = "mc_initial_displayed_payment_methods",
                 productUsage = setOf("Checkout"),
             )
-            assertThat(controller.configure(DEFAULT_CLIENT_SECRET))
+            assertThat(
+                controller.configure(
+                    DEFAULT_CLIENT_SECRET,
+                    CheckoutController.Configuration().paymentElement(PaymentElement.Configuration()),
+                )
+            )
                 .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
         },
     ) {
@@ -119,7 +125,12 @@ internal class CheckoutPaymentElementAnalyticsTest {
                     eventName = "mc_initial_displayed_payment_methods",
                     productUsage = setOf("Checkout"),
                 )
-                assertThat(controller.configure(DEFAULT_CLIENT_SECRET))
+                assertThat(
+                    controller.configure(
+                        DEFAULT_CLIENT_SECRET,
+                        CheckoutController.Configuration().paymentElement(PaymentElement.Configuration()),
+                    )
+                )
                     .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
             },
         ) {
@@ -195,7 +206,12 @@ internal class CheckoutPaymentElementAnalyticsTest {
                     eventName = "mc_initial_displayed_payment_methods",
                     productUsage = setOf("Checkout"),
                 )
-                assertThat(controller.configure(DEFAULT_CLIENT_SECRET))
+                assertThat(
+                    controller.configure(
+                        DEFAULT_CLIENT_SECRET,
+                        CheckoutController.Configuration().paymentElement(PaymentElement.Configuration()),
+                    )
+                )
                     .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
             },
         ) {

@@ -215,13 +215,7 @@ internal class CheckoutStateLoader @Inject constructor(
             collectedDetails = collectedDetails,
         )
 
-        if (embeddedConfig == null) {
-            // TODO: report unexpected error
-            return null
-        }
-
-        if (commonConfiguration == null) {
-            // TODO: report unexpected error
+        if (embeddedConfig == null || commonConfiguration == null) {
             return null
         }
 

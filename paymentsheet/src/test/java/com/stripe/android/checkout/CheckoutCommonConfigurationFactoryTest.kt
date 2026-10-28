@@ -86,6 +86,7 @@ internal class CheckoutCommonConfigurationFactoryTest {
     @Test
     fun `uses the provided merchant display name`() {
         val configuration = CheckoutController.Configuration()
+            .paymentElement(PaymentElement.Configuration())
             .merchantDisplayName("Acme Corp")
             .build()
 
@@ -193,6 +194,45 @@ internal class CheckoutCommonConfigurationFactoryTest {
 
         assertThat(result?.link?.display)
             .isEqualTo(PaymentSheet.LinkConfiguration.Display.Never)
+    }
+
+    @Test
+    fun `createForExpressCheckoutElement uses defaults when payment element is not configured`() {
+        val configuration = CheckoutController.Configuration()
+            .expressCheckoutElement(
+                ExpressCheckoutElement.Configuration()
+                    .googlePayConfiguration(
+                        GooglePayConfiguration().label("ECE total").buttonType(
+                            GooglePayConfiguration.ButtonType.Donate
+                        )
+                    )
+                    .linkConfiguration(
+                        ExpressCheckoutElement.Configuration.LinkConfiguration().display(
+                            ExpressCheckoutElement.Configuration.LinkConfiguration.Display.Never
+                        )
+                    )
+            )
+            .build()
+
+        val result = requireNotNull(
+            factory().createForExpressCheckoutElement(
+                configuration = configuration,
+                checkoutSessionResponse = CheckoutSessionResponseFactory.create(merchantCountry = "GB"),
+                collectedDetails = collectedDetails(),
+            )
+        )
+
+        assertThat(result.preferredNetworks).isEqualTo(ConfigurationDefaults.preferredNetworks)
+        assertThat(result.paymentMethodOrder).isEqualTo(ConfigurationDefaults.paymentMethodOrder)
+        assertThat(result.cardBrandAcceptance).isEqualTo(ConfigurationDefaults.cardBrandAcceptance)
+        assertThat(result.termsDisplay).isEmpty()
+        assertThat(result.opensCardScannerAutomatically)
+            .isEqualTo(ConfigurationDefaults.opensCardScannerAutomatically)
+        assertThat(result.appearance).isEqualTo(ConfigurationDefaults.appearance)
+        assertThat(result.googlePay?.countryCode).isEqualTo("GB")
+        assertThat(result.googlePay?.label).isEqualTo("ECE total")
+        assertThat(result.googlePay?.buttonType).isEqualTo(PaymentSheet.GooglePayConfiguration.ButtonType.Donate)
+        assertThat(result.link.display).isEqualTo(PaymentSheet.LinkConfiguration.Display.Never)
     }
 
     @Test
@@ -328,6 +368,7 @@ internal class CheckoutCommonConfigurationFactoryTest {
     @Test
     fun `maps configured billing defaults to payment element and express checkout element`() {
         val configuration = CheckoutController.Configuration()
+            .paymentElement(PaymentElement.Configuration())
             .defaults(
                 CheckoutController.Configuration.Defaults().phone("+15555551234").billingDetails(
                     CheckoutController.Configuration.Defaults.ContactDetails()
@@ -548,14 +589,17 @@ internal class CheckoutCommonConfigurationFactoryTest {
         val defaults = CheckoutController.Configuration.Defaults().phone("+15555551234")
         assertThat(defaults.build().phone).isEqualTo("+15555551234")
         val configuration = CheckoutController.Configuration()
+            .paymentElement(PaymentElement.Configuration())
             .defaults(defaults.phone(null))
             .expressCheckoutElement(ExpressCheckoutElement.Configuration())
             .build()
         val response = CheckoutSessionResponseFactory.create()
         val details = collectedDetails()
 
-        assertThat(factory().createForPaymentElement(configuration, response, details)?.defaultBillingDetails?.phone)
-            .isNull()
+        val paymentElementConfiguration = requireNotNull(
+            factory().createForPaymentElement(configuration, response, details)
+        )
+        assertThat(paymentElementConfiguration.defaultBillingDetails?.phone).isNull()
         val expressConfiguration = requireNotNull(
             factory().createForExpressCheckoutElement(configuration, response, details)
         )

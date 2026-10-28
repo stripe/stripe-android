@@ -114,7 +114,12 @@ internal class CheckoutControllerComposeTest {
         ).checkoutController
         try {
             networkRule.checkoutInit { response -> successResponse(response) {} }
-            assertThat(controller.configure("${DEFAULT_CHECKOUT_SESSION_ID}_secret_example"))
+            assertThat(
+                controller.configure(
+                    "${DEFAULT_CHECKOUT_SESSION_ID}_secret_example",
+                    CheckoutController.Configuration().paymentElement(PaymentElement.Configuration()),
+                )
+            )
                 .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
             CheckoutControllerStateFactory.createStateHolder(savedState.handle)
                 .setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
