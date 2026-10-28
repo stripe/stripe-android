@@ -153,6 +153,8 @@ internal object GooglePayPaymentDataCallbackHandler {
             GooglePayPaymentDataUpdate.CallbackTrigger.Initialize,
             GooglePayPaymentDataUpdate.CallbackTrigger.ShippingAddress ->
                 GooglePayPaymentDataError.Intent.ShippingAddress
+            GooglePayPaymentDataUpdate.CallbackTrigger.PaymentMethod ->
+                GooglePayPaymentDataError.Intent.PaymentMethod
             GooglePayPaymentDataUpdate.CallbackTrigger.ShippingOption ->
                 GooglePayPaymentDataError.Intent.ShippingOption
             GooglePayPaymentDataUpdate.CallbackTrigger.Offer ->
