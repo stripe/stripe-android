@@ -16,6 +16,7 @@ import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.form.OnClickOverrideDelegate
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.amount
 import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.paymentsheet.ui.PrimaryButton
@@ -52,6 +53,7 @@ internal interface SheetActivityStateHolder {
     data class State(
         val primaryButtonLabel: ResolvableString,
         val isEnabled: Boolean,
+        val isSelectionButtonVisible: Boolean,
         val processingState: PrimaryButtonProcessingState,
         val isProcessing: Boolean,
         val primaryButtonIcon: PrimaryButtonIcon,
@@ -80,6 +82,7 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
         SheetActivityStateHolder.State(
             primaryButtonLabel = primaryButtonLabel(paymentMethodMetadata.stripeIntent, configuration),
             isEnabled = false,
+            isSelectionButtonVisible = isSelectionButtonVisible(selectionHolder.selection.value, null),
             processingState = PrimaryButtonProcessingState.Idle(null),
             isProcessing = false,
             primaryButtonIcon = if (launchMode !is EmbeddedLaunchMode.PaymentOptions &&
@@ -165,7 +168,8 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
                 _state.update { currentState ->
                     currentState.copy(
                         isEnabled = usBankAccountFormPrimaryButtonUiState?.enabled
-                            ?: (selection != null && !currentState.isProcessing)
+                            ?: (selection != null && !currentState.isProcessing),
+                        isSelectionButtonVisible = isSelectionButtonVisible(selection, currentState.mandateText),
                     )
                 }
             }
@@ -181,9 +185,15 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
     override fun updateMandate(mandateText: ResolvableString?) {
         _state.update {
             it.copy(
-                mandateText = mandateText
+                mandateText = mandateText,
+                isSelectionButtonVisible = isSelectionButtonVisible(selectionHolder.selection.value, mandateText),
             )
         }
+    }
+
+    private fun isSelectionButtonVisible(selection: PaymentSelection?, mandateText: ResolvableString?): Boolean {
+        return launchMode !is EmbeddedLaunchMode.PaymentOptions ||
+            selection?.requiresConfirmation == true || mandateText != null
     }
 
     override fun updateError(error: ResolvableString?) {

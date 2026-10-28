@@ -2,8 +2,10 @@ package com.stripe.android.paymentelement.embedded.sheet
 
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.Turbine
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.taptoadd.FakeTapToAddHelper
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.LinkAccountHolder
@@ -26,6 +28,8 @@ import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInteractor
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
+import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.mandateTextFromPaymentMethodMetadata
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.verticalmode.FakeManageScreenInteractor
@@ -46,6 +50,7 @@ import org.junit.Rule
 import org.junit.Test
 import javax.inject.Provider
 
+@Suppress("LargeClass")
 internal class InitialPaymentOptionsScreenFactoryTest {
     @get:Rule
     val coroutineTestRule = CoroutineTestRule()
@@ -463,6 +468,98 @@ internal class InitialPaymentOptionsScreenFactoryTest {
     }
 
     @Test
+    fun `horizontal saved selection derives mandate from metadata and clears it for a card`() = testScenario(
+        paymentMethodMetadata = savedMandateMetadata(PaymentSheet.PaymentMethodLayout.Horizontal),
+        customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
+            paymentMethods = listOf(
+                PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD,
+                PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+            ),
+        ),
+        testDispatcher = StandardTestDispatcher(),
+    ) {
+        val selection = PaymentSelection.Saved(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD)
+        selectionHolder.setSelection(selection)
+        sheetActivityStateHolder.state.test {
+            assertThat(awaitItem().mandateText).isNull()
+            activateInitialScreen()
+
+            val mandate = awaitItem().mandateText
+            assertThat(mandate).isNotNull()
+            assertThat(mandate).isEqualTo(
+                selection.mandateTextFromPaymentMethodMetadata(
+                    savedMandateMetadata(PaymentSheet.PaymentMethodLayout.Horizontal)
+                )
+            )
+
+            selectionHolder.setSelection(PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
+            testScope.runCurrent()
+
+            assertThat(awaitItem().mandateText).isNull()
+        }
+    }
+
+    @Test
+    fun `horizontal saved screen clears stale mandate on return from a form`() = testScenario(
+        paymentMethodMetadata = savedMandateMetadata(PaymentSheet.PaymentMethodLayout.Horizontal),
+        customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
+            paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+        ),
+        testDispatcher = StandardTestDispatcher(),
+    ) {
+        selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+        val screens = factory.createInitialScreen()
+        navigator.performAction(EmbeddedNavigator.Action.ReplaceCurrentScreen(screens.last()))
+        assertThat(eventReporter.showNewPaymentOptionsCalls.awaitItem()).isEqualTo(Unit)
+        testScope.runCurrent()
+        sheetActivityStateHolder.updateState { it.copy(mandateText = "Form mandate".resolvableString) }
+
+        sheetActivityStateHolder.state.test {
+            assertThat(awaitItem().mandateText).isEqualTo("Form mandate".resolvableString)
+            selectionHolder.setSelection(PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
+            testScope.runCurrent()
+            expectNoEvents()
+
+            navigator.performAction(EmbeddedNavigator.Action.ReplaceCurrentScreen(screens.first()))
+            assertThat(eventReporter.showExistingPaymentOptionsCalls.awaitItem()).isEqualTo(Unit)
+            testScope.runCurrent()
+
+            assertThat(awaitItem().mandateText).isNull()
+        }
+    }
+
+    @Test
+    fun `vertical saved selection forwards mandate updates to sheet state`() = testScenario(
+        paymentMethodMetadata = savedMandateMetadata(PaymentSheet.PaymentMethodLayout.Vertical),
+        customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
+            paymentMethods = listOf(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD),
+        ),
+        testDispatcher = StandardTestDispatcher(),
+    ) {
+        val selection = PaymentSelection.Saved(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD)
+        selectionHolder.setSelection(selection)
+        sheetActivityStateHolder.state.test {
+            assertThat(awaitItem().mandateText).isNull()
+            activateInitialScreen()
+
+            val mandate = awaitItem().mandateText
+            assertThat(mandate).isNotNull()
+            assertThat(mandate).isEqualTo(
+                selection.mandateTextFromPaymentMethodMetadata(
+                    savedMandateMetadata(PaymentSheet.PaymentMethodLayout.Vertical)
+                )
+            )
+        }
+    }
+
+    private fun savedMandateMetadata(layout: PaymentSheet.PaymentMethodLayout) = PaymentMethodMetadataFactory.create(
+        stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+            paymentMethodTypes = listOf("card", "sepa_debit"),
+        ),
+        paymentMethodLayout = layout,
+    )
+
+    @Test
     fun `continue click delegates to continue coordinator`() = testScenario {
         factory.onContinueClick()
 
@@ -657,6 +754,7 @@ internal class InitialPaymentOptionsScreenFactoryTest {
             onClickOverrideCalls = onClickOverrideCalls,
             eventReporter = eventReporter,
             testScope = testScope,
+            sheetActivityStateHolder = sheetActivityStateHolder,
         ).block()
         eventReporter.validate()
         continueCoordinator.validate()
@@ -673,7 +771,19 @@ internal class InitialPaymentOptionsScreenFactoryTest {
         val onClickOverrideCalls: Turbine<Unit>,
         val eventReporter: FakeEventReporter,
         val testScope: TestScope,
-    )
+        val sheetActivityStateHolder: FakeSheetActivityStateHolder,
+    ) {
+        suspend fun activateInitialScreen() {
+            val screen = factory.createInitialScreen().first()
+            navigator.performAction(EmbeddedNavigator.Action.ReplaceCurrentScreen(screen))
+            when (screen) {
+                is EmbeddedNavigator.Screen.HorizontalSavedPaymentOptions ->
+                    assertThat(eventReporter.showExistingPaymentOptionsCalls.awaitItem()).isEqualTo(Unit)
+                else -> assertThat(eventReporter.showNewPaymentOptionsCalls.awaitItem()).isEqualTo(Unit)
+            }
+            testScope.runCurrent()
+        }
+    }
 }
 
 private class FakeEmbeddedUpdateScreenInteractorFactory : EmbeddedUpdateScreenInteractorFactory {

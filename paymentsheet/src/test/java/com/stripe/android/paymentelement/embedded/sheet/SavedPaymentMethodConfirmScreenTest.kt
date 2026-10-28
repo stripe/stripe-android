@@ -181,6 +181,7 @@ internal class SavedPaymentMethodConfirmScreenTest {
     private fun defaultState() = SheetActivityStateHolder.State(
         primaryButtonLabel = "Pay".resolvableString,
         isEnabled = true,
+        isSelectionButtonVisible = true,
         processingState = PrimaryButtonProcessingState.Idle(null),
         isProcessing = false,
         primaryButtonIcon = PrimaryButtonIcon.Lock,

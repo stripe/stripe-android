@@ -553,6 +553,7 @@ internal class EmbeddedNavigatorTest {
                 SheetActivityStateHolder.State(
                     primaryButtonLabel = "".resolvableString,
                     isEnabled = false,
+                    isSelectionButtonVisible = true,
                     processingState = PrimaryButtonProcessingState.Idle(null),
                     isProcessing = false,
                     primaryButtonIcon = PrimaryButtonIcon.Lock,
@@ -710,6 +711,7 @@ internal class EmbeddedNavigatorTest {
             initialState = SheetActivityStateHolder.State(
                 primaryButtonLabel = "Confirm".resolvableString,
                 isEnabled = false,
+                isSelectionButtonVisible = true,
                 processingState = PrimaryButtonProcessingState.Processing,
                 isProcessing = true,
                 primaryButtonIcon = PrimaryButtonIcon.Lock,
@@ -864,6 +866,7 @@ internal class EmbeddedNavigatorTest {
                 SheetActivityStateHolder.State(
                     primaryButtonLabel = "".resolvableString,
                     isEnabled = false,
+                    isSelectionButtonVisible = true,
                     processingState = PrimaryButtonProcessingState.Idle(null),
                     isProcessing = isProcessing,
                     primaryButtonIcon = PrimaryButtonIcon.Lock,
@@ -885,6 +888,7 @@ internal class EmbeddedNavigatorTest {
                 SheetActivityStateHolder.State(
                     primaryButtonLabel = "".resolvableString,
                     isEnabled = false,
+                    isSelectionButtonVisible = true,
                     processingState = PrimaryButtonProcessingState.Idle(null),
                     isProcessing = isProcessing,
                     primaryButtonIcon = PrimaryButtonIcon.Lock,
@@ -905,6 +909,7 @@ internal class EmbeddedNavigatorTest {
                 SheetActivityStateHolder.State(
                     primaryButtonLabel = "".resolvableString,
                     isEnabled = false,
+                    isSelectionButtonVisible = true,
                     processingState = PrimaryButtonProcessingState.Idle(null),
                     isProcessing = isProcessing,
                     primaryButtonIcon = PrimaryButtonIcon.Lock,

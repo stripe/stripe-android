@@ -761,6 +761,10 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
                 formPage.waitUntilVisible()
                 Espresso.pressBack()
                 formPage.waitUntilMissing()
+                waitForPaymentOptionsLayout(paymentMethodLayout)
+                testRules.compose.onNodeWithTag(PRIMARY_BUTTON_TEST_TAG).assertDoesNotExist()
+                verticalModePage.clickNewPaymentMethodButton("card")
+                formPage.waitUntilVisible()
             }
             PaymentElement.Configuration.PaymentMethodLayout.Horizontal -> {
                 formPage.waitUntilVisible()
@@ -769,7 +773,6 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
                 error("Expected an explicit layout.")
             }
         }
-        waitForPaymentOptionsLayout(paymentMethodLayout)
     }
 
     private fun openHorizontalPaymentMethodListFromWalletOptions() {

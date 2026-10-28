@@ -178,6 +178,7 @@ internal class EmbeddedSavedPaymentMethodMutatorFactoryTest {
                 SheetActivityStateHolder.State(
                     primaryButtonLabel = "".resolvableString,
                     isEnabled = false,
+                    isSelectionButtonVisible = true,
                     processingState = PrimaryButtonProcessingState.Idle(null),
                     isProcessing = false,
                     primaryButtonIcon = PrimaryButtonIcon.Lock,

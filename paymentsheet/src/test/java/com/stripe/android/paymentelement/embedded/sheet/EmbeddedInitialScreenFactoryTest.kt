@@ -96,6 +96,7 @@ internal class EmbeddedInitialScreenFactoryTest {
 
         assertThat(screens).hasSize(1)
         assertThat(screens.single()).isInstanceOf<EmbeddedNavigator.Screen.VerticalPaymentOptions>()
+        assertThat(sheetActivityStateHolder.updateMandateTurbine.awaitItem()).isNull()
     }
 
     @Test
@@ -115,6 +116,7 @@ internal class EmbeddedInitialScreenFactoryTest {
             assertThat(screens).hasSize(2)
             assertThat(screens[0]).isInstanceOf<EmbeddedNavigator.Screen.VerticalPaymentOptions>()
             assertThat(screens[1]).isInstanceOf<EmbeddedNavigator.Screen.Form>()
+            assertThat(sheetActivityStateHolder.updateMandateTurbine.awaitItem()).isNull()
         }
 
     @Suppress("LongMethod")
