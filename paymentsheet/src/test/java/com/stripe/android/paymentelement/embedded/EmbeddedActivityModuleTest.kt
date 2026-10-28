@@ -124,7 +124,7 @@ internal class EmbeddedActivityModuleTest {
         val eventReporter = FakeAddressLauncherEventReporter()
         val factory = EmbeddedActivityModule.provideAutocompleteAddressInteractorFactory(
             stripeAutocompleteRepository = FakeStripeAutocompleteRepository(),
-            coroutineScope = this,
+            coroutineScope = backgroundScope,
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 shouldUseAutocompleteProxyEndpoints = shouldUseAutocompleteProxyEndpoints,
             ),
