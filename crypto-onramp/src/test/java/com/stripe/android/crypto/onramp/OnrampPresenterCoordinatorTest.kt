@@ -54,7 +54,9 @@ import com.stripe.android.crypto.onramp.ui.KycScreenAction
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.link.LinkController
 import com.stripe.android.model.CardBrand
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -79,6 +81,7 @@ class OnrampPresenterCoordinatorTest {
     private val lifecycleOwner = TestLifecycleOwner()
     private val activity = Robolectric.buildActivity(ComponentActivity::class.java).create().get()
     private val testScope = TestScope()
+    private val checkoutResults = Channel<OnrampCheckoutResult>(Channel.UNLIMITED)
     private val checkoutCallback = mock<OnrampCheckoutCallback>()
     private val onrampSessionClientSecretProvider: suspend (String) -> String = { "cos_test_secret" }
     private val samsungPayLauncher = FakeSamsungPayLauncher()
@@ -104,12 +107,13 @@ class OnrampPresenterCoordinatorTest {
         // Verify startCheckout was called
         verify(interactor).startCheckout(onrampSessionId)
 
-        // Simulate the interactor emitting a completed checkout state (this will trigger the observer)
+        // Simulate the interactor completing checkout and emitting its result.
         onrampStateFlow.value = OnrampState(
             checkoutState = CheckoutState(
                 status = Status.Completed(OnrampCheckoutResult.Completed())
             )
         )
+        checkoutResults.send((onrampStateFlow.value.checkoutState!!.status as Status.Completed).result)
         testScope.testScheduler.advanceUntilIdle()
 
         // Then
@@ -130,6 +134,7 @@ class OnrampPresenterCoordinatorTest {
                 status = Status.Completed(OnrampCheckoutResult.Canceled())
             )
         )
+        checkoutResults.send((onrampStateFlow.value.checkoutState!!.status as Status.Completed).result)
         testScope.testScheduler.advanceUntilIdle()
 
         val callbackCaptor = argumentCaptor<OnrampCheckoutResult>()
@@ -150,6 +155,7 @@ class OnrampPresenterCoordinatorTest {
                 status = Status.Completed(OnrampCheckoutResult.Failed(error))
             )
         )
+        checkoutResults.send((onrampStateFlow.value.checkoutState!!.status as Status.Completed).result)
         testScope.testScheduler.advanceUntilIdle()
 
         val callbackCaptor = argumentCaptor<OnrampCheckoutResult>()
@@ -159,6 +165,68 @@ class OnrampPresenterCoordinatorTest {
             .isInstanceOf(OnrampCheckoutResult.Failed::class.java)
         assertThat((callbackCaptor.firstValue as OnrampCheckoutResult.Failed).error)
             .isSameInstanceAs(error)
+    }
+
+    @Test
+    fun `recreated presenter does not deliver a checkout result again`() = runTest {
+        val results = Turbine<OnrampCheckoutResult>()
+        val state = MutableStateFlow(OnrampState())
+        createCoordinator(onrampStateFlow = state, checkoutCallback = results::add)
+        val result = OnrampCheckoutResult.Completed()
+        state.value = OnrampState(checkoutState = CheckoutState(Status.Completed(result)))
+        checkoutResults.send(result)
+        testScope.testScheduler.advanceUntilIdle()
+        assertThat(results.awaitItem()).isSameInstanceAs(result)
+
+        lifecycleOwner.currentState = Lifecycle.State.DESTROYED
+        val recreatedOwner = TestLifecycleOwner()
+        try {
+            createCoordinator(
+                onrampStateFlow = state,
+                checkoutCallback = results::add,
+                lifecycleOwner = recreatedOwner,
+                activity = Robolectric.buildActivity(ComponentActivity::class.java).create().get(),
+            )
+            testScope.testScheduler.advanceUntilIdle()
+            results.expectNoEvents()
+
+            val nextResult = OnrampCheckoutResult.Completed()
+            state.value = OnrampState(checkoutState = CheckoutState(Status.Completed(nextResult)))
+            checkoutResults.send(nextResult)
+            testScope.testScheduler.advanceUntilIdle()
+            assertThat(results.awaitItem()).isSameInstanceAs(nextResult)
+            results.ensureAllEventsConsumed()
+        } finally {
+            recreatedOwner.currentState = Lifecycle.State.DESTROYED
+        }
+    }
+
+    @Test
+    fun `recreated presenter delivers checkout completed while no presenter was observing`() = runTest {
+        val results = Turbine<OnrampCheckoutResult>()
+        val state = MutableStateFlow(OnrampState())
+        createCoordinator(onrampStateFlow = state, checkoutCallback = results::add)
+        lifecycleOwner.currentState = Lifecycle.State.DESTROYED
+        val result = OnrampCheckoutResult.Completed()
+        state.value = OnrampState(checkoutState = CheckoutState(Status.Completed(result)))
+        checkoutResults.send(result)
+        testScope.testScheduler.advanceUntilIdle()
+        results.expectNoEvents()
+
+        val recreatedOwner = TestLifecycleOwner()
+        try {
+            createCoordinator(
+                onrampStateFlow = state,
+                checkoutCallback = results::add,
+                lifecycleOwner = recreatedOwner,
+                activity = Robolectric.buildActivity(ComponentActivity::class.java).create().get(),
+            )
+            testScope.testScheduler.advanceUntilIdle()
+            assertThat(results.awaitItem()).isSameInstanceAs(result)
+            results.ensureAllEventsConsumed()
+        } finally {
+            recreatedOwner.currentState = Lifecycle.State.DESTROYED
+        }
     }
 
     @Test
@@ -751,6 +819,9 @@ class OnrampPresenterCoordinatorTest {
         termsOfServiceCallback: OnrampPartnerTermsCallback? = null,
         userAttestationCallback: OnrampUserAttestationCallback? = null,
         verifyIdentityCallback: OnrampVerifyIdentityCallback = OnrampVerifyIdentityCallback {},
+        checkoutCallback: OnrampCheckoutCallback = this.checkoutCallback,
+        lifecycleOwner: TestLifecycleOwner = this.lifecycleOwner,
+        activity: ComponentActivity = this.activity,
     ): OnrampPresenterCoordinator {
         lifecycleOwner.currentState = Lifecycle.State.STARTED
 
@@ -769,6 +840,7 @@ class OnrampPresenterCoordinatorTest {
         ).thenReturn(linkPresenter)
 
         whenever(interactor.state).thenReturn(onrampStateFlow)
+        whenever(interactor.checkoutResults).thenReturn(checkoutResults.receiveAsFlow())
 
         val callbacks = OnrampCallbacks()
             .checkoutCallback(checkoutCallback)
