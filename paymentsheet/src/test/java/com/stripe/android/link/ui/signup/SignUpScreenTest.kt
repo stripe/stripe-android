@@ -7,6 +7,7 @@ import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.hasAnyChild
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -18,6 +19,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.LinkController
 import com.stripe.android.link.LinkDismissalCoordinator
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.RealLinkDismissalCoordinator
@@ -327,6 +329,26 @@ internal class SignUpScreenTest {
             .assertDoesNotExist()
     }
 
+    @Test
+    fun `authentication content replaces the header copy`() = runTest(dispatcher) {
+        val content = LinkController.AuthenticationContent(
+            title = "Continue with Link",
+            subtitle = "Sign in or create an account to get started.",
+            consentAction = LinkController.AuthenticationConsentAction.NetworkedIdentity,
+        )
+        val viewModel = viewModel(linkLaunchMode = LinkLaunchMode.Authentication(content = content))
+
+        composeTestRule.setContent {
+            DefaultLinkTheme {
+                SignUpScreen(viewModel = viewModel)
+            }
+        }
+
+        composeTestRule.onNodeWithTag(SIGN_UP_HEADER_TAG).assertTextEquals("Continue with Link")
+        composeTestRule.onNodeWithText("Sign in or create an account to get started.").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Pay faster everywhere Link is accepted.").assertDoesNotExist()
+    }
+
     private fun List<SemanticsNodeInteraction>.assert(interaction: SemanticsNodeInteraction.() -> Unit) {
         forEach { interaction(it) }
     }
@@ -349,7 +371,8 @@ internal class SignUpScreenTest {
         linkAccountManager: FakeLinkAccountManager = FakeLinkAccountManager(),
         dismissalCoordinator: LinkDismissalCoordinator = RealLinkDismissalCoordinator(),
         customerInfo: LinkConfiguration.CustomerInfo = TestFactory.LINK_CUSTOMER_INFO,
-        moveToWeb: (Throwable) -> Unit = {}
+        moveToWeb: (Throwable) -> Unit = {},
+        linkLaunchMode: LinkLaunchMode = LinkLaunchMode.Full(showSecondaryButton = true),
     ): SignUpViewModel {
         return SignUpViewModel(
             configuration = TestFactory.LINK_CONFIGURATION.copy(
@@ -362,7 +385,7 @@ internal class SignUpScreenTest {
             navigateAndClearStack = {},
             dismissalCoordinator = dismissalCoordinator,
             moveToWeb = moveToWeb,
-            linkLaunchMode = LinkLaunchMode.Full(showSecondaryButton = true),
+            linkLaunchMode = linkLaunchMode,
             dismissWithResult = {},
             verifyDuringSignUp = {},
         ).also { viewModelStoreRule.track(it) }

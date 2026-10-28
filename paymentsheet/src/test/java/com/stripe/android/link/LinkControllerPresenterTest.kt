@@ -34,7 +34,9 @@ class LinkControllerPresenterTest {
 
         verify(interactor).authenticate(
             launcher = launcher,
-            email = email
+            email = email,
+            phoneNumber = null,
+            content = null,
         )
     }
 
