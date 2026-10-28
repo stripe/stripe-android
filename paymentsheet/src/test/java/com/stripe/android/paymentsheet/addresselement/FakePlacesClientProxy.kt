@@ -33,8 +33,8 @@ internal class FakePlacesClientProxy(
         country: String,
         limit: Int
     ): Result<FindAutocompletePredictionsResponse> {
-        onBeforeFindPredictions?.invoke()
         _findPredictionsCalls.add(FindPredictionsCall(query, country, limit))
+        onBeforeFindPredictions?.invoke()
         return findPredictionsResult
     }
 
