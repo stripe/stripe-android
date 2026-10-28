@@ -33,6 +33,7 @@ import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
+import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.FakeStripeImageLoader
 import com.stripe.android.uicore.FormInsets
 import com.stripe.android.uicore.IconStyle
@@ -676,6 +677,7 @@ internal class CheckoutStateLoaderTest {
             customer = customer,
             delay = paymentElementLoaderDelay,
         )
+        val errorReporter = FakeErrorReporter()
         val loader = CheckoutStateLoader(
             embeddedConfigurationFactory = CheckoutEmbeddedConfigurationFactory(appName = "Example, Inc."),
             commonConfigurationFactory = CheckoutCommonConfigurationFactory(appName = "Example, Inc."),
@@ -685,6 +687,7 @@ internal class CheckoutStateLoaderTest {
             stateHolder = stateHolder,
             customerStateHolder = customerStateHolder,
             internalRowSelectionCallback = { internalRowSelectionCallback },
+            errorReporter = errorReporter,
         )
 
         Scenario(
@@ -700,6 +703,7 @@ internal class CheckoutStateLoaderTest {
         ).block()
 
         imageLoader.ensureAllEventsConsumed()
+        errorReporter.ensureAllEventsConsumed()
     }
 
     private class Scenario(
