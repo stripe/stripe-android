@@ -40,12 +40,6 @@ internal fun CheckoutController.Configuration.State.toExpressCheckoutElementGoog
     }
 
 @OptIn(CheckoutSessionPreview::class)
-internal fun CheckoutController.Configuration.State.toPaymentElementGooglePayConfiguration(
-    checkoutSessionResponse: CheckoutSessionResponse,
-): PaymentSheet.GooglePayConfiguration? =
-    paymentElementConfiguration?.toGooglePayConfiguration(checkoutSessionResponse)
-
-@OptIn(CheckoutSessionPreview::class)
 internal fun PaymentElement.Configuration.State.toGooglePayConfiguration(
     checkoutSessionResponse: CheckoutSessionResponse,
 ): PaymentSheet.GooglePayConfiguration? =
