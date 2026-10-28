@@ -11,7 +11,6 @@ import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
-import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInteractor
 import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.screenshottesting.LayoutDirection
 import com.stripe.android.screenshottesting.PaparazziConfigOption
@@ -22,7 +21,6 @@ import com.stripe.android.ui.core.FormUI
 import com.stripe.android.ui.core.elements.CardDetailsSectionElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.ScannedCardDetails
-import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.utils.screenshots.PaymentSheetAppearance.DefaultAppearance
 import kotlinx.coroutines.CoroutineScope
@@ -368,153 +366,6 @@ class CardUiDefinitionFactoryTest {
                         address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
                     ),
                 ),
-            )
-        }
-    }
-
-    @Test
-    fun testCondensedAutocompleteForm() {
-        paparazziRule.snapshot {
-            CardDefinition.CreateFormUi(
-                paymentMethodCreateParams = PaymentMethodCreateParams.createWithOverride(
-                    code = "card",
-                    billingDetails = null,
-                    requiresMandate = false,
-                    overrideParamMap = mapOf(
-                        "type" to "card",
-                        "card" to mapOf(
-                            "number" to "4242424242424242",
-                            "exp_month" to "07",
-                            "exp_year" to "2050",
-                            "cvc" to "123",
-                        ),
-                        "billing_details" to emptyMap<FormFieldId, String?>(),
-                    ),
-                    productUsage = emptySet(),
-                    clientAttributionMetadata = CLIENT_ATTRIBUTION_METADATA,
-                ),
-                metadata = metadata.copy(
-                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                        address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
-                    ),
-                ),
-                autocompleteAddressInteractorFactory = {
-                    TestAutocompleteAddressInteractor.noOp(
-                        autocompleteConfig = AutocompleteAddressInteractor.Config(
-                            googlePlacesApiKey = "123",
-                            autocompleteCountries = setOf("US"),
-                            isPlacesAvailable = true,
-                        )
-                    )
-                }
-            )
-        }
-    }
-
-    @Test
-    fun testCondensedAutocompleteFormWithInsets() {
-        customTextFieldsPaparazziRule.snapshot {
-            CardDefinition.CreateFormUi(
-                paymentMethodCreateParams = PaymentMethodCreateParams.createWithOverride(
-                    code = "card",
-                    billingDetails = null,
-                    requiresMandate = false,
-                    overrideParamMap = mapOf(),
-                    productUsage = emptySet(),
-                    clientAttributionMetadata = CLIENT_ATTRIBUTION_METADATA,
-                ),
-                metadata = metadata.copy(
-                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                        address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
-                    ),
-                ),
-                autocompleteAddressInteractorFactory = {
-                    TestAutocompleteAddressInteractor.noOp(
-                        autocompleteConfig = AutocompleteAddressInteractor.Config(
-                            googlePlacesApiKey = "123",
-                            autocompleteCountries = setOf("US"),
-                            isPlacesAvailable = true,
-                        )
-                    )
-                }
-            )
-        }
-    }
-
-    @Test
-    fun testCondensedAutocompleteFormWithValidation() {
-        paparazziRule.snapshot {
-            CardDefinition.CreateFormUi(
-                paymentMethodCreateParams = PaymentMethodCreateParams.createWithOverride(
-                    code = "card",
-                    billingDetails = null,
-                    requiresMandate = false,
-                    overrideParamMap = emptyMap(),
-                    productUsage = emptySet(),
-                    clientAttributionMetadata = CLIENT_ATTRIBUTION_METADATA,
-                ),
-                metadata = metadata.copy(
-                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                        address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
-                    ),
-                ),
-                autocompleteAddressInteractorFactory = {
-                    TestAutocompleteAddressInteractor.noOp(
-                        autocompleteConfig = AutocompleteAddressInteractor.Config(
-                            googlePlacesApiKey = "123",
-                            autocompleteCountries = setOf("US"),
-                            isPlacesAvailable = true,
-                        )
-                    )
-                },
-                isValidating = true,
-            )
-        }
-    }
-
-    @Test
-    fun testExpandedAutocompleteForm() {
-        paparazziRule.snapshot {
-            CardDefinition.CreateFormUi(
-                paymentMethodCreateParams = PaymentMethodCreateParams.createWithOverride(
-                    code = "card",
-                    billingDetails = null,
-                    requiresMandate = false,
-                    overrideParamMap = mapOf(
-                        "type" to "card",
-                        "card" to mapOf(
-                            "number" to "4242424242424242",
-                            "exp_month" to "07",
-                            "exp_year" to "2050",
-                            "cvc" to "123",
-                        ),
-                        "billing_details" to mapOf(
-                            "address" to mapOf(
-                                "country" to "US",
-                                "line1" to "123 Apple Street",
-                                "state" to "CA",
-                                "city" to "South San Francisco",
-                                "postal_code" to "94080",
-                            )
-                        ),
-                    ),
-                    productUsage = emptySet(),
-                    clientAttributionMetadata = CLIENT_ATTRIBUTION_METADATA,
-                ),
-                metadata = metadata.copy(
-                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                        address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
-                    ),
-                ),
-                autocompleteAddressInteractorFactory = {
-                    TestAutocompleteAddressInteractor.noOp(
-                        autocompleteConfig = AutocompleteAddressInteractor.Config(
-                            googlePlacesApiKey = "123",
-                            autocompleteCountries = setOf("US"),
-                            isPlacesAvailable = true,
-                        )
-                    )
-                }
             )
         }
     }
