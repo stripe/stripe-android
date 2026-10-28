@@ -4,6 +4,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.view.AuthActivityStarterHost
@@ -67,7 +68,10 @@ class GenericAuthenticatorTest {
     }
 
     private companion object {
-        val API_CONFIGURATION = ApiConfiguration.State("pk_test_resumed", "acct_resumed")
+        val API_CONFIGURATION = ApiConfiguration.State(
+            publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+            stripeAccountId = ApiKeyFixtures.FAKE_STRIPE_ACCOUNT,
+        )
     }
 }
 

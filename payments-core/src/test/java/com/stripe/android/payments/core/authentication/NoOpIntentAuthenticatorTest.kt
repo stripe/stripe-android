@@ -59,7 +59,7 @@ class NoOpIntentAuthenticatorTest {
             .containsExactly(
                 PaymentRelayStarter.Args.PaymentIntentArgs(
                     PaymentIntentFixtures.PI_WITH_LAST_PAYMENT_ERROR,
-                    stripeAccountId = "acct_no_op",
+                    stripeAccountId = ApiKeyFixtures.FAKE_STRIPE_ACCOUNT,
                 )
             )
     }
@@ -93,7 +93,7 @@ class NoOpIntentAuthenticatorTest {
         )
         val result =
             bundleArgumentCaptor.firstValue.get("extra_args") as PaymentFlowResult.Unvalidated
-        assertThat(result.stripeAccountId).isEqualTo("acct_no_op")
+        assertThat(result.stripeAccountId).isEqualTo(ApiKeyFixtures.FAKE_STRIPE_ACCOUNT)
         assertThat(result.clientSecret).isEqualTo("pi_1F7J1aCRMbs6FrXfaJcvbxF6_secret_mIuDLsSfoo1m6s")
 
         assertThat(requestCodeArgumentCaptor.firstValue).isEqualTo(PAYMENT_REQUEST_CODE)
@@ -102,7 +102,7 @@ class NoOpIntentAuthenticatorTest {
     private companion object {
         private val API_CONFIGURATION = ApiConfiguration.State(
             publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-            stripeAccountId = "acct_no_op",
+            stripeAccountId = ApiKeyFixtures.FAKE_STRIPE_ACCOUNT,
         )
     }
 }

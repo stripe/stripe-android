@@ -697,7 +697,7 @@ class PaymentLauncherViewModelAnalyticsTest {
         val SETUP_CLIENT_SECRET = requireNotNull(SetupIntentFixtures.SI_SUCCEEDED.clientSecret)
         const val PM_ID = "pm_12345"
         const val RETURN_URL = "return://to.me"
-        const val TEST_STRIPE_ACCOUNT_ID = "acct_123"
+        const val TEST_STRIPE_ACCOUNT_ID = ApiKeyFixtures.FAKE_STRIPE_ACCOUNT
         val EXPAND_PAYMENT_METHOD = listOf("payment_method")
         val API_CONFIGURATION = ApiConfiguration.State(
             publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,

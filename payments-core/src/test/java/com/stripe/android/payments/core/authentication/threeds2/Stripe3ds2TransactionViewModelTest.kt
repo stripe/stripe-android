@@ -61,7 +61,7 @@ class Stripe3ds2TransactionViewModelTest {
 
             verify(stripeRepository).start3ds2Auth(
                 any(),
-                eq(ApiRequest.Options("pk_test_nextActionData"))
+                eq(ApiRequest.Options(ApiKeyFixtures.CONNECTED_ACCOUNT_PUBLISHABLE_KEY))
             )
         }
 
@@ -79,7 +79,7 @@ class Stripe3ds2TransactionViewModelTest {
 
             verify(stripeRepository).start3ds2Auth(
                 any(),
-                eq(ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, "acct_123"))
+                eq(ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, ApiKeyFixtures.FAKE_STRIPE_ACCOUNT))
             )
         }
 
@@ -139,12 +139,14 @@ class Stripe3ds2TransactionViewModelTest {
                 )
             ),
             PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
-            PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2.nextActionData
-                as StripeIntent.NextActionData.SdkData.Use3DS2,
-            ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, "acct_123"),
+            (PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2.nextActionData
+                as StripeIntent.NextActionData.SdkData.Use3DS2).copy(
+                publishableKey = ApiKeyFixtures.CONNECTED_ACCOUNT_PUBLISHABLE_KEY,
+            ),
+            ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, ApiKeyFixtures.FAKE_STRIPE_ACCOUNT),
             enableLogging = ENABLE_LOGGING,
             statusBarColor = null,
-            ApiConfiguration.State(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, "acct_123"),
+            ApiConfiguration.State(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, ApiKeyFixtures.FAKE_STRIPE_ACCOUNT),
             PRODUCT_USAGE
         )
     }

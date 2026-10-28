@@ -19,6 +19,7 @@ import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.matcher.ViewMatchers.withContentDescription
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.model.StripeIntent
@@ -74,7 +75,9 @@ internal class PollingActivityTest {
         val fakePoller = FakeIntentStatusPoller()
         val scenario = pollingScenario(
             poller = fakePoller,
-            args = defaultArgs.copy(apiConfiguration = DEFAULT_API_CONFIG.copy(stripeAccountId = "acct_polling")),
+            args = defaultArgs.copy(
+                apiConfiguration = DEFAULT_API_CONFIG.copy(stripeAccountId = ApiKeyFixtures.OTHER_ACCOUNT_ID),
+            ),
         )
 
         scenario.onActivity {
@@ -83,14 +86,16 @@ internal class PollingActivityTest {
 
             val result = PaymentFlowResult.Unvalidated.fromIntent(scenario.getResult().resultData)
             assertThat(result.flowOutcome).isEqualTo(StripeIntentResult.Outcome.SUCCEEDED)
-            assertThat(result.stripeAccountId).isEqualTo("acct_polling")
+            assertThat(result.stripeAccountId).isEqualTo(ApiKeyFixtures.OTHER_ACCOUNT_ID)
         }
     }
 
     @Test
     fun `Closes activity with correct result if polling is canceled`() {
         val scenario = pollingScenario(
-            args = defaultArgs.copy(apiConfiguration = DEFAULT_API_CONFIG.copy(stripeAccountId = "acct_polling")),
+            args = defaultArgs.copy(
+                apiConfiguration = DEFAULT_API_CONFIG.copy(stripeAccountId = ApiKeyFixtures.OTHER_ACCOUNT_ID),
+            ),
         )
 
         scenario.onActivity {
@@ -102,7 +107,7 @@ internal class PollingActivityTest {
 
             val result = PaymentFlowResult.Unvalidated.fromIntent(scenario.getResult().resultData)
             assertThat(result.flowOutcome).isEqualTo(StripeIntentResult.Outcome.CANCELED)
-            assertThat(result.stripeAccountId).isEqualTo("acct_polling")
+            assertThat(result.stripeAccountId).isEqualTo(ApiKeyFixtures.OTHER_ACCOUNT_ID)
         }
     }
 

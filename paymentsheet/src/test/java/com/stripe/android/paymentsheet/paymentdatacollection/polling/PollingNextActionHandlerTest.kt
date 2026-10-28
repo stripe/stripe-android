@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.google.testing.junit.testparameterinjector.TestParameterValuesProvider
+import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
@@ -20,7 +21,10 @@ internal class PollingNextActionHandlerTest {
         @TestParameter(valuesProvider = ExistingPaymentMethodCaseProvider::class)
         testCase: ExistingPaymentMethodCase,
     ) {
-        val apiConfiguration = ApiConfiguration.State("pk_test_123", "acct_polling")
+        val apiConfiguration = ApiConfiguration.State(
+            publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+            stripeAccountId = ApiKeyFixtures.FAKE_ACCOUNT_ID,
+        )
 
         val args = PollingNextActionHandler().getArgsForPaymentMethod(
             actionable = createIntent(testCase.paymentMethodType),
@@ -42,7 +46,10 @@ internal class PollingNextActionHandlerTest {
 
     @Test
     fun `Pix uses hosted instructions and expiration time`() {
-        val apiConfiguration = ApiConfiguration.State("pk_test_123", "acct_polling")
+        val apiConfiguration = ApiConfiguration.State(
+            publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+            stripeAccountId = ApiKeyFixtures.FAKE_ACCOUNT_ID,
+        )
 
         val args = PollingNextActionHandler().getArgsForPaymentMethod(
             actionable = createPixIntent(expiresAt = 1_700_003_600),
@@ -67,7 +74,10 @@ internal class PollingNextActionHandlerTest {
         val args = PollingNextActionHandler().getArgsForPaymentMethod(
             actionable = createPixIntent(expiresAt = null),
             statusBarColor = null,
-            apiConfiguration = ApiConfiguration.State("pk_test_123", "acct_polling"),
+            apiConfiguration = ApiConfiguration.State(
+                publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                stripeAccountId = ApiKeyFixtures.FAKE_ACCOUNT_ID,
+            ),
             currentTimeMillis = 1_700_000_000_000,
         )
 
@@ -79,7 +89,10 @@ internal class PollingNextActionHandlerTest {
         val args = PollingNextActionHandler().getArgsForPaymentMethod(
             actionable = createPixIntent(expiresAt = 1_699_999_999),
             statusBarColor = null,
-            apiConfiguration = ApiConfiguration.State("pk_test_123", "acct_polling"),
+            apiConfiguration = ApiConfiguration.State(
+                publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                stripeAccountId = ApiKeyFixtures.FAKE_ACCOUNT_ID,
+            ),
             currentTimeMillis = 1_700_000_000_000,
         )
 

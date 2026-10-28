@@ -249,20 +249,23 @@ internal class StripePaymentControllerTest {
         }
 
     @Test
-    fun `Next action uses the caller key and account override`() = assertNextActionConfiguration("acct_override")
+    fun `Next action uses the caller key and account override`() =
+        assertNextActionConfiguration(ApiKeyFixtures.OTHER_STRIPE_ACCOUNT)
 
     @Test
     fun `Next action preserves a null caller account`() = assertNextActionConfiguration(null)
 
     private fun assertNextActionConfiguration(stripeAccountId: String?) = runTest {
         val host = FakeAuthActivityStarterHost()
-        val requestOptions = ApiRequest.Options("pk_test_caller", stripeAccountId)
+        val requestOptions = ApiRequest.Options(ApiKeyFixtures.CONNECTED_ACCOUNT_PUBLISHABLE_KEY, stripeAccountId)
 
         controller.handleNextAction(host, PaymentIntentFixtures.PI_REQUIRES_REDIRECT, requestOptions)
 
         val call = host.startActivityCalls.awaitItem()
         val args = requireNotNull(PaymentBrowserAuthContract.parseArgs(Intent().putExtras(call.extras)))
-        assertThat(args.apiConfiguration).isEqualTo(ApiConfiguration.State("pk_test_caller", stripeAccountId))
+        assertThat(args.apiConfiguration).isEqualTo(
+            ApiConfiguration.State(ApiKeyFixtures.CONNECTED_ACCOUNT_PUBLISHABLE_KEY, stripeAccountId)
+        )
         host.ensureAllEventsConsumed()
     }
 
@@ -270,7 +273,11 @@ internal class StripePaymentControllerTest {
     fun `Confirmation keeps its idempotency key while next action receives credentials`() = runTest {
         val repository = FakeConfirmationRepository()
         val host = FakeAuthActivityStarterHost()
-        val options = ApiRequest.Options("pk_test_caller", "acct_override", "confirmation_idempotency")
+        val options = ApiRequest.Options(
+            apiKey = ApiKeyFixtures.CONNECTED_ACCOUNT_PUBLISHABLE_KEY,
+            stripeAccount = ApiKeyFixtures.OTHER_STRIPE_ACCOUNT,
+            idempotencyKey = "confirmation_idempotency",
+        )
         val params = ConfirmPaymentIntentParams.createWithPaymentMethodId("pm_123", "pi_123_secret_456")
 
         createController(repository).startConfirmAndAuth(host, params, options)
@@ -278,9 +285,14 @@ internal class StripePaymentControllerTest {
         assertThat(repository.confirmOptions.awaitItem()).isSameInstanceAs(options)
         val call = host.startActivityCalls.awaitItem()
         val args = requireNotNull(Stripe3ds2TransactionContract.Args.fromIntent(Intent().putExtras(call.extras)))
-        assertThat(args.apiConfiguration).isEqualTo(ApiConfiguration.State("pk_test_caller", "acct_override"))
-        assertThat(args.requestOptions.apiKey).isEqualTo("pk_test_caller")
-        assertThat(args.requestOptions.stripeAccount).isEqualTo("acct_override")
+        assertThat(args.apiConfiguration).isEqualTo(
+            ApiConfiguration.State(
+                publishableKey = ApiKeyFixtures.CONNECTED_ACCOUNT_PUBLISHABLE_KEY,
+                stripeAccountId = ApiKeyFixtures.OTHER_STRIPE_ACCOUNT,
+            )
+        )
+        assertThat(args.requestOptions.apiKey).isEqualTo(ApiKeyFixtures.CONNECTED_ACCOUNT_PUBLISHABLE_KEY)
+        assertThat(args.requestOptions.stripeAccount).isEqualTo(ApiKeyFixtures.OTHER_STRIPE_ACCOUNT)
         assertThat(args.requestOptions.idempotencyKey).isNull()
         repository.confirmOptions.ensureAllEventsConsumed()
         host.ensureAllEventsConsumed()
@@ -383,7 +395,7 @@ internal class StripePaymentControllerTest {
     }
 
     private companion object {
-        private const val ACCOUNT_ID = "acct_123"
+        private const val ACCOUNT_ID = ApiKeyFixtures.FAKE_STRIPE_ACCOUNT
         private val REQUEST_OPTIONS = ApiRequest.Options(
             apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             stripeAccount = ACCOUNT_ID

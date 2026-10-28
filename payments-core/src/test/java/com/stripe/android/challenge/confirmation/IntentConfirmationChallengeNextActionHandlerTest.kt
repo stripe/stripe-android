@@ -8,6 +8,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.testing.TestLifecycleOwner
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.exception.StripeException
@@ -243,10 +244,10 @@ internal class IntentConfirmationChallengeNextActionHandlerTest {
     }
 
     private companion object {
-        private const val ACCOUNT_ID = "acct_123"
+        private const val ACCOUNT_ID = ApiKeyFixtures.FAKE_STRIPE_ACCOUNT
 
         private val API_CONFIGURATION = ApiConfiguration.State(
-            publishableKey = "pk_test_challenge_invocation",
+            publishableKey = ApiKeyFixtures.CONNECTED_ACCOUNT_PUBLISHABLE_KEY,
             stripeAccountId = ACCOUNT_ID
         )
 

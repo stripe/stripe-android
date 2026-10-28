@@ -335,7 +335,7 @@ class PaymentLauncherViewModelTest {
     @Test
     fun `verify paymentIntentProcessor is chosen correctly`() =
         runScenario(isPaymentIntent = true) {
-            val callbackAccount = "acct_callback"
+            val callbackAccount = ApiKeyFixtures.OTHER_STRIPE_ACCOUNT
             val caller = DummyActivityResultCaller.noOp()
             viewModel.register(caller, authHost.lifecycleOwner)
             val registration = nextActionHandlerRegistry.registrationCalls.awaitItem()
@@ -367,7 +367,7 @@ class PaymentLauncherViewModelTest {
     @Test
     fun `verify setupIntentProcessor is chosen correctly`() =
         runScenario(isPaymentIntent = false) {
-            val callbackAccount = "acct_callback"
+            val callbackAccount = ApiKeyFixtures.OTHER_STRIPE_ACCOUNT
             val caller = DummyActivityResultCaller.noOp()
             viewModel.register(caller, authHost.lifecycleOwner)
             val registration = nextActionHandlerRegistry.registrationCalls.awaitItem()
@@ -867,7 +867,7 @@ class PaymentLauncherViewModelTest {
         val SETUP_CLIENT_SECRET = requireNotNull(SetupIntentFixtures.SI_SUCCEEDED.clientSecret)
         const val PM_ID = "pm_12345"
         const val RETURN_URL = "return://to.me"
-        const val TEST_STRIPE_ACCOUNT_ID = "acct_123"
+        const val TEST_STRIPE_ACCOUNT_ID = ApiKeyFixtures.FAKE_STRIPE_ACCOUNT
         val PRODUCT_USAGE = setOf("TestProductUsage")
         val API_CONFIGURATION = ApiConfiguration.State(
             publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,

@@ -233,10 +233,10 @@ class WebIntentNextActionHandlerTest {
     }
 
     private companion object {
-        private const val ACCOUNT_ID = "acct_123"
+        private const val ACCOUNT_ID = ApiKeyFixtures.FAKE_STRIPE_ACCOUNT
 
         private val API_CONFIGURATION = ApiConfiguration.State(
-            publishableKey = "pk_test_web_invocation",
+            publishableKey = ApiKeyFixtures.CONNECTED_ACCOUNT_PUBLISHABLE_KEY,
             stripeAccountId = ACCOUNT_ID
         )
     }
