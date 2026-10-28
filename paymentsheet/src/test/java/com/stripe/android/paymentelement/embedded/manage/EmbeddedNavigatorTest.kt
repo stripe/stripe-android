@@ -291,6 +291,63 @@ internal class EmbeddedNavigatorTest {
     }
 
     @Test
+    fun `ResetToScreens closes discarded screens and reports the new root shown`() = runTest {
+        val scope = coroutineScopeCleanupRule.track(CoroutineScope(Job() + UnconfinedTestDispatcher(testScheduler)))
+        val eventReporter = FakeEventReporter()
+        val manageInteractor = FakeManageScreenInteractor()
+        val updateInteractor = FakeUpdatePaymentMethodInteractor()
+        val currentScreen = EmbeddedNavigator.Screen.ManageUpdate(updateInteractor)
+        val paymentOptionsInteractor = FakePaymentMethodVerticalLayoutInteractor.create()
+        val paymentOptionsScreen = createPaymentOptionsScreen(interactor = paymentOptionsInteractor)
+        val navigator = EmbeddedNavigator(
+            coroutineScope = scope,
+            eventReporter = eventReporter,
+            initialBackStack = listOf(EmbeddedNavigator.Screen.ManageAll(manageInteractor), currentScreen),
+        )
+        assertThat(eventReporter.showEditablePaymentOptionCalls.awaitItem()).isEqualTo(Unit)
+
+        navigator.screen.test {
+            assertThat(awaitItem()).isSameInstanceAs(currentScreen)
+            assertThat(navigator.canGoBack).isTrue()
+
+            navigator.performAction(EmbeddedNavigator.Action.ResetToScreens(listOf(paymentOptionsScreen)))
+
+            assertThat(awaitItem()).isSameInstanceAs(paymentOptionsScreen)
+            assertThat(navigator.canGoBack).isFalse()
+        }
+        assertThat(eventReporter.hideEditablePaymentOptionCalls.awaitItem()).isEqualTo(Unit)
+        assertThat(eventReporter.showNewPaymentOptionsCalls.awaitItem()).isEqualTo(Unit)
+        assertThat(manageInteractor.closeCalls.awaitItem()).isEqualTo(Unit)
+        assertThat(updateInteractor.closeCalls.awaitItem()).isEqualTo(Unit)
+
+        scope.cancel()
+        assertThat(paymentOptionsInteractor.closeCalls.awaitItem()).isEqualTo(Unit)
+        manageInteractor.validate()
+        updateInteractor.closeCalls.ensureAllEventsConsumed()
+        paymentOptionsInteractor.validate()
+        eventReporter.validate()
+    }
+
+    @Test
+    fun `ResetToScreens closes dropped screens without reporting them shown`() = testScenario {
+        val (formScreen, formInteractor) = createFormScreen()
+        val paymentOptionsInteractor = FakePaymentMethodVerticalLayoutInteractor.create()
+        val paymentOptionsScreen = createPaymentOptionsScreen(interactor = paymentOptionsInteractor)
+        navigator.screen.test {
+            assertThat(awaitItem()).isSameInstanceAs(initialScreen)
+
+            navigator.performAction(EmbeddedNavigator.Action.GoToScreen(formScreen))
+            navigator.performAction(EmbeddedNavigator.Action.ResetToScreens(listOf(paymentOptionsScreen)))
+
+            assertThat(paymentOptionsInteractor.closeCalls.awaitItem()).isEqualTo(Unit)
+            assertThat(awaitItem()).isSameInstanceAs(formScreen)
+        }
+
+        paymentOptionsInteractor.validate()
+        formInteractor.validate()
+    }
+
+    @Test
     fun `initial screen ManageUpdate calls onShowEditablePaymentOption`() = runTest {
         val eventReporter = FakeEventReporter()
         EmbeddedNavigator(

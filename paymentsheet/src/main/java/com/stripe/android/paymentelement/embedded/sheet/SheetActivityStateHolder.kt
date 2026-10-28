@@ -14,8 +14,10 @@ import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.form.OnClickOverrideDelegate
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.amount
 import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.paymentsheet.ui.PrimaryButton
@@ -75,6 +77,8 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
     private val launchMode: EmbeddedLaunchMode,
     private val embeddedNavigatorProvider: Provider<EmbeddedNavigator>,
     private val savedPaymentMethodConfirmScreenFactoryProvider: Provider<SavedPaymentMethodConfirmScreenFactory>,
+    private val initialPaymentOptionsScreenFactoryProvider: Provider<InitialPaymentOptionsScreenFactory>,
+    private val errorReporter: ErrorReporter,
 ) : SheetActivityStateHolder {
     private val _state = MutableStateFlow(
         SheetActivityStateHolder.State(
@@ -114,38 +118,30 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
                         )
                         null
                     }
-                    is TapToAddNextStep.ShowSavedPaymentMethods -> EmbeddedActivityResult.Complete(
-                        selection = result.paymentSelection,
-                        previousNewSelections = selectionHolder.previousNewSelections,
-                        hasBeenConfirmed = false,
-                        customerState = customerStateHolder.customer.value,
-                        linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
-                        checkoutSessionResponse = null,
-                        shouldInvokeSelectionCallback = false,
-                        launchMode = launchMode,
-                    )
-                    TapToAddNextStep.Complete -> EmbeddedActivityResult.Complete(
-                        selection = null,
-                        previousNewSelections = selectionHolder.previousNewSelections,
-                        hasBeenConfirmed = true,
-                        customerState = customerStateHolder.customer.value,
-                        linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
-                        checkoutSessionResponse = null,
-                        shouldInvokeSelectionCallback = false,
-                        launchMode = launchMode,
-                    )
+                    is TapToAddNextStep.ShowSavedPaymentMethods -> {
+                        if (launchMode is EmbeddedLaunchMode.PaymentOptions) {
+                            val screens = initialPaymentOptionsScreenFactoryProvider.get().createInitialScreen()
+                            embeddedNavigatorProvider.get().performAction(
+                                EmbeddedNavigator.Action.ResetToScreens(screens)
+                            )
+                            null
+                        } else {
+                            createTapToAddResult(selection = result.paymentSelection, hasBeenConfirmed = false)
+                        }
+                    }
+                    TapToAddNextStep.Complete -> {
+                        if (launchMode is EmbeddedLaunchMode.PaymentOptions) {
+                            errorReporter.report(
+                                ErrorReporter.UnexpectedErrorEvent.TAP_TO_ADD_FLOW_CONTROLLER_RECEIVED_COMPLETE_RESULT,
+                            )
+                            null
+                        } else {
+                            createTapToAddResult(selection = null, hasBeenConfirmed = true)
+                        }
+                    }
                     is TapToAddNextStep.Continue -> {
                         customerStateHolder.addPaymentMethod(result.paymentSelection.paymentMethod)
-                        EmbeddedActivityResult.Complete(
-                            selection = result.paymentSelection,
-                            previousNewSelections = selectionHolder.previousNewSelections,
-                            hasBeenConfirmed = false,
-                            customerState = customerStateHolder.customer.value,
-                            linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
-                            checkoutSessionResponse = null,
-                            shouldInvokeSelectionCallback = false,
-                            launchMode = launchMode,
-                        )
+                        createTapToAddResult(selection = result.paymentSelection, hasBeenConfirmed = false)
                     }
                 }
                 activityResult?.let(::setResult)
@@ -170,6 +166,22 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
                 }
             }
         }
+    }
+
+    private fun createTapToAddResult(
+        selection: PaymentSelection.Saved?,
+        hasBeenConfirmed: Boolean,
+    ): EmbeddedActivityResult.Complete {
+        return EmbeddedActivityResult.Complete(
+            selection = selection,
+            previousNewSelections = selectionHolder.previousNewSelections,
+            hasBeenConfirmed = hasBeenConfirmed,
+            customerState = customerStateHolder.customer.value,
+            linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
+            checkoutSessionResponse = null,
+            shouldInvokeSelectionCallback = false,
+            launchMode = launchMode,
+        )
     }
 
     override fun setResult(result: EmbeddedActivityResult) {

@@ -43,6 +43,7 @@ import com.stripe.android.paymentsheet.verticalmode.FakeSavedPaymentMethodConfir
 import com.stripe.android.paymentsheet.verticalmode.ManageScreenInteractor
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.utils.FakeIsNfcScanningAvailable
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
@@ -303,6 +304,8 @@ internal class EmbeddedNavigatorScreenScreenshotTest {
             linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
             launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
             embeddedNavigatorProvider = Provider { error("Not expected") },
+            initialPaymentOptionsScreenFactoryProvider = Provider { error("Not expected") },
+            errorReporter = FakeErrorReporter(),
             savedPaymentMethodConfirmScreenFactoryProvider = Provider { error("Not expected") },
         )
     }

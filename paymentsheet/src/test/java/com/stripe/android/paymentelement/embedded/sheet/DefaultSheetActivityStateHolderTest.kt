@@ -28,6 +28,7 @@ import com.stripe.android.paymentelement.embedded.form.OnClickDelegateOverrideIm
 import com.stripe.android.paymentelement.embedded.form.OnClickOverrideDelegate
 import com.stripe.android.paymentelement.embedded.form.confirmationStateComplete
 import com.stripe.android.paymentelement.embedded.form.confirmationStateConfirming
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.FakeCustomerStateHolder
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -42,6 +43,7 @@ import com.stripe.android.paymentsheet.verticalmode.SavedPaymentMethodConfirmInt
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormInteractor
 import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.ui.core.R
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.StateFlow
@@ -492,12 +494,13 @@ internal class DefaultSheetActivityStateHolderTest {
     }
 
     @Test
-    fun `TapToAddResult Continue sets state helper result as expected`() {
+    fun `FlowController TapToAdd Continue returns saved selection and adds payment method`() {
         val tapToAddHelper = FakeTapToAddHelper()
         val customerStateHolder = FakeCustomerStateHolder()
         testScenario(
             tapToAddHelper = tapToAddHelper,
             customerStateHolder = customerStateHolder,
+            launchMode = EmbeddedLaunchMode.PaymentOptions,
         ) {
             val expectedSelection = PaymentSelection.Saved(CARD_PAYMENT_METHOD)
 
@@ -517,15 +520,33 @@ internal class DefaultSheetActivityStateHolderTest {
                         linkAccountInfo = LinkAccountUpdate.Value(null),
                         checkoutSessionResponse = null,
                         shouldInvokeSelectionCallback = false,
-                        launchMode = EmbeddedLaunchMode.Form(
-                            selectedPaymentMethodCode = "card",
-                        ),
+                        launchMode = EmbeddedLaunchMode.PaymentOptions,
                     )
                 )
             }
             assertThat(customerStateHolder.addPaymentMethodTurbine.awaitItem()).isEqualTo(
                 expectedSelection.paymentMethod
             )
+        }
+    }
+
+    @Test
+    fun `FlowController TapToAdd Complete reports error and keeps sheet open without confirmation`() {
+        val tapToAddHelper = FakeTapToAddHelper()
+        testScenario(
+            tapToAddHelper = tapToAddHelper,
+            launchMode = EmbeddedLaunchMode.PaymentOptions,
+        ) {
+            stateHolder.result.test {
+                tapToAddHelper.emitNextStep(TapToAddNextStep.Complete)
+
+                assertThat(errorReporter.awaitCall().errorEvent).isEqualTo(
+                    ErrorReporter.UnexpectedErrorEvent.TAP_TO_ADD_FLOW_CONTROLLER_RECEIVED_COMPLETE_RESULT
+                )
+                expectNoEvents()
+            }
+            confirmationHandler.startTurbine.expectNoEvents()
+            eventReporter.validate()
         }
     }
 
@@ -622,6 +643,8 @@ internal class DefaultSheetActivityStateHolderTest {
         val confirmationHandler: FakeConfirmationHandler,
         val onClickOverrideDelegate: OnClickOverrideDelegate,
         val navigator: EmbeddedNavigator,
+        val errorReporter: FakeErrorReporter,
+        val eventReporter: FakeEventReporter,
     )
 
     private fun testScenario(
@@ -650,6 +673,8 @@ internal class DefaultSheetActivityStateHolderTest {
             initialBackStack = initialBackStack,
             eventReporter = FakeEventReporter(),
         )
+        val errorReporter = FakeErrorReporter()
+        val eventReporter = FakeEventReporter()
         lateinit var screenFactory: SavedPaymentMethodConfirmScreenFactory
         val stateHolder = DefaultSheetActivityStateHolder(
             paymentMethodMetadata = paymentMethodMetadata,
@@ -657,13 +682,15 @@ internal class DefaultSheetActivityStateHolderTest {
             configuration = config,
             coroutineScope = viewModelScope,
             onClickDelegate = onClickOverrideDelegate,
-            eventReporter = FakeEventReporter(),
+            eventReporter = eventReporter,
             confirmationHandler = confirmationHandler,
             tapToAddHelper = tapToAddHelper,
             customerStateHolder = customerStateHolder,
             linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
             launchMode = launchMode,
             embeddedNavigatorProvider = Provider { navigator },
+            initialPaymentOptionsScreenFactoryProvider = Provider { error("Not expected") },
+            errorReporter = errorReporter,
             savedPaymentMethodConfirmScreenFactoryProvider = Provider { screenFactory },
         )
         screenFactory = SavedPaymentMethodConfirmScreenFactory(
@@ -682,7 +709,11 @@ internal class DefaultSheetActivityStateHolderTest {
             confirmationHandler = confirmationHandler,
             onClickOverrideDelegate = onClickOverrideDelegate,
             navigator = navigator,
+            errorReporter = errorReporter,
+            eventReporter = eventReporter,
         ).block()
+        errorReporter.ensureAllEventsConsumed()
+        customerStateHolder.validate()
     }
 
     private class RecordingSavedPaymentMethodConfirmInteractorFactory(

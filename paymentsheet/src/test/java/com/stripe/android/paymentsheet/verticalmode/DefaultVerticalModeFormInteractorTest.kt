@@ -39,6 +39,7 @@ import com.stripe.android.paymentsheet.utils.errorTest
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormInteractor.ViewAction
 import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.ui.core.elements.CardDetailsSectionController
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SetAsDefaultPaymentMethodElement
@@ -370,6 +371,8 @@ internal class DefaultVerticalModeFormInteractorTest {
                 selectedPaymentMethodCode = paymentMethodCode,
             ),
             embeddedNavigatorProvider = Provider { error("Not expected") },
+            initialPaymentOptionsScreenFactoryProvider = Provider { error("Not expected") },
+            errorReporter = FakeErrorReporter(),
             savedPaymentMethodConfirmScreenFactoryProvider = Provider { error("Not expected") },
         )
         val formHelperFactory = EmbeddedFormHelperFactory(
