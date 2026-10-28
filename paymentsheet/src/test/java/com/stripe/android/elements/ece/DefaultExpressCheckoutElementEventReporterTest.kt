@@ -18,6 +18,7 @@ import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.android.utils.FakeDurationProvider
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -40,11 +41,8 @@ internal class DefaultExpressCheckoutElementEventReporterTest {
                 "google_pay_visibility" to "automatic",
             ),
         )
-        assertThat(
-            durationProvider.has(
-                FakeDurationProvider.Call.Start(DurationProvider.Key.ExpressCheckoutElement, true)
-            )
-        ).isTrue()
+        assertThat(durationProvider.callsTurbine.awaitItem())
+            .isEqualTo(FakeDurationProvider.Call.Start(DurationProvider.Key.ExpressCheckoutElement, reset = true))
     }
 
     @Test
@@ -65,6 +63,8 @@ internal class DefaultExpressCheckoutElementEventReporterTest {
                 "google_pay_visibility" to "never",
             ),
         )
+        assertThat(durationProvider.callsTurbine.awaitItem())
+            .isEqualTo(FakeDurationProvider.Call.Start(DurationProvider.Key.ExpressCheckoutElement, reset = true))
     }
 
     private class Scenario(
@@ -76,8 +76,8 @@ internal class DefaultExpressCheckoutElementEventReporterTest {
     private fun runScenario(
         expressCheckoutElementConfiguration: ExpressCheckoutElement.Configuration =
             ExpressCheckoutElement.Configuration(),
-        block: Scenario.() -> Unit,
-    ) {
+        block: suspend Scenario.() -> Unit,
+    ) = runTest {
         val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
         val durationProvider = FakeDurationProvider()
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
@@ -121,5 +121,7 @@ internal class DefaultExpressCheckoutElementEventReporterTest {
                 durationProvider = durationProvider,
             )
         )
+
+        durationProvider.validate()
     }
 }
