@@ -60,6 +60,120 @@ internal class DefaultSheetActivityStateHolderTest {
     val closeFormInteractorRule = CleanupTestRule(VerticalModeFormInteractor::close)
 
     @Test
+    fun `result is delivered to an active collector`() = testScenario {
+        val result = completedResult()
+
+        stateHolder.result.test {
+            expectNoEvents()
+            stateHolder.setResult(result)
+            assertThat(awaitItem()).isSameInstanceAs(result)
+        }
+    }
+
+    @Test
+    fun `result set before collection is retained`() = testScenario {
+        val result = completedResult()
+        stateHolder.setResult(result)
+
+        stateHolder.result.test {
+            assertThat(awaitItem()).isSameInstanceAs(result)
+        }
+    }
+
+    @Test
+    fun `replacement collector receives retained result`() = testScenario {
+        val result = completedResult()
+
+        stateHolder.result.test {
+            stateHolder.setResult(result)
+            assertThat(awaitItem()).isSameInstanceAs(result)
+            cancelAndIgnoreRemainingEvents()
+        }
+
+        stateHolder.result.test {
+            assertThat(awaitItem()).isSameInstanceAs(result)
+        }
+    }
+
+    @Test
+    fun `second completion does not replace first completion`() = testScenario {
+        val result = completedResult()
+
+        stateHolder.result.test {
+            stateHolder.setResult(result)
+            assertThat(awaitItem()).isSameInstanceAs(result)
+
+            stateHolder.setResult(result.copy(hasBeenConfirmed = true))
+            expectNoEvents()
+        }
+
+        stateHolder.result.test {
+            assertThat(awaitItem()).isSameInstanceAs(result)
+        }
+    }
+
+    @Test
+    fun `cancellation does not replace first completion`() = testScenario {
+        val result = completedResult()
+        stateHolder.setResult(result)
+        stateHolder.setResult(cancelledResult())
+
+        stateHolder.result.test {
+            assertThat(awaitItem()).isSameInstanceAs(result)
+        }
+    }
+
+    @Test
+    fun `completion does not replace first cancellation`() = testScenario {
+        val result = cancelledResult()
+        stateHolder.setResult(result)
+        stateHolder.setResult(completedResult())
+
+        stateHolder.result.test {
+            assertThat(awaitItem()).isSameInstanceAs(result)
+        }
+    }
+
+    @Test
+    fun `second cancellation does not replace first cancellation`() = testScenario {
+        val result = cancelledResult()
+        stateHolder.setResult(result)
+        stateHolder.setResult(result.copy(launchMode = EmbeddedLaunchMode.Manage))
+
+        stateHolder.result.test {
+            assertThat(awaitItem()).isSameInstanceAs(result)
+        }
+    }
+
+    @Test
+    fun `completion does not replace first error`() = testScenario {
+        val result = EmbeddedActivityResult.Error(launchMode = EmbeddedLaunchMode.Manage)
+        stateHolder.setResult(result)
+        stateHolder.setResult(completedResult())
+
+        stateHolder.result.test {
+            assertThat(awaitItem()).isSameInstanceAs(result)
+        }
+    }
+
+    private fun Scenario.completedResult() = EmbeddedActivityResult.Complete(
+        selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
+        previousNewSelections = selectionHolder.previousNewSelections,
+        hasBeenConfirmed = false,
+        customerState = null,
+        linkAccountInfo = LinkAccountUpdate.Value(null),
+        checkoutSessionResponse = null,
+        shouldInvokeSelectionCallback = false,
+        launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
+    )
+
+    private fun cancelledResult() = EmbeddedActivityResult.Cancelled(
+        customerState = null,
+        linkAccountInfo = LinkAccountUpdate.Value(null),
+        launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
+    )
+
+    @Test
     fun `state initializes correctly`() = testScenario {
         stateHolder.state.test {
             val state = awaitItem()

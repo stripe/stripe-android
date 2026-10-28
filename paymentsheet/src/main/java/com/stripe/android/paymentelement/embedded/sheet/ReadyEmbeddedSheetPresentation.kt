@@ -38,6 +38,7 @@ import com.stripe.android.uicore.utils.collectAsState
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 internal class ReadyEmbeddedSheetPresentation @AssistedInject constructor(
@@ -61,7 +62,7 @@ internal class ReadyEmbeddedSheetPresentation @AssistedInject constructor(
         )
 
         activity.lifecycleScope.launch {
-            sheetActivityStateHolder.result.collect(activity::finishWithResult)
+            activity.finishWithResult(sheetActivityStateHolder.result.first())
         }
 
         activity.onBackPressedDispatcher.addCallback {
@@ -76,7 +77,7 @@ internal class ReadyEmbeddedSheetPresentation @AssistedInject constructor(
     }
 
     override fun onDismissed() {
-        activity.finishWithResult(createDismissalResult())
+        sheetActivityStateHolder.setResult(createDismissalResult())
     }
 
     @Composable
@@ -85,7 +86,7 @@ internal class ReadyEmbeddedSheetPresentation @AssistedInject constructor(
             EmbeddedSheetReadyContent(
                 navigator = embeddedNavigator,
                 onResult = { result ->
-                    activity.finishWithResult(createNavigatorResult(result))
+                    sheetActivityStateHolder.setResult(createNavigatorResult(result))
                 },
             )
         }

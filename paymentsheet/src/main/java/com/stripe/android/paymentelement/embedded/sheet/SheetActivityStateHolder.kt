@@ -25,11 +25,13 @@ import com.stripe.android.paymentsheet.utils.continueButtonLabel
 import com.stripe.android.paymentsheet.utils.reportPaymentResult
 import com.stripe.android.ui.core.Amount
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -38,7 +40,10 @@ import javax.inject.Singleton
 
 internal interface SheetActivityStateHolder {
     val state: StateFlow<State>
-    val result: SharedFlow<EmbeddedActivityResult>
+
+    /** Retains the first terminal result for current and future collectors. */
+    val result: Flow<EmbeddedActivityResult>
+
     val validationRequested: SharedFlow<Unit>
     fun updateMandate(mandateText: ResolvableString?)
     fun updatePrimaryButton(callback: (PrimaryButton.UIState?) -> PrimaryButton.UIState?)
@@ -87,8 +92,8 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
     )
     override val state: StateFlow<SheetActivityStateHolder.State> = _state
 
-    private val _result = MutableSharedFlow<EmbeddedActivityResult>()
-    override val result: SharedFlow<EmbeddedActivityResult> = _result
+    private val _result = MutableStateFlow<EmbeddedActivityResult?>(null)
+    override val result: Flow<EmbeddedActivityResult> = _result.filterNotNull()
 
     private val _validationRequested = MutableSharedFlow<Unit>()
     override val validationRequested: SharedFlow<Unit> = _validationRequested
@@ -167,9 +172,7 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
     }
 
     override fun setResult(result: EmbeddedActivityResult) {
-        coroutineScope.launch {
-            _result.emit(result)
-        }
+        _result.compareAndSet(null, result)
     }
 
     override fun updateMandate(mandateText: ResolvableString?) {

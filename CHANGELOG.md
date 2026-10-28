@@ -3,6 +3,9 @@
 NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
 
+### PaymentSheet
+* [Fixed] Embedded Payment Element sheets retain their first result when collection starts late or the activity is recreated.
+
 ## 23.25.1 - 2026-10-26
 
 ### PaymentSheet
