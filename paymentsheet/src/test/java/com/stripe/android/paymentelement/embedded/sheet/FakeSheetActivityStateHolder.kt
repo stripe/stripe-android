@@ -49,6 +49,7 @@ internal class FakeSheetActivityStateHolder(
     }
 
     override fun updateProcessing(isProcessing: Boolean) {
+        _state.update { it.copy(isProcessing = isProcessing) }
         updateProcessingTurbine.add(isProcessing)
     }
 

@@ -59,6 +59,43 @@ internal class DefaultSheetActivityContinueCoordinatorTest {
     }
 
     @Test
+    fun `continue without tax region update is ignored while processing`() = runScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+    ) {
+        stateHolder.updateState { it.copy(isProcessing = true) }
+
+        continueCoordinator.onContinue()
+
+        stateHolder.resultTurbine.expectNoEvents()
+        stateHolder.updateProcessingTurbine.expectNoEvents()
+    }
+
+    @Test
+    fun `repeated continue is ignored before tax region update coroutine starts`() {
+        networkRule.checkoutUpdate { response ->
+            response.testBodyFromFile("checkout-session-init.json")
+        }
+
+        runScenario(paymentMethodMetadata = CHECKOUT_SESSION_METADATA) {
+            continueCoordinator.onContinue()
+
+            assertThat(stateHolder.state.value.isProcessing).isTrue()
+            assertThat(stateHolder.updateProcessingTurbine.awaitItem()).isTrue()
+
+            continueCoordinator.onContinue()
+
+            stateHolder.updateProcessingTurbine.expectNoEvents()
+            stateHolder.resultTurbine.expectNoEvents()
+            testScope.runCurrent()
+
+            val result = stateHolder.resultTurbine.awaitItem() as EmbeddedActivityResult.Complete
+            assertThat(result.checkoutSessionResponse?.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
+            stateHolder.resultTurbine.expectNoEvents()
+            stateHolder.updateProcessingTurbine.expectNoEvents()
+        }
+    }
+
+    @Test
     fun `successful tax region update returns updated response`() {
         networkRule.checkoutUpdate { response ->
             response.testBodyFromFile("checkout-session-init.json")
@@ -82,7 +119,7 @@ internal class DefaultSheetActivityContinueCoordinatorTest {
     }
 
     @Test
-    fun `failed tax region update stops processing and shows error`() {
+    fun `failed tax region update shows error and allows retry`() {
         networkRule.checkoutUpdate { response ->
             response.setResponseCode(400)
             response.setBody("""{"error":{"message":"$ERROR_MESSAGE"}}""")
@@ -97,6 +134,17 @@ internal class DefaultSheetActivityContinueCoordinatorTest {
             assertThat(stateHolder.updateErrorTurbine.awaitItem())
                 .isEqualTo(IllegalStateException(ERROR_MESSAGE).stripeErrorMessage())
             stateHolder.resultTurbine.expectNoEvents()
+            assertThat(stateHolder.state.value.isProcessing).isFalse()
+
+            networkRule.checkoutUpdate { response ->
+                response.testBodyFromFile("checkout-session-init.json")
+            }
+            continueCoordinator.onContinue()
+            testScope.runCurrent()
+
+            assertThat(stateHolder.updateProcessingTurbine.awaitItem()).isTrue()
+            val result = stateHolder.resultTurbine.awaitItem() as EmbeddedActivityResult.Complete
+            assertThat(result.checkoutSessionResponse?.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
         }
     }
 
