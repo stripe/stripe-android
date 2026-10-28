@@ -127,6 +127,15 @@ internal class EmbeddedNavigator private constructor(
                     onScreenShown(action.screen)
                 }
             }
+            is Action.ResetToScreens -> {
+                val previousScreen = screen.value
+                if (navigationHandler.resetTo(action.screens)) {
+                    onScreenHidden(previousScreen)
+                    onScreenShown(action.screens.last())
+                } else {
+                    action.screens.forEach { (it as? Closeable)?.close() }
+                }
+            }
         }
     }
 
@@ -507,6 +516,8 @@ internal class EmbeddedNavigator private constructor(
         data class GoToScreen(val screen: Screen) : Action()
 
         data class ReplaceCurrentScreen(val screen: Screen) : Action()
+
+        data class ResetToScreens(val screens: List<Screen>) : Action()
     }
 }
 
