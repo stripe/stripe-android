@@ -32,6 +32,7 @@ internal class DefaultSheetActivityContinueCoordinator @Inject constructor(
     private val launchMode: EmbeddedLaunchMode,
     private val eventReporter: EventReporter,
     private val embeddedNavigatorProvider: Provider<EmbeddedNavigator>,
+    private val linkPaymentMethodSelectionHandler: SheetLinkPaymentMethodSelectionHandler,
     @ViewModelScope private val coroutineScope: CoroutineScope,
 ) : SheetActivityContinueCoordinator {
 
@@ -43,6 +44,7 @@ internal class DefaultSheetActivityContinueCoordinator @Inject constructor(
         if (launchMode.isFlowControllerPaymentOptions && selection != null) {
             eventReporter.onSelectPaymentOption(selection)
         }
+        if (linkPaymentMethodSelectionHandler.launchIfEligible(selection)) return
         val taxRegionUpdate = taxRegionUpdater.prepareUpdate(
             checkoutSessionResponse = paymentMethodMetadata.checkoutSessionResponse,
             selection = selection,

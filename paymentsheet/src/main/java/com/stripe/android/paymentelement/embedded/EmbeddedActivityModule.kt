@@ -39,6 +39,7 @@ import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetActivityConf
 import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetActivityContinueCoordinator
 import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetActivityRegistrar
 import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetActivityStateHolder
+import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetLinkPaymentMethodSelectionHandler
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedFormScreenFactory
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedInitialScreenFactory
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedNavigator
@@ -46,6 +47,7 @@ import com.stripe.android.paymentelement.embedded.sheet.SheetActivityConfirmatio
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityContinueCoordinator
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityRegistrar
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityStateHolder
+import com.stripe.android.paymentelement.embedded.sheet.SheetLinkPaymentMethodSelectionHandler
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
@@ -143,6 +145,11 @@ internal interface EmbeddedActivityModule {
     fun bindsContinueCoordinator(
         continueCoordinator: DefaultSheetActivityContinueCoordinator
     ): SheetActivityContinueCoordinator
+
+    @Binds
+    fun bindsSheetLinkPaymentMethodSelectionHandler(
+        handler: DefaultSheetLinkPaymentMethodSelectionHandler
+    ): SheetLinkPaymentMethodSelectionHandler
 
     @Binds
     fun bindsAddressLauncherEventReporter(
