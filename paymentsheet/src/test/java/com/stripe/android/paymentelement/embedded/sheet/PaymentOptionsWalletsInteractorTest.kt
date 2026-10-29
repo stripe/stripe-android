@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.LinkAccountUpdate
+import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.model.LinkAccount
@@ -149,6 +150,69 @@ internal class PaymentOptionsWalletsInteractorTest {
     }
 
     @Test
+    fun `Link selection without a selected payment allows default payment details`() = runScenario(
+        paymentMethodMetadata = createMetadata(
+            paymentMethodTypes = listOf("card"),
+            enableDisplayableDefaultValues = true,
+        ),
+        initialSelection = PaymentSelection.Link(LinkBrand.Link),
+    ) {
+        linkAccountHolder.set(LinkAccountUpdate.Value(account = LINK_ACCOUNT_WITH_PAYMENT, lastUpdateReason = null))
+
+        interactor.walletsState.test {
+            assertThat(awaitItem()!!.link(WalletLocation.HEADER)!!.state)
+                .isInstanceOf(LinkButtonState.DefaultPayment::class.java)
+        }
+    }
+
+    @Test
+    fun `Link selection with a selected payment disables default payment details`() = runScenario(
+        paymentMethodMetadata = createMetadata(
+            paymentMethodTypes = listOf("card"),
+            enableDisplayableDefaultValues = true,
+        ),
+        initialSelection = LINK_SELECTION_WITH_PAYMENT,
+    ) {
+        linkAccountHolder.set(LinkAccountUpdate.Value(account = LINK_ACCOUNT_WITH_PAYMENT, lastUpdateReason = null))
+
+        interactor.walletsState.test {
+            assertThat(awaitItem()!!.link(WalletLocation.HEADER)!!.state)
+                .isEqualTo(LinkButtonState.Email(LINK_ACCOUNT_WITH_PAYMENT.email))
+        }
+    }
+
+    @Test
+    fun `Link default payment details update when only selection changes`() = runScenario(
+        paymentMethodMetadata = createMetadata(
+            paymentMethodTypes = listOf("card"),
+            enableDisplayableDefaultValues = true,
+        ),
+    ) {
+        linkAccountHolder.set(LinkAccountUpdate.Value(account = LINK_ACCOUNT_WITH_PAYMENT, lastUpdateReason = null))
+
+        interactor.walletsState.test {
+            assertThat(awaitItem()!!.link(WalletLocation.HEADER)!!.state)
+                .isInstanceOf(LinkButtonState.DefaultPayment::class.java)
+
+            selectionHolder.setSelection(LINK_SELECTION_WITH_PAYMENT)
+            assertThat(awaitItem()!!.link(WalletLocation.HEADER)!!.state)
+                .isEqualTo(LinkButtonState.Email(LINK_ACCOUNT_WITH_PAYMENT.email))
+
+            selectionHolder.setSelection(PaymentSelection.Link(LinkBrand.Link))
+            assertThat(awaitItem()!!.link(WalletLocation.HEADER)!!.state)
+                .isInstanceOf(LinkButtonState.DefaultPayment::class.java)
+
+            selectionHolder.setSelection(LINK_SELECTION_WITH_PAYMENT)
+            assertThat(awaitItem()!!.link(WalletLocation.HEADER)!!.state)
+                .isEqualTo(LinkButtonState.Email(LINK_ACCOUNT_WITH_PAYMENT.email))
+
+            selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+            assertThat(awaitItem()!!.link(WalletLocation.HEADER)!!.state)
+                .isInstanceOf(LinkButtonState.DefaultPayment::class.java)
+        }
+    }
+
+    @Test
     fun `Google Pay click selects Google Pay and continues`() = runScenario {
         interactor.walletsState.value!!.onGooglePayPressed()
 
@@ -174,10 +238,12 @@ internal class PaymentOptionsWalletsInteractorTest {
     private fun runScenario(
         paymentMethodMetadata: PaymentMethodMetadata = createMetadata(paymentMethodTypes = listOf("card")),
         initialCustomerState: CustomerState? = null,
+        initialSelection: PaymentSelection? = null,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val savedStateHandle = SavedStateHandle()
         val selectionHolder = DefaultEmbeddedSelectionHolder(savedStateHandle)
+        selectionHolder.setSelection(initialSelection)
         val customerStateHolder = DefaultCustomerStateHolder(
             savedStateHandle = savedStateHandle,
             selection = selectionHolder.selection,
@@ -220,6 +286,15 @@ internal class PaymentOptionsWalletsInteractorTest {
     )
 
     private companion object {
+        val LINK_SELECTION_WITH_PAYMENT = PaymentSelection.Link(
+            brand = LinkBrand.Link,
+            selectedPayment = LinkPaymentMethod.ConsumerPaymentDetails(
+                details = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
+                collectedCvc = null,
+                billingPhone = null,
+            ),
+        )
+
         val LINK_ACCOUNT_WITH_PAYMENT = TestFactory.LINK_ACCOUNT.copy(
             displayablePaymentDetails = DisplayablePaymentDetails(
                 defaultCardBrand = "visa",
