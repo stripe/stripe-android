@@ -9,7 +9,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.PrimaryButtonIcon
-import kotlinx.coroutines.flow.MutableStateFlow
+import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -17,12 +17,12 @@ import org.junit.runner.RunWith
 @RunWith(TestParameterInjector::class)
 internal class UsBankAccountFormArgumentsKtxTest {
     @Test
-    fun `primary button reads the latest supplied icon independently of the flow type`(
+    fun `primary button uses the explicit icon independently of the flow type`(
         @TestParameter isCompleteFlow: Boolean,
         @TestParameter primaryButtonIcon: PrimaryButtonIcon,
     ) = runTest {
         val updates = Turbine<(PrimaryButton.UIState?) -> PrimaryButton.UIState?>()
-        val iconState = MutableStateFlow(
+        val iconState = stateFlowOf(
             if (primaryButtonIcon == PrimaryButtonIcon.Lock) PrimaryButtonIcon.None else PrimaryButtonIcon.Lock
         )
         val arguments = USBankAccountFormArgumentsFactory.create(
@@ -47,10 +47,9 @@ internal class UsBankAccountFormArgumentsKtxTest {
             ),
         )
 
-        iconState.value = primaryButtonIcon
-
         arguments.handleScreenStateChanged(
             screenState = BankFormScreenState(isPaymentFlow = true),
+            primaryButtonIcon = primaryButtonIcon,
             enabled = true,
             canClickWhileDisabled = true,
             onPrimaryButtonClick = {},
