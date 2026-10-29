@@ -1,5 +1,6 @@
 package com.stripe.android.utils
 
+import app.cash.turbine.Turbine
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -37,7 +38,14 @@ internal class FakePaymentElementLoader(
     private val shippingDetails: AddressDetails? = null,
     private val experimentsData: ElementsSession.ExperimentsData? = null,
     private val integrationMetadata: IntegrationMetadata? = null,
+    private val loadCallRecorder: Turbine<LoadCall>? = null,
 ) : PaymentElementLoader {
+
+    data class LoadCall(
+        val initializationMode: PaymentElementLoader.InitializationMode,
+        val integrationConfiguration: PaymentElementLoader.Configuration,
+        val metadata: PaymentElementLoader.Metadata,
+    )
 
     var lastIntegrationConfiguration: PaymentElementLoader.Configuration? = null
         private set
@@ -94,6 +102,13 @@ internal class FakePaymentElementLoader(
         integrationConfiguration: PaymentElementLoader.Configuration,
         metadata: PaymentElementLoader.Metadata,
     ): Result<PaymentElementLoader.State> {
+        loadCallRecorder?.add(
+            LoadCall(
+                initializationMode = initializationMode,
+                integrationConfiguration = integrationConfiguration,
+                metadata = metadata,
+            )
+        )
         lastIntegrationConfiguration = integrationConfiguration
         delay(delay)
         return if (shouldFail) {

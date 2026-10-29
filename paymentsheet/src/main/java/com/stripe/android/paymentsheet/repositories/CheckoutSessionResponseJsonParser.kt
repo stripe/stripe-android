@@ -64,6 +64,7 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
         CheckoutSessionResponse(
             id = id,
             configId = configId,
+            automaticPaymentMethodTypes = json.optionalBoolean("automatic_payment_method_types"),
             currency = currency,
             paymentStatus = paymentStatus,
             status = status,

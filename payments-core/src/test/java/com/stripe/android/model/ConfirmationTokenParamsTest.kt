@@ -335,6 +335,10 @@ class ConfirmationTokenParamsTest {
             paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
             paymentMethodSelectionFlow = PaymentMethodSelectionFlow.Automatic,
             checkoutSessionId = null,
+            checkoutConfigId = null,
+            merchantIntegrationSource = "elements",
+            merchantIntegrationSubtype = "mobile",
+            merchantIntegrationAdditionalElements = null,
         )
         val params = ConfirmationTokenParams(
             clientAttributionMetadata = clientAttributionMetadata

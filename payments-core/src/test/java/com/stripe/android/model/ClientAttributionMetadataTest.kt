@@ -14,6 +14,10 @@ class ClientAttributionMetadataTest {
             paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
             paymentMethodSelectionFlow = PaymentMethodSelectionFlow.MerchantSpecified,
             checkoutSessionId = null,
+            checkoutConfigId = null,
+            merchantIntegrationSource = "elements",
+            merchantIntegrationSubtype = "mobile",
+            merchantIntegrationAdditionalElements = null,
         ).toParamMap()
 
         assertThat(clientAttributionMetadataParams).hasSize(7)
@@ -54,6 +58,10 @@ class ClientAttributionMetadataTest {
             paymentMethodSelectionFlow = PaymentMethodSelectionFlow.Automatic,
             paymentIntentCreationFlow = null,
             checkoutSessionId = null,
+            checkoutConfigId = null,
+            merchantIntegrationSource = "elements",
+            merchantIntegrationSubtype = "mobile",
+            merchantIntegrationAdditionalElements = null,
         ).toParamMap()
 
         assertThat(clientAttributionMetadataParams).hasSize(6)
@@ -67,6 +75,10 @@ class ClientAttributionMetadataTest {
             paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
             paymentMethodSelectionFlow = null,
             checkoutSessionId = null,
+            checkoutConfigId = null,
+            merchantIntegrationSource = "elements",
+            merchantIntegrationSubtype = "mobile",
+            merchantIntegrationAdditionalElements = null,
         ).toParamMap()
 
         assertThat(clientAttributionMetadataParams).hasSize(6)
@@ -80,6 +92,10 @@ class ClientAttributionMetadataTest {
             paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
             paymentMethodSelectionFlow = PaymentMethodSelectionFlow.MerchantSpecified,
             checkoutSessionId = null,
+            checkoutConfigId = null,
+            merchantIntegrationSource = "elements",
+            merchantIntegrationSubtype = "mobile",
+            merchantIntegrationAdditionalElements = null,
         ).toParamMap()
 
         assertThat(clientAttributionMetadataParams).hasSize(6)
@@ -87,15 +103,29 @@ class ClientAttributionMetadataTest {
     }
 
     @Test
-    fun `toParamMap() includes checkoutSessionId when non-null`() {
+    fun `toParamMap() includes checkout attribution when present`() {
         val clientAttributionMetadataParams = ClientAttributionMetadata(
             elementsSessionConfigId = null,
             paymentIntentCreationFlow = null,
             paymentMethodSelectionFlow = PaymentMethodSelectionFlow.Automatic,
             checkoutSessionId = "cs_test_123",
+            checkoutConfigId = "checkout_config_123",
+            merchantIntegrationSource = "mobile-checkout",
+            merchantIntegrationSubtype = "mobile-payment-element",
+            merchantIntegrationAdditionalElements = listOf("mobile-payment-element", "mobile-shipping-address-element"),
         ).toParamMap()
 
         assertThat(clientAttributionMetadataParams).containsEntry("checkout_session_id", "cs_test_123")
+        assertThat(clientAttributionMetadataParams).containsEntry("checkout_config_id", "checkout_config_123")
+        assertThat(clientAttributionMetadataParams).containsEntry("merchant_integration_source", "mobile-checkout")
+        assertThat(clientAttributionMetadataParams).containsEntry(
+            "merchant_integration_subtype",
+            "mobile-payment-element",
+        )
+        assertThat(clientAttributionMetadataParams).containsEntry(
+            "merchant_integration_additional_elements",
+            listOf("mobile-payment-element", "mobile-shipping-address-element"),
+        )
     }
 
     @Test
@@ -105,6 +135,10 @@ class ClientAttributionMetadataTest {
             paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
             paymentMethodSelectionFlow = PaymentMethodSelectionFlow.MerchantSpecified,
             checkoutSessionId = null,
+            checkoutConfigId = null,
+            merchantIntegrationSource = "elements",
+            merchantIntegrationSubtype = "mobile",
+            merchantIntegrationAdditionalElements = null,
         ).toParamMap()
 
         assertThat(clientAttributionMetadataParams).doesNotContainKey("checkout_session_id")

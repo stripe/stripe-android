@@ -104,6 +104,7 @@ internal class DefaultCreateLinkStateTest {
                 automaticTaxEnabled = true,
                 taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
             ),
+            configuredElements = emptyList(),
         )
 
         val result = createLinkState(
@@ -212,6 +213,7 @@ internal class DefaultCreateLinkStateTest {
             collectedEmail = null,
             instancesKey = "DefaultCreateLinkStateTest",
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(elementsSession = elementsSession),
+            configuredElements = emptyList(),
         )
 
         val result = createLinkState(
@@ -374,6 +376,7 @@ internal class DefaultCreateLinkStateTest {
                 elementsSession = elementsSession,
                 customerEmail = customerEmail,
             ),
+            configuredElements = emptyList(),
         )
     }
 
@@ -465,6 +468,10 @@ internal class DefaultCreateLinkStateTest {
             paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
             paymentMethodSelectionFlow = PaymentMethodSelectionFlow.MerchantSpecified,
             checkoutSessionId = null,
+            checkoutConfigId = null,
+            merchantIntegrationSource = "elements",
+            merchantIntegrationSubtype = "mobile",
+            merchantIntegrationAdditionalElements = null,
         )
     }
 }

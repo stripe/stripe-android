@@ -145,6 +145,10 @@ class ConfirmCheckoutSessionParamsTest {
             paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
             paymentMethodSelectionFlow = PaymentMethodSelectionFlow.MerchantSpecified,
             checkoutSessionId = null,
+            checkoutConfigId = null,
+            merchantIntegrationSource = "elements",
+            merchantIntegrationSubtype = "mobile",
+            merchantIntegrationAdditionalElements = null,
         )
 
         val SHIPPING = ConfirmCheckoutSessionParams.Shipping(

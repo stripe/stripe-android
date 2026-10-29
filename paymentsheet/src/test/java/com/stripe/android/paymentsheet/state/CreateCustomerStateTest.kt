@@ -39,6 +39,7 @@ internal class CreateCustomerStateTest {
             collectedEmail = null,
             instancesKey = "instances_key",
             checkoutSessionResponse = checkoutSessionResponse,
+            configuredElements = emptyList(),
         )
 
         val result = createCustomerState(
@@ -69,6 +70,7 @@ internal class CreateCustomerStateTest {
             collectedEmail = null,
             instancesKey = "instances_key",
             checkoutSessionResponse = checkoutSessionResponse,
+            configuredElements = emptyList(),
         )
 
         val result = createCustomerState(
@@ -119,6 +121,7 @@ internal class CreateCustomerStateTest {
                 collectedEmail = null,
                 instancesKey = "instances_key",
                 checkoutSessionResponse = checkoutSessionResponse,
+                configuredElements = emptyList(),
             ),
             metadata = createAutomaticTaxCheckoutMetadata(checkoutSessionResponse),
             paymentMethodFilter = DefaultPaymentMethodFilter(),

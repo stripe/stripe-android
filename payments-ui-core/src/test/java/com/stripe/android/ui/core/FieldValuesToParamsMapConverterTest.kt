@@ -136,6 +136,10 @@ class FieldValuesToParamsMapConverterTest {
                     paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
                     paymentMethodSelectionFlow = PaymentMethodSelectionFlow.Automatic,
                     checkoutSessionId = null,
+                    checkoutConfigId = null,
+                    merchantIntegrationSource = "elements",
+                    merchantIntegrationSubtype = "mobile",
+                    merchantIntegrationAdditionalElements = null,
                 )
             )
 
@@ -592,6 +596,10 @@ class FieldValuesToParamsMapConverterTest {
             paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
             paymentMethodSelectionFlow = PaymentMethodSelectionFlow.Automatic,
             checkoutSessionId = null,
+            checkoutConfigId = null,
+            merchantIntegrationSource = "elements",
+            merchantIntegrationSubtype = "mobile",
+            merchantIntegrationAdditionalElements = null,
         )
     }
 }

@@ -3,6 +3,7 @@ package com.stripe.android.link.serialization
 import android.content.Context
 import android.os.Build
 import android.util.Base64
+import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.model.PaymentIntent
@@ -12,6 +13,8 @@ import com.stripe.android.model.StripeIntent
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonObject
 
 @Serializable
 internal data class PopupPayload(
@@ -44,7 +47,7 @@ internal data class PopupPayload(
     @SerialName("linkFundingSources")
     val linkFundingSources: List<String>,
     @SerialName("clientAttributionMetadata")
-    val clientAttributionMetadata: Map<String, String>
+    val clientAttributionMetadata: JsonObject
 ) {
     @SerialName("path")
     val path: String = "mobile_pay"
@@ -157,7 +160,9 @@ internal data class PopupPayload(
                 setupFutureUsage = stripeIntent.isSetupForFutureUsage(passthroughModeEnabled),
                 flags = flags,
                 linkFundingSources = stripeIntent.linkFundingSources.map { it.uppercase() },
-                clientAttributionMetadata = clientAttributionMetadata.toParamMap(),
+                clientAttributionMetadata = Json.parseToJsonElement(
+                    StripeJsonUtils.mapToJsonObject(clientAttributionMetadata.toParamMap()).toString()
+                ).jsonObject,
             )
         }
 

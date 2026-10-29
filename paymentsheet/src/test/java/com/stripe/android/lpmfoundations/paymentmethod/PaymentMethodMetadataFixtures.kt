@@ -30,6 +30,10 @@ internal object PaymentMethodMetadataFixtures {
         paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
         paymentMethodSelectionFlow = PaymentMethodSelectionFlow.Automatic,
         checkoutSessionId = null,
+        checkoutConfigId = null,
+        merchantIntegrationSource = "elements",
+        merchantIntegrationSubtype = "mobile",
+        merchantIntegrationAdditionalElements = null,
     )
 
     internal val CUSTOMER_SESSIONS_CUSTOMER_METADATA = CustomerMetadata.CustomerSession(

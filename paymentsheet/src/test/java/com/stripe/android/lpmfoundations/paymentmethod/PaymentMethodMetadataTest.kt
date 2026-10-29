@@ -1362,6 +1362,10 @@ internal class PaymentMethodMetadataTest {
                 paymentMethodSelectionFlow = null,
                 paymentIntentCreationFlow = null,
                 checkoutSessionId = null,
+                checkoutConfigId = null,
+                merchantIntegrationSource = "elements",
+                merchantIntegrationSubtype = "mobile",
+                merchantIntegrationAdditionalElements = null,
             ),
             attestOnIntentConfirmation = false,
             appearance = configuration.appearance,
@@ -2320,6 +2324,7 @@ internal class PaymentMethodMetadataTest {
                 collectedEmail = null,
                 instancesKey = "key",
                 checkoutSessionResponse = checkoutSessionResponse,
+                configuredElements = emptyList(),
             ),
             integrationMetadata = IntegrationMetadata.CheckoutSession(
                 collectedEmail = null,
@@ -2343,6 +2348,7 @@ internal class PaymentMethodMetadataTest {
                 collectedEmail = null,
                 instancesKey = "key",
                 checkoutSessionResponse = checkoutSessionResponse,
+                configuredElements = emptyList(),
             ),
             integrationMetadata = IntegrationMetadata.CheckoutSession(
                 collectedEmail = null,
@@ -2366,6 +2372,7 @@ internal class PaymentMethodMetadataTest {
                 collectedEmail = null,
                 instancesKey = "key",
                 checkoutSessionResponse = checkoutSessionResponse,
+                configuredElements = emptyList(),
             ),
             integrationMetadata = IntegrationMetadata.CheckoutSession(
                 collectedEmail = null,
@@ -2389,6 +2396,7 @@ internal class PaymentMethodMetadataTest {
                 collectedEmail = null,
                 instancesKey = "key",
                 checkoutSessionResponse = checkoutSessionResponse,
+                configuredElements = emptyList(),
             ),
             integrationMetadata = IntegrationMetadata.CheckoutSession(
                 collectedEmail = null,

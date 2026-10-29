@@ -581,6 +581,10 @@ class PaymentMethodCreateParamsTest {
             paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
             paymentMethodSelectionFlow = PaymentMethodSelectionFlow.Automatic,
             checkoutSessionId = null,
+            checkoutConfigId = null,
+            merchantIntegrationSource = "elements",
+            merchantIntegrationSubtype = "mobile",
+            merchantIntegrationAdditionalElements = null,
         )
         val paymentMethodCreateParams = PaymentMethodCreateParams.createWithOverride(
             code = "card",
@@ -606,6 +610,10 @@ class PaymentMethodCreateParamsTest {
         paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
         paymentMethodSelectionFlow = PaymentMethodSelectionFlow.Automatic,
         checkoutSessionId = null,
+        checkoutConfigId = null,
+        merchantIntegrationSource = "elements",
+        merchantIntegrationSubtype = "mobile",
+        merchantIntegrationAdditionalElements = null,
     )
 
     private fun createFpx(): PaymentMethodCreateParams {

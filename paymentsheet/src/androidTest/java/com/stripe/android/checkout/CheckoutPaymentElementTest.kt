@@ -96,6 +96,14 @@ internal class CheckoutPaymentElementTest {
         runCheckoutPaymentElementScenario(
             networkRule = networkRule,
             resultCallback = { result -> checkoutResult = result },
+            checkoutInitResponse = { response ->
+                response.testBodyFromFile("checkout-session-init.json") { json ->
+                    json.put("customer_email", "checkout@example.com")
+                    json.getJSONObject("elements_session").remove("link_settings")
+                    json.put("config_id", "checkout_config_123")
+                    json.put("automatic_payment_method_types", true)
+                }
+            },
             setup = { controller ->
                 assertThat(
                     controller.configure(
@@ -109,6 +117,18 @@ internal class CheckoutPaymentElementTest {
             networkRule.checkoutConfirm(
                 bodyPart("payment_method_data[type]", "card"),
                 bodyPart("payment_method_data[card][number]", "4242424242424242"),
+                bodyPart("client_attribution_metadata[merchant_integration_source]", "mobile-checkout"),
+                bodyPart("client_attribution_metadata[merchant_integration_subtype]", "mobile-payment-element"),
+                bodyPart("client_attribution_metadata[checkout_config_id]", "checkout_config_123"),
+                bodyPart("client_attribution_metadata[payment_method_selection_flow]", "automatic"),
+                bodyPart(
+                    "client_attribution_metadata[merchant_integration_additional_elements][]",
+                    "mobile-payment-element",
+                ),
+                bodyPart(
+                    "payment_method_data[client_attribution_metadata][merchant_integration_subtype]",
+                    "mobile-payment-element",
+                ),
                 bodyPart(
                     "payment_method_data[payment_user_agent]",
                     "stripe-android/${StripeSdkVersion.VERSION_NAME};checkout_elements",

@@ -37,6 +37,7 @@ internal class CheckoutSessionLoaderTest {
             collectedEmail = null,
             instancesKey = "CheckoutSessionLoaderTest",
             checkoutSessionResponse = response,
+            configuredElements = emptyList(),
         )
     }
 

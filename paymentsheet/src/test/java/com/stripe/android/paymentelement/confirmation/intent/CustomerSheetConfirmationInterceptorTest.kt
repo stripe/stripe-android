@@ -38,6 +38,10 @@ class CustomerSheetConfirmationInterceptorTest {
         paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
         paymentMethodSelectionFlow = PaymentMethodSelectionFlow.MerchantSpecified,
         checkoutSessionId = null,
+        checkoutConfigId = null,
+        merchantIntegrationSource = "elements",
+        merchantIntegrationSubtype = "mobile",
+        merchantIntegrationAdditionalElements = null,
     )
 
     private val requestOptions = ApiRequest.Options(

@@ -95,6 +95,10 @@ class CheckoutSessionConfirmationInterceptorTest {
                     paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
                     paymentMethodSelectionFlow = PaymentMethodSelectionFlow.MerchantSpecified,
                     checkoutSessionId = null,
+                    checkoutConfigId = null,
+                    merchantIntegrationSource = "elements",
+                    merchantIntegrationSubtype = "mobile",
+                    merchantIntegrationAdditionalElements = null,
                 ),
             )
             PaymentMethod.Type.SepaDebit -> PaymentMethodCreateParamsFixtures.DEFAULT_SEPA_DEBIT
@@ -946,6 +950,10 @@ class CheckoutSessionConfirmationInterceptorTest {
                 paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
                 paymentMethodSelectionFlow = PaymentMethodSelectionFlow.MerchantSpecified,
                 checkoutSessionId = null,
+                checkoutConfigId = null,
+                merchantIntegrationSource = "elements",
+                merchantIntegrationSubtype = "mobile",
+                merchantIntegrationAdditionalElements = null,
             ),
             context = applicationContext,
             checkoutSessionRepository = checkoutSessionRepository,

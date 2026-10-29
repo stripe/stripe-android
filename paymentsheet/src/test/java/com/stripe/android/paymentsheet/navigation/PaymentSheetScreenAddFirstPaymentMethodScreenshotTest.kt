@@ -115,6 +115,10 @@ internal class PaymentSheetScreenAddFirstPaymentMethodScreenshotTest {
                     paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
                     paymentMethodSelectionFlow = PaymentMethodSelectionFlow.Automatic,
                     checkoutSessionId = null,
+                    checkoutConfigId = null,
+                    merchantIntegrationSource = "elements",
+                    merchantIntegrationSubtype = "mobile",
+                    merchantIntegrationAdditionalElements = null,
                 )
             ),
             previousPaymentMethodExtraParams = PaymentMethodExtraParams.Card(

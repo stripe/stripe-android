@@ -14,13 +14,17 @@ data class ClientAttributionMetadata(
     @get:VisibleForTesting val paymentIntentCreationFlow: PaymentIntentCreationFlow?,
     @get:VisibleForTesting val paymentMethodSelectionFlow: PaymentMethodSelectionFlow?,
     @get:VisibleForTesting val checkoutSessionId: String?,
+    private val checkoutConfigId: String?,
+    private val merchantIntegrationSource: String,
+    private val merchantIntegrationSubtype: String,
+    private val merchantIntegrationAdditionalElements: List<String>?,
     private val stripeSdkVersion: String = StripeSdkVersion.VERSION_NAME,
 ) : StripeParamsModel, Parcelable {
 
-    override fun toParamMap(): Map<String, String> {
+    override fun toParamMap(): Map<String, Any> {
         return mapOf(
-            "merchant_integration_source" to "elements",
-            "merchant_integration_subtype" to "mobile",
+            "merchant_integration_source" to merchantIntegrationSource,
+            "merchant_integration_subtype" to merchantIntegrationSubtype,
             "merchant_integration_version" to "stripe-android/$stripeSdkVersion",
             "client_session_id" to AnalyticsRequestFactory.sessionId.toString(),
         ).plus(
@@ -38,6 +42,14 @@ data class ClientAttributionMetadata(
         ).plus(
             checkoutSessionId?.let {
                 mapOf("checkout_session_id" to it)
+            }.orEmpty()
+        ).plus(
+            checkoutConfigId?.let {
+                mapOf("checkout_config_id" to it)
+            }.orEmpty()
+        ).plus(
+            merchantIntegrationAdditionalElements?.let {
+                mapOf("merchant_integration_additional_elements" to it)
             }.orEmpty()
         )
     }

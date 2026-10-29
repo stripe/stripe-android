@@ -174,6 +174,10 @@ internal class DefaultPaymentElementLoaderTest {
                         paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
                         paymentMethodSelectionFlow = PaymentMethodSelectionFlow.MerchantSpecified,
                         checkoutSessionId = null,
+                        checkoutConfigId = null,
+                        merchantIntegrationSource = "elements",
+                        merchantIntegrationSubtype = "mobile",
+                        merchantIntegrationAdditionalElements = null,
                     ),
                     integrationMetadata = IntegrationMetadata.IntentFirst("pi_1234_secret_1234"),
                     elementsSessionId = "session_1234",
@@ -288,6 +292,7 @@ internal class DefaultPaymentElementLoaderTest {
                 collectedEmail = null,
                 instancesKey = "DefaultPaymentElementLoaderTest",
                 checkoutSessionResponse = createCheckoutSessionResponse(canDetachPaymentMethod = true),
+                configuredElements = emptyList(),
             ),
             paymentSheetConfiguration = PaymentSheet.Configuration(
                 merchantDisplayName = "Some name",
@@ -382,6 +387,7 @@ internal class DefaultPaymentElementLoaderTest {
                     collectedEmail = null,
                     instancesKey = "DefaultPaymentElementLoaderTest",
                     checkoutSessionResponse = checkoutSessionResponse,
+                    configuredElements = emptyList(),
                 ),
                 PaymentSheetFixtures.CONFIG_GOOGLEPAY.newBuilder()
                     .defaultBillingDetails(PaymentSheet.BillingDetails(email = "customer@email.com"))
@@ -424,6 +430,7 @@ internal class DefaultPaymentElementLoaderTest {
                 collectedEmail = null,
                 instancesKey = "DefaultPaymentElementLoaderTest",
                 checkoutSessionResponse = checkoutSessionResponse,
+                configuredElements = emptyList(),
             ),
             isGooglePaySupportedByConfiguration = CompletableDeferred(true),
         )
@@ -457,6 +464,7 @@ internal class DefaultPaymentElementLoaderTest {
                     collectedEmail = null,
                     instancesKey = "DefaultPaymentElementLoaderTest",
                     checkoutSessionResponse = checkoutSessionResponse,
+                    configuredElements = emptyList(),
                 ),
                 PaymentSheetFixtures.CONFIG_MINIMUM.newBuilder()
                     .defaultBillingDetails(PaymentSheet.BillingDetails(email = "customer@email.com"))
@@ -1860,6 +1868,7 @@ internal class DefaultPaymentElementLoaderTest {
             collectedEmail = null,
             instancesKey = "DefaultPaymentElementLoaderTest",
             checkoutSessionResponse = createCheckoutSessionResponse(canDetachPaymentMethod = true),
+            configuredElements = emptyList(),
         ).validate()
     }
 
@@ -1869,6 +1878,7 @@ internal class DefaultPaymentElementLoaderTest {
             collectedEmail = null,
             instancesKey = "DefaultPaymentElementLoaderTest",
             checkoutSessionResponse = createCheckoutSessionResponse(canDetachPaymentMethod = true),
+            configuredElements = emptyList(),
         )
         assertThat(checkoutSession.checkoutSessionResponse.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
     }
@@ -1879,6 +1889,7 @@ internal class DefaultPaymentElementLoaderTest {
             collectedEmail = null,
             instancesKey = "DefaultPaymentElementLoaderTest",
             checkoutSessionResponse = createCheckoutSessionResponse(canDetachPaymentMethod = true),
+            configuredElements = emptyList(),
         )
         assertThat(checkoutSession.integrationMetadata(null))
             .isEqualTo(
@@ -3175,6 +3186,7 @@ internal class DefaultPaymentElementLoaderTest {
                     collectedEmail = null,
                     instancesKey = "DefaultPaymentElementLoaderTest",
                     checkoutSessionResponse = checkoutSessionResponse,
+                    configuredElements = emptyList(),
                 ),
                 paymentSheetConfiguration = PaymentSheet.Configuration.Builder(
                     merchantDisplayName = "Merchant, Inc.",
@@ -4327,6 +4339,71 @@ internal class DefaultPaymentElementLoaderTest {
         )
     }
 
+    @Test
+    fun `checkout Payment Element metadata identifies the configured Checkout integration`() = runScenario {
+        val clientAttributionMetadata = loadCheckoutSessionClientAttributionMetadata(
+            integrationConfiguration = PaymentElementLoader.Configuration.Embedded(
+                isRowSelectionImmediateAction = false,
+                configuration = EmbeddedPaymentElement.Configuration.Builder("Merchant").build(),
+                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+            ),
+        )
+        val params = clientAttributionMetadata.toParamMap()
+
+        assertThat(params["merchant_integration_source"]).isEqualTo("mobile-checkout")
+        assertThat(params["merchant_integration_subtype"]).isEqualTo("mobile-payment-element")
+        assertThat(params["checkout_session_id"]).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
+        assertThat(params["checkout_config_id"]).isEqualTo("cfg_checkout_123")
+        assertThat(params["merchant_integration_additional_elements"]).isEqualTo(
+            listOf("mobile-payment-element", "mobile-express-checkout-element")
+        )
+        assertThat(clientAttributionMetadata.paymentIntentCreationFlow).isNull()
+        assertThat(clientAttributionMetadata.paymentMethodSelectionFlow)
+            .isEqualTo(PaymentMethodSelectionFlow.Automatic)
+    }
+
+    @Test
+    fun `Express Checkout Element metadata uses the Express Checkout subtype`() = runScenario {
+        val clientAttributionMetadata = loadCheckoutSessionClientAttributionMetadata(
+            integrationConfiguration = PaymentElementLoader.Configuration.ExpressCheckoutElement(
+                commonConfiguration = PaymentSheet.Configuration("Merchant").asCommonConfiguration(),
+            ),
+        )
+
+        assertThat(clientAttributionMetadata.toParamMap()["merchant_integration_subtype"])
+            .isEqualTo("mobile-express-checkout-element")
+    }
+
+    private suspend fun Scenario.loadCheckoutSessionClientAttributionMetadata(
+        integrationConfiguration: PaymentElementLoader.Configuration,
+    ): ClientAttributionMetadata {
+        val configuredElements = listOf(
+            "mobile-payment-element",
+            "mobile-express-checkout-element",
+        )
+        val checkoutSessionResponse = createCheckoutSessionResponse(canDetachPaymentMethod = true).copy(
+            configId = "cfg_checkout_123",
+            automaticPaymentMethodTypes = true,
+        )
+
+        val result = createPaymentElementLoader().load(
+            initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+                instancesKey = "DefaultPaymentElementLoaderTest",
+                checkoutSessionResponse = checkoutSessionResponse,
+                collectedEmail = null,
+                configuredElements = configuredElements,
+            ),
+            integrationConfiguration = integrationConfiguration,
+            metadata = PaymentElementLoader.Metadata(initializedViaCompose = false),
+        ).getOrThrow()
+
+        consumeLoadingEvents()
+        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
+        assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
+
+        return result.paymentMethodMetadata.clientAttributionMetadata
+    }
+
     private suspend fun Scenario.assertCheckoutDoesNotLoadPaymentMethodMessaging(
         integrationConfiguration: PaymentElementLoader.Configuration,
     ) {
@@ -4351,6 +4428,7 @@ internal class DefaultPaymentElementLoaderTest {
                     elementsSession = requireNotNull(response.elementsSession).copy(experimentsData = experimentsData),
                 ),
                 collectedEmail = null,
+                configuredElements = emptyList(),
             ),
             integrationConfiguration = integrationConfiguration,
             metadata = PaymentElementLoader.Metadata(initializedViaCompose = false),
