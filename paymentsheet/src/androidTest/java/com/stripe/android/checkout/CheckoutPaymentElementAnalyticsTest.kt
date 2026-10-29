@@ -16,8 +16,6 @@ import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatcher
 import com.stripe.android.networktesting.RequestMatchers.analyticsPayloadField
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
-import com.stripe.android.networktesting.RequestMatchers.hasQueryParam
-import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedContentPage
@@ -434,10 +432,7 @@ internal class CheckoutPaymentElementAnalyticsTest {
     }
 
     private fun validateSuccessfulConfigureAnalytics(vararg requestMatchers: RequestMatcher) {
-        networkRule.validateCheckoutInitStarted(
-            DEFAULT_CHECKOUT_SESSION_ID,
-            not(hasQueryParam("duration")),
-        )
+        networkRule.validateCheckoutInitStarted(DEFAULT_CHECKOUT_SESSION_ID)
         networkRule.validateAnalyticsRequest(
             eventName = "mc_load_started",
             productUsage = setOf("checkout_elements"),

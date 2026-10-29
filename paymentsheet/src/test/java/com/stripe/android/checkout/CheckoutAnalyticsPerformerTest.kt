@@ -52,7 +52,9 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
+import kotlin.time.TestTimeSource
 
 @OptIn(ApiConfigurationPreview::class)
 @RunWith(RobolectricTestRunner::class)
@@ -543,6 +545,49 @@ internal class CheckoutAnalyticsPerformerTest {
         )
     }
 
+    @Test
+    fun `init uses the active API configuration instead of previously committed payment metadata`() = runScenario {
+        performer.createInitAttempt("cs_test_newinit").started(response = null)
+
+        val request = analyticsRequestExecutor.awaitInitEvent(INIT_STARTED_EVENT)
+        assertThat(request).containsEntry("checkout_session_id", "cs_test_newinit")
+        assertThat(request).doesNotContainKey("checkout_config_id")
+    }
+
+    @Test
+    fun `queued init attempt includes its wait in its own duration`() = runScenario {
+        val first = performer.createInitAttempt("cs_test_first")
+        first.started(response = null)
+        val firstStarted = analyticsRequestExecutor.awaitInitEvent(INIT_STARTED_EVENT)
+        assertThat(firstStarted).containsEntry("checkout_session_id", "cs_test_first")
+        assertThat(firstStarted).doesNotContainKey("duration")
+
+        timeSource += 150.milliseconds
+        val second = performer.createInitAttempt("cs_test_second")
+        second.started(response = null)
+        val secondStarted = analyticsRequestExecutor.awaitInitEvent(INIT_STARTED_EVENT)
+        assertThat(secondStarted).containsEntry("checkout_session_id", "cs_test_second")
+
+        timeSource += 350.milliseconds
+        first.succeeded(
+            response = CheckoutSessionResponseFactory.create(id = "cs_test_first"),
+            orderedLpms = listOf("card", "klarna"),
+        )
+        val succeeded = analyticsRequestExecutor.awaitInitEvent(INIT_SUCCEEDED_EVENT)
+        assertThat(succeeded).containsEntry("checkout_session_id", "cs_test_first")
+        assertThat(succeeded).containsEntry("ordered_lpms", "card,klarna")
+        assertThat(succeeded).containsEntry("duration", 0.5f)
+
+        timeSource += 500.milliseconds
+        second.failed(response = null, error = IllegalStateException("private failure details"))
+        val failed = analyticsRequestExecutor.awaitInitEvent(INIT_FAILED_EVENT)
+        assertThat(failed).containsEntry("checkout_session_id", "cs_test_second")
+        assertThat(failed).containsEntry("duration", 0.85f)
+        assertThat(failed).containsEntry("error_type", "java.lang.IllegalStateException")
+        assertThat(failed).doesNotContainKey("checkout_config_id")
+        assertThat(failed.toString()).doesNotContain("private failure details")
+    }
+
     private fun assertFailureReported(
         type: ConfirmationHandler.Result.Failed.ErrorType,
         expectedErrorParams: Map<String, Any> = mapOf("error_type" to "java.lang.IllegalStateException"),
@@ -607,6 +652,13 @@ internal class CheckoutAnalyticsPerformerTest {
         return request
     }
 
+    private suspend fun FakeAnalyticsRequestExecutor.awaitInitEvent(event: String): Map<String, *> {
+        val request = awaitEvent(event)
+        assertThat(request).containsEntry("product_usage", "checkout_elements")
+        assertThat(request).containsEntry("publishable_key", FALLBACK_PUBLISHABLE_KEY)
+        return request
+    }
+
     private fun runScenario(
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(
             apiConfiguration = ApiConfiguration(DEFAULT_METADATA_PUBLISHABLE_KEY).build(),
@@ -639,6 +691,7 @@ internal class CheckoutAnalyticsPerformerTest {
             analyticsRequestExecutor = analyticsRequestExecutor,
             durationProvider = durationProvider,
             fallbackApiConfiguration = ApiConfiguration(FALLBACK_PUBLISHABLE_KEY).build(),
+            timeSource = TestTimeSource(),
             backgroundScope = backgroundScope,
             testScheduler = testScheduler,
         )
@@ -657,6 +710,7 @@ internal class CheckoutAnalyticsPerformerTest {
         val analyticsRequestExecutor: FakeAnalyticsRequestExecutor,
         val durationProvider: FakeDurationProvider,
         private val fallbackApiConfiguration: ApiConfiguration.State,
+        val timeSource: TestTimeSource,
         private val backgroundScope: CoroutineScope,
         private val testScheduler: TestCoroutineScheduler,
     ) {
@@ -678,6 +732,7 @@ internal class CheckoutAnalyticsPerformerTest {
             analyticsRequestExecutor = analyticsRequestExecutor,
             durationProvider = durationProvider,
             apiConfiguration = fallbackApiConfiguration,
+            timeSource = timeSource,
             workContext = UnconfinedTestDispatcher(testScheduler),
         )
     }
@@ -690,6 +745,10 @@ internal class CheckoutAnalyticsPerformerTest {
         const val SUCCEEDED_EVENT = "checkout_elements.confirm.succeeded"
         const val FAILED_EVENT = "checkout_elements.confirm.failed"
         const val CANCELED_EVENT = "checkout_elements.confirm.canceled"
+
+        const val INIT_STARTED_EVENT = "checkout_elements.init.started"
+        const val INIT_SUCCEEDED_EVENT = "checkout_elements.init.succeeded"
+        const val INIT_FAILED_EVENT = "checkout_elements.init.failed"
 
         val CONFIRMATION_DURATION = 2.seconds
         const val CONFIRMATION_DURATION_SECONDS = 2f
