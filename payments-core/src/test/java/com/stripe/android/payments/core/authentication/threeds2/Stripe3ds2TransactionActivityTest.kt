@@ -101,7 +101,7 @@ class Stripe3ds2TransactionActivityTest {
             RequestCredentials(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, stripeAccount = null),
             enableLogging = false,
             statusBarColor = null,
-            ApiConfiguration.State(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, "acct_123", betas = emptySet()),
+            ApiConfiguration.State(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, "acct_123"),
             setOf()
         )
     }

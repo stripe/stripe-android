@@ -45,7 +45,6 @@ internal class SetupIntentFlowResultProcessorTest {
             ApiConfiguration.State(
                 publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
                 stripeAccountId = null,
-                betas = emptySet(),
             )
         },
         mockStripeRepository,

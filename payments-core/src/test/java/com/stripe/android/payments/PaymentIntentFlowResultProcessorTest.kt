@@ -1656,7 +1656,6 @@ internal class PaymentIntentFlowResultProcessorTest {
             ApiConfiguration.State(
                 publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
                 stripeAccountId = null,
-                betas = emptySet(),
             )
         },
         stripeRepository,

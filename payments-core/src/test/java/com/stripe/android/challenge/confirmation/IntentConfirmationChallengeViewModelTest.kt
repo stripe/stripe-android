@@ -175,7 +175,7 @@ internal class IntentConfirmationChallengeViewModelTest {
     fun `when closeClicked is called and intent id is null, result emits Canceled and errorReporter reports`() {
         val fakeErrorReporter = FakeErrorReporter()
         val argsWithNullId = IntentConfirmationChallengeArgs(
-            apiConfiguration = ApiConfiguration.State("pk_test_123", "acct_123", betas = emptySet()),
+            apiConfiguration = ApiConfiguration.State("pk_test_123", "acct_123"),
             intent = PaymentIntentFixtures.PI_WITH_NULL_ID,
             productUsage = listOf("PaymentSheet"),
             captchaVendorName = "hcaptcha",
@@ -369,7 +369,7 @@ internal class IntentConfirmationChallengeViewModelTest {
         private val REQUEST_OPTIONS = RequestCredentials("pk_test_vOo1umqsYxSrP5UXfOeL3ecm", stripeAccount = null)
 
         val TEST_ARGS = IntentConfirmationChallengeArgs(
-            apiConfiguration = ApiConfiguration.State("pk_test_123", "acct_123", betas = emptySet()),
+            apiConfiguration = ApiConfiguration.State("pk_test_123", "acct_123"),
             intent = PaymentIntentFixtures.PI_SUCCEEDED,
             productUsage = listOf("PaymentSheet"),
             captchaVendorName = "hcaptcha",

@@ -93,7 +93,6 @@ internal class PaymentBrowserAuthContract :
             ApiConfiguration.State(
                 publishableKey = parcel.readString() ?: "",
                 stripeAccountId = parcel.readString(),
-                betas = emptySet(),
             ),
             parcel.readByte() != 0.toByte(),
             parcel.readByte() != 0.toByte(),

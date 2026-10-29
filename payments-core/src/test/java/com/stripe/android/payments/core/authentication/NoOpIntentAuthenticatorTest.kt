@@ -103,7 +103,6 @@ class NoOpIntentAuthenticatorTest {
         private val API_CONFIGURATION = ApiConfiguration.State(
             publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             stripeAccountId = ApiKeyFixtures.FAKE_STRIPE_ACCOUNT,
-            betas = emptySet(),
         )
     }
 }
