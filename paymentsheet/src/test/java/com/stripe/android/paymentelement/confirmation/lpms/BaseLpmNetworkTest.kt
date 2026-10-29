@@ -97,6 +97,7 @@ internal open class BaseLpmNetworkTest(
                     apiConfiguration = ApiConfiguration.State(
                         publishableKey = publishableKey,
                         stripeAccountId = null,
+                        betas = emptySet(),
                     ),
                     paymentElementCallbackIdentifier = LPM_NETWORK_PAYMENT_ELEMENT_CALLBACK_TEST_IDENTIFIER,
                     allowsManualConfirmation = allowsManualConfirmation,

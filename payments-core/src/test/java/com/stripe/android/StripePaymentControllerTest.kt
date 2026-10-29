@@ -327,7 +327,8 @@ internal class StripePaymentControllerTest {
         private const val ACCOUNT_ID = ApiKeyFixtures.FAKE_STRIPE_ACCOUNT
         private val REQUEST_OPTIONS = ApiRequest.Options(
             apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-            stripeAccount = ACCOUNT_ID
+            stripeAccount = ACCOUNT_ID,
+            betas = emptySet(),
         )
     }
 }

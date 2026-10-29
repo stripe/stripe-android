@@ -507,7 +507,7 @@ class CardAccountRangeServiceTest {
     private fun createRemoteCardAccountRangeSource(): CardAccountRangeSource {
         return RemoteCardAccountRangeSource(
             StripeApiRepository(applicationContext, { publishableKey }, RequestSurface.PaymentElement),
-            ApiRequest.Options(publishableKey),
+            ApiRequest.Options(publishableKey, betas = emptySet()),
             DefaultCardAccountRangeStore(applicationContext),
             DefaultAnalyticsRequestExecutor(),
             PaymentAnalyticsRequestFactory(applicationContext, publishableKey)

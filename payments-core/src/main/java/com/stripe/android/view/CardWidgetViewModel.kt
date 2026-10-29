@@ -61,6 +61,7 @@ internal class CardWidgetViewModel(
             requestOptions = ApiRequest.Options(
                 apiKey = paymentConfig.publishableKey,
                 stripeAccount = paymentConfig.stripeAccountId,
+                betas = emptySet(),
             ),
             params = onBehalfOf?.let {
                 mapOf("on_behalf_of" to it)

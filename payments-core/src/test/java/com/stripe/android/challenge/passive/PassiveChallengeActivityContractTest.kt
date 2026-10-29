@@ -27,7 +27,7 @@ internal class PassiveChallengeActivityContractTest {
         )
         val args = PassiveChallengeActivityContract.Args(
             passiveCaptchaParams,
-            apiConfiguration = ApiConfiguration.State("pk_123", "acct_123"),
+            apiConfiguration = ApiConfiguration.State("pk_123", "acct_123", betas = emptySet()),
             productUsage = emptySet()
         )
 

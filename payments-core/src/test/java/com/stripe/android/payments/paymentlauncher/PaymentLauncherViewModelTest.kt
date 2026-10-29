@@ -358,6 +358,7 @@ class PaymentLauncherViewModelTest {
                     options = ApiRequest.Options(
                         apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
                         stripeAccount = callbackAccount,
+                        betas = emptySet(),
                     ),
                     expandFields = EXPAND_PAYMENT_METHOD,
                 )
@@ -390,6 +391,7 @@ class PaymentLauncherViewModelTest {
                     options = ApiRequest.Options(
                         apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
                         stripeAccount = callbackAccount,
+                        betas = emptySet(),
                     ),
                     expandFields = EXPAND_PAYMENT_METHOD,
                 )
@@ -819,6 +821,7 @@ class PaymentLauncherViewModelTest {
             ApiConfiguration.State(
                 publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
                 stripeAccountId = TEST_STRIPE_ACCOUNT_ID,
+                betas = emptySet(),
             )
         }
         val clock = Clock { dispatcher.scheduler.currentTime }
@@ -872,11 +875,13 @@ class PaymentLauncherViewModelTest {
         val API_CONFIGURATION = ApiConfiguration.State(
             publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             stripeAccountId = TEST_STRIPE_ACCOUNT_ID,
+            betas = emptySet(),
         )
         val EXPAND_PAYMENT_METHOD = listOf("payment_method")
         val API_REQUEST_OPTIONS = ApiRequest.Options(
             apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             stripeAccount = TEST_STRIPE_ACCOUNT_ID,
+            betas = emptySet(),
         )
 
         fun paymentFlowResult(@StripeIntentResult.Outcome outcome: Int) = PaymentFlowResult.Unvalidated(

@@ -16,7 +16,7 @@ This is the recommended complete implementation. It preserves the distinction be
 
 Reference: [Mobile API Review: Beta Headers for MPE](https://docs.google.com/document/d/1i5jhlsr_ki0OqFmlDVlBdg5nI-whDVwQfd6cyOLHD6w/edit?tab=t.0), read on 2026-10-14. The document proposes a public-preview `ApiConfiguration.betas(Set<String>)` API for PaymentSheet, FlowController, and EmbeddedPaymentElement. It calls out Vipps as the motivating integration, arbitrary strings rather than a maintained enum, and a minor SDK release. The review outcome is not filled in; this plan does not claim API approval.
 
-All three alternatives start from `refactor/next-action-api-configuration` at `a7447f8ec14b7205e22f09fff05806d7214fdbb7`. They are competing designs, not a sequence of implementations. This PR changes documentation only.
+All three alternatives start from `refactor/next-action-api-configuration` at `a7447f8ec14b7205e22f09fff05806d7214fdbb7`. They are competing designs, not a sequence of implementations. This branch now includes the implementation described below.
 
 The requested behavior is: every Stripe API request belonging to a payment flow with an explicit configuration receives that configuration's beta flags. This includes auxiliary requests, credential overrides, authentication, retries, and activities launched by the flow. It does not mean a process-wide beta setting: a different payment flow must retain its own flags, and a flow with no flags must not inherit another flow's flags. Non-payment-element public integrations remain outside the API review's product scope, but shared networking must keep working for those integrations.
 
@@ -143,7 +143,7 @@ Choose option 3 unless the simplicity of explicit State forwarding in option 1 i
 
 ## Validation and release gates for the implementation
 
-These are future implementation checks, not checks run for this documentation PR. Invoke repository testing skills before writing tests and delegate routine Gradle commands according to `AGENTS.md`.
+These are the implementation validation gates. See the PR description for checks actually run. Invoke repository testing skills before writing tests and delegate routine Gradle commands according to `AGENTS.md`.
 
 Start with focused tests in the touched packages; then run affected-module suites and checks:
 

@@ -42,7 +42,13 @@ class DefaultPaymentNextActionHandlerRegistryTest {
         ),
         includePaymentSheetNextActionHandlers = false,
         applicationContext = ApplicationProvider.getApplicationContext(),
-        apiConfigurationProvider = { ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null) },
+        apiConfigurationProvider = {
+            ApiConfiguration.State(
+                publishableKey = "pk_test_123",
+                stripeAccountId = null,
+                betas = emptySet(),
+            )
+        },
     )
 
     private val allAuthenticators = setOf(

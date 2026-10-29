@@ -88,6 +88,7 @@ class AddressLauncher internal constructor(
             apiConfiguration = ApiConfiguration.State(
                 publishableKey = publishableKey,
                 stripeAccountId = null,
+                betas = emptySet(),
             ),
             config = configuration,
         )

@@ -339,7 +339,7 @@ class LinkApiRepositoryTest {
                 )
             },
             requestSurface = eq("android_payment_element"),
-            requestOptions = eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID)),
+            requestOptions = eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID, betas = emptySet())),
         )
     }
 
@@ -441,7 +441,7 @@ class LinkApiRepositoryTest {
                     )
                 },
                 requestSurface = eq("android_payment_element"),
-                requestOptions = eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID)),
+                requestOptions = eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID, betas = emptySet())),
             )
         }
 
@@ -609,7 +609,8 @@ class LinkApiRepositoryTest {
         assertThat(createDetailsCall.requestOptions).isEqualTo(
             ApiRequest.Options(
                 apiKey = PUBLISHABLE_KEY,
-                stripeAccount = STRIPE_ACCOUNT_ID
+                stripeAccount = STRIPE_ACCOUNT_ID,
+                betas = emptySet(),
             )
         )
         assertThat(createDetailsCall.customerEphemeralKey).isEqualTo(ephemeralKey)
@@ -724,7 +725,11 @@ class LinkApiRepositoryTest {
                 "expand" to listOf("payment_method"),
                 "client_attribution_metadata" to PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA.toParamMap(),
             ),
-            requestOptions = ApiRequest.Options(apiKey = PUBLISHABLE_KEY, stripeAccount = STRIPE_ACCOUNT_ID)
+            requestOptions = ApiRequest.Options(
+                apiKey = PUBLISHABLE_KEY,
+                stripeAccount = STRIPE_ACCOUNT_ID,
+                betas = emptySet(),
+            )
         )
         assertThat(savedLinkPaymentDetails.paymentDetails)
             .isEqualTo(
@@ -778,7 +783,11 @@ class LinkApiRepositoryTest {
                 "expand" to listOf("payment_method"),
                 "client_attribution_metadata" to PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA.toParamMap(),
             ),
-            requestOptions = ApiRequest.Options(apiKey = PUBLISHABLE_KEY, stripeAccount = STRIPE_ACCOUNT_ID)
+            requestOptions = ApiRequest.Options(
+                apiKey = PUBLISHABLE_KEY,
+                stripeAccount = STRIPE_ACCOUNT_ID,
+                betas = emptySet(),
+            )
         )
     }
 
@@ -846,7 +855,7 @@ class LinkApiRepositoryTest {
             connectionsMerchantName = null,
             accountPhoneNumber = null,
             emailAddress = null,
-            requestOptions = ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID),
+            requestOptions = ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID, betas = emptySet()),
             isResendSmsCode = false
         )
     }
@@ -925,7 +934,7 @@ class LinkApiRepositoryTest {
         verify(stripeRepository).listPaymentDetails(
             eq(secret),
             eq(setOf("card")),
-            eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID))
+            eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID, betas = emptySet()))
         )
     }
 
@@ -1000,7 +1009,7 @@ class LinkApiRepositoryTest {
         verify(stripeRepository).deletePaymentDetails(
             eq(secret),
             eq(id),
-            eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID))
+            eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID, betas = emptySet()))
         )
     }
 
@@ -1049,7 +1058,7 @@ class LinkApiRepositoryTest {
         verify(stripeRepository).updatePaymentDetails(
             eq(secret),
             eq(params),
-            eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID))
+            eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID, betas = emptySet()))
         )
     }
 
@@ -1181,6 +1190,7 @@ class LinkApiRepositoryTest {
         val DEFAULT_API_CONFIGURATION = ApiConfiguration.State(
             publishableKey = PUBLISHABLE_KEY,
             stripeAccountId = STRIPE_ACCOUNT_ID,
+            betas = emptySet(),
         )
     }
 }

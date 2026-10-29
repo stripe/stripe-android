@@ -1,7 +1,7 @@
 package com.stripe.android.payments.bankaccount.domain
 
 import com.stripe.android.core.ApiConfiguration
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.toRequestOptions
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.networking.StripeRepository
@@ -31,10 +31,7 @@ internal class AttachFinancialConnectionsSession @Inject constructor(
                 financialConnectionsSessionId = linkedAccountSessionId,
                 clientSecret = paymentIntentClientSecret.value,
                 paymentIntentId = paymentIntentClientSecret.paymentIntentId,
-                requestOptions = ApiRequest.Options(
-                    apiKey = apiConfiguration.publishableKey,
-                    stripeAccount = apiConfiguration.stripeAccountId
-                ),
+                requestOptions = apiConfiguration.toRequestOptions(idempotencyKey = null),
                 expandFields = EXPAND_PAYMENT_METHOD
             ).getOrThrow()
         }
@@ -60,10 +57,7 @@ internal class AttachFinancialConnectionsSession @Inject constructor(
                 financialConnectionsSessionId = linkedAccountSessionId,
                 clientSecret = setupIntentClientSecret.value,
                 setupIntentId = setupIntentClientSecret.setupIntentId,
-                requestOptions = ApiRequest.Options(
-                    apiKey = apiConfiguration.publishableKey,
-                    stripeAccount = apiConfiguration.stripeAccountId
-                ),
+                requestOptions = apiConfiguration.toRequestOptions(idempotencyKey = null),
                 expandFields = EXPAND_PAYMENT_METHOD
             ).getOrThrow()
         }

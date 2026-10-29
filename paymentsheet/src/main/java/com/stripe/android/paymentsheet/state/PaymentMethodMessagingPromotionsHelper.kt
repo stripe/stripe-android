@@ -3,7 +3,7 @@ package com.stripe.android.paymentsheet.repositories
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.ViewModelScope
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.toRequestOptions
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.ElementsSession.ExperimentAssignment
 import com.stripe.android.model.PaymentMethod
@@ -65,10 +65,7 @@ internal class DefaultPaymentMethodMessagePromotionsHelper @Inject constructor(
                 currency = intent.currency ?: "usd",
                 country = intent.countryCode,
                 locale = Locale.getDefault().language,
-                requestOptions = ApiRequest.Options(
-                    apiKey = apiConfiguration.publishableKey,
-                    stripeAccount = apiConfiguration.stripeAccountId
-                )
+                requestOptions = apiConfiguration.toRequestOptions(idempotencyKey = null)
             )
         }
     }

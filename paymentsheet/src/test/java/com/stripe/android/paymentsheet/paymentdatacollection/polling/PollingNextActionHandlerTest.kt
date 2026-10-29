@@ -24,6 +24,7 @@ internal class PollingNextActionHandlerTest {
         val apiConfiguration = ApiConfiguration.State(
             publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             stripeAccountId = ApiKeyFixtures.FAKE_ACCOUNT_ID,
+            betas = emptySet(),
         )
 
         val args = PollingNextActionHandler().getArgsForPaymentMethod(
@@ -49,6 +50,7 @@ internal class PollingNextActionHandlerTest {
         val apiConfiguration = ApiConfiguration.State(
             publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             stripeAccountId = ApiKeyFixtures.FAKE_ACCOUNT_ID,
+            betas = emptySet(),
         )
 
         val args = PollingNextActionHandler().getArgsForPaymentMethod(
@@ -77,6 +79,7 @@ internal class PollingNextActionHandlerTest {
             apiConfiguration = ApiConfiguration.State(
                 publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
                 stripeAccountId = ApiKeyFixtures.FAKE_ACCOUNT_ID,
+                betas = emptySet(),
             ),
             currentTimeMillis = 1_700_000_000_000,
         )
@@ -92,6 +95,7 @@ internal class PollingNextActionHandlerTest {
             apiConfiguration = ApiConfiguration.State(
                 publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
                 stripeAccountId = ApiKeyFixtures.FAKE_ACCOUNT_ID,
+                betas = emptySet(),
             ),
             currentTimeMillis = 1_700_000_000_000,
         )

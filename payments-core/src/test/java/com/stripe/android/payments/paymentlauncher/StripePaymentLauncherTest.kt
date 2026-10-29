@@ -22,6 +22,7 @@ class StripePaymentLauncherTest {
             ApiConfiguration.State(
                 publishableKey = PUBLISHABLE_KEY,
                 stripeAccountId = STRIPE_ACCOUNT_ID,
+                betas = emptySet(),
             )
         },
         hostActivityLauncher = mockHostActivityLauncher,

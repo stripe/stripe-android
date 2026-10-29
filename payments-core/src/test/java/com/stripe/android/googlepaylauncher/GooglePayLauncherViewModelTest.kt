@@ -349,7 +349,8 @@ class GooglePayLauncherViewModelTest {
         )
         val REQUEST_OPTIONS = ApiRequest.Options(
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-            "account"
+            "account",
+            betas = emptySet(),
         )
     }
 }

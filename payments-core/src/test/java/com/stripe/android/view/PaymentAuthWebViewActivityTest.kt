@@ -101,7 +101,11 @@ internal class PaymentAuthWebViewActivityTest {
             clientSecret = CLIENT_SECRET,
             url = "https://example.com",
             statusBarColor = Color.RED,
-            apiConfiguration = ApiConfiguration.State(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, "acct_123"),
+            apiConfiguration = ApiConfiguration.State(
+                ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                "acct_123",
+                betas = emptySet(),
+            ),
             isInstantApp = false
         )
     }

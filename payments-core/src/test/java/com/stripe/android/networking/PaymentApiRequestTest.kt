@@ -15,7 +15,7 @@ class PaymentApiRequestTest {
     fun url_withCardData_createsProperQueryString() {
         val url = ApiRequest.Factory().createGet(
             url = StripeApiRepository.sourcesUrl,
-            options = ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY),
+            options = ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, betas = emptySet()),
             params = CardParamsFixtures.MINIMUM.toParamMap()
         ).url
 

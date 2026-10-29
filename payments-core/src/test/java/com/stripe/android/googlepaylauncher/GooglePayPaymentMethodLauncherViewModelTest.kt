@@ -139,7 +139,8 @@ class GooglePayPaymentMethodLauncherViewModelTest {
         assertThat(stripeRepository.getRequestOptions()).isEqualTo(
             ApiRequest.Options(
                 apiKey = ARGS.apiConfiguration.publishableKey,
-                stripeAccount = ARGS.apiConfiguration.stripeAccountId
+                stripeAccount = ARGS.apiConfiguration.stripeAccountId,
+                betas = emptySet(),
             )
         )
     }
@@ -440,7 +441,8 @@ class GooglePayPaymentMethodLauncherViewModelTest {
             ),
             apiConfiguration = ApiConfiguration.State(
                 ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-                ApiKeyFixtures.FAKE_STRIPE_ACCOUNT
+                ApiKeyFixtures.FAKE_STRIPE_ACCOUNT,
+                betas = emptySet(),
             ),
             shippingAddressParameters = null,
         )

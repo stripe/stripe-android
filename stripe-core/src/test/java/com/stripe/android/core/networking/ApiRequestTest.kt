@@ -69,7 +69,7 @@ internal class ApiRequestTest {
             ),
             FACTORY.createPost(
                 PAYMENT_METHODS_URL,
-                ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, "acct"),
+                ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, "acct", betas = emptySet()),
                 params
             )
         )
@@ -97,14 +97,14 @@ internal class ApiRequestTest {
 
     @Test
     fun optionsToStringDoesNotExposeApiKey() {
-        val options = ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+        val options = ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, betas = emptySet())
         val str = options.toString()
         assertFalse(str.contains(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY))
         assertFalse(str.contains("pk_test"))
     }
 
     private companion object {
-        private val OPTIONS = ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+        private val OPTIONS = ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, betas = emptySet())
 
         private val FACTORY = ApiRequest.Factory()
 

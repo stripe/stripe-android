@@ -33,13 +33,15 @@ class DefaultCardAccountRangeRepositoryFactory @Inject constructor(
     private val apiConfigurationProvider: Provider<ApiConfiguration.State>,
 ) : CardAccountRangeRepository.Factory {
     private val appContext = context.applicationContext
-    private val cardAccountRangeRepository = lazy {
+    private val repositories = mutableMapOf<ApiConfiguration.State?, CardAccountRangeRepository>()
+
+    private fun createRepository(apiConfiguration: ApiConfiguration.State?): CardAccountRangeRepository {
         val store = InMemoryCardAccountRangeStore()
-        DefaultCardAccountRangeRepository(
+        return DefaultCardAccountRangeRepository(
             inMemorySource = InMemoryCardAccountRangeSource(store),
-            remoteSource = createRemoteCardAccountRangeSource(store),
+            remoteSource = createRemoteCardAccountRangeSource(store, apiConfiguration),
             staticSource = StaticCardAccountRangeSource(),
-            store = store
+            store = store,
         )
     }
 
@@ -57,18 +59,28 @@ class DefaultCardAccountRangeRepositoryFactory @Inject constructor(
             ApiConfiguration.State(
                 publishableKey = publishableKeySupplier(),
                 stripeAccountId = null,
+                betas = emptySet(),
             )
         },
     )
 
     @Throws(IllegalStateException::class)
     override fun create(): CardAccountRangeRepository {
-        return cardAccountRangeRepository.value
+        val configuration = runCatching { apiConfigurationProvider.get() }.getOrNull()
+        return synchronized(repositories) {
+            repositories.getOrPut(configuration) { createRepository(configuration) }
+        }
     }
 
     override fun createWithStripeRepository(
         stripeRepository: StripeRepository,
         publishableKey: String
+    ): CardAccountRangeRepository = createWithStripeRepository(stripeRepository, publishableKey, emptySet())
+
+    internal fun createWithStripeRepository(
+        stripeRepository: StripeRepository,
+        publishableKey: String,
+        betas: Set<String>,
     ): CardAccountRangeRepository {
         val store = InMemoryCardAccountRangeStore()
         return DefaultCardAccountRangeRepository(
@@ -76,7 +88,8 @@ class DefaultCardAccountRangeRepositoryFactory @Inject constructor(
             remoteSource = RemoteCardAccountRangeSource(
                 stripeRepository,
                 ApiRequest.Options(
-                    publishableKey
+                    publishableKey,
+                    betas = betas.toSet(),
                 ),
                 store,
                 DefaultAnalyticsRequestExecutor(),
@@ -88,10 +101,11 @@ class DefaultCardAccountRangeRepositoryFactory @Inject constructor(
     }
 
     private fun createRemoteCardAccountRangeSource(
-        store: CardAccountRangeStore
+        store: CardAccountRangeStore,
+        apiConfiguration: ApiConfiguration.State?,
     ): CardAccountRangeSource {
         return runCatching {
-            apiConfigurationProvider.get().publishableKey
+            requireNotNull(apiConfiguration).publishableKey
         }.onSuccess { publishableKey ->
             fireAnalyticsEvent(
                 publishableKey,
@@ -111,7 +125,8 @@ class DefaultCardAccountRangeRepositoryFactory @Inject constructor(
                         requestSurface = requestSurface,
                     ),
                     ApiRequest.Options(
-                        publishableKey
+                        publishableKey,
+                        betas = requireNotNull(apiConfiguration).betas.toSet(),
                     ),
                     store,
                     DefaultAnalyticsRequestExecutor(),

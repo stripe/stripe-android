@@ -134,6 +134,6 @@ internal class DefaultAlipayRepositoryTest {
 
     private companion object {
         private val INTENT = PaymentIntentFixtures.ALIPAY_REQUIRES_ACTION
-        private val REQUEST_OPTIONS = ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+        private val REQUEST_OPTIONS = ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, betas = emptySet())
     }
 }

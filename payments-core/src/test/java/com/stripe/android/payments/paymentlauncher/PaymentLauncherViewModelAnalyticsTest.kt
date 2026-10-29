@@ -702,10 +702,12 @@ class PaymentLauncherViewModelAnalyticsTest {
         val API_CONFIGURATION = ApiConfiguration.State(
             publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             stripeAccountId = TEST_STRIPE_ACCOUNT_ID,
+            betas = emptySet(),
         )
         val API_REQUEST_OPTIONS = ApiRequest.Options(
             apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             stripeAccount = TEST_STRIPE_ACCOUNT_ID,
+            betas = emptySet(),
         )
 
         fun paymentFlowResult(@StripeIntentResult.Outcome outcome: Int) = PaymentFlowResult.Unvalidated(

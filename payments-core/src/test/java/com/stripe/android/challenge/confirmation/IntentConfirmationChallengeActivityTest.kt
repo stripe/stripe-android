@@ -226,7 +226,7 @@ internal class IntentConfirmationChallengeActivityTest {
                     userAgent = "fake-user-agent",
                     stripeRepository = object : AbsFakeStripeRepository() {},
                     errorReporter = FakeErrorReporter(),
-                    requestOptions = ApiRequest.Options("pk_test_123"),
+                    requestOptions = ApiRequest.Options("pk_test_123", betas = emptySet()),
                     fireAndForgetScope = TestScope(testDispatcher),
                     logger = Logger.noop(),
                 ) as T
@@ -252,7 +252,7 @@ internal class IntentConfirmationChallengeActivityTest {
 
     private fun createTestArgs(): IntentConfirmationChallengeArgs {
         return IntentConfirmationChallengeArgs(
-            apiConfiguration = ApiConfiguration.State("pk_test_123", "acct_123"),
+            apiConfiguration = ApiConfiguration.State("pk_test_123", "acct_123", betas = emptySet()),
             intent = PaymentIntentFixtures.PI_SUCCEEDED,
             productUsage = listOf("PaymentSheet"),
             captchaVendorName = "hcaptcha"
@@ -281,7 +281,7 @@ internal class IntentConfirmationChallengeActivityTest {
                         }
                     },
                     errorReporter = FakeErrorReporter(),
-                    requestOptions = ApiRequest.Options("pk_test_123"),
+                    requestOptions = ApiRequest.Options("pk_test_123", betas = emptySet()),
                     fireAndForgetScope = TestScope(testDispatcher),
                     logger = Logger.noop(),
                 ) as T

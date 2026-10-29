@@ -40,7 +40,11 @@ internal class SetupIntentFlowResultProcessorTest {
     private val processor = SetupIntentFlowResultProcessor(
         ApplicationProvider.getApplicationContext(),
         {
-            ApiConfiguration.State(publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, stripeAccountId = null)
+            ApiConfiguration.State(
+                publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                stripeAccountId = null,
+                betas = emptySet(),
+            )
         },
         mockStripeRepository,
         Logger.noop(),
@@ -111,7 +115,7 @@ internal class SetupIntentFlowResultProcessorTest {
             )
 
             val clientSecret = "pi_3L8WOsLu5o3P18Zp191FpRSy_secret_5JIwIT1ooCwRm28AwreUAc6N4"
-            val requestOptions = ApiRequest.Options(apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+            val requestOptions = ApiRequest.Options(apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, betas = emptySet())
 
             val result = processor.processResult(
                 PaymentFlowResult.Unvalidated(
@@ -147,7 +151,7 @@ internal class SetupIntentFlowResultProcessorTest {
             )
 
             val clientSecret = "pi_3L8WOsLu5o3P18Zp191FpRSy_secret_5JIwIT1ooCwRm28AwreUAc6N4"
-            val requestOptions = ApiRequest.Options(apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+            val requestOptions = ApiRequest.Options(apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, betas = emptySet())
 
             val result = processor.processResult(
                 PaymentFlowResult.Unvalidated(
@@ -185,7 +189,7 @@ internal class SetupIntentFlowResultProcessorTest {
             val clientSecret = requireNotNull(
                 intent.clientSecret
             )
-            val requestOptions = ApiRequest.Options(apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+            val requestOptions = ApiRequest.Options(apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, betas = emptySet())
 
             val result = processor.processResult(
                 PaymentFlowResult.Unvalidated(

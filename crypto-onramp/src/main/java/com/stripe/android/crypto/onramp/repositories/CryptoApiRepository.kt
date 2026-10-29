@@ -15,6 +15,7 @@ import com.stripe.android.core.networking.StripeRequest
 import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.core.networking.responseJson
 import com.stripe.android.core.networking.toMap
+import com.stripe.android.core.networking.toRequestOptions
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.crypto.onramp.model.ConfirmPartnerTermsRequest
 import com.stripe.android.crypto.onramp.model.CreatePaymentTokenRequest
@@ -150,6 +151,7 @@ internal class CryptoApiRepository @Inject constructor(
                     apiKey = linkSessionKey,
                     stripeAccount = apiConfigProvider.get().stripeAccountId,
                     idempotencyKey = null,
+                    betas = apiConfigProvider.get().betas.toSet(),
                 ),
                 params = request.toParamMap(),
             ),
@@ -168,6 +170,7 @@ internal class CryptoApiRepository @Inject constructor(
                     apiKey = linkSessionKey,
                     stripeAccount = apiConfigProvider.get().stripeAccountId,
                     idempotencyKey = null,
+                    betas = apiConfigProvider.get().betas.toSet(),
                 ),
                 appInfo = appInfo,
             ),
@@ -465,6 +468,7 @@ internal class CryptoApiRepository @Inject constructor(
         val options = ApiRequest.Options(
             apiKey = platformPublishableKey,
             stripeAccount = apiConfigProvider.get().stripeAccountId,
+            betas = apiConfigProvider.get().betas.toSet(),
         )
 
         return stripeRepository.createToken(
@@ -528,16 +532,14 @@ internal class CryptoApiRepository @Inject constructor(
             options = ApiRequest.Options(
                 apiKey = publishableKey,
                 stripeAccount = apiConfigProvider.get().stripeAccountId,
+                betas = apiConfigProvider.get().betas.toSet(),
             )
         )
     }
 
     private fun buildRequestOptions(): ApiRequest.Options {
         val apiConfiguration = apiConfigProvider.get()
-        return ApiRequest.Options(
-            apiKey = apiConfiguration.publishableKey,
-            stripeAccount = apiConfiguration.stripeAccountId,
-        )
+        return apiConfiguration.toRequestOptions(idempotencyKey = null)
     }
 
     private fun credentialsParams(

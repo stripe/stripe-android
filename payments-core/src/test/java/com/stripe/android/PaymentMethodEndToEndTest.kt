@@ -192,7 +192,7 @@ internal class PaymentMethodEndToEndTest {
         val params = PaymentMethodCreateParamsFixtures.GRABPAY
         val paymentMethod = repository.createPaymentMethod(
             params,
-            ApiRequest.Options(ApiKeyFixtures.GRABPAY_PUBLISHABLE_KEY)
+            ApiRequest.Options(ApiKeyFixtures.GRABPAY_PUBLISHABLE_KEY, betas = emptySet())
         ).getOrThrow()
         assertThat(paymentMethod.type)
             .isEqualTo(PaymentMethod.Type.GrabPay)
@@ -207,7 +207,7 @@ internal class PaymentMethodEndToEndTest {
             workContext = testDispatcher
         ).createPaymentMethod(
             PaymentMethodCreateParams.createPayPay(),
-            ApiRequest.Options(ApiKeyFixtures.PAY_PAY_PUBLISHABLE_KEY)
+            ApiRequest.Options(ApiKeyFixtures.PAY_PAY_PUBLISHABLE_KEY, betas = emptySet())
         ).getOrThrow()
 
         assertThat(paymentMethod.type)
@@ -223,7 +223,7 @@ internal class PaymentMethodEndToEndTest {
             workContext = testDispatcher
         ).createPaymentMethod(
             PaymentMethodCreateParams.createPayPal(),
-            ApiRequest.Options(ApiKeyFixtures.PAYPAL_PUBLISHABLE_KEY)
+            ApiRequest.Options(ApiKeyFixtures.PAYPAL_PUBLISHABLE_KEY, betas = emptySet())
         ).getOrThrow()
 
         assertThat(paymentMethod.type)

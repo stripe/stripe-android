@@ -44,7 +44,8 @@ internal class CustomerApiRepository @Inject constructor(
             productUsageTokens,
             ApiRequest.Options(
                 ephemeralKeySecret,
-                apiConfiguration.stripeAccountId
+                apiConfiguration.stripeAccountId,
+                betas = apiConfiguration.betas.toSet(),
             )
         ).getOrNull()
     }
@@ -74,6 +75,7 @@ internal class CustomerApiRepository @Inject constructor(
                     requestOptions = ApiRequest.Options(
                         apiKey = ephemeralKeySecret,
                         stripeAccount = apiConfiguration.stripeAccountId,
+                        betas = apiConfiguration.betas.toSet(),
                     ),
                     apiConfiguration = apiConfiguration,
                 ).onFailure {
@@ -121,6 +123,7 @@ internal class CustomerApiRepository @Inject constructor(
             requestOptions = ApiRequest.Options(
                 apiKey = ephemeralKeySecret,
                 stripeAccount = apiConfiguration.stripeAccountId,
+                betas = apiConfiguration.betas.toSet(),
             ),
         ).onFailure {
             logger.error("Failed to detach payment method $paymentMethodId.", it)
@@ -144,6 +147,7 @@ internal class CustomerApiRepository @Inject constructor(
         val requestOptions = ApiRequest.Options(
             apiKey = ephemeralKeySecret,
             stripeAccount = apiConfiguration.stripeAccountId,
+            betas = apiConfiguration.betas.toSet(),
         )
 
         val detachOne: suspend (String) -> Result<PaymentMethod> = { pmId ->
@@ -229,6 +233,7 @@ internal class CustomerApiRepository @Inject constructor(
             requestOptions = ApiRequest.Options(
                 apiKey = ephemeralKeySecret,
                 stripeAccount = apiConfiguration.stripeAccountId,
+                betas = apiConfiguration.betas.toSet(),
             )
         ).onFailure {
             logger.error("Failed to attach payment method $paymentMethodId.", it)
@@ -247,6 +252,7 @@ internal class CustomerApiRepository @Inject constructor(
             options = ApiRequest.Options(
                 apiKey = ephemeralKeySecret,
                 stripeAccount = apiConfiguration.stripeAccountId,
+                betas = apiConfiguration.betas.toSet(),
             )
         ).onFailure {
             logger.error("Failed to update payment method $paymentMethodId.", it)
@@ -263,6 +269,7 @@ internal class CustomerApiRepository @Inject constructor(
         options = ApiRequest.Options(
             apiKey = ephemeralKeySecret,
             stripeAccount = apiConfiguration.stripeAccountId,
+            betas = apiConfiguration.betas.toSet(),
         )
     )
 
@@ -279,6 +286,7 @@ internal class CustomerApiRepository @Inject constructor(
             requestOptions = ApiRequest.Options(
                 apiKey = ephemeralKeySecret,
                 stripeAccount = apiConfiguration.stripeAccountId,
+                betas = apiConfiguration.betas.toSet(),
             ),
         ).onFailure {
             logger.error("Failed to retrieve payment method $paymentMethodId.", it)

@@ -7,6 +7,7 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
@@ -28,7 +29,9 @@ import kotlin.time.Duration.Companion.seconds
 @RunWith(RobolectricTestRunner::class)
 internal class PollingComponentTest {
     @get:Rule
-    val networkRule = NetworkRule()
+    val networkRule = NetworkRule(
+        expectedStripeVersions = mapOf(ApiRequest.API_HOST to "2020-03-02;polling_beta=v1"),
+    )
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule()
@@ -86,6 +89,7 @@ internal class PollingComponentTest {
         val API_CONFIGURATION = ApiConfiguration.State(
             publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             stripeAccountId = ApiKeyFixtures.FAKE_ACCOUNT_ID,
+            betas = setOf("polling_beta=v1"),
         )
     }
 }

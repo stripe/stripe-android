@@ -40,7 +40,7 @@ class RequestHeadersFactoriesTest {
         val stripeAccount = "acct_123abc"
         val headers = createBasePaymentApiHeaders(
             locale = Locale.US,
-            options = ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, stripeAccount)
+            options = ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, stripeAccount, betas = emptySet())
         )
 
         assertThat(headers[HEADER_AUTHORIZATION])
@@ -129,7 +129,7 @@ class RequestHeadersFactoriesTest {
         val stripeAccount = "acct_123abc"
         val headers = createBasePaymentApiHeaders(
             locale = Locale.SIMPLIFIED_CHINESE,
-            options = ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, stripeAccount)
+            options = ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, stripeAccount, betas = emptySet())
         )
 
         assertThat(headers[HEADER_AUTHORIZATION])
@@ -210,6 +210,6 @@ class RequestHeadersFactoriesTest {
 
     private companion object {
         private const val BOUNDARY = "TEST_BOUNDARY"
-        private val OPTIONS = ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+        private val OPTIONS = ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, betas = emptySet())
     }
 }

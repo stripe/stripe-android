@@ -84,6 +84,7 @@ class GooglePayButtonTest {
         val TEST_API_CONFIGURATION = ApiConfiguration.State(
             publishableKey = "pk_test_123",
             stripeAccountId = "acct_123",
+            betas = emptySet(),
         )
     }
 }

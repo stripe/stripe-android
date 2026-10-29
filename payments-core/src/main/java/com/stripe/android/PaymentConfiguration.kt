@@ -114,6 +114,7 @@ constructor(
                     ApiConfiguration.State(
                         publishableKey = publishableKey,
                         stripeAccountId = stripeAccountId,
+                        betas = emptySet(),
                     )
                 },
             ).refresh()
