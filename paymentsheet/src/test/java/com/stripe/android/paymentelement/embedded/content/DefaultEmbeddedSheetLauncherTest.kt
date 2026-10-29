@@ -619,7 +619,10 @@ internal class DefaultEmbeddedSheetLauncherTest {
             customerState = customerState,
             linkAccountInfo = linkAccountInfo,
             promotions = emptyList(),
-            launchMode = EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries),
+            launchMode = EmbeddedLaunchMode.PaymentOptions(
+                visibleWallets = WalletType.entries,
+                isFlowController = false,
+            ),
             presentationState = EmbeddedActivityArgs.PresentationState.Ready,
         )
 
@@ -694,7 +697,10 @@ internal class DefaultEmbeddedSheetLauncherTest {
             hasBeenConfirmed = false,
             checkoutSessionResponse = null,
             shouldInvokeSelectionCallback = false,
-            launchMode = EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries),
+            launchMode = EmbeddedLaunchMode.PaymentOptions(
+                visibleWallets = WalletType.entries,
+                isFlowController = false,
+            ),
         )
 
         val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
@@ -721,7 +727,10 @@ internal class DefaultEmbeddedSheetLauncherTest {
             hasBeenConfirmed = false,
             checkoutSessionResponse = null,
             shouldInvokeSelectionCallback = false,
-            launchMode = EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries),
+            launchMode = EmbeddedLaunchMode.PaymentOptions(
+                visibleWallets = WalletType.entries,
+                isFlowController = false,
+            ),
         )
 
         val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
@@ -744,7 +753,10 @@ internal class DefaultEmbeddedSheetLauncherTest {
             hasBeenConfirmed = true,
             checkoutSessionResponse = null,
             shouldInvokeSelectionCallback = false,
-            launchMode = EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries),
+            launchMode = EmbeddedLaunchMode.PaymentOptions(
+                visibleWallets = WalletType.entries,
+                isFlowController = false,
+            ),
         )
 
         val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
@@ -765,7 +777,10 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val result = EmbeddedActivityResult.Cancelled(
             customerState = customerState,
             linkAccountInfo = linkAccountInfo,
-            launchMode = EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries),
+            launchMode = EmbeddedLaunchMode.PaymentOptions(
+                visibleWallets = WalletType.entries,
+                isFlowController = false,
+            ),
         )
 
         val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
@@ -787,7 +802,10 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val result = EmbeddedActivityResult.Cancelled(
             customerState = createCustomerState(paymentMethods = emptyList()),
             linkAccountInfo = LinkAccountUpdate.Value(null),
-            launchMode = EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries),
+            launchMode = EmbeddedLaunchMode.PaymentOptions(
+                visibleWallets = WalletType.entries,
+                isFlowController = false,
+            ),
         )
         val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
         callback.onActivityResult(result)
@@ -807,7 +825,10 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val result = EmbeddedActivityResult.Cancelled(
             customerState = createCustomerState(paymentMethods = listOf(paymentMethod)),
             linkAccountInfo = LinkAccountUpdate.Value(null),
-            launchMode = EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries),
+            launchMode = EmbeddedLaunchMode.PaymentOptions(
+                visibleWallets = WalletType.entries,
+                isFlowController = false,
+            ),
         )
         val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
         callback.onActivityResult(result)

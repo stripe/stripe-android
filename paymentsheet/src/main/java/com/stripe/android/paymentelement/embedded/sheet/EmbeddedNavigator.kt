@@ -225,7 +225,7 @@ internal class EmbeddedNavigator private constructor(
             private val embeddedSelectionHolder: EmbeddedSelectionHolder,
             private val customerStateHolder: CustomerStateHolder,
             private val linkAccountHolder: LinkAccountHolder,
-            private val launchMode: EmbeddedLaunchMode.Form,
+            val launchMode: EmbeddedLaunchMode.Form,
         ) : Screen(), Closeable {
             override fun topBarState(): StateFlow<PaymentSheetTopBarState?> = stateFlowOf(
                 PaymentSheetTopBarStateFactory.create(

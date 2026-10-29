@@ -30,6 +30,7 @@ import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PrefsRepository
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.ApiConfigurationResolverModule
 import com.stripe.android.paymentsheet.injection.LinkHoldbackExposureModule
 import com.stripe.android.paymentsheet.injection.PaymentMethodMessagePromotionsExperimentHandlerModule
@@ -226,6 +227,9 @@ internal interface EmbeddedPaymentElementViewModelModule {
         @Provides
         @Named(PRODUCT_USAGE)
         fun provideProductUsageTokens(): Set<String> = setOf("EmbeddedPaymentElement")
+
+        @Provides
+        fun provideEventReporterMode(): EventReporter.Mode = EventReporter.Mode.Embedded
 
         @Provides
         fun providesContext(application: Application): Context {

@@ -278,7 +278,10 @@ internal class EmbeddedSheetActivityCoordinatorTest {
 
         fun createArgs(
             presentationState: EmbeddedActivityArgs.PresentationState,
-            launchMode: EmbeddedLaunchMode = EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries),
+            launchMode: EmbeddedLaunchMode = EmbeddedLaunchMode.PaymentOptions(
+                visibleWallets = WalletType.entries,
+                isFlowController = false,
+            ),
             callbackIdentifier: String = "callback_identifier",
         ): EmbeddedActivityArgs {
             return EmbeddedActivityArgs(

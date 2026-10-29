@@ -322,6 +322,7 @@ internal class DefaultFlowController @Inject internal constructor(
                 visibleWallets = state.config.walletButtons.walletsVisibleInPaymentElement(
                     walletButtonsRendered = viewModel.walletButtonsRendered,
                 ),
+                isFlowController = true,
             ),
             presentationState = EmbeddedActivityArgs.PresentationState.Ready,
         )

@@ -132,7 +132,10 @@ internal class DefaultSheetActivityStateHolderTest {
     @Test
     fun `PaymentOptions mode always uses continue label regardless of formSheetAction`() {
         testScenario(
-            launchMode = EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries),
+            launchMode = EmbeddedLaunchMode.PaymentOptions(
+                visibleWallets = WalletType.entries,
+                isFlowController = false,
+            ),
         ) {
             stateHolder.state.test {
                 val state = awaitItem()
@@ -531,6 +534,30 @@ internal class DefaultSheetActivityStateHolderTest {
     }
 
     @Test
+    fun `TapToAddResult Continue reports the selected payment option for FlowController`() {
+        val tapToAddHelper = FakeTapToAddHelper()
+        val launchMode = EmbeddedLaunchMode.PaymentOptions(
+            visibleWallets = WalletType.entries,
+            isFlowController = true,
+        )
+        testScenario(
+            tapToAddHelper = tapToAddHelper,
+            launchMode = launchMode,
+        ) {
+            val expectedSelection = PaymentSelection.Saved(CARD_PAYMENT_METHOD)
+
+            stateHolder.result.test {
+                tapToAddHelper.emitNextStep(TapToAddNextStep.Continue(paymentSelection = expectedSelection))
+
+                val result = awaitItem() as EmbeddedActivityResult.Complete
+                assertThat(result.selection).isEqualTo(expectedSelection)
+                assertThat(result.launchMode).isEqualTo(launchMode)
+            }
+            assertThat(eventReporter.selectPaymentOptionCalls.awaitItem()).isEqualTo(expectedSelection)
+        }
+    }
+
+    @Test
     fun `TapToAddResult confirm saved payment method replaces current screen`() {
         val tapToAddHelper = FakeTapToAddHelper()
         val interactorFactory = RecordingSavedPaymentMethodConfirmInteractorFactory()
@@ -579,7 +606,10 @@ internal class DefaultSheetActivityStateHolderTest {
         val formScreen = createFormScreen(formInteractor)
         testScenario(
             tapToAddHelper = tapToAddHelper,
-            launchMode = EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries),
+            launchMode = EmbeddedLaunchMode.PaymentOptions(
+                visibleWallets = WalletType.entries,
+                isFlowController = false,
+            ),
             initialBackStack = listOf(paymentOptionsScreen, formScreen),
             savedPaymentMethodConfirmInteractorFactory = interactorFactory,
         ) {
@@ -623,6 +653,7 @@ internal class DefaultSheetActivityStateHolderTest {
         val confirmationHandler: FakeConfirmationHandler,
         val onClickOverrideDelegate: OnClickOverrideDelegate,
         val navigator: EmbeddedNavigator,
+        val eventReporter: FakeEventReporter,
     )
 
     private fun testScenario(
@@ -652,13 +683,14 @@ internal class DefaultSheetActivityStateHolderTest {
             eventReporter = FakeEventReporter(),
         )
         lateinit var screenFactory: SavedPaymentMethodConfirmScreenFactory
+        val eventReporter = FakeEventReporter()
         val stateHolder = DefaultSheetActivityStateHolder(
             paymentMethodMetadata = paymentMethodMetadata,
             selectionHolder = selectionHolder,
             configuration = config,
             coroutineScope = viewModelScope,
             onClickDelegate = onClickOverrideDelegate,
-            eventReporter = FakeEventReporter(),
+            eventReporter = eventReporter,
             confirmationHandler = confirmationHandler,
             tapToAddHelper = tapToAddHelper,
             customerStateHolder = customerStateHolder,
@@ -683,7 +715,10 @@ internal class DefaultSheetActivityStateHolderTest {
             confirmationHandler = confirmationHandler,
             onClickOverrideDelegate = onClickOverrideDelegate,
             navigator = navigator,
+            eventReporter = eventReporter,
         ).block()
+
+        eventReporter.validate()
     }
 
     private class RecordingSavedPaymentMethodConfirmInteractorFactory(

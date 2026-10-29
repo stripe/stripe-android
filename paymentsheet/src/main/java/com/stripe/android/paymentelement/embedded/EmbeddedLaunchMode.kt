@@ -17,5 +17,9 @@ internal sealed interface EmbeddedLaunchMode : Parcelable {
     @Parcelize
     data class PaymentOptions(
         val visibleWallets: List<WalletType>,
+        val isFlowController: Boolean,
     ) : EmbeddedLaunchMode
 }
+
+internal val EmbeddedLaunchMode.isFlowControllerPaymentOptions: Boolean
+    get() = (this as? EmbeddedLaunchMode.PaymentOptions)?.isFlowController == true

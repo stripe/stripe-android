@@ -77,7 +77,7 @@ internal class EmbeddedInitialScreenFactoryTest {
 
     @Test
     fun `create returns payment options screen for payment options launch mode`() = runScenario(
-        launchMode = EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries),
+        launchMode = EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries, isFlowController = false),
     ) {
         assertThat(factory.create().single()).isInstanceOf<EmbeddedNavigator.Screen.HorizontalPaymentOptions>()
         assertThat(sheetActivityStateHolder.updateErrorTurbine.awaitItem()).isNull()
@@ -85,7 +85,7 @@ internal class EmbeddedInitialScreenFactoryTest {
 
     @Test
     fun `create returns vertical payment options screen for vertical layout with multiple PMs`() = runScenario(
-        launchMode = EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries),
+        launchMode = EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries, isFlowController = false),
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("card", "cashapp"),
@@ -102,7 +102,10 @@ internal class EmbeddedInitialScreenFactoryTest {
     @Test
     fun `create returns vertical payment options and form screens when selected payment method requires a form`() =
         runScenario(
-            launchMode = EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries),
+            launchMode = EmbeddedLaunchMode.PaymentOptions(
+                visibleWallets = WalletType.entries,
+                isFlowController = false,
+            ),
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                     paymentMethodTypes = listOf("card", "cashapp"),

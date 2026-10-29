@@ -104,7 +104,10 @@ internal class EmbeddedSheetViewModelTest {
                 lastUpdateReason = LinkAccountUpdate.Value.UpdateReason.LoggedOut,
             ),
             promotions = emptyList(),
-            launchMode = EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries),
+            launchMode = EmbeddedLaunchMode.PaymentOptions(
+                visibleWallets = WalletType.entries,
+                isFlowController = false,
+            ),
             presentationState = EmbeddedActivityArgs.PresentationState.Ready,
         )
         private var controller = createController(null)

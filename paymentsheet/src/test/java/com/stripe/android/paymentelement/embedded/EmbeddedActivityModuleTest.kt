@@ -19,6 +19,7 @@ import com.stripe.android.paymentsheet.addresselement.BillingInlineAutocompleteA
 import com.stripe.android.paymentsheet.addresselement.FakeStripeAutocompleteRepository
 import com.stripe.android.paymentsheet.addresselement.PaymentElementAutocompleteAddressInteractor
 import com.stripe.android.paymentsheet.addresselement.analytics.FakeAddressLauncherEventReporter
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
@@ -53,6 +54,27 @@ internal class EmbeddedActivityModuleTest {
         }
 
     @Test
+    fun `FlowController payment options report analytics in Custom mode`() {
+        val mode = EmbeddedActivityModule.provideEventReporterMode(
+            EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries, isFlowController = true)
+        )
+
+        assertThat(mode).isEqualTo(EventReporter.Mode.Custom)
+    }
+
+    @Test
+    fun `non-FlowController launches report analytics in Embedded mode`() {
+        listOf(
+            EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries, isFlowController = false),
+            EmbeddedLaunchMode.Manage,
+            EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
+        ).forEach { launchMode ->
+            assertThat(EmbeddedActivityModule.provideEventReporterMode(launchMode))
+                .isEqualTo(EventReporter.Mode.Embedded)
+        }
+    }
+
+    @Test
     fun `Manage launch provides the Manage launch selector`() {
         val selectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle())
         val manageLaunchSelector = ManageLaunchSavedPaymentMethodSelector(
@@ -75,7 +97,7 @@ internal class EmbeddedActivityModuleTest {
     @Test
     fun `non-Manage launches commit selection without creating the Manage launch selector`() = runTest {
         listOf(
-            EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries),
+            EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries, isFlowController = false),
             EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
         ).forEach { launchMode ->
             val selectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle())

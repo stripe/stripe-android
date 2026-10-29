@@ -12,6 +12,7 @@ import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.form.OnClickOverrideDelegate
+import com.stripe.android.paymentelement.embedded.isFlowControllerPaymentOptions
 import com.stripe.android.paymentelement.embedded.manage.EmbeddedManageScreenInteractorFactory
 import com.stripe.android.paymentelement.embedded.manage.EmbeddedUpdateScreenInteractorFactory
 import com.stripe.android.paymentsheet.CustomerStateHolder
@@ -205,6 +206,9 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
         if (onClickOverride != null) {
             onClickOverride()
             return
+        }
+        if (launchMode.isFlowControllerPaymentOptions) {
+            selectionHolder.selection.value?.let(eventReporter::onPressConfirmButton)
         }
         continueCoordinator.onContinue()
     }

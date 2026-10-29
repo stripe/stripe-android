@@ -105,7 +105,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
         assertThat(result.customerState).isEqualTo(PaymentSheetFixtures.EMPTY_CUSTOMER_STATE)
         assertThat(result.linkAccountInfo.lastUpdateReason)
             .isEqualTo(LinkAccountUpdate.Value.UpdateReason.LoggedOut)
-        assertThat(result.launchMode).isEqualTo(EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries))
+        assertThat(result.launchMode).isEqualTo(PAYMENT_OPTIONS_LAUNCH_MODE)
     }
 
     @Test
@@ -175,9 +175,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
         val result = EmbeddedSheetContract.parseResult(scenario.result.resultCode, scenario.result.resultData)
         assertThat(result).isInstanceOf<EmbeddedActivityResult.Cancelled>()
         val cancelled = result as EmbeddedActivityResult.Cancelled
-        assertThat(cancelled.launchMode).isEqualTo(
-            EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries)
-        )
+        assertThat(cancelled.launchMode).isEqualTo(PAYMENT_OPTIONS_LAUNCH_MODE)
     }
 
     @Test
@@ -214,8 +212,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
                 .isEqualTo(previousNewSelection)
             assertThat(result.linkAccountInfo.lastUpdateReason)
                 .isEqualTo(LinkAccountUpdate.Value.UpdateReason.LoggedOut)
-            assertThat(result.launchMode)
-                .isEqualTo(EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries))
+            assertThat(result.launchMode).isEqualTo(PAYMENT_OPTIONS_LAUNCH_MODE)
         }
     }
 
@@ -281,7 +278,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
         val result = scenario.awaitResult() as EmbeddedActivityResult.Complete
         assertThat(result.selection).isInstanceOf<PaymentSelection.New.Card>()
         assertThat(result.hasBeenConfirmed).isFalse()
-        assertThat(result.launchMode).isEqualTo(EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries))
+        assertThat(result.launchMode).isEqualTo(PAYMENT_OPTIONS_LAUNCH_MODE)
     }
 
     @Test
@@ -624,7 +621,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
                 lastUpdateReason = LinkAccountUpdate.Value.UpdateReason.LoggedOut,
             ),
             promotions = emptyList(),
-            launchMode = EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries),
+            launchMode = PAYMENT_OPTIONS_LAUNCH_MODE,
             presentationState = presentationState,
         )
     }
@@ -728,6 +725,13 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
                     ),
                 ),
             )
+        )
+    }
+
+    private companion object {
+        val PAYMENT_OPTIONS_LAUNCH_MODE = EmbeddedLaunchMode.PaymentOptions(
+            visibleWallets = WalletType.entries,
+            isFlowController = false,
         )
     }
 }

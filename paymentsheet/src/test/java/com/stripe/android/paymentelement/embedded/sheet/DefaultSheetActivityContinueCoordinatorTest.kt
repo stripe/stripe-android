@@ -68,6 +68,47 @@ internal class DefaultSheetActivityContinueCoordinatorTest {
     }
 
     @Test
+    fun `FlowController continue reports the selected payment option`() = runScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+        launchMode = FLOW_CONTROLLER_LAUNCH_MODE,
+    ) {
+        continueCoordinator.onContinue()
+
+        assertThat(eventReporter.selectPaymentOptionCalls.awaitItem())
+            .isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+        assertThat(stateHolder.resultTurbine.awaitItem()).isEqualTo(
+            completeResult(checkoutSessionResponse = null)
+        )
+    }
+
+    @Test
+    fun `FlowController continue without a selection does not report a payment option`() = runScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+        selection = null,
+        launchMode = FLOW_CONTROLLER_LAUNCH_MODE,
+    ) {
+        continueCoordinator.onContinue()
+
+        assertThat(stateHolder.resultTurbine.awaitItem()).isEqualTo(
+            completeResult(selection = null, checkoutSessionResponse = null)
+        )
+        eventReporter.selectPaymentOptionCalls.expectNoEvents()
+    }
+
+    @Test
+    fun `FlowController continue is not reported while processing`() = runScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+        launchMode = FLOW_CONTROLLER_LAUNCH_MODE,
+    ) {
+        stateHolder.updateState { it.copy(isProcessing = true) }
+
+        continueCoordinator.onContinue()
+
+        stateHolder.resultTurbine.expectNoEvents()
+        eventReporter.selectPaymentOptionCalls.expectNoEvents()
+    }
+
+    @Test
     fun `continue without tax region update is ignored while processing`() = runScenario(
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
     ) {
@@ -205,6 +246,7 @@ internal class DefaultSheetActivityContinueCoordinatorTest {
         paymentMethodMetadata: PaymentMethodMetadata,
         selection: PaymentSelection? = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
         taxRegionUpdater: SheetTaxRegionUpdater = SheetTaxRegionUpdater(checkoutSessionTaxRegionUpdater()),
+        launchMode: EmbeddedLaunchMode = LAUNCH_MODE,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val selectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle()).apply {
@@ -232,7 +274,8 @@ internal class DefaultSheetActivityContinueCoordinatorTest {
             selectionHolder = selectionHolder,
             customerStateHolder = customerStateHolder,
             linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
-            launchMode = LAUNCH_MODE,
+            launchMode = launchMode,
+            eventReporter = eventReporter,
             embeddedNavigatorProvider = Provider { navigator },
             coroutineScope = this,
         )
@@ -245,6 +288,7 @@ internal class DefaultSheetActivityContinueCoordinatorTest {
             testScope = this,
             navigator = navigator,
             eventReporter = eventReporter,
+            launchMode = launchMode,
         ).block()
 
         backgroundScope.cancel()
@@ -285,6 +329,7 @@ internal class DefaultSheetActivityContinueCoordinatorTest {
         val testScope: TestScope,
         val navigator: EmbeddedNavigator,
         val eventReporter: FakeEventReporter,
+        val launchMode: EmbeddedLaunchMode,
     ) {
         fun completeResult(
             selection: PaymentSelection? = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
@@ -298,14 +343,21 @@ internal class DefaultSheetActivityContinueCoordinatorTest {
                 linkAccountInfo = LinkAccountUpdate.Value(null),
                 checkoutSessionResponse = checkoutSessionResponse,
                 shouldInvokeSelectionCallback = false,
-                launchMode = LAUNCH_MODE,
+                launchMode = launchMode,
             )
         }
     }
 
     private companion object {
         const val ERROR_MESSAGE = "Tax region update failed"
-        val LAUNCH_MODE = EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries)
+        val LAUNCH_MODE = EmbeddedLaunchMode.PaymentOptions(
+            visibleWallets = WalletType.entries,
+            isFlowController = false,
+        )
+        val FLOW_CONTROLLER_LAUNCH_MODE = EmbeddedLaunchMode.PaymentOptions(
+            visibleWallets = WalletType.entries,
+            isFlowController = true,
+        )
         val CHECKOUT_SESSION_METADATA = PaymentMethodMetadataFactory.create(
             integrationMetadata = IntegrationMetadata.CheckoutSession(
                 collectedEmail = null,

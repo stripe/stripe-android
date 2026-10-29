@@ -187,7 +187,10 @@ internal class PaymentOptionsEmbeddedSheetMandateTest {
                 lastUpdateReason = LinkAccountUpdate.Value.UpdateReason.LoggedOut,
             ),
             promotions = emptyList(),
-            launchMode = EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries),
+            launchMode = EmbeddedLaunchMode.PaymentOptions(
+                visibleWallets = WalletType.entries,
+                isFlowController = false,
+            ),
             presentationState = EmbeddedActivityArgs.PresentationState.Ready,
         )
         ActivityScenario.launchActivityForResult<EmbeddedSheetActivity>(

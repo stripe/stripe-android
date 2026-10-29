@@ -14,6 +14,7 @@ import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.form.OnClickOverrideDelegate
+import com.stripe.android.paymentelement.embedded.isFlowControllerPaymentOptions
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.amount
@@ -136,6 +137,9 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
                     )
                     is TapToAddNextStep.Continue -> {
                         customerStateHolder.addPaymentMethod(result.paymentSelection.paymentMethod)
+                        if (launchMode.isFlowControllerPaymentOptions) {
+                            eventReporter.onSelectPaymentOption(result.paymentSelection)
+                        }
                         EmbeddedActivityResult.Complete(
                             selection = result.paymentSelection,
                             previousNewSelections = selectionHolder.previousNewSelections,

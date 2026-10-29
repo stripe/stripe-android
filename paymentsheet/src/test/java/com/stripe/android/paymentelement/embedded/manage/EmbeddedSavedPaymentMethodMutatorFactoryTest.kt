@@ -115,7 +115,10 @@ internal class EmbeddedSavedPaymentMethodMutatorFactoryTest {
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(
             hasCustomerConfiguration = true,
         ),
-        launchMode: EmbeddedLaunchMode = EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries),
+        launchMode: EmbeddedLaunchMode = EmbeddedLaunchMode.PaymentOptions(
+            visibleWallets = WalletType.entries,
+            isFlowController = false,
+        ),
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD

@@ -261,7 +261,10 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
             customerState = customerState,
             linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
             promotions = emptyList(),
-            launchMode = EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries),
+            launchMode = EmbeddedLaunchMode.PaymentOptions(
+                visibleWallets = WalletType.entries,
+                isFlowController = false,
+            ),
             presentationState = EmbeddedActivityArgs.PresentationState.Ready,
         )
         activityLauncher.launch(args)

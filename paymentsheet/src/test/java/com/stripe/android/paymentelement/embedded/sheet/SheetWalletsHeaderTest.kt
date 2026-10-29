@@ -108,7 +108,10 @@ internal class SheetWalletsHeaderTest {
     }
 
     private fun createState(
-        launchMode: EmbeddedLaunchMode = EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries),
+        launchMode: EmbeddedLaunchMode = EmbeddedLaunchMode.PaymentOptions(
+            visibleWallets = WalletType.entries,
+            isFlowController = false,
+        ),
         screen: EmbeddedNavigator.Screen,
         canGoBack: Boolean = false,
         walletsState: WalletsState? = createWalletsState(),

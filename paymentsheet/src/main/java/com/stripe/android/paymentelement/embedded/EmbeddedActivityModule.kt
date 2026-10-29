@@ -151,16 +151,32 @@ internal interface EmbeddedActivityModule {
         }
 
         @Provides
+        fun provideEventReporterMode(launchMode: EmbeddedLaunchMode): EventReporter.Mode {
+            return if (launchMode.isFlowControllerPaymentOptions) {
+                EventReporter.Mode.Custom
+            } else {
+                EventReporter.Mode.Embedded
+            }
+        }
+
+        @Provides
         @Singleton
         fun provideEmbeddedNavigator(
             initialScreenFactory: EmbeddedInitialScreenFactory,
             @ViewModelScope viewModelScope: CoroutineScope,
             eventReporter: EventReporter,
+            launchMode: EmbeddedLaunchMode,
         ): EmbeddedNavigator {
+            val initialBackStack = initialScreenFactory.create()
+            val initialForm = initialBackStack.last() as? EmbeddedNavigator.Screen.Form
+            if (launchMode.isFlowControllerPaymentOptions && initialForm != null) {
+                eventReporter.onPaymentMethodFormShown(initialForm.launchMode.selectedPaymentMethodCode)
+                eventReporter.onShowNewPaymentOptions()
+            }
             return EmbeddedNavigator(
                 coroutineScope = viewModelScope,
                 eventReporter = eventReporter,
-                initialBackStack = initialScreenFactory.create(),
+                initialBackStack = initialBackStack,
             )
         }
 

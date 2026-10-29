@@ -109,7 +109,7 @@ internal class InitialPaymentOptionsScreenFactoryTest {
 
     @Test
     fun `present reopens restored single payment method directly on its form`() = testScenario(
-        launchMode = EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries),
+        launchMode = EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries, isFlowController = false),
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
         ),
@@ -127,7 +127,7 @@ internal class InitialPaymentOptionsScreenFactoryTest {
 
     @Test
     fun `present with saved payment methods retains payment options beneath restored form`() = testScenario(
-        launchMode = EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries),
+        launchMode = EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries, isFlowController = false),
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
         ),
@@ -146,7 +146,7 @@ internal class InitialPaymentOptionsScreenFactoryTest {
 
     @Test
     fun `present with multiple payment methods retains payment options beneath restored form`() = testScenario(
-        launchMode = EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries),
+        launchMode = EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries, isFlowController = false),
     ) {
         selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
 
@@ -471,6 +471,32 @@ internal class InitialPaymentOptionsScreenFactoryTest {
     }
 
     @Test
+    fun `FlowController continue click reports confirm button press`() = testScenario(
+        launchMode = EmbeddedLaunchMode.PaymentOptions(
+            visibleWallets = WalletType.entries,
+            isFlowController = true,
+        ),
+    ) {
+        selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+
+        factory.onContinueClick()
+
+        assertThat(eventReporter.pressConfirmButtonCalls.awaitItem())
+            .isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+        assertThat(continueCoordinator.onContinueCalls.awaitItem()).isEqualTo(Unit)
+    }
+
+    @Test
+    fun `non-FlowController continue click does not report confirm button press`() = testScenario {
+        selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+
+        factory.onContinueClick()
+
+        assertThat(continueCoordinator.onContinueCalls.awaitItem()).isEqualTo(Unit)
+        eventReporter.pressConfirmButtonCalls.expectNoEvents()
+    }
+
+    @Test
     fun `continue invokes override once without completing for an existing selection`() = testScenario {
         selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
         onClickOverrideDelegate.set { onClickOverrideCalls.add(Unit) }
@@ -510,7 +536,10 @@ internal class InitialPaymentOptionsScreenFactoryTest {
 
     @Suppress("LongMethod")
     private fun testScenario(
-        launchMode: EmbeddedLaunchMode = EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries),
+        launchMode: EmbeddedLaunchMode = EmbeddedLaunchMode.PaymentOptions(
+            visibleWallets = WalletType.entries,
+            isFlowController = false,
+        ),
         isGooglePayReady: Boolean = true,
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(

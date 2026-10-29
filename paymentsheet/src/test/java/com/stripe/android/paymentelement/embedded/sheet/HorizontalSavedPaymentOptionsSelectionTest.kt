@@ -54,7 +54,12 @@ internal class HorizontalSavedPaymentOptionsSelectionTest {
         val result = awaitResult()
         assertThat(result.selection).isEqualTo(PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
         assertThat(result.hasBeenConfirmed).isFalse()
-        assertThat(result.launchMode).isEqualTo(EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries))
+        assertThat(result.launchMode).isEqualTo(
+            EmbeddedLaunchMode.PaymentOptions(
+                visibleWallets = WalletType.entries,
+                isFlowController = false,
+            )
+        )
     }
 
     @Test
@@ -118,7 +123,10 @@ internal class HorizontalSavedPaymentOptionsSelectionTest {
                 lastUpdateReason = LinkAccountUpdate.Value.UpdateReason.LoggedOut,
             ),
             promotions = emptyList(),
-            launchMode = EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries),
+            launchMode = EmbeddedLaunchMode.PaymentOptions(
+                visibleWallets = WalletType.entries,
+                isFlowController = false,
+            ),
             presentationState = EmbeddedActivityArgs.PresentationState.Ready,
         )
         ActivityScenario.launchActivityForResult<EmbeddedSheetActivity>(

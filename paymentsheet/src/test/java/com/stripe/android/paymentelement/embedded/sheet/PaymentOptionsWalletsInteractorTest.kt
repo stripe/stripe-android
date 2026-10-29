@@ -239,7 +239,10 @@ internal class PaymentOptionsWalletsInteractorTest {
     @Test
     fun `hidden Link is not shown in header or inline`() = runScenario(
         paymentMethodMetadata = createMetadata(paymentMethodTypes = listOf("card", "cashapp")),
-        launchMode = EmbeddedLaunchMode.PaymentOptions(visibleWallets = listOf(WalletType.GooglePay)),
+        launchMode = EmbeddedLaunchMode.PaymentOptions(
+            visibleWallets = listOf(WalletType.GooglePay),
+            isFlowController = false,
+        ),
     ) {
         val state = interactor.walletsState.value!!
         assertThat(state.link(WalletLocation.HEADER)).isNull()
@@ -250,7 +253,10 @@ internal class PaymentOptionsWalletsInteractorTest {
     @Test
     fun `hidden Google Pay is not shown in header or inline`() = runScenario(
         paymentMethodMetadata = createMetadata(paymentMethodTypes = listOf("card", "cashapp")),
-        launchMode = EmbeddedLaunchMode.PaymentOptions(visibleWallets = listOf(WalletType.Link)),
+        launchMode = EmbeddedLaunchMode.PaymentOptions(
+            visibleWallets = listOf(WalletType.Link),
+            isFlowController = false,
+        ),
     ) {
         val state = interactor.walletsState.value!!
         assertThat(state.googlePay(WalletLocation.HEADER)).isNull()
@@ -260,7 +266,7 @@ internal class PaymentOptionsWalletsInteractorTest {
 
     @Test
     fun `hidden wallets are not shown in direct form header`() = runScenario(
-        launchMode = EmbeddedLaunchMode.PaymentOptions(visibleWallets = emptyList()),
+        launchMode = EmbeddedLaunchMode.PaymentOptions(visibleWallets = emptyList(), isFlowController = false),
     ) {
         assertThat(interactor.walletsState.value).isNull()
     }
@@ -278,7 +284,10 @@ internal class PaymentOptionsWalletsInteractorTest {
         paymentMethodMetadata: PaymentMethodMetadata = createMetadata(paymentMethodTypes = listOf("card")),
         initialCustomerState: CustomerState? = null,
         initialSelection: PaymentSelection? = null,
-        launchMode: EmbeddedLaunchMode = EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries),
+        launchMode: EmbeddedLaunchMode = EmbeddedLaunchMode.PaymentOptions(
+            visibleWallets = WalletType.entries,
+            isFlowController = false,
+        ),
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val savedStateHandle = SavedStateHandle()

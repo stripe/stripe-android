@@ -580,7 +580,12 @@ internal class DefaultFlowControllerTest {
         assertThat(args.customerState).isEqualTo(PaymentSheetFixtures.EMPTY_CUSTOMER_STATE)
         assertThat(args.linkAccountInfo).isEqualTo(LinkAccountUpdate.Value(null))
         assertThat(args.promotions).isEqualTo(listOf(KLARNA_PROMOTION))
-        assertThat(args.launchMode).isEqualTo(EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries))
+        assertThat(args.launchMode).isEqualTo(
+            EmbeddedLaunchMode.PaymentOptions(
+                visibleWallets = WalletType.entries,
+                isFlowController = true,
+            )
+        )
         assertThat(args.presentationState).isEqualTo(EmbeddedActivityArgs.PresentationState.Ready)
     }
 
@@ -611,7 +616,12 @@ internal class DefaultFlowControllerTest {
         val argsCaptor = argumentCaptor<EmbeddedActivityArgs>()
         verify(paymentOptionActivityLauncher).launch(argsCaptor.capture(), anyOrNull())
         assertThat(argsCaptor.firstValue.launchMode)
-            .isEqualTo(EmbeddedLaunchMode.PaymentOptions(visibleWallets = listOf(WalletType.Link)))
+            .isEqualTo(
+                EmbeddedLaunchMode.PaymentOptions(
+                    visibleWallets = listOf(WalletType.Link),
+                    isFlowController = true,
+                )
+            )
     }
 
     @Test
@@ -901,7 +911,12 @@ internal class DefaultFlowControllerTest {
         )
 
         flowController.onPaymentOptionResult(
-            EmbeddedActivityResult.Error(EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries))
+            EmbeddedActivityResult.Error(
+                EmbeddedLaunchMode.PaymentOptions(
+                    visibleWallets = WalletType.entries,
+                    isFlowController = true,
+                )
+            )
         )
 
         verify(paymentOptionResultCallback).onPaymentOptionResult(
@@ -2735,7 +2750,7 @@ private fun completeResult(
     linkAccountInfo = linkAccountInfo,
     checkoutSessionResponse = null,
     shouldInvokeSelectionCallback = false,
-    launchMode = EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries),
+    launchMode = EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries, isFlowController = true),
 )
 
 private fun cancelledResult(
@@ -2744,5 +2759,5 @@ private fun cancelledResult(
 ) = EmbeddedActivityResult.Cancelled(
     customerState = customerState,
     linkAccountInfo = linkAccountInfo,
-    launchMode = EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries),
+    launchMode = EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries, isFlowController = true),
 )
