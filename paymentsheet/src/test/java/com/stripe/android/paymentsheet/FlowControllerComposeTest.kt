@@ -21,6 +21,7 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
+import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
 import com.stripe.android.paymentsheet.flowcontroller.DefaultFlowController
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerViewModel
 import com.stripe.android.testing.CoroutineTestRule
@@ -127,7 +128,7 @@ internal class FlowControllerComposeTest {
                         val viewModel = viewModelStore[key] as? FlowControllerViewModel
                         if (viewModel != null && viewModel.state == null) {
                             viewModel.state = DefaultFlowController.State(
-                                paymentSheetState = PaymentSheetFixtures.PAYMENT_OPTIONS_CONTRACT_ARGS.state,
+                                paymentSheetState = PaymentSheetFixtures.PAYMENT_SHEET_STATE_FULL,
                                 config = PaymentSheetFixtures.CONFIG_GOOGLEPAY,
                             )
                         }
@@ -161,7 +162,7 @@ internal class FlowControllerComposeTest {
         lateinit var firstController: PaymentSheet.FlowController
         lateinit var secondController: PaymentSheet.FlowController
 
-        suspend fun present(controller: PaymentSheet.FlowController): PaymentOptionContract.Args {
+        suspend fun present(controller: PaymentSheet.FlowController): EmbeddedActivityArgs {
             composeRule.runOnIdle {
                 controller.presentPaymentOptions()
             }
@@ -170,7 +171,7 @@ internal class FlowControllerComposeTest {
     }
 
     internal class FakeFlowControllerActivityResultRegistry : ActivityResultRegistry() {
-        val launchCalls = Turbine<PaymentOptionContract.Args>()
+        val launchCalls = Turbine<EmbeddedActivityArgs>()
 
         override fun <I, O> onLaunch(
             requestCode: Int,
@@ -178,7 +179,7 @@ internal class FlowControllerComposeTest {
             input: I,
             options: ActivityOptionsCompat?,
         ) {
-            launchCalls.add(input as PaymentOptionContract.Args)
+            launchCalls.add(input as EmbeddedActivityArgs)
         }
 
         fun ensureAllEventsConsumed() {
