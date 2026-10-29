@@ -43,13 +43,16 @@ class PaymentElement @Inject internal constructor(
      * A composable function that displays payment methods inline.
      *
      * It can present a sheet to collect more details or display saved payment methods.
+     * Displays nothing if no [PaymentElement] configuration was provided to [CheckoutController.configure].
      */
     @Composable
     fun Content() {
         val state by stateHolder.stateFlow.collectAsState()
-        val mandateState = state?.mandateState
+        val currentState = state ?: return
+        if (currentState.configuration.paymentElementConfiguration == null) return
+
         SideEffect {
-            mandateState?.recordContentAccess()
+            currentState.mandateState.recordContentAccess()
         }
         val embeddedContent by contentHelper.embeddedContent.collectAsState()
         embeddedContent?.Content()
@@ -58,11 +61,17 @@ class PaymentElement @Inject internal constructor(
     /**
      * Presents a sheet for the customer to select or manage their payment method.
      *
+     * Does nothing if no [PaymentElement] configuration was provided to [CheckoutController.configure].
      * May be called from any thread. Calls from a background thread are dispatched to the main thread.
      */
     @AnyThread
     fun present() {
+        if (stateHolder.state?.configuration?.paymentElementConfiguration == null) return
+
         coroutineScope.launch(Dispatchers.Main.immediate) {
+            // The configuration may have changed while dispatching from a background thread.
+            if (stateHolder.state?.configuration?.paymentElementConfiguration == null) return@launch
+
             contentHelper.presentPaymentOptions()
         }
     }
