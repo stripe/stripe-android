@@ -118,7 +118,8 @@ private class FinancialConnectionsAccountsRepositoryImpl(
                 PARAMS_ID to sessionId,
                 PARAMS_CLIENT_SECRET to clientSecret,
                 "expand" to listOf("data.institution"),
-            )
+            ),
+            idempotencyKey = null,
         )
         return requestExecutor.execute(
             request,
@@ -139,7 +140,8 @@ private class FinancialConnectionsAccountsRepositoryImpl(
                 PARAMS_CLIENT_SECRET to clientSecret,
                 PARAMS_CONSUMER_CLIENT_SECRET to consumerSessionClientSecret,
                 "expand" to listOf("data.institution"),
-            )
+            ),
+            idempotencyKey = null,
         )
         return requestExecutor.execute(
             request,
@@ -165,6 +167,7 @@ private class FinancialConnectionsAccountsRepositoryImpl(
             ).filterNotNullValues() + selectedAccountIds.mapIndexed { index, selectedAccountId ->
                 "$PARAM_SELECTED_ACCOUNTS[$index]" to selectedAccountId
             },
+            idempotencyKey = null,
         )
         return requestExecutor.execute(
             request,
@@ -183,7 +186,8 @@ private class FinancialConnectionsAccountsRepositoryImpl(
             params = mapOf(
                 PARAMS_CONSUMER_CLIENT_SECRET to consumerSessionClientSecret,
                 PARAMS_CLIENT_SECRET to clientSecret
-            ).filterNotNullValues() + paymentAccount.toParamMap()
+            ).filterNotNullValues() + paymentAccount.toParamMap(),
+            idempotencyKey = null,
         )
         return requestExecutor.execute(
             request,
@@ -203,7 +207,8 @@ private class FinancialConnectionsAccountsRepositoryImpl(
                 PARAMS_ID to sessionId,
                 PARAMS_CLIENT_SECRET to clientSecret,
                 "expand" to listOf("data.institution"),
-            ) + selectAccounts.mapIndexed { index, account -> "$PARAM_SELECTED_ACCOUNTS[$index]" to account }
+            ) + selectAccounts.mapIndexed { index, account -> "$PARAM_SELECTED_ACCOUNTS[$index]" to account },
+            idempotencyKey = null,
         )
         return requestExecutor.execute(
             request,
@@ -228,6 +233,7 @@ private class FinancialConnectionsAccountsRepositoryImpl(
             url = pollAccountsNumbersUrl,
             options = provideApiRequestOptions(useConsumerPublishableKey = false),
             params = accounts + (PARAMS_CLIENT_SECRET to clientSecret),
+            idempotencyKey = null,
         )
 
         requestExecutor.execute(request)

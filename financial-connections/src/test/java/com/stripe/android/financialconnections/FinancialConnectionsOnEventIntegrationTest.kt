@@ -7,6 +7,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.FinishWithResult
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenNativeAuthFlow
@@ -235,7 +236,12 @@ internal class FinancialConnectionsOnEventIntegrationTest {
     ) = FinancialConnectionsManifestRepository(
         requestExecutor = requestExecutor,
         apiRequestFactory = ApiRequest.Factory(),
-        provideApiRequestOptions = { ApiRequest.Options(apiKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
+        provideApiRequestOptions = {
+                RequestCredentials(
+            apiKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+            stripeAccount = null,
+                )
+    },
         logger = Logger.noop(),
         locale = Locale.US,
         initialSync = null,

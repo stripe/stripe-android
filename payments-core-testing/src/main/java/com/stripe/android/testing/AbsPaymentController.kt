@@ -7,7 +7,7 @@ import com.stripe.android.AlipayAuthenticator
 import com.stripe.android.PaymentController
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.SetupIntentResult
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.Source
@@ -20,21 +20,24 @@ abstract class AbsPaymentController : PaymentController {
     override suspend fun startConfirmAndAuth(
         host: AuthActivityStarterHost,
         confirmStripeIntentParams: ConfirmStripeIntentParams,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ) {
     }
 
     override suspend fun confirmAndAuthenticateAlipay(
         confirmPaymentIntentParams: ConfirmPaymentIntentParams,
         authenticator: AlipayAuthenticator,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<PaymentIntentResult> {
         return Result.failure(NotImplementedError())
     }
 
     override suspend fun confirmWeChatPay(
         confirmPaymentIntentParams: ConfirmPaymentIntentParams,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<WeChatPayNextAction> {
         return Result.failure(NotImplementedError())
     }
@@ -42,15 +45,17 @@ abstract class AbsPaymentController : PaymentController {
     override suspend fun startAuth(
         host: AuthActivityStarterHost,
         clientSecret: String,
-        requestOptions: ApiRequest.Options,
-        type: PaymentController.StripeIntentType
+        requestOptions: RequestCredentials,
+        type: PaymentController.StripeIntentType,
+        idempotencyKey: String?,
     ) {
     }
 
     override suspend fun startAuthenticateSource(
         host: AuthActivityStarterHost,
         source: Source,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ) {
     }
 
@@ -81,7 +86,8 @@ abstract class AbsPaymentController : PaymentController {
     override suspend fun handleNextAction(
         host: AuthActivityStarterHost,
         stripeIntent: StripeIntent,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ) {
     }
 

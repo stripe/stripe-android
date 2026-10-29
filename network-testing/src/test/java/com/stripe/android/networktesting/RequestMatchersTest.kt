@@ -6,6 +6,34 @@ import org.junit.Test
 class RequestMatchersTest {
 
     @Test
+    fun `version matcher rejects missing tokens`() {
+        val matcher = RequestMatchers.stripeVersions(mapOf("api.stripe.com" to "2020-03-02;example=v1"))
+        val request = createRequest(
+            headers = mapOf("original-host" to "api.stripe.com", "Stripe-Version" to "2020-03-02"),
+        )
+        assertThat(matcher.matches(request)).isFalse()
+    }
+
+    @Test
+    fun `version matcher rejects extra tokens`() {
+        val matcher = RequestMatchers.stripeVersions(mapOf("api.stripe.com" to "2020-03-02;example=v1"))
+        val request = createRequest(
+            headers = mapOf(
+                "original-host" to "api.stripe.com",
+                "Stripe-Version" to "2020-03-02;example=v1;leaked=v1",
+            ),
+        )
+        assertThat(matcher.matches(request)).isFalse()
+    }
+
+    @Test
+    fun `version matcher leaves telemetry unchanged`() {
+        val matcher = RequestMatchers.stripeVersions(mapOf("api.stripe.com" to "2020-03-02;example=v1"))
+        val request = createRequest(headers = mapOf("original-host" to "q.stripe.com"))
+        assertThat(matcher.matches(request)).isTrue()
+    }
+
+    @Test
     fun `stripeApiKey matches publishable key for API request`() {
         val request = createRequest(
             path = "/v1/payment_intents/pi_123",

@@ -3,6 +3,7 @@ package com.stripe.android.financialconnections.repository
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.FinancialConnectionsPreCollectedConsent
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventContext
@@ -19,6 +20,7 @@ import org.junit.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.given
+import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
@@ -41,8 +43,9 @@ internal class FinancialConnectionsManifestRepositoryImplTest {
         requestExecutor = mockRequestExecutor,
         apiRequestFactory = apiRequestFactory,
         provideApiRequestOptions = {
-            ApiRequest.Options(
-                apiKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
+            RequestCredentials(
+                apiKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+                stripeAccount = null,
             )
         },
         logger = Logger.noop(),
@@ -124,7 +127,8 @@ internal class FinancialConnectionsManifestRepositoryImplTest {
         verify(apiRequestFactory).createPost(
             url = any(),
             options = any(),
-            params = paramsCaptor.capture()
+            params = paramsCaptor.capture(),
+            idempotencyKey = isNull(),
         )
         assertThat(paramsCaptor.firstValue["pre_collected_consent"]).isEqualTo(
             mapOf(
@@ -151,7 +155,8 @@ internal class FinancialConnectionsManifestRepositoryImplTest {
         verify(apiRequestFactory).createPost(
             url = any(),
             options = any(),
-            params = paramsCaptor.capture()
+            params = paramsCaptor.capture(),
+            idempotencyKey = isNull(),
         )
         assertThat(paramsCaptor.firstValue).doesNotContainKey("pre_collected_consent")
     }
@@ -166,6 +171,7 @@ internal class FinancialConnectionsManifestRepositoryImplTest {
                 url = any(),
                 options = any(),
                 params = any(),
+                idempotencyKey = isNull(),
             )
         ).thenReturn(request)
         whenever(mockRequestExecutor.execute(any(), any<KSerializer<*>>()))
@@ -194,6 +200,7 @@ internal class FinancialConnectionsManifestRepositoryImplTest {
             url = any(),
             options = any(),
             params = paramsCaptor.capture(),
+            idempotencyKey = isNull(),
         )
         assertThat(paramsCaptor.allValues.map { it["pre_collected_consent"] }).containsExactly(
             PRE_COLLECTED_CONSENT_PARAMS,
@@ -212,7 +219,8 @@ internal class FinancialConnectionsManifestRepositoryImplTest {
             apiRequestFactory.createPost(
                 url = any(),
                 options = any(),
-                params = any()
+                params = any(),
+                idempotencyKey = isNull(),
             )
         ).thenReturn(mock)
         given(mockRequestExecutor.execute(any(), any<KSerializer<*>>())).willSuspendableAnswer {

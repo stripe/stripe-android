@@ -5,6 +5,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeRequest
 import com.stripe.android.core.networking.StripeResponse
@@ -65,8 +66,9 @@ internal class FinancialConnectionsRequestExecutorTest {
     ) {
         val request = ApiRequest.Factory().createPost(
             url = "https://api.stripe.com/v1/financial_connections/authorization_sessions/events",
-            options = ApiRequest.Options(apiKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY),
-            params = emptyMap<String, Any>()
+            options = RequestCredentials(apiKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, stripeAccount = null),
+            params = emptyMap<String, Any>(),
+            idempotencyKey = null,
         )
 
         val result = requestExecutor.executeWithoutUserFacingEvents(request, String.serializer())
@@ -114,7 +116,12 @@ internal class FinancialConnectionsRequestExecutorTest {
         val repository = FinancialConnectionsManifestRepository(
             requestExecutor = requestExecutor,
             apiRequestFactory = ApiRequest.Factory(),
-            provideApiRequestOptions = { ApiRequest.Options(apiKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
+            provideApiRequestOptions = {
+                RequestCredentials(
+                apiKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+                stripeAccount = null,
+                )
+        },
             logger = Logger.noop(),
             locale = Locale.US,
             initialSync = null,

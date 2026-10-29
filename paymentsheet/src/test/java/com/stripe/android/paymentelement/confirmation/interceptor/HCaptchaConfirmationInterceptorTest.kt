@@ -2,7 +2,7 @@ package com.stripe.android.paymentelement.confirmation.interceptor
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.SharedPaymentTokenSessionPreview
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
@@ -72,8 +72,9 @@ class HCaptchaConfirmationInterceptorTest {
             stripeRepository = object : AbsFakeStripeRepository() {
                 override suspend fun retrieveStripeIntent(
                     clientSecret: String,
-                    options: ApiRequest.Options,
-                    expandFields: List<String>
+                    options: RequestCredentials,
+                    expandFields: List<String>,
+                    idempotencyKey: String?,
                 ): Result<StripeIntent> {
                     return Result.success(
                         SetupIntentFactory.create(
@@ -117,8 +118,9 @@ class HCaptchaConfirmationInterceptorTest {
             stripeRepository = object : AbsFakeStripeRepository() {
                 override suspend fun retrieveStripeIntent(
                     clientSecret: String,
-                    options: ApiRequest.Options,
-                    expandFields: List<String>
+                    options: RequestCredentials,
+                    expandFields: List<String>,
+                    idempotencyKey: String?,
                 ): Result<StripeIntent> {
                     return Result.success(
                         PaymentIntentFixtures.PI_SUCCEEDED.copy(

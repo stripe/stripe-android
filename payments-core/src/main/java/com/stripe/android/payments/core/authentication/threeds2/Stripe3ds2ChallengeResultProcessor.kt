@@ -1,12 +1,13 @@
 package com.stripe.android.payments.core.authentication.threeds2
 
 import com.stripe.android.StripeIntentResult
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.LINEAR_DELAY
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.core.networking.RetryDelaySupplier
 import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
@@ -31,7 +32,8 @@ internal class DefaultStripe3ds2ChallengeResultProcessor @Inject constructor(
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
     @Named(LINEAR_DELAY) private val retryDelaySupplier: RetryDelaySupplier,
     private val logger: Logger,
-    @IOContext private val workContext: CoroutineContext
+    @IOContext private val workContext: CoroutineContext,
+    private val apiConfiguration: ApiConfiguration.State,
 ) : Stripe3ds2ChallengeResultProcessor {
 
     override suspend fun process(
@@ -89,12 +91,12 @@ internal class DefaultStripe3ds2ChallengeResultProcessor @Inject constructor(
             )
         )
 
-        val requestOptions = ApiRequest.Options(
+        val requestOptions = RequestCredentials(
             challengeResult.intentData.publishableKey,
             challengeResult.intentData.accountId
         )
 
-        val completionSucceeded = complete3ds2Auth(challengeResult, requestOptions)
+        val completionSucceeded = complete3ds2Auth(challengeResult, requestOptions, idempotencyKey = null)
         val flowOutcome = if (completionSucceeded) {
             when (challengeResult) {
                 is ChallengeResult.Succeeded -> {
@@ -140,13 +142,16 @@ internal class DefaultStripe3ds2ChallengeResultProcessor @Inject constructor(
      */
     private suspend fun complete3ds2Auth(
         challengeResult: ChallengeResult,
-        requestOptions: ApiRequest.Options,
-        remainingRetries: Int = MAX_RETRIES
+        requestOptions: RequestCredentials,
+        remainingRetries: Int = MAX_RETRIES,
+        idempotencyKey: String?,
     ): Boolean {
         // complete3ds2Auth() result can be ignored
         return stripeRepository.complete3ds2Auth(
             challengeResult.intentData.sourceId,
-            requestOptions
+            requestOptions,
+            apiConfiguration = apiConfiguration,
+            idempotencyKey = idempotencyKey,
         ).fold(
             onSuccess = {
                 val attemptedRetries = MAX_RETRIES - remainingRetries
@@ -163,7 +168,8 @@ internal class DefaultStripe3ds2ChallengeResultProcessor @Inject constructor(
                     challengeResult,
                     requestOptions,
                     remainingRetries,
-                    error
+                    error,
+                    idempotencyKey = idempotencyKey,
                 )
             }
         )
@@ -181,9 +187,10 @@ internal class DefaultStripe3ds2ChallengeResultProcessor @Inject constructor(
      */
     private suspend fun onComplete3ds2AuthFailure(
         challengeResult: ChallengeResult,
-        requestOptions: ApiRequest.Options,
+        requestOptions: RequestCredentials,
         remainingRetries: Int,
-        error: Throwable
+        error: Throwable,
+        idempotencyKey: String?,
     ): Boolean {
         logger.error(
             "3DS2 challenge completion request failed. Remaining retries: $remainingRetries",
@@ -208,7 +215,8 @@ internal class DefaultStripe3ds2ChallengeResultProcessor @Inject constructor(
             complete3ds2Auth(
                 challengeResult,
                 requestOptions,
-                remainingRetries = remainingRetries - 1
+                remainingRetries = remainingRetries - 1,
+                idempotencyKey = idempotencyKey,
             )
         } else {
             logger.debug(

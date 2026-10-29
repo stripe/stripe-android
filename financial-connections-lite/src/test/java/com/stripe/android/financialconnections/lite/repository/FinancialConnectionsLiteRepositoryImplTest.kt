@@ -2,6 +2,7 @@ package com.stripe.android.financialconnections.lite.repository
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.financialconnections.FinancialConnectionsPreCollectedConsent
 import com.stripe.android.financialconnections.lite.TextFixtures
 import com.stripe.android.financialconnections.lite.network.FinancialConnectionsLiteRequestExecutor
@@ -10,6 +11,7 @@ import kotlinx.serialization.KSerializer
 import org.junit.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -27,7 +29,7 @@ internal class FinancialConnectionsLiteRepositoryImplTest {
     @Test
     fun `synchronize - includes pre_collected_consent in request when provided`() = runTest {
         val paramsCaptor = argumentCaptor<Map<String, Any?>>()
-        val optionsCaptor = argumentCaptor<ApiRequest.Options>()
+        val optionsCaptor = argumentCaptor<RequestCredentials>()
         givenSynchronizeRequestSucceeds()
 
         repository.synchronize(
@@ -43,7 +45,8 @@ internal class FinancialConnectionsLiteRepositoryImplTest {
         verify(apiRequestFactory).createPost(
             url = any(),
             options = optionsCaptor.capture(),
-            params = paramsCaptor.capture()
+            params = paramsCaptor.capture(),
+            idempotencyKey = isNull(),
         )
         assertThat(optionsCaptor.firstValue.apiKey).isEqualTo(TextFixtures.DEFAULT_API_CONFIG.publishableKey)
         assertThat(optionsCaptor.firstValue.stripeAccount).isEqualTo(TextFixtures.DEFAULT_API_CONFIG.stripeAccountId)
@@ -58,7 +61,7 @@ internal class FinancialConnectionsLiteRepositoryImplTest {
     @Test
     fun `synchronize - omits pre_collected_consent from request when not provided`() = runTest {
         val paramsCaptor = argumentCaptor<Map<String, Any?>>()
-        val optionsCaptor = argumentCaptor<ApiRequest.Options>()
+        val optionsCaptor = argumentCaptor<RequestCredentials>()
         givenSynchronizeRequestSucceeds()
 
         repository.synchronize(
@@ -69,7 +72,8 @@ internal class FinancialConnectionsLiteRepositoryImplTest {
         verify(apiRequestFactory).createPost(
             url = any(),
             options = optionsCaptor.capture(),
-            params = paramsCaptor.capture()
+            params = paramsCaptor.capture(),
+            idempotencyKey = isNull(),
         )
         assertThat(optionsCaptor.firstValue.apiKey).isEqualTo(TextFixtures.DEFAULT_API_CONFIG.publishableKey)
         assertThat(optionsCaptor.firstValue.stripeAccount).isEqualTo(TextFixtures.DEFAULT_API_CONFIG.stripeAccountId)
@@ -82,7 +86,8 @@ internal class FinancialConnectionsLiteRepositoryImplTest {
             apiRequestFactory.createPost(
                 url = any(),
                 options = any(),
-                params = any()
+                params = any(),
+                idempotencyKey = isNull(),
             )
         ).thenReturn(request)
         whenever(requestExecutor.execute(any(), any<KSerializer<*>>())).thenReturn(

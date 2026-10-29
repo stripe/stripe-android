@@ -4,8 +4,8 @@ import android.webkit.MimeTypeMap
 import com.stripe.android.core.AppInfo
 import com.stripe.android.core.model.StripeFileParams
 import com.stripe.android.core.model.StripeFilePurpose
-import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.FileUploadRequest
+import com.stripe.android.core.networking.RequestCredentials
 import java.io.File
 import java.io.OutputStream
 import java.io.PrintWriter
@@ -14,12 +14,14 @@ import java.util.Locale
 
 internal class OnrampFileUploadRequest(
     private val file: File,
-    options: ApiRequest.Options,
+    options: RequestCredentials,
     appInfo: AppInfo?,
 ) : FileUploadRequest(
     fileParams = StripeFileParams(file, StripeFilePurpose.CryptoOnrampKycDocument),
     options = options,
     appInfo = appInfo,
+    apiConfiguration = null,
+    idempotencyKey = null,
 ) {
     override fun writePostBody(outputStream: OutputStream) {
         val contentType = MimeTypeMap.getSingleton()

@@ -17,7 +17,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.CancelCaptchaChallengeParams
 import com.stripe.android.model.PaymentIntent
@@ -94,7 +94,7 @@ internal class IntentConfirmationChallengeActivityTest {
                 ApplicationProvider.getApplicationContext(),
                 IntentConfirmationChallengeActivity::class.java
             )
-        ).use { scenario ->
+).use { scenario ->
             advanceUntilIdle()
 
             // Activity should finish gracefully without crashing
@@ -226,7 +226,7 @@ internal class IntentConfirmationChallengeActivityTest {
                     userAgent = "fake-user-agent",
                     stripeRepository = object : AbsFakeStripeRepository() {},
                     errorReporter = FakeErrorReporter(),
-                    requestOptions = ApiRequest.Options("pk_test_123"),
+                    requestOptions = RequestCredentials("pk_test_123", stripeAccount = null),
                     fireAndForgetScope = TestScope(testDispatcher),
                     logger = Logger.noop(),
                 ) as T
@@ -275,13 +275,14 @@ internal class IntentConfirmationChallengeActivityTest {
                         override suspend fun cancelPaymentIntentCaptchaChallenge(
                             paymentIntentId: String,
                             params: CancelCaptchaChallengeParams,
-                            requestOptions: ApiRequest.Options
+                            requestOptions: RequestCredentials,
+                            idempotencyKey: String?,
                         ): Result<PaymentIntent> {
                             return Result.success(PaymentIntentFixtures.PI_SUCCEEDED)
                         }
                     },
                     errorReporter = FakeErrorReporter(),
-                    requestOptions = ApiRequest.Options("pk_test_123"),
+                    requestOptions = RequestCredentials("pk_test_123", stripeAccount = null),
                     fireAndForgetScope = TestScope(testDispatcher),
                     logger = Logger.noop(),
                 ) as T

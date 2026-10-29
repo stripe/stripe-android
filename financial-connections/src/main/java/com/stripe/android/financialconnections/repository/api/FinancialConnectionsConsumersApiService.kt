@@ -2,6 +2,7 @@ package com.stripe.android.financialconnections.repository.api
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.financialconnections.network.FinancialConnectionsRequestExecutor
 import com.stripe.android.financialconnections.utils.filterNotNullValues
 import com.stripe.android.model.ConsumerSessionLookup
@@ -18,7 +19,7 @@ internal interface FinancialConnectionsConsumersApiService {
     companion object {
         operator fun invoke(
             requestExecutor: FinancialConnectionsRequestExecutor,
-            apiOptions: ApiRequest.Options,
+            apiOptions: RequestCredentials,
             apiRequestFactory: ApiRequest.Factory,
         ): FinancialConnectionsConsumersApiService =
             FinancialConnectionsConsumersApiServiceImpl(
@@ -32,7 +33,7 @@ internal interface FinancialConnectionsConsumersApiService {
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 private class FinancialConnectionsConsumersApiServiceImpl(
     private val requestExecutor: FinancialConnectionsRequestExecutor,
-    private val apiOptions: ApiRequest.Options,
+    private val apiOptions: RequestCredentials,
     private val apiRequestFactory: ApiRequest.Factory
 ) : FinancialConnectionsConsumersApiService {
 
@@ -51,7 +52,8 @@ private class FinancialConnectionsConsumersApiServiceImpl(
                 "email_address" to email.lowercase(),
                 "client_secret" to clientSecret,
                 "request_surface" to requestSurface
-            ).filterNotNullValues()
+            ).filterNotNullValues(),
+            idempotencyKey = null,
         )
         return requestExecutor.execute(
             request,

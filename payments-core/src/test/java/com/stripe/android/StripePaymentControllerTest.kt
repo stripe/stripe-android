@@ -9,7 +9,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.StripePaymentController.Companion.EXPAND_PAYMENT_METHOD
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.model.AlipayAuthResult
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntent
@@ -34,6 +34,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
@@ -186,7 +187,7 @@ internal class StripePaymentControllerTest {
     @Test
     fun `confirmAndAuthenticateAlipay() adds a return URL when one is not provided`() =
         runTest {
-            whenever(alipayRepository.authenticate(any(), any(), any())).thenReturn(
+            whenever(alipayRepository.authenticate(any(), any(), any(), idempotencyKey = anyOrNull())).thenReturn(
                 AlipayAuthResult(
                     StripeIntentResult.Outcome.SUCCEEDED
                 )
@@ -200,7 +201,8 @@ internal class StripePaymentControllerTest {
                     "client_secret"
                 ),
                 mock(),
-                REQUEST_OPTIONS
+                REQUEST_OPTIONS,
+                idempotencyKey = null,
             ).getOrThrow()
 
             assertThat(stripeRepository.confirmPaymentIntentArgs).hasSize(1)
@@ -220,7 +222,7 @@ internal class StripePaymentControllerTest {
     @Test
     fun `confirmAndAuthenticateAlipay() preserves a provided return URL`() =
         runTest {
-            whenever(alipayRepository.authenticate(any(), any(), any())).thenReturn(
+            whenever(alipayRepository.authenticate(any(), any(), any(), idempotencyKey = anyOrNull())).thenReturn(
                 AlipayAuthResult(
                     StripeIntentResult.Outcome.SUCCEEDED
                 )
@@ -234,7 +236,8 @@ internal class StripePaymentControllerTest {
                     "client_secret"
                 ).copy(returnUrl = "example://return_url"),
                 mock(),
-                REQUEST_OPTIONS
+                REQUEST_OPTIONS,
+                idempotencyKey = null,
             ).getOrThrow()
 
             assertThat(stripeRepository.confirmPaymentIntentArgs).hasSize(1)
@@ -262,23 +265,25 @@ internal class StripePaymentControllerTest {
         var confirmPaymentIntentResponse = PaymentIntentFixtures.PI_WITH_SHIPPING
 
         val retrievePaymentIntentArgs =
-            mutableListOf<Triple<String, ApiRequest.Options, List<String>>>()
-        val cancelPaymentIntentArgs = mutableListOf<Triple<String, String, ApiRequest.Options>>()
+            mutableListOf<Triple<String, RequestCredentials, List<String>>>()
+        val cancelPaymentIntentArgs = mutableListOf<Triple<String, String, RequestCredentials>>()
         val confirmPaymentIntentArgs =
-            mutableListOf<Triple<ConfirmPaymentIntentParams, ApiRequest.Options, List<String>>>()
+            mutableListOf<Triple<ConfirmPaymentIntentParams, RequestCredentials, List<String>>>()
 
         override suspend fun retrieveSetupIntent(
             clientSecret: String,
-            options: ApiRequest.Options,
-            expandFields: List<String>
+            options: RequestCredentials,
+            expandFields: List<String>,
+            idempotencyKey: String?,
         ): Result<SetupIntent> {
             return Result.success(SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT)
         }
 
         override suspend fun retrievePaymentIntent(
             clientSecret: String,
-            options: ApiRequest.Options,
-            expandFields: List<String>
+            options: RequestCredentials,
+            expandFields: List<String>,
+            idempotencyKey: String?,
         ): Result<PaymentIntent> {
             retrievePaymentIntentArgs.add(
                 Triple(clientSecret, options, expandFields)
@@ -289,7 +294,8 @@ internal class StripePaymentControllerTest {
         override suspend fun retrieveSource(
             sourceId: String,
             clientSecret: String,
-            options: ApiRequest.Options
+            options: RequestCredentials,
+            idempotencyKey: String?,
         ): Result<Source> {
             return Result.success(SourceFixtures.SOURCE_CARD.copy(status = Source.Status.Chargeable))
         }
@@ -297,7 +303,8 @@ internal class StripePaymentControllerTest {
         override suspend fun cancelPaymentIntentSource(
             paymentIntentId: String,
             sourceId: String,
-            options: ApiRequest.Options
+            options: RequestCredentials,
+            idempotencyKey: String?,
         ): Result<PaymentIntent> {
             cancelPaymentIntentArgs.add(
                 Triple(paymentIntentId, sourceId, options)
@@ -308,13 +315,15 @@ internal class StripePaymentControllerTest {
         override suspend fun cancelSetupIntentSource(
             setupIntentId: String,
             sourceId: String,
-            options: ApiRequest.Options
+            options: RequestCredentials,
+            idempotencyKey: String?,
         ): Result<SetupIntent> = Result.success(SetupIntentFixtures.CANCELLED)
 
         override suspend fun confirmPaymentIntent(
             confirmPaymentIntentParams: ConfirmPaymentIntentParams,
-            options: ApiRequest.Options,
-            expandFields: List<String>
+            options: RequestCredentials,
+            expandFields: List<String>,
+            idempotencyKey: String?,
         ): Result<PaymentIntent> {
             confirmPaymentIntentArgs.add(
                 Triple(confirmPaymentIntentParams, options, expandFields)
@@ -325,7 +334,7 @@ internal class StripePaymentControllerTest {
 
     private companion object {
         private const val ACCOUNT_ID = ApiKeyFixtures.FAKE_STRIPE_ACCOUNT
-        private val REQUEST_OPTIONS = ApiRequest.Options(
+        private val REQUEST_OPTIONS = RequestCredentials(
             apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             stripeAccount = ACCOUNT_ID
         )

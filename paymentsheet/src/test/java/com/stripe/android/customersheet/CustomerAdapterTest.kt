@@ -270,7 +270,7 @@ class CustomerAdapterTest {
         val error = CustomerAdapter.Result.failure<CustomerEphemeralKey>(
             cause = Exception("Cannot get customer"),
             displayMessage = "Merchant says cannot get customer"
-        )
+)
         val adapter = createAdapter(
             customerEphemeralKeyProvider = { error }
         )
@@ -304,11 +304,11 @@ class CustomerAdapterTest {
                         APIException(
                             message = "could not attach payment method",
                             stripeError = StripeError(message = "Unable to attach payment method")
-                        )
-                    )
+)
+)
                 }
-            )
-        )
+)
+)
         val result = adapter.attachPaymentMethod("pm_1234")
         assertThat(result.failureOrNull()?.displayMessage)
             .isEqualTo("Something went wrong")
@@ -320,14 +320,14 @@ class CustomerAdapterTest {
             onDetachPaymentMethod = {
                 Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
             }
-        )
+)
         val adapter = createAdapter(
             customerRepository = customerRepository,
-        )
+)
         val result = adapter.detachPaymentMethod("pm_1234")
         assertThat(result.getOrNull()).isEqualTo(
             PaymentMethodFixtures.CARD_PAYMENT_METHOD
-        )
+)
         assertThat(customerRepository.detachRequests.awaitItem().apiConfiguration)
             .isEqualTo(DEFAULT_API_CONFIG)
     }
@@ -381,15 +381,15 @@ class CustomerAdapterTest {
                         APIException(
                             message = "could not update payment method",
                             stripeError = StripeError(message = "Unable to update payment method")
-                        )
-                    )
+)
+)
                 }
-            )
-        )
+)
+)
         val result = adapter.updatePaymentMethod(
             paymentMethodId = "pm_1234",
             params = PaymentMethodUpdateParams.createCard()
-        )
+)
         assertThat(result.failureOrNull()?.displayMessage)
             .isEqualTo("Something went wrong")
     }
@@ -402,24 +402,24 @@ class CustomerAdapterTest {
                     CustomerEphemeralKey(
                         customerId = "cus_123",
                         ephemeralKey = "ek_123"
-                    )
-                )
+)
+)
             },
             prefsRepositoryFactory = {
                 DefaultPrefsRepository(
                     context = application,
                     customerId = it.customerId,
                     workContext = testScheduler
-                )
+)
             }
-        )
+)
         adapter.setSelectedPaymentOption(
             paymentOption = CustomerAdapter.PaymentOption.StripeId("pm_1234")
-        )
+)
         val result = adapter.retrieveSelectedPaymentOption()
         assertThat(result.getOrNull()).isEqualTo(
             CustomerAdapter.PaymentOption.StripeId("pm_1234")
-        )
+)
     }
 
     @Test
@@ -430,28 +430,28 @@ class CustomerAdapterTest {
                     CustomerEphemeralKey(
                         customerId = "cus_123",
                         ephemeralKey = "ek_123"
-                    )
-                )
+)
+)
             },
             prefsRepositoryFactory = {
                 DefaultPrefsRepository(
                     context = application,
                     customerId = it.customerId,
                     workContext = testScheduler
-                )
+)
             }
-        )
+)
         adapter.setSelectedPaymentOption(
             paymentOption = CustomerAdapter.PaymentOption.StripeId("pm_1234")
-        )
+)
         var result = adapter.retrieveSelectedPaymentOption()
         assertThat(result.getOrNull()).isEqualTo(
             CustomerAdapter.PaymentOption.StripeId("pm_1234")
-        )
+)
 
         adapter.setSelectedPaymentOption(
             paymentOption = null
-        )
+)
         result = adapter.retrieveSelectedPaymentOption()
         assertThat(result.getOrNull()).isEqualTo(null)
     }
@@ -460,23 +460,23 @@ class CustomerAdapterTest {
     fun `setSelectedPaymentMethodOption succeeds when payment selection was saved`() = runTest {
         val prefsRepository = FakePrefsRepository(
             setSavedSelectionResult = true
-        )
+)
         val adapter = createAdapter(
             customerEphemeralKeyProvider = {
                 CustomerAdapter.Result.success(
                     CustomerEphemeralKey(
                         customerId = "cus_123",
                         ephemeralKey = "ek_123"
-                    )
-                )
+)
+)
             },
             prefsRepositoryFactory = {
                 prefsRepository
             },
-        )
+)
         val result = adapter.setSelectedPaymentOption(
             paymentOption = CustomerAdapter.PaymentOption.StripeId("pm_1234")
-        )
+)
         assertThat(result.getOrNull())
             .isEqualTo(Unit)
 
@@ -493,18 +493,18 @@ class CustomerAdapterTest {
                     CustomerEphemeralKey(
                         customerId = "cus_123",
                         ephemeralKey = "ek_123"
-                    )
-                )
+)
+)
             },
             prefsRepositoryFactory = {
                 FakePrefsRepository(
                     setSavedSelectionResult = false
-                )
+)
             },
-        )
+)
         val result = adapter.setSelectedPaymentOption(
             paymentOption = CustomerAdapter.PaymentOption.StripeId("pm_1234")
-        )
+)
         assertThat(result.failureOrNull()?.cause?.message)
             .isEqualTo("Unable to persist payment option StripeId(id=pm_1234)")
         assertThat(result.failureOrNull()?.displayMessage)
@@ -519,20 +519,20 @@ class CustomerAdapterTest {
                     CustomerEphemeralKey(
                         customerId = "cus_123",
                         ephemeralKey = "ek_123"
-                    )
-                )
+)
+)
             },
             prefsRepositoryFactory = {
                 DefaultPrefsRepository(
                     context = application,
                     customerId = it.customerId,
                     workContext = testScheduler
-                )
+)
             }
-        )
+)
         adapter.setSelectedPaymentOption(
             paymentOption = null
-        )
+)
         val result = adapter.retrieveSelectedPaymentOption()
         assertThat(result.getOrNull()).isNull()
     }
@@ -559,7 +559,7 @@ class CustomerAdapterTest {
             setupIntentClientSecretProvider = {
                 CustomerAdapter.Result.success("seti_123")
             },
-        )
+)
         val result = adapter.setupIntentClientSecretForCustomerAttach()
         assertThat(result.getOrNull()).isEqualTo("seti_123")
     }
@@ -571,9 +571,9 @@ class CustomerAdapterTest {
                 CustomerAdapter.Result.failure(
                     cause = Exception("some exception"),
                     displayMessage = "Couldn't get client secret"
-                )
+)
             },
-        )
+)
         val result = adapter.setupIntentClientSecretForCustomerAttach()
         assertThat(result.failureOrNull()?.displayMessage)
             .isEqualTo("Couldn't get client secret")
@@ -583,7 +583,7 @@ class CustomerAdapterTest {
     fun `setupIntentClientSecretForCustomerAttach fails when null and called`() = runTest {
         val adapter = createAdapter(
             setupIntentClientSecretProvider = null,
-        )
+)
 
         val error = assertFailsWith<IllegalArgumentException> {
             adapter.setupIntentClientSecretForCustomerAttach()
@@ -591,20 +591,20 @@ class CustomerAdapterTest {
 
         assertThat(error.message).isEqualTo(
             "setupIntentClientSecretProvider cannot be null"
-        )
+)
     }
 
     @Test
     fun `canCreateSetupIntents should return true if setupIntentClientSecretForCustomerAttach is not null`() {
         var adapter = createAdapter(
             setupIntentClientSecretProvider = null,
-        )
+)
 
         assertThat(adapter.canCreateSetupIntents).isFalse()
 
         adapter = createAdapter(
             setupIntentClientSecretProvider = { CustomerAdapter.Result.success("client_secret") },
-        )
+)
 
         assertThat(adapter.canCreateSetupIntents).isTrue()
     }
@@ -620,24 +620,24 @@ class CustomerAdapterTest {
         }
         val savedPaymentOption = CustomerAdapter.PaymentOption.StripeId(
             PaymentMethodFixtures.CARD_PAYMENT_METHOD.id
-        )
+)
         val savedSelection = savedPaymentOption.toPaymentSelection(
             paymentMethodProvider = paymentMethodProvider,
-        )
+)
         assertThat(savedSelection)
             .isInstanceOf<PaymentSelection.Saved>()
 
         val googlePaymentOption = CustomerAdapter.PaymentOption.GooglePay
         val googleSelection = googlePaymentOption.toPaymentSelection(
             paymentMethodProvider = paymentMethodProvider,
-        )
+)
         assertThat(googleSelection)
             .isInstanceOf<PaymentSelection.GooglePay>()
 
         val nullSavedPaymentOption = CustomerAdapter.PaymentOption.StripeId("id_123")
         val nullSavedSelection = nullSavedPaymentOption.toPaymentSelection(
             paymentMethodProvider = paymentMethodProvider,
-        )
+)
         assertThat(nullSavedSelection)
             .isNull()
     }
@@ -660,9 +660,9 @@ class CustomerAdapterTest {
                 CustomerAdapter.Result.failure(
                     cause = cause,
                     displayMessage = displayMessage
-                )
+)
             }
-        )
+)
         assertThat(newResult.getOrNull())
             .isEqualTo("Success")
     }
@@ -672,7 +672,7 @@ class CustomerAdapterTest {
         val result: CustomerAdapter.Result<String> = CustomerAdapter.Result.failure(
             cause = IllegalStateException("Illegal state"),
             displayMessage = "This is display message",
-        )
+)
         assertThat(result.failureOrNull()?.displayMessage)
             .isEqualTo("This is display message")
         assertThat(result.getOrNull())
@@ -690,9 +690,9 @@ class CustomerAdapterTest {
                 CustomerAdapter.Result.failure(
                     cause = IllegalStateException("Illegal state"),
                     displayMessage = "This is a new display message",
-                )
+)
             }
-        )
+)
         assertThat(newResult.failureOrNull()?.displayMessage)
             .isEqualTo("This is a new display message")
     }
@@ -702,9 +702,9 @@ class CustomerAdapterTest {
         val result: CustomerAdapter.Result<String> = CustomerAdapter.Result.failure(
             cause = APIException(
                 stripeError = StripeError(message = "Some API error")
-            ),
+),
             displayMessage = "There was a problem with Stripe",
-        )
+)
         assertThat(result.failureOrNull()?.displayMessage)
             .isEqualTo("There was a problem with Stripe")
 
@@ -724,18 +724,18 @@ class CustomerAdapterTest {
             cause = APIException(
                 message = "Unlocalized message",
                 stripeError = null,
-            ),
+),
             displayMessage = "There was a problem with Stripe",
-        )
+)
         assertThat(stripeResult.failureOrNull()?.displayMessage)
             .isEqualTo("There was a problem with Stripe")
 
         stripeResult = CustomerAdapter.Result.failure(
             cause = APIException(
                 message = "Unlocalized message"
-            ),
+),
             displayMessage = null,
-        )
+)
         assertThat(stripeResult.failureOrNull()?.displayMessage)
             .isEqualTo(null)
     }
@@ -748,11 +748,11 @@ class CustomerAdapterTest {
                     context = application,
                     customerId = it.customerId,
                     workContext = testScheduler
-                ).apply {
+).apply {
                     setSavedSelection(SavedSelection.GooglePay)
                 }
             }
-        )
+)
 
         val result = adapter.retrieveSelectedPaymentOption()
 
@@ -767,8 +767,8 @@ class CustomerAdapterTest {
                     CustomerEphemeralKey(
                         customerId = "cus_123",
                         ephemeralKey = "ek_123"
-                    )
-                )
+)
+)
             },
         setupIntentClientSecretProvider: SetupIntentClientSecretProvider? =
             SetupIntentClientSecretProvider {
@@ -780,7 +780,7 @@ class CustomerAdapterTest {
             FakePrefsRepository()
         },
         paymentMethodTypes: List<String>? = null,
-    ): StripeCustomerAdapter {
+): StripeCustomerAdapter {
         return StripeCustomerAdapter(
             context = application,
             customerEphemeralKeyProvider = customerEphemeralKeyProvider,
@@ -789,7 +789,9 @@ class CustomerAdapterTest {
             timeProvider = timeProvider,
             customerRepository = customerRepository,
             prefsRepositoryFactory = prefsRepositoryFactory,
-            apiConfigurationProvider = { DEFAULT_API_CONFIG },
+            apiConfigurationProvider = {
+                DEFAULT_API_CONFIG
+            },
             workContext = testDispatcher
         )
     }

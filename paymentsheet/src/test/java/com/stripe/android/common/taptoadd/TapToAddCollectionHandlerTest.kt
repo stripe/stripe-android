@@ -6,7 +6,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.common.taptoadd.ui.createTapToAddUxConfiguration
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
@@ -308,7 +308,7 @@ class TapToAddCollectionHandlerTest {
                 )
             )
             assertThat(updateCall.options).isEqualTo(
-                ApiRequest.Options(
+                RequestCredentials(
                     apiKey = "ek_123",
                     stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
                 )
@@ -1039,10 +1039,7 @@ class TapToAddCollectionHandlerTest {
         retrieveSetupIntentCalls: Turbine<TerminalScenario.RetrieveSetupIntentCall>
     ) {
         on {
-            retrieveSetupIntent(
-                clientSecret = any<String>(),
-                callback = any<SetupIntentCallback>(),
-            )
+            retrieveSetupIntent(clientSecret = any<String>(), callback = any<SetupIntentCallback>())
         } doAnswer { invocation ->
             val setupIntentClientSecret = invocation.arguments[0] as? String
                 ?: fail("Invalid argument: Not a setup intent!")
@@ -1256,19 +1253,21 @@ private class FakeTapToAddStripeRepository(
     data class UpdatePaymentMethodCall(
         val paymentMethodId: String,
         val paymentMethodUpdateParams: PaymentMethodUpdateParams,
-        val options: ApiRequest.Options,
+        val options: RequestCredentials,
     )
 
     override suspend fun retrieveSavedPaymentMethodFromCardPresentPaymentMethod(
         cardPresentPaymentMethodId: String,
         customerId: String,
-        options: ApiRequest.Options
+        options: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<PaymentMethod> = retrieveSavedPaymentMethodFromCardPresentPaymentMethodResult
 
     override suspend fun updatePaymentMethod(
         paymentMethodId: String,
         paymentMethodUpdateParams: PaymentMethodUpdateParams,
-        options: ApiRequest.Options
+        options: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<PaymentMethod> {
         updatePaymentMethodCalls.add(
             UpdatePaymentMethodCall(

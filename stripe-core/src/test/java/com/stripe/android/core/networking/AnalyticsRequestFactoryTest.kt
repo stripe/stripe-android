@@ -42,7 +42,7 @@ class AnalyticsRequestFactoryTest : TestCase() {
         val params = factory.createRequest(mockEvent, emptyMap()).params
 
         assertThat(params["publishable_key"])
-            .isEqualTo(ApiRequest.Options.UNDEFINED_PUBLISHABLE_KEY)
+            .isEqualTo(RequestCredentials.UNDEFINED_PUBLISHABLE_KEY)
     }
 
     @Test

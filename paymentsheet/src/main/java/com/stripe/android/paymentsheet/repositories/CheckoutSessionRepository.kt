@@ -2,11 +2,13 @@ package com.stripe.android.paymentsheet.repositories
 
 import com.stripe.android.Stripe
 import com.stripe.android.checkout.CheckoutController.Address
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.exception.safeAnalyticsMessage
 import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.executeRequestWithResultParser
 import com.stripe.android.core.version.StripeSdkVersion
@@ -26,7 +28,8 @@ internal class CheckoutSessionRepository @Inject constructor(
     private val fraudDetectionDataRepository: FraudDetectionDataRepository,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
-    private val apiRequestOptionsProvider: Provider<ApiRequest.Options>,
+    private val apiConfigurationProvider: Provider<ApiConfiguration.State>,
+    private val apiRequestOptionsProvider: Provider<RequestCredentials>,
 ) {
 
     private val apiRequestFactory = ApiRequest.Factory(
@@ -48,6 +51,8 @@ internal class CheckoutSessionRepository @Inject constructor(
                 url = url,
                 options = options,
                 params = params,
+                idempotencyKey = null,
+                apiConfiguration = apiConfigurationProvider.get(),
             ),
             responseJsonParser = CheckoutSessionResponseJsonParser,
         )

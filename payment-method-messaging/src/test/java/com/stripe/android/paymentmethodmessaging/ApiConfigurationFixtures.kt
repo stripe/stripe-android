@@ -1,7 +1,7 @@
 package com.stripe.android.paymentmethodmessaging
 
 import com.stripe.android.core.ApiConfiguration
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.RequestCredentials
 
 internal object ApiConfigurationFixtures {
     val DEFAULT_API_CONFIG = ApiConfiguration.State(
@@ -9,7 +9,7 @@ internal object ApiConfigurationFixtures {
         stripeAccountId = "acct_123",
     )
 
-    val DEFAULT_REQUEST_OPTIONS = ApiRequest.Options(
+    val DEFAULT_REQUEST_OPTIONS = RequestCredentials(
         apiKey = DEFAULT_API_CONFIG.publishableKey,
         stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
     )

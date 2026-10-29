@@ -21,7 +21,7 @@ import com.stripe.android.GooglePayConfig
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.ApiConfiguration
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.model.Address
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.GooglePayFixtures
@@ -137,7 +137,7 @@ class GooglePayPaymentMethodLauncherViewModelTest {
             )
         )
         assertThat(stripeRepository.getRequestOptions()).isEqualTo(
-            ApiRequest.Options(
+            RequestCredentials(
                 apiKey = ARGS.apiConfiguration.publishableKey,
                 stripeAccount = ARGS.apiConfiguration.stripeAccountId
             )
@@ -382,11 +382,12 @@ class GooglePayPaymentMethodLauncherViewModelTest {
 
     private class FakeStripeRepository : AbsFakeStripeRepository() {
         private var createParams: PaymentMethodCreateParams? = null
-        private var requestOptions: ApiRequest.Options? = null
+        private var requestOptions: RequestCredentials? = null
 
         override suspend fun createPaymentMethod(
             paymentMethodCreateParams: PaymentMethodCreateParams,
-            options: ApiRequest.Options,
+            options: RequestCredentials,
+            idempotencyKey: String?,
         ): Result<PaymentMethod> {
             createParams = paymentMethodCreateParams
             requestOptions = options
@@ -394,7 +395,7 @@ class GooglePayPaymentMethodLauncherViewModelTest {
         }
 
         fun getCreateParams(): PaymentMethodCreateParams? = createParams
-        fun getRequestOptions(): ApiRequest.Options? = requestOptions
+        fun getRequestOptions(): RequestCredentials? = requestOptions
     }
 
     internal class TestFragment : Fragment() {
@@ -440,7 +441,7 @@ class GooglePayPaymentMethodLauncherViewModelTest {
             ),
             apiConfiguration = ApiConfiguration.State(
                 ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-                ApiKeyFixtures.FAKE_STRIPE_ACCOUNT
+                ApiKeyFixtures.FAKE_STRIPE_ACCOUNT,
             ),
             shippingAddressParameters = null,
         )

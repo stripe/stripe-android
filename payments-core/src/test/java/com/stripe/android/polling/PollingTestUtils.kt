@@ -1,6 +1,7 @@
 package com.stripe.android.polling
 
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.PaymentIntentFactory
@@ -16,7 +17,7 @@ internal fun createIntentStatusPoller(
 ): DefaultIntentStatusPoller {
     return DefaultIntentStatusPoller(
         stripeRepository = FakeStripeRepository(enqueuedStatuses, isSetupIntent),
-        requestOptions = ApiRequest.Options(
+        requestOptions = RequestCredentials(
             apiKey = "key",
             stripeAccount = "acct_123",
         ),
@@ -25,6 +26,7 @@ internal fun createIntentStatusPoller(
             pollingInterval = pollingInterval,
         ),
         dispatcher = dispatcher,
+        apiConfiguration = ApiConfiguration("pk_test_123").build(),
     )
 }
 
@@ -37,8 +39,9 @@ private class FakeStripeRepository(
 
     override suspend fun retrieveStripeIntent(
         clientSecret: String,
-        options: ApiRequest.Options,
-        expandFields: List<String>
+        options: RequestCredentials,
+        expandFields: List<String>,
+        idempotencyKey: String?,
     ): Result<StripeIntent> {
         val intentStatus = queue.removeAt(0)
         val stripeIntent = if (isSetupIntent) {

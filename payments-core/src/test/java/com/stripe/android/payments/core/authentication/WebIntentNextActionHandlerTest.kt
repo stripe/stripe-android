@@ -237,7 +237,7 @@ class WebIntentNextActionHandlerTest {
 
         private val API_CONFIGURATION = ApiConfiguration.State(
             publishableKey = ApiKeyFixtures.CONNECTED_ACCOUNT_PUBLISHABLE_KEY,
-            stripeAccountId = ACCOUNT_ID
+            stripeAccountId = ACCOUNT_ID,
         )
     }
 

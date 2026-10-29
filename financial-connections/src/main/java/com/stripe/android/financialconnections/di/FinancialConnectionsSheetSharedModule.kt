@@ -20,6 +20,7 @@ import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.core.networking.DefaultAnalyticsRequestV2Executor
 import com.stripe.android.core.networking.NetworkTypeDetector
 import com.stripe.android.core.networking.RealAnalyticsRequestV2Storage
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.core.utils.ContextUtils.packageInfo
 import com.stripe.android.core.utils.IsWorkManagerAvailable
 import com.stripe.android.core.utils.RealIsWorkManagerAvailable
@@ -125,9 +126,9 @@ internal interface FinancialConnectionsSheetSharedModule {
         @ActivityRetainedScope
         internal fun providesApiOptions(
             apiConfigurationProvider: Provider<ApiConfiguration.State>
-        ): ApiRequest.Options {
+        ): RequestCredentials {
             val apiConfiguration = apiConfigurationProvider.get()
-            return ApiRequest.Options(
+            return RequestCredentials(
                 apiKey = apiConfiguration.publishableKey,
                 stripeAccount = apiConfiguration.stripeAccountId
             )
@@ -171,9 +172,10 @@ internal interface FinancialConnectionsSheetSharedModule {
         @Provides
         @ActivityRetainedScope
         fun providesApiRequestFactory(
-            apiVersion: ApiVersion
+            apiVersion: ApiVersion,
+            apiConfiguration: ApiConfiguration.State,
         ): ApiRequest.Factory = ApiRequest.Factory(
-            apiVersion = apiVersion.code
+            apiVersion = ApiVersion.withBetas(apiVersion.code, apiConfiguration.betas),
         )
 
         @Provides

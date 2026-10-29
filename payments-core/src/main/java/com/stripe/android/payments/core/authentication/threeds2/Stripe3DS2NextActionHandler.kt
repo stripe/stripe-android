@@ -7,7 +7,7 @@ import androidx.annotation.VisibleForTesting
 import com.stripe.android.PaymentAuthConfig
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.injection.ENABLE_LOGGING
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.core.authentication.PaymentNextActionHandler
@@ -68,10 +68,9 @@ internal class Stripe3DS2NextActionHandler @Inject constructor(
                 config.stripe3ds2Config,
                 actionable,
                 actionable.nextActionData as StripeIntent.NextActionData.SdkData.Use3DS2,
-                ApiRequest.Options(
+                RequestCredentials(
                     apiKey = apiConfiguration.publishableKey,
                     stripeAccount = apiConfiguration.stripeAccountId,
-                    idempotencyKey = null,
                 ),
                 enableLogging = enableLogging,
                 host.statusBarColor,

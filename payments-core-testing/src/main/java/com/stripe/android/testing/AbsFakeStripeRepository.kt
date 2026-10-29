@@ -4,7 +4,7 @@ import com.stripe.android.cards.Bin
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.model.StripeFile
 import com.stripe.android.core.model.StripeFileParams
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.model.BankStatuses
 import com.stripe.android.model.CancelCaptchaChallengeParams
@@ -45,31 +45,35 @@ abstract class AbsFakeStripeRepository : StripeRepository {
 
     override suspend fun retrieveStripeIntent(
         clientSecret: String,
-        options: ApiRequest.Options,
-        expandFields: List<String>
+        options: RequestCredentials,
+        expandFields: List<String>,
+        idempotencyKey: String?,
     ): Result<StripeIntent> {
         TODO("Not yet implemented")
     }
 
     override suspend fun confirmPaymentIntent(
         confirmPaymentIntentParams: ConfirmPaymentIntentParams,
-        options: ApiRequest.Options,
-        expandFields: List<String>
+        options: RequestCredentials,
+        expandFields: List<String>,
+        idempotencyKey: String?,
     ): Result<PaymentIntent> {
         TODO("Not yet implemented")
     }
 
     override suspend fun retrievePaymentIntent(
         clientSecret: String,
-        options: ApiRequest.Options,
-        expandFields: List<String>
+        options: RequestCredentials,
+        expandFields: List<String>,
+        idempotencyKey: String?,
     ): Result<PaymentIntent> {
         TODO("Not yet implemented")
     }
 
     override suspend fun refreshPaymentIntent(
         clientSecret: String,
-        options: ApiRequest.Options
+        options: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<PaymentIntent> {
         TODO("Not yet implemented")
     }
@@ -77,30 +81,34 @@ abstract class AbsFakeStripeRepository : StripeRepository {
     override suspend fun cancelPaymentIntentSource(
         paymentIntentId: String,
         sourceId: String,
-        options: ApiRequest.Options
+        options: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<PaymentIntent> {
         TODO("Not yet implemented")
     }
 
     override suspend fun confirmSetupIntent(
         confirmSetupIntentParams: ConfirmSetupIntentParams,
-        options: ApiRequest.Options,
-        expandFields: List<String>
+        options: RequestCredentials,
+        expandFields: List<String>,
+        idempotencyKey: String?,
     ): Result<SetupIntent> {
         TODO("Not yet implemented")
     }
 
     override suspend fun retrieveSetupIntent(
         clientSecret: String,
-        options: ApiRequest.Options,
-        expandFields: List<String>
+        options: RequestCredentials,
+        expandFields: List<String>,
+        idempotencyKey: String?,
     ): Result<SetupIntent> {
         TODO("Not yet implemented")
     }
 
     override suspend fun refreshSetupIntent(
         clientSecret: String,
-        options: ApiRequest.Options,
+        options: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<SetupIntent> {
         TODO("Not yet implemented")
     }
@@ -108,14 +116,16 @@ abstract class AbsFakeStripeRepository : StripeRepository {
     override suspend fun cancelSetupIntentSource(
         setupIntentId: String,
         sourceId: String,
-        options: ApiRequest.Options
+        options: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<SetupIntent> {
         TODO("Not yet implemented")
     }
 
     override suspend fun createSource(
         sourceParams: SourceParams,
-        options: ApiRequest.Options
+        options: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<Source> {
         TODO("Not yet implemented")
     }
@@ -123,14 +133,16 @@ abstract class AbsFakeStripeRepository : StripeRepository {
     override suspend fun retrieveSource(
         sourceId: String,
         clientSecret: String,
-        options: ApiRequest.Options
+        options: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<Source> {
         TODO("Not yet implemented")
     }
 
     override suspend fun createPaymentMethod(
         paymentMethodCreateParams: PaymentMethodCreateParams,
-        options: ApiRequest.Options
+        options: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<PaymentMethod> {
         TODO("Not yet implemented")
     }
@@ -138,21 +150,24 @@ abstract class AbsFakeStripeRepository : StripeRepository {
     override suspend fun updatePaymentMethod(
         paymentMethodId: String,
         paymentMethodUpdateParams: PaymentMethodUpdateParams,
-        options: ApiRequest.Options
+        options: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<PaymentMethod> {
         TODO("Not yet implemented")
     }
 
     override suspend fun createToken(
         tokenParams: TokenParams,
-        options: ApiRequest.Options
+        options: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<Token> {
         TODO("Not yet implemented")
     }
 
     override suspend fun createConfirmationToken(
         confirmationTokenParams: ConfirmationTokenParams,
-        options: ApiRequest.Options
+        options: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<ConfirmationToken> {
         TODO("Not yet implemented")
     }
@@ -163,7 +178,8 @@ abstract class AbsFakeStripeRepository : StripeRepository {
         productUsageTokens: Set<String>,
         sourceId: String,
         sourceType: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<Source> {
         TODO("Not yet implemented")
     }
@@ -173,7 +189,8 @@ abstract class AbsFakeStripeRepository : StripeRepository {
         publishableKey: String,
         productUsageTokens: Set<String>,
         sourceId: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<Source> {
         TODO("Not yet implemented")
     }
@@ -182,7 +199,8 @@ abstract class AbsFakeStripeRepository : StripeRepository {
         customerId: String,
         productUsageTokens: Set<String>,
         paymentMethodId: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<PaymentMethod> {
         TODO("Not yet implemented")
     }
@@ -190,7 +208,8 @@ abstract class AbsFakeStripeRepository : StripeRepository {
     override suspend fun detachPaymentMethod(
         productUsageTokens: Set<String>,
         paymentMethodId: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<PaymentMethod> {
         TODO("Not yet implemented")
     }
@@ -199,7 +218,8 @@ abstract class AbsFakeStripeRepository : StripeRepository {
         customerSessionClientSecret: String,
         productUsageTokens: Set<String>,
         paymentMethodId: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<PaymentMethod> {
         TODO("Not yet implemented")
     }
@@ -207,8 +227,9 @@ abstract class AbsFakeStripeRepository : StripeRepository {
     override suspend fun getPaymentMethods(
         listPaymentMethodsParams: ListPaymentMethodsParams,
         productUsageTokens: Set<String>,
-        requestOptions: ApiRequest.Options,
+        requestOptions: RequestCredentials,
         apiConfiguration: ApiConfiguration.State,
+        idempotencyKey: String?,
     ): Result<List<PaymentMethod>> {
         TODO("Not yet implemented")
     }
@@ -217,7 +238,8 @@ abstract class AbsFakeStripeRepository : StripeRepository {
         customerId: String,
         paymentMethodId: String,
         productUsageTokens: Set<String>,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<PaymentMethod> {
         TODO("Not yet implemented")
     }
@@ -225,7 +247,8 @@ abstract class AbsFakeStripeRepository : StripeRepository {
     override suspend fun retrieveSavedPaymentMethodFromCardPresentPaymentMethod(
         cardPresentPaymentMethodId: String,
         customerId: String,
-        options: ApiRequest.Options
+        options: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<PaymentMethod> {
         TODO("Not yet implemented")
     }
@@ -236,7 +259,8 @@ abstract class AbsFakeStripeRepository : StripeRepository {
         productUsageTokens: Set<String>,
         sourceId: String,
         sourceType: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<Customer> {
         TODO("Not yet implemented")
     }
@@ -246,7 +270,8 @@ abstract class AbsFakeStripeRepository : StripeRepository {
         publishableKey: String,
         productUsageTokens: Set<String>,
         shippingInformation: ShippingInformation,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<Customer> {
         TODO("Not yet implemented")
     }
@@ -254,7 +279,8 @@ abstract class AbsFakeStripeRepository : StripeRepository {
     override suspend fun retrieveCustomer(
         customerId: String,
         productUsageTokens: Set<String>,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<Customer> {
         TODO("Not yet implemented")
     }
@@ -263,7 +289,8 @@ abstract class AbsFakeStripeRepository : StripeRepository {
         cardId: String,
         verificationId: String,
         userOneTimeCode: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<String> {
         TODO("Not yet implemented")
     }
@@ -273,51 +300,62 @@ abstract class AbsFakeStripeRepository : StripeRepository {
         newPin: String,
         verificationId: String,
         userOneTimeCode: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Throwable? {
         TODO("Not yet implemented")
     }
 
     override suspend fun getFpxBankStatus(
-        options: ApiRequest.Options
+        options: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<BankStatuses> {
         TODO("Not yet implemented")
     }
 
-    override suspend fun getCardMetadata(bin: Bin, options: ApiRequest.Options): Result<CardMetadata> {
+    override suspend fun getCardMetadata(
+        bin: Bin,
+        options: RequestCredentials,
+        idempotencyKey: String?,
+    ): Result<CardMetadata> {
         TODO("Not yet implemented")
     }
 
     override suspend fun start3ds2Auth(
         authParams: Stripe3ds2AuthParams,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<Stripe3ds2AuthResult> {
         TODO("Not yet implemented")
     }
 
     override suspend fun complete3ds2Auth(
         sourceId: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<Stripe3ds2AuthResult> {
         TODO("Not yet implemented")
     }
 
     override suspend fun createFile(
         fileParams: StripeFileParams,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<StripeFile> {
         TODO("Not yet implemented")
     }
 
     override suspend fun retrieveObject(
         url: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<StripeResponse<String>> {
         TODO("Not yet implemented")
     }
 
     override suspend fun createRadarSession(
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<RadarSessionWithHCaptcha> {
         TODO("Not yet implemented")
     }
@@ -326,7 +364,8 @@ abstract class AbsFakeStripeRepository : StripeRepository {
         radarSessionToken: String,
         hcaptchaToken: String,
         hcaptchaEKey: String?,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<RadarSessionWithHCaptcha> {
         TODO("Not yet implemented")
     }
@@ -335,7 +374,8 @@ abstract class AbsFakeStripeRepository : StripeRepository {
         consumerSessionClientSecret: String,
         id: String,
         extraParams: Map<String, *>?,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<PaymentMethod> {
         TODO("Not yet implemented")
     }
@@ -343,7 +383,8 @@ abstract class AbsFakeStripeRepository : StripeRepository {
     override suspend fun setDefaultPaymentMethod(
         customerId: String,
         paymentMethodId: String?,
-        options: ApiRequest.Options
+        options: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<Customer> {
         TODO("Not yet implemented")
     }
@@ -351,7 +392,8 @@ abstract class AbsFakeStripeRepository : StripeRepository {
     override suspend fun logOut(
         consumerSessionClientSecret: String,
         consumerAccountPublishableKey: String?,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<ConsumerSession> {
         TODO("Not yet implemented")
     }
@@ -360,8 +402,9 @@ abstract class AbsFakeStripeRepository : StripeRepository {
         clientSecret: String,
         paymentIntentId: String,
         financialConnectionsSessionId: String,
-        requestOptions: ApiRequest.Options,
-        expandFields: List<String>
+        requestOptions: RequestCredentials,
+        expandFields: List<String>,
+        idempotencyKey: String?,
     ): Result<PaymentIntent> {
         TODO("Not yet implemented")
     }
@@ -370,15 +413,17 @@ abstract class AbsFakeStripeRepository : StripeRepository {
         clientSecret: String,
         setupIntentId: String,
         financialConnectionsSessionId: String,
-        requestOptions: ApiRequest.Options,
-        expandFields: List<String>
+        requestOptions: RequestCredentials,
+        expandFields: List<String>,
+        idempotencyKey: String?,
     ): Result<SetupIntent> {
         TODO("Not yet implemented")
     }
 
     override suspend fun createFinancialConnectionsSessionForDeferredPayments(
         params: CreateFinancialConnectionsSessionForDeferredPaymentParams,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<FinancialConnectionsSession> {
         TODO("Not yet implemented")
     }
@@ -386,7 +431,8 @@ abstract class AbsFakeStripeRepository : StripeRepository {
     override suspend fun createPaymentIntentFinancialConnectionsSession(
         paymentIntentId: String,
         params: CreateFinancialConnectionsSessionParams,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<FinancialConnectionsSession> {
         TODO("Not yet implemented")
     }
@@ -394,7 +440,8 @@ abstract class AbsFakeStripeRepository : StripeRepository {
     override suspend fun createSetupIntentFinancialConnectionsSession(
         setupIntentId: String,
         params: CreateFinancialConnectionsSessionParams,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<FinancialConnectionsSession> {
         TODO("Not yet implemented")
     }
@@ -403,7 +450,8 @@ abstract class AbsFakeStripeRepository : StripeRepository {
         clientSecret: String,
         firstAmount: Int,
         secondAmount: Int,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<PaymentIntent> {
         TODO("Not yet implemented")
     }
@@ -411,7 +459,8 @@ abstract class AbsFakeStripeRepository : StripeRepository {
     override suspend fun verifyPaymentIntentWithMicrodeposits(
         clientSecret: String,
         descriptorCode: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<PaymentIntent> {
         TODO("Not yet implemented")
     }
@@ -420,7 +469,8 @@ abstract class AbsFakeStripeRepository : StripeRepository {
         clientSecret: String,
         firstAmount: Int,
         secondAmount: Int,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<SetupIntent> {
         TODO("Not yet implemented")
     }
@@ -428,7 +478,8 @@ abstract class AbsFakeStripeRepository : StripeRepository {
     override suspend fun verifySetupIntentWithMicrodeposits(
         clientSecret: String,
         descriptorCode: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<SetupIntent> {
         TODO("Not yet implemented")
     }
@@ -439,7 +490,8 @@ abstract class AbsFakeStripeRepository : StripeRepository {
         currency: String,
         country: String?,
         locale: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<PaymentMethodMessage> {
         TODO("Not yet implemented")
     }
@@ -449,21 +501,24 @@ abstract class AbsFakeStripeRepository : StripeRepository {
         currency: String,
         country: String?,
         locale: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<PaymentMethodMessagePromotionList> {
         TODO("Not yet implemented")
     }
 
     override suspend fun retrieveCardMetadata(
         cardNumber: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<CardMetadata> {
         TODO("Not yet implemented")
     }
 
     override suspend fun retrieveCardElementConfig(
-        requestOptions: ApiRequest.Options,
-        params: Map<String, String>?
+        requestOptions: RequestCredentials,
+        params: Map<String, String>?,
+        idempotencyKey: String?,
     ): Result<MobileCardElementConfig> {
         TODO("Not yet implemented")
     }
@@ -475,14 +530,16 @@ abstract class AbsFakeStripeRepository : StripeRepository {
     override suspend fun listPaymentDetails(
         clientSecret: String,
         paymentMethodTypes: Set<String>,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<ConsumerPaymentDetails> {
         TODO("Not yet implemented")
     }
 
     override suspend fun listShippingAddresses(
         clientSecret: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<ConsumerShippingAddresses> {
         TODO("Not yet implemented")
     }
@@ -490,7 +547,8 @@ abstract class AbsFakeStripeRepository : StripeRepository {
     override suspend fun deletePaymentDetails(
         clientSecret: String,
         paymentDetailsId: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<Unit> {
         TODO("Not yet implemented")
     }
@@ -498,7 +556,8 @@ abstract class AbsFakeStripeRepository : StripeRepository {
     override suspend fun updatePaymentDetails(
         clientSecret: String,
         paymentDetailsUpdateParams: ConsumerPaymentDetailsUpdateParams,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<ConsumerPaymentDetails> {
         TODO("Not yet implemented")
     }
@@ -506,7 +565,8 @@ abstract class AbsFakeStripeRepository : StripeRepository {
     override suspend fun cancelPaymentIntentCaptchaChallenge(
         paymentIntentId: String,
         params: CancelCaptchaChallengeParams,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<PaymentIntent> {
         TODO("Not yet implemented")
     }
@@ -514,7 +574,8 @@ abstract class AbsFakeStripeRepository : StripeRepository {
     override suspend fun cancelSetupIntentCaptchaChallenge(
         setupIntentId: String,
         params: CancelCaptchaChallengeParams,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<SetupIntent> {
         TODO("Not yet implemented")
     }

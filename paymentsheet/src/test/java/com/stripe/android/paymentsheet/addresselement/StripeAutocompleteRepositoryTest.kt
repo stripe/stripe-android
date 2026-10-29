@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.addresselement
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeRequest
 import com.stripe.android.core.networking.StripeResponse
@@ -116,6 +117,7 @@ class StripeAutocompleteRepositoryTest {
             stripeNetworkClient = networkClient,
             apiRequestFactory = ApiRequest.Factory(),
             requestOptionsProvider = { OPTIONS },
+            apiConfigurationProvider = { DEFAULT_API_CONFIG },
         )
         return Scenario(networkClient = networkClient, repository = repository)
     }
@@ -153,7 +155,7 @@ class StripeAutocompleteRepositoryTest {
             "state":"CA","postal_code":"94105","country":"US"}}
         """.trimIndent()
 
-        val OPTIONS = ApiRequest.Options(
+        val OPTIONS = RequestCredentials(
             apiKey = DEFAULT_API_CONFIG.publishableKey,
             stripeAccount = DEFAULT_API_CONFIG.stripeAccountId
         )

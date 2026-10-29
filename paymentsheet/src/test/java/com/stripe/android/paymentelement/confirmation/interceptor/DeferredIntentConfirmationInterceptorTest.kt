@@ -5,7 +5,7 @@ import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.exception.InvalidRequestException
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
@@ -41,6 +41,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
+import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
@@ -77,7 +78,8 @@ class DeferredIntentConfirmationInterceptorTest {
             stripeRepository = object : AbsFakeStripeRepository() {
                 override suspend fun createPaymentMethod(
                     paymentMethodCreateParams: PaymentMethodCreateParams,
-                    options: ApiRequest.Options
+                    options: RequestCredentials,
+                    idempotencyKey: String?,
                 ): Result<PaymentMethod> {
                     return Result.failure(invalidRequestException)
                 }
@@ -96,7 +98,7 @@ class DeferredIntentConfirmationInterceptorTest {
                 cause = invalidRequestException,
                 message = "Your card is not supported.".resolvableString,
                 errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
-            )
+)
         )
     }
 
@@ -115,8 +117,9 @@ class DeferredIntentConfirmationInterceptorTest {
             stripeRepository = object : AbsFakeStripeRepository() {
                 override suspend fun retrieveStripeIntent(
                     clientSecret: String,
-                    options: ApiRequest.Options,
-                    expandFields: List<String>
+                    options: RequestCredentials,
+                    expandFields: List<String>,
+                    idempotencyKey: String?,
                 ): Result<StripeIntent> {
                     return Result.failure(apiException)
                 }
@@ -133,7 +136,7 @@ class DeferredIntentConfirmationInterceptorTest {
                 cause = apiException,
                 message = resolvableString(R.string.stripe_something_went_wrong),
                 errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
-            )
+)
         )
     }
 
@@ -157,7 +160,7 @@ class DeferredIntentConfirmationInterceptorTest {
                 cause = CreateIntentCallbackFailureException(TestException("that didn't work…")),
                 message = resolvableString("that didn't work…"),
                 errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
-            )
+)
         )
     }
 
@@ -178,7 +181,7 @@ class DeferredIntentConfirmationInterceptorTest {
                 cause = CreateIntentCallbackFailureException(TestException()),
                 message = resolvableString(R.string.stripe_something_went_wrong),
                 errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
-            )
+)
         )
     }
 
@@ -189,8 +192,9 @@ class DeferredIntentConfirmationInterceptorTest {
             stripeRepository = object : AbsFakeStripeRepository() {
                 override suspend fun retrieveStripeIntent(
                     clientSecret: String,
-                    options: ApiRequest.Options,
+                    options: RequestCredentials,
                     expandFields: List<String>,
+                    idempotencyKey: String?,
                 ): Result<StripeIntent> {
                     return Result.success(
                         PaymentIntentFixtures.PI_SUCCEEDED.copy(
@@ -217,8 +221,9 @@ class DeferredIntentConfirmationInterceptorTest {
             stripeRepository = object : AbsFakeStripeRepository() {
                 override suspend fun retrieveStripeIntent(
                     clientSecret: String,
-                    options: ApiRequest.Options,
-                    expandFields: List<String>
+                    options: RequestCredentials,
+                    expandFields: List<String>,
+                    idempotencyKey: String?,
                 ): Result<StripeIntent> {
                     return Result.success(PaymentIntentFixtures.PI_SUCCEEDED)
                 }
@@ -239,7 +244,7 @@ class DeferredIntentConfirmationInterceptorTest {
                     set(DeferredIntentConfirmationTypeKey, DeferredIntentConfirmationType.Server)
                 },
                 completedFullPaymentFlow = true,
-            )
+)
         )
     }
 
@@ -251,8 +256,9 @@ class DeferredIntentConfirmationInterceptorTest {
                 stripeRepository = object : AbsFakeStripeRepository() {
                     override suspend fun retrieveStripeIntent(
                         clientSecret: String,
-                        options: ApiRequest.Options,
-                        expandFields: List<String>
+                        options: RequestCredentials,
+                        expandFields: List<String>,
+                        idempotencyKey: String?,
                     ): Result<StripeIntent> {
                         val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
                         return Result.success(
@@ -281,7 +287,7 @@ class DeferredIntentConfirmationInterceptorTest {
                         deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
                     ),
                     receivesResultInProcess = false,
-                )
+)
             )
         }
 
@@ -295,8 +301,9 @@ class DeferredIntentConfirmationInterceptorTest {
             stripeRepository = object : AbsFakeStripeRepository() {
                 override suspend fun retrieveStripeIntent(
                     clientSecret: String,
-                    options: ApiRequest.Options,
-                    expandFields: List<String>
+                    options: RequestCredentials,
+                    expandFields: List<String>,
+                    idempotencyKey: String?,
                 ): Result<StripeIntent> {
                     return Result.success(PaymentIntentFixtures.PI_SUCCEEDED)
                 }
@@ -345,7 +352,7 @@ class DeferredIntentConfirmationInterceptorTest {
         val intent = PaymentIntentFactory.create()
         val nextStep = interceptor.interceptDefaultSavedPaymentMethod()
 
-        verify(stripeRepository, never()).retrieveStripeIntent(any(), any(), any())
+        verify(stripeRepository, never()).retrieveStripeIntent(any(), any(), any(), idempotencyKey = isNull())
 
         assertThat(nextStep).isEqualTo(
             ConfirmationDefinition.Action.Complete<IntentConfirmationDefinition.Args>(
@@ -354,7 +361,7 @@ class DeferredIntentConfirmationInterceptorTest {
                     set(DeferredIntentConfirmationTypeKey, DeferredIntentConfirmationType.None)
                 },
                 completedFullPaymentFlow = true,
-            )
+)
         )
     }
 
@@ -472,8 +479,9 @@ class DeferredIntentConfirmationInterceptorTest {
         return object : AbsFakeStripeRepository() {
             override suspend fun retrieveStripeIntent(
                 clientSecret: String,
-                options: ApiRequest.Options,
-                expandFields: List<String>
+                options: RequestCredentials,
+                expandFields: List<String>,
+                idempotencyKey: String?,
             ): Result<StripeIntent> {
                 return Result.success(
                     PaymentIntentFixtures.PI_SUCCEEDED.copy(

@@ -10,6 +10,7 @@ import com.stripe.android.core.model.StripeFile
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
 import com.stripe.android.core.model.parsers.StripeFileJsonParser
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeRequest
 import com.stripe.android.core.networking.StripeResponse
@@ -146,12 +147,12 @@ internal class CryptoApiRepository @Inject constructor(
         return execute(
             request = apiRequestFactory.createPost(
                 url = fulfillKycRequirementsUrl,
-                options = ApiRequest.Options(
+                options = RequestCredentials(
                     apiKey = linkSessionKey,
                     stripeAccount = apiConfigProvider.get().stripeAccountId,
-                    idempotencyKey = null,
                 ),
                 params = request.toParamMap(),
+                idempotencyKey = null,
             ),
             responseSerializer = Unit.serializer(),
         )
@@ -164,10 +165,9 @@ internal class CryptoApiRepository @Inject constructor(
         return execute(
             request = OnrampFileUploadRequest(
                 file = file,
-                options = ApiRequest.Options(
+                options = RequestCredentials(
                     apiKey = linkSessionKey,
                     stripeAccount = apiConfigProvider.get().stripeAccountId,
-                    idempotencyKey = null,
                 ),
                 appInfo = appInfo,
             ),
@@ -278,6 +278,7 @@ internal class CryptoApiRepository @Inject constructor(
                 url = partnerTermsUrl,
                 options = buildRequestOptions(),
                 params = Json.encodeToJsonElement(params).jsonObject.toMap(),
+                idempotencyKey = null,
             ),
             consumerSessionClientSecret = consumerSessionClientSecret,
         )
@@ -428,7 +429,8 @@ internal class CryptoApiRepository @Inject constructor(
                 "crypto_customer_id" to cryptoCustomerId,
                 "country_hint" to countryHint,
                 "ui_mode" to "headless"
-            ).filterNotNullValues()
+            ).filterNotNullValues(),
+            idempotencyKey = null,
         )
 
         return execute(
@@ -462,7 +464,7 @@ internal class CryptoApiRepository @Inject constructor(
         paymentCredential: String,
         platformPublishableKey: String,
     ): Result<PaymentMethod> {
-        val options = ApiRequest.Options(
+        val options = RequestCredentials(
             apiKey = platformPublishableKey,
             stripeAccount = apiConfigProvider.get().stripeAccountId,
         )
@@ -470,6 +472,7 @@ internal class CryptoApiRepository @Inject constructor(
         return stripeRepository.createToken(
             tokenParams = SamsungPayTokenParams(paymentCredential),
             options = options,
+            idempotencyKey = null,
         ).fold(
             onSuccess = { token ->
                 stripeRepository.createPaymentMethod(
@@ -477,6 +480,7 @@ internal class CryptoApiRepository @Inject constructor(
                         card = PaymentMethodCreateParams.Card.create(token.id),
                     ),
                     options = options,
+                    idempotencyKey = null,
                 )
             },
             onFailure = { Result.failure(it) },
@@ -503,6 +507,7 @@ internal class CryptoApiRepository @Inject constructor(
             url = getOnrampSessionUrl,
             options = buildRequestOptions(),
             params = params,
+            idempotencyKey = null,
         )
 
         return execute(
@@ -518,23 +523,21 @@ internal class CryptoApiRepository @Inject constructor(
      * @param publishableKey The special publishable key from platform settings to use for this request.
      * @return The PaymentIntent.
      */
-    suspend fun retrievePaymentIntent(
-        clientSecret: String,
-        publishableKey: String
-    ): Result<PaymentIntent> {
+    suspend fun retrievePaymentIntent(clientSecret: String, publishableKey: String): Result<PaymentIntent> {
         return stripeRepository.retrievePaymentIntent(
             clientSecret = clientSecret,
             expandFields = listOf("payment_method"),
-            options = ApiRequest.Options(
+            options = RequestCredentials(
                 apiKey = publishableKey,
                 stripeAccount = apiConfigProvider.get().stripeAccountId,
-            )
+            ),
+            idempotencyKey = null,
         )
     }
 
-    private fun buildRequestOptions(): ApiRequest.Options {
+    private fun buildRequestOptions(): RequestCredentials {
         val apiConfiguration = apiConfigProvider.get()
-        return ApiRequest.Options(
+        return RequestCredentials(
             apiKey = apiConfiguration.publishableKey,
             stripeAccount = apiConfiguration.stripeAccountId,
         )
@@ -559,6 +562,7 @@ internal class CryptoApiRepository @Inject constructor(
             url = url,
             options = buildRequestOptions(),
             params = paramsJson.toMap(),
+            idempotencyKey = null,
         )
 
         return execute(
@@ -578,6 +582,7 @@ internal class CryptoApiRepository @Inject constructor(
                 url = url,
                 options = buildRequestOptions(),
                 params = params,
+                idempotencyKey = null,
             ),
             consumerSessionClientSecret = consumerSessionClientSecret,
         )
@@ -597,6 +602,7 @@ internal class CryptoApiRepository @Inject constructor(
             url = url,
             options = buildRequestOptions(),
             params = paramsJson.toMap(),
+            idempotencyKey = null,
         )
 
         return execute(

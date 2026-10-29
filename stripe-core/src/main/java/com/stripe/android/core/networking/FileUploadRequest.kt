@@ -1,6 +1,8 @@
 package com.stripe.android.core.networking
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.AppInfo
 import com.stripe.android.core.model.StripeFileParams
 import com.stripe.android.core.networking.StripeRequest.MimeType
@@ -17,19 +19,23 @@ import kotlin.random.Random
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 open class FileUploadRequest(
     private val fileParams: StripeFileParams,
-    options: ApiRequest.Options,
+    options: RequestCredentials,
     appInfo: AppInfo? = null,
     /**
      * Boundary to delineate parts of the message
      *
      * See [Multipart messages](https://en.wikipedia.org/wiki/MIME#Multipart_messages)
      */
-    protected val boundary: String = createBoundary()
+    protected val boundary: String = createBoundary(),
+    apiConfiguration: ApiConfiguration.State?,
+    idempotencyKey: String?,
 ) : StripeRequest() {
     private val headersFactory: RequestHeadersFactory = RequestHeadersFactory.FileUpload(
         options = options,
         appInfo = appInfo,
-        boundary = boundary
+        boundary = boundary,
+        apiVersion = ApiVersion.withBetas(ApiVersion.get().code, apiConfiguration?.betas.orEmpty()),
+        idempotencyKey = idempotencyKey,
     )
 
     override val method: Method = Method.POST

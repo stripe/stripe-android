@@ -45,7 +45,8 @@ private class FinancialConnectionsInstitutionsRepositoryImpl(
             options = provideApiRequestOptions(useConsumerPublishableKey = true),
             params = mapOf(
                 PARAMS_CLIENT_SECRET to clientSecret,
-            )
+            ),
+            idempotencyKey = null,
         )
         return requestExecutor.execute(
             request,
@@ -65,7 +66,8 @@ private class FinancialConnectionsInstitutionsRepositoryImpl(
                 PARAMS_CLIENT_SECRET to clientSecret,
                 "query" to query,
                 "limit" to limit
-            )
+            ),
+            idempotencyKey = null,
         )
         return requestExecutor.execute(
             request,

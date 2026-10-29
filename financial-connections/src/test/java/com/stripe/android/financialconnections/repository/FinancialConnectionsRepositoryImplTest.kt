@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.financialconnections.ApiKeyFixtures
@@ -35,7 +36,7 @@ class FinancialConnectionsRepositoryImplTest {
             logger = Logger.noop(),
         ),
         provideApiRequestOptions = {
-            ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+            RequestCredentials(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, stripeAccount = null)
         },
         apiRequestFactory = apiRequestFactory,
         fraudDetectionDataRepository = fraudDetectionDataRepository,

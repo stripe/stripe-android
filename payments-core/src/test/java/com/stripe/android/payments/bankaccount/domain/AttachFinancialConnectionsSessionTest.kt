@@ -3,7 +3,7 @@ package com.stripe.android.payments.bankaccount.domain
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.core.exception.APIException
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.networking.StripeRepository
@@ -11,6 +11,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -45,11 +46,12 @@ class AttachFinancialConnectionsSessionTest {
                 clientSecret = clientSecret,
                 paymentIntentId = "pi_1234",
                 financialConnectionsSessionId = linkedAccountSessionId,
-                requestOptions = ApiRequest.Options(
+                requestOptions = RequestCredentials(
                     apiKey = DEFAULT_API_CONFIG.publishableKey,
                     stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
                 ),
-                expandFields = listOf("payment_method")
+                expandFields = listOf("payment_method"),
+                idempotencyKey = null,
             )
             assertThat((result)).isEqualTo(Result.success(paymentIntent))
         }
@@ -75,11 +77,12 @@ class AttachFinancialConnectionsSessionTest {
                 clientSecret = clientSecret,
                 paymentIntentId = "pi_1234",
                 financialConnectionsSessionId = linkedAccountSessionId,
-                requestOptions = ApiRequest.Options(
+                requestOptions = RequestCredentials(
                     apiKey = DEFAULT_API_CONFIG.publishableKey,
                     stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
                 ),
-                expandFields = listOf("payment_method")
+                expandFields = listOf("payment_method"),
+                idempotencyKey = null,
             )
             assertThat(result.exceptionOrNull()!!).isEqualTo(expectedException)
         }
@@ -127,11 +130,12 @@ class AttachFinancialConnectionsSessionTest {
                 clientSecret = clientSecret,
                 setupIntentId = "seti_1234",
                 financialConnectionsSessionId = linkedAccountSessionId,
-                requestOptions = ApiRequest.Options(
+                requestOptions = RequestCredentials(
                     apiKey = DEFAULT_API_CONFIG.publishableKey,
                     stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
                 ),
-                expandFields = listOf("payment_method")
+                expandFields = listOf("payment_method"),
+                idempotencyKey = null,
             )
             assertThat((result)).isEqualTo(Result.success(setupIntent))
         }
@@ -157,11 +161,12 @@ class AttachFinancialConnectionsSessionTest {
                 clientSecret = clientSecret,
                 setupIntentId = "seti_1234",
                 financialConnectionsSessionId = linkedAccountSessionId,
-                requestOptions = ApiRequest.Options(
+                requestOptions = RequestCredentials(
                     apiKey = DEFAULT_API_CONFIG.publishableKey,
                     stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
                 ),
-                expandFields = listOf("payment_method")
+                expandFields = listOf("payment_method"),
+                idempotencyKey = null,
             )
             assertThat(setupIntent.exceptionOrNull()!!).isEqualTo(expectedException)
         }
@@ -197,7 +202,8 @@ class AttachFinancialConnectionsSessionTest {
                 any(),
                 any(),
                 any(),
-                any()
+                any(),
+                idempotencyKey = isNull(),
             )
         ).doReturn(paymentIntent())
     }
@@ -211,7 +217,8 @@ class AttachFinancialConnectionsSessionTest {
                 any(),
                 any(),
                 any(),
-                any()
+                any(),
+                idempotencyKey = isNull(),
             )
         ).doReturn(setupIntent())
     }

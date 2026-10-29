@@ -13,9 +13,9 @@ import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.networking.AnalyticsRequest
-import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.PaymentIntentFixtures
@@ -703,7 +703,7 @@ class PaymentLauncherViewModelAnalyticsTest {
             publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             stripeAccountId = TEST_STRIPE_ACCOUNT_ID,
         )
-        val API_REQUEST_OPTIONS = ApiRequest.Options(
+        val API_REQUEST_OPTIONS = RequestCredentials(
             apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             stripeAccount = TEST_STRIPE_ACCOUNT_ID,
         )

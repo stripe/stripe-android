@@ -1,6 +1,6 @@
 package com.stripe.android.customersheet
 
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.SetupIntent
@@ -15,23 +15,26 @@ class FakeStripeRepository(
 
     override suspend fun createPaymentMethod(
         paymentMethodCreateParams: PaymentMethodCreateParams,
-        options: ApiRequest.Options
+        options: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<PaymentMethod> {
         return createPaymentMethodResult
     }
 
     override suspend fun retrieveSetupIntent(
         clientSecret: String,
-        options: ApiRequest.Options,
-        expandFields: List<String>
+        options: RequestCredentials,
+        expandFields: List<String>,
+        idempotencyKey: String?,
     ): Result<SetupIntent> {
         return retrieveSetupIntent
     }
 
     override suspend fun retrieveStripeIntent(
         clientSecret: String,
-        options: ApiRequest.Options,
-        expandFields: List<String>
+        options: RequestCredentials,
+        expandFields: List<String>,
+        idempotencyKey: String?,
     ): Result<StripeIntent> {
         return retrieveIntent
     }

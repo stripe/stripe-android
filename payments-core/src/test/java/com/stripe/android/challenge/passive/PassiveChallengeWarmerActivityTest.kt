@@ -158,7 +158,7 @@ internal class PassiveChallengeWarmerActivityTest {
                 ApplicationProvider.getApplicationContext(),
                 PassiveChallengeWarmerActivity::class.java
             )
-        ).use { scenario ->
+).use { scenario ->
             advanceUntilIdle()
 
             // Activity should finish gracefully without crashing

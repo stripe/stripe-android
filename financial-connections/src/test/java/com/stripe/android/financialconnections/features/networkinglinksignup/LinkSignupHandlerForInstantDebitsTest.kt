@@ -85,7 +85,7 @@ class LinkSignupHandlerForInstantDebitsTest {
                 phoneNumber = any(),
                 country = any(),
                 verificationToken = any(),
-                appId = any()
+                appId = any(),
             )
         ).thenReturn(consumerSessionSignup())
 
@@ -142,7 +142,7 @@ class LinkSignupHandlerForInstantDebitsTest {
         verify(consumerRepository).signUp(
             email = eq("test@instantdebits.com"),
             phoneNumber = eq("+1234567890"),
-            country = eq("US")
+            country = eq("US"),
         )
 
         verify(attachConsumerToLinkAccountSession).invoke(any())

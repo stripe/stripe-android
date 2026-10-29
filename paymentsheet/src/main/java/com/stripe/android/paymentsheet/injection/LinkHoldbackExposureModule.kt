@@ -75,7 +75,8 @@ internal class LinkHoldbackExposureModule {
             stripeNetworkClient = DefaultStripeNetworkClient(
                 logger = logger,
                 workContext = workContext
-            )
+            ),
+            requestApiConfiguration = null,
         )
         return LinkApiRepository(
             application = application,

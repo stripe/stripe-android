@@ -4,7 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentMethod
@@ -24,8 +24,10 @@ import org.junit.runner.RunWith
 import org.mockito.Mockito.anyString
 import org.mockito.Mockito.verify
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
+import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.stub
 import org.mockito.kotlin.whenever
@@ -58,6 +60,8 @@ internal class CustomerRepositoryTest {
                 customerId = any(),
                 productUsageTokens = any(),
                 requestOptions = any(),
+                apiConfiguration = any(),
+                idempotencyKey = isNull(),
             )
         ).thenReturn(Result.success(mock()))
 
@@ -71,6 +75,8 @@ internal class CustomerRepositoryTest {
             customerId = eq("customer_id"),
             productUsageTokens = any(),
             requestOptions = eq(expectedRequestOptions()),
+            apiConfiguration = any(),
+            idempotencyKey = isNull(),
         )
     }
 
@@ -100,6 +106,7 @@ internal class CustomerRepositoryTest {
                 productUsageTokens = any(),
                 requestOptions = eq(expectedRequestOptions()),
                 apiConfiguration = eq(DEFAULT_API_CONFIG),
+                idempotencyKey = isNull(),
             )
         }
 
@@ -117,7 +124,7 @@ internal class CustomerRepositoryTest {
                 ephemeralKeySecret = "ephemeral_key",
                 listOf(PaymentMethod.Type.Card, PaymentMethod.Type.PayPal),
                 true,
-                apiConfiguration = DEFAULT_API_CONFIG
+                apiConfiguration = DEFAULT_API_CONFIG,
             )
 
             verify(stripeRepository).getPaymentMethods(
@@ -131,6 +138,7 @@ internal class CustomerRepositoryTest {
                 productUsageTokens = any(),
                 requestOptions = any(),
                 apiConfiguration = eq(DEFAULT_API_CONFIG),
+                idempotencyKey = isNull(),
             )
         }
 
@@ -184,6 +192,7 @@ internal class CustomerRepositoryTest {
                         productUsageTokens = any(),
                         requestOptions = any(),
                         apiConfiguration = any(),
+                        idempotencyKey = isNull(),
                     )
                 }.thenReturn(Result.success(mockedReturnPaymentMethods))
             }
@@ -193,7 +202,7 @@ internal class CustomerRepositoryTest {
                 ephemeralKeySecret = "ephemeral_key",
                 listOf(PaymentMethod.Type.Card),
                 true,
-                apiConfiguration = DEFAULT_API_CONFIG
+                apiConfiguration = DEFAULT_API_CONFIG,
             ).getOrThrow()
 
             assertThat(result).hasSize(1)
@@ -243,6 +252,7 @@ internal class CustomerRepositoryTest {
                     productUsageTokens = any(),
                     requestOptions = any(),
                     apiConfiguration = any(),
+                    idempotencyKey = isNull(),
                 )
             }.thenReturn(Result.success(mockedReturnPaymentMethods))
         }
@@ -252,7 +262,7 @@ internal class CustomerRepositoryTest {
             ephemeralKeySecret = "ephemeral_key",
             listOf(PaymentMethod.Type.Card),
             true,
-            apiConfiguration = DEFAULT_API_CONFIG
+            apiConfiguration = DEFAULT_API_CONFIG,
         ).getOrThrow()
 
         assertThat(result).hasSize(2)
@@ -272,7 +282,7 @@ internal class CustomerRepositoryTest {
                 ephemeralKeySecret = "ephemeral_key",
                 listOf(PaymentMethod.Type.Card),
                 silentlyFail = true,
-                apiConfiguration = DEFAULT_API_CONFIG
+                apiConfiguration = DEFAULT_API_CONFIG,
             )
 
             assertThat(result.getOrNull()).isEmpty()
@@ -292,7 +302,7 @@ internal class CustomerRepositoryTest {
                 ephemeralKeySecret = "ephemeral_key",
                 listOf(PaymentMethod.Type.Card),
                 silentlyFail = false,
-                apiConfiguration = DEFAULT_API_CONFIG
+                apiConfiguration = DEFAULT_API_CONFIG,
             )
 
             assertThat(result.exceptionOrNull()?.message)
@@ -318,7 +328,7 @@ internal class CustomerRepositoryTest {
                 ephemeralKeySecret = "ephemeral_key",
                 listOf(PaymentMethod.Type.Card, PaymentMethod.Type.Card, PaymentMethod.Type.Card),
                 silentlyFail = true,
-                apiConfiguration = DEFAULT_API_CONFIG
+                apiConfiguration = DEFAULT_API_CONFIG,
             )
 
             assertThat(result.getOrNull()).containsExactly(
@@ -351,7 +361,7 @@ internal class CustomerRepositoryTest {
                 ephemeralKeySecret = "ephemeral_key",
                 listOf(PaymentMethod.Type.Card, PaymentMethod.Type.Card, PaymentMethod.Type.Card),
                 silentlyFail = false,
-                apiConfiguration = DEFAULT_API_CONFIG
+                apiConfiguration = DEFAULT_API_CONFIG,
             )
 
             assertThat(result.exceptionOrNull()?.message)
@@ -378,7 +388,7 @@ internal class CustomerRepositoryTest {
                 customerId = "customer_id",
                 ephemeralKeySecret = "ephemeral_key",
                 paymentMethodId = "payment_method_id",
-                apiConfiguration = DEFAULT_API_CONFIG
+                apiConfiguration = DEFAULT_API_CONFIG,
             )
 
             assertThat(result.getOrNull()).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
@@ -386,6 +396,8 @@ internal class CustomerRepositoryTest {
                 productUsageTokens = any(),
                 paymentMethodId = eq("payment_method_id"),
                 requestOptions = eq(expectedRequestOptions()),
+                apiConfiguration = any(),
+                idempotencyKey = anyOrNull(),
             )
         }
 
@@ -400,7 +412,7 @@ internal class CustomerRepositoryTest {
                 customerId = "customer_id",
                 ephemeralKeySecret = "ephemeral_key",
                 paymentMethodId = "payment_method_id",
-                apiConfiguration = DEFAULT_API_CONFIG
+                apiConfiguration = DEFAULT_API_CONFIG,
             )
 
             assertThat(result.isFailure).isTrue()
@@ -432,6 +444,8 @@ internal class CustomerRepositoryTest {
                 productUsageTokens = any(),
                 paymentMethodId = eq("payment_method_id"),
                 requestOptions = eq(expectedRequestOptions()),
+                apiConfiguration = any(),
+                idempotencyKey = isNull(),
             )
         }
 
@@ -507,7 +521,7 @@ internal class CustomerRepositoryTest {
                 customerId = FAKE_CUSTOMER_ID,
                 ephemeralKeySecret = FAKE_EPHEMERAL_KEY,
                 paymentMethodId = paymentMethodToRemove.id,
-                apiConfiguration = DEFAULT_API_CONFIG
+                apiConfiguration = DEFAULT_API_CONFIG,
             )
 
             val duplicates = paymentMethods.filter { paymentMethod ->
@@ -567,7 +581,7 @@ internal class CustomerRepositoryTest {
                 customerId = "customer_id",
                 ephemeralKeySecret = "ephemeral_key",
                 paymentMethodId = "payment_method_id",
-                apiConfiguration = DEFAULT_API_CONFIG
+                apiConfiguration = DEFAULT_API_CONFIG,
             )
 
             assertThat(result).isEqualTo(
@@ -578,6 +592,8 @@ internal class CustomerRepositoryTest {
                 productUsageTokens = any(),
                 paymentMethodId = eq("payment_method_id"),
                 requestOptions = eq(expectedRequestOptions()),
+                apiConfiguration = any(),
+                idempotencyKey = isNull(),
             )
         }
 
@@ -591,7 +607,7 @@ internal class CustomerRepositoryTest {
                 customerId = "customer_id",
                 ephemeralKeySecret = "ephemeral_key",
                 paymentMethodId = "payment_method_id",
-                apiConfiguration = DEFAULT_API_CONFIG
+                apiConfiguration = DEFAULT_API_CONFIG,
             )
 
             assertThat(result).isEqualTo(error)
@@ -608,7 +624,7 @@ internal class CustomerRepositoryTest {
                 ephemeralKeySecret = "ephemeral_key",
                 paymentMethodId = "payment_method_id",
                 params = PaymentMethodUpdateParams.createCard(),
-                apiConfiguration = DEFAULT_API_CONFIG
+                apiConfiguration = DEFAULT_API_CONFIG,
             )
 
             assertThat(result).isEqualTo(success)
@@ -616,6 +632,8 @@ internal class CustomerRepositoryTest {
                 paymentMethodId = eq("payment_method_id"),
                 paymentMethodUpdateParams = any(),
                 options = eq(expectedRequestOptions()),
+                apiConfiguration = any(),
+                idempotencyKey = isNull(),
             )
         }
 
@@ -626,6 +644,8 @@ internal class CustomerRepositoryTest {
                 customerId = any(),
                 paymentMethodId = any(),
                 options = any(),
+                apiConfiguration = any(),
+                idempotencyKey = isNull(),
             )
         ).thenReturn(Result.success(mock()))
 
@@ -640,6 +660,8 @@ internal class CustomerRepositoryTest {
             customerId = eq("customer_id"),
             paymentMethodId = eq("payment_method_id"),
             options = eq(expectedRequestOptions()),
+            apiConfiguration = any(),
+            idempotencyKey = isNull(),
         )
     }
 
@@ -651,6 +673,8 @@ internal class CustomerRepositoryTest {
                 paymentMethodId = any(),
                 productUsageTokens = any(),
                 requestOptions = any(),
+                apiConfiguration = any(),
+                idempotencyKey = isNull(),
             )
         ).thenReturn(Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
 
@@ -666,6 +690,8 @@ internal class CustomerRepositoryTest {
             paymentMethodId = eq("payment_method_id"),
             productUsageTokens = any(),
             requestOptions = eq(expectedRequestOptions()),
+            apiConfiguration = any(),
+            idempotencyKey = isNull(),
         )
     }
 
@@ -680,7 +706,7 @@ internal class CustomerRepositoryTest {
                 ephemeralKeySecret = "ephemeral_key",
                 paymentMethodId = "payment_method_id",
                 params = PaymentMethodUpdateParams.createCard(),
-                apiConfiguration = DEFAULT_API_CONFIG
+                apiConfiguration = DEFAULT_API_CONFIG,
             )
 
             assertThat(result).isEqualTo(error)
@@ -697,7 +723,7 @@ internal class CustomerRepositoryTest {
         )
     }
 
-    private fun expectedRequestOptions() = ApiRequest.Options(
+    private fun expectedRequestOptions() = RequestCredentials(
         apiKey = "ephemeral_key",
         stripeAccount = ApiKeyFixtures.FAKE_ACCOUNT_ID,
     )
@@ -710,6 +736,7 @@ internal class CustomerRepositoryTest {
                 productUsageTokens = any(),
                 requestOptions = any(),
                 apiConfiguration = any(),
+                idempotencyKey = isNull(),
             )
         )
             .doReturn(Result.failure(InvalidParameterException("Request Failed")))
@@ -727,6 +754,7 @@ internal class CustomerRepositoryTest {
                     productUsageTokens = any(),
                     requestOptions = any(),
                     apiConfiguration = any(),
+                    idempotencyKey = isNull(),
                 )
             }.doReturn(result)
         }
@@ -741,6 +769,8 @@ internal class CustomerRepositoryTest {
                     productUsageTokens = any(),
                     paymentMethodId = anyString(),
                     requestOptions = any(),
+                    apiConfiguration = any(),
+                    idempotencyKey = isNull(),
                 )
             }.doReturn(result)
         }
@@ -756,6 +786,8 @@ internal class CustomerRepositoryTest {
                     productUsageTokens = any(),
                     paymentMethodId = anyString(),
                     requestOptions = any(),
+                    apiConfiguration = any(),
+                    idempotencyKey = isNull(),
                 )
             }.doReturn(result)
         }
@@ -771,6 +803,8 @@ internal class CustomerRepositoryTest {
                     productUsageTokens = any(),
                     paymentMethodId = anyString(),
                     requestOptions = any(),
+                    apiConfiguration = any(),
+                    idempotencyKey = isNull(),
                 )
             }.doReturn(result)
         }
@@ -785,6 +819,8 @@ internal class CustomerRepositoryTest {
                     paymentMethodId = any(),
                     paymentMethodUpdateParams = any(),
                     options = any(),
+                    apiConfiguration = any(),
+                    idempotencyKey = isNull(),
                 )
             }.doReturn(result)
         }
@@ -829,21 +865,24 @@ internal class CustomerRepositoryTest {
         override suspend fun detachPaymentMethod(
             productUsageTokens: Set<String>,
             paymentMethodId: String,
-            requestOptions: ApiRequest.Options
+            requestOptions: RequestCredentials,
+            idempotencyKey: String?,
         ): Result<PaymentMethod> = doDetach(paymentMethodId)
 
         override suspend fun detachPaymentMethod(
             customerSessionClientSecret: String,
             productUsageTokens: Set<String>,
             paymentMethodId: String,
-            requestOptions: ApiRequest.Options
+            requestOptions: RequestCredentials,
+            idempotencyKey: String?,
         ): Result<PaymentMethod> = doDetach(paymentMethodId)
 
         override suspend fun getPaymentMethods(
             listPaymentMethodsParams: ListPaymentMethodsParams,
             productUsageTokens: Set<String>,
-            requestOptions: ApiRequest.Options,
+            requestOptions: RequestCredentials,
             apiConfiguration: ApiConfiguration.State,
+            idempotencyKey: String?,
         ): Result<List<PaymentMethod>> {
             return Result.success(paymentMethodsToRetrieve)
         }

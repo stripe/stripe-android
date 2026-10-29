@@ -1,9 +1,11 @@
 package com.stripe.android.repository
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.AppInfo
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.executeRequestWithErrorParsing
 import com.stripe.android.core.networking.executeRequestWithModelJsonParser
@@ -37,15 +39,317 @@ import java.util.Locale
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 interface ConsumersApiService {
+    fun withApiConfiguration(apiConfiguration: ApiConfiguration.State): ConsumersApiService = this
 
     suspend fun signUp(
         params: SignUpParams,
-        requestOptions: ApiRequest.Options,
+        requestOptions: RequestCredentials,
+        apiConfiguration: ApiConfiguration.State,
+        idempotencyKey: String?,
+    ): Result<ConsumerSessionSignup> {
+        return withApiConfiguration(apiConfiguration).signUp(
+            params = params,
+            requestOptions = requestOptions,
+            idempotencyKey = idempotencyKey,
+        )
+    }
+
+    suspend fun mobileSignUp(
+        params: SignUpParams,
+        requestOptions: RequestCredentials,
+        apiConfiguration: ApiConfiguration.State,
+        idempotencyKey: String?,
+    ): Result<ConsumerSessionSignup> {
+        return withApiConfiguration(apiConfiguration).mobileSignUp(
+            params = params,
+            requestOptions = requestOptions,
+            idempotencyKey = idempotencyKey,
+        )
+    }
+
+    suspend fun lookupConsumerSession(
+        email: String?,
+        linkAuthIntentId: String?,
+        requestSurface: String,
+        sessionId: String,
+        doNotLogConsumerFunnelEvent: Boolean,
+        supportedVerificationTypes: List<String>?,
+        requestOptions: RequestCredentials,
+        customerId: String?,
+        apiConfiguration: ApiConfiguration.State,
+        idempotencyKey: String?,
+    ): ConsumerSessionLookup {
+        return withApiConfiguration(apiConfiguration).lookupConsumerSession(
+            email = email,
+            linkAuthIntentId = linkAuthIntentId,
+            requestSurface = requestSurface,
+            sessionId = sessionId,
+            doNotLogConsumerFunnelEvent = doNotLogConsumerFunnelEvent,
+            supportedVerificationTypes = supportedVerificationTypes,
+            requestOptions = requestOptions,
+            customerId = customerId,
+            idempotencyKey = idempotencyKey,
+        )
+    }
+
+    suspend fun mobileLookupConsumerSession(
+        email: String?,
+        emailSource: EmailSource?,
+        linkAuthIntentId: String?,
+        requestSurface: String,
+        verificationToken: String,
+        appId: String,
+        supportedVerificationTypes: List<String>?,
+        requestOptions: RequestCredentials,
+        sessionId: String,
+        customerId: String?,
+        linkAuthTokenClientSecret: String?,
+        apiConfiguration: ApiConfiguration.State,
+        idempotencyKey: String?,
+    ): ConsumerSessionLookup {
+        return withApiConfiguration(apiConfiguration).mobileLookupConsumerSession(
+            email = email,
+            emailSource = emailSource,
+            linkAuthIntentId = linkAuthIntentId,
+            requestSurface = requestSurface,
+            verificationToken = verificationToken,
+            appId = appId,
+            supportedVerificationTypes = supportedVerificationTypes,
+            requestOptions = requestOptions,
+            sessionId = sessionId,
+            customerId = customerId,
+            linkAuthTokenClientSecret = linkAuthTokenClientSecret,
+            idempotencyKey = idempotencyKey,
+        )
+    }
+
+    suspend fun refreshConsumerSession(
+        appId: String,
+        consumerSessionClientSecret: String,
+        supportedVerificationTypes: List<String>?,
+        requestSurface: String,
+        requestOptions: RequestCredentials,
+        apiConfiguration: ApiConfiguration.State,
+        idempotencyKey: String?,
+    ): ConsumerSessionRefresh {
+        return withApiConfiguration(apiConfiguration).refreshConsumerSession(
+            appId = appId,
+            consumerSessionClientSecret = consumerSessionClientSecret,
+            supportedVerificationTypes = supportedVerificationTypes,
+            requestSurface = requestSurface,
+            requestOptions = requestOptions,
+            idempotencyKey = idempotencyKey,
+        )
+    }
+
+    suspend fun startConsumerVerification(
+        consumerSessionClientSecret: String,
+        locale: Locale,
+        requestSurface: String,
+        type: VerificationType,
+        customEmailType: CustomEmailType?,
+        connectionsMerchantName: String?,
+        accountPhoneNumber: String?,
+        emailAddress: String?,
+        requestOptions: RequestCredentials,
+        isResendSmsCode: Boolean = false,
+        apiConfiguration: ApiConfiguration.State,
+        idempotencyKey: String?,
+    ): ConsumerSession {
+        return withApiConfiguration(apiConfiguration).startConsumerVerification(
+            consumerSessionClientSecret = consumerSessionClientSecret,
+            locale = locale,
+            requestSurface = requestSurface,
+            type = type,
+            customEmailType = customEmailType,
+            connectionsMerchantName = connectionsMerchantName,
+            accountPhoneNumber = accountPhoneNumber,
+            emailAddress = emailAddress,
+            requestOptions = requestOptions,
+            isResendSmsCode = isResendSmsCode,
+            idempotencyKey = idempotencyKey,
+        )
+    }
+
+    suspend fun confirmConsumerVerification(
+        consumerSessionClientSecret: String,
+        verificationCode: String,
+        requestSurface: String,
+        type: VerificationType,
+        consentGranted: Boolean?,
+        requestOptions: RequestCredentials,
+        apiConfiguration: ApiConfiguration.State,
+        idempotencyKey: String?,
+    ): ConsumerSession {
+        return withApiConfiguration(apiConfiguration).confirmConsumerVerification(
+            consumerSessionClientSecret = consumerSessionClientSecret,
+            verificationCode = verificationCode,
+            requestSurface = requestSurface,
+            type = type,
+            consentGranted = consentGranted,
+            requestOptions = requestOptions,
+            idempotencyKey = idempotencyKey,
+        )
+    }
+
+    suspend fun postConsentUpdate(
+        consumerSessionClientSecret: String,
+        consentGranted: Boolean,
+        requestSurface: String,
+        requestOptions: RequestCredentials,
+        apiConfiguration: ApiConfiguration.State,
+        idempotencyKey: String?,
+    ): Result<Unit> {
+        return withApiConfiguration(apiConfiguration).postConsentUpdate(
+            consumerSessionClientSecret = consumerSessionClientSecret,
+            consentGranted = consentGranted,
+            requestSurface = requestSurface,
+            requestOptions = requestOptions,
+            idempotencyKey = idempotencyKey,
+        )
+    }
+
+    suspend fun attachLinkConsumerToLinkAccountSession(
+        consumerSessionClientSecret: String,
+        clientSecret: String,
+        requestSurface: String,
+        requestOptions: RequestCredentials,
+        apiConfiguration: ApiConfiguration.State,
+        idempotencyKey: String?,
+    ): AttachConsumerToLinkAccountSession {
+        return withApiConfiguration(apiConfiguration).attachLinkConsumerToLinkAccountSession(
+            consumerSessionClientSecret = consumerSessionClientSecret,
+            clientSecret = clientSecret,
+            requestSurface = requestSurface,
+            requestOptions = requestOptions,
+            idempotencyKey = idempotencyKey,
+        )
+    }
+
+    suspend fun createPaymentDetails(
+        consumerSessionClientSecret: String,
+        paymentDetailsCreateParams: ConsumerPaymentDetailsCreateParams,
+        requestSurface: String,
+        requestOptions: RequestCredentials,
+        apiConfiguration: ApiConfiguration.State,
+        idempotencyKey: String?,
+    ): Result<ConsumerPaymentDetails> {
+        return withApiConfiguration(apiConfiguration).createPaymentDetails(
+            consumerSessionClientSecret = consumerSessionClientSecret,
+            paymentDetailsCreateParams = paymentDetailsCreateParams,
+            requestSurface = requestSurface,
+            requestOptions = requestOptions,
+            idempotencyKey = idempotencyKey,
+        )
+    }
+
+    suspend fun createPaymentDetails(
+        consumerSessionClientSecret: String,
+        paymentMethodId: String,
+        requestSurface: String,
+        requestOptions: RequestCredentials,
+        customerEphemeralKey: String,
+        apiConfiguration: ApiConfiguration.State,
+        idempotencyKey: String?,
+    ): Result<ConsumerPaymentDetails> {
+        return withApiConfiguration(apiConfiguration).createPaymentDetails(
+            consumerSessionClientSecret = consumerSessionClientSecret,
+            paymentMethodId = paymentMethodId,
+            requestSurface = requestSurface,
+            requestOptions = requestOptions,
+            customerEphemeralKey = customerEphemeralKey,
+            idempotencyKey = idempotencyKey,
+        )
+    }
+
+    suspend fun sharePaymentDetails(
+        consumerSessionClientSecret: String,
+        paymentDetailsId: String,
+        expectedPaymentMethodType: String?,
+        billingPhone: String?,
+        requestSurface: String,
+        requestOptions: RequestCredentials,
+        extraParams: Map<String, Any?>,
+        apiConfiguration: ApiConfiguration.State,
+        idempotencyKey: String?,
+    ): Result<SharePaymentDetails> {
+        return withApiConfiguration(apiConfiguration).sharePaymentDetails(
+            consumerSessionClientSecret = consumerSessionClientSecret,
+            paymentDetailsId = paymentDetailsId,
+            expectedPaymentMethodType = expectedPaymentMethodType,
+            billingPhone = billingPhone,
+            requestSurface = requestSurface,
+            requestOptions = requestOptions,
+            extraParams = extraParams,
+            idempotencyKey = idempotencyKey,
+        )
+    }
+
+    suspend fun updateAvailableIncentives(
+        sessionId: String,
+        paymentDetailsId: String,
+        consumerSessionClientSecret: String,
+        requestSurface: String,
+        requestOptions: RequestCredentials,
+        apiConfiguration: ApiConfiguration.State,
+        idempotencyKey: String?,
+    ): Result<UpdateAvailableIncentives> {
+        return withApiConfiguration(apiConfiguration).updateAvailableIncentives(
+            sessionId = sessionId,
+            paymentDetailsId = paymentDetailsId,
+            consumerSessionClientSecret = consumerSessionClientSecret,
+            requestSurface = requestSurface,
+            requestOptions = requestOptions,
+            idempotencyKey = idempotencyKey,
+        )
+    }
+
+    suspend fun createLinkAccountSession(
+        consumerSessionClientSecret: String,
+        intentToken: String?,
+        linkMode: LinkMode?,
+        requestSurface: String,
+        requestOptions: RequestCredentials,
+        apiConfiguration: ApiConfiguration.State,
+        idempotencyKey: String?,
+    ): Result<LinkAccountSession> {
+        return withApiConfiguration(apiConfiguration).createLinkAccountSession(
+            consumerSessionClientSecret = consumerSessionClientSecret,
+            intentToken = intentToken,
+            linkMode = linkMode,
+            requestSurface = requestSurface,
+            requestOptions = requestOptions,
+            idempotencyKey = idempotencyKey,
+        )
+    }
+
+    suspend fun updatePhoneNumber(
+        consumerSessionClientSecret: String,
+        phoneNumber: String,
+        requestSurface: String,
+        requestOptions: RequestCredentials,
+        apiConfiguration: ApiConfiguration.State,
+        idempotencyKey: String?,
+    ): Result<ConsumerSession> {
+        return withApiConfiguration(apiConfiguration).updatePhoneNumber(
+            consumerSessionClientSecret = consumerSessionClientSecret,
+            phoneNumber = phoneNumber,
+            requestSurface = requestSurface,
+            requestOptions = requestOptions,
+            idempotencyKey = idempotencyKey,
+        )
+    }
+
+    suspend fun signUp(
+        params: SignUpParams,
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<ConsumerSessionSignup>
 
     suspend fun mobileSignUp(
         params: SignUpParams,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<ConsumerSessionSignup>
 
     suspend fun lookupConsumerSession(
@@ -55,8 +359,9 @@ interface ConsumersApiService {
         sessionId: String,
         doNotLogConsumerFunnelEvent: Boolean,
         supportedVerificationTypes: List<String>?,
-        requestOptions: ApiRequest.Options,
-        customerId: String?
+        requestOptions: RequestCredentials,
+        customerId: String?,
+        idempotencyKey: String?,
     ): ConsumerSessionLookup
 
     suspend fun mobileLookupConsumerSession(
@@ -67,10 +372,11 @@ interface ConsumersApiService {
         verificationToken: String,
         appId: String,
         supportedVerificationTypes: List<String>?,
-        requestOptions: ApiRequest.Options,
+        requestOptions: RequestCredentials,
         sessionId: String,
         customerId: String?,
-        linkAuthTokenClientSecret: String?
+        linkAuthTokenClientSecret: String?,
+        idempotencyKey: String?,
     ): ConsumerSessionLookup
 
     suspend fun refreshConsumerSession(
@@ -78,7 +384,8 @@ interface ConsumersApiService {
         consumerSessionClientSecret: String,
         supportedVerificationTypes: List<String>?,
         requestSurface: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): ConsumerSessionRefresh
 
     suspend fun startConsumerVerification(
@@ -90,8 +397,9 @@ interface ConsumersApiService {
         connectionsMerchantName: String?,
         accountPhoneNumber: String?,
         emailAddress: String?,
-        requestOptions: ApiRequest.Options,
-        isResendSmsCode: Boolean = false
+        requestOptions: RequestCredentials,
+        isResendSmsCode: Boolean = false,
+        idempotencyKey: String?,
     ): ConsumerSession
 
     suspend fun confirmConsumerVerification(
@@ -100,36 +408,41 @@ interface ConsumersApiService {
         requestSurface: String,
         type: VerificationType,
         consentGranted: Boolean?,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): ConsumerSession
 
     suspend fun postConsentUpdate(
         consumerSessionClientSecret: String,
         consentGranted: Boolean,
         requestSurface: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<Unit>
 
     suspend fun attachLinkConsumerToLinkAccountSession(
         consumerSessionClientSecret: String,
         clientSecret: String,
         requestSurface: String,
-        requestOptions: ApiRequest.Options,
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): AttachConsumerToLinkAccountSession
 
     suspend fun createPaymentDetails(
         consumerSessionClientSecret: String,
         paymentDetailsCreateParams: ConsumerPaymentDetailsCreateParams,
         requestSurface: String,
-        requestOptions: ApiRequest.Options,
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<ConsumerPaymentDetails>
 
     suspend fun createPaymentDetails(
         consumerSessionClientSecret: String,
         paymentMethodId: String,
         requestSurface: String,
-        requestOptions: ApiRequest.Options,
-        customerEphemeralKey: String
+        requestOptions: RequestCredentials,
+        customerEphemeralKey: String,
+        idempotencyKey: String?,
     ): Result<ConsumerPaymentDetails>
 
     suspend fun sharePaymentDetails(
@@ -138,8 +451,9 @@ interface ConsumersApiService {
         expectedPaymentMethodType: String?,
         billingPhone: String?,
         requestSurface: String,
-        requestOptions: ApiRequest.Options,
+        requestOptions: RequestCredentials,
         extraParams: Map<String, Any?>,
+        idempotencyKey: String?,
     ): Result<SharePaymentDetails>
 
     suspend fun updateAvailableIncentives(
@@ -147,7 +461,8 @@ interface ConsumersApiService {
         paymentDetailsId: String,
         consumerSessionClientSecret: String,
         requestSurface: String,
-        requestOptions: ApiRequest.Options,
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<UpdateAvailableIncentives>
 
     suspend fun createLinkAccountSession(
@@ -155,24 +470,37 @@ interface ConsumersApiService {
         intentToken: String?,
         linkMode: LinkMode?,
         requestSurface: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<LinkAccountSession>
 
     suspend fun updatePhoneNumber(
         consumerSessionClientSecret: String,
         phoneNumber: String,
         requestSurface: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<ConsumerSession>
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 class ConsumersApiServiceImpl(
     private val stripeNetworkClient: StripeNetworkClient,
-    apiVersion: String,
-    sdkVersion: String = StripeSdkVersion.VERSION,
-    appInfo: AppInfo?
+    private val apiVersion: String,
+    private val sdkVersion: String = StripeSdkVersion.VERSION,
+    private val appInfo: AppInfo?,
+    private val requestApiConfiguration: ApiConfiguration.State?
 ) : ConsumersApiService {
+
+    override fun withApiConfiguration(apiConfiguration: ApiConfiguration.State): ConsumersApiService {
+        return ConsumersApiServiceImpl(
+            stripeNetworkClient = stripeNetworkClient,
+            apiVersion = apiVersion,
+            sdkVersion = sdkVersion,
+            appInfo = appInfo,
+            requestApiConfiguration = apiConfiguration.copy(betas = apiConfiguration.betas.toSet()),
+        )
+    }
 
     private val stripeErrorJsonParser = StripeErrorJsonParser()
 
@@ -184,7 +512,8 @@ class ConsumersApiServiceImpl(
 
     override suspend fun signUp(
         params: SignUpParams,
-        requestOptions: ApiRequest.Options,
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<ConsumerSessionSignup> {
         return executeRequestWithResultParser(
             stripeErrorJsonParser = stripeErrorJsonParser,
@@ -192,7 +521,9 @@ class ConsumersApiServiceImpl(
             request = apiRequestFactory.createPost(
                 url = consumerAccountsSignUpUrl,
                 options = requestOptions,
-                params = params.toParamMap()
+                params = params.toParamMap(),
+                apiConfiguration = requestApiConfiguration,
+                idempotencyKey = idempotencyKey,
             ),
             responseJsonParser = ConsumerSessionSignupJsonParser,
         )
@@ -203,7 +534,8 @@ class ConsumersApiServiceImpl(
      */
     override suspend fun mobileSignUp(
         params: SignUpParams,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<ConsumerSessionSignup> {
         return executeRequestWithResultParser(
             stripeErrorJsonParser = stripeErrorJsonParser,
@@ -211,7 +543,9 @@ class ConsumersApiServiceImpl(
             request = apiRequestFactory.createPost(
                 url = consumerMobileSignUpUrl,
                 options = requestOptions,
-                params = params.toParamMap()
+                params = params.toParamMap(),
+                apiConfiguration = requestApiConfiguration,
+                idempotencyKey = idempotencyKey,
             ),
             responseJsonParser = ConsumerSessionSignupJsonParser,
         )
@@ -227,8 +561,9 @@ class ConsumersApiServiceImpl(
         sessionId: String,
         doNotLogConsumerFunnelEvent: Boolean,
         supportedVerificationTypes: List<String>?,
-        requestOptions: ApiRequest.Options,
-        customerId: String?
+        requestOptions: RequestCredentials,
+        customerId: String?,
+        idempotencyKey: String?,
     ): ConsumerSessionLookup {
         val avoidConsumerLoggingParams: Map<String, Boolean> = if (doNotLogConsumerFunnelEvent) {
             mapOf("do_not_log_consumer_funnel_event" to true)
@@ -247,7 +582,9 @@ class ConsumersApiServiceImpl(
                     "email_address" to email?.lowercase(),
                     "link_auth_intent_id" to linkAuthIntentId,
                     "customer_id" to customerId
-                ).filterValues { it != null } + avoidConsumerLoggingParams
+                ).filterValues { it != null } + avoidConsumerLoggingParams,
+                apiConfiguration = requestApiConfiguration,
+                idempotencyKey = idempotencyKey,
             ),
             responseJsonParser = ConsumerSessionLookupJsonParser()
         )
@@ -264,10 +601,11 @@ class ConsumersApiServiceImpl(
         verificationToken: String,
         appId: String,
         supportedVerificationTypes: List<String>?,
-        requestOptions: ApiRequest.Options,
+        requestOptions: RequestCredentials,
         sessionId: String,
         customerId: String?,
-        linkAuthTokenClientSecret: String?
+        linkAuthTokenClientSecret: String?,
+        idempotencyKey: String?,
     ): ConsumerSessionLookup {
         return executeRequestWithModelJsonParser(
             stripeErrorJsonParser = stripeErrorJsonParser,
@@ -286,7 +624,9 @@ class ConsumersApiServiceImpl(
                     "customer_id" to customerId,
                     "supported_verification_types" to supportedVerificationTypes,
                     "link_auth_token_client_secret" to linkAuthTokenClientSecret
-                ).filterValues { it != null }
+                ).filterValues { it != null },
+                apiConfiguration = requestApiConfiguration,
+                idempotencyKey = idempotencyKey,
             ),
             responseJsonParser = ConsumerSessionLookupJsonParser()
         )
@@ -297,7 +637,8 @@ class ConsumersApiServiceImpl(
         consumerSessionClientSecret: String,
         supportedVerificationTypes: List<String>?,
         requestSurface: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): ConsumerSessionRefresh {
         return executeRequestWithModelJsonParser(
             stripeErrorJsonParser = stripeErrorJsonParser,
@@ -313,6 +654,8 @@ class ConsumersApiServiceImpl(
                     ),
                     "supported_verification_types" to supportedVerificationTypes
                 ),
+                apiConfiguration = requestApiConfiguration,
+                idempotencyKey = idempotencyKey,
             ),
             responseJsonParser = ConsumerSessionRefreshJsonParser()
         )
@@ -330,8 +673,9 @@ class ConsumersApiServiceImpl(
         connectionsMerchantName: String?,
         accountPhoneNumber: String?,
         emailAddress: String?,
-        requestOptions: ApiRequest.Options,
-        isResendSmsCode: Boolean
+        requestOptions: RequestCredentials,
+        isResendSmsCode: Boolean,
+        idempotencyKey: String?,
     ): ConsumerSession {
         return executeRequestWithModelJsonParser(
             stripeErrorJsonParser = stripeErrorJsonParser,
@@ -351,7 +695,9 @@ class ConsumersApiServiceImpl(
                     if (isResendSmsCode) {
                         put("is_resend_sms_code", true)
                     }
-                }
+                },
+                apiConfiguration = requestApiConfiguration,
+                idempotencyKey = idempotencyKey,
             ),
             responseJsonParser = ConsumerSessionJsonParser()
         )
@@ -366,7 +712,8 @@ class ConsumersApiServiceImpl(
         requestSurface: String,
         type: VerificationType,
         consentGranted: Boolean?,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): ConsumerSession = executeRequestWithModelJsonParser(
         stripeErrorJsonParser = stripeErrorJsonParser,
         stripeNetworkClient = stripeNetworkClient,
@@ -381,7 +728,9 @@ class ConsumersApiServiceImpl(
                 "type" to type.value,
                 "code" to verificationCode,
                 "consent_granted" to consentGranted
-            ).filterValues { it != null }
+            ).filterValues { it != null },
+            apiConfiguration = requestApiConfiguration,
+            idempotencyKey = idempotencyKey,
         ),
         responseJsonParser = ConsumerSessionJsonParser()
     )
@@ -390,7 +739,8 @@ class ConsumersApiServiceImpl(
         consumerSessionClientSecret: String,
         consentGranted: Boolean,
         requestSurface: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<Unit> {
         return executeRequestWithErrorParsing(
             stripeErrorJsonParser = stripeErrorJsonParser,
@@ -404,7 +754,9 @@ class ConsumersApiServiceImpl(
                         "consumer_session_client_secret" to consumerSessionClientSecret
                     ),
                     "consent_granted" to consentGranted
-                )
+                ),
+                apiConfiguration = requestApiConfiguration,
+                idempotencyKey = idempotencyKey,
             )
         )
     }
@@ -413,7 +765,8 @@ class ConsumersApiServiceImpl(
         consumerSessionClientSecret: String,
         clientSecret: String,
         requestSurface: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): AttachConsumerToLinkAccountSession {
         return executeRequestWithModelJsonParser(
             stripeErrorJsonParser = stripeErrorJsonParser,
@@ -427,7 +780,9 @@ class ConsumersApiServiceImpl(
                         "consumer_session_client_secret" to consumerSessionClientSecret,
                     ),
                     "link_account_session" to clientSecret,
-                )
+                ),
+                apiConfiguration = requestApiConfiguration,
+                idempotencyKey = idempotencyKey,
             ),
             responseJsonParser = AttachConsumerToLinkAccountSessionJsonParser,
         )
@@ -437,7 +792,8 @@ class ConsumersApiServiceImpl(
         consumerSessionClientSecret: String,
         paymentDetailsCreateParams: ConsumerPaymentDetailsCreateParams,
         requestSurface: String,
-        requestOptions: ApiRequest.Options,
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<ConsumerPaymentDetails> {
         return executeRequestWithResultParser(
             stripeErrorJsonParser = stripeErrorJsonParser,
@@ -452,7 +808,9 @@ class ConsumersApiServiceImpl(
                     ),
                 ).plus(
                     paymentDetailsCreateParams.toParamMap()
-                )
+                ),
+                apiConfiguration = requestApiConfiguration,
+                idempotencyKey = idempotencyKey,
             ),
             responseJsonParser = ConsumerPaymentDetailsJsonParser,
         )
@@ -462,8 +820,9 @@ class ConsumersApiServiceImpl(
         consumerSessionClientSecret: String,
         paymentMethodId: String,
         requestSurface: String,
-        requestOptions: ApiRequest.Options,
+        requestOptions: RequestCredentials,
         customerEphemeralKey: String,
+        idempotencyKey: String?,
     ): Result<ConsumerPaymentDetails> {
         return executeRequestWithResultParser(
             stripeErrorJsonParser = stripeErrorJsonParser,
@@ -478,7 +837,9 @@ class ConsumersApiServiceImpl(
                         "consumer_session_client_secret" to consumerSessionClientSecret
                     ),
                     "customer_ephemeral_key_secret" to customerEphemeralKey
-                )
+                ),
+                apiConfiguration = requestApiConfiguration,
+                idempotencyKey = idempotencyKey,
             ),
             responseJsonParser = ConsumerPaymentDetailsJsonParser,
         )
@@ -490,8 +851,9 @@ class ConsumersApiServiceImpl(
         expectedPaymentMethodType: String?,
         billingPhone: String?,
         requestSurface: String,
-        requestOptions: ApiRequest.Options,
+        requestOptions: RequestCredentials,
         extraParams: Map<String, Any?>,
+        idempotencyKey: String?,
     ): Result<SharePaymentDetails> {
         return executeRequestWithResultParser(
             stripeErrorJsonParser = stripeErrorJsonParser,
@@ -508,6 +870,8 @@ class ConsumersApiServiceImpl(
                     ),
                     "billing_phone" to billingPhone,
                 ) + extraParams,
+                apiConfiguration = requestApiConfiguration,
+                idempotencyKey = idempotencyKey,
             ),
             responseJsonParser = SharePaymentDetailsJsonParser,
         )
@@ -518,7 +882,8 @@ class ConsumersApiServiceImpl(
         paymentDetailsId: String,
         consumerSessionClientSecret: String,
         requestSurface: String,
-        requestOptions: ApiRequest.Options,
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<UpdateAvailableIncentives> {
         return executeRequestWithResultParser(
             stripeErrorJsonParser = stripeErrorJsonParser,
@@ -534,6 +899,8 @@ class ConsumersApiServiceImpl(
                         "consumer_session_client_secret" to consumerSessionClientSecret
                     ),
                 ),
+                apiConfiguration = requestApiConfiguration,
+                idempotencyKey = idempotencyKey,
             ),
             responseJsonParser = UpdateAvailableIncentivesJsonParser,
         )
@@ -544,7 +911,8 @@ class ConsumersApiServiceImpl(
         intentToken: String?,
         linkMode: LinkMode?,
         requestSurface: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<LinkAccountSession> {
         return executeRequestWithResultParser(
             stripeErrorJsonParser = stripeErrorJsonParser,
@@ -560,6 +928,8 @@ class ConsumersApiServiceImpl(
                     "link_mode" to linkMode?.value,
                     "request_surface" to requestSurface,
                 ),
+                apiConfiguration = requestApiConfiguration,
+                idempotencyKey = idempotencyKey,
             ),
             responseJsonParser = LinkAccountSessionJsonParser,
         )
@@ -569,7 +939,8 @@ class ConsumersApiServiceImpl(
         consumerSessionClientSecret: String,
         phoneNumber: String,
         requestSurface: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<ConsumerSession> {
         return executeRequestWithResultParser(
             stripeErrorJsonParser = stripeErrorJsonParser,
@@ -584,6 +955,8 @@ class ConsumersApiServiceImpl(
                     "phone_number" to phoneNumber,
                     "request_surface" to requestSurface,
                 ),
+                apiConfiguration = requestApiConfiguration,
+                idempotencyKey = idempotencyKey,
             ),
             responseJsonParser = ConsumerSessionJsonParser(),
         )

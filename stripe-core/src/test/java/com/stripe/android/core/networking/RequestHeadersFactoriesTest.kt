@@ -26,12 +26,13 @@ class RequestHeadersFactoriesTest {
     // Tests for RequestHeadersFactory.AbstractPaymentApiHeadersFactory
     @Test
     fun create_shouldIncludeExpectedAcceptLanguageHeader() {
-        assertThat(createBasePaymentApiHeaders(Locale.JAPAN)[HEADER_ACCEPT_LANGUAGE])
+        assertThat(createBasePaymentApiHeaders(Locale.JAPAN, idempotencyKey = null)[HEADER_ACCEPT_LANGUAGE])
             .isEqualTo("ja-JP")
 
-        assertThat(createBasePaymentApiHeaders(Locale.ENGLISH)[HEADER_ACCEPT_LANGUAGE]).isEqualTo("en")
+        val englishHeaders = createBasePaymentApiHeaders(Locale.ENGLISH, idempotencyKey = null)
+        assertThat(englishHeaders[HEADER_ACCEPT_LANGUAGE]).isEqualTo("en")
 
-        assertThat(createBasePaymentApiHeaders(Locale.ROOT)[HEADER_ACCEPT_LANGUAGE])
+        assertThat(createBasePaymentApiHeaders(Locale.ROOT, idempotencyKey = null)[HEADER_ACCEPT_LANGUAGE])
             .isNull()
     }
 
@@ -40,7 +41,8 @@ class RequestHeadersFactoriesTest {
         val stripeAccount = "acct_123abc"
         val headers = createBasePaymentApiHeaders(
             locale = Locale.US,
-            options = ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, stripeAccount)
+            options = RequestCredentials(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, stripeAccount),
+            idempotencyKey = null,
         )
 
         assertThat(headers[HEADER_AUTHORIZATION])
@@ -52,7 +54,7 @@ class RequestHeadersFactoriesTest {
 
     @Test
     fun headers_withOnlyRequiredOptions_doesNotAddEmptyOptions() {
-        val headers = createBasePaymentApiHeaders()
+        val headers = createBasePaymentApiHeaders(idempotencyKey = null)
 
         assertThat(headers.containsKey(HEADER_STRIPE_VERSION)).isTrue()
         assertThat(headers.containsKey(HEADER_STRIPE_ACCOUNT)).isFalse()
@@ -61,7 +63,7 @@ class RequestHeadersFactoriesTest {
 
     @Test
     fun headers_containsPropertyMapValues() {
-        val headers = createBasePaymentApiHeaders()
+        val headers = createBasePaymentApiHeaders(idempotencyKey = null)
 
         val userAgentData = JSONObject(
             requireNotNull(headers[HEADER_STRIPE_CLIENT_USER_AGENT])
@@ -80,7 +82,7 @@ class RequestHeadersFactoriesTest {
 
     @Test
     fun headers_correctlyAddsExpectedAdditionalParameters() {
-        val headers = createBasePaymentApiHeaders()
+        val headers = createBasePaymentApiHeaders(idempotencyKey = null)
 
         val expectedUserAgent = "Stripe/v1 AndroidBindings/${StripeSdkVersion.VERSION_NAME}"
         assertThat(headers[HEADER_USER_AGENT]).isEqualTo(expectedUserAgent)
@@ -90,7 +92,7 @@ class RequestHeadersFactoriesTest {
 
     @Test
     fun headers_withInternalAppInfo() {
-        val headers = createBasePaymentApiHeaders(appInfo = AppInfoFixtures.DEFAULT)
+        val headers = createBasePaymentApiHeaders(appInfo = AppInfoFixtures.DEFAULT, idempotencyKey = null)
         assertThat(headers[HEADER_USER_AGENT])
             .isEqualTo("${RequestHeadersFactory.getUserAgent()} MyAwesomePlugin/1.2.34 (https://myawesomeplugin.info)")
 
@@ -129,7 +131,8 @@ class RequestHeadersFactoriesTest {
         val stripeAccount = "acct_123abc"
         val headers = createBasePaymentApiHeaders(
             locale = Locale.SIMPLIFIED_CHINESE,
-            options = ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, stripeAccount)
+            options = RequestCredentials(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, stripeAccount),
+            idempotencyKey = null,
         )
 
         assertThat(headers[HEADER_AUTHORIZATION])
@@ -141,13 +144,15 @@ class RequestHeadersFactoriesTest {
 
     private fun createBasePaymentApiHeaders(
         locale: Locale = Locale.getDefault(),
-        options: ApiRequest.Options = OPTIONS,
-        appInfo: AppInfo? = null
+        options: RequestCredentials = OPTIONS,
+        appInfo: AppInfo? = null,
+        idempotencyKey: String?,
     ): Map<String, String> {
         return RequestHeadersFactory.BaseApiHeadersFactory(
             optionsProvider = { options },
             appInfo = appInfo,
-            locale = locale
+            locale = locale,
+            idempotencyKey = idempotencyKey,
         ).create()
     }
 
@@ -156,7 +161,8 @@ class RequestHeadersFactoriesTest {
     fun api_post_headers() {
         val postHeaders = RequestHeadersFactory.Api(
             options = OPTIONS,
-            appInfo = AppInfoFixtures.DEFAULT
+            appInfo = AppInfoFixtures.DEFAULT,
+            idempotencyKey = null,
         ).createPostHeader()
         assertThat(postHeaders[HEADER_CONTENT_TYPE])
             .isEqualTo("${StripeRequest.MimeType.Form}; charset=${RequestHeadersFactory.CHARSET}")
@@ -167,7 +173,8 @@ class RequestHeadersFactoriesTest {
     fun file_upload_post_headers() {
         val postHeaders = RequestHeadersFactory.FileUpload(
             options = OPTIONS,
-            boundary = BOUNDARY
+            boundary = BOUNDARY,
+            idempotencyKey = null,
         ).createPostHeader()
         assertThat(postHeaders[HEADER_CONTENT_TYPE])
             .isEqualTo("${StripeRequest.MimeType.MultipartForm.code}; boundary=$BOUNDARY")
@@ -210,6 +217,6 @@ class RequestHeadersFactoriesTest {
 
     private companion object {
         private const val BOUNDARY = "TEST_BOUNDARY"
-        private val OPTIONS = ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+        private val OPTIONS = RequestCredentials(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, stripeAccount = null)
     }
 }

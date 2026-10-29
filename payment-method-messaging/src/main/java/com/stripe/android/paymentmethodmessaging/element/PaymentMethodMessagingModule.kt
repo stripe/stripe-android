@@ -14,8 +14,8 @@ import com.stripe.android.paymentmethodmessaging.element.analytics.PaymentMethod
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
 import com.stripe.android.payments.core.injection.ApiConfigurationFromPaymentConfigurationModule
-import com.stripe.android.payments.core.injection.ApiRequestOptionsModule
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
+import com.stripe.android.payments.core.injection.RequestCredentialsModule
 import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.isSystemDarkTheme
@@ -30,7 +30,7 @@ import javax.inject.Named
 @Module(
     includes = [
         ApiConfigurationFromPaymentConfigurationModule::class,
-        ApiRequestOptionsModule::class,
+        RequestCredentialsModule::class,
     ]
 )
 internal interface PaymentMethodMessagingModule {

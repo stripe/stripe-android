@@ -1,6 +1,6 @@
 package com.stripe.android.paymentmethodmessaging.element
 
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.model.PaymentMethodMessage
 import com.stripe.android.model.PaymentMethodMessageImage
 import com.stripe.android.model.PaymentMethodMessageLearnMore
@@ -13,7 +13,8 @@ class FakeStripeRepository : AbsFakeStripeRepository() {
         currency: String,
         country: String?,
         locale: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<PaymentMethodMessage> {
         return when {
             amount > 0 -> Result.success(if (paymentMethods.size == 1) singlePartner else multiPartner)

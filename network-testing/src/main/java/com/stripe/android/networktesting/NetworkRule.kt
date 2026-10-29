@@ -25,6 +25,7 @@ class NetworkRule private constructor(
     private val hostsToTrack: Set<String>,
     validationTimeout: Duration?,
     private val defaultMatcher: RequestMatcher,
+    private val versionMatcher: RequestMatcher,
 ) : TestRule {
     private val mockWebServer = TestMockWebServer(validationTimeout)
 
@@ -34,10 +35,12 @@ class NetworkRule private constructor(
     constructor(
         hostsToTrack: List<String> = listOf(ApiRequest.API_HOST),
         validationTimeout: Duration? = null,
+        expectedStripeVersions: Map<String, String> = emptyMap(),
     ) : this(
         hostsToTrack.map { it.hostFromUrl() }.toSet(),
         validationTimeout,
         RequestMatchers.stripeApiKey(),
+        RequestMatchers.stripeVersions(expectedStripeVersions.mapKeys { it.key.hostFromUrl() }),
     )
 
     override fun apply(base: Statement, description: Description): Statement {
@@ -87,9 +90,9 @@ class NetworkRule private constructor(
         applyDefaultAuthorization: Boolean,
     ): Array<out RequestMatcher> {
         return if (applyDefaultAuthorization) {
-            arrayOf(defaultMatcher, *requestMatcher)
+            arrayOf(defaultMatcher, versionMatcher, *requestMatcher)
         } else {
-            requestMatcher
+            arrayOf(versionMatcher, *requestMatcher)
         }
     }
 

@@ -2,8 +2,9 @@ package com.stripe.android.paymentelement.confirmation.intent
 
 import android.content.Context
 import com.stripe.android.common.exception.stripeErrorMessage
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.exception.StripeException
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
@@ -44,7 +45,8 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
     @Assisted private val clientAttributionMetadata: ClientAttributionMetadata,
     private val context: Context,
     private val stripeRepository: StripeRepository,
-    private val requestOptions: ApiRequest.Options,
+    private val requestOptions: RequestCredentials,
+    private val apiConfiguration: ApiConfiguration.State,
     private val userFacingLogger: UserFacingLogger,
 ) : IntentConfirmationInterceptor {
     init {
@@ -81,6 +83,8 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                 clientAttributionMetadata,
             ),
             options = requestOptions,
+            apiConfiguration = apiConfiguration,
+            idempotencyKey = null,
         ).fold(
             onSuccess = { confirmationToken ->
                 handleDeferredOnConfirmationTokenCreated(
@@ -124,6 +128,8 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
             } else {
                 requestOptions
             },
+            apiConfiguration = apiConfiguration,
+            idempotencyKey = null,
         ).fold(
             onSuccess = { confirmationToken ->
                 handleDeferredOnConfirmationTokenCreated(
@@ -196,6 +202,8 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
         return stripeRepository.retrieveStripeIntent(
             clientSecret = clientSecret,
             options = requestOptions,
+            apiConfiguration = apiConfiguration,
+            idempotencyKey = null,
         ).mapCatching { intent ->
             if (intent.isConfirmed) {
                 ConfirmationDefinition.Action.Complete(
@@ -212,7 +220,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                         deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
                     ),
                     receivesResultInProcess = false,
-                )
+)
             } else {
                 confirmActionHelper.createConfirmAction(
                     clientSecret,

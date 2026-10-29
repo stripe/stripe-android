@@ -3,7 +3,7 @@ package com.stripe.android.paymentsheet.state
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
@@ -39,7 +39,7 @@ class DefaultPaymentMethodMessagePromotionsHelperTest {
         assertThat(request.country).isNull()
         assertThat(request.locale).isEqualTo(Locale.getDefault().language)
         assertThat(request.options).isEqualTo(
-            ApiRequest.Options(
+            RequestCredentials(
                 apiKey = DEFAULT_API_CONFIG.publishableKey,
                 stripeAccount = DEFAULT_API_CONFIG.stripeAccountId
             )
@@ -232,7 +232,8 @@ class DefaultPaymentMethodMessagePromotionsHelperTest {
             currency: String,
             country: String?,
             locale: String,
-            requestOptions: ApiRequest.Options
+            requestOptions: RequestCredentials,
+            idempotencyKey: String?,
         ): Result<PaymentMethodMessagePromotionList> {
             _calls.add(
                 Request(
@@ -251,7 +252,7 @@ class DefaultPaymentMethodMessagePromotionsHelperTest {
             val currency: String,
             val country: String?,
             val locale: String,
-            val options: ApiRequest.Options
+            val options: RequestCredentials
         )
     }
 

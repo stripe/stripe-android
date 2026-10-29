@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.annotation.RestrictTo
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.ApiConfiguration
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.RequestCredentials
 import dagger.Module
 import dagger.Provides
 import javax.inject.Provider
@@ -26,13 +26,13 @@ class ApiConfigurationFromPaymentConfigurationModule {
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Module
-class ApiRequestOptionsModule {
+class RequestCredentialsModule {
     @Provides
     fun provideApiRequestOptions(
         apiConfigurationProvider: Provider<ApiConfiguration.State>
-    ): ApiRequest.Options {
+    ): RequestCredentials {
         val apiConfiguration = apiConfigurationProvider.get()
-        return ApiRequest.Options(
+        return RequestCredentials(
             apiKey = apiConfiguration.publishableKey,
             stripeAccount = apiConfiguration.stripeAccountId,
         )

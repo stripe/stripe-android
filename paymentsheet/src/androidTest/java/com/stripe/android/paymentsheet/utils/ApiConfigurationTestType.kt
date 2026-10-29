@@ -33,7 +33,8 @@ internal sealed class ApiConfigurationTestType(
             },
             paymentConfigurationStripeAccount = paymentConfigurationStripeAccount,
             apiConfiguration = apiConfiguration?.let {
-                ApiConfiguration(publishableKey).stripeAccountId(it.build().stripeAccountId)
+                val state = it.build()
+                ApiConfiguration(publishableKey).stripeAccountId(state.stripeAccountId).betas(state.betas)
             },
             updatePaymentConfigurationPublishableKey = updatePaymentConfigurationPublishableKey,
         )
@@ -63,6 +64,15 @@ internal sealed class ApiConfigurationTestType(
         paymentConfigurationPublishableKey = IGNORED_PAYMENT_CONFIGURATION_PUBLISHABLE_KEY,
         paymentConfigurationStripeAccount = IGNORED_PAYMENT_CONFIGURATION_STRIPE_ACCOUNT,
         apiConfiguration = ApiConfiguration(TestApiKeys.PUBLISHABLE).stripeAccountId(TestApiKeys.ACCOUNT),
+        updatePaymentConfigurationPublishableKey = false,
+    )
+
+    data object ApiConfigurationWithBetas : ApiConfigurationTestType(
+        paymentConfigurationPublishableKey = null,
+        paymentConfigurationStripeAccount = null,
+        apiConfiguration = ApiConfiguration(TestApiKeys.PUBLISHABLE)
+            .stripeAccountId(TestApiKeys.ACCOUNT)
+            .betas(setOf("integration_beta=v1")),
         updatePaymentConfigurationPublishableKey = false,
     )
 

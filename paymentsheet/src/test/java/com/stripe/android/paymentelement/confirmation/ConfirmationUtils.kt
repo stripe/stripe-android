@@ -4,9 +4,10 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
-import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.googlepaylauncher.injection.InternalGooglePayPaymentMethodLauncherFactory
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.LinkPaymentLauncher
@@ -69,7 +70,7 @@ internal suspend fun createIntentConfirmationInterceptor(
     },
     preparePaymentMethodHandlerProvider: Provider<PreparePaymentMethodHandler?> = Provider { null }
 ): IntentConfirmationInterceptor {
-    val requestOptions = ApiRequest.Options(
+    val requestOptions = RequestCredentials(
         apiKey = publishableKeyProvider(),
         stripeAccount = null,
     )
@@ -106,6 +107,7 @@ internal suspend fun createIntentConfirmationInterceptor(
                     allowsManualConfirmation = false,
                     requestOptions = requestOptions,
                     clientAttributionMetadata = clientAttributionMetadata,
+                    apiConfiguration = ApiConfiguration("pk_test_123").build(),
                 )
             }
         },
@@ -125,6 +127,7 @@ internal suspend fun createIntentConfirmationInterceptor(
                     requestOptions = requestOptions,
                     userFacingLogger = FakeUserFacingLogger(),
                     clientAttributionMetadata = clientAttributionMetadata,
+                    apiConfiguration = ApiConfiguration("pk_test_123").build(),
                 )
             }
         },
@@ -138,6 +141,7 @@ internal suspend fun createIntentConfirmationInterceptor(
                     handler = handler,
                     stripeRepository = stripeRepository,
                     requestOptions = requestOptions,
+                    apiConfiguration = ApiConfiguration("pk_test_123").build(),
                 )
             }
         },
@@ -156,11 +160,14 @@ internal suspend fun createIntentConfirmationInterceptor(
                         publishableKey = "pk",
                     ),
                     apiRequestOptionsProvider = {
-                        ApiRequest.Options(
+                        RequestCredentials(
                             apiKey = DEFAULT_API_CONFIG.publishableKey,
                             stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
                         )
                     },
+                    apiConfigurationProvider = {
+                DEFAULT_API_CONFIG
+            },
                 )
                 return CheckoutSessionConfirmationInterceptor(
                     integrationMetadata = integrationMetadata,

@@ -8,7 +8,7 @@ import com.stripe.android.StripeIntentResult
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
@@ -33,9 +33,11 @@ import org.mockito.Mockito.atMost
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.times
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.atLeast
 import org.mockito.kotlin.atLeastOnce
 import org.mockito.kotlin.eq
+import org.mockito.kotlin.isNull
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -43,6 +45,18 @@ import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 internal class PaymentIntentFlowResultProcessorTest {
+    private suspend fun givenPaymentIntent(intent: PaymentIntent) {
+        whenever(
+            mockStripeRepository.retrievePaymentIntent(
+                clientSecret = any(),
+                options = any(),
+                expandFields = any<List<String>>(),
+                apiConfiguration = any(),
+                idempotencyKey = isNull(),
+            )
+        ).thenReturn(Result.success(intent))
+    }
+
     private val testDispatcher = UnconfinedTestDispatcher()
 
     private lateinit var mockStripeRepository: StripeRepository
@@ -55,7 +69,15 @@ internal class PaymentIntentFlowResultProcessorTest {
     @Test
     fun `processPaymentIntent() when shouldCancelSource=true should return canceled PaymentIntent`() =
         runTest(testDispatcher) {
-            whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
+            whenever(
+                mockStripeRepository.retrievePaymentIntent(
+                    clientSecret = any(),
+                    options = any(),
+                    expandFields = any<List<String>>(),
+                    apiConfiguration = any(),
+                    idempotencyKey = isNull(),
+                )
+            ).thenReturn(
                 Result.success(PaymentIntentFixtures.PI_REQUIRES_REDIRECT)
             )
             whenever(
@@ -63,12 +85,21 @@ internal class PaymentIntentFlowResultProcessorTest {
                     paymentIntentId = any(),
                     sourceId = any(),
                     options = any(),
+                    apiConfiguration = any(),
+                    idempotencyKey = isNull(),
                 )
             ).thenReturn(
                 Result.success(PaymentIntentFixtures.CANCELLED)
             )
 
-            whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenThrow(
+            whenever(
+                mockStripeRepository.refreshPaymentIntent(
+                any(),
+                any(),
+                    apiConfiguration = any(),
+                    idempotencyKey = isNull(),
+                )
+            ).thenThrow(
                 AssertionError("No expected to call refresh in this test")
             )
 
@@ -105,10 +136,15 @@ internal class PaymentIntentFlowResultProcessorTest {
                     type = PaymentIntent.Error.Type.CardError,
                 ),
             )
-            whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
-                Result.success(paymentIntentWithCardDeclined)
-            )
-            whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenThrow(
+            givenPaymentIntent(paymentIntentWithCardDeclined)
+            whenever(
+                mockStripeRepository.refreshPaymentIntent(
+                any(),
+                any(),
+                    apiConfiguration = any(),
+                    idempotencyKey = isNull(),
+                )
+            ).thenThrow(
                 AssertionError("No expected to call refresh in this test")
             )
 
@@ -125,9 +161,25 @@ internal class PaymentIntentFlowResultProcessorTest {
     @Test
     fun `when 3DS2 data contains intentId and publishableKey then they are used on source cancel`() =
         runTest(testDispatcher) {
-            whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any()))
+            whenever(
+                mockStripeRepository.retrievePaymentIntent(
+                    clientSecret = any(),
+                    options = any(),
+                    expandFields = any<List<String>>(),
+                    apiConfiguration = any(),
+                    idempotencyKey = isNull(),
+                )
+            )
                 .thenReturn(Result.success(PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2))
-            whenever(mockStripeRepository.cancelPaymentIntentSource(any(), any(), any()))
+            whenever(
+                mockStripeRepository.cancelPaymentIntentSource(
+                any(),
+                any(),
+                any(),
+                    apiConfiguration = any(),
+                    idempotencyKey = anyOrNull(),
+                )
+            )
                 .thenReturn(Result.success(PaymentIntentFixtures.PAYMENT_INTENT_WITH_CANCELED_3DS2_SOURCE))
 
             createProcessor().processResult(
@@ -142,7 +194,9 @@ internal class PaymentIntentFlowResultProcessorTest {
             verify(mockStripeRepository).cancelPaymentIntentSource(
                 eq("pi_1ExkUeAWhjPjYwPiLWUvXrSA"),
                 eq("source_id"),
-                eq(ApiRequest.Options("pk_test_nextActionData"))
+                eq(RequestCredentials("pk_test_nextActionData", stripeAccount = null)),
+                apiConfiguration = any(),
+                idempotencyKey = anyOrNull(),
             )
         }
 
@@ -152,10 +206,16 @@ internal class PaymentIntentFlowResultProcessorTest {
             val intent = PaymentIntentFixtures.PI_VISA_3DS2.copy(
                 status = StripeIntent.Status.RequiresAction
             )
-            whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
-                Result.success(intent)
-            )
-            whenever(mockStripeRepository.cancelPaymentIntentSource(any(), any(), any())).thenReturn(
+            givenPaymentIntent(intent)
+            whenever(
+                mockStripeRepository.cancelPaymentIntentSource(
+                any(),
+                any(),
+                any(),
+                    apiConfiguration = any(),
+                    idempotencyKey = anyOrNull(),
+                )
+            ).thenReturn(
                 Result.success(PaymentIntentFixtures.PAYMENT_INTENT_WITH_CANCELED_3DS2_SOURCE)
             )
 
@@ -168,8 +228,20 @@ internal class PaymentIntentFlowResultProcessorTest {
                 )
             ).getOrThrow()
 
-            verify(mockStripeRepository).cancelPaymentIntentSource(any(), eq("source_id"), any())
-            verify(mockStripeRepository).retrievePaymentIntent(any(), any(), any())
+            verify(mockStripeRepository).cancelPaymentIntentSource(
+                any(),
+                eq("source_id"),
+                any(),
+                apiConfiguration = any(),
+                idempotencyKey = anyOrNull(),
+            )
+            verify(mockStripeRepository).retrievePaymentIntent(
+                clientSecret = any(),
+                options = any(),
+                expandFields = any<List<String>>(),
+                apiConfiguration = any(),
+                idempotencyKey = isNull(),
+            )
         }
 
     @Test
@@ -181,7 +253,15 @@ internal class PaymentIntentFlowResultProcessorTest {
                 paymentMethodTypes = listOf("card", "revolut_pay")
             )
             val succeededIntent = intent.copy(status = StripeIntent.Status.Succeeded)
-            whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
+            whenever(
+                mockStripeRepository.retrievePaymentIntent(
+                    clientSecret = any(),
+                    options = any(),
+                    expandFields = any<List<String>>(),
+                    apiConfiguration = any(),
+                    idempotencyKey = isNull(),
+                )
+            ).thenReturn(
                 Result.success(intent),
                 Result.success(succeededIntent)
             )
@@ -196,40 +276,73 @@ internal class PaymentIntentFlowResultProcessorTest {
             ).getOrThrow()
 
             assertThat(result.intent.status).isEqualTo(StripeIntent.Status.Succeeded)
-            verify(mockStripeRepository, never()).cancelPaymentIntentSource(any(), any(), any())
+            verify(mockStripeRepository, never()).cancelPaymentIntentSource(
+                any(),
+                any(),
+                any(),
+                apiConfiguration = any(),
+                idempotencyKey = anyOrNull(),
+            )
         }
 
     @Test
     fun `no refresh when user cancels the payment`() = runTest(testDispatcher) {
-        whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
+        whenever(
+            mockStripeRepository.retrievePaymentIntent(
+                clientSecret = any(),
+                options = any(),
+                expandFields = any<List<String>>(),
+                apiConfiguration = any(),
+                idempotencyKey = isNull(),
+            )
+        ).thenReturn(
             Result.success(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
         )
 
-        whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenThrow(
+        whenever(
+            mockStripeRepository.refreshPaymentIntent(any(), any(), apiConfiguration = any(), idempotencyKey = isNull())
+        ).thenThrow(
             AssertionError("No expected to call refresh in this test")
         )
 
         val clientSecret = "pi_3JkCxKBNJ02ErVOj0kNqBMAZ_secret_bC6oXqo976LFM06Z9rlhmzUQq"
-        val requestOptions = ApiRequest.Options(apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+        val requestOptions = RequestCredentials(apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, stripeAccount = null)
 
         verify(mockStripeRepository, never()).refreshPaymentIntent(
             eq(clientSecret),
-            eq(requestOptions)
+            eq(requestOptions),
+            apiConfiguration = any(),
+            idempotencyKey = isNull(),
         )
     }
 
     @Test
     fun `refresh reaches max time user confirms the payment`() =
         runTest(testDispatcher) {
-            whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
+            whenever(
+                mockStripeRepository.retrievePaymentIntent(
+                    clientSecret = any(),
+                    options = any(),
+                    expandFields = any<List<String>>(),
+                    apiConfiguration = any(),
+                    idempotencyKey = isNull(),
+                )
+            ).thenReturn(
                 Result.success(PaymentIntentFixtures.PI_REQUIRES_WECHAT_PAY_AUTHORIZE)
             )
-            whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenThrow(
+            whenever(
+                mockStripeRepository.refreshPaymentIntent(
+                any(),
+                any(),
+                    apiConfiguration = any(),
+                    idempotencyKey = isNull(),
+                )
+            ).thenThrow(
                 AssertionError("No expected to call refresh in this test")
             )
 
             val clientSecret = "pi_3JkCxKBNJ02ErVOj0kNqBMAZ_secret_bC6oXqo976LFM06Z9rlhmzUQq"
-            val requestOptions = ApiRequest.Options(apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+            val requestOptions = RequestCredentials(apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, stripeAccount = null)
 
             createProcessor().processResult(
                 PaymentFlowResult.Unvalidated(
@@ -244,13 +357,20 @@ internal class PaymentIntentFlowResultProcessorTest {
             ).retrievePaymentIntent(
                 eq(clientSecret),
                 eq(requestOptions),
-                eq(PaymentFlowResultProcessor.EXPAND_PAYMENT_METHOD)
+                eq(PaymentFlowResultProcessor.EXPAND_PAYMENT_METHOD),
+                apiConfiguration = any(),
+                idempotencyKey = isNull(),
             )
 
             verify(
                 mockStripeRepository,
                 times(0)
-            ).refreshPaymentIntent(eq(clientSecret), eq(requestOptions))
+            ).refreshPaymentIntent(
+                eq(clientSecret),
+                eq(requestOptions),
+                apiConfiguration = any(),
+                idempotencyKey = isNull(),
+            )
         }
 
     @Test
@@ -437,11 +557,16 @@ internal class PaymentIntentFlowResultProcessorTest {
             val intent = PaymentIntentFixtures.PI_VISA_3DS2.copy(
                 status = StripeIntent.Status.RequiresAction
             )
-            whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
-                Result.success(intent)
-            )
+            givenPaymentIntent(intent)
 
-            whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenThrow(
+            whenever(
+                mockStripeRepository.refreshPaymentIntent(
+                any(),
+                any(),
+                    apiConfiguration = any(),
+                    idempotencyKey = isNull(),
+                )
+            ).thenThrow(
                 AssertionError("No expected to call refresh in this test")
             )
 
@@ -459,14 +584,26 @@ internal class PaymentIntentFlowResultProcessorTest {
             verify(
                 mockStripeRepository,
                 atLeast(MINIMUM_RETRIEVE_CALLS)
-            ).retrievePaymentIntent(any(), any(), any())
+            ).retrievePaymentIntent(
+                clientSecret = any(),
+                options = any(),
+                expandFields = any<List<String>>(),
+                apiConfiguration = any(),
+                idempotencyKey = isNull(),
+            )
 
             verify(
                 mockStripeRepository,
                 atMost(
                     getMaxNumberOfInvocations(PaymentMethod.Type.Card)
                 )
-            ).retrievePaymentIntent(any(), any(), any())
+            ).retrievePaymentIntent(
+                clientSecret = any(),
+                options = any(),
+                expandFields = any<List<String>>(),
+                apiConfiguration = any(),
+                idempotencyKey = isNull(),
+            )
 
             assertThat(result)
                 .isEqualTo(
@@ -486,7 +623,15 @@ internal class PaymentIntentFlowResultProcessorTest {
 
         val succeededIntent = processingIntent.copy(status = StripeIntent.Status.Succeeded)
 
-        whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
+        whenever(
+            mockStripeRepository.retrievePaymentIntent(
+                clientSecret = any(),
+                options = any(),
+                expandFields = any<List<String>>(),
+                apiConfiguration = any(),
+                idempotencyKey = isNull(),
+            )
+        ).thenReturn(
             Result.success(processingIntent),
             Result.failure(APIConnectionException()),
             Result.failure(APIConnectionException()),
@@ -495,12 +640,14 @@ internal class PaymentIntentFlowResultProcessorTest {
             Result.success(succeededIntent),
         )
 
-        whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenThrow(
+        whenever(
+            mockStripeRepository.refreshPaymentIntent(any(), any(), apiConfiguration = any(), idempotencyKey = isNull())
+        ).thenThrow(
             AssertionError("No expected to call refresh in this test")
         )
 
         val clientSecret = requireNotNull(processingIntent.clientSecret)
-        val requestOptions = ApiRequest.Options(apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+        val requestOptions = RequestCredentials(apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, stripeAccount = null)
 
         val result = createProcessor().processResult(
             PaymentFlowResult.Unvalidated(
@@ -516,6 +663,8 @@ internal class PaymentIntentFlowResultProcessorTest {
             eq(clientSecret),
             eq(requestOptions),
             eq(PaymentFlowResultProcessor.EXPAND_PAYMENT_METHOD),
+            apiConfiguration = any(),
+            idempotencyKey = isNull(),
         )
 
         val expectedResult = PaymentIntentResult(
@@ -537,11 +686,16 @@ internal class PaymentIntentFlowResultProcessorTest {
                 paymentMethodTypes = listOf("card", "swish"),
             )
 
-            whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
-                Result.success(requiresActionIntent),
-            )
+            givenPaymentIntent(requiresActionIntent)
 
-            whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenThrow(
+            whenever(
+                mockStripeRepository.refreshPaymentIntent(
+                any(),
+                any(),
+                    apiConfiguration = any(),
+                    idempotencyKey = isNull(),
+                )
+            ).thenThrow(
                 AssertionError("No expected to call refresh in this test")
             )
 
@@ -566,14 +720,26 @@ internal class PaymentIntentFlowResultProcessorTest {
             verify(
                 mockStripeRepository,
                 atLeast(MINIMUM_RETRIEVE_CALLS)
-            ).retrievePaymentIntent(any(), any(), any())
+            ).retrievePaymentIntent(
+                clientSecret = any(),
+                options = any(),
+                expandFields = any<List<String>>(),
+                apiConfiguration = any(),
+                idempotencyKey = isNull(),
+            )
 
             verify(
                 mockStripeRepository,
                 atMost(
                     getMaxNumberOfInvocations(paymentMethod.type!!)
                 )
-            ).retrievePaymentIntent(any(), any(), any())
+            ).retrievePaymentIntent(
+                clientSecret = any(),
+                options = any(),
+                expandFields = any<List<String>>(),
+                apiConfiguration = any(),
+                idempotencyKey = isNull(),
+            )
         }
 
     @Test
@@ -587,13 +753,28 @@ internal class PaymentIntentFlowResultProcessorTest {
 
             val succeededIntent = requiresActionIntent.copy(status = StripeIntent.Status.Succeeded)
 
-            whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
+            whenever(
+                mockStripeRepository.retrievePaymentIntent(
+                    clientSecret = any(),
+                    options = any(),
+                    expandFields = any<List<String>>(),
+                    apiConfiguration = any(),
+                    idempotencyKey = isNull(),
+                )
+            ).thenReturn(
                 Result.success(requiresActionIntent),
                 Result.success(requiresActionIntent),
                 Result.success(succeededIntent),
             )
 
-            whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenThrow(
+            whenever(
+                mockStripeRepository.refreshPaymentIntent(
+                any(),
+                any(),
+                    apiConfiguration = any(),
+                    idempotencyKey = isNull(),
+                )
+            ).thenThrow(
                 AssertionError("No expected to call refresh in this test")
             )
 
@@ -626,12 +807,27 @@ internal class PaymentIntentFlowResultProcessorTest {
 
             val succeededIntent = requiresActionIntent.copy(status = StripeIntent.Status.Succeeded)
 
-            whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
+            whenever(
+                mockStripeRepository.retrievePaymentIntent(
+                    clientSecret = any(),
+                    options = any(),
+                    expandFields = any<List<String>>(),
+                    apiConfiguration = any(),
+                    idempotencyKey = isNull(),
+                )
+            ).thenReturn(
                 Result.success(requiresActionIntent),
                 Result.failure(Exception("Unexpected retrieve call")),
             )
 
-            whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenReturn(
+            whenever(
+                mockStripeRepository.refreshPaymentIntent(
+                any(),
+                any(),
+                    apiConfiguration = any(),
+                    idempotencyKey = isNull(),
+                )
+            ).thenReturn(
                 Result.success(succeededIntent),
             )
 
@@ -662,12 +858,27 @@ internal class PaymentIntentFlowResultProcessorTest {
                 paymentMethodTypes = listOf("card", "cashapp"),
             )
 
-            whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
+            whenever(
+                mockStripeRepository.retrievePaymentIntent(
+                    clientSecret = any(),
+                    options = any(),
+                    expandFields = any<List<String>>(),
+                    apiConfiguration = any(),
+                    idempotencyKey = isNull(),
+                )
+            ).thenReturn(
                 Result.success(requiresActionIntent),
                 Result.failure(Exception("Unexpected retrieve call")),
             )
 
-            whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenReturn(
+            whenever(
+                mockStripeRepository.refreshPaymentIntent(
+                any(),
+                any(),
+                    apiConfiguration = any(),
+                    idempotencyKey = isNull(),
+                )
+            ).thenReturn(
                 Result.success(requiresActionIntent),
             )
 
@@ -689,7 +900,12 @@ internal class PaymentIntentFlowResultProcessorTest {
 
             assertThat(result).isEqualTo(expectedResult)
 
-            verify(mockStripeRepository).refreshPaymentIntent(any(), any())
+            verify(mockStripeRepository).refreshPaymentIntent(
+                any(),
+                any(),
+                apiConfiguration = any(),
+                idempotencyKey = isNull(),
+            )
         }
 
     @Test
@@ -702,11 +918,16 @@ internal class PaymentIntentFlowResultProcessorTest {
                 paymentMethodTypes = listOf("card", "amazon_pay"),
             )
 
-            whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
-                Result.success(requiresActionIntent),
-            )
+            givenPaymentIntent(requiresActionIntent)
 
-            whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenThrow(
+            whenever(
+                mockStripeRepository.refreshPaymentIntent(
+                any(),
+                any(),
+                    apiConfiguration = any(),
+                    idempotencyKey = isNull(),
+                )
+            ).thenThrow(
                 AssertionError("No expected to call refresh in this test")
             )
 
@@ -731,14 +952,26 @@ internal class PaymentIntentFlowResultProcessorTest {
             verify(
                 mockStripeRepository,
                 atLeast(MINIMUM_RETRIEVE_CALLS)
-            ).retrievePaymentIntent(any(), any(), any())
+            ).retrievePaymentIntent(
+                clientSecret = any(),
+                options = any(),
+                expandFields = any<List<String>>(),
+                apiConfiguration = any(),
+                idempotencyKey = isNull(),
+            )
 
             verify(
                 mockStripeRepository,
                 atMost(
                     getMaxNumberOfInvocations(paymentMethod.type!!)
                 )
-            ).retrievePaymentIntent(any(), any(), any())
+            ).retrievePaymentIntent(
+                clientSecret = any(),
+                options = any(),
+                expandFields = any<List<String>>(),
+                apiConfiguration = any(),
+                idempotencyKey = isNull(),
+            )
         }
 
     @Test
@@ -752,13 +985,28 @@ internal class PaymentIntentFlowResultProcessorTest {
 
             val succeededIntent = requiresActionIntent.copy(status = StripeIntent.Status.Succeeded)
 
-            whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
+            whenever(
+                mockStripeRepository.retrievePaymentIntent(
+                    clientSecret = any(),
+                    options = any(),
+                    expandFields = any<List<String>>(),
+                    apiConfiguration = any(),
+                    idempotencyKey = isNull(),
+                )
+            ).thenReturn(
                 Result.success(requiresActionIntent),
                 Result.success(requiresActionIntent),
                 Result.success(succeededIntent),
             )
 
-            whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenThrow(
+            whenever(
+                mockStripeRepository.refreshPaymentIntent(
+                any(),
+                any(),
+                    apiConfiguration = any(),
+                    idempotencyKey = isNull(),
+                )
+            ).thenThrow(
                 AssertionError("No expected to call refresh in this test")
             )
 
@@ -790,11 +1038,16 @@ internal class PaymentIntentFlowResultProcessorTest {
                 paymentMethodTypes = listOf("card", "revolut_pay"),
             )
 
-            whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
-                Result.success(requiresActionIntent),
-            )
+            givenPaymentIntent(requiresActionIntent)
 
-            whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenThrow(
+            whenever(
+                mockStripeRepository.refreshPaymentIntent(
+                any(),
+                any(),
+                    apiConfiguration = any(),
+                    idempotencyKey = isNull(),
+                )
+            ).thenThrow(
                 AssertionError("No expected to call refresh in this test")
             )
 
@@ -819,12 +1072,24 @@ internal class PaymentIntentFlowResultProcessorTest {
             verify(
                 mockStripeRepository,
                 atLeast(3)
-            ).retrievePaymentIntent(any(), any(), any())
+            ).retrievePaymentIntent(
+                clientSecret = any(),
+                options = any(),
+                expandFields = any<List<String>>(),
+                apiConfiguration = any(),
+                idempotencyKey = isNull(),
+            )
 
             verify(
                 mockStripeRepository,
                 atMost(8)
-            ).retrievePaymentIntent(any(), any(), any())
+            ).retrievePaymentIntent(
+                clientSecret = any(),
+                options = any(),
+                expandFields = any<List<String>>(),
+                apiConfiguration = any(),
+                idempotencyKey = isNull(),
+            )
         }
 
     @Test
@@ -838,13 +1103,28 @@ internal class PaymentIntentFlowResultProcessorTest {
 
             val succeededIntent = requiresActionIntent.copy(status = StripeIntent.Status.Succeeded)
 
-            whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
+            whenever(
+                mockStripeRepository.retrievePaymentIntent(
+                    clientSecret = any(),
+                    options = any(),
+                    expandFields = any<List<String>>(),
+                    apiConfiguration = any(),
+                    idempotencyKey = isNull(),
+                )
+            ).thenReturn(
                 Result.success(requiresActionIntent),
                 Result.success(requiresActionIntent),
                 Result.success(succeededIntent),
             )
 
-            whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenThrow(
+            whenever(
+                mockStripeRepository.refreshPaymentIntent(
+                any(),
+                any(),
+                    apiConfiguration = any(),
+                    idempotencyKey = isNull(),
+                )
+            ).thenThrow(
                 AssertionError("No expected to call refresh in this test")
             )
 
@@ -873,11 +1153,16 @@ internal class PaymentIntentFlowResultProcessorTest {
                 status = StripeIntent.Status.Processing
             )
 
-            whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
-                Result.success(processingIntent)
-            )
+            givenPaymentIntent(processingIntent)
 
-            whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenThrow(
+            whenever(
+                mockStripeRepository.refreshPaymentIntent(
+                any(),
+                any(),
+                    apiConfiguration = any(),
+                    idempotencyKey = isNull(),
+                )
+            ).thenThrow(
                 AssertionError("Not expected to call refresh in this test")
             )
 
@@ -891,7 +1176,13 @@ internal class PaymentIntentFlowResultProcessorTest {
             ).getOrThrow()
 
             // Should only retrieve once (no polling)
-            verify(mockStripeRepository, times(1)).retrievePaymentIntent(any(), any(), any())
+            verify(mockStripeRepository, times(1)).retrievePaymentIntent(
+                clientSecret = any(),
+                options = any(),
+                expandFields = any<List<String>>(),
+                apiConfiguration = any(),
+                idempotencyKey = isNull(),
+            )
 
             assertThat(result)
                 .isEqualTo(
@@ -912,12 +1203,27 @@ internal class PaymentIntentFlowResultProcessorTest {
                 paymentMethod = paymentMethodWithUnknownType,
             )
 
-            whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
+            whenever(
+                mockStripeRepository.retrievePaymentIntent(
+                    clientSecret = any(),
+                    options = any(),
+                    expandFields = any<List<String>>(),
+                    apiConfiguration = any(),
+                    idempotencyKey = isNull(),
+                )
+            ).thenReturn(
                 Result.success(requiresActionIntent),
                 Result.failure(Exception("Unexpected second retrieve call")),
             )
 
-            whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenThrow(
+            whenever(
+                mockStripeRepository.refreshPaymentIntent(
+                any(),
+                any(),
+                    apiConfiguration = any(),
+                    idempotencyKey = isNull(),
+                )
+            ).thenThrow(
                 AssertionError("Not expected to call refresh in this test")
             )
 
@@ -930,7 +1236,13 @@ internal class PaymentIntentFlowResultProcessorTest {
                 )
             ).getOrThrow()
 
-            verify(mockStripeRepository, times(1)).retrievePaymentIntent(any(), any(), any())
+            verify(mockStripeRepository, times(1)).retrievePaymentIntent(
+                clientSecret = any(),
+                options = any(),
+                expandFields = any<List<String>>(),
+                apiConfiguration = any(),
+                idempotencyKey = isNull(),
+            )
 
             assertThat(result).isEqualTo(
                 PaymentIntentResult(
@@ -950,12 +1262,27 @@ internal class PaymentIntentFlowResultProcessorTest {
                 paymentMethod = null,
             )
 
-            whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
+            whenever(
+                mockStripeRepository.retrievePaymentIntent(
+                    clientSecret = any(),
+                    options = any(),
+                    expandFields = any<List<String>>(),
+                    apiConfiguration = any(),
+                    idempotencyKey = isNull(),
+                )
+            ).thenReturn(
                 Result.success(requiresActionIntent),
                 Result.failure(Exception("Unexpected second retrieve call")),
             )
 
-            whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenThrow(
+            whenever(
+                mockStripeRepository.refreshPaymentIntent(
+                any(),
+                any(),
+                    apiConfiguration = any(),
+                    idempotencyKey = isNull(),
+                )
+            ).thenThrow(
                 AssertionError("Not expected to call refresh in this test")
             )
 
@@ -968,7 +1295,13 @@ internal class PaymentIntentFlowResultProcessorTest {
                 )
             ).getOrThrow()
 
-            verify(mockStripeRepository, times(1)).retrievePaymentIntent(any(), any(), any())
+            verify(mockStripeRepository, times(1)).retrievePaymentIntent(
+                clientSecret = any(),
+                options = any(),
+                expandFields = any<List<String>>(),
+                apiConfiguration = any(),
+                idempotencyKey = isNull(),
+            )
 
             assertThat(result).isEqualTo(
                 PaymentIntentResult(
@@ -991,13 +1324,28 @@ internal class PaymentIntentFlowResultProcessorTest {
 
             val succeededIntent = requiresActionIntent.copy(status = StripeIntent.Status.Succeeded)
 
-            whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
+            whenever(
+                mockStripeRepository.retrievePaymentIntent(
+                    clientSecret = any(),
+                    options = any(),
+                    expandFields = any<List<String>>(),
+                    apiConfiguration = any(),
+                    idempotencyKey = isNull(),
+                )
+            ).thenReturn(
                 Result.success(requiresActionIntent),
                 Result.success(requiresActionIntent),
                 Result.success(succeededIntent),
             )
 
-            whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenThrow(
+            whenever(
+                mockStripeRepository.refreshPaymentIntent(
+                any(),
+                any(),
+                    apiConfiguration = any(),
+                    idempotencyKey = isNull(),
+                )
+            ).thenThrow(
                 AssertionError("No expected to call refresh in this test")
             )
 
@@ -1016,7 +1364,13 @@ internal class PaymentIntentFlowResultProcessorTest {
                 failureMessage = null,
             )
 
-            verify(mockStripeRepository, times(3)).retrievePaymentIntent(any(), any(), any())
+            verify(mockStripeRepository, times(3)).retrievePaymentIntent(
+                clientSecret = any(),
+                options = any(),
+                expandFields = any<List<String>>(),
+                apiConfiguration = any(),
+                idempotencyKey = isNull(),
+            )
 
             assertThat(result).isEqualTo(expectedResult)
         }
@@ -1031,11 +1385,16 @@ internal class PaymentIntentFlowResultProcessorTest {
                 paymentMethodTypes = listOf("card", "swish"),
             )
 
-            whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
-                Result.success(requiresActionIntent),
-            )
+            givenPaymentIntent(requiresActionIntent)
 
-            whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenThrow(
+            whenever(
+                mockStripeRepository.refreshPaymentIntent(
+                any(),
+                any(),
+                    apiConfiguration = any(),
+                    idempotencyKey = isNull(),
+                )
+            ).thenThrow(
                 AssertionError("No expected to call refresh in this test")
             )
 
@@ -1072,13 +1431,28 @@ internal class PaymentIntentFlowResultProcessorTest {
             // (the initial poll inside pollStripeIntentUntilTerminalState) both succeed with a known
             // status; every retrieve after that (including the final one made after the polling
             // window closes) fails.
-            whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
+            whenever(
+                mockStripeRepository.retrievePaymentIntent(
+                    clientSecret = any(),
+                    options = any(),
+                    expandFields = any<List<String>>(),
+                    apiConfiguration = any(),
+                    idempotencyKey = isNull(),
+                )
+            ).thenReturn(
                 Result.success(requiresActionIntent),
                 Result.success(requiresActionIntent),
                 Result.failure(APIConnectionException()),
             )
 
-            whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenThrow(
+            whenever(
+                mockStripeRepository.refreshPaymentIntent(
+                any(),
+                any(),
+                    apiConfiguration = any(),
+                    idempotencyKey = isNull(),
+                )
+            ).thenThrow(
                 AssertionError("No expected to call refresh in this test")
             )
 
@@ -1116,12 +1490,27 @@ internal class PaymentIntentFlowResultProcessorTest {
             )
             val succeededIntent = requiresActionIntent.copy(status = StripeIntent.Status.Succeeded)
 
-            whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
+            whenever(
+                mockStripeRepository.retrievePaymentIntent(
+                    clientSecret = any(),
+                    options = any(),
+                    expandFields = any<List<String>>(),
+                    apiConfiguration = any(),
+                    idempotencyKey = isNull(),
+                )
+            ).thenReturn(
                 Result.success(requiresActionIntent),
                 Result.success(succeededIntent),
             )
 
-            whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenThrow(
+            whenever(
+                mockStripeRepository.refreshPaymentIntent(
+                any(),
+                any(),
+                    apiConfiguration = any(),
+                    idempotencyKey = isNull(),
+                )
+            ).thenThrow(
                 AssertionError("No expected to call refresh in this test")
             )
 
@@ -1162,12 +1551,27 @@ internal class PaymentIntentFlowResultProcessorTest {
                 paymentMethodTypes = listOf(type.code),
             )
 
-            whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
+            whenever(
+                mockStripeRepository.retrievePaymentIntent(
+                    clientSecret = any(),
+                    options = any(),
+                    expandFields = any<List<String>>(),
+                    apiConfiguration = any(),
+                    idempotencyKey = isNull(),
+                )
+            ).thenReturn(
                 Result.success(requiresActionIntent),
                 Result.failure(Exception("Unexpected second retrieve call")),
             )
 
-            whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenThrow(
+            whenever(
+                mockStripeRepository.refreshPaymentIntent(
+                any(),
+                any(),
+                    apiConfiguration = any(),
+                    idempotencyKey = isNull(),
+                )
+            ).thenThrow(
                 AssertionError("Not expected to call refresh in this test")
             )
 
@@ -1181,7 +1585,13 @@ internal class PaymentIntentFlowResultProcessorTest {
                 )
             ).getOrThrow()
 
-            verify(mockStripeRepository, times(1)).retrievePaymentIntent(any(), any(), any())
+            verify(mockStripeRepository, times(1)).retrievePaymentIntent(
+                clientSecret = any(),
+                options = any(),
+                expandFields = any<List<String>>(),
+                apiConfiguration = any(),
+                idempotencyKey = isNull(),
+            )
             pollingAnalyticsEventReporter.ensureAllEventsConsumed()
         }
 
@@ -1190,17 +1600,27 @@ internal class PaymentIntentFlowResultProcessorTest {
         refreshedIntent: PaymentIntent = initialIntent,
         expectedIntent: PaymentIntent = refreshedIntent
     ) {
-        whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
+        whenever(
+            mockStripeRepository.retrievePaymentIntent(
+                clientSecret = any(),
+                options = any(),
+                expandFields = any<List<String>>(),
+                apiConfiguration = any(),
+                idempotencyKey = isNull(),
+            )
+        ).thenReturn(
             Result.success(initialIntent),
             Result.success(refreshedIntent),
         )
 
-        whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenThrow(
+        whenever(
+            mockStripeRepository.refreshPaymentIntent(any(), any(), apiConfiguration = any(), idempotencyKey = isNull())
+        ).thenThrow(
             AssertionError("No expected to call refresh in this test")
         )
 
         val clientSecret = requireNotNull(initialIntent.clientSecret)
-        val requestOptions = ApiRequest.Options(apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+        val requestOptions = RequestCredentials(apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, stripeAccount = null)
 
         val result = createProcessor().processResult(
             PaymentFlowResult.Unvalidated(
@@ -1212,7 +1632,9 @@ internal class PaymentIntentFlowResultProcessorTest {
         verify(mockStripeRepository, atLeastOnce()).retrievePaymentIntent(
             eq(clientSecret),
             eq(requestOptions),
-            eq(PaymentFlowResultProcessor.EXPAND_PAYMENT_METHOD)
+            eq(PaymentFlowResultProcessor.EXPAND_PAYMENT_METHOD),
+            apiConfiguration = any(),
+            idempotencyKey = isNull(),
         )
 
         assertThat(result)
@@ -1231,7 +1653,10 @@ internal class PaymentIntentFlowResultProcessorTest {
     ): PaymentIntentFlowResultProcessor = PaymentIntentFlowResultProcessor(
         ApplicationProvider.getApplicationContext(),
         {
-            ApiConfiguration.State(publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, stripeAccountId = null)
+            ApiConfiguration.State(
+                publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                stripeAccountId = null,
+            )
         },
         stripeRepository,
         Logger.noop(),
@@ -1246,15 +1671,17 @@ internal class PaymentIntentFlowResultProcessorTest {
     ) : AbsFakeStripeRepository() {
         override suspend fun retrievePaymentIntent(
             clientSecret: String,
-            options: ApiRequest.Options,
-            expandFields: List<String>
+            options: RequestCredentials,
+            expandFields: List<String>,
+            idempotencyKey: String?,
         ): Result<PaymentIntent> {
             return retrievePaymentIntent()
         }
 
         override suspend fun refreshPaymentIntent(
             clientSecret: String,
-            options: ApiRequest.Options
+            options: RequestCredentials,
+            idempotencyKey: String?,
         ): Result<PaymentIntent> {
             return refreshPaymentIntent()
         }

@@ -18,7 +18,7 @@ import com.stripe.android.R
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.googlepaylauncher.injection.DaggerGooglePayPaymentMethodLauncherViewModelFactoryComponent
 import com.stripe.android.model.GooglePayResult
@@ -144,7 +144,7 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
         return (
             args.config.merchantCountryCode.equals(Locale.US.country, ignoreCase = true) ||
                 args.config.merchantCountryCode.equals(Locale.CANADA.country, ignoreCase = true)
-            ) && args.amount == 0L
+        ) && args.amount == 0L
     }
 
     suspend fun loadPaymentData(): Task<PaymentData> {
@@ -168,12 +168,17 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
             billingEmailOverride = args.billingEmailOverride,
         )
 
-        val requestOptions = ApiRequest.Options(
+        val requestOptions = RequestCredentials(
             apiKey = args.apiConfiguration.publishableKey,
             stripeAccount = args.apiConfiguration.stripeAccountId
         )
 
-        return stripeRepository.createPaymentMethod(params, requestOptions).fold(
+        return stripeRepository.createPaymentMethod(
+            params,
+            requestOptions,
+            apiConfiguration = args.apiConfiguration,
+            idempotencyKey = null,
+        ).fold(
             onSuccess = {
                 GooglePayPaymentMethodLauncher.Result.Completed(
                     paymentMethod = it,

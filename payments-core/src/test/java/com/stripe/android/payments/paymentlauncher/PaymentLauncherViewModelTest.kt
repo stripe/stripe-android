@@ -18,7 +18,7 @@ import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.PaymentIntent
@@ -355,7 +355,7 @@ class PaymentLauncherViewModelTest {
             assertThat(repository.retrievePaymentIntentCalls.awaitItem()).isEqualTo(
                 FakeStripeRepository.RetrieveIntentCall(
                     clientSecret = CLIENT_SECRET,
-                    options = ApiRequest.Options(
+                    options = RequestCredentials(
                         apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
                         stripeAccount = callbackAccount,
                     ),
@@ -387,7 +387,7 @@ class PaymentLauncherViewModelTest {
             assertThat(repository.retrieveSetupIntentCalls.awaitItem()).isEqualTo(
                 FakeStripeRepository.RetrieveIntentCall(
                     clientSecret = SETUP_CLIENT_SECRET,
-                    options = ApiRequest.Options(
+                    options = RequestCredentials(
                         apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
                         stripeAccount = callbackAccount,
                     ),
@@ -874,7 +874,7 @@ class PaymentLauncherViewModelTest {
             stripeAccountId = TEST_STRIPE_ACCOUNT_ID,
         )
         val EXPAND_PAYMENT_METHOD = listOf("payment_method")
-        val API_REQUEST_OPTIONS = ApiRequest.Options(
+        val API_REQUEST_OPTIONS = RequestCredentials(
             apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             stripeAccount = TEST_STRIPE_ACCOUNT_ID,
         )

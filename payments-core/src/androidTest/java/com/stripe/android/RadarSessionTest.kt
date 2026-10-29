@@ -2,7 +2,7 @@ package com.stripe.android
 
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.model.RadarSessionWithHCaptcha
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.testing.AbsFakeStripeRepository
@@ -19,7 +19,10 @@ import org.junit.rules.RuleChain
 
 class RadarSessionTest {
     private val mockApiRepository: StripeRepository = object : AbsFakeStripeRepository() {
-        override suspend fun createRadarSession(requestOptions: ApiRequest.Options): Result<RadarSessionWithHCaptcha> {
+        override suspend fun createRadarSession(
+            requestOptions: RequestCredentials,
+            idempotencyKey: String?,
+        ): Result<RadarSessionWithHCaptcha> {
             return Result.success(RadarSessionWithHCaptcha("rse_id", HCAPTCHA_SITE_KEY, "rqdata"))
         }
 
@@ -27,7 +30,8 @@ class RadarSessionTest {
             radarSessionToken: String,
             hcaptchaToken: String,
             hcaptchaEKey: String?,
-            requestOptions: ApiRequest.Options
+            requestOptions: RequestCredentials,
+            idempotencyKey: String?,
         ): Result<RadarSessionWithHCaptcha> {
             if (hcaptchaToken == "20000000-aaaa-bbbb-cccc-000000000002") {
                 return Result.success(RadarSessionWithHCaptcha("rse_id", HCAPTCHA_SITE_KEY, "rqdata"))

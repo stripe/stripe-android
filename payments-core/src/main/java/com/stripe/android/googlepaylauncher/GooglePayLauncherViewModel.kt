@@ -22,7 +22,7 @@ import com.stripe.android.StripePaymentController
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.googlepaylauncher.GooglePayLauncher.BillingAddressConfig.Format
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -47,7 +47,7 @@ import kotlin.coroutines.CoroutineContext
 @Suppress("LongParameterList")
 internal class GooglePayLauncherViewModel(
     private val paymentsClient: PaymentsClient,
-    private val requestOptions: ApiRequest.Options,
+    private val requestOptions: RequestCredentials,
     private val args: GooglePayLauncherContract.Args,
     private val stripeRepository: StripeRepository,
     private val paymentController: PaymentController,
@@ -106,7 +106,8 @@ internal class GooglePayLauncherViewModel(
             is GooglePayLauncherContract.PaymentIntentArgs -> {
                 stripeRepository.retrievePaymentIntent(
                     args.clientSecret,
-                    requestOptions
+                    requestOptions,
+                    idempotencyKey = null,
                 ).map { intent ->
                     createTransactionInfo(
                         stripeIntent = intent,
@@ -118,7 +119,8 @@ internal class GooglePayLauncherViewModel(
             is GooglePayLauncherContract.SetupIntentArgs -> {
                 stripeRepository.retrieveSetupIntent(
                     args.clientSecret,
-                    requestOptions
+                    requestOptions,
+                    idempotencyKey = null,
                 ).map { intent ->
                     createTransactionInfo(
                         stripeIntent = intent,
@@ -219,7 +221,8 @@ internal class GooglePayLauncherViewModel(
             paymentController.startConfirmAndAuth(
                 host,
                 confirmStripeIntentParams,
-                requestOptions
+                requestOptions,
+                idempotencyKey = null,
             )
         }
     }
@@ -299,7 +302,9 @@ internal class GooglePayLauncherViewModel(
                 logger = logger,
                 workContext = workContext,
                 productUsageTokens = productUsageTokens,
-                paymentAnalyticsRequestFactory = analyticsRequestFactory
+                paymentAnalyticsRequestFactory = analyticsRequestFactory,
+                requestApiConfiguration = null,
+                initializeRequestServices = true,
             )
 
             val errorReporter = ErrorReporter.createFallbackInstance(
@@ -328,7 +333,7 @@ internal class GooglePayLauncherViewModel(
 
             return GooglePayLauncherViewModel(
                 paymentsClient = DefaultPaymentsClientFactory(context = application).create(googlePayEnvironment),
-                requestOptions = ApiRequest.Options(
+                requestOptions = RequestCredentials(
                     publishableKey,
                     stripeAccountId
                 ),

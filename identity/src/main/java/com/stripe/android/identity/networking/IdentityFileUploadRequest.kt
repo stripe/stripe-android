@@ -2,8 +2,8 @@ package com.stripe.android.identity.networking
 
 import com.stripe.android.core.AppInfo
 import com.stripe.android.core.model.StripeFileParams
-import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.FileUploadRequest
+import com.stripe.android.core.networking.RequestCredentials
 import java.io.OutputStream
 import java.io.PrintWriter
 
@@ -12,10 +12,10 @@ import java.io.PrintWriter
  */
 internal class IdentityFileUploadRequest(
     fileParams: StripeFileParams,
-    options: ApiRequest.Options,
+    options: RequestCredentials,
     appInfo: AppInfo? = null,
     internal val verificationId: String
-) : FileUploadRequest(fileParams, options, appInfo) {
+) : FileUploadRequest(fileParams, options, appInfo, apiConfiguration = null, idempotencyKey = null) {
 
     override fun writePostBody(outputStream: OutputStream) {
         outputStream.writer().use {

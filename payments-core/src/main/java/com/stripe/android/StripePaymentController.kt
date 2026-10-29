@@ -11,8 +11,8 @@ import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
-import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
@@ -147,7 +147,8 @@ constructor(
     override suspend fun startConfirmAndAuth(
         host: AuthActivityStarterHost,
         confirmStripeIntentParams: ConfirmStripeIntentParams,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ) {
         logReturnUrl(confirmStripeIntentParams.returnUrl)
         val returnUrl = resolveReturnUrl(confirmStripeIntentParams.returnUrl)
@@ -158,7 +159,8 @@ constructor(
                     confirmStripeIntentParams.also {
                         it.returnUrl = returnUrl
                     },
-                    requestOptions
+                    requestOptions,
+                    idempotencyKey = idempotencyKey,
                 )
             }
             is ConfirmSetupIntentParams -> {
@@ -166,7 +168,8 @@ constructor(
                     confirmStripeIntentParams.also {
                         it.returnUrl = returnUrl
                     },
-                    requestOptions
+                    requestOptions,
+                    idempotencyKey = idempotencyKey,
                 )
             }
         }
@@ -176,7 +179,8 @@ constructor(
                 handleNextAction(
                     host,
                     intent,
-                    requestOptions
+                    requestOptions,
+                    idempotencyKey = idempotencyKey,
                 )
             },
             onFailure = {
@@ -192,29 +196,36 @@ constructor(
     override suspend fun confirmAndAuthenticateAlipay(
         confirmPaymentIntentParams: ConfirmPaymentIntentParams,
         authenticator: AlipayAuthenticator,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<PaymentIntentResult> {
         // Alipay+ redirects to return_url; use the SDK default so the app is reopened.
         val params = confirmPaymentIntentParams.copy(
             returnUrl = resolveReturnUrl(confirmPaymentIntentParams.returnUrl)
         )
 
-        val paymentIntentResult = confirmPaymentIntent(params, requestOptions)
+        val paymentIntentResult = confirmPaymentIntent(params, requestOptions, idempotencyKey = idempotencyKey)
 
         return paymentIntentResult.mapResult { paymentIntent ->
             authenticateAlipay(
                 paymentIntent,
                 authenticator,
-                requestOptions
+                requestOptions,
+                idempotencyKey = idempotencyKey,
             )
         }
     }
 
     override suspend fun confirmWeChatPay(
         confirmPaymentIntentParams: ConfirmPaymentIntentParams,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<WeChatPayNextAction> {
-        val paymentIntentResult = confirmPaymentIntent(confirmPaymentIntentParams, requestOptions)
+        val paymentIntentResult = confirmPaymentIntent(
+            confirmPaymentIntentParams,
+            requestOptions,
+            idempotencyKey = idempotencyKey,
+        )
 
         return paymentIntentResult.mapCatching { paymentIntent ->
             require(paymentIntent.nextActionData is StripeIntent.NextActionData.WeChatPayRedirect) {
@@ -230,40 +241,45 @@ constructor(
 
     private suspend fun confirmPaymentIntent(
         confirmStripeIntentParams: ConfirmPaymentIntentParams,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<PaymentIntent> {
         return stripeRepository.confirmPaymentIntent(
             // mark this request as `use_stripe_sdk=true`
             confirmPaymentIntentParams = confirmStripeIntentParams.withShouldUseStripeSdk(true),
             options = requestOptions,
-            expandFields = EXPAND_PAYMENT_METHOD
+            expandFields = EXPAND_PAYMENT_METHOD,
+            idempotencyKey = idempotencyKey,
         )
     }
 
     private suspend fun confirmSetupIntent(
         confirmStripeIntentParams: ConfirmSetupIntentParams,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<SetupIntent> {
         return stripeRepository.confirmSetupIntent(
             // mark this request as `use_stripe_sdk=true`
             confirmSetupIntentParams = confirmStripeIntentParams.withShouldUseStripeSdk(true),
             options = requestOptions,
-            expandFields = EXPAND_PAYMENT_METHOD
+            expandFields = EXPAND_PAYMENT_METHOD,
+            idempotencyKey = idempotencyKey,
         )
     }
 
     override suspend fun startAuth(
         host: AuthActivityStarterHost,
         clientSecret: String,
-        requestOptions: ApiRequest.Options,
-        type: PaymentController.StripeIntentType
+        requestOptions: RequestCredentials,
+        type: PaymentController.StripeIntentType,
+        idempotencyKey: String?,
     ) {
         val stripeIntentResult = when (type) {
             PaymentController.StripeIntentType.PaymentIntent -> {
-                stripeRepository.retrievePaymentIntent(clientSecret, requestOptions)
+                stripeRepository.retrievePaymentIntent(clientSecret, requestOptions, idempotencyKey = idempotencyKey)
             }
             PaymentController.StripeIntentType.SetupIntent -> {
-                stripeRepository.retrieveSetupIntent(clientSecret, requestOptions)
+                stripeRepository.retrieveSetupIntent(clientSecret, requestOptions, idempotencyKey = idempotencyKey)
             }
         }
 
@@ -272,7 +288,8 @@ constructor(
                 handleNextAction(
                     host = host,
                     stripeIntent = stripeIntent,
-                    requestOptions = requestOptions
+                    requestOptions = requestOptions,
+                    idempotencyKey = idempotencyKey,
                 )
             },
             onFailure = {
@@ -295,7 +312,8 @@ constructor(
     override suspend fun startAuthenticateSource(
         host: AuthActivityStarterHost,
         source: Source,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ) {
         analyticsRequestExecutor.executeAsync(
             paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.AuthSourceStart)
@@ -304,10 +322,11 @@ constructor(
         stripeRepository.retrieveSource(
             sourceId = source.id.orEmpty(),
             clientSecret = source.clientSecret.orEmpty(),
-            options = requestOptions
+            options = requestOptions,
+            idempotencyKey = idempotencyKey,
         ).fold(
             onSuccess = { retrievedSourced ->
-                onSourceRetrieved(host, retrievedSourced, requestOptions)
+                onSourceRetrieved(host, retrievedSourced, requestOptions,)
             },
             onFailure = {
                 handleError(
@@ -322,7 +341,7 @@ constructor(
     private suspend fun onSourceRetrieved(
         host: AuthActivityStarterHost,
         source: Source,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
     ) {
         nextActionHandlerRegistry.getNextActionHandler(source).performNextAction(
             host,
@@ -388,7 +407,7 @@ constructor(
         val sourceId = result.sourceId.orEmpty()
         val clientSecret = result.clientSecret.orEmpty()
 
-        val requestOptions = ApiRequest.Options(
+        val requestOptions = RequestCredentials(
             apiKey = publishableKeyProvider(),
             stripeAccount = result.stripeAccountId
         )
@@ -400,25 +419,29 @@ constructor(
         return stripeRepository.retrieveSource(
             sourceId,
             clientSecret,
-            requestOptions
+            requestOptions,
+            idempotencyKey = null,
         )
     }
 
     private suspend fun authenticateAlipay(
         paymentIntent: PaymentIntent,
         authenticator: AlipayAuthenticator,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<PaymentIntentResult> {
         val outcome = alipayRepository.authenticate(
             paymentIntent = paymentIntent,
             authenticator = authenticator,
             requestOptions = requestOptions,
+            idempotencyKey = idempotencyKey,
         ).outcome
 
         val refreshedPaymentIntentResult = stripeRepository.retrievePaymentIntent(
             paymentIntent.clientSecret.orEmpty(),
             requestOptions,
-            expandFields = EXPAND_PAYMENT_METHOD
+            expandFields = EXPAND_PAYMENT_METHOD,
+            idempotencyKey = idempotencyKey,
         )
 
         return refreshedPaymentIntentResult.map { refreshedPaymentIntent ->
@@ -452,7 +475,8 @@ constructor(
     override suspend fun handleNextAction(
         host: AuthActivityStarterHost,
         stripeIntent: StripeIntent,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ) {
         nextActionHandlerRegistry.getNextActionHandler(stripeIntent).performNextAction(
             host,

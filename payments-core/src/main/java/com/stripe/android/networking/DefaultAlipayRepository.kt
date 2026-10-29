@@ -2,7 +2,7 @@ package com.stripe.android.networking
 
 import com.stripe.android.AlipayAuthenticator
 import com.stripe.android.StripeIntentResult
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.model.AlipayAuthResult
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.StripeIntent
@@ -14,7 +14,8 @@ internal class DefaultAlipayRepository(
     override suspend fun authenticate(
         paymentIntent: PaymentIntent,
         authenticator: AlipayAuthenticator,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): AlipayAuthResult {
         if (paymentIntent.paymentMethod?.liveMode == false) {
             throw IllegalArgumentException(
@@ -34,7 +35,11 @@ internal class DefaultAlipayRepository(
             val result = output[ALIPAY_RESULT_FIELD]
 
             if (result == AlipayAuthResult.RESULT_CODE_SUCCESS) {
-                pingAlipayEndpointBeforeRetrievingPaymentIntentStatus(nextActionData.type, requestOptions)
+                pingAlipayEndpointBeforeRetrievingPaymentIntentStatus(
+                    nextActionData.type,
+                    requestOptions,
+                    idempotencyKey = idempotencyKey,
+                )
             }
 
             val outcome = when (output[ALIPAY_RESULT_FIELD]) {
@@ -52,14 +57,15 @@ internal class DefaultAlipayRepository(
 
     private suspend fun pingAlipayEndpointBeforeRetrievingPaymentIntentStatus(
         withNativeData: StripeIntent.NextActionData.AlipayRedirect.Type.WithNativeData,
-        requestOptions: ApiRequest.Options,
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ) {
         val authCompleteUrl = withNativeData.authCompleteUrl
 
         // Alipay requires us to hit an endpoint before retrieving the PaymentIntent to ensure the
         // status is up-to-date.
         if (authCompleteUrl != null) {
-            stripeRepository.retrieveObject(authCompleteUrl, requestOptions)
+            stripeRepository.retrieveObject(authCompleteUrl, requestOptions, idempotencyKey = idempotencyKey)
         }
     }
 

@@ -281,7 +281,8 @@ private class FinancialConnectionsManifestRepositoryImpl(
                         "collected_at" to it.collectedAt,
                     )
                 }
-            ).filterNotNullValues()
+            ).filterNotNullValues(),
+            idempotencyKey = null,
         ),
         SynchronizeSessionResponse.serializer()
     ).also {
@@ -298,7 +299,8 @@ private class FinancialConnectionsManifestRepositoryImpl(
             params = mapOf(
                 "expand" to listOf("active_auth_session"),
                 NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret
-            )
+            ),
+            idempotencyKey = null,
         )
         return requestExecutor.execute(
             financialConnectionsRequest,
@@ -320,7 +322,8 @@ private class FinancialConnectionsManifestRepositoryImpl(
                 "use_abstract_flow" to true,
                 "return_url" to "auth-redirect/$applicationId",
                 "institution" to institution.id
-            )
+            ),
+            idempotencyKey = null,
         )
         return requestExecutor.execute(
             request,
@@ -341,7 +344,8 @@ private class FinancialConnectionsManifestRepositoryImpl(
             params = mapOf(
                 NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret,
                 "currently_selected_institution" to institution.id,
-            )
+            ),
+            idempotencyKey = null,
         )
         return requestExecutor.execute(
             request,
@@ -368,7 +372,8 @@ private class FinancialConnectionsManifestRepositoryImpl(
                 NetworkConstants.PARAMS_ID to sessionId,
             ) + authSessionEvents.mapIndexed { index, event ->
                 "frontend_events[$index]" to event.toMap()
-            }
+            },
+            idempotencyKey = null,
         )
         return requestExecutor.executeWithoutUserFacingEvents(
             request,
@@ -386,7 +391,8 @@ private class FinancialConnectionsManifestRepositoryImpl(
             params = mapOf(
                 NetworkConstants.PARAMS_ID to sessionId,
                 NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret
-            )
+            ),
+            idempotencyKey = null,
         )
         return requestExecutor.execute(
             request,
@@ -407,7 +413,8 @@ private class FinancialConnectionsManifestRepositoryImpl(
                 NetworkConstants.PARAMS_ID to sessionId,
                 NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret,
                 "emit_events" to true
-            )
+            ),
+            idempotencyKey = null,
         ),
         FinancialConnectionsAuthorizationSession.serializer()
     ).also {
@@ -427,7 +434,8 @@ private class FinancialConnectionsManifestRepositoryImpl(
                     NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret,
                     "core_authorization" to coreAuthorization,
                     "return_url" to "auth-redirect/$applicationId",
-                )
+                ),
+                idempotencyKey = null,
             ),
             AuthorizationRepairResponse.serializer()
         )
@@ -456,7 +464,8 @@ private class FinancialConnectionsManifestRepositoryImpl(
                 NetworkConstants.PARAMS_ID to sessionId,
                 NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret,
                 "public_token" to publicToken
-            ).filter { it.value != null }
+            ).filter { it.value != null },
+            idempotencyKey = null,
         )
         return requestExecutor.execute(
             request,
@@ -475,7 +484,8 @@ private class FinancialConnectionsManifestRepositoryImpl(
             params = mapOf(
                 "expand" to listOf("active_auth_session"),
                 NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret
-            )
+            ),
+            idempotencyKey = null,
         )
         return requestExecutor.execute(
             request,
@@ -510,7 +520,8 @@ private class FinancialConnectionsManifestRepositoryImpl(
                 "locale" to locale,
                 "email_address" to email,
                 "phone_number" to phoneNumber
-            ).filterNotNullValues() + accounts
+            ).filterNotNullValues() + accounts,
+            idempotencyKey = null,
         )
         return requestExecutor.execute(
             request,
@@ -533,7 +544,8 @@ private class FinancialConnectionsManifestRepositoryImpl(
                 "expand" to listOf("active_auth_session"),
                 "client_requested_next_pane_on_disable_networking" to clientSuggestedNextPaneOnDisableNetworking,
                 "disabled_reason" to disabledReason,
-            ).filterNotNullValues()
+            ).filterNotNullValues(),
+            idempotencyKey = null,
         )
         return requestExecutor.execute(
             request,
@@ -552,7 +564,8 @@ private class FinancialConnectionsManifestRepositoryImpl(
             params = mapOf(
                 NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret,
                 "expand" to listOf("active_auth_session"),
-            )
+            ),
+            idempotencyKey = null,
         )
         return requestExecutor.execute(
             request,

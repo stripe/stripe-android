@@ -15,7 +15,7 @@ import com.stripe.android.PaymentIntentResult
 import com.stripe.android.SetupIntentResult
 import com.stripe.android.StripePaymentController
 import com.stripe.android.core.exception.StripeException
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.googlepaylauncher.GooglePayLauncherViewModel.Companion.HAS_LAUNCHED_KEY
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
@@ -38,6 +38,7 @@ import org.junit.Rule
 import org.junit.runner.RunWith
 import org.mockito.kotlin.KArgumentCaptor
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
@@ -238,7 +239,7 @@ class GooglePayLauncherViewModelTest {
 
             val argumentCaptor: KArgumentCaptor<ConfirmStripeIntentParams> = argumentCaptor()
             verify(mockPaymentController)
-                .startConfirmAndAuth(any(), argumentCaptor.capture(), any())
+                .startConfirmAndAuth(any(), argumentCaptor.capture(), any(), idempotencyKey = anyOrNull())
             assertThat(argumentCaptor.firstValue)
                 .isInstanceOf(ConfirmPaymentIntentParams::class.java)
         }
@@ -258,7 +259,7 @@ class GooglePayLauncherViewModelTest {
 
             val argumentCaptor: KArgumentCaptor<ConfirmStripeIntentParams> = argumentCaptor()
             verify(mockPaymentController)
-                .startConfirmAndAuth(any(), argumentCaptor.capture(), any())
+                .startConfirmAndAuth(any(), argumentCaptor.capture(), any(), idempotencyKey = anyOrNull())
             assertThat(argumentCaptor.firstValue)
                 .isInstanceOf(ConfirmSetupIntentParams::class.java)
         }
@@ -322,16 +323,18 @@ class GooglePayLauncherViewModelTest {
 
         override suspend fun retrievePaymentIntent(
             clientSecret: String,
-            options: ApiRequest.Options,
-            expandFields: List<String>
+            options: RequestCredentials,
+            expandFields: List<String>,
+            idempotencyKey: String?,
         ): Result<PaymentIntent> {
             return Result.success(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
         }
 
         override suspend fun retrieveSetupIntent(
             clientSecret: String,
-            options: ApiRequest.Options,
-            expandFields: List<String>
+            options: RequestCredentials,
+            expandFields: List<String>,
+            idempotencyKey: String?,
         ): Result<SetupIntent> {
             return Result.success(SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD)
         }
@@ -347,7 +350,7 @@ class GooglePayLauncherViewModelTest {
             "pi_123_secret_456",
             GOOGLE_PAY_CONFIG
         )
-        val REQUEST_OPTIONS = ApiRequest.Options(
+        val REQUEST_OPTIONS = RequestCredentials(
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             "account"
         )

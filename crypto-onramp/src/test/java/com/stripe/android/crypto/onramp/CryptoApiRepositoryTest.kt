@@ -6,6 +6,7 @@ import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.HEADER_STRIPE_VERSION
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeRequest
 import com.stripe.android.core.networking.StripeResponse
@@ -35,7 +36,9 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.KArgumentCaptor
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
@@ -1226,8 +1229,20 @@ class CryptoApiRepositoryTest {
             used = false,
         )
         val paymentMethod = createCardPaymentMethod()
-        whenever(stripeRepository.createToken(any(), any())).thenReturn(Result.success(token))
-        whenever(stripeRepository.createPaymentMethod(any(), any())).thenReturn(Result.success(paymentMethod))
+        whenever(
+            stripeRepository.createToken(
+            any(),
+            any(),
+            idempotencyKey = isNull(),
+            )
+        ).thenReturn(Result.success(token))
+        whenever(
+            stripeRepository.createPaymentMethod(
+            any(),
+            any(),
+            idempotencyKey = isNull(),
+            )
+        ).thenReturn(Result.success(paymentMethod))
 
         val result = cryptoApiRepository.createSamsungPayPaymentMethod(
             paymentCredential = "{\"method\":\"3DS\"}",
@@ -1236,16 +1251,17 @@ class CryptoApiRepositoryTest {
 
         assertThat(result.getOrThrow()).isSameInstanceAs(paymentMethod)
         val tokenParams = argumentCaptor<TokenParams>()
-        val tokenOptions = argumentCaptor<ApiRequest.Options>()
-        verify(stripeRepository).createToken(tokenParams.capture(), tokenOptions.capture())
+        val tokenOptions = argumentCaptor<RequestCredentials>()
+        verify(stripeRepository).createToken(tokenParams.capture(), tokenOptions.capture(), idempotencyKey = null)
         assertThat(tokenOptions.firstValue.apiKey).isEqualTo("pk_platform_samsung_pay")
         assertThat(tokenOptions.firstValue.stripeAccount).isEqualTo("TestAccountId")
 
         val paymentMethodParams = argumentCaptor<PaymentMethodCreateParams>()
-        val paymentMethodOptions = argumentCaptor<ApiRequest.Options>()
+        val paymentMethodOptions = argumentCaptor<RequestCredentials>()
         verify(stripeRepository).createPaymentMethod(
             paymentMethodParams.capture(),
             paymentMethodOptions.capture(),
+            idempotencyKey = null,
         )
         assertThat(paymentMethodParams.firstValue.toParamMap()).isEqualTo(
             mapOf(
@@ -1260,7 +1276,13 @@ class CryptoApiRepositoryTest {
     @Test
     fun `create Samsung Pay payment method stops when tokenization fails`() = runTest {
         val error = APIException(message = "Samsung Pay tokenization failed")
-        whenever(stripeRepository.createToken(any(), any())).thenReturn(Result.failure(error))
+        whenever(
+            stripeRepository.createToken(
+            any(),
+            any(),
+            idempotencyKey = isNull(),
+            )
+        ).thenReturn(Result.failure(error))
 
         val result = cryptoApiRepository.createSamsungPayPaymentMethod(
             paymentCredential = "invalid_credential",
@@ -1268,7 +1290,7 @@ class CryptoApiRepositoryTest {
         )
 
         assertThat(result.exceptionOrNull()).isSameInstanceAs(error)
-        verify(stripeRepository, never()).createPaymentMethod(any(), any())
+        verify(stripeRepository, never()).createPaymentMethod(any(), any(), idempotencyKey = anyOrNull())
     }
 
     private fun assertKycCollectionRequest(apiRequest: ApiRequest) {

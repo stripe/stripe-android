@@ -17,8 +17,8 @@ import com.stripe.android.paymentelement.embedded.EmbeddedCommonModule
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedLinkExtrasModule
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
-import com.stripe.android.payments.core.injection.ApiRequestOptionsModule
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
+import com.stripe.android.payments.core.injection.RequestCredentialsModule
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.injection.PaymentMethodMessagePromotionsExperimentHandlerModule
@@ -31,7 +31,7 @@ import javax.inject.Singleton
 
 @Component(
     modules = [
-        ApiRequestOptionsModule::class,
+        RequestCredentialsModule::class,
         EmbeddedActivityModule::class,
         EmbeddedCommonModule::class,
         ElementsSessionClientParamsModule::class,

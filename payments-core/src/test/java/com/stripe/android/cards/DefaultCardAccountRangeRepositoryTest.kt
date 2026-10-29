@@ -6,7 +6,7 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CardNumberFixtures
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.BinFixtures
@@ -310,10 +310,12 @@ internal class DefaultCardAccountRangeRepositoryTest {
             context = application,
             publishableKeyProvider = { publishableKey },
             requestSurface = StripeRepository.DEFAULT_REQUEST_SURFACE,
+            requestApiConfiguration = null,
+            initializeRequestServices = true,
         )
         return RemoteCardAccountRangeSource(
             stripeRepository,
-            ApiRequest.Options(publishableKey),
+            RequestCredentials(publishableKey, stripeAccount = null),
             store,
             { },
             PaymentAnalyticsRequestFactory(application, publishableKey)
@@ -334,7 +336,7 @@ internal class DefaultCardAccountRangeRepositoryTest {
     }
 
     private companion object {
-        private val DEFAULT_OPTIONS = ApiRequest.Options(TestApiKeys.PUBLISHABLE)
+        private val DEFAULT_OPTIONS = RequestCredentials(TestApiKeys.PUBLISHABLE, stripeAccount = null)
 
         private val VISA_ACCOUNT_RANGES = listOf(
             AccountRange(

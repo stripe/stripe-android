@@ -16,7 +16,8 @@ internal class ApiRequestTest {
     fun getContentType() {
         val contentType = FACTORY.createGet(
             SOURCES_URL,
-            OPTIONS
+            OPTIONS,
+            idempotencyKey = null,
         ).postHeaders?.get(HEADER_CONTENT_TYPE)
         assertEquals("application/x-www-form-urlencoded; charset=UTF-8", contentType)
     }
@@ -26,7 +27,8 @@ internal class ApiRequestTest {
         ByteArrayOutputStream().use {
             FACTORY.createPost(
                 PAYMENT_METHODS_URL,
-                OPTIONS
+                OPTIONS,
+                idempotencyKey = null,
             ).writePostBody(it)
             assertTrue(it.size() == 0)
         }
@@ -38,7 +40,8 @@ internal class ApiRequestTest {
             FACTORY.createPost(
                 PAYMENT_METHODS_URL,
                 OPTIONS,
-                mapOf("customer" to "cus_123")
+                mapOf("customer" to "cus_123"),
+                idempotencyKey = null,
             ).writePostBody(it)
             assertEquals(16, it.size())
         }
@@ -52,12 +55,14 @@ internal class ApiRequestTest {
             FACTORY.createPost(
                 PAYMENT_METHODS_URL,
                 OPTIONS,
-                params
+                params,
+                idempotencyKey = null,
             ),
             FACTORY.createPost(
                 PAYMENT_METHODS_URL,
                 OPTIONS,
-                params
+                params,
+                idempotencyKey = null,
             )
         )
 
@@ -65,12 +70,14 @@ internal class ApiRequestTest {
             FACTORY.createPost(
                 PAYMENT_METHODS_URL,
                 OPTIONS,
-                params
+                params,
+                idempotencyKey = null,
             ),
             FACTORY.createPost(
                 PAYMENT_METHODS_URL,
-                ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, "acct"),
-                params
+                RequestCredentials(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, "acct"),
+                params,
+                idempotencyKey = null,
             )
         )
     }
@@ -80,7 +87,8 @@ internal class ApiRequestTest {
         val url = FACTORY.createGet(
             SOURCES_URL,
             OPTIONS,
-            mapOf("param" to "123")
+            mapOf("param" to "123"),
+            idempotencyKey = null,
         ).url
         assertEquals(url, "sources?param=123")
     }
@@ -90,21 +98,22 @@ internal class ApiRequestTest {
         val url = FACTORY.createDelete(
             SOURCES_URL,
             OPTIONS,
-            mapOf("param" to "123")
+            mapOf("param" to "123"),
+            idempotencyKey = null,
         ).url
         assertEquals(url, "sources?param=123")
     }
 
     @Test
     fun optionsToStringDoesNotExposeApiKey() {
-        val options = ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+        val options = RequestCredentials(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, stripeAccount = null)
         val str = options.toString()
         assertFalse(str.contains(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY))
         assertFalse(str.contains("pk_test"))
     }
 
     private companion object {
-        private val OPTIONS = ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+        private val OPTIONS = RequestCredentials(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, stripeAccount = null)
 
         private val FACTORY = ApiRequest.Factory()
 

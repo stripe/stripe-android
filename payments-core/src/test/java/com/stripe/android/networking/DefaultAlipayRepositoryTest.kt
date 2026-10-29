@@ -4,7 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.AlipayAuthenticator
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.StripeIntentResult
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.model.AlipayAuthResult
 import com.stripe.android.model.PaymentIntentFixtures
 import kotlinx.coroutines.test.runTest
@@ -25,14 +25,16 @@ internal class DefaultAlipayRepositoryTest {
         val result = repository.authenticate(
             INTENT,
             createAuthenticator(AlipayAuthResult.RESULT_CODE_SUCCESS),
-            REQUEST_OPTIONS
+            REQUEST_OPTIONS,
+            idempotencyKey = null,
         )
 
         assertThat(result.outcome)
             .isEqualTo(StripeIntentResult.Outcome.SUCCEEDED)
         verify(stripeRepository).retrieveObject(
             "https://hooks.stripe.com/adapter/alipay/redirect/complete/src_1HDEFWKlwPmebFhp6tcpln8T/src_client_secret_S6H9mVMKK6qxk9YxsUvbH55K",
-            REQUEST_OPTIONS
+            REQUEST_OPTIONS,
+            idempotencyKey = null,
         )
     }
 
@@ -41,7 +43,8 @@ internal class DefaultAlipayRepositoryTest {
         val result = repository.authenticate(
             INTENT,
             createAuthenticator(AlipayAuthResult.RESULT_CODE_CANCELLED),
-            REQUEST_OPTIONS
+            REQUEST_OPTIONS,
+            idempotencyKey = null,
         )
         assertThat(result.outcome)
             .isEqualTo(StripeIntentResult.Outcome.CANCELED)
@@ -52,7 +55,8 @@ internal class DefaultAlipayRepositoryTest {
         val result = repository.authenticate(
             INTENT,
             createAuthenticator(AlipayAuthResult.RESULT_CODE_FAILED),
-            REQUEST_OPTIONS
+            REQUEST_OPTIONS,
+            idempotencyKey = null,
         )
         assertThat(result.outcome)
             .isEqualTo(StripeIntentResult.Outcome.FAILED)
@@ -63,7 +67,8 @@ internal class DefaultAlipayRepositoryTest {
         val result = repository.authenticate(
             INTENT,
             createAuthenticator("unknown"),
-            REQUEST_OPTIONS
+            REQUEST_OPTIONS,
+            idempotencyKey = null,
         )
         assertThat(result.outcome)
             .isEqualTo(StripeIntentResult.Outcome.UNKNOWN)
@@ -74,7 +79,8 @@ internal class DefaultAlipayRepositoryTest {
         val result = repository.authenticate(
             INTENT,
             createAuthenticator(null),
-            REQUEST_OPTIONS
+            REQUEST_OPTIONS,
+            idempotencyKey = null,
         )
         assertThat(result.outcome)
             .isEqualTo(StripeIntentResult.Outcome.UNKNOWN)
@@ -86,7 +92,8 @@ internal class DefaultAlipayRepositoryTest {
             repository.authenticate(
                 PaymentIntentFixtures.PI_REQUIRES_REDIRECT,
                 createAuthenticator(AlipayAuthResult.RESULT_CODE_SUCCESS),
-                REQUEST_OPTIONS
+                REQUEST_OPTIONS,
+                idempotencyKey = null,
             )
         }
 
@@ -100,7 +107,8 @@ internal class DefaultAlipayRepositoryTest {
             repository.authenticate(
                 PaymentIntentFixtures.ALIPAY_REQUIRES_ACTION_NO_NATIVE_DATA,
                 createAuthenticator(AlipayAuthResult.RESULT_CODE_SUCCESS),
-                REQUEST_OPTIONS
+                REQUEST_OPTIONS,
+                idempotencyKey = null,
             )
         }
 
@@ -114,7 +122,8 @@ internal class DefaultAlipayRepositoryTest {
             repository.authenticate(
                 PaymentIntentFixtures.ALIPAY_TEST_MODE,
                 createAuthenticator(AlipayAuthResult.RESULT_CODE_SUCCESS),
-                REQUEST_OPTIONS
+                REQUEST_OPTIONS,
+                idempotencyKey = null,
             )
         }
         assertThat(exception.message)
@@ -134,6 +143,6 @@ internal class DefaultAlipayRepositoryTest {
 
     private companion object {
         private val INTENT = PaymentIntentFixtures.ALIPAY_REQUIRES_ACTION
-        private val REQUEST_OPTIONS = ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+        private val REQUEST_OPTIONS = RequestCredentials(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, stripeAccount = null)
     }
 }

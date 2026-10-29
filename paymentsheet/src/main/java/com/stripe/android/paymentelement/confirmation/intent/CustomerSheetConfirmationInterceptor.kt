@@ -1,8 +1,9 @@
 package com.stripe.android.paymentelement.confirmation.intent
 
 import com.stripe.android.common.exception.stripeErrorMessage
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.customersheet.util.isUnverifiedUSBankAccount
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
@@ -25,7 +26,8 @@ internal class CustomerSheetConfirmationInterceptor @AssistedInject constructor(
     @Assisted private val clientAttributionMetadata: ClientAttributionMetadata,
     @Assisted private val integrationMetadata: IntegrationMetadata.CustomerSheet,
     private val stripeRepository: StripeRepository,
-    private val requestOptions: ApiRequest.Options,
+    private val requestOptions: RequestCredentials,
+    private val apiConfiguration: ApiConfiguration.State,
     private val setupIntentInterceptorFactory: CustomerSheetSetupIntentInterceptor.Factory,
     private val attachPaymentMethodInterceptorFactory: CustomerSheetAttachPaymentMethodInterceptor.Factory,
     private val logger: Logger,
@@ -107,6 +109,8 @@ internal class CustomerSheetConfirmationInterceptor @AssistedInject constructor(
         return stripeRepository.createPaymentMethod(
             paymentMethodCreateParams = paymentMethodCreateParams,
             options = requestOptions,
+            apiConfiguration = apiConfiguration,
+            idempotencyKey = null,
         ).onFailure { throwable ->
             logger.error(
                 msg = "Failed to create payment method for ${paymentMethodCreateParams.typeCode}",

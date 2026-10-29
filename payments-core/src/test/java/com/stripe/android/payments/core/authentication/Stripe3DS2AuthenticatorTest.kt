@@ -7,7 +7,7 @@ import androidx.lifecycle.LifecycleRegistry
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentAuthConfig
 import com.stripe.android.core.ApiConfiguration
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.payments.core.authentication.threeds2.Stripe3DS2NextActionHandler
 import com.stripe.android.payments.core.authentication.threeds2.Stripe3ds2TransactionContract
@@ -96,7 +96,7 @@ class Stripe3DS2AuthenticatorTest {
             publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             stripeAccountId = ACCOUNT_ID,
         )
-        private val REQUEST_OPTIONS = ApiRequest.Options(
+        private val REQUEST_OPTIONS = RequestCredentials(
             apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             stripeAccount = ACCOUNT_ID
         )

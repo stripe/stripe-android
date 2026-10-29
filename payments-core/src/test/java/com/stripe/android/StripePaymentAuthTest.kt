@@ -41,11 +41,7 @@ internal class StripePaymentAuthTest {
                     data
                 )
             ).thenReturn(true)
-            whenever(
-                paymentController.getPaymentIntentResult(
-                    data
-                )
-            ).thenReturn(Result.success(result))
+            whenever(paymentController.getPaymentIntentResult(data)).thenReturn(Result.success(result))
 
             val stripe = createStripe()
             stripe.onPaymentResult(
@@ -72,11 +68,7 @@ internal class StripePaymentAuthTest {
                 )
             ).thenReturn(true)
 
-            whenever(
-                paymentController.getPaymentIntentResult(
-                    data
-                )
-            ).thenReturn(Result.failure(exception))
+            whenever(paymentController.getPaymentIntentResult(data)).thenReturn(Result.failure(exception))
 
             val stripe = createStripe()
             stripe.onPaymentResult(
@@ -101,11 +93,7 @@ internal class StripePaymentAuthTest {
                     data
                 )
             ).thenReturn(true)
-            whenever(
-                paymentController.getSetupIntentResult(
-                    data
-                )
-            ).thenReturn(Result.success(result))
+            whenever(paymentController.getSetupIntentResult(data)).thenReturn(Result.success(result))
 
             val stripe = createStripe()
             stripe.onSetupResult(
@@ -131,11 +119,7 @@ internal class StripePaymentAuthTest {
                 )
             ).thenReturn(true)
 
-            whenever(
-                paymentController.getSetupIntentResult(
-                    data
-                )
-            ).thenReturn(Result.failure(exception))
+            whenever(paymentController.getSetupIntentResult(data)).thenReturn(Result.failure(exception))
 
             val stripe = createStripe()
             stripe.onSetupResult(
@@ -154,11 +138,7 @@ internal class StripePaymentAuthTest {
         runTest {
             val source = SourceFixtures.CARD
             val data = Intent()
-            whenever(
-                paymentController.getAuthenticateSourceResult(
-                    data
-                )
-            ).thenReturn(Result.success(source))
+            whenever(paymentController.getAuthenticateSourceResult(data)).thenReturn(Result.success(source))
 
             val stripe = createStripe()
             stripe.onAuthenticateSourceResult(
@@ -177,11 +157,7 @@ internal class StripePaymentAuthTest {
             val data = Intent()
             val exception = APIException()
 
-            whenever(
-                paymentController.getAuthenticateSourceResult(
-                    data
-                )
-            ).thenReturn(Result.failure(exception))
+            whenever(paymentController.getAuthenticateSourceResult(data)).thenReturn(Result.failure(exception))
 
             val stripe = createStripe()
             stripe.onAuthenticateSourceResult(
@@ -203,7 +179,9 @@ internal class StripePaymentAuthTest {
                 stripeNetworkClient = DefaultStripeNetworkClient(
                     workContext = testDispatcher
                 ),
-                analyticsRequestExecutor = {}
+                analyticsRequestExecutor = {},
+                requestApiConfiguration = null,
+                initializeRequestServices = true,
             ),
             paymentController,
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
