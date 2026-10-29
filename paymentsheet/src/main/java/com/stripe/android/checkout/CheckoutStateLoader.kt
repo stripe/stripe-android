@@ -8,7 +8,6 @@ import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentelement.embedded.content.EmbeddedSelectionChooser
-import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.parseAppearance
@@ -32,7 +31,6 @@ internal class CheckoutStateLoader @Inject constructor(
     private val stateHolder: CheckoutControllerStateHolder,
     private val customerStateHolder: CustomerStateHolder,
     private val internalRowSelectionCallback: Provider<InternalRowSelectionCallback?>,
-    private val errorReporter: ErrorReporter,
 ) {
     /**
      * Loads the initial state without publishing it, so [CheckoutController.configure] can finish
@@ -214,16 +212,10 @@ internal class CheckoutStateLoader @Inject constructor(
 
         val commonConfiguration = commonConfigurationFactory.create(
             configuration = configuration,
+            paymentElementConfiguration = paymentElementConfiguration,
             checkoutSessionResponse = response,
             collectedDetails = collectedDetails,
         )
-
-        if (commonConfiguration == null) {
-            errorReporter.report(
-                errorEvent = ErrorReporter.UnexpectedErrorEvent.CHECKOUT_COMMON_CONFIGURATION_IS_NULL,
-            )
-            return null
-        }
 
         val paymentElementLoaderConfig = PaymentElementLoader.Configuration.Embedded(
             isRowSelectionImmediateAction = internalRowSelectionCallback.get() != null,
