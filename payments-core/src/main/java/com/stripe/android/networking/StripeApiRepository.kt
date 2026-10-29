@@ -137,7 +137,6 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 ApiConfiguration.State(
                     publishableKey = publishableKeyProvider(),
                     stripeAccountId = null,
-                    betas = emptySet(),
                 )
             },
             workContext = workContext,
@@ -152,7 +151,6 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 ApiConfiguration.State(
                     publishableKey = publishableKeyProvider(),
                     stripeAccountId = null,
-                    betas = emptySet(),
                 )
             },
         ),

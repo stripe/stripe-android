@@ -16,7 +16,7 @@ import org.robolectric.RobolectricTestRunner
 internal class DefaultConfirmationChallengeBridgeHandlerTest {
 
     private val testArgs = IntentConfirmationChallengeArgs(
-        apiConfiguration = ApiConfiguration.State("pk_test_123", "acct_123", betas = emptySet()),
+        apiConfiguration = ApiConfiguration.State("pk_test_123", "acct_123"),
         intent = PaymentIntentFixtures.PI_SUCCEEDED,
         productUsage = listOf("PaymentSheet"),
         captchaVendorName = "hcaptcha",

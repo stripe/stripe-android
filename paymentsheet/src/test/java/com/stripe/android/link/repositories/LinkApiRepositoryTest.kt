@@ -1223,7 +1223,6 @@ class LinkApiRepositoryTest {
         val DEFAULT_API_CONFIGURATION = ApiConfiguration.State(
             publishableKey = PUBLISHABLE_KEY,
             stripeAccountId = STRIPE_ACCOUNT_ID,
-            betas = emptySet(),
         )
     }
 }

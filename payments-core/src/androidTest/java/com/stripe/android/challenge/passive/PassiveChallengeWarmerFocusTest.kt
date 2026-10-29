@@ -145,7 +145,6 @@ internal class PassiveChallengeWarmerFocusTest {
             apiConfiguration = ApiConfiguration.State(
                 publishableKey = "pk_test_123",
                 stripeAccountId = null,
-                betas = emptySet(),
             ),
             productUsage = listOf("PaymentSheet"),
         )

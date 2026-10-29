@@ -100,7 +100,6 @@ class PaymentLauncherFactory(
                 ApiConfiguration.State(
                     publishableKey = publishableKey,
                     stripeAccountId = stripeAccountId,
-                    betas = emptySet(),
                 )
             },
             hostActivityLauncher = hostActivityLauncher,
@@ -119,7 +118,6 @@ class PaymentLauncherFactory(
                 ApiConfiguration.State(
                     publishableKey = config.publishableKey,
                     stripeAccountId = config.stripeAccountId,
-                    betas = emptySet(),
                 )
             },
             hostActivityLauncher = hostActivityLauncher,

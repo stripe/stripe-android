@@ -36,7 +36,6 @@ class DefaultCardAccountRangeRepositoryFactoryTest {
             ApiConfiguration.State(
                 TestApiKeys.PUBLISHABLE,
                 TestApiKeys.ACCOUNT,
-                betas = emptySet(),
             )
         }
         assertThat(factory.create())

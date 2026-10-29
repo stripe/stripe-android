@@ -46,7 +46,6 @@ class DefaultPaymentNextActionHandlerRegistryTest {
             ApiConfiguration.State(
             publishableKey = "pk_test_123",
             stripeAccountId = null,
-            betas = emptySet(),
             )
         },
     )

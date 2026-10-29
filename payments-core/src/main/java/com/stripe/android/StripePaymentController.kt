@@ -72,7 +72,6 @@ constructor(
         ApiConfiguration.State(
             publishableKey = publishableKeyProvider(),
             stripeAccountId = null,
-            betas = emptySet(),
         )
     }
     private val paymentIntentFlowResultProcessor = PaymentIntentFlowResultProcessor(
@@ -331,7 +330,6 @@ constructor(
             ApiConfiguration.State(
                 publishableKey = requestOptions.apiKey,
                 stripeAccountId = requestOptions.stripeAccount,
-                betas = emptySet(),
             )
         )
     }
@@ -462,7 +460,6 @@ constructor(
             ApiConfiguration.State(
                 publishableKey = requestOptions.apiKey,
                 stripeAccountId = requestOptions.stripeAccount,
-                betas = emptySet(),
             )
         )
     }

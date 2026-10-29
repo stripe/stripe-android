@@ -75,7 +75,6 @@ class FinancialConnectionsSheet internal constructor(
             apiConfiguration = ApiConfiguration.State(
                 publishableKey = publishableKey,
                 stripeAccountId = stripeAccountId,
-                betas = emptySet(),
             ),
             preCollectedConsent = preCollectedConsent,
         )

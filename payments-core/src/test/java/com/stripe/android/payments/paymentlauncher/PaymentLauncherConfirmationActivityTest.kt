@@ -367,7 +367,6 @@ class PaymentLauncherConfirmationActivityTest {
         val API_CONFIGURATION = ApiConfiguration.State(
             publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             stripeAccountId = TEST_STRIPE_ACCOUNT_ID,
-            betas = emptySet(),
         )
         val PAYMENT_INTENT_NEXT_ACTION_ARGS =
             PaymentLauncherContract.Args.PaymentIntentNextActionArgs(

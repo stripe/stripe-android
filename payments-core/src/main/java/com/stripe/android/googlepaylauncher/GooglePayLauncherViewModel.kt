@@ -304,7 +304,6 @@ internal class GooglePayLauncherViewModel(
                     ApiConfiguration.State(
                         publishableKey = publishableKey,
                         stripeAccountId = stripeAccountId,
-                        betas = emptySet(),
                     )
                 },
                 productUsage = productUsageTokens

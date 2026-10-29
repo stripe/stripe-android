@@ -20,7 +20,6 @@ class ApiConfigurationFromPaymentConfigurationModule {
         return ApiConfiguration.State(
             publishableKey = paymentConfiguration.publishableKey,
             stripeAccountId = paymentConfiguration.stripeAccountId,
-            betas = emptySet(),
         )
     }
 }
