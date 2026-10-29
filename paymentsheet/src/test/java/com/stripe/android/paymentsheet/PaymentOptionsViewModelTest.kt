@@ -55,7 +55,6 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
-import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPaymentMethod
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
 import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodRepository
 import com.stripe.android.paymentsheet.state.LinkState
@@ -99,7 +98,6 @@ import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import kotlin.coroutines.CoroutineContext
 import kotlin.test.Test
-import com.stripe.android.R as PaymentsCoreR
 
 @RunWith(RobolectricTestRunner::class)
 internal class PaymentOptionsViewModelTest {
@@ -398,7 +396,7 @@ internal class PaymentOptionsViewModelTest {
     }
 
     @Test
-    fun `transition target is AddFirstPaymentMethod if payment methods is empty`() = runTest {
+    fun `transition target is VerticalModeForm if only card is supported and payment methods is empty`() = runTest {
         val viewModel = createViewModel(
             args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
                 paymentMethods = listOf(),
@@ -408,7 +406,7 @@ internal class PaymentOptionsViewModelTest {
         )
 
         viewModel.navigationHandler.currentScreen.test {
-            assertThat(awaitItem()).isInstanceOf<AddFirstPaymentMethod>()
+            assertThat(awaitItem()).isInstanceOf<PaymentSheetScreen.VerticalModeForm>()
         }
     }
 
@@ -497,7 +495,7 @@ internal class PaymentOptionsViewModelTest {
         }
 
     @Test
-    fun `currentScreen is AddFirstPaymentMethod if no SPMs and one supportedPaymentMethod in automatic`() =
+    fun `currentScreen is VerticalModeForm if no SPMs and only card is supported in automatic`() =
         runTest {
             val viewModel = createViewModel(
                 args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
@@ -514,9 +512,51 @@ internal class PaymentOptionsViewModelTest {
             )
 
             viewModel.navigationHandler.currentScreen.test {
-                assertThat(awaitItem()).isInstanceOf<AddFirstPaymentMethod>()
+                assertThat(awaitItem()).isInstanceOf<PaymentSheetScreen.VerticalModeForm>()
             }
         }
+
+    @Test
+    fun `single non-card payment method uses vertical form without saved methods in automatic`() = runTest {
+        val viewModel = createViewModel(
+            args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
+                config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.newBuilder()
+                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Automatic)
+                    .build(),
+                paymentMethods = emptyList(),
+                isGooglePayReady = false,
+                linkState = null,
+                stripeIntent = PaymentIntentFixtures.PI_WITH_PAYMENT_METHOD!!.copy(
+                    paymentMethodTypes = listOf("cashapp"),
+                ),
+            ),
+        )
+
+        viewModel.navigationHandler.currentScreen.test {
+            assertThat(awaitItem()).isInstanceOf<PaymentSheetScreen.VerticalModeForm>()
+        }
+    }
+
+    @Test
+    fun `single non-card payment method uses vertical form without saved methods in horizontal`() = runTest {
+        val viewModel = createViewModel(
+            args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
+                config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.newBuilder()
+                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
+                    .build(),
+                paymentMethods = emptyList(),
+                isGooglePayReady = false,
+                linkState = null,
+                stripeIntent = PaymentIntentFixtures.PI_WITH_PAYMENT_METHOD!!.copy(
+                    paymentMethodTypes = listOf("cashapp"),
+                ),
+            ),
+        )
+
+        viewModel.navigationHandler.currentScreen.test {
+            assertThat(awaitItem()).isInstanceOf<PaymentSheetScreen.VerticalModeForm>()
+        }
+    }
 
     @Test
     fun `currentScreen is SelectSavedPaymentMethods if just one payment method in automatic`() =
@@ -792,7 +832,7 @@ internal class PaymentOptionsViewModelTest {
     }
 
     @Test
-    fun `Doesn't consider unsupported payment methods in header text creation`() = runTest {
+    fun `unsupported payment methods do not prevent routing directly to the single payment method form`() = runTest {
         val args = PAYMENT_OPTION_CONTRACT_ARGS.copy(
             state = PAYMENT_OPTION_CONTRACT_ARGS.state.copy(
                 config = PAYMENT_OPTION_CONTRACT_ARGS.state.config.copy(
@@ -813,8 +853,10 @@ internal class PaymentOptionsViewModelTest {
         val viewModel = createViewModel(args)
 
         viewModel.navigationHandler.currentScreen.test {
-            awaitItem().title(isCompleteFlow = false, isWalletEnabled = false).test {
-                assertThat(awaitItem()).isEqualTo(PaymentsCoreR.string.stripe_title_add_a_card.resolvableString)
+            val screen = awaitItem()
+            assertThat(screen).isInstanceOf<PaymentSheetScreen.VerticalModeForm>()
+            screen.title(isCompleteFlow = false, isWalletEnabled = false).test {
+                assertThat(awaitItem()).isNull()
             }
         }
     }

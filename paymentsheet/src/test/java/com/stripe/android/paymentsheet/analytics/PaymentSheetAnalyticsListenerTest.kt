@@ -89,19 +89,20 @@ class PaymentSheetAnalyticsListenerTest {
     @Test
     fun `form events are emitted only once when screen changes to one with a form`() = runScenario {
         val screenTypes = listOf(
+            PaymentSheetScreen.VerticalModeForm::class,
             PaymentSheetScreen.AddFirstPaymentMethod::class,
             PaymentSheetScreen.AddAnotherPaymentMethod::class,
             PaymentSheetScreen.VerticalMode::class,
+            PaymentSheetScreen.VerticalModeForm::class,
         )
         screenTypes.forEach { screenType ->
             currentScreen.value = mock(screenType.java)
             testScheduler.advanceUntilIdle()
-        }
 
-        // Only emit the first time the screen is shown.
-        verify(eventReporter).onShowNewPaymentOptions()
-        // Only once since it didn't change.
-        verify(eventReporter).onPaymentMethodFormShown(eq("card"))
+            // Report immediately for the initial form, with no duplicates on later screens.
+            verify(eventReporter).onShowNewPaymentOptions()
+            verify(eventReporter).onPaymentMethodFormShown(eq("card"))
+        }
     }
 
     @Test

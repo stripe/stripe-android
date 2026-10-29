@@ -426,7 +426,13 @@ internal class PaymentOptionsViewModel @Inject constructor(
         paymentMethodMetadata: PaymentMethodMetadata,
         customerStateHolder: CustomerStateHolder,
     ): List<PaymentSheetScreen> {
-        if (paymentMethodMetadata.paymentMethodOrientation() == PaymentMethodOrientation.Vertical) {
+        val isSinglePaymentMethodWithoutSavedPaymentMethods =
+            paymentMethodMetadata.supportedPaymentMethodTypes().size == 1 &&
+                customerStateHolder.paymentMethods.value.isEmpty() && !args.state.showSavedPaymentMethods
+        if (
+            paymentMethodMetadata.paymentMethodOrientation() == PaymentMethodOrientation.Vertical ||
+            isSinglePaymentMethodWithoutSavedPaymentMethods
+        ) {
             return VerticalModeInitialScreenFactory.create(
                 viewModel = this,
                 paymentMethodMetadata = paymentMethodMetadata,
