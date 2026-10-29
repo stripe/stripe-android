@@ -18,6 +18,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
@@ -186,7 +187,7 @@ internal class PaymentOptionsEmbeddedSheetMandateTest {
                 lastUpdateReason = LinkAccountUpdate.Value.UpdateReason.LoggedOut,
             ),
             promotions = emptyList(),
-            launchMode = EmbeddedLaunchMode.PaymentOptions,
+            launchMode = EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries),
             presentationState = EmbeddedActivityArgs.PresentationState.Ready,
         )
         ActivityScenario.launchActivityForResult<EmbeddedSheetActivity>(

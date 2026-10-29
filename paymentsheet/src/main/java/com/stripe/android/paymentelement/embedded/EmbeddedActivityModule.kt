@@ -172,7 +172,7 @@ internal interface EmbeddedActivityModule {
             manageLaunchSelector: Provider<ManageLaunchSavedPaymentMethodSelector>,
         ): ManageScreenSavedPaymentMethodSelector = when (launchMode) {
             is EmbeddedLaunchMode.Manage -> manageLaunchSelector.get()
-            EmbeddedLaunchMode.PaymentOptions,
+            is EmbeddedLaunchMode.PaymentOptions,
             is EmbeddedLaunchMode.Form -> ImmediateSavedPaymentMethodSelector(selectionHolder)
         }
 

@@ -326,7 +326,7 @@ internal class EmbeddedNavigatorScreenScreenshotTest {
                         navigator = navigator,
                         screen = screen,
                         walletsHeaderState = walletsHeaderState(
-                            launchMode = EmbeddedLaunchMode.PaymentOptions,
+                            launchMode = EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries),
                             screen = screen,
                             canGoBack = navigator.canGoBack,
                             walletsState = walletsState,

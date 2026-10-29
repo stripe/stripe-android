@@ -11,6 +11,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
@@ -131,7 +132,7 @@ internal class DefaultSheetActivityStateHolderTest {
     @Test
     fun `PaymentOptions mode always uses continue label regardless of formSheetAction`() {
         testScenario(
-            launchMode = EmbeddedLaunchMode.PaymentOptions,
+            launchMode = EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries),
         ) {
             stateHolder.state.test {
                 val state = awaitItem()
@@ -578,7 +579,7 @@ internal class DefaultSheetActivityStateHolderTest {
         val formScreen = createFormScreen(formInteractor)
         testScenario(
             tapToAddHelper = tapToAddHelper,
-            launchMode = EmbeddedLaunchMode.PaymentOptions,
+            launchMode = EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries),
             initialBackStack = listOf(paymentOptionsScreen, formScreen),
             savedPaymentMethodConfirmInteractorFactory = interactorFactory,
         ) {

@@ -29,6 +29,7 @@ import com.stripe.android.link.ui.LinkButtonTestTag
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
@@ -104,7 +105,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
         assertThat(result.customerState).isEqualTo(PaymentSheetFixtures.EMPTY_CUSTOMER_STATE)
         assertThat(result.linkAccountInfo.lastUpdateReason)
             .isEqualTo(LinkAccountUpdate.Value.UpdateReason.LoggedOut)
-        assertThat(result.launchMode).isEqualTo(EmbeddedLaunchMode.PaymentOptions)
+        assertThat(result.launchMode).isEqualTo(EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries))
     }
 
     @Test
@@ -175,7 +176,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
         assertThat(result).isInstanceOf<EmbeddedActivityResult.Cancelled>()
         val cancelled = result as EmbeddedActivityResult.Cancelled
         assertThat(cancelled.launchMode).isEqualTo(
-            EmbeddedLaunchMode.PaymentOptions
+            EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries)
         )
     }
 
@@ -213,7 +214,8 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
                 .isEqualTo(previousNewSelection)
             assertThat(result.linkAccountInfo.lastUpdateReason)
                 .isEqualTo(LinkAccountUpdate.Value.UpdateReason.LoggedOut)
-            assertThat(result.launchMode).isEqualTo(EmbeddedLaunchMode.PaymentOptions)
+            assertThat(result.launchMode)
+                .isEqualTo(EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries))
         }
     }
 
@@ -279,7 +281,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
         val result = scenario.awaitResult() as EmbeddedActivityResult.Complete
         assertThat(result.selection).isInstanceOf<PaymentSelection.New.Card>()
         assertThat(result.hasBeenConfirmed).isFalse()
-        assertThat(result.launchMode).isEqualTo(EmbeddedLaunchMode.PaymentOptions)
+        assertThat(result.launchMode).isEqualTo(EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries))
     }
 
     @Test
@@ -622,7 +624,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
                 lastUpdateReason = LinkAccountUpdate.Value.UpdateReason.LoggedOut,
             ),
             promotions = emptyList(),
-            launchMode = EmbeddedLaunchMode.PaymentOptions,
+            launchMode = EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries),
             presentationState = presentationState,
         )
     }

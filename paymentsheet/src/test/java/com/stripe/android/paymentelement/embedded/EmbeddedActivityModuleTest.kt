@@ -5,6 +5,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
@@ -74,7 +75,7 @@ internal class EmbeddedActivityModuleTest {
     @Test
     fun `non-Manage launches commit selection without creating the Manage launch selector`() = runTest {
         listOf(
-            EmbeddedLaunchMode.PaymentOptions,
+            EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries),
             EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
         ).forEach { launchMode ->
             val selectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle())

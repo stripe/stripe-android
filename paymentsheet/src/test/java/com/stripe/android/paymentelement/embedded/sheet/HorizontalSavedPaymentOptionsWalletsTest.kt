@@ -13,6 +13,7 @@ import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.ui.LinkButtonTestTag
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
@@ -102,7 +103,7 @@ internal class HorizontalSavedPaymentOptionsWalletsTest {
                 lastUpdateReason = LinkAccountUpdate.Value.UpdateReason.LoggedOut,
             ),
             promotions = emptyList(),
-            launchMode = EmbeddedLaunchMode.PaymentOptions,
+            launchMode = EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries),
             presentationState = EmbeddedActivityArgs.PresentationState.Ready,
         )
         ActivityScenario.launchActivityForResult<EmbeddedSheetActivity>(

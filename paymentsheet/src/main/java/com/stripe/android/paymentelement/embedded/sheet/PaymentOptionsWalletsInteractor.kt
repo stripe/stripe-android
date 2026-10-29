@@ -4,6 +4,7 @@ import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.SetupIntent
+import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
@@ -17,6 +18,7 @@ import javax.inject.Singleton
 @Singleton
 internal class PaymentOptionsWalletsInteractor @Inject constructor(
     private val paymentMethodMetadata: PaymentMethodMetadata,
+    launchMode: EmbeddedLaunchMode,
     customerStateHolder: CustomerStateHolder,
     private val selectionHolder: EmbeddedSelectionHolder,
     linkAccountHolder: LinkAccountHolder,
@@ -27,6 +29,12 @@ internal class PaymentOptionsWalletsInteractor @Inject constructor(
     val canShowDirectForm: Boolean = paymentMethodMetadata.supportedPaymentMethodTypes().size == 1 &&
         customerStateHolder.paymentMethods.value.isEmpty()
 
+    private val visibleWallets: List<WalletType> = when (launchMode) {
+        is EmbeddedLaunchMode.PaymentOptions -> launchMode.visibleWallets
+        is EmbeddedLaunchMode.Form,
+        is EmbeddedLaunchMode.Manage -> WalletType.entries
+    }
+
     val walletsState: StateFlow<WalletsState?> = combineAsStateFlow(
         sheetActivityStateHolder.state,
         linkAccountHolder.linkAccountInfo,
@@ -36,9 +44,10 @@ internal class PaymentOptionsWalletsInteractor @Inject constructor(
         val hasLinkWithSelectedPayment = currentSelection is PaymentSelection.Link &&
             currentSelection.selectedPayment != null
         WalletsState.create(
-            isLinkAvailable = paymentMethodMetadata.shouldShowLinkButton,
+            isLinkAvailable = paymentMethodMetadata.shouldShowLinkButton && visibleWallets.contains(WalletType.Link),
             linkEmail = linkAccount?.email,
-            isGooglePayReady = paymentMethodMetadata.isGooglePayReady,
+            isGooglePayReady = paymentMethodMetadata.isGooglePayReady &&
+                visibleWallets.contains(WalletType.GooglePay),
             apiConfiguration = paymentMethodMetadata.apiConfiguration,
             buttonsEnabled = !sheetState.isProcessing,
             paymentMethodTypes = paymentMethodMetadata.supportedPaymentMethodTypes(),

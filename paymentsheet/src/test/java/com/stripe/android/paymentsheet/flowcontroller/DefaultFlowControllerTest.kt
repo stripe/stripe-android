@@ -38,6 +38,7 @@ import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
+import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
 import com.stripe.android.model.ClientAttributionMetadata
@@ -56,6 +57,7 @@ import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -578,8 +580,38 @@ internal class DefaultFlowControllerTest {
         assertThat(args.customerState).isEqualTo(PaymentSheetFixtures.EMPTY_CUSTOMER_STATE)
         assertThat(args.linkAccountInfo).isEqualTo(LinkAccountUpdate.Value(null))
         assertThat(args.promotions).isEqualTo(listOf(KLARNA_PROMOTION))
-        assertThat(args.launchMode).isEqualTo(EmbeddedLaunchMode.PaymentOptions)
+        assertThat(args.launchMode).isEqualTo(EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries))
         assertThat(args.presentationState).isEqualTo(EmbeddedActivityArgs.PresentationState.Ready)
+    }
+
+    @OptIn(WalletButtonsPreview::class)
+    @Test
+    fun `presentPaymentOptions() passes wallets visible in payment element`() = runTest {
+        val viewModel = createViewModel()
+        val flowController = createFlowController(viewModel = viewModel)
+
+        flowController.configureExpectingSuccess(
+            configuration = PaymentSheet.Configuration.Builder("com.stripe.android.paymentsheet.test")
+                .walletButtons(
+                    PaymentSheet.WalletButtonsConfiguration(
+                        visibility = PaymentSheet.WalletButtonsConfiguration.Visibility(
+                            paymentElement = mapOf(
+                                PaymentSheet.WalletButtonsConfiguration.Wallet.Link to
+                                    PaymentSheet.WalletButtonsConfiguration.PaymentElementVisibility.Always,
+                            ),
+                        ),
+                    )
+                )
+                .build()
+        )
+        viewModel.walletButtonsRendered = true
+
+        flowController.presentPaymentOptions()
+
+        val argsCaptor = argumentCaptor<EmbeddedActivityArgs>()
+        verify(paymentOptionActivityLauncher).launch(argsCaptor.capture(), anyOrNull())
+        assertThat(argsCaptor.firstValue.launchMode)
+            .isEqualTo(EmbeddedLaunchMode.PaymentOptions(visibleWallets = listOf(WalletType.Link)))
     }
 
     @Test
@@ -868,7 +900,9 @@ internal class DefaultFlowControllerTest {
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
         )
 
-        flowController.onPaymentOptionResult(EmbeddedActivityResult.Error(EmbeddedLaunchMode.PaymentOptions))
+        flowController.onPaymentOptionResult(
+            EmbeddedActivityResult.Error(EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries))
+        )
 
         verify(paymentOptionResultCallback).onPaymentOptionResult(
             argThat {
@@ -2701,7 +2735,7 @@ private fun completeResult(
     linkAccountInfo = linkAccountInfo,
     checkoutSessionResponse = null,
     shouldInvokeSelectionCallback = false,
-    launchMode = EmbeddedLaunchMode.PaymentOptions,
+    launchMode = EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries),
 )
 
 private fun cancelledResult(
@@ -2710,5 +2744,5 @@ private fun cancelledResult(
 ) = EmbeddedActivityResult.Cancelled(
     customerState = customerState,
     linkAccountInfo = linkAccountInfo,
-    launchMode = EmbeddedLaunchMode.PaymentOptions,
+    launchMode = EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries),
 )

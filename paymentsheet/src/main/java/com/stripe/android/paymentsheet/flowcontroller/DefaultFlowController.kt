@@ -77,6 +77,7 @@ import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.paymentsheet.utils.reportPaymentResult
+import com.stripe.android.paymentsheet.walletsVisibleInPaymentElement
 import com.stripe.android.uicore.utils.AnimationConstants
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -317,7 +318,11 @@ internal class DefaultFlowController @Inject internal constructor(
             customerState = state.paymentSheetState.customer,
             linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
             promotions = paymentMethodMessagePromotionsHelper.getPromotions().orEmpty(),
-            launchMode = EmbeddedLaunchMode.PaymentOptions,
+            launchMode = EmbeddedLaunchMode.PaymentOptions(
+                visibleWallets = state.config.walletButtons.walletsVisibleInPaymentElement(
+                    walletButtonsRendered = viewModel.walletButtonsRendered,
+                ),
+            ),
             presentationState = EmbeddedActivityArgs.PresentationState.Ready,
         )
 

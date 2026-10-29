@@ -7,6 +7,7 @@ import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
@@ -114,7 +115,7 @@ internal class EmbeddedSavedPaymentMethodMutatorFactoryTest {
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(
             hasCustomerConfiguration = true,
         ),
-        launchMode: EmbeddedLaunchMode = EmbeddedLaunchMode.PaymentOptions,
+        launchMode: EmbeddedLaunchMode = EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries),
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD

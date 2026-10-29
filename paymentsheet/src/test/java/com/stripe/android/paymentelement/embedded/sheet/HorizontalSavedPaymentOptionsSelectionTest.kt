@@ -12,6 +12,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
@@ -53,7 +54,7 @@ internal class HorizontalSavedPaymentOptionsSelectionTest {
         val result = awaitResult()
         assertThat(result.selection).isEqualTo(PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
         assertThat(result.hasBeenConfirmed).isFalse()
-        assertThat(result.launchMode).isEqualTo(EmbeddedLaunchMode.PaymentOptions)
+        assertThat(result.launchMode).isEqualTo(EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries))
     }
 
     @Test
@@ -117,7 +118,7 @@ internal class HorizontalSavedPaymentOptionsSelectionTest {
                 lastUpdateReason = LinkAccountUpdate.Value.UpdateReason.LoggedOut,
             ),
             promotions = emptyList(),
-            launchMode = EmbeddedLaunchMode.PaymentOptions,
+            launchMode = EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries),
             presentationState = EmbeddedActivityArgs.PresentationState.Ready,
         )
         ActivityScenario.launchActivityForResult<EmbeddedSheetActivity>(

@@ -9,6 +9,7 @@ import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
@@ -108,7 +109,7 @@ internal class InitialPaymentOptionsScreenFactoryTest {
 
     @Test
     fun `present reopens restored single payment method directly on its form`() = testScenario(
-        launchMode = EmbeddedLaunchMode.PaymentOptions,
+        launchMode = EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries),
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
         ),
@@ -126,7 +127,7 @@ internal class InitialPaymentOptionsScreenFactoryTest {
 
     @Test
     fun `present with saved payment methods retains payment options beneath restored form`() = testScenario(
-        launchMode = EmbeddedLaunchMode.PaymentOptions,
+        launchMode = EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries),
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
         ),
@@ -145,7 +146,7 @@ internal class InitialPaymentOptionsScreenFactoryTest {
 
     @Test
     fun `present with multiple payment methods retains payment options beneath restored form`() = testScenario(
-        launchMode = EmbeddedLaunchMode.PaymentOptions,
+        launchMode = EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries),
     ) {
         selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
 
@@ -509,7 +510,7 @@ internal class InitialPaymentOptionsScreenFactoryTest {
 
     @Suppress("LongMethod")
     private fun testScenario(
-        launchMode: EmbeddedLaunchMode = EmbeddedLaunchMode.PaymentOptions,
+        launchMode: EmbeddedLaunchMode = EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries),
         isGooglePayReady: Boolean = true,
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
@@ -552,6 +553,7 @@ internal class InitialPaymentOptionsScreenFactoryTest {
         val linkAccountHolder = LinkAccountHolder(SavedStateHandle())
         val walletsInteractor = PaymentOptionsWalletsInteractor(
             paymentMethodMetadata = paymentMethodMetadata,
+            launchMode = launchMode,
             customerStateHolder = customerStateHolder,
             selectionHolder = selectionHolder,
             linkAccountHolder = linkAccountHolder,

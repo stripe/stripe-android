@@ -32,6 +32,23 @@ internal val WalletType.configType: PaymentSheet.WalletButtonsConfiguration.Wall
         WalletType.GooglePay -> PaymentSheet.WalletButtonsConfiguration.Wallet.GooglePay
     }
 
+internal fun PaymentSheet.WalletButtonsConfiguration.walletsVisibleInPaymentElement(
+    walletButtonsRendered: Boolean,
+): List<WalletType> {
+    return WalletType.entries.filter { walletType ->
+        when (visibility.paymentElement[walletType.configType]) {
+            null,
+            PaymentSheet.WalletButtonsConfiguration.PaymentElementVisibility.Automatic -> {
+                !walletButtonsRendered ||
+                    visibility.walletButtonsView[walletType.configType] ==
+                    PaymentSheet.WalletButtonsConfiguration.WalletButtonsViewVisibility.Never
+            }
+            PaymentSheet.WalletButtonsConfiguration.PaymentElementVisibility.Always -> true
+            PaymentSheet.WalletButtonsConfiguration.PaymentElementVisibility.Never -> false
+        }
+    }
+}
+
 @OptIn(AppearanceAPIAdditionsPreview::class)
 internal fun PaymentSheet.Typography.Font.toTextStyle(): TextStyle {
     return TextStyle(

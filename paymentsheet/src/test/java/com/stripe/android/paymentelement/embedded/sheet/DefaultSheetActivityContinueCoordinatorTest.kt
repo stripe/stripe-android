@@ -16,6 +16,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
+import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networktesting.NetworkRule
@@ -304,7 +305,7 @@ internal class DefaultSheetActivityContinueCoordinatorTest {
 
     private companion object {
         const val ERROR_MESSAGE = "Tax region update failed"
-        val LAUNCH_MODE = EmbeddedLaunchMode.PaymentOptions
+        val LAUNCH_MODE = EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries)
         val CHECKOUT_SESSION_METADATA = PaymentMethodMetadataFactory.create(
             integrationMetadata = IntegrationMetadata.CheckoutSession(
                 collectedEmail = null,

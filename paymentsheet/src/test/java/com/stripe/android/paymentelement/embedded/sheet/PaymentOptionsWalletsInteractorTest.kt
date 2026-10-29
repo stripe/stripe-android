@@ -17,6 +17,7 @@ import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
+import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
@@ -235,10 +236,49 @@ internal class PaymentOptionsWalletsInteractorTest {
         assertThat(continueCoordinator.onContinueCalls.awaitItem()).isEqualTo(Unit)
     }
 
+    @Test
+    fun `hidden Link is not shown in header or inline`() = runScenario(
+        paymentMethodMetadata = createMetadata(paymentMethodTypes = listOf("card", "cashapp")),
+        launchMode = EmbeddedLaunchMode.PaymentOptions(visibleWallets = listOf(WalletType.GooglePay)),
+    ) {
+        val state = interactor.walletsState.value!!
+        assertThat(state.link(WalletLocation.HEADER)).isNull()
+        assertThat(state.link(WalletLocation.INLINE)).isNull()
+        assertThat(state.googlePay(WalletLocation.INLINE)).isNotNull()
+    }
+
+    @Test
+    fun `hidden Google Pay is not shown in header or inline`() = runScenario(
+        paymentMethodMetadata = createMetadata(paymentMethodTypes = listOf("card", "cashapp")),
+        launchMode = EmbeddedLaunchMode.PaymentOptions(visibleWallets = listOf(WalletType.Link)),
+    ) {
+        val state = interactor.walletsState.value!!
+        assertThat(state.googlePay(WalletLocation.HEADER)).isNull()
+        assertThat(state.googlePay(WalletLocation.INLINE)).isNull()
+        assertThat(state.link(WalletLocation.HEADER)).isNotNull()
+    }
+
+    @Test
+    fun `hidden wallets are not shown in direct form header`() = runScenario(
+        launchMode = EmbeddedLaunchMode.PaymentOptions(visibleWallets = emptyList()),
+    ) {
+        assertThat(interactor.walletsState.value).isNull()
+    }
+
+    @Test
+    fun `all wallets are shown outside of payment options launch mode`() = runScenario(
+        launchMode = EmbeddedLaunchMode.Manage,
+    ) {
+        val state = interactor.walletsState.value!!
+        assertThat(state.googlePay(WalletLocation.HEADER)).isNotNull()
+        assertThat(state.link(WalletLocation.HEADER)).isNotNull()
+    }
+
     private fun runScenario(
         paymentMethodMetadata: PaymentMethodMetadata = createMetadata(paymentMethodTypes = listOf("card")),
         initialCustomerState: CustomerState? = null,
         initialSelection: PaymentSelection? = null,
+        launchMode: EmbeddedLaunchMode = EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries),
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val savedStateHandle = SavedStateHandle()
@@ -256,6 +296,7 @@ internal class PaymentOptionsWalletsInteractorTest {
         val sheetActivityStateHolder = FakeSheetActivityStateHolder()
         val interactor = PaymentOptionsWalletsInteractor(
             paymentMethodMetadata = paymentMethodMetadata,
+            launchMode = launchMode,
             customerStateHolder = customerStateHolder,
             selectionHolder = selectionHolder,
             linkAccountHolder = linkAccountHolder,

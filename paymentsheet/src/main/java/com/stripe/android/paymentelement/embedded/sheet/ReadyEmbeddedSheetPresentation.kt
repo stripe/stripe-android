@@ -108,7 +108,7 @@ internal class ReadyEmbeddedSheetPresentation @AssistedInject constructor(
                 shouldInvokeSelectionCallback = false,
                 launchMode = launchMode,
             )
-            is EmbeddedLaunchMode.PaymentOptions -> createPaymentOptionsCancellationResult()
+            is EmbeddedLaunchMode.PaymentOptions -> createPaymentOptionsCancellationResult(launchMode)
         }
     }
 
@@ -119,7 +119,7 @@ internal class ReadyEmbeddedSheetPresentation @AssistedInject constructor(
                 shouldInvokeSelectionCallback = result == true,
                 launchMode = launchMode,
             )
-            is EmbeddedLaunchMode.PaymentOptions -> createPaymentOptionsCancellationResult()
+            is EmbeddedLaunchMode.PaymentOptions -> createPaymentOptionsCancellationResult(launchMode)
         }
     }
 
@@ -139,11 +139,13 @@ internal class ReadyEmbeddedSheetPresentation @AssistedInject constructor(
         )
     }
 
-    private fun createPaymentOptionsCancellationResult(): EmbeddedActivityResult {
+    private fun createPaymentOptionsCancellationResult(
+        launchMode: EmbeddedLaunchMode.PaymentOptions,
+    ): EmbeddedActivityResult {
         return EmbeddedActivityResult.Cancelled(
             customerState = customerStateHolder.customer.value,
             linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
-            launchMode = EmbeddedLaunchMode.PaymentOptions,
+            launchMode = launchMode,
         )
     }
 
