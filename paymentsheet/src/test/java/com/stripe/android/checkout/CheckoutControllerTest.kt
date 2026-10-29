@@ -48,6 +48,8 @@ import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.utils.simulateProcessDeath
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
@@ -122,6 +124,19 @@ internal class CheckoutControllerTest {
         assertThat(state.expressCheckoutElementPaymentMethodMetadata).isNull()
         assertThat(state.embeddedConfiguration).isNull()
         assertThat(state.paymentSelection).isNull()
+    }
+
+    @Test
+    fun `configure returns failure when default billing address has no country`() = runConfigureScenario(
+        configuration = configurationWithMissingBillingCountry(),
+        networkSetup = {},
+    ) {
+        assertThat(result).isInstanceOf(CheckoutController.OperationResult.Failed::class.java)
+        val failure = result as CheckoutController.OperationResult.Failed
+        assertThat(failure.error).isInstanceOf(IllegalArgumentException::class.java)
+        assertThat(failure.error).hasMessageThat().isEqualTo("Country is required.")
+        assertThat(committedState).isNull()
+        assertThat(controller.session.value).isNull()
     }
 
     @Test
@@ -261,6 +276,25 @@ internal class CheckoutControllerTest {
         assertThat(billingAddress.postalCode).isEqualTo("94103")
         assertThat(billingAddress.state).isEqualTo("CA")
     }
+
+    @Test
+    fun `reconfigure returns failure when default shipping address has no country`() =
+        runConfigureScenario {
+            val stateBefore = requireNotNull(committedState)
+            val sessionBefore = controller.session.value
+
+            val result = controller.configure(
+                DEFAULT_CLIENT_SECRET,
+                configurationWithDefaultShippingAddress(address = Address()),
+            )
+
+            assertThat(result).isInstanceOf(CheckoutController.OperationResult.Failed::class.java)
+            val failure = result as CheckoutController.OperationResult.Failed
+            assertThat(failure.error).isInstanceOf(IllegalArgumentException::class.java)
+            assertThat(failure.error).hasMessageThat().isEqualTo("Country is required.")
+            assertThat(committedState).isEqualTo(stateBefore)
+            assertThat(controller.session.value).isEqualTo(sessionBefore)
+        }
 
     @Test
     fun `configure syncs tax from the initial saved payment method rather than the default billing address`() =
@@ -1646,7 +1680,7 @@ internal class CheckoutControllerTest {
     fun `configure returns failure when a payment flow is presented`() = runMutationScenario(
         sheetIsOpen = true
     ) {
-        val result = controller.configure(DEFAULT_CLIENT_SECRET, configurationWithPaymentElement())
+        val result = controller.configure(DEFAULT_CLIENT_SECRET, configurationWithMissingBillingCountry())
 
         assertThat(result).isInstanceOf(CheckoutController.OperationResult.Failed::class.java)
         val failure = result as CheckoutController.OperationResult.Failed
@@ -1750,6 +1784,53 @@ internal class CheckoutControllerTest {
             // A single loading window spanned both operations, with no flicker to false in between.
             assertThat(isUpdatingTurbine.awaitItem()).isFalse()
         }
+
+    @Test
+    fun `canceling queued configure propagates cancellation without changing the session`() = runMutationScenario {
+        val sessionBefore = controller.session.value
+        val stateBefore = committedState()
+        val serverUpdateStarted = Turbine<Unit>()
+        val releaseServerUpdate = CompletableDeferred<Unit>()
+        val serverUpdateFailure = IllegalStateException("server update failed")
+        val serverUpdate = async(Dispatchers.Default) {
+            controller.runServerUpdate {
+                serverUpdateStarted.add(Unit)
+                releaseServerUpdate.await()
+                Result.failure(serverUpdateFailure)
+            }
+        }
+
+        try {
+            serverUpdateStarted.awaitItem()
+
+            val configure = async(start = CoroutineStart.UNDISPATCHED) {
+                controller.configure(DEFAULT_CLIENT_SECRET, configurationWithPaymentElement())
+            }
+            testScheduler.runCurrent()
+            assertThat(configure.isCompleted).isFalse()
+
+            val cancellation = CancellationException("configure canceled while queued")
+            configure.cancel(cancellation)
+            configure.join()
+
+            assertThat(configure.isCancelled).isTrue()
+            val error = runCatching { configure.await() }.exceptionOrNull()
+            assertThat(error).isInstanceOf(CancellationException::class.java)
+            assertThat(error).hasMessageThat().isEqualTo("configure canceled while queued")
+            assertThat(controller.session.value).isEqualTo(sessionBefore)
+            assertThat(committedState()).isEqualTo(stateBefore)
+
+            releaseServerUpdate.complete(Unit)
+            val result = serverUpdate.await()
+            assertThat(result).isInstanceOf(CheckoutController.OperationResult.Failed::class.java)
+            assertThat((result as CheckoutController.OperationResult.Failed).error)
+                .isSameInstanceAs(serverUpdateFailure)
+        } finally {
+            releaseServerUpdate.complete(Unit)
+        }
+
+        serverUpdateStarted.ensureAllEventsConsumed()
+    }
 
     // region allowedShippingCountries validation
 
@@ -2001,6 +2082,13 @@ internal class CheckoutControllerTest {
             )
         )
     }
+
+    private fun configurationWithMissingBillingCountry(): CheckoutController.Configuration =
+        configurationWithPaymentElement().defaults(
+            CheckoutController.Configuration.Defaults().billingDetails(
+                CheckoutController.Configuration.Defaults.ContactDetails().address(Address()),
+            ),
+        )
 
     private fun configurationWithDefaultShippingAddress(
         address: Address? = fullAddress,

@@ -102,6 +102,8 @@ class CheckoutController @Inject internal constructor(
      * Loads the Checkout Session identified by [clientSecret] and prepares the
      * payment UI, populating [session] on success.
      *
+     * Configuration validation failures return [OperationResult.Failed].
+     *
      * @param clientSecret The client secret of the Checkout Session to load.
      * @param configuration Options controlling how the checkout is configured and displayed.
      */
@@ -115,7 +117,11 @@ class CheckoutController @Inject internal constructor(
             return@withContext integrationLaunchedFailure()
         }
         operationCoordinator.runMutation {
-            val configurationState = configuration.build()
+            val configurationState = try {
+                configuration.build()
+            } catch (error: IllegalArgumentException) {
+                return@runMutation kotlin.Result.failure(error)
+            }
             val sessionId = clientSecret.substringBefore("_secret_")
 
             checkoutSessionRepository.init(
