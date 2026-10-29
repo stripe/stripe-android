@@ -9,15 +9,11 @@ class ClientAttributionMetadataTest {
 
     @Test
     fun `toParamMap() creates correct params`() {
-        val clientAttributionMetadataParams = ClientAttributionMetadata(
+        val clientAttributionMetadataParams = ClientAttributionMetadata.Elements(
             elementsSessionConfigId = "e961790f-43ed-4fcc-a534-74eeca28d042",
             paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
             paymentMethodSelectionFlow = PaymentMethodSelectionFlow.MerchantSpecified,
-            checkoutSessionId = null,
-            checkoutConfigId = null,
-            merchantIntegrationSource = "elements",
-            merchantIntegrationSubtype = "mobile",
-            merchantIntegrationAdditionalElements = null,
+            stripeSdkVersion = StripeSdkVersion.VERSION_NAME,
         ).toParamMap()
 
         assertThat(clientAttributionMetadataParams).hasSize(7)
@@ -53,15 +49,11 @@ class ClientAttributionMetadataTest {
 
     @Test
     fun `toParamMap() omits paymentIntentCreationFlow if null`() {
-        val clientAttributionMetadataParams = ClientAttributionMetadata(
+        val clientAttributionMetadataParams = ClientAttributionMetadata.Elements(
             elementsSessionConfigId = "e961790f-43ed-4fcc-a534-74eeca28d042",
             paymentMethodSelectionFlow = PaymentMethodSelectionFlow.Automatic,
             paymentIntentCreationFlow = null,
-            checkoutSessionId = null,
-            checkoutConfigId = null,
-            merchantIntegrationSource = "elements",
-            merchantIntegrationSubtype = "mobile",
-            merchantIntegrationAdditionalElements = null,
+            stripeSdkVersion = StripeSdkVersion.VERSION_NAME,
         ).toParamMap()
 
         assertThat(clientAttributionMetadataParams).hasSize(6)
@@ -70,15 +62,11 @@ class ClientAttributionMetadataTest {
 
     @Test
     fun `toParamMap() omits paymentMethodSelectionFlow if null`() {
-        val clientAttributionMetadataParams = ClientAttributionMetadata(
+        val clientAttributionMetadataParams = ClientAttributionMetadata.Elements(
             elementsSessionConfigId = "e961790f-43ed-4fcc-a534-74eeca28d042",
             paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
             paymentMethodSelectionFlow = null,
-            checkoutSessionId = null,
-            checkoutConfigId = null,
-            merchantIntegrationSource = "elements",
-            merchantIntegrationSubtype = "mobile",
-            merchantIntegrationAdditionalElements = null,
+            stripeSdkVersion = StripeSdkVersion.VERSION_NAME,
         ).toParamMap()
 
         assertThat(clientAttributionMetadataParams).hasSize(6)
@@ -87,15 +75,11 @@ class ClientAttributionMetadataTest {
 
     @Test
     fun `toParamMap() omits elementsSessionConfigId if null`() {
-        val clientAttributionMetadataParams = ClientAttributionMetadata(
+        val clientAttributionMetadataParams = ClientAttributionMetadata.Elements(
             elementsSessionConfigId = null,
             paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
             paymentMethodSelectionFlow = PaymentMethodSelectionFlow.MerchantSpecified,
-            checkoutSessionId = null,
-            checkoutConfigId = null,
-            merchantIntegrationSource = "elements",
-            merchantIntegrationSubtype = "mobile",
-            merchantIntegrationAdditionalElements = null,
+            stripeSdkVersion = StripeSdkVersion.VERSION_NAME,
         ).toParamMap()
 
         assertThat(clientAttributionMetadataParams).hasSize(6)
@@ -104,17 +88,17 @@ class ClientAttributionMetadataTest {
 
     @Test
     fun `toParamMap() includes checkout attribution when present`() {
-        val clientAttributionMetadataParams = ClientAttributionMetadata(
+        val clientAttributionMetadataParams = ClientAttributionMetadata.CheckoutSession(
             elementsSessionConfigId = null,
-            paymentIntentCreationFlow = null,
             paymentMethodSelectionFlow = PaymentMethodSelectionFlow.Automatic,
             checkoutSessionId = "cs_test_123",
             checkoutConfigId = "checkout_config_123",
-            merchantIntegrationSource = "mobile-checkout",
-            merchantIntegrationSubtype = "mobile-payment-element",
-            merchantIntegrationAdditionalElements = listOf("mobile-payment-element", "mobile-shipping-address-element"),
+            configuredElements = listOf("mobile-payment-element", "mobile-shipping-address-element"),
+            isExpressCheckoutElement = false,
+            stripeSdkVersion = StripeSdkVersion.VERSION_NAME,
         ).toParamMap()
 
+        assertThat(clientAttributionMetadataParams).doesNotContainKey("payment_intent_creation_flow")
         assertThat(clientAttributionMetadataParams).containsEntry("checkout_session_id", "cs_test_123")
         assertThat(clientAttributionMetadataParams).containsEntry("checkout_config_id", "checkout_config_123")
         assertThat(clientAttributionMetadataParams).containsEntry("merchant_integration_source", "mobile-checkout")
@@ -129,18 +113,16 @@ class ClientAttributionMetadataTest {
     }
 
     @Test
-    fun `toParamMap() omits checkoutSessionId if null`() {
-        val clientAttributionMetadataParams = ClientAttributionMetadata(
+    fun `Elements toParamMap() omits checkout fields`() {
+        val clientAttributionMetadataParams = ClientAttributionMetadata.Elements(
             elementsSessionConfigId = null,
             paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
             paymentMethodSelectionFlow = PaymentMethodSelectionFlow.MerchantSpecified,
-            checkoutSessionId = null,
-            checkoutConfigId = null,
-            merchantIntegrationSource = "elements",
-            merchantIntegrationSubtype = "mobile",
-            merchantIntegrationAdditionalElements = null,
+            stripeSdkVersion = StripeSdkVersion.VERSION_NAME,
         ).toParamMap()
 
         assertThat(clientAttributionMetadataParams).doesNotContainKey("checkout_session_id")
+        assertThat(clientAttributionMetadataParams).doesNotContainKey("checkout_config_id")
+        assertThat(clientAttributionMetadataParams).doesNotContainKey("merchant_integration_additional_elements")
     }
 }

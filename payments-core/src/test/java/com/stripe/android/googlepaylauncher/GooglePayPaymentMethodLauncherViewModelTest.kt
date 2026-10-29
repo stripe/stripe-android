@@ -22,6 +22,7 @@ import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.model.Address
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.GooglePayFixtures
@@ -432,15 +433,11 @@ class GooglePayPaymentMethodLauncherViewModelTest {
             ),
             currencyCode = "usd",
             amount = 1000,
-            clientAttributionMetadata = ClientAttributionMetadata(
+            clientAttributionMetadata = ClientAttributionMetadata.Elements(
                 elementsSessionConfigId = "e961790f-43ed-4fcc-a534-74eeca28d042",
                 paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
                 paymentMethodSelectionFlow = PaymentMethodSelectionFlow.Automatic,
-                checkoutSessionId = null,
-                checkoutConfigId = null,
-                merchantIntegrationSource = "elements",
-                merchantIntegrationSubtype = "mobile",
-                merchantIntegrationAdditionalElements = null,
+                stripeSdkVersion = StripeSdkVersion.VERSION_NAME,
             ),
             apiConfiguration = ApiConfiguration.State(
                 ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,

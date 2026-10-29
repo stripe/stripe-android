@@ -21,6 +21,7 @@ import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.DurationProvider
+import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.googlepaylauncher.injection.GooglePayRepositoryFactory
@@ -169,15 +170,11 @@ internal class DefaultPaymentElementLoaderTest {
                     saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
                     canRemoveLastPaymentMethod = true,
                     canUpdateCardExpiryAndBillingDetails = false,
-                    clientAttributionMetadata = ClientAttributionMetadata(
+                    clientAttributionMetadata = ClientAttributionMetadata.Elements(
                         elementsSessionConfigId = DEFAULT_ELEMENTS_SESSION_CONFIG_ID,
                         paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
                         paymentMethodSelectionFlow = PaymentMethodSelectionFlow.MerchantSpecified,
-                        checkoutSessionId = null,
-                        checkoutConfigId = null,
-                        merchantIntegrationSource = "elements",
-                        merchantIntegrationSubtype = "mobile",
-                        merchantIntegrationAdditionalElements = null,
+                        stripeSdkVersion = StripeSdkVersion.VERSION_NAME,
                     ),
                     integrationMetadata = IntegrationMetadata.IntentFirst("pi_1234_secret_1234"),
                     elementsSessionId = "session_1234",
@@ -4357,7 +4354,7 @@ internal class DefaultPaymentElementLoaderTest {
         assertThat(params["merchant_integration_additional_elements"]).isEqualTo(
             listOf("mobile-payment-element", "mobile-express-checkout-element")
         )
-        assertThat(clientAttributionMetadata.paymentIntentCreationFlow).isNull()
+        assertThat(params).doesNotContainKey("payment_intent_creation_flow")
         assertThat(clientAttributionMetadata.paymentMethodSelectionFlow)
             .isEqualTo(PaymentMethodSelectionFlow.Automatic)
     }

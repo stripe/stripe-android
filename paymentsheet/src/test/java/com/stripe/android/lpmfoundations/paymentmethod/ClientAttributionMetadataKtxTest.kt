@@ -2,7 +2,6 @@ package com.stripe.android.lpmfoundations.paymentmethod
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.ClientAttributionMetadata
-import com.stripe.android.model.PaymentIntentCreationFlow
 import com.stripe.android.model.PaymentMethodSelectionFlow
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
@@ -19,8 +18,8 @@ class ClientAttributionMetadataKtxTest {
             initializationMode = initializationMode,
         )
 
-        assertThat(clientAttributionMetadata.paymentIntentCreationFlow)
-            .isEqualTo(PaymentIntentCreationFlow.Standard)
+        assertThat(clientAttributionMetadata.toParamMap()["payment_intent_creation_flow"])
+            .isEqualTo("standard")
     }
 
     @Test
@@ -31,8 +30,8 @@ class ClientAttributionMetadataKtxTest {
             initializationMode = initializationMode,
         )
 
-        assertThat(clientAttributionMetadata.paymentIntentCreationFlow)
-            .isEqualTo(PaymentIntentCreationFlow.Standard)
+        assertThat(clientAttributionMetadata.toParamMap()["payment_intent_creation_flow"])
+            .isEqualTo("standard")
     }
 
     @Test
@@ -50,8 +49,8 @@ class ClientAttributionMetadataKtxTest {
             initializationMode = initializationMode,
         )
 
-        assertThat(clientAttributionMetadata.paymentIntentCreationFlow)
-            .isEqualTo(PaymentIntentCreationFlow.Deferred)
+        assertThat(clientAttributionMetadata.toParamMap()["payment_intent_creation_flow"])
+            .isEqualTo("deferred")
     }
 
     @Test
@@ -90,7 +89,7 @@ class ClientAttributionMetadataKtxTest {
     }
 
     @Test
-    fun `payment intent creation flow is null for checkout session`() {
+    fun `payment intent creation flow is omitted for checkout session`() {
         val initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
             collectedEmail = null,
             instancesKey = "instances_key",
@@ -102,7 +101,8 @@ class ClientAttributionMetadataKtxTest {
             initializationMode = initializationMode,
         )
 
-        assertThat(clientAttributionMetadata.paymentIntentCreationFlow).isNull()
+        assertThat(clientAttributionMetadata.toParamMap())
+            .doesNotContainKey("payment_intent_creation_flow")
     }
 
     @Test
@@ -118,18 +118,19 @@ class ClientAttributionMetadataKtxTest {
             initializationMode = initializationMode,
         )
 
-        assertThat(clientAttributionMetadata.checkoutSessionId).isEqualTo("cs_test_456")
+        assertThat(clientAttributionMetadata.toParamMap()["checkout_session_id"])
+            .isEqualTo("cs_test_456")
     }
 
     @Test
-    fun `checkout session ID is null for non-checkout-session modes`() {
+    fun `checkout session ID is omitted for non-checkout-session modes`() {
         val initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("cs_123")
 
         val clientAttributionMetadata = createClientAttributionMetadata(
             initializationMode = initializationMode,
         )
 
-        assertThat(clientAttributionMetadata.checkoutSessionId).isNull()
+        assertThat(clientAttributionMetadata.toParamMap()).doesNotContainKey("checkout_session_id")
     }
 
     @Test
@@ -155,10 +156,10 @@ class ClientAttributionMetadataKtxTest {
         )
         val params = clientAttributionMetadata.toParamMap()
 
-        assertThat(clientAttributionMetadata.paymentIntentCreationFlow).isNull()
+        assertThat(params).doesNotContainKey("payment_intent_creation_flow")
+        assertThat(params["checkout_session_id"]).isEqualTo("cs_test_456")
         assertThat(clientAttributionMetadata.paymentMethodSelectionFlow)
             .isEqualTo(PaymentMethodSelectionFlow.Automatic)
-        assertThat(clientAttributionMetadata.checkoutSessionId).isEqualTo("cs_test_456")
         assertThat(params["merchant_integration_source"]).isEqualTo("mobile-checkout")
         assertThat(params["merchant_integration_subtype"]).isEqualTo("mobile-payment-element")
         assertThat(params["checkout_config_id"]).isEqualTo("cfg_test_123")

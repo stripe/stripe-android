@@ -6,6 +6,7 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.ui.LinkButtonState
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -110,15 +111,11 @@ internal class PaymentSheetScreenAddFirstPaymentMethodScreenshotTest {
                         "exp_year" to "2050",
                     ),
                 ),
-                clientAttributionMetadata = ClientAttributionMetadata(
+                clientAttributionMetadata = ClientAttributionMetadata.Elements(
                     elementsSessionConfigId = "e961790f-43ed-4fcc-a534-74eeca28d042",
                     paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
                     paymentMethodSelectionFlow = PaymentMethodSelectionFlow.Automatic,
-                    checkoutSessionId = null,
-                    checkoutConfigId = null,
-                    merchantIntegrationSource = "elements",
-                    merchantIntegrationSubtype = "mobile",
-                    merchantIntegrationAdditionalElements = null,
+                    stripeSdkVersion = StripeSdkVersion.VERSION_NAME,
                 )
             ),
             previousPaymentMethodExtraParams = PaymentMethodExtraParams.Card(

@@ -6,6 +6,7 @@ import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.gate.FakeLinkGate
 import com.stripe.android.link.model.AccountStatus
@@ -463,15 +464,11 @@ internal class DefaultCreateLinkStateTest {
             clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value
         )
 
-        val DEFAULT_CLIENT_ATTRIBUTION_METADATA = ClientAttributionMetadata(
+        val DEFAULT_CLIENT_ATTRIBUTION_METADATA = ClientAttributionMetadata.Elements(
             elementsSessionConfigId = FakeElementsSessionRepository.DEFAULT_ELEMENTS_SESSION_CONFIG_ID,
             paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
             paymentMethodSelectionFlow = PaymentMethodSelectionFlow.MerchantSpecified,
-            checkoutSessionId = null,
-            checkoutConfigId = null,
-            merchantIntegrationSource = "elements",
-            merchantIntegrationSubtype = "mobile",
-            merchantIntegrationAdditionalElements = null,
+            stripeSdkVersion = StripeSdkVersion.VERSION_NAME,
         )
     }
 }

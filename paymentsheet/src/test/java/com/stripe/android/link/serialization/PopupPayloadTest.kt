@@ -5,11 +5,14 @@ import android.os.LocaleList
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.networking.AnalyticsRequestFactory
+import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.TestFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
+import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodSelectionFlow
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.SetupIntentFactory
@@ -402,16 +405,17 @@ internal class PopupPayloadTest {
     @Test
     fun `create serializes checkout attribution elements as a JSON array`() {
         val configuration = createLinkConfiguration().copy(
-            clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA.copy(
+            clientAttributionMetadata = ClientAttributionMetadata.CheckoutSession(
+                elementsSessionConfigId = "e961790f-43ed-4fcc-a534-74eeca28d042",
+                paymentMethodSelectionFlow = PaymentMethodSelectionFlow.Automatic,
                 checkoutSessionId = "cs_test_123",
                 checkoutConfigId = "checkout_config_123",
-                paymentIntentCreationFlow = null,
-                merchantIntegrationSource = "mobile-checkout",
-                merchantIntegrationSubtype = "mobile-payment-element",
-                merchantIntegrationAdditionalElements = listOf(
+                configuredElements = listOf(
                     "mobile-payment-element",
                     "mobile-shipping-address-element",
                 ),
+                isExpressCheckoutElement = false,
+                stripeSdkVersion = StripeSdkVersion.VERSION_NAME,
             ),
         )
         val payload = PopupPayload.create(

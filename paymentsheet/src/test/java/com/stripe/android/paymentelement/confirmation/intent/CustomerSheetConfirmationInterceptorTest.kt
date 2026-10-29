@@ -7,6 +7,7 @@ import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.customersheet.FakeStripeRepository
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
@@ -33,15 +34,11 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class CustomerSheetConfirmationInterceptorTest {
 
-    private val clientAttributionMetadata = ClientAttributionMetadata(
+    private val clientAttributionMetadata = ClientAttributionMetadata.Elements(
         elementsSessionConfigId = "test_session_id",
         paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
         paymentMethodSelectionFlow = PaymentMethodSelectionFlow.MerchantSpecified,
-        checkoutSessionId = null,
-        checkoutConfigId = null,
-        merchantIntegrationSource = "elements",
-        merchantIntegrationSubtype = "mobile",
-        merchantIntegrationAdditionalElements = null,
+        stripeSdkVersion = StripeSdkVersion.VERSION_NAME,
     )
 
     private val requestOptions = ApiRequest.Options(

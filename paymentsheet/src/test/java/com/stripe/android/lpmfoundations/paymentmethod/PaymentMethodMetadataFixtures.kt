@@ -3,6 +3,7 @@ package com.stripe.android.lpmfoundations.paymentmethod
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.PaymentIntentCreationFlow
 import com.stripe.android.model.PaymentMethodSelectionFlow
@@ -25,15 +26,11 @@ internal object PaymentMethodMetadataFixtures {
         attachmentStyle = IntegrationMetadata.CustomerSheet.AttachmentStyle.SetupIntent,
     )
 
-    internal val CLIENT_ATTRIBUTION_METADATA = ClientAttributionMetadata(
+    internal val CLIENT_ATTRIBUTION_METADATA = ClientAttributionMetadata.Elements(
         elementsSessionConfigId = "e961790f-43ed-4fcc-a534-74eeca28d042",
         paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
         paymentMethodSelectionFlow = PaymentMethodSelectionFlow.Automatic,
-        checkoutSessionId = null,
-        checkoutConfigId = null,
-        merchantIntegrationSource = "elements",
-        merchantIntegrationSubtype = "mobile",
-        merchantIntegrationAdditionalElements = null,
+        stripeSdkVersion = StripeSdkVersion.VERSION_NAME,
     )
 
     internal val CUSTOMER_SESSIONS_CUSTOMER_METADATA = CustomerMetadata.CustomerSession(

@@ -6,6 +6,7 @@ import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.FeatureFlags
+import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.TestFactory
@@ -1357,15 +1358,11 @@ internal class PaymentMethodMetadataTest {
             forceSetupFutureUseBehaviorAndNewMandate = false,
             passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
             openCardScanAutomatically = false,
-            clientAttributionMetadata = ClientAttributionMetadata(
+            clientAttributionMetadata = ClientAttributionMetadata.Elements(
                 elementsSessionConfigId = elementsSession.elementsSessionConfigId,
                 paymentMethodSelectionFlow = null,
                 paymentIntentCreationFlow = null,
-                checkoutSessionId = null,
-                checkoutConfigId = null,
-                merchantIntegrationSource = "elements",
-                merchantIntegrationSubtype = "mobile",
-                merchantIntegrationAdditionalElements = null,
+                stripeSdkVersion = StripeSdkVersion.VERSION_NAME,
             ),
             attestOnIntentConfirmation = false,
             appearance = configuration.appearance,

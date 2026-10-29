@@ -9,6 +9,7 @@ import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.orEmpty
 import com.stripe.android.core.utils.FeatureFlags.disableNfcScanning
+import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.lpmfoundations.FormHeaderInformation
@@ -518,15 +519,11 @@ internal data class PaymentMethodMetadata(
                     .flags[ELEMENTS_MOBILE_FORCE_SETUP_FUTURE_USE_BEHAVIOR_AND_NEW_MANDATE_TEXT] == true,
                 passiveCaptchaParams = elementsSession.passiveCaptchaParams,
                 openCardScanAutomatically = configuration.opensCardScannerAutomatically,
-                clientAttributionMetadata = ClientAttributionMetadata(
+                clientAttributionMetadata = ClientAttributionMetadata.Elements(
                     elementsSessionConfigId = elementsSession.elementsSessionConfigId,
                     paymentMethodSelectionFlow = null,
                     paymentIntentCreationFlow = null,
-                    checkoutSessionId = null,
-                    checkoutConfigId = null,
-                    merchantIntegrationSource = "elements",
-                    merchantIntegrationSubtype = "mobile",
-                    merchantIntegrationAdditionalElements = null,
+                    stripeSdkVersion = StripeSdkVersion.VERSION_NAME,
                 ),
                 attestOnIntentConfirmation = elementsSession.enableAttestationOnIntentConfirmation,
                 appearance = configuration.appearance,

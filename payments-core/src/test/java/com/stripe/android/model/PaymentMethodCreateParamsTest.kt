@@ -2,6 +2,7 @@ package com.stripe.android.model
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardNumberFixtures
+import com.stripe.android.core.version.StripeSdkVersion
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -576,15 +577,11 @@ class PaymentMethodCreateParamsTest {
 
     @Test
     fun `toParamMap() includes ClientAttributionMetadata if not null`() {
-        val clientAttributionMetadata = ClientAttributionMetadata(
+        val clientAttributionMetadata = ClientAttributionMetadata.Elements(
             elementsSessionConfigId = "e961790f-43ed-4fcc-a534-74eeca28d042",
             paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
             paymentMethodSelectionFlow = PaymentMethodSelectionFlow.Automatic,
-            checkoutSessionId = null,
-            checkoutConfigId = null,
-            merchantIntegrationSource = "elements",
-            merchantIntegrationSubtype = "mobile",
-            merchantIntegrationAdditionalElements = null,
+            stripeSdkVersion = StripeSdkVersion.VERSION_NAME,
         )
         val paymentMethodCreateParams = PaymentMethodCreateParams.createWithOverride(
             code = "card",
@@ -605,15 +602,11 @@ class PaymentMethodCreateParamsTest {
         )
     }
 
-    private val clientAttributionMetadata = ClientAttributionMetadata(
+    private val clientAttributionMetadata = ClientAttributionMetadata.Elements(
         elementsSessionConfigId = "elements_session_123",
         paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
         paymentMethodSelectionFlow = PaymentMethodSelectionFlow.Automatic,
-        checkoutSessionId = null,
-        checkoutConfigId = null,
-        merchantIntegrationSource = "elements",
-        merchantIntegrationSubtype = "mobile",
-        merchantIntegrationAdditionalElements = null,
+        stripeSdkVersion = StripeSdkVersion.VERSION_NAME,
     )
 
     private fun createFpx(): PaymentMethodCreateParams {
