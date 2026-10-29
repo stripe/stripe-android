@@ -2,8 +2,10 @@ package com.stripe.android.payments.core.authentication
 
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.testing.TestLifecycleOwner
+import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.ApiKeyFixtures
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.CompletableDeferred
@@ -26,7 +28,7 @@ class GenericAuthenticatorTest {
 
     @Test
     fun `Only starts authentication flow once lifecycle changes to resumed`() = runTest {
-        val authenticator = TestNextActionHandler()
+        val authenticator = FakeResumedNextActionHandler()
         lifecycleOwner.currentState = Lifecycle.State.CREATED
 
         val completable = CompletableDeferred<Unit>()
@@ -35,44 +37,53 @@ class GenericAuthenticatorTest {
             authenticator.performNextAction(
                 host = host,
                 actionable = mock(),
-                requestOptions = mock(),
+                apiConfiguration = API_CONFIGURATION,
             )
             completable.complete(Unit)
         }
 
-        assertThat(authenticator.wasInvoked).isFalse()
+        testScheduler.runCurrent()
+        authenticator.nextActionCalls.expectNoEvents()
 
         lifecycleOwner.currentState = Lifecycle.State.RESUMED
         completable.await()
 
-        assertThat(authenticator.wasInvoked).isTrue()
+        assertThat(authenticator.nextActionCalls.awaitItem()).isSameInstanceAs(API_CONFIGURATION)
+        authenticator.nextActionCalls.ensureAllEventsConsumed()
     }
 
     @Test
     fun `Immediately starts authentication flow if lifecycle already resumed`() = runTest {
-        val authenticator = TestNextActionHandler()
+        val authenticator = FakeResumedNextActionHandler()
         lifecycleOwner.currentState = Lifecycle.State.RESUMED
 
         authenticator.performNextAction(
             host = host,
             actionable = mock(),
-            requestOptions = mock(),
+            apiConfiguration = API_CONFIGURATION,
         )
 
-        assertThat(authenticator.wasInvoked).isTrue()
+        assertThat(authenticator.nextActionCalls.awaitItem()).isSameInstanceAs(API_CONFIGURATION)
+        authenticator.nextActionCalls.ensureAllEventsConsumed()
+    }
+
+    private companion object {
+        val API_CONFIGURATION = ApiConfiguration.State(
+            publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+            stripeAccountId = ApiKeyFixtures.FAKE_STRIPE_ACCOUNT,
+        )
     }
 }
 
-private class TestNextActionHandler : PaymentNextActionHandler<StripeIntent>() {
+internal class FakeResumedNextActionHandler : PaymentNextActionHandler<StripeIntent>() {
 
-    var wasInvoked: Boolean = false
-        private set
+    val nextActionCalls = Turbine<ApiConfiguration.State>()
 
     override suspend fun performNextActionOnResumed(
         host: AuthActivityStarterHost,
         actionable: StripeIntent,
-        requestOptions: ApiRequest.Options
+        apiConfiguration: ApiConfiguration.State
     ) {
-        wasInvoked = true
+        nextActionCalls.add(apiConfiguration)
     }
 }

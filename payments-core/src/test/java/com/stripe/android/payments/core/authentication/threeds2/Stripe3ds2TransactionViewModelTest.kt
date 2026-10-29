@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ApplicationProvider
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentAuthConfig
 import com.stripe.android.core.ApiConfiguration
@@ -60,7 +61,7 @@ class Stripe3ds2TransactionViewModelTest {
 
             verify(stripeRepository).start3ds2Auth(
                 any(),
-                eq(ApiRequest.Options("pk_test_nextActionData"))
+                eq(ApiRequest.Options(ApiKeyFixtures.CONNECTED_ACCOUNT_PUBLISHABLE_KEY))
             )
         }
 
@@ -78,9 +79,18 @@ class Stripe3ds2TransactionViewModelTest {
 
             verify(stripeRepository).start3ds2Auth(
                 any(),
-                eq(ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY))
+                eq(ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, ApiKeyFixtures.FAKE_STRIPE_ACCOUNT))
             )
         }
+
+    @Test
+    fun `An empty next action key uses the merchant key and account`() = runTest {
+        val viewModel = createViewModel(
+            args = ARGS.copy(nextActionData = ARGS.nextActionData.copy(publishableKey = ""))
+        )
+
+        assertThat(viewModel.threeDS2RequestOptions).isEqualTo(ARGS.requestOptions)
+    }
 
     @Test
     fun `Stripe3ds2TransactionViewModel gets initialized`() {
@@ -120,6 +130,8 @@ class Stripe3ds2TransactionViewModelTest {
     private companion object {
         const val ENABLE_LOGGING = false
         val PRODUCT_USAGE = setOf("TestProductUsage")
+        val NEXT_ACTION_DATA = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2.nextActionData
+            as StripeIntent.NextActionData.SdkData.Use3DS2
         val ARGS = Stripe3ds2TransactionContract.Args(
             SdkTransactionId.create(),
             PaymentAuthConfig.Stripe3ds2Config(
@@ -129,12 +141,13 @@ class Stripe3ds2TransactionViewModelTest {
                 )
             ),
             PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
-            PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2.nextActionData
-                as StripeIntent.NextActionData.SdkData.Use3DS2,
-            ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY),
+            NEXT_ACTION_DATA.copy(
+                publishableKey = ApiKeyFixtures.CONNECTED_ACCOUNT_PUBLISHABLE_KEY,
+            ),
+            ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, ApiKeyFixtures.FAKE_STRIPE_ACCOUNT),
             enableLogging = ENABLE_LOGGING,
             statusBarColor = null,
-            ApiConfiguration.State(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, "acct_123"),
+            ApiConfiguration.State(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, ApiKeyFixtures.FAKE_STRIPE_ACCOUNT),
             PRODUCT_USAGE
         )
     }

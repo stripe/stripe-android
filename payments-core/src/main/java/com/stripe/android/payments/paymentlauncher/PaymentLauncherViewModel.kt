@@ -11,6 +11,7 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.StripeIntentResult
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.exception.LocalStripeException
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.UIContext
@@ -56,6 +57,7 @@ internal class PaymentLauncherViewModel @Inject constructor(
     private val stripeApiRepository: StripeRepository,
     private val nextActionHandlerRegistry: PaymentNextActionHandlerRegistry,
     private val defaultReturnUrl: DefaultReturnUrl,
+    private val apiConfiguration: ApiConfiguration.State,
     private val apiRequestOptionsProvider: Provider<ApiRequest.Options>,
     private val lazyPaymentIntentFlowResultProcessor: Lazy<PaymentIntentFlowResultProcessor>,
     private val lazySetupIntentFlowResultProcessor: Lazy<SetupIntentFlowResultProcessor>,
@@ -141,7 +143,7 @@ internal class PaymentLauncherViewModel @Inject constructor(
                         nextActionHandlerRegistry.getNextActionHandler(intent).performNextAction(
                             host,
                             intent,
-                            apiRequestOptionsProvider.get()
+                            apiConfiguration
                         )
                     }
                 },
@@ -225,7 +227,7 @@ internal class PaymentLauncherViewModel @Inject constructor(
                         .performNextAction(
                             host,
                             unredactedPaymentIntent,
-                            apiRequestOptionsProvider.get()
+                            apiConfiguration
                         )
                 },
                 onFailure = {
@@ -256,7 +258,7 @@ internal class PaymentLauncherViewModel @Inject constructor(
                 .performNextAction(
                     host,
                     intent,
-                    apiRequestOptionsProvider.get()
+                    apiConfiguration
                 )
         }
     }

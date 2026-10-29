@@ -15,7 +15,6 @@ import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.AnalyticsFields
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
-import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
@@ -183,9 +182,6 @@ class WebIntentNextActionHandlerTest {
             paymentAnalyticsRequestFactory = analyticsRequestFactory,
             enableLogging = false,
             uiContext = testDispatcher,
-            apiConfigProvider = {
-                ApiConfiguration.State(publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, stripeAccountId = null)
-            },
             isInstantApp = false,
             defaultReturnUrl = DefaultReturnUrl("some_package_name"),
             redirectResolver = redirectResolver,
@@ -200,7 +196,7 @@ class WebIntentNextActionHandlerTest {
         authenticator.performNextAction(
             host,
             stripeIntent,
-            REQUEST_OPTIONS
+            API_CONFIGURATION
         )
         verify(paymentBrowserWebStarter).start(
             browserAuthContractArgumentCaptor.capture()
@@ -214,7 +210,7 @@ class WebIntentNextActionHandlerTest {
         assertThat(args.referrer).isEqualTo(expectedReferrer)
         assertThat(args.returnUrl).isEqualTo(expectedReturnUrl)
         assertThat(args.apiConfiguration).isEqualTo(
-            ApiConfiguration.State(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, ACCOUNT_ID)
+            API_CONFIGURATION
         )
         assertThat(args.shouldCancelIntentOnUserNavigation).isEqualTo(
             expectedShouldCancelIntentOnUserNavigation
@@ -237,11 +233,11 @@ class WebIntentNextActionHandlerTest {
     }
 
     private companion object {
-        private const val ACCOUNT_ID = "acct_123"
+        private const val ACCOUNT_ID = ApiKeyFixtures.FAKE_STRIPE_ACCOUNT
 
-        private val REQUEST_OPTIONS = ApiRequest.Options(
-            apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-            stripeAccount = ACCOUNT_ID
+        private val API_CONFIGURATION = ApiConfiguration.State(
+            publishableKey = ApiKeyFixtures.CONNECTED_ACCOUNT_PUBLISHABLE_KEY,
+            stripeAccountId = ACCOUNT_ID
         )
     }
 

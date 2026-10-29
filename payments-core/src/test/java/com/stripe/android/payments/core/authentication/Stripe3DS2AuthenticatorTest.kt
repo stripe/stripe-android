@@ -41,7 +41,6 @@ class Stripe3DS2AuthenticatorTest {
     private val authenticator = Stripe3DS2NextActionHandler(
         paymentAuthConfig,
         enableLogging = false,
-        apiConfigProvider = { API_CONFIGURATION },
         productUsage = setOf()
     )
 
@@ -53,7 +52,7 @@ class Stripe3DS2AuthenticatorTest {
             authenticator.performNextAction(
                 host,
                 paymentIntent,
-                REQUEST_OPTIONS
+                API_CONFIGURATION
             )
 
             verify(activity).startActivityForResult(
@@ -61,7 +60,9 @@ class Stripe3DS2AuthenticatorTest {
                     val args = requireNotNull(
                         Stripe3ds2TransactionContract.Args.fromIntent(intent)
                     )
-                    args.stripeIntent == paymentIntent && args.apiConfiguration == API_CONFIGURATION
+                    args.stripeIntent == paymentIntent &&
+                        args.apiConfiguration == API_CONFIGURATION &&
+                        args.requestOptions == REQUEST_OPTIONS
                 },
                 eq(50000)
             )
@@ -77,18 +78,20 @@ class Stripe3DS2AuthenticatorTest {
             authenticator.performNextAction(
                 host,
                 paymentIntent,
-                REQUEST_OPTIONS
+                API_CONFIGURATION
             )
 
             verify(mockLauncher).launch(
                 argWhere { args ->
-                    args.stripeIntent == paymentIntent && args.apiConfiguration == API_CONFIGURATION
+                    args.stripeIntent == paymentIntent &&
+                        args.apiConfiguration == API_CONFIGURATION &&
+                        args.requestOptions == REQUEST_OPTIONS
                 }
             )
         }
 
     private companion object {
-        private const val ACCOUNT_ID = "acct_123"
+        private const val ACCOUNT_ID = ApiKeyFixtures.FAKE_STRIPE_ACCOUNT
         private val API_CONFIGURATION = ApiConfiguration.State(
             publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             stripeAccountId = ACCOUNT_ID,

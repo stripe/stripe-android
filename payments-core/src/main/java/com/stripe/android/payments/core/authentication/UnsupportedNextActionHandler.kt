@@ -1,8 +1,8 @@
 package com.stripe.android.payments.core.authentication
 
 import com.stripe.android.PaymentRelayStarter
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.exception.StripeException
-import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.getRequestCode
@@ -22,7 +22,7 @@ internal class UnsupportedNextActionHandler @Inject constructor(
     override suspend fun performNextActionOnResumed(
         host: AuthActivityStarterHost,
         actionable: StripeIntent,
-        requestOptions: ApiRequest.Options
+        apiConfiguration: ApiConfiguration.State
     ) {
         val exception = actionable.nextActionData?.let {
             val nextActionType = it::class.java
