@@ -109,8 +109,10 @@ class CheckoutController @Inject internal constructor(
         clientSecret: String,
         configuration: Configuration = Configuration(),
     ): OperationResult = withContext(Dispatchers.Main.immediate) {
-        val sessionId = CheckoutSessionResponse.getIdFromClientSecret(clientSecret)
-        val initAnalytics = checkoutAnalyticsPerformer.createInitAttempt(sessionId)
+        val sessionId = clientSecret.substringBefore("_secret_")
+        // Without the delimiter, sessionId is the whole client secret, so keep it out of analytics.
+        val analyticsSessionId = sessionId.takeIf { "_secret_" in clientSecret }
+        val initAnalytics = checkoutAnalyticsPerformer.createInitAttempt(analyticsSessionId)
         // Build first: invalid defaults throw, which would otherwise leave an unpaired started event.
         val configurationState = configuration.build()
         // A failed reconfigure leaves the previous session in the holder; report this attempt's response.
@@ -123,8 +125,7 @@ class CheckoutController @Inject internal constructor(
         } else {
             operationCoordinator.runMutation {
                 checkoutSessionRepository.init(
-                    // Preserve API validation for malformed secrets without exposing them to analytics.
-                    sessionId = sessionId ?: clientSecret.substringBefore("_secret_"),
+                    sessionId = sessionId,
                     clientSecret = clientSecret,
                     adaptivePricingAllowed = configurationState.currencySelectorElementConfiguration != null,
                 ).mapCatching { response ->
@@ -156,8 +157,10 @@ class CheckoutController @Inject internal constructor(
                     }
                     // Read inside the lock so a queued mutation can't change the published payment methods first.
                     val state = stateHolder.state
-                    (state?.paymentMethodMetadata ?: state?.expressCheckoutElementPaymentMethodMetadata)
-                        ?.sortedSupportedPaymentMethods()?.map { it.code }.orEmpty()
+                    val orderedLpms =
+                        (state?.paymentMethodMetadata ?: state?.expressCheckoutElementPaymentMethodMetadata)
+                            ?.sortedSupportedPaymentMethods()?.map { it.code }.orEmpty()
+                    orderedLpms
                 }
             }
         }
