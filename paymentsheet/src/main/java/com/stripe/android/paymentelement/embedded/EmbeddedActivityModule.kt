@@ -34,6 +34,7 @@ import com.stripe.android.paymentelement.embedded.manage.EmbeddedUpdateScreenInt
 import com.stripe.android.paymentelement.embedded.manage.ManageLaunchSavedPaymentMethodSelector
 import com.stripe.android.paymentelement.embedded.manage.ManageScreenSavedPaymentMethodSelector
 import com.stripe.android.paymentelement.embedded.sheet.DefaultEmbeddedFormScreenFactory
+import com.stripe.android.paymentelement.embedded.sheet.DefaultEmbeddedInitialScreenFactory
 import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetActivityConfirmationHelper
 import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetActivityContinueCoordinator
 import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetActivityRegistrar
@@ -95,6 +96,11 @@ internal interface EmbeddedActivityModule {
     fun bindsEmbeddedFormScreenFactory(
         factory: DefaultEmbeddedFormScreenFactory
     ): EmbeddedFormScreenFactory
+
+    @Binds
+    fun bindsEmbeddedInitialScreenFactory(
+        factory: DefaultEmbeddedInitialScreenFactory
+    ): EmbeddedInitialScreenFactory
 
     @Binds
     fun bindsCardAccountRangeRepositoryFactory(
@@ -224,13 +230,18 @@ internal interface EmbeddedActivityModule {
             embeddedSelectionHolder: EmbeddedSelectionHolder,
             customerStateHolder: CustomerStateHolder,
             paymentMethodMetadata: PaymentMethodMetadata,
+            launchMode: EmbeddedLaunchMode,
             @Named(STATUS_BAR_COLOR) statusBarColor: Int?,
         ): TapToAddHelper {
             return tapToAddHelperFactory.create(
                 coroutineScope = coroutineScope,
-                tapToAddMode = when (configuration.formSheetAction) {
-                    EmbeddedPaymentElement.FormSheetAction.Continue -> TapToAddMode.Continue
-                    EmbeddedPaymentElement.FormSheetAction.Confirm -> TapToAddMode.Complete
+                tapToAddMode = if (launchMode.isFlowControllerPaymentOptions) {
+                    TapToAddMode.Continue
+                } else {
+                    when (configuration.formSheetAction) {
+                        EmbeddedPaymentElement.FormSheetAction.Continue -> TapToAddMode.Continue
+                        EmbeddedPaymentElement.FormSheetAction.Confirm -> TapToAddMode.Complete
+                    }
                 },
                 updateSelection = embeddedSelectionHolder::setSelection,
                 customerStateHolder = customerStateHolder,

@@ -242,7 +242,7 @@ internal class EmbeddedInitialScreenFactoryTest {
             savedPaymentMethodMutator = savedPaymentMethodMutator,
             walletsInteractor = walletsInteractor,
         )
-        val factory = EmbeddedInitialScreenFactory(
+        val factory = DefaultEmbeddedInitialScreenFactory(
             launchMode = launchMode,
             formScreenFactory = formFactory,
             initialManageScreenFactory = initialManageScreenFactory,

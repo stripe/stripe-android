@@ -2,6 +2,8 @@ package com.stripe.android.paymentelement.embedded
 
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.common.taptoadd.FakeTapToAddHelper
+import com.stripe.android.common.taptoadd.TapToAddMode
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -12,8 +14,10 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodMessageLearnMore
 import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.manage.ManageLaunchSavedPaymentMethodSelector
 import com.stripe.android.paymentelement.embedded.sheet.SheetTaxRegionUpdater
+import com.stripe.android.paymentsheet.FakeCustomerStateHolder
 import com.stripe.android.paymentsheet.addresselement.AUTOCOMPLETE_DEFAULT_COUNTRIES
 import com.stripe.android.paymentsheet.addresselement.BillingInlineAutocompleteAddressInteractor
 import com.stripe.android.paymentsheet.addresselement.FakeStripeAutocompleteRepository
@@ -114,6 +118,36 @@ internal class EmbeddedActivityModuleTest {
     }
 
     @Test
+    fun `FlowController payment options use Continue tap to add mode regardless of formSheetAction`() =
+        runTapToAddModeScenario(
+            launchMode = EmbeddedLaunchMode.PaymentOptions(
+                visibleWallets = WalletType.entries,
+                isFlowController = true,
+            ),
+            formSheetAction = EmbeddedPaymentElement.FormSheetAction.Confirm,
+            expectedMode = TapToAddMode.Continue,
+        )
+
+    @Test
+    fun `non-FlowController payment options use Complete tap to add mode when formSheetAction is Confirm`() =
+        runTapToAddModeScenario(
+            launchMode = EmbeddedLaunchMode.PaymentOptions(
+                visibleWallets = WalletType.entries,
+                isFlowController = false,
+            ),
+            formSheetAction = EmbeddedPaymentElement.FormSheetAction.Confirm,
+            expectedMode = TapToAddMode.Complete,
+        )
+
+    @Test
+    fun `form launches use Continue tap to add mode when formSheetAction is Continue`() =
+        runTapToAddModeScenario(
+            launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
+            formSheetAction = EmbeddedPaymentElement.FormSheetAction.Continue,
+            expectedMode = TapToAddMode.Continue,
+        )
+
+    @Test
     fun `checkout sheets do not provide promotions or report promotion displays`() = runPromotionsScenario(
         integrationMetadata = IntegrationMetadata.CheckoutSession(
             id = "cs_123",
@@ -157,6 +191,29 @@ internal class EmbeddedActivityModuleTest {
         Scenario(factory.create()).block()
 
         eventReporter.validate()
+    }
+
+    private fun runTapToAddModeScenario(
+        launchMode: EmbeddedLaunchMode,
+        formSheetAction: EmbeddedPaymentElement.FormSheetAction,
+        expectedMode: TapToAddMode,
+    ) = runTest {
+        FakeTapToAddHelper.Factory.test {
+            EmbeddedActivityModule.providesTapToAddHelper(
+                coroutineScope = this@runTest,
+                configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.")
+                    .formSheetAction(formSheetAction)
+                    .build(),
+                tapToAddHelperFactory = tapToAddHelperFactory,
+                embeddedSelectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle()),
+                customerStateHolder = FakeCustomerStateHolder(),
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+                launchMode = launchMode,
+                statusBarColor = null,
+            )
+
+            assertThat(createCalls.awaitItem().tapToAddMode).isEqualTo(expectedMode)
+        }
     }
 
     private data class Scenario(
