@@ -700,7 +700,7 @@ class InputAddressViewModelTest {
 
             viewModel.clickBillingSameAsShipping(newValue = true)
             testDispatcher.scheduler.advanceUntilIdle()
-            assertThat(placesClient.findPredictionsCalls.awaitItem().query).isEqualTo("123 Apple Street")
+            placesClient.findPredictionsCalls.expectNoEvents()
             assertThat(viewModel.hasChanges()).isFalse()
         }
 
@@ -730,7 +730,7 @@ class InputAddressViewModelTest {
                 )
             )
             testDispatcher.scheduler.advanceUntilIdle()
-            assertThat(placesClient.findPredictionsCalls.awaitItem().query).isEqualTo("123 Apple Street")
+            placesClient.findPredictionsCalls.expectNoEvents()
 
             assertThat(
                 viewModel.addressFormController.uncompletedFormValues.value[FormFieldId.Line1]?.value

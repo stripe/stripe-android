@@ -52,7 +52,7 @@ internal class InlineAutocompleteController(
     private val state = MutableStateFlow(
         State(
             activation = ActivationState.ActiveByQuery,
-            paused = false,
+            paused = true,
             prediction = null,
             selection = null,
             display = InlinePredictionsState.Idle,
@@ -87,9 +87,11 @@ internal class InlineAutocompleteController(
         queryFlow = query
         countryFlow = country
         lastObservedCountry = country.value ?: ""
-        state.update { it.copy(paused = false, prediction = null) }
+        state.update { it.copy(prediction = null) }
         observeJob = coroutineScope.launch {
-            combine(query, country) { q, c -> q to (c ?: "") }
+            combine(query, country, state.map { it.paused }.distinctUntilChanged()) { q, c, _ ->
+                q to (c ?: "")
+            }
                 .onEach { (q, c) -> onInputChanged(q, c) }
                 .debounce(AutocompleteViewModel.SEARCH_DEBOUNCE_MS)
                 .collect { (q, c) -> onInputSettled(q, c) }
