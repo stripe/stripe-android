@@ -210,7 +210,7 @@ internal class FakeEventReporter : EventReporter {
 
     override fun onPaymentFailure(
         paymentSelection: PaymentSelection,
-        error: PaymentSheetConfirmationError
+        error: PaymentSheetConfirmationError,
     ) {
         _paymentFailureCalls.add(
             PaymentFailureCall(
@@ -375,7 +375,7 @@ internal class FakeEventReporter : EventReporter {
 
     data class PaymentFailureCall(
         val paymentSelection: PaymentSelection,
-        val error: PaymentSheetConfirmationError
+        val error: PaymentSheetConfirmationError,
     )
 
     data class PaymentSuccessCall(

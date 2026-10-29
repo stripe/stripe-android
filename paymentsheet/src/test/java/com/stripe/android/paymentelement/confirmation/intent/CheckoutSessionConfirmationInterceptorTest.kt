@@ -314,7 +314,7 @@ class CheckoutSessionConfirmationInterceptorTest {
         assertThat(result).isInstanceOf<ConfirmationDefinition.Action.Fail<IntentConfirmationDefinition.Args>>()
 
         val failAction = result as ConfirmationDefinition.Action.Fail
-        assertThat(failAction.errorType).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Payment)
+        assertThat(failAction.errorType).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Transaction())
     }
 
     @Test
@@ -331,7 +331,7 @@ class CheckoutSessionConfirmationInterceptorTest {
         assertThat(result).isInstanceOf<ConfirmationDefinition.Action.Fail<IntentConfirmationDefinition.Args>>()
         val failAction = result as ConfirmationDefinition.Action.Fail
         assertThat(failAction.cause.message).contains("Invalid billing address")
-        assertThat(failAction.errorType).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Payment)
+        assertThat(failAction.errorType).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Transaction())
     }
 
     @Test
@@ -357,7 +357,7 @@ class CheckoutSessionConfirmationInterceptorTest {
             val error = failAction.cause as LocalStripeException
             assertThat(error.analyticsValue()).isEqualTo("checkoutSessionTotalChanged")
             assertThat(error.stripeError?.code).isEqualTo("checkout_session_total_changed")
-            assertThat(failAction.errorType).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Payment)
+            assertThat(failAction.errorType).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Transaction())
         }
 
     @Test
@@ -407,7 +407,7 @@ class CheckoutSessionConfirmationInterceptorTest {
 
         val failAction = result as ConfirmationDefinition.Action.Fail
         assertThat(failAction.cause).isInstanceOf<IllegalStateException>()
-        assertThat(failAction.errorType).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Payment)
+        assertThat(failAction.errorType).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Transaction())
     }
 
     @Test
@@ -515,7 +515,7 @@ class CheckoutSessionConfirmationInterceptorTest {
         assertThat(result).isInstanceOf<ConfirmationDefinition.Action.Fail<IntentConfirmationDefinition.Args>>()
 
         val failAction = result as ConfirmationDefinition.Action.Fail
-        assertThat(failAction.errorType).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Payment)
+        assertThat(failAction.errorType).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Transaction())
     }
 
     @Test

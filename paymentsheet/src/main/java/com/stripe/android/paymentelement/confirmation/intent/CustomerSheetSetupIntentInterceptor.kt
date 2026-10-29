@@ -63,7 +63,7 @@ internal class DefaultCustomerSheetSetupIntentInterceptor(
                     ConfirmationDefinition.Action.Fail(
                         cause = cause,
                         message = displayMessage?.resolvableString ?: cause.stripeErrorMessage(),
-                        errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                        errorType = ConfirmationHandler.Result.Failed.ErrorType.Transaction(),
                     )
                 }
             )

@@ -49,7 +49,7 @@ internal class SharedPaymentTokenConfirmationInterceptor @AssistedInject constru
                 ConfirmationDefinition.Action.Fail(
                     cause = error,
                     message = error.stripeErrorMessage(),
-                    errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                    errorType = ConfirmationHandler.Result.Failed.ErrorType.Transaction(),
                 )
             }
         )
@@ -89,7 +89,7 @@ internal class SharedPaymentTokenConfirmationInterceptor @AssistedInject constru
             ConfirmationDefinition.Action.Fail(
                 cause = exception,
                 message = exception.errorMessage,
-                errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                errorType = ConfirmationHandler.Result.Failed.ErrorType.Transaction(),
             )
         }
     }

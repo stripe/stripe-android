@@ -75,7 +75,7 @@ class CustomerSheetAttachPaymentMethodInterceptorTest {
         val failAction = result as ConfirmationDefinition.Action.Fail
 
         assertThat(failAction.message).isEqualTo(errorMessage.resolvableString)
-        assertThat(failAction.errorType).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Payment)
+        assertThat(failAction.errorType).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Transaction())
     }
 
     @Test

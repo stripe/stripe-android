@@ -94,7 +94,7 @@ class CustomPaymentMethodConfirmationDefinitionTest {
         )
         assertThat(failAction.message).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
         assertThat(failAction.errorType).isEqualTo(
-            ConfirmationHandler.Result.Failed.ErrorType.Payment,
+            ConfirmationHandler.Result.Failed.ErrorType.Transaction(),
         )
 
         val event = errorReporter.awaitCall()
@@ -187,7 +187,7 @@ class CustomPaymentMethodConfirmationDefinitionTest {
 
         assertThat(failedResult.cause).isEqualTo(exception)
         assertThat(failedResult.message).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
-        assertThat(failedResult.type).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Payment)
+        assertThat(failedResult.type).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Transaction())
     }
 
     @Test

@@ -89,7 +89,7 @@ internal class CheckoutAnalyticsPerformer @Inject constructor(
                     confirmationContext = confirmationContext,
                     analyticsMetadata = analyticsMetadata,
                     duration = durationProvider.end(DurationProvider.Key.Checkout),
-                    error = result.toConfirmationError() ?: PaymentSheetConfirmationError.Stripe(result.cause),
+                    error = result.toConfirmationError() ?: PaymentSheetConfirmationError(result.cause),
                 )
             )
             is ConfirmationHandler.Result.Canceled -> Unit

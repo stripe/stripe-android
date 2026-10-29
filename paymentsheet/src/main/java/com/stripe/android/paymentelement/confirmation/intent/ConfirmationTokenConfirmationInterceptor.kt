@@ -97,7 +97,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                 ConfirmationDefinition.Action.Fail(
                     cause = error,
                     message = error.stripeErrorMessage(),
-                    errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                    errorType = ConfirmationHandler.Result.Failed.ErrorType.Transaction(),
                 )
             }
         )
@@ -138,7 +138,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                 ConfirmationDefinition.Action.Fail(
                     cause = error,
                     message = error.stripeErrorMessage(),
-                    errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                    errorType = ConfirmationHandler.Result.Failed.ErrorType.Transaction(),
                 )
             }
         )
@@ -180,7 +180,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                     cause = exception,
                     message = result.displayMessage?.resolvableString
                         ?: exception.stripeErrorMessage(),
-                    errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                    errorType = ConfirmationHandler.Result.Failed.ErrorType.Transaction(),
                 )
             }
         }
@@ -234,7 +234,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
             ConfirmationDefinition.Action.Fail(
                 cause = error,
                 message = error.stripeErrorMessage(),
-                errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                errorType = ConfirmationHandler.Result.Failed.ErrorType.Transaction(),
             )
         }
     }
