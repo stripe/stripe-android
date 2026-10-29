@@ -1,16 +1,13 @@
 package com.stripe.android.paymentsheet.utils
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.isInstanceOf
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.MutableConfirmationMetadata
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationTypeKey
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
-import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -18,61 +15,57 @@ import org.junit.Test
 class ConfirmationReportingUtilsTest {
 
     @Test
-    fun `toConfirmationError returns correct error for external payment method error`() {
-        val epmError = ConfirmationHandler.Result.Failed(
-            cause = Exception(),
+    fun `reportPaymentResult forwards transaction failure without analytics overrides`() = runTest {
+        val eventReporter = FakeEventReporter()
+        val result = ConfirmationHandler.Result.Failed(
+            cause = IllegalStateException("Payment failed"),
             message = "Something went wrong".resolvableString,
-            type = ConfirmationHandler.Result.Failed.ErrorType.ExternalPaymentMethod
+            type = ConfirmationHandler.Result.Failed.ErrorType.Transaction(),
         )
 
-        val confirmationError = epmError.toConfirmationError()
-        assertThat(confirmationError).isNotNull()
-        assertThat(confirmationError).isInstanceOf<PaymentSheetConfirmationError.ExternalPaymentMethod>()
+        eventReporter.reportPaymentResult(result, PaymentSelection.GooglePay)
+
+        val event = eventReporter.paymentFailureCalls.awaitItem()
+        assertThat(event.error.cause).isSameInstanceAs(result.cause)
+        assertThat(event.error.analyticsValue).isNull()
+        assertThat(event.error.errorCode).isNull()
+        eventReporter.validate()
     }
 
     @Test
-    fun `toConfirmationError returns correct error for stripe error`() {
-        val stripeError = ConfirmationHandler.Result.Failed(
-            cause = StripeException.create(
-                Throwable(
-                    message = "Something went wrong with Stripe",
-                )
+    fun `reportPaymentResult forwards provided payment method analytics value`() = runTest {
+        val eventReporter = FakeEventReporter()
+        val result = ConfirmationHandler.Result.Failed(
+            cause = IllegalStateException("External payment failed"),
+            message = "Something went wrong".resolvableString,
+            type = ConfirmationHandler.Result.Failed.ErrorType.Transaction(
+                analyticsValue = "externalPaymentMethodError",
             ),
-            message = "Something went wrong".resolvableString,
-            type = ConfirmationHandler.Result.Failed.ErrorType.Payment
         )
 
-        val confirmationError = stripeError.toConfirmationError()
-        assertThat(confirmationError).isNotNull()
-        assertThat(confirmationError).isInstanceOf<PaymentSheetConfirmationError.Stripe>()
-        assertThat(confirmationError?.cause?.message).isEqualTo("Something went wrong with Stripe")
+        eventReporter.reportPaymentResult(result, PaymentSelection.GooglePay)
+
+        val event = eventReporter.paymentFailureCalls.awaitItem()
+        assertThat(event.error.cause).isSameInstanceAs(result.cause)
+        assertThat(event.error.analyticsValue).isEqualTo("externalPaymentMethodError")
+        assertThat(event.error.errorCode).isNull()
+        eventReporter.validate()
     }
 
     @Test
-    fun `toConfirmationError returns correct error for google pay error`() {
-        val googlePayError = ConfirmationHandler.Result.Failed(
-            cause = Exception(),
-            message = "Something went wrong".resolvableString,
-            type = ConfirmationHandler.Result.Failed.ErrorType.GooglePay(12)
-        )
-
-        val confirmationError = googlePayError.toConfirmationError()
-        assertThat(confirmationError).isNotNull()
-        assertThat(confirmationError).isInstanceOf<PaymentSheetConfirmationError.GooglePay>()
-        assertThat(confirmationError?.errorCode).isEqualTo("12")
-    }
+    fun `reportPaymentResult does not report internal failure`() = assertFailureNotReported(
+        ConfirmationHandler.Result.Failed.ErrorType.Internal,
+    )
 
     @Test
-    fun `toConfirmationError returns null for non reportable error`() {
-        val merchantError = ConfirmationHandler.Result.Failed(
-            cause = Exception(),
-            message = "Something went wrong".resolvableString,
-            type = ConfirmationHandler.Result.Failed.ErrorType.MerchantIntegration
-        )
+    fun `reportPaymentResult does not report merchant integration failure`() = assertFailureNotReported(
+        ConfirmationHandler.Result.Failed.ErrorType.MerchantIntegration,
+    )
 
-        val confirmationError = merchantError.toConfirmationError()
-        assertThat(confirmationError).isNull()
-    }
+    @Test
+    fun `reportPaymentResult does not report fatal failure`() = assertFailureNotReported(
+        ConfirmationHandler.Result.Failed.ErrorType.Fatal,
+    )
 
     @Test
     fun `reportPaymentResult reports success correctly`() = runTest {
@@ -98,14 +91,33 @@ class ConfirmationReportingUtilsTest {
         val result = ConfirmationHandler.Result.Failed(
             cause = Exception(),
             message = "Something went wrong".resolvableString,
-            type = ConfirmationHandler.Result.Failed.ErrorType.GooglePay(12)
+            type = ConfirmationHandler.Result.Failed.ErrorType.Transaction(
+                analyticsValue = "googlePay_12",
+                errorCode = "12",
+            )
         )
 
         eventReporter.reportPaymentResult(result, PaymentSelection.GooglePay)
 
         val event = eventReporter.paymentFailureCalls.awaitItem()
         assertThat(event.paymentSelection).isEqualTo(PaymentSelection.GooglePay)
-        assertThat(event.error).isInstanceOf<PaymentSheetConfirmationError.GooglePay>()
+        assertThat(event.error.cause).isSameInstanceAs(result.cause)
+        assertThat(event.error.analyticsValue).isEqualTo("googlePay_12")
+        assertThat(event.error.errorCode).isEqualTo("12")
+        eventReporter.validate()
+    }
+
+    private fun assertFailureNotReported(type: ConfirmationHandler.Result.Failed.ErrorType) = runTest {
+        val eventReporter = FakeEventReporter()
+        val result = ConfirmationHandler.Result.Failed(
+            cause = IllegalStateException("Payment failed"),
+            message = "Something went wrong".resolvableString,
+            type = type,
+        )
+
+        eventReporter.reportPaymentResult(result, PaymentSelection.GooglePay)
+
+        eventReporter.paymentFailureCalls.expectNoEvents()
         eventReporter.validate()
     }
 }

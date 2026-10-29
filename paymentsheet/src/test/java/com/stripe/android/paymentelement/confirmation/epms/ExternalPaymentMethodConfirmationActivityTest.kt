@@ -117,7 +117,11 @@ internal class ExternalPaymentMethodConfirmationActivityTest {
 
             val failedResult = awaitItem().assertComplete().result.assertFailed()
 
-            assertThat(failedResult.type).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.ExternalPaymentMethod)
+            assertThat(failedResult.type).isEqualTo(
+                ConfirmationHandler.Result.Failed.ErrorType.Transaction(
+                    analyticsValue = "externalPaymentMethodError",
+                )
+            )
             assertThat(failedResult.message).isEqualTo(failureMessage.resolvableString)
 
             val cause = failedResult.cause

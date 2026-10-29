@@ -73,7 +73,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
             return ConfirmationDefinition.Action.Fail(
                 cause = error,
                 message = error.stripeErrorMessage(),
-                errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                errorType = ConfirmationHandler.Result.Failed.ErrorType.Transaction(),
             )
         }
 
@@ -153,7 +153,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
                 ConfirmationDefinition.Action.Fail(
                     cause = error,
                     message = error.stripeErrorMessage(),
-                    errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                    errorType = ConfirmationHandler.Result.Failed.ErrorType.Transaction(),
                 )
             }
         )
@@ -170,7 +170,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
                 return ConfirmationDefinition.Action.Fail(
                     cause = exception,
                     message = exception.stripeErrorMessage(),
-                    errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                    errorType = ConfirmationHandler.Result.Failed.ErrorType.Transaction(),
                 )
             }
 
@@ -199,7 +199,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
                 ConfirmationDefinition.Action.Fail(
                     cause = exception,
                     message = exception.stripeErrorMessage(),
-                    errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                    errorType = ConfirmationHandler.Result.Failed.ErrorType.Transaction(),
                 )
             }
         }

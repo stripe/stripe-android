@@ -128,7 +128,11 @@ class ExternalPaymentMethodConfirmationDefinitionTest {
 
         assertThat(failedResult.cause).isEqualTo(exception)
         assertThat(failedResult.message).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
-        assertThat(failedResult.type).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.ExternalPaymentMethod)
+        assertThat(failedResult.type).isEqualTo(
+            ConfirmationHandler.Result.Failed.ErrorType.Transaction(
+                analyticsValue = "externalPaymentMethodError",
+            )
+        )
     }
 
     @Test
@@ -172,7 +176,9 @@ class ExternalPaymentMethodConfirmationDefinitionTest {
         )
         assertThat(failAction.message).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
         assertThat(failAction.errorType).isEqualTo(
-            ConfirmationHandler.Result.Failed.ErrorType.ExternalPaymentMethod,
+            ConfirmationHandler.Result.Failed.ErrorType.Transaction(
+                analyticsValue = "externalPaymentMethodError",
+            ),
         )
 
         assertThat(errorReporter.getLoggedErrors()).containsExactly(

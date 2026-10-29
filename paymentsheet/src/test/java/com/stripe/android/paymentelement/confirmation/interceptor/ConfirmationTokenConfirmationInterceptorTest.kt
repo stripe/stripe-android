@@ -111,7 +111,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
             ConfirmationDefinition.Action.Fail<IntentConfirmationDefinition.Args>(
                 cause = invalidRequestException,
                 message = "Your card is not supported.".resolvableString,
-                errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                errorType = ConfirmationHandler.Result.Failed.ErrorType.Transaction(),
             )
         )
     }
@@ -153,7 +153,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
             ConfirmationDefinition.Action.Fail<IntentConfirmationDefinition.Args>(
                 cause = apiException,
                 message = resolvableString(R.string.stripe_something_went_wrong),
-                errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                errorType = ConfirmationHandler.Result.Failed.ErrorType.Transaction(),
             )
         )
     }
@@ -178,7 +178,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
             ConfirmationDefinition.Action.Fail<IntentConfirmationDefinition.Args>(
                 cause = CreateIntentWithConfirmationTokenCallbackFailureException(TestException("that didn't work…")),
                 message = resolvableString("that didn't work…"),
-                errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                errorType = ConfirmationHandler.Result.Failed.ErrorType.Transaction(),
             )
         )
     }
@@ -200,7 +200,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
             ConfirmationDefinition.Action.Fail<IntentConfirmationDefinition.Args>(
                 cause = CreateIntentWithConfirmationTokenCallbackFailureException(TestException()),
                 message = resolvableString(R.string.stripe_something_went_wrong),
-                errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                errorType = ConfirmationHandler.Result.Failed.ErrorType.Transaction(),
             )
         )
     }
@@ -593,7 +593,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
             ConfirmationDefinition.Action.Fail<IntentConfirmationDefinition.Args>(
                 cause = invalidRequestException,
                 message = "Your card is not supported.".resolvableString,
-                errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                errorType = ConfirmationHandler.Result.Failed.ErrorType.Transaction(),
             )
         )
     }

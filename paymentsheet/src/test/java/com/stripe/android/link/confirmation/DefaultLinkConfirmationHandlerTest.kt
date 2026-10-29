@@ -169,7 +169,7 @@ internal class DefaultLinkConfirmationHandlerTest {
             item = ConfirmationHandler.Result.Failed(
                 cause = error,
                 message = errorMessage,
-                type = ConfirmationHandler.Result.Failed.ErrorType.Payment
+                type = ConfirmationHandler.Result.Failed.ErrorType.Transaction()
             )
         )
 

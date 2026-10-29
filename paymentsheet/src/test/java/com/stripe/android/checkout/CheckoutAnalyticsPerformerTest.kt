@@ -94,7 +94,7 @@ internal class CheckoutAnalyticsPerformerTest {
             ConfirmationHandler.Result.Failed(
                 cause = error,
                 message = privateMessage.resolvableString,
-                type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                type = ConfirmationHandler.Result.Failed.ErrorType.Transaction(),
             )
         )
 
@@ -115,9 +115,15 @@ internal class CheckoutAnalyticsPerformerTest {
     }
 
     @Test
-    fun `Google Pay failure preserves its analytics error classification`() = assertFailureReported(
-        type = ConfirmationHandler.Result.Failed.ErrorType.GooglePay(errorCode = 12),
-        expectedErrorParams = mapOf("error_type" to "googlePay_12", "error_code" to "12"),
+    fun `Transaction failure preserves its analytics error classification`() = assertFailureReported(
+        type = ConfirmationHandler.Result.Failed.ErrorType.Transaction(
+            analyticsValue = "transaction_error",
+            errorCode = "transaction_code",
+        ),
+        expectedErrorParams = mapOf(
+            "error_type" to "transaction_error",
+            "error_code" to "transaction_code",
+        ),
     )
 
     @Test

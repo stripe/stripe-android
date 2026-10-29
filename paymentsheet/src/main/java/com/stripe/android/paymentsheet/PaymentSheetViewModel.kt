@@ -688,9 +688,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     private fun processConfirmationFailure(failure: ConfirmationHandler.Result.Failed) {
         when (failure.type) {
-            ConfirmationHandler.Result.Failed.ErrorType.Payment,
-            ConfirmationHandler.Result.Failed.ErrorType.ExternalPaymentMethod,
-            is ConfirmationHandler.Result.Failed.ErrorType.GooglePay -> {
+            is ConfirmationHandler.Result.Failed.ErrorType.Transaction -> {
                 failure.toConfirmationError()?.let { confirmationError ->
                     handlePaymentFailed(
                         error = confirmationError,

@@ -256,7 +256,7 @@ class CustomerSheetConfirmationInterceptorTest {
 
             assertThat(failAction.cause).isInstanceOf<InvalidRequestException>()
             assertThat(failAction.message).isEqualTo("Your card is not supported.".resolvableString)
-            assertThat(failAction.errorType).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Payment)
+            assertThat(failAction.errorType).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Transaction())
 
             assertThat(logger.errorLogs).hasSize(1)
             assertThat(logger.errorLogs[0].first)
@@ -272,7 +272,7 @@ class CustomerSheetConfirmationInterceptorTest {
         setupInterceptAction = ConfirmationDefinition.Action.Fail(
             cause = Exception("Failed to create setup intent"),
             message = "Unable to create setup intent".resolvableString,
-            errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+            errorType = ConfirmationHandler.Result.Failed.ErrorType.Transaction(),
         ),
     ) {
         val result = interceptor.intercept(
@@ -288,9 +288,7 @@ class CustomerSheetConfirmationInterceptorTest {
 
         val failAction = result as ConfirmationDefinition.Action.Fail
         assertThat(failAction.message).isEqualTo("Unable to create setup intent".resolvableString)
-        assertThat(failAction.errorType).isEqualTo(
-            ConfirmationHandler.Result.Failed.ErrorType.Payment
-        )
+        assertThat(failAction.errorType).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Transaction())
 
         assertThat(createSetupIntentInterceptorFactoryCalls.awaitItem()).isNotNull()
         assertThat(createSetupIntentInterceptCalls.awaitItem()).isNotNull()
@@ -304,7 +302,7 @@ class CustomerSheetConfirmationInterceptorTest {
         attachInterceptAction = ConfirmationDefinition.Action.Fail(
             cause = Exception("Failed to attach payment method"),
             message = "Unable to attach payment method to customer".resolvableString,
-            errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+            errorType = ConfirmationHandler.Result.Failed.ErrorType.Transaction(),
         ),
     ) {
         val result = interceptor.intercept(
@@ -320,9 +318,7 @@ class CustomerSheetConfirmationInterceptorTest {
 
         val failAction = result as ConfirmationDefinition.Action.Fail
         assertThat(failAction.message).isEqualTo("Unable to attach payment method to customer".resolvableString)
-        assertThat(failAction.errorType).isEqualTo(
-            ConfirmationHandler.Result.Failed.ErrorType.Payment
-        )
+        assertThat(failAction.errorType).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Transaction())
 
         assertThat(createAttachPaymentMethodInterceptorFactoryCalls.awaitItem()).isNotNull()
         assertThat(createAttachPaymentMethodInterceptCalls.awaitItem()).isNotNull()

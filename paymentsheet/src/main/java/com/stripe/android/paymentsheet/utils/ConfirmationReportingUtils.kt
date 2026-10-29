@@ -7,16 +7,14 @@ import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
 import com.stripe.android.paymentsheet.model.PaymentSelection
 
 internal fun ConfirmationHandler.Result.Failed.toConfirmationError(): PaymentSheetConfirmationError? {
-    return when (type) {
-        ConfirmationHandler.Result.Failed.ErrorType.ExternalPaymentMethod ->
-            PaymentSheetConfirmationError.ExternalPaymentMethod
-        ConfirmationHandler.Result.Failed.ErrorType.Payment ->
-            PaymentSheetConfirmationError.Stripe(cause)
-        is ConfirmationHandler.Result.Failed.ErrorType.GooglePay ->
-            PaymentSheetConfirmationError.GooglePay(type.errorCode)
-        ConfirmationHandler.Result.Failed.ErrorType.Internal,
-        ConfirmationHandler.Result.Failed.ErrorType.MerchantIntegration,
-        ConfirmationHandler.Result.Failed.ErrorType.Fatal -> null
+    return if (type is ConfirmationHandler.Result.Failed.ErrorType.Transaction) {
+        PaymentSheetConfirmationError(
+            cause = cause,
+            analyticsValue = type.analyticsValue,
+            errorCode = type.errorCode,
+        )
+    } else {
+        null
     }
 }
 

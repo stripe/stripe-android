@@ -190,8 +190,12 @@ internal interface ConfirmationHandler {
 
                 /**
                  * Indicates an error when processing a payment during the confirmation process.
+                 * [analyticsValue] and [errorCode] override the values derived from the cause in failure analytics.
                  */
-                data object Payment : ErrorType
+                data class Transaction(
+                    val analyticsValue: String? = null,
+                    val errorCode: String? = null,
+                ) : ErrorType
 
                 /**
                  * Indicates an internal process error occurred during the confirmation process.
@@ -202,16 +206,6 @@ internal interface ConfirmationHandler {
                  * Indicates a merchant integration error occurred during the confirmation process.
                  */
                 data object MerchantIntegration : ErrorType
-
-                /**
-                 * Indicates an error occurred when confirming with external payment methods
-                 */
-                data object ExternalPaymentMethod : ErrorType
-
-                /**
-                 * Indicates an error occurred when confirming with Google Pay
-                 */
-                data class GooglePay(val errorCode: Int) : ErrorType
             }
         }
     }

@@ -71,7 +71,7 @@ import com.stripe.android.paymentsheet.state.LinkDisabledState
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
-import com.stripe.android.paymentsheet.utils.toConfirmationError
+import com.stripe.android.paymentsheet.utils.reportPaymentResult
 import com.stripe.android.uicore.utils.AnimationConstants
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -612,16 +612,7 @@ internal class DefaultFlowController @Inject internal constructor(
                 )
             }
             is ConfirmationHandler.Result.Failed -> {
-                val error = result.toConfirmationError()
-
-                error?.let { confirmationError ->
-                    viewModel.paymentSelection?.let { paymentSelection ->
-                        eventReporter.onPaymentFailure(
-                            paymentSelection = paymentSelection,
-                            error = confirmationError
-                        )
-                    }
-                }
+                eventReporter.reportPaymentResult(result, viewModel.paymentSelection)
 
                 onPaymentResult(
                     paymentResult = PaymentResult.Failed(result.cause),
@@ -712,7 +703,7 @@ internal class DefaultFlowController @Inject internal constructor(
                 viewModel.paymentSelection?.let { paymentSelection ->
                     eventReporter.onPaymentFailure(
                         paymentSelection = paymentSelection,
-                        error = PaymentSheetConfirmationError.Stripe(paymentResult.throwable),
+                        error = PaymentSheetConfirmationError(cause = paymentResult.throwable),
                     )
                 }
             }

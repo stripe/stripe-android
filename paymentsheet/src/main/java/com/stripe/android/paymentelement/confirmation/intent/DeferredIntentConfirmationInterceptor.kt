@@ -101,7 +101,7 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
                 ConfirmationDefinition.Action.Fail(
                     cause = error,
                     message = error.stripeErrorMessage(),
-                    errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                    errorType = ConfirmationHandler.Result.Failed.ErrorType.Transaction(),
                 )
             }
         )
@@ -175,7 +175,7 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
                     cause = exception,
                     message = result.displayMessage?.resolvableString
                         ?: exception.stripeErrorMessage(),
-                    errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                    errorType = ConfirmationHandler.Result.Failed.ErrorType.Transaction(),
                 )
             }
         }
@@ -212,7 +212,7 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
             ConfirmationDefinition.Action.Fail(
                 cause = error,
                 message = error.stripeErrorMessage(),
-                errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                errorType = ConfirmationHandler.Result.Failed.ErrorType.Transaction(),
             )
         }
     }
@@ -248,7 +248,7 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
             ConfirmationDefinition.Action.Fail(
                 cause = InvalidDeferredIntentUsageException(),
                 message = resolvableString(R.string.stripe_paymentsheet_invalid_deferred_intent_usage),
-                errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                errorType = ConfirmationHandler.Result.Failed.ErrorType.Transaction(),
             )
         }
     }

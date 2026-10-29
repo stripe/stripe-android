@@ -106,7 +106,7 @@ internal class CustomPaymentMethodConfirmationActivityTest {
 
             val failedResult = awaitItem().assertComplete().result.assertFailed()
 
-            assertThat(failedResult.type).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Payment)
+            assertThat(failedResult.type).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Transaction())
             assertThat(failedResult.message).isEqualTo("Failed CPM!".resolvableString)
             assertThat(failedResult.cause).isEqualTo(exception)
         }

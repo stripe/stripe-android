@@ -186,7 +186,7 @@ class IntentConfirmationDefinitionTest {
         assertThat(action.cause).isInstanceOf(IllegalStateException::class.java)
         assertThat(action.cause.message).isEqualTo("CreateIntentCallback must be implemented")
         assertThat(action.message).isEqualTo("Callback is missing".resolvableString)
-        assertThat(action.errorType).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Payment)
+        assertThat(action.errorType).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Transaction())
     }
 
     @Test
@@ -268,7 +268,7 @@ class IntentConfirmationDefinitionTest {
 
         assertThat(failAction.cause).isEqualTo(cause)
         assertThat(failAction.message).isEqualTo(message.resolvableString)
-        assertThat(failAction.errorType).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Payment)
+        assertThat(failAction.errorType).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Transaction())
     }
 
     @Test
@@ -559,7 +559,7 @@ class IntentConfirmationDefinitionTest {
 
         assertThat(failedResult.cause).isEqualTo(exception)
         assertThat(failedResult.message).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
-        assertThat(failedResult.type).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Payment)
+        assertThat(failedResult.type).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Transaction())
     }
 
     @Test
