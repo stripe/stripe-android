@@ -111,58 +111,59 @@ class CheckoutController @Inject internal constructor(
     ): OperationResult = withContext(Dispatchers.Main.immediate) {
         val sessionId = clientSecret.substringBefore("_secret_")
         // Without the delimiter, sessionId is the whole client secret, so keep it out of analytics.
-        val analyticsSessionId = sessionId.takeIf { "_secret_" in clientSecret }
+        val analyticsSessionId = sessionId.takeIf { it.isNotEmpty() && "_secret_" in clientSecret }
         val initAnalytics = checkoutAnalyticsPerformer.createInitAttempt(analyticsSessionId)
-        // Build first: invalid defaults throw, which would otherwise leave an unpaired started event.
-        val configurationState = configuration.build()
         // A failed reconfigure leaves the previous session in the holder; report this attempt's response.
         var attemptResponse: CheckoutSessionResponse? = null
         initAnalytics.started(response = null)
         // A re-configure while a payment flow is presented would reload the session out from under
         // the open sheet. The first configure runs with null state, so this only blocks re-configures.
-        val result = if (sheetStateHolder.sheetIsOpen) {
-            integrationLaunchedFailure()
-        } else {
-            operationCoordinator.runMutation {
-                checkoutSessionRepository.init(
-                    sessionId = sessionId,
-                    clientSecret = clientSecret,
-                    adaptivePricingAllowed = configurationState.currencySelectorElementConfiguration != null,
-                ).mapCatching { response ->
-                    attemptResponse = response
-                    val initialLoad = checkoutStateLoader.loadInitial(
-                        configuration = configurationState,
-                        checkoutSessionResponse = response,
-                    )
-                    val addressSource = response.taxAddressSource
-                    val taxAddress = when (addressSource) {
-                        CheckoutSessionResponse.TaxAddressSource.SHIPPING ->
-                            initialLoad.state.collectedDetails.shippingAddress
-                        CheckoutSessionResponse.TaxAddressSource.BILLING ->
-                            initialLoad.state.paymentSelection?.billingDetails?.address?.toCheckoutAddress()
-                                ?: configurationState.defaults.billingDetails?.address
-                        null -> null
-                    }
-                    if (taxAddress != null && addressSource != null && response.automaticTaxEnabled) {
-                        val updatedResponse = checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
+        val result = try {
+            if (sheetStateHolder.sheetIsOpen) {
+                integrationLaunchedFailure()
+            } else {
+                operationCoordinator.runMutation {
+                    val configurationState = configuration.build()
+                    checkoutSessionRepository.init(
+                        sessionId = sessionId,
+                        clientSecret = clientSecret,
+                        adaptivePricingAllowed = configurationState.currencySelectorElementConfiguration != null,
+                    ).mapCatching { response ->
+                        attemptResponse = response
+                        val initialLoad = checkoutStateLoader.loadInitial(
+                            configuration = configurationState,
                             checkoutSessionResponse = response,
-                            addressSource = addressSource,
-                            address = taxAddress,
-                        ).getOrThrow()
-                        attemptResponse = updatedResponse
-                        // The updated totals change payment method metadata, so rebuild it before publishing.
-                        checkoutStateLoader.reload(initialLoad.state.copy(checkoutSessionResponse = updatedResponse))
-                    } else {
-                        checkoutStateLoader.publish(initialLoad)
+                        )
+                        val addressSource = response.taxAddressSource
+                        val taxAddress = when (addressSource) {
+                            CheckoutSessionResponse.TaxAddressSource.SHIPPING ->
+                                initialLoad.state.collectedDetails.shippingAddress
+                            CheckoutSessionResponse.TaxAddressSource.BILLING ->
+                                initialLoad.state.paymentSelection?.billingDetails?.address?.toCheckoutAddress()
+                                    ?: configurationState.defaults.billingDetails?.address
+                            null -> null
+                        }
+                        if (taxAddress != null && addressSource != null && response.automaticTaxEnabled) {
+                            val taxResponse = checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
+                                checkoutSessionResponse = response,
+                                addressSource = addressSource,
+                                address = taxAddress,
+                            ).getOrThrow()
+                            attemptResponse = taxResponse
+                            // The updated totals change payment method metadata, so rebuild it before publishing.
+                            checkoutStateLoader.reload(initialLoad.state.copy(checkoutSessionResponse = taxResponse))
+                        } else {
+                            checkoutStateLoader.publish(initialLoad)
+                        }
+                        // Read inside the lock before a queued mutation can change the published payment methods.
+                        stateHolder.state?.paymentMethodMetadata?.sortedSupportedPaymentMethods()?.map { it.code }
+                            ?: session.value?.availableExpressCheckoutPaymentMethods.orEmpty()
                     }
-                    // Read inside the lock so a queued mutation can't change the published payment methods first.
-                    val state = stateHolder.state
-                    val orderedLpms =
-                        (state?.paymentMethodMetadata ?: state?.expressCheckoutElementPaymentMethodMetadata)
-                            ?.sortedSupportedPaymentMethods()?.map { it.code }.orEmpty()
-                    orderedLpms
                 }
             }
+        } catch (@Suppress("TooGenericExceptionCaught") error: Exception) {
+            initAnalytics.failed(attemptResponse, error)
+            throw error
         }
         result
             .onSuccess { orderedLpms -> initAnalytics.succeeded(attemptResponse, orderedLpms) }

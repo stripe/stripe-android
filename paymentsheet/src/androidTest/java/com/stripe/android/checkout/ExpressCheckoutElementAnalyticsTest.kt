@@ -1,6 +1,7 @@
 package com.stripe.android.checkout
 
 import androidx.test.espresso.intent.rule.IntentsRule
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.checkouttesting.CheckoutInitResponseFactory
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
@@ -10,6 +11,7 @@ import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.utils.FeatureFlags
+import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdate
 import com.stripe.android.networktesting.AdvancedFraudSignalsTestRule
 import com.stripe.android.networktesting.NetworkRule
@@ -44,6 +46,30 @@ internal class ExpressCheckoutElementAnalyticsTest {
     }
 
     private val page = ExpressCheckoutElementPage(testRules.compose)
+
+    @Test
+    fun testConfigureWithoutPaymentElementReportsAvailableExpressMethods() = runCheckoutPaymentElementScenario(
+        networkRule = networkRule,
+        renderPaymentElementContent = false,
+        setup = { controller ->
+            networkRule.validateCheckoutInitStarted(DEFAULT_CHECKOUT_SESSION_ID)
+            validateLoadingAnalyticsRequests()
+            networkRule.validateCheckoutInitSucceeded(
+                sessionId = DEFAULT_CHECKOUT_SESSION_ID,
+                analyticsPayloadField("ordered_lpms", "google_pay"),
+            )
+
+            assertThat(
+                controller.configure(
+                    "${DEFAULT_CHECKOUT_SESSION_ID}_secret_example",
+                    CheckoutController.Configuration().expressCheckoutElement(ExpressCheckoutElement.Configuration()),
+                )
+            ).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
+            assertThat(controller.session.value?.availableExpressCheckoutPaymentMethods).containsExactly("google_pay")
+        },
+    ) {
+        markTestSucceeded()
+    }
 
     @Test
     fun testSuccessfulGooglePayPayment() {

@@ -555,7 +555,7 @@ internal class CheckoutAnalyticsPerformerTest {
     }
 
     @Test
-    fun `queued init attempt includes its wait in its own duration`() = runScenario {
+    fun `overlapping init attempts retain independent durations`() = runScenario {
         val first = performer.createInitAttempt("cs_test_first")
         first.started(response = null)
         val firstStarted = analyticsRequestExecutor.awaitInitEvent(INIT_STARTED_EVENT)

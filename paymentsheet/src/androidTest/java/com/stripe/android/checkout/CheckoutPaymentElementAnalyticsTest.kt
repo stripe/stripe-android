@@ -95,7 +95,7 @@ internal class CheckoutPaymentElementAnalyticsTest {
         assertThat(
             controller.configure(
                 DEFAULT_CLIENT_SECRET,
-                CheckoutController.Configuration().paymentElement(PaymentElement.Configuration()),
+                configurationWithDefaultBillingCountry(null),
             )
         ).isInstanceOf(CheckoutController.OperationResult.Failed::class.java)
 
@@ -299,7 +299,21 @@ internal class CheckoutPaymentElementAnalyticsTest {
         }
 
     @Test
-    fun testMalformedClientSecretIsOmittedFromInitAnalytics() = runCheckoutPaymentElementScenario(
+    fun testMalformedClientSecretIsOmittedFromInitAnalytics() = testClientSecretIsOmittedFromInitAnalytics(
+        clientSecret = "not_a_client_secret",
+        sessionId = "not_a_client_secret",
+    )
+
+    @Test
+    fun testEmptySessionIdIsOmittedFromInitAnalytics() = testClientSecretIsOmittedFromInitAnalytics(
+        clientSecret = "_secret_example",
+        sessionId = "",
+    )
+
+    private fun testClientSecretIsOmittedFromInitAnalytics(
+        clientSecret: String,
+        sessionId: String,
+    ) = runCheckoutPaymentElementScenario(
         networkRule = networkRule,
         setup = { controller ->
             validateSuccessfulConfigureAnalytics()
@@ -312,9 +326,8 @@ internal class CheckoutPaymentElementAnalyticsTest {
         },
     ) {
         contentPage.waitUntilVisible()
-        val malformedClientSecret = "not_a_client_secret"
         networkRule.checkoutInit(
-            sessionId = malformedClientSecret,
+            sessionId = sessionId,
             responseFactory = ::checkoutInitApiFailureResponse,
         )
         networkRule.validateCheckoutInitStarted(sessionId = null)
@@ -325,7 +338,7 @@ internal class CheckoutPaymentElementAnalyticsTest {
             analyticsPayloadField("request_id", INIT_FAILURE_REQUEST_ID),
         )
 
-        assertThat(controller.configure(malformedClientSecret))
+        assertThat(controller.configure(clientSecret))
             .isInstanceOf(CheckoutController.OperationResult.Failed::class.java)
 
         markTestSucceeded()
@@ -404,13 +417,13 @@ internal class CheckoutPaymentElementAnalyticsTest {
         )
     }
 
-    private fun configurationWithDefaultBillingCountry(country: String): CheckoutController.Configuration =
+    private fun configurationWithDefaultBillingCountry(country: String?): CheckoutController.Configuration =
         CheckoutController.Configuration()
             .paymentElement(PaymentElement.Configuration())
             .defaults(
                 CheckoutController.Configuration.Defaults().billingDetails(
                     CheckoutController.Configuration.Defaults.ContactDetails().address(
-                        CheckoutController.Address().country(country)
+                        CheckoutController.Address().apply { country?.let { country(it) } }
                     )
                 )
             )
