@@ -59,7 +59,6 @@ class DefaultCardAccountRangeRepositoryFactory @Inject constructor(
             ApiConfiguration.State(
                 publishableKey = publishableKeySupplier(),
                 stripeAccountId = null,
-                betas = emptySet(),
             )
         },
     )

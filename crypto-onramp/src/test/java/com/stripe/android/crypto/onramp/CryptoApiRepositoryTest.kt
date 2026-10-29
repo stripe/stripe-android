@@ -58,7 +58,6 @@ class CryptoApiRepositoryTest {
             ApiConfiguration.State(
                 publishableKey = "pk_test_vOo1umqsYxSrP5UXfOeL3ecm",
                 stripeAccountId = "TestAccountId",
-                betas = emptySet(),
             )
         },
         apiVersion = CRYPTO_ONRAMP_API_VERSION,

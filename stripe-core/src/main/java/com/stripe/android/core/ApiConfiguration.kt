@@ -45,7 +45,7 @@ class ApiConfiguration(
     data class State(
         val publishableKey: String,
         val stripeAccountId: String?,
-        val betas: Set<String>,
+        val betas: Set<String> = emptySet(),
     ) : Parcelable {
         fun isLiveMode(): Boolean {
             return !publishableKey.startsWith("pk_test")

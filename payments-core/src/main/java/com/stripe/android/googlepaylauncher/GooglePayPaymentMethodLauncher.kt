@@ -80,7 +80,6 @@ class GooglePayPaymentMethodLauncher internal constructor(
         ApiConfiguration.State(
             publishableKey = it.publishableKey,
             stripeAccountId = it.stripeAccountId,
-            betas = emptySet(),
         )
     }
 

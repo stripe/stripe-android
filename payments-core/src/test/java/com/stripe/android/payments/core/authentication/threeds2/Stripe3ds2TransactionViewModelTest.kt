@@ -160,7 +160,6 @@ class Stripe3ds2TransactionViewModelTest {
             ApiConfiguration.State(
                 ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
                 ApiKeyFixtures.FAKE_STRIPE_ACCOUNT,
-                betas = emptySet(),
             ),
             PRODUCT_USAGE
         )

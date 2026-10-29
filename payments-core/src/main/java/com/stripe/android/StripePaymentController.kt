@@ -72,7 +72,6 @@ constructor(
         ApiConfiguration.State(
             publishableKey = publishableKeyProvider(),
             stripeAccountId = null,
-            betas = emptySet(),
         )
     }
     private val paymentIntentFlowResultProcessor = PaymentIntentFlowResultProcessor(

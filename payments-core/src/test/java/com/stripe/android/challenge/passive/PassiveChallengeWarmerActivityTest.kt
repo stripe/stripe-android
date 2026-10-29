@@ -218,7 +218,7 @@ internal class PassiveChallengeWarmerActivityTest {
 
         private val args = PassiveChallengeWarmerArgs(
             passiveCaptchaParams = passiveCaptchaParams,
-            apiConfiguration = ApiConfiguration.State("pk_123", "acct_123", betas = emptySet()),
+            apiConfiguration = ApiConfiguration.State("pk_123", "acct_123"),
             productUsage = listOf("PaymentSheet")
         )
     }

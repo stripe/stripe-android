@@ -137,7 +137,6 @@ class WeChatPayAuthenticatorTest {
         private val API_CONFIGURATION = ApiConfiguration.State(
             publishableKey = "TestKey",
             stripeAccountId = "TestAccountId",
-            betas = emptySet(),
         )
     }
 }

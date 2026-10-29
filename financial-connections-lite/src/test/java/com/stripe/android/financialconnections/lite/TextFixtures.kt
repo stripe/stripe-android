@@ -12,7 +12,6 @@ internal object TextFixtures {
     val DEFAULT_API_CONFIG = ApiConfiguration.State(
         publishableKey = "pk_test_123",
         stripeAccountId = "acct_test",
-        betas = emptySet(),
     )
 
     val configuration = FinancialConnectionsSheetConfiguration(

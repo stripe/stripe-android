@@ -252,7 +252,7 @@ internal class IntentConfirmationChallengeActivityTest {
 
     private fun createTestArgs(): IntentConfirmationChallengeArgs {
         return IntentConfirmationChallengeArgs(
-            apiConfiguration = ApiConfiguration.State("pk_test_123", "acct_123", betas = emptySet()),
+            apiConfiguration = ApiConfiguration.State("pk_test_123", "acct_123"),
             intent = PaymentIntentFixtures.PI_SUCCEEDED,
             productUsage = listOf("PaymentSheet"),
             captchaVendorName = "hcaptcha"

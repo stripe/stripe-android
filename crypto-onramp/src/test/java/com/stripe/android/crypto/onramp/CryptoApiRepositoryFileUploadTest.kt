@@ -125,7 +125,7 @@ class CryptoApiRepositoryFileUploadTest {
                 stripeRepository = mock<StripeRepository>(),
                 linkController = mock<LinkController>(),
                 apiConfigProvider = {
-                ApiConfiguration.State("pk_test_123", "acct_123", betas = emptySet()) },
+                ApiConfiguration.State("pk_test_123", "acct_123") },
                 apiVersion = CRYPTO_ONRAMP_API_VERSION,
                 sdkVersion = StripeSdkVersion.VERSION,
                 appInfo = null,

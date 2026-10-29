@@ -123,7 +123,6 @@ class StripeBrowserLauncherViewModelTest {
             apiConfiguration = ApiConfiguration.State(
                 ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
                 "acct_123",
-                betas = emptySet(),
             ),
             isInstantApp = false
         )

@@ -208,7 +208,6 @@ class WalletViewModelTest {
                     apiConfiguration = ApiConfiguration.State(
                         publishableKey = linkAccount.consumerPublishableKey!!,
                         stripeAccountId = null,
-                        betas = emptySet(),
                     ),
                     preCollectedConsent = null,
                 )

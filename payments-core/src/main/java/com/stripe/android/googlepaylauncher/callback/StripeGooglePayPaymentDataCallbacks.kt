@@ -41,7 +41,6 @@ internal class StripeGooglePayPaymentDataCallbacks(
                 ApiConfiguration.State(
                     publishableKey = paymentConfiguration.publishableKey,
                     stripeAccountId = paymentConfiguration.stripeAccountId,
-                    betas = emptySet(),
                 )
             },
             productUsage = emptySet(),

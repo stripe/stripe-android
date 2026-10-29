@@ -6,6 +6,9 @@ import org.junit.Test
 class ApiConfigurationTest {
     @Test
     fun `beta tokens are empty by default`() {
+        val state = ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null)
+
+        assertThat(state.betas).isEmpty()
         assertThat(ApiConfiguration("pk_test_123").build().betas).isEmpty()
     }
 
