@@ -135,7 +135,8 @@ internal fun UpdateCardScreenBodyPreview() {
                                 administrativeArea = null,
                                 countryCode = CountryCode.US,
                                 postalCode = "42424"
-                            )
+                            ),
+                            display = null,
                         ),
                         billingPhoneNumber = null
                     ),

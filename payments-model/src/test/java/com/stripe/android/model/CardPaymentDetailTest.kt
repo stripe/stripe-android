@@ -25,7 +25,8 @@ class CardPaymentDetailTest {
             administrativeArea = null,
             countryCode = CountryCode.US,
             postalCode = "42424"
-        )
+        ),
+        display = null,
     )
 
     @Test

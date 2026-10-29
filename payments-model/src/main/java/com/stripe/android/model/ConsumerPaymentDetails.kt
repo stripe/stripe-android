@@ -41,14 +41,16 @@ data class ConsumerPaymentDetails(
         val brand: CardBrand,
         val networks: List<String>,
         val cvcCheck: CvcCheck,
-        val funding: Funding
+        val funding: Funding,
+        override val display: Display?,
     ) : PaymentDetails(
         id = id,
         isDefault = isDefault,
         type = TYPE,
         nickname = nickname,
         billingAddress = billingAddress,
-        billingEmailAddress = billingEmailAddress
+        billingEmailAddress = billingEmailAddress,
+        display = display,
     ) {
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -119,13 +121,15 @@ data class ConsumerPaymentDetails(
         val bankIconCode: String?,
         override val billingAddress: BillingAddress?,
         override val billingEmailAddress: String?,
+        override val display: Display?,
     ) : PaymentDetails(
         id = id,
         type = TYPE,
         isDefault = isDefault,
         nickname = nickname,
         billingAddress = billingAddress,
-        billingEmailAddress = billingEmailAddress
+        billingEmailAddress = billingEmailAddress,
+        display = display,
     ) {
 
         companion object {
@@ -151,7 +155,8 @@ data class ConsumerPaymentDetails(
         isDefault = isDefault,
         nickname = nickname,
         billingAddress = billingAddress,
-        billingEmailAddress = billingEmailAddress
+        billingEmailAddress = billingEmailAddress,
+        display = display,
     )
 
     @Parcelize

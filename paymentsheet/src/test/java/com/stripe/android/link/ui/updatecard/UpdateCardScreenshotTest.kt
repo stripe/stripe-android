@@ -232,7 +232,8 @@ internal class UpdateCardScreenshotTest(
                 administrativeArea = null,
                 countryCode = CountryCode.US,
                 postalCode = "42424"
-            )
+            ),
+            display = null,
         )
 
         private fun bankAccount(): ConsumerPaymentDetails.BankAccount = ConsumerPaymentDetails.BankAccount(
@@ -251,7 +252,8 @@ internal class UpdateCardScreenshotTest(
             ),
             bankAccountName = "My Bank Account",
             bankIconCode = "bank_icon_code",
-            billingEmailAddress = null
+            billingEmailAddress = null,
+            display = null,
         )
 
         private fun cardEditConfiguration(): CardEditConfiguration {
