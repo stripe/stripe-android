@@ -240,6 +240,7 @@ class LinkController @Inject internal constructor(
             this.apiConfiguration = ApiConfiguration.State(
                 publishableKey = publishableKey,
                 stripeAccountId = stripeAccountId,
+                betas = emptySet(),
             )
         }
 
@@ -249,6 +250,7 @@ class LinkController @Inject internal constructor(
             this.apiConfiguration = ApiConfiguration.State(
                 publishableKey = publishableKey,
                 stripeAccountId = stripeAccountId,
+                betas = emptySet(),
             )
             this.email = null
         }

@@ -83,6 +83,7 @@ interface ErrorReporter : FraudDetectionErrorReporter {
                     ApiConfiguration.State(
                         publishableKey = paymentConfiguration.publishableKey,
                         stripeAccountId = paymentConfiguration.stripeAccountId,
+                        betas = emptySet(),
                     )
                 },
                 productUsage = productUsage,

@@ -95,6 +95,7 @@ class Stripe3DS2AuthenticatorTest {
         private val API_CONFIGURATION = ApiConfiguration.State(
             publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             stripeAccountId = ACCOUNT_ID,
+            betas = emptySet(),
         )
         private val REQUEST_OPTIONS = ApiRequest.Options(
             apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,

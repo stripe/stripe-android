@@ -158,7 +158,7 @@ internal class PassiveChallengeWarmerActivityTest {
                 ApplicationProvider.getApplicationContext(),
                 PassiveChallengeWarmerActivity::class.java
             )
-        ).use { scenario ->
+).use { scenario ->
             advanceUntilIdle()
 
             // Activity should finish gracefully without crashing
@@ -218,7 +218,7 @@ internal class PassiveChallengeWarmerActivityTest {
 
         private val args = PassiveChallengeWarmerArgs(
             passiveCaptchaParams = passiveCaptchaParams,
-            apiConfiguration = ApiConfiguration.State("pk_123", "acct_123"),
+            apiConfiguration = ApiConfiguration.State("pk_123", "acct_123", betas = emptySet()),
             productUsage = listOf("PaymentSheet")
         )
     }

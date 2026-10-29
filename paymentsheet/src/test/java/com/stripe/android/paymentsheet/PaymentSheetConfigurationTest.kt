@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet
 import androidx.compose.ui.graphics.Color
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.AddressAutocompletePreview
@@ -20,6 +21,15 @@ class PaymentSheetConfigurationTest {
         CardFundingFilteringPrivatePreview::class,
         AddressAutocompletePreview::class,
     )
+    @Test
+    fun `beta flags survive builder reconstruction`() {
+        val original = PaymentSheet.Configuration.Builder("Merchant")
+            .apiConfiguration(ApiConfiguration("pk_test_123").betas(setOf("example=v1")))
+            .build()
+
+        assertThat(original.newBuilder().build().apiConfiguration?.betas).containsExactly("example=v1")
+    }
+
     @Test
     fun `newBuilder round-trips all properties`() {
         val original = PaymentSheet.Configuration(

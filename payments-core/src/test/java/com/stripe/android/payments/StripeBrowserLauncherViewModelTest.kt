@@ -120,7 +120,11 @@ class StripeBrowserLauncherViewModelTest {
             clientSecret = "pi_1F7J1aCRMbs6FrXfaJcvbxF6_secret_mIuDLsSfoo1m6s",
             url = "https://bank.com",
             statusBarColor = Color.RED,
-            apiConfiguration = ApiConfiguration.State(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, "acct_123"),
+            apiConfiguration = ApiConfiguration.State(
+                ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                "acct_123",
+                betas = emptySet(),
+            ),
             isInstantApp = false
         )
     }

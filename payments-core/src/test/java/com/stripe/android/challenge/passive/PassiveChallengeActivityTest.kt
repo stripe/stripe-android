@@ -111,7 +111,7 @@ internal class PassiveChallengeActivityTest {
                 ApplicationProvider.getApplicationContext(),
                 PassiveChallengeActivity::class.java
             )
-        ).use { scenario ->
+).use { scenario ->
             advanceUntilIdle()
 
             // Activity should finish gracefully without crashing
@@ -171,7 +171,7 @@ internal class PassiveChallengeActivityTest {
 
         private val args = PassiveChallengeArgs(
             passiveCaptchaParams = passiveCaptchaParams,
-            apiConfiguration = ApiConfiguration.State("pk_123", "acct_123"),
+            apiConfiguration = ApiConfiguration.State("pk_123", "acct_123", betas = emptySet()),
             productUsage = listOf("PaymentSheet")
         )
     }

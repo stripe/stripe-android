@@ -356,12 +356,17 @@ class DefaultSavedPaymentMethodRepositoryTest {
                     stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
                 )
             },
+            apiConfigurationProvider = {
+                DEFAULT_API_CONFIG
+            },
         )
         val repository = DefaultSavedPaymentMethodRepository(
             customerRepository = customerRepository,
             checkoutSessionRepository = checkoutSessionRepository,
             elementsSessionClientParams = clientParams,
-            apiConfigurationProvider = { DEFAULT_API_CONFIG },
+            apiConfigurationProvider = {
+                DEFAULT_API_CONFIG
+            },
         )
 
         Scenario(

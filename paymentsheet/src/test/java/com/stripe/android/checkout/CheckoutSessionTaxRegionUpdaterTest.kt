@@ -130,6 +130,9 @@ internal class CheckoutSessionTaxRegionUpdaterTest {
                     stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
                 )
             },
+            apiConfigurationProvider = {
+                DEFAULT_API_CONFIG
+            },
         )
 
         val updater = CheckoutSessionTaxRegionUpdater(checkoutSessionRepository)

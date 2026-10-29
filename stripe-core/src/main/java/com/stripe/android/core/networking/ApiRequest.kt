@@ -2,6 +2,7 @@ package com.stripe.android.core.networking
 
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.ApiKeyValidator
 import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.AppInfo
@@ -125,6 +126,57 @@ data class ApiRequest internal constructor(
         private val apiVersion: String = ApiVersion.get().code,
         private val sdkVersion: String = StripeSdkVersion.VERSION
     ) {
+        fun createGet(
+            url: String,
+            options: Options,
+            params: Map<String, *>?,
+            apiConfiguration: ApiConfiguration.State?,
+        ): ApiRequest {
+            return ApiRequest(
+                method = Method.GET,
+                baseUrl = url,
+                params = params,
+                options = options,
+                appInfo = appInfo,
+                apiVersion = ApiVersion.withBetas(apiVersion, apiConfiguration?.betas.orEmpty()),
+                sdkVersion = sdkVersion,
+            )
+        }
+
+        fun createPost(
+            url: String,
+            options: Options,
+            params: Map<String, *>?,
+            apiConfiguration: ApiConfiguration.State?,
+        ): ApiRequest {
+            return ApiRequest(
+                method = Method.POST,
+                baseUrl = url,
+                params = params,
+                options = options,
+                appInfo = appInfo,
+                apiVersion = ApiVersion.withBetas(apiVersion, apiConfiguration?.betas.orEmpty()),
+                sdkVersion = sdkVersion,
+            )
+        }
+
+        fun createDelete(
+            url: String,
+            options: Options,
+            params: Map<String, *>?,
+            apiConfiguration: ApiConfiguration.State?,
+        ): ApiRequest {
+            return ApiRequest(
+                method = Method.DELETE,
+                baseUrl = url,
+                params = params,
+                options = options,
+                appInfo = appInfo,
+                apiVersion = ApiVersion.withBetas(apiVersion, apiConfiguration?.betas.orEmpty()),
+                sdkVersion = sdkVersion,
+            )
+        }
+
         fun createGet(
             url: String,
             options: Options,

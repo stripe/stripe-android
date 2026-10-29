@@ -31,7 +31,7 @@ import kotlin.coroutines.CoroutineContext
  */
 internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : StripeIntentResult<T>>(
     context: Context,
-    private val apiConfigProvider: Provider<ApiConfiguration.State>,
+    protected val apiConfigProvider: Provider<ApiConfiguration.State>,
     protected val stripeRepository: StripeRepository,
     private val logger: Logger,
     private val workContext: CoroutineContext,
@@ -361,6 +361,7 @@ internal class PaymentIntentFlowResultProcessor @Inject constructor(
             clientSecret,
             requestOptions,
             expandFields,
+            apiConfiguration = apiConfigProvider.get(),
         )
     }
 
@@ -372,6 +373,7 @@ internal class PaymentIntentFlowResultProcessor @Inject constructor(
         return stripeRepository.refreshPaymentIntent(
             clientSecret,
             requestOptions,
+            apiConfiguration = apiConfigProvider.get(),
         )
     }
 
@@ -384,6 +386,7 @@ internal class PaymentIntentFlowResultProcessor @Inject constructor(
             paymentIntentId = stripeIntentId,
             sourceId = sourceId,
             options = requestOptions,
+            apiConfiguration = apiConfigProvider.get(),
         )
     }
 
@@ -428,7 +431,8 @@ internal class SetupIntentFlowResultProcessor @Inject constructor(
         return stripeRepository.retrieveSetupIntent(
             clientSecret,
             requestOptions,
-            expandFields
+            expandFields,
+            apiConfiguration = apiConfigProvider.get(),
         )
     }
 
@@ -440,6 +444,7 @@ internal class SetupIntentFlowResultProcessor @Inject constructor(
         return stripeRepository.refreshSetupIntent(
             clientSecret,
             requestOptions,
+            apiConfiguration = apiConfigProvider.get(),
         )
     }
 
@@ -452,6 +457,7 @@ internal class SetupIntentFlowResultProcessor @Inject constructor(
             setupIntentId = stripeIntentId,
             sourceId = sourceId,
             options = requestOptions,
+            apiConfiguration = apiConfigProvider.get(),
         )
     }
 

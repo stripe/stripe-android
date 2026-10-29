@@ -1,6 +1,7 @@
 package com.stripe.android.payments.core.authentication.threeds2
 
 import com.stripe.android.StripeIntentResult
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
@@ -31,7 +32,8 @@ internal class DefaultStripe3ds2ChallengeResultProcessor @Inject constructor(
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
     @Named(LINEAR_DELAY) private val retryDelaySupplier: RetryDelaySupplier,
     private val logger: Logger,
-    @IOContext private val workContext: CoroutineContext
+    @IOContext private val workContext: CoroutineContext,
+    private val apiConfiguration: ApiConfiguration.State,
 ) : Stripe3ds2ChallengeResultProcessor {
 
     override suspend fun process(
@@ -146,7 +148,8 @@ internal class DefaultStripe3ds2ChallengeResultProcessor @Inject constructor(
         // complete3ds2Auth() result can be ignored
         return stripeRepository.complete3ds2Auth(
             challengeResult.intentData.sourceId,
-            requestOptions
+            requestOptions,
+            apiConfiguration = apiConfiguration,
         ).fold(
             onSuccess = {
                 val attemptedRetries = MAX_RETRIES - remainingRetries

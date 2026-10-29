@@ -409,6 +409,7 @@ class AddressElementViewModelModuleTest {
                         stripeAccount = "acct_123",
                     )
                 },
+                apiConfigurationProvider = { DEFAULT_API_CONFIG },
             ),
         )
     }

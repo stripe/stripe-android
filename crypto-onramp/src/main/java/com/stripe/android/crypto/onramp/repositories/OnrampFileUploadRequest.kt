@@ -20,6 +20,7 @@ internal class OnrampFileUploadRequest(
     fileParams = StripeFileParams(file, StripeFilePurpose.CryptoOnrampKycDocument),
     options = options,
     appInfo = appInfo,
+    apiConfiguration = null,
 ) {
     override fun writePostBody(outputStream: OutputStream) {
         val contentType = MimeTypeMap.getSingleton()

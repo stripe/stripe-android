@@ -32,7 +32,7 @@ internal class DefaultPassiveChallengeWarmerTest {
         rqData = "test_rq_data",
         tokenTimeoutSeconds = null
     )
-    private val testApiConfiguration = ApiConfiguration.State("pk_test_123", "acct_123")
+    private val testApiConfiguration = ApiConfiguration.State("pk_test_123", "acct_123", betas = emptySet())
     private val testProductUsage = setOf("PaymentSheet")
 
     @Test

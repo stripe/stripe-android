@@ -108,7 +108,9 @@ class Stripe internal constructor(
             requestSurface = StripeRepository.DEFAULT_REQUEST_SURFACE,
             appInfo = appInfo,
             logger = Logger.getInstance(enableLogging),
-            betas = betas
+            betas = betas,
+            requestApiConfiguration = null,
+            initializeRequestServices = true,
         ),
         ApiKeyValidator.get().requireValid(publishableKey),
         stripeAccountId,

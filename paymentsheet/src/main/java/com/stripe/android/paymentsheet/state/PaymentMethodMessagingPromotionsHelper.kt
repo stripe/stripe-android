@@ -68,7 +68,8 @@ internal class DefaultPaymentMethodMessagePromotionsHelper @Inject constructor(
                 requestOptions = ApiRequest.Options(
                     apiKey = apiConfiguration.publishableKey,
                     stripeAccount = apiConfiguration.stripeAccountId
-                )
+                ),
+                apiConfiguration = apiConfiguration,
             )
         }
     }

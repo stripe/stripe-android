@@ -1,6 +1,7 @@
 package com.stripe.android.repository
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.AppInfo
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
 import com.stripe.android.core.networking.ApiRequest
@@ -37,6 +38,276 @@ import java.util.Locale
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 interface ConsumersApiService {
+    fun withApiConfiguration(apiConfiguration: ApiConfiguration.State): ConsumersApiService = this
+
+    suspend fun signUp(
+        params: SignUpParams,
+        requestOptions: ApiRequest.Options,
+        apiConfiguration: ApiConfiguration.State,
+    ): Result<ConsumerSessionSignup> {
+        return withApiConfiguration(apiConfiguration).signUp(
+            params = params,
+            requestOptions = requestOptions,
+        )
+    }
+
+    suspend fun mobileSignUp(
+        params: SignUpParams,
+        requestOptions: ApiRequest.Options,
+        apiConfiguration: ApiConfiguration.State,
+    ): Result<ConsumerSessionSignup> {
+        return withApiConfiguration(apiConfiguration).mobileSignUp(
+            params = params,
+            requestOptions = requestOptions,
+        )
+    }
+
+    suspend fun lookupConsumerSession(
+        email: String?,
+        linkAuthIntentId: String?,
+        requestSurface: String,
+        sessionId: String,
+        doNotLogConsumerFunnelEvent: Boolean,
+        supportedVerificationTypes: List<String>?,
+        requestOptions: ApiRequest.Options,
+        customerId: String?,
+        apiConfiguration: ApiConfiguration.State,
+    ): ConsumerSessionLookup {
+        return withApiConfiguration(apiConfiguration).lookupConsumerSession(
+            email = email,
+            linkAuthIntentId = linkAuthIntentId,
+            requestSurface = requestSurface,
+            sessionId = sessionId,
+            doNotLogConsumerFunnelEvent = doNotLogConsumerFunnelEvent,
+            supportedVerificationTypes = supportedVerificationTypes,
+            requestOptions = requestOptions,
+            customerId = customerId,
+        )
+    }
+
+    suspend fun mobileLookupConsumerSession(
+        email: String?,
+        emailSource: EmailSource?,
+        linkAuthIntentId: String?,
+        requestSurface: String,
+        verificationToken: String,
+        appId: String,
+        supportedVerificationTypes: List<String>?,
+        requestOptions: ApiRequest.Options,
+        sessionId: String,
+        customerId: String?,
+        linkAuthTokenClientSecret: String?,
+        apiConfiguration: ApiConfiguration.State,
+    ): ConsumerSessionLookup {
+        return withApiConfiguration(apiConfiguration).mobileLookupConsumerSession(
+            email = email,
+            emailSource = emailSource,
+            linkAuthIntentId = linkAuthIntentId,
+            requestSurface = requestSurface,
+            verificationToken = verificationToken,
+            appId = appId,
+            supportedVerificationTypes = supportedVerificationTypes,
+            requestOptions = requestOptions,
+            sessionId = sessionId,
+            customerId = customerId,
+            linkAuthTokenClientSecret = linkAuthTokenClientSecret,
+        )
+    }
+
+    suspend fun refreshConsumerSession(
+        appId: String,
+        consumerSessionClientSecret: String,
+        supportedVerificationTypes: List<String>?,
+        requestSurface: String,
+        requestOptions: ApiRequest.Options,
+        apiConfiguration: ApiConfiguration.State,
+    ): ConsumerSessionRefresh {
+        return withApiConfiguration(apiConfiguration).refreshConsumerSession(
+            appId = appId,
+            consumerSessionClientSecret = consumerSessionClientSecret,
+            supportedVerificationTypes = supportedVerificationTypes,
+            requestSurface = requestSurface,
+            requestOptions = requestOptions,
+        )
+    }
+
+    suspend fun startConsumerVerification(
+        consumerSessionClientSecret: String,
+        locale: Locale,
+        requestSurface: String,
+        type: VerificationType,
+        customEmailType: CustomEmailType?,
+        connectionsMerchantName: String?,
+        accountPhoneNumber: String?,
+        emailAddress: String?,
+        requestOptions: ApiRequest.Options,
+        isResendSmsCode: Boolean = false,
+        apiConfiguration: ApiConfiguration.State,
+    ): ConsumerSession {
+        return withApiConfiguration(apiConfiguration).startConsumerVerification(
+            consumerSessionClientSecret = consumerSessionClientSecret,
+            locale = locale,
+            requestSurface = requestSurface,
+            type = type,
+            customEmailType = customEmailType,
+            connectionsMerchantName = connectionsMerchantName,
+            accountPhoneNumber = accountPhoneNumber,
+            emailAddress = emailAddress,
+            requestOptions = requestOptions,
+            isResendSmsCode = isResendSmsCode,
+        )
+    }
+
+    suspend fun confirmConsumerVerification(
+        consumerSessionClientSecret: String,
+        verificationCode: String,
+        requestSurface: String,
+        type: VerificationType,
+        consentGranted: Boolean?,
+        requestOptions: ApiRequest.Options,
+        apiConfiguration: ApiConfiguration.State,
+    ): ConsumerSession {
+        return withApiConfiguration(apiConfiguration).confirmConsumerVerification(
+            consumerSessionClientSecret = consumerSessionClientSecret,
+            verificationCode = verificationCode,
+            requestSurface = requestSurface,
+            type = type,
+            consentGranted = consentGranted,
+            requestOptions = requestOptions,
+        )
+    }
+
+    suspend fun postConsentUpdate(
+        consumerSessionClientSecret: String,
+        consentGranted: Boolean,
+        requestSurface: String,
+        requestOptions: ApiRequest.Options,
+        apiConfiguration: ApiConfiguration.State,
+    ): Result<Unit> {
+        return withApiConfiguration(apiConfiguration).postConsentUpdate(
+            consumerSessionClientSecret = consumerSessionClientSecret,
+            consentGranted = consentGranted,
+            requestSurface = requestSurface,
+            requestOptions = requestOptions,
+        )
+    }
+
+    suspend fun attachLinkConsumerToLinkAccountSession(
+        consumerSessionClientSecret: String,
+        clientSecret: String,
+        requestSurface: String,
+        requestOptions: ApiRequest.Options,
+        apiConfiguration: ApiConfiguration.State,
+    ): AttachConsumerToLinkAccountSession {
+        return withApiConfiguration(apiConfiguration).attachLinkConsumerToLinkAccountSession(
+            consumerSessionClientSecret = consumerSessionClientSecret,
+            clientSecret = clientSecret,
+            requestSurface = requestSurface,
+            requestOptions = requestOptions,
+        )
+    }
+
+    suspend fun createPaymentDetails(
+        consumerSessionClientSecret: String,
+        paymentDetailsCreateParams: ConsumerPaymentDetailsCreateParams,
+        requestSurface: String,
+        requestOptions: ApiRequest.Options,
+        apiConfiguration: ApiConfiguration.State,
+    ): Result<ConsumerPaymentDetails> {
+        return withApiConfiguration(apiConfiguration).createPaymentDetails(
+            consumerSessionClientSecret = consumerSessionClientSecret,
+            paymentDetailsCreateParams = paymentDetailsCreateParams,
+            requestSurface = requestSurface,
+            requestOptions = requestOptions,
+        )
+    }
+
+    suspend fun createPaymentDetails(
+        consumerSessionClientSecret: String,
+        paymentMethodId: String,
+        requestSurface: String,
+        requestOptions: ApiRequest.Options,
+        customerEphemeralKey: String,
+        apiConfiguration: ApiConfiguration.State,
+    ): Result<ConsumerPaymentDetails> {
+        return withApiConfiguration(apiConfiguration).createPaymentDetails(
+            consumerSessionClientSecret = consumerSessionClientSecret,
+            paymentMethodId = paymentMethodId,
+            requestSurface = requestSurface,
+            requestOptions = requestOptions,
+            customerEphemeralKey = customerEphemeralKey,
+        )
+    }
+
+    suspend fun sharePaymentDetails(
+        consumerSessionClientSecret: String,
+        paymentDetailsId: String,
+        expectedPaymentMethodType: String?,
+        billingPhone: String?,
+        requestSurface: String,
+        requestOptions: ApiRequest.Options,
+        extraParams: Map<String, Any?>,
+        apiConfiguration: ApiConfiguration.State,
+    ): Result<SharePaymentDetails> {
+        return withApiConfiguration(apiConfiguration).sharePaymentDetails(
+            consumerSessionClientSecret = consumerSessionClientSecret,
+            paymentDetailsId = paymentDetailsId,
+            expectedPaymentMethodType = expectedPaymentMethodType,
+            billingPhone = billingPhone,
+            requestSurface = requestSurface,
+            requestOptions = requestOptions,
+            extraParams = extraParams,
+        )
+    }
+
+    suspend fun updateAvailableIncentives(
+        sessionId: String,
+        paymentDetailsId: String,
+        consumerSessionClientSecret: String,
+        requestSurface: String,
+        requestOptions: ApiRequest.Options,
+        apiConfiguration: ApiConfiguration.State,
+    ): Result<UpdateAvailableIncentives> {
+        return withApiConfiguration(apiConfiguration).updateAvailableIncentives(
+            sessionId = sessionId,
+            paymentDetailsId = paymentDetailsId,
+            consumerSessionClientSecret = consumerSessionClientSecret,
+            requestSurface = requestSurface,
+            requestOptions = requestOptions,
+        )
+    }
+
+    suspend fun createLinkAccountSession(
+        consumerSessionClientSecret: String,
+        intentToken: String?,
+        linkMode: LinkMode?,
+        requestSurface: String,
+        requestOptions: ApiRequest.Options,
+        apiConfiguration: ApiConfiguration.State,
+    ): Result<LinkAccountSession> {
+        return withApiConfiguration(apiConfiguration).createLinkAccountSession(
+            consumerSessionClientSecret = consumerSessionClientSecret,
+            intentToken = intentToken,
+            linkMode = linkMode,
+            requestSurface = requestSurface,
+            requestOptions = requestOptions,
+        )
+    }
+
+    suspend fun updatePhoneNumber(
+        consumerSessionClientSecret: String,
+        phoneNumber: String,
+        requestSurface: String,
+        requestOptions: ApiRequest.Options,
+        apiConfiguration: ApiConfiguration.State,
+    ): Result<ConsumerSession> {
+        return withApiConfiguration(apiConfiguration).updatePhoneNumber(
+            consumerSessionClientSecret = consumerSessionClientSecret,
+            phoneNumber = phoneNumber,
+            requestSurface = requestSurface,
+            requestOptions = requestOptions,
+        )
+    }
 
     suspend fun signUp(
         params: SignUpParams,
@@ -169,10 +440,21 @@ interface ConsumersApiService {
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 class ConsumersApiServiceImpl(
     private val stripeNetworkClient: StripeNetworkClient,
-    apiVersion: String,
-    sdkVersion: String = StripeSdkVersion.VERSION,
-    appInfo: AppInfo?
+    private val apiVersion: String,
+    private val sdkVersion: String = StripeSdkVersion.VERSION,
+    private val appInfo: AppInfo?,
+    private val requestApiConfiguration: ApiConfiguration.State?
 ) : ConsumersApiService {
+
+    override fun withApiConfiguration(apiConfiguration: ApiConfiguration.State): ConsumersApiService {
+        return ConsumersApiServiceImpl(
+            stripeNetworkClient = stripeNetworkClient,
+            apiVersion = apiVersion,
+            sdkVersion = sdkVersion,
+            appInfo = appInfo,
+            requestApiConfiguration = apiConfiguration.copy(betas = apiConfiguration.betas.toSet()),
+        )
+    }
 
     private val stripeErrorJsonParser = StripeErrorJsonParser()
 
@@ -192,7 +474,8 @@ class ConsumersApiServiceImpl(
             request = apiRequestFactory.createPost(
                 url = consumerAccountsSignUpUrl,
                 options = requestOptions,
-                params = params.toParamMap()
+                params = params.toParamMap(),
+                apiConfiguration = requestApiConfiguration,
             ),
             responseJsonParser = ConsumerSessionSignupJsonParser,
         )
@@ -211,7 +494,8 @@ class ConsumersApiServiceImpl(
             request = apiRequestFactory.createPost(
                 url = consumerMobileSignUpUrl,
                 options = requestOptions,
-                params = params.toParamMap()
+                params = params.toParamMap(),
+                apiConfiguration = requestApiConfiguration,
             ),
             responseJsonParser = ConsumerSessionSignupJsonParser,
         )
@@ -247,7 +531,8 @@ class ConsumersApiServiceImpl(
                     "email_address" to email?.lowercase(),
                     "link_auth_intent_id" to linkAuthIntentId,
                     "customer_id" to customerId
-                ).filterValues { it != null } + avoidConsumerLoggingParams
+                ).filterValues { it != null } + avoidConsumerLoggingParams,
+                apiConfiguration = requestApiConfiguration,
             ),
             responseJsonParser = ConsumerSessionLookupJsonParser()
         )
@@ -286,7 +571,8 @@ class ConsumersApiServiceImpl(
                     "customer_id" to customerId,
                     "supported_verification_types" to supportedVerificationTypes,
                     "link_auth_token_client_secret" to linkAuthTokenClientSecret
-                ).filterValues { it != null }
+                ).filterValues { it != null },
+                apiConfiguration = requestApiConfiguration,
             ),
             responseJsonParser = ConsumerSessionLookupJsonParser()
         )
@@ -313,6 +599,7 @@ class ConsumersApiServiceImpl(
                     ),
                     "supported_verification_types" to supportedVerificationTypes
                 ),
+                apiConfiguration = requestApiConfiguration,
             ),
             responseJsonParser = ConsumerSessionRefreshJsonParser()
         )
@@ -351,7 +638,8 @@ class ConsumersApiServiceImpl(
                     if (isResendSmsCode) {
                         put("is_resend_sms_code", true)
                     }
-                }
+                },
+                apiConfiguration = requestApiConfiguration,
             ),
             responseJsonParser = ConsumerSessionJsonParser()
         )
@@ -381,7 +669,8 @@ class ConsumersApiServiceImpl(
                 "type" to type.value,
                 "code" to verificationCode,
                 "consent_granted" to consentGranted
-            ).filterValues { it != null }
+            ).filterValues { it != null },
+            apiConfiguration = requestApiConfiguration,
         ),
         responseJsonParser = ConsumerSessionJsonParser()
     )
@@ -404,7 +693,8 @@ class ConsumersApiServiceImpl(
                         "consumer_session_client_secret" to consumerSessionClientSecret
                     ),
                     "consent_granted" to consentGranted
-                )
+                ),
+                apiConfiguration = requestApiConfiguration,
             )
         )
     }
@@ -427,7 +717,8 @@ class ConsumersApiServiceImpl(
                         "consumer_session_client_secret" to consumerSessionClientSecret,
                     ),
                     "link_account_session" to clientSecret,
-                )
+                ),
+                apiConfiguration = requestApiConfiguration,
             ),
             responseJsonParser = AttachConsumerToLinkAccountSessionJsonParser,
         )
@@ -452,7 +743,8 @@ class ConsumersApiServiceImpl(
                     ),
                 ).plus(
                     paymentDetailsCreateParams.toParamMap()
-                )
+                ),
+                apiConfiguration = requestApiConfiguration,
             ),
             responseJsonParser = ConsumerPaymentDetailsJsonParser,
         )
@@ -478,7 +770,8 @@ class ConsumersApiServiceImpl(
                         "consumer_session_client_secret" to consumerSessionClientSecret
                     ),
                     "customer_ephemeral_key_secret" to customerEphemeralKey
-                )
+                ),
+                apiConfiguration = requestApiConfiguration,
             ),
             responseJsonParser = ConsumerPaymentDetailsJsonParser,
         )
@@ -508,6 +801,7 @@ class ConsumersApiServiceImpl(
                     ),
                     "billing_phone" to billingPhone,
                 ) + extraParams,
+                apiConfiguration = requestApiConfiguration,
             ),
             responseJsonParser = SharePaymentDetailsJsonParser,
         )
@@ -534,6 +828,7 @@ class ConsumersApiServiceImpl(
                         "consumer_session_client_secret" to consumerSessionClientSecret
                     ),
                 ),
+                apiConfiguration = requestApiConfiguration,
             ),
             responseJsonParser = UpdateAvailableIncentivesJsonParser,
         )
@@ -560,6 +855,7 @@ class ConsumersApiServiceImpl(
                     "link_mode" to linkMode?.value,
                     "request_surface" to requestSurface,
                 ),
+                apiConfiguration = requestApiConfiguration,
             ),
             responseJsonParser = LinkAccountSessionJsonParser,
         )
@@ -584,6 +880,7 @@ class ConsumersApiServiceImpl(
                     "phone_number" to phoneNumber,
                     "request_surface" to requestSurface,
                 ),
+                apiConfiguration = requestApiConfiguration,
             ),
             responseJsonParser = ConsumerSessionJsonParser(),
         )

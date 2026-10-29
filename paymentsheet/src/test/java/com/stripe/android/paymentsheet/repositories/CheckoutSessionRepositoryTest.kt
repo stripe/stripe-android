@@ -48,6 +48,9 @@ class CheckoutSessionRepositoryTest {
                 stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
             )
         },
+        apiConfigurationProvider = {
+                DEFAULT_API_CONFIG
+            },
     )
 
     @Test

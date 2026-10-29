@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
@@ -106,6 +107,7 @@ internal suspend fun createIntentConfirmationInterceptor(
                     allowsManualConfirmation = false,
                     requestOptions = requestOptions,
                     clientAttributionMetadata = clientAttributionMetadata,
+                    apiConfiguration = ApiConfiguration("pk_test_123").build(),
                 )
             }
         },
@@ -125,6 +127,7 @@ internal suspend fun createIntentConfirmationInterceptor(
                     requestOptions = requestOptions,
                     userFacingLogger = FakeUserFacingLogger(),
                     clientAttributionMetadata = clientAttributionMetadata,
+                    apiConfiguration = ApiConfiguration("pk_test_123").build(),
                 )
             }
         },
@@ -138,6 +141,7 @@ internal suspend fun createIntentConfirmationInterceptor(
                     handler = handler,
                     stripeRepository = stripeRepository,
                     requestOptions = requestOptions,
+                    apiConfiguration = ApiConfiguration("pk_test_123").build(),
                 )
             }
         },
@@ -161,6 +165,9 @@ internal suspend fun createIntentConfirmationInterceptor(
                             stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
                         )
                     },
+                    apiConfigurationProvider = {
+                DEFAULT_API_CONFIG
+            },
                 )
                 return CheckoutSessionConfirmationInterceptor(
                     integrationMetadata = integrationMetadata,

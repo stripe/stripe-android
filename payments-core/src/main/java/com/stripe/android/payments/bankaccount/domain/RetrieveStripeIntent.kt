@@ -23,6 +23,7 @@ internal class RetrieveStripeIntent @Inject constructor(
                 apiKey = apiConfiguration.publishableKey,
                 stripeAccount = apiConfiguration.stripeAccountId,
             ),
+            apiConfiguration = apiConfiguration,
         )
     }
 }

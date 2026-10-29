@@ -2,6 +2,7 @@ package com.stripe.android.financialconnections.di
 
 import android.app.Application
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.Logger
 import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
@@ -95,13 +96,15 @@ internal interface FinancialConnectionsSheetNativeModule {
         @Provides
         @ActivityRetainedScope
         fun provideConsumersApiService(
+            apiConfiguration: ApiConfiguration.State,
             apiVersion: ApiVersion,
             stripeNetworkClient: StripeNetworkClient,
         ): ConsumersApiService = ConsumersApiServiceImpl(
             appInfo = null,
             sdkVersion = StripeSdkVersion.VERSION,
             apiVersion = apiVersion.code,
-            stripeNetworkClient = stripeNetworkClient
+            stripeNetworkClient = stripeNetworkClient,
+            requestApiConfiguration = apiConfiguration,
         )
 
         @ActivityRetainedScope

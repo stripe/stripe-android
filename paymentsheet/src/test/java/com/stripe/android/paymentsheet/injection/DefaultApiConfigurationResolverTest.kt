@@ -30,6 +30,7 @@ internal class DefaultApiConfigurationResolverTest {
         val apiConfiguration = ApiConfiguration.State(
             publishableKey = "pk_test_from_api_configuration",
             stripeAccountId = "acct_from_api_configuration",
+            betas = emptySet(),
         )
 
         val resolvedApiConfiguration = DefaultApiConfigurationResolver(context).resolve(apiConfiguration)
@@ -51,6 +52,7 @@ internal class DefaultApiConfigurationResolverTest {
             ApiConfiguration.State(
                 publishableKey = "pk_test_from_payment_configuration",
                 stripeAccountId = "acct_from_payment_configuration",
+                betas = emptySet(),
             )
         )
     }
@@ -61,6 +63,7 @@ internal class DefaultApiConfigurationResolverTest {
         val apiConfiguration = ApiConfiguration.State(
             publishableKey = "pk_test_from_api_configuration",
             stripeAccountId = "acct_from_api_configuration",
+            betas = emptySet(),
         )
 
         assertFailsWith<IllegalStateException> {

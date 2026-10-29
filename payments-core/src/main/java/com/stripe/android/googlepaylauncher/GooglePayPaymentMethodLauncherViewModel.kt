@@ -144,7 +144,7 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
         return (
             args.config.merchantCountryCode.equals(Locale.US.country, ignoreCase = true) ||
                 args.config.merchantCountryCode.equals(Locale.CANADA.country, ignoreCase = true)
-            ) && args.amount == 0L
+        ) && args.amount == 0L
     }
 
     suspend fun loadPaymentData(): Task<PaymentData> {
@@ -173,7 +173,11 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
             stripeAccount = args.apiConfiguration.stripeAccountId
         )
 
-        return stripeRepository.createPaymentMethod(params, requestOptions).fold(
+        return stripeRepository.createPaymentMethod(
+            params,
+            requestOptions,
+            apiConfiguration = args.apiConfiguration,
+        ).fold(
             onSuccess = {
                 GooglePayPaymentMethodLauncher.Result.Completed(
                     paymentMethod = it,

@@ -55,10 +55,12 @@ internal class ElementsSessionRepositoryTest {
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
-            apiConfiguration = DEFAULT_API_CONFIG,
+            apiConfiguration = DEFAULT_API_CONFIG.copy(betas = setOf("elements_beta=v1")),
         ).getOrThrow()
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
+        assertThat(requestCaptor.firstValue.headers["Stripe-Version"])
+            .isEqualTo("2020-03-02;elements_beta=v1")
         val requestOptions = (requestCaptor.firstValue as ApiRequest).options
         assertThat(requestOptions.apiKey).isEqualTo(DEFAULT_API_CONFIG.publishableKey)
         assertThat(requestOptions.stripeAccount).isEqualTo(DEFAULT_API_CONFIG.stripeAccountId)
@@ -86,7 +88,7 @@ internal class ElementsSessionRepositoryTest {
         }
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
-        verify(stripeRepository, never()).retrievePaymentIntent(any(), any(), any())
+        verify(stripeRepository, never()).retrievePaymentIntent(any(), any(), any(), apiConfiguration = any())
         assertThat(session).isNotNull()
 
         val request = requestCaptor.firstValue as ApiRequest
@@ -102,7 +104,7 @@ internal class ElementsSessionRepositoryTest {
                 StripeResponse(500, """{"error":{"message":"Server error"}}""", emptyMap())
             )
 
-            whenever(stripeRepository.retrievePaymentIntent(any(), any(), any()))
+            whenever(stripeRepository.retrievePaymentIntent(any(), any(), any(), apiConfiguration = any()))
                 .thenReturn(Result.success(PaymentIntentFixtures.PI_WITH_SHIPPING))
 
             val session = withLocale(Locale.ITALY) {
@@ -120,7 +122,7 @@ internal class ElementsSessionRepositoryTest {
             }
 
             verify(stripeNetworkClient).executeRequest(any())
-            verify(stripeRepository).retrievePaymentIntent(any(), any(), any())
+            verify(stripeRepository).retrievePaymentIntent(any(), any(), any(), apiConfiguration = any())
             assertThat(session.stripeIntent).isEqualTo(PaymentIntentFixtures.PI_WITH_SHIPPING)
         }
 
@@ -131,7 +133,7 @@ internal class ElementsSessionRepositoryTest {
                 StripeResponse(500, """{"error":{"message":"Server error"}}""", emptyMap())
             )
 
-            whenever(stripeRepository.retrievePaymentIntent(any(), any(), any()))
+            whenever(stripeRepository.retrievePaymentIntent(any(), any(), any(), apiConfiguration = any()))
                 .thenReturn(Result.success(PaymentIntentFixtures.PI_WITH_SHIPPING))
 
             val session = withLocale(Locale.ITALY) {
@@ -149,7 +151,7 @@ internal class ElementsSessionRepositoryTest {
             }
 
             verify(stripeNetworkClient).executeRequest(any())
-            verify(stripeRepository).retrievePaymentIntent(any(), any(), any())
+            verify(stripeRepository).retrievePaymentIntent(any(), any(), any(), apiConfiguration = any())
             assertThat(session.stripeIntent).isEqualTo(PaymentIntentFixtures.PI_WITH_SHIPPING)
         }
 
@@ -178,7 +180,7 @@ internal class ElementsSessionRepositoryTest {
         ).getOrThrow()
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
-        verify(stripeRepository, never()).retrievePaymentIntent(any(), any(), any())
+        verify(stripeRepository, never()).retrievePaymentIntent(any(), any(), any(), apiConfiguration = any())
         assertThat(session).isNotNull()
 
         val request = requestCaptor.firstValue as ApiRequest

@@ -87,11 +87,11 @@ internal class RealElementsSessionRepository @Inject constructor(
             apiKey = apiConfiguration.publishableKey,
             stripeAccount = apiConfiguration.stripeAccountId,
         )
-        val elementsSession = retrieveElementsSession(params, requestOptions)
+        val elementsSession = retrieveElementsSession(params, requestOptions, apiConfiguration)
 
         return elementsSession.getResultOrElse { elementsSessionFailure ->
             if (shouldFallback(elementsSession)) {
-                fallback(params, elementsSessionFailure, requestOptions)
+                fallback(params, elementsSessionFailure, requestOptions, apiConfiguration)
             } else {
                 elementsSession
             }
@@ -101,6 +101,7 @@ internal class RealElementsSessionRepository @Inject constructor(
     private suspend fun retrieveElementsSession(
         params: ElementsSessionParams,
         options: ApiRequest.Options,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<ElementsSession> {
         val requestParams = buildMap {
             this["type"] = params.type
@@ -132,6 +133,7 @@ internal class RealElementsSessionRepository @Inject constructor(
                 url = ELEMENTS_SESSIONS_URL,
                 options = options,
                 params = requestParams + expandParam,
+                apiConfiguration = apiConfiguration,
             ),
             responseJsonParser = ElementsSessionJsonParser(
                 params = params,
@@ -144,20 +146,23 @@ internal class RealElementsSessionRepository @Inject constructor(
         params: ElementsSessionParams,
         elementsSessionFailure: Throwable,
         requestOptions: ApiRequest.Options,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<ElementsSession> = withContext(workContext) {
         val stripeIntent = when (params) {
             is ElementsSessionParams.PaymentIntentType -> {
                 stripeRepository.retrievePaymentIntent(
                     clientSecret = params.clientSecret,
                     options = requestOptions,
-                    expandFields = listOf("payment_method")
+                    expandFields = listOf("payment_method"),
+                    apiConfiguration = apiConfiguration,
                 )
             }
             is ElementsSessionParams.SetupIntentType -> {
                 stripeRepository.retrieveSetupIntent(
                     clientSecret = params.clientSecret,
                     options = requestOptions,
-                    expandFields = listOf("payment_method")
+                    expandFields = listOf("payment_method"),
+                    apiConfiguration = apiConfiguration,
                 )
             }
             is ElementsSessionParams.DeferredIntentType -> {

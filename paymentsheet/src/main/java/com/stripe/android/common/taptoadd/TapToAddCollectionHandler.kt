@@ -175,10 +175,7 @@ internal class DefaultTapToAddCollectionHandler(
     }
 
     private suspend fun retrieveSetupIntent(clientSecret: String) = suspendCoroutine { continuation ->
-        terminal().retrieveSetupIntent(
-            clientSecret = clientSecret,
-            callback = continuation.createSetupIntentCallback(),
-        )
+        terminal().retrieveSetupIntent(clientSecret = clientSecret, callback = continuation.createSetupIntentCallback())
     }
 
     private suspend fun collectPaymentMethod(
@@ -216,6 +213,7 @@ internal class DefaultTapToAddCollectionHandler(
                     )
                 ),
                 options = getApiOptions(customerMetadata, metadata),
+                apiConfiguration = metadata.apiConfiguration,
             ).getOrThrow()
         } ?: paymentMethod
     }
@@ -317,7 +315,8 @@ internal class DefaultTapToAddCollectionHandler(
         return stripeRepository.retrieveSavedPaymentMethodFromCardPresentPaymentMethod(
             cardPresentPaymentMethodId = paymentMethodId,
             customerId = customerId,
-            options = getApiOptions(customerMetadata, paymentMethodMetadata)
+            options = getApiOptions(customerMetadata, paymentMethodMetadata),
+            apiConfiguration = paymentMethodMetadata.apiConfiguration,
         ).getOrThrow()
     }
 

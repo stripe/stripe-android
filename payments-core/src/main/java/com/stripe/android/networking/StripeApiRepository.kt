@@ -137,6 +137,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 ApiConfiguration.State(
                     publishableKey = publishableKeyProvider(),
                     stripeAccountId = null,
+                    betas = emptySet(),
                 )
             },
             workContext = workContext,
@@ -151,14 +152,17 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 ApiConfiguration.State(
                     publishableKey = publishableKeyProvider(),
                     stripeAccountId = null,
+                    betas = emptySet(),
                 )
             },
         ),
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory =
         PaymentAnalyticsRequestFactory(context, publishableKeyProvider, productUsageTokens),
     betas: Set<StripeApiBeta> = emptySet(),
-    apiVersion: String = ApiVersion(betas = betas.map { it.code }.toSet()).code,
-    sdkVersion: String = StripeSdkVersion.VERSION
+    private val apiVersion: String = ApiVersion(betas = betas.map { it.code }.toSet()).code,
+    private val sdkVersion: String = StripeSdkVersion.VERSION,
+    private val requestApiConfiguration: ApiConfiguration.State?,
+    private val initializeRequestServices: Boolean,
 ) : StripeRepository {
 
     @Inject
@@ -188,8 +192,31 @@ class StripeApiRepository @JvmOverloads internal constructor(
             apiConfigurationProvider = apiConfigurationProvider,
         ),
         paymentAnalyticsRequestFactory = paymentAnalyticsRequestFactory,
-        analyticsRequestExecutor = analyticsRequestExecutor
+        analyticsRequestExecutor = analyticsRequestExecutor,
+        requestApiConfiguration = null,
+        initializeRequestServices = true,
     )
+
+    override fun withApiConfiguration(apiConfiguration: ApiConfiguration.State): StripeRepository {
+        return StripeApiRepository(
+            context = context,
+            publishableKeyProvider = publishableKeyProvider,
+            requestSurface = requestSurface,
+            appInfo = appInfo,
+            logger = logger,
+            workContext = workContext,
+            productUsageTokens = productUsageTokens,
+            stripeNetworkClient = stripeNetworkClient,
+            analyticsRequestExecutor = analyticsRequestExecutor,
+            fraudDetectionDataRepository = fraudDetectionDataRepository,
+            cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
+            paymentAnalyticsRequestFactory = paymentAnalyticsRequestFactory,
+            apiVersion = apiVersion,
+            sdkVersion = sdkVersion,
+            requestApiConfiguration = apiConfiguration.copy(betas = apiConfiguration.betas.toSet()),
+            initializeRequestServices = false,
+        )
+    }
 
     private val apiRequestFactory = ApiRequest.Factory(
         appInfo = appInfo,
@@ -201,7 +228,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
         get() = fraudDetectionDataRepository.getCached()
 
     init {
-        fireFraudDetectionDataRequest()
+        if (initializeRequestServices) fireFraudDetectionDataRequest()
     }
 
     override suspend fun retrieveStripeIntent(
@@ -274,6 +301,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 url = getConfirmPaymentIntentUrl(paymentIntentId),
                 options = options,
                 params = params,
+                apiConfiguration = requestApiConfiguration,
             ),
             jsonParser = PaymentIntentJsonParser(),
         ) { result ->
@@ -321,6 +349,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 url = getRetrievePaymentIntentUrl(paymentIntentId),
                 options = options,
                 params = params,
+                apiConfiguration = requestApiConfiguration,
             ),
             jsonParser = PaymentIntentJsonParser(),
         ) {
@@ -354,6 +383,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 url = getRefreshPaymentIntentUrl(paymentIntentId),
                 options = options,
                 params = createClientSecretParam(clientSecret, emptyList()),
+                apiConfiguration = requestApiConfiguration,
             ),
             jsonParser = PaymentIntentJsonParser(),
         ) {
@@ -370,10 +400,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
      *
      * @param clientSecret client_secret of the SetupIntent to retrieve
      */
-    override suspend fun refreshSetupIntent(
-        clientSecret: String,
-        options: ApiRequest.Options
-    ): Result<SetupIntent> {
+    override suspend fun refreshSetupIntent(clientSecret: String, options: ApiRequest.Options): Result<SetupIntent> {
         val setupIntentId = runCatching {
             SetupIntent.ClientSecret(clientSecret).setupIntentId
         }.getOrElse {
@@ -387,6 +414,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 url = getRefreshSetupIntentUrl(setupIntentId),
                 options = options,
                 params = createClientSecretParam(clientSecret, emptyList()),
+                apiConfiguration = requestApiConfiguration,
             ),
             jsonParser = SetupIntentJsonParser(),
         ) {
@@ -411,6 +439,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 url = getCancelPaymentIntentSourceUrl(paymentIntentId),
                 options = options,
                 params = mapOf("source" to sourceId),
+                apiConfiguration = requestApiConfiguration,
             ),
             jsonParser = PaymentIntentJsonParser(),
         ) {
@@ -467,7 +496,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
                     sourceParams = null,
                     fraudDetectionData = fraudDetectionData,
                     productUsageTokens = productUsageTokens,
-                )
+                ),
+                apiConfiguration = requestApiConfiguration,
             ),
             SetupIntentJsonParser()
         ) { result ->
@@ -511,6 +541,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 url = getRetrieveSetupIntentUrl(setupIntentId),
                 options = options,
                 params = params,
+                apiConfiguration = requestApiConfiguration,
             ),
             jsonParser = SetupIntentJsonParser(),
         ) {
@@ -532,7 +563,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
             apiRequestFactory.createPost(
                 getCancelSetupIntentSourceUrl(setupIntentId),
                 options,
-                mapOf("source" to sourceId)
+                mapOf("source" to sourceId),
+                apiConfiguration = requestApiConfiguration,
             ),
             SetupIntentJsonParser()
         ) {
@@ -560,7 +592,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 options,
                 sourceParams.toParamMap()
                     .plus(buildPaymentUserAgentPair(sourceParams.attribution))
-                    .plus(fraudDetectionData?.params.orEmpty())
+                    .plus(fraudDetectionData?.params.orEmpty()),
+                apiConfiguration = requestApiConfiguration,
             ),
             SourceJsonParser()
         ) {
@@ -590,6 +623,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 url = getRetrieveSourceApiUrl(sourceId),
                 options = options,
                 params = SourceParams.createRetrieveSourceParams(clientSecret),
+                apiConfiguration = requestApiConfiguration,
             ),
             jsonParser = SourceJsonParser(),
         ) {
@@ -614,7 +648,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 options,
                 paymentMethodCreateParams.toParamMap()
                     .plus(buildPaymentUserAgentPair(paymentMethodCreateParams.attribution))
-                    .plus(fraudDetectionData?.params.orEmpty())
+                    .plus(fraudDetectionData?.params.orEmpty()),
+                apiConfiguration = requestApiConfiguration,
             ),
             PaymentMethodJsonParser()
         ) {
@@ -639,6 +674,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 url = getPaymentMethodUrl(paymentMethodId),
                 options = options,
                 params = paymentMethodUpdateParams.toParamMap(),
+                apiConfiguration = requestApiConfiguration,
             ),
             jsonParser = PaymentMethodJsonParser()
         ) {
@@ -660,7 +696,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
             apiRequest = apiRequestFactory.createPost(
                 url = getSetDefaultPaymentMethodUrl(customerId = customerId),
                 options = options,
-                params = mapOf("payment_method" to (paymentMethodId ?: ""))
+                params = mapOf("payment_method" to (paymentMethodId ?: "")),
+                apiConfiguration = requestApiConfiguration,
             ),
             jsonParser = CustomerJsonParser()
         )
@@ -678,7 +715,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
                     paymentMethodId = cardPresentPaymentMethodId,
                 ),
                 options = options,
-                params = emptyMap<String, String>()
+                params = emptyMap<String, String>(),
+                apiConfiguration = requestApiConfiguration,
             ),
             jsonParser = PaymentMethodJsonParser()
         )
@@ -707,7 +745,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 options,
                 tokenParams.toParamMap()
                     .plus(buildPaymentUserAgentPair(tokenParams.attribution))
-                    .plus(fraudDetectionData?.params.orEmpty())
+                    .plus(fraudDetectionData?.params.orEmpty()),
+                apiConfiguration = requestApiConfiguration,
             ),
             TokenJsonParser()
         ) {
@@ -739,7 +778,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
                     sourceParams = null,
                     fraudDetectionData = fraudDetectionData,
                     productUsageTokens = productUsageTokens,
-                )
+                ),
+                apiConfiguration = requestApiConfiguration,
             ),
             ConfirmationTokenJsonParser()
         ) {
@@ -768,6 +808,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 url = getAddCustomerSourceUrl(customerId),
                 options = requestOptions,
                 params = mapOf("source" to sourceId),
+                apiConfiguration = requestApiConfiguration,
             ),
             jsonParser = SourceJsonParser(),
         ) {
@@ -794,6 +835,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
             apiRequest = apiRequestFactory.createDelete(
                 url = getDeleteCustomerSourceUrl(customerId, sourceId),
                 options = requestOptions,
+                apiConfiguration = requestApiConfiguration,
+                params = null,
             ),
             jsonParser = SourceJsonParser(),
         ) {
@@ -820,7 +863,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
             apiRequest = apiRequestFactory.createPost(
                 url = getAttachPaymentMethodUrl(paymentMethodId),
                 options = requestOptions,
-                params = mapOf("customer" to customerId)
+                params = mapOf("customer" to customerId),
+                apiConfiguration = requestApiConfiguration,
             ),
             jsonParser = PaymentMethodJsonParser()
         ) {
@@ -849,6 +893,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
             apiRequest = apiRequestFactory.createPost(
                 url = getDetachPaymentMethodUrl(paymentMethodId),
                 options = requestOptions,
+                apiConfiguration = requestApiConfiguration,
+                params = null,
             ),
             jsonParser = PaymentMethodJsonParser()
         ) {
@@ -879,6 +925,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 url = getElementsDetachPaymentMethodUrl(paymentMethodId),
                 options = requestOptions,
                 params = mapOf("customer_session_client_secret" to customerSessionClientSecret),
+                apiConfiguration = requestApiConfiguration,
             ),
             jsonParser = PaymentMethodJsonParser()
         ) {
@@ -904,6 +951,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 url = paymentMethodsUrl,
                 options = requestOptions,
                 params = listPaymentMethodsParams.toParamMap(),
+                apiConfiguration = apiConfiguration,
             ),
             jsonParser = PaymentMethodsListJsonParser(),
             onResponse = {
@@ -935,6 +983,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
             apiRequest = apiRequestFactory.createGet(
                 url = getRetrieveCustomerPaymentMethodUrl(customerId, paymentMethodId),
                 options = requestOptions,
+                apiConfiguration = requestApiConfiguration,
+                params = null,
             ),
             jsonParser = PaymentMethodJsonParser(),
         ) {
@@ -963,6 +1013,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 url = getRetrieveCustomerUrl(customerId),
                 options = requestOptions,
                 params = mapOf("default_source" to sourceId),
+                apiConfiguration = requestApiConfiguration,
             ),
             jsonParser = CustomerJsonParser(),
         ) {
@@ -991,6 +1042,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 url = getRetrieveCustomerUrl(customerId),
                 options = requestOptions,
                 params = mapOf("shipping" to shippingInformation.toParamMap()),
+                apiConfiguration = requestApiConfiguration,
             ),
             jsonParser = CustomerJsonParser(),
         ) {
@@ -1015,6 +1067,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
             apiRequest = apiRequestFactory.createGet(
                 url = getRetrieveCustomerUrl(customerId),
                 options = requestOptions,
+                apiConfiguration = requestApiConfiguration,
+                params = null,
             ),
             jsonParser = CustomerJsonParser(),
         ) {
@@ -1043,6 +1097,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 params = mapOf(
                     "verification" to createVerificationParam(verificationId, userOneTimeCode)
                 ),
+                apiConfiguration = requestApiConfiguration,
             ),
             jsonParser = IssuingCardPinJsonParser(),
             onResponse = { fireAnalyticsRequest(PaymentAnalyticsEvent.IssuingRetrievePin) },
@@ -1068,6 +1123,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                         "verification" to createVerificationParam(verificationId, userOneTimeCode),
                         "pin" to newPin,
                     ),
+                    apiConfiguration = requestApiConfiguration,
                 ),
                 onResponse = { fireAnalyticsRequest(PaymentAnalyticsEvent.IssuingUpdatePin) },
             )
@@ -1083,6 +1139,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 // don't pass connected account
                 options = options.copy(stripeAccount = null),
                 params = mapOf("account_holder_type" to "individual"),
+                apiConfiguration = requestApiConfiguration,
             ),
             jsonParser = FpxBankStatusesJsonParser(),
         ) {
@@ -1099,6 +1156,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 url = getEdgeUrl("card-metadata"),
                 options = options.copy(stripeAccount = null),
                 params = mapOf("key" to options.apiKey, "bin_prefix" to bin.value),
+                apiConfiguration = requestApiConfiguration,
             ),
             jsonParser = CardMetadataJsonParser(bin, isNetwork = true),
         ).onFailure {
@@ -1119,6 +1177,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 url = getApiUrl("3ds2/authenticate"),
                 options = requestOptions,
                 params = authParams.toParamMap(),
+                apiConfiguration = requestApiConfiguration,
             ),
             jsonParser = Stripe3ds2AuthResultJsonParser(),
         ) {
@@ -1137,6 +1196,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 url = getApiUrl("3ds2/challenge_complete"),
                 options = requestOptions,
                 params = mapOf("source" to sourceId),
+                apiConfiguration = requestApiConfiguration,
             ),
             jsonParser = Stripe3ds2AuthResultJsonParser(),
         )
@@ -1152,7 +1212,12 @@ class StripeApiRepository @JvmOverloads internal constructor(
         val response = runCatching {
             makeFileUploadRequest(
                 apiRequestOptions = requestOptions,
-                fileUploadRequest = FileUploadRequest(fileParams, requestOptions, appInfo),
+                fileUploadRequest = FileUploadRequest(
+                    fileParams,
+                    requestOptions,
+                    appInfo,
+                    apiConfiguration = requestApiConfiguration,
+                ),
                 onResponse = { fireAnalyticsRequest(PaymentAnalyticsEvent.FileCreate) },
             )
         }
@@ -1172,7 +1237,12 @@ class StripeApiRepository @JvmOverloads internal constructor(
 
         return runCatching {
             makeApiRequest(
-                apiRequest = apiRequestFactory.createGet(url, requestOptions),
+                apiRequest = apiRequestFactory.createGet(
+                    url,
+                    requestOptions,
+                    apiConfiguration = requestApiConfiguration,
+                    params = null,
+                ),
                 onResponse = { fireAnalyticsRequest(PaymentAnalyticsEvent.StripeUrlRetrieve) },
             )
         }
@@ -1203,6 +1273,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                     url = getApiUrl("radar/session"),
                     options = requestOptions,
                     params = params,
+                    apiConfiguration = requestApiConfiguration,
                 ),
                 jsonParser = RadarSessionWithHCaptchaJsonParser(),
             ) {
@@ -1233,7 +1304,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
                             "passive_captcha_ekey" to hcaptchaEKey
                         )
                     } ?: emptyMap()
-                )
+                ),
+                apiConfiguration = requestApiConfiguration,
             ),
             jsonParser = RadarSessionWithHCaptchaJsonParser(),
         )
@@ -1256,7 +1328,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
                     ),
                     "id" to id,
                     buildPaymentUserAgentPair(),
-                ).plus(extraParams ?: emptyMap())
+                ).plus(extraParams ?: emptyMap()),
+                apiConfiguration = requestApiConfiguration,
             ),
             jsonParser = ConsumerPaymentDetailsShareJsonParser,
         ).map { it.paymentMethod }
@@ -1277,6 +1350,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                         "consumer_session_client_secret" to consumerSessionClientSecret
                     ),
                 ),
+                apiConfiguration = requestApiConfiguration,
             ),
             jsonParser = ConsumerSessionJsonParser(),
         )
@@ -1290,7 +1364,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
             apiRequestFactory.createPost(
                 url = deferredFinancialConnectionsSessionUrl,
                 options = requestOptions,
-                params = params.toMap()
+                params = params.toMap(),
+                apiConfiguration = requestApiConfiguration,
             ),
             FinancialConnectionsSessionJsonParser()
         ) {
@@ -1307,7 +1382,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
             apiRequestFactory.createPost(
                 url = getPaymentIntentFinancialConnectionsSessionUrl(paymentIntentId),
                 options = requestOptions,
-                params = params.toMap()
+                params = params.toMap(),
+                apiConfiguration = requestApiConfiguration,
             ),
             FinancialConnectionsSessionJsonParser()
         ) {
@@ -1324,7 +1400,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
             apiRequestFactory.createPost(
                 url = getSetupIntentFinancialConnectionsSessionUrl(setupIntentId),
                 options = requestOptions,
-                params = params.toMap()
+                params = params.toMap(),
+                apiConfiguration = requestApiConfiguration,
             ),
             FinancialConnectionsSessionJsonParser()
         ) {
@@ -1368,7 +1445,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 ),
                 requestOptions,
                 mapOf("client_secret" to clientSecret)
-                    .plus(createExpandParam(expandFields))
+                    .plus(createExpandParam(expandFields)),
+                apiConfiguration = requestApiConfiguration,
             ),
             PaymentIntentJsonParser()
         ) {
@@ -1394,7 +1472,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 ),
                 requestOptions,
                 mapOf("client_secret" to clientSecret)
-                    .plus(createExpandParam(expandFields))
+                    .plus(createExpandParam(expandFields)),
+                apiConfiguration = requestApiConfiguration,
             ),
             SetupIntentJsonParser()
         ) {
@@ -1424,7 +1503,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 mapOf(
                     "client_secret" to clientSecret,
                     "amounts" to listOf(firstAmount, secondAmount)
-                )
+                ),
+                apiConfiguration = requestApiConfiguration,
             ),
             PaymentIntentJsonParser()
         ) {
@@ -1453,7 +1533,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 mapOf(
                     "client_secret" to clientSecret,
                     "descriptor_code" to descriptorCode
-                )
+                ),
+                apiConfiguration = requestApiConfiguration,
             ),
             PaymentIntentJsonParser()
         ) {
@@ -1483,7 +1564,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 mapOf(
                     "client_secret" to clientSecret,
                     "amounts" to listOf(firstAmount, secondAmount)
-                )
+                ),
+                apiConfiguration = requestApiConfiguration,
             ),
             SetupIntentJsonParser()
         )
@@ -1510,7 +1592,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 mapOf(
                     "client_secret" to clientSecret,
                     "descriptor_code" to descriptorCode
-                )
+                ),
+                apiConfiguration = requestApiConfiguration,
             ),
             SetupIntentJsonParser()
         )
@@ -1535,9 +1618,10 @@ class StripeApiRepository @JvmOverloads internal constructor(
                     "locale" to locale,
                     "key" to requestOptions.apiKey,
                     "_stripe_account" to requestOptions.stripeAccount
-                ) + paymentMethods.mapIndexed { index, paymentMethod ->
+) + paymentMethods.mapIndexed { index, paymentMethod ->
                     "payment_methods[$index]" to paymentMethod
-                }
+                },
+                apiConfiguration = requestApiConfiguration,
             ),
             PaymentMethodMessageJsonParser()
         ) {
@@ -1563,7 +1647,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
                     "locale" to locale,
                     "key" to requestOptions.apiKey,
                     "_stripe_account" to requestOptions.stripeAccount
-                )
+),
+                apiConfiguration = requestApiConfiguration,
             ),
             PaymentMethodMessagePromotionJsonParser()
         ) {
@@ -1599,11 +1684,20 @@ class StripeApiRepository @JvmOverloads internal constructor(
             )
         )
 
-        val cardAccountRangeRepository =
+        val cardAccountRangeRepository = if (
+            cardAccountRangeRepositoryFactory is DefaultCardAccountRangeRepositoryFactory
+        ) {
             cardAccountRangeRepositoryFactory.createWithStripeRepository(
                 stripeRepository = this,
-                publishableKey = publishableKeyProvider()
+                publishableKey = publishableKeyProvider(),
+                betas = requestApiConfiguration?.betas.orEmpty(),
             )
+        } else {
+            cardAccountRangeRepositoryFactory.createWithStripeRepository(
+                stripeRepository = this,
+                publishableKey = publishableKeyProvider(),
+            )
+        }
 
         val accountRanges = cardAccountRangeRepository.getAccountRanges(
             cardNumber = unvalidatedNumber
@@ -1626,6 +1720,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 url = mobileCardElementConfigUrl,
                 options = requestOptions,
                 params = params,
+                apiConfiguration = requestApiConfiguration,
             ),
             jsonParser = MobileCardElementConfigParser(),
         )
@@ -1646,7 +1741,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
                         "consumer_session_client_secret" to clientSecret
                     ),
                     "types" to paymentMethodTypes.toList()
-                )
+                ),
+                apiConfiguration = requestApiConfiguration,
             ),
             ConsumerPaymentDetailsJsonParser
         )
@@ -1665,7 +1761,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
                     "credentials" to mapOf(
                         "consumer_session_client_secret" to clientSecret
                     ),
-                )
+                ),
+                apiConfiguration = requestApiConfiguration,
             ),
             ConsumerShippingAddressesParser
         )
@@ -1686,7 +1783,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
                         "credentials" to mapOf(
                             "consumer_session_client_secret" to clientSecret
                         )
-                    )
+                    ),
+                    apiConfiguration = requestApiConfiguration,
                 ),
                 onResponse = {}
             )
@@ -1709,7 +1807,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
                     )
                 ).plus(
                     paymentDetailsUpdateParams.toParamMap()
-                )
+                ),
+                apiConfiguration = requestApiConfiguration,
             ),
             ConsumerPaymentDetailsJsonParser
         )
@@ -1725,6 +1824,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 url = getCancelPaymentIntentCaptchaChallengeUrl(paymentIntentId),
                 options = requestOptions,
                 params = params.toParamMap(),
+                apiConfiguration = requestApiConfiguration,
             ),
             jsonParser = PaymentIntentJsonParser(),
         )
@@ -1740,6 +1840,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 url = getCancelSetupIntentCaptchaChallengeUrl(setupIntentId),
                 options = requestOptions,
                 params = params.toParamMap(),
+                apiConfiguration = requestApiConfiguration,
             ),
             jsonParser = SetupIntentJsonParser(),
         )

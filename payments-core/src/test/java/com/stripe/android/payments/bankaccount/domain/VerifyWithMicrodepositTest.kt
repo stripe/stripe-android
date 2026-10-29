@@ -196,17 +196,17 @@ class VerifyWithMicrodepositTest {
     ) {
         whenever(
             stripeRepository.verifyPaymentIntentWithMicrodeposits(
-                any(),
-                any(),
-                any(),
-                any()
+                clientSecret = any(),
+                firstAmount = any(),
+                secondAmount = any(),
+                requestOptions = any()
             )
         ).doReturn(paymentIntent())
         whenever(
             stripeRepository.verifyPaymentIntentWithMicrodeposits(
-                any(),
-                any(),
-                any()
+                clientSecret = any(),
+                descriptorCode = any(),
+                requestOptions = any()
             )
         ).doReturn(paymentIntent())
     }
@@ -214,17 +214,17 @@ class VerifyWithMicrodepositTest {
     private suspend fun givenVerifySetupIntentReturns(setupIntent: () -> Result<SetupIntent>) {
         whenever(
             stripeRepository.verifySetupIntentWithMicrodeposits(
-                any(),
-                any(),
-                any(),
-                any()
+                clientSecret = any(),
+                firstAmount = any(),
+                secondAmount = any(),
+                requestOptions = any()
             )
         ).thenReturn(setupIntent())
         whenever(
             stripeRepository.verifySetupIntentWithMicrodeposits(
-                any(),
-                any(),
-                any()
+                clientSecret = any(),
+                descriptorCode = any(),
+                requestOptions = any()
             )
         ).thenReturn(setupIntent())
     }

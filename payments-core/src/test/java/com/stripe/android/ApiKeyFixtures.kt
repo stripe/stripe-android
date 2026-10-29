@@ -11,6 +11,7 @@ internal object ApiKeyFixtures {
     val DEFAULT_API_CONFIG = ApiConfiguration.State(
         publishableKey = DEFAULT_PUBLISHABLE_KEY,
         stripeAccountId = FAKE_STRIPE_ACCOUNT,
+        betas = emptySet(),
     )
 
     const val CONNECTED_ACCOUNT_PUBLISHABLE_KEY = "pk_test_fdjfCYpGSwAX24KUEiuaAAWX"

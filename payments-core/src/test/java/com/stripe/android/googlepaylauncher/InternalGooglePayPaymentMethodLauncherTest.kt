@@ -161,7 +161,8 @@ class InternalGooglePayPaymentMethodLauncherTest {
     private companion object {
         val API_CONFIG = ApiConfiguration.State(
             publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-            stripeAccountId = ApiKeyFixtures.FAKE_STRIPE_ACCOUNT
+            stripeAccountId = ApiKeyFixtures.FAKE_STRIPE_ACCOUNT,
+            betas = emptySet(),
         )
         val CONFIG = GooglePayPaymentMethodLauncher.Config(
             environment = GooglePayEnvironment.Test,

@@ -171,9 +171,10 @@ internal interface FinancialConnectionsSheetSharedModule {
         @Provides
         @ActivityRetainedScope
         fun providesApiRequestFactory(
-            apiVersion: ApiVersion
+            apiVersion: ApiVersion,
+            apiConfiguration: ApiConfiguration.State,
         ): ApiRequest.Factory = ApiRequest.Factory(
-            apiVersion = apiVersion.code
+            apiVersion = ApiVersion.withBetas(apiVersion.code, apiConfiguration.betas),
         )
 
         @Provides

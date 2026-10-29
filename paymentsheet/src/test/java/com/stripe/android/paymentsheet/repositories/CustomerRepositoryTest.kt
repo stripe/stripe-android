@@ -58,6 +58,7 @@ internal class CustomerRepositoryTest {
                 customerId = any(),
                 productUsageTokens = any(),
                 requestOptions = any(),
+                apiConfiguration = any(),
             )
         ).thenReturn(Result.success(mock()))
 
@@ -71,6 +72,7 @@ internal class CustomerRepositoryTest {
             customerId = eq("customer_id"),
             productUsageTokens = any(),
             requestOptions = eq(expectedRequestOptions()),
+            apiConfiguration = any(),
         )
     }
 
@@ -386,6 +388,7 @@ internal class CustomerRepositoryTest {
                 productUsageTokens = any(),
                 paymentMethodId = eq("payment_method_id"),
                 requestOptions = eq(expectedRequestOptions()),
+                apiConfiguration = any(),
             )
         }
 
@@ -432,6 +435,7 @@ internal class CustomerRepositoryTest {
                 productUsageTokens = any(),
                 paymentMethodId = eq("payment_method_id"),
                 requestOptions = eq(expectedRequestOptions()),
+                apiConfiguration = any(),
             )
         }
 
@@ -578,6 +582,7 @@ internal class CustomerRepositoryTest {
                 productUsageTokens = any(),
                 paymentMethodId = eq("payment_method_id"),
                 requestOptions = eq(expectedRequestOptions()),
+                apiConfiguration = any(),
             )
         }
 
@@ -616,6 +621,7 @@ internal class CustomerRepositoryTest {
                 paymentMethodId = eq("payment_method_id"),
                 paymentMethodUpdateParams = any(),
                 options = eq(expectedRequestOptions()),
+                apiConfiguration = any(),
             )
         }
 
@@ -626,6 +632,7 @@ internal class CustomerRepositoryTest {
                 customerId = any(),
                 paymentMethodId = any(),
                 options = any(),
+                apiConfiguration = any(),
             )
         ).thenReturn(Result.success(mock()))
 
@@ -640,6 +647,7 @@ internal class CustomerRepositoryTest {
             customerId = eq("customer_id"),
             paymentMethodId = eq("payment_method_id"),
             options = eq(expectedRequestOptions()),
+            apiConfiguration = any(),
         )
     }
 
@@ -651,6 +659,7 @@ internal class CustomerRepositoryTest {
                 paymentMethodId = any(),
                 productUsageTokens = any(),
                 requestOptions = any(),
+                apiConfiguration = any(),
             )
         ).thenReturn(Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
 
@@ -666,6 +675,7 @@ internal class CustomerRepositoryTest {
             paymentMethodId = eq("payment_method_id"),
             productUsageTokens = any(),
             requestOptions = eq(expectedRequestOptions()),
+            apiConfiguration = any(),
         )
     }
 
@@ -741,6 +751,7 @@ internal class CustomerRepositoryTest {
                     productUsageTokens = any(),
                     paymentMethodId = anyString(),
                     requestOptions = any(),
+                    apiConfiguration = any(),
                 )
             }.doReturn(result)
         }
@@ -756,6 +767,7 @@ internal class CustomerRepositoryTest {
                     productUsageTokens = any(),
                     paymentMethodId = anyString(),
                     requestOptions = any(),
+                    apiConfiguration = any(),
                 )
             }.doReturn(result)
         }
@@ -771,6 +783,7 @@ internal class CustomerRepositoryTest {
                     productUsageTokens = any(),
                     paymentMethodId = anyString(),
                     requestOptions = any(),
+                    apiConfiguration = any(),
                 )
             }.doReturn(result)
         }
@@ -785,6 +798,7 @@ internal class CustomerRepositoryTest {
                     paymentMethodId = any(),
                     paymentMethodUpdateParams = any(),
                     options = any(),
+                    apiConfiguration = any(),
                 )
             }.doReturn(result)
         }

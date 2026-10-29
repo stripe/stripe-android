@@ -192,6 +192,9 @@ internal class SheetTaxRegionUpdaterTest {
                     stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
                 )
             },
+            apiConfigurationProvider = {
+                DEFAULT_API_CONFIG
+            },
         )
 
         return CheckoutSessionTaxRegionUpdater(checkoutSessionRepository)

@@ -1,5 +1,6 @@
 package com.stripe.android.polling
 
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.testing.AbsFakeStripeRepository
@@ -25,6 +26,7 @@ internal fun createIntentStatusPoller(
             pollingInterval = pollingInterval,
         ),
         dispatcher = dispatcher,
+        apiConfiguration = ApiConfiguration("pk_test_123").build(),
     )
 }
 

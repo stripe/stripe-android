@@ -114,7 +114,9 @@ internal class FinancialConnectionsRequestExecutorTest {
         val repository = FinancialConnectionsManifestRepository(
             requestExecutor = requestExecutor,
             apiRequestFactory = ApiRequest.Factory(),
-            provideApiRequestOptions = { ApiRequest.Options(apiKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
+            provideApiRequestOptions = {
+                ApiRequest.Options(apiKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+            },
             logger = Logger.noop(),
             locale = Locale.US,
             initialSync = null,

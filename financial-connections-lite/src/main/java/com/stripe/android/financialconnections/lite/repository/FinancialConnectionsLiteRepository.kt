@@ -51,7 +51,8 @@ internal class FinancialConnectionsLiteRepositoryImpl(
                         "collected_at" to it.collectedAt,
                     )
                 }
-            ).filterNotNullValues()
+            ).filterNotNullValues(),
+            apiConfiguration = configuration.apiConfiguration,
         ),
         SynchronizeSessionResponse.serializer()
     )
@@ -64,7 +65,8 @@ internal class FinancialConnectionsLiteRepositoryImpl(
             options = configuration.apiRequestOptions(),
             params = mapOf(
                 PARAMS_CLIENT_SECRET to configuration.financialConnectionsSessionClientSecret
-            )
+            ),
+            apiConfiguration = configuration.apiConfiguration,
         )
         return requestExecutor.execute(
             financialConnectionsRequest,

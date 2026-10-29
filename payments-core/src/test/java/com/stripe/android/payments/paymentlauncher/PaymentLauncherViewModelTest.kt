@@ -819,6 +819,7 @@ class PaymentLauncherViewModelTest {
             ApiConfiguration.State(
                 publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
                 stripeAccountId = TEST_STRIPE_ACCOUNT_ID,
+                betas = emptySet(),
             )
         }
         val clock = Clock { dispatcher.scheduler.currentTime }
@@ -872,6 +873,7 @@ class PaymentLauncherViewModelTest {
         val API_CONFIGURATION = ApiConfiguration.State(
             publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             stripeAccountId = TEST_STRIPE_ACCOUNT_ID,
+            betas = emptySet(),
         )
         val EXPAND_PAYMENT_METHOD = listOf("payment_method")
         val API_REQUEST_OPTIONS = ApiRequest.Options(

@@ -116,6 +116,7 @@ class StripeAutocompleteRepositoryTest {
             stripeNetworkClient = networkClient,
             apiRequestFactory = ApiRequest.Factory(),
             requestOptionsProvider = { OPTIONS },
+            apiConfigurationProvider = { DEFAULT_API_CONFIG },
         )
         return Scenario(networkClient = networkClient, repository = repository)
     }

@@ -76,7 +76,7 @@ class CheckoutSessionConfirmationInterceptorTest {
         @TestParameter saved: Boolean,
         @TestParameter(value = ["Card", "Link", "SepaDebit"]) type: PaymentMethod.Type,
         @TestParameter setup: Boolean,
-    ) {
+) {
         val paymentMethod = when (type) {
             PaymentMethod.Type.Card -> PaymentMethodFixtures.CARD_PAYMENT_METHOD
             PaymentMethod.Type.Link -> PaymentMethodFixtures.LINK_PAYMENT_METHOD
@@ -185,7 +185,7 @@ class CheckoutSessionConfirmationInterceptorTest {
     @Test
     fun `saved payment method confirmation completes without expected type when unavailable`(
         @TestParameter unrecognized: Boolean,
-    ) {
+) {
         val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(
             type = null,
             code = if (unrecognized) "unrecognized_payment_method" else null,
@@ -214,7 +214,7 @@ class CheckoutSessionConfirmationInterceptorTest {
     fun `confirmation sends collected email`(
         @TestParameter saved: Boolean,
         @TestParameter setup: Boolean,
-    ) = runScenario(collectedEmail = "local+checkout@example.com") {
+) = runScenario(collectedEmail = "local+checkout@example.com") {
         networkRule.checkoutConfirm(
             bodyPart("collected_information[email]", "local+checkout@example.com"),
         ) { response ->
@@ -230,7 +230,7 @@ class CheckoutSessionConfirmationInterceptorTest {
     fun `confirmation omits collected email`(
         @TestParameter saved: Boolean,
         @TestParameter reason: EmailOmissionReason,
-    ) = runScenario(
+) = runScenario(
         collectedEmail = "local@example.com".takeUnless { reason == EmailOmissionReason.Absent },
         checkoutSessionResponse = CheckoutSessionResponseFactory.create(
             customerEmail = "fixed@example.com".takeIf { reason == EmailOmissionReason.Session },
@@ -248,7 +248,7 @@ class CheckoutSessionConfirmationInterceptorTest {
                 response
             }
         },
-    ) {
+) {
         networkRule.checkoutConfirm(
             doesNotContainBodyPartsWithPrefix("collected_information"),
         ) { response ->
@@ -930,6 +930,9 @@ class CheckoutSessionConfirmationInterceptorTest {
                     apiKey = DEFAULT_API_CONFIG.publishableKey,
                     stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
                 )
+            },
+            apiConfigurationProvider = {
+                DEFAULT_API_CONFIG
             },
         )
 

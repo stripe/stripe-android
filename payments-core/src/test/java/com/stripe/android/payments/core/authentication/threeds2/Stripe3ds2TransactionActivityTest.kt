@@ -74,7 +74,7 @@ class Stripe3ds2TransactionActivityTest {
             activityScenario.onActivity { activity ->
                 assertIs<ChallengeProgressFragmentFactory>(
                     activity.supportFragmentManager.fragmentFactory
-                )
+)
             }
         }
     }
@@ -101,7 +101,7 @@ class Stripe3ds2TransactionActivityTest {
             ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY),
             enableLogging = false,
             statusBarColor = null,
-            ApiConfiguration.State(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, "acct_123"),
+            ApiConfiguration.State(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, "acct_123", betas = emptySet()),
             setOf()
         )
     }
