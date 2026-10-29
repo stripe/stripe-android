@@ -159,7 +159,10 @@ class PaymentAuthWebViewActivityViewModelTest {
             clientSecret = "client_secret",
             url = "https://example.com",
             statusBarColor = Color.RED,
-            apiConfiguration = ApiConfiguration.State(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, "acct_123"),
+            apiConfiguration = ApiConfiguration.State(
+                ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                "acct_123",
+            ),
             isInstantApp = false
         )
     }

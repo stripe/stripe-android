@@ -475,6 +475,7 @@ internal class WalletViewModel(
                         apiConfiguration = ApiConfiguration.State(
                             publishableKey = linkAccount.consumerPublishableKey!!,
                             stripeAccountId = null,
+                            betas = configuration.apiConfiguration.betas,
                         ),
                         preCollectedConsent = null,
                     )

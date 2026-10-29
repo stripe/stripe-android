@@ -42,7 +42,7 @@ internal class StripeNextActionTest {
     fun `next action with empty secret returns an error`(
         @TestParameter intentType: PaymentController.StripeIntentType,
         @TestParameter host: Host,
-    ) = runScenario {
+) = runScenario {
         handleNextAction(intentType, host, "")
 
         assertError(intentType)
@@ -51,7 +51,7 @@ internal class StripeNextActionTest {
     @Test
     fun `next action error omits the supplied invalid secret`(
         @TestParameter intentType: PaymentController.StripeIntentType,
-    ) = runScenario {
+) = runScenario {
         val clientSecret = when (intentType) {
             PaymentController.StripeIntentType.PaymentIntent -> "person@example.com"
             PaymentController.StripeIntentType.SetupIntent -> "person@example.com_secret_invalid"
@@ -67,7 +67,7 @@ internal class StripeNextActionTest {
     fun `next action rejects a secret for the opposite intent type`(
         @TestParameter intentType: PaymentController.StripeIntentType,
         @TestParameter host: Host,
-    ) = runScenario {
+) = runScenario {
         val clientSecret = when (intentType) {
             PaymentController.StripeIntentType.PaymentIntent -> {
                 SetupIntent.ClientSecret("seti_a1b2c3_secret_x7y8z9").value
@@ -98,6 +98,8 @@ internal class StripeNextActionTest {
             stripeNetworkClient = networkClient,
             analyticsRequestExecutor = analyticsRequestExecutor,
             fraudDetectionDataRepository = FakeFraudDetectionDataRepository(null),
+            requestApiConfiguration = null,
+            initializeRequestServices = true,
         )
         val controller = StripePaymentController(
             context = context,
@@ -169,7 +171,7 @@ internal class StripeNextActionTest {
                 .isEqualTo(PaymentRelayActivity::class.java.name)
             val resultData = ActivityScenario.launchActivityForResult<PaymentRelayActivity>(
                 startedActivity.intent,
-            ).use { relayScenario ->
+).use { relayScenario ->
                 requireNotNull(relayScenario.result.resultData)
             }
             assertThat(PaymentFlowResult.Unvalidated.fromIntent(resultData).clientSecret).isNull()

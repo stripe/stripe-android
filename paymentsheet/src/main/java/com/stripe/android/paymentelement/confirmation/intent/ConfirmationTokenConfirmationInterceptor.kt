@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.confirmation.intent
 
 import android.content.Context
 import com.stripe.android.common.exception.stripeErrorMessage
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.strings.resolvableString
@@ -45,6 +46,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
     private val context: Context,
     private val stripeRepository: StripeRepository,
     private val requestOptions: ApiRequest.Options,
+    private val apiConfiguration: ApiConfiguration.State,
     private val userFacingLogger: UserFacingLogger,
 ) : IntentConfirmationInterceptor {
     init {
@@ -81,6 +83,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                 clientAttributionMetadata,
             ),
             options = requestOptions,
+            apiConfiguration = apiConfiguration,
         ).fold(
             onSuccess = { confirmationToken ->
                 handleDeferredOnConfirmationTokenCreated(
@@ -124,6 +127,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
             } else {
                 requestOptions
             },
+            apiConfiguration = apiConfiguration,
         ).fold(
             onSuccess = { confirmationToken ->
                 handleDeferredOnConfirmationTokenCreated(
@@ -196,6 +200,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
         return stripeRepository.retrieveStripeIntent(
             clientSecret = clientSecret,
             options = requestOptions,
+            apiConfiguration = apiConfiguration,
         ).mapCatching { intent ->
             if (intent.isConfirmed) {
                 ConfirmationDefinition.Action.Complete(
@@ -212,7 +217,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                         deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
                     ),
                     receivesResultInProcess = false,
-                )
+)
             } else {
                 confirmActionHelper.createConfirmAction(
                     clientSecret,

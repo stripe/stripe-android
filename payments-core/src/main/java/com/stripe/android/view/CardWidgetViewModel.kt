@@ -78,6 +78,8 @@ internal class CardWidgetViewModel(
                 context = context,
                 publishableKeyProvider = { PaymentConfiguration.getInstance(context).publishableKey },
                 requestSurface = StripeRepository.DEFAULT_REQUEST_SURFACE,
+                requestApiConfiguration = null,
+                initializeRequestServices = true,
             )
 
             @Suppress("UNCHECKED_CAST")

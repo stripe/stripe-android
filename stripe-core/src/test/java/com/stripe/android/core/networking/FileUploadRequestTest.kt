@@ -3,6 +3,7 @@ package com.stripe.android.core.networking
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.ApiKeyFixtures
 import com.stripe.android.core.FileFactory
 import com.stripe.android.core.model.StripeFileParams
@@ -18,6 +19,20 @@ class FileUploadRequestTest {
     private val fileFactory = FileFactory(context)
 
     @Test
+    fun `upload headers preserve session flags`() {
+        val configuration = ApiConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+            .betas(setOf("upload_beta=v1"))
+            .build()
+        val request = FileUploadRequest(
+            fileParams = StripeFileParams(fileFactory.create(), StripeFilePurpose.IdentityDocument),
+            options = OPTIONS,
+            apiConfiguration = configuration,
+        )
+
+        assertThat(request.headers["Stripe-Version"]).isEqualTo("2020-03-02;upload_beta=v1")
+    }
+
+    @Test
     fun writeBody_shouldWriteExpectedNumberOfBytes() {
         val request = FileUploadRequest(
             StripeFileParams(
@@ -25,7 +40,8 @@ class FileUploadRequestTest {
                 purpose = StripeFilePurpose.IdentityDocument
             ),
             OPTIONS,
-            boundary = "5955816017232305695"
+            boundary = "5955816017232305695",
+            apiConfiguration = null,
         )
 
         ByteArrayOutputStream().use {
@@ -43,7 +59,8 @@ class FileUploadRequestTest {
                 purpose = StripeFilePurpose.IdentityDocument
             ),
             OPTIONS,
-            boundary = "5955816017232305695"
+            boundary = "5955816017232305695",
+            apiConfiguration = null,
         )
 
         val expected =
@@ -65,7 +82,8 @@ class FileUploadRequestTest {
                 purpose = StripeFilePurpose.IdentityDocument
             ),
             OPTIONS,
-            boundary = "5955816017232305695"
+            boundary = "5955816017232305695",
+            apiConfiguration = null,
         )
 
         val expected =

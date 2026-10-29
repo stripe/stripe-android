@@ -45,7 +45,768 @@ import com.stripe.android.model.TokenParams
  * An interface for data operations on Stripe API objects.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // originally made public for paymentsheet
+@Suppress("LargeClass")
 interface StripeRepository {
+    /** Creates an operation-scoped repository carrying this immutable session configuration. */
+    fun withApiConfiguration(apiConfiguration: ApiConfiguration.State): StripeRepository = this
+
+    suspend fun retrieveStripeIntent(
+        clientSecret: String,
+        options: ApiRequest.Options,
+        expandFields: List<String> = emptyList(),
+        apiConfiguration: ApiConfiguration.State,
+    ): Result<StripeIntent> {
+        return withApiConfiguration(apiConfiguration).retrieveStripeIntent(
+            clientSecret = clientSecret,
+            options = options,
+            expandFields = expandFields,
+        )
+    }
+
+    suspend fun confirmPaymentIntent(
+        confirmPaymentIntentParams: ConfirmPaymentIntentParams,
+        options: ApiRequest.Options,
+        expandFields: List<String> = emptyList(),
+        apiConfiguration: ApiConfiguration.State,
+    ): Result<PaymentIntent> {
+        return withApiConfiguration(apiConfiguration).confirmPaymentIntent(
+            confirmPaymentIntentParams = confirmPaymentIntentParams,
+            options = options,
+            expandFields = expandFields,
+        )
+    }
+
+    suspend fun retrievePaymentIntent(
+        clientSecret: String,
+        options: ApiRequest.Options,
+        expandFields: List<String> = emptyList(),
+        apiConfiguration: ApiConfiguration.State,
+    ): Result<PaymentIntent> {
+        return withApiConfiguration(apiConfiguration).retrievePaymentIntent(
+            clientSecret = clientSecret,
+            options = options,
+            expandFields = expandFields,
+        )
+    }
+
+    suspend fun refreshPaymentIntent(
+        clientSecret: String,
+        options: ApiRequest.Options,
+        apiConfiguration: ApiConfiguration.State,
+    ): Result<PaymentIntent> {
+        return withApiConfiguration(apiConfiguration).refreshPaymentIntent(
+            clientSecret = clientSecret,
+            options = options,
+        )
+    }
+
+    suspend fun cancelPaymentIntentSource(
+        paymentIntentId: String,
+        sourceId: String,
+        options: ApiRequest.Options,
+        apiConfiguration: ApiConfiguration.State,
+    ): Result<PaymentIntent> {
+        return withApiConfiguration(apiConfiguration).cancelPaymentIntentSource(
+            paymentIntentId = paymentIntentId,
+            sourceId = sourceId,
+            options = options,
+        )
+    }
+
+    suspend fun confirmSetupIntent(
+        confirmSetupIntentParams: ConfirmSetupIntentParams,
+        options: ApiRequest.Options,
+        expandFields: List<String> = emptyList(),
+        apiConfiguration: ApiConfiguration.State,
+    ): Result<SetupIntent> {
+        return withApiConfiguration(apiConfiguration).confirmSetupIntent(
+            confirmSetupIntentParams = confirmSetupIntentParams,
+            options = options,
+            expandFields = expandFields,
+        )
+    }
+
+    suspend fun retrieveSetupIntent(
+        clientSecret: String,
+        options: ApiRequest.Options,
+        expandFields: List<String> = emptyList(),
+        apiConfiguration: ApiConfiguration.State,
+    ): Result<SetupIntent> {
+        return withApiConfiguration(apiConfiguration).retrieveSetupIntent(
+            clientSecret = clientSecret,
+            options = options,
+            expandFields = expandFields,
+        )
+    }
+
+    suspend fun refreshSetupIntent(
+        clientSecret: String,
+        options: ApiRequest.Options,
+        apiConfiguration: ApiConfiguration.State,
+    ): Result<SetupIntent> {
+        return withApiConfiguration(apiConfiguration).refreshSetupIntent(clientSecret = clientSecret, options = options)
+    }
+
+    suspend fun cancelSetupIntentSource(
+        setupIntentId: String,
+        sourceId: String,
+        options: ApiRequest.Options,
+        apiConfiguration: ApiConfiguration.State,
+    ): Result<SetupIntent> {
+        return withApiConfiguration(apiConfiguration).cancelSetupIntentSource(
+            setupIntentId = setupIntentId,
+            sourceId = sourceId,
+            options = options,
+        )
+    }
+
+    suspend fun createSource(
+        sourceParams: SourceParams,
+        options: ApiRequest.Options,
+        apiConfiguration: ApiConfiguration.State,
+    ): Result<Source> {
+        return withApiConfiguration(apiConfiguration).createSource(
+            sourceParams = sourceParams,
+            options = options,
+        )
+    }
+
+    suspend fun retrieveSource(
+        sourceId: String,
+        clientSecret: String,
+        options: ApiRequest.Options,
+        apiConfiguration: ApiConfiguration.State,
+    ): Result<Source> {
+        return withApiConfiguration(apiConfiguration).retrieveSource(
+            sourceId = sourceId,
+            clientSecret = clientSecret,
+            options = options,
+        )
+    }
+
+    suspend fun createPaymentMethod(
+        paymentMethodCreateParams: PaymentMethodCreateParams,
+        options: ApiRequest.Options,
+        apiConfiguration: ApiConfiguration.State,
+    ): Result<PaymentMethod> {
+        return withApiConfiguration(apiConfiguration).createPaymentMethod(
+            paymentMethodCreateParams = paymentMethodCreateParams,
+            options = options,
+        )
+    }
+
+    suspend fun updatePaymentMethod(
+        paymentMethodId: String,
+        paymentMethodUpdateParams: PaymentMethodUpdateParams,
+        options: ApiRequest.Options,
+        apiConfiguration: ApiConfiguration.State,
+    ): Result<PaymentMethod> {
+        return withApiConfiguration(apiConfiguration).updatePaymentMethod(
+            paymentMethodId = paymentMethodId,
+            paymentMethodUpdateParams = paymentMethodUpdateParams,
+            options = options,
+        )
+    }
+
+    suspend fun setDefaultPaymentMethod(
+        customerId: String,
+        paymentMethodId: String?,
+        options: ApiRequest.Options,
+        apiConfiguration: ApiConfiguration.State,
+    ): Result<Customer> {
+        return withApiConfiguration(apiConfiguration).setDefaultPaymentMethod(
+            customerId = customerId,
+            paymentMethodId = paymentMethodId,
+            options = options,
+        )
+    }
+
+    suspend fun retrieveSavedPaymentMethodFromCardPresentPaymentMethod(
+        cardPresentPaymentMethodId: String,
+        customerId: String,
+        options: ApiRequest.Options,
+        apiConfiguration: ApiConfiguration.State,
+    ): Result<PaymentMethod> {
+        return withApiConfiguration(apiConfiguration).retrieveSavedPaymentMethodFromCardPresentPaymentMethod(
+            cardPresentPaymentMethodId = cardPresentPaymentMethodId,
+            customerId = customerId,
+            options = options,
+        )
+    }
+
+    suspend fun createToken(
+        tokenParams: TokenParams,
+        options: ApiRequest.Options,
+        apiConfiguration: ApiConfiguration.State,
+    ): Result<Token> {
+        return withApiConfiguration(apiConfiguration).createToken(
+            tokenParams = tokenParams,
+            options = options,
+        )
+    }
+
+    suspend fun createConfirmationToken(
+        confirmationTokenParams: ConfirmationTokenParams,
+        options: ApiRequest.Options,
+        apiConfiguration: ApiConfiguration.State,
+    ): Result<ConfirmationToken> {
+        return withApiConfiguration(apiConfiguration).createConfirmationToken(
+            confirmationTokenParams = confirmationTokenParams,
+            options = options,
+        )
+    }
+
+    suspend fun addCustomerSource(
+        customerId: String,
+        publishableKey: String,
+        productUsageTokens: Set<String>,
+        sourceId: String,
+        @Source.SourceType sourceType: String,
+        requestOptions: ApiRequest.Options,
+        apiConfiguration: ApiConfiguration.State,
+    ): Result<Source> {
+        return withApiConfiguration(apiConfiguration).addCustomerSource(
+            customerId = customerId,
+            publishableKey = publishableKey,
+            productUsageTokens = productUsageTokens,
+            sourceId = sourceId,
+            sourceType = sourceType,
+            requestOptions = requestOptions,
+        )
+    }
+
+    suspend fun deleteCustomerSource(
+        customerId: String,
+        publishableKey: String,
+        productUsageTokens: Set<String>,
+        sourceId: String,
+        requestOptions: ApiRequest.Options,
+        apiConfiguration: ApiConfiguration.State,
+    ): Result<Source> {
+        return withApiConfiguration(apiConfiguration).deleteCustomerSource(
+            customerId = customerId,
+            publishableKey = publishableKey,
+            productUsageTokens = productUsageTokens,
+            sourceId = sourceId,
+            requestOptions = requestOptions,
+        )
+    }
+
+    suspend fun attachPaymentMethod(
+        customerId: String,
+        productUsageTokens: Set<String>,
+        paymentMethodId: String,
+        requestOptions: ApiRequest.Options,
+        apiConfiguration: ApiConfiguration.State,
+    ): Result<PaymentMethod> {
+        return withApiConfiguration(apiConfiguration).attachPaymentMethod(
+            customerId = customerId,
+            productUsageTokens = productUsageTokens,
+            paymentMethodId = paymentMethodId,
+            requestOptions = requestOptions,
+        )
+    }
+
+    suspend fun detachPaymentMethod(
+        productUsageTokens: Set<String>,
+        paymentMethodId: String,
+        requestOptions: ApiRequest.Options,
+        apiConfiguration: ApiConfiguration.State,
+    ): Result<PaymentMethod> {
+        return withApiConfiguration(apiConfiguration).detachPaymentMethod(
+            productUsageTokens = productUsageTokens,
+            paymentMethodId = paymentMethodId,
+            requestOptions = requestOptions,
+        )
+    }
+
+    suspend fun detachPaymentMethod(
+        customerSessionClientSecret: String,
+        productUsageTokens: Set<String>,
+        paymentMethodId: String,
+        requestOptions: ApiRequest.Options,
+        apiConfiguration: ApiConfiguration.State,
+    ): Result<PaymentMethod> {
+        return withApiConfiguration(apiConfiguration).detachPaymentMethod(
+            customerSessionClientSecret = customerSessionClientSecret,
+            productUsageTokens = productUsageTokens,
+            paymentMethodId = paymentMethodId,
+            requestOptions = requestOptions,
+        )
+    }
+
+    suspend fun retrieveCustomerPaymentMethod(
+        customerId: String,
+        paymentMethodId: String,
+        productUsageTokens: Set<String>,
+        requestOptions: ApiRequest.Options,
+        apiConfiguration: ApiConfiguration.State,
+    ): Result<PaymentMethod> {
+        return withApiConfiguration(apiConfiguration).retrieveCustomerPaymentMethod(
+            customerId = customerId,
+            paymentMethodId = paymentMethodId,
+            productUsageTokens = productUsageTokens,
+            requestOptions = requestOptions,
+        )
+    }
+
+    suspend fun setDefaultCustomerSource(
+        customerId: String,
+        publishableKey: String,
+        productUsageTokens: Set<String>,
+        sourceId: String,
+        @Source.SourceType sourceType: String,
+        requestOptions: ApiRequest.Options,
+        apiConfiguration: ApiConfiguration.State,
+    ): Result<Customer> {
+        return withApiConfiguration(apiConfiguration).setDefaultCustomerSource(
+            customerId = customerId,
+            publishableKey = publishableKey,
+            productUsageTokens = productUsageTokens,
+            sourceId = sourceId,
+            sourceType = sourceType,
+            requestOptions = requestOptions,
+        )
+    }
+
+    suspend fun setCustomerShippingInfo(
+        customerId: String,
+        publishableKey: String,
+        productUsageTokens: Set<String>,
+        shippingInformation: ShippingInformation,
+        requestOptions: ApiRequest.Options,
+        apiConfiguration: ApiConfiguration.State,
+    ): Result<Customer> {
+        return withApiConfiguration(apiConfiguration).setCustomerShippingInfo(
+            customerId = customerId,
+            publishableKey = publishableKey,
+            productUsageTokens = productUsageTokens,
+            shippingInformation = shippingInformation,
+            requestOptions = requestOptions,
+        )
+    }
+
+    suspend fun retrieveCustomer(
+        customerId: String,
+        productUsageTokens: Set<String>,
+        requestOptions: ApiRequest.Options,
+        apiConfiguration: ApiConfiguration.State,
+    ): Result<Customer> {
+        return withApiConfiguration(apiConfiguration).retrieveCustomer(
+            customerId = customerId,
+            productUsageTokens = productUsageTokens,
+            requestOptions = requestOptions,
+        )
+    }
+
+    suspend fun retrieveIssuingCardPin(
+        cardId: String,
+        verificationId: String,
+        userOneTimeCode: String,
+        requestOptions: ApiRequest.Options,
+        apiConfiguration: ApiConfiguration.State,
+    ): Result<String> {
+        return withApiConfiguration(apiConfiguration).retrieveIssuingCardPin(
+            cardId = cardId,
+            verificationId = verificationId,
+            userOneTimeCode = userOneTimeCode,
+            requestOptions = requestOptions,
+        )
+    }
+
+    suspend fun updateIssuingCardPin(
+        cardId: String,
+        newPin: String,
+        verificationId: String,
+        userOneTimeCode: String,
+        requestOptions: ApiRequest.Options,
+        apiConfiguration: ApiConfiguration.State,
+    ): Throwable? {
+        return withApiConfiguration(apiConfiguration).updateIssuingCardPin(
+            cardId = cardId,
+            newPin = newPin,
+            verificationId = verificationId,
+            userOneTimeCode = userOneTimeCode,
+            requestOptions = requestOptions,
+        )
+    }
+
+    suspend fun getFpxBankStatus(
+        options: ApiRequest.Options,
+        apiConfiguration: ApiConfiguration.State,
+    ): Result<BankStatuses> {
+        return withApiConfiguration(apiConfiguration).getFpxBankStatus(
+            options = options,
+        )
+    }
+
+    suspend fun getCardMetadata(
+        bin: Bin,
+        options: ApiRequest.Options,
+        apiConfiguration: ApiConfiguration.State,
+    ): Result<CardMetadata> {
+        return withApiConfiguration(apiConfiguration).getCardMetadata(
+            bin = bin,
+            options = options,
+        )
+    }
+
+    suspend fun start3ds2Auth(
+        authParams: Stripe3ds2AuthParams,
+        requestOptions: ApiRequest.Options,
+        apiConfiguration: ApiConfiguration.State,
+    ): Result<Stripe3ds2AuthResult> {
+        return withApiConfiguration(apiConfiguration).start3ds2Auth(
+            authParams = authParams,
+            requestOptions = requestOptions,
+        )
+    }
+
+    suspend fun complete3ds2Auth(
+        sourceId: String,
+        requestOptions: ApiRequest.Options,
+        apiConfiguration: ApiConfiguration.State,
+    ): Result<Stripe3ds2AuthResult> {
+        return withApiConfiguration(apiConfiguration).complete3ds2Auth(
+            sourceId = sourceId,
+            requestOptions = requestOptions,
+        )
+    }
+
+    suspend fun createFile(
+        fileParams: StripeFileParams,
+        requestOptions: ApiRequest.Options,
+        apiConfiguration: ApiConfiguration.State,
+    ): Result<StripeFile> {
+        return withApiConfiguration(apiConfiguration).createFile(
+            fileParams = fileParams,
+            requestOptions = requestOptions,
+        )
+    }
+
+    suspend fun retrieveObject(
+        url: String,
+        requestOptions: ApiRequest.Options,
+        apiConfiguration: ApiConfiguration.State,
+    ): Result<StripeResponse<String>> {
+        return withApiConfiguration(apiConfiguration).retrieveObject(
+            url = url,
+            requestOptions = requestOptions,
+        )
+    }
+
+    suspend fun createRadarSession(
+        requestOptions: ApiRequest.Options,
+        apiConfiguration: ApiConfiguration.State,
+    ): Result<RadarSessionWithHCaptcha> {
+        return withApiConfiguration(apiConfiguration).createRadarSession(
+            requestOptions = requestOptions,
+        )
+    }
+
+    suspend fun attachHCaptchaToRadarSession(
+        radarSessionToken: String,
+        hcaptchaToken: String,
+        hcaptchaEKey: String?,
+        requestOptions: ApiRequest.Options,
+        apiConfiguration: ApiConfiguration.State,
+    ): Result<RadarSessionWithHCaptcha> {
+        return withApiConfiguration(apiConfiguration).attachHCaptchaToRadarSession(
+            radarSessionToken = radarSessionToken,
+            hcaptchaToken = hcaptchaToken,
+            hcaptchaEKey = hcaptchaEKey,
+            requestOptions = requestOptions,
+        )
+    }
+
+    suspend fun sharePaymentDetails(
+        consumerSessionClientSecret: String,
+        id: String,
+        extraParams: Map<String, *>?,
+        requestOptions: ApiRequest.Options,
+        apiConfiguration: ApiConfiguration.State,
+    ): Result<PaymentMethod> {
+        return withApiConfiguration(apiConfiguration).sharePaymentDetails(
+            consumerSessionClientSecret = consumerSessionClientSecret,
+            id = id,
+            extraParams = extraParams,
+            requestOptions = requestOptions,
+        )
+    }
+
+    suspend fun logOut(
+        consumerSessionClientSecret: String,
+        consumerAccountPublishableKey: String?,
+        requestOptions: ApiRequest.Options,
+        apiConfiguration: ApiConfiguration.State,
+    ): Result<ConsumerSession> {
+        return withApiConfiguration(apiConfiguration).logOut(
+            consumerSessionClientSecret = consumerSessionClientSecret,
+            consumerAccountPublishableKey = consumerAccountPublishableKey,
+            requestOptions = requestOptions,
+        )
+    }
+
+    suspend fun createFinancialConnectionsSessionForDeferredPayments(
+        params: CreateFinancialConnectionsSessionForDeferredPaymentParams,
+        requestOptions: ApiRequest.Options,
+        apiConfiguration: ApiConfiguration.State,
+    ): Result<FinancialConnectionsSession> {
+        return withApiConfiguration(apiConfiguration).createFinancialConnectionsSessionForDeferredPayments(
+            params = params,
+            requestOptions = requestOptions,
+        )
+    }
+
+    suspend fun createPaymentIntentFinancialConnectionsSession(
+        paymentIntentId: String,
+        params: CreateFinancialConnectionsSessionParams,
+        requestOptions: ApiRequest.Options,
+        apiConfiguration: ApiConfiguration.State,
+    ): Result<FinancialConnectionsSession> {
+        return withApiConfiguration(apiConfiguration).createPaymentIntentFinancialConnectionsSession(
+            paymentIntentId = paymentIntentId,
+            params = params,
+            requestOptions = requestOptions,
+        )
+    }
+
+    suspend fun createSetupIntentFinancialConnectionsSession(
+        setupIntentId: String,
+        params: CreateFinancialConnectionsSessionParams,
+        requestOptions: ApiRequest.Options,
+        apiConfiguration: ApiConfiguration.State,
+    ): Result<FinancialConnectionsSession> {
+        return withApiConfiguration(apiConfiguration).createSetupIntentFinancialConnectionsSession(
+            setupIntentId = setupIntentId,
+            params = params,
+            requestOptions = requestOptions,
+        )
+    }
+
+    suspend fun attachFinancialConnectionsSessionToPaymentIntent(
+        clientSecret: String,
+        paymentIntentId: String,
+        financialConnectionsSessionId: String,
+        requestOptions: ApiRequest.Options,
+        expandFields: List<String>,
+        apiConfiguration: ApiConfiguration.State,
+    ): Result<PaymentIntent> {
+        return withApiConfiguration(apiConfiguration).attachFinancialConnectionsSessionToPaymentIntent(
+            clientSecret = clientSecret,
+            paymentIntentId = paymentIntentId,
+            financialConnectionsSessionId = financialConnectionsSessionId,
+            requestOptions = requestOptions,
+            expandFields = expandFields,
+        )
+    }
+
+    suspend fun attachFinancialConnectionsSessionToSetupIntent(
+        clientSecret: String,
+        setupIntentId: String,
+        financialConnectionsSessionId: String,
+        requestOptions: ApiRequest.Options,
+        expandFields: List<String>,
+        apiConfiguration: ApiConfiguration.State,
+    ): Result<SetupIntent> {
+        return withApiConfiguration(apiConfiguration).attachFinancialConnectionsSessionToSetupIntent(
+            clientSecret = clientSecret,
+            setupIntentId = setupIntentId,
+            financialConnectionsSessionId = financialConnectionsSessionId,
+            requestOptions = requestOptions,
+            expandFields = expandFields,
+        )
+    }
+
+    suspend fun verifyPaymentIntentWithMicrodeposits(
+        clientSecret: String,
+        firstAmount: Int,
+        secondAmount: Int,
+        requestOptions: ApiRequest.Options,
+        apiConfiguration: ApiConfiguration.State,
+    ): Result<PaymentIntent> {
+        return withApiConfiguration(apiConfiguration).verifyPaymentIntentWithMicrodeposits(
+            clientSecret = clientSecret,
+            firstAmount = firstAmount,
+            secondAmount = secondAmount,
+            requestOptions = requestOptions,
+        )
+    }
+
+    suspend fun verifyPaymentIntentWithMicrodeposits(
+        clientSecret: String,
+        descriptorCode: String,
+        requestOptions: ApiRequest.Options,
+        apiConfiguration: ApiConfiguration.State,
+    ): Result<PaymentIntent> {
+        return withApiConfiguration(apiConfiguration).verifyPaymentIntentWithMicrodeposits(
+            clientSecret = clientSecret,
+            descriptorCode = descriptorCode,
+            requestOptions = requestOptions,
+        )
+    }
+
+    suspend fun verifySetupIntentWithMicrodeposits(
+        clientSecret: String,
+        firstAmount: Int,
+        secondAmount: Int,
+        requestOptions: ApiRequest.Options,
+        apiConfiguration: ApiConfiguration.State,
+    ): Result<SetupIntent> {
+        return withApiConfiguration(apiConfiguration).verifySetupIntentWithMicrodeposits(
+            clientSecret = clientSecret,
+            firstAmount = firstAmount,
+            secondAmount = secondAmount,
+            requestOptions = requestOptions,
+        )
+    }
+
+    suspend fun verifySetupIntentWithMicrodeposits(
+        clientSecret: String,
+        descriptorCode: String,
+        requestOptions: ApiRequest.Options,
+        apiConfiguration: ApiConfiguration.State,
+    ): Result<SetupIntent> {
+        return withApiConfiguration(apiConfiguration).verifySetupIntentWithMicrodeposits(
+            clientSecret = clientSecret,
+            descriptorCode = descriptorCode,
+            requestOptions = requestOptions,
+        )
+    }
+
+    suspend fun retrievePaymentMethodMessage(
+        paymentMethods: List<String>,
+        amount: Int,
+        currency: String,
+        country: String?,
+        locale: String,
+        requestOptions: ApiRequest.Options,
+        apiConfiguration: ApiConfiguration.State,
+    ): Result<PaymentMethodMessage> {
+        return withApiConfiguration(apiConfiguration).retrievePaymentMethodMessage(
+            paymentMethods = paymentMethods,
+            amount = amount,
+            currency = currency,
+            country = country,
+            locale = locale,
+            requestOptions = requestOptions,
+        )
+    }
+
+    suspend fun retrievePaymentMethodMessagePromotionsForPaymentSheet(
+        amount: Int,
+        currency: String,
+        country: String?,
+        locale: String,
+        requestOptions: ApiRequest.Options,
+        apiConfiguration: ApiConfiguration.State,
+    ): Result<PaymentMethodMessagePromotionList> {
+        return withApiConfiguration(apiConfiguration).retrievePaymentMethodMessagePromotionsForPaymentSheet(
+            amount = amount,
+            currency = currency,
+            country = country,
+            locale = locale,
+            requestOptions = requestOptions,
+        )
+    }
+
+    suspend fun retrieveCardMetadata(
+        cardNumber: String,
+        requestOptions: ApiRequest.Options,
+        apiConfiguration: ApiConfiguration.State,
+    ): Result<CardMetadata> {
+        return withApiConfiguration(apiConfiguration).retrieveCardMetadata(
+            cardNumber = cardNumber,
+            requestOptions = requestOptions,
+        )
+    }
+
+    suspend fun retrieveCardElementConfig(
+        requestOptions: ApiRequest.Options,
+        params: Map<String, String>? = null,
+        apiConfiguration: ApiConfiguration.State,
+    ): Result<MobileCardElementConfig> {
+        return withApiConfiguration(apiConfiguration).retrieveCardElementConfig(
+            requestOptions = requestOptions,
+            params = params,
+        )
+    }
+
+    suspend fun listPaymentDetails(
+        clientSecret: String,
+        paymentMethodTypes: Set<String>,
+        requestOptions: ApiRequest.Options,
+        apiConfiguration: ApiConfiguration.State,
+    ): Result<ConsumerPaymentDetails> {
+        return withApiConfiguration(apiConfiguration).listPaymentDetails(
+            clientSecret = clientSecret,
+            paymentMethodTypes = paymentMethodTypes,
+            requestOptions = requestOptions,
+        )
+    }
+
+    suspend fun listShippingAddresses(
+        clientSecret: String,
+        requestOptions: ApiRequest.Options,
+        apiConfiguration: ApiConfiguration.State,
+    ): Result<ConsumerShippingAddresses> {
+        return withApiConfiguration(apiConfiguration).listShippingAddresses(
+            clientSecret = clientSecret,
+            requestOptions = requestOptions,
+        )
+    }
+
+    suspend fun deletePaymentDetails(
+        clientSecret: String,
+        paymentDetailsId: String,
+        requestOptions: ApiRequest.Options,
+        apiConfiguration: ApiConfiguration.State,
+    ): Result<Unit> {
+        return withApiConfiguration(apiConfiguration).deletePaymentDetails(
+            clientSecret = clientSecret,
+            paymentDetailsId = paymentDetailsId,
+            requestOptions = requestOptions,
+        )
+    }
+
+    suspend fun updatePaymentDetails(
+        clientSecret: String,
+        paymentDetailsUpdateParams: ConsumerPaymentDetailsUpdateParams,
+        requestOptions: ApiRequest.Options,
+        apiConfiguration: ApiConfiguration.State,
+    ): Result<ConsumerPaymentDetails> {
+        return withApiConfiguration(apiConfiguration).updatePaymentDetails(
+            clientSecret = clientSecret,
+            paymentDetailsUpdateParams = paymentDetailsUpdateParams,
+            requestOptions = requestOptions,
+        )
+    }
+
+    suspend fun cancelPaymentIntentCaptchaChallenge(
+        paymentIntentId: String,
+        params: CancelCaptchaChallengeParams,
+        requestOptions: ApiRequest.Options,
+        apiConfiguration: ApiConfiguration.State,
+    ): Result<PaymentIntent> {
+        return withApiConfiguration(apiConfiguration).cancelPaymentIntentCaptchaChallenge(
+            paymentIntentId = paymentIntentId,
+            params = params,
+            requestOptions = requestOptions,
+        )
+    }
+
+    suspend fun cancelSetupIntentCaptchaChallenge(
+        setupIntentId: String,
+        params: CancelCaptchaChallengeParams,
+        requestOptions: ApiRequest.Options,
+        apiConfiguration: ApiConfiguration.State,
+    ): Result<SetupIntent> {
+        return withApiConfiguration(apiConfiguration).cancelSetupIntentCaptchaChallenge(
+            setupIntentId = setupIntentId,
+            params = params,
+            requestOptions = requestOptions,
+        )
+    }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun retrieveStripeIntent(
@@ -69,10 +830,7 @@ interface StripeRepository {
     ): Result<PaymentIntent>
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    suspend fun refreshPaymentIntent(
-        clientSecret: String,
-        options: ApiRequest.Options
-    ): Result<PaymentIntent>
+    suspend fun refreshPaymentIntent(clientSecret: String, options: ApiRequest.Options): Result<PaymentIntent>
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun cancelPaymentIntentSource(
@@ -96,10 +854,7 @@ interface StripeRepository {
     ): Result<SetupIntent>
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    suspend fun refreshSetupIntent(
-        clientSecret: String,
-        options: ApiRequest.Options,
-    ): Result<SetupIntent>
+    suspend fun refreshSetupIntent(clientSecret: String, options: ApiRequest.Options): Result<SetupIntent>
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun cancelSetupIntentSource(
@@ -268,7 +1023,9 @@ interface StripeRepository {
     ): Throwable?
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    suspend fun getFpxBankStatus(options: ApiRequest.Options): Result<BankStatuses>
+    suspend fun getFpxBankStatus(
+        options: ApiRequest.Options
+    ): Result<BankStatuses>
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun getCardMetadata(

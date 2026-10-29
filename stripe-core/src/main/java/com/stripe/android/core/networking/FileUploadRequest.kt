@@ -1,6 +1,8 @@
 package com.stripe.android.core.networking
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.AppInfo
 import com.stripe.android.core.model.StripeFileParams
 import com.stripe.android.core.networking.StripeRequest.MimeType
@@ -24,12 +26,14 @@ open class FileUploadRequest(
      *
      * See [Multipart messages](https://en.wikipedia.org/wiki/MIME#Multipart_messages)
      */
-    protected val boundary: String = createBoundary()
+    protected val boundary: String = createBoundary(),
+    apiConfiguration: ApiConfiguration.State?
 ) : StripeRequest() {
     private val headersFactory: RequestHeadersFactory = RequestHeadersFactory.FileUpload(
         options = options,
         appInfo = appInfo,
-        boundary = boundary
+        boundary = boundary,
+        apiVersion = ApiVersion.withBetas(ApiVersion.get().code, apiConfiguration?.betas.orEmpty()),
     )
 
     override val method: Method = Method.POST

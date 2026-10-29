@@ -104,10 +104,7 @@ internal class GooglePayLauncherViewModel(
     ): Result<String> {
         val transactionInfoResult = when (args) {
             is GooglePayLauncherContract.PaymentIntentArgs -> {
-                stripeRepository.retrievePaymentIntent(
-                    args.clientSecret,
-                    requestOptions
-                ).map { intent ->
+                stripeRepository.retrievePaymentIntent(args.clientSecret, requestOptions).map { intent ->
                     createTransactionInfo(
                         stripeIntent = intent,
                         currencyCode = intent.currency.orEmpty(),
@@ -116,10 +113,7 @@ internal class GooglePayLauncherViewModel(
                 }
             }
             is GooglePayLauncherContract.SetupIntentArgs -> {
-                stripeRepository.retrieveSetupIntent(
-                    args.clientSecret,
-                    requestOptions
-                ).map { intent ->
+                stripeRepository.retrieveSetupIntent(args.clientSecret, requestOptions).map { intent ->
                     createTransactionInfo(
                         stripeIntent = intent,
                         currencyCode = args.currencyCode,
@@ -299,7 +293,9 @@ internal class GooglePayLauncherViewModel(
                 logger = logger,
                 workContext = workContext,
                 productUsageTokens = productUsageTokens,
-                paymentAnalyticsRequestFactory = analyticsRequestFactory
+                paymentAnalyticsRequestFactory = analyticsRequestFactory,
+                requestApiConfiguration = null,
+                initializeRequestServices = true,
             )
 
             val errorReporter = ErrorReporter.createFallbackInstance(

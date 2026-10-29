@@ -225,7 +225,9 @@ internal class StripeEndToEndTest {
             context = context,
             publishableKeyProvider = { publishableKey },
             requestSurface = RequestSurface.PaymentElement,
-            workContext = testDispatcher
+            workContext = testDispatcher,
+            requestApiConfiguration = null,
+            initializeRequestServices = true,
         )
         return Stripe(
             stripeRepository = stripeRepository,

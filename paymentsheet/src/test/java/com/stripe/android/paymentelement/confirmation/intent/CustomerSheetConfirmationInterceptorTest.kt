@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.confirmation.intent
 
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.InvalidRequestException
@@ -363,6 +364,7 @@ class CustomerSheetConfirmationInterceptorTest {
             setupIntentInterceptorFactory = setupIntentInterceptorFactory,
             attachPaymentMethodInterceptorFactory = attachPaymentMethodInterceptorFactory,
             logger = logger,
+            apiConfiguration = ApiConfiguration("pk_test_123").build(),
         )
 
         val scenario = Scenario(

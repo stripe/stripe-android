@@ -102,7 +102,7 @@ internal open class BaseLpmNetworkTest(
                     allowsManualConfirmation = allowsManualConfirmation,
                 ),
             )
-        ).use { scenario ->
+).use { scenario ->
             val testStarted = CountDownLatch(1)
             lateinit var job: Job
 

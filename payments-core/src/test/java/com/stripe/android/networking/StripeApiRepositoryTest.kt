@@ -99,7 +99,9 @@ internal class StripeApiRepositoryTest {
         context = context,
         publishableKeyProvider = { DEFAULT_OPTIONS.apiKey },
         requestSurface = StripeRepository.DEFAULT_REQUEST_SURFACE,
-        workContext = testDispatcher
+        workContext = testDispatcher,
+        requestApiConfiguration = null,
+        initializeRequestServices = true,
     )
     private val fileFactory = FileFactory(context)
 
@@ -1074,10 +1076,7 @@ internal class StripeApiRepositoryTest {
             val clientSecret = "temporarily put a private key here simulate the backend"
             val publishableKey = "put a public key that matches the private key here"
 
-            stripeApiRepository.retrievePaymentIntent(
-                clientSecret,
-                ApiRequest.Options(publishableKey)
-            ).getOrThrow()
+            stripeApiRepository.retrievePaymentIntent(clientSecret, ApiRequest.Options(publishableKey)).getOrThrow()
         }
 
     @Test
@@ -1091,7 +1090,9 @@ internal class StripeApiRepositoryTest {
                 workContext = testDispatcher
             ),
             analyticsRequestExecutor = analyticsRequestExecutor,
-            fraudDetectionDataRepository = fraudDetectionDataRepository
+            fraudDetectionDataRepository = fraudDetectionDataRepository,
+            requestApiConfiguration = null,
+            initializeRequestServices = true,
         )
 
         requireNotNull(
@@ -1557,7 +1558,9 @@ internal class StripeApiRepositoryTest {
                 publishableKeyProvider = { DEFAULT_OPTIONS.apiKey },
                 requestSurface = StripeRepository.DEFAULT_REQUEST_SURFACE,
                 workContext = testDispatcher,
-                sdkVersion = "AndroidBindings/13.0.0"
+                sdkVersion = "AndroidBindings/13.0.0",
+                requestApiConfiguration = null,
+                initializeRequestServices = true,
             )
 
             val ex = stripeRepository.retrieveSetupIntent(
@@ -1579,18 +1582,18 @@ internal class StripeApiRepositoryTest {
     //                { DEFAULT_OPTIONS.apiKey },
     //                workContext = testDispatcher,
     //                sdkVersion = "AndroidBindings/14.0.0"
-    //            )
+    // )
     //
     //            val ex = assertFailsWith<InvalidRequestException> {
     //                stripeRepository.retrieveSetupIntent(
     //                    "seti_1CkiBMLENEVhOs7YMtUehLau_secret_invalid",
     //                    DEFAULT_OPTIONS
-    //                )
+    // )
     //            }
     //            assertThat(
     //                "そのような setupintent はありません : 'seti_1CkiBMLENEVhOs7YMtUehLau'",
     //                ex.stripeError?.message
-    //            )
+    // )
     //        }
 
     @Test
@@ -1887,7 +1890,9 @@ internal class StripeApiRepositoryTest {
                         sid = "02892cd4-183a-4074-bca2-5dc0647dd816ce4cbf"
                     )
                 ),
-                workContext = testDispatcher
+                workContext = testDispatcher,
+                requestApiConfiguration = null,
+                initializeRequestServices = true,
             )
             val radarSession = stripeRepository.createRadarSession(DEFAULT_OPTIONS).getOrThrow()
 
@@ -1907,7 +1912,9 @@ internal class StripeApiRepositoryTest {
                 fraudDetectionDataRepository = FakeFraudDetectionDataRepository(
                     null
                 ),
-                workContext = testDispatcher
+                workContext = testDispatcher,
+                requestApiConfiguration = null,
+                initializeRequestServices = true,
             )
 
             val invalidRequestException = stripeRepository.createRadarSession(DEFAULT_OPTIONS).exceptionOrNull()
@@ -3399,7 +3406,9 @@ internal class StripeApiRepositoryTest {
             productUsageTokens = productUsage,
             stripeNetworkClient = stripeNetworkClient,
             analyticsRequestExecutor = analyticsRequestExecutor,
-            fraudDetectionDataRepository = fraudDetectionDataRepository
+            fraudDetectionDataRepository = fraudDetectionDataRepository,
+            requestApiConfiguration = null,
+            initializeRequestServices = true,
         )
     }
 

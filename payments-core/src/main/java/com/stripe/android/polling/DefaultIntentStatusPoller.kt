@@ -1,6 +1,7 @@
 package com.stripe.android.polling
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
@@ -19,6 +20,7 @@ class DefaultIntentStatusPoller @Inject constructor(
     private val requestOptions: ApiRequest.Options,
     private val config: IntentStatusPoller.Config,
     private val dispatcher: CoroutineDispatcher,
+    private val apiConfiguration: ApiConfiguration.State,
 ) : IntentStatusPoller {
 
     private var pollingJob: Job? = null
@@ -57,6 +59,7 @@ class DefaultIntentStatusPoller @Inject constructor(
         val stripeIntent = stripeRepository.retrieveStripeIntent(
             clientSecret = config.clientSecret,
             options = requestOptions,
+            apiConfiguration = apiConfiguration,
         )
         return stripeIntent.getOrNull()?.status
     }

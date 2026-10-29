@@ -114,6 +114,7 @@ internal class IntentConfirmationChallengeViewModel @Inject constructor(
                     paymentIntentId = intentId,
                     params = params,
                     requestOptions = requestOptions,
+                    apiConfiguration = args.apiConfiguration,
                 )
             }
             is SetupIntent -> {
@@ -121,6 +122,7 @@ internal class IntentConfirmationChallengeViewModel @Inject constructor(
                     setupIntentId = intentId,
                     params = params,
                     requestOptions = requestOptions,
+                    apiConfiguration = args.apiConfiguration,
                 )
             }
         }

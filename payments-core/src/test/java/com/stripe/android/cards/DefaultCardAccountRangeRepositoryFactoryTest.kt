@@ -35,7 +35,7 @@ class DefaultCardAccountRangeRepositoryFactoryTest {
         val factory = getFactory {
             ApiConfiguration.State(
                 TestApiKeys.PUBLISHABLE,
-                TestApiKeys.ACCOUNT
+                TestApiKeys.ACCOUNT,
             )
         }
         assertThat(factory.create())

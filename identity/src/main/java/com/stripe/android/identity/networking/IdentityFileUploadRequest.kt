@@ -15,7 +15,7 @@ internal class IdentityFileUploadRequest(
     options: ApiRequest.Options,
     appInfo: AppInfo? = null,
     internal val verificationId: String
-) : FileUploadRequest(fileParams, options, appInfo) {
+) : FileUploadRequest(fileParams, options, appInfo, apiConfiguration = null) {
 
     override fun writePostBody(outputStream: OutputStream) {
         outputStream.writer().use {

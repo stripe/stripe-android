@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.repositories
 
 import com.stripe.android.Stripe
 import com.stripe.android.checkout.CheckoutController.Address
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.exception.safeAnalyticsMessage
 import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
@@ -26,6 +27,7 @@ internal class CheckoutSessionRepository @Inject constructor(
     private val fraudDetectionDataRepository: FraudDetectionDataRepository,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
+    private val apiConfigurationProvider: Provider<ApiConfiguration.State>,
     private val apiRequestOptionsProvider: Provider<ApiRequest.Options>,
 ) {
 
@@ -48,6 +50,7 @@ internal class CheckoutSessionRepository @Inject constructor(
                 url = url,
                 options = options,
                 params = params,
+                apiConfiguration = apiConfigurationProvider.get(),
             ),
             responseJsonParser = CheckoutSessionResponseJsonParser,
         )

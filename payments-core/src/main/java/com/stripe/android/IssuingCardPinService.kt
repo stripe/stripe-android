@@ -376,7 +376,9 @@ class IssuingCardPinService @VisibleForTesting internal constructor(
                         context,
                         { publishableKey },
                         defaultProductUsageTokens = setOf("IssuingCardPinService")
-                    )
+                    ),
+                    requestApiConfiguration = null,
+                    initializeRequestServices = true,
                 ),
                 StripeOperationIdFactory(),
                 stripeAccountId = stripeAccountId

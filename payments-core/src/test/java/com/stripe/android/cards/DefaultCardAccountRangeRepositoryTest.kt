@@ -310,6 +310,8 @@ internal class DefaultCardAccountRangeRepositoryTest {
             context = application,
             publishableKeyProvider = { publishableKey },
             requestSurface = StripeRepository.DEFAULT_REQUEST_SURFACE,
+            requestApiConfiguration = null,
+            initializeRequestServices = true,
         )
         return RemoteCardAccountRangeSource(
             stripeRepository,

@@ -111,7 +111,7 @@ internal class PassiveChallengeActivityTest {
                 ApplicationProvider.getApplicationContext(),
                 PassiveChallengeActivity::class.java
             )
-        ).use { scenario ->
+).use { scenario ->
             advanceUntilIdle()
 
             // Activity should finish gracefully without crashing

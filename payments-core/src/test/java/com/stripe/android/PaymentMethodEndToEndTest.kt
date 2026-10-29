@@ -108,7 +108,7 @@ internal class PaymentMethodEndToEndTest {
         )
         val exception = assertFailsWith<InvalidRequestException>(
             "A name is required to create a US Bank Account payment method"
-        ) {
+) {
             Stripe(
                 context,
                 ApiKeyFixtures.US_BANK_ACCOUNT_PUBLISHABLE_KEY
@@ -144,7 +144,7 @@ internal class PaymentMethodEndToEndTest {
         val stripe = Stripe(context, ApiKeyFixtures.OXXO_PUBLISHABLE_KEY)
         val missingNameException = assertFailsWith<InvalidRequestException>(
             "A name is required to create an OXXO payment method."
-        ) {
+) {
             stripe
                 .createPaymentMethodSynchronous(
                     PaymentMethodCreateParams.createOxxo(
@@ -158,7 +158,7 @@ internal class PaymentMethodEndToEndTest {
 
         val missingEmailException = assertFailsWith<InvalidRequestException>(
             "An email is required to create an OXXO payment method."
-        ) {
+) {
             stripe.createPaymentMethodSynchronous(
                 PaymentMethodCreateParams.createOxxo(
                     billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS.toBuilder().setEmail(null)
@@ -186,7 +186,9 @@ internal class PaymentMethodEndToEndTest {
             context = context,
             publishableKeyProvider = { ApiKeyFixtures.GRABPAY_PUBLISHABLE_KEY },
             requestSurface = RequestSurface.PaymentElement,
-            workContext = testDispatcher
+            workContext = testDispatcher,
+            requestApiConfiguration = null,
+            initializeRequestServices = true,
         )
 
         val params = PaymentMethodCreateParamsFixtures.GRABPAY
@@ -204,7 +206,9 @@ internal class PaymentMethodEndToEndTest {
             context = context,
             publishableKeyProvider = { ApiKeyFixtures.PAY_PAY_PUBLISHABLE_KEY },
             requestSurface = RequestSurface.PaymentElement,
-            workContext = testDispatcher
+            workContext = testDispatcher,
+            requestApiConfiguration = null,
+            initializeRequestServices = true,
         ).createPaymentMethod(
             PaymentMethodCreateParams.createPayPay(),
             ApiRequest.Options(ApiKeyFixtures.PAY_PAY_PUBLISHABLE_KEY)
@@ -220,7 +224,9 @@ internal class PaymentMethodEndToEndTest {
             context = context,
             publishableKeyProvider = { ApiKeyFixtures.PAYPAL_PUBLISHABLE_KEY },
             requestSurface = RequestSurface.PaymentElement,
-            workContext = testDispatcher
+            workContext = testDispatcher,
+            requestApiConfiguration = null,
+            initializeRequestServices = true,
         ).createPaymentMethod(
             PaymentMethodCreateParams.createPayPal(),
             ApiRequest.Options(ApiKeyFixtures.PAYPAL_PUBLISHABLE_KEY)
@@ -247,7 +253,7 @@ internal class PaymentMethodEndToEndTest {
         val stripe = Stripe(context, ApiKeyFixtures.AFTERPAY_PUBLISHABLE_KEY)
         val missingNameException = assertFailsWith<InvalidRequestException>(
             "Name is required to create an Afterpay payment method"
-        ) {
+) {
             stripe
                 .createPaymentMethodSynchronous(
                     PaymentMethodCreateParams.createAfterpayClearpay(
@@ -262,7 +268,7 @@ internal class PaymentMethodEndToEndTest {
 
         val missingEmailException = assertFailsWith<InvalidRequestException>(
             "Email is required to create an Afterpay payment method"
-        ) {
+) {
             stripe
                 .createPaymentMethodSynchronous(
                     PaymentMethodCreateParams.createAfterpayClearpay(

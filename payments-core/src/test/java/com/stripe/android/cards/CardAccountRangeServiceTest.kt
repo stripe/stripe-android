@@ -141,7 +141,7 @@ class CardAccountRangeServiceTest {
         testBehavior(
             cardNumber = "4",
             isCbcEligible = true,
-        ) {
+) {
             assertThat(awaitItem().accountRanges).isEmpty()
         }
     }
@@ -152,12 +152,12 @@ class CardAccountRangeServiceTest {
             defaultAccountRange(
                 brandInfo = AccountRange.BrandInfo.Visa,
                 funding = CardFunding.Unknown,
-            ),
+),
             defaultAccountRange(
                 brandInfo = AccountRange.BrandInfo.CartesBancaires,
                 funding = CardFunding.Unknown,
-            )
-        )
+)
+)
 
         testBehavior(
             cardNumber = "4000 0000",
@@ -169,7 +169,7 @@ class CardAccountRangeServiceTest {
 
                 override val loading: StateFlow<Boolean> = stateFlowOf(false)
             }
-        ) {
+) {
             assertThat(awaitItem().accountRanges).containsExactlyElementsIn(expectedAccountRanges)
         }
     }
@@ -181,7 +181,7 @@ class CardAccountRangeServiceTest {
         cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
         cardFundingFilter: CardFundingFilter = DefaultCardFundingFilter,
         validate: suspend TurbineTestContext<CardAccountRangeService.AccountRangesResult>.() -> Unit,
-    ) {
+) {
         val repository = mockRemoteCardAccountRangeSource?.let {
             createMockRemoteDefaultCardAccountRangeRepository(it)
         } ?: createDefaultCardAccountRangeRepository()
@@ -193,7 +193,7 @@ class CardAccountRangeServiceTest {
             staticCardAccountRanges = DefaultStaticCardAccountRanges(),
             cardBrandFilter = cardBrandFilter,
             cardFundingFilter = cardFundingFilter
-        )
+)
 
         service.onCardNumberChanged(CardNumber.Unvalidated(cardNumber), isCbcEligible = isCbcEligible)
 
@@ -217,7 +217,7 @@ class CardAccountRangeServiceTest {
                 cardNumber = cardNumber,
                 isCbcEligible = false,
                 cardBrandFilter = cardBrandFilter
-            ) {
+) {
                 val result = awaitItem()
                 // Since Mastercard is disallowed, the accountRanges should be empty
                 assertThat(result.accountRanges).isEmpty()
@@ -242,7 +242,7 @@ class CardAccountRangeServiceTest {
                 cardNumber = cardNumber,
                 isCbcEligible = false,
                 cardBrandFilter = cardBrandFilter
-            ) {
+) {
                 assertThat(awaitItem().accountRanges).isNotEmpty()
             }
         }
@@ -263,19 +263,19 @@ class CardAccountRangeServiceTest {
             staticCardAccountRanges = DefaultStaticCardAccountRanges(),
             cardFundingFilter = DefaultCardFundingFilter,
             accountRangeResultListener = fakeListener,
-        )
+)
 
         val expectedAccountRange1 = defaultAccountRange()
         val expectedAccountRange2 = defaultAccountRange(
             lowBinRange = "4000002500001001",
             highBinRange = "4000002500001001",
             brandInfo = AccountRange.BrandInfo.CartesBancaires
-        )
+)
         val expectedAccountRange3 = defaultAccountRange(
             lowBinRange = "2221000000000000",
             highBinRange = "2720999999999999",
             brandInfo = AccountRange.BrandInfo.Mastercard,
-        )
+)
 
         service.onCardNumberChanged(CardNumber.Unvalidated("4"), isCbcEligible = false)
         with(fakeListener.awaitItem()) {
@@ -305,7 +305,7 @@ class CardAccountRangeServiceTest {
             testDispatcher,
             DefaultStaticCardAccountRanges(),
             cardFundingFilter = restrictiveFundingFilter
-        )
+)
 
         val cardNumber = CardNumber.Unvalidated("4242424242424242")
         service.onCardNumberChanged(cardNumber, isCbcEligible = false)
@@ -326,7 +326,7 @@ class CardAccountRangeServiceTest {
             testDispatcher,
             DefaultStaticCardAccountRanges(),
             cardFundingFilter = defaultFundingFilter
-        )
+)
 
         val cardNumber = CardNumber.Unvalidated("4242424242424242")
         service.onCardNumberChanged(cardNumber, isCbcEligible = false)
@@ -345,7 +345,7 @@ class CardAccountRangeServiceTest {
             assertThat(service.accountRangesStateFlow.value.unfilteredRanges).containsExactly(
                 UNIONPAY_622454_16_DIGIT_RANGE,
                 UNIONPAY_622454_19_DIGIT_RANGE,
-            ).inOrder()
+).inOrder()
         }
 
     @Test
@@ -506,7 +506,13 @@ class CardAccountRangeServiceTest {
 
     private fun createRemoteCardAccountRangeSource(): CardAccountRangeSource {
         return RemoteCardAccountRangeSource(
-            StripeApiRepository(applicationContext, { publishableKey }, RequestSurface.PaymentElement),
+            StripeApiRepository(
+                context = applicationContext,
+                publishableKeyProvider = { publishableKey },
+                requestSurface = RequestSurface.PaymentElement,
+                requestApiConfiguration = null,
+                initializeRequestServices = true,
+            ),
             ApiRequest.Options(publishableKey),
             DefaultCardAccountRangeStore(applicationContext),
             DefaultAnalyticsRequestExecutor(),

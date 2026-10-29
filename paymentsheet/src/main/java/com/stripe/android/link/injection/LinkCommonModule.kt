@@ -40,7 +40,8 @@ internal interface LinkCommonModule {
             stripeNetworkClient = DefaultStripeNetworkClient(
                 logger = logger,
                 workContext = workContext
-            )
+            ),
+            requestApiConfiguration = null,
         )
     }
 }

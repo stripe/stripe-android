@@ -160,7 +160,8 @@ internal class Stripe3ds2TransactionViewModel @Inject constructor(
 
         stripeRepository.start3ds2Auth(
             authParams,
-            requestOptions
+            requestOptions,
+            apiConfiguration = args.apiConfiguration,
         )
     }
 

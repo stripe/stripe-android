@@ -440,7 +440,7 @@ class GooglePayPaymentMethodLauncherViewModelTest {
             ),
             apiConfiguration = ApiConfiguration.State(
                 ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-                ApiKeyFixtures.FAKE_STRIPE_ACCOUNT
+                ApiKeyFixtures.FAKE_STRIPE_ACCOUNT,
             ),
             shippingAddressParameters = null,
         )

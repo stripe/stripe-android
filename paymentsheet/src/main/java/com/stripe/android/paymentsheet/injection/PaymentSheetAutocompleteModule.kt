@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.injection
 
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.payments.core.injection.ApiRequestOptionsModule
@@ -15,9 +16,11 @@ internal class PaymentSheetAutocompleteModule {
     @Provides
     @Singleton
     fun provideStripeAutocompleteRepository(
+        apiConfigurationProvider: Provider<ApiConfiguration.State>,
         stripeNetworkClient: StripeNetworkClient,
         requestOptionsProvider: Provider<ApiRequest.Options>,
     ): StripeAutocompleteRepository = DefaultStripeAutocompleteRepository(
+        apiConfigurationProvider = apiConfigurationProvider,
         stripeNetworkClient = stripeNetworkClient,
         apiRequestFactory = ApiRequest.Factory(),
         requestOptionsProvider = requestOptionsProvider,

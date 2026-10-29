@@ -5,6 +5,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.StripeIntentResult
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.exception.InvalidRequestException
@@ -51,7 +52,8 @@ class DefaultStripe3ds2ChallengeResultProcessorTest {
         analyticsRequestFactory,
         LinearRetryDelaySupplier(),
         Logger.noop(),
-        testDispatcher
+        testDispatcher,
+        apiConfiguration = ApiConfiguration("pk_test_123").build(),
     )
 
     @get:Rule

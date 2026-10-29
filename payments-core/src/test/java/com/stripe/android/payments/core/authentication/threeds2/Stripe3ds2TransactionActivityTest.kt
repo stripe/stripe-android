@@ -74,7 +74,7 @@ class Stripe3ds2TransactionActivityTest {
             activityScenario.onActivity { activity ->
                 assertIs<ChallengeProgressFragmentFactory>(
                     activity.supportFragmentManager.fragmentFactory
-                )
+)
             }
         }
     }

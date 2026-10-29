@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.injection
 import android.content.Context
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
 import com.stripe.android.checkout.toCheckoutAddress
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.networking.ApiRequest
@@ -88,12 +89,14 @@ internal class AddressElementViewModelModule {
     @Provides
     @Singleton
     fun provideStripeAutocompleteRepository(
+        apiConfigurationProvider: Provider<ApiConfiguration.State>,
         stripeNetworkClient: StripeNetworkClient,
         requestOptionsProvider: Provider<ApiRequest.Options>,
     ): StripeAutocompleteRepository = DefaultStripeAutocompleteRepository(
         stripeNetworkClient = stripeNetworkClient,
         apiRequestFactory = ApiRequest.Factory(),
         requestOptionsProvider = requestOptionsProvider,
+        apiConfigurationProvider = apiConfigurationProvider,
     )
 
     @Provides

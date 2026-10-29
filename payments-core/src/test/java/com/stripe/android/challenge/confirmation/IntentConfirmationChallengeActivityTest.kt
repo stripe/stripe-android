@@ -94,7 +94,7 @@ internal class IntentConfirmationChallengeActivityTest {
                 ApplicationProvider.getApplicationContext(),
                 IntentConfirmationChallengeActivity::class.java
             )
-        ).use { scenario ->
+).use { scenario ->
             advanceUntilIdle()
 
             // Activity should finish gracefully without crashing

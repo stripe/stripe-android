@@ -38,7 +38,8 @@ class ConsumersApiServiceImplTest {
         stripeNetworkClient = DefaultStripeNetworkClient(),
         sdkVersion = StripeSdkVersion.VERSION,
         apiVersion = ApiVersion(betas = emptySet()).code,
-        appInfo = null
+        appInfo = null,
+        requestApiConfiguration = null,
     )
 
     @Test

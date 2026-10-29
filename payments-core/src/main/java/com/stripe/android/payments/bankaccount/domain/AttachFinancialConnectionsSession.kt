@@ -35,7 +35,8 @@ internal class AttachFinancialConnectionsSession @Inject constructor(
                     apiKey = apiConfiguration.publishableKey,
                     stripeAccount = apiConfiguration.stripeAccountId
                 ),
-                expandFields = EXPAND_PAYMENT_METHOD
+                expandFields = EXPAND_PAYMENT_METHOD,
+                apiConfiguration = apiConfiguration,
             ).getOrThrow()
         }
     }
@@ -64,7 +65,8 @@ internal class AttachFinancialConnectionsSession @Inject constructor(
                     apiKey = apiConfiguration.publishableKey,
                     stripeAccount = apiConfiguration.stripeAccountId
                 ),
-                expandFields = EXPAND_PAYMENT_METHOD
+                expandFields = EXPAND_PAYMENT_METHOD,
+                apiConfiguration = apiConfiguration,
             ).getOrThrow()
         }
     }
