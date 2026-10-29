@@ -209,7 +209,6 @@ class PaymentElementAutocompleteAddressInteractorTest {
         val config = AutocompleteAddressInteractor.Config(
             googlePlacesApiKey = "test-key",
             autocompleteCountries = setOf("US"),
-            isPlacesAvailable = true,
             isInlineAutocompleteEnabled = true,
         )
 
@@ -241,7 +240,6 @@ class PaymentElementAutocompleteAddressInteractorTest {
         val config = AutocompleteAddressInteractor.Config(
             googlePlacesApiKey = "test-key",
             autocompleteCountries = setOf("US"),
-            isPlacesAvailable = true,
             isInlineAutocompleteEnabled = true,
         )
         val fakePlaces = FakePlacesClientProxy(
@@ -280,7 +278,6 @@ class PaymentElementAutocompleteAddressInteractorTest {
         val config = AutocompleteAddressInteractor.Config(
             googlePlacesApiKey = "test-key",
             autocompleteCountries = setOf("US"),
-            isPlacesAvailable = true,
             isInlineAutocompleteEnabled = true,
         )
 
@@ -305,7 +302,6 @@ class PaymentElementAutocompleteAddressInteractorTest {
         val config = AutocompleteAddressInteractor.Config(
             googlePlacesApiKey = null,
             autocompleteCountries = setOf("US"),
-            isPlacesAvailable = false,
             isInlineAutocompleteEnabled = true,
         )
 
@@ -324,7 +320,6 @@ class PaymentElementAutocompleteAddressInteractorTest {
 
         assertThat(interactor).isInstanceOf(BillingInlineAutocompleteAddressInteractor::class.java)
         assertThat(interactor.autocompleteConfig.shouldUseStripeHostedAutocomplete).isTrue()
-        assertThat(interactor.autocompleteConfig.isPlacesAvailable).isFalse()
     }
 
     @Test
@@ -332,7 +327,6 @@ class PaymentElementAutocompleteAddressInteractorTest {
         val config = AutocompleteAddressInteractor.Config(
             googlePlacesApiKey = null,
             autocompleteCountries = setOf("US"),
-            isPlacesAvailable = false,
             isInlineAutocompleteEnabled = true,
         )
 

@@ -31,7 +31,6 @@ import kotlinx.coroutines.flow.first
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class AddressTextFieldController(
     label: ResolvableString,
-    addressInputMode: AddressInputMode,
     private val inlineAutocompleteHandler: InlineAutocompleteHandler?,
     private val reportsFormValue: Boolean,
     initialQuery: String,
@@ -39,7 +38,6 @@ class AddressTextFieldController(
 ) : InputController, SectionFieldValidationController, SectionFieldComposable {
     private val _isValidating = MutableStateFlow(false)
     private val _inlineQuery = MutableStateFlow(initialQuery)
-    private val onNavigation = (addressInputMode as? AddressInputMode.AutocompleteCondensed)?.onNavigation
 
     val isEditable = inlineAutocompleteHandler != null
     val inlineQuery: StateFlow<String> = _inlineQuery.asStateFlow()
@@ -150,9 +148,5 @@ class AddressTextFieldController(
         } else {
             AddressTextFieldUI(controller = this, enabled = enabled, onSearchActivated = null, modifier = modifier)
         }
-    }
-
-    fun launchAutocompleteScreen() {
-        onNavigation?.invoke()
     }
 }

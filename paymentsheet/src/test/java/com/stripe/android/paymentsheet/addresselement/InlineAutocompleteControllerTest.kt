@@ -1239,7 +1239,6 @@ class InlineAutocompleteControllerTest {
         val config = AutocompleteAddressInteractor.Config(
             googlePlacesApiKey = "test_key",
             autocompleteCountries = autocompleteCountries,
-            isPlacesAvailable = true,
             isInlineAutocompleteEnabled = true,
             shouldUseStripeHostedAutocomplete = shouldUseStripeHostedAutocomplete,
         )
