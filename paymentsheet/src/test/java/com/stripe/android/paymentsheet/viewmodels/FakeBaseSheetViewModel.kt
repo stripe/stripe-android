@@ -110,8 +110,6 @@ internal class FakeBaseSheetViewModel private constructor(
     val walletsProcessingStateSource = MutableStateFlow<WalletsProcessingState?>(null)
     override val walletsProcessingState: StateFlow<WalletsProcessingState?> = walletsProcessingStateSource.asStateFlow()
 
-    override val primaryButtonIcon = PrimaryButtonIcon.Lock
-
     val primaryButtonUiStateSource = MutableStateFlow<PrimaryButton.UIState?>(null)
     override val primaryButtonUiState: StateFlow<PrimaryButton.UIState?> = primaryButtonUiStateSource.asStateFlow()
 

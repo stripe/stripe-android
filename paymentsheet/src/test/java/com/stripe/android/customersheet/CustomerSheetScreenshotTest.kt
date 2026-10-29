@@ -42,6 +42,7 @@ import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.LocaleTestRule
 import com.stripe.android.testing.SetupIntentFactory
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import com.stripe.android.utils.screenshots.PaymentSheetAppearance
 import kotlinx.coroutines.CoroutineScope
@@ -105,7 +106,7 @@ internal class CustomerSheetScreenshotTest {
         linkMode = null,
         onBehalfOf = null,
         isCompleteFlow = false,
-        primaryButtonIcon = PrimaryButtonIcon.None,
+        primaryButtonIcon = stateFlowOf(PrimaryButtonIcon.None),
         isPaymentFlow = false,
         stripeIntentId = null,
         clientSecret = null,

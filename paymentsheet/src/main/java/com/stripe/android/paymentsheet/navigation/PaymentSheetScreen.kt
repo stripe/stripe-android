@@ -19,6 +19,7 @@ import com.stripe.android.paymentsheet.ui.AddPaymentMethod
 import com.stripe.android.paymentsheet.ui.AddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarStateFactory
+import com.stripe.android.paymentsheet.ui.PrimaryButtonIcon
 import com.stripe.android.paymentsheet.ui.SavedPaymentMethodTabLayoutUI
 import com.stripe.android.paymentsheet.ui.SavedPaymentMethodsTopContentPadding
 import com.stripe.android.paymentsheet.ui.SelectSavedPaymentMethodsInteractor
@@ -54,7 +55,7 @@ internal data class BuyButtonState(
 ) {
     data class BuyButtonOverride(
         val label: ResolvableString,
-        val lockEnabled: Boolean
+        val icon: PrimaryButtonIcon
     )
 }
 
@@ -406,7 +407,7 @@ internal sealed interface PaymentSheetScreen {
                 visible = true,
                 buyButtonOverride = BuyButtonState.BuyButtonOverride(
                     label = resolvableString(R.string.stripe_paymentsheet_confirm),
-                    lockEnabled = false
+                    icon = PrimaryButtonIcon.None
                 )
             )
         )

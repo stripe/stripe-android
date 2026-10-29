@@ -56,7 +56,7 @@ private fun USBankAccountFormArguments.updatePrimaryButton(
             },
             onDisabledClick = onDisabledClick,
             enabled = enabled,
-            icon = primaryButtonIcon,
+            icon = primaryButtonIcon.value,
         )
     }
 }

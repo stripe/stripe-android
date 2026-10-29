@@ -116,7 +116,9 @@ internal class EmbeddedAddPaymentMethodInteractorFactoryTest {
     ) = runScenario(primaryButtonIcon = primaryButtonIcon) {
         val arguments = interactor.state.value.usBankAccountFormArguments
         assertThat(arguments.isCompleteFlow).isFalse()
-        assertThat(arguments.primaryButtonIcon).isEqualTo(primaryButtonIcon)
+        arguments.primaryButtonIcon.test {
+            assertThat(awaitItem()).isEqualTo(primaryButtonIcon)
+        }
     }
 
     @Test

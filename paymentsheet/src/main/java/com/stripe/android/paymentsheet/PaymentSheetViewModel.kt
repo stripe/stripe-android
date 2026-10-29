@@ -65,7 +65,6 @@ import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.DefaultAddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.DefaultSelectSavedPaymentMethodsInteractor
-import com.stripe.android.paymentsheet.ui.PrimaryButtonIcon
 import com.stripe.android.paymentsheet.utils.asGooglePayButtonType
 import com.stripe.android.paymentsheet.utils.toConfirmationError
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeInitialScreenFactory
@@ -132,11 +131,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     stripeAutocompleteRepository = stripeAutocompleteRepository,
     addressLauncherEventReporter = addressLauncherEventReporter,
 ) {
-    override val primaryButtonIcon = PrimaryButtonIcon.Lock
-
     private val primaryButtonUiStateMapper = PrimaryButtonUiStateMapper(
         config = config,
-        primaryButtonIcon = primaryButtonIcon,
         currentScreenFlow = navigationHandler.currentScreen,
         buttonsEnabledFlow = buttonsEnabled,
         paymentMethodMetadataFlow = paymentMethodMetadata,

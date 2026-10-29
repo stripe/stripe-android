@@ -16,6 +16,8 @@ import com.stripe.android.paymentsheet.ui.PrimaryButtonIcon
 import com.stripe.android.paymentsheet.verticalmode.BankFormInteractor
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
+import com.stripe.android.uicore.utils.mapAsStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 
 /**
@@ -48,7 +50,7 @@ internal class USBankAccountFormArguments(
     val onBehalfOf: String?,
     val showCheckbox: Boolean,
     val isCompleteFlow: Boolean,
-    val primaryButtonIcon: PrimaryButtonIcon,
+    val primaryButtonIcon: StateFlow<PrimaryButtonIcon>,
     val isPaymentFlow: Boolean,
     val stripeIntentId: String?,
     val clientSecret: String?,
@@ -86,7 +88,10 @@ internal class USBankAccountFormArguments(
                 hostedSurface = hostedSurface,
                 integrationInputs = USBankAccountFormArgumentsFactory.IntegrationInputs(
                     isCompleteFlow = viewModel.isCompleteFlow,
-                    primaryButtonIcon = viewModel.primaryButtonIcon,
+                    // Arguments can be created while the loading screen still hides the button.
+                    primaryButtonIcon = viewModel.primaryButtonUiState.mapAsStateFlow {
+                        it?.icon ?: PrimaryButtonIcon.None
+                    },
                     shippingDetails = viewModel.config.shippingDetails,
                     draftPaymentSelection = viewModel.newPaymentSelection?.paymentSelection,
                     autocompleteAddressInteractorFactory = viewModel.autocompleteAddressInteractorFactory,
@@ -111,7 +116,7 @@ internal class USBankAccountFormArguments(
             selectedPaymentMethodCode: String,
             hostedSurface: String,
             isCompleteFlow: Boolean,
-            primaryButtonIcon: PrimaryButtonIcon,
+            primaryButtonIcon: StateFlow<PrimaryButtonIcon>,
             draftPaymentSelection: PaymentSelection?,
             bankFormInteractor: BankFormInteractor,
             hasSavedPaymentMethods: Boolean,

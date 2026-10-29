@@ -6,6 +6,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentsheet.FakeCvcRecollectionInteractor
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcCompletionState
+import com.stripe.android.paymentsheet.ui.PrimaryButtonIcon
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.mockito.kotlin.mock
@@ -21,7 +22,7 @@ internal class PaymentSheetCvcRecollectionTest {
                             visible = true,
                             buyButtonOverride = BuyButtonState.BuyButtonOverride(
                                 label = resolvableString(R.string.stripe_paymentsheet_confirm),
-                                lockEnabled = false
+                                icon = PrimaryButtonIcon.None
                             )
                         )
                     )

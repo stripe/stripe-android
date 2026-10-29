@@ -13,11 +13,12 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.PrimaryButtonIcon
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
+import kotlinx.coroutines.flow.StateFlow
 
 internal object USBankAccountFormArgumentsFactory {
     data class IntegrationInputs(
         val isCompleteFlow: Boolean,
-        val primaryButtonIcon: PrimaryButtonIcon,
+        val primaryButtonIcon: StateFlow<PrimaryButtonIcon>,
         val shippingDetails: AddressDetails?,
         val draftPaymentSelection: PaymentSelection?,
         val autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,

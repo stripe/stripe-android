@@ -18,7 +18,6 @@ import kotlinx.coroutines.flow.StateFlow
 
 internal class PrimaryButtonUiStateMapper(
     private val config: PaymentSheet.Configuration,
-    private val primaryButtonIcon: PrimaryButtonIcon,
     private val currentScreenFlow: StateFlow<PaymentSheetScreen>,
     private val buttonsEnabledFlow: StateFlow<Boolean>,
     private val paymentMethodMetadataFlow: StateFlow<PaymentMethodMetadata?>,
@@ -50,11 +49,7 @@ internal class PrimaryButtonUiStateMapper(
                     onClick = onClick,
                     enabled = buttonsEnabled && selection != null &&
                         cvcRecollectionCompleteOrNotRequired(screen, cvcComplete, selection),
-                    icon = if (buyButtonState.buyButtonOverride?.lockEnabled != false) {
-                        primaryButtonIcon
-                    } else {
-                        PrimaryButtonIcon.None
-                    },
+                    icon = buyButtonState.buyButtonOverride?.icon ?: PrimaryButtonIcon.Lock,
                     canClickWhileDisabled = canClickWhenDisabled,
                     onDisabledClick = {
                         if (canClickWhenDisabled) {
@@ -79,7 +74,7 @@ internal class PrimaryButtonUiStateMapper(
                 label = continueButtonLabel(config.primaryButtonLabel),
                 onClick = onClick,
                 enabled = buttonsEnabled && selection != null,
-                icon = primaryButtonIcon,
+                icon = PrimaryButtonIcon.None,
                 canClickWhileDisabled = canClickWhenDisabled,
                 onDisabledClick = {
                     if (canClickWhenDisabled) {

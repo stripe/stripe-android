@@ -35,7 +35,6 @@ import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodRepository
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
-import com.stripe.android.paymentsheet.ui.PrimaryButtonIcon
 import com.stripe.android.ui.core.elements.CvcConfig
 import com.stripe.android.ui.core.elements.CvcController
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
@@ -128,7 +127,6 @@ internal abstract class BaseSheetViewModel(
 
     val customPrimaryButtonUiState = MutableStateFlow<PrimaryButton.UIState?>(null)
 
-    abstract val primaryButtonIcon: PrimaryButtonIcon
     abstract val primaryButtonUiState: StateFlow<PrimaryButton.UIState?>
     abstract val error: StateFlow<ResolvableString?>
 
