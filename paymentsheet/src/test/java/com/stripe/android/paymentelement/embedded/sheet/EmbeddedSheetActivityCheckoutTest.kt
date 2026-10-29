@@ -424,6 +424,7 @@ internal class EmbeddedSheetActivityCheckoutTest {
                     paymentMethodMetadata = checkoutPaymentMethodMetadata(),
                     configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.")
                         .build(),
+                    googlePlacesApiKey = null,
                     productUsage = setOf("EmbeddedPaymentElement"),
                     paymentElementCallbackIdentifier = "EmbeddedSheetActivityCheckoutTestCallbackIdentifier",
                     statusBarColor = null,

@@ -56,6 +56,7 @@ import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networktesting.NetworkRule
+import com.stripe.android.paymentelement.AddressAutocompletePreview
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
@@ -572,6 +573,7 @@ internal class DefaultFlowControllerTest {
         assertThat(args.configuration).isEqualTo(
             PaymentSheet.Configuration("com.stripe.android.paymentsheet.test").asEmbeddedConfiguration()
         )
+        assertThat(args.googlePlacesApiKey).isNull()
         assertThat(args.productUsage).isEqualTo(PRODUCT_USAGE)
         assertThat(args.paymentElementCallbackIdentifier).isEqualTo(FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER)
         assertThat(args.statusBarColor).isEqualTo(STATUS_BAR_COLOR)
@@ -587,6 +589,25 @@ internal class DefaultFlowControllerTest {
             )
         )
         assertThat(args.presentationState).isEqualTo(EmbeddedActivityArgs.PresentationState.Ready)
+    }
+
+    @OptIn(AddressAutocompletePreview::class)
+    @Suppress("DEPRECATION")
+    @Test
+    fun `presentPaymentOptions() passes Google Places API key`() = runTest {
+        val flowController = createFlowController()
+
+        flowController.configureExpectingSuccess(
+            configuration = PaymentSheet.Configuration.Builder("com.stripe.android.paymentsheet.test")
+                .googlePlacesApiKey("gp_123")
+                .build()
+        )
+
+        flowController.presentPaymentOptions()
+
+        val argsCaptor = argumentCaptor<EmbeddedActivityArgs>()
+        verify(paymentOptionActivityLauncher).launch(argsCaptor.capture(), anyOrNull())
+        assertThat(argsCaptor.firstValue.googlePlacesApiKey).isEqualTo("gp_123")
     }
 
     @OptIn(WalletButtonsPreview::class)

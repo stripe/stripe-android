@@ -287,6 +287,7 @@ internal class EmbeddedSheetActivityCoordinatorTest {
             return EmbeddedActivityArgs(
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
                 configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
+                googlePlacesApiKey = null,
                 productUsage = setOf("EmbeddedPaymentElement"),
                 paymentElementCallbackIdentifier = callbackIdentifier,
                 statusBarColor = null,

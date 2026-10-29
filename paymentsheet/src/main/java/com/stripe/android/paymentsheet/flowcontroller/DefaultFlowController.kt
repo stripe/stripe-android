@@ -310,6 +310,7 @@ internal class DefaultFlowController @Inject internal constructor(
         val args = EmbeddedActivityArgs(
             paymentMethodMetadata = state.paymentSheetState.paymentMethodMetadata,
             configuration = state.config.asEmbeddedConfiguration(),
+            googlePlacesApiKey = state.config.googlePlacesApiKey,
             productUsage = productUsage,
             paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
             statusBarColor = viewModel.statusBarColor,

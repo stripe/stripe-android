@@ -267,6 +267,7 @@ internal class EmbeddedSheetActivityTest {
                     paymentMethodMetadata = paymentMethodMetadata,
                     configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.")
                         .build(),
+                    googlePlacesApiKey = null,
                     productUsage = setOf("EmbeddedPaymentElement"),
                     paymentElementCallbackIdentifier = "EmbeddedSheetActivityTestCallbackIdentifier",
                     statusBarColor = null,

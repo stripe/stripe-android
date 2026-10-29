@@ -294,6 +294,7 @@ internal class EmbeddedSheetActivityTest {
                 input = EmbeddedActivityArgs(
                     paymentMethodMetadata = paymentMethodMetadata,
                     configuration = configuration,
+                    googlePlacesApiKey = null,
                     productUsage = setOf("EmbeddedPaymentElement"),
                     statusBarColor = null,
                     paymentElementCallbackIdentifier = "EmbeddedFormTestIdentifier",

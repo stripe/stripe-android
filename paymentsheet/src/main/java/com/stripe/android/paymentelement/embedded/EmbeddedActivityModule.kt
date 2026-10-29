@@ -48,6 +48,7 @@ import com.stripe.android.paymentelement.embedded.sheet.SheetActivityContinueCoo
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityRegistrar
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityStateHolder
 import com.stripe.android.paymentelement.embedded.sheet.SheetLinkPaymentMethodSelectionHandler
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
@@ -59,6 +60,7 @@ import com.stripe.android.paymentsheet.addresselement.StripeAutocompleteReposito
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.paymentsheet.addresselement.analytics.DefaultAddressLauncherEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.injection.createInlineAutocompletePlacesClient
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.NoOpPromotionsHelper
@@ -67,7 +69,9 @@ import com.stripe.android.paymentsheet.repositories.PrefetchedPaymentMethodMessa
 import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.paymentsheet.verticalmode.DefaultSavedPaymentMethodConfirmInteractor
 import com.stripe.android.paymentsheet.verticalmode.SavedPaymentMethodConfirmInteractor
+import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
+import com.stripe.android.uicore.elements.DefaultIsPlacesAvailable
 import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.utils.mapAsStateFlow
@@ -80,6 +84,8 @@ import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Named
 import javax.inject.Provider
 import javax.inject.Singleton
+
+internal const val GOOGLE_PLACES_API_KEY = "GOOGLE_PLACES_API_KEY"
 
 @Suppress("TooManyFunctions")
 @Module
@@ -263,23 +269,38 @@ internal interface EmbeddedActivityModule {
 
         @Provides
         @Singleton
+        fun providePlacesClient(
+            context: Context,
+            @Named(GOOGLE_PLACES_API_KEY) googlePlacesApiKey: String?,
+            errorReporter: ErrorReporter,
+        ): PlacesClientProxy? = createInlineAutocompletePlacesClient(
+            context = context,
+            googlePlacesApiKey = googlePlacesApiKey,
+            errorReporter = errorReporter,
+            isPlacesAvailable = DefaultIsPlacesAvailable()(),
+        )
+
+        @Provides
+        @Singleton
         fun provideAutocompleteAddressInteractorFactory(
             stripeAutocompleteRepository: StripeAutocompleteRepository,
             @ViewModelScope coroutineScope: CoroutineScope,
             paymentMethodMetadata: PaymentMethodMetadata,
             eventReporter: AddressLauncherEventReporter,
+            @Named(GOOGLE_PLACES_API_KEY) googlePlacesApiKey: String?,
+            placesClient: PlacesClientProxy?,
         ): AutocompleteAddressInteractor.Factory {
             return PaymentElementAutocompleteAddressInteractor.Factory(
-                // Embedded supports Stripe-hosted inline autocomplete, which does not launch an activity.
+                // Inline autocomplete does not launch an activity.
                 launcher = null,
                 apiConfigurationProvider = { paymentMethodMetadata.apiConfiguration },
                 autocompleteConfig = AutocompleteAddressInteractor.Config(
-                    googlePlacesApiKey = null,
+                    googlePlacesApiKey = googlePlacesApiKey,
                     autocompleteCountries = AUTOCOMPLETE_DEFAULT_COUNTRIES,
-                    isPlacesAvailable = false,
+                    isPlacesAvailable = placesClient != null,
                     isInlineAutocompleteEnabled = true,
                 ),
-                placesClient = null,
+                placesClient = placesClient,
                 stripeAutocompleteRepository = stripeAutocompleteRepository,
                 coroutineScope = coroutineScope,
                 shouldUseAutocompleteProxyEndpointsProvider = {

@@ -187,6 +187,7 @@ internal class PaymentOptionsEmbeddedSheetAnalyticsTest {
         val args = EmbeddedActivityArgs(
             paymentMethodMetadata = paymentMethodMetadata,
             configuration = PaymentSheet.Configuration("Example, Inc.").asEmbeddedConfiguration(),
+            googlePlacesApiKey = null,
             productUsage = setOf("PaymentSheet.FlowController"),
             statusBarColor = null,
             paymentElementCallbackIdentifier = "PaymentOptionsAnalyticsTestIdentifier",

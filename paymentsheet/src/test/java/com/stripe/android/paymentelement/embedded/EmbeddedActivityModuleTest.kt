@@ -20,6 +20,7 @@ import com.stripe.android.paymentelement.embedded.sheet.SheetTaxRegionUpdater
 import com.stripe.android.paymentsheet.FakeCustomerStateHolder
 import com.stripe.android.paymentsheet.addresselement.AUTOCOMPLETE_DEFAULT_COUNTRIES
 import com.stripe.android.paymentsheet.addresselement.BillingInlineAutocompleteAddressInteractor
+import com.stripe.android.paymentsheet.addresselement.FakePlacesClientProxy
 import com.stripe.android.paymentsheet.addresselement.FakeStripeAutocompleteRepository
 import com.stripe.android.paymentsheet.addresselement.PaymentElementAutocompleteAddressInteractor
 import com.stripe.android.paymentsheet.addresselement.analytics.FakeAddressLauncherEventReporter
@@ -28,6 +29,7 @@ import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
+import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -56,6 +58,48 @@ internal class EmbeddedActivityModuleTest {
             assertThat(interactor.autocompleteConfig.googlePlacesApiKey).isNull()
             assertThat(interactor.autocompleteConfig.shouldUseStripeHostedAutocomplete).isFalse()
         }
+
+    @Test
+    fun `autocomplete factory uses Google Places inline interactor when API key and places client are provided`() =
+        runScenario(
+            shouldUseAutocompleteProxyEndpoints = false,
+            googlePlacesApiKey = "gp_123",
+            placesClient = FakePlacesClientProxy(
+                findPredictionsResult = Result.failure(IllegalStateException("Not used")),
+                fetchPlaceResult = Result.failure(IllegalStateException("Not used")),
+            ),
+        ) {
+            assertThat(interactor).isInstanceOf(BillingInlineAutocompleteAddressInteractor::class.java)
+            assertThat(interactor.autocompleteConfig.googlePlacesApiKey).isEqualTo("gp_123")
+            assertThat(interactor.autocompleteConfig.isPlacesAvailable).isTrue()
+            assertThat(interactor.autocompleteConfig.isInlineAutocompleteEnabled).isTrue()
+            assertThat(interactor.autocompleteConfig.shouldUseStripeHostedAutocomplete).isFalse()
+        }
+
+    @Test
+    fun `autocomplete factory keeps API key with Stripe-hosted interactor when enabled`() = runScenario(
+        shouldUseAutocompleteProxyEndpoints = true,
+        googlePlacesApiKey = "gp_123",
+        placesClient = FakePlacesClientProxy(
+            findPredictionsResult = Result.failure(IllegalStateException("Not used")),
+            fetchPlaceResult = Result.failure(IllegalStateException("Not used")),
+        ),
+    ) {
+        assertThat(interactor).isInstanceOf(BillingInlineAutocompleteAddressInteractor::class.java)
+        assertThat(interactor.autocompleteConfig.googlePlacesApiKey).isEqualTo("gp_123")
+        assertThat(interactor.autocompleteConfig.shouldUseStripeHostedAutocomplete).isTrue()
+    }
+
+    @Test
+    fun `autocomplete factory reports places unavailable without places client`() = runScenario(
+        shouldUseAutocompleteProxyEndpoints = false,
+        googlePlacesApiKey = "gp_123",
+        placesClient = null,
+    ) {
+        assertThat(interactor).isInstanceOf(PaymentElementAutocompleteAddressInteractor::class.java)
+        assertThat(interactor.autocompleteConfig.googlePlacesApiKey).isEqualTo("gp_123")
+        assertThat(interactor.autocompleteConfig.isPlacesAvailable).isFalse()
+    }
 
     @Test
     fun `FlowController payment options report analytics in Custom mode`() {
@@ -176,6 +220,8 @@ internal class EmbeddedActivityModuleTest {
 
     private fun runScenario(
         shouldUseAutocompleteProxyEndpoints: Boolean,
+        googlePlacesApiKey: String? = null,
+        placesClient: PlacesClientProxy? = null,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val eventReporter = FakeAddressLauncherEventReporter()
@@ -186,6 +232,8 @@ internal class EmbeddedActivityModuleTest {
                 shouldUseAutocompleteProxyEndpoints = shouldUseAutocompleteProxyEndpoints,
             ),
             eventReporter = eventReporter,
+            googlePlacesApiKey = googlePlacesApiKey,
+            placesClient = placesClient,
         )
 
         Scenario(factory.create()).block()

@@ -110,6 +110,7 @@ internal class HorizontalSavedPaymentOptionsSelectionTest {
                 paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
             ),
             configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
+            googlePlacesApiKey = null,
             productUsage = setOf("EmbeddedPaymentElement"),
             paymentElementCallbackIdentifier = "HorizontalSavedPaymentOptionsSelectionTestIdentifier",
             statusBarColor = null,

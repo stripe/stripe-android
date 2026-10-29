@@ -90,6 +90,7 @@ internal class HorizontalSavedPaymentOptionsWalletsTest {
                 ),
             ),
             configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
+            googlePlacesApiKey = null,
             productUsage = setOf("EmbeddedPaymentElement"),
             paymentElementCallbackIdentifier = "HorizontalSavedPaymentOptionsWalletsTestIdentifier",
             statusBarColor = null,

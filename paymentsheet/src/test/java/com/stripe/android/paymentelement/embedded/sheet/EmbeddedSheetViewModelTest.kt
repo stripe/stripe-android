@@ -89,6 +89,7 @@ internal class EmbeddedSheetViewModelTest {
         val args = EmbeddedActivityArgs(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
             configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
+            googlePlacesApiKey = null,
             productUsage = setOf("PaymentSheet.FlowController"),
             paymentElementCallbackIdentifier = "EmbeddedSheetViewModelTest",
             statusBarColor = null,
