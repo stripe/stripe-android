@@ -105,7 +105,7 @@ internal class PaymentOptionsWalletsInteractorTest {
     }
 
     @Test
-    fun `wallet clicks cannot replace the selection during processing`() = runScenario {
+    fun `wallet clicks are ignored while processing and resume afterwards`() = runScenario {
         selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
         val state = interactor.walletsState.value!!
         sheetActivityStateHolder.updateState { it.copy(isProcessing = true) }
@@ -115,6 +115,12 @@ internal class PaymentOptionsWalletsInteractorTest {
 
         assertThat(selectionHolder.selection.value).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
         continueCoordinator.onContinueCalls.expectNoEvents()
+
+        sheetActivityStateHolder.updateState { it.copy(isProcessing = false) }
+        state.onGooglePayPressed()
+
+        assertThat(selectionHolder.selection.value).isEqualTo(PaymentSelection.GooglePay)
+        assertThat(continueCoordinator.onContinueCalls.awaitItem()).isEqualTo(Unit)
     }
 
     @Test

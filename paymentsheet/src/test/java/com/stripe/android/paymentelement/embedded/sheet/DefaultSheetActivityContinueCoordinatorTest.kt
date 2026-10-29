@@ -35,6 +35,7 @@ import com.stripe.android.paymentsheet.verticalmode.FakeManageScreenInteractor
 import com.stripe.android.paymentsheet.verticalmode.FakePaymentMethodVerticalLayoutInteractor
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.android.utils.FakeFraudDetectionDataRepository
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceTimeBy
@@ -66,7 +67,7 @@ internal class DefaultSheetActivityContinueCoordinatorTest {
     }
 
     @Test
-    fun `continue without tax region update is ignored while processing`() = runScenario(
+    fun `continue without tax region update is ignored while processing and resumes afterwards`() = runScenario(
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
     ) {
         stateHolder.updateState { it.copy(isProcessing = true) }
@@ -75,6 +76,13 @@ internal class DefaultSheetActivityContinueCoordinatorTest {
 
         stateHolder.resultTurbine.expectNoEvents()
         stateHolder.updateProcessingTurbine.expectNoEvents()
+
+        stateHolder.updateState { it.copy(isProcessing = false) }
+        continueCoordinator.onContinue()
+
+        assertThat(stateHolder.resultTurbine.awaitItem()).isEqualTo(
+            completeResult(checkoutSessionResponse = null)
+        )
     }
 
     @Test
@@ -197,6 +205,33 @@ internal class DefaultSheetActivityContinueCoordinatorTest {
             )
         }
         updateCalls.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `repeated continue is ignored while tax region update is suspended`() {
+        val response = CompletableDeferred<Result<CheckoutSessionResponse>>()
+        runScenario(
+            paymentMethodMetadata = CHECKOUT_SESSION_METADATA,
+            taxRegionUpdater = SheetTaxRegionUpdater { _, _, _ -> response.await() },
+        ) {
+            continueCoordinator.onContinue()
+            assertThat(stateHolder.updateProcessingTurbine.awaitItem()).isTrue()
+            testScope.runCurrent()
+
+            continueCoordinator.onContinue()
+            testScope.runCurrent()
+
+            stateHolder.updateProcessingTurbine.expectNoEvents()
+            stateHolder.resultTurbine.expectNoEvents()
+
+            val updatedResponse = CheckoutSessionResponseFactory.create()
+            response.complete(Result.success(updatedResponse))
+            testScope.runCurrent()
+
+            assertThat(stateHolder.resultTurbine.awaitItem()).isEqualTo(
+                completeResult(checkoutSessionResponse = updatedResponse)
+            )
+        }
     }
 
     private fun runScenario(
