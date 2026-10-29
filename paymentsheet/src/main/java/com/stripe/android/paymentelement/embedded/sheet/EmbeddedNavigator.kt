@@ -86,6 +86,9 @@ internal class EmbeddedNavigator private constructor(
     )
 
     val screen: StateFlow<Screen> = navigationHandler.currentScreen
+    val isTransitioning: Boolean
+        get() = navigationHandler.isTransitioning()
+
     val canGoBack: Boolean
         get() = navigationHandler.canGoBack
 
