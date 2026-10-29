@@ -54,14 +54,19 @@ import com.stripe.android.crypto.onramp.ui.KycScreenAction
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.link.LinkController
 import com.stripe.android.model.CardBrand
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withContext
 import org.junit.After
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.doSuspendableAnswer
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
@@ -526,6 +531,56 @@ class OnrampPresenterCoordinatorTest {
 
         assertThat(results.awaitItem())
             .isInstanceOf(OnrampPartnerTermsResult.NotRequired::class.java)
+        results.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `terms response after host destruction does not present`() = testScope.runTest {
+        val response = CompletableDeferred<OnrampStartPartnerTermsResult>()
+        whenever(interactor.startPartnerTerms(PartnerDeclarationType.TermsOfService))
+            .doSuspendableAnswer { withContext(NonCancellable) { response.await() } }
+        val results = Turbine<OnrampPartnerTermsResult>()
+        val coordinator = createCoordinator(termsOfServiceCallback = OnrampPartnerTermsCallback(results::add))
+
+        coordinator.presentTermsOfServiceIfNeeded()
+        testScheduler.runCurrent()
+        verify(interactor).startPartnerTerms(PartnerDeclarationType.TermsOfService)
+        lifecycleOwner.currentState = Lifecycle.State.DESTROYED
+        response.complete(
+            OnrampStartPartnerTermsResult.PresentationRequired(
+                terms = PartnerTerms.Required(
+                    PartnerTerms.Declaration("decl_test", PartnerDeclarationType.TermsOfService, "terms")
+                ),
+                appearance = null,
+            )
+        )
+        testScheduler.advanceUntilIdle()
+
+        assertThat(shadowOf(activity).nextStartedActivity).isNull()
+        results.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `terms cancellation after host destruction does not invoke callback`() = testScope.runTest {
+        val response = CompletableDeferred<OnrampStartPartnerTermsResult>()
+        whenever(interactor.startPartnerTerms(PartnerDeclarationType.TransactionTerms))
+            .doSuspendableAnswer {
+                try {
+                    response.await()
+                } catch (error: CancellationException) {
+                    OnrampStartPartnerTermsResult.Failed(error)
+                }
+            }
+        val results = Turbine<OnrampPartnerTermsResult>()
+        val coordinator = createCoordinator(termsAndConditionsCallback = OnrampPartnerTermsCallback(results::add))
+
+        coordinator.presentTermsAndConditionsIfNeeded()
+        testScheduler.runCurrent()
+        verify(interactor).startPartnerTerms(PartnerDeclarationType.TransactionTerms)
+        lifecycleOwner.currentState = Lifecycle.State.DESTROYED
+        response.complete(OnrampStartPartnerTermsResult.Failed(CancellationException("Host destroyed")))
+        testScheduler.advanceUntilIdle()
+
         results.ensureAllEventsConsumed()
     }
 
