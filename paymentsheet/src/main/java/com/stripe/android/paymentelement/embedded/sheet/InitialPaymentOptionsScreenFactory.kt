@@ -187,9 +187,16 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
                 )
             },
             onUpdatePaymentMethod = ::navigateToUpdateScreen,
-            updateSelection = { selection, _ -> selectionHolder.setSelection(selection) },
+            updateSelection = ::onSavedPaymentMethodsSelectionUpdated,
             linkBrand = paymentMethodMetadata.effectiveLinkBrand(linkAccount),
         )
+    }
+
+    private fun onSavedPaymentMethodsSelectionUpdated(selection: PaymentSelection?, isUserInput: Boolean) {
+        selectionHolder.setSelection(selection)
+        if (isUserInput && selection?.requiresConfirmation != true) {
+            continueCoordinator.onContinue()
+        }
     }
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)

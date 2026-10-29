@@ -93,7 +93,7 @@ internal class PaymentOptionsEmbeddedSheetMandateTest {
             layout = PaymentSheet.PaymentMethodLayout.Vertical,
         ),
         paymentMethod = PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD,
-        selectPaymentMethod = true,
+        selection = PaymentSelection.Saved(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD),
     ) {
         verticalModePage.waitUntilVisible()
 
@@ -108,19 +108,16 @@ internal class PaymentOptionsEmbeddedSheetMandateTest {
             isGooglePayReady = true,
         ),
         paymentMethod = PaymentMethodFixtures.US_BANK_ACCOUNT,
-        selectPaymentMethod = false,
+        selection = PaymentSelection.GooglePay,
     ) {
         val mandateText = "By continuing, you agree to authorize payments pursuant to these terms."
-        composeTestRule.onNodeWithTag(PaymentOptionsItem.ViewType.GooglePay.name).performClick()
+        composeTestRule.onNodeWithTag(PaymentOptionsItem.ViewType.GooglePay.name).assertIsDisplayed()
         composeTestRule.onNodeWithText(mandateText).assertDoesNotExist()
 
         composeTestRule.onNodeWithTag("${SAVED_PAYMENT_METHOD_CARD_TEST_TAG}_\u2066···· 6789\u2069")
             .performClick()
         composeTestRule.onNodeWithText(mandateText).performScrollTo().assertIsDisplayed()
         assertMandatePosition(isAbovePrimaryButton = false)
-
-        composeTestRule.onNodeWithTag(PaymentOptionsItem.ViewType.GooglePay.name).performClick()
-        composeTestRule.onNodeWithText(mandateText).assertDoesNotExist()
     }
 
     @Test
@@ -130,7 +127,7 @@ internal class PaymentOptionsEmbeddedSheetMandateTest {
             layout = PaymentSheet.PaymentMethodLayout.Horizontal,
         ),
         paymentMethod = PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD,
-        selectPaymentMethod = true,
+        selection = PaymentSelection.Saved(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD),
     ) {
         assertMandatePosition(isAbovePrimaryButton = true)
     }
@@ -170,7 +167,7 @@ internal class PaymentOptionsEmbeddedSheetMandateTest {
     private fun runScenario(
         paymentMethodMetadata: PaymentMethodMetadata,
         paymentMethod: PaymentMethod? = null,
-        selectPaymentMethod: Boolean = false,
+        selection: PaymentSelection? = null,
         block: (ActivityScenario<EmbeddedSheetActivity>) -> Unit,
     ) {
         val args = EmbeddedActivityArgs(
@@ -179,7 +176,7 @@ internal class PaymentOptionsEmbeddedSheetMandateTest {
             productUsage = setOf("EmbeddedPaymentElement"),
             statusBarColor = null,
             paymentElementCallbackIdentifier = "PaymentOptionsMandateTestIdentifier",
-            selection = paymentMethod?.takeIf { selectPaymentMethod }?.let { PaymentSelection.Saved(it) },
+            selection = selection,
             previousNewSelections = Bundle(),
             customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
                 paymentMethods = listOfNotNull(paymentMethod),
