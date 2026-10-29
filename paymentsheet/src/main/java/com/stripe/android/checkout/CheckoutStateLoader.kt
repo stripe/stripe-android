@@ -207,6 +207,7 @@ internal class CheckoutStateLoader @Inject constructor(
 
         val embeddedConfig = embeddedConfigurationFactory.create(
             configuration = configuration,
+            paymentElementConfiguration = paymentElementConfiguration,
             checkoutSessionResponse = response,
             collectedDetails = collectedDetails,
         )
@@ -216,13 +217,6 @@ internal class CheckoutStateLoader @Inject constructor(
             checkoutSessionResponse = response,
             collectedDetails = collectedDetails,
         )
-
-        if (embeddedConfig == null) {
-            errorReporter.report(
-                errorEvent = ErrorReporter.UnexpectedErrorEvent.CHECKOUT_EMBEDDED_CONFIGURATION_IS_NULL,
-            )
-            return null
-        }
 
         if (commonConfiguration == null) {
             errorReporter.report(

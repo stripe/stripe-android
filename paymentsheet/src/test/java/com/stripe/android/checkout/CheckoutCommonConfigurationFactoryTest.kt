@@ -75,8 +75,13 @@ internal class CheckoutCommonConfigurationFactoryTest {
         )
 
         val expected = CheckoutEmbeddedConfigurationFactory(appName = "Test App")
-            .create(configuration, checkoutSessionResponse, collectedDetails)
-            ?.asCommonConfiguration()
+            .create(
+                configuration = configuration,
+                paymentElementConfiguration = requireNotNull(configuration.paymentElementConfiguration),
+                checkoutSessionResponse = checkoutSessionResponse,
+                collectedDetails = collectedDetails,
+            )
+            .asCommonConfiguration()
         val actual = factory()
             .create(configuration, checkoutSessionResponse, collectedDetails)
 
