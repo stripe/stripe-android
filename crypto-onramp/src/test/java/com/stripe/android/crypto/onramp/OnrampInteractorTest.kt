@@ -95,6 +95,7 @@ import com.stripe.android.link.LinkAppearance
 import com.stripe.android.link.LinkController
 import com.stripe.android.link.PaymentMethodPreviewDetails
 import com.stripe.android.link.exceptions.LinkUnavailableException
+import com.stripe.android.link.exceptions.MissingAppAttestationException
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardFunding
 import com.stripe.android.model.DateOfBirth
@@ -596,8 +597,8 @@ class OnrampInteractorTest {
     }
 
     @Test
-    fun testConfigureMapsLinkUnavailableExceptionToRichAttestationError() = runTest {
-        val linkError = LinkUnavailableException(IllegalStateException("Native Link is not available"))
+    fun testConfigureMapsMissingAppAttestationExceptionToRichAttestationError() = runTest {
+        val linkError = MissingAppAttestationException()
         whenever(linkController.configure(any())).thenReturn(Result.failure(linkError))
 
         val result = interactor.configure(createConfigurationState())
@@ -612,6 +613,21 @@ class OnrampInteractorTest {
             attestationError = error as AppAttestationUnavailableException,
             underlyingError = linkError,
         )
+    }
+
+    @Test
+    fun testConfigureDoesNotMapLinkUnavailableExceptionToAttestationError() = runTest {
+        val linkError = LinkUnavailableException()
+        whenever(linkController.configure(any())).thenReturn(Result.failure(linkError))
+
+        val result = interactor.configure(createConfigurationState())
+
+        assertThat(result).isInstanceOf(OnrampConfigurationResult.Failed::class.java)
+
+        val error = (result as OnrampConfigurationResult.Failed).error
+        assertThat(error).isNotInstanceOf(AppAttestationUnavailableException::class.java)
+        assertThat(assertUnexpectedError<LinkUnavailableException>(error).underlyingError)
+            .isSameInstanceAs(linkError)
     }
 
     @Test

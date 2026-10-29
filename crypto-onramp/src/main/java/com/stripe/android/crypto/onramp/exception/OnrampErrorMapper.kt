@@ -5,7 +5,7 @@ import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.crypto.onramp.R
 import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsEvent
-import com.stripe.android.link.exceptions.LinkUnavailableException
+import com.stripe.android.link.exceptions.MissingAppAttestationException
 import com.stripe.android.link.exceptions.AppAttestationException as LinkAppAttestationException
 
 @Suppress("LongMethod")
@@ -39,7 +39,7 @@ internal fun Throwable.toCryptoOnrampError(
         )
     }
 
-    if (this is LinkUnavailableException) {
+    if (this is MissingAppAttestationException) {
         return toAppAttestationUnavailableError(
             context = context,
             diagnosticContext = diagnosticContext,

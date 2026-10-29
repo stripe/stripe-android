@@ -4,9 +4,12 @@ import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.link.exceptions.LinkUnavailableException
+import com.stripe.android.link.exceptions.MissingAppAttestationException
 import com.stripe.android.link.gate.FakeLinkGate
+import com.stripe.android.model.LinkDisabledReason
 import com.stripe.android.networking.RequestSurface
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.state.LinkDisabledState
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.FakeLogger
@@ -63,26 +66,51 @@ internal class DefaultLinkConfigurationLoaderTest {
     }
 
     @Test
-    fun `load() returns failure when linkState configuration is null`() = runTest {
+    fun `load() returns LinkUnavailableException when link state is missing`() = runTest {
         val loader = createLoader(
-            paymentElementLoader = FakePaymentElementLoader(linkState = null)
+            paymentElementLoader = FakePaymentElementLoader(linkState = null),
+            useNativeLink = true,
         )
 
         val result = loader.load(configuration)
-        assertThat(result.isFailure).isTrue()
         assertThat(result.exceptionOrNull()).isInstanceOf(LinkUnavailableException::class.java)
     }
 
     @Test
-    fun `load() returns failure when useNativeLink is false`() = runTest {
+    fun `load() returns LinkUnavailableException when Link is not supported in elements session`() = runTest {
+        val loader = createLoader(
+            paymentElementLoader = FakePaymentElementLoader(
+                linkState = LinkDisabledState(listOf(LinkDisabledReason.NotSupportedInElementsSession)),
+            ),
+            useNativeLink = false,
+        )
+
+        val result = loader.load(configuration)
+        // The missing Link support is reported instead of the attestation issue
+        assertThat(result.exceptionOrNull()).isInstanceOf(LinkUnavailableException::class.java)
+    }
+
+    @Test
+    fun `load() returns MissingAppAttestationException when Link is disabled for native Link reasons`() = runTest {
+        val loader = createLoader(
+            paymentElementLoader = FakePaymentElementLoader(
+                linkState = LinkDisabledState(listOf(LinkDisabledReason.BillingDetailsCollection)),
+            ),
+        )
+
+        val result = loader.load(configuration)
+        assertThat(result.exceptionOrNull()).isInstanceOf(MissingAppAttestationException::class.java)
+    }
+
+    @Test
+    fun `load() returns MissingAppAttestationException when useNativeLink is false`() = runTest {
         val loader = createLoader(
             paymentElementLoader = FakePaymentElementLoader(linkState = linkState),
             useNativeLink = false
         )
 
         val result = loader.load(configuration)
-        assertThat(result.isFailure).isTrue()
-        assertThat(result.exceptionOrNull()).isInstanceOf(LinkUnavailableException::class.java)
+        assertThat(result.exceptionOrNull()).isInstanceOf(MissingAppAttestationException::class.java)
     }
 
     @Test

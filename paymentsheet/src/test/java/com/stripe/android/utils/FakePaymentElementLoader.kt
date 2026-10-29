@@ -15,7 +15,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.CustomerState
-import com.stripe.android.paymentsheet.state.LinkState
+import com.stripe.android.paymentsheet.state.LinkStateResult
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetLoadingException
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
@@ -29,7 +29,7 @@ internal class FakePaymentElementLoader(
     private var paymentSelection: PaymentSelection? = null,
     private val isGooglePayAvailable: Boolean = false,
     private val delay: Duration = Duration.ZERO,
-    private val linkState: LinkState? = null,
+    private val linkState: LinkStateResult? = null,
     private val validationError: PaymentSheetLoadingException? = null,
     private val cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
     private val passiveCaptchaParams: PassiveCaptchaParams? = null,
