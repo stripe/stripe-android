@@ -1,12 +1,30 @@
 {
-  "session_id": "cs_test_abc123",
   "ui_mode": "mobile_elements",
-  "mode": "modeless",
   "status": "open",
   "payment_status": "unpaid",
   "livemode": false,
-  "currency": "eur",
-  "checkout_items": [
+  "adaptive_pricing_info": {
+    "local_currency_options": [
+      {
+        "amount": 4594,
+        "currency": "eur",
+        "disclosure": {
+          "caption": "1 USD = 0.900961 EUR"
+        }
+      }
+    ],
+    "integration_currency_option": {
+      "amount": 5099,
+      "currency": "usd",
+      "disclosure": {
+        "caption": "Exchange rate and fees of your bank may apply."
+      }
+    }
+  },
+  "id": "cs_test_abc123",
+  "presentment_currency": "eur",
+  "integration_currency": "usd",
+  "items": [
     {
       "key": "group_1",
       "type": "one_time_price",
@@ -20,8 +38,28 @@
               "unit_amount": 4594,
               "product": {
                 "name": "Classic T-Shirt",
-                "images": []
-              }
+                "images": [],
+                "object": "product",
+                "active": false,
+                "addons": null,
+                "id": "prod_checkout123",
+                "livemode": false,
+                "url": null,
+                "attributes": [],
+                "description": null,
+                "unit_label": null
+              },
+              "livemode": false,
+              "active": false,
+              "tax_behavior": "exclusive",
+              "custom_unit_amount": null,
+              "transform_quantity": null,
+              "type": "one_time",
+              "unit_amount_decimal": "4594",
+              "object": "price",
+              "billing_scheme": "per_unit",
+              "recurring": null,
+              "tiers_mode": null
             },
             "quantity": 1,
             "subtotal": 4594,
@@ -32,89 +70,105 @@
             "tax_amounts": [],
             "tax_inclusive": 0,
             "tax_exclusive": 0,
-            "adjustable_quantity": null
+            "adjustable_quantity": null,
+            "amount_details": {
+              "tax_inclusive": 0,
+              "subtotal": 4594,
+              "discount": 0,
+              "discount_amounts": [],
+              "total": 4594,
+              "tax_amounts": [],
+              "tax_exclusive": 0
+            }
           }
-        ]
+        ],
+        "subtotal": 4594,
+        "total": 4594
       }
     }
   ],
-  "recurring_details": {
-    "total_summary": {
-      "total_discount_amounts": [],
-      "total_tax_amounts": []
-    }
+  "total_summary": {
+    "total_tax_amounts": [],
+    "subtotal": 4594,
+    "total": 4594,
+    "due": 4594
   },
-  "tax_meta": {
-    "computation_type": "Off",
-    "status": null
+  "automatic_tax": {
+    "enabled": false,
+    "status": "ready",
+    "address_source": null
   },
-  "adaptive_pricing_info": {
-    "active_presentment_currency": "eur",
-    "integration_amount": 5099,
-    "integration_currency": "usd",
-    "integration_custom_amount_info": null,
-    "is_using_subscription_threshold_fx_rate_behavior": null,
-    "local_currency_options": [
-      {
-        "amount": 4594,
-        "conversion_markup_bps": 400,
-        "currency": "eur",
-        "presentment_exchange_rate": "0.900961",
-        "reference_rate_info": null
-      }
+  "merchant_info": {
+    "display_name": "Mobile US Tax Test Merchant",
+    "country": "US"
+  },
+  "apple_pay_preference": "enabled",
+  "google_pay_preference": "enabled",
+  "link_settings": {
+    "link_funding_sources": [
+      "CARD"
+    ],
+    "link_consumer_incentive": null,
+    "link_payment_session_context": {
+      "bank_account_permissions": [],
+      "link_payment_method_bank_account_permissions": null,
+      "bank_account_verification_method": null,
+      "link_supported_payment_methods": [
+        "CARD"
+      ]
+    },
+    "consumer_found": false,
+    "link_mobile_attestation_state_sync_enabled": true,
+    "enable_partner_lookup": false,
+    "link_mobile_disable_signup": false,
+    "link_mobile_use_attestation_endpoints": false,
+    "link_brand": "link",
+    "link_popup_webview_option": "shared",
+    "link_supported_payment_methods_onboarding_enabled": [
+      "CARD"
+    ],
+    "link_us_bank_account_funding_source_enabled": false,
+    "link_enable_displayable_default_values_in_ece": false,
+    "link_mode": "LINK_CARD_BRAND",
+    "link_supported_payment_methods": [
+      "CARD"
     ]
   },
-  "elements_session": {
-    "apple_pay_preference": "enabled",
-    "business_name": "Mobile Example Account",
-    "google_pay_preference": "enabled",
-    "link_settings": {
-      "link_authenticated_change_event_enabled": false,
-      "link_bank_onboarding_enabled": false,
-      "link_funding_sources": [
-        "CARD"
-      ],
-      "link_mobile_disable_default_opt_in": true,
-      "link_passthrough_mode_enabled": false
-    },
-    "merchant_country": "US",
-    "merchant_currency": "usd",
-    "merchant_id": "acct_1HvTI7Lu5o3P18Zp",
-    "ordered_payment_method_types_and_wallets": [
-      "card",
-      "card_wallet_link",
-      "google_pay",
-      "ideal",
-      "apple_pay"
-    ],
-    "payment_method_preference": {
-      "object": "payment_method_preference",
-      "country_code": "US",
-      "ordered_payment_method_types": [
-        "card",
-        "ideal"
-      ],
-      "type": "deferred_intent"
-    },
-    "shipping_address_settings": {
-      "autocomplete_allowed": true
-    },
-    "unactivated_payment_method_types": [],
-    "session_id": "elements_session_cs_123",
-    "config_id": "cs_config_123"
+  "ordered_payment_method_types_and_wallets": [
+    "card",
+    "apple_pay",
+    "google_pay"
+  ],
+  "unactivated_payment_method_types": [],
+  "country_code": "US",
+  "elements_session_id": "elements_session_cs_123",
+  "elements_session_config_id": "cs_config_123",
+  "saved_payment_method_options": {
+    "payment_method_save": "disabled",
+    "payment_method_remove": "disabled"
   },
-  "server_built_elements_session_params": {
-    "type": "deferred_intent",
-    "locale": "en-US",
-    "deferred_intent": {
-      "mode": "payment",
-      "amount": 5099,
-      "currency": "usd",
-      "capture_method": "automatic",
-      "payment_method_types": [
-        "card",
-        "ideal"
-      ]
+  "checkout_session_config_id": "checkout_config_123",
+  "setup_future_usage_for_payment_method_type": {},
+  "object": "checkout.session",
+  "state": "ready",
+  "email_collection": "always",
+  "phone_number_collection": {
+    "enabled": false
+  },
+  "card_brand_choice": {
+    "eligible": false,
+    "preferred_networks": [
+      "cartes_bancaires"
+    ],
+    "supported_cobranded_networks": {
+      "cartes_bancaires": true
     }
-  }
+  },
+  "shipping_address_collection": null,
+  "billing_address_collection": "auto",
+  "payment_method_collection": "auto",
+  "blocked_billing_address_countries": [],
+  "name_collection": null,
+  "customer_email": "test+location_DE@example.com",
+  "customer": null
 }

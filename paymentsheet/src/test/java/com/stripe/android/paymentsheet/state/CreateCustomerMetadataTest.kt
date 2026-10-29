@@ -63,7 +63,6 @@ internal class CreateCustomerMetadataTest {
             customer = CHECKOUT_CUSTOMER,
             savedPaymentMethodsOfferSave = CheckoutSessionResponse.SavedPaymentMethodsOfferSave(
                 enabled = true,
-                status = CheckoutSessionResponse.SavedPaymentMethodsOfferSave.Status.NOT_ACCEPTED,
             ),
         ),
     ) {
@@ -77,7 +76,6 @@ internal class CreateCustomerMetadataTest {
             customer = CHECKOUT_CUSTOMER,
             savedPaymentMethodsOfferSave = CheckoutSessionResponse.SavedPaymentMethodsOfferSave(
                 enabled = false,
-                status = CheckoutSessionResponse.SavedPaymentMethodsOfferSave.Status.NOT_ACCEPTED,
             ),
         ),
     ) {

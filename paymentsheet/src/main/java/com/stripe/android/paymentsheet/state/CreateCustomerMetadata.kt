@@ -33,6 +33,7 @@ internal class CreateCustomerMetadata @Inject constructor(
             val customer = initializationMode.checkoutSessionResponse.customer ?: return null
             return CustomerMetadata.CheckoutSession(
                 sessionId = initializationMode.checkoutSessionResponse.id,
+                clientSecret = initializationMode.checkoutSessionResponse.clientSecret,
                 customerId = customer.id,
                 removePaymentMethod = if (customer.canDetachPaymentMethod) {
                     PaymentMethodRemovePermission.Full

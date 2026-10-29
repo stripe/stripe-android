@@ -27,8 +27,7 @@ internal object GooglePayDisplayItemsFactory {
 
         items += response.checkoutItems.flatMap { it.oneTimePrice.items }.map { it.asDisplayItem(context) }
         items += response.subtotalDisplayItem(context)
-        items += response.recurringDetails?.totalDiscountAmounts.orEmpty().map { it.asDisplayItem(context) }
-        items += response.recurringDetails?.totalTaxAmounts.orEmpty().map { it.asDisplayItem(context) }
+        items += response.totalSummary?.totalTaxAmounts.orEmpty().map { it.asDisplayItem(context) }
         items += response.totalLineItem(context)
 
         return items
@@ -71,16 +70,6 @@ internal object GooglePayDisplayItemsFactory {
             label = label.resolvableString.resolve(context),
             type = GooglePayJsonFactory.DisplayItem.Type.LINE_ITEM,
             price = subtotal,
-        )
-    }
-
-    private fun CheckoutSessionResponse.DiscountAmount.asDisplayItem(
-        context: Context,
-    ): GooglePayJsonFactory.DisplayItem {
-        return GooglePayJsonFactory.DisplayItem(
-            label = (displayName ?: coupon.name ?: coupon.code).resolvableString.resolve(context),
-            type = GooglePayJsonFactory.DisplayItem.Type.DISCOUNT,
-            price = -amount,
         )
     }
 

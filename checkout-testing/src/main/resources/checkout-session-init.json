@@ -1,12 +1,12 @@
 {
-  "session_id": "cs_test_abc123",
   "ui_mode": "mobile_elements",
-  "mode": "modeless",
   "status": "open",
   "payment_status": "unpaid",
   "livemode": false,
-  "currency": "usd",
-  "checkout_items": [
+  "id": "cs_test_abc123",
+  "presentment_currency": "usd",
+  "integration_currency": "usd",
+  "items": [
     {
       "key": "group_1",
       "type": "one_time_price",
@@ -20,8 +20,28 @@
               "unit_amount": 5099,
               "product": {
                 "name": "Classic T-Shirt",
-                "images": []
-              }
+                "images": [],
+                "object": "product",
+                "active": false,
+                "addons": null,
+                "id": "prod_checkout123",
+                "livemode": false,
+                "url": null,
+                "attributes": [],
+                "description": null,
+                "unit_label": null
+              },
+              "livemode": false,
+              "active": false,
+              "tax_behavior": "exclusive",
+              "custom_unit_amount": null,
+              "transform_quantity": null,
+              "type": "one_time",
+              "unit_amount_decimal": "5099",
+              "object": "price",
+              "billing_scheme": "per_unit",
+              "recurring": null,
+              "tiers_mode": null
             },
             "quantity": 1,
             "subtotal": 5099,
@@ -32,75 +52,107 @@
             "tax_amounts": [],
             "tax_inclusive": 0,
             "tax_exclusive": 0,
-            "adjustable_quantity": null
+            "adjustable_quantity": null,
+            "amount_details": {
+              "tax_inclusive": 0,
+              "subtotal": 5099,
+              "discount": 0,
+              "discount_amounts": [],
+              "total": 5099,
+              "tax_amounts": [],
+              "tax_exclusive": 0
+            }
           }
-        ]
+        ],
+        "subtotal": 5099,
+        "total": 5099
       }
     }
   ],
-  "recurring_details": {
-    "total_summary": {
-      "total_discount_amounts": [],
-      "total_tax_amounts": []
-    }
+  "total_summary": {
+    "total_tax_amounts": [],
+    "subtotal": 5099,
+    "total": 5099,
+    "due": 5099
   },
-  "tax_meta": {
-    "computation_type": "Off",
-    "status": null
+  "automatic_tax": {
+    "enabled": false,
+    "status": "ready",
+    "address_source": null
   },
-  "elements_session": {
-    "apple_pay_preference": "enabled",
-    "business_name": "Mobile Example Account",
-    "google_pay_preference": "enabled",
-    "link_settings": {
-      "link_authenticated_change_event_enabled": false,
-      "link_bank_onboarding_enabled": false,
-      "link_funding_sources": [
-        "CARD"
-      ],
-      "link_mobile_disable_default_opt_in": true,
-      "link_passthrough_mode_enabled": false
-    },
-    "merchant_country": "US",
-    "merchant_currency": "usd",
-    "merchant_id": "acct_1HvTI7Lu5o3P18Zp",
-    "ordered_payment_method_types_and_wallets": [
-      "card",
-      "link",
-      "apple_pay",
-      "google_pay",
-      "cashapp"
+  "merchant_info": {
+    "display_name": "Mobile Example Account",
+    "country": "US"
+  },
+  "apple_pay_preference": "enabled",
+  "google_pay_preference": "enabled",
+  "link_settings": {
+    "link_funding_sources": [
+      "CARD"
     ],
-    "payment_method_preference": {
-      "object": "payment_method_preference",
-      "country_code": "US",
-      "ordered_payment_method_types": [
-        "card",
-        "link",
-        "cashapp"
-      ],
-      "type": "deferred_intent"
-    },
-    "shipping_address_settings": {
-      "autocomplete_allowed": true
-    },
-    "unactivated_payment_method_types": [],
-    "session_id": "elements_session_cs_123",
-    "config_id": "cs_config_123"
-  },
-  "server_built_elements_session_params": {
-    "type": "deferred_intent",
-    "locale": "en-US",
-    "deferred_intent": {
-      "mode": "payment",
-      "amount": 5099,
-      "currency": "usd",
-      "capture_method": "automatic",
-      "payment_method_types": [
-        "card",
-        "link",
-        "cashapp"
+    "link_consumer_incentive": null,
+    "link_payment_session_context": {
+      "bank_account_permissions": [],
+      "link_payment_method_bank_account_permissions": null,
+      "bank_account_verification_method": null,
+      "link_supported_payment_methods": [
+        "CARD"
       ]
+    },
+    "consumer_found": null,
+    "link_mobile_attestation_state_sync_enabled": true,
+    "enable_partner_lookup": false,
+    "link_mobile_disable_signup": false,
+    "link_mobile_use_attestation_endpoints": false,
+    "link_brand": "link",
+    "link_popup_webview_option": "shared",
+    "link_supported_payment_methods_onboarding_enabled": [
+      "CARD"
+    ],
+    "link_us_bank_account_funding_source_enabled": false,
+    "link_enable_displayable_default_values_in_ece": false,
+    "link_mode": "LINK_CARD_BRAND",
+    "link_supported_payment_methods": [
+      "CARD"
+    ]
+  },
+  "ordered_payment_method_types_and_wallets": [
+    "card",
+    "link",
+    "apple_pay",
+    "google_pay",
+    "cashapp"
+  ],
+  "unactivated_payment_method_types": [],
+  "country_code": "US",
+  "elements_session_id": "elements_session_cs_123",
+  "elements_session_config_id": "cs_config_123",
+  "saved_payment_method_options": {
+    "payment_method_save": "disabled",
+    "payment_method_remove": "disabled"
+  },
+  "checkout_session_config_id": "checkout_config_123",
+  "setup_future_usage_for_payment_method_type": {},
+  "object": "checkout.session",
+  "state": "ready",
+  "email_collection": "always",
+  "phone_number_collection": {
+    "enabled": false
+  },
+  "card_brand_choice": {
+    "eligible": false,
+    "preferred_networks": [
+      "cartes_bancaires"
+    ],
+    "supported_cobranded_networks": {
+      "cartes_bancaires": false
     }
-  }
+  },
+  "shipping_address_collection": null,
+  "billing_address_collection": "auto",
+  "payment_method_collection": "auto",
+  "blocked_billing_address_countries": [],
+  "name_collection": null,
+  "customer": null,
+  "adaptive_pricing_info": null
 }

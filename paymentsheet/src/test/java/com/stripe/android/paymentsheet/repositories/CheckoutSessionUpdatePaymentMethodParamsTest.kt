@@ -46,7 +46,6 @@ internal class CheckoutSessionUpdatePaymentMethodParamsTest {
 
         assertThat(paramMap).containsExactly(
             "payment_method_to_update[payment_method_id]", "pm_123",
-            "elements_session_client[is_aggregation_expected]", "true",
         )
     }
 
@@ -68,7 +67,6 @@ internal class CheckoutSessionUpdatePaymentMethodParamsTest {
             "payment_method_to_update[expiry_details]", mapOf("exp_month" to 12, "exp_year" to 2030),
             // BillingDetails owns its own serialization; we only assert it's forwarded under the right key.
             "payment_method_to_update[billing_details]", billingDetails.toParamMap(),
-            "elements_session_client[is_aggregation_expected]", "true",
         )
     }
 

@@ -20,6 +20,7 @@ internal class CustomerMetadataTest {
     @Test
     fun `CheckoutSession should support card expiry and billing details but not card brand updates`() {
         val metadata = CustomerMetadata.CheckoutSession(
+            clientSecret = "cs_test_abc123_secret_test",
             sessionId = "cs_123",
             customerId = "cus_123",
             removePaymentMethod = PaymentMethodRemovePermission.Full,

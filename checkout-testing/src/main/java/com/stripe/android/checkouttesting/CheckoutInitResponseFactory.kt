@@ -19,17 +19,13 @@ object CheckoutInitResponseFactory {
         create(response) { json ->
             json.put("billing_address_collection", "required")
             json.put(
-                "tax_context",
+                "automatic_tax",
                 JSONObject()
-                    .put("automatic_tax_enabled", true)
-                    .put("automatic_tax_address_source", "session.billing")
+                    .put("enabled", true)
+                    .put("status", "ready")
+                    .put("address_source", "billing")
             )
-            json.put(
-                "tax_meta",
-                JSONObject()
-                    .put("computation_type", "automatic")
-                    .put("status", "requires_location_inputs")
-            )
+            json.getJSONObject("automatic_tax").put("status", "requires_address")
         }
     }
 
@@ -39,7 +35,6 @@ object CheckoutInitResponseFactory {
     ) {
         response.testBodyFromFile("checkout-session-init.json") { json ->
             json.put("customer_email", "checkout@example.com")
-            json.put("account_settings", JSONObject().put("country", "US"))
             modify(json)
         }
     }

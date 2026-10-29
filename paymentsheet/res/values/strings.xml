@@ -452,4 +452,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_wallet_update_card">Update card</string>
   <!-- A text notice shown when the user selects an expired card. -->
   <string name="stripe_wallet_update_expired_card_error">This card has expired. Update your card info or choose a different payment method.</string>
+  <!-- Fallback disclosure when paying in the merchant's currency instead of using Adaptive Pricing. -->
+  <string name="stripe_currency_selector_bank_fees_disclaimer">Exchange rate and fees of your bank may apply.</string>
+  <string name="stripe_currency_selector_show_details">Show exchange rate details</string>
+  <string name="stripe_currency_selector_hide_details">Hide exchange rate details</string>
 </resources>

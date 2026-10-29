@@ -89,14 +89,14 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
             checkoutInitResponse = { response ->
                 response.testBodyFromFile("checkout-session-init.json") { json ->
                     json.put("billing_address_collection", "required")
+                    json.getJSONObject("saved_payment_method_options").put("payment_method_remove", "enabled")
                     json.put(
                         "customer",
                         JSONObject()
                             .put("id", "cus_123")
-                            .put("can_detach_payment_method", true)
                             .put("payment_methods", JSONArray().put(savedCardJson(BILLING_ADDRESS_ZIP))),
                     )
-                    json.getJSONObject("elements_session").remove("link_settings")
+                    json.remove("link_settings")
                 }
             },
             setup = { configuredController ->
@@ -128,11 +128,11 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
                 ),
             ) { response ->
                 response.testBodyFromFile("checkout-session-init.json") { json ->
+                    json.getJSONObject("saved_payment_method_options").put("payment_method_remove", "enabled")
                     json.put(
                         "customer",
                         JSONObject()
                             .put("id", "cus_123")
-                            .put("can_detach_payment_method", true)
                             .put("payment_methods", JSONArray().put(savedCardJson(UPDATED_BILLING_ZIP))),
                     )
                 }
@@ -813,7 +813,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
             bodyPart("tax_region[city]", BILLING_ADDRESS_CITY),
             bodyPart("tax_region[state]", BILLING_ADDRESS_STATE),
             bodyPart("tax_region[postal_code]", BILLING_ADDRESS_ZIP),
-            bodyPart("elements_session_client[is_aggregation_expected]", "true"),
+            bodyPart("client_secret", DEFAULT_CLIENT_SECRET),
             responseFactory = responseFactory,
         )
     }
@@ -825,7 +825,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
             bodyPart("tax_region[city]", SAVED_BILLING_ADDRESS_CITY),
             bodyPart("tax_region[state]", SAVED_BILLING_ADDRESS_STATE),
             bodyPart("tax_region[postal_code]", SAVED_BILLING_ADDRESS_ZIP),
-            bodyPart("elements_session_client[is_aggregation_expected]", "true"),
+            bodyPart("client_secret", DEFAULT_CLIENT_SECRET),
             responseFactory = responseFactory,
         )
     }
@@ -890,28 +890,23 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
             json.put("customer_email", "checkout@example.com")
             json.put("billing_address_collection", billingAddressCollection)
             json.put(
-                "tax_context",
+                "automatic_tax",
                 JSONObject()
-                    .put("automatic_tax_enabled", true)
-                    .put("automatic_tax_address_source", "session.billing"),
+                    .put("enabled", true)
+                    .put("status", "ready")
+                    .put("address_source", "billing"),
             )
-            json.put(
-                "tax_meta",
-                JSONObject()
-                    .put("computation_type", "automatic")
-                    .put("status", taxStatus),
-            )
-            json.getJSONArray("checkout_items").getJSONObject(0)
+            json.getJSONObject("automatic_tax").put("status", if (taxStatus == "requires_location_inputs") "requires_address" else "ready")
+            json.getJSONArray("items").getJSONObject(0)
                 .getJSONObject("one_time_price").getJSONArray("items").getJSONObject(0)
+                .getJSONObject("amount_details")
                 .put("subtotal", INITIAL_TOTAL)
                 .put("total", total)
                 .put("tax_exclusive", total - INITIAL_TOTAL)
-            json.getJSONObject("elements_session").remove("link_settings")
-            json.getJSONObject("server_built_elements_session_params")
-                .getJSONObject("deferred_intent")
-                .put("amount", total)
+            json.remove("link_settings")
+            json.getJSONObject("total_summary").put("due", total)
             if (hasSavedPaymentMethod) {
-                json.put("account_settings", JSONObject("""{"country":"US"}"""))
+                json.getJSONObject("saved_payment_method_options").put("payment_method_remove", "enabled")
                 json.put(
                     "customer",
                     JSONObject(
@@ -956,8 +951,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
                                     "exp_year": 2034,
                                     "last4": "5555"
                                 }
-                            }],
-                            "can_detach_payment_method": true
+                            }]
                         }
                         """.trimIndent()
                     )

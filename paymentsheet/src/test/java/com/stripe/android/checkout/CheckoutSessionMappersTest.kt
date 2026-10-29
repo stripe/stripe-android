@@ -10,6 +10,26 @@ import java.util.Locale
 
 class CheckoutSessionMappersTest {
     @Test
+    fun `maps integration currency independently of adaptive pricing`() {
+        val session = CheckoutSessionResponseFactory.create(
+            currency = "eur",
+            integrationCurrency = "usd",
+        ).session()
+
+        assertThat(session.currency).isEqualTo("usd")
+        assertThat(session.totals.total.amount).isEqualTo("€10.00")
+    }
+
+    @Test
+    fun `public session falls back to the customer email`() {
+        val session = CheckoutSessionResponseFactory.create(
+            customer = CheckoutSessionResponse.Customer("cus_test", "customer@example.com", emptyList(), false),
+        ).session()
+
+        assertThat(session.email).isEqualTo("customer@example.com")
+    }
+
+    @Test
     fun `maps unified public fields and totals`() {
         val response = CheckoutSessionResponseFactory.create(
             businessName = "Widgets, Inc.",
@@ -78,13 +98,15 @@ class CheckoutSessionMappersTest {
     fun `maps adaptive pricing currencies`() {
         val session = CheckoutSessionResponseFactory.create(
             currency = "eur",
+            integrationCurrency = "usd",
             checkoutItems = listOf(CheckoutSessionResponseFactory.checkoutItem(currency = "eur")),
             adaptivePricingInfo = CheckoutSessionResponse.AdaptivePricingInfo(
                 activePresentmentCurrency = "eur",
                 integrationAmount = 1100,
                 integrationCurrency = "usd",
+                integrationDisclosureCaption = null,
                 localCurrencyOptions = listOf(
-                    CheckoutSessionResponse.LocalCurrencyOption(1000, 400, "eur", "0.90")
+                    CheckoutSessionResponse.LocalCurrencyOption(1000, "eur", "1 USD = 0.90 EUR", null)
                 ),
             ),
         ).session()
@@ -119,7 +141,7 @@ class CheckoutSessionMappersTest {
     }
 
     @Test
-    fun `local email and shipping address override response state`() {
+    fun `server email takes precedence while shipping comes from local state`() {
         val address = CheckoutController.Address.State("Denver", "US", "1 Main", null, "80202", "CO")
         val session = CheckoutSessionResponseFactory.create(customerEmail = "server@example.com").asCheckoutSession(
             collectedEmail = "local@example.com",
@@ -131,7 +153,7 @@ class CheckoutSessionMappersTest {
             locale = Locale.US,
         )
 
-        assertThat(session.email).isEqualTo("local@example.com")
+        assertThat(session.email).isEqualTo("server@example.com")
         assertThat(session.shippingAddress?.name).isEqualTo("Jenny")
         assertThat(session.shippingAddress?.address?.postalCode).isEqualTo("80202")
     }

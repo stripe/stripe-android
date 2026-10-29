@@ -8,8 +8,10 @@ import com.stripe.android.model.SetupIntent
 internal object CheckoutSessionResponseFactory {
     fun create(
         id: String = DEFAULT_CHECKOUT_SESSION_ID,
+        clientSecret: String = "${id}_secret_test",
         amount: Long = 1000L,
         currency: String = "usd",
+        integrationCurrency: String = currency,
         paymentStatus: CheckoutSessionResponse.PaymentStatus = CheckoutSessionResponse.PaymentStatus.UNPAID,
         status: CheckoutSessionResponse.Status = CheckoutSessionResponse.Status.OPEN,
         liveMode: Boolean = false,
@@ -20,7 +22,7 @@ internal object CheckoutSessionResponseFactory {
         customer: CheckoutSessionResponse.Customer? = null,
         savedPaymentMethodsOfferSave: CheckoutSessionResponse.SavedPaymentMethodsOfferSave? = null,
         checkoutItems: List<CheckoutSessionResponse.CheckoutItem> = listOf(checkoutItem(amount, currency)),
-        recurringDetails: CheckoutSessionResponse.RecurringDetails? = null,
+        totalSummary: CheckoutSessionResponse.TotalSummary? = null,
         adaptivePricingInfo: CheckoutSessionResponse.AdaptivePricingInfo? = null,
         taxMeta: CheckoutSessionResponse.TaxMeta? = CheckoutSessionResponse.TaxMeta(
             CheckoutSessionResponse.TaxComputationType.OFF,
@@ -35,9 +37,12 @@ internal object CheckoutSessionResponseFactory {
         businessName: String? = "Example, Inc.",
         configId: String? = null,
     ) = CheckoutSessionResponse(
+        clientSecret = clientSecret,
+        paymentResponse = null,
         id = id,
         configId = configId,
         currency = currency,
+        integrationCurrency = integrationCurrency,
         paymentStatus = paymentStatus,
         status = status,
         livemode = liveMode,
@@ -48,7 +53,7 @@ internal object CheckoutSessionResponseFactory {
         customer = customer,
         savedPaymentMethodsOfferSave = savedPaymentMethodsOfferSave,
         checkoutItems = checkoutItems,
-        recurringDetails = recurringDetails,
+        totalSummary = totalSummary,
         adaptivePricingInfo = adaptivePricingInfo,
         taxMeta = taxMeta,
         automaticTaxEnabled = automaticTaxEnabled,

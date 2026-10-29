@@ -20,11 +20,12 @@ internal class CheckoutSessionTaxRegionUpdater @Inject constructor(
     suspend fun updateServerStateIfNeeded(
         checkoutSessionResponse: CheckoutSessionResponse,
         addressSource: CheckoutSessionResponse.TaxAddressSource,
-        address: CheckoutController.Address.State,
+        address: CheckoutController.Address.State?,
     ): Result<CheckoutSessionResponse> {
         return if (requiresUpdate(checkoutSessionResponse, addressSource)) {
             checkoutSessionRepository.updateTaxRegion(
                 sessionId = checkoutSessionResponse.id,
+                clientSecret = checkoutSessionResponse.clientSecret,
                 address = address,
             )
         } else {

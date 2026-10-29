@@ -2,7 +2,6 @@
   "customer_email": "email@example.com",
   "customer": {
     "id": "cus_VDrEHIySBXFE9z",
-    "can_detach_payment_method": true,
     "payment_methods": [
       {
         "id": "pm_1UDPW3Lu5o3P18Zp5rGujYbm",
@@ -27,30 +26,59 @@
         }
       },
       {
-        "id": "pm_1UDPW3Lu5o3P18ZpfZ3q9HVI",
         "object": "payment_method",
-        "allow_redisplay": "always",
-        "customer": "cus_VDrEHIySBXFE9z",
-        "livemode": false,
-        "type": "card",
+        "id": "pm_1UDPW3Lu5o3P18ZpfZ3q9HVI",
+        "billing_details": {
+          "email": "jane@example.com",
+          "phone": "+15551234567",
+          "tax_id": null,
+          "name": "Jane Doe",
+          "address": {
+            "state": "CA",
+            "country": "US",
+            "line2": null,
+            "city": "San Francisco",
+            "line1": "123 Main St",
+            "postal_code": "94105"
+          }
+        },
         "card": {
-          "brand": "visa",
-          "country": "US",
-          "exp_month": 9,
-          "exp_year": 2027,
-          "funding": "credit",
+          "regulated_status": "unregulated",
           "last4": "4242",
+          "funding": "credit",
+          "generated_from": null,
           "networks": {
             "available": [
               "visa"
-            ]
-          }
-        }
+            ],
+            "preferred": null
+          },
+          "brand": "visa",
+          "checks": {
+            "address_postal_code_check": null,
+            "cvc_check": null,
+            "address_line1_check": null
+          },
+          "three_d_secure_usage": {
+            "supported": true
+          },
+          "wallet": null,
+          "display_brand": "visa",
+          "exp_month": 9,
+          "exp_year": 2027,
+          "country": "US"
+        },
+        "livemode": false,
+        "created": 1790965235,
+        "allow_redisplay": "always",
+        "type": "card",
+        "customer": "cus_VDrEHIySBXFE9z",
+        "customer_account": null
       }
     ]
   },
-  "customer_managed_saved_payment_methods_offer_save": {
-    "enabled": true,
-    "status": "not_accepted"
+  "saved_payment_method_options": {
+    "payment_method_save": "enabled",
+    "payment_method_remove": "enabled"
   }
 }

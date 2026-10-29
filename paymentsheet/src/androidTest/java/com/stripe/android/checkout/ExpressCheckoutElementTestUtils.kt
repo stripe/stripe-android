@@ -58,17 +58,13 @@ internal fun enqueueSuccessfulGooglePayPayment(
 internal fun createCheckoutInitResponseWithRequiredShippingAddressForAutomaticTax(response: MockResponse) {
     createCheckoutInitResponseWithRequiredShippingAddress(response) { json ->
         json.put(
-            "tax_context",
+            "automatic_tax",
             JSONObject()
-                .put("automatic_tax_enabled", true)
-                .put("automatic_tax_address_source", "session.shipping")
+                .put("enabled", true)
+                .put("status", "ready")
+                .put("address_source", "shipping")
         )
-        json.put(
-            "tax_meta",
-            JSONObject()
-                .put("computation_type", "automatic")
-                .put("status", "requires_location_inputs")
-        )
+        json.getJSONObject("automatic_tax").put("status", "requires_address")
     }
 }
 
@@ -78,7 +74,6 @@ internal fun createCheckoutInitResponseWithRequiredShippingAddress(
 ) {
     response.testBodyFromFile("checkout-session-init.json") { json ->
         json.put("customer_email", "checkout@example.com")
-        json.put("account_settings", JSONObject().put("country", "US"))
         json.put(
             "shipping_address_collection",
             JSONObject().put("allowed_countries", JSONArray(listOf("US", "CA")))

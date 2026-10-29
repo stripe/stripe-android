@@ -27,6 +27,7 @@ import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.testing.createComposeCleanupRule
+import com.stripe.android.testing.waitUntilWithIdle
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -44,6 +45,7 @@ internal class CurrencySelectorElementContentUITest {
     private val composeRule = createAndroidComposeRule<ComponentActivity>()
 
     private val networkRule = NetworkRule()
+    private val testDispatcher = StandardTestDispatcher()
 
     // Destroys built controllers when the test finishes, releasing each one's viewModelScope.
     private val destroyControllerRule = CleanupTestRule(CheckoutController::destroy)
@@ -51,7 +53,7 @@ internal class CurrencySelectorElementContentUITest {
     @get:Rule
     val ruleChain: RuleChain = RuleChain
         // Keep controller continuations on the test thread and let runTest drive Main work.
-        .outerRule(CoroutineTestRule(StandardTestDispatcher()))
+        .outerRule(CoroutineTestRule(testDispatcher))
         .around(destroyControllerRule)
         .around(createComposeCleanupRule())
         .around(composeRule)
@@ -137,14 +139,26 @@ internal class CurrencySelectorElementContentUITest {
         // doesn't match won't be served, so receiving the event also proves the currency was correct.
         val requestReceived = Turbine<Unit>()
         networkRule.checkoutUpdate(
-            bodyPart("updated_currency", "USD"),
+            bodyPart("adaptive_pricing[currency]", "USD"),
             responseFactory = { response ->
                 requestReceived.add(Unit)
                 response.testBodyFromFile(FIXTURE_WITH_ADAPTIVE_PRICING) { json ->
                     json.put("customer_email", "checkout@example.com")
-                    json.getJSONObject("elements_session").remove("link_settings")
-                    json.getJSONObject("adaptive_pricing_info")
-                        .put("active_presentment_currency", "usd")
+                    json.remove("link_settings")
+                    json.put("presentment_currency", "usd")
+                    val item = json.getJSONArray("items").getJSONObject(0)
+                        .getJSONObject("one_time_price").getJSONArray("items").getJSONObject(0)
+                    item.getJSONObject("price")
+                        .put("currency", "usd")
+                        .put("unit_amount", 5099)
+                        .put("unit_amount_decimal", "5099")
+                    item.put("unit_amount", 5099).put("unit_amount_decimal", "5099")
+                    item.put("subtotal", 5099).put("total", 5099)
+                    item.getJSONObject("amount_details").put("subtotal", 5099).put("total", 5099)
+                    json.getJSONArray("items").getJSONObject(0).getJSONObject("one_time_price")
+                        .put("subtotal", 5099).put("total", 5099)
+                    json.getJSONObject("total_summary")
+                        .put("subtotal", 5099).put("total", 5099).put("due", 5099)
                 }
             },
         )
@@ -153,6 +167,11 @@ internal class CurrencySelectorElementContentUITest {
 
         requestReceived.awaitItem()
         requestReceived.ensureAllEventsConsumed()
+        composeRule.waitUntilWithIdle {
+            testDispatcher.scheduler.runCurrent()
+            controller.session.value?.currencySelectorOptions?.selectedCode == "USD"
+        }
+        assertThat(controller.session.value?.presentmentDetails?.presentmentCurrency).isEqualTo("usd")
     }
 
     private fun runScenario(
@@ -192,7 +211,7 @@ internal class CurrencySelectorElementContentUITest {
             // so the loader doesn't fire an unrelated consumer session lookup.
             response.testBodyFromFile(fixture) { json ->
                 json.put("customer_email", "checkout@example.com")
-                json.getJSONObject("elements_session").remove("link_settings")
+                json.remove("link_settings")
             }
         }
     }

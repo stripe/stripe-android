@@ -18,7 +18,9 @@ import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.elements.CurrencySelectorElement
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.createComposeCleanupRule
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -35,6 +37,9 @@ internal class CurrencySelectorToggleUITest {
     @get:Rule
     val composeCleanupRule = createComposeCleanupRule()
 
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule(UnconfinedTestDispatcher())
+
     private val usdOption = CurrencyOption(
         code = "USD",
         formattedAmount = "$50.99",
@@ -45,6 +50,35 @@ internal class CurrencySelectorToggleUITest {
         formattedAmount = "€45.87",
         flag = FlagContent.Emoji("🇪🇺"),
     )
+
+    @Test
+    fun disclosureDetails_expandAndCollapse() = runScenario(
+        exchangeRateText = "1 EUR = 1.1 USD",
+        exchangeRateDetails = "This rate includes a conversion fee.",
+    ) {
+        composeRule.onNodeWithTag(TEST_TAG_CURRENCY_SELECTOR_DETAILS).assertDoesNotExist()
+        composeRule.onNodeWithTag(TEST_TAG_CURRENCY_SELECTOR_DISCLOSURE).performClick()
+        composeRule.onNodeWithTag(TEST_TAG_CURRENCY_SELECTOR_DETAILS)
+            .assertIsDisplayed()
+            .assertTextEquals("This rate includes a conversion fee.")
+        composeRule.onNodeWithTag(TEST_TAG_CURRENCY_SELECTOR_DISCLOSURE).performClick()
+        composeRule.onNodeWithTag(TEST_TAG_CURRENCY_SELECTOR_DETAILS).assertDoesNotExist()
+    }
+
+    @Test
+    fun integrationCurrency_usesFallbackDisclaimer() = runScenario(selectedCode = "EUR") {
+        composeRule.onNodeWithText("Exchange rate and fees of your bank may apply.").assertIsDisplayed()
+    }
+
+    @Test
+    fun integrationCurrency_doesNotExposeLocalDisclosureDetails() = runScenario(
+        selectedCode = "EUR",
+        exchangeRateText = "Your bank's exchange rate may apply.",
+        exchangeRateDetails = "Local currency details",
+    ) {
+        composeRule.onNodeWithTag(TEST_TAG_CURRENCY_SELECTOR_DISCLOSURE).assertExists()
+        composeRule.onNodeWithTag(TEST_TAG_CURRENCY_SELECTOR_DETAILS).assertDoesNotExist()
+    }
 
     @Test
     fun clickingSelectedOption_doesNotCallCallback() = runScenario {
@@ -158,6 +192,7 @@ internal class CurrencySelectorToggleUITest {
         showCurrencyCode: Boolean = false,
         errorMessage: String? = null,
         exchangeRateText: String? = null,
+        exchangeRateDetails: String? = null,
         block: suspend Scenario.() -> Unit,
     ) {
         val onCurrencySelectedCalls = Turbine<CurrencyOption>()
@@ -165,6 +200,7 @@ internal class CurrencySelectorToggleUITest {
         composeRule.setContent {
             CurrencySelectorToggle(
                 options = CurrencySelectorOptions(
+                    exchangeRateDetails = exchangeRateDetails,
                     first = usdOption,
                     second = eurOption,
                     selectedCode = selectedCode,

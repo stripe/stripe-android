@@ -186,70 +186,6 @@ internal class ElementsSessionJsonParser(
         }
     }
 
-    private fun parseLinkSettings(
-        json: JSONObject?,
-        linkFundingSources: JSONArray?,
-    ): ElementsSession.LinkSettings {
-        val disableLinkSignup = json?.optBoolean(FIELD_DISABLE_LINK_SIGNUP) == true
-        val linkPassthroughModeEnabled = json?.optBoolean(FIELD_LINK_PASSTHROUGH_MODE_ENABLED) == true
-        val useLinkAttestationEndpoints = json?.optBoolean(FIELD_USE_LINK_ATTESTATION_ENDPOINTS) == true
-        val disableLinkRuxInFlowController = json?.optBoolean(FIELD_LINK_MOBILE_DISABLE_RUX_IN_FLOW_CONTROLLER) == true
-        val suppressLink2faModal = json?.optBoolean(FIELD_LINK_SUPPRESS_2FA_MODAL) == true
-        val linkEnableDisplayableDefaultValuesInEce = json?.optBoolean(
-            FIELD_LINK_ENABLE_DISPLAYABLE_DEFAULT_VALUES_IN_ECE
-        ) == true
-        val linkSignUpOptInFeatureEnabled = json?.optBoolean(FIELD_LINK_SIGN_UP_OPT_IN_FEATURE_ENABLED) == true
-        val linkSignUpOptInInitialValue = json?.optBoolean(FIELD_LINK_SIGN_UP_OPT_IN_INITIAL_VALUE) == true
-
-        val linkMode = json?.optString(FIELD_LINK_MODE)?.let { mode ->
-            LinkMode.entries.firstOrNull { it.value == mode }
-        }
-
-        val linkBrand = if (FeatureFlags.forceOnelink.isEnabled) {
-            LinkBrand.Onelink
-        } else {
-            json?.optString(FIELD_LINK_BRAND)
-                ?.takeIf { it.isNotEmpty() }
-                ?.let { brand ->
-                    LinkBrand.entries.firstOrNull { it.value == brand }
-                }
-                // For backward compatibility, if the backend doesn't return a Link brand, we assume it's Link.
-                ?: LinkBrand.Link
-        }
-
-        val linkFlags = json?.let { linkSettingsJson ->
-            parseLinkFlags(linkSettingsJson)
-        } ?: emptyMap()
-
-        val linkConsumerIncentive = if (FeatureFlags.instantDebitsIncentives.isEnabled) {
-            val linkConsumerIncentiveJson = json?.optJSONObject("link_consumer_incentive")
-            linkConsumerIncentiveJson?.let { LinkConsumerIncentiveJsonParser.parse(it) }
-        } else {
-            null
-        }
-
-        val linkSupportedPaymentMethodsOnboardingEnabled = jsonArrayToList(
-            jsonArray = json?.optJSONArray(FIELD_LINK_SUPPORTED_PAYMENT_METHODS_ONBOARDING_ENABLED),
-        )
-
-        return ElementsSession.LinkSettings(
-            linkFundingSources = jsonArrayToList(linkFundingSources),
-            linkPassthroughModeEnabled = linkPassthroughModeEnabled,
-            linkMode = linkMode,
-            linkFlags = linkFlags,
-            disableLinkSignup = disableLinkSignup,
-            linkConsumerIncentive = linkConsumerIncentive,
-            useAttestationEndpoints = useLinkAttestationEndpoints,
-            suppress2faModal = suppressLink2faModal,
-            disableLinkRuxInFlowController = disableLinkRuxInFlowController,
-            linkEnableDisplayableDefaultValuesInEce = linkEnableDisplayableDefaultValuesInEce,
-            linkSignUpOptInFeatureEnabled = linkSignUpOptInFeatureEnabled,
-            linkSignUpOptInInitialValue = linkSignUpOptInInitialValue,
-            linkSupportedPaymentMethodsOnboardingEnabled = linkSupportedPaymentMethodsOnboardingEnabled,
-            linkBrand = linkBrand,
-        )
-    }
-
     private fun parseCustomPaymentMethods(json: JSONArray?): List<ElementsSession.CustomPaymentMethod> {
         if (json == null) {
             return emptyList()
@@ -422,38 +358,6 @@ internal class ElementsSessionJsonParser(
         }
     }
 
-    private fun parseCardBrandChoice(json: JSONObject): ElementsSession.CardBrandChoice? {
-        val cardBrandChoice = json.optJSONObject(FIELD_CARD_BRAND_CHOICE) ?: return null
-        val preferredNetworks = mutableListOf<String>()
-
-        cardBrandChoice.optJSONArray(FIELD_PREFERRED_NETWORKS)?.let { jsonArray ->
-            for (index in 0 until jsonArray.length()) {
-                jsonArray.optString(index)?.let {
-                    preferredNetworks.add(it)
-                }
-            }
-        }
-
-        return ElementsSession.CardBrandChoice(
-            eligible = cardBrandChoice.optBoolean(FIELD_ELIGIBLE, false),
-            preferredNetworks = preferredNetworks.toList()
-        )
-    }
-
-    private fun parseLinkFlags(json: JSONObject): Map<String, Boolean> {
-        val flags = mutableMapOf<String, Boolean>()
-
-        json.keys().forEach { key ->
-            val value = json.get(key)
-
-            if (value is Boolean) {
-                flags[key] = value
-            }
-        }
-
-        return flags.toMap()
-    }
-
     private fun parsePaymentMethodRemoveLastFeatures(
         json: JSONObject
     ): ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature {
@@ -467,47 +371,6 @@ internal class ElementsSessionJsonParser(
             VALUE_ENABLED -> ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Enabled
             else -> ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Disabled
         }
-    }
-
-    /**
-     * Parse the flags from the [json] object.
-     * @param json the json object to parse
-     */
-    private fun parseSessionFlags(json: JSONObject): Map<ElementsSession.Flag, Boolean> {
-        val flags = mutableMapOf<ElementsSession.Flag, Boolean>()
-
-        json.keys().forEach { key ->
-            val value = json.get(key)
-            ElementsSession.Flag.entries
-                .firstOrNull { it.flagValue == key }
-                ?.let { flag ->
-                    if (value is Boolean) {
-                        flags[flag] = value
-                    }
-                }
-        }
-
-        return flags.toMap()
-    }
-
-    /**
-     * Parse the experiment assignments from the [json] object.
-     * @param json the json object to parse
-     */
-    private fun parseExperimentAssignments(json: JSONObject): Map<ExperimentAssignment, String> {
-        val specs = mutableMapOf<ExperimentAssignment, String>()
-        json.keys().forEach { key ->
-            val value = json.get(key)
-            ExperimentAssignment.entries
-                .firstOrNull { it.experimentValue == key }
-                ?.let { flag ->
-                    if (value is String) {
-                        specs[flag] = value
-                    }
-                }
-        }
-
-        return specs.toMap()
     }
 
     private fun buildCardArtLookup(json: JSONObject): Map<String, PaymentMethod.Card.CardArt> {
@@ -540,6 +403,137 @@ internal class ElementsSessionJsonParser(
     }
 
     internal companion object {
+        internal fun parseLinkSettings(
+            json: JSONObject?,
+            linkFundingSources: JSONArray?,
+        ): ElementsSession.LinkSettings {
+            val disableLinkSignup = json?.optBoolean(FIELD_DISABLE_LINK_SIGNUP) == true
+            val linkPassthroughModeEnabled = json?.optBoolean(FIELD_LINK_PASSTHROUGH_MODE_ENABLED) == true
+            val useLinkAttestationEndpoints = json?.optBoolean(FIELD_USE_LINK_ATTESTATION_ENDPOINTS) == true
+            val disableLinkRuxInFlowController = json?.optBoolean(
+                FIELD_LINK_MOBILE_DISABLE_RUX_IN_FLOW_CONTROLLER
+            ) == true
+            val suppressLink2faModal = json?.optBoolean(FIELD_LINK_SUPPRESS_2FA_MODAL) == true
+            val linkEnableDisplayableDefaultValuesInEce = json?.optBoolean(
+                FIELD_LINK_ENABLE_DISPLAYABLE_DEFAULT_VALUES_IN_ECE
+            ) == true
+            val linkSignUpOptInFeatureEnabled = json?.optBoolean(FIELD_LINK_SIGN_UP_OPT_IN_FEATURE_ENABLED) == true
+            val linkSignUpOptInInitialValue = json?.optBoolean(FIELD_LINK_SIGN_UP_OPT_IN_INITIAL_VALUE) == true
+
+            val linkMode = json?.optString(FIELD_LINK_MODE)?.let { mode ->
+                LinkMode.entries.firstOrNull { it.value == mode }
+            }
+
+            val linkBrand = if (FeatureFlags.forceOnelink.isEnabled) {
+                LinkBrand.Onelink
+            } else {
+                json?.optString(FIELD_LINK_BRAND)
+                    ?.takeIf { it.isNotEmpty() }
+                    ?.let { brand ->
+                        LinkBrand.entries.firstOrNull { it.value == brand }
+                    }
+                    // For backward compatibility, if the backend doesn't return a Link brand, we assume it's Link.
+                    ?: LinkBrand.Link
+            }
+
+            val linkFlags = json?.let { linkSettingsJson ->
+                parseLinkFlags(linkSettingsJson)
+            } ?: emptyMap()
+
+            val linkConsumerIncentive = if (FeatureFlags.instantDebitsIncentives.isEnabled) {
+                val linkConsumerIncentiveJson = json?.optJSONObject("link_consumer_incentive")
+                linkConsumerIncentiveJson?.let { LinkConsumerIncentiveJsonParser.parse(it) }
+            } else {
+                null
+            }
+
+            val linkSupportedPaymentMethodsOnboardingEnabled = jsonArrayToList(
+                jsonArray = json?.optJSONArray(FIELD_LINK_SUPPORTED_PAYMENT_METHODS_ONBOARDING_ENABLED),
+            )
+
+            return ElementsSession.LinkSettings(
+                linkFundingSources = jsonArrayToList(linkFundingSources),
+                linkPassthroughModeEnabled = linkPassthroughModeEnabled,
+                linkMode = linkMode,
+                linkFlags = linkFlags,
+                disableLinkSignup = disableLinkSignup,
+                linkConsumerIncentive = linkConsumerIncentive,
+                useAttestationEndpoints = useLinkAttestationEndpoints,
+                suppress2faModal = suppressLink2faModal,
+                disableLinkRuxInFlowController = disableLinkRuxInFlowController,
+                linkEnableDisplayableDefaultValuesInEce = linkEnableDisplayableDefaultValuesInEce,
+                linkSignUpOptInFeatureEnabled = linkSignUpOptInFeatureEnabled,
+                linkSignUpOptInInitialValue = linkSignUpOptInInitialValue,
+                linkSupportedPaymentMethodsOnboardingEnabled = linkSupportedPaymentMethodsOnboardingEnabled,
+                linkBrand = linkBrand,
+            )
+        }
+
+        private fun parseLinkFlags(json: JSONObject): Map<String, Boolean> {
+            val flags = mutableMapOf<String, Boolean>()
+
+            json.keys().forEach { key ->
+                val value = json.get(key)
+
+                if (value is Boolean) {
+                    flags[key] = value
+                }
+            }
+
+            return flags.toMap()
+        }
+
+        internal fun parseCardBrandChoice(json: JSONObject): ElementsSession.CardBrandChoice? {
+            val cardBrandChoice = json.optJSONObject(FIELD_CARD_BRAND_CHOICE) ?: return null
+            val preferredNetworks = mutableListOf<String>()
+
+            cardBrandChoice.optJSONArray(FIELD_PREFERRED_NETWORKS)?.let { jsonArray ->
+                for (index in 0 until jsonArray.length()) {
+                    jsonArray.optString(index)?.let {
+                        preferredNetworks.add(it)
+                    }
+                }
+            }
+
+            return ElementsSession.CardBrandChoice(
+                eligible = cardBrandChoice.optBoolean(FIELD_ELIGIBLE, false),
+                preferredNetworks = preferredNetworks.toList()
+            )
+        }
+
+        internal fun parseSessionFlags(json: JSONObject): Map<ElementsSession.Flag, Boolean> {
+            val flags = mutableMapOf<ElementsSession.Flag, Boolean>()
+
+            json.keys().forEach { key ->
+                val value = json.get(key)
+                ElementsSession.Flag.entries
+                    .firstOrNull { it.flagValue == key }
+                    ?.let { flag ->
+                        if (value is Boolean) {
+                            flags[flag] = value
+                        }
+                    }
+            }
+
+            return flags.toMap()
+        }
+
+        internal fun parseExperimentAssignments(json: JSONObject): Map<ExperimentAssignment, String> {
+            val specs = mutableMapOf<ExperimentAssignment, String>()
+            json.keys().forEach { key ->
+                val value = json.get(key)
+                ExperimentAssignment.entries
+                    .firstOrNull { it.experimentValue == key }
+                    ?.let { flag ->
+                        if (value is String) {
+                            specs[flag] = value
+                        }
+                    }
+            }
+
+            return specs.toMap()
+        }
+
         private const val FIELD_OBJECT = "object"
         private const val FIELD_ELEMENTS_SESSION_ID = "session_id"
         private const val FIELD_ELEMENTS_SESSION_CONFIG_ID = "config_id"

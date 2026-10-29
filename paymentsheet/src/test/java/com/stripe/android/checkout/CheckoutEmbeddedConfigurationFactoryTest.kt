@@ -359,7 +359,7 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
     }
 
     @Test
-    fun `sources the collected email over the checkout session customer email`() {
+    fun `sources the checkout session customer email over the collected email`() {
         val configuration = controllerConfiguration()
 
         val result = factory().create(
@@ -369,7 +369,7 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
             collectedDetails = collectedDetails(email = "collected@example.com"),
         )
 
-        assertThat(result.defaultBillingDetails?.email).isEqualTo("collected@example.com")
+        assertThat(result.defaultBillingDetails?.email).isEqualTo("checkout@example.com")
     }
 
     @Test

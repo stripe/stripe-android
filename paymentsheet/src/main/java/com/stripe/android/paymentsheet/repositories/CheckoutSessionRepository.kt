@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.repositories
 
 import com.stripe.android.Stripe
 import com.stripe.android.checkout.CheckoutController.Address
+import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.exception.safeAnalyticsMessage
 import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
@@ -10,18 +11,22 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.executeRequestWithResultParser
 import com.stripe.android.core.version.StripeSdkVersion
+import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethodUpdateParams
+import com.stripe.android.model.SetupIntent
 import com.stripe.android.networking.ConfirmationParamsUtils
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
+import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
 import java.util.TimeZone
-import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Provider
 
 @OptIn(CheckoutSessionPreview::class)
 internal class CheckoutSessionRepository @Inject constructor(
+    private val stripeRepository: StripeRepository,
+    private val elementsSessionClientParams: ElementsSessionClientParams,
     private val stripeNetworkClient: StripeNetworkClient,
     private val fraudDetectionDataRepository: FraudDetectionDataRepository,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
@@ -37,6 +42,7 @@ internal class CheckoutSessionRepository @Inject constructor(
     private val stripeErrorJsonParser = StripeErrorJsonParser()
 
     private suspend fun executePost(
+        clientSecret: String,
         url: String,
         params: Map<String, *>,
     ): Result<CheckoutSessionResponse> {
@@ -47,32 +53,31 @@ internal class CheckoutSessionRepository @Inject constructor(
             request = apiRequestFactory.createPost(
                 url = url,
                 options = options,
-                params = params,
+                params = elementsSessionClientParams.toCheckoutSessionMap() + params +
+                    ("client_secret" to clientSecret),
             ),
-            responseJsonParser = CheckoutSessionResponseJsonParser,
+            responseJsonParser = CheckoutSessionResponseJsonParser(clientSecret),
         )
     }
 
     suspend fun init(
-        clientParams: ElementsSessionClientParams,
         sessionId: String,
+        clientSecret: String,
         adaptivePricingAllowed: Boolean,
     ): Result<CheckoutSessionResponse> {
         return executePost(
+            clientSecret = clientSecret,
             url = initUrl(sessionId),
             params = mapOf(
-                "browser_locale" to clientParams.locale,
-                "browser_timezone" to TimeZone.getDefault().id,
-                "eid" to UUID.randomUUID().toString(),
-                "redirect_type" to "embedded",
-                "elements_session_client" to clientParams.toCheckoutSessionMap(),
-                "adaptive_pricing[allowed]" to adaptivePricingAllowed.toString(),
+                "adaptive_pricing[allowed]" to adaptivePricingAllowed,
+                "timezone" to TimeZone.getDefault().id,
             ),
         )
     }
 
     suspend fun confirm(
         id: String,
+        clientSecret: String,
         params: ConfirmCheckoutSessionParams,
     ): Result<CheckoutSessionResponse> {
         fraudDetectionDataRepository.refresh()
@@ -85,25 +90,63 @@ internal class CheckoutSessionRepository @Inject constructor(
             productUsageTokens = setOf("checkout_elements"),
         )
         return executePost(
+            clientSecret = clientSecret,
             url = confirmUrl(id),
-            params = requestParams.plus("elements_session_client[is_aggregation_expected]" to "true"),
-        )
+            params = requestParams,
+        ).mapCatching { response ->
+            check(response.status != CheckoutSessionResponse.Status.EXPIRED) {
+                "Checkout Session unexpectedly expired after confirmation."
+            }
+            if (response.paymentResponse?.status == "requires_payment_method") {
+                throw InvalidRequestException(
+                    stripeError = response.paymentResponse.error,
+                    message = response.paymentResponse.error?.message ?: "Checkout requires a payment method.",
+                )
+            }
+            val paymentReference = response.paymentResponse?.paymentIntent
+            val setupReference = response.paymentResponse?.setupIntent
+            val intent = when {
+                paymentReference != null -> stripeRepository.retrievePaymentIntent(
+                    clientSecret = paymentReference.clientSecret,
+                    options = apiRequestOptionsProvider.get(),
+                    expandFields = listOf("payment_method"),
+                ).getOrThrow()
+                setupReference != null -> stripeRepository.retrieveSetupIntent(
+                    clientSecret = setupReference.clientSecret,
+                    options = apiRequestOptionsProvider.get(),
+                    expandFields = listOf("payment_method"),
+                ).getOrThrow()
+                else -> error(
+                    if (response.paymentResponse?.status == "requires_action") {
+                        "CheckoutClient requires an action without a supported Intent."
+                    } else {
+                        "No PaymentIntent or SetupIntent in checkout session confirm response"
+                    }
+                )
+            }
+            response.copy(
+                paymentIntent = intent as? PaymentIntent,
+                setupIntent = intent as? SetupIntent,
+                elementsSession = response.elementsSession?.copy(stripeIntent = intent),
+            )
+        }
     }
 
     suspend fun detachPaymentMethod(
         sessionId: String,
+        clientSecret: String,
         paymentMethodId: String,
-        clientParams: ElementsSessionClientParams,
     ): Result<CheckoutSessionResponse> = executePost(
+        clientSecret = clientSecret,
         url = updateUrl(sessionId),
         params = mapOf(
             "payment_method_to_detach" to paymentMethodId,
-            "elements_session_client" to clientParams.toCheckoutSessionMap(),
         ),
     )
 
     suspend fun updatePaymentMethod(
         sessionId: String,
+        clientSecret: String,
         paymentMethodId: String,
         params: PaymentMethodUpdateParams,
     ): Result<CheckoutSessionResponse> {
@@ -117,6 +160,7 @@ internal class CheckoutSessionRepository @Inject constructor(
 
         return if (updateParams.hasSupportedUpdates) {
             executePost(
+                clientSecret = clientSecret,
                 url = updateUrl(sessionId),
                 params = updateParams.toParamMap(),
             )
@@ -127,39 +171,46 @@ internal class CheckoutSessionRepository @Inject constructor(
 
     suspend fun applyPromotionCode(
         sessionId: String,
+        clientSecret: String,
         promotionCode: String,
     ): Result<CheckoutSessionResponse> = executePost(
+        clientSecret = clientSecret,
         url = updateUrl(sessionId),
         params = mapOf(
             "promotion_code" to promotionCode,
-            "elements_session_client[is_aggregation_expected]" to "true",
         ),
     )
 
     suspend fun updateTaxRegion(
         sessionId: String,
-        address: Address.State,
+        clientSecret: String,
+        address: Address.State?,
     ): Result<CheckoutSessionResponse> = executePost(
+        clientSecret = clientSecret,
         url = updateUrl(sessionId),
         params = buildMap {
+            if (address == null) {
+                put("tax_region", "")
+                return@buildMap
+            }
             putIfNotEmpty("tax_region[country]", address.country)
             putIfNotEmpty("tax_region[line1]", address.line1)
             putIfNotEmpty("tax_region[line2]", address.line2)
             putIfNotEmpty("tax_region[city]", address.city)
             putIfNotEmpty("tax_region[state]", address.state)
             putIfNotEmpty("tax_region[postal_code]", address.postalCode)
-            put("elements_session_client[is_aggregation_expected]", "true")
         },
     )
 
     suspend fun updateCurrency(
         sessionId: String,
+        clientSecret: String,
         currencyCode: String,
     ): Result<CheckoutSessionResponse> = executePost(
+        clientSecret = clientSecret,
         url = updateUrl(sessionId),
         params = mapOf(
-            "updated_currency" to currencyCode,
-            "elements_session_client[is_aggregation_expected]" to "true",
+            "adaptive_pricing[currency]" to currencyCode,
         ),
     ).onSuccess {
         fireEvent(PaymentSheetEvent.AdaptivePricingCurrencyToggled())
@@ -181,13 +232,13 @@ internal class CheckoutSessionRepository @Inject constructor(
             "Checkout session update requires at least card expiry or billing details."
 
         private fun initUrl(sessionId: String): String =
-            "${ApiRequest.API_HOST}/v1/payment_pages/$sessionId/init"
+            "${ApiRequest.API_HOST}/v1/checkout_client/$sessionId/init"
 
         private fun confirmUrl(checkoutSessionId: String): String =
-            "${ApiRequest.API_HOST}/v1/payment_pages/$checkoutSessionId/confirm"
+            "${ApiRequest.API_HOST}/v1/checkout_client/$checkoutSessionId/confirm"
 
         private fun updateUrl(sessionId: String): String =
-            "${ApiRequest.API_HOST}/v1/payment_pages/$sessionId"
+            "${ApiRequest.API_HOST}/v1/checkout_client/$sessionId/update"
     }
 }
 

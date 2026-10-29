@@ -620,12 +620,13 @@ internal class CheckoutStateLoaderTest {
         activePresentmentCurrency = "eur",
         integrationAmount = 5099,
         integrationCurrency = "usd",
+        integrationDisclosureCaption = null,
         localCurrencyOptions = listOf(
             CheckoutSessionResponse.LocalCurrencyOption(
                 amount = 4594,
-                conversionMarkupBps = 400,
                 currency = "eur",
-                presentmentExchangeRate = "0.900961",
+                disclosureCaption = "1 USD = 0.900961 EUR",
+                disclosureDetails = null,
             ),
         ),
     )

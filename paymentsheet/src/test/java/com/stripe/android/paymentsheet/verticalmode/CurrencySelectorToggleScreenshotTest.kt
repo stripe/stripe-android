@@ -26,11 +26,27 @@ internal class CurrencySelectorToggleScreenshotTest {
     private val defaultAppearance = CurrencySelectorElement.Configuration.Appearance().build()
 
     private val options = CurrencySelectorOptions(
+        exchangeRateDetails = null,
         first = CurrencyOption(code = "USD", formattedAmount = "$50.99", flag = FlagContent.Emoji("🇺🇸")),
         second = CurrencyOption(code = "EUR", formattedAmount = "€45.87", flag = FlagContent.Emoji("🇪🇺")),
         selectedCode = "USD",
         exchangeRateText = "1 USD = 0.91 EUR",
     )
+
+    @Test
+    fun testDisclosureDetails() {
+        paparazziRule.snapshot {
+            CurrencySelectorToggle(
+                options = options.copy(
+                    exchangeRateDetails = "This rate includes a fee to guarantee the exchange rate.",
+                ),
+                onCurrencySelected = {},
+                isEnabled = true,
+                showCurrencyCode = false,
+                appearance = defaultAppearance,
+            )
+        }
+    }
 
     @Test
     fun testFirstOptionSelected() {

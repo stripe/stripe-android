@@ -31,6 +31,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
+import com.stripe.android.paymentsheet.repositories.CheckoutStripeRepositoryFactory
 import com.stripe.android.paymentsheet.verticalmode.FakeManageScreenInteractor
 import com.stripe.android.paymentsheet.verticalmode.FakePaymentMethodVerticalLayoutInteractor
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
@@ -255,6 +256,8 @@ internal class DefaultSheetActivityContinueCoordinatorTest {
 
     private fun checkoutSessionTaxRegionUpdater(): CheckoutSessionTaxRegionUpdater {
         val checkoutSessionRepository = CheckoutSessionRepository(
+            stripeRepository = CheckoutStripeRepositoryFactory.create(),
+            elementsSessionClientParams = CheckoutStripeRepositoryFactory.clientParams(),
             fraudDetectionDataRepository = FakeFraudDetectionDataRepository.create(),
             stripeNetworkClient = DefaultStripeNetworkClient(),
             analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),

@@ -10,7 +10,6 @@ internal class ElementsSessionClientParams(
     val mobileSessionId: String get() = mobileSessionIdProvider()
 
     fun toCheckoutSessionMap(): Map<String, String> = mapOf(
-        "is_aggregation_expected" to "true",
         "locale" to locale,
         "mobile_session_id" to mobileSessionId,
         "mobile_app_id" to mobileAppId,

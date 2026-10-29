@@ -6,6 +6,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.model.Address
+import com.stripe.android.networktesting.AdvancedFraudSignalsTestRule
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.analyticsPayloadField
 import com.stripe.android.networktesting.RequestMatchers.hasQueryParam
@@ -32,7 +33,8 @@ internal class AddressElementAnalyticsTest {
 
     @get:Rule
     val testRules: TestRules = TestRules.create(networkRule = networkRule) {
-        around(placesClientProxyTestRule)
+        around(AdvancedFraudSignalsTestRule())
+            .around(placesClientProxyTestRule)
     }
 
     private val page = AddressElementPage(testRules.compose, ApplicationProvider.getApplicationContext())

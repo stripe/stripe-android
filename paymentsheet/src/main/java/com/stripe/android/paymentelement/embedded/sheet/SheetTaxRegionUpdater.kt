@@ -15,7 +15,7 @@ internal typealias SheetTaxRegionUpdate = suspend () -> Result<CheckoutSessionRe
 internal typealias TaxRegionUpdate = suspend (
     CheckoutSessionResponse,
     CheckoutSessionResponse.TaxAddressSource,
-    CheckoutController.Address.State,
+    CheckoutController.Address.State?,
 ) -> Result<CheckoutSessionResponse>
 
 @OptIn(CheckoutSessionPreview::class)
@@ -35,7 +35,6 @@ internal class SheetTaxRegionUpdater internal constructor(
             ?.takeIf { it.collectsTaxFromBillingAddress }
             ?: return null
         val address = selection?.billingDetails?.address?.toCheckoutAddress()
-            ?: return null
 
         return {
             updateTaxRegion(

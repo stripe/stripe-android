@@ -130,6 +130,7 @@ internal class DefaultCustomerStateHolderTest {
                 card = PaymentMethodFixtures.CARD_PAYMENT_METHOD.card?.copy(brand = CardBrand.MasterCard),
             ),
             customerMetadata = CustomerMetadata.CheckoutSession(
+                clientSecret = "cs_test_abc123_secret_test",
                 sessionId = "cs_123",
                 customerId = "cus_123",
                 removePaymentMethod = PaymentMethodRemovePermission.Full,

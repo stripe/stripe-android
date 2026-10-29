@@ -13,7 +13,10 @@ internal object CurrencySelectorOptionsFactory {
         locale: Locale = Locale.getDefault(),
         flagImages: Map<String, Bitmap>?,
     ): CurrencySelectorOptions? {
-        val localOption = adaptivePricingInfo?.localCurrencyOptions?.firstOrNull() ?: return null
+        val info = adaptivePricingInfo ?: return null
+        val localOption = info.localCurrencyOptions.firstOrNull {
+            it.currency.equals(info.activePresentmentCurrency, ignoreCase = true)
+        } ?: info.localCurrencyOptions.firstOrNull() ?: return null
 
         val integrationCode = adaptivePricingInfo.integrationCurrency.uppercase()
         val localCode = localOption.currency.uppercase()
@@ -59,12 +62,13 @@ internal object CurrencySelectorOptionsFactory {
         val selectedCode = adaptivePricingInfo.activePresentmentCurrency.uppercase()
 
         val exchangeRateText = if (adaptivePricingInfo.isActive) {
-            "1 $integrationCode = ${localOption.presentmentExchangeRate} $localCode"
+            localOption.disclosureCaption
         } else {
-            null
+            adaptivePricingInfo.integrationDisclosureCaption
         }
 
         return CurrencySelectorOptions(
+            exchangeRateDetails = localOption.disclosureDetails,
             first = localCurrencyOption,
             second = integrationCurrencyOption,
             selectedCode = selectedCode,
