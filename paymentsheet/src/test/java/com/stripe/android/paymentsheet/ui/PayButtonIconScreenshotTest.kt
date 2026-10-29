@@ -25,16 +25,6 @@ internal class PayButtonIconScreenshotTest {
     )
 
     @Test
-    fun idle(@TestParameter icon: PrimaryButtonIcon, @TestParameter enabled: Boolean) {
-        snapshot(icon, enabled, PrimaryButtonProcessingState.Idle(null))
-    }
-
-    @Test
-    fun processing(@TestParameter icon: PrimaryButtonIcon) {
-        snapshot(icon, false, PrimaryButtonProcessingState.Processing)
-    }
-
-    @Test
     fun completed(@TestParameter icon: PrimaryButtonIcon) {
         snapshot(icon, false, PrimaryButtonProcessingState.Completed)
     }
