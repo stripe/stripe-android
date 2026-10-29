@@ -47,11 +47,9 @@ class PaymentElement @Inject internal constructor(
     @Composable
     fun Content() {
         val state by stateHolder.stateFlow.collectAsState()
-        val currentState = state ?: return
-        if (currentState.configuration.paymentElementConfiguration == null) return
-
+        val mandateState = state?.mandateState
         SideEffect {
-            currentState.mandateState.recordContentAccess()
+            mandateState?.recordContentAccess()
         }
         val embeddedContent by contentHelper.embeddedContent.collectAsState()
         embeddedContent?.Content()
@@ -64,12 +62,7 @@ class PaymentElement @Inject internal constructor(
      */
     @AnyThread
     fun present() {
-        if (stateHolder.state?.configuration?.paymentElementConfiguration == null) return
-
         coroutineScope.launch(Dispatchers.Main.immediate) {
-            // The configuration may have changed while dispatching from a background thread.
-            if (stateHolder.state?.configuration?.paymentElementConfiguration == null) return@launch
-
             contentHelper.presentPaymentOptions()
         }
     }
