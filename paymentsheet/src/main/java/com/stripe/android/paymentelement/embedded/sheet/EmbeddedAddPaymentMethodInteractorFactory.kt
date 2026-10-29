@@ -40,8 +40,12 @@ internal class EmbeddedAddPaymentMethodInteractorFactory @Inject constructor(
     @Suppress("LongMethod")
     fun create(): AddPaymentMethodInteractor {
         val coroutineScope = viewModelScope.childScope(Dispatchers.Main)
-        val initialCode = (embeddedSelectionHolder.selection.value as? PaymentSelection.New)?.paymentMethodType
-            ?: paymentMethodMetadata.supportedPaymentMethodTypes().first()
+        val initialCode = when (val selection = embeddedSelectionHolder.selection.value) {
+            is PaymentSelection.New,
+            is PaymentSelection.CustomPaymentMethod,
+            is PaymentSelection.ExternalPaymentMethod -> selection.paymentMethodType
+            else -> paymentMethodMetadata.supportedPaymentMethodTypes().first()
+        }
         val hasSavedPaymentMethods = customerStateHolder.paymentMethods.value.isNotEmpty()
 
         val formHelper = embeddedFormHelperFactory.create(

@@ -521,7 +521,7 @@ internal class CheckoutOperationCoordinatorTest {
             ConfirmationHandler.Result.Failed(
                 cause = expected,
                 message = "Confirmation fallback message".resolvableString,
-                type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                type = ConfirmationHandler.Result.Failed.ErrorType.Transaction(),
             )
         )
 
@@ -564,7 +564,7 @@ internal class CheckoutOperationCoordinatorTest {
                 ConfirmationHandler.Result.Failed(
                     cause = expected,
                     message = "Confirmation failed".resolvableString,
-                    type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                    type = ConfirmationHandler.Result.Failed.ErrorType.Transaction(),
                 )
             )
 
@@ -750,7 +750,7 @@ internal class CheckoutOperationCoordinatorTest {
             ConfirmationHandler.Result.Failed(
                 cause = expected,
                 message = "Confirmation failed".resolvableString,
-                type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                type = ConfirmationHandler.Result.Failed.ErrorType.Transaction(),
             )
         )
 

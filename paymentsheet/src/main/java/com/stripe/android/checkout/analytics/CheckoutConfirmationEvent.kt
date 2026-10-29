@@ -43,10 +43,13 @@ internal sealed class CheckoutConfirmationEvent : AnalyticsEvent {
     ) : CheckoutConfirmationEvent() {
         override val eventName: String = "checkout_elements.confirm.failed"
         override val params: Map<String, Any> = buildMap {
-            val stripeException = error.cause as? StripeException
-            put("error_type", stripeException?.stripeError?.type ?: error.analyticsValue)
-            error.errorCode?.let { put("error_code", it) }
-            stripeException?.requestId?.let { put("request_id", it) }
+            val stripeException = StripeException.create(error.cause)
+            put(
+                "error_type",
+                error.analyticsValue ?: stripeException.stripeError?.type ?: stripeException.analyticsValue(),
+            )
+            (error.errorCode ?: stripeException.stripeError?.code)?.let { put("error_code", it) }
+            stripeException.requestId?.let { put("request_id", it) }
             putAll(confirmationParams(confirmationContext))
             putAll(analyticsMetadata.paramsMap)
             putAll(duration.mapOfDurationInSeconds())
@@ -73,6 +76,7 @@ internal sealed class CheckoutConfirmationEvent : AnalyticsEvent {
             put("selected_lpm", confirmationContext.paymentSelection.code())
             put("is_saved_payment_method", confirmationContext.paymentSelection.isSaved)
             confirmationContext.paymentSelection.linkContext()?.let { put("link_context", it) }
+            confirmationContext.linkUi?.let { put("link_ui", it.code) }
             put("invocation_source", confirmationContext.invocationSource.code)
             put("active_link_session", confirmationContext.activeLinkSession)
         }

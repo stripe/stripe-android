@@ -23,7 +23,6 @@ import com.stripe.android.paymentelement.confirmation.linkinline.LinkInlineSignu
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
-import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.testing.CleanupTestRule
@@ -311,7 +310,7 @@ internal class DefaultTapToAddConfirmationInteractorTest {
                 ConfirmationHandler.Result.Failed(
                     cause = exception,
                     message = errorMessage,
-                    type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                    type = ConfirmationHandler.Result.Failed.ErrorType.Transaction(),
                 ),
             )
 
@@ -328,8 +327,8 @@ internal class DefaultTapToAddConfirmationInteractorTest {
                         paymentMethod = paymentMethod,
                     )
                 )
-            assertThat(paymentFailureEventCall.error)
-                .isEqualTo(PaymentSheetConfirmationError.Stripe(exception))
+            assertThat(paymentFailureEventCall.error.cause)
+                .isSameInstanceAs(exception)
         }
     }
 
@@ -349,7 +348,7 @@ internal class DefaultTapToAddConfirmationInteractorTest {
                 ConfirmationHandler.Result.Failed(
                     cause = exception,
                     message = errorMessage,
-                    type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                    type = ConfirmationHandler.Result.Failed.ErrorType.Transaction(),
                 ),
             )
 
@@ -367,8 +366,8 @@ internal class DefaultTapToAddConfirmationInteractorTest {
                         paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(cvc = "123"),
                     )
                 )
-            assertThat(paymentFailureEventCall.error)
-                .isEqualTo(PaymentSheetConfirmationError.Stripe(exception))
+            assertThat(paymentFailureEventCall.error.cause)
+                .isSameInstanceAs(exception)
         }
     }
 
@@ -493,7 +492,7 @@ internal class DefaultTapToAddConfirmationInteractorTest {
                 ConfirmationHandler.Result.Failed(
                     cause = Exception("Payment failed"),
                     message = "Payment failed".resolvableString,
-                    type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                    type = ConfirmationHandler.Result.Failed.ErrorType.Transaction(),
                 ),
             )
 
@@ -540,7 +539,7 @@ internal class DefaultTapToAddConfirmationInteractorTest {
                 ConfirmationHandler.Result.Failed(
                     cause = Exception("Payment failed"),
                     message = "Payment failed".resolvableString,
-                    type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                    type = ConfirmationHandler.Result.Failed.ErrorType.Transaction(),
                 ),
             )
             cvcFormHelper.updateState(CvcFormHelper.State.Complete(cvc = "123"))

@@ -55,7 +55,9 @@ internal class ExternalPaymentMethodConfirmationDefinition @Inject constructor(
             ConfirmationDefinition.Action.Fail(
                 cause = error,
                 message = error.stripeErrorMessage(),
-                errorType = ConfirmationHandler.Result.Failed.ErrorType.ExternalPaymentMethod,
+                errorType = ConfirmationHandler.Result.Failed.ErrorType.Transaction(
+                    analyticsValue = "externalPaymentMethodError",
+                ),
             )
         } else {
             ConfirmationDefinition.Action.Launch(
@@ -109,7 +111,9 @@ internal class ExternalPaymentMethodConfirmationDefinition @Inject constructor(
             is PaymentResult.Failed -> ConfirmationDefinition.Result.Failed(
                 cause = result.throwable,
                 message = result.throwable.stripeErrorMessage(),
-                type = ConfirmationHandler.Result.Failed.ErrorType.ExternalPaymentMethod,
+                type = ConfirmationHandler.Result.Failed.ErrorType.Transaction(
+                    analyticsValue = "externalPaymentMethodError",
+                ),
             )
             is PaymentResult.Canceled -> ConfirmationDefinition.Result.Canceled(
                 action = ConfirmationHandler.Result.Canceled.Action.None,

@@ -64,6 +64,41 @@ import kotlin.time.Duration.Companion.seconds
 internal class CheckoutStateLoaderTest {
 
     @Test
+    fun `loadInitial skips element loading when no elements are configured`() = runScenario(
+        configuration = CheckoutController.Configuration().build(),
+        shouldFail = true,
+        chosenSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
+    ) {
+        val loaded = loadInitial()
+
+        assertThat(loaded.state.paymentMethodMetadata).isNull()
+        assertThat(loaded.state.expressCheckoutElementPaymentMethodMetadata).isNull()
+        assertThat(loaded.state.embeddedConfiguration).isNull()
+        assertThat(loaded.state.paymentSelection).isNull()
+        assertThat(loaded.customer).isNull()
+    }
+
+    @Test
+    fun `reload clears payment element state when no elements are configured`() = runScenario(
+        shouldFail = true,
+    ) {
+        val previousState = committedState(
+            paymentSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
+        ).copy(configuration = CheckoutController.Configuration().build())
+        assertThat(previousState.paymentMethodMetadata).isNotNull()
+        assertThat(previousState.embeddedConfiguration).isNotNull()
+        assertThat(previousState.paymentSelection).isNotNull()
+
+        loader.reload(previousState)
+
+        val state = requireNotNull(stateHolder.state)
+        assertThat(state.paymentMethodMetadata).isNull()
+        assertThat(state.expressCheckoutElementPaymentMethodMetadata).isNull()
+        assertThat(state.embeddedConfiguration).isNull()
+        assertThat(state.paymentSelection).isNull()
+    }
+
+    @Test
     fun `loading a new configuration starts fresh mandate acknowledgement for the same session`() = runScenario {
         val firstState = loadInitial().state
         val selection = PaymentSelection.Saved(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD)
@@ -103,30 +138,59 @@ internal class CheckoutStateLoaderTest {
     fun `loadInitial loads only payment element metadata when ECE is not configured`() = runScenario {
         val state = loadInitial().state
 
+        assertThat(state.embeddedConfiguration).isNotNull()
         assertThat(state.paymentMethodMetadata).isNotNull()
         assertThat(state.expressCheckoutElementPaymentMethodMetadata).isNull()
     }
 
     @Test
-    fun `loadInitial loads ECE payment method metadata when ECE is configured`() = runScenario(
+    fun `loadInitial loads only ECE metadata when payment element is not configured`() = runScenario(
+        configuration = CheckoutController.Configuration()
+            .expressCheckoutElement(ExpressCheckoutElement.Configuration())
+            .build(),
+        loaderSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
+        chosenSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
+        customer = savedCustomer(),
+    ) {
+        val loaded = loadInitial()
+
+        assertThat(loaded.state.expressCheckoutElementPaymentMethodMetadata).isNotNull()
+        assertThat(loaded.state.paymentMethodMetadata).isNull()
+        assertThat(loaded.state.embeddedConfiguration).isNull()
+        assertThat(loaded.state.paymentSelection).isNull()
+        assertThat(loaded.customer).isNull()
+    }
+
+    @Test
+    fun `reload loads only ECE metadata when payment element is not configured`() = runScenario(
         configuration = CheckoutController.Configuration()
             .expressCheckoutElement(ExpressCheckoutElement.Configuration())
             .build(),
     ) {
-        val state = loadInitial().state
+        val initial = loadInitial().state
 
+        loader.reload(initial)
+
+        val state = requireNotNull(stateHolder.state)
         assertThat(state.expressCheckoutElementPaymentMethodMetadata).isNotNull()
+        assertThat(state.paymentMethodMetadata).isNull()
+        assertThat(state.embeddedConfiguration).isNull()
+        assertThat(state.paymentSelection).isNull()
     }
 
     @Test
     fun `loadInitial loads payment element and ECE in parallel`() = runScenario(
         configuration = CheckoutController.Configuration()
+            .paymentElement(PaymentElement.Configuration())
             .expressCheckoutElement(ExpressCheckoutElement.Configuration())
             .build(),
         paymentElementLoaderDelay = 1.seconds,
     ) {
-        loadInitial()
+        val state = loadInitial().state
 
+        assertThat(state.paymentMethodMetadata).isNotNull()
+        assertThat(state.expressCheckoutElementPaymentMethodMetadata).isNotNull()
+        assertThat(state.embeddedConfiguration).isNotNull()
         assertThat(testScheduler.currentTime).isEqualTo(1.seconds.inWholeMilliseconds)
     }
 
@@ -508,7 +572,9 @@ internal class CheckoutStateLoaderTest {
             internalRowSelectionCallback = { null },
         )
 
-    private fun defaultConfiguration() = CheckoutController.Configuration().build()
+    private fun defaultConfiguration() = CheckoutController.Configuration()
+        .paymentElement(PaymentElement.Configuration())
+        .build()
 
     private fun response(
         merchantCountry: String? = "US",
@@ -534,7 +600,7 @@ internal class CheckoutStateLoaderTest {
         checkoutSessionResponse: CheckoutSessionResponse = CheckoutSessionResponseFactory.create(),
         linkEagerPresentationSuppressed: Boolean = false,
     ) = CheckoutControllerState(
-        configuration = CheckoutController.Configuration().build(),
+        configuration = defaultConfiguration(),
         checkoutSessionResponse = checkoutSessionResponse,
         flagImages = null,
         collectedDetails = CheckoutCollectedDetails(email = null),

@@ -52,7 +52,7 @@ internal class ConfirmActionHelper(private val isLiveMode: Boolean) {
             } else {
                 message.resolvableString
             },
-            errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+            errorType = ConfirmationHandler.Result.Failed.ErrorType.Transaction(),
         )
     }
 }

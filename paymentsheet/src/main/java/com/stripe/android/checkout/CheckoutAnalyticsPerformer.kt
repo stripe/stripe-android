@@ -6,12 +6,17 @@ import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.checkout.analytics.CheckoutConfirmationContext
 import com.stripe.android.checkout.analytics.CheckoutConfirmationContext.InvocationSource
+import com.stripe.android.checkout.analytics.CheckoutConfirmationContext.LinkUi
 import com.stripe.android.checkout.analytics.CheckoutConfirmationEvent
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.link.account.LinkAccountHolder
+import com.stripe.android.link.model.LinkAccount
+import com.stripe.android.link.ui.inline.UserInput
+import com.stripe.android.model.ConsumerSession.VerificationSession.SessionState
+import com.stripe.android.model.ConsumerSession.VerificationSession.SessionType
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.intent.CheckoutSessionResponseKey
@@ -90,7 +95,7 @@ internal class CheckoutAnalyticsPerformer @Inject constructor(
                     confirmationContext = confirmationContext,
                     analyticsMetadata = analyticsMetadata,
                     duration = duration,
-                    error = result.toConfirmationError() ?: PaymentSheetConfirmationError.Stripe(result.cause),
+                    error = result.toConfirmationError() ?: PaymentSheetConfirmationError(result.cause),
                 )
             )
             is ConfirmationHandler.Result.Canceled -> reportEvent(
@@ -126,11 +131,13 @@ internal class CheckoutAnalyticsPerformer @Inject constructor(
             InvocationSource.Merchant -> state?.paymentMethodMetadata
             InvocationSource.ExpressCheckoutElement -> state?.expressCheckoutElementPaymentMethodMetadata
         }
+        val linkAccount = linkAccountHolder.linkAccountInfo.value.account
         val confirmationContext = CheckoutConfirmationContext(
             paymentSelection = paymentSelection,
             invocationSource = invocationSource,
-            activeLinkSession = linkAccountHolder.linkAccountInfo.value.account?.isVerified
+            activeLinkSession = linkAccount?.isVerified
                 ?: (metadata?.linkState?.loginState == LinkState.LoginState.LoggedIn),
+            linkUi = paymentSelection.linkUi(linkAccount),
         )
         savedStateHandle[CONFIRMATION_CONTEXT_KEY] = confirmationContext
         durationProvider.start(DurationProvider.Key.CheckoutConfirmation)
@@ -140,6 +147,27 @@ internal class CheckoutAnalyticsPerformer @Inject constructor(
                 analyticsMetadata = DefaultAnalyticsMetadataFactory.create(state?.checkoutSessionResponse),
             )
         )
+    }
+
+    private fun PaymentSelection.linkUi(linkAccount: LinkAccount?): LinkUi? = when (this) {
+        is PaymentSelection.Link -> if (selectedPayment == null) {
+            LinkUi.NativePopup
+        } else {
+            linkAccount?.let { account ->
+                val hasVerifiedOtp = account.verificationSessions.any {
+                    it.state == SessionState.Verified && (it.type == SessionType.Sms || it.type == SessionType.Email)
+                }
+                // Match the shared Link UI classification, including seamless sign-in without OTP.
+                when {
+                    hasVerifiedOtp -> LinkUi.NativeReturning
+                    account.isVerified -> LinkUi.NativeSignup
+                    else -> null
+                }
+            }
+        }
+        is PaymentSelection.New.Card -> LinkUi.InlineSignup.takeIf { linkInput is UserInput.SignUp }
+        is PaymentSelection.Saved -> LinkUi.InlineSignup.takeIf { linkInput is UserInput.SignUp }
+        else -> null
     }
 
     private companion object {

@@ -31,6 +31,8 @@ internal class DefaultSheetActivityContinueCoordinator @Inject constructor(
 ) : SheetActivityContinueCoordinator {
 
     override fun onContinue() {
+        if (stateHolder.state.value.isProcessing) return
+
         val selection = selectionHolder.selection.value
         val taxRegionUpdate = taxRegionUpdater.prepareUpdate(
             checkoutSessionResponse = paymentMethodMetadata.checkoutSessionResponse,
@@ -41,8 +43,8 @@ internal class DefaultSheetActivityContinueCoordinator @Inject constructor(
             return
         }
 
+        stateHolder.updateProcessing(true)
         coroutineScope.launch {
-            stateHolder.updateProcessing(true)
             taxRegionUpdate().fold(
                 onSuccess = { response ->
                     stateHolder.setResult(createResult(selection, response))

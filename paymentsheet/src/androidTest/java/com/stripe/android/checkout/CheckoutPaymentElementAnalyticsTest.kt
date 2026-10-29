@@ -9,6 +9,7 @@ import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.core.exception.LocalStripeException
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.elements.PaymentElement
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.networktesting.AdvancedFraudSignalsTestRule
 import com.stripe.android.networktesting.NetworkRule
@@ -64,7 +65,12 @@ internal class CheckoutPaymentElementAnalyticsTest {
                 productUsage = setOf("checkout_elements"),
                 analyticsPayloadField("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID),
             )
-            assertThat(controller.configure(DEFAULT_CLIENT_SECRET))
+            assertThat(
+                controller.configure(
+                    DEFAULT_CLIENT_SECRET,
+                    CheckoutController.Configuration().paymentElement(PaymentElement.Configuration()),
+                )
+            )
                 .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
         },
     ) {
@@ -125,7 +131,12 @@ internal class CheckoutPaymentElementAnalyticsTest {
                     productUsage = setOf("checkout_elements"),
                     analyticsPayloadField("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID),
                 )
-                assertThat(controller.configure(DEFAULT_CLIENT_SECRET))
+                assertThat(
+                    controller.configure(
+                        DEFAULT_CLIENT_SECRET,
+                        CheckoutController.Configuration().paymentElement(PaymentElement.Configuration()),
+                    )
+                )
                     .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
             },
         ) {
@@ -204,7 +215,12 @@ internal class CheckoutPaymentElementAnalyticsTest {
                     productUsage = setOf("checkout_elements"),
                     analyticsPayloadField("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID),
                 )
-                assertThat(controller.configure(DEFAULT_CLIENT_SECRET))
+                assertThat(
+                    controller.configure(
+                        DEFAULT_CLIENT_SECRET,
+                        CheckoutController.Configuration().paymentElement(PaymentElement.Configuration()),
+                    )
+                )
                     .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
             },
         ) {

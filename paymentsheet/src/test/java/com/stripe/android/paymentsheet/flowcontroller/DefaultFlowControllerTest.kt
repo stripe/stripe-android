@@ -19,7 +19,6 @@ import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
@@ -62,7 +61,6 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.MutableConfirmationMetadata
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.bacs.BacsConfirmationOption
-import com.stripe.android.paymentelement.confirmation.epms.ExternalPaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationTypeKey
@@ -277,7 +275,7 @@ internal class DefaultFlowControllerTest {
         verify(eventReporter)
             .onPaymentFailure(
                 paymentSelection = isA<PaymentSelection.New>(),
-                error = eq(PaymentSheetConfirmationError.Stripe(error)),
+                error = eq(PaymentSheetConfirmationError(cause = error)),
             )
     }
 
@@ -326,18 +324,17 @@ internal class DefaultFlowControllerTest {
                 ConfirmationHandler.Result.Failed(
                     cause = InvalidDeferredIntentUsageException(),
                     message = "An error occurred!".resolvableString,
-                    type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                    type = ConfirmationHandler.Result.Failed.ErrorType.Transaction(),
                 )
             )
 
             val error = eventReporter.paymentFailureCalls.awaitItem().error
 
-            assertThat(error.analyticsValue).isEqualTo("invalidDeferredIntentUsage")
             assertThat(error.cause).isInstanceOf(InvalidDeferredIntentUsageException::class.java)
         }
 
     @Test
-    fun `Sends correct event for failed Google Pay payment`() = confirmationTest {
+    fun `Sends correct event for transaction failure`() = confirmationTest {
         val viewModel = createViewModel()
         val flowController = createFlowController(viewModel = viewModel)
 
@@ -370,19 +367,28 @@ internal class DefaultFlowControllerTest {
             )
         )
 
-        val errorCode = GooglePayPaymentMethodLauncher.INTERNAL_ERROR
+        val error = InvalidDeferredIntentUsageException()
 
         confirmationState.value = ConfirmationHandler.State.Complete(
             ConfirmationHandler.Result.Failed(
-                cause = InvalidDeferredIntentUsageException(),
+                cause = error,
                 message = "An error occurred!".resolvableString,
-                type = ConfirmationHandler.Result.Failed.ErrorType.GooglePay(errorCode),
+                type = ConfirmationHandler.Result.Failed.ErrorType.Transaction(
+                    analyticsValue = "transaction_error",
+                    errorCode = "internal_error",
+                ),
             )
         )
 
         verify(eventReporter).onPaymentFailure(
             paymentSelection = isA<PaymentSelection.GooglePay>(),
-            error = eq(PaymentSheetConfirmationError.GooglePay(errorCode)),
+            error = eq(
+                PaymentSheetConfirmationError(
+                    cause = error,
+                    analyticsValue = "transaction_error",
+                    errorCode = "internal_error",
+                )
+            ),
         )
     }
 
@@ -1483,13 +1489,14 @@ internal class DefaultFlowControllerTest {
             ConfirmationHandler.Result.Failed(
                 cause = IllegalStateException("Failed!"),
                 message = "Failed!".resolvableString,
-                type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                type = ConfirmationHandler.Result.Failed.ErrorType.Transaction(),
             )
         )
 
         val failureCall = eventReporter.paymentFailureCalls.awaitItem()
 
-        assertThat(failureCall.error).isInstanceOf(PaymentSheetConfirmationError.Stripe::class.java)
+        assertThat(failureCall.error.cause).isInstanceOf(IllegalStateException::class.java)
+        assertThat(failureCall.error.cause.message).isEqualTo("Failed!")
     }
 
     @Test
@@ -1785,7 +1792,7 @@ internal class DefaultFlowControllerTest {
             ConfirmationHandler.Result.Failed(
                 cause = Exception("something went wrong"),
                 message = "something went wrong".resolvableString,
-                type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                type = ConfirmationHandler.Result.Failed.ErrorType.Transaction(),
             )
         )
 
@@ -2210,45 +2217,6 @@ internal class DefaultFlowControllerTest {
             PaymentElementCallbackReferences[FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER]
                 ?.confirmCustomPaymentMethodCallback
         ).isNull()
-    }
-
-    @Test
-    fun `On external payment error, should report external payment method failure`() = confirmationTest {
-        val eventReporter = FakeEventReporter()
-        val flowController = createFlowController(
-            eventReporter = eventReporter,
-        ).apply {
-            configureExpectingSuccess()
-        }
-
-        flowController.onPaymentOptionResult(
-            PaymentOptionsActivityResult.Succeeded(
-                paymentSelection = EXTERNAL_PAYMENT_SELECTION,
-                linkAccountInfo = LinkAccountUpdate.Value(null)
-            )
-        )
-        flowController.confirm()
-
-        val arguments = startTurbine.awaitItem()
-
-        assertThat(arguments.confirmationOption).isEqualTo(
-            ExternalPaymentMethodConfirmationOption(
-                type = EXTERNAL_PAYMENT_SELECTION.type,
-                billingDetails = EXTERNAL_PAYMENT_SELECTION.billingDetails,
-            )
-        )
-
-        confirmationState.value = ConfirmationHandler.State.Complete(
-            ConfirmationHandler.Result.Failed(
-                cause = Exception("An error!"),
-                message = "An error!".resolvableString,
-                type = ConfirmationHandler.Result.Failed.ErrorType.ExternalPaymentMethod,
-            )
-        )
-
-        val failureCall = eventReporter.paymentFailureCalls.awaitItem()
-
-        assertThat(failureCall.error).isEqualTo(PaymentSheetConfirmationError.ExternalPaymentMethod)
     }
 
     @Test

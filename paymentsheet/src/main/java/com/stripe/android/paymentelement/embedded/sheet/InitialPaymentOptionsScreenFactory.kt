@@ -8,6 +8,7 @@ import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodOrientation
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
+import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.form.OnClickOverrideDelegate
 import com.stripe.android.paymentelement.embedded.manage.EmbeddedManageScreenInteractorFactory
@@ -47,6 +48,7 @@ import javax.inject.Provider
 
 internal class InitialPaymentOptionsScreenFactory @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
+    private val launchMode: EmbeddedLaunchMode,
     private val paymentMethodMetadata: PaymentMethodMetadata,
     private val customerStateHolder: CustomerStateHolder,
     private val selectionHolder: EmbeddedSelectionHolder,
@@ -74,7 +76,9 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
     }
 
     private fun createVerticalInitialScreens(): List<EmbeddedNavigator.Screen> {
-        if (walletsInteractor.canShowDirectForm && selectionHolder.selection.value == null) {
+        val canOpenDirectForm = launchMode is EmbeddedLaunchMode.PaymentOptions ||
+            selectionHolder.selection.value == null
+        if (walletsInteractor.canShowDirectForm && canOpenDirectForm) {
             val paymentMethodCode = paymentMethodMetadata.supportedPaymentMethodTypes().single()
             return listOf(formScreenFactory.createFormScreen(paymentMethodCode))
         }
@@ -111,8 +115,11 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
 
         return buildList {
             add(createHorizontalSavedPaymentMethodsScreen())
-            if (selectionHolder.selection.value is PaymentSelection.New) {
-                add(createHorizontalScreen())
+            when (selectionHolder.selection.value) {
+                is PaymentSelection.New,
+                is PaymentSelection.CustomPaymentMethod,
+                is PaymentSelection.ExternalPaymentMethod -> add(createHorizontalScreen())
+                else -> Unit
             }
         }
     }

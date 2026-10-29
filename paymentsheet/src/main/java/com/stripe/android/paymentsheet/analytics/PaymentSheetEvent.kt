@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.analytics
 
 import com.stripe.android.common.analytics.experiment.LoggableExperiment
+import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.core.utils.mapOfDurationInSeconds
 import com.stripe.android.model.CardBrand
@@ -214,8 +215,16 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
                 put(INTENT_ID, id)
             }
             if (result is Result.Failure) {
-                put(FIELD_ERROR_MESSAGE, result.error.analyticsValue)
-                result.error.errorCode?.let { errorCode ->
+                val stripeException = StripeException.create(result.error.cause)
+
+                put(
+                    FIELD_ERROR_MESSAGE,
+                    result.error.analyticsValue ?: stripeException.analyticsValue(),
+                )
+
+                val errorCode = result.error.errorCode ?: stripeException.stripeError?.code
+
+                errorCode?.let { errorCode ->
                     put(FIELD_ERROR_CODE, errorCode)
                 }
             }
@@ -232,6 +241,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
 
         sealed interface Result {
             data object Success : Result
+
             data class Failure(val error: PaymentSheetConfirmationError) : Result
 
             val analyticsValue: String

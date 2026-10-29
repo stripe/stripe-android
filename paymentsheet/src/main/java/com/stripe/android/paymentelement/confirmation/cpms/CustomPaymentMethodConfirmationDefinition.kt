@@ -52,7 +52,7 @@ internal class CustomPaymentMethodConfirmationDefinition @Inject constructor(
             ConfirmationDefinition.Action.Fail(
                 cause = error,
                 message = error.stripeErrorMessage(),
-                errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                errorType = ConfirmationHandler.Result.Failed.ErrorType.Transaction(),
             )
         } else {
             ConfirmationDefinition.Action.Launch(
@@ -108,7 +108,7 @@ internal class CustomPaymentMethodConfirmationDefinition @Inject constructor(
             is InternalCustomPaymentMethodResult.Failed -> ConfirmationDefinition.Result.Failed(
                 cause = result.throwable,
                 message = result.throwable.stripeErrorMessage(),
-                type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                type = ConfirmationHandler.Result.Failed.ErrorType.Transaction(),
             )
             is InternalCustomPaymentMethodResult.Canceled -> ConfirmationDefinition.Result.Canceled(
                 action = ConfirmationHandler.Result.Canceled.Action.None,

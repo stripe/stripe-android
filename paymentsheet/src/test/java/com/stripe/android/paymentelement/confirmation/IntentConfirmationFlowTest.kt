@@ -183,7 +183,7 @@ internal class IntentConfirmationFlowTest {
         assertThat(failAction.cause).isInstanceOf(IllegalStateException::class.java)
         assertThat(failAction.cause.message).isEqualTo("An error occurred!")
         assertThat(failAction.message).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
-        assertThat(failAction.errorType).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Payment)
+        assertThat(failAction.errorType).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Transaction())
     }
 
     @Test
@@ -206,7 +206,7 @@ internal class IntentConfirmationFlowTest {
         assertThat(failAction.cause).isInstanceOf(IllegalStateException::class.java)
         assertThat(failAction.cause.message).isEqualTo("An error occurred!")
         assertThat(failAction.message).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
-        assertThat(failAction.errorType).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Payment)
+        assertThat(failAction.errorType).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Transaction())
     }
 
     @Test

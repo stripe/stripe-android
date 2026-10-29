@@ -6,6 +6,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.elements.PaymentElement
 import com.stripe.android.elements.ShippingAddressElement
 import com.stripe.android.networktesting.AdvancedFraudSignalsTestRule
 import com.stripe.android.networktesting.NetworkRule
@@ -53,6 +54,7 @@ internal class CheckoutShippingAddressElementAnalyticsTest {
         val initialLine1 = "510 Townsend St"
         val updatedCity = "Cambridge"
         val configuration = CheckoutController.Configuration()
+            .paymentElement(PaymentElement.Configuration())
             .shippingAddressElement(ShippingAddressElement.Configuration())
             .defaults(
                 CheckoutController.Configuration.Defaults().shippingDetails(
@@ -95,6 +97,7 @@ internal class CheckoutShippingAddressElementAnalyticsTest {
     @Test
     fun testHostedAutocompleteSelectionReportsSelectedResult() {
         val configuration = CheckoutController.Configuration()
+            .paymentElement(PaymentElement.Configuration())
             .shippingAddressElement(ShippingAddressElement.Configuration())
             .defaults(
                 CheckoutController.Configuration.Defaults().shippingDetails(

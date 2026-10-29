@@ -79,7 +79,7 @@ internal class CustomerSheetConfirmationInterceptor @AssistedInject constructor(
                 ConfirmationDefinition.Action.Fail(
                     cause = cause,
                     message = cause.stripeErrorMessage(),
-                    errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                    errorType = ConfirmationHandler.Result.Failed.ErrorType.Transaction(),
                 )
             }
         )

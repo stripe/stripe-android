@@ -1,5 +1,6 @@
 package com.stripe.android.checkout
 
+import com.stripe.android.elements.PaymentElement
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -39,10 +40,10 @@ internal fun CheckoutController.Configuration.State.toExpressCheckoutElementGoog
     }
 
 @OptIn(CheckoutSessionPreview::class)
-internal fun CheckoutController.Configuration.State.toPaymentElementGooglePayConfiguration(
+internal fun PaymentElement.Configuration.State.toGooglePayConfiguration(
     checkoutSessionResponse: CheckoutSessionResponse,
 ): PaymentSheet.GooglePayConfiguration? =
-    paymentElementConfiguration.googlePayConfiguration
+    googlePayConfiguration
         .takeIf { it.display == GooglePayDisplay.Automatic }
         ?.let { configuration ->
             checkoutSessionResponse.merchantCountry?.let { merchantCountry ->

@@ -66,7 +66,6 @@ internal class PaymentSheetAnalyticsListener(
     private fun reportPaymentSheetShown(currentScreen: PaymentSheetScreen) {
         when (currentScreen) {
             is PaymentSheetScreen.Loading,
-            is PaymentSheetScreen.VerticalModeForm,
             is PaymentSheetScreen.SavedPaymentMethodConfirm,
             is PaymentSheetScreen.CvcRecollection -> {
                 // Nothing to do here
@@ -84,6 +83,13 @@ internal class PaymentSheetAnalyticsListener(
             }
             is PaymentSheetScreen.VerticalMode -> {
                 reportPaymentOptions(false)
+            }
+            is PaymentSheetScreen.VerticalModeForm -> {
+                // Forms opened from the vertical list are reported by its interactor.
+                if (!previouslyPresentedSheet) {
+                    reportFormShown(currentPaymentMethodTypeProvider())
+                    reportPaymentOptions(false)
+                }
             }
             is AddFirstPaymentMethod, is AddAnotherPaymentMethod -> {
                 reportFormShown(currentPaymentMethodTypeProvider())

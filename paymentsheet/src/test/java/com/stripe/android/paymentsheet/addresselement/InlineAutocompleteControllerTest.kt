@@ -1042,6 +1042,113 @@ class InlineAutocompleteControllerTest {
     }
 
     @Test
+    fun `editing away and back fetches predictions for the original query again`() = runScenario {
+        val fetchGate = CompletableDeferred<Unit>()
+        fakePlacesClient.onBeforeFindPredictions = { fetchGate.await() }
+        delegate.observeQueryChanges(queryFlow, countryFlow)
+
+        queryFlow.value = "123 Main"
+        advanceTimeBy(500)
+        assertThat(fakePlacesClient.findPredictionsCalls.awaitItem().query).isEqualTo("123 Main")
+
+        // Edit away and back within the debounce window while the first fetch is still in flight.
+        queryFlow.value = "123 Main S"
+        fetchGate.complete(Unit)
+        queryFlow.value = "123 Main"
+        advanceTimeBy(500)
+
+        assertThat(fakePlacesClient.findPredictionsCalls.awaitItem().query).isEqualTo("123 Main")
+        assertThat(delegate.inlinePredictionsState.value).isEqualTo(
+            InlinePredictionsState.Results(query = "123 Main", predictions = emptyList())
+        )
+    }
+
+    @Test
+    fun `prediction result arriving after place selection succeeds is discarded`() = runScenario {
+        val fetchPlaceGate = CompletableDeferred<Unit>()
+        val findPredictionsGate = CompletableDeferred<Unit>()
+        // Matching line1 keeps the expanded form's query equal to the in-flight one, so only the
+        // Idle check can discard the late result.
+        fakePlacesClient.fetchPlaceResult = Result.success(Address(line1 = "456 Oak Ave"))
+        fakePlacesClient.onBeforeFetchPlace = { fetchPlaceGate.await() }
+        fakePlacesClient.onBeforeFindPredictions = { findPredictionsGate.await() }
+        delegate.observeQueryChanges(queryFlow, countryFlow)
+        queryFlow.value = "123 Main"
+
+        delegate.onPredictionSelected("place_1")
+        fakePlacesClient.fetchPlaceCalls.awaitItem()
+
+        // Typing during selection starts an independent prediction fetch.
+        queryFlow.value = "456 Oak Ave"
+        advanceTimeBy(500)
+        assertThat(fakePlacesClient.findPredictionsCalls.awaitItem().query).isEqualTo("456 Oak Ave")
+
+        fetchPlaceGate.complete(Unit)
+        fakePlacesClient.resetSessionCalls.awaitItem()
+        assertThat(eventCalls.awaitItem())
+            .isInstanceOf<AutocompleteAddressInteractor.Event.OnExpandForm>()
+        assertThat(delegate.inlinePredictionsState.value).isEqualTo(InlinePredictionsState.Idle)
+
+        findPredictionsGate.complete(Unit)
+        advanceTimeBy(100)
+
+        assertThat(delegate.inlinePredictionsState.value).isEqualTo(InlinePredictionsState.Idle)
+    }
+
+    @Test
+    fun `search reopens predictions for the same query after dismissal`() = runScenario {
+        fakePlacesClient.findPredictionsResult = Result.success(
+            FindAutocompletePredictionsResponse(
+                listOf(
+                    AutocompletePrediction(
+                        SpannableString("123 Main St"),
+                        SpannableString("San Francisco, CA"),
+                        "place_1",
+                    )
+                )
+            )
+        )
+        delegate.observeQueryChanges(queryFlow, countryFlow)
+        queryFlow.value = "123 Main"
+
+        delegate.onSearchActivated()
+        assertThat(fakePlacesClient.findPredictionsCalls.awaitItem().query).isEqualTo("123 Main")
+        val state = delegate.inlinePredictionsState.value
+        assertThat(state).isInstanceOf<InlinePredictionsState.Results>()
+        val results = state as InlinePredictionsState.Results
+        assertThat(results.query).isEqualTo("123 Main")
+        assertThat(results.predictions.single().id).isEqualTo("place_1")
+
+        delegate.onDismissed()
+        assertThat(delegate.inlinePredictionsState.value).isEqualTo(InlinePredictionsState.Idle)
+
+        delegate.onSearchActivated()
+        assertThat(fakePlacesClient.findPredictionsCalls.awaitItem().query).isEqualTo("123 Main")
+        assertThat(delegate.inlinePredictionsState.value).isEqualTo(results)
+    }
+
+    @Test
+    fun `search cancels an in-flight place selection`() = runScenario {
+        val fetchPlaceGate = CompletableDeferred<Unit>()
+        fakePlacesClient.onBeforeFetchPlace = { fetchPlaceGate.await() }
+        delegate.observeQueryChanges(queryFlow, countryFlow)
+        queryFlow.value = "123 Main"
+
+        delegate.onPredictionSelected("place_1")
+        fakePlacesClient.fetchPlaceCalls.awaitItem()
+
+        delegate.onSearchActivated()
+        fakePlacesClient.findPredictionsCalls.awaitItem()
+        fakePlacesClient.resetSessionCalls.awaitItem()
+
+        fetchPlaceGate.complete(Unit)
+        advanceTimeBy(100)
+
+        eventCalls.expectNoEvents()
+        assertThat(delegate.autocompleteFilledAddress).isNull()
+    }
+
+    @Test
     fun `expanded mode - typing does not trigger predictions after expandFormFromInline`() =
         runScenario {
             fakePlacesClient.findPredictionsResult = Result.success(

@@ -67,6 +67,30 @@ internal class EmbeddedAddPaymentMethodInteractorFactoryTest {
     }
 
     @Test
+    fun `initial code seeds from the current custom selection`() = runScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            displayableCustomPaymentMethods = listOf(PaymentMethodFixtures.PAYPAL_CUSTOM_PAYMENT_METHOD),
+        ),
+        initialSelection = PaymentMethodFixtures.createCustomPaymentMethod(
+            PaymentMethodFixtures.PAYPAL_CUSTOM_PAYMENT_METHOD,
+        ),
+    ) {
+        assertThat(interactor.state.value.selectedPaymentMethodCode).isEqualTo("cpmt_paypal")
+    }
+
+    @Test
+    fun `initial code seeds from the current external selection`() = runScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            externalPaymentMethodSpecs = listOf(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC),
+        ),
+        initialSelection = PaymentMethodFixtures.createExternalPaymentMethod(
+            PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC,
+        ),
+    ) {
+        assertThat(interactor.state.value.selectedPaymentMethodCode).isEqualTo("external_paypal")
+    }
+
+    @Test
     fun `OnPaymentMethodSelected updates the selected code`() = runScenario {
         interactor.handleViewAction(
             AddPaymentMethodInteractor.ViewAction.OnPaymentMethodSelected("cashapp")

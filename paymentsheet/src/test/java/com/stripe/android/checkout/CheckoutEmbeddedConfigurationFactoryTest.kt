@@ -26,111 +26,154 @@ import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConf
 internal class CheckoutEmbeddedConfigurationFactoryTest {
 
     @Test
+    fun `creates embedded configuration from explicit payment element configuration`() {
+        val paymentElementConfiguration = PaymentElement.Configuration()
+            .embeddedViewDisplaysMandateText(false)
+            .preferredNetworks(listOf(CardBrand.CartesBancaires))
+            .googlePayConfiguration(PaymentElementGooglePayConfiguration().label("Explicit total"))
+            .build()
+
+        val result = factory().create(
+            configuration = CheckoutController.Configuration().build(),
+            paymentElementConfiguration = paymentElementConfiguration,
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(merchantCountry = "US"),
+            collectedDetails = collectedDetails(),
+        )
+
+        assertThat(result.embeddedViewDisplaysMandateText).isFalse()
+        assertThat(result.preferredNetworks).containsExactly(CardBrand.CartesBancaires)
+        assertThat(result.googlePay?.label).isEqualTo("Explicit total")
+    }
+
+    @Test
     fun `uses the provided merchant display name`() {
         val configuration = CheckoutController.Configuration()
+            .paymentElement(PaymentElement.Configuration())
             .merchantDisplayName("Acme Corp")
             .build()
 
         val result = factory().create(
             configuration = configuration,
+            paymentElementConfiguration = requireNotNull(configuration.paymentElementConfiguration),
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
             collectedDetails = collectedDetails(),
         )
 
-        assertThat(result?.merchantDisplayName).isEqualTo("Acme Corp")
+        assertThat(result.merchantDisplayName).isEqualTo("Acme Corp")
     }
 
     @Test
     fun `falls back to the checkout session business name when merchant display name is unset`() {
+        val configuration = controllerConfiguration()
+
         val result = factory().create(
-            configuration = controllerConfiguration(),
+            configuration = configuration,
+            paymentElementConfiguration = requireNotNull(configuration.paymentElementConfiguration),
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(businessName = "Session Biz"),
             collectedDetails = collectedDetails(),
         )
 
-        assertThat(result?.merchantDisplayName).isEqualTo("Session Biz")
+        assertThat(result.merchantDisplayName).isEqualTo("Session Biz")
     }
 
     @Test
     fun `falls back to the app name when merchant display name and business name are unset`() {
+        val configuration = controllerConfiguration()
+
         val result = factory(appName = "My App").create(
-            configuration = controllerConfiguration(),
+            configuration = configuration,
+            paymentElementConfiguration = requireNotNull(configuration.paymentElementConfiguration),
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(businessName = null),
             collectedDetails = collectedDetails(),
         )
 
-        assertThat(result?.merchantDisplayName).isEqualTo("My App")
+        assertThat(result.merchantDisplayName).isEqualTo("My App")
     }
 
     @Test
     fun `propagates embeddedViewDisplaysMandateText when true`() {
+        val configuration = controllerConfiguration(embeddedViewDisplaysMandateText = true)
+
         val result = factory().create(
-            configuration = controllerConfiguration(embeddedViewDisplaysMandateText = true),
+            configuration = configuration,
+            paymentElementConfiguration = requireNotNull(configuration.paymentElementConfiguration),
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
             collectedDetails = collectedDetails(),
         )
 
-        assertThat(result?.embeddedViewDisplaysMandateText).isTrue()
+        assertThat(result.embeddedViewDisplaysMandateText).isTrue()
     }
 
     @Test
     fun `propagates embeddedViewDisplaysMandateText when false`() {
+        val configuration = controllerConfiguration(embeddedViewDisplaysMandateText = false)
+
         val result = factory().create(
-            configuration = controllerConfiguration(embeddedViewDisplaysMandateText = false),
+            configuration = configuration,
+            paymentElementConfiguration = requireNotNull(configuration.paymentElementConfiguration),
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
             collectedDetails = collectedDetails(),
         )
 
-        assertThat(result?.embeddedViewDisplaysMandateText).isFalse()
+        assertThat(result.embeddedViewDisplaysMandateText).isFalse()
     }
 
     @Test
     fun `propagates payment element appearance`() {
+        val configuration = controllerConfiguration(
+            appearance = PaymentElement.Configuration.Appearance()
+                .colorsLight(
+                    PaymentElement.Configuration.Appearance.Colors.light().primary(0xFF123456.toInt())
+                )
+                .typography(Appearance.Typography().sizeScaleFactor(1.5f))
+                .shapes(Appearance.Shapes().cornerRadiusDp(12f))
+                .embeddedAppearance(
+                    Appearance.Embedded()
+                        .rowStyle(Appearance.Embedded.RowStyle.FloatingButton().spacingDp(7f))
+                )
+        )
+
         val result = factory().create(
-            configuration = controllerConfiguration(
-                appearance = PaymentElement.Configuration.Appearance()
-                    .colorsLight(
-                        PaymentElement.Configuration.Appearance.Colors.light().primary(0xFF123456.toInt())
-                    )
-                    .typography(Appearance.Typography().sizeScaleFactor(1.5f))
-                    .shapes(Appearance.Shapes().cornerRadiusDp(12f))
-                    .embeddedAppearance(
-                        Appearance.Embedded()
-                            .rowStyle(Appearance.Embedded.RowStyle.FloatingButton().spacingDp(7f))
-                    )
-            ),
+            configuration = configuration,
+            paymentElementConfiguration = requireNotNull(configuration.paymentElementConfiguration),
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
             collectedDetails = collectedDetails(),
         )
 
-        assertThat(result?.appearance?.colorsLight?.primary).isEqualTo(0xFF123456.toInt())
-        assertThat(result?.appearance?.typography?.sizeScaleFactor).isEqualTo(1.5f)
-        assertThat(result?.appearance?.shapes?.cornerRadiusDp).isEqualTo(12f)
-        assertThat(result?.appearance?.embeddedAppearance?.style).isEqualTo(
+        assertThat(result.appearance.colorsLight.primary).isEqualTo(0xFF123456.toInt())
+        assertThat(result.appearance.typography.sizeScaleFactor).isEqualTo(1.5f)
+        assertThat(result.appearance.shapes.cornerRadiusDp).isEqualTo(12f)
+        assertThat(result.appearance.embeddedAppearance.style).isEqualTo(
             PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton.Builder().spacingDp(7f).build()
         )
     }
 
     @Test
     fun `collects full address when the session requires a billing address`() {
+        val configuration = controllerConfiguration()
+
         val result = factory().create(
-            configuration = controllerConfiguration(),
+            configuration = configuration,
+            paymentElementConfiguration = requireNotNull(configuration.paymentElementConfiguration),
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(requiresBillingAddress = true),
             collectedDetails = collectedDetails(),
         )
 
-        assertThat(result?.billingDetailsCollectionConfiguration?.address).isEqualTo(PSFull)
+        assertThat(result.billingDetailsCollectionConfiguration.address).isEqualTo(PSFull)
     }
 
     @Test
     fun `uses Automatic when the session does not require a billing address`() {
+        val configuration = controllerConfiguration()
+
         val result = factory().create(
-            configuration = controllerConfiguration(),
+            configuration = configuration,
+            paymentElementConfiguration = requireNotNull(configuration.paymentElementConfiguration),
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(requiresBillingAddress = false),
             collectedDetails = collectedDetails(),
         )
 
-        assertThat(result?.billingDetailsCollectionConfiguration?.address).isEqualTo(PSAutomatic)
+        assertThat(result.billingDetailsCollectionConfiguration.address).isEqualTo(PSAutomatic)
     }
 
     @Test
@@ -155,6 +198,7 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
 
         val result = factory().create(
             configuration = configuration,
+            paymentElementConfiguration = requireNotNull(configuration.paymentElementConfiguration),
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(
                 merchantCountry = "GB",
                 liveMode = true,
@@ -162,7 +206,7 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
             collectedDetails = collectedDetails(),
         )
 
-        val googlePay = requireNotNull(result?.googlePay)
+        val googlePay = requireNotNull(result.googlePay)
         assertThat(googlePay.environment)
             .isEqualTo(PaymentSheet.GooglePayConfiguration.Environment.Test)
         assertThat(googlePay.countryCode).isEqualTo("GB")
@@ -174,13 +218,16 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
 
     @Test
     fun `leaves googlePay null when the checkout session country is missing`() {
+        val configuration = controllerConfiguration()
+
         val result = factory().create(
-            configuration = controllerConfiguration(),
+            configuration = configuration,
+            paymentElementConfiguration = requireNotNull(configuration.paymentElementConfiguration),
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(merchantCountry = null),
             collectedDetails = collectedDetails(),
         )
 
-        assertThat(result?.googlePay).isNull()
+        assertThat(result.googlePay).isNull()
     }
 
     @Test
@@ -195,11 +242,12 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
 
         val result = factory().create(
             configuration = configuration,
+            paymentElementConfiguration = requireNotNull(configuration.paymentElementConfiguration),
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
             collectedDetails = collectedDetails(),
         )
 
-        assertThat(result?.preferredNetworks)
+        assertThat(result.preferredNetworks)
             .isEqualTo(listOf(CardBrand.CartesBancaires, CardBrand.Visa))
     }
 
@@ -211,11 +259,12 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
 
         val result = factory().create(
             configuration = configuration,
+            paymentElementConfiguration = requireNotNull(configuration.paymentElementConfiguration),
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
             collectedDetails = collectedDetails(),
         )
 
-        assertThat(result?.opensCardScannerAutomatically).isTrue()
+        assertThat(result.opensCardScannerAutomatically).isTrue()
     }
 
     @Test
@@ -232,11 +281,12 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
 
         val result = factory().create(
             configuration = configuration,
+            paymentElementConfiguration = requireNotNull(configuration.paymentElementConfiguration),
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
             collectedDetails = collectedDetails(),
         )
 
-        assertThat(result?.cardBrandAcceptance).isEqualTo(
+        assertThat(result.cardBrandAcceptance).isEqualTo(
             PaymentSheet.CardBrandAcceptance.disallowed(
                 listOf(PaymentSheet.CardBrandAcceptance.BrandCategory.Amex)
             )
@@ -245,21 +295,24 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
 
     @Test
     fun `leaves googlePay null when payment element display is Never`() {
-        val result = factory().create(
-            configuration = CheckoutController.Configuration()
-                .paymentElement(
-                    PaymentElement.Configuration().googlePayConfiguration(
-                        PaymentElementGooglePayConfiguration()
-                            .display(PaymentElementGooglePayConfiguration.Display.Never)
-                    )
+        val configuration = CheckoutController.Configuration()
+            .paymentElement(
+                PaymentElement.Configuration().googlePayConfiguration(
+                    PaymentElementGooglePayConfiguration()
+                        .display(PaymentElementGooglePayConfiguration.Display.Never)
                 )
-                .expressCheckoutElement(ExpressCheckoutElement.Configuration())
-                .build(),
+            )
+            .expressCheckoutElement(ExpressCheckoutElement.Configuration())
+            .build()
+
+        val result = factory().create(
+            configuration = configuration,
+            paymentElementConfiguration = requireNotNull(configuration.paymentElementConfiguration),
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(merchantCountry = "US"),
             collectedDetails = collectedDetails(),
         )
 
-        assertThat(result?.googlePay).isNull()
+        assertThat(result.googlePay).isNull()
     }
 
     @Test
@@ -276,11 +329,12 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
 
         val result = factory().create(
             configuration = configuration,
+            paymentElementConfiguration = requireNotNull(configuration.paymentElementConfiguration),
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
             collectedDetails = collectedDetails(),
         )
 
-        assertThat(result?.link?.display).isEqualTo(PaymentSheet.LinkConfiguration.Display.Never)
+        assertThat(result.link.display).isEqualTo(PaymentSheet.LinkConfiguration.Display.Never)
     }
 
     @Test
@@ -295,50 +349,58 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
 
         val result = factory().create(
             configuration = configuration,
+            paymentElementConfiguration = requireNotNull(configuration.paymentElementConfiguration),
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
             collectedDetails = collectedDetails(),
         )
 
-        assertThat(result?.termsDisplay)
+        assertThat(result.termsDisplay)
             .isEqualTo(mapOf(PaymentMethod.Type.Card to PaymentSheet.TermsDisplay.NEVER))
     }
 
     @Test
     fun `sources the collected email over the checkout session customer email`() {
+        val configuration = controllerConfiguration()
+
         val result = factory().create(
-            configuration = controllerConfiguration(),
+            configuration = configuration,
+            paymentElementConfiguration = requireNotNull(configuration.paymentElementConfiguration),
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(customerEmail = "checkout@example.com"),
             collectedDetails = collectedDetails(email = "collected@example.com"),
         )
 
-        assertThat(result?.defaultBillingDetails?.email).isEqualTo("collected@example.com")
+        assertThat(result.defaultBillingDetails?.email).isEqualTo("collected@example.com")
     }
 
     @Test
     fun `populates billing details from configuration defaults`() {
+        val configuration = CheckoutController.Configuration()
+            .paymentElement(PaymentElement.Configuration())
+            .defaults(
+                CheckoutController.Configuration.Defaults().phone("+15555551234").billingDetails(
+                    CheckoutController.Configuration.Defaults.ContactDetails()
+                        .name("Jane Billing")
+                        .address(
+                            CheckoutController.Address()
+                                .city("Denver")
+                                .country("US")
+                                .line1("123 Main St")
+                                .line2("Apt 4")
+                                .postalCode("80202")
+                                .state("CO"),
+                        ),
+                ),
+            )
+            .build()
+
         val result = factory().create(
-            configuration = CheckoutController.Configuration()
-                .defaults(
-                    CheckoutController.Configuration.Defaults().phone("+15555551234").billingDetails(
-                        CheckoutController.Configuration.Defaults.ContactDetails()
-                            .name("Jane Billing")
-                            .address(
-                                CheckoutController.Address()
-                                    .city("Denver")
-                                    .country("US")
-                                    .line1("123 Main St")
-                                    .line2("Apt 4")
-                                    .postalCode("80202")
-                                    .state("CO"),
-                            ),
-                    ),
-                )
-                .build(),
+            configuration = configuration,
+            paymentElementConfiguration = requireNotNull(configuration.paymentElementConfiguration),
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(customerEmail = "checkout@example.com"),
             collectedDetails = collectedDetails(),
         )
 
-        val billingDetails = requireNotNull(result?.defaultBillingDetails)
+        val billingDetails = requireNotNull(result.defaultBillingDetails)
         assertThat(billingDetails.email).isEqualTo("checkout@example.com")
         assertThat(billingDetails.name).isEqualTo("Jane Billing")
         assertThat(billingDetails.phone).isEqualTo("+15555551234")
@@ -353,8 +415,11 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
 
     @Test
     fun `populates shipping details from the session data`() {
+        val configuration = controllerConfiguration()
+
         val result = factory().create(
-            configuration = controllerConfiguration(),
+            configuration = configuration,
+            paymentElementConfiguration = requireNotNull(configuration.paymentElementConfiguration),
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
             collectedDetails = collectedDetails(
                 shippingName = "John Shipping",
@@ -369,8 +434,8 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
             ),
         )
 
-        assertThat(result?.shippingDetails?.name).isEqualTo("John Shipping")
-        val address = requireNotNull(result?.shippingDetails?.address)
+        assertThat(result.shippingDetails?.name).isEqualTo("John Shipping")
+        val address = requireNotNull(result.shippingDetails?.address)
         assertThat(address.city).isEqualTo("Denver")
         assertThat(address.country).isEqualTo("US")
         assertThat(address.line1).isEqualTo("123 Main St")
@@ -381,13 +446,16 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
 
     @Test
     fun `sets attachDefaultsToPaymentMethod to true`() {
+        val configuration = controllerConfiguration()
+
         val result = factory().create(
-            configuration = controllerConfiguration(),
+            configuration = configuration,
+            paymentElementConfiguration = requireNotNull(configuration.paymentElementConfiguration),
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
             collectedDetails = collectedDetails(),
         )
 
-        assertThat(result?.billingDetailsCollectionConfiguration?.attachDefaultsToPaymentMethod).isTrue()
+        assertThat(result.billingDetailsCollectionConfiguration.attachDefaultsToPaymentMethod).isTrue()
     }
 
     @Test
@@ -395,16 +463,18 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
         val defaults = CheckoutController.Configuration.Defaults().phone("+15555551234")
         assertThat(defaults.build().phone).isEqualTo("+15555551234")
         val configuration = CheckoutController.Configuration()
+            .paymentElement(PaymentElement.Configuration())
             .defaults(defaults.phone(null))
             .build()
 
         val result = factory().create(
             configuration = configuration,
+            paymentElementConfiguration = requireNotNull(configuration.paymentElementConfiguration),
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
             collectedDetails = collectedDetails(),
         )
 
-        assertThat(result?.defaultBillingDetails?.phone).isNull()
+        assertThat(result.defaultBillingDetails?.phone).isNull()
     }
 
     private fun factory(appName: String = "Test App") = CheckoutEmbeddedConfigurationFactory(appName)
