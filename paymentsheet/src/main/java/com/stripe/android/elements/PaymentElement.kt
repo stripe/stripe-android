@@ -43,7 +43,6 @@ class PaymentElement @Inject internal constructor(
      * A composable function that displays payment methods inline.
      *
      * It can present a sheet to collect more details or display saved payment methods.
-     * Displays nothing if no [PaymentElement] configuration was provided to [CheckoutController.configure].
      */
     @Composable
     fun Content() {
@@ -61,7 +60,6 @@ class PaymentElement @Inject internal constructor(
     /**
      * Presents a sheet for the customer to select or manage their payment method.
      *
-     * Does nothing if no [PaymentElement] configuration was provided to [CheckoutController.configure].
      * May be called from any thread. Calls from a background thread are dispatched to the main thread.
      */
     @AnyThread
