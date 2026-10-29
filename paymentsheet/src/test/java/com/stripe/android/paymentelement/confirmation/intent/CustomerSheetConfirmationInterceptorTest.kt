@@ -2,10 +2,11 @@ package com.stripe.android.paymentelement.confirmation.intent
 
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.InvalidRequestException
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.customersheet.FakeStripeRepository
 import com.stripe.android.isInstanceOf
@@ -40,8 +41,9 @@ class CustomerSheetConfirmationInterceptorTest {
         checkoutSessionId = null,
     )
 
-    private val requestOptions = ApiRequest.Options(
+    private val requestOptions = RequestCredentials(
         apiKey = "pk_test_123",
+        stripeAccount = null,
     )
 
     @Test
@@ -363,6 +365,7 @@ class CustomerSheetConfirmationInterceptorTest {
             setupIntentInterceptorFactory = setupIntentInterceptorFactory,
             attachPaymentMethodInterceptorFactory = attachPaymentMethodInterceptorFactory,
             logger = logger,
+            apiConfiguration = ApiConfiguration("pk_test_123").build(),
         )
 
         val scenario = Scenario(

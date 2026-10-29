@@ -745,7 +745,7 @@ class OnrampInteractorTest {
         assertThat(result).isInstanceOf(OnrampDeleteWalletAddressResult.Failed::class.java)
         assertUnexpectedError<MissingConsumerSecretException>(
             (result as OnrampDeleteWalletAddressResult.Failed).error
-        )
+)
     }
 
     @Test
@@ -2017,7 +2017,7 @@ class OnrampInteractorTest {
         assertThat(result).isInstanceOf(OnrampCheckoutResult.Failed::class.java)
         val unexpectedError = assertUnexpectedError<RuntimeException>(
             (result as OnrampCheckoutResult.Failed).error
-        )
+)
         assertThat(unexpectedError.underlyingError).isSameInstanceAs(error)
 
         testAnalyticsService.assertContainsEvent(
@@ -2222,7 +2222,7 @@ class OnrampInteractorTest {
         whenever(
             recoveredRepository.retrievePaymentIntent(
                 clientSecret = "pi_test_secret",
-                publishableKey = "pk_platform_123"
+                publishableKey = "pk_platform_123",
             )
         ).thenReturn(Result.success(paymentIntentRequiringCard3ds()))
 
@@ -2288,7 +2288,7 @@ class OnrampInteractorTest {
         whenever(
             cryptoApiRepository.retrievePaymentIntent(
                 clientSecret = "pi_test_secret",
-                publishableKey = "pk_platform_123"
+                publishableKey = "pk_platform_123",
             )
         ).thenReturn(
             Result.success(
@@ -2314,9 +2314,7 @@ class OnrampInteractorTest {
 
     @Test
     fun testAttachKycInfoFailsMissingSecret() = runTest {
-        whenever(
-            linkController.state(any())
-        ).thenReturn(
+        whenever(linkController.state(any())).thenReturn(
             MutableStateFlow(mockLinkStateWithAccount(mockLinkAccountWithoutSecret()))
         )
 
@@ -2337,9 +2335,7 @@ class OnrampInteractorTest {
 
     @Test
     fun testRegisterWalletAddressFailsMissingSecret() = runTest {
-        whenever(
-            linkController.state(any())
-        ).thenReturn(
+        whenever(linkController.state(any())).thenReturn(
             MutableStateFlow(mockLinkStateWithAccount(mockLinkAccountWithoutSecret()))
         )
 
@@ -2355,9 +2351,7 @@ class OnrampInteractorTest {
 
     @Test
     fun testGetWalletOwnershipChallengeFailsMissingSecret() = runTest {
-        whenever(
-            linkController.state(any())
-        ).thenReturn(
+        whenever(linkController.state(any())).thenReturn(
             MutableStateFlow(mockLinkStateWithAccount(mockLinkAccountWithoutSecret()))
         )
 
@@ -2373,9 +2367,7 @@ class OnrampInteractorTest {
 
     @Test
     fun testSubmitWalletOwnershipSignatureFailsMissingSecret() = runTest {
-        whenever(
-            linkController.state(any())
-        ).thenReturn(
+        whenever(linkController.state(any())).thenReturn(
             MutableStateFlow(mockLinkStateWithAccount(mockLinkAccountWithoutSecret()))
         )
 
@@ -2480,9 +2472,7 @@ class OnrampInteractorTest {
 
     @Test
     fun testHandleVerifyKycResultConfirmedMissingSecret() = runTest {
-        whenever(
-            linkController.state(any())
-        ).thenReturn(
+        whenever(linkController.state(any())).thenReturn(
             MutableStateFlow(mockLinkStateWithAccount(mockLinkAccountWithoutSecret()))
         )
 
@@ -2817,12 +2807,7 @@ class OnrampInteractorTest {
             )
         ).thenReturn(Result.success(mockPlatformSettings))
 
-        whenever(
-            cryptoApiRepository.getOnrampSession(
-                sessionId = any(),
-                sessionClientSecret = any()
-            )
-        ).thenReturn(
+        whenever(cryptoApiRepository.getOnrampSession(sessionId = any(), sessionClientSecret = any())).thenReturn(
             Result.success(
                 GetOnrampSessionResponse(
                     id = "cos_test_session_id",
@@ -2835,7 +2820,7 @@ class OnrampInteractorTest {
         whenever(
             cryptoApiRepository.retrievePaymentIntent(
                 clientSecret = "pi_test_secret",
-                publishableKey = "pk_platform_123"
+                publishableKey = "pk_platform_123",
             )
         ).thenReturn(
             Result.success(paymentIntentRequiringCard3ds())

@@ -46,6 +46,7 @@ internal object PaymentMethodMetadataFixtures {
     internal val DEFAULT_API_CONFIG = ApiConfiguration.State(
         publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
         stripeAccountId = ApiKeyFixtures.FAKE_ACCOUNT_ID,
+        betas = emptySet(),
     )
 
     internal fun getDefaultCustomerMetadata(

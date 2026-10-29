@@ -26,6 +26,7 @@ internal object ApiKeyFixtures {
     val DEFAULT_API_CONFIG = ApiConfiguration.State(
         publishableKey = DEFAULT_PUBLISHABLE_KEY,
         stripeAccountId = DEFAULT_STRIPE_ACCOUNT,
+        betas = emptySet(),
     )
 
     const val HOSTED_AUTH_URL = "https://stripe.com/auth/flow/start"

@@ -4,7 +4,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.model.CountryCode
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.link.FakeConsumersApiService
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.model.PaymentDetailsFixtures
@@ -41,6 +41,7 @@ import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argThat
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
+import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -104,8 +105,9 @@ class LinkApiRepositoryTest {
                 sessionId: String,
                 doNotLogConsumerFunnelEvent: Boolean,
                 supportedVerificationTypes: List<String>?,
-                requestOptions: ApiRequest.Options,
-                customerId: String?
+                requestOptions: RequestCredentials,
+                customerId: String?,
+                idempotencyKey: String?,
             ): ConsumerSessionLookup {
                 throw error
             }
@@ -167,10 +169,11 @@ class LinkApiRepositoryTest {
                 verificationToken: String,
                 appId: String,
                 supportedVerificationTypes: List<String>?,
-                requestOptions: ApiRequest.Options,
+                requestOptions: RequestCredentials,
                 sessionId: String,
                 customerId: String?,
-                linkAuthTokenClientSecret: String?
+                linkAuthTokenClientSecret: String?,
+                idempotencyKey: String?,
             ): ConsumerSessionLookup {
                 throw error
             }
@@ -339,7 +342,9 @@ class LinkApiRepositoryTest {
                 )
             },
             requestSurface = eq("android_payment_element"),
-            requestOptions = eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID)),
+            requestOptions = eq(RequestCredentials(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID)),
+            apiConfiguration = any(),
+            idempotencyKey = isNull(),
         )
     }
 
@@ -366,6 +371,8 @@ class LinkApiRepositoryTest {
             paymentDetailsCreateParams = argCaptor.capture(),
             requestSurface = any(),
             requestOptions = any(),
+            apiConfiguration = any(),
+            idempotencyKey = isNull(),
         )
 
         @Suppress("UNCHECKED_CAST")
@@ -386,6 +393,8 @@ class LinkApiRepositoryTest {
                     paymentDetailsCreateParams = any(),
                     requestSurface = any(),
                     requestOptions = any(),
+                    apiConfiguration = any(),
+                    idempotencyKey = isNull(),
                 )
             ).thenReturn(Result.success(paymentDetails))
 
@@ -441,7 +450,9 @@ class LinkApiRepositoryTest {
                     )
                 },
                 requestSurface = eq("android_payment_element"),
-                requestOptions = eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID)),
+                requestOptions = eq(RequestCredentials(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID)),
+                apiConfiguration = any(),
+                idempotencyKey = isNull(),
             )
         }
 
@@ -481,6 +492,8 @@ class LinkApiRepositoryTest {
                 paymentDetailsCreateParams = any(),
                 requestSurface = any(),
                 requestOptions = any(),
+                apiConfiguration = any(),
+                idempotencyKey = isNull(),
             )
         ).thenReturn(Result.success(paymentDetails))
 
@@ -549,6 +562,8 @@ class LinkApiRepositoryTest {
                 paymentDetailsCreateParams = any(),
                 requestSurface = any(),
                 requestOptions = any(),
+                apiConfiguration = any(),
+                idempotencyKey = isNull(),
             )
         ).thenReturn(Result.failure(RuntimeException("error")))
 
@@ -607,7 +622,7 @@ class LinkApiRepositoryTest {
         assertThat(createDetailsCall.consumerSessionClientSecret).isEqualTo(secret)
         assertThat(createDetailsCall.requestSurface).isEqualTo("android_payment_element")
         assertThat(createDetailsCall.requestOptions).isEqualTo(
-            ApiRequest.Options(
+            RequestCredentials(
                 apiKey = PUBLISHABLE_KEY,
                 stripeAccount = STRIPE_ACCOUNT_ID
             )
@@ -647,6 +662,8 @@ class LinkApiRepositoryTest {
                 paymentDetailsCreateParams = any(),
                 requestSurface = any(),
                 requestOptions = any(),
+                apiConfiguration = any(),
+                idempotencyKey = isNull(),
             )
         ).thenReturn(Result.failure(RuntimeException("error")))
 
@@ -682,6 +699,8 @@ class LinkApiRepositoryTest {
             paymentDetailsCreateParams = paramsCaptor.capture(),
             requestSurface = any(),
             requestOptions = any(),
+            apiConfiguration = any(),
+            idempotencyKey = isNull(),
         )
 
         val capturedParams = paramsCaptor.firstValue
@@ -702,6 +721,8 @@ class LinkApiRepositoryTest {
                 id = any(),
                 extraParams = anyOrNull(),
                 requestOptions = any(),
+                apiConfiguration = any(),
+                idempotencyKey = isNull(),
             )
         ).thenReturn(Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
 
@@ -717,14 +738,23 @@ class LinkApiRepositoryTest {
         val savedLinkPaymentDetails = result.getOrThrow()
 
         verify(stripeRepository).sharePaymentDetails(
-            consumerSessionClientSecret = consumerSessionSecret,
-            id = paymentDetailsId,
-            extraParams = mapOf(
+            consumerSessionClientSecret = eq(consumerSessionSecret),
+            id = eq(paymentDetailsId),
+            extraParams = eq(
+                mapOf(
                 "payment_method_options" to mapOf("card" to mapOf("cvc" to "123")),
                 "expand" to listOf("payment_method"),
                 "client_attribution_metadata" to PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA.toParamMap(),
+                )
             ),
-            requestOptions = ApiRequest.Options(apiKey = PUBLISHABLE_KEY, stripeAccount = STRIPE_ACCOUNT_ID)
+            requestOptions = eq(
+                RequestCredentials(
+                apiKey = PUBLISHABLE_KEY,
+                stripeAccount = STRIPE_ACCOUNT_ID,
+                )
+            ),
+            apiConfiguration = any(),
+            idempotencyKey = eq(null),
         )
         assertThat(savedLinkPaymentDetails.paymentDetails)
             .isEqualTo(
@@ -757,6 +787,8 @@ class LinkApiRepositoryTest {
                 id = any(),
                 extraParams = anyOrNull(),
                 requestOptions = any(),
+                apiConfiguration = any(),
+                idempotencyKey = isNull(),
             )
         ).thenReturn(Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
 
@@ -771,14 +803,23 @@ class LinkApiRepositoryTest {
         assertThat(result.isSuccess).isTrue()
 
         verify(stripeRepository).sharePaymentDetails(
-            consumerSessionClientSecret = consumerSessionSecret,
-            id = paymentDetailsId,
-            extraParams = mapOf(
+            consumerSessionClientSecret = eq(consumerSessionSecret),
+            id = eq(paymentDetailsId),
+            extraParams = eq(
+                mapOf(
                 "payment_method_options" to mapOf("card" to mapOf("cvc" to "123")),
                 "expand" to listOf("payment_method"),
                 "client_attribution_metadata" to PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA.toParamMap(),
+                )
             ),
-            requestOptions = ApiRequest.Options(apiKey = PUBLISHABLE_KEY, stripeAccount = STRIPE_ACCOUNT_ID)
+            requestOptions = eq(
+                RequestCredentials(
+                apiKey = PUBLISHABLE_KEY,
+                stripeAccount = STRIPE_ACCOUNT_ID,
+                )
+            ),
+            apiConfiguration = any(),
+            idempotencyKey = eq(null),
         )
     }
 
@@ -792,6 +833,8 @@ class LinkApiRepositoryTest {
                 id = any(),
                 extraParams = anyOrNull(),
                 requestOptions = any(),
+                apiConfiguration = any(),
+                idempotencyKey = isNull(),
             )
         ).thenReturn(Result.failure(RuntimeException("error")))
 
@@ -838,16 +881,18 @@ class LinkApiRepositoryTest {
         )
 
         verify(consumersApiService).startConsumerVerification(
-            consumerSessionClientSecret = secret,
-            locale = Locale.US,
-            requestSurface = CONSUMER_SURFACE,
-            type = VerificationType.SMS,
-            customEmailType = null,
-            connectionsMerchantName = null,
-            accountPhoneNumber = null,
-            emailAddress = null,
-            requestOptions = ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID),
-            isResendSmsCode = false
+            consumerSessionClientSecret = eq(secret),
+            locale = eq(Locale.US),
+            requestSurface = eq(CONSUMER_SURFACE),
+            type = eq(VerificationType.SMS),
+            customEmailType = eq(null),
+            connectionsMerchantName = eq(null),
+            accountPhoneNumber = eq(null),
+            emailAddress = eq(null),
+            requestOptions = eq(RequestCredentials(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID)),
+            isResendSmsCode = eq(false),
+            apiConfiguration = any(),
+            idempotencyKey = eq(null),
         )
     }
 
@@ -865,7 +910,9 @@ class LinkApiRepositoryTest {
                 accountPhoneNumber = anyOrNull(),
                 emailAddress = anyOrNull(),
                 requestOptions = any(),
-                isResendSmsCode = any()
+                isResendSmsCode = any(),
+                apiConfiguration = any(),
+                idempotencyKey = isNull(),
             )
         )
             .thenReturn(consumerSession)
@@ -896,7 +943,9 @@ class LinkApiRepositoryTest {
                 accountPhoneNumber = anyOrNull(),
                 emailAddress = anyOrNull(),
                 requestOptions = any(),
-                isResendSmsCode = any()
+                isResendSmsCode = any(),
+                apiConfiguration = any(),
+                idempotencyKey = isNull(),
             )
         )
             .thenThrow(RuntimeException("error"))
@@ -925,7 +974,9 @@ class LinkApiRepositoryTest {
         verify(stripeRepository).listPaymentDetails(
             eq(secret),
             eq(setOf("card")),
-            eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID))
+            eq(RequestCredentials(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID)),
+            apiConfiguration = any(),
+            idempotencyKey = anyOrNull(),
         )
     }
 
@@ -1000,13 +1051,23 @@ class LinkApiRepositoryTest {
         verify(stripeRepository).deletePaymentDetails(
             eq(secret),
             eq(id),
-            eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID))
+            eq(RequestCredentials(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID)),
+            apiConfiguration = any(),
+            idempotencyKey = anyOrNull(),
         )
     }
 
     @Test
     fun `deletePaymentDetails returns successful result`() = runTest {
-        whenever(stripeRepository.deletePaymentDetails(any(), any(), any())).thenReturn(Result.success(Unit))
+        whenever(
+            stripeRepository.deletePaymentDetails(
+            any(),
+            any(),
+            any(),
+            apiConfiguration = any(),
+            idempotencyKey = isNull(),
+            )
+        ).thenReturn(Result.success(Unit))
 
         val result = linkRepository.deletePaymentDetails(
             paymentDetailsId = "id",
@@ -1020,7 +1081,15 @@ class LinkApiRepositoryTest {
     @Test
     fun `deletePaymentDetails returns error result when repository fails`() = runTest {
         val error = RuntimeException("error")
-        whenever(stripeRepository.deletePaymentDetails(any(), any(), any()))
+        whenever(
+            stripeRepository.deletePaymentDetails(
+            any(),
+            any(),
+            any(),
+            apiConfiguration = any(),
+            idempotencyKey = isNull(),
+            )
+        )
             .thenReturn(Result.failure(error))
 
         val result = linkRepository.deletePaymentDetails(
@@ -1049,13 +1118,23 @@ class LinkApiRepositoryTest {
         verify(stripeRepository).updatePaymentDetails(
             eq(secret),
             eq(params),
-            eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID))
+            eq(RequestCredentials(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID)),
+            apiConfiguration = any(),
+            idempotencyKey = anyOrNull(),
         )
     }
 
     @Test
     fun `updatePaymentDetails returns successful result`() = runTest {
-        whenever(stripeRepository.updatePaymentDetails(any(), any(), any()))
+        whenever(
+            stripeRepository.updatePaymentDetails(
+            any(),
+            any(),
+            any(),
+            apiConfiguration = any(),
+            idempotencyKey = isNull(),
+            )
+        )
             .thenReturn(Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS))
 
         val result = linkRepository.updatePaymentDetails(
@@ -1073,7 +1152,15 @@ class LinkApiRepositoryTest {
     @Test
     fun `updatePaymentDetails returns error result when repository fails`() = runTest {
         val error = RuntimeException("error")
-        whenever(stripeRepository.updatePaymentDetails(any(), any(), any()))
+        whenever(
+            stripeRepository.updatePaymentDetails(
+            any(),
+            any(),
+            any(),
+            apiConfiguration = any(),
+            idempotencyKey = isNull(),
+            )
+        )
             .thenReturn(Result.failure(error))
 
         val result = linkRepository.updatePaymentDetails(
@@ -1097,6 +1184,8 @@ class LinkApiRepositoryTest {
                 id = any(),
                 extraParams = anyOrNull(),
                 requestOptions = any(),
+                apiConfiguration = any(),
+                idempotencyKey = isNull(),
             )
         ).thenReturn(Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
 
@@ -1117,6 +1206,8 @@ class LinkApiRepositoryTest {
             id = any(),
             extraParams = extraParamsCaptor.capture(),
             requestOptions = any(),
+            apiConfiguration = any(),
+            idempotencyKey = isNull(),
         )
 
         val extraParams = extraParamsCaptor.firstValue
@@ -1181,6 +1272,7 @@ class LinkApiRepositoryTest {
         val DEFAULT_API_CONFIGURATION = ApiConfiguration.State(
             publishableKey = PUBLISHABLE_KEY,
             stripeAccountId = STRIPE_ACCOUNT_ID,
+            betas = emptySet(),
         )
     }
 }

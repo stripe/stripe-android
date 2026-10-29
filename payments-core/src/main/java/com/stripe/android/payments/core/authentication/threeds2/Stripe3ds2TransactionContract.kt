@@ -7,7 +7,7 @@ import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.os.bundleOf
 import com.stripe.android.PaymentAuthConfig
 import com.stripe.android.core.ApiConfiguration
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.model.Stripe3ds2Fingerprint
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.PaymentFlowResult
@@ -37,7 +37,7 @@ internal class Stripe3ds2TransactionContract :
         val config: PaymentAuthConfig.Stripe3ds2Config,
         val stripeIntent: StripeIntent,
         val nextActionData: StripeIntent.NextActionData.SdkData.Use3DS2,
-        val requestOptions: ApiRequest.Options,
+        val requestOptions: RequestCredentials,
         val enableLogging: Boolean,
         val statusBarColor: Int?,
         val apiConfiguration: ApiConfiguration.State,

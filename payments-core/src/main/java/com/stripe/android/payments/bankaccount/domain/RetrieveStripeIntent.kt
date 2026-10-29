@@ -1,7 +1,7 @@
 package com.stripe.android.payments.bankaccount.domain
 
 import com.stripe.android.core.ApiConfiguration
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
 import javax.inject.Inject
@@ -19,10 +19,12 @@ internal class RetrieveStripeIntent @Inject constructor(
     ): Result<StripeIntent> {
         return stripeRepository.retrieveStripeIntent(
             clientSecret = clientSecret,
-            options = ApiRequest.Options(
+            options = RequestCredentials(
                 apiKey = apiConfiguration.publishableKey,
                 stripeAccount = apiConfiguration.stripeAccountId,
             ),
+            apiConfiguration = apiConfiguration,
+            idempotencyKey = null,
         )
     }
 }

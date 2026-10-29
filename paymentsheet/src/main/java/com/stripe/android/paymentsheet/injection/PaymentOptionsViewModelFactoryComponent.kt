@@ -6,7 +6,7 @@ import com.stripe.android.common.di.ElementsSessionClientParamsModule
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.networking.PaymentElementRequestSurfaceModule
-import com.stripe.android.payments.core.injection.ApiRequestOptionsModule
+import com.stripe.android.payments.core.injection.RequestCredentialsModule
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.PaymentOptionContract
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel
@@ -17,7 +17,7 @@ import javax.inject.Singleton
 @Singleton
 @Component(
     modules = [
-        ApiRequestOptionsModule::class,
+        RequestCredentialsModule::class,
         StripeRepositoryModule::class,
         PaymentSheetCommonModule::class,
         ApiConfigurationModule::class,

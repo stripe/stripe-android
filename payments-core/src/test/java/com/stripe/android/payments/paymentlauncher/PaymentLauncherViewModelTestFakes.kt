@@ -9,7 +9,7 @@ import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.Turbine
 import com.stripe.android.core.ApiConfiguration
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.PaymentIntent
@@ -40,8 +40,9 @@ internal object PaymentLauncherViewModelTestFakes {
 
         override suspend fun confirmPaymentIntent(
             confirmPaymentIntentParams: ConfirmPaymentIntentParams,
-            options: ApiRequest.Options,
+            options: RequestCredentials,
             expandFields: List<String>,
+            idempotencyKey: String?,
         ): Result<PaymentIntent> {
             confirmPaymentIntentCalls.add(ConfirmPaymentIntentCall(confirmPaymentIntentParams, options, expandFields))
             return confirmPaymentIntentResult
@@ -49,8 +50,9 @@ internal object PaymentLauncherViewModelTestFakes {
 
         override suspend fun confirmSetupIntent(
             confirmSetupIntentParams: ConfirmSetupIntentParams,
-            options: ApiRequest.Options,
+            options: RequestCredentials,
             expandFields: List<String>,
+            idempotencyKey: String?,
         ): Result<SetupIntent> {
             confirmSetupIntentCalls.add(ConfirmSetupIntentCall(confirmSetupIntentParams, options, expandFields))
             return confirmSetupIntentResult
@@ -58,8 +60,9 @@ internal object PaymentLauncherViewModelTestFakes {
 
         override suspend fun retrieveStripeIntent(
             clientSecret: String,
-            options: ApiRequest.Options,
+            options: RequestCredentials,
             expandFields: List<String>,
+            idempotencyKey: String?,
         ): Result<StripeIntent> {
             retrieveStripeIntentCalls.add(RetrieveIntentCall(clientSecret, options, expandFields))
             return retrieveStripeIntentResult
@@ -67,8 +70,9 @@ internal object PaymentLauncherViewModelTestFakes {
 
         override suspend fun retrievePaymentIntent(
             clientSecret: String,
-            options: ApiRequest.Options,
+            options: RequestCredentials,
             expandFields: List<String>,
+            idempotencyKey: String?,
         ): Result<PaymentIntent> {
             retrievePaymentIntentCalls.add(RetrieveIntentCall(clientSecret, options, expandFields))
             return retrievePaymentIntentResult
@@ -76,8 +80,9 @@ internal object PaymentLauncherViewModelTestFakes {
 
         override suspend fun retrieveSetupIntent(
             clientSecret: String,
-            options: ApiRequest.Options,
+            options: RequestCredentials,
             expandFields: List<String>,
+            idempotencyKey: String?,
         ): Result<SetupIntent> {
             retrieveSetupIntentCalls.add(RetrieveIntentCall(clientSecret, options, expandFields))
             return retrieveSetupIntentResult
@@ -93,19 +98,19 @@ internal object PaymentLauncherViewModelTestFakes {
 
         data class ConfirmPaymentIntentCall(
             val params: ConfirmPaymentIntentParams,
-            val options: ApiRequest.Options,
+            val options: RequestCredentials,
             val expandFields: List<String>,
         )
 
         data class ConfirmSetupIntentCall(
             val params: ConfirmSetupIntentParams,
-            val options: ApiRequest.Options,
+            val options: RequestCredentials,
             val expandFields: List<String>,
         )
 
         data class RetrieveIntentCall(
             val clientSecret: String,
-            val options: ApiRequest.Options,
+            val options: RequestCredentials,
             val expandFields: List<String>,
         )
     }

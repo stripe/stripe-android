@@ -2,7 +2,7 @@ package com.stripe.android.paymentelement.confirmation.interceptor
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.SharedPaymentTokenSessionPreview
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -74,7 +74,7 @@ internal suspend fun IntentConfirmationInterceptor.interceptDefaultNewPaymentMet
         shouldSave = false,
     ),
     shippingValues = null,
-)
+    )
 
 internal suspend fun IntentConfirmationInterceptor.interceptDefaultSavedPaymentMethod():
     ConfirmationDefinition.Action<IntentConfirmationDefinition.Args> = intercept(
@@ -85,7 +85,7 @@ internal suspend fun IntentConfirmationInterceptor.interceptDefaultSavedPaymentM
         optionsParams = null,
     ),
     shippingValues = null,
-)
+    )
 
 @Suppress("UNCHECKED_CAST")
 internal fun <T : ConfirmStripeIntentParams>
@@ -93,7 +93,7 @@ internal fun <T : ConfirmStripeIntentParams>
     return (
         (this as? ConfirmationDefinition.Action.Launch)
             ?.launcherArguments as? IntentConfirmationDefinition.Args.Confirm
-        ) ?.confirmNextParams as? T
+    ) ?.confirmNextParams as? T
 }
 
 internal fun ConfirmStripeIntentParams.radarOptions(): RadarOptions? {
@@ -110,7 +110,8 @@ internal fun stripeRepositoryReturning(
     return object : AbsFakeStripeRepository() {
         override suspend fun createPaymentMethod(
             paymentMethodCreateParams: PaymentMethodCreateParams,
-            options: ApiRequest.Options
+            options: RequestCredentials,
+            idempotencyKey: String?,
         ): Result<PaymentMethod> {
             return Result.success(
                 PaymentMethodFactory.card(random = true).copy(
@@ -121,8 +122,9 @@ internal fun stripeRepositoryReturning(
 
         override suspend fun retrieveStripeIntent(
             clientSecret: String,
-            options: ApiRequest.Options,
-            expandFields: List<String>
+            options: RequestCredentials,
+            expandFields: List<String>,
+            idempotencyKey: String?,
         ): Result<StripeIntent> {
             return Result.success(
                 PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2.copy(

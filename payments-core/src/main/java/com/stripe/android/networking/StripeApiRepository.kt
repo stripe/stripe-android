@@ -38,6 +38,7 @@ import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.core.networking.FileUploadRequest
 import com.stripe.android.core.networking.HTTP_TOO_MANY_REQUESTS
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.core.networking.RequestId
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeResponse
@@ -137,6 +138,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 ApiConfiguration.State(
                     publishableKey = publishableKeyProvider(),
                     stripeAccountId = null,
+                    betas = emptySet(),
                 )
             },
             workContext = workContext,
@@ -151,14 +153,17 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 ApiConfiguration.State(
                     publishableKey = publishableKeyProvider(),
                     stripeAccountId = null,
+                    betas = emptySet(),
                 )
             },
         ),
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory =
         PaymentAnalyticsRequestFactory(context, publishableKeyProvider, productUsageTokens),
     betas: Set<StripeApiBeta> = emptySet(),
-    apiVersion: String = ApiVersion(betas = betas.map { it.code }.toSet()).code,
-    sdkVersion: String = StripeSdkVersion.VERSION
+    private val apiVersion: String = ApiVersion(betas = betas.map { it.code }.toSet()).code,
+    private val sdkVersion: String = StripeSdkVersion.VERSION,
+    private val requestApiConfiguration: ApiConfiguration.State?,
+    private val initializeRequestServices: Boolean,
 ) : StripeRepository {
 
     @Inject
@@ -188,8 +193,31 @@ class StripeApiRepository @JvmOverloads internal constructor(
             apiConfigurationProvider = apiConfigurationProvider,
         ),
         paymentAnalyticsRequestFactory = paymentAnalyticsRequestFactory,
-        analyticsRequestExecutor = analyticsRequestExecutor
+        analyticsRequestExecutor = analyticsRequestExecutor,
+        requestApiConfiguration = null,
+        initializeRequestServices = true,
     )
+
+    override fun withApiConfiguration(apiConfiguration: ApiConfiguration.State): StripeRepository {
+        return StripeApiRepository(
+            context = context,
+            publishableKeyProvider = publishableKeyProvider,
+            requestSurface = requestSurface,
+            appInfo = appInfo,
+            logger = logger,
+            workContext = workContext,
+            productUsageTokens = productUsageTokens,
+            stripeNetworkClient = stripeNetworkClient,
+            analyticsRequestExecutor = analyticsRequestExecutor,
+            fraudDetectionDataRepository = fraudDetectionDataRepository,
+            cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
+            paymentAnalyticsRequestFactory = paymentAnalyticsRequestFactory,
+            apiVersion = apiVersion,
+            sdkVersion = sdkVersion,
+            requestApiConfiguration = apiConfiguration.copy(betas = apiConfiguration.betas.toSet()),
+            initializeRequestServices = false,
+        )
+    }
 
     private val apiRequestFactory = ApiRequest.Factory(
         appInfo = appInfo,
@@ -201,20 +229,21 @@ class StripeApiRepository @JvmOverloads internal constructor(
         get() = fraudDetectionDataRepository.getCached()
 
     init {
-        fireFraudDetectionDataRequest()
+        if (initializeRequestServices) fireFraudDetectionDataRequest()
     }
 
     override suspend fun retrieveStripeIntent(
         clientSecret: String,
-        options: ApiRequest.Options,
-        expandFields: List<String>
+        options: RequestCredentials,
+        expandFields: List<String>,
+        idempotencyKey: String?,
     ): Result<StripeIntent> {
         return when {
             PaymentIntent.ClientSecret.isMatch(clientSecret) -> {
-                retrievePaymentIntent(clientSecret, options, expandFields)
+                retrievePaymentIntent(clientSecret, options, expandFields, idempotencyKey = idempotencyKey)
             }
             SetupIntent.ClientSecret.isMatch(clientSecret) -> {
-                retrieveSetupIntent(clientSecret, options, expandFields)
+                retrieveSetupIntent(clientSecret, options, expandFields, idempotencyKey = idempotencyKey)
             }
             else -> {
                 Result.failure(IllegalStateException("Invalid client secret."))
@@ -233,22 +262,25 @@ class StripeApiRepository @JvmOverloads internal constructor(
      */
     override suspend fun confirmPaymentIntent(
         confirmPaymentIntentParams: ConfirmPaymentIntentParams,
-        options: ApiRequest.Options,
-        expandFields: List<String>
+        options: RequestCredentials,
+        expandFields: List<String>,
+        idempotencyKey: String?,
     ): Result<PaymentIntent> {
-        return confirmPaymentIntentParams.maybeForDashboard(options).mapResult {
+        return confirmPaymentIntentParams.maybeForDashboard(options, idempotencyKey = idempotencyKey).mapResult {
             confirmPaymentIntentInternal(
                 confirmPaymentIntentParams = it,
                 options = options,
-                expandFields = expandFields
+                expandFields = expandFields,
+                idempotencyKey = idempotencyKey,
             )
         }
     }
 
     private suspend fun confirmPaymentIntentInternal(
         confirmPaymentIntentParams: ConfirmPaymentIntentParams,
-        options: ApiRequest.Options,
-        expandFields: List<String>
+        options: RequestCredentials,
+        expandFields: List<String>,
+        idempotencyKey: String?,
     ): Result<PaymentIntent> {
         val params = ConfirmationParamsUtils.prepareConfirmationParams(
             confirmPaymentIntentParams.toParamMap()
@@ -274,6 +306,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 url = getConfirmPaymentIntentUrl(paymentIntentId),
                 options = options,
                 params = params,
+                apiConfiguration = requestApiConfiguration,
+                idempotencyKey = idempotencyKey,
             ),
             jsonParser = PaymentIntentJsonParser(),
         ) { result ->
@@ -299,8 +333,9 @@ class StripeApiRepository @JvmOverloads internal constructor(
      */
     override suspend fun retrievePaymentIntent(
         clientSecret: String,
-        options: ApiRequest.Options,
-        expandFields: List<String>
+        options: RequestCredentials,
+        expandFields: List<String>,
+        idempotencyKey: String?,
     ): Result<PaymentIntent> {
         val paymentIntentId = runCatching {
             PaymentIntent.ClientSecret(clientSecret).paymentIntentId
@@ -321,6 +356,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 url = getRetrievePaymentIntentUrl(paymentIntentId),
                 options = options,
                 params = params,
+                apiConfiguration = requestApiConfiguration,
+                idempotencyKey = idempotencyKey,
             ),
             jsonParser = PaymentIntentJsonParser(),
         ) {
@@ -339,7 +376,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
      */
     override suspend fun refreshPaymentIntent(
         clientSecret: String,
-        options: ApiRequest.Options
+        options: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<PaymentIntent> {
         val paymentIntentId = runCatching {
             PaymentIntent.ClientSecret(clientSecret).paymentIntentId
@@ -354,6 +392,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 url = getRefreshPaymentIntentUrl(paymentIntentId),
                 options = options,
                 params = createClientSecretParam(clientSecret, emptyList()),
+                apiConfiguration = requestApiConfiguration,
+                idempotencyKey = idempotencyKey,
             ),
             jsonParser = PaymentIntentJsonParser(),
         ) {
@@ -372,7 +412,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
      */
     override suspend fun refreshSetupIntent(
         clientSecret: String,
-        options: ApiRequest.Options
+        options: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<SetupIntent> {
         val setupIntentId = runCatching {
             SetupIntent.ClientSecret(clientSecret).setupIntentId
@@ -387,6 +428,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 url = getRefreshSetupIntentUrl(setupIntentId),
                 options = options,
                 params = createClientSecretParam(clientSecret, emptyList()),
+                apiConfiguration = requestApiConfiguration,
+                idempotencyKey = idempotencyKey,
             ),
             jsonParser = SetupIntentJsonParser(),
         ) {
@@ -402,7 +445,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
     override suspend fun cancelPaymentIntentSource(
         paymentIntentId: String,
         sourceId: String,
-        options: ApiRequest.Options
+        options: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<PaymentIntent> {
         fireFraudDetectionDataRequest()
 
@@ -411,6 +455,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 url = getCancelPaymentIntentSourceUrl(paymentIntentId),
                 options = options,
                 params = mapOf("source" to sourceId),
+                apiConfiguration = requestApiConfiguration,
+                idempotencyKey = idempotencyKey,
             ),
             jsonParser = PaymentIntentJsonParser(),
         ) {
@@ -429,22 +475,25 @@ class StripeApiRepository @JvmOverloads internal constructor(
      */
     override suspend fun confirmSetupIntent(
         confirmSetupIntentParams: ConfirmSetupIntentParams,
-        options: ApiRequest.Options,
-        expandFields: List<String>
+        options: RequestCredentials,
+        expandFields: List<String>,
+        idempotencyKey: String?,
     ): Result<SetupIntent> {
-        return confirmSetupIntentParams.maybeForDashboard(options).mapResult {
+        return confirmSetupIntentParams.maybeForDashboard(options, idempotencyKey = idempotencyKey).mapResult {
             confirmSetupIntentInternal(
                 confirmSetupIntentParams = it,
                 options = options,
-                expandFields = expandFields
+                expandFields = expandFields,
+                idempotencyKey = idempotencyKey,
             )
         }
     }
 
     private suspend fun confirmSetupIntentInternal(
         confirmSetupIntentParams: ConfirmSetupIntentParams,
-        options: ApiRequest.Options,
-        expandFields: List<String>
+        options: RequestCredentials,
+        expandFields: List<String>,
+        idempotencyKey: String?,
     ): Result<SetupIntent> {
         val setupIntentId = runCatching {
             SetupIntent.ClientSecret(confirmSetupIntentParams.clientSecret).setupIntentId
@@ -467,7 +516,9 @@ class StripeApiRepository @JvmOverloads internal constructor(
                     sourceParams = null,
                     fraudDetectionData = fraudDetectionData,
                     productUsageTokens = productUsageTokens,
-                )
+                ),
+                apiConfiguration = requestApiConfiguration,
+                idempotencyKey = idempotencyKey,
             ),
             SetupIntentJsonParser()
         ) { result ->
@@ -489,8 +540,9 @@ class StripeApiRepository @JvmOverloads internal constructor(
      */
     override suspend fun retrieveSetupIntent(
         clientSecret: String,
-        options: ApiRequest.Options,
-        expandFields: List<String>
+        options: RequestCredentials,
+        expandFields: List<String>,
+        idempotencyKey: String?,
     ): Result<SetupIntent> {
         val setupIntentId = runCatching {
             SetupIntent.ClientSecret(clientSecret).setupIntentId
@@ -511,6 +563,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 url = getRetrieveSetupIntentUrl(setupIntentId),
                 options = options,
                 params = params,
+                apiConfiguration = requestApiConfiguration,
+                idempotencyKey = idempotencyKey,
             ),
             jsonParser = SetupIntentJsonParser(),
         ) {
@@ -526,13 +580,16 @@ class StripeApiRepository @JvmOverloads internal constructor(
     override suspend fun cancelSetupIntentSource(
         setupIntentId: String,
         sourceId: String,
-        options: ApiRequest.Options
+        options: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<SetupIntent> {
         return fetchStripeModelResult(
             apiRequestFactory.createPost(
                 getCancelSetupIntentSourceUrl(setupIntentId),
                 options,
-                mapOf("source" to sourceId)
+                mapOf("source" to sourceId),
+                apiConfiguration = requestApiConfiguration,
+                idempotencyKey = idempotencyKey,
             ),
             SetupIntentJsonParser()
         ) {
@@ -550,7 +607,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
      */
     override suspend fun createSource(
         sourceParams: SourceParams,
-        options: ApiRequest.Options
+        options: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<Source> {
         fireFraudDetectionDataRequest()
 
@@ -560,7 +618,9 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 options,
                 sourceParams.toParamMap()
                     .plus(buildPaymentUserAgentPair(sourceParams.attribution))
-                    .plus(fraudDetectionData?.params.orEmpty())
+                    .plus(fraudDetectionData?.params.orEmpty()),
+                apiConfiguration = requestApiConfiguration,
+                idempotencyKey = idempotencyKey,
             ),
             SourceJsonParser()
         ) {
@@ -583,13 +643,16 @@ class StripeApiRepository @JvmOverloads internal constructor(
     override suspend fun retrieveSource(
         sourceId: String,
         clientSecret: String,
-        options: ApiRequest.Options
+        options: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<Source> {
         return fetchStripeModelResult(
             apiRequest = apiRequestFactory.createGet(
                 url = getRetrieveSourceApiUrl(sourceId),
                 options = options,
                 params = SourceParams.createRetrieveSourceParams(clientSecret),
+                apiConfiguration = requestApiConfiguration,
+                idempotencyKey = idempotencyKey,
             ),
             jsonParser = SourceJsonParser(),
         ) {
@@ -604,7 +667,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
      */
     override suspend fun createPaymentMethod(
         paymentMethodCreateParams: PaymentMethodCreateParams,
-        options: ApiRequest.Options
+        options: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<PaymentMethod> {
         fireFraudDetectionDataRequest()
 
@@ -614,7 +678,9 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 options,
                 paymentMethodCreateParams.toParamMap()
                     .plus(buildPaymentUserAgentPair(paymentMethodCreateParams.attribution))
-                    .plus(fraudDetectionData?.params.orEmpty())
+                    .plus(fraudDetectionData?.params.orEmpty()),
+                apiConfiguration = requestApiConfiguration,
+                idempotencyKey = idempotencyKey,
             ),
             PaymentMethodJsonParser()
         ) {
@@ -630,7 +696,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
     override suspend fun updatePaymentMethod(
         paymentMethodId: String,
         paymentMethodUpdateParams: PaymentMethodUpdateParams,
-        options: ApiRequest.Options,
+        options: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<PaymentMethod> {
         fireFraudDetectionDataRequest()
 
@@ -639,6 +706,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 url = getPaymentMethodUrl(paymentMethodId),
                 options = options,
                 params = paymentMethodUpdateParams.toParamMap(),
+                apiConfiguration = requestApiConfiguration,
+                idempotencyKey = idempotencyKey,
             ),
             jsonParser = PaymentMethodJsonParser()
         ) {
@@ -654,13 +723,16 @@ class StripeApiRepository @JvmOverloads internal constructor(
     override suspend fun setDefaultPaymentMethod(
         customerId: String,
         paymentMethodId: String?,
-        options: ApiRequest.Options
+        options: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<Customer> {
         return fetchStripeModelResult(
             apiRequest = apiRequestFactory.createPost(
                 url = getSetDefaultPaymentMethodUrl(customerId = customerId),
                 options = options,
-                params = mapOf("payment_method" to (paymentMethodId ?: ""))
+                params = mapOf("payment_method" to (paymentMethodId ?: "")),
+                apiConfiguration = requestApiConfiguration,
+                idempotencyKey = idempotencyKey,
             ),
             jsonParser = CustomerJsonParser()
         )
@@ -669,7 +741,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
     override suspend fun retrieveSavedPaymentMethodFromCardPresentPaymentMethod(
         cardPresentPaymentMethodId: String,
         customerId: String,
-        options: ApiRequest.Options
+        options: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<PaymentMethod> {
         return fetchStripeModelResult(
             apiRequest = apiRequestFactory.createGet(
@@ -678,7 +751,9 @@ class StripeApiRepository @JvmOverloads internal constructor(
                     paymentMethodId = cardPresentPaymentMethodId,
                 ),
                 options = options,
-                params = emptyMap<String, String>()
+                params = emptyMap<String, String>(),
+                apiConfiguration = requestApiConfiguration,
+                idempotencyKey = idempotencyKey,
             ),
             jsonParser = PaymentMethodJsonParser()
         )
@@ -690,14 +765,15 @@ class StripeApiRepository @JvmOverloads internal constructor(
      * Analytics event: [PaymentAnalyticsEvent.TokenCreate]
      *
      * @param tokenParams a [TokenParams] representing the object for which this token is being created
-     * @param options a [ApiRequest.Options] object that contains connection data like the api
+     * @param options a [RequestCredentials] object that contains connection data like the api
      * key, api version, etc
      *
      * @return a [Result] containing the generated [Token] or the encountered [Exception]
      */
     override suspend fun createToken(
         tokenParams: TokenParams,
-        options: ApiRequest.Options
+        options: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<Token> {
         fireFraudDetectionDataRequest()
 
@@ -707,7 +783,9 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 options,
                 tokenParams.toParamMap()
                     .plus(buildPaymentUserAgentPair(tokenParams.attribution))
-                    .plus(fraudDetectionData?.params.orEmpty())
+                    .plus(fraudDetectionData?.params.orEmpty()),
+                apiConfiguration = requestApiConfiguration,
+                idempotencyKey = idempotencyKey,
             ),
             TokenJsonParser()
         ) {
@@ -725,7 +803,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
      */
     override suspend fun createConfirmationToken(
         confirmationTokenParams: ConfirmationTokenParams,
-        options: ApiRequest.Options
+        options: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<ConfirmationToken> {
         fireFraudDetectionDataRequest()
 
@@ -739,7 +818,9 @@ class StripeApiRepository @JvmOverloads internal constructor(
                     sourceParams = null,
                     fraudDetectionData = fraudDetectionData,
                     productUsageTokens = productUsageTokens,
-                )
+                ),
+                apiConfiguration = requestApiConfiguration,
+                idempotencyKey = idempotencyKey,
             ),
             ConfirmationTokenJsonParser()
         ) {
@@ -761,13 +842,16 @@ class StripeApiRepository @JvmOverloads internal constructor(
         productUsageTokens: Set<String>,
         sourceId: String,
         @Source.SourceType sourceType: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<Source> {
         return fetchStripeModelResult(
             apiRequest = apiRequestFactory.createPost(
                 url = getAddCustomerSourceUrl(customerId),
                 options = requestOptions,
                 params = mapOf("source" to sourceId),
+                apiConfiguration = requestApiConfiguration,
+                idempotencyKey = idempotencyKey,
             ),
             jsonParser = SourceJsonParser(),
         ) {
@@ -788,12 +872,16 @@ class StripeApiRepository @JvmOverloads internal constructor(
         publishableKey: String,
         productUsageTokens: Set<String>,
         sourceId: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<Source> {
         return fetchStripeModelResult(
             apiRequest = apiRequestFactory.createDelete(
                 url = getDeleteCustomerSourceUrl(customerId, sourceId),
                 options = requestOptions,
+                apiConfiguration = requestApiConfiguration,
+                params = null,
+                idempotencyKey = idempotencyKey,
             ),
             jsonParser = SourceJsonParser(),
         ) {
@@ -812,7 +900,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
         customerId: String,
         productUsageTokens: Set<String>,
         paymentMethodId: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<PaymentMethod> {
         fireFraudDetectionDataRequest()
 
@@ -820,7 +909,9 @@ class StripeApiRepository @JvmOverloads internal constructor(
             apiRequest = apiRequestFactory.createPost(
                 url = getAttachPaymentMethodUrl(paymentMethodId),
                 options = requestOptions,
-                params = mapOf("customer" to customerId)
+                params = mapOf("customer" to customerId),
+                apiConfiguration = requestApiConfiguration,
+                idempotencyKey = idempotencyKey,
             ),
             jsonParser = PaymentMethodJsonParser()
         ) {
@@ -843,12 +934,16 @@ class StripeApiRepository @JvmOverloads internal constructor(
     override suspend fun detachPaymentMethod(
         productUsageTokens: Set<String>,
         paymentMethodId: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<PaymentMethod> {
         return fetchStripeModelResult(
             apiRequest = apiRequestFactory.createPost(
                 url = getDetachPaymentMethodUrl(paymentMethodId),
                 options = requestOptions,
+                apiConfiguration = requestApiConfiguration,
+                params = null,
+                idempotencyKey = idempotencyKey,
             ),
             jsonParser = PaymentMethodJsonParser()
         ) {
@@ -872,13 +967,16 @@ class StripeApiRepository @JvmOverloads internal constructor(
         customerSessionClientSecret: String,
         productUsageTokens: Set<String>,
         paymentMethodId: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<PaymentMethod> {
         return fetchStripeModelResult(
             apiRequest = apiRequestFactory.createPost(
                 url = getElementsDetachPaymentMethodUrl(paymentMethodId),
                 options = requestOptions,
                 params = mapOf("customer_session_client_secret" to customerSessionClientSecret),
+                apiConfiguration = requestApiConfiguration,
+                idempotencyKey = idempotencyKey,
             ),
             jsonParser = PaymentMethodJsonParser()
         ) {
@@ -896,14 +994,17 @@ class StripeApiRepository @JvmOverloads internal constructor(
     override suspend fun getPaymentMethods(
         listPaymentMethodsParams: ListPaymentMethodsParams,
         productUsageTokens: Set<String>,
-        requestOptions: ApiRequest.Options,
+        requestOptions: RequestCredentials,
         apiConfiguration: ApiConfiguration.State,
+        idempotencyKey: String?,
     ): Result<List<PaymentMethod>> {
         return fetchStripeModelResult(
             apiRequest = apiRequestFactory.createGet(
                 url = paymentMethodsUrl,
                 options = requestOptions,
                 params = listPaymentMethodsParams.toParamMap(),
+                apiConfiguration = apiConfiguration,
+                idempotencyKey = idempotencyKey,
             ),
             jsonParser = PaymentMethodsListJsonParser(),
             onResponse = {
@@ -929,12 +1030,16 @@ class StripeApiRepository @JvmOverloads internal constructor(
         customerId: String,
         paymentMethodId: String,
         productUsageTokens: Set<String>,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<PaymentMethod> {
         return fetchStripeModelResult(
             apiRequest = apiRequestFactory.createGet(
                 url = getRetrieveCustomerPaymentMethodUrl(customerId, paymentMethodId),
                 options = requestOptions,
+                apiConfiguration = requestApiConfiguration,
+                params = null,
+                idempotencyKey = idempotencyKey,
             ),
             jsonParser = PaymentMethodJsonParser(),
         ) {
@@ -956,13 +1061,16 @@ class StripeApiRepository @JvmOverloads internal constructor(
         productUsageTokens: Set<String>,
         sourceId: String,
         @Source.SourceType sourceType: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<Customer> {
         return fetchStripeModelResult(
             apiRequest = apiRequestFactory.createPost(
                 url = getRetrieveCustomerUrl(customerId),
                 options = requestOptions,
                 params = mapOf("default_source" to sourceId),
+                apiConfiguration = requestApiConfiguration,
+                idempotencyKey = idempotencyKey,
             ),
             jsonParser = CustomerJsonParser(),
         ) {
@@ -984,13 +1092,16 @@ class StripeApiRepository @JvmOverloads internal constructor(
         publishableKey: String,
         productUsageTokens: Set<String>,
         shippingInformation: ShippingInformation,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<Customer> {
         return fetchStripeModelResult(
             apiRequest = apiRequestFactory.createPost(
                 url = getRetrieveCustomerUrl(customerId),
                 options = requestOptions,
                 params = mapOf("shipping" to shippingInformation.toParamMap()),
+                apiConfiguration = requestApiConfiguration,
+                idempotencyKey = idempotencyKey,
             ),
             jsonParser = CustomerJsonParser(),
         ) {
@@ -1009,12 +1120,16 @@ class StripeApiRepository @JvmOverloads internal constructor(
     override suspend fun retrieveCustomer(
         customerId: String,
         productUsageTokens: Set<String>,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<Customer> {
         return fetchStripeModelResult(
             apiRequest = apiRequestFactory.createGet(
                 url = getRetrieveCustomerUrl(customerId),
                 options = requestOptions,
+                apiConfiguration = requestApiConfiguration,
+                params = null,
+                idempotencyKey = idempotencyKey,
             ),
             jsonParser = CustomerJsonParser(),
         ) {
@@ -1034,7 +1149,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
         cardId: String,
         verificationId: String,
         userOneTimeCode: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<String> {
         return fetchStripeModelResult(
             apiRequest = apiRequestFactory.createGet(
@@ -1043,6 +1159,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 params = mapOf(
                     "verification" to createVerificationParam(verificationId, userOneTimeCode)
                 ),
+                apiConfiguration = requestApiConfiguration,
+                idempotencyKey = idempotencyKey,
             ),
             jsonParser = IssuingCardPinJsonParser(),
             onResponse = { fireAnalyticsRequest(PaymentAnalyticsEvent.IssuingRetrievePin) },
@@ -1057,7 +1175,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
         newPin: String,
         verificationId: String,
         userOneTimeCode: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Throwable? {
         return runCatching {
             makeApiRequest(
@@ -1068,6 +1187,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
                         "verification" to createVerificationParam(verificationId, userOneTimeCode),
                         "pin" to newPin,
                     ),
+                    apiConfiguration = requestApiConfiguration,
+                    idempotencyKey = idempotencyKey,
                 ),
                 onResponse = { fireAnalyticsRequest(PaymentAnalyticsEvent.IssuingUpdatePin) },
             )
@@ -1075,7 +1196,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
     }
 
     override suspend fun getFpxBankStatus(
-        options: ApiRequest.Options
+        options: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<BankStatuses> {
         return fetchStripeModelResult(
             apiRequest = apiRequestFactory.createGet(
@@ -1083,6 +1205,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 // don't pass connected account
                 options = options.copy(stripeAccount = null),
                 params = mapOf("account_holder_type" to "individual"),
+                apiConfiguration = requestApiConfiguration,
+                idempotencyKey = idempotencyKey,
             ),
             jsonParser = FpxBankStatusesJsonParser(),
         ) {
@@ -1092,13 +1216,16 @@ class StripeApiRepository @JvmOverloads internal constructor(
 
     override suspend fun getCardMetadata(
         bin: Bin,
-        options: ApiRequest.Options
+        options: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<CardMetadata> {
         return fetchStripeModelResult(
             apiRequest = apiRequestFactory.createGet(
                 url = getEdgeUrl("card-metadata"),
                 options = options.copy(stripeAccount = null),
                 params = mapOf("key" to options.apiKey, "bin_prefix" to bin.value),
+                apiConfiguration = requestApiConfiguration,
+                idempotencyKey = idempotencyKey,
             ),
             jsonParser = CardMetadataJsonParser(bin, isNetwork = true),
         ).onFailure {
@@ -1112,13 +1239,16 @@ class StripeApiRepository @JvmOverloads internal constructor(
     @VisibleForTesting
     override suspend fun start3ds2Auth(
         authParams: Stripe3ds2AuthParams,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<Stripe3ds2AuthResult> {
         return fetchStripeModelResult(
             apiRequest = apiRequestFactory.createPost(
                 url = getApiUrl("3ds2/authenticate"),
                 options = requestOptions,
                 params = authParams.toParamMap(),
+                apiConfiguration = requestApiConfiguration,
+                idempotencyKey = idempotencyKey,
             ),
             jsonParser = Stripe3ds2AuthResultJsonParser(),
         ) {
@@ -1130,13 +1260,16 @@ class StripeApiRepository @JvmOverloads internal constructor(
 
     override suspend fun complete3ds2Auth(
         sourceId: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<Stripe3ds2AuthResult> {
         return fetchStripeModelResult(
             apiRequest = apiRequestFactory.createPost(
                 url = getApiUrl("3ds2/challenge_complete"),
                 options = requestOptions,
                 params = mapOf("source" to sourceId),
+                apiConfiguration = requestApiConfiguration,
+                idempotencyKey = idempotencyKey,
             ),
             jsonParser = Stripe3ds2AuthResultJsonParser(),
         )
@@ -1147,12 +1280,19 @@ class StripeApiRepository @JvmOverloads internal constructor(
      */
     override suspend fun createFile(
         fileParams: StripeFileParams,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<StripeFile> {
         val response = runCatching {
             makeFileUploadRequest(
                 apiRequestOptions = requestOptions,
-                fileUploadRequest = FileUploadRequest(fileParams, requestOptions, appInfo),
+                fileUploadRequest = FileUploadRequest(
+                    fileParams,
+                    requestOptions,
+                    appInfo,
+                    apiConfiguration = requestApiConfiguration,
+                    idempotencyKey = idempotencyKey,
+                ),
                 onResponse = { fireAnalyticsRequest(PaymentAnalyticsEvent.FileCreate) },
             )
         }
@@ -1164,7 +1304,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
 
     override suspend fun retrieveObject(
         url: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<StripeResponse<String>> {
         if (!StripeUrlUtils.isStripeUrl(url)) {
             return Result.failure(IllegalArgumentException("Unrecognized domain: $url"))
@@ -1172,7 +1313,13 @@ class StripeApiRepository @JvmOverloads internal constructor(
 
         return runCatching {
             makeApiRequest(
-                apiRequest = apiRequestFactory.createGet(url, requestOptions),
+                apiRequest = apiRequestFactory.createGet(
+                    url,
+                    requestOptions,
+                    apiConfiguration = requestApiConfiguration,
+                    params = null,
+                    idempotencyKey = idempotencyKey,
+                ),
                 onResponse = { fireAnalyticsRequest(PaymentAnalyticsEvent.StripeUrlRetrieve) },
             )
         }
@@ -1183,7 +1330,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
      * to `/v1/radar/session`.
      */
     override suspend fun createRadarSession(
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<RadarSessionWithHCaptcha> {
         val validation = runCatching {
             require(Stripe.advancedFraudSignalsEnabled) {
@@ -1203,6 +1351,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
                     url = getApiUrl("radar/session"),
                     options = requestOptions,
                     params = params,
+                    apiConfiguration = requestApiConfiguration,
+                    idempotencyKey = idempotencyKey,
                 ),
                 jsonParser = RadarSessionWithHCaptchaJsonParser(),
             ) {
@@ -1219,7 +1369,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
         radarSessionToken: String,
         hcaptchaToken: String,
         hcaptchaEKey: String?,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<RadarSessionWithHCaptcha> {
         return fetchStripeModelResult(
             apiRequest = apiRequestFactory.createPost(
@@ -1233,7 +1384,9 @@ class StripeApiRepository @JvmOverloads internal constructor(
                             "passive_captcha_ekey" to hcaptchaEKey
                         )
                     } ?: emptyMap()
-                )
+                ),
+                apiConfiguration = requestApiConfiguration,
+                idempotencyKey = idempotencyKey,
             ),
             jsonParser = RadarSessionWithHCaptchaJsonParser(),
         )
@@ -1243,7 +1396,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
         consumerSessionClientSecret: String,
         id: String,
         extraParams: Map<String, *>?,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<PaymentMethod> {
         return fetchStripeModelResult(
             apiRequest = apiRequestFactory.createPost(
@@ -1256,7 +1410,9 @@ class StripeApiRepository @JvmOverloads internal constructor(
                     ),
                     "id" to id,
                     buildPaymentUserAgentPair(),
-                ).plus(extraParams ?: emptyMap())
+                ).plus(extraParams ?: emptyMap()),
+                apiConfiguration = requestApiConfiguration,
+                idempotencyKey = idempotencyKey,
             ),
             jsonParser = ConsumerPaymentDetailsShareJsonParser,
         ).map { it.paymentMethod }
@@ -1265,7 +1421,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
     override suspend fun logOut(
         consumerSessionClientSecret: String,
         consumerAccountPublishableKey: String?,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<ConsumerSession> {
         return fetchStripeModelResult(
             apiRequest = apiRequestFactory.createPost(
@@ -1277,6 +1434,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
                         "consumer_session_client_secret" to consumerSessionClientSecret
                     ),
                 ),
+                apiConfiguration = requestApiConfiguration,
+                idempotencyKey = idempotencyKey,
             ),
             jsonParser = ConsumerSessionJsonParser(),
         )
@@ -1284,13 +1443,16 @@ class StripeApiRepository @JvmOverloads internal constructor(
 
     override suspend fun createFinancialConnectionsSessionForDeferredPayments(
         params: CreateFinancialConnectionsSessionForDeferredPaymentParams,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<FinancialConnectionsSession> {
         return fetchStripeModelResult(
             apiRequestFactory.createPost(
                 url = deferredFinancialConnectionsSessionUrl,
                 options = requestOptions,
-                params = params.toMap()
+                params = params.toMap(),
+                apiConfiguration = requestApiConfiguration,
+                idempotencyKey = idempotencyKey,
             ),
             FinancialConnectionsSessionJsonParser()
         ) {
@@ -1301,13 +1463,16 @@ class StripeApiRepository @JvmOverloads internal constructor(
     override suspend fun createPaymentIntentFinancialConnectionsSession(
         paymentIntentId: String,
         params: CreateFinancialConnectionsSessionParams,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<FinancialConnectionsSession> {
         return fetchStripeModelResult(
             apiRequestFactory.createPost(
                 url = getPaymentIntentFinancialConnectionsSessionUrl(paymentIntentId),
                 options = requestOptions,
-                params = params.toMap()
+                params = params.toMap(),
+                apiConfiguration = requestApiConfiguration,
+                idempotencyKey = idempotencyKey,
             ),
             FinancialConnectionsSessionJsonParser()
         ) {
@@ -1318,13 +1483,16 @@ class StripeApiRepository @JvmOverloads internal constructor(
     override suspend fun createSetupIntentFinancialConnectionsSession(
         setupIntentId: String,
         params: CreateFinancialConnectionsSessionParams,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<FinancialConnectionsSession> {
         return fetchStripeModelResult(
             apiRequestFactory.createPost(
                 url = getSetupIntentFinancialConnectionsSessionUrl(setupIntentId),
                 options = requestOptions,
-                params = params.toMap()
+                params = params.toMap(),
+                apiConfiguration = requestApiConfiguration,
+                idempotencyKey = idempotencyKey,
             ),
             FinancialConnectionsSessionJsonParser()
         ) {
@@ -1357,8 +1525,9 @@ class StripeApiRepository @JvmOverloads internal constructor(
         clientSecret: String,
         paymentIntentId: String,
         financialConnectionsSessionId: String,
-        requestOptions: ApiRequest.Options,
-        expandFields: List<String>
+        requestOptions: RequestCredentials,
+        expandFields: List<String>,
+        idempotencyKey: String?,
     ): Result<PaymentIntent> {
         return fetchStripeModelResult(
             apiRequestFactory.createPost(
@@ -1368,7 +1537,9 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 ),
                 requestOptions,
                 mapOf("client_secret" to clientSecret)
-                    .plus(createExpandParam(expandFields))
+                    .plus(createExpandParam(expandFields)),
+                apiConfiguration = requestApiConfiguration,
+                idempotencyKey = idempotencyKey,
             ),
             PaymentIntentJsonParser()
         ) {
@@ -1383,8 +1554,9 @@ class StripeApiRepository @JvmOverloads internal constructor(
         clientSecret: String,
         setupIntentId: String,
         financialConnectionsSessionId: String,
-        requestOptions: ApiRequest.Options,
-        expandFields: List<String>
+        requestOptions: RequestCredentials,
+        expandFields: List<String>,
+        idempotencyKey: String?,
     ): Result<SetupIntent> {
         return fetchStripeModelResult(
             apiRequestFactory.createPost(
@@ -1394,7 +1566,9 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 ),
                 requestOptions,
                 mapOf("client_secret" to clientSecret)
-                    .plus(createExpandParam(expandFields))
+                    .plus(createExpandParam(expandFields)),
+                apiConfiguration = requestApiConfiguration,
+                idempotencyKey = idempotencyKey,
             ),
             SetupIntentJsonParser()
         ) {
@@ -1409,7 +1583,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
         clientSecret: String,
         firstAmount: Int,
         secondAmount: Int,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<PaymentIntent> {
         val paymentIntentId = runCatching {
             PaymentIntent.ClientSecret(clientSecret).paymentIntentId
@@ -1424,7 +1599,9 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 mapOf(
                     "client_secret" to clientSecret,
                     "amounts" to listOf(firstAmount, secondAmount)
-                )
+                ),
+                apiConfiguration = requestApiConfiguration,
+                idempotencyKey = idempotencyKey,
             ),
             PaymentIntentJsonParser()
         ) {
@@ -1438,7 +1615,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
     override suspend fun verifyPaymentIntentWithMicrodeposits(
         clientSecret: String,
         descriptorCode: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<PaymentIntent> {
         val paymentIntentId = runCatching {
             PaymentIntent.ClientSecret(clientSecret).paymentIntentId
@@ -1453,7 +1631,9 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 mapOf(
                     "client_secret" to clientSecret,
                     "descriptor_code" to descriptorCode
-                )
+                ),
+                apiConfiguration = requestApiConfiguration,
+                idempotencyKey = idempotencyKey,
             ),
             PaymentIntentJsonParser()
         ) {
@@ -1468,7 +1648,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
         clientSecret: String,
         firstAmount: Int,
         secondAmount: Int,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<SetupIntent> {
         val setupIntentId = runCatching {
             SetupIntent.ClientSecret(clientSecret).setupIntentId
@@ -1483,7 +1664,9 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 mapOf(
                     "client_secret" to clientSecret,
                     "amounts" to listOf(firstAmount, secondAmount)
-                )
+                ),
+                apiConfiguration = requestApiConfiguration,
+                idempotencyKey = idempotencyKey,
             ),
             SetupIntentJsonParser()
         )
@@ -1495,7 +1678,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
     override suspend fun verifySetupIntentWithMicrodeposits(
         clientSecret: String,
         descriptorCode: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<SetupIntent> {
         val setupIntentId = runCatching {
             SetupIntent.ClientSecret(clientSecret).setupIntentId
@@ -1510,7 +1694,9 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 mapOf(
                     "client_secret" to clientSecret,
                     "descriptor_code" to descriptorCode
-                )
+                ),
+                apiConfiguration = requestApiConfiguration,
+                idempotencyKey = idempotencyKey,
             ),
             SetupIntentJsonParser()
         )
@@ -1522,7 +1708,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
         currency: String,
         country: String?,
         locale: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<PaymentMethodMessage> {
         return fetchStripeModelResult(
             apiRequestFactory.createGet(
@@ -1535,9 +1722,11 @@ class StripeApiRepository @JvmOverloads internal constructor(
                     "locale" to locale,
                     "key" to requestOptions.apiKey,
                     "_stripe_account" to requestOptions.stripeAccount
-                ) + paymentMethods.mapIndexed { index, paymentMethod ->
+) + paymentMethods.mapIndexed { index, paymentMethod ->
                     "payment_methods[$index]" to paymentMethod
-                }
+                },
+                apiConfiguration = requestApiConfiguration,
+                idempotencyKey = idempotencyKey,
             ),
             PaymentMethodMessageJsonParser()
         ) {
@@ -1550,7 +1739,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
         currency: String,
         country: String?,
         locale: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<PaymentMethodMessagePromotionList> {
         return fetchStripeModelResult(
             apiRequestFactory.createGet(
@@ -1563,7 +1753,9 @@ class StripeApiRepository @JvmOverloads internal constructor(
                     "locale" to locale,
                     "key" to requestOptions.apiKey,
                     "_stripe_account" to requestOptions.stripeAccount
-                )
+),
+                apiConfiguration = requestApiConfiguration,
+                idempotencyKey = idempotencyKey,
             ),
             PaymentMethodMessagePromotionJsonParser()
         ) {
@@ -1589,7 +1781,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
 
     override suspend fun retrieveCardMetadata(
         cardNumber: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<CardMetadata> {
         val unvalidatedNumber = CardNumber.Unvalidated(cardNumber)
 
@@ -1599,11 +1792,20 @@ class StripeApiRepository @JvmOverloads internal constructor(
             )
         )
 
-        val cardAccountRangeRepository =
+        val cardAccountRangeRepository = if (
+            cardAccountRangeRepositoryFactory is DefaultCardAccountRangeRepositoryFactory
+        ) {
             cardAccountRangeRepositoryFactory.createWithStripeRepository(
                 stripeRepository = this,
-                publishableKey = publishableKeyProvider()
+                publishableKey = publishableKeyProvider(),
+                betas = requestApiConfiguration?.betas.orEmpty(),
             )
+        } else {
+            cardAccountRangeRepositoryFactory.createWithStripeRepository(
+                stripeRepository = this,
+                publishableKey = publishableKeyProvider(),
+            )
+        }
 
         val accountRanges = cardAccountRangeRepository.getAccountRanges(
             cardNumber = unvalidatedNumber
@@ -1618,14 +1820,17 @@ class StripeApiRepository @JvmOverloads internal constructor(
     }
 
     override suspend fun retrieveCardElementConfig(
-        requestOptions: ApiRequest.Options,
-        params: Map<String, String>?
+        requestOptions: RequestCredentials,
+        params: Map<String, String>?,
+        idempotencyKey: String?,
     ): Result<MobileCardElementConfig> {
         return fetchStripeModelResult(
             apiRequestFactory.createGet(
                 url = mobileCardElementConfigUrl,
                 options = requestOptions,
                 params = params,
+                apiConfiguration = requestApiConfiguration,
+                idempotencyKey = idempotencyKey,
             ),
             jsonParser = MobileCardElementConfigParser(),
         )
@@ -1634,7 +1839,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
     override suspend fun listPaymentDetails(
         clientSecret: String,
         paymentMethodTypes: Set<String>,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<ConsumerPaymentDetails> {
         return fetchStripeModelResult(
             apiRequestFactory.createPost(
@@ -1646,7 +1852,9 @@ class StripeApiRepository @JvmOverloads internal constructor(
                         "consumer_session_client_secret" to clientSecret
                     ),
                     "types" to paymentMethodTypes.toList()
-                )
+                ),
+                apiConfiguration = requestApiConfiguration,
+                idempotencyKey = idempotencyKey,
             ),
             ConsumerPaymentDetailsJsonParser
         )
@@ -1654,7 +1862,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
 
     override suspend fun listShippingAddresses(
         clientSecret: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<ConsumerShippingAddresses> {
         return fetchStripeModelResult(
             apiRequestFactory.createPost(
@@ -1665,7 +1874,9 @@ class StripeApiRepository @JvmOverloads internal constructor(
                     "credentials" to mapOf(
                         "consumer_session_client_secret" to clientSecret
                     ),
-                )
+                ),
+                apiConfiguration = requestApiConfiguration,
+                idempotencyKey = idempotencyKey,
             ),
             ConsumerShippingAddressesParser
         )
@@ -1674,7 +1885,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
     override suspend fun deletePaymentDetails(
         clientSecret: String,
         paymentDetailsId: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<Unit> {
         return runCatching {
             makeApiRequest(
@@ -1686,7 +1898,9 @@ class StripeApiRepository @JvmOverloads internal constructor(
                         "credentials" to mapOf(
                             "consumer_session_client_secret" to clientSecret
                         )
-                    )
+                    ),
+                    apiConfiguration = requestApiConfiguration,
+                    idempotencyKey = idempotencyKey,
                 ),
                 onResponse = {}
             )
@@ -1696,7 +1910,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
     override suspend fun updatePaymentDetails(
         clientSecret: String,
         paymentDetailsUpdateParams: ConsumerPaymentDetailsUpdateParams,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<ConsumerPaymentDetails> {
         return fetchStripeModelResult(
             apiRequestFactory.createPost(
@@ -1709,7 +1924,9 @@ class StripeApiRepository @JvmOverloads internal constructor(
                     )
                 ).plus(
                     paymentDetailsUpdateParams.toParamMap()
-                )
+                ),
+                apiConfiguration = requestApiConfiguration,
+                idempotencyKey = idempotencyKey,
             ),
             ConsumerPaymentDetailsJsonParser
         )
@@ -1718,13 +1935,16 @@ class StripeApiRepository @JvmOverloads internal constructor(
     override suspend fun cancelPaymentIntentCaptchaChallenge(
         paymentIntentId: String,
         params: CancelCaptchaChallengeParams,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<PaymentIntent> {
         return fetchStripeModelResult(
             apiRequest = apiRequestFactory.createPost(
                 url = getCancelPaymentIntentCaptchaChallengeUrl(paymentIntentId),
                 options = requestOptions,
                 params = params.toParamMap(),
+                apiConfiguration = requestApiConfiguration,
+                idempotencyKey = idempotencyKey,
             ),
             jsonParser = PaymentIntentJsonParser(),
         )
@@ -1733,13 +1953,16 @@ class StripeApiRepository @JvmOverloads internal constructor(
     override suspend fun cancelSetupIntentCaptchaChallenge(
         setupIntentId: String,
         params: CancelCaptchaChallengeParams,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<SetupIntent> {
         return fetchStripeModelResult(
             apiRequest = apiRequestFactory.createPost(
                 url = getCancelSetupIntentCaptchaChallengeUrl(setupIntentId),
                 options = requestOptions,
                 params = params.toParamMap(),
+                apiConfiguration = requestApiConfiguration,
+                idempotencyKey = idempotencyKey,
             ),
             jsonParser = SetupIntentJsonParser(),
         )
@@ -1752,8 +1975,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
         APIException::class
     )
     private fun handleApiError(
-        requestOptions: ApiRequest.Options,
-        response: StripeResponse<String>
+        requestOptions: RequestCredentials,
+        response: StripeResponse<String>,
     ) {
         val requestId = response.requestId?.value
         val responseCode = response.code
@@ -1827,7 +2050,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
         }
 
         if (response.isError) {
-            handleApiError(apiRequest.options, response)
+            handleApiError(apiRequest.options, response,)
         }
 
         resetDnsCache(dnsCacheData)
@@ -1844,9 +2067,9 @@ class StripeApiRepository @JvmOverloads internal constructor(
         APIException::class
     )
     internal suspend fun makeFileUploadRequest(
-        apiRequestOptions: ApiRequest.Options,
+        apiRequestOptions: RequestCredentials,
         fileUploadRequest: FileUploadRequest,
-        onResponse: (RequestId?) -> Unit
+        onResponse: (RequestId?) -> Unit,
     ): StripeResponse<String> {
         val dnsCacheData = disableDnsCache()
 
@@ -1862,7 +2085,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
         }
 
         if (response.isError) {
-            handleApiError(apiRequestOptions, response)
+            handleApiError(apiRequestOptions, response,)
         }
 
         resetDnsCache(dnsCacheData)
@@ -1927,7 +2150,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
     }
 
     private suspend fun ConfirmPaymentIntentParams.maybeForDashboard(
-        options: ApiRequest.Options
+        options: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<ConfirmPaymentIntentParams> {
         if (!options.apiKeyIsUserKey) {
             return Result.success(this)
@@ -1940,6 +2164,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
             createPaymentMethod(
                 paymentMethodCreateParams = paymentMethodCreateParams,
                 options = options,
+                idempotencyKey = idempotencyKey,
             ).map { it.id }
         } else {
             return Result.success(this)
@@ -1955,7 +2180,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
     }
 
     private suspend fun ConfirmSetupIntentParams.maybeForDashboard(
-        options: ApiRequest.Options
+        options: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<ConfirmSetupIntentParams> {
         if (!options.apiKeyIsUserKey) {
             return Result.success(this)
@@ -1968,6 +2194,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
             createPaymentMethod(
                 paymentMethodCreateParams = paymentMethodCreateParams,
                 options = options,
+                idempotencyKey = idempotencyKey,
             ).map { it.id }
         } else {
             return Result.success(this)
@@ -1983,7 +2210,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
     }
 
     private fun Result<StripeResponse<String>>.errorMessage(
-        requestOptions: ApiRequest.Options,
+        requestOptions: RequestCredentials,
     ): String? {
         val response = getOrNull()
         val resultError = exceptionOrNull()
@@ -1992,7 +2219,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
             resultError != null -> resultError.safeAnalyticsMessage
             response != null && response.isError -> {
                 runCatching {
-                    handleApiError(requestOptions, response)
+                    handleApiError(requestOptions, response,)
                 }.let { errorResult ->
                     errorResult.exceptionOrNull()?.safeAnalyticsMessage
                 }

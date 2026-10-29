@@ -7,8 +7,8 @@ import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.common.exception.stripeErrorMessage
-import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
@@ -194,10 +194,13 @@ internal class DefaultSheetActivityContinueCoordinatorTest {
                 publishableKey = "pk_test_123",
             ),
             apiRequestOptionsProvider = {
-                ApiRequest.Options(
+                RequestCredentials(
                     apiKey = DEFAULT_API_CONFIG.publishableKey,
                     stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
                 )
+            },
+            apiConfigurationProvider = {
+                DEFAULT_API_CONFIG
             },
         )
 

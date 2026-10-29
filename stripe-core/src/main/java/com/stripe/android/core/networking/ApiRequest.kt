@@ -1,13 +1,11 @@
 package com.stripe.android.core.networking
 
-import android.os.Parcelable
 import androidx.annotation.RestrictTo
-import com.stripe.android.core.ApiKeyValidator
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.AppInfo
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.version.StripeSdkVersion
-import kotlinx.parcelize.Parcelize
 import java.io.OutputStream
 import java.io.UnsupportedEncodingException
 
@@ -19,7 +17,8 @@ data class ApiRequest internal constructor(
     override val method: Method,
     val baseUrl: String,
     val params: Map<String, *>? = null,
-    val options: Options,
+    val options: RequestCredentials,
+    val idempotencyKey: String?,
     private val appInfo: AppInfo? = null,
     private val apiVersion: String = ApiVersion.get().code,
     private val sdkVersion: String = StripeSdkVersion.VERSION
@@ -44,7 +43,8 @@ data class ApiRequest internal constructor(
         options = options,
         appInfo = appInfo,
         apiVersion = apiVersion,
-        sdkVersion = sdkVersion
+        sdkVersion = sdkVersion,
+        idempotencyKey = idempotencyKey,
     )
 
     override val mimeType: MimeType = MimeType.Form
@@ -88,37 +88,6 @@ data class ApiRequest internal constructor(
         return "${method.code} $baseUrl"
     }
 
-    /**
-     * Data class representing options for a Stripe API request.
-     */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    @Parcelize
-    data class Options constructor(
-        val apiKey: String,
-        val stripeAccount: String? = null,
-        val idempotencyKey: String? = null
-    ) : Parcelable {
-
-        override fun toString(): String {
-            return "Options(apiKey=***)"
-        }
-
-        val apiKeyIsUserKey: Boolean
-            get() = apiKey.startsWith("uk_")
-
-        val apiKeyIsLiveMode: Boolean
-            get() = !apiKey.contains("test")
-
-        init {
-            ApiKeyValidator().requireValid(apiKey)
-        }
-
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        companion object {
-            const val UNDEFINED_PUBLISHABLE_KEY = "pk_undefined"
-        }
-    }
-
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Factory(
         private val appInfo: AppInfo? = null,
@@ -127,8 +96,66 @@ data class ApiRequest internal constructor(
     ) {
         fun createGet(
             url: String,
-            options: Options,
-            params: Map<String, *>? = null
+            options: RequestCredentials?,
+            params: Map<String, *>?,
+            apiConfiguration: ApiConfiguration.State?,
+            idempotencyKey: String?,
+        ): ApiRequest {
+            return ApiRequest(
+                method = Method.GET,
+                baseUrl = url,
+                params = params,
+                options = resolveRequestCredentials(apiConfiguration, options),
+                appInfo = appInfo,
+                apiVersion = ApiVersion.withBetas(apiVersion, apiConfiguration?.betas.orEmpty()),
+                sdkVersion = sdkVersion,
+                idempotencyKey = idempotencyKey,
+            )
+        }
+
+        fun createPost(
+            url: String,
+            options: RequestCredentials?,
+            params: Map<String, *>?,
+            apiConfiguration: ApiConfiguration.State?,
+            idempotencyKey: String?,
+        ): ApiRequest {
+            return ApiRequest(
+                method = Method.POST,
+                baseUrl = url,
+                params = params,
+                options = resolveRequestCredentials(apiConfiguration, options),
+                appInfo = appInfo,
+                apiVersion = ApiVersion.withBetas(apiVersion, apiConfiguration?.betas.orEmpty()),
+                sdkVersion = sdkVersion,
+                idempotencyKey = idempotencyKey,
+            )
+        }
+
+        fun createDelete(
+            url: String,
+            options: RequestCredentials?,
+            params: Map<String, *>?,
+            apiConfiguration: ApiConfiguration.State?,
+            idempotencyKey: String?,
+        ): ApiRequest {
+            return ApiRequest(
+                method = Method.DELETE,
+                baseUrl = url,
+                params = params,
+                options = resolveRequestCredentials(apiConfiguration, options),
+                appInfo = appInfo,
+                apiVersion = ApiVersion.withBetas(apiVersion, apiConfiguration?.betas.orEmpty()),
+                sdkVersion = sdkVersion,
+                idempotencyKey = idempotencyKey,
+            )
+        }
+
+        fun createGet(
+            url: String,
+            options: RequestCredentials,
+            params: Map<String, *>? = null,
+            idempotencyKey: String?,
         ): ApiRequest {
             return ApiRequest(
                 method = Method.GET,
@@ -137,14 +164,16 @@ data class ApiRequest internal constructor(
                 options = options,
                 appInfo = appInfo,
                 apiVersion = apiVersion,
-                sdkVersion = sdkVersion
+                sdkVersion = sdkVersion,
+                idempotencyKey = idempotencyKey,
             )
         }
 
         fun createPost(
             url: String,
-            options: Options,
-            params: Map<String, *>? = null
+            options: RequestCredentials,
+            params: Map<String, *>? = null,
+            idempotencyKey: String?,
         ): ApiRequest {
             return ApiRequest(
                 method = Method.POST,
@@ -153,14 +182,16 @@ data class ApiRequest internal constructor(
                 options = options,
                 appInfo = appInfo,
                 apiVersion = apiVersion,
-                sdkVersion = sdkVersion
+                sdkVersion = sdkVersion,
+                idempotencyKey = idempotencyKey,
             )
         }
 
         fun createDelete(
             url: String,
-            options: Options,
-            params: Map<String, *>? = null
+            options: RequestCredentials,
+            params: Map<String, *>? = null,
+            idempotencyKey: String?,
         ): ApiRequest {
             return ApiRequest(
                 Method.DELETE,
@@ -169,7 +200,8 @@ data class ApiRequest internal constructor(
                 options = options,
                 appInfo = appInfo,
                 apiVersion = apiVersion,
-                sdkVersion = sdkVersion
+                sdkVersion = sdkVersion,
+                idempotencyKey = idempotencyKey,
             )
         }
     }

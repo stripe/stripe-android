@@ -5,13 +5,14 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.StripeIntentResult
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
-import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.LinearRetryDelaySupplier
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.model.Stripe3ds2AuthResult
 import com.stripe.android.model.Stripe3ds2AuthResultFixtures
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
@@ -51,7 +52,8 @@ class DefaultStripe3ds2ChallengeResultProcessorTest {
         analyticsRequestFactory,
         LinearRetryDelaySupplier(),
         Logger.noop(),
-        testDispatcher
+        testDispatcher,
+        apiConfiguration = ApiConfiguration("pk_test_123").build(),
     )
 
     @get:Rule
@@ -274,7 +276,8 @@ class DefaultStripe3ds2ChallengeResultProcessorTest {
 
         override suspend fun complete3ds2Auth(
             sourceId: String,
-            requestOptions: ApiRequest.Options
+            requestOptions: RequestCredentials,
+            idempotencyKey: String?,
         ): Result<Stripe3ds2AuthResult> {
             complete3ds2AuthInvocations++
             sourceIds.add(sourceId)

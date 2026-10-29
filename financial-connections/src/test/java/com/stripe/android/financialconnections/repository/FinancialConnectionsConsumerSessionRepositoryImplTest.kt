@@ -5,7 +5,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.frauddetection.FraudDetectionData
 import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.ApiKeyFixtures.consumerSession
 import com.stripe.android.financialconnections.ApiKeyFixtures.consumerSessionSignup
@@ -30,6 +30,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argThat
 import org.mockito.kotlin.eq
+import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
@@ -42,8 +43,9 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
     private val consumersApiService: ConsumersApiService = mock()
     private val financialConnectionsConsumersApiService: FinancialConnectionsConsumersApiService =
         mock()
-    private val apiOptions: ApiRequest.Options = ApiRequest.Options(
+    private val apiOptions: RequestCredentials = RequestCredentials(
         apiKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+        stripeAccount = null,
     )
     private val logger: Logger = mock()
     private val locale: Locale = Locale.getDefault()
@@ -84,7 +86,8 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
         whenever(
             consumersApiService.signUp(
                 params = any(),
-                requestOptions = anyOrNull()
+                requestOptions = anyOrNull(),
+                idempotencyKey = isNull(),
             )
         ).thenReturn(Result.success(consumerSessionSignup))
 
@@ -137,6 +140,7 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
                         incentiveEligibilitySession == IncentiveEligibilitySession.PaymentIntent("pi_123")
                 },
                 requestOptions = anyOrNull(),
+                idempotencyKey = null,
             )
         ).thenReturn(
             Result.success(consumerSessionSignup)
@@ -231,7 +235,8 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
                 accountPhoneNumber = anyOrNull(),
                 emailAddress = anyOrNull(),
                 requestOptions = eq(apiOptions),
-                isResendSmsCode = any()
+                isResendSmsCode = any(),
+                idempotencyKey = isNull(),
             )
         ).thenReturn(consumerSession)
 
@@ -242,7 +247,7 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
             consumerSessionClientSecret = consumerSessionClientSecret,
             connectionsMerchantName = connectionsMerchantName,
             type = type,
-            customEmailType = customEmailType
+            customEmailType = customEmailType,
         )
 
         assertThat(result).isEqualTo(consumerSession)
@@ -256,7 +261,8 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
             customEmailType = customEmailType,
             accountPhoneNumber = null,
             emailAddress = null,
-            requestOptions = apiOptions
+            requestOptions = apiOptions,
+            idempotencyKey = null,
         )
 
         // ensures there's a cached consumer session after the start-verification call.
@@ -287,7 +293,8 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
                 requestSurface = eq("android_connections"),
                 type = eq(type),
                 consentGranted = eq(null),
-                requestOptions = eq(apiOptions)
+                requestOptions = eq(apiOptions),
+                idempotencyKey = isNull(),
             )
         ).thenReturn(consumerSession)
 
@@ -297,7 +304,7 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
         val result = repository.confirmConsumerVerification(
             consumerSessionClientSecret = consumerSessionClientSecret,
             verificationCode = verificationCode,
-            type = type
+            type = type,
         )
 
         assertThat(result).isEqualTo(consumerSession)
@@ -308,7 +315,8 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
             requestSurface = "android_connections",
             type = type,
             consentGranted = null,
-            requestOptions = apiOptions
+            requestOptions = apiOptions,
+            idempotencyKey = null,
         )
 
         // ensures there's a cached consumer session after the confirm-verification call.
@@ -331,7 +339,8 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
         whenever(
             consumersApiService.signUp(
                 params = any(),
-                requestOptions = anyOrNull()
+                requestOptions = anyOrNull(),
+                idempotencyKey = isNull(),
             )
         ).thenReturn(Result.success(consumerSessionSignup()))
 
@@ -343,7 +352,8 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
 
         verify(consumersApiService).signUp(
             params = argThat { requestSurface == "android_connections" },
-            requestOptions = anyOrNull()
+            requestOptions = anyOrNull(),
+            idempotencyKey = null,
         )
     }
 
@@ -354,7 +364,8 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
         whenever(
             consumersApiService.signUp(
                 params = any(),
-                requestOptions = anyOrNull()
+                requestOptions = anyOrNull(),
+                idempotencyKey = isNull(),
             )
         ).thenReturn(Result.success(consumerSessionSignup()))
 
@@ -368,7 +379,8 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
             params = argThat {
                 requestSurface == "android_instant_debits"
             },
-            requestOptions = anyOrNull()
+            requestOptions = anyOrNull(),
+            idempotencyKey = null,
         )
     }
 
@@ -395,6 +407,7 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
                 requestSurface = anyOrNull(),
                 requestOptions = anyOrNull(),
                 extraParams = eq(fraudParams.params),
+                idempotencyKey = isNull(),
             )
         ).thenReturn(
             Result.success(

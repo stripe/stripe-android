@@ -57,7 +57,7 @@ import com.stripe.android.paymentelement.embedded.content.EmbeddedSelectionChoos
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
 import com.stripe.android.payments.core.injection.ApiConfigurationFromPaymentConfigurationModule
-import com.stripe.android.payments.core.injection.ApiRequestOptionsModule
+import com.stripe.android.payments.core.injection.RequestCredentialsModule
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
@@ -130,7 +130,7 @@ import javax.inject.Singleton
         NfcScanningAvailabilityModule::class,
         PaymentOptionCardArtModule::class,
         ApiConfigurationFromPaymentConfigurationModule::class,
-        ApiRequestOptionsModule::class,
+        RequestCredentialsModule::class,
         ApiConfigurationResolverModule::class,
     ],
 )

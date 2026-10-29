@@ -8,6 +8,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.RestrictTo
 import androidx.fragment.app.Fragment
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentIntent
@@ -26,7 +27,8 @@ interface PaymentController {
     suspend fun startConfirmAndAuth(
         host: AuthActivityStarterHost,
         confirmStripeIntentParams: ConfirmStripeIntentParams,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     )
 
     /**
@@ -35,14 +37,15 @@ interface PaymentController {
      * @param confirmPaymentIntentParams [ConfirmPaymentIntentParams] used to confirm the
      * [PaymentIntent]
      * @param authenticator a [AlipayAuthenticator] used to interface with the Alipay SDK
-     * @param requestOptions a [ApiRequest.Options] to associate with this request
+     * @param requestOptions a [RequestCredentials] to associate with this request
      *
      * @return a [PaymentIntentResult] object
      */
     suspend fun confirmAndAuthenticateAlipay(
         confirmPaymentIntentParams: ConfirmPaymentIntentParams,
         authenticator: AlipayAuthenticator,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<PaymentIntentResult>
 
     /**
@@ -54,20 +57,23 @@ interface PaymentController {
      */
     suspend fun confirmWeChatPay(
         confirmPaymentIntentParams: ConfirmPaymentIntentParams,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<WeChatPayNextAction>
 
     suspend fun startAuth(
         host: AuthActivityStarterHost,
         clientSecret: String,
-        requestOptions: ApiRequest.Options,
-        type: StripeIntentType
+        requestOptions: RequestCredentials,
+        type: StripeIntentType,
+        idempotencyKey: String?,
     )
 
     suspend fun startAuthenticateSource(
         host: AuthActivityStarterHost,
         source: Source,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     )
 
     /**
@@ -119,7 +125,8 @@ interface PaymentController {
     suspend fun handleNextAction(
         host: AuthActivityStarterHost,
         stripeIntent: StripeIntent,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     )
 
     /**

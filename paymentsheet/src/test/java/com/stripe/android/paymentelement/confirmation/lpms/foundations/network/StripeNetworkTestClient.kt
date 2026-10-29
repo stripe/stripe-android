@@ -1,6 +1,6 @@
 package com.stripe.android.paymentelement.confirmation.lpms.foundations.network
 
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
@@ -12,7 +12,7 @@ import javax.inject.Inject
 
 internal class StripeNetworkTestClient @Inject constructor(
     private val stripeRepository: StripeRepository,
-    private val requestOptions: ApiRequest.Options,
+    private val requestOptions: RequestCredentials,
 ) {
     suspend fun createPaymentIntent(
         country: MerchantCountry,
@@ -51,6 +51,7 @@ internal class StripeNetworkTestClient @Inject constructor(
         return stripeRepository.retrievePaymentIntent(
             clientSecret = clientSecret,
             options = requestOptions,
+            idempotencyKey = null,
         )
     }
 
@@ -83,6 +84,7 @@ internal class StripeNetworkTestClient @Inject constructor(
         return stripeRepository.retrieveSetupIntent(
             clientSecret = clientSecret,
             options = requestOptions,
+            idempotencyKey = null,
         )
     }
 
@@ -92,6 +94,7 @@ internal class StripeNetworkTestClient @Inject constructor(
                 .withShouldUseStripeSdk(shouldUseStripeSdk = true)
                 .withReturnUrl(),
             options = requestOptions,
+            idempotencyKey = null,
         )
     }
 
@@ -101,6 +104,7 @@ internal class StripeNetworkTestClient @Inject constructor(
                 .withShouldUseStripeSdk(shouldUseStripeSdk = true)
                 .withReturnUrl(),
             options = requestOptions,
+            idempotencyKey = null,
         )
     }
 

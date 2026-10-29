@@ -61,7 +61,7 @@ class WeChatPayAuthenticatorTest {
             assertFailsWithMessage<IllegalArgumentException>(
                 "WeChatPay dependency is not found, add " +
                     "${WeChatPayReflectionHelper.WECHAT_PAY_GRADLE_DEP} in app's build.gradle"
-            ) {
+) {
                 authenticator.performNextAction(
                     host,
                     PaymentIntentFixtures.PI_REQUIRES_BLIK_AUTHORIZE,
@@ -76,7 +76,7 @@ class WeChatPayAuthenticatorTest {
             assertFailsWithMessage<IllegalArgumentException>(
                 "stripeIntent.nextActionData should be WeChatPayRedirect, " +
                     "instead it is BlikAuthorize"
-            ) {
+) {
                 authenticator.performNextAction(
                     host,
                     PaymentIntentFixtures.PI_REQUIRES_BLIK_AUTHORIZE,
@@ -91,7 +91,7 @@ class WeChatPayAuthenticatorTest {
             assertFailsWithMessage<IllegalArgumentException>(
                 "stripeIntent.nextActionData should be WeChatPayRedirect, " +
                     "instead it is null"
-            ) {
+) {
                 authenticator.performNextAction(
                     host,
                     PaymentIntentFixtures.PI_NO_NEXT_ACTION_DATA,
@@ -136,7 +136,8 @@ class WeChatPayAuthenticatorTest {
     private companion object {
         private val API_CONFIGURATION = ApiConfiguration.State(
             publishableKey = "TestKey",
-            stripeAccountId = "TestAccountId"
+            stripeAccountId = "TestAccountId",
+            betas = emptySet(),
         )
     }
 }

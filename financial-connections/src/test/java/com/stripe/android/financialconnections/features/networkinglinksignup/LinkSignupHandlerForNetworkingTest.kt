@@ -94,7 +94,7 @@ class LinkSignupHandlerForNetworkingTest {
                 phoneNumber = any(),
                 country = any(),
                 verificationToken = any(),
-                appId = any()
+                appId = any(),
             )
         ).thenReturn(signup)
     }
@@ -110,7 +110,7 @@ class LinkSignupHandlerForNetworkingTest {
             phoneNumber = eq("+1987654321"),
             country = eq("US"),
             verificationToken = eq("token"),
-            appId = eq("applicationId")
+            appId = eq("applicationId"),
         )
         verify(saveAccountToLink).existing(any(), any(), any(), any())
         assertEquals(Pane.SUCCESS, result)

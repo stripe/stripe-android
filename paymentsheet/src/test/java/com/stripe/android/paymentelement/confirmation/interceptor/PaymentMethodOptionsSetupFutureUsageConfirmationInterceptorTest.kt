@@ -2,7 +2,7 @@ package com.stripe.android.paymentelement.confirmation.interceptor
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.SharedPaymentTokenSessionPreview
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentMethod
@@ -49,8 +49,9 @@ class PaymentMethodOptionsSetupFutureUsageConfirmationInterceptorTest {
             stripeRepository = object : AbsFakeStripeRepository() {
                 override suspend fun retrieveStripeIntent(
                     clientSecret: String,
-                    options: ApiRequest.Options,
-                    expandFields: List<String>
+                    options: RequestCredentials,
+                    expandFields: List<String>,
+                    idempotencyKey: String?,
                 ): Result<StripeIntent> {
                     return Result.success(PaymentIntentFactory.create())
                 }
@@ -89,8 +90,9 @@ class PaymentMethodOptionsSetupFutureUsageConfirmationInterceptorTest {
             stripeRepository = object : AbsFakeStripeRepository() {
                 override suspend fun retrieveStripeIntent(
                     clientSecret: String,
-                    options: ApiRequest.Options,
-                    expandFields: List<String>
+                    options: RequestCredentials,
+                    expandFields: List<String>,
+                    idempotencyKey: String?,
                 ): Result<StripeIntent> {
                     return Result.success(PaymentIntentFactory.create())
                 }
@@ -129,15 +131,17 @@ class PaymentMethodOptionsSetupFutureUsageConfirmationInterceptorTest {
                 stripeRepository = object : AbsFakeStripeRepository() {
                     override suspend fun retrieveStripeIntent(
                         clientSecret: String,
-                        options: ApiRequest.Options,
-                        expandFields: List<String>
+                        options: RequestCredentials,
+                        expandFields: List<String>,
+                        idempotencyKey: String?,
                     ): Result<StripeIntent> {
                         return Result.success(PaymentIntentFactory.create())
                     }
 
                     override suspend fun createPaymentMethod(
                         paymentMethodCreateParams: PaymentMethodCreateParams,
-                        options: ApiRequest.Options
+                        options: RequestCredentials,
+                        idempotencyKey: String?,
                     ): Result<PaymentMethod> {
                         return Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
                     }
@@ -194,15 +198,17 @@ class PaymentMethodOptionsSetupFutureUsageConfirmationInterceptorTest {
                 stripeRepository = object : AbsFakeStripeRepository() {
                     override suspend fun retrieveStripeIntent(
                         clientSecret: String,
-                        options: ApiRequest.Options,
-                        expandFields: List<String>
+                        options: RequestCredentials,
+                        expandFields: List<String>,
+                        idempotencyKey: String?,
                     ): Result<StripeIntent> {
                         return Result.success(PaymentIntentFactory.create())
                     }
 
                     override suspend fun createPaymentMethod(
                         paymentMethodCreateParams: PaymentMethodCreateParams,
-                        options: ApiRequest.Options
+                        options: RequestCredentials,
+                        idempotencyKey: String?,
                     ): Result<PaymentMethod> {
                         return Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
                     }

@@ -1,7 +1,8 @@
 package com.stripe.android.paymentelement.confirmation.intent
 
 import com.stripe.android.common.exception.stripeErrorMessage
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.AndroidVerificationObject
 import com.stripe.android.model.ClientAttributionMetadata
@@ -36,7 +37,8 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
     @Assisted private val createIntentCallback: CreateIntentCallback,
     @Assisted private val clientAttributionMetadata: ClientAttributionMetadata,
     private val stripeRepository: StripeRepository,
-    private val requestOptions: ApiRequest.Options,
+    private val requestOptions: RequestCredentials,
+    private val apiConfiguration: ApiConfiguration.State,
     @Named(ALLOWS_MANUAL_CONFIRMATION) private val allowsManualConfirmation: Boolean,
 ) : IntentConfirmationInterceptor {
     private val confirmActionHelper: ConfirmActionHelper = ConfirmActionHelper(requestOptions.apiKeyIsLiveMode)
@@ -81,6 +83,8 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
         return stripeRepository.createPaymentMethod(
             paymentMethodCreateParams = confirmationOption.createParams,
             options = requestOptions,
+            apiConfiguration = apiConfiguration,
+            idempotencyKey = null,
         ).fold(
             onSuccess = { paymentMethod ->
                 handleDeferredIntentCreationFromPaymentMethod(
@@ -193,6 +197,8 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
         return stripeRepository.retrieveStripeIntent(
             clientSecret = clientSecret,
             options = requestOptions,
+            apiConfiguration = apiConfiguration,
+            idempotencyKey = null,
         ).mapCatching { intent ->
             when {
                 intent.isConfirmed -> handleConfirmedIntent(intent, confirmationOption)

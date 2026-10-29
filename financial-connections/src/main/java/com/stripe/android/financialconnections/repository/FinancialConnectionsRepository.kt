@@ -75,7 +75,8 @@ internal class FinancialConnectionsRepositoryImpl @Inject constructor(
         val financialConnectionsRequest = apiRequestFactory.createGet(
             url = listAccountsUrl,
             options = provideApiRequestOptions(useConsumerPublishableKey = false),
-            params = getFinancialConnectionsAcccountsParams.toParamMap()
+            params = getFinancialConnectionsAcccountsParams.toParamMap(),
+            idempotencyKey = null,
         )
         return requestExecutor.execute(
             financialConnectionsRequest,
@@ -91,7 +92,8 @@ internal class FinancialConnectionsRepositoryImpl @Inject constructor(
             options = provideApiRequestOptions(useConsumerPublishableKey = false),
             params = mapOf(
                 NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret
-            )
+            ),
+            idempotencyKey = null,
         )
         return requestExecutor.execute(
             financialConnectionsRequest,
@@ -109,7 +111,8 @@ internal class FinancialConnectionsRepositoryImpl @Inject constructor(
             params = mapOf(
                 NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret,
                 "terminal_error" to terminalError
-            ).filterNotNullValues()
+            ).filterNotNullValues(),
+            idempotencyKey = null,
         )
         return requestExecutor.execute(
             financialConnectionsRequest,
@@ -127,7 +130,8 @@ internal class FinancialConnectionsRepositoryImpl @Inject constructor(
             params = mapOf(
                 NetworkConstants.PARAMS_ID to sessionId,
                 NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret
-            )
+            ),
+            idempotencyKey = null,
         )
         return requestExecutor.execute(
             request,
@@ -160,6 +164,7 @@ internal class FinancialConnectionsRepositoryImpl @Inject constructor(
             url = paymentMethodsUrl,
             options = provideApiRequestOptions(useConsumerPublishableKey = false),
             params = linkParams + billingParams + fraudDetectionParams,
+            idempotencyKey = null,
         )
 
         return requestExecutor.execute(request)

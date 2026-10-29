@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.ApiKeyFixtures.partnerAccount
 import com.stripe.android.financialconnections.ApiKeyFixtures.partnerAccountList
@@ -17,6 +18,7 @@ import org.junit.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.given
+import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
@@ -36,8 +38,9 @@ internal class FinancialConnectionsAccountsRepositoryImplTest {
     private fun buildRepository() = FinancialConnectionsAccountsRepository(
         requestExecutor = mockRequestExecutor,
         provideApiRequestOptions = {
-            ApiRequest.Options(
-                apiKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
+            RequestCredentials(
+                apiKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+                stripeAccount = null,
             )
         },
         apiRequestFactory = apiRequestFactory,
@@ -83,7 +86,8 @@ internal class FinancialConnectionsAccountsRepositoryImplTest {
             apiRequestFactory.createPost(
                 url = any(),
                 options = any(),
-                params = any()
+                params = any(),
+                idempotencyKey = isNull(),
             )
         ).thenReturn(mock)
         given(

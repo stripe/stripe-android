@@ -5,8 +5,8 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutUpdate
-import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
@@ -187,10 +187,13 @@ internal class SheetTaxRegionUpdaterTest {
                 publishableKey = "pk_test_123",
             ),
             apiRequestOptionsProvider = {
-                ApiRequest.Options(
+                RequestCredentials(
                     apiKey = DEFAULT_API_CONFIG.publishableKey,
                     stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
                 )
+            },
+            apiConfigurationProvider = {
+                DEFAULT_API_CONFIG
             },
         )
 

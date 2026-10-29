@@ -3,8 +3,8 @@ package com.stripe.android.paymentsheet.repositories
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.PaymentMethodRemovePermission
-import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
@@ -351,17 +351,22 @@ class DefaultSavedPaymentMethodRepositoryTest {
                 publishableKey = "pk_test_123",
             ),
             apiRequestOptionsProvider = {
-                ApiRequest.Options(
+                RequestCredentials(
                     apiKey = DEFAULT_API_CONFIG.publishableKey,
                     stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
                 )
+            },
+            apiConfigurationProvider = {
+                DEFAULT_API_CONFIG
             },
         )
         val repository = DefaultSavedPaymentMethodRepository(
             customerRepository = customerRepository,
             checkoutSessionRepository = checkoutSessionRepository,
             elementsSessionClientParams = clientParams,
-            apiConfigurationProvider = { DEFAULT_API_CONFIG },
+            apiConfigurationProvider = {
+                DEFAULT_API_CONFIG
+            },
         )
 
         Scenario(

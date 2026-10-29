@@ -4,8 +4,8 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ConsumerFixtures
 import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.exception.APIException
-import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.model.ConsumerPaymentDetails
@@ -38,7 +38,8 @@ class ConsumersApiServiceImplTest {
         stripeNetworkClient = DefaultStripeNetworkClient(),
         sdkVersion = StripeSdkVersion.VERSION,
         apiVersion = ApiVersion(betas = emptySet()).code,
-        appInfo = null
+        appInfo = null,
+        requestApiConfiguration = null,
     )
 
     @Test
@@ -79,6 +80,7 @@ class ConsumersApiServiceImplTest {
                 requestSurface = requestSurface,
             ),
             requestOptions = DEFAULT_OPTIONS,
+            idempotencyKey = null,
         ).getOrThrow()
 
         assertThat(signup.consumerSession.verificationSessions).isEmpty()
@@ -113,7 +115,8 @@ class ConsumersApiServiceImplTest {
             requestOptions = DEFAULT_OPTIONS,
             doNotLogConsumerFunnelEvent = false,
             supportedVerificationTypes = null,
-            customerId = null
+            customerId = null,
+            idempotencyKey = null,
         )
 
         assertThat(lookup.exists).isTrue()
@@ -147,7 +150,8 @@ class ConsumersApiServiceImplTest {
                 doNotLogConsumerFunnelEvent = false,
                 supportedVerificationTypes = null,
                 requestOptions = DEFAULT_OPTIONS,
-                customerId = null
+                customerId = null,
+                idempotencyKey = null,
             )
         }
     }
@@ -179,7 +183,8 @@ class ConsumersApiServiceImplTest {
             connectionsMerchantName = null,
             accountPhoneNumber = null,
             emailAddress = null,
-            requestOptions = DEFAULT_OPTIONS
+            requestOptions = DEFAULT_OPTIONS,
+            idempotencyKey = null,
         )
 
         assertThat(consumerSession.redactedPhoneNumber).isEqualTo("+1********56")
@@ -219,7 +224,8 @@ class ConsumersApiServiceImplTest {
             accountPhoneNumber = null,
             emailAddress = null,
             requestOptions = DEFAULT_OPTIONS,
-            isResendSmsCode = true
+            isResendSmsCode = true,
+            idempotencyKey = null,
         )
     }
 
@@ -250,7 +256,8 @@ class ConsumersApiServiceImplTest {
             accountPhoneNumber = null,
             emailAddress = null,
             requestOptions = DEFAULT_OPTIONS,
-            isResendSmsCode = false
+            isResendSmsCode = false,
+            idempotencyKey = null,
         )
     }
 
@@ -281,7 +288,8 @@ class ConsumersApiServiceImplTest {
             accountPhoneNumber = "+15555555555",
             emailAddress = "Email@Email.com",
             requestOptions = DEFAULT_OPTIONS,
-            isResendSmsCode = false
+            isResendSmsCode = false,
+            idempotencyKey = null,
         )
     }
 
@@ -306,7 +314,8 @@ class ConsumersApiServiceImplTest {
             accountPhoneNumber = null,
             emailAddress = null,
             requestOptions = DEFAULT_OPTIONS,
-            isResendSmsCode = false
+            isResendSmsCode = false,
+            idempotencyKey = null,
         )
     }
 
@@ -334,7 +343,8 @@ class ConsumersApiServiceImplTest {
             requestSurface = "android_payment_element",
             type = VerificationType.SMS,
             consentGranted = null,
-            requestOptions = DEFAULT_OPTIONS
+            requestOptions = DEFAULT_OPTIONS,
+            idempotencyKey = null,
         )
 
         assertThat(consumerSession.redactedPhoneNumber).isEqualTo("+1********56")
@@ -393,6 +403,7 @@ class ConsumersApiServiceImplTest {
             ),
             requestSurface = requestSurface,
             requestOptions = DEFAULT_OPTIONS,
+            idempotencyKey = null,
         ).getOrThrow()
 
         val cardDetails = paymentDetails.paymentDetails.first() as ConsumerPaymentDetails.Card
@@ -450,6 +461,7 @@ class ConsumersApiServiceImplTest {
             ),
             requestSurface = requestSurface,
             requestOptions = DEFAULT_OPTIONS,
+            idempotencyKey = null,
         ).getOrThrow()
 
         val cardDetails = paymentDetails.paymentDetails.first() as ConsumerPaymentDetails.Card
@@ -482,6 +494,7 @@ class ConsumersApiServiceImplTest {
             requestSurface = requestSurface,
             requestOptions = DEFAULT_OPTIONS,
             customerEphemeralKey = ephemeralKey,
+            idempotencyKey = null,
         ).getOrThrow()
 
         val cardDetails = paymentDetails.paymentDetails.first() as ConsumerPaymentDetails.Card
@@ -507,7 +520,7 @@ class ConsumersApiServiceImplTest {
     }
 
     private companion object {
-        private val DEFAULT_OPTIONS = ApiRequest.Options(TestApiKeys.PUBLISHABLE, TestApiKeys.ACCOUNT)
+        private val DEFAULT_OPTIONS = RequestCredentials(TestApiKeys.PUBLISHABLE, TestApiKeys.ACCOUNT)
         private const val DEFAULT_SESSION_ID = "sess_123"
     }
 }

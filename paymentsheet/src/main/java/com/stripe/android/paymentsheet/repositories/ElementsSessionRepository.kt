@@ -10,6 +10,7 @@ import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.HTTP_INTERNAL_SERVER_ERROR
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.executeRequestWithResultParser
 import com.stripe.android.core.version.StripeSdkVersion
@@ -83,15 +84,15 @@ internal class RealElementsSessionRepository @Inject constructor(
             linkDisallowedFundingSourceCreation = linkDisallowedFundingSourceCreation,
         )
 
-        val requestOptions = ApiRequest.Options(
+        val requestOptions = RequestCredentials(
             apiKey = apiConfiguration.publishableKey,
             stripeAccount = apiConfiguration.stripeAccountId,
         )
-        val elementsSession = retrieveElementsSession(params, requestOptions)
+        val elementsSession = retrieveElementsSession(params, requestOptions, apiConfiguration, idempotencyKey = null)
 
         return elementsSession.getResultOrElse { elementsSessionFailure ->
             if (shouldFallback(elementsSession)) {
-                fallback(params, elementsSessionFailure, requestOptions)
+                fallback(params, elementsSessionFailure, requestOptions, apiConfiguration, idempotencyKey = null)
             } else {
                 elementsSession
             }
@@ -100,7 +101,9 @@ internal class RealElementsSessionRepository @Inject constructor(
 
     private suspend fun retrieveElementsSession(
         params: ElementsSessionParams,
-        options: ApiRequest.Options,
+        options: RequestCredentials,
+        apiConfiguration: ApiConfiguration.State,
+        idempotencyKey: String?,
     ): Result<ElementsSession> {
         val requestParams = buildMap {
             this["type"] = params.type
@@ -132,6 +135,8 @@ internal class RealElementsSessionRepository @Inject constructor(
                 url = ELEMENTS_SESSIONS_URL,
                 options = options,
                 params = requestParams + expandParam,
+                apiConfiguration = apiConfiguration,
+                idempotencyKey = idempotencyKey,
             ),
             responseJsonParser = ElementsSessionJsonParser(
                 params = params,
@@ -143,21 +148,27 @@ internal class RealElementsSessionRepository @Inject constructor(
     private suspend fun fallback(
         params: ElementsSessionParams,
         elementsSessionFailure: Throwable,
-        requestOptions: ApiRequest.Options,
+        requestOptions: RequestCredentials,
+        apiConfiguration: ApiConfiguration.State,
+        idempotencyKey: String?,
     ): Result<ElementsSession> = withContext(workContext) {
         val stripeIntent = when (params) {
             is ElementsSessionParams.PaymentIntentType -> {
                 stripeRepository.retrievePaymentIntent(
                     clientSecret = params.clientSecret,
                     options = requestOptions,
-                    expandFields = listOf("payment_method")
+                    expandFields = listOf("payment_method"),
+                    apiConfiguration = apiConfiguration,
+                    idempotencyKey = idempotencyKey,
                 )
             }
             is ElementsSessionParams.SetupIntentType -> {
                 stripeRepository.retrieveSetupIntent(
                     clientSecret = params.clientSecret,
                     options = requestOptions,
-                    expandFields = listOf("payment_method")
+                    expandFields = listOf("payment_method"),
+                    apiConfiguration = apiConfiguration,
+                    idempotencyKey = idempotencyKey,
                 )
             }
             is ElementsSessionParams.DeferredIntentType -> {
@@ -340,7 +351,7 @@ private val PaymentSheet.CustomerConfiguration.legacyCustomerEphemeralKey: Strin
         is PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey -> accessType.ephemeralKeySecret
     }
 
-private fun ElementsSessionParams.DeferredIntentType.toStripeIntent(options: ApiRequest.Options): StripeIntent {
+private fun ElementsSessionParams.DeferredIntentType.toStripeIntent(options: RequestCredentials): StripeIntent {
     val deferredIntentParams = this.deferredIntentParams
     val now = Calendar.getInstance().timeInMillis
     return when (val deferredIntentMode = deferredIntentParams.mode) {

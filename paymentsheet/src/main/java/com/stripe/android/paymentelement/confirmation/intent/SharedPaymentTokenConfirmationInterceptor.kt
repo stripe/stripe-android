@@ -2,7 +2,8 @@ package com.stripe.android.paymentelement.confirmation.intent
 
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.exception.stripeErrorMessage
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.link.utils.errorMessage
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentMethod
@@ -26,7 +27,8 @@ internal class SharedPaymentTokenConfirmationInterceptor @AssistedInject constru
     @Assisted private val intentConfiguration: PaymentSheet.IntentConfiguration,
     @Assisted private val handler: PreparePaymentMethodHandler,
     private val stripeRepository: StripeRepository,
-    private val requestOptions: ApiRequest.Options,
+    private val requestOptions: RequestCredentials,
+    private val apiConfiguration: ApiConfiguration.State,
 ) : IntentConfirmationInterceptor {
 
     override suspend fun intercept(
@@ -36,7 +38,9 @@ internal class SharedPaymentTokenConfirmationInterceptor @AssistedInject constru
     ): ConfirmationDefinition.Action<Args> {
         return stripeRepository.createPaymentMethod(
             confirmationOption.createParams.updatedWithProductUsage(intentConfiguration),
-            requestOptions
+            requestOptions,
+            apiConfiguration = apiConfiguration,
+            idempotencyKey = null,
         ).fold(
             onSuccess = { paymentMethod ->
                 intercept(

@@ -43,6 +43,7 @@ internal class CollectBankAccountForACHLauncher(
                 apiConfiguration = ApiConfiguration.State(
                     publishableKey = publishableKey,
                     stripeAccountId = stripeAccountId,
+                    betas = emptySet(),
                 ),
                 clientSecret = clientSecret,
                 configuration = configuration,
@@ -79,6 +80,7 @@ internal class CollectBankAccountForACHLauncher(
                 apiConfiguration = ApiConfiguration.State(
                     publishableKey = publishableKey,
                     stripeAccountId = stripeAccountId,
+                    betas = emptySet(),
                 ),
                 clientSecret = clientSecret,
                 configuration = configuration,
@@ -105,6 +107,7 @@ internal class CollectBankAccountForACHLauncher(
                 apiConfiguration = ApiConfiguration.State(
                     publishableKey = publishableKey,
                     stripeAccountId = stripeAccountId,
+                    betas = emptySet(),
                 ),
                 elementsSessionId = elementsSessionId,
                 configuration = configuration,
@@ -131,6 +134,7 @@ internal class CollectBankAccountForACHLauncher(
                 apiConfiguration = ApiConfiguration.State(
                     publishableKey = publishableKey,
                     stripeAccountId = stripeAccountId,
+                    betas = emptySet(),
                 ),
                 elementsSessionId = elementsSessionId,
                 configuration = configuration,

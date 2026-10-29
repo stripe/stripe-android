@@ -1,7 +1,9 @@
 package com.stripe.android.paymentsheet.addresselement
 
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.executeRequestWithResultParser
 import javax.inject.Provider
@@ -9,7 +11,8 @@ import javax.inject.Provider
 internal class DefaultStripeAutocompleteRepository(
     private val stripeNetworkClient: StripeNetworkClient,
     private val apiRequestFactory: ApiRequest.Factory,
-    private val requestOptionsProvider: Provider<ApiRequest.Options>,
+    private val apiConfigurationProvider: Provider<ApiConfiguration.State>,
+    private val requestOptionsProvider: Provider<RequestCredentials>,
 ) : StripeAutocompleteRepository {
 
     private val stripeErrorJsonParser = StripeErrorJsonParser()
@@ -36,6 +39,8 @@ internal class DefaultStripeAutocompleteRepository(
                 url = AUTOCOMPLETE_URL,
                 options = requestOptionsProvider.get(),
                 params = params,
+                idempotencyKey = null,
+                apiConfiguration = apiConfigurationProvider.get(),
             ),
             responseJsonParser = AutocompletePredictionsResponseJsonParser,
         )
@@ -62,6 +67,8 @@ internal class DefaultStripeAutocompleteRepository(
                 url = DETAILS_URL,
                 options = requestOptionsProvider.get(),
                 params = params,
+                idempotencyKey = null,
+                apiConfiguration = apiConfigurationProvider.get(),
             ),
             responseJsonParser = PlaceDetailsResponseJsonParser,
         )

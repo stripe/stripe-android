@@ -7,8 +7,8 @@ import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.networking.AnalyticsRequestFactory
-import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.model.Address
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
@@ -404,11 +404,12 @@ class AddressElementViewModelModuleTest {
                     publishableKey = "pk_test_123",
                 ),
                 apiRequestOptionsProvider = Provider {
-                    ApiRequest.Options(
+                    RequestCredentials(
                         apiKey = "pk_test_123",
                         stripeAccount = "acct_123",
                     )
                 },
+                apiConfigurationProvider = { DEFAULT_API_CONFIG },
             ),
         )
     }

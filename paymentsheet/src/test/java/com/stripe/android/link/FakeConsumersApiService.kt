@@ -1,6 +1,6 @@
 package com.stripe.android.link
 
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.model.AttachConsumerToLinkAccountSession
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
@@ -44,7 +44,8 @@ internal open class FakeConsumersApiService : ConsumersApiService {
 
     override suspend fun signUp(
         params: SignUpParams,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<ConsumerSessionSignup> {
         signUpCalls.add(
             SignUpCall(
@@ -57,7 +58,8 @@ internal open class FakeConsumersApiService : ConsumersApiService {
 
     override suspend fun mobileSignUp(
         params: SignUpParams,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<ConsumerSessionSignup> {
         mobileSignUpCalls.add(
             SignUpCall(
@@ -75,8 +77,9 @@ internal open class FakeConsumersApiService : ConsumersApiService {
         sessionId: String,
         doNotLogConsumerFunnelEvent: Boolean,
         supportedVerificationTypes: List<String>?,
-        requestOptions: ApiRequest.Options,
-        customerId: String?
+        requestOptions: RequestCredentials,
+        customerId: String?,
+        idempotencyKey: String?,
     ): ConsumerSessionLookup {
         lookupCalls.add(
             LookupCall(
@@ -98,10 +101,11 @@ internal open class FakeConsumersApiService : ConsumersApiService {
         verificationToken: String,
         appId: String,
         supportedVerificationTypes: List<String>?,
-        requestOptions: ApiRequest.Options,
+        requestOptions: RequestCredentials,
         sessionId: String,
         customerId: String?,
-        linkAuthTokenClientSecret: String?
+        linkAuthTokenClientSecret: String?,
+        idempotencyKey: String?,
     ): ConsumerSessionLookup {
         mobileLookupCalls.add(
             MobileLookupCall(
@@ -127,8 +131,9 @@ internal open class FakeConsumersApiService : ConsumersApiService {
         connectionsMerchantName: String?,
         accountPhoneNumber: String?,
         emailAddress: String?,
-        requestOptions: ApiRequest.Options,
-        isResendSmsCode: Boolean
+        requestOptions: RequestCredentials,
+        isResendSmsCode: Boolean,
+        idempotencyKey: String?,
     ): ConsumerSession {
         TODO("Not yet implemented")
     }
@@ -139,7 +144,8 @@ internal open class FakeConsumersApiService : ConsumersApiService {
         requestSurface: String,
         type: VerificationType,
         consentGranted: Boolean?,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): ConsumerSession {
         TODO("Not yet implemented")
     }
@@ -148,7 +154,8 @@ internal open class FakeConsumersApiService : ConsumersApiService {
         consumerSessionClientSecret: String,
         consentGranted: Boolean,
         requestSurface: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<Unit> {
         TODO("Not yet implemented")
     }
@@ -157,7 +164,8 @@ internal open class FakeConsumersApiService : ConsumersApiService {
         consumerSessionClientSecret: String,
         clientSecret: String,
         requestSurface: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): AttachConsumerToLinkAccountSession {
         TODO("Not yet implemented")
     }
@@ -166,7 +174,8 @@ internal open class FakeConsumersApiService : ConsumersApiService {
         consumerSessionClientSecret: String,
         paymentDetailsCreateParams: ConsumerPaymentDetailsCreateParams,
         requestSurface: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<ConsumerPaymentDetails> {
         return createPaymentDetailsResult
     }
@@ -175,8 +184,9 @@ internal open class FakeConsumersApiService : ConsumersApiService {
         consumerSessionClientSecret: String,
         paymentMethodId: String,
         requestSurface: String,
-        requestOptions: ApiRequest.Options,
+        requestOptions: RequestCredentials,
         customerEphemeralKey: String,
+        idempotencyKey: String?,
     ): Result<ConsumerPaymentDetails> {
         createPaymentDetailsFromPaymentMethodCalls.add(
             CreatePaymentDetailsFromPaymentMethodCall(
@@ -196,8 +206,9 @@ internal open class FakeConsumersApiService : ConsumersApiService {
         expectedPaymentMethodType: String?,
         billingPhone: String?,
         requestSurface: String,
-        requestOptions: ApiRequest.Options,
-        extraParams: Map<String, Any?>
+        requestOptions: RequestCredentials,
+        extraParams: Map<String, Any?>,
+        idempotencyKey: String?,
     ): Result<SharePaymentDetails> {
         sharePaymentDetailsCalls.add(SharePaymentDetailsCall(extraParams, requestOptions))
         return Result.success(TestFactory.LINK_SHARE_PAYMENT_DETAILS)
@@ -208,7 +219,8 @@ internal open class FakeConsumersApiService : ConsumersApiService {
         paymentDetailsId: String,
         consumerSessionClientSecret: String,
         requestSurface: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<UpdateAvailableIncentives> {
         TODO("Not yet implemented")
     }
@@ -218,7 +230,8 @@ internal open class FakeConsumersApiService : ConsumersApiService {
         intentToken: String?,
         linkMode: LinkMode?,
         requestSurface: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<LinkAccountSession> {
         TODO("Not yet implemented")
     }
@@ -228,14 +241,16 @@ internal open class FakeConsumersApiService : ConsumersApiService {
         consumerSessionClientSecret: String,
         supportedVerificationTypes: List<String>?,
         requestSurface: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): ConsumerSessionRefresh = refreshConsumerSessionResult
 
     override suspend fun updatePhoneNumber(
         consumerSessionClientSecret: String,
         phoneNumber: String,
         requestSurface: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: RequestCredentials,
+        idempotencyKey: String?,
     ): Result<ConsumerSession> {
         TODO("Not yet implemented")
     }
@@ -245,7 +260,7 @@ internal open class FakeConsumersApiService : ConsumersApiService {
         val linkAuthIntentId: String?,
         val requestSurface: String,
         val sessionId: String,
-        val requestOptions: ApiRequest.Options
+        val requestOptions: RequestCredentials
     )
 
     data class MobileLookupCall(
@@ -255,25 +270,25 @@ internal open class FakeConsumersApiService : ConsumersApiService {
         val requestSurface: String,
         val verificationToken: String,
         val appId: String,
-        val requestOptions: ApiRequest.Options,
+        val requestOptions: RequestCredentials,
         val sessionId: String
     )
 
     data class SignUpCall(
         val params: SignUpParams,
-        val requestOptions: ApiRequest.Options
+        val requestOptions: RequestCredentials
     )
 
     data class SharePaymentDetailsCall(
         val extraParams: Map<String, Any?>,
-        val requestOptions: ApiRequest.Options
+        val requestOptions: RequestCredentials
     )
 
     data class CreatePaymentDetailsFromPaymentMethodCall(
         val consumerSessionClientSecret: String,
         val paymentMethodId: String,
         val requestSurface: String,
-        val requestOptions: ApiRequest.Options,
+        val requestOptions: RequestCredentials,
         val customerEphemeralKey: String,
     )
 }

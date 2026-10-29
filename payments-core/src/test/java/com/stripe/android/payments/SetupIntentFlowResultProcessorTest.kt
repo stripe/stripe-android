@@ -7,7 +7,7 @@ import com.stripe.android.SetupIntentResult
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
@@ -21,6 +21,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.atLeast
 import org.mockito.kotlin.atLeastOnce
 import org.mockito.kotlin.atMost
@@ -31,6 +32,7 @@ import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
+@Suppress("LargeClass")
 internal class SetupIntentFlowResultProcessorTest {
     private val testDispatcher = UnconfinedTestDispatcher()
 
@@ -40,7 +42,11 @@ internal class SetupIntentFlowResultProcessorTest {
     private val processor = SetupIntentFlowResultProcessor(
         ApplicationProvider.getApplicationContext(),
         {
-            ApiConfiguration.State(publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, stripeAccountId = null)
+            ApiConfiguration.State(
+                publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                stripeAccountId = null,
+                betas = emptySet(),
+            )
         },
         mockStripeRepository,
         Logger.noop(),
@@ -52,10 +58,26 @@ internal class SetupIntentFlowResultProcessorTest {
     @Test
     fun `processResult() when shouldCancelSource=true should return canceled SetupIntent`() =
         runTest(testDispatcher) {
-            whenever(mockStripeRepository.retrieveSetupIntent(any(), any(), any())).thenReturn(
+            whenever(
+                mockStripeRepository.retrieveSetupIntent(
+                clientSecret = any(),
+                options = any(),
+                expandFields = any<List<String>>(),
+                apiConfiguration = any(),
+                idempotencyKey = anyOrNull(),
+                )
+            ).thenReturn(
                 Result.success(SetupIntentFixtures.SI_NEXT_ACTION_REDIRECT)
             )
-            whenever(mockStripeRepository.cancelSetupIntentSource(any(), any(), any())).thenReturn(
+            whenever(
+                mockStripeRepository.cancelSetupIntentSource(
+                any(),
+                any(),
+                any(),
+                apiConfiguration = any(),
+                idempotencyKey = anyOrNull(),
+                )
+            ).thenReturn(
                 Result.success(SetupIntentFixtures.CANCELLED)
             )
 
@@ -82,10 +104,26 @@ internal class SetupIntentFlowResultProcessorTest {
             val intent = SetupIntentFixtures.SI_3DS2_PROCESSING.copy(
                 status = StripeIntent.Status.RequiresAction
             )
-            whenever(mockStripeRepository.retrieveSetupIntent(any(), any(), any())).thenReturn(
+            whenever(
+                mockStripeRepository.retrieveSetupIntent(
+                clientSecret = any(),
+                options = any(),
+                expandFields = any<List<String>>(),
+                apiConfiguration = any(),
+                idempotencyKey = anyOrNull(),
+                )
+            ).thenReturn(
                 Result.success(intent)
             )
-            whenever(mockStripeRepository.cancelSetupIntentSource(any(), any(), any())).thenReturn(
+            whenever(
+                mockStripeRepository.cancelSetupIntentSource(
+                any(),
+                any(),
+                any(),
+                apiConfiguration = any(),
+                idempotencyKey = anyOrNull(),
+                )
+            ).thenReturn(
                 Result.success(SetupIntentFixtures.CANCELLED)
             )
 
@@ -98,20 +136,40 @@ internal class SetupIntentFlowResultProcessorTest {
                 )
             ).getOrThrow()
 
-            verify(mockStripeRepository).cancelSetupIntentSource(any(), eq("source_id"), any())
-            verify(mockStripeRepository).retrieveSetupIntent(any(), any(), any())
+            verify(mockStripeRepository).cancelSetupIntentSource(
+                any(),
+                eq("source_id"),
+                any(),
+                apiConfiguration = any(),
+                idempotencyKey = anyOrNull(),
+            )
+            verify(mockStripeRepository).retrieveSetupIntent(
+                clientSecret = any(),
+                options = any(),
+                expandFields = any<List<String>>(),
+                apiConfiguration = any(),
+                idempotencyKey = anyOrNull(),
+            )
         }
 
     @Test
     fun `3ds2 canceled with processing intent should succeed`() =
         runTest(testDispatcher) {
-            whenever(mockStripeRepository.retrieveSetupIntent(any(), any(), any())).thenReturn(
+            whenever(
+                mockStripeRepository.retrieveSetupIntent(
+                clientSecret = any(),
+                options = any(),
+                expandFields = any<List<String>>(),
+                apiConfiguration = any(),
+                idempotencyKey = anyOrNull(),
+                )
+            ).thenReturn(
                 Result.success(SetupIntentFixtures.SI_3DS2_PROCESSING),
                 Result.success(SetupIntentFixtures.SI_3DS2_SUCCEEDED),
             )
 
             val clientSecret = "pi_3L8WOsLu5o3P18Zp191FpRSy_secret_5JIwIT1ooCwRm28AwreUAc6N4"
-            val requestOptions = ApiRequest.Options(apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+            val requestOptions = RequestCredentials(apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, stripeAccount = null)
 
             val result = processor.processResult(
                 PaymentFlowResult.Unvalidated(
@@ -126,7 +184,9 @@ internal class SetupIntentFlowResultProcessorTest {
             ).retrieveSetupIntent(
                 eq(clientSecret),
                 eq(requestOptions),
-                eq(PaymentFlowResultProcessor.EXPAND_PAYMENT_METHOD)
+                eq(PaymentFlowResultProcessor.EXPAND_PAYMENT_METHOD),
+                apiConfiguration = any(),
+                idempotencyKey = anyOrNull(),
             )
 
             assertThat(result)
@@ -142,12 +202,20 @@ internal class SetupIntentFlowResultProcessorTest {
     @Test
     fun `3ds2 canceled with succeeded intent should succeed`() =
         runTest(testDispatcher) {
-            whenever(mockStripeRepository.retrieveSetupIntent(any(), any(), any())).thenReturn(
+            whenever(
+                mockStripeRepository.retrieveSetupIntent(
+                clientSecret = any(),
+                options = any(),
+                expandFields = any<List<String>>(),
+                apiConfiguration = any(),
+                idempotencyKey = anyOrNull(),
+                )
+            ).thenReturn(
                 Result.success(SetupIntentFixtures.SI_3DS2_SUCCEEDED)
             )
 
             val clientSecret = "pi_3L8WOsLu5o3P18Zp191FpRSy_secret_5JIwIT1ooCwRm28AwreUAc6N4"
-            val requestOptions = ApiRequest.Options(apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+            val requestOptions = RequestCredentials(apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, stripeAccount = null)
 
             val result = processor.processResult(
                 PaymentFlowResult.Unvalidated(
@@ -159,7 +227,9 @@ internal class SetupIntentFlowResultProcessorTest {
             verify(mockStripeRepository).retrieveSetupIntent(
                 eq(clientSecret),
                 eq(requestOptions),
-                eq(PaymentFlowResultProcessor.EXPAND_PAYMENT_METHOD)
+                eq(PaymentFlowResultProcessor.EXPAND_PAYMENT_METHOD),
+                apiConfiguration = any(),
+                idempotencyKey = anyOrNull(),
             )
 
             assertThat(result)
@@ -178,14 +248,22 @@ internal class SetupIntentFlowResultProcessorTest {
             val intent = SetupIntentFixtures.SI_3DS2_PROCESSING.copy(
                 status = StripeIntent.Status.RequiresAction
             )
-            whenever(mockStripeRepository.retrieveSetupIntent(any(), any(), any())).thenReturn(
+            whenever(
+                mockStripeRepository.retrieveSetupIntent(
+                clientSecret = any(),
+                options = any(),
+                expandFields = any<List<String>>(),
+                apiConfiguration = any(),
+                idempotencyKey = anyOrNull(),
+                )
+            ).thenReturn(
                 Result.success(intent)
             )
 
             val clientSecret = requireNotNull(
                 intent.clientSecret
             )
-            val requestOptions = ApiRequest.Options(apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+            val requestOptions = RequestCredentials(apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, stripeAccount = null)
 
             val result = processor.processResult(
                 PaymentFlowResult.Unvalidated(
@@ -200,7 +278,9 @@ internal class SetupIntentFlowResultProcessorTest {
             ).retrieveSetupIntent(
                 eq(clientSecret),
                 eq(requestOptions),
-                eq(PaymentFlowResultProcessor.EXPAND_PAYMENT_METHOD)
+                eq(PaymentFlowResultProcessor.EXPAND_PAYMENT_METHOD),
+                apiConfiguration = any(),
+                idempotencyKey = anyOrNull(),
             )
 
             verify(
@@ -209,7 +289,9 @@ internal class SetupIntentFlowResultProcessorTest {
             ).retrieveSetupIntent(
                 eq(clientSecret),
                 eq(requestOptions),
-                eq(PaymentFlowResultProcessor.EXPAND_PAYMENT_METHOD)
+                eq(PaymentFlowResultProcessor.EXPAND_PAYMENT_METHOD),
+                apiConfiguration = any(),
+                idempotencyKey = anyOrNull(),
             )
 
             assertThat(result)
@@ -232,7 +314,15 @@ internal class SetupIntentFlowResultProcessorTest {
                 paymentMethodTypes = listOf("card", "swish"),
             )
 
-            whenever(mockStripeRepository.retrieveSetupIntent(any(), any(), any())).thenReturn(
+            whenever(
+                mockStripeRepository.retrieveSetupIntent(
+                clientSecret = any(),
+                options = any(),
+                expandFields = any<List<String>>(),
+                apiConfiguration = any(),
+                idempotencyKey = anyOrNull(),
+                )
+            ).thenReturn(
                 Result.success(requiresActionIntent),
             )
 
@@ -256,20 +346,12 @@ internal class SetupIntentFlowResultProcessorTest {
             verify(
                 mockStripeRepository,
                 atLeast(MINIMUM_RETRIEVE_CALLS)
-            ).retrieveSetupIntent(
-                any(),
-                any(),
-                any(),
-            )
+            ).retrieveSetupIntent(any(), any(), any(), apiConfiguration = any(), idempotencyKey = anyOrNull())
 
             verify(
                 mockStripeRepository,
                 atMost(getMaxNumberOfInvocations(paymentMethod.type!!))
-            ).retrieveSetupIntent(
-                any(),
-                any(),
-                any(),
-            )
+            ).retrieveSetupIntent(any(), any(), any(), apiConfiguration = any(), idempotencyKey = anyOrNull())
         }
 
     @Test
@@ -283,7 +365,15 @@ internal class SetupIntentFlowResultProcessorTest {
 
             val succeededIntent = requiresActionIntent.copy(status = StripeIntent.Status.Succeeded)
 
-            whenever(mockStripeRepository.retrieveSetupIntent(any(), any(), any())).thenReturn(
+            whenever(
+                mockStripeRepository.retrieveSetupIntent(
+                clientSecret = any(),
+                options = any(),
+                expandFields = any<List<String>>(),
+                apiConfiguration = any(),
+                idempotencyKey = anyOrNull(),
+                )
+            ).thenReturn(
                 Result.success(requiresActionIntent),
                 Result.success(requiresActionIntent),
                 Result.success(succeededIntent),
@@ -318,11 +408,26 @@ internal class SetupIntentFlowResultProcessorTest {
 
             val succeededIntent = requiresActionIntent.copy(status = StripeIntent.Status.Succeeded)
 
-            whenever(mockStripeRepository.retrieveSetupIntent(any(), any(), any())).thenReturn(
+            whenever(
+                mockStripeRepository.retrieveSetupIntent(
+                clientSecret = any(),
+                options = any(),
+                expandFields = any<List<String>>(),
+                apiConfiguration = any(),
+                idempotencyKey = anyOrNull(),
+                )
+            ).thenReturn(
                 Result.success(requiresActionIntent),
             )
 
-            whenever(mockStripeRepository.refreshSetupIntent(any(), any())).thenReturn(
+            whenever(
+                mockStripeRepository.refreshSetupIntent(
+                any(),
+                any(),
+                apiConfiguration = any(),
+                idempotencyKey = anyOrNull(),
+                )
+            ).thenReturn(
                 Result.success(succeededIntent),
             )
 
@@ -354,7 +459,15 @@ internal class SetupIntentFlowResultProcessorTest {
                 paymentMethodTypes = listOf("card", "amazon_pay"),
             )
 
-            whenever(mockStripeRepository.retrieveSetupIntent(any(), any(), any())).thenReturn(
+            whenever(
+                mockStripeRepository.retrieveSetupIntent(
+                clientSecret = any(),
+                options = any(),
+                expandFields = any<List<String>>(),
+                apiConfiguration = any(),
+                idempotencyKey = anyOrNull(),
+                )
+            ).thenReturn(
                 Result.success(requiresActionIntent),
             )
 
@@ -378,20 +491,12 @@ internal class SetupIntentFlowResultProcessorTest {
             verify(
                 mockStripeRepository,
                 atLeast(MINIMUM_RETRIEVE_CALLS)
-            ).retrieveSetupIntent(
-                any(),
-                any(),
-                any(),
-            )
+            ).retrieveSetupIntent(any(), any(), any(), apiConfiguration = any(), idempotencyKey = anyOrNull())
 
             verify(
                 mockStripeRepository,
                 atMost(getMaxNumberOfInvocations(paymentMethod.type!!))
-            ).retrieveSetupIntent(
-                any(),
-                any(),
-                any(),
-            )
+            ).retrieveSetupIntent(any(), any(), any(), apiConfiguration = any(), idempotencyKey = anyOrNull())
         }
 
     @Test
@@ -405,7 +510,15 @@ internal class SetupIntentFlowResultProcessorTest {
 
             val succeededIntent = requiresActionIntent.copy(status = StripeIntent.Status.Succeeded)
 
-            whenever(mockStripeRepository.retrieveSetupIntent(any(), any(), any())).thenReturn(
+            whenever(
+                mockStripeRepository.retrieveSetupIntent(
+                clientSecret = any(),
+                options = any(),
+                expandFields = any<List<String>>(),
+                apiConfiguration = any(),
+                idempotencyKey = anyOrNull(),
+                )
+            ).thenReturn(
                 Result.success(requiresActionIntent),
                 Result.success(requiresActionIntent),
                 Result.success(succeededIntent),
@@ -439,7 +552,15 @@ internal class SetupIntentFlowResultProcessorTest {
                 paymentMethodTypes = listOf("card", "revolut_pay"),
             )
 
-            whenever(mockStripeRepository.retrieveSetupIntent(any(), any(), any())).thenReturn(
+            whenever(
+                mockStripeRepository.retrieveSetupIntent(
+                clientSecret = any(),
+                options = any(),
+                expandFields = any<List<String>>(),
+                apiConfiguration = any(),
+                idempotencyKey = anyOrNull(),
+                )
+            ).thenReturn(
                 Result.success(requiresActionIntent),
             )
 
@@ -463,20 +584,12 @@ internal class SetupIntentFlowResultProcessorTest {
             verify(
                 mockStripeRepository,
                 atLeast(MINIMUM_RETRIEVE_CALLS)
-            ).retrieveSetupIntent(
-                any(),
-                any(),
-                any(),
-            )
+            ).retrieveSetupIntent(any(), any(), any(), apiConfiguration = any(), idempotencyKey = anyOrNull())
 
             verify(
                 mockStripeRepository,
                 atMost(getMaxNumberOfInvocations(paymentMethod.type!!))
-            ).retrieveSetupIntent(
-                any(),
-                any(),
-                any(),
-            )
+            ).retrieveSetupIntent(any(), any(), any(), apiConfiguration = any(), idempotencyKey = anyOrNull())
         }
 
     @Test
@@ -490,7 +603,15 @@ internal class SetupIntentFlowResultProcessorTest {
 
             val succeededIntent = requiresActionIntent.copy(status = StripeIntent.Status.Succeeded)
 
-            whenever(mockStripeRepository.retrieveSetupIntent(any(), any(), any())).thenReturn(
+            whenever(
+                mockStripeRepository.retrieveSetupIntent(
+                clientSecret = any(),
+                options = any(),
+                expandFields = any<List<String>>(),
+                apiConfiguration = any(),
+                idempotencyKey = anyOrNull(),
+                )
+            ).thenReturn(
                 Result.success(requiresActionIntent),
                 Result.success(requiresActionIntent),
                 Result.success(succeededIntent),
@@ -524,7 +645,15 @@ internal class SetupIntentFlowResultProcessorTest {
                 paymentMethodTypes = listOf("card", "swish"),
             )
 
-            whenever(mockStripeRepository.retrieveSetupIntent(any(), any(), any())).thenReturn(
+            whenever(
+                mockStripeRepository.retrieveSetupIntent(
+                clientSecret = any(),
+                options = any(),
+                expandFields = any<List<String>>(),
+                apiConfiguration = any(),
+                idempotencyKey = anyOrNull(),
+                )
+            ).thenReturn(
                 Result.success(requiresActionIntent),
             )
 
@@ -556,7 +685,15 @@ internal class SetupIntentFlowResultProcessorTest {
             )
             val succeededIntent = requiresActionIntent.copy(status = StripeIntent.Status.Succeeded)
 
-            whenever(mockStripeRepository.retrieveSetupIntent(any(), any(), any())).thenReturn(
+            whenever(
+                mockStripeRepository.retrieveSetupIntent(
+                clientSecret = any(),
+                options = any(),
+                expandFields = any<List<String>>(),
+                apiConfiguration = any(),
+                idempotencyKey = anyOrNull(),
+                )
+            ).thenReturn(
                 Result.success(requiresActionIntent),
                 Result.success(succeededIntent),
             )

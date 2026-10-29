@@ -2,7 +2,7 @@ package com.stripe.android.paymentelement.confirmation.intent
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.customersheet.data.CustomerSheetDataResult
 import com.stripe.android.customersheet.data.CustomerSheetIntentDataSource
@@ -31,8 +31,9 @@ class CustomerSheetSetupIntentInterceptorTest {
         checkoutSessionId = null,
     )
 
-    private val requestOptions = ApiRequest.Options(
+    private val requestOptions = RequestCredentials(
         apiKey = "pk_test_123",
+        stripeAccount = null,
     )
 
     @Test
@@ -131,7 +132,7 @@ class CustomerSheetSetupIntentInterceptorTest {
     }
 
     private class FakeIntentFirstConfirmationInterceptorFactory(
-        private val requestOptions: ApiRequest.Options,
+        private val requestOptions: RequestCredentials,
     ) : IntentFirstConfirmationInterceptor.Factory {
         override fun create(
             clientSecret: String,

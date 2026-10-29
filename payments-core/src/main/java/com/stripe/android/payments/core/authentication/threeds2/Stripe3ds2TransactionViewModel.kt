@@ -14,7 +14,7 @@ import com.stripe.android.auth.PaymentBrowserAuthContract
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.model.Stripe3ds2AuthParams
 import com.stripe.android.model.Stripe3ds2AuthResult
@@ -60,7 +60,7 @@ internal class Stripe3ds2TransactionViewModel @Inject constructor(
     // When the nextActionData object holds a publishable key, it should be used for 3DS2 requests.
     // That is the case for payments using Link, for example.
     val threeDS2RequestOptions = args.nextActionData.publishableKey?.takeIf { it.isNotEmpty() }
-        ?.let { ApiRequest.Options(it) } ?: args.requestOptions
+        ?.let { RequestCredentials(it, stripeAccount = null) } ?: args.requestOptions
 
     suspend fun processChallengeResult(
         challengeResult: ChallengeResult
@@ -113,7 +113,8 @@ internal class Stripe3ds2TransactionViewModel @Inject constructor(
             transaction,
             stripe3ds2Fingerprint,
             threeDS2RequestOptions,
-            timeout
+            timeout,
+            idempotencyKey = null,
         ).fold(
             onSuccess = { authResult ->
                 on3ds2AuthSuccess(
@@ -139,8 +140,9 @@ internal class Stripe3ds2TransactionViewModel @Inject constructor(
     private suspend fun perform3ds2AuthenticationRequest(
         transaction: Transaction,
         stripe3ds2Fingerprint: Stripe3ds2Fingerprint,
-        requestOptions: ApiRequest.Options,
-        timeout: Int
+        requestOptions: RequestCredentials,
+        timeout: Int,
+        idempotencyKey: String?,
     ): Result<Stripe3ds2AuthResult> = withContext(workContext) {
         val areqParams = transaction.createAuthenticationRequestParameters()
 
@@ -160,7 +162,9 @@ internal class Stripe3ds2TransactionViewModel @Inject constructor(
 
         stripeRepository.start3ds2Auth(
             authParams,
-            requestOptions
+            requestOptions,
+            apiConfiguration = args.apiConfiguration,
+            idempotencyKey = idempotencyKey,
         )
     }
 

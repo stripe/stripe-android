@@ -173,7 +173,8 @@ internal interface NativeLinkModule {
             stripeNetworkClient = DefaultStripeNetworkClient(
                 logger = logger,
                 workContext = workContext
-            )
+            ),
+            requestApiConfiguration = null,
         )
 
         @Provides

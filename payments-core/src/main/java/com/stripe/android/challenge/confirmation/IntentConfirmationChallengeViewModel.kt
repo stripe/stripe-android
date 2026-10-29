@@ -18,7 +18,7 @@ import com.stripe.android.challenge.confirmation.di.SDK_USER_AGENT
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.UIContext
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.model.CancelCaptchaChallengeParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
@@ -44,7 +44,7 @@ internal class IntentConfirmationChallengeViewModel @Inject constructor(
     @Named(SDK_USER_AGENT) val userAgent: String,
     private val stripeRepository: StripeRepository,
     private val errorReporter: ErrorReporter,
-    private val requestOptions: ApiRequest.Options,
+    private val requestOptions: RequestCredentials,
     @FireAndForgetScope private val fireAndForgetScope: CoroutineScope,
     val logger: Logger,
 ) : ViewModel(), DefaultLifecycleObserver {
@@ -114,6 +114,8 @@ internal class IntentConfirmationChallengeViewModel @Inject constructor(
                     paymentIntentId = intentId,
                     params = params,
                     requestOptions = requestOptions,
+                    apiConfiguration = args.apiConfiguration,
+                    idempotencyKey = null,
                 )
             }
             is SetupIntent -> {
@@ -121,6 +123,8 @@ internal class IntentConfirmationChallengeViewModel @Inject constructor(
                     setupIntentId = intentId,
                     params = params,
                     requestOptions = requestOptions,
+                    apiConfiguration = args.apiConfiguration,
+                    idempotencyKey = null,
                 )
             }
         }

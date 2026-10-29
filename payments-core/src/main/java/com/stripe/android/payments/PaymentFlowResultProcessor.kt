@@ -11,6 +11,7 @@ import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
@@ -31,7 +32,7 @@ import kotlin.coroutines.CoroutineContext
  */
 internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : StripeIntentResult<T>>(
     context: Context,
-    private val apiConfigProvider: Provider<ApiConfiguration.State>,
+    protected val apiConfigProvider: Provider<ApiConfiguration.State>,
     protected val stripeRepository: StripeRepository,
     private val logger: Logger,
     private val workContext: CoroutineContext,
@@ -47,7 +48,7 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
             return@withContext Result.failure(it)
         }
 
-        val requestOptions = ApiRequest.Options(
+        val requestOptions = RequestCredentials(
             apiKey = apiConfigProvider.get().publishableKey,
             stripeAccount = result.stripeAccountId
         )
@@ -59,7 +60,8 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
         retrieveStripeIntent(
             clientSecret = result.clientSecret,
             requestOptions = requestOptions,
-            expandFields = EXPAND_PAYMENT_METHOD
+            expandFields = EXPAND_PAYMENT_METHOD,
+            idempotencyKey = null,
         ).mapCatching { stripeIntent ->
             when {
                 stripeIntent.status == StripeIntent.Status.Succeeded ||
@@ -84,14 +86,15 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
                         refreshStripeIntent(
                             clientSecret = result.clientSecret,
                             requestOptions = requestOptions,
-                            expandFields = EXPAND_PAYMENT_METHOD
+                            expandFields = EXPAND_PAYMENT_METHOD,
+                            idempotencyKey = null,
                         ).getOrThrow()
                     } else {
                         pollStripeIntentUntilTerminalState(
                             originalIntent = stripeIntent,
                             clientSecret = result.clientSecret,
                             requestOptions = requestOptions,
-                            initialRetrieveIntentStartTime = initialRetrieveIntentStartTime
+                            initialRetrieveIntentStartTime = initialRetrieveIntentStartTime,
                         ).getOrThrow()
                     }
 
@@ -120,9 +123,10 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
                     val intent = cancelStripeIntentSource(
                         stripeIntentId = threeDS2Data?.threeDS2IntentId ?: stripeIntent.id.orEmpty(),
                         requestOptions = threeDS2Data?.publishableKey?.let {
-                            ApiRequest.Options(it)
+                            RequestCredentials(it, stripeAccount = null)
                         } ?: requestOptions,
-                        sourceId = sourceId
+                        sourceId = sourceId,
+                        idempotencyKey = null,
                     ).getOrThrow()
 
                     createStripeIntentResult(
@@ -227,14 +231,16 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
 
     protected abstract suspend fun retrieveStripeIntent(
         clientSecret: String,
-        requestOptions: ApiRequest.Options,
-        expandFields: List<String>
+        requestOptions: RequestCredentials,
+        expandFields: List<String>,
+        idempotencyKey: String?,
     ): Result<T>
 
     protected abstract suspend fun refreshStripeIntent(
         clientSecret: String,
-        requestOptions: ApiRequest.Options,
-        expandFields: List<String>
+        requestOptions: RequestCredentials,
+        expandFields: List<String>,
+        idempotencyKey: String?,
     ): Result<T>
 
     /**
@@ -250,15 +256,20 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
     private suspend fun pollStripeIntentUntilTerminalState(
         originalIntent: StripeIntent,
         clientSecret: String,
-        requestOptions: ApiRequest.Options,
-        initialRetrieveIntentStartTime: Long
+        requestOptions: RequestCredentials,
+        initialRetrieveIntentStartTime: Long,
     ): Result<T> {
         var timeOfLastRequest = initialRetrieveIntentStartTime
         var stripeIntentResult: Result<T>? = null
         var lastObservedStatus: StripeIntent.Status? = null
 
         suspend fun retrieveAndTrackStatus(): Result<T> {
-            val result = retrieveStripeIntent(clientSecret, requestOptions, EXPAND_PAYMENT_METHOD)
+            val result = retrieveStripeIntent(
+                clientSecret,
+                requestOptions,
+                EXPAND_PAYMENT_METHOD,
+                idempotencyKey = null,
+            )
             lastObservedStatus = result.getOrNull()?.status ?: lastObservedStatus
             return result
         }
@@ -305,8 +316,9 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
      */
     protected abstract suspend fun cancelStripeIntentSource(
         stripeIntentId: String,
-        requestOptions: ApiRequest.Options,
-        sourceId: String
+        requestOptions: RequestCredentials,
+        sourceId: String,
+        idempotencyKey: String?,
     ): Result<T>
 
     protected abstract fun createStripeIntentResult(
@@ -354,36 +366,45 @@ internal class PaymentIntentFlowResultProcessor @Inject constructor(
 ) {
     override suspend fun retrieveStripeIntent(
         clientSecret: String,
-        requestOptions: ApiRequest.Options,
-        expandFields: List<String>
+        requestOptions: RequestCredentials,
+        expandFields: List<String>,
+        idempotencyKey: String?,
     ): Result<PaymentIntent> {
         return stripeRepository.retrievePaymentIntent(
             clientSecret,
             requestOptions,
             expandFields,
+            apiConfiguration = apiConfigProvider.get(),
+            idempotencyKey = idempotencyKey,
         )
     }
 
     override suspend fun refreshStripeIntent(
         clientSecret: String,
-        requestOptions: ApiRequest.Options,
-        expandFields: List<String>
+        requestOptions: RequestCredentials,
+        expandFields: List<String>,
+        idempotencyKey: String?,
     ): Result<PaymentIntent> {
         return stripeRepository.refreshPaymentIntent(
             clientSecret,
             requestOptions,
+            apiConfiguration = apiConfigProvider.get(),
+            idempotencyKey = idempotencyKey,
         )
     }
 
     override suspend fun cancelStripeIntentSource(
         stripeIntentId: String,
-        requestOptions: ApiRequest.Options,
-        sourceId: String
+        requestOptions: RequestCredentials,
+        sourceId: String,
+        idempotencyKey: String?,
     ): Result<PaymentIntent> {
         return stripeRepository.cancelPaymentIntentSource(
             paymentIntentId = stripeIntentId,
             sourceId = sourceId,
             options = requestOptions,
+            apiConfiguration = apiConfigProvider.get(),
+            idempotencyKey = idempotencyKey,
         )
     }
 
@@ -422,36 +443,45 @@ internal class SetupIntentFlowResultProcessor @Inject constructor(
 ) {
     override suspend fun retrieveStripeIntent(
         clientSecret: String,
-        requestOptions: ApiRequest.Options,
-        expandFields: List<String>
+        requestOptions: RequestCredentials,
+        expandFields: List<String>,
+        idempotencyKey: String?,
     ): Result<SetupIntent> {
         return stripeRepository.retrieveSetupIntent(
             clientSecret,
             requestOptions,
-            expandFields
+            expandFields,
+            apiConfiguration = apiConfigProvider.get(),
+            idempotencyKey = idempotencyKey,
         )
     }
 
     override suspend fun refreshStripeIntent(
         clientSecret: String,
-        requestOptions: ApiRequest.Options,
-        expandFields: List<String>
+        requestOptions: RequestCredentials,
+        expandFields: List<String>,
+        idempotencyKey: String?,
     ): Result<SetupIntent> {
         return stripeRepository.refreshSetupIntent(
             clientSecret,
             requestOptions,
+            apiConfiguration = apiConfigProvider.get(),
+            idempotencyKey = idempotencyKey,
         )
     }
 
     override suspend fun cancelStripeIntentSource(
         stripeIntentId: String,
-        requestOptions: ApiRequest.Options,
-        sourceId: String
+        requestOptions: RequestCredentials,
+        sourceId: String,
+        idempotencyKey: String?,
     ): Result<SetupIntent> {
         return stripeRepository.cancelSetupIntentSource(
             setupIntentId = stripeIntentId,
             sourceId = sourceId,
             options = requestOptions,
+            apiConfiguration = apiConfigProvider.get(),
+            idempotencyKey = idempotencyKey,
         )
     }
 

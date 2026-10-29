@@ -10,7 +10,7 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentAuthConfig
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.PaymentFlowResult
@@ -74,7 +74,7 @@ class Stripe3ds2TransactionActivityTest {
             activityScenario.onActivity { activity ->
                 assertIs<ChallengeProgressFragmentFactory>(
                     activity.supportFragmentManager.fragmentFactory
-                )
+)
             }
         }
     }
@@ -98,10 +98,10 @@ class Stripe3ds2TransactionActivityTest {
             PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
             PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2.nextActionData
                 as StripeIntent.NextActionData.SdkData.Use3DS2,
-            ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY),
+            RequestCredentials(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, stripeAccount = null),
             enableLogging = false,
             statusBarColor = null,
-            ApiConfiguration.State(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, "acct_123"),
+            ApiConfiguration.State(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, "acct_123", betas = emptySet()),
             setOf()
         )
     }

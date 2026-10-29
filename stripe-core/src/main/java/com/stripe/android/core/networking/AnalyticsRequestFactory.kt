@@ -60,7 +60,7 @@ open class AnalyticsRequestFactory(
             } else {
                 publishableKey
             }
-        }.getOrDefault(ApiRequest.Options.UNDEFINED_PUBLISHABLE_KEY),
+        }.getOrDefault(RequestCredentials.UNDEFINED_PUBLISHABLE_KEY),
         AnalyticsFields.OS_NAME to Build.VERSION.CODENAME,
         AnalyticsFields.OS_RELEASE to Build.VERSION.RELEASE,
         AnalyticsFields.OS_VERSION to Build.VERSION.SDK_INT,

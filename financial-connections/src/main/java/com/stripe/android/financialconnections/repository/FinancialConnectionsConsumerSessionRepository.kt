@@ -2,7 +2,7 @@ package com.stripe.android.financialconnections.repository
 
 import com.stripe.android.core.Logger
 import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.financialconnections.ElementsSessionContext
 import com.stripe.android.financialconnections.ElementsSessionContext.BillingDetails
 import com.stripe.android.financialconnections.domain.IsLinkWithStripe
@@ -157,7 +157,9 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
         email = email,
         phoneNumber = phoneNumber,
         country = country,
-        signupCall = consumersApiService::signUp
+        signupCall = { params, credentials ->
+            consumersApiService.signUp(params, credentials, idempotencyKey = null)
+        }
     )
 
     override suspend fun mobileSignUp(
@@ -172,7 +174,9 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
         country = country,
         verificationToken = verificationToken,
         appId = appId,
-        signupCall = consumersApiService::mobileSignUp
+        signupCall = { params, credentials ->
+            consumersApiService.mobileSignUp(params, credentials, idempotencyKey = null)
+        }
     )
 
     private suspend fun performSignUp(
@@ -181,7 +185,7 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
         country: String,
         verificationToken: String? = null,
         appId: String? = null,
-        signupCall: suspend (SignUpParams, ApiRequest.Options) -> Result<ConsumerSessionSignup>
+        signupCall: suspend (SignUpParams, RequestCredentials) -> Result<ConsumerSessionSignup>
     ): ConsumerSessionSignup = mutex.withLock {
         val signUpParams = SignUpParams(
             email = email,
@@ -221,6 +225,7 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
             accountPhoneNumber = null,
             emailAddress = null,
             requestOptions = provideApiRequestOptions(useConsumerPublishableKey = false),
+            idempotencyKey = null,
         ).also { session ->
             updateCachedConsumerSession("startConsumerVerification", session)
         }
@@ -238,6 +243,7 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
             requestSurface = requestSurface,
             consentGranted = null,
             requestOptions = provideApiRequestOptions(useConsumerPublishableKey = false),
+            idempotencyKey = null,
         ).also { session ->
             updateCachedConsumerSession("confirmConsumerVerification", session)
         }
@@ -252,6 +258,7 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
             clientSecret = clientSecret,
             requestSurface = requestSurface,
             requestOptions = provideApiRequestOptions(useConsumerPublishableKey = false),
+            idempotencyKey = null,
         )
     }
 
@@ -270,6 +277,7 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
             ),
             requestSurface = requestSurface,
             requestOptions = provideApiRequestOptions(useConsumerPublishableKey = true),
+            idempotencyKey = null,
         ).getOrThrow()
     }
 
@@ -290,6 +298,7 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
             requestSurface = requestSurface,
             requestOptions = provideApiRequestOptions(useConsumerPublishableKey = false),
             extraParams = fraudDetectionData + expandParams,
+            idempotencyKey = null,
         ).getOrThrow()
     }
 
@@ -304,6 +313,7 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
             consumerSessionClientSecret = consumerSessionClientSecret,
             requestSurface = requestSurface,
             requestOptions = provideApiRequestOptions(useConsumerPublishableKey = false),
+            idempotencyKey = null,
         )
     }
 
@@ -336,6 +346,7 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
         customerId = null,
         supportedVerificationTypes = null,
         linkAuthTokenClientSecret = null,
+        idempotencyKey = null,
     ).also {
         updateCachedConsumerSessionFromLookup(it)
     }

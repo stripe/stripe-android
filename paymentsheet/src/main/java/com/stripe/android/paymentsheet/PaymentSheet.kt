@@ -27,6 +27,7 @@ import com.stripe.android.LinkDisallowFundingSourceCreationPreview
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.core.ApiConfigurationPreview
 import com.stripe.android.core.reactnative.ReactNativeSdkInternal
 import com.stripe.android.core.reactnative.UnregisterSignal
 import com.stripe.android.core.strings.ResolvableString
@@ -1275,7 +1276,7 @@ class PaymentSheet internal constructor(
              * When not set, the payment element uses the credentials initialized through
              * [com.stripe.android.PaymentConfiguration].
              */
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            @ApiConfigurationPreview
             fun apiConfiguration(apiConfiguration: ApiConfiguration) = apply {
                 this.apiConfiguration = apiConfiguration.build()
             }
@@ -1350,7 +1351,9 @@ class PaymentSheet internal constructor(
                 userOverrideCountry?.let { userOverrideCountry(it) }
                 apiConfiguration?.let {
                     apiConfiguration(
-                        ApiConfiguration(it.publishableKey).stripeAccountId(it.stripeAccountId)
+                        ApiConfiguration(it.publishableKey)
+                            .stripeAccountId(it.stripeAccountId)
+                            .betas(it.betas)
                     )
                 }
             }

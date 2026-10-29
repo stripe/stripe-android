@@ -43,8 +43,8 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentif
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayPaymentDataUpdateNoOpModule
 import com.stripe.android.paymentelement.confirmation.injection.PaymentElementConfirmationModule
 import com.stripe.android.payments.core.analytics.ErrorReporter
-import com.stripe.android.payments.core.injection.ApiRequestOptionsModule
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
+import com.stripe.android.payments.core.injection.RequestCredentialsModule
 import com.stripe.android.paymentsheet.FakePrefsRepository
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
@@ -72,7 +72,7 @@ internal fun paymentElementConfirmationTest(
 ) {
     ActivityScenario.launch<PaymentElementConfirmationTestActivity>(
         Intent(application, PaymentElementConfirmationTestActivity::class.java)
-    ).use { scenario ->
+).use { scenario ->
         scenario.onActivity { activity ->
             runTest {
                 test(
@@ -126,7 +126,7 @@ internal class PaymentElementConfirmationTestActivity : AppCompatActivity() {
         ElementsSessionClientParamsModule::class,
         PaymentElementConfirmationModule::class,
         PaymentElementConfirmationTestModule::class,
-        ApiRequestOptionsModule::class,
+        RequestCredentialsModule::class,
         GooglePayLauncherModule::class,
         GooglePayPaymentDataUpdateNoOpModule::class,
     ]

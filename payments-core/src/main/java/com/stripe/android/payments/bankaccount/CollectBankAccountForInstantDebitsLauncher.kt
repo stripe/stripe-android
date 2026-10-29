@@ -28,6 +28,7 @@ class CollectBankAccountForInstantDebitsLauncher(
                 apiConfiguration = ApiConfiguration.State(
                     publishableKey = publishableKey,
                     stripeAccountId = stripeAccountId,
+                    betas = emptySet(),
                 ),
                 clientSecret = clientSecret,
                 configuration = configuration,
@@ -63,6 +64,7 @@ class CollectBankAccountForInstantDebitsLauncher(
                 apiConfiguration = ApiConfiguration.State(
                     publishableKey = publishableKey,
                     stripeAccountId = stripeAccountId,
+                    betas = emptySet(),
                 ),
                 clientSecret = clientSecret,
                 configuration = configuration,
@@ -102,6 +104,7 @@ class CollectBankAccountForInstantDebitsLauncher(
                 apiConfiguration = ApiConfiguration.State(
                     publishableKey = publishableKey,
                     stripeAccountId = stripeAccountId,
+                    betas = emptySet(),
                 ),
                 elementsSessionId = elementsSessionId,
                 configuration = configuration,
@@ -128,6 +131,7 @@ class CollectBankAccountForInstantDebitsLauncher(
                 apiConfiguration = ApiConfiguration.State(
                     publishableKey = publishableKey,
                     stripeAccountId = stripeAccountId,
+                    betas = emptySet(),
                 ),
                 elementsSessionId = elementsSessionId,
                 configuration = configuration,

@@ -6,7 +6,7 @@ import androidx.annotation.VisibleForTesting
 import com.stripe.android.EphemeralKeyManager.KeyManagerListener
 import com.stripe.android.Stripe.Companion.appInfo
 import com.stripe.android.core.exception.InvalidRequestException
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.networking.StripeRepository
@@ -149,10 +149,11 @@ class IssuingCardPinService @VisibleForTesting internal constructor(
                 cardId = operation.cardId,
                 verificationId = operation.verificationId,
                 userOneTimeCode = operation.userOneTimeCode,
-                requestOptions = ApiRequest.Options(
+                requestOptions = RequestCredentials(
                     apiKey = ephemeralKey.secret,
                     stripeAccount = stripeAccountId,
                 ),
+                idempotencyKey = null,
             ).fold(
                 onSuccess = { pin ->
                     withContext(Dispatchers.Main) {
@@ -231,10 +232,11 @@ class IssuingCardPinService @VisibleForTesting internal constructor(
                 newPin = operation.newPin,
                 verificationId = operation.verificationId,
                 userOneTimeCode = operation.userOneTimeCode,
-                requestOptions = ApiRequest.Options(
+                requestOptions = RequestCredentials(
                     apiKey = ephemeralKey.secret,
                     stripeAccount = stripeAccountId,
                 ),
+                idempotencyKey = null,
             )
 
             withContext(Dispatchers.Main) {
@@ -376,7 +378,9 @@ class IssuingCardPinService @VisibleForTesting internal constructor(
                         context,
                         { publishableKey },
                         defaultProductUsageTokens = setOf("IssuingCardPinService")
-                    )
+                    ),
+                    requestApiConfiguration = null,
+                    initializeRequestServices = true,
                 ),
                 StripeOperationIdFactory(),
                 stripeAccountId = stripeAccountId

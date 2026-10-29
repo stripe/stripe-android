@@ -5,7 +5,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CardNumberFixtures
 import com.stripe.android.core.networking.AnalyticsRequest
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.BinFixtures
 import com.stripe.android.model.BinRange
@@ -19,6 +19,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
+import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
@@ -160,7 +161,7 @@ internal class RemoteCardAccountRangeSourceTest {
                 )
             ).isNull()
 
-            verify(repository, never()).getCardMetadata(any(), any())
+            verify(repository, never()).getCardMetadata(any(), any(), idempotencyKey = isNull())
             verify(cardAccountRangeStore, never()).save(any(), any())
         }
 
@@ -215,13 +216,15 @@ internal class RemoteCardAccountRangeSourceTest {
     ) : AbsFakeStripeRepository() {
         override suspend fun getCardMetadata(
             bin: Bin,
-            options: ApiRequest.Options
+            options: RequestCredentials,
+            idempotencyKey: String?,
         ): Result<CardMetadata> = result
     }
 
     private companion object {
-        private val REQUEST_OPTIONS = ApiRequest.Options(
-            apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
+        private val REQUEST_OPTIONS = RequestCredentials(
+            apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+            stripeAccount = null,
         )
 
         private val FAILED_REQUEST = Result.failure<CardMetadata>(IOException())

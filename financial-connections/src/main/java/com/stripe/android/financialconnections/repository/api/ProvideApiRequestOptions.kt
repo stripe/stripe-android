@@ -1,23 +1,23 @@
 package com.stripe.android.financialconnections.repository.api
 
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.financialconnections.domain.IsLinkWithStripe
 import com.stripe.android.financialconnections.repository.ConsumerSessionProvider
 import javax.inject.Inject
 
 internal fun interface ProvideApiRequestOptions {
-    operator fun invoke(useConsumerPublishableKey: Boolean): ApiRequest.Options
+    operator fun invoke(useConsumerPublishableKey: Boolean): RequestCredentials
 }
 
 internal class RealProvideApiRequestOptions @Inject constructor(
     private val consumerSessionProvider: ConsumerSessionProvider,
     private val isLinkWithStripe: IsLinkWithStripe,
-    private val apiRequestOptions: ApiRequest.Options,
+    private val apiRequestOptions: RequestCredentials,
 ) : ProvideApiRequestOptions {
 
     override fun invoke(
         useConsumerPublishableKey: Boolean,
-    ): ApiRequest.Options {
+    ): RequestCredentials {
         return if (useConsumerPublishableKey) {
             consumerApiRequestOptions() ?: apiRequestOptions
         } else {
@@ -25,12 +25,12 @@ internal class RealProvideApiRequestOptions @Inject constructor(
         }
     }
 
-    private fun consumerApiRequestOptions(): ApiRequest.Options? {
+    private fun consumerApiRequestOptions(): RequestCredentials? {
         val session = consumerSessionProvider.provideConsumerSession()?.takeIf { it.isVerified }
         val consumerPublishableKey = session?.publishableKey?.takeIf { isLinkWithStripe() }
 
         return consumerPublishableKey?.let {
-            ApiRequest.Options(apiKey = it)
+            RequestCredentials(apiKey = it, stripeAccount = null)
         }
     }
 }

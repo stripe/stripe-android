@@ -1,6 +1,6 @@
 package com.stripe.android.paymentelement.confirmation.intent
 
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.RadarOptions
@@ -16,7 +16,7 @@ import dagger.assisted.AssistedInject
 internal class IntentFirstConfirmationInterceptor @AssistedInject constructor(
     @Assisted private val clientSecret: String,
     @Assisted private val clientAttributionMetadata: ClientAttributionMetadata,
-    requestOptions: ApiRequest.Options,
+    requestOptions: RequestCredentials,
 ) : IntentConfirmationInterceptor {
     private val confirmActionHelper: ConfirmActionHelper = ConfirmActionHelper(requestOptions.apiKeyIsLiveMode)
 

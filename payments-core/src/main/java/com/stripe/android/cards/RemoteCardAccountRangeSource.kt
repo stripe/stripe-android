@@ -1,7 +1,7 @@
 package com.stripe.android.cards
 
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.model.AccountRange
 import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
@@ -14,7 +14,7 @@ import kotlinx.coroutines.withContext
 
 internal class RemoteCardAccountRangeSource(
     private val stripeRepository: StripeRepository,
-    private val requestOptions: ApiRequest.Options,
+    private val requestOptions: RequestCredentials,
     private val cardAccountRangeStore: CardAccountRangeStore,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory
@@ -32,6 +32,7 @@ internal class RemoteCardAccountRangeSource(
                 stripeRepository.getCardMetadata(
                     bin = bin,
                     options = requestOptions,
+                    idempotencyKey = null,
                 ).map { metadata ->
                     metadata.accountRanges
                 }

@@ -2,6 +2,7 @@ package com.stripe.android.financialconnections.di
 
 import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.financialconnections.FinancialConnectionsSheetState
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventContext
 import com.stripe.android.financialconnections.network.FinancialConnectionsRequestExecutor
@@ -22,7 +23,7 @@ internal object FinancialConnectionsSheetModule {
     @ActivityRetainedScope
     @Provides
     internal fun providesProvideApiRequestOptions(
-        apiRequestOptions: ApiRequest.Options,
+        apiRequestOptions: RequestCredentials,
     ): ProvideApiRequestOptions {
         // We don't need to use any consumer publishable key here
         return ProvideApiRequestOptions { apiRequestOptions }

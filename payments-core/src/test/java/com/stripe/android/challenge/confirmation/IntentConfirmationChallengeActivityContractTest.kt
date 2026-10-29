@@ -168,7 +168,7 @@ internal class IntentConfirmationChallengeActivityContractTest {
     }
 
     private companion object {
-        val API_CONFIGURATION = ApiConfiguration.State("pk_test_123", "acct_123")
+        val API_CONFIGURATION = ApiConfiguration.State("pk_test_123", "acct_123", betas = emptySet())
         val PRODUCT_USAGE = setOf("PaymentSheet")
     }
 }

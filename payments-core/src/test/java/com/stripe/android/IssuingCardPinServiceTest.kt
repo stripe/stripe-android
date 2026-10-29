@@ -3,7 +3,7 @@ package com.stripe.android
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.InvalidRequestException
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.testharness.TestEphemeralKeyProvider
 import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.CoroutineTestRule
@@ -108,7 +108,8 @@ class IssuingCardPinServiceTest {
             cardId: String,
             verificationId: String,
             userOneTimeCode: String,
-            requestOptions: ApiRequest.Options
+            requestOptions: RequestCredentials,
+            idempotencyKey: String?,
         ): Result<String> = retrievedPin()
 
         override suspend fun updateIssuingCardPin(
@@ -116,7 +117,8 @@ class IssuingCardPinServiceTest {
             newPin: String,
             verificationId: String,
             userOneTimeCode: String,
-            requestOptions: ApiRequest.Options
+            requestOptions: RequestCredentials,
+            idempotencyKey: String?,
         ): Throwable? {
             updatePinCalls++
             return null

@@ -16,7 +16,7 @@ import com.stripe.android.core.exception.LocalStripeException
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -58,7 +58,7 @@ internal class PaymentLauncherViewModel @Inject constructor(
     private val nextActionHandlerRegistry: PaymentNextActionHandlerRegistry,
     private val defaultReturnUrl: DefaultReturnUrl,
     private val apiConfiguration: ApiConfiguration.State,
-    private val apiRequestOptionsProvider: Provider<ApiRequest.Options>,
+    private val apiRequestOptionsProvider: Provider<RequestCredentials>,
     private val lazyPaymentIntentFlowResultProcessor: Lazy<PaymentIntentFlowResultProcessor>,
     private val lazySetupIntentFlowResultProcessor: Lazy<SetupIntentFlowResultProcessor>,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
@@ -187,6 +187,8 @@ internal class PaymentLauncherViewModel @Inject constructor(
                     confirmPaymentIntentParams = decoratedParams,
                     options = apiRequestOptionsProvider.get(),
                     expandFields = EXPAND_PAYMENT_METHOD,
+                    apiConfiguration = apiConfiguration,
+                    idempotencyKey = null,
                 )
             }
             is ConfirmSetupIntentParams -> {
@@ -194,6 +196,8 @@ internal class PaymentLauncherViewModel @Inject constructor(
                     confirmSetupIntentParams = decoratedParams,
                     options = apiRequestOptionsProvider.get(),
                     expandFields = EXPAND_PAYMENT_METHOD,
+                    apiConfiguration = apiConfiguration,
+                    idempotencyKey = null,
                 )
             }
         }
@@ -214,6 +218,8 @@ internal class PaymentLauncherViewModel @Inject constructor(
             stripeApiRepository.retrieveStripeIntent(
                 clientSecret = clientSecret,
                 options = apiRequestOptionsProvider.get(),
+                apiConfiguration = apiConfiguration,
+                idempotencyKey = null,
             ).fold(
                 onSuccess = { intent ->
                     val unredactedPaymentIntent = if (intent is PaymentIntent && intent.isRedacted) {

@@ -2,7 +2,7 @@ package com.stripe.android.payments.bankaccount.domain
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.exception.APIException
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.networking.StripeRepository
@@ -10,6 +10,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -43,7 +44,8 @@ class VerifyWithMicrodepositTest {
                 clientSecret = clientSecret,
                 firstAmount = 12,
                 secondAmount = 34,
-                requestOptions = ApiRequest.Options(publishableKey)
+                requestOptions = RequestCredentials(publishableKey, stripeAccount = null),
+                idempotencyKey = isNull(),
             )
             assertThat((result)).isEqualTo(Result.success(paymentIntent))
         }
@@ -71,7 +73,8 @@ class VerifyWithMicrodepositTest {
             verify(stripeRepository).verifyPaymentIntentWithMicrodeposits(
                 clientSecret = clientSecret,
                 descriptorCode = "code",
-                requestOptions = ApiRequest.Options(publishableKey)
+                requestOptions = RequestCredentials(publishableKey, stripeAccount = null),
+                idempotencyKey = isNull(),
             )
             assertThat((result)).isEqualTo(Result.success(paymentIntent))
         }
@@ -99,7 +102,8 @@ class VerifyWithMicrodepositTest {
                 clientSecret = clientSecret,
                 firstAmount = 12,
                 secondAmount = 34,
-                requestOptions = ApiRequest.Options(publishableKey)
+                requestOptions = RequestCredentials(publishableKey, stripeAccount = null),
+                idempotencyKey = isNull(),
             )
             assertThat(result.exceptionOrNull()!!).isEqualTo(expectedException)
         }
@@ -129,7 +133,8 @@ class VerifyWithMicrodepositTest {
                 clientSecret = clientSecret,
                 firstAmount = 12,
                 secondAmount = 34,
-                requestOptions = ApiRequest.Options(publishableKey)
+                requestOptions = RequestCredentials(publishableKey, stripeAccount = null),
+                idempotencyKey = isNull(),
             )
             assertThat((result)).isEqualTo(Result.success(setupIntent))
         }
@@ -157,7 +162,8 @@ class VerifyWithMicrodepositTest {
             verify(stripeRepository).verifySetupIntentWithMicrodeposits(
                 clientSecret = clientSecret,
                 descriptorCode = "code",
-                requestOptions = ApiRequest.Options(publishableKey)
+                requestOptions = RequestCredentials(publishableKey, stripeAccount = null),
+                idempotencyKey = isNull(),
             )
             assertThat((result)).isEqualTo(Result.success(setupIntent))
         }
@@ -185,7 +191,8 @@ class VerifyWithMicrodepositTest {
                 clientSecret = clientSecret,
                 firstAmount = 12,
                 secondAmount = 34,
-                requestOptions = ApiRequest.Options(publishableKey)
+                requestOptions = RequestCredentials(publishableKey, stripeAccount = null),
+                idempotencyKey = isNull(),
             )
             assertThat(result.exceptionOrNull()!!).isEqualTo(expectedException)
         }
@@ -196,17 +203,19 @@ class VerifyWithMicrodepositTest {
     ) {
         whenever(
             stripeRepository.verifyPaymentIntentWithMicrodeposits(
-                any(),
-                any(),
-                any(),
-                any()
+                clientSecret = any(),
+                firstAmount = any(),
+                secondAmount = any(),
+                requestOptions = any(),
+                idempotencyKey = isNull(),
             )
         ).doReturn(paymentIntent())
         whenever(
             stripeRepository.verifyPaymentIntentWithMicrodeposits(
-                any(),
-                any(),
-                any()
+                clientSecret = any(),
+                descriptorCode = any(),
+                requestOptions = any(),
+                idempotencyKey = isNull(),
             )
         ).doReturn(paymentIntent())
     }
@@ -214,17 +223,19 @@ class VerifyWithMicrodepositTest {
     private suspend fun givenVerifySetupIntentReturns(setupIntent: () -> Result<SetupIntent>) {
         whenever(
             stripeRepository.verifySetupIntentWithMicrodeposits(
-                any(),
-                any(),
-                any(),
-                any()
+                clientSecret = any(),
+                firstAmount = any(),
+                secondAmount = any(),
+                requestOptions = any(),
+                idempotencyKey = isNull(),
             )
         ).thenReturn(setupIntent())
         whenever(
             stripeRepository.verifySetupIntentWithMicrodeposits(
-                any(),
-                any(),
-                any()
+                clientSecret = any(),
+                descriptorCode = any(),
+                requestOptions = any(),
+                idempotencyKey = isNull(),
             )
         ).thenReturn(setupIntent())
     }

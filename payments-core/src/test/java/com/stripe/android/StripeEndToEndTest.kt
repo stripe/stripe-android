@@ -73,7 +73,7 @@ internal class StripeEndToEndTest {
         val paymentIntentCallback: ApiResultCallback<PaymentIntent> = mock()
         createStripeWithTestScope().retrievePaymentIntent(
             clientSecret = "pi_abc_secret_invalid",
-            callback = paymentIntentCallback
+            callback = paymentIntentCallback,
         )
         idleLooper()
 
@@ -90,7 +90,7 @@ internal class StripeEndToEndTest {
 
         createStripeWithTestScope().retrieveSetupIntent(
             clientSecret = "seti_abc_secret_invalid",
-            callback = setupIntentCallback
+            callback = setupIntentCallback,
         )
         idleLooper()
 
@@ -225,7 +225,9 @@ internal class StripeEndToEndTest {
             context = context,
             publishableKeyProvider = { publishableKey },
             requestSurface = RequestSurface.PaymentElement,
-            workContext = testDispatcher
+            workContext = testDispatcher,
+            requestApiConfiguration = null,
+            initializeRequestServices = true,
         )
         return Stripe(
             stripeRepository = stripeRepository,

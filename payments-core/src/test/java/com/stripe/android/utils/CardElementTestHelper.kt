@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.model.MobileCardElementConfig
 import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.ViewModelStoreTestRule
@@ -25,8 +25,9 @@ internal object CardElementTestHelper {
             },
             stripeRepository = object : AbsFakeStripeRepository() {
                 override suspend fun retrieveCardElementConfig(
-                    requestOptions: ApiRequest.Options,
-                    params: Map<String, String>?
+                    requestOptions: RequestCredentials,
+                    params: Map<String, String>?,
+                    idempotencyKey: String?,
                 ): Result<MobileCardElementConfig> {
                     return Result.success(
                         MobileCardElementConfig(

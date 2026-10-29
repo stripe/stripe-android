@@ -1,6 +1,7 @@
 package com.stripe.android.financialconnections.lite.repository
 
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.RequestCredentials
 import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
 import com.stripe.android.financialconnections.lite.network.FinancialConnectionsLiteRequestExecutor
 import com.stripe.android.financialconnections.lite.repository.model.SynchronizeSessionResponse
@@ -24,7 +25,7 @@ internal class FinancialConnectionsLiteRepositoryImpl(
     private val apiRequestFactory: ApiRequest.Factory,
 ) : FinancialConnectionsLiteRepository {
 
-    fun FinancialConnectionsSheetConfiguration.apiRequestOptions() = ApiRequest.Options(
+    fun FinancialConnectionsSheetConfiguration.apiRequestOptions() = RequestCredentials(
         apiKey = apiConfiguration.publishableKey,
         stripeAccount = apiConfiguration.stripeAccountId,
     )
@@ -51,7 +52,9 @@ internal class FinancialConnectionsLiteRepositoryImpl(
                         "collected_at" to it.collectedAt,
                     )
                 }
-            ).filterNotNullValues()
+            ).filterNotNullValues(),
+            idempotencyKey = null,
+            apiConfiguration = configuration.apiConfiguration,
         ),
         SynchronizeSessionResponse.serializer()
     )
@@ -64,7 +67,9 @@ internal class FinancialConnectionsLiteRepositoryImpl(
             options = configuration.apiRequestOptions(),
             params = mapOf(
                 PARAMS_CLIENT_SECRET to configuration.financialConnectionsSessionClientSecret
-            )
+            ),
+            idempotencyKey = null,
+            apiConfiguration = configuration.apiConfiguration,
         )
         return requestExecutor.execute(
             financialConnectionsRequest,
