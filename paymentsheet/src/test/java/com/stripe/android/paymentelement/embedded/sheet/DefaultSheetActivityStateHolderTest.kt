@@ -144,6 +144,69 @@ internal class DefaultSheetActivityStateHolderTest {
     }
 
     @Test
+    fun `FlowController hides Continue for an ordinary saved card`() = testScenario(
+        launchMode = EmbeddedLaunchMode.PaymentOptions,
+    ) {
+        stateHolder.state.test {
+            assertThat(awaitItem().isSelectionButtonVisible).isFalse()
+            selectionHolder.setSelection(PaymentSelection.Saved(CARD_PAYMENT_METHOD))
+            val state = awaitItem()
+            assertThat(state.isEnabled).isTrue()
+            assertThat(state.isSelectionButtonVisible).isFalse()
+        }
+    }
+
+    @Test
+    fun `FlowController updates Continue visibility when selection requires confirmation`() = testScenario(
+        launchMode = EmbeddedLaunchMode.PaymentOptions,
+    ) {
+        stateHolder.state.test {
+            assertThat(awaitItem().isSelectionButtonVisible).isFalse()
+            selectionHolder.setSelection(PaymentSelection.Saved(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD))
+            assertThat(awaitItem().isSelectionButtonVisible).isTrue()
+            selectionHolder.setSelection(PaymentSelection.Saved(CARD_PAYMENT_METHOD))
+            assertThat(awaitItem().isSelectionButtonVisible).isFalse()
+        }
+    }
+
+    @Test
+    fun `FlowController updates Continue visibility when mandate changes`() = testScenario(
+        launchMode = EmbeddedLaunchMode.PaymentOptions,
+    ) {
+        selectionHolder.setSelection(PaymentSelection.Saved(CARD_PAYMENT_METHOD))
+        stateHolder.state.test {
+            assertThat(awaitItem().isSelectionButtonVisible).isFalse()
+            stateHolder.updateMandate("Mandate".resolvableString)
+            val state = awaitItem()
+            assertThat(state.mandateText).isEqualTo("Mandate".resolvableString)
+            assertThat(state.isSelectionButtonVisible).isTrue()
+            stateHolder.updateMandate(null)
+            assertThat(awaitItem().isSelectionButtonVisible).isFalse()
+        }
+    }
+
+    @Test
+    fun `FlowController keeps Continue visible for a mandate after selection changes`() = testScenario(
+        launchMode = EmbeddedLaunchMode.PaymentOptions,
+    ) {
+        stateHolder.updateMandate("Mandate".resolvableString)
+        stateHolder.state.test {
+            assertThat(awaitItem().isSelectionButtonVisible).isTrue()
+            selectionHolder.setSelection(PaymentSelection.Saved(CARD_PAYMENT_METHOD))
+            assertThat(awaitItem().isSelectionButtonVisible).isTrue()
+        }
+    }
+
+    @Test
+    fun `regular embedded keeps Continue visible for an ordinary saved card`() = testScenario {
+        stateHolder.state.test {
+            assertThat(awaitItem().isSelectionButtonVisible).isTrue()
+            selectionHolder.setSelection(PaymentSelection.Saved(CARD_PAYMENT_METHOD))
+            assertThat(awaitItem().isSelectionButtonVisible).isTrue()
+        }
+    }
+
+    @Test
     fun `state updates isEnabled when selection is set`() = testScenario {
         stateHolder.state.test {
             assertThat(awaitItem().isEnabled).isFalse()
@@ -747,6 +810,7 @@ internal class DefaultSheetActivityStateHolderTest {
                 SheetActivityStateHolder.State(
                     primaryButtonLabel = "Continue".resolvableString,
                     isEnabled = true,
+                    isSelectionButtonVisible = true,
                     processingState = PrimaryButtonProcessingState.Idle(null),
                     isProcessing = false,
                     primaryButtonIcon = PrimaryButtonIcon.None,
@@ -764,6 +828,7 @@ internal class DefaultSheetActivityStateHolderTest {
                 SheetActivityStateHolder.State(
                     primaryButtonLabel = "Continue".resolvableString,
                     isEnabled = true,
+                    isSelectionButtonVisible = true,
                     processingState = PrimaryButtonProcessingState.Idle(null),
                     isProcessing = false,
                     primaryButtonIcon = PrimaryButtonIcon.None,

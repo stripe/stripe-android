@@ -56,6 +56,7 @@ import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.ui.GOOGLE_PAY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_METHOD_CARD_TEST_TAG
+import com.stripe.android.paymentsheet.ui.SHEET_MANDATE_TEST_TAG
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.testing.createComposeCleanupRule
@@ -73,6 +74,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 
 @RunWith(RobolectricTestRunner::class)
+@Suppress("LargeClass")
 internal class PaymentOptionsEmbeddedSheetActivityTest {
     private val applicationContext = ApplicationProvider.getApplicationContext<Application>()
     private val composeTestRule = createEmptyComposeRule()
@@ -182,7 +184,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
     @Test
     fun `recreated payment options waits for Continue and returns selection and previous new selections`() {
         val previousNewSelection = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION
-        val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        val selection = PaymentSelection.Saved(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD)
 
         launch(
             selection = selection,
@@ -296,23 +298,36 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
     }
 
     @Test
-    fun `horizontal saved payment options selects saved method and continues`() {
+    fun `horizontal saved card selection hides Continue`() {
         val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
-        launchHorizontal(customerState = customerStateWith(paymentMethod)) { scenario ->
+        launchHorizontal(customerState = customerStateWith(paymentMethod)) {
             composeTestRule.onNodeWithTag(
                 "${SAVED_PAYMENT_METHOD_CARD_TEST_TAG}_\u2066···· 4242\u2069"
             ).performClick()
+
+            composeTestRule.onNodeWithTag(PRIMARY_BUTTON_TEST_TAG).assertDoesNotExist()
+        }
+    }
+
+    @Test
+    fun `horizontal saved mandate selection continues without confirming`() {
+        val selection = PaymentSelection.Saved(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD)
+        launch(
+            selection = selection,
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+            ),
+        ) { scenario ->
+            scenario.onActivity { activity -> assertThat(activity.isFinishing).isFalse() }
+            composeTestRule.onNodeWithTag(SHEET_MANDATE_TEST_TAG).performScrollTo().assertIsDisplayed()
             composeTestRule.onNodeWithTag(PRIMARY_BUTTON_TEST_TAG)
                 .performScrollTo()
                 .assertIsEnabled()
                 .performClick()
-            onIdle()
 
-            val result = EmbeddedSheetContract.parseResult(
-                scenario.result.resultCode,
-                scenario.result.resultData,
-            ) as EmbeddedActivityResult.Complete
-            assertThat(result.selection).isEqualTo(PaymentSelection.Saved(paymentMethod))
+            val result = scenario.awaitResult() as EmbeddedActivityResult.Complete
+            assertThat(result.selection).isEqualTo(selection)
+            assertThat(result.hasBeenConfirmed).isFalse()
         }
     }
 
@@ -722,7 +737,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
 
     private fun savedSelectionWithBillingAddress(): PaymentSelection.Saved {
         return PaymentSelection.Saved(
-            PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(
+            PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD.copy(
                 billingDetails = PaymentMethod.BillingDetails(
                     address = Address(
                         city = "San Francisco",

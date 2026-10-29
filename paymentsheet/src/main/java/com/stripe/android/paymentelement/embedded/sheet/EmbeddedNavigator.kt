@@ -12,6 +12,7 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.account.LinkAccountHolder
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
@@ -21,6 +22,7 @@ import com.stripe.android.paymentelement.embedded.form.FormActivityPrimaryButton
 import com.stripe.android.paymentelement.embedded.form.FormScreenContent
 import com.stripe.android.paymentelement.embedded.form.USBankAccountMandate
 import com.stripe.android.paymentsheet.CustomerStateHolder
+import com.stripe.android.paymentsheet.PaymentOptionsItem
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.navigation.NavigationHandler
@@ -370,13 +372,16 @@ internal class EmbeddedNavigator private constructor(
                     interactor = interactor,
                     modifier = Modifier.padding(MaterialTheme.stripeFormInsets.getOuterFormInsets()),
                 )
+                USBankAccountMandate(state)
                 FormActivityError(state)
-                Spacer(Modifier.height(40.dp))
-                FormActivityPrimaryButton(
-                    state = state,
-                    onClick = onContinueClick,
-                    onDisabledClick = onPrimaryButtonDisabledClick,
-                )
+                if (state.isSelectionButtonVisible) {
+                    Spacer(Modifier.height(40.dp))
+                    FormActivityPrimaryButton(
+                        state = state,
+                        onClick = onContinueClick,
+                        onDisabledClick = onPrimaryButtonDisabledClick,
+                    )
+                }
                 PaymentSheetContentPadding()
             }
 
@@ -415,6 +420,7 @@ internal class EmbeddedNavigator private constructor(
                 val state by sheetActivityState.collectAsState()
                 USBankAccountMandate(state)
                 FormActivityError(state)
+                // The form's button can collect a bank account before a payment selection exists.
                 Spacer(Modifier.height(40.dp))
                 FormActivityPrimaryButton(
                     state = state,
@@ -467,13 +473,24 @@ internal class EmbeddedNavigator private constructor(
                     modifier = Modifier.padding(MaterialTheme.stripeFormInsets.getOuterFormInsets()),
                 )
                 val state by sheetActivityState.collectAsState()
+                val interactorState by interactor.state.collectAsState()
+                val savedMethod = interactorState.selectedPaymentOptionsItem as? PaymentOptionsItem.SavedPaymentMethod
+                val showMandateAboveButton = savedMethod?.paymentMethod?.type == PaymentMethod.Type.SepaDebit
+                if (showMandateAboveButton) {
+                    USBankAccountMandate(state)
+                }
                 FormActivityError(state)
-                Spacer(Modifier.height(40.dp))
-                FormActivityPrimaryButton(
-                    state = state,
-                    onClick = onContinueClick,
-                    onDisabledClick = onPrimaryButtonDisabledClick,
-                )
+                if (state.isSelectionButtonVisible) {
+                    Spacer(Modifier.height(40.dp))
+                    FormActivityPrimaryButton(
+                        state = state,
+                        onClick = onContinueClick,
+                        onDisabledClick = onPrimaryButtonDisabledClick,
+                    )
+                }
+                if (!showMandateAboveButton) {
+                    USBankAccountMandate(state)
+                }
                 PaymentSheetContentPadding()
             }
 

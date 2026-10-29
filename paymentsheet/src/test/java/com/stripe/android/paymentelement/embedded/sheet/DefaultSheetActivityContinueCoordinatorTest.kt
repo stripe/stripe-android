@@ -79,6 +79,20 @@ internal class DefaultSheetActivityContinueCoordinatorTest {
     }
 
     @Test
+    fun `Continue returns saved mandate selection without confirming payment`() = runScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+        selection = PaymentSelection.Saved(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD),
+    ) {
+        continueCoordinator.onContinue()
+
+        val result = stateHolder.resultTurbine.awaitItem() as EmbeddedActivityResult.Complete
+        assertThat(result.selection).isEqualTo(PaymentSelection.Saved(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD))
+        assertThat(result.hasBeenConfirmed).isFalse()
+        assertThat(result.launchMode).isEqualTo(EmbeddedLaunchMode.PaymentOptions)
+        stateHolder.updateProcessingTurbine.expectNoEvents()
+    }
+
+    @Test
     fun `repeated continue is ignored before tax region update coroutine starts`() {
         networkRule.checkoutUpdate { response ->
             response.testBodyFromFile("checkout-session-init.json")

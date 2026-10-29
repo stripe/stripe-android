@@ -18,6 +18,7 @@ internal class FakeSheetActivityStateHolder(
     initialState: SheetActivityStateHolder.State = SheetActivityStateHolder.State(
         primaryButtonLabel = "".resolvableString,
         isEnabled = false,
+        isSelectionButtonVisible = true,
         processingState = PrimaryButtonProcessingState.Idle(null),
         isProcessing = false,
         primaryButtonIcon = PrimaryButtonIcon.Lock,
@@ -30,6 +31,7 @@ internal class FakeSheetActivityStateHolder(
         _state.update(transform)
     }
 
+    val updateMandateTurbine = Turbine<ResolvableString?>()
     val resultTurbine = Turbine<EmbeddedActivityResult>()
     val updateErrorTurbine = Turbine<ResolvableString?>()
     val updateProcessingTurbine = Turbine<Boolean>()
@@ -38,7 +40,8 @@ internal class FakeSheetActivityStateHolder(
     override val validationRequested: SharedFlow<Unit> = MutableSharedFlow<Unit>()
 
     override fun updateMandate(mandateText: ResolvableString?) {
-        error("This should never be called!")
+        updateMandateTurbine.add(mandateText)
+        _state.update { it.copy(mandateText = mandateText) }
     }
 
     override fun updatePrimaryButton(callback: (PrimaryButton.UIState?) -> PrimaryButton.UIState?) {
@@ -61,6 +64,7 @@ internal class FakeSheetActivityStateHolder(
     }
 
     fun validate() {
+        updateMandateTurbine.ensureAllEventsConsumed()
         resultTurbine.ensureAllEventsConsumed()
         updateErrorTurbine.ensureAllEventsConsumed()
         updateProcessingTurbine.ensureAllEventsConsumed()

@@ -21,6 +21,7 @@ import com.stripe.android.paymentsheet.PaymentOptionsItem
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.mandateTextFromPaymentMethodMetadata
 import com.stripe.android.paymentsheet.model.paymentMethodType
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
@@ -39,10 +40,12 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Provider
 
@@ -134,6 +137,21 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
     }
 
     private fun createHorizontalSavedPaymentMethodsScreen(): EmbeddedNavigator.Screen {
+        viewModelScope.launch {
+            combine(
+                selectionHolder.selection,
+                isCurrentScreen<EmbeddedNavigator.Screen.HorizontalSavedPaymentOptions>(),
+            ) { selection, isCurrentScreen ->
+                selection to isCurrentScreen
+            }.collect { (selection, isCurrentScreen) ->
+                if (isCurrentScreen) {
+                    sheetActivityStateHolder.updateMandate(
+                        (selection as? PaymentSelection.Saved)
+                            ?.mandateTextFromPaymentMethodMetadata(paymentMethodMetadata)
+                    )
+                }
+            }
+        }
         return EmbeddedNavigator.Screen.HorizontalSavedPaymentOptions(
             interactor = createSavedPaymentMethodsInteractor(),
             sheetActivityState = sheetActivityStateHolder.state,
@@ -251,8 +269,9 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
                     isVerticalLayout = true,
                 )
             },
-            // Embedded renders mandate text through its own path, not the mandate-above-button handler.
-            updateMandateText = null,
+            updateMandateText = { mandateText, _ ->
+                sheetActivityStateHolder.updateMandate(mandateText)
+            },
             coroutineScope = coroutineScope,
             paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
             linkAccount = linkAccountHolder.linkAccountInfo,

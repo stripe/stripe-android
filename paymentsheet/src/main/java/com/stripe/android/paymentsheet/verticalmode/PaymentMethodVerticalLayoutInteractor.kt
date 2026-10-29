@@ -391,8 +391,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             }
         }
 
-        // Only wired up for flows that surface mandate text above the primary button (PaymentSheet and
-        // FlowController). Embedded renders mandates through its own path and passes null. Launched on this
+        // Flows that render mandates outside the list consume these updates. Launched on this
         // interactor's scope so both collectors are cancelled by close() when the screen goes away.
         if (updateMandateText != null) {
             coroutineScope.launch(mainDispatcher) {
