@@ -10,14 +10,21 @@ import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkAccountUpdate
+import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.LinkAccountHolder
+import com.stripe.android.link.model.LinkAccount
+import com.stripe.android.link.ui.inline.SignUpConsentAction
+import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.CardBrand
+import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.LinkDisabledReason
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
@@ -157,6 +164,9 @@ internal class CheckoutAnalyticsPerformerTest {
 
     @Test
     fun `express checkout confirmation context survives performer recreation`() = runScenario {
+        stateHolder.state = stateHolder.state!!.copy(
+            expressCheckoutElementPaymentMethodMetadata = linkMetadata(LinkState.LoginState.NeedsVerification),
+        )
         val selection = PaymentSelection.Link(brand = LinkBrand.Link)
         performer.onExpressCheckoutElementConfirmationStarted(selection)
 
@@ -168,7 +178,222 @@ internal class CheckoutAnalyticsPerformerTest {
             ExpectedEvent(
                 event = "checkout_elements.confirm.succeeded",
                 publishableKey = DEFAULT_METADATA_PUBLISHABLE_KEY,
-                params = mapOf("selected_lpm" to "link"),
+                params = expressCheckoutConfirmationParams,
+            ),
+        )
+    }
+
+    @Test
+    fun `native returning Link UI survives account changes and performer recreation`() = runScenario(
+        paymentMethodMetadata = linkMetadata(LinkState.LoginState.LoggedIn),
+    ) {
+        linkAccountHolder.set(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
+        performer.onPaymentElementConfirmationStarted(nativeLinkSelection)
+        linkAccountHolder.set(LinkAccountUpdate.Value(null))
+        startReporting(recreatePerformer())
+
+        confirmationHandler.state.value = ConfirmationHandler.State.Complete(
+            ConfirmationHandler.Result.Failed(
+                cause = IllegalStateException("Unable to confirm"),
+                message = "Unable to confirm".resolvableString,
+                type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+            )
+        )
+
+        analyticsRequestExecutor.awaitAndAssertConfirmationRequest(
+            ExpectedEvent(
+                event = "checkout_elements.confirm.failed",
+                publishableKey = DEFAULT_METADATA_PUBLISHABLE_KEY,
+                params = mapOf(
+                    "selected_lpm" to "link",
+                    "link_context" to "wallet",
+                    "link_ui" to "native-returning",
+                    "invocation_source" to "merchant",
+                    "active_link_session" to true,
+                ),
+            ),
+        )
+    }
+
+    @Test
+    fun `native Link signup reports its UI`() = runScenario(
+        paymentMethodMetadata = linkMetadata(LinkState.LoginState.LoggedIn),
+    ) {
+        val signupSession = TestFactory.CONSUMER_SESSION.copy(
+            verificationSessions = listOf(
+                ConsumerSession.VerificationSession(
+                    type = ConsumerSession.VerificationSession.SessionType.SignUp,
+                    state = ConsumerSession.VerificationSession.SessionState.Started,
+                )
+            ),
+        )
+        linkAccountHolder.set(LinkAccountUpdate.Value(LinkAccount(signupSession)))
+        startReporting()
+        performer.onPaymentElementConfirmationStarted(nativeLinkSelection)
+
+        confirmationHandler.state.value = ConfirmationHandler.State.Complete(successfulResult())
+
+        analyticsRequestExecutor.awaitAndAssertConfirmationRequest(
+            ExpectedEvent(
+                event = "checkout_elements.confirm.succeeded",
+                publishableKey = DEFAULT_METADATA_PUBLISHABLE_KEY,
+                params = mapOf("link_ui" to "native-signup"),
+            ),
+        )
+    }
+
+    @Test
+    fun `verified Link auth token without OTP reports native signup UI`() = runScenario(
+        paymentMethodMetadata = linkMetadata(LinkState.LoginState.LoggedIn),
+    ) {
+        val verifiedSession = TestFactory.CONSUMER_SESSION.copy(
+            verificationSessions = listOf(
+                ConsumerSession.VerificationSession(
+                    type = ConsumerSession.VerificationSession.SessionType.LinkAuthToken,
+                    state = ConsumerSession.VerificationSession.SessionState.Verified,
+                )
+            ),
+            currentAuthenticationLevel = null,
+            minimumAuthenticationLevel = null,
+        )
+        linkAccountHolder.set(LinkAccountUpdate.Value(LinkAccount(verifiedSession)))
+        startReporting()
+        performer.onPaymentElementConfirmationStarted(nativeLinkSelection)
+
+        confirmationHandler.state.value = ConfirmationHandler.State.Complete(successfulResult())
+
+        analyticsRequestExecutor.awaitAndAssertConfirmationRequest(
+            ExpectedEvent(
+                event = "checkout_elements.confirm.succeeded",
+                publishableKey = DEFAULT_METADATA_PUBLISHABLE_KEY,
+                params = mapOf("link_ui" to "native-signup"),
+            ),
+        )
+    }
+
+    @Test
+    fun `verified Email OTP reports native returning UI`() = runScenario(
+        paymentMethodMetadata = linkMetadata(LinkState.LoginState.LoggedIn),
+    ) {
+        val verifiedEmailSession = TestFactory.CONSUMER_SESSION.copy(
+            verificationSessions = listOf(
+                ConsumerSession.VerificationSession(
+                    type = ConsumerSession.VerificationSession.SessionType.Email,
+                    state = ConsumerSession.VerificationSession.SessionState.Verified,
+                )
+            ),
+        )
+        linkAccountHolder.set(LinkAccountUpdate.Value(LinkAccount(verifiedEmailSession)))
+        startReporting()
+        performer.onPaymentElementConfirmationStarted(nativeLinkSelection)
+
+        confirmationHandler.state.value = ConfirmationHandler.State.Complete(successfulResult())
+
+        analyticsRequestExecutor.awaitAndAssertConfirmationRequest(
+            ExpectedEvent(
+                event = "checkout_elements.confirm.succeeded",
+                publishableKey = DEFAULT_METADATA_PUBLISHABLE_KEY,
+                params = mapOf("link_ui" to "native-returning"),
+            ),
+        )
+    }
+
+    @Test
+    fun `signup with verified SMS OTP reports native returning UI`() = runScenario(
+        paymentMethodMetadata = linkMetadata(LinkState.LoginState.LoggedIn),
+    ) {
+        val verifiedSignupSession = TestFactory.CONSUMER_SESSION.copy(
+            verificationSessions = listOf(
+                ConsumerSession.VerificationSession(
+                    type = ConsumerSession.VerificationSession.SessionType.SignUp,
+                    state = ConsumerSession.VerificationSession.SessionState.Started,
+                ),
+                ConsumerSession.VerificationSession(
+                    type = ConsumerSession.VerificationSession.SessionType.Sms,
+                    state = ConsumerSession.VerificationSession.SessionState.Verified,
+                ),
+            ),
+        )
+        linkAccountHolder.set(LinkAccountUpdate.Value(LinkAccount(verifiedSignupSession)))
+        startReporting()
+        performer.onPaymentElementConfirmationStarted(nativeLinkSelection)
+
+        confirmationHandler.state.value = ConfirmationHandler.State.Complete(successfulResult())
+
+        analyticsRequestExecutor.awaitAndAssertConfirmationRequest(
+            ExpectedEvent(
+                event = "checkout_elements.confirm.succeeded",
+                publishableKey = DEFAULT_METADATA_PUBLISHABLE_KEY,
+                params = mapOf("link_ui" to "native-returning"),
+            ),
+        )
+    }
+
+    @Test
+    fun `new card inline Link signup reports its UI`() = runScenario(
+        paymentMethodMetadata = linkMetadata(LinkState.LoginState.LoggedOut),
+    ) {
+        startReporting()
+        performer.onPaymentElementConfirmationStarted(inlineSignupSelection)
+
+        confirmationHandler.state.value = ConfirmationHandler.State.Complete(successfulResult())
+
+        analyticsRequestExecutor.awaitAndAssertConfirmationRequest(
+            ExpectedEvent(
+                event = "checkout_elements.confirm.succeeded",
+                publishableKey = DEFAULT_METADATA_PUBLISHABLE_KEY,
+                params = mapOf(
+                    "selected_lpm" to "card",
+                    "is_saved_payment_method" to false,
+                    "link_ui" to "inline-signup",
+                ),
+            ),
+        )
+    }
+
+    @Test
+    fun `saved card inline Link signup reports its UI`() = runScenario(
+        paymentMethodMetadata = linkMetadata(LinkState.LoginState.LoggedOut),
+    ) {
+        startReporting()
+        performer.onPaymentElementConfirmationStarted(
+            PaymentSelection.Saved(
+                paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+                linkInput = inlineSignupSelection.linkInput,
+            )
+        )
+
+        confirmationHandler.state.value = ConfirmationHandler.State.Complete(successfulResult())
+
+        analyticsRequestExecutor.awaitAndAssertConfirmationRequest(
+            ExpectedEvent(
+                event = "checkout_elements.confirm.succeeded",
+                publishableKey = DEFAULT_METADATA_PUBLISHABLE_KEY,
+                params = mapOf(
+                    "selected_lpm" to "card",
+                    "is_saved_payment_method" to true,
+                    "link_ui" to "inline-signup",
+                ),
+            ),
+        )
+    }
+
+    @Test
+    fun `inline Link sign in does not report signup UI`() = runScenario(
+        paymentMethodMetadata = linkMetadata(LinkState.LoginState.NeedsVerification),
+    ) {
+        startReporting()
+        performer.onPaymentElementConfirmationStarted(
+            inlineSignupSelection.copy(linkInput = UserInput.SignIn("email@example.com"))
+        )
+
+        confirmationHandler.state.value = ConfirmationHandler.State.Complete(successfulResult())
+
+        analyticsRequestExecutor.awaitAndAssertConfirmationRequest(
+            ExpectedEvent(
+                event = "checkout_elements.confirm.succeeded",
+                publishableKey = DEFAULT_METADATA_PUBLISHABLE_KEY,
+                params = mapOf("selected_lpm" to "card"),
             ),
         )
     }
@@ -410,6 +635,9 @@ internal class CheckoutAnalyticsPerformerTest {
         expected.params.forEach { (key, value) ->
             assertThat(request.params).containsEntry(key, value)
         }
+        if ("link_ui" !in expected.params) {
+            assertThat(request.params).doesNotContainKey("link_ui")
+        }
         return request.params
     }
 
@@ -433,7 +661,29 @@ internal class CheckoutAnalyticsPerformerTest {
             "selected_lpm" to "link",
             "is_saved_payment_method" to false,
             "link_context" to "wallet",
+            "link_ui" to "native-popup",
             "invocation_source" to "express_checkout_element",
+        )
+
+        val nativeLinkSelection = PaymentSelection.Link(
+            brand = LinkBrand.Link,
+            selectedPayment = LinkPaymentMethod.ConsumerPaymentDetails(
+                details = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
+                collectedCvc = null,
+                billingPhone = null,
+            ),
+        )
+        val inlineSignupSelection = PaymentSelection.New.Card(
+            paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+            brand = CardBrand.Visa,
+            customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
+            linkInput = UserInput.SignUp(
+                email = "email@example.com",
+                phone = "1234567890",
+                country = "US",
+                name = null,
+                consentAction = SignUpConsentAction.Checkbox,
+            ),
         )
     }
 }
