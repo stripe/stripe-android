@@ -14,7 +14,11 @@ internal class ConfirmOperation(
     confirmationContext: CheckoutConfirmationContext,
     private val durationProvider: DurationProvider,
     report: (CheckoutAnalyticsEvent) -> Unit,
-) : CheckoutAnalyticsOperation<PaymentSheetConfirmationError>(Operation.Confirm, report) {
+) : CheckoutAnalyticsOperation<PaymentSheetConfirmationError>(
+    operation = Operation.Confirm,
+    sessionId = null,
+    report = report,
+) {
     override val params: Map<String, Any?> = buildMap {
         put("selected_lpm", confirmationContext.paymentSelection.code())
         put("is_saved_payment_method", confirmationContext.paymentSelection.isSaved)
@@ -37,10 +41,10 @@ internal class ConfirmOperation(
     }
 
     fun succeeded(response: CheckoutSessionResponse?) {
-        reportOutcome(Outcome.Succeeded, response, error = null)
+        reportOutcome(Outcome.Succeeded, response, additionalParams = emptyMap(), error = null)
     }
 
     fun canceled(response: CheckoutSessionResponse?) {
-        reportOutcome(Outcome.Canceled, response, error = null)
+        reportOutcome(Outcome.Canceled, response, additionalParams = emptyMap(), error = null)
     }
 }

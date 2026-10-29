@@ -13,6 +13,7 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.utils.FakeDurationProvider
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
+import kotlin.time.TimeSource
 
 @OptIn(ApiConfigurationPreview::class)
 internal object TestCheckoutAnalyticsPerformerFactory {
@@ -25,6 +26,7 @@ internal object TestCheckoutAnalyticsPerformerFactory {
         linkAccountHolder: LinkAccountHolder = LinkAccountHolder(savedStateHandle),
         durationProvider: DurationProvider = FakeDurationProvider(),
         apiConfiguration: ApiConfiguration.State = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
+        timeSource: TimeSource = TimeSource.Monotonic,
     ): CheckoutAnalyticsPerformer = CheckoutAnalyticsPerformer(
         confirmationHandler = confirmationHandler,
         savedStateHandle = savedStateHandle,
@@ -34,6 +36,7 @@ internal object TestCheckoutAnalyticsPerformerFactory {
         analyticsRequestExecutor = analyticsRequestExecutor,
         durationProvider = durationProvider,
         apiConfigurationProvider = Provider { apiConfiguration },
+        timeSource = timeSource,
         workContext = workContext,
     )
 }

@@ -176,6 +176,13 @@ internal data class CheckoutSessionResponse(
         val disclosureCaption: String?,
         val disclosureDetails: String?,
     ) : StripeModel
+
+    companion object {
+        private val CLIENT_SECRET_PATTERN = Regex("(cs_(?:test|live)_[a-zA-Z0-9]+)_secret_[a-zA-Z0-9]+")
+
+        fun getIdFromClientSecret(clientSecret: String): String? =
+            CLIENT_SECRET_PATTERN.matchEntire(clientSecret)?.groupValues?.get(1)
+    }
 }
 
 internal fun CheckoutSessionResponse.validateShippingCountry(country: String): Result<Unit> {

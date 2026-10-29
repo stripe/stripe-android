@@ -109,47 +109,64 @@ class CheckoutController @Inject internal constructor(
         clientSecret: String,
         configuration: Configuration = Configuration(),
     ): OperationResult = withContext(Dispatchers.Main.immediate) {
+        val sessionId = CheckoutSessionResponse.getIdFromClientSecret(clientSecret)
+        val initAnalytics = checkoutAnalyticsPerformer.createInitAttempt(sessionId)
+        val configurationState = if (sheetStateHolder.sheetIsOpen) null else configuration.build()
+        initAnalytics.started(response = null)
+        // A failed reconfigure leaves the previous session in the holder; report this attempt's response.
+        var attemptResponse: CheckoutSessionResponse? = null
+        var orderedLpms: List<String> = emptyList()
         // A re-configure while a payment flow is presented would reload the session out from under
         // the open sheet. The first configure runs with null state, so this only blocks re-configures.
-        if (sheetStateHolder.sheetIsOpen) {
-            return@withContext integrationLaunchedFailure()
-        }
-        operationCoordinator.runMutation {
-            val configurationState = configuration.build()
-            val sessionId = clientSecret.substringBefore("_secret_")
-
-            checkoutSessionRepository.init(
-                sessionId = sessionId,
-                clientSecret = clientSecret,
-                adaptivePricingAllowed = configurationState.currencySelectorElementConfiguration != null,
-            ).mapCatching { response ->
-                val initialLoad = checkoutStateLoader.loadInitial(
-                    configuration = configurationState,
-                    checkoutSessionResponse = response,
-                )
-                val addressSource = response.taxAddressSource
-                val taxAddress = when (addressSource) {
-                    CheckoutSessionResponse.TaxAddressSource.SHIPPING ->
-                        initialLoad.state.collectedDetails.shippingAddress
-                    CheckoutSessionResponse.TaxAddressSource.BILLING ->
-                        initialLoad.state.paymentSelection?.billingDetails?.address?.toCheckoutAddress()
-                            ?: configurationState.defaults.billingDetails?.address
-                    null -> null
-                }
-                if (taxAddress != null && addressSource != null && response.automaticTaxEnabled) {
-                    val updatedResponse = checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
+        val result = if (configurationState == null) {
+            integrationLaunchedFailure()
+        } else {
+            operationCoordinator.runMutation {
+                checkoutSessionRepository.init(
+                    // Preserve API validation for malformed secrets without exposing them to analytics.
+                    sessionId = sessionId ?: clientSecret.substringBefore("_secret_"),
+                    clientSecret = clientSecret,
+                    adaptivePricingAllowed = configurationState.currencySelectorElementConfiguration != null,
+                ).mapCatching { response ->
+                    attemptResponse = response
+                    val initialLoad = checkoutStateLoader.loadInitial(
+                        configuration = configurationState,
                         checkoutSessionResponse = response,
-                        addressSource = addressSource,
-                        address = taxAddress,
-                    ).getOrThrow()
-                    // The updated totals change payment method metadata, so rebuild it before publishing.
-                    checkoutStateLoader.reload(initialLoad.state.copy(checkoutSessionResponse = updatedResponse))
-                } else {
-                    checkoutStateLoader.publish(initialLoad)
+                    )
+                    val addressSource = response.taxAddressSource
+                    val taxAddress = initialTaxAddress(initialLoad.state)
+                    if (taxAddress != null && addressSource != null && response.automaticTaxEnabled) {
+                        val updatedResponse = checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
+                            checkoutSessionResponse = response,
+                            addressSource = addressSource,
+                            address = taxAddress,
+                        ).getOrThrow()
+                        attemptResponse = updatedResponse
+                        // The updated totals change payment method metadata, so rebuild it before publishing.
+                        checkoutStateLoader.reload(initialLoad.state.copy(checkoutSessionResponse = updatedResponse))
+                    } else {
+                        checkoutStateLoader.publish(initialLoad)
+                    }
+                    val state = stateHolder.state
+                    orderedLpms = (state?.paymentMethodMetadata ?: state?.expressCheckoutElementPaymentMethodMetadata)
+                        ?.sortedSupportedPaymentMethods()?.map { it.code }.orEmpty()
                 }
             }
         }
+        result
+            .onSuccess { initAnalytics.succeeded(attemptResponse, orderedLpms) }
+            .onFailure { initAnalytics.failed(attemptResponse, it) }
     }.toOperationResult()
+
+    private fun initialTaxAddress(state: CheckoutControllerState): Address.State? {
+        return when (state.checkoutSessionResponse.taxAddressSource) {
+            CheckoutSessionResponse.TaxAddressSource.SHIPPING -> state.collectedDetails.shippingAddress
+            CheckoutSessionResponse.TaxAddressSource.BILLING ->
+                state.paymentSelection?.billingDetails?.address?.toCheckoutAddress()
+                    ?: state.configuration.defaults.billingDetails?.address
+            null -> null
+        }
+    }
 
     /**
      * Applies a promotion code to the checkout session.

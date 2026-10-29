@@ -9,6 +9,7 @@ import kotlin.time.Duration
 internal class CheckoutAnalyticsEvent(
     val operation: Operation,
     outcome: Outcome,
+    sessionId: String?,
     analyticsMetadata: AnalyticsMetadata,
     duration: Duration?,
     error: Error?,
@@ -16,6 +17,8 @@ internal class CheckoutAnalyticsEvent(
 ) : AnalyticsEvent {
     override val eventName = "checkout_elements.${operation.code}.${outcome.code}"
     val params: Map<String, Any?> = buildMap {
+        // Use the attempted ID until response metadata is available, then prefer the response ID.
+        sessionId?.let { put("checkout_session_id", it) }
         putAll(operationParams)
         putAll(analyticsMetadata.paramsMap)
         putAll(duration.mapOfDurationInSeconds())
@@ -27,6 +30,7 @@ internal class CheckoutAnalyticsEvent(
     }
 
     enum class Operation(val code: String) {
+        Init("init"),
         Confirm("confirm"),
     }
 

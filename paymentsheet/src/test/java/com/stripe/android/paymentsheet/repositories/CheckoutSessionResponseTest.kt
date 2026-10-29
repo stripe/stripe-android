@@ -1,12 +1,44 @@
 package com.stripe.android.paymentsheet.repositories
 
 import com.google.common.truth.Truth.assertThat
+import com.google.testing.junit.testparameterinjector.TestParameter
+import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
 import org.junit.Test
+import org.junit.runner.RunWith
 
+@RunWith(TestParameterInjector::class)
 internal class CheckoutSessionResponseTest {
+    @Test
+    fun `extracts the session ID from a test client secret`() {
+        assertThat(CheckoutSessionResponse.getIdFromClientSecret("cs_test_abc123_secret_value"))
+            .isEqualTo("cs_test_abc123")
+    }
+
+    @Test
+    fun `extracts the session ID from a live client secret`() {
+        assertThat(CheckoutSessionResponse.getIdFromClientSecret("cs_live_abc123_secret_value"))
+            .isEqualTo("cs_live_abc123")
+    }
+
+    @Test
+    fun `omits session identity from malformed client secrets`(
+        @TestParameter(
+            value = [
+                "",
+                "not_a_client_secret",
+                "cs_test_abc123",
+                "cs_unknown_abc123_secret_value",
+                "cs_test_abc123_secret_",
+                "cs_test_abc123_secret_value_extra",
+            ]
+        ) clientSecret: String,
+    ) {
+        assertThat(CheckoutSessionResponse.getIdFromClientSecret(clientSecret)).isNull()
+    }
+
     @Test
     fun `processing payment completes the session without claiming it is paid`() {
         val intent = PaymentIntentFixtures.PI_SUCCEEDED.copy(status = StripeIntent.Status.Processing)

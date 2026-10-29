@@ -9,6 +9,7 @@ import com.stripe.android.checkout.analytics.CheckoutConfirmationContext
 import com.stripe.android.checkout.analytics.CheckoutConfirmationContext.InvocationSource
 import com.stripe.android.checkout.analytics.CheckoutConfirmationContext.LinkUi
 import com.stripe.android.checkout.analytics.ConfirmOperation
+import com.stripe.android.checkout.analytics.InitOperation
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
@@ -31,6 +32,7 @@ import javax.inject.Inject
 import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
+import kotlin.time.TimeSource
 
 @Singleton
 internal class CheckoutAnalyticsPerformer @Inject constructor(
@@ -42,6 +44,7 @@ internal class CheckoutAnalyticsPerformer @Inject constructor(
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val durationProvider: DurationProvider,
     private val apiConfigurationProvider: Provider<ApiConfiguration.State>,
+    private val timeSource: TimeSource,
     @IOContext private val workContext: CoroutineContext,
 ) {
     private val analyticsRequestFactory = PaymentAnalyticsRequestFactory(
@@ -49,6 +52,9 @@ internal class CheckoutAnalyticsPerformer @Inject constructor(
         defaultProductUsageTokens = setOf("checkout_elements"),
         apiConfigurationProvider = apiConfigurationProvider,
     )
+
+    fun createInitAttempt(sessionId: String?): InitOperation =
+        InitOperation(sessionId, timeSource.markNow(), ::reportEvent)
 
     fun onPaymentElementConfirmationStarted(paymentSelection: PaymentSelection) {
         saveConfirmation(InvocationSource.Merchant, paymentSelection)
@@ -92,8 +98,13 @@ internal class CheckoutAnalyticsPerformer @Inject constructor(
     }
 
     private fun reportEvent(event: CheckoutAnalyticsEvent) {
-        val publishableKey = stateHolder.state?.paymentMethodMetadata?.apiConfiguration?.publishableKey
-            ?: apiConfigurationProvider.get().publishableKey
+        val publishableKey = when (event.operation) {
+            // Init must use the active configuration, not metadata retained from a previous configure.
+            CheckoutAnalyticsEvent.Operation.Init -> apiConfigurationProvider.get().publishableKey
+            CheckoutAnalyticsEvent.Operation.Confirm ->
+                stateHolder.state?.paymentMethodMetadata?.apiConfiguration?.publishableKey
+                    ?: apiConfigurationProvider.get().publishableKey
+        }
         CoroutineScope(workContext).launch {
             analyticsRequestExecutor.executeAsync(
                 analyticsRequestFactory.createRequest(

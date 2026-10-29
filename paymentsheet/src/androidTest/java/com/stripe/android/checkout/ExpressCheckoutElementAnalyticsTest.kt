@@ -3,6 +3,7 @@ package com.stripe.android.checkout
 import androidx.test.espresso.intent.rule.IntentsRule
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.checkouttesting.CheckoutInitResponseFactory
+import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutConfirm
 import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.checkouttesting.checkoutUpdate
@@ -344,7 +345,12 @@ internal class ExpressCheckoutElementAnalyticsTest {
         initialCheckoutSessionResponseFactory: (MockResponse) -> Unit = CheckoutInitResponseFactory::create,
         block: suspend ExpressCheckoutElementScenario.() -> Unit,
     ) {
+        networkRule.validateCheckoutInitStarted(DEFAULT_CHECKOUT_SESSION_ID)
         enqueueLoadingRequests(linkEnabled = linkEnabled)
+        networkRule.validateCheckoutInitSucceeded(
+            sessionId = DEFAULT_CHECKOUT_SESSION_ID,
+            analyticsPayloadField("ordered_lpms", "card,cashapp"),
+        )
         networkRule.validateAnalyticsRequest(
             eventName = "elements.express_checkout_element.init",
             productUsage = setOf("checkout_elements"),
