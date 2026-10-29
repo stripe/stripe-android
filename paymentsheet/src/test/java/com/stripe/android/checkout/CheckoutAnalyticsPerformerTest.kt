@@ -237,6 +237,93 @@ internal class CheckoutAnalyticsPerformerTest {
     }
 
     @Test
+    fun `verified Link auth token without OTP reports native signup UI`() = runScenario(
+        paymentMethodMetadata = linkMetadata(LinkState.LoginState.LoggedIn),
+    ) {
+        val verifiedSession = TestFactory.CONSUMER_SESSION.copy(
+            verificationSessions = listOf(
+                ConsumerSession.VerificationSession(
+                    type = ConsumerSession.VerificationSession.SessionType.LinkAuthToken,
+                    state = ConsumerSession.VerificationSession.SessionState.Verified,
+                )
+            ),
+            currentAuthenticationLevel = null,
+            minimumAuthenticationLevel = null,
+        )
+        linkAccountHolder.set(LinkAccountUpdate.Value(LinkAccount(verifiedSession)))
+        startReporting()
+        performer.onPaymentElementConfirmationStarted(nativeLinkSelection)
+
+        confirmationHandler.state.value = ConfirmationHandler.State.Complete(successfulResult())
+
+        analyticsRequestExecutor.awaitAndAssertConfirmationRequest(
+            ExpectedEvent(
+                event = "checkout_elements.confirm.succeeded",
+                publishableKey = DEFAULT_METADATA_PUBLISHABLE_KEY,
+                params = mapOf("link_ui" to "native-signup"),
+            ),
+        )
+    }
+
+    @Test
+    fun `verified Email OTP reports native returning UI`() = runScenario(
+        paymentMethodMetadata = linkMetadata(LinkState.LoginState.LoggedIn),
+    ) {
+        val verifiedEmailSession = TestFactory.CONSUMER_SESSION.copy(
+            verificationSessions = listOf(
+                ConsumerSession.VerificationSession(
+                    type = ConsumerSession.VerificationSession.SessionType.Email,
+                    state = ConsumerSession.VerificationSession.SessionState.Verified,
+                )
+            ),
+        )
+        linkAccountHolder.set(LinkAccountUpdate.Value(LinkAccount(verifiedEmailSession)))
+        startReporting()
+        performer.onPaymentElementConfirmationStarted(nativeLinkSelection)
+
+        confirmationHandler.state.value = ConfirmationHandler.State.Complete(successfulResult())
+
+        analyticsRequestExecutor.awaitAndAssertConfirmationRequest(
+            ExpectedEvent(
+                event = "checkout_elements.confirm.succeeded",
+                publishableKey = DEFAULT_METADATA_PUBLISHABLE_KEY,
+                params = mapOf("link_ui" to "native-returning"),
+            ),
+        )
+    }
+
+    @Test
+    fun `signup with verified SMS OTP reports native returning UI`() = runScenario(
+        paymentMethodMetadata = linkMetadata(LinkState.LoginState.LoggedIn),
+    ) {
+        val verifiedSignupSession = TestFactory.CONSUMER_SESSION.copy(
+            verificationSessions = listOf(
+                ConsumerSession.VerificationSession(
+                    type = ConsumerSession.VerificationSession.SessionType.SignUp,
+                    state = ConsumerSession.VerificationSession.SessionState.Started,
+                ),
+                ConsumerSession.VerificationSession(
+                    type = ConsumerSession.VerificationSession.SessionType.Sms,
+                    state = ConsumerSession.VerificationSession.SessionState.Verified,
+                ),
+            ),
+        )
+        linkAccountHolder.set(LinkAccountUpdate.Value(LinkAccount(verifiedSignupSession)))
+        startReporting()
+        performer.onPaymentElementConfirmationStarted(nativeLinkSelection)
+
+        confirmationHandler.state.value = ConfirmationHandler.State.Complete(successfulResult())
+
+        analyticsRequestExecutor.awaitAndAssertConfirmationRequest(
+            ExpectedEvent(
+                event = "checkout_elements.confirm.succeeded",
+                publishableKey = DEFAULT_METADATA_PUBLISHABLE_KEY,
+                params = mapOf("link_ui" to "native-returning"),
+            ),
+        )
+    }
+
+    @Test
     fun `new card inline Link signup reports its UI`() = runScenario(
         paymentMethodMetadata = linkMetadata(LinkState.LoginState.LoggedOut),
     ) {
