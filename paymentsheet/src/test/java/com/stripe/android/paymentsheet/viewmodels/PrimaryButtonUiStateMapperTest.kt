@@ -244,30 +244,13 @@ class PrimaryButtonUiStateMapperTest {
     }
 
     @Test
-    fun `Shows lock icon correctly based on the flow type`() = runTest {
-        val mapper = createMapper(
-            currentScreenFlow = stateFlowOf(
-                PaymentSheetScreen.SelectSavedPaymentMethods(
-                    FakeSelectSavedPaymentMethodsInteractor()
-                )
-            ),
-            buttonsEnabledFlow = stateFlowOf(false),
-            paymentMethodMetadataFlow = stateFlowOf(PaymentMethodMetadataFactory.create()),
-            selectionFlow = stateFlowOf(usBankAccountSelection()),
-            customPrimaryButtonUiStateFlow = stateFlowOf(null),
-            cvcFlow = stateFlowOf(true)
-        )
+    fun `Shows the supplied lock icon in both flows`() = runTest {
+        assertPrimaryButtonIcon(PrimaryButtonIcon.Lock)
+    }
 
-        val resultWithLock = mapper.forCompleteFlow()
-        val resultWithoutLock = mapper.forCustomFlow()
-
-        resultWithLock.test {
-            assertThat(awaitItem()?.icon).isEqualTo(PrimaryButtonIcon.Lock)
-        }
-
-        resultWithoutLock.test {
-            assertThat(awaitItem()?.icon).isEqualTo(PrimaryButtonIcon.None)
-        }
+    @Test
+    fun `Shows no icon in either flow when supplied None`() = runTest {
+        assertPrimaryButtonIcon(PrimaryButtonIcon.None)
     }
 
     @Test
@@ -723,7 +706,35 @@ class PrimaryButtonUiStateMapperTest {
         }
     }
 
+    private suspend fun assertPrimaryButtonIcon(primaryButtonIcon: PrimaryButtonIcon) {
+        val mapper = createMapper(
+            primaryButtonIcon = primaryButtonIcon,
+            currentScreenFlow = stateFlowOf(
+                PaymentSheetScreen.SelectSavedPaymentMethods(
+                    FakeSelectSavedPaymentMethodsInteractor()
+                )
+            ),
+            buttonsEnabledFlow = stateFlowOf(false),
+            paymentMethodMetadataFlow = stateFlowOf(PaymentMethodMetadataFactory.create()),
+            selectionFlow = stateFlowOf(usBankAccountSelection()),
+            customPrimaryButtonUiStateFlow = stateFlowOf(null),
+            cvcFlow = stateFlowOf(true)
+        )
+
+        val completeFlowResult = mapper.forCompleteFlow()
+        val customFlowResult = mapper.forCustomFlow()
+
+        completeFlowResult.test {
+            assertThat(awaitItem()?.icon).isEqualTo(primaryButtonIcon)
+        }
+
+        customFlowResult.test {
+            assertThat(awaitItem()?.icon).isEqualTo(primaryButtonIcon)
+        }
+    }
+
     private fun createMapper(
+        primaryButtonIcon: PrimaryButtonIcon = PrimaryButtonIcon.Lock,
         config: PaymentSheet.Configuration = PaymentSheet.Configuration("Some Name"),
         currentScreenFlow: StateFlow<PaymentSheetScreen>,
         buttonsEnabledFlow: StateFlow<Boolean>,
@@ -735,6 +746,7 @@ class PrimaryButtonUiStateMapperTest {
     ): PrimaryButtonUiStateMapper {
         return PrimaryButtonUiStateMapper(
             config = config,
+            primaryButtonIcon = primaryButtonIcon,
             currentScreenFlow = currentScreenFlow,
             buttonsEnabledFlow = buttonsEnabledFlow,
             paymentMethodMetadataFlow = paymentMethodMetadataFlow,

@@ -29,6 +29,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.PaymentElementTheme
+import com.stripe.android.paymentsheet.ui.PrimaryButtonIcon
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.paymentsheet.utils.ViewModelStoreOwnerContext
@@ -104,6 +105,7 @@ internal class CustomerSheetScreenshotTest {
         linkMode = null,
         onBehalfOf = null,
         isCompleteFlow = false,
+        primaryButtonIcon = PrimaryButtonIcon.None,
         isPaymentFlow = false,
         stripeIntentId = null,
         clientSecret = null,

@@ -11,11 +11,13 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.paymentsheet.ui.PrimaryButtonIcon
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 
 internal object USBankAccountFormArgumentsFactory {
     data class IntegrationInputs(
         val isCompleteFlow: Boolean,
+        val primaryButtonIcon: PrimaryButtonIcon,
         val shippingDetails: AddressDetails?,
         val draftPaymentSelection: PaymentSelection?,
         val autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
@@ -52,6 +54,7 @@ internal object USBankAccountFormArgumentsFactory {
             linkMode = paymentMethodMetadata.linkMode,
             onBehalfOf = paymentMethodMetadata.onBehalfOf,
             isCompleteFlow = integrationInputs.isCompleteFlow,
+            primaryButtonIcon = integrationInputs.primaryButtonIcon,
             isPaymentFlow = stripeIntent is PaymentIntent,
             stripeIntentId = stripeIntent.id,
             clientSecret = stripeIntent.clientSecret,

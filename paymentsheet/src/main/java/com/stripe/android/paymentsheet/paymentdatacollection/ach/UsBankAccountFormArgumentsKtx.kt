@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet.paymentdatacollection.ach
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentsheet.ui.PrimaryButton
-import com.stripe.android.paymentsheet.ui.PrimaryButtonIcon
 import com.stripe.android.ui.core.R as StripeUiCoreR
 
 internal fun USBankAccountFormArguments.handleScreenStateChanged(
@@ -57,7 +56,7 @@ private fun USBankAccountFormArguments.updatePrimaryButton(
             },
             onDisabledClick = onDisabledClick,
             enabled = enabled,
-            icon = if (isCompleteFlow) PrimaryButtonIcon.Lock else PrimaryButtonIcon.None,
+            icon = primaryButtonIcon,
         )
     }
 }

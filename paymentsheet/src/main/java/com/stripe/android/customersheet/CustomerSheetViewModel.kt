@@ -70,6 +70,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFo
 import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.PaymentMethodRemovalDelayMillis
 import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.paymentsheet.ui.PrimaryButtonIcon
 import com.stripe.android.paymentsheet.ui.transformToPaymentMethodCreateParams
 import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
 import com.stripe.android.ui.core.cardscan.CardScanEvent
@@ -877,6 +878,7 @@ internal class CustomerSheetViewModel(
             showCheckbox = false,
             onBehalfOf = null,
             isCompleteFlow = false,
+            primaryButtonIcon = PrimaryButtonIcon.None,
             isPaymentFlow = false,
             stripeIntentId = stripeIntent?.id,
             clientSecret = stripeIntent?.clientSecret,

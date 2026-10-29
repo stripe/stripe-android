@@ -50,6 +50,7 @@ import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.DefaultAddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.DefaultSelectSavedPaymentMethodsInteractor
+import com.stripe.android.paymentsheet.ui.PrimaryButtonIcon
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeInitialScreenFactory
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.PrimaryButtonUiStateMapper
@@ -107,8 +108,11 @@ internal class PaymentOptionsViewModel @Inject constructor(
     addressLauncherEventReporter = addressLauncherEventReporter,
 ) {
 
+    override val primaryButtonIcon = PrimaryButtonIcon.None
+
     private val primaryButtonUiStateMapper = PrimaryButtonUiStateMapper(
         config = config,
+        primaryButtonIcon = primaryButtonIcon,
         currentScreenFlow = navigationHandler.currentScreen,
         buttonsEnabledFlow = buttonsEnabled,
         paymentMethodMetadataFlow = stateFlowOf(args.state.paymentMethodMetadata),

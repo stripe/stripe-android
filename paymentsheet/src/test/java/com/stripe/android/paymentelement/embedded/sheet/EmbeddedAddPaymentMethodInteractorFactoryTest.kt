@@ -3,6 +3,8 @@ package com.stripe.android.paymentelement.embedded.sheet
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.google.testing.junit.testparameterinjector.TestParameter
+import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.TestFactory
@@ -20,6 +22,7 @@ import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.ui.AddPaymentMethodInteractor
+import com.stripe.android.paymentsheet.ui.PrimaryButtonIcon
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.utils.stateFlowOf
@@ -32,8 +35,10 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
+import org.junit.runner.RunWith
 import kotlin.test.Test
 
+@RunWith(TestParameterInjector::class)
 internal class EmbeddedAddPaymentMethodInteractorFactoryTest {
 
     @get:Rule
@@ -106,6 +111,15 @@ internal class EmbeddedAddPaymentMethodInteractorFactoryTest {
     }
 
     @Test
+    fun `US bank account arguments receive the sheet primary button icon`(
+        @TestParameter primaryButtonIcon: PrimaryButtonIcon,
+    ) = runScenario(primaryButtonIcon = primaryButtonIcon) {
+        val arguments = interactor.state.value.usBankAccountFormArguments
+        assertThat(arguments.isCompleteFlow).isFalse()
+        assertThat(arguments.primaryButtonIcon).isEqualTo(primaryButtonIcon)
+    }
+
+    @Test
     fun `linked bank account removes incentive`() {
         val incentive = PaymentMethodIncentive(
             identifier = "link_instant_debits",
@@ -135,6 +149,7 @@ internal class EmbeddedAddPaymentMethodInteractorFactoryTest {
 
                 awaitItem()
                 assertThat(awaitItem().incentive).isNull()
+                assertThat(sheetActivityStateHolder.updateErrorTurbine.awaitItem()).isNull()
             }
         }
     }
@@ -146,6 +161,7 @@ internal class EmbeddedAddPaymentMethodInteractorFactoryTest {
             ),
         ),
         initialSelection: PaymentSelection? = null,
+        primaryButtonIcon: PrimaryButtonIcon = PrimaryButtonIcon.Lock,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         // A separate scope so the interactor's never-completing state collectors don't keep runTest from finishing.
@@ -167,12 +183,15 @@ internal class EmbeddedAddPaymentMethodInteractorFactoryTest {
             selection = selectionHolder.selection,
         )
         val autocompleteAddressInteractorFactory = TestAutocompleteAddressInteractor.noOpFactory()
+        val sheetActivityStateHolder = FakeSheetActivityStateHolder().apply {
+            updateState { it.copy(primaryButtonIcon = primaryButtonIcon) }
+        }
         val factory = EmbeddedAddPaymentMethodInteractorFactory(
             paymentMethodMetadata = paymentMethodMetadata,
             embeddedSelectionHolder = selectionHolder,
             embeddedFormHelperFactory = embeddedFormHelperFactory,
             viewModelScope = viewModelScope,
-            sheetActivityStateHolder = FakeSheetActivityStateHolder(),
+            sheetActivityStateHolder = sheetActivityStateHolder,
             tapToAddHelper = FakeTapToAddHelper.noOp(),
             eventReporter = FakeEventReporter(),
             paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
@@ -180,19 +199,23 @@ internal class EmbeddedAddPaymentMethodInteractorFactoryTest {
             autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
         )
         val interactor = factory.create()
+        assertThat(sheetActivityStateHolder.updateErrorTurbine.awaitItem()).isNull()
 
         Scenario(
             interactor = interactor,
+            sheetActivityStateHolder = sheetActivityStateHolder,
             paymentMethodMetadata = paymentMethodMetadata,
             autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
         ).apply { block() }
 
+        sheetActivityStateHolder.validate()
         interactor.close()
         viewModelScope.cancel()
     }
 
     private data class Scenario(
         val interactor: AddPaymentMethodInteractor,
+        val sheetActivityStateHolder: FakeSheetActivityStateHolder,
         val paymentMethodMetadata: PaymentMethodMetadata,
         val autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory,
     )

@@ -12,6 +12,7 @@ import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.paymentsheet.ui.PrimaryButtonIcon
 import com.stripe.android.paymentsheet.verticalmode.BankFormInteractor
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
@@ -22,6 +23,7 @@ import kotlinx.coroutines.flow.update
  *
  * @param onBehalfOf the connected account of the business of record to attach this US bank account.
  * @param isCompleteFlow whether or not the USBankAccount is being presented in [PaymentSheet].
+ * @param primaryButtonIcon the icon supplied by the host for its primary button.
  * @param isPaymentFlow whether or not the USBankAccount is being used for payment.
  * @param stripeIntentId the [StripeIntent] id.
  * @param clientSecret the client secret.
@@ -46,6 +48,7 @@ internal class USBankAccountFormArguments(
     val onBehalfOf: String?,
     val showCheckbox: Boolean,
     val isCompleteFlow: Boolean,
+    val primaryButtonIcon: PrimaryButtonIcon,
     val isPaymentFlow: Boolean,
     val stripeIntentId: String?,
     val clientSecret: String?,
@@ -83,6 +86,7 @@ internal class USBankAccountFormArguments(
                 hostedSurface = hostedSurface,
                 integrationInputs = USBankAccountFormArgumentsFactory.IntegrationInputs(
                     isCompleteFlow = viewModel.isCompleteFlow,
+                    primaryButtonIcon = viewModel.primaryButtonIcon,
                     shippingDetails = viewModel.config.shippingDetails,
                     draftPaymentSelection = viewModel.newPaymentSelection?.paymentSelection,
                     autocompleteAddressInteractorFactory = viewModel.autocompleteAddressInteractorFactory,
@@ -107,6 +111,7 @@ internal class USBankAccountFormArguments(
             selectedPaymentMethodCode: String,
             hostedSurface: String,
             isCompleteFlow: Boolean,
+            primaryButtonIcon: PrimaryButtonIcon,
             draftPaymentSelection: PaymentSelection?,
             bankFormInteractor: BankFormInteractor,
             hasSavedPaymentMethods: Boolean,
@@ -123,6 +128,7 @@ internal class USBankAccountFormArguments(
                 hostedSurface = hostedSurface,
                 integrationInputs = USBankAccountFormArgumentsFactory.IntegrationInputs(
                     isCompleteFlow = isCompleteFlow,
+                    primaryButtonIcon = primaryButtonIcon,
                     shippingDetails = paymentMethodMetadata.shippingDetails,
                     draftPaymentSelection = draftPaymentSelection,
                     autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
