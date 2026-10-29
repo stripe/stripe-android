@@ -37,7 +37,8 @@ internal class FinancialConnectionsAccountsRepositoryImplTest {
         requestExecutor = mockRequestExecutor,
         provideApiRequestOptions = {
             ApiRequest.Options(
-                apiKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
+                apiKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+                betas = emptySet(),
             )
         },
         apiRequestFactory = apiRequestFactory,

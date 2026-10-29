@@ -98,7 +98,8 @@ class Stripe3DS2AuthenticatorTest {
         )
         private val REQUEST_OPTIONS = ApiRequest.Options(
             apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-            stripeAccount = ACCOUNT_ID
+            stripeAccount = ACCOUNT_ID,
+            betas = emptySet(),
         )
     }
 }

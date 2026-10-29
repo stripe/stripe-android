@@ -311,6 +311,7 @@ class TapToAddCollectionHandlerTest {
                 ApiRequest.Options(
                     apiKey = "ek_123",
                     stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
+                    betas = emptySet(),
                 )
             )
 

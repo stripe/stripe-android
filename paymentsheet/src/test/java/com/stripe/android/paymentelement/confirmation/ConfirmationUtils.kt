@@ -72,6 +72,7 @@ internal suspend fun createIntentConfirmationInterceptor(
     val requestOptions = ApiRequest.Options(
         apiKey = publishableKeyProvider(),
         stripeAccount = null,
+        betas = emptySet(),
     )
     val deferredIntentCallbackRetriever = DeferredIntentCallbackRetriever(
         intentCreationCallbackProvider = intentCreationCallbackProvider,
@@ -159,6 +160,7 @@ internal suspend fun createIntentConfirmationInterceptor(
                         ApiRequest.Options(
                             apiKey = DEFAULT_API_CONFIG.publishableKey,
                             stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
+                            betas = emptySet(),
                         )
                     },
                 )

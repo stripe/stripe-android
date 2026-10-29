@@ -43,7 +43,7 @@ class VerifyWithMicrodepositTest {
                 clientSecret = clientSecret,
                 firstAmount = 12,
                 secondAmount = 34,
-                requestOptions = ApiRequest.Options(publishableKey)
+                requestOptions = ApiRequest.Options(publishableKey, betas = emptySet())
             )
             assertThat((result)).isEqualTo(Result.success(paymentIntent))
         }
@@ -71,7 +71,7 @@ class VerifyWithMicrodepositTest {
             verify(stripeRepository).verifyPaymentIntentWithMicrodeposits(
                 clientSecret = clientSecret,
                 descriptorCode = "code",
-                requestOptions = ApiRequest.Options(publishableKey)
+                requestOptions = ApiRequest.Options(publishableKey, betas = emptySet())
             )
             assertThat((result)).isEqualTo(Result.success(paymentIntent))
         }
@@ -99,7 +99,7 @@ class VerifyWithMicrodepositTest {
                 clientSecret = clientSecret,
                 firstAmount = 12,
                 secondAmount = 34,
-                requestOptions = ApiRequest.Options(publishableKey)
+                requestOptions = ApiRequest.Options(publishableKey, betas = emptySet())
             )
             assertThat(result.exceptionOrNull()!!).isEqualTo(expectedException)
         }
@@ -129,7 +129,7 @@ class VerifyWithMicrodepositTest {
                 clientSecret = clientSecret,
                 firstAmount = 12,
                 secondAmount = 34,
-                requestOptions = ApiRequest.Options(publishableKey)
+                requestOptions = ApiRequest.Options(publishableKey, betas = emptySet())
             )
             assertThat((result)).isEqualTo(Result.success(setupIntent))
         }
@@ -157,7 +157,7 @@ class VerifyWithMicrodepositTest {
             verify(stripeRepository).verifySetupIntentWithMicrodeposits(
                 clientSecret = clientSecret,
                 descriptorCode = "code",
-                requestOptions = ApiRequest.Options(publishableKey)
+                requestOptions = ApiRequest.Options(publishableKey, betas = emptySet())
             )
             assertThat((result)).isEqualTo(Result.success(setupIntent))
         }
@@ -185,7 +185,7 @@ class VerifyWithMicrodepositTest {
                 clientSecret = clientSecret,
                 firstAmount = 12,
                 secondAmount = 34,
-                requestOptions = ApiRequest.Options(publishableKey)
+                requestOptions = ApiRequest.Options(publishableKey, betas = emptySet())
             )
             assertThat(result.exceptionOrNull()!!).isEqualTo(expectedException)
         }

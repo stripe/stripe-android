@@ -173,7 +173,8 @@ class Stripe internal constructor(
                 confirmPaymentIntentParams,
                 ApiRequest.Options(
                     apiKey = publishableKey,
-                    stripeAccount = stripeAccountId
+                    stripeAccount = stripeAccountId,
+                    betas = emptySet(),
                 )
             )
         }
@@ -203,7 +204,8 @@ class Stripe internal constructor(
                 authenticator,
                 ApiRequest.Options(
                     apiKey = publishableKey,
-                    stripeAccount = stripeAccountId
+                    stripeAccount = stripeAccountId,
+                    betas = emptySet(),
                 )
             )
         }
@@ -243,7 +245,8 @@ class Stripe internal constructor(
                 confirmPaymentIntentParams,
                 ApiRequest.Options(
                     apiKey = publishableKey,
-                    stripeAccount = stripeAccountId
+                    stripeAccount = stripeAccountId,
+                    betas = emptySet(),
                 )
             )
         }
@@ -271,7 +274,8 @@ class Stripe internal constructor(
                 confirmPaymentIntentParams,
                 ApiRequest.Options(
                     apiKey = publishableKey,
-                    stripeAccount = stripeAccountId
+                    stripeAccount = stripeAccountId,
+                    betas = emptySet(),
                 )
             )
         }
@@ -302,7 +306,8 @@ class Stripe internal constructor(
                 clientSecret,
                 ApiRequest.Options(
                     apiKey = publishableKey,
-                    stripeAccount = stripeAccountId
+                    stripeAccount = stripeAccountId,
+                    betas = emptySet(),
                 ),
                 PaymentController.StripeIntentType.PaymentIntent
             )
@@ -334,7 +339,8 @@ class Stripe internal constructor(
                 clientSecret,
                 ApiRequest.Options(
                     apiKey = publishableKey,
-                    stripeAccount = stripeAccountId
+                    stripeAccount = stripeAccountId,
+                    betas = emptySet(),
                 ),
                 PaymentController.StripeIntentType.PaymentIntent
             )
@@ -401,7 +407,8 @@ class Stripe internal constructor(
                 clientSecret,
                 ApiRequest.Options(
                     apiKey = publishableKey,
-                    stripeAccount = stripeAccountId
+                    stripeAccount = stripeAccountId,
+                    betas = emptySet(),
                 ),
                 expand,
             )
@@ -439,7 +446,8 @@ class Stripe internal constructor(
                 PaymentIntent.ClientSecret(clientSecret).value,
                 ApiRequest.Options(
                     apiKey = publishableKey,
-                    stripeAccount = stripeAccountId
+                    stripeAccount = stripeAccountId,
+                    betas = emptySet(),
                 ),
                 expand,
             ).getOrElse { throw StripeException.create(it) }
@@ -477,7 +485,8 @@ class Stripe internal constructor(
                 ApiRequest.Options(
                     apiKey = publishableKey,
                     stripeAccount = stripeAccountId,
-                    idempotencyKey = idempotencyKey
+                    idempotencyKey = idempotencyKey,
+                    betas = emptySet(),
                 )
             ).getOrElse { throw StripeException.create(it) }
         }
@@ -507,7 +516,8 @@ class Stripe internal constructor(
                 confirmSetupIntentParams,
                 ApiRequest.Options(
                     apiKey = publishableKey,
-                    stripeAccount = stripeAccountId
+                    stripeAccount = stripeAccountId,
+                    betas = emptySet(),
                 )
             )
         }
@@ -534,7 +544,8 @@ class Stripe internal constructor(
                 confirmSetupIntentParams,
                 ApiRequest.Options(
                     apiKey = publishableKey,
-                    stripeAccount = stripeAccountId
+                    stripeAccount = stripeAccountId,
+                    betas = emptySet(),
                 )
             )
         }
@@ -563,7 +574,8 @@ class Stripe internal constructor(
                 clientSecret,
                 ApiRequest.Options(
                     apiKey = publishableKey,
-                    stripeAccount = stripeAccountId
+                    stripeAccount = stripeAccountId,
+                    betas = emptySet(),
                 ),
                 PaymentController.StripeIntentType.SetupIntent
             )
@@ -593,7 +605,8 @@ class Stripe internal constructor(
                 clientSecret,
                 ApiRequest.Options(
                     apiKey = publishableKey,
-                    stripeAccount = stripeAccountId
+                    stripeAccount = stripeAccountId,
+                    betas = emptySet(),
                 ),
                 PaymentController.StripeIntentType.SetupIntent
             )
@@ -665,7 +678,8 @@ class Stripe internal constructor(
                 clientSecret,
                 ApiRequest.Options(
                     apiKey = publishableKey,
-                    stripeAccount = stripeAccountId
+                    stripeAccount = stripeAccountId,
+                    betas = emptySet(),
                 ),
                 expand,
             )
@@ -703,7 +717,8 @@ class Stripe internal constructor(
                 SetupIntent.ClientSecret(clientSecret).value,
                 ApiRequest.Options(
                     apiKey = publishableKey,
-                    stripeAccount = stripeAccountId
+                    stripeAccount = stripeAccountId,
+                    betas = emptySet(),
                 ),
                 expand,
             ).getOrElse { throw StripeException.create(it) }
@@ -741,7 +756,8 @@ class Stripe internal constructor(
                 ApiRequest.Options(
                     apiKey = publishableKey,
                     stripeAccount = stripeAccountId,
-                    idempotencyKey = idempotencyKey
+                    idempotencyKey = idempotencyKey,
+                    betas = emptySet(),
                 )
             ).getOrElse { throw StripeException.create(it) }
         }
@@ -777,7 +793,8 @@ class Stripe internal constructor(
                 ApiRequest.Options(
                     apiKey = publishableKey,
                     stripeAccount = stripeAccountId,
-                    idempotencyKey = idempotencyKey
+                    idempotencyKey = idempotencyKey,
+                    betas = emptySet(),
                 )
             )
         }
@@ -814,7 +831,8 @@ class Stripe internal constructor(
                 ApiRequest.Options(
                     apiKey = ephemeralKeySecret,
                     stripeAccount = stripeAccountId,
-                    idempotencyKey = idempotencyKey
+                    idempotencyKey = idempotencyKey,
+                    betas = emptySet(),
                 )
             )
         }
@@ -853,7 +871,8 @@ class Stripe internal constructor(
                 ApiRequest.Options(
                     apiKey = publishableKey,
                     stripeAccount = stripeAccountId,
-                    idempotencyKey = idempotencyKey
+                    idempotencyKey = idempotencyKey,
+                    betas = emptySet(),
                 )
             ).getOrElse { throw StripeException.create(it) }
         }
@@ -884,7 +903,7 @@ class Stripe internal constructor(
             paymentController.startAuthenticateSource(
                 AuthActivityStarterHost.create(activity),
                 source,
-                ApiRequest.Options(publishableKey, stripeAccountId)
+                ApiRequest.Options(publishableKey, stripeAccountId, betas = emptySet())
             )
         }
     }
@@ -910,7 +929,7 @@ class Stripe internal constructor(
             paymentController.startAuthenticateSource(
                 AuthActivityStarterHost.create(fragment),
                 source,
-                ApiRequest.Options(publishableKey, stripeAccountId)
+                ApiRequest.Options(publishableKey, stripeAccountId, betas = emptySet())
             )
         }
     }
@@ -969,7 +988,8 @@ class Stripe internal constructor(
                 ApiRequest.Options(
                     apiKey = publishableKey,
                     stripeAccount = stripeAccountId,
-                    idempotencyKey = idempotencyKey
+                    idempotencyKey = idempotencyKey,
+                    betas = emptySet(),
                 )
             )
         }
@@ -1014,7 +1034,8 @@ class Stripe internal constructor(
                 ApiRequest.Options(
                     apiKey = publishableKey,
                     stripeAccount = stripeAccountId,
-                    idempotencyKey = idempotencyKey
+                    idempotencyKey = idempotencyKey,
+                    betas = emptySet(),
                 )
             ).getOrElse { throw StripeException.create(it) }
         }
@@ -1051,7 +1072,8 @@ class Stripe internal constructor(
                 clientSecret,
                 ApiRequest.Options(
                     apiKey = publishableKey,
-                    stripeAccount = stripeAccountId
+                    stripeAccount = stripeAccountId,
+                    betas = emptySet(),
                 )
             )
         }
@@ -1095,7 +1117,8 @@ class Stripe internal constructor(
                 clientSecret,
                 ApiRequest.Options(
                     apiKey = publishableKey,
-                    stripeAccount = stripeAccountId
+                    stripeAccount = stripeAccountId,
+                    betas = emptySet(),
                 )
             ).getOrElse { throw StripeException.create(it) }
         }
@@ -1533,7 +1556,8 @@ class Stripe internal constructor(
             options = ApiRequest.Options(
                 apiKey = publishableKey,
                 stripeAccount = stripeAccountId,
-                idempotencyKey = idempotencyKey
+                idempotencyKey = idempotencyKey,
+                betas = emptySet(),
             ),
         ).getOrElse { throw StripeException.create(it) }
     }
@@ -1550,7 +1574,8 @@ class Stripe internal constructor(
                 ApiRequest.Options(
                     apiKey = publishableKey,
                     stripeAccount = stripeAccountId,
-                    idempotencyKey = idempotencyKey
+                    idempotencyKey = idempotencyKey,
+                    betas = emptySet(),
                 )
             )
         }
@@ -1579,7 +1604,8 @@ class Stripe internal constructor(
                 ApiRequest.Options(
                     apiKey = publishableKey,
                     stripeAccount = stripeAccountId,
-                    idempotencyKey = idempotencyKey
+                    idempotencyKey = idempotencyKey,
+                    betas = emptySet(),
                 )
             )
         }
@@ -1606,7 +1632,8 @@ class Stripe internal constructor(
                 ApiRequest.Options(
                     apiKey = publishableKey,
                     stripeAccount = stripeAccountId,
-                    idempotencyKey = idempotencyKey
+                    idempotencyKey = idempotencyKey,
+                    betas = emptySet(),
                 )
             ).getOrElse { throw StripeException.create(it) }
         }
@@ -1635,7 +1662,8 @@ class Stripe internal constructor(
             stripeRepository.createRadarSession(
                 ApiRequest.Options(
                     apiKey = publishableKey,
-                    stripeAccount = stripeAccountId
+                    stripeAccount = stripeAccountId,
+                    betas = emptySet(),
                 )
             ).flatMap { radarSession ->
                 val siteKey = radarSession.passiveCaptchaSiteKey
@@ -1661,7 +1689,8 @@ class Stripe internal constructor(
                     hcaptchaEKey = null, // TODO (awush): we don't yet get this value from hCaptcha
                     ApiRequest.Options(
                         apiKey = publishableKey,
-                        stripeAccount = stripeAccountId
+                        stripeAccount = stripeAccountId,
+                        betas = emptySet(),
                     )
                 )
             }.map { radarSession ->
@@ -1699,7 +1728,8 @@ class Stripe internal constructor(
                 secondAmount = secondAmount,
                 requestOptions = ApiRequest.Options(
                     apiKey = publishableKey,
-                    stripeAccount = stripeAccountId
+                    stripeAccount = stripeAccountId,
+                    betas = emptySet(),
                 )
             )
         }
@@ -1730,7 +1760,8 @@ class Stripe internal constructor(
                 descriptorCode = descriptorCode,
                 requestOptions = ApiRequest.Options(
                     apiKey = publishableKey,
-                    stripeAccount = stripeAccountId
+                    stripeAccount = stripeAccountId,
+                    betas = emptySet(),
                 )
             )
         }
@@ -1765,7 +1796,8 @@ class Stripe internal constructor(
                 secondAmount = secondAmount,
                 requestOptions = ApiRequest.Options(
                     apiKey = publishableKey,
-                    stripeAccount = stripeAccountId
+                    stripeAccount = stripeAccountId,
+                    betas = emptySet(),
                 )
             )
         }
@@ -1796,7 +1828,8 @@ class Stripe internal constructor(
                 descriptorCode = descriptorCode,
                 requestOptions = ApiRequest.Options(
                     apiKey = publishableKey,
-                    stripeAccount = stripeAccountId
+                    stripeAccount = stripeAccountId,
+                    betas = emptySet(),
                 )
             )
         }
@@ -1818,7 +1851,8 @@ class Stripe internal constructor(
                 cardNumber = cardNumber,
                 requestOptions = ApiRequest.Options(
                     apiKey = publishableKey,
-                    stripeAccount = stripeAccountId
+                    stripeAccount = stripeAccountId,
+                    betas = emptySet(),
                 )
             ).map { metadata ->
                 val brands = metadata.accountRanges.map { it.brand }

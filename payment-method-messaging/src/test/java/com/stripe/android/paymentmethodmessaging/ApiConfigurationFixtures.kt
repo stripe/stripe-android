@@ -12,5 +12,6 @@ internal object ApiConfigurationFixtures {
     val DEFAULT_REQUEST_OPTIONS = ApiRequest.Options(
         apiKey = DEFAULT_API_CONFIG.publishableKey,
         stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
+        betas = emptySet(),
     )
 }

@@ -700,6 +700,7 @@ internal class CustomerRepositoryTest {
     private fun expectedRequestOptions() = ApiRequest.Options(
         apiKey = "ephemeral_key",
         stripeAccount = ApiKeyFixtures.FAKE_ACCOUNT_ID,
+        betas = emptySet(),
     )
 
     private suspend fun failsOnceStripeRepository(): StripeRepository {

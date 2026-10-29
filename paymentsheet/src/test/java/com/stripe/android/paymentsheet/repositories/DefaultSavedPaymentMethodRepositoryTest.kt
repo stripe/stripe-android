@@ -354,6 +354,7 @@ class DefaultSavedPaymentMethodRepositoryTest {
                 ApiRequest.Options(
                     apiKey = DEFAULT_API_CONFIG.publishableKey,
                     stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
+                    betas = emptySet(),
                 )
             },
         )

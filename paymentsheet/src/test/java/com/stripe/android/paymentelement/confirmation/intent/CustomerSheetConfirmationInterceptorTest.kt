@@ -42,6 +42,7 @@ class CustomerSheetConfirmationInterceptorTest {
 
     private val requestOptions = ApiRequest.Options(
         apiKey = "pk_test_123",
+        betas = emptySet(),
     )
 
     @Test

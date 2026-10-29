@@ -235,7 +235,12 @@ internal class FinancialConnectionsOnEventIntegrationTest {
     ) = FinancialConnectionsManifestRepository(
         requestExecutor = requestExecutor,
         apiRequestFactory = ApiRequest.Factory(),
-        provideApiRequestOptions = { ApiRequest.Options(apiKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
+        provideApiRequestOptions = {
+                ApiRequest.Options(
+            apiKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+            betas = emptySet(),
+                )
+            },
         logger = Logger.noop(),
         locale = Locale.US,
         initialSync = null,

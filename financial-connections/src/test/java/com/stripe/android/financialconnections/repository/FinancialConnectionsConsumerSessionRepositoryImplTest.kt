@@ -44,6 +44,7 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
         mock()
     private val apiOptions: ApiRequest.Options = ApiRequest.Options(
         apiKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+        betas = emptySet(),
     )
     private val logger: Logger = mock()
     private val locale: Locale = Locale.getDefault()

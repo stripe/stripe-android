@@ -63,6 +63,7 @@ class CreateFinancialConnectionsSessionTest {
                 requestOptions = ApiRequest.Options(
                     apiKey = DEFAULT_API_CONFIG.publishableKey,
                     stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
+                    betas = emptySet(),
                 )
             )
             assertThat((paymentIntent)).isEqualTo(Result.success(linkedAccountSession))
@@ -103,6 +104,7 @@ class CreateFinancialConnectionsSessionTest {
                 requestOptions = ApiRequest.Options(
                     apiKey = DEFAULT_API_CONFIG.publishableKey,
                     stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
+                    betas = emptySet(),
                 )
             )
             assertThat(paymentIntent.exceptionOrNull()!!).isEqualTo(expectedException)
@@ -165,7 +167,8 @@ class CreateFinancialConnectionsSessionTest {
                 ),
                 requestOptions = ApiRequest.Options(
                     apiKey = DEFAULT_API_CONFIG.publishableKey,
-                    stripeAccount = DEFAULT_API_CONFIG.stripeAccountId
+                    stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
+                    betas = emptySet(),
                 )
             )
             assertThat((paymentIntent)).isEqualTo(Result.success(linkedAccountSession))
@@ -205,6 +208,7 @@ class CreateFinancialConnectionsSessionTest {
                 requestOptions = ApiRequest.Options(
                     apiKey = DEFAULT_API_CONFIG.publishableKey,
                     stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
+                    betas = emptySet(),
                 )
             )
             assertThat(paymentIntent.exceptionOrNull()!!).isEqualTo(expectedException)
@@ -281,7 +285,8 @@ class CreateFinancialConnectionsSessionTest {
                 requestOptions = eq(
                     ApiRequest.Options(
                         apiKey = DEFAULT_API_CONFIG.publishableKey,
-                        stripeAccount = DEFAULT_API_CONFIG.stripeAccountId
+                        stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
+                        betas = emptySet(),
                     )
                 )
             )
@@ -338,6 +343,7 @@ class CreateFinancialConnectionsSessionTest {
                     ApiRequest.Options(
                         apiKey = DEFAULT_API_CONFIG.publishableKey,
                         stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
+                        betas = emptySet(),
                     )
                 )
             )

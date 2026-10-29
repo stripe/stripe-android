@@ -65,7 +65,7 @@ internal class FinancialConnectionsRequestExecutorTest {
     ) {
         val request = ApiRequest.Factory().createPost(
             url = "https://api.stripe.com/v1/financial_connections/authorization_sessions/events",
-            options = ApiRequest.Options(apiKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY),
+            options = ApiRequest.Options(apiKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, betas = emptySet()),
             params = emptyMap<String, Any>()
         )
 
@@ -114,7 +114,12 @@ internal class FinancialConnectionsRequestExecutorTest {
         val repository = FinancialConnectionsManifestRepository(
             requestExecutor = requestExecutor,
             apiRequestFactory = ApiRequest.Factory(),
-            provideApiRequestOptions = { ApiRequest.Options(apiKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
+            provideApiRequestOptions = {
+                ApiRequest.Options(
+                apiKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+                betas = emptySet(),
+                    )
+            },
             logger = Logger.noop(),
             locale = Locale.US,
             initialSync = null,

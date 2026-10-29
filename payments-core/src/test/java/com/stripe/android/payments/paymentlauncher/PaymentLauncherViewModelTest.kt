@@ -358,6 +358,7 @@ class PaymentLauncherViewModelTest {
                     options = ApiRequest.Options(
                         apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
                         stripeAccount = callbackAccount,
+                        betas = emptySet(),
                     ),
                     expandFields = EXPAND_PAYMENT_METHOD,
                 )
@@ -390,6 +391,7 @@ class PaymentLauncherViewModelTest {
                     options = ApiRequest.Options(
                         apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
                         stripeAccount = callbackAccount,
+                        betas = emptySet(),
                     ),
                     expandFields = EXPAND_PAYMENT_METHOD,
                 )
@@ -877,6 +879,7 @@ class PaymentLauncherViewModelTest {
         val API_REQUEST_OPTIONS = ApiRequest.Options(
             apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             stripeAccount = TEST_STRIPE_ACCOUNT_ID,
+            betas = emptySet(),
         )
 
         fun paymentFlowResult(@StripeIntentResult.Outcome outcome: Int) = PaymentFlowResult.Unvalidated(

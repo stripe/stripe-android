@@ -407,6 +407,7 @@ class AddressElementViewModelModuleTest {
                     ApiRequest.Options(
                         apiKey = "pk_test_123",
                         stripeAccount = "acct_123",
+                        betas = emptySet(),
                     )
                 },
             ),

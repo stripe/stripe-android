@@ -330,6 +330,7 @@ constructor(
             ApiConfiguration.State(
                 publishableKey = requestOptions.apiKey,
                 stripeAccountId = requestOptions.stripeAccount,
+                betas = requestOptions.betas,
             )
         )
     }
@@ -390,7 +391,8 @@ constructor(
 
         val requestOptions = ApiRequest.Options(
             apiKey = publishableKeyProvider(),
-            stripeAccount = result.stripeAccountId
+            stripeAccount = result.stripeAccountId,
+            betas = emptySet(),
         )
 
         analyticsRequestExecutor.executeAsync(
@@ -460,6 +462,7 @@ constructor(
             ApiConfiguration.State(
                 publishableKey = requestOptions.apiKey,
                 stripeAccountId = requestOptions.stripeAccount,
+                betas = requestOptions.betas,
             )
         )
     }

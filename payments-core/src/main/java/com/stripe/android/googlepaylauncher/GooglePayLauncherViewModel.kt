@@ -330,7 +330,8 @@ internal class GooglePayLauncherViewModel(
                 paymentsClient = DefaultPaymentsClientFactory(context = application).create(googlePayEnvironment),
                 requestOptions = ApiRequest.Options(
                     publishableKey,
-                    stripeAccountId
+                    stripeAccountId,
+                    betas = emptySet(),
                 ),
                 args = args,
                 stripeRepository = stripeRepository,

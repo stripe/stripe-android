@@ -11,7 +11,8 @@ class ApiRequestOptionsTest {
     fun testCreate() {
         val opts = ApiRequest.Options(
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-            "account"
+            "account",
+            betas = emptySet(),
         )
         assertThat(opts.apiKey).isEqualTo(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
         assertThat(opts.stripeAccount).isEqualTo("account")
@@ -20,27 +21,27 @@ class ApiRequestOptionsTest {
     @Test
     fun testCreate_withSecretKey_throwsException() {
         assertFailsWith<IllegalArgumentException> {
-            ApiRequest.Options(ApiKeyFixtures.FAKE_SECRET_KEY)
+            ApiRequest.Options(ApiKeyFixtures.FAKE_SECRET_KEY, betas = emptySet())
         }
     }
 
     @Test
     fun testApiKey_withTest_isNotLiveMode() {
-        val options = ApiRequest.Options(apiKey = "pk_test_1234")
+        val options = ApiRequest.Options(apiKey = "pk_test_1234", betas = emptySet())
 
         assertThat(options.apiKeyIsLiveMode).isFalse()
     }
 
     @Test
     fun testApiKey_withLive_isLiveMode() {
-        val options = ApiRequest.Options(apiKey = "pk_live_1234")
+        val options = ApiRequest.Options(apiKey = "pk_live_1234", betas = emptySet())
 
         assertThat(options.apiKeyIsLiveMode).isTrue()
     }
 
     @Test
     fun testApiKey_withoutLiveOrTest_isLiveMode() {
-        val options = ApiRequest.Options(apiKey = "pk_other_1234")
+        val options = ApiRequest.Options(apiKey = "pk_other_1234", betas = emptySet())
 
         assertThat(options.apiKeyIsLiveMode).isTrue()
     }

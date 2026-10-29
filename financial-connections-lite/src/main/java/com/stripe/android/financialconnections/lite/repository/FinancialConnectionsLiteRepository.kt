@@ -1,6 +1,7 @@
 package com.stripe.android.financialconnections.lite.repository
 
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.toRequestOptions
 import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
 import com.stripe.android.financialconnections.lite.network.FinancialConnectionsLiteRequestExecutor
 import com.stripe.android.financialconnections.lite.repository.model.SynchronizeSessionResponse
@@ -24,10 +25,8 @@ internal class FinancialConnectionsLiteRepositoryImpl(
     private val apiRequestFactory: ApiRequest.Factory,
 ) : FinancialConnectionsLiteRepository {
 
-    fun FinancialConnectionsSheetConfiguration.apiRequestOptions() = ApiRequest.Options(
-        apiKey = apiConfiguration.publishableKey,
-        stripeAccount = apiConfiguration.stripeAccountId,
-    )
+    fun FinancialConnectionsSheetConfiguration.apiRequestOptions() =
+        apiConfiguration.toRequestOptions(idempotencyKey = null)
 
     override suspend fun synchronize(
         configuration: FinancialConnectionsSheetConfiguration,

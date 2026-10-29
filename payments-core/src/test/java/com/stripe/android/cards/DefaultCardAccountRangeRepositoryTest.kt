@@ -313,7 +313,7 @@ internal class DefaultCardAccountRangeRepositoryTest {
         )
         return RemoteCardAccountRangeSource(
             stripeRepository,
-            ApiRequest.Options(publishableKey),
+            ApiRequest.Options(publishableKey, betas = emptySet()),
             store,
             { },
             PaymentAnalyticsRequestFactory(application, publishableKey)
@@ -334,7 +334,7 @@ internal class DefaultCardAccountRangeRepositoryTest {
     }
 
     private companion object {
-        private val DEFAULT_OPTIONS = ApiRequest.Options(TestApiKeys.PUBLISHABLE)
+        private val DEFAULT_OPTIONS = ApiRequest.Options(TestApiKeys.PUBLISHABLE, betas = emptySet())
 
         private val VISA_ACCOUNT_RANGES = listOf(
             AccountRange(

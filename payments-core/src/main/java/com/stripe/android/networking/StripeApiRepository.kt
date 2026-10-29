@@ -1599,11 +1599,17 @@ class StripeApiRepository @JvmOverloads internal constructor(
             )
         )
 
-        val cardAccountRangeRepository =
+        val cardAccountRangeRepository = if (
+            cardAccountRangeRepositoryFactory is DefaultCardAccountRangeRepositoryFactory
+        ) {
             cardAccountRangeRepositoryFactory.createWithStripeRepository(
                 stripeRepository = this,
-                publishableKey = publishableKeyProvider()
+                publishableKey = publishableKeyProvider(),
+                betas = requestOptions.betas,
             )
+        } else {
+            cardAccountRangeRepositoryFactory.createWithStripeRepository(this, publishableKeyProvider())
+        }
 
         val accountRanges = cardAccountRangeRepository.getAccountRanges(
             cardNumber = unvalidatedNumber

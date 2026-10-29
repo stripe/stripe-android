@@ -42,6 +42,7 @@ class RetrieveStripeIntentTest {
                 options = ApiRequest.Options(
                     apiKey = DEFAULT_API_CONFIG.publishableKey,
                     stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
+                    betas = emptySet(),
                 )
             )
 
@@ -71,6 +72,7 @@ class RetrieveStripeIntentTest {
                 options = ApiRequest.Options(
                     apiKey = DEFAULT_API_CONFIG.publishableKey,
                     stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
+                    betas = emptySet(),
                 )
             )
 
@@ -99,6 +101,7 @@ class RetrieveStripeIntentTest {
                 options = ApiRequest.Options(
                     apiKey = DEFAULT_API_CONFIG.publishableKey,
                     stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
+                    betas = emptySet(),
                 )
             )
             assertThat(intent).isInstanceOf(SetupIntent::class.java)
@@ -127,6 +130,7 @@ class RetrieveStripeIntentTest {
                 options = ApiRequest.Options(
                     apiKey = DEFAULT_API_CONFIG.publishableKey,
                     stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
+                    betas = emptySet(),
                 )
             )
 

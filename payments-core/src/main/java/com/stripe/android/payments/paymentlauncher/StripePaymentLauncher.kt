@@ -104,6 +104,7 @@ class StripePaymentLauncher @AssistedInject internal constructor(
                 productUsage = productUsage,
                 includePaymentSheetNextHandlers = includePaymentSheetNextHandlers,
                 statusBarColor = statusBarColor,
+                betas = apiConfigurationProvider.get().betas,
             )
         )
     }

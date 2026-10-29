@@ -81,6 +81,6 @@ class FileUploadRequestTest {
     }
 
     private companion object {
-        private val OPTIONS = ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+        private val OPTIONS = ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, betas = emptySet())
     }
 }

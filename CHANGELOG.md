@@ -1,7 +1,10 @@
 # CHANGELOG
 
-NEXT_VERSION_BUMP: PATCH
+NEXT_VERSION_BUMP: MINOR
 ## XX.XX.XX - 20XX-XX-XX
+
+### PaymentSheet
+* [ADDED] Added public-preview beta API version tokens through `ApiConfiguration` for PaymentSheet, FlowController, and EmbeddedPaymentElement.
 
 ## 23.25.1 - 2026-10-26
 

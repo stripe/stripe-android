@@ -152,6 +152,7 @@ class IssuingCardPinService @VisibleForTesting internal constructor(
                 requestOptions = ApiRequest.Options(
                     apiKey = ephemeralKey.secret,
                     stripeAccount = stripeAccountId,
+                    betas = emptySet(),
                 ),
             ).fold(
                 onSuccess = { pin ->
@@ -234,6 +235,7 @@ class IssuingCardPinService @VisibleForTesting internal constructor(
                 requestOptions = ApiRequest.Options(
                     apiKey = ephemeralKey.secret,
                     stripeAccount = stripeAccountId,
+                    betas = emptySet(),
                 ),
             )
 

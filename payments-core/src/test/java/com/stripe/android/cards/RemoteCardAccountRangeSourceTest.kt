@@ -221,7 +221,8 @@ internal class RemoteCardAccountRangeSourceTest {
 
     private companion object {
         private val REQUEST_OPTIONS = ApiRequest.Options(
-            apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
+            apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+            betas = emptySet(),
         )
 
         private val FAILED_REQUEST = Result.failure<CardMetadata>(IOException())

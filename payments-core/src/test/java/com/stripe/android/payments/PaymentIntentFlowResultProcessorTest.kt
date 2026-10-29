@@ -142,7 +142,7 @@ internal class PaymentIntentFlowResultProcessorTest {
             verify(mockStripeRepository).cancelPaymentIntentSource(
                 eq("pi_1ExkUeAWhjPjYwPiLWUvXrSA"),
                 eq("source_id"),
-                eq(ApiRequest.Options("pk_test_nextActionData"))
+                eq(ApiRequest.Options("pk_test_nextActionData", betas = emptySet()))
             )
         }
 
@@ -210,7 +210,7 @@ internal class PaymentIntentFlowResultProcessorTest {
         )
 
         val clientSecret = "pi_3JkCxKBNJ02ErVOj0kNqBMAZ_secret_bC6oXqo976LFM06Z9rlhmzUQq"
-        val requestOptions = ApiRequest.Options(apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+        val requestOptions = ApiRequest.Options(apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, betas = emptySet())
 
         verify(mockStripeRepository, never()).refreshPaymentIntent(
             eq(clientSecret),
@@ -229,7 +229,7 @@ internal class PaymentIntentFlowResultProcessorTest {
             )
 
             val clientSecret = "pi_3JkCxKBNJ02ErVOj0kNqBMAZ_secret_bC6oXqo976LFM06Z9rlhmzUQq"
-            val requestOptions = ApiRequest.Options(apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+            val requestOptions = ApiRequest.Options(apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, betas = emptySet())
 
             createProcessor().processResult(
                 PaymentFlowResult.Unvalidated(
@@ -500,7 +500,7 @@ internal class PaymentIntentFlowResultProcessorTest {
         )
 
         val clientSecret = requireNotNull(processingIntent.clientSecret)
-        val requestOptions = ApiRequest.Options(apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+        val requestOptions = ApiRequest.Options(apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, betas = emptySet())
 
         val result = createProcessor().processResult(
             PaymentFlowResult.Unvalidated(
@@ -1200,7 +1200,7 @@ internal class PaymentIntentFlowResultProcessorTest {
         )
 
         val clientSecret = requireNotNull(initialIntent.clientSecret)
-        val requestOptions = ApiRequest.Options(apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+        val requestOptions = ApiRequest.Options(apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, betas = emptySet())
 
         val result = createProcessor().processResult(
             PaymentFlowResult.Unvalidated(
@@ -1231,7 +1231,10 @@ internal class PaymentIntentFlowResultProcessorTest {
     ): PaymentIntentFlowResultProcessor = PaymentIntentFlowResultProcessor(
         ApplicationProvider.getApplicationContext(),
         {
-            ApiConfiguration.State(publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, stripeAccountId = null)
+            ApiConfiguration.State(
+                publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                stripeAccountId = null,
+            )
         },
         stripeRepository,
         Logger.noop(),

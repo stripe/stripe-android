@@ -98,7 +98,7 @@ class Stripe3ds2TransactionActivityTest {
             PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
             PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2.nextActionData
                 as StripeIntent.NextActionData.SdkData.Use3DS2,
-            ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY),
+            ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, betas = emptySet()),
             enableLogging = false,
             statusBarColor = null,
             ApiConfiguration.State(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, "acct_123"),

@@ -12,6 +12,7 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.HTTP_INTERNAL_SERVER_ERROR
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.executeRequestWithResultParser
+import com.stripe.android.core.networking.toRequestOptions
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.model.DeferredIntentParams
 import com.stripe.android.model.ElementsSession
@@ -83,10 +84,7 @@ internal class RealElementsSessionRepository @Inject constructor(
             linkDisallowedFundingSourceCreation = linkDisallowedFundingSourceCreation,
         )
 
-        val requestOptions = ApiRequest.Options(
-            apiKey = apiConfiguration.publishableKey,
-            stripeAccount = apiConfiguration.stripeAccountId,
-        )
+        val requestOptions = apiConfiguration.toRequestOptions(idempotencyKey = null)
         val elementsSession = retrieveElementsSession(params, requestOptions)
 
         return elementsSession.getResultOrElse { elementsSessionFailure ->

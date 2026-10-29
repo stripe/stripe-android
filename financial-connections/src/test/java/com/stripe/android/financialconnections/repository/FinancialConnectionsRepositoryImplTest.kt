@@ -35,7 +35,7 @@ class FinancialConnectionsRepositoryImplTest {
             logger = Logger.noop(),
         ),
         provideApiRequestOptions = {
-            ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+            ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, betas = emptySet())
         },
         apiRequestFactory = apiRequestFactory,
         fraudDetectionDataRepository = fraudDetectionDataRepository,

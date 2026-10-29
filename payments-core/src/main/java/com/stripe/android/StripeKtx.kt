@@ -70,7 +70,8 @@ suspend fun Stripe.confirmAlipayPayment(
             authenticator,
             ApiRequest.Options(
                 apiKey = publishableKey,
-                stripeAccount = stripeAccountId
+                stripeAccount = stripeAccountId,
+                betas = emptySet(),
             )
         )
     }
@@ -111,7 +112,8 @@ suspend fun Stripe.createPaymentMethod(
             ApiRequest.Options(
                 apiKey = publishableKey,
                 stripeAccount = stripeAccountId,
-                idempotencyKey = idempotencyKey
+                idempotencyKey = idempotencyKey,
+                betas = emptySet(),
             )
         )
     }
@@ -157,7 +159,8 @@ suspend fun Stripe.updatePaymentMethod(
             ApiRequest.Options(
                 apiKey = ephemeralKeySecret,
                 stripeAccount = stripeAccountId,
-                idempotencyKey = idempotencyKey
+                idempotencyKey = idempotencyKey,
+                betas = emptySet(),
             )
         )
     }
@@ -198,7 +201,8 @@ suspend fun Stripe.createSource(
             ApiRequest.Options(
                 apiKey = publishableKey,
                 stripeAccount = stripeAccountId,
-                idempotencyKey = idempotencyKey
+                idempotencyKey = idempotencyKey,
+                betas = emptySet(),
             )
         )
     }
@@ -459,7 +463,8 @@ suspend fun Stripe.createFile(
             ApiRequest.Options(
                 apiKey = publishableKey,
                 stripeAccount = stripeAccountId,
-                idempotencyKey = idempotencyKey
+                idempotencyKey = idempotencyKey,
+                betas = emptySet(),
             )
         )
     }
@@ -492,6 +497,7 @@ suspend fun Stripe.createRadarSession(
             ApiRequest.Options(
                 apiKey = publishableKey,
                 stripeAccount = stripeAccountId,
+                betas = emptySet(),
             )
         ).flatMap { radarSession ->
             val siteKey = radarSession.passiveCaptchaSiteKey
@@ -517,7 +523,8 @@ suspend fun Stripe.createRadarSession(
                 hcaptchaEKey = null, // TODO (awush): we don't yet get this value from hCaptcha
                 ApiRequest.Options(
                     apiKey = publishableKey,
-                    stripeAccount = stripeAccountId
+                    stripeAccount = stripeAccountId,
+                    betas = emptySet(),
                 )
             )
         }.map { radarSession ->
@@ -560,7 +567,8 @@ suspend fun Stripe.retrievePaymentIntent(
             clientSecret,
             ApiRequest.Options(
                 apiKey = publishableKey,
-                stripeAccount = stripeAccountId
+                stripeAccount = stripeAccountId,
+                betas = emptySet(),
             ),
             expand,
         )
@@ -601,7 +609,8 @@ suspend fun Stripe.retrieveSetupIntent(
             clientSecret,
             ApiRequest.Options(
                 apiKey = publishableKey,
-                stripeAccount = stripeAccountId
+                stripeAccount = stripeAccountId,
+                betas = emptySet(),
             ),
             expand,
         )
@@ -643,7 +652,8 @@ suspend fun Stripe.retrieveSource(
             clientSecret,
             ApiRequest.Options(
                 apiKey = publishableKey,
-                stripeAccount = stripeAccountId
+                stripeAccount = stripeAccountId,
+                betas = emptySet(),
             )
         )
     }
@@ -683,7 +693,8 @@ suspend fun Stripe.confirmSetupIntent(
             ApiRequest.Options(
                 apiKey = publishableKey,
                 stripeAccount = stripeAccountId,
-                idempotencyKey = idempotencyKey
+                idempotencyKey = idempotencyKey,
+                betas = emptySet(),
             ),
             expand,
         )
@@ -715,7 +726,8 @@ suspend fun Stripe.confirmWeChatPayPayment(
             confirmPaymentIntentParams,
             ApiRequest.Options(
                 apiKey = publishableKey,
-                stripeAccount = stripeAccountId
+                stripeAccount = stripeAccountId,
+                betas = emptySet(),
             )
         )
     }
@@ -753,7 +765,8 @@ suspend fun Stripe.confirmPaymentIntent(
             ApiRequest.Options(
                 apiKey = publishableKey,
                 stripeAccount = stripeAccountId,
-                idempotencyKey = idempotencyKey
+                idempotencyKey = idempotencyKey,
+                betas = emptySet(),
             )
         )
     }
@@ -924,7 +937,8 @@ suspend fun Stripe.verifyPaymentIntentWithMicrodeposits(
             secondAmount = secondAmount,
             requestOptions = ApiRequest.Options(
                 apiKey = publishableKey,
-                stripeAccount = stripeAccountId
+                stripeAccount = stripeAccountId,
+                betas = emptySet(),
             )
         )
     }
@@ -965,7 +979,8 @@ suspend fun Stripe.verifyPaymentIntentWithMicrodeposits(
             descriptorCode = descriptorCode,
             requestOptions = ApiRequest.Options(
                 apiKey = publishableKey,
-                stripeAccount = stripeAccountId
+                stripeAccount = stripeAccountId,
+                betas = emptySet(),
             )
         )
     }
@@ -1010,7 +1025,8 @@ suspend fun Stripe.verifySetupIntentWithMicrodeposits(
             secondAmount = secondAmount,
             requestOptions = ApiRequest.Options(
                 apiKey = publishableKey,
-                stripeAccount = stripeAccountId
+                stripeAccount = stripeAccountId,
+                betas = emptySet(),
             )
         )
     }
@@ -1051,7 +1067,8 @@ suspend fun Stripe.verifySetupIntentWithMicrodeposits(
             descriptorCode = descriptorCode,
             requestOptions = ApiRequest.Options(
                 apiKey = publishableKey,
-                stripeAccount = stripeAccountId
+                stripeAccount = stripeAccountId,
+                betas = emptySet(),
             )
         )
     }
@@ -1079,7 +1096,8 @@ suspend fun Stripe.retrievePossibleBrands(
             cardNumber = cardNumber,
             requestOptions = ApiRequest.Options(
                 apiKey = publishableKey,
-                stripeAccount = stripeAccountId
+                stripeAccount = stripeAccountId,
+                betas = emptySet(),
             )
         ).map { metadata ->
             val brands = metadata.accountRanges.map { it.brand }
@@ -1104,6 +1122,7 @@ suspend fun Stripe.attachPaymentMethod(
             apiKey = ephemeralKeySecret,
             stripeAccount = stripeAccountId,
             idempotencyKey = idempotencyKey,
+            betas = emptySet(),
         )
     )
 }

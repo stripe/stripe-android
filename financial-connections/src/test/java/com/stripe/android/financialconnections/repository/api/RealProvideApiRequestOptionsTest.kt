@@ -12,6 +12,7 @@ class RealProvideApiRequestOptionsTest {
     private val merchantApiRequestOptions = ApiRequest.Options(
         apiKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
         stripeAccount = "acct_123",
+        betas = emptySet(),
     )
 
     @Test
@@ -29,7 +30,7 @@ class RealProvideApiRequestOptionsTest {
 
         val apiOptions = provideApiRequestOptions(useConsumerPublishableKey = true)
         assertThat(apiOptions).isEqualTo(
-            ApiRequest.Options(apiKey = "pk_123")
+            ApiRequest.Options(apiKey = "pk_123", betas = emptySet())
         )
     }
 

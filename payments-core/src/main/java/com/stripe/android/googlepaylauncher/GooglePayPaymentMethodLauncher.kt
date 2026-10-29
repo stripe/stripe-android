@@ -79,7 +79,7 @@ class GooglePayPaymentMethodLauncher internal constructor(
     private val apiConfiguration = PaymentConfiguration.getInstance(context).let {
         ApiConfiguration.State(
             publishableKey = it.publishableKey,
-            stripeAccountId = it.stripeAccountId
+            stripeAccountId = it.stripeAccountId,
         )
     }
 

@@ -58,7 +58,8 @@ internal class DefaultIdentityRepository @Inject constructor(
         apiRequestFactory.createGet(
             url = "$BASE_URL/$IDENTITY_VERIFICATION_PAGES/${urlEncode(id)}",
             options = ApiRequest.Options(
-                apiKey = ephemeralKey
+                apiKey = ephemeralKey,
+                betas = emptySet(),
             ),
             params = mapOf(
                 APP_IDENTIFIER to context.packageName
@@ -76,7 +77,8 @@ internal class DefaultIdentityRepository @Inject constructor(
         apiRequestFactory.createPost(
             url = "$BASE_URL/$IDENTITY_VERIFICATION_PAGES/${urlEncode(id)}/$DATA",
             options = ApiRequest.Options(
-                apiKey = ephemeralKey
+                apiKey = ephemeralKey,
+                betas = emptySet(),
             ),
             params = mapOf(
                 collectedDataParam.createCollectedDataParamEntry(json),
@@ -93,7 +95,8 @@ internal class DefaultIdentityRepository @Inject constructor(
         apiRequestFactory.createPost(
             url = "$BASE_URL/$IDENTITY_VERIFICATION_PAGES/${urlEncode(id)}/$SUBMIT",
             options = ApiRequest.Options(
-                apiKey = ephemeralKey
+                apiKey = ephemeralKey,
+                betas = emptySet(),
             )
         ),
         VerificationPageData.serializer()
@@ -107,7 +110,8 @@ internal class DefaultIdentityRepository @Inject constructor(
         apiRequestFactory.createPost(
             url = "$BASE_URL/$IDENTITY_VERIFICATION_PAGES/${urlEncode(id)}/$TESTING/$VERIFY",
             options = ApiRequest.Options(
-                apiKey = ephemeralKey
+                apiKey = ephemeralKey,
+                betas = emptySet(),
             ),
             params = mapOf(
                 SIMULATE_DELAY to simulateDelay
@@ -124,7 +128,8 @@ internal class DefaultIdentityRepository @Inject constructor(
         apiRequestFactory.createPost(
             url = "$BASE_URL/$IDENTITY_VERIFICATION_PAGES/${urlEncode(id)}/$TESTING/$UNVERIFY",
             options = ApiRequest.Options(
-                apiKey = ephemeralKey
+                apiKey = ephemeralKey,
+                betas = emptySet(),
             ),
             params = mapOf(
                 SIMULATE_DELAY to simulateDelay
@@ -140,7 +145,8 @@ internal class DefaultIdentityRepository @Inject constructor(
         apiRequestFactory.createPost(
             url = "$BASE_URL/$IDENTITY_VERIFICATION_PAGES/${urlEncode(id)}/$PHONE_OTP/$GENERATE",
             options = ApiRequest.Options(
-                apiKey = ephemeralKey
+                apiKey = ephemeralKey,
+                betas = emptySet(),
             )
         ),
         VerificationPageData.serializer()
@@ -153,7 +159,8 @@ internal class DefaultIdentityRepository @Inject constructor(
         apiRequestFactory.createPost(
             url = "$BASE_URL/$IDENTITY_VERIFICATION_PAGES/${urlEncode(id)}/$PHONE_OTP/$CANNOT_VERIFY",
             options = ApiRequest.Options(
-                apiKey = ephemeralKey
+                apiKey = ephemeralKey,
+                betas = emptySet(),
             )
         ),
         VerificationPageData.serializer()
@@ -172,7 +179,8 @@ internal class DefaultIdentityRepository @Inject constructor(
                 purpose = filePurpose
             ),
             options = ApiRequest.Options(
-                apiKey = ephemeralKey
+                apiKey = ephemeralKey,
+                betas = emptySet(),
             ),
             verificationId = verificationId
         ),

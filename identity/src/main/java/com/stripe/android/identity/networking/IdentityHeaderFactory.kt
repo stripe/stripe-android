@@ -18,7 +18,8 @@ internal object IdentityHeaderFactory {
             apiOptions = ApiRequest.Options(
                 apiKey = requireNotNull(value),
                 stripeAccount = null,
-                idempotencyKey = null
+                idempotencyKey = null,
+                betas = emptySet(),
             )
         }
     private var apiOptions: ApiRequest.Options? = null

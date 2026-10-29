@@ -19,6 +19,7 @@ internal fun createIntentStatusPoller(
         requestOptions = ApiRequest.Options(
             apiKey = "key",
             stripeAccount = "acct_123",
+            betas = emptySet(),
         ),
         config = IntentStatusPoller.Config(
             clientSecret = "secret",

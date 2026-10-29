@@ -364,7 +364,7 @@ internal class IntentConfirmationChallengeViewModelTest {
     }
 
     private companion object {
-        private val REQUEST_OPTIONS = ApiRequest.Options("pk_test_vOo1umqsYxSrP5UXfOeL3ecm")
+        private val REQUEST_OPTIONS = ApiRequest.Options("pk_test_vOo1umqsYxSrP5UXfOeL3ecm", betas = emptySet())
 
         val TEST_ARGS = IntentConfirmationChallengeArgs(
             apiConfiguration = ApiConfiguration.State("pk_test_123", "acct_123"),

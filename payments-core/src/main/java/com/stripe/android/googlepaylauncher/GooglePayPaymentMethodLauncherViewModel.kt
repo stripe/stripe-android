@@ -18,7 +18,7 @@ import com.stripe.android.R
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.toRequestOptions
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.googlepaylauncher.injection.DaggerGooglePayPaymentMethodLauncherViewModelFactoryComponent
 import com.stripe.android.model.GooglePayResult
@@ -168,10 +168,7 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
             billingEmailOverride = args.billingEmailOverride,
         )
 
-        val requestOptions = ApiRequest.Options(
-            apiKey = args.apiConfiguration.publishableKey,
-            stripeAccount = args.apiConfiguration.stripeAccountId
-        )
+        val requestOptions = args.apiConfiguration.toRequestOptions(idempotencyKey = null)
 
         return stripeRepository.createPaymentMethod(params, requestOptions).fold(
             onSuccess = {

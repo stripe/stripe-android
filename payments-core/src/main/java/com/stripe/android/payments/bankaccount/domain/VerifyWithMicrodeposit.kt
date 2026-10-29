@@ -24,7 +24,7 @@ internal class VerifyWithMicrodeposit @Inject constructor(
         clientSecret = clientSecret,
         firstAmount = firstAmount,
         secondAmount = secondAmount,
-        requestOptions = ApiRequest.Options(publishableKey)
+        requestOptions = ApiRequest.Options(publishableKey, betas = emptySet())
     )
 
     /**
@@ -40,7 +40,7 @@ internal class VerifyWithMicrodeposit @Inject constructor(
     ): Result<PaymentIntent> = stripeRepository.verifyPaymentIntentWithMicrodeposits(
         clientSecret = clientSecret,
         descriptorCode = descriptorCode,
-        requestOptions = ApiRequest.Options(publishableKey)
+        requestOptions = ApiRequest.Options(publishableKey, betas = emptySet())
     )
 
     /**
@@ -58,7 +58,7 @@ internal class VerifyWithMicrodeposit @Inject constructor(
         clientSecret = clientSecret,
         firstAmount = firstAmount,
         secondAmount = secondAmount,
-        requestOptions = ApiRequest.Options(publishableKey)
+        requestOptions = ApiRequest.Options(publishableKey, betas = emptySet())
     )
 
     /**
@@ -74,6 +74,6 @@ internal class VerifyWithMicrodeposit @Inject constructor(
     ): Result<SetupIntent> = stripeRepository.verifySetupIntentWithMicrodeposits(
         clientSecret = clientSecret,
         descriptorCode = descriptorCode,
-        requestOptions = ApiRequest.Options(publishableKey)
+        requestOptions = ApiRequest.Options(publishableKey, betas = emptySet())
     )
 }

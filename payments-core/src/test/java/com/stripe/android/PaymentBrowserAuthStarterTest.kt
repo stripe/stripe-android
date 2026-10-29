@@ -148,7 +148,10 @@ class PaymentBrowserAuthStarterTest {
             url = "https://hooks.stripe.com/",
             returnUrl = "stripe://payment-auth",
             statusBarColor = Color.RED,
-            apiConfiguration = ApiConfiguration.State(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, "acct_123"),
+            apiConfiguration = ApiConfiguration.State(
+                ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                "acct_123",
+            ),
             isInstantApp = false
         )
     }
