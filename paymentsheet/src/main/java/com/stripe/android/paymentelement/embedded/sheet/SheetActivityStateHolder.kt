@@ -19,6 +19,7 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.amount
 import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.paymentsheet.ui.PrimaryButtonIcon
 import com.stripe.android.paymentsheet.ui.PrimaryButtonProcessingState
 import com.stripe.android.paymentsheet.utils.buyButtonLabel
 import com.stripe.android.paymentsheet.utils.continueButtonLabel
@@ -53,7 +54,7 @@ internal interface SheetActivityStateHolder {
         val isEnabled: Boolean,
         val processingState: PrimaryButtonProcessingState,
         val isProcessing: Boolean,
-        val shouldDisplayLockIcon: Boolean,
+        val primaryButtonIcon: PrimaryButtonIcon,
         val error: ResolvableString? = null,
         val mandateText: ResolvableString? = null,
     )
@@ -81,8 +82,13 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
             isEnabled = false,
             processingState = PrimaryButtonProcessingState.Idle(null),
             isProcessing = false,
-            shouldDisplayLockIcon = launchMode !is EmbeddedLaunchMode.PaymentOptions &&
-                configuration.formSheetAction == EmbeddedPaymentElement.FormSheetAction.Confirm,
+            primaryButtonIcon = if (launchMode !is EmbeddedLaunchMode.PaymentOptions &&
+                configuration.formSheetAction == EmbeddedPaymentElement.FormSheetAction.Confirm
+            ) {
+                PrimaryButtonIcon.Lock
+            } else {
+                PrimaryButtonIcon.None
+            },
         )
     )
     override val state: StateFlow<SheetActivityStateHolder.State> = _state

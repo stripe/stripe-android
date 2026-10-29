@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.paymentsheet.ui.PrimaryButtonIcon
 import com.stripe.android.paymentsheet.ui.PrimaryButtonProcessingState
 import com.stripe.android.ui.core.FormUI
 import com.stripe.android.uicore.strings.resolve
@@ -47,7 +48,7 @@ internal fun ColumnScope.TapToAddCardAddedScreen(
                 PrimaryButton(
                     modifier = Modifier.testTag(TAP_TO_ADD_CARD_ADDED_PRIMARY_BUTTON),
                     label = label.resolve(),
-                    locked = false,
+                    icon = PrimaryButtonIcon.None,
                     enabled = enabled,
                     processingState = PrimaryButtonProcessingState.Idle(null),
                     onProcessingCompleted = {},

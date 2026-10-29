@@ -440,7 +440,7 @@ private fun PrimaryButton(viewModel: BaseSheetViewModel) {
             uiState?.let { state ->
                 PrimaryButton(
                     label = state.label.resolve(),
-                    locked = state.lockVisible,
+                    icon = state.icon,
                     enabled = state.enabled && processingState is PrimaryButtonProcessingState.Idle,
                     subduedWhileProcessing = false,
                     modifier = Modifier.padding(

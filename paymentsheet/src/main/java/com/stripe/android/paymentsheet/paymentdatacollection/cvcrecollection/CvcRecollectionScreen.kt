@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.paymentsheet.ui.PrimaryButtonIcon
 import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.Placeholder
@@ -250,7 +251,7 @@ private fun CvcRecollectionButton(
     ) {
         PrimaryButton(
             label = stringResource(R.string.stripe_paymentsheet_confirm),
-            locked = false,
+            icon = PrimaryButtonIcon.None,
             enabled = isComplete
         ) {
             onConfirmPressed.invoke()

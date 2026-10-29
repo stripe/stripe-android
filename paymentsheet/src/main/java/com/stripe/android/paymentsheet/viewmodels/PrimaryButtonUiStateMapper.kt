@@ -8,6 +8,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods.CvcRecollectionState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.paymentsheet.ui.PrimaryButtonIcon
 import com.stripe.android.paymentsheet.utils.buyButtonLabel
 import com.stripe.android.paymentsheet.utils.continueButtonLabel
 import com.stripe.android.uicore.utils.combineAsStateFlow
@@ -48,7 +49,11 @@ internal class PrimaryButtonUiStateMapper(
                     onClick = onClick,
                     enabled = buttonsEnabled && selection != null &&
                         cvcRecollectionCompleteOrNotRequired(screen, cvcComplete, selection),
-                    lockVisible = buyButtonState.buyButtonOverride?.lockEnabled ?: true,
+                    icon = if (buyButtonState.buyButtonOverride?.lockEnabled != false) {
+                        PrimaryButtonIcon.Lock
+                    } else {
+                        PrimaryButtonIcon.None
+                    },
                     canClickWhileDisabled = canClickWhenDisabled,
                     onDisabledClick = {
                         if (canClickWhenDisabled) {
@@ -73,7 +78,7 @@ internal class PrimaryButtonUiStateMapper(
                 label = continueButtonLabel(config.primaryButtonLabel),
                 onClick = onClick,
                 enabled = buttonsEnabled && selection != null,
-                lockVisible = false,
+                icon = PrimaryButtonIcon.None,
                 canClickWhileDisabled = canClickWhenDisabled,
                 onDisabledClick = {
                     if (canClickWhenDisabled) {

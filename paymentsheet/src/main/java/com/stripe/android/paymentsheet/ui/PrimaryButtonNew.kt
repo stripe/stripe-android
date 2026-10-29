@@ -84,7 +84,7 @@ internal sealed interface PrimaryButtonProcessingState {
 @Composable
 internal fun PrimaryButton(
     label: String,
-    locked: Boolean,
+    icon: PrimaryButtonIcon,
     enabled: Boolean,
     modifier: Modifier = Modifier,
     processingState: PrimaryButtonProcessingState = PrimaryButtonProcessingState.Idle(null),
@@ -141,7 +141,7 @@ internal fun PrimaryButton(
                 processingState = processingState,
                 areAnimationsDisabled = areAnimationsDisabled,
                 subduedWhileProcessing = subduedWhileProcessing,
-                locked = locked,
+                icon = icon,
                 onProcessingCompleted = onProcessingCompleted,
             )
         }
@@ -154,7 +154,7 @@ private fun Content(
     processingState: PrimaryButtonProcessingState,
     areAnimationsDisabled: Boolean,
     subduedWhileProcessing: Boolean,
-    locked: Boolean,
+    icon: PrimaryButtonIcon,
     onProcessingCompleted: () -> Unit,
 ) {
     ContentContainer(
@@ -180,7 +180,7 @@ private fun Content(
                     },
                     processing = processingState !is PrimaryButtonProcessingState.Idle,
                     subduedWhileProcessing = subduedWhileProcessing,
-                    locked = locked,
+                    icon = icon,
                 )
             }
         }
@@ -234,7 +234,7 @@ private fun BoxScope.StaticIncompleteProcessing(
     text: String,
     processing: Boolean,
     subduedWhileProcessing: Boolean,
-    locked: Boolean,
+    icon: PrimaryButtonIcon,
 ) {
     val colors = PrimaryButtonTheme.colors
     val typography = PrimaryButtonTheme.typography
@@ -261,7 +261,7 @@ private fun BoxScope.StaticIncompleteProcessing(
             color = onBackground,
             modifier = Modifier.align(Alignment.CenterEnd),
         )
-    } else if (locked) {
+    } else if (icon == PrimaryButtonIcon.Lock) {
         Icon(
             painter = painterResource(
                 id = R.drawable.stripe_ic_paymentsheet_googlepay_primary_button_lock
@@ -402,7 +402,7 @@ private fun PrimaryButtonPreview() {
             PrimaryButton(
                 label = "Pay $50.99",
                 processingState = processingState,
-                locked = false,
+                icon = PrimaryButtonIcon.None,
                 enabled = true,
                 onClick = {},
                 onProcessingCompleted = {
