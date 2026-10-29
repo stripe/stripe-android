@@ -158,12 +158,14 @@ internal class CheckoutPaymentElementAnalyticsTest {
                 }
             }
             networkRule.checkoutInit(responseFactory = ::billingTaxCheckoutInitResponse)
-            networkRule.validateAnalyticsRequest(
+            networkRule.validateConfirmationStartedAnalyticsRequest(
+                invocationSource = "merchant",
+                selectedLpm = "google_pay",
+            )
+            networkRule.validateConfirmationResultAnalyticsRequest(
                 eventName = "checkout_elements.confirm.failed",
-                productUsage = setOf("checkout_elements"),
-                analyticsPayloadField("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID),
-                analyticsPayloadField("invocation_source", "merchant"),
-                analyticsPayloadField("selected_lpm", "google_pay"),
+                invocationSource = "merchant",
+                selectedLpm = "google_pay",
                 analyticsPayloadField("error_type", "checkoutSessionTotalChanged"),
                 analyticsPayloadField("error_code", "checkout_session_total_changed"),
             )

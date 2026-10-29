@@ -13,6 +13,15 @@ import kotlin.time.Duration
 internal sealed class CheckoutConfirmationEvent : AnalyticsEvent {
     abstract val params: Map<String, Any>
 
+    class Started(
+        confirmationContext: CheckoutConfirmationContext,
+        analyticsMetadata: AnalyticsMetadata,
+    ) : CheckoutConfirmationEvent() {
+        override val eventName: String = "checkout_elements.confirm.started"
+        override val params: Map<String, Any> =
+            confirmationParams(confirmationContext) + analyticsMetadata.paramsMap
+    }
+
     class Succeeded(
         confirmationContext: CheckoutConfirmationContext,
         analyticsMetadata: AnalyticsMetadata,
@@ -41,6 +50,19 @@ internal sealed class CheckoutConfirmationEvent : AnalyticsEvent {
             )
             (error.errorCode ?: stripeException.stripeError?.code)?.let { put("error_code", it) }
             stripeException.requestId?.let { put("request_id", it) }
+            putAll(confirmationParams(confirmationContext))
+            putAll(analyticsMetadata.paramsMap)
+            putAll(duration.mapOfDurationInSeconds())
+        }
+    }
+
+    class Canceled(
+        confirmationContext: CheckoutConfirmationContext,
+        analyticsMetadata: AnalyticsMetadata,
+        duration: Duration?,
+    ) : CheckoutConfirmationEvent() {
+        override val eventName: String = "checkout_elements.confirm.canceled"
+        override val params: Map<String, Any> = buildMap {
             putAll(confirmationParams(confirmationContext))
             putAll(analyticsMetadata.paramsMap)
             putAll(duration.mapOfDurationInSeconds())

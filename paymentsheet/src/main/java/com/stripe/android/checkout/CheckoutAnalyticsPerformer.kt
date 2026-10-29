@@ -80,24 +80,31 @@ internal class CheckoutAnalyticsPerformer @Inject constructor(
             ?.metadata?.get(CheckoutSessionResponseKey)
         val response = confirmationResponse ?: stateHolder.state?.checkoutSessionResponse
         val analyticsMetadata = DefaultAnalyticsMetadataFactory.create(response)
+        val duration = durationProvider.end(DurationProvider.Key.CheckoutConfirmation)
 
         when (result) {
             is ConfirmationHandler.Result.Succeeded -> reportEvent(
                 CheckoutConfirmationEvent.Succeeded(
                     confirmationContext = confirmationContext,
                     analyticsMetadata = analyticsMetadata,
-                    duration = durationProvider.end(DurationProvider.Key.Checkout),
+                    duration = duration,
                 )
             )
             is ConfirmationHandler.Result.Failed -> reportEvent(
                 CheckoutConfirmationEvent.Failed(
                     confirmationContext = confirmationContext,
                     analyticsMetadata = analyticsMetadata,
-                    duration = durationProvider.end(DurationProvider.Key.Checkout),
+                    duration = duration,
                     error = result.toConfirmationError() ?: PaymentSheetConfirmationError(result.cause),
                 )
             )
-            is ConfirmationHandler.Result.Canceled -> Unit
+            is ConfirmationHandler.Result.Canceled -> reportEvent(
+                CheckoutConfirmationEvent.Canceled(
+                    confirmationContext = confirmationContext,
+                    analyticsMetadata = analyticsMetadata,
+                    duration = duration,
+                )
+            )
         }
     }
 
@@ -125,12 +132,20 @@ internal class CheckoutAnalyticsPerformer @Inject constructor(
             InvocationSource.ExpressCheckoutElement -> state?.expressCheckoutElementPaymentMethodMetadata
         }
         val linkAccount = linkAccountHolder.linkAccountInfo.value.account
-        savedStateHandle[CONFIRMATION_CONTEXT_KEY] = CheckoutConfirmationContext(
+        val confirmationContext = CheckoutConfirmationContext(
             paymentSelection = paymentSelection,
             invocationSource = invocationSource,
             activeLinkSession = linkAccount?.isVerified
                 ?: (metadata?.linkState?.loginState == LinkState.LoginState.LoggedIn),
             linkUi = paymentSelection.linkUi(linkAccount),
+        )
+        savedStateHandle[CONFIRMATION_CONTEXT_KEY] = confirmationContext
+        durationProvider.start(DurationProvider.Key.CheckoutConfirmation)
+        reportEvent(
+            CheckoutConfirmationEvent.Started(
+                confirmationContext = confirmationContext,
+                analyticsMetadata = DefaultAnalyticsMetadataFactory.create(state?.checkoutSessionResponse),
+            )
         )
     }
 
