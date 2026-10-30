@@ -5,8 +5,8 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.uicore.StripeThemeDefaults
 
 internal const val FIELD_APPEARANCE_USAGE = "usage"
-internal const val FIELD_COLORS_LIGHT = "colorsLight"
-internal const val FIELD_COLORS_DARK = "colorsDark"
+internal const val FIELD_COLORS_LIGHT = "colors_light"
+internal const val FIELD_COLORS_DARK = "colors_dark"
 internal const val FIELD_CORNER_RADIUS = "corner_radius"
 internal const val FIELD_BORDER_WIDTH = "border_width"
 internal const val FIELD_FONT = "font"

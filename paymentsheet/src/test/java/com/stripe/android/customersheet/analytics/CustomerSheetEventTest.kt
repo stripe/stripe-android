@@ -20,15 +20,15 @@ class CustomerSheetEventTest {
             "google_pay_enabled" to true,
             "default_billing_details" to false,
             "appearance" to mapOf(
-                "colorsLight" to false,
-                "colorsDark" to false,
+                "colors_light" to false,
+                "colors_dark" to false,
                 "corner_radius" to false,
                 "border_width" to false,
                 "font" to false,
                 "size_scale_factor" to false,
                 "primary_button" to mapOf(
-                    "colorsLight" to false,
-                    "colorsDark" to false,
+                    "colors_light" to false,
+                    "colors_dark" to false,
                     "corner_radius" to false,
                     "border_width" to false,
                     "font" to false,
@@ -67,15 +67,15 @@ class CustomerSheetEventTest {
             "google_pay_enabled" to false,
             "default_billing_details" to false,
             "appearance" to mapOf(
-                "colorsLight" to false,
-                "colorsDark" to false,
+                "colors_light" to false,
+                "colors_dark" to false,
                 "corner_radius" to false,
                 "border_width" to false,
                 "font" to false,
                 "size_scale_factor" to false,
                 "primary_button" to mapOf(
-                    "colorsLight" to false,
-                    "colorsDark" to false,
+                    "colors_light" to false,
+                    "colors_dark" to false,
                     "corner_radius" to false,
                     "border_width" to false,
                     "font" to false,
@@ -104,16 +104,16 @@ class CustomerSheetEventTest {
     @Test
     fun `Init event should should mark all optional params present if they are there`() {
         val expectedPrimaryButton = mapOf(
-            "colorsLight" to true,
-            "colorsDark" to true,
+            "colors_light" to true,
+            "colors_dark" to true,
             "corner_radius" to true,
             "border_width" to true,
             "font" to true
         )
 
         val expectedAppearance = mapOf(
-            "colorsLight" to true,
-            "colorsDark" to true,
+            "colors_light" to true,
+            "colors_dark" to true,
             "corner_radius" to true,
             "border_width" to true,
             "font" to true,
