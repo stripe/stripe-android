@@ -251,7 +251,7 @@ internal class CheckoutStateLoaderTest {
                     .shippingDetails(
                         CheckoutController.Configuration.Defaults.ContactDetails()
                             .name("John Shipping")
-                            .address(CheckoutController.Address().country("US").city("Seattle")),
+                            .address(CheckoutController.Address(country = "US").city("Seattle")),
                     )
                     .email("prefill@example.com"),
             )
@@ -262,7 +262,7 @@ internal class CheckoutStateLoaderTest {
             CheckoutCollectedDetails(
                 email = "prefill@example.com",
                 shippingName = "John Shipping",
-                shippingAddress = CheckoutController.Address().country("US").city("Seattle").build(),
+                shippingAddress = CheckoutController.Address(country = "US").city("Seattle").build(),
             ),
         )
     }
@@ -275,7 +275,7 @@ internal class CheckoutStateLoaderTest {
                 CheckoutController.Configuration.Defaults().shippingDetails(
                     CheckoutController.Configuration.Defaults.ContactDetails()
                         .name("John Shipping")
-                        .address(CheckoutController.Address().country("DE")),
+                        .address(CheckoutController.Address(country = "DE")),
                 ),
             )
             .build(),

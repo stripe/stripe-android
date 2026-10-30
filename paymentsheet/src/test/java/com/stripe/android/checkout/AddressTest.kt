@@ -3,16 +3,14 @@ package com.stripe.android.checkout
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutController.Address
 import com.stripe.android.paymentelement.CheckoutSessionPreview
-import org.junit.Assert.assertThrows
 import org.junit.Test
 
 @OptIn(CheckoutSessionPreview::class)
 class AddressTest {
     @Test
     fun `build trims whitespace from all fields`() {
-        val state = Address()
+        val state = Address(country = "  US  ")
             .city("  Denver  ")
-            .country("  US  ")
             .line1("  123 Main St  ")
             .line2("  Apt 4  ")
             .postalCode("  80202  ")
@@ -25,15 +23,5 @@ class AddressTest {
         assertThat(state.line2).isEqualTo("Apt 4")
         assertThat(state.postalCode).isEqualTo("80202")
         assertThat(state.state).isEqualTo("CO")
-    }
-
-    @Test
-    fun `build requires country`() {
-        val error = assertThrows(IllegalArgumentException::class.java) {
-            Address()
-                .city("Denver")
-                .build()
-        }
-        assertThat(error).hasMessageThat().isEqualTo("Country is required.")
     }
 }

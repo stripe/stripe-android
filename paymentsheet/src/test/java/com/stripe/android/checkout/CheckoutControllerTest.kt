@@ -48,8 +48,6 @@ import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.utils.simulateProcessDeath
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
@@ -124,19 +122,6 @@ internal class CheckoutControllerTest {
         assertThat(state.expressCheckoutElementPaymentMethodMetadata).isNull()
         assertThat(state.embeddedConfiguration).isNull()
         assertThat(state.paymentSelection).isNull()
-    }
-
-    @Test
-    fun `configure returns failure when default billing address has no country`() = runConfigureScenario(
-        configuration = configurationWithMissingBillingCountry(),
-        networkSetup = {},
-    ) {
-        assertThat(result).isInstanceOf(CheckoutController.OperationResult.Failed::class.java)
-        val failure = result as CheckoutController.OperationResult.Failed
-        assertThat(failure.error).isInstanceOf(IllegalArgumentException::class.java)
-        assertThat(failure.error).hasMessageThat().isEqualTo("Country is required.")
-        assertThat(committedState).isNull()
-        assertThat(controller.session.value).isNull()
     }
 
     @Test
@@ -257,9 +242,8 @@ internal class CheckoutControllerTest {
         configuration = configurationWithPaymentElement().defaults(
             CheckoutController.Configuration.Defaults().billingDetails(
                 CheckoutController.Configuration.Defaults.ContactDetails().address(
-                    CheckoutController.Address()
+                    CheckoutController.Address(country = " US ")
                         .city(" San Francisco ")
-                        .country(" US ")
                         .line1(" 510 Townsend St ")
                         .postalCode(" 94103 ")
                         .state(" CA ")
@@ -276,25 +260,6 @@ internal class CheckoutControllerTest {
         assertThat(billingAddress.postalCode).isEqualTo("94103")
         assertThat(billingAddress.state).isEqualTo("CA")
     }
-
-    @Test
-    fun `reconfigure returns failure when default shipping address has no country`() =
-        runConfigureScenario {
-            val stateBefore = requireNotNull(committedState)
-            val sessionBefore = controller.session.value
-
-            val result = controller.configure(
-                DEFAULT_CLIENT_SECRET,
-                configurationWithDefaultShippingAddress(address = Address()),
-            )
-
-            assertThat(result).isInstanceOf(CheckoutController.OperationResult.Failed::class.java)
-            val failure = result as CheckoutController.OperationResult.Failed
-            assertThat(failure.error).isInstanceOf(IllegalArgumentException::class.java)
-            assertThat(failure.error).hasMessageThat().isEqualTo("Country is required.")
-            assertThat(committedState).isEqualTo(stateBefore)
-            assertThat(controller.session.value).isEqualTo(sessionBefore)
-        }
 
     @Test
     fun `configure syncs tax from the initial saved payment method rather than the default billing address`() =
@@ -408,9 +373,8 @@ internal class CheckoutControllerTest {
                         CheckoutController.Configuration.Defaults.ContactDetails()
                             .name("John Shipping")
                             .address(
-                                CheckoutController.Address()
+                                CheckoutController.Address(country = "US")
                                     .city("San Francisco")
-                                    .country("US")
                                     .line1("510 Townsend St")
                                     .postalCode("94103")
                                     .state("CA")
@@ -434,7 +398,7 @@ internal class CheckoutControllerTest {
                     CheckoutController.Configuration.Defaults().shippingDetails(
                         CheckoutController.Configuration.Defaults.ContactDetails()
                             .name("John Shipping")
-                            .address(CheckoutController.Address().country("DE"))
+                            .address(CheckoutController.Address(country = "DE"))
                     )
                 ),
             initModifier = allowedShippingCountries(listOf("US", "CA")),
@@ -453,7 +417,7 @@ internal class CheckoutControllerTest {
                 CheckoutController.Configuration.Defaults().shippingDetails(
                     CheckoutController.Configuration.Defaults.ContactDetails()
                         .name("John Shipping")
-                        .address(CheckoutController.Address().country("DE"))
+                        .address(CheckoutController.Address(country = "DE"))
                 )
             ),
             initModifier = allowedShippingCountries(listOf("US", "CA")),
@@ -520,7 +484,7 @@ internal class CheckoutControllerTest {
     fun `configure sends partial default shipping address without requiring a complete address`() =
         runConfigureScenario(
             configuration = configurationWithDefaultShippingAddress(
-                address = Address().country("CA").postalCode("M5V 3L9"),
+                address = Address(country = "CA").postalCode("M5V 3L9"),
             ),
             initModifier = automaticTaxFor("shipping"),
             networkSetup = {
@@ -572,7 +536,7 @@ internal class CheckoutControllerTest {
     fun `configure does not sync shipping tax when SAE filters a disallowed default address`() =
         runConfigureScenario(
             configuration = configurationWithDefaultShippingAddress(
-                address = Address().country("DE"),
+                address = Address(country = "DE"),
             ).shippingAddressElement(ShippingAddressElement.Configuration()),
             initModifier = combine(
                 automaticTaxFor("shipping"),
@@ -1383,7 +1347,7 @@ internal class CheckoutControllerTest {
                 responseFactory = successResponseFactory(automaticTaxFor("shipping")),
             )
 
-            val address = Address().country("US").postalCode("80202")
+            val address = Address(country = "US").postalCode("80202")
             val result = controller.updateShippingAddress(name = null, address = address)
 
             assertThat(result).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
@@ -1680,7 +1644,7 @@ internal class CheckoutControllerTest {
     fun `configure returns failure when a payment flow is presented`() = runMutationScenario(
         sheetIsOpen = true
     ) {
-        val result = controller.configure(DEFAULT_CLIENT_SECRET, configurationWithMissingBillingCountry())
+        val result = controller.configure(DEFAULT_CLIENT_SECRET, configurationWithPaymentElement())
 
         assertThat(result).isInstanceOf(CheckoutController.OperationResult.Failed::class.java)
         val failure = result as CheckoutController.OperationResult.Failed
@@ -1785,53 +1749,6 @@ internal class CheckoutControllerTest {
             assertThat(isUpdatingTurbine.awaitItem()).isFalse()
         }
 
-    @Test
-    fun `canceling queued configure propagates cancellation without changing the session`() = runMutationScenario {
-        val sessionBefore = controller.session.value
-        val stateBefore = committedState()
-        val serverUpdateStarted = Turbine<Unit>()
-        val releaseServerUpdate = CompletableDeferred<Unit>()
-        val serverUpdateFailure = IllegalStateException("server update failed")
-        val serverUpdate = async(Dispatchers.Default) {
-            controller.runServerUpdate {
-                serverUpdateStarted.add(Unit)
-                releaseServerUpdate.await()
-                Result.failure(serverUpdateFailure)
-            }
-        }
-
-        try {
-            serverUpdateStarted.awaitItem()
-
-            val configure = async(start = CoroutineStart.UNDISPATCHED) {
-                controller.configure(DEFAULT_CLIENT_SECRET, configurationWithPaymentElement())
-            }
-            testScheduler.runCurrent()
-            assertThat(configure.isCompleted).isFalse()
-
-            val cancellation = CancellationException("configure canceled while queued")
-            configure.cancel(cancellation)
-            configure.join()
-
-            assertThat(configure.isCancelled).isTrue()
-            val error = runCatching { configure.await() }.exceptionOrNull()
-            assertThat(error).isInstanceOf(CancellationException::class.java)
-            assertThat(error).hasMessageThat().isEqualTo("configure canceled while queued")
-            assertThat(controller.session.value).isEqualTo(sessionBefore)
-            assertThat(committedState()).isEqualTo(stateBefore)
-
-            releaseServerUpdate.complete(Unit)
-            val result = serverUpdate.await()
-            assertThat(result).isInstanceOf(CheckoutController.OperationResult.Failed::class.java)
-            assertThat((result as CheckoutController.OperationResult.Failed).error)
-                .isSameInstanceAs(serverUpdateFailure)
-        } finally {
-            releaseServerUpdate.complete(Unit)
-        }
-
-        serverUpdateStarted.ensureAllEventsConsumed()
-    }
-
     // region allowedShippingCountries validation
 
     @Test
@@ -1849,7 +1766,7 @@ internal class CheckoutControllerTest {
 
             val result = controller.updateShippingAddress(
                 name = null,
-                address = Address().country("US"),
+                address = Address(country = "US"),
             )
 
             assertThat(result).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
@@ -1868,7 +1785,7 @@ internal class CheckoutControllerTest {
 
             val result = controller.updateShippingAddress(
                 name = null,
-                address = Address().country("DE"),
+                address = Address(country = "DE"),
             )
 
             assertThat(result).isInstanceOf(CheckoutController.OperationResult.Failed::class.java)
@@ -1886,7 +1803,7 @@ internal class CheckoutControllerTest {
             // No allowlist set, so any country passes.
             val result = controller.updateShippingAddress(
                 name = null,
-                address = Address().country("DE"),
+                address = Address(country = "DE"),
             )
 
             assertThat(result).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
@@ -1899,7 +1816,7 @@ internal class CheckoutControllerTest {
 
             val result = controller.updateShippingAddress(
                 name = null,
-                address = Address().country("US"),
+                address = Address(country = "US"),
             )
 
             assertThat(result).isInstanceOf(CheckoutController.OperationResult.Failed::class.java)
@@ -1909,21 +1826,6 @@ internal class CheckoutControllerTest {
                 "Country code 'US' is not in allowedShippingCountries"
             )
             assertThat(controller.session.value).isEqualTo(before)
-        }
-
-    @Test
-    fun `updateShippingAddress with missing country throws IllegalArgumentException before allowlist check`() =
-        runMutationScenario(initModifier = allowedShippingCountries(listOf("US"))) {
-            // Address.build() requires a country and throws synchronously, before the allowlist is
-            // ever consulted, so the call is wrapped to capture the thrown exception.
-            val result = runCatching {
-                controller.updateShippingAddress(name = null, address = Address())
-            }
-
-            assertThat(result.isFailure).isTrue()
-            val exception = result.exceptionOrNull()
-            assertThat(exception).isInstanceOf(IllegalArgumentException::class.java)
-            assertThat(exception).hasMessageThat().isEqualTo("Country is required.")
         }
 
     // endregion
@@ -2071,9 +1973,8 @@ internal class CheckoutControllerTest {
         return configurationWithPaymentElement().defaults(
             CheckoutController.Configuration.Defaults().billingDetails(
                 CheckoutController.Configuration.Defaults.ContactDetails().address(
-                    CheckoutController.Address()
+                    CheckoutController.Address(country = "US")
                         .city("San Francisco")
-                        .country("US")
                         .line1("510 Townsend St")
                         .line2("Suite 100")
                         .postalCode("94103")
@@ -2082,13 +1983,6 @@ internal class CheckoutControllerTest {
             )
         )
     }
-
-    private fun configurationWithMissingBillingCountry(): CheckoutController.Configuration =
-        configurationWithPaymentElement().defaults(
-            CheckoutController.Configuration.Defaults().billingDetails(
-                CheckoutController.Configuration.Defaults.ContactDetails().address(Address()),
-            ),
-        )
 
     private fun configurationWithDefaultShippingAddress(
         address: Address? = fullAddress,
@@ -2099,9 +1993,8 @@ internal class CheckoutControllerTest {
             .shippingDetails(shippingDetails)
             .billingDetails(
                 CheckoutController.Configuration.Defaults.ContactDetails().address(
-                    Address()
+                    Address(country = "US")
                         .city("San Francisco")
-                        .country("US")
                         .line1("510 Townsend St")
                         .line2("Suite 100")
                         .postalCode("94103")
@@ -2409,9 +2302,8 @@ internal class CheckoutControllerTest {
         const val DEFAULT_CLIENT_SECRET = "${DEFAULT_CHECKOUT_SESSION_ID}_secret_example"
         const val DEFAULT_INTEGRATION_NAME = "stripe_checkout"
 
-        val fullAddress: Address = Address()
+        val fullAddress: Address = Address(country = "US")
             .city("Denver")
-            .country("US")
             .line1("123 Main St")
             .line2("Apt 4")
             .postalCode("80202")

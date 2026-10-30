@@ -102,8 +102,6 @@ class CheckoutController @Inject internal constructor(
      * Loads the Checkout Session identified by [clientSecret] and prepares the
      * payment UI, populating [session] on success.
      *
-     * Configuration validation failures return [OperationResult.Failed].
-     *
      * @param clientSecret The client secret of the Checkout Session to load.
      * @param configuration Options controlling how the checkout is configured and displayed.
      */
@@ -117,11 +115,7 @@ class CheckoutController @Inject internal constructor(
             return@withContext integrationLaunchedFailure()
         }
         operationCoordinator.runMutation {
-            val configurationState = try {
-                configuration.build()
-            } catch (error: IllegalArgumentException) {
-                return@runMutation kotlin.Result.failure(error)
-            }
+            val configurationState = configuration.build()
             val sessionId = clientSecret.substringBefore("_secret_")
 
             checkoutSessionRepository.init(
@@ -1351,12 +1345,15 @@ class CheckoutController @Inject internal constructor(
 
     /**
      * Builder for an address passed to [updateShippingAddress].
+     *
+     * @param country The two-letter country code (ISO 3166-1 alpha-2).
      */
     @CheckoutSessionPreview
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    class Address {
+    class Address(
+        private val country: String,
+    ) {
         private var city: String? = null
-        private var country: String? = null
         private var line1: String? = null
         private var line2: String? = null
         private var postalCode: String? = null
@@ -1367,13 +1364,6 @@ class CheckoutController @Inject internal constructor(
          */
         fun city(city: String?) = apply {
             this.city = city
-        }
-
-        /**
-         * Sets the two-letter country code (ISO 3166-1 alpha-2). Required.
-         */
-        fun country(country: String) = apply {
-            this.country = country
         }
 
         /**
@@ -1417,9 +1407,7 @@ class CheckoutController @Inject internal constructor(
         internal fun build(): State {
             return State(
                 city = city?.trim(),
-                country = requireNotNull(country?.trim()) {
-                    "Country is required."
-                },
+                country = country.trim(),
                 line1 = line1?.trim(),
                 line2 = line2?.trim(),
                 postalCode = postalCode?.trim(),
