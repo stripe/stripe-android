@@ -208,12 +208,16 @@ internal class CheckoutStateLoaderTest {
                 "mobile-shipping-address-element",
                 "mobile-currency-selector-element",
             )
-            assertThat(calls.count {
-                it.integrationConfiguration is PaymentElementLoader.Configuration.Embedded
-            }).isEqualTo(1)
-            assertThat(calls.count {
-                it.integrationConfiguration is PaymentElementLoader.Configuration.ExpressCheckoutElement
-            }).isEqualTo(1)
+            assertThat(
+                calls.count {
+                    it.integrationConfiguration is PaymentElementLoader.Configuration.Embedded
+                }
+            ).isEqualTo(1)
+            assertThat(
+                calls.count {
+                    it.integrationConfiguration is PaymentElementLoader.Configuration.ExpressCheckoutElement
+                }
+            ).isEqualTo(1)
             calls.forEach { call ->
                 val initializationMode = call.initializationMode as
                     PaymentElementLoader.InitializationMode.CheckoutSession

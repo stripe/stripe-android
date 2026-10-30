@@ -2,6 +2,7 @@ package com.stripe.android.lpmfoundations.paymentmethod
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.ClientAttributionMetadata
+import com.stripe.android.model.PaymentIntentCreationFlow
 import com.stripe.android.model.PaymentMethodSelectionFlow
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
@@ -16,10 +17,10 @@ class ClientAttributionMetadataKtxTest {
 
         val clientAttributionMetadata = createClientAttributionMetadata(
             initializationMode = initializationMode,
-        )
+        ) as ClientAttributionMetadata.Elements
 
-        assertThat(clientAttributionMetadata.toParamMap()["payment_intent_creation_flow"])
-            .isEqualTo("standard")
+        assertThat(clientAttributionMetadata.paymentIntentCreationFlow)
+            .isEqualTo(PaymentIntentCreationFlow.Standard)
     }
 
     @Test
@@ -28,10 +29,10 @@ class ClientAttributionMetadataKtxTest {
 
         val clientAttributionMetadata = createClientAttributionMetadata(
             initializationMode = initializationMode,
-        )
+        ) as ClientAttributionMetadata.Elements
 
-        assertThat(clientAttributionMetadata.toParamMap()["payment_intent_creation_flow"])
-            .isEqualTo("standard")
+        assertThat(clientAttributionMetadata.paymentIntentCreationFlow)
+            .isEqualTo(PaymentIntentCreationFlow.Standard)
     }
 
     @Test
@@ -47,10 +48,10 @@ class ClientAttributionMetadataKtxTest {
 
         val clientAttributionMetadata = createClientAttributionMetadata(
             initializationMode = initializationMode,
-        )
+        ) as ClientAttributionMetadata.Elements
 
-        assertThat(clientAttributionMetadata.toParamMap()["payment_intent_creation_flow"])
-            .isEqualTo("deferred")
+        assertThat(clientAttributionMetadata.paymentIntentCreationFlow)
+            .isEqualTo(PaymentIntentCreationFlow.Deferred)
     }
 
     @Test
@@ -116,10 +117,9 @@ class ClientAttributionMetadataKtxTest {
 
         val clientAttributionMetadata = createClientAttributionMetadata(
             initializationMode = initializationMode,
-        )
+        ) as ClientAttributionMetadata.CheckoutSession
 
-        assertThat(clientAttributionMetadata.toParamMap()["checkout_session_id"])
-            .isEqualTo("cs_test_456")
+        assertThat(clientAttributionMetadata.checkoutSessionId).isEqualTo("cs_test_456")
     }
 
     @Test

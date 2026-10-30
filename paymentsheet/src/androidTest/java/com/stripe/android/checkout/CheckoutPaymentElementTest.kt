@@ -99,8 +99,8 @@ internal class CheckoutPaymentElementTest {
             checkoutInitResponse = { response ->
                 response.testBodyFromFile("checkout-session-init.json") { json ->
                     json.put("customer_email", "checkout@example.com")
-                    json.getJSONObject("elements_session").remove("link_settings")
-                    json.put("config_id", "checkout_config_123")
+                    json.remove("link_settings")
+                    json.put("checkout_session_config_id", "checkout_config_123")
                     json.put("automatic_payment_method_types", true)
                 }
             },

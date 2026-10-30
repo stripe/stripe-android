@@ -354,6 +354,8 @@ internal class CheckoutSessionResponseJsonParser(
         if (!has(name) || isNull(name)) null else getJSONObject(name)
     private fun JSONObject.requiredArray(name: String): JSONArray = getJSONArray(name)
     private fun JSONObject.requiredBoolean(name: String): Boolean = getBoolean(name)
+    private fun JSONObject.optionalBoolean(name: String): Boolean? =
+        if (!has(name) || isNull(name)) null else getBoolean(name)
     private fun JSONObject.requiredLong(name: String): Long = getLong(name)
     private fun JSONObject.optionalLong(name: String): Long? =
         if (!has(name) || isNull(name)) null else getLong(name)

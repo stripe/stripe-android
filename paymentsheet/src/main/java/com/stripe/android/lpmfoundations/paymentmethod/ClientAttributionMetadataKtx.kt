@@ -13,6 +13,7 @@ internal fun ClientAttributionMetadata.Companion.create(
     isExpressCheckoutElement: Boolean,
 ): ClientAttributionMetadata {
     val paymentIntentCreationFlow = when (initializationMode) {
+        // CheckoutSession attribution is constructed separately below.
         is PaymentElementLoader.InitializationMode.CheckoutSession -> null
         is PaymentElementLoader.InitializationMode.CryptoOnramp,
         is PaymentElementLoader.InitializationMode.StandaloneLink,

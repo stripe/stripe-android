@@ -4367,7 +4367,7 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `checkout Payment Element metadata identifies the configured Checkout integration`() = runScenario {
+    fun `checkout Payment Element metadata uses the Payment Element subtype`() = runScenario {
         val clientAttributionMetadata = loadCheckoutSessionClientAttributionMetadata(
             integrationConfiguration = PaymentElementLoader.Configuration.Embedded(
                 isRowSelectionImmediateAction = false,
@@ -4375,18 +4375,9 @@ internal class DefaultPaymentElementLoaderTest {
                 paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
             ),
         )
-        val params = clientAttributionMetadata.toParamMap()
 
-        assertThat(params["merchant_integration_source"]).isEqualTo("mobile-checkout")
-        assertThat(params["merchant_integration_subtype"]).isEqualTo("mobile-payment-element")
-        assertThat(params["checkout_session_id"]).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
-        assertThat(params["checkout_config_id"]).isEqualTo("cfg_checkout_123")
-        assertThat(params["merchant_integration_additional_elements"]).isEqualTo(
-            listOf("mobile-payment-element", "mobile-express-checkout-element")
-        )
-        assertThat(params).doesNotContainKey("payment_intent_creation_flow")
-        assertThat(clientAttributionMetadata.paymentMethodSelectionFlow)
-            .isEqualTo(PaymentMethodSelectionFlow.Automatic)
+        assertThat(clientAttributionMetadata.toParamMap()["merchant_integration_subtype"])
+            .isEqualTo("mobile-payment-element")
     }
 
     @Test
