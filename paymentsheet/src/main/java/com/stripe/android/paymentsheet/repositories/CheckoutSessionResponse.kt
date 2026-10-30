@@ -14,6 +14,7 @@ internal data class CheckoutSessionResponse(
     val id: String,
     val clientSecret: String,
     val configId: String?,
+    val automaticPaymentMethodTypes: Boolean?,
     val currency: String,
     val integrationCurrency: String,
     val paymentStatus: PaymentStatus,

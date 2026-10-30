@@ -229,6 +229,7 @@ internal interface PaymentElementLoader {
             val instancesKey: String,
             val checkoutSessionResponse: CheckoutSessionResponse,
             val collectedEmail: String?,
+            val configuredElements: List<String>,
         ) : InitializationMode() {
             override fun validate() {
                 // Nothing to validate — the response was already loaded successfully.
@@ -393,6 +394,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             elementsSessionConfigId = elementsSession.elementsSessionConfigId,
             initializationMode = initializationMode,
             automaticPaymentMethodsEnabled = elementsSession.stripeIntent.automaticPaymentMethodsEnabled,
+            isExpressCheckoutElement =
+                integrationConfiguration is PaymentElementLoader.Configuration.ExpressCheckoutElement,
         )
 
         val customerMetadata = createCustomerMetadata(

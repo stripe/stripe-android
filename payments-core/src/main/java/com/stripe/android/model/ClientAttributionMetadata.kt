@@ -4,43 +4,70 @@ import android.os.Parcelable
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.core.networking.AnalyticsRequestFactory
-import com.stripe.android.core.version.StripeSdkVersion
 import kotlinx.parcelize.Parcelize
 
-@Parcelize
+/** Attribution shared by collection and confirmation requests, with fields scoped to each integration. */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-data class ClientAttributionMetadata(
-    @get:VisibleForTesting val elementsSessionConfigId: String?,
-    @get:VisibleForTesting val paymentIntentCreationFlow: PaymentIntentCreationFlow?,
-    @get:VisibleForTesting val paymentMethodSelectionFlow: PaymentMethodSelectionFlow?,
-    @get:VisibleForTesting val checkoutSessionId: String?,
-    private val stripeSdkVersion: String = StripeSdkVersion.VERSION_NAME,
-) : StripeParamsModel, Parcelable {
+sealed class ClientAttributionMetadata : StripeParamsModel, Parcelable {
+    @get:VisibleForTesting
+    abstract val elementsSessionConfigId: String?
 
-    override fun toParamMap(): Map<String, String> {
-        return mapOf(
-            "merchant_integration_source" to "elements",
-            "merchant_integration_subtype" to "mobile",
-            "merchant_integration_version" to "stripe-android/$stripeSdkVersion",
-            "client_session_id" to AnalyticsRequestFactory.sessionId.toString(),
-        ).plus(
-            paymentMethodSelectionFlow?.let {
-                mapOf("payment_method_selection_flow" to it.paramValue)
-            }.orEmpty()
-        ).plus(
-            paymentIntentCreationFlow?.let {
-                mapOf("payment_intent_creation_flow" to it.paramValue)
-            }.orEmpty()
-        ).plus(
-            elementsSessionConfigId?.let {
-                mapOf("elements_session_config_id" to it)
-            }.orEmpty()
-        ).plus(
-            checkoutSessionId?.let {
-                mapOf("checkout_session_id" to it)
-            }.orEmpty()
-        )
+    @get:VisibleForTesting
+    abstract val paymentMethodSelectionFlow: PaymentMethodSelectionFlow?
+
+    protected abstract val stripeSdkVersion: String
+
+    final override fun toParamMap(): Map<String, Any> {
+        val (source, subtype) = when (this) {
+            is Elements -> "elements" to "mobile"
+            is CheckoutSession -> "mobile-checkout" to if (isExpressCheckoutElement) {
+                "mobile-express-checkout-element"
+            } else {
+                "mobile-payment-element"
+            }
+        }
+        return buildMap {
+            put("merchant_integration_source", source)
+            put("merchant_integration_subtype", subtype)
+            put("merchant_integration_version", "stripe-android/$stripeSdkVersion")
+            put("client_session_id", AnalyticsRequestFactory.sessionId.toString())
+            paymentMethodSelectionFlow?.let { put("payment_method_selection_flow", it.paramValue) }
+            when (val metadata = this@ClientAttributionMetadata) {
+                is Elements -> metadata.paymentIntentCreationFlow?.let {
+                    put("payment_intent_creation_flow", it.paramValue)
+                }
+                is CheckoutSession -> {
+                    put("checkout_session_id", metadata.checkoutSessionId)
+                    metadata.checkoutConfigId?.let { put("checkout_config_id", it) }
+                    put("merchant_integration_additional_elements", metadata.configuredElements)
+                }
+            }
+            elementsSessionConfigId?.let { put("elements_session_config_id", it) }
+        }
     }
+
+    /** Elements attribution permits absent flow metadata for integrations such as CustomerSheet. */
+    @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    data class Elements(
+        override val elementsSessionConfigId: String?,
+        @get:VisibleForTesting val paymentIntentCreationFlow: PaymentIntentCreationFlow?,
+        override val paymentMethodSelectionFlow: PaymentMethodSelectionFlow?,
+        protected override val stripeSdkVersion: String,
+    ) : ClientAttributionMetadata()
+
+    /** Checkout owns intent creation and identifies the configured session and payment surface. */
+    @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    data class CheckoutSession(
+        override val elementsSessionConfigId: String?,
+        override val paymentMethodSelectionFlow: PaymentMethodSelectionFlow?,
+        val checkoutSessionId: String,
+        val checkoutConfigId: String?,
+        val configuredElements: List<String>,
+        val isExpressCheckoutElement: Boolean,
+        protected override val stripeSdkVersion: String,
+    ) : ClientAttributionMetadata()
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object

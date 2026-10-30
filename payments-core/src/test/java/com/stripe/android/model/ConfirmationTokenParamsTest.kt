@@ -1,6 +1,7 @@
 package com.stripe.android.model
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.version.StripeSdkVersion
 import kotlin.test.Test
 
 class ConfirmationTokenParamsTest {
@@ -330,11 +331,11 @@ class ConfirmationTokenParamsTest {
 
     @Test
     fun toParamMap_withClientAttributionMetadata_setsClientAttributionMetadataParam() {
-        val clientAttributionMetadata = ClientAttributionMetadata(
+        val clientAttributionMetadata = ClientAttributionMetadata.Elements(
             elementsSessionConfigId = "elements_session_123",
             paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
             paymentMethodSelectionFlow = PaymentMethodSelectionFlow.Automatic,
-            checkoutSessionId = null,
+            stripeSdkVersion = StripeSdkVersion.VERSION_NAME,
         )
         val params = ConfirmationTokenParams(
             clientAttributionMetadata = clientAttributionMetadata

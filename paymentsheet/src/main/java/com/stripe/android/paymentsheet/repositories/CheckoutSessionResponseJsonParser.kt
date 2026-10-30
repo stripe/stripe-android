@@ -28,6 +28,7 @@ internal class CheckoutSessionResponseJsonParser(
         require(json.requiredString("ui_mode") == "mobile_elements")
         val id = json.requiredString("id")
         val configId = json.optionalString("checkout_session_config_id")
+        val automaticPaymentMethodTypes = json.optionalBoolean("automatic_payment_method_types")
         val currency = json.requiredString("presentment_currency")
         val paymentStatus = when (json.requiredString("payment_status")) {
             "paid" -> CheckoutSessionResponse.PaymentStatus.PAID
@@ -75,6 +76,7 @@ internal class CheckoutSessionResponseJsonParser(
             id = id,
             clientSecret = clientSecret,
             configId = configId,
+            automaticPaymentMethodTypes = automaticPaymentMethodTypes,
             currency = currency,
             integrationCurrency = json.requiredString("integration_currency"),
             paymentStatus = paymentStatus,
@@ -352,6 +354,8 @@ internal class CheckoutSessionResponseJsonParser(
         if (!has(name) || isNull(name)) null else getJSONObject(name)
     private fun JSONObject.requiredArray(name: String): JSONArray = getJSONArray(name)
     private fun JSONObject.requiredBoolean(name: String): Boolean = getBoolean(name)
+    private fun JSONObject.optionalBoolean(name: String): Boolean? =
+        if (!has(name) || isNull(name)) null else getBoolean(name)
     private fun JSONObject.requiredLong(name: String): Long = getLong(name)
     private fun JSONObject.optionalLong(name: String): Long? =
         if (!has(name) || isNull(name)) null else getLong(name)

@@ -98,6 +98,7 @@ internal class CheckoutStateLoader @Inject constructor(
                 instancesKey = response.id,
                 checkoutSessionResponse = response,
                 collectedEmail = collectedDetails.email,
+                configuredElements = getConfiguredElements(configuration),
             ),
             paymentElementLoaderConfig = paymentElementConfigs?.paymentElementLoaderConfig,
             expressCheckoutElementConfiguration = expressCheckoutElementConfiguration,
@@ -127,6 +128,23 @@ internal class CheckoutStateLoader @Inject constructor(
             mandateState = carryForward.mandateState,
         )
         return LoadedState(state = state, customer = loadResults.customer)
+    }
+
+    private fun getConfiguredElements(configuration: CheckoutController.Configuration.State): List<String> {
+        return buildList {
+            if (configuration.paymentElementConfiguration != null) {
+                add("mobile-payment-element")
+            }
+            if (configuration.expressCheckoutElementConfiguration != null) {
+                add("mobile-express-checkout-element")
+            }
+            if (configuration.shippingAddressElementConfiguration != null) {
+                add("mobile-shipping-address-element")
+            }
+            if (configuration.currencySelectorElementConfiguration != null) {
+                add("mobile-currency-selector-element")
+            }
+        }
     }
 
     private fun getSelection(

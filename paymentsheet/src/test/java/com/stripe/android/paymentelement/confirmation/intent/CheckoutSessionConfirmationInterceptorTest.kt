@@ -225,11 +225,11 @@ class CheckoutSessionConfirmationInterceptorTest {
             PaymentMethod.Type.Link -> PaymentMethodCreateParams.createLink(
                 paymentDetailsId = "payment_details_123",
                 consumerSessionClientSecret = "consumer_session_secret",
-                clientAttributionMetadata = ClientAttributionMetadata(
+                clientAttributionMetadata = ClientAttributionMetadata.Elements(
                     elementsSessionConfigId = "test_session_id",
                     paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
                     paymentMethodSelectionFlow = PaymentMethodSelectionFlow.MerchantSpecified,
-                    checkoutSessionId = null,
+                    stripeSdkVersion = StripeSdkVersion.VERSION_NAME,
                 ),
             )
             PaymentMethod.Type.SepaDebit -> PaymentMethodCreateParamsFixtures.DEFAULT_SEPA_DEBIT
@@ -1178,11 +1178,11 @@ class CheckoutSessionConfirmationInterceptorTest {
                 checkoutSessionResponse = checkoutSessionResponse,
             ),
             customerMetadata = customerMetadata,
-            clientAttributionMetadata = ClientAttributionMetadata(
+            clientAttributionMetadata = ClientAttributionMetadata.Elements(
                 elementsSessionConfigId = "test_session_id",
                 paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
                 paymentMethodSelectionFlow = PaymentMethodSelectionFlow.MerchantSpecified,
-                checkoutSessionId = null,
+                stripeSdkVersion = StripeSdkVersion.VERSION_NAME,
             ),
             context = applicationContext,
             checkoutSessionRepository = checkoutSessionRepository,

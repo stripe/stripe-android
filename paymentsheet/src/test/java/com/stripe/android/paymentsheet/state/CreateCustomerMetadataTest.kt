@@ -278,6 +278,7 @@ internal class CreateCustomerMetadataTest {
                     taxAddressSource = null,
                     allowedShippingCountries = null,
                 ),
+                configuredElements = emptyList(),
             )
         }
 

@@ -87,6 +87,7 @@ class DefaultAnalyticsMetadataFactoryTest {
             instancesKey = "instances_key",
             checkoutSessionResponse = response,
             collectedEmail = null,
+            configuredElements = emptyList(),
         )
 
         val resultMap = createAnalyticsMetadata(
