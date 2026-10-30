@@ -17,7 +17,7 @@ class CheckoutSessionMappersTest {
         ).session()
 
         assertThat(session.currency).isEqualTo("usd")
-        assertThat(session.totals.total.amount).isEqualTo("€10.00")
+        assertThat(session.totals?.total?.amount).isEqualTo("€10.00")
     }
 
     @Test
@@ -28,7 +28,7 @@ class CheckoutSessionMappersTest {
 
         assertThat(session.currency).isNull()
         assertThat(session.minorUnitsAmountDivisor).isEqualTo(100)
-        assertThat(session.totals.total.amount).isEqualTo("$10.00")
+        assertThat(session.totals?.total?.amount).isEqualTo("$10.00")
     }
 
     @Test
@@ -40,19 +40,29 @@ class CheckoutSessionMappersTest {
 
         assertThat(session.currency).isEqualTo("jpy")
         assertThat(session.minorUnitsAmountDivisor).isEqualTo(100)
-        assertThat(session.totals.total.amount).isEqualTo("$10.00")
+        assertThat(session.totals?.total?.amount).isEqualTo("$10.00")
     }
 
     @Test
-    fun `maps absent session currencies using item currency for amounts`() {
+    fun `absent session currency does not use item currency for totals`() {
         val session = CheckoutSessionResponseFactory.create(
             currency = null,
             checkoutItems = listOf(CheckoutSessionResponseFactory.checkoutItem(currency = "jpy")),
+            totalSummary = CheckoutSessionResponse.TotalSummary(
+                totalTaxAmounts = listOf(
+                    CheckoutSessionResponse.TaxAmount(
+                        amount = 100,
+                        inclusive = false,
+                        taxRate = CheckoutSessionResponse.TaxRate("Tax", 10.0, null),
+                    )
+                ),
+            ),
         ).session()
 
         assertThat(session.currency).isNull()
         assertThat(session.minorUnitsAmountDivisor).isNull()
-        assertThat(session.totals.total.amount).isEqualTo("¥1,000")
+        assertThat(session.totals).isNull()
+        assertThat(session.taxAmounts).isNull()
     }
 
     @Test
@@ -87,11 +97,11 @@ class CheckoutSessionMappersTest {
         assertThat(session.livemode).isTrue()
         assertThat(session.email).isEqualTo("server@example.com")
         assertThat(session.minorUnitsAmountDivisor).isEqualTo(100)
-        assertThat(session.totals.subtotal.minorUnitsAmount).isEqualTo(1000.0)
-        assertThat(session.totals.taxInclusive.minorUnitsAmount).isEqualTo(20.0)
-        assertThat(session.totals.taxExclusive.minorUnitsAmount).isEqualTo(80.0)
-        assertThat(session.totals.discount.minorUnitsAmount).isEqualTo(0.0)
-        assertThat(session.totals.total.minorUnitsAmount).isEqualTo(1080.0)
+        assertThat(session.totals?.subtotal?.minorUnitsAmount).isEqualTo(1000.0)
+        assertThat(session.totals?.taxInclusive?.minorUnitsAmount).isEqualTo(20.0)
+        assertThat(session.totals?.taxExclusive?.minorUnitsAmount).isEqualTo(80.0)
+        assertThat(session.totals?.discount?.minorUnitsAmount).isEqualTo(0.0)
+        assertThat(session.totals?.total?.minorUnitsAmount).isEqualTo(1080.0)
     }
 
     @Test
@@ -121,8 +131,8 @@ class CheckoutSessionMappersTest {
         }
         val decimal = CheckoutSessionResponseFactory.create(checkoutItems = listOf(decimalItem)).session()
 
-        assertThat(usd.totals.total.amount).isEqualTo("$12.34")
-        assertThat(jpy.totals.total.amount).isEqualTo("¥1,234")
+        assertThat(usd.totals?.total?.amount).isEqualTo("$12.34")
+        assertThat(jpy.totals?.total?.amount).isEqualTo("¥1,234")
         assertThat(
             (decimal.orderSummaryItems.single() as CheckoutController.Session.OrderSummaryItem.OneTimePrice)
                 .items.single().unitAmountDecimal?.amount

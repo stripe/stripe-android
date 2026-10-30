@@ -75,10 +75,6 @@ internal data class CheckoutSessionResponse(
     val amount: Long
         get() = checkoutItems.sumOf { group -> group.oneTimePrice.items.sumOf { it.total } }
 
-    // Line-item currencies remain available when the session omits its presentment currency.
-    val currencyForAmounts: String
-        get() = currency ?: checkoutItems.first().oneTimePrice.items.first().price.currency
-
     val collectsTaxFromBillingAddress: Boolean
         get() = automaticTaxEnabled && taxAddressSource == TaxAddressSource.BILLING
 
@@ -163,14 +159,15 @@ internal data class CheckoutSessionResponse(
 
     @Parcelize
     data class AdaptivePricingInfo(
-        val activePresentmentCurrency: String,
+        val activePresentmentCurrency: String?,
         val integrationAmount: Long,
         val integrationCurrency: String,
         val integrationDisclosureCaption: String?,
         val localCurrencyOptions: List<LocalCurrencyOption>,
     ) : StripeModel {
         val isActive: Boolean
-            get() = !activePresentmentCurrency.equals(integrationCurrency, ignoreCase = true)
+            get() = activePresentmentCurrency != null &&
+                !activePresentmentCurrency.equals(integrationCurrency, ignoreCase = true)
     }
 
     @Parcelize

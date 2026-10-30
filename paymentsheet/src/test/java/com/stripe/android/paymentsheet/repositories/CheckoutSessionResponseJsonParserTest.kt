@@ -71,7 +71,8 @@ class CheckoutSessionResponseJsonParserTest {
         val result = requireNotNull(parse(json))
 
         assertThat(result.currency).isNull()
-        assertThat((result.elementsSession?.stripeIntent as PaymentIntent).currency).isEqualTo("usd")
+        assertThat((result.elementsSession?.stripeIntent as PaymentIntent).currency).isNull()
+        assertThat(result.adaptivePricingInfo?.activePresentmentCurrency).isNull()
     }
 
     @Test
@@ -81,7 +82,7 @@ class CheckoutSessionResponseJsonParserTest {
         val result = requireNotNull(parse(json))
 
         assertThat(result.currency).isNull()
-        assertThat((result.elementsSession?.stripeIntent as PaymentIntent).currency).isEqualTo("usd")
+        assertThat((result.elementsSession?.stripeIntent as PaymentIntent).currency).isNull()
     }
 
     @Test
@@ -95,6 +96,19 @@ class CheckoutSessionResponseJsonParserTest {
         assertThat(result.currency).isNull()
         assertThat(result.integrationCurrency).isNull()
         assertThat(result.elementsSession?.stripeIntent).isInstanceOf(SetupIntent::class.java)
+    }
+
+    @Test
+    fun `absent presentment currency does not require matching item currencies`() {
+        val json = base()
+        json.remove("presentment_currency")
+        item(json).getJSONObject("price").put("currency", "jpy")
+
+        val result = requireNotNull(parse(json))
+
+        assertThat(result.currency).isNull()
+        assertThat((result.elementsSession?.stripeIntent as PaymentIntent).currency).isNull()
+        assertThat(result.checkoutItems.single().oneTimePrice.items.single().price.currency).isEqualTo("jpy")
     }
 
     @Test

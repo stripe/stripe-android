@@ -542,9 +542,10 @@ class CheckoutController @Inject internal constructor(
          */
         val taxAmounts: List<TaxAmount>?,
         /**
-         * The tax and discount breakdown for the computed session total.
+         * The tax and discount breakdown for the computed session total, or `null` if presentment
+         * currency is unavailable.
          */
-        val totals: Totals,
+        val totals: Totals?,
         internal val currencySelectorOptions: CurrencySelectorOptions?,
         internal val availableExpressButtonTypes: List<ExpressButtonType>,
     ) {

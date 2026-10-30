@@ -10,7 +10,6 @@ import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.model.parsers.DeferredPaymentIntentJsonParser
 import com.stripe.android.model.parsers.DeferredSetupIntentJsonParser
 import com.stripe.android.model.parsers.ElementsSessionJsonParser
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
@@ -44,10 +43,9 @@ internal class CheckoutSessionResponseJsonParser(
 
         val checkoutItems = json.requiredArray("items").objects().map(::parseCheckoutItem)
         require(checkoutItems.isNotEmpty())
-        val currencyForAmounts = currency ?: checkoutItems.first().oneTimePrice.items.first().price.currency
         require(
             checkoutItems.all { group ->
-                group.oneTimePrice.items.all { it.price.currency == currencyForAmounts }
+                group.oneTimePrice.items.all { currency == null || it.price.currency == currency }
             }
         )
 
@@ -58,7 +56,7 @@ internal class CheckoutSessionResponseJsonParser(
             livemode = livemode,
             noPaymentRequired = paymentStatus == CheckoutSessionResponse.PaymentStatus.NO_PAYMENT_REQUIRED,
             amount = checkoutItems.sumOf { group -> group.oneTimePrice.items.sumOf { it.total } },
-            currency = currencyForAmounts,
+            currency = currency,
         )
         val automaticTax = json.optionalObject("automatic_tax")
         val savedOptions = json.requiredObject("saved_payment_method_options")
@@ -96,7 +94,7 @@ internal class CheckoutSessionResponseJsonParser(
             checkoutItems = checkoutItems,
             totalSummary = parseTotalSummary(json.requiredObject("total_summary")),
             adaptivePricingInfo = json.optionalObject("adaptive_pricing_info")?.let {
-                parseAdaptivePricingInfo(it, currencyForAmounts)
+                parseAdaptivePricingInfo(it, currency)
             },
             taxMeta = automaticTax?.let {
                 CheckoutSessionResponse.TaxMeta(
@@ -203,7 +201,7 @@ internal class CheckoutSessionResponseJsonParser(
 
     private fun parseAdaptivePricingInfo(
         json: JSONObject,
-        currency: String,
+        currency: String?,
     ): CheckoutSessionResponse.AdaptivePricingInfo {
         val integration = json.requiredObject("integration_currency_option")
         return CheckoutSessionResponse.AdaptivePricingInfo(
@@ -253,7 +251,7 @@ internal class CheckoutSessionResponseJsonParser(
         livemode: Boolean,
         noPaymentRequired: Boolean,
         amount: Long,
-        currency: String,
+        currency: String?,
     ): ElementsSession {
         val sessionId = json.requiredString("elements_session_id")
         val merchant = json.requiredObject("merchant_info")
@@ -282,18 +280,21 @@ internal class CheckoutSessionResponseJsonParser(
                 timeProvider = System::currentTimeMillis,
             ).parse(intentJson).copy(paymentMethodOptionsJsonString = options.toString())
         } else {
-            DeferredPaymentIntentJsonParser(
-                elementsSessionId = sessionId,
-                paymentMode = DeferredIntentParams.Mode.Payment(
-                    amount = amount,
-                    currency = currency,
-                    setupFutureUsage = null,
-                    captureMethod = PaymentIntent.CaptureMethod.Automatic,
-                    paymentMethodOptionsJsonString = options.toString(),
-                ),
+            PaymentIntent(
+                id = sessionId,
+                clientSecret = null,
+                paymentMethodTypes = paymentTypes,
+                amount = amount,
+                currency = currency,
+                countryCode = StripeJsonUtils.optString(json, "country_code"),
+                linkFundingSources = fundingSources?.strings().orEmpty().map { it.lowercase() },
+                unactivatedPaymentMethods = json.requiredArray("unactivated_payment_method_types")
+                    .strings().map { it.lowercase() },
                 isLiveMode = livemode,
-                timeProvider = System::currentTimeMillis,
-            ).parse(intentJson)
+                created = System.currentTimeMillis(),
+                paymentMethodOptionsJsonString = options.toString(),
+                automaticPaymentMethodsEnabled = paymentTypes.isEmpty(),
+            )
         }
         val captcha = json.optionalObject("passive_captcha")
         val flags = json.optionalObject("flags")?.let { ElementsSessionJsonParser.parseSessionFlags(it) } ?: emptyMap()

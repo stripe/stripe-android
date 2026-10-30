@@ -52,7 +52,7 @@ internal class DefaultCheckoutGooglePayPaymentDataUpdateMapperTest {
     }
 
     @Test
-    fun `toResponse uses item currency when session currency is absent`() {
+    fun `toResponse omits transaction info when session currency is absent`() {
         val result = mapper.toResponse(
             countryCode = "JP",
             response = CheckoutSessionResponseFactory.create(
@@ -62,7 +62,7 @@ internal class DefaultCheckoutGooglePayPaymentDataUpdateMapperTest {
             paymentDataUpdate = PAYMENT_DATA_UPDATE,
         )
 
-        assertThat(result.newTransactionInfo?.currencyCode).isEqualTo("JPY")
+        assertThat(result.newTransactionInfo).isNull()
     }
 
     @Test

@@ -29,15 +29,15 @@ internal fun CheckoutSessionResponse.asCheckoutSession(
     availableExpressButtonTypes: List<ExpressButtonType>,
     locale: Locale = Locale.getDefault(),
 ): Session {
-    val presentmentCurrency = currencyForAmounts
+    val presentmentCurrency = currency
     return Session(
         id = id,
         businessName = businessName,
         status = status.asStatus(paymentStatus),
         livemode = livemode,
         currency = integrationCurrency,
-        presentmentDetails = adaptivePricingInfo?.let {
-            Session.PresentmentDetails(it.activePresentmentCurrency)
+        presentmentDetails = adaptivePricingInfo?.activePresentmentCurrency?.let {
+            Session.PresentmentDetails(it)
         },
         discountAmounts = emptyList(),
         email = fixedEmail ?: collectedEmail,
@@ -48,10 +48,10 @@ internal fun CheckoutSessionResponse.asCheckoutSession(
             Session.ShippingAddress(collectedShippingName, it.asShippingAddress())
         },
         tax = taxMeta.asTax(taxAddressSource),
-        taxAmounts = totalSummary?.totalTaxAmounts?.map {
-            it.asTaxAmount(presentmentCurrency, locale)
+        taxAmounts = presentmentCurrency?.let { currency ->
+            totalSummary?.totalTaxAmounts?.map { it.asTaxAmount(currency, locale) }
         },
-        totals = totals(presentmentCurrency, locale),
+        totals = presentmentCurrency?.let { totals(it, locale) },
         currencySelectorOptions = CurrencySelectorOptionsFactory.create(
             adaptivePricingInfo = adaptivePricingInfo,
             locale = locale,
