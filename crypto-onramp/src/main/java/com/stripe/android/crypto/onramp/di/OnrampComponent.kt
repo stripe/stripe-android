@@ -20,6 +20,7 @@ import javax.inject.Singleton
     ]
 )
 internal interface OnrampComponent {
+    val savedStateHandle: SavedStateHandle
     val onrampCoordinator: OnrampCoordinator
     val onrampCallbackIdentifier: String
 

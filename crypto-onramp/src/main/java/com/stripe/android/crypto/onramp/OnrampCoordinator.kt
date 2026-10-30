@@ -209,9 +209,6 @@ class OnrampCoordinator @Inject internal constructor(
     fun createPresenter(
         activity: ComponentActivity
     ): Presenter {
-        // A finished host removes the global registration. Restore it before
-        // constructing launchers, which can synchronously deliver pending results.
-        callbackStore.restore()
         return presenterComponentFactory
             .build(
                 activity = activity,

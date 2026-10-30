@@ -784,7 +784,7 @@ class OnrampPresenterCoordinatorTest {
         termsOfServiceCallback?.let(callbacks::termsOfServiceCallback)
         userAttestationCallback?.let(callbacks::userAttestationCallback)
 
-        OnrampCallbackReferences[DEFAULT_ONRAMP_INSTANCE_KEY] = callbacks.build()
+        val callbackStore = OnrampCallbackStore().apply { update(callbacks.build()) }
 
         return OnrampPresenterCoordinator(
             linkController = linkController,
@@ -793,6 +793,7 @@ class OnrampPresenterCoordinatorTest {
             activity = activity,
             coroutineScope = testScope,
             onrampCallbackIdentifier = DEFAULT_ONRAMP_INSTANCE_KEY,
+            callbackStore = callbackStore,
             samsungPayLauncherFactory = samsungPayLauncherFactory,
         )
     }

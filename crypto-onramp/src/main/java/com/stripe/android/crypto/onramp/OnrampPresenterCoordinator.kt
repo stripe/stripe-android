@@ -70,11 +70,11 @@ internal class OnrampPresenterCoordinator @Inject constructor(
     private val activity: ComponentActivity,
     private val coroutineScope: CoroutineScope,
     private val onrampCallbackIdentifier: String,
+    private val callbackStore: OnrampCallbackStore,
     private val samsungPayLauncherFactory: SamsungPayLauncher.Factory,
 ) {
     private val onrampCallbacksState: OnrampCallbacks.State
-        get() = OnrampCallbackReferences[onrampCallbackIdentifier]
-            ?: error("OnrampCallbackReferences not registered for key: $onrampCallbackIdentifier")
+        get() = callbackStore.callbacks
     private val linkControllerState = linkController.state(activity)
 
     private val linkPresenter = linkController.createPresenter(
@@ -190,7 +190,6 @@ internal class OnrampPresenterCoordinator @Inject constructor(
 
                     if (activity.isFinishing) {
                         KycSubmissionHandlerRegistry.remove(onrampCallbackIdentifier)
-                        OnrampCallbackReferences.remove(onrampCallbackIdentifier)
                     }
                 }
             }
