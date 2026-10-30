@@ -1,5 +1,6 @@
 package com.stripe.android.paymentelement.embedded.sheet
 
+import com.stripe.android.common.analytics.experiment.PrimaryButtonExperiment
 import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddNextStep
 import com.stripe.android.core.injection.ViewModelScope
@@ -85,7 +86,11 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
             primaryButtonIcon = if (launchMode !is EmbeddedLaunchMode.PaymentOptions &&
                 configuration.formSheetAction == EmbeddedPaymentElement.FormSheetAction.Confirm
             ) {
-                PrimaryButtonIcon.Lock
+                PrimaryButtonExperiment.getIcon(
+                    metadata = paymentMethodMetadata,
+                    eventReporter = eventReporter,
+                    mode = EventReporter.Mode.Embedded,
+                )
             } else {
                 PrimaryButtonIcon.None
             },

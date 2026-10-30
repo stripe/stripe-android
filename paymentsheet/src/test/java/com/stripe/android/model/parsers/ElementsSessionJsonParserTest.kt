@@ -234,6 +234,32 @@ class ElementsSessionJsonParserTest {
     }
 
     @Test
+    fun `parses primary button padlock experiment assignment`() {
+        val variant = "arbitrary_assignment"
+        val json = JSONObject(ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON.toString()).put(
+            "experiments_data",
+            JSONObject().put("arb_id", "arb_123").put(
+                "experiment_assignments",
+                JSONObject().put("ocs_mobile_remove_primary_button_padlock", variant),
+            ),
+        )
+        val elementsSession = ElementsSessionJsonParser(
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = "secret",
+                externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
+                appId = APP_ID,
+            ),
+            isLiveMode = true,
+        ).parse(json)
+
+        assertThat(elementsSession?.experimentsData?.arbId).isEqualTo("arb_123")
+        assertThat(elementsSession?.experimentsData?.experimentAssignments).containsExactly(
+            ElementsSession.ExperimentAssignment.OCS_MOBILE_REMOVE_PRIMARY_BUTTON_PADLOCK, variant,
+        )
+    }
+
+    @Test
     fun `Test ordered payment methods returned in PI payment_method_type variable`() {
         val parsedData = ElementsSessionJsonParser(
             ElementsSessionParams.PaymentIntentType(

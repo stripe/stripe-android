@@ -11,6 +11,8 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.ElementsSession
+import com.stripe.android.model.ElementsSession.ExperimentAssignment
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
@@ -74,6 +76,50 @@ internal class DefaultSheetActivityStateHolderTest {
             )
             assertThat(state.primaryButtonIcon).isEqualTo(PrimaryButtonIcon.Lock)
         }
+    }
+
+    @Test
+    fun `control confirmation button keeps padlock and logs exposure once`() = assertConfirmationButtonIconAndExposure(
+        variant = "control",
+        expectedIcon = PrimaryButtonIcon.Lock,
+    )
+
+    @Test
+    fun `control_test confirmation button keeps padlock and logs exposure once`() =
+        assertConfirmationButtonIconAndExposure(
+            variant = "control_test",
+            expectedIcon = PrimaryButtonIcon.Lock,
+        )
+
+    @Test
+    fun `treatment_no_padlock confirmation button removes padlock and logs exposure once`() =
+        assertConfirmationButtonIconAndExposure(
+            variant = "treatment_no_padlock",
+            expectedIcon = PrimaryButtonIcon.None,
+        )
+
+    @Test
+    fun `continue button does not log experiment exposure`() = testScenario(
+        experimentsData = experimentsData("treatment_no_padlock"),
+        config = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.")
+            .formSheetAction(EmbeddedPaymentElement.FormSheetAction.Continue)
+            .build(),
+    ) {
+        stateHolder.state.test {
+            assertThat(awaitItem().primaryButtonIcon).isEqualTo(PrimaryButtonIcon.None)
+        }
+        eventReporter.experimentExposureCalls.expectNoEvents()
+    }
+
+    @Test
+    fun `payment options does not log experiment exposure`() = testScenario(
+        experimentsData = experimentsData("treatment_no_padlock"),
+        launchMode = EmbeddedLaunchMode.PaymentOptions,
+    ) {
+        stateHolder.state.test {
+            assertThat(awaitItem().primaryButtonIcon).isEqualTo(PrimaryButtonIcon.None)
+        }
+        eventReporter.experimentExposureCalls.expectNoEvents()
     }
 
     @Test
@@ -616,16 +662,34 @@ internal class DefaultSheetActivityStateHolderTest {
         }
     }
 
+    private fun assertConfirmationButtonIconAndExposure(
+        variant: String,
+        expectedIcon: PrimaryButtonIcon,
+    ) = testScenario(experimentsData = experimentsData(variant)) {
+        stateHolder.state.test {
+            assertThat(awaitItem().primaryButtonIcon).isEqualTo(expectedIcon)
+            assertThat(eventReporter.experimentExposureCalls.awaitItem().experiment.group).isEqualTo(variant)
+
+            selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+            assertThat(awaitItem().primaryButtonIcon).isEqualTo(expectedIcon)
+            stateHolder.updateProcessing(true)
+            assertThat(awaitItem().primaryButtonIcon).isEqualTo(expectedIcon)
+            eventReporter.experimentExposureCalls.expectNoEvents()
+        }
+    }
+
     private class Scenario(
         val selectionHolder: EmbeddedSelectionHolder,
         val stateHolder: DefaultSheetActivityStateHolder,
         val confirmationHandler: FakeConfirmationHandler,
         val onClickOverrideDelegate: OnClickOverrideDelegate,
         val navigator: EmbeddedNavigator,
+        val eventReporter: FakeEventReporter,
     )
 
     private fun testScenario(
         stripeIntent: StripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+        experimentsData: ElementsSession.ExperimentsData? = null,
         config: EmbeddedPaymentElement.Configuration = EmbeddedConfirmationStateFixtures.defaultState().configuration,
         tapToAddHelper: FakeTapToAddHelper = FakeTapToAddHelper.noOp(),
         customerStateHolder: FakeCustomerStateHolder = FakeCustomerStateHolder(),
@@ -640,7 +704,11 @@ internal class DefaultSheetActivityStateHolderTest {
             FakeSavedPaymentMethodConfirmInteractor.Factory(),
         block: suspend Scenario.() -> Unit
     ) = runTest {
-        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(stripeIntent = stripeIntent)
+        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = stripeIntent,
+            experimentsData = experimentsData,
+        )
+        val eventReporter = FakeEventReporter()
         val selectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle())
         val onClickOverrideDelegate = OnClickDelegateOverrideImpl()
         val confirmationHandler = FakeConfirmationHandler()
@@ -657,7 +725,7 @@ internal class DefaultSheetActivityStateHolderTest {
             configuration = config,
             coroutineScope = viewModelScope,
             onClickDelegate = onClickOverrideDelegate,
-            eventReporter = FakeEventReporter(),
+            eventReporter = eventReporter,
             confirmationHandler = confirmationHandler,
             tapToAddHelper = tapToAddHelper,
             customerStateHolder = customerStateHolder,
@@ -682,7 +750,16 @@ internal class DefaultSheetActivityStateHolderTest {
             confirmationHandler = confirmationHandler,
             onClickOverrideDelegate = onClickOverrideDelegate,
             navigator = navigator,
+            eventReporter = eventReporter,
         ).block()
+        eventReporter.experimentExposureCalls.ensureAllEventsConsumed()
+    }
+
+    private fun experimentsData(variant: String): ElementsSession.ExperimentsData {
+        return ElementsSession.ExperimentsData(
+            arbId = "arb_123",
+            experimentAssignments = mapOf(ExperimentAssignment.OCS_MOBILE_REMOVE_PRIMARY_BUTTON_PADLOCK to variant),
+        )
     }
 
     private class RecordingSavedPaymentMethodConfirmInteractorFactory(
