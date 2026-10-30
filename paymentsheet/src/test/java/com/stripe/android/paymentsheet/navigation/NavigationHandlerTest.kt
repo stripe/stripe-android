@@ -212,7 +212,8 @@ internal class NavigationHandlerTest {
             assertThat(awaitItem()).isEqualTo(screenTwo)
             assertThat(navigationHandler.canGoBack).isTrue()
             val screenThree = FakeScreen()
-            navigationHandler.resetTo(listOf(screenThree))
+            val reset = navigationHandler.resetTo(listOf(screenThree))
+            assertThat(reset).isTrue()
             assertThat(awaitItem()).isEqualTo(screenThree)
             assertThat(navigationHandler.canGoBack).isFalse()
         }
@@ -259,6 +260,30 @@ internal class NavigationHandlerTest {
             assertThat(screenOne.closeCalls.awaitItem()).isEqualTo(Unit)
             screenOne.validate()
             screenTwo.validate()
+        }
+    }
+
+    @Test
+    fun `resetTo returns false and closes the passed screens while a transition is in progress`() = runTest {
+        val testScope = TestScope()
+        val navigationHandler = NavigationHandler<TestScreen>(
+            coroutineScope = testScope,
+            initialScreen = LoadingScreen,
+        ) {}
+
+        navigationHandler.currentScreen.test {
+            assertThat(awaitItem()).isEqualTo(LoadingScreen)
+            val pendingScreen = FakeScreen()
+            navigationHandler.transitionToWithDelay(pendingScreen)
+            val droppedScreen = FakeCloseableScreen()
+
+            val reset = navigationHandler.resetTo(listOf(droppedScreen))
+
+            assertThat(reset).isFalse()
+            assertThat(droppedScreen.closeCalls.awaitItem()).isEqualTo(Unit)
+            droppedScreen.validate()
+            testScope.testScheduler.advanceTimeBy(251.milliseconds)
+            assertThat(awaitItem()).isEqualTo(pendingScreen)
         }
     }
 
