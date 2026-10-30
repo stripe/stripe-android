@@ -15,6 +15,7 @@ import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.account.LinkAccountHolder
+import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
@@ -111,7 +112,10 @@ internal class SavedPaymentMethodConfirmScreenTest {
 
     @Test
     fun `completed processing preserves PaymentOptions launch mode`() = runTest {
-        val launchMode = EmbeddedLaunchMode.PaymentOptions
+        val launchMode = EmbeddedLaunchMode.PaymentOptions(
+            visibleWallets = WalletType.entries,
+            isFlowController = false,
+        )
         runScenario(
             initialState = defaultState().copy(
                 isEnabled = false,

@@ -100,11 +100,6 @@ internal interface EmbeddedCommonModule {
         }
 
         @Provides
-        fun provideEventReporterMode(): EventReporter.Mode {
-            return EventReporter.Mode.Embedded
-        }
-
-        @Provides
         fun provideDurationProvider(): DurationProvider {
             return DefaultDurationProvider.instance
         }

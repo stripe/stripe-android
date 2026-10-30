@@ -20,6 +20,7 @@ internal class DefaultSheetActivityRegistrar @Inject constructor(
     private val confirmationHandler: ConfirmationHandler,
     private val tapToAddHelper: TapToAddHelper,
     private val paymentMethodMetadata: PaymentMethodMetadata,
+    private val linkPaymentMethodSelectionHandler: SheetLinkPaymentMethodSelectionHandler,
 ) : SheetActivityRegistrar {
 
     private var isBootstrapped = false
@@ -30,6 +31,7 @@ internal class DefaultSheetActivityRegistrar @Inject constructor(
     ) {
         confirmationHandler.register(activityResultCaller, lifecycleOwner)
         tapToAddHelper.register(activityResultCaller, lifecycleOwner)
+        linkPaymentMethodSelectionHandler.register(activityResultCaller, lifecycleOwner)
         if (!isBootstrapped) {
             confirmationHandler.bootstrap(paymentMethodMetadata)
             isBootstrapped = true

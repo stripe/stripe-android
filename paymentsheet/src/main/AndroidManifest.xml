@@ -9,10 +9,6 @@
             android:theme="@style/StripePaymentSheetDefaultTheme"
             android:exported="false" />
         <activity
-            android:name=".PaymentOptionsActivity"
-            android:theme="@style/StripePaymentSheetDefaultTheme"
-            android:exported="false" />
-        <activity
             android:name="com.stripe.android.customersheet.CustomerSheetActivity"
             android:theme="@style/StripePaymentSheetDefaultTheme"
             android:exported="false" />

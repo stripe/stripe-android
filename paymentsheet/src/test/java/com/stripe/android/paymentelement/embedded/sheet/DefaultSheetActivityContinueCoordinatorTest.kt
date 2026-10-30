@@ -16,6 +16,8 @@ import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
+import com.stripe.android.lpmfoundations.paymentmethod.WalletType
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networktesting.NetworkRule
@@ -59,11 +61,87 @@ internal class DefaultSheetActivityContinueCoordinatorTest {
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
     ) {
         continueCoordinator.onContinue()
+        assertThat(linkHandler.launchIfEligibleCalls.awaitItem())
+            .isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
 
         assertThat(stateHolder.resultTurbine.awaitItem()).isEqualTo(
             completeResult(checkoutSessionResponse = null)
         )
         stateHolder.updateProcessingTurbine.expectNoEvents()
+    }
+
+    @Test
+    fun `FlowController continue reports the selected payment option`() = runScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+        launchMode = FLOW_CONTROLLER_LAUNCH_MODE,
+    ) {
+        continueCoordinator.onContinue()
+        assertThat(linkHandler.launchIfEligibleCalls.awaitItem())
+            .isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+
+        assertThat(eventReporter.selectPaymentOptionCalls.awaitItem())
+            .isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+        assertThat(stateHolder.resultTurbine.awaitItem()).isEqualTo(
+            completeResult(checkoutSessionResponse = null)
+        )
+    }
+
+    @Test
+    fun `FlowController continue without a selection does not report a payment option`() = runScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+        selection = null,
+        launchMode = FLOW_CONTROLLER_LAUNCH_MODE,
+    ) {
+        continueCoordinator.onContinue()
+        assertThat(linkHandler.launchIfEligibleCalls.awaitItem()).isNull()
+
+        assertThat(stateHolder.resultTurbine.awaitItem()).isEqualTo(
+            completeResult(selection = null, checkoutSessionResponse = null)
+        )
+        eventReporter.selectPaymentOptionCalls.expectNoEvents()
+    }
+
+    @Test
+    fun `FlowController continue is not reported while processing`() = runScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+        launchMode = FLOW_CONTROLLER_LAUNCH_MODE,
+    ) {
+        stateHolder.updateState { it.copy(isProcessing = true) }
+
+        continueCoordinator.onContinue()
+
+        stateHolder.resultTurbine.expectNoEvents()
+        eventReporter.selectPaymentOptionCalls.expectNoEvents()
+    }
+
+    @Test
+    fun `continue does not complete when Link payment method selection launches`() = runScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+        selection = LINK_SELECTION,
+        launchMode = FLOW_CONTROLLER_LAUNCH_MODE,
+        linkHandler = FakeSheetLinkPaymentMethodSelectionHandler(launchResult = true),
+    ) {
+        continueCoordinator.onContinue()
+
+        assertThat(eventReporter.selectPaymentOptionCalls.awaitItem()).isEqualTo(LINK_SELECTION)
+        assertThat(linkHandler.launchIfEligibleCalls.awaitItem()).isEqualTo(LINK_SELECTION)
+        stateHolder.resultTurbine.expectNoEvents()
+        stateHolder.updateProcessingTurbine.expectNoEvents()
+    }
+
+    @Test
+    fun `continue completes with Link selection when Link selection does not launch`() = runScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+        selection = LINK_SELECTION,
+        launchMode = FLOW_CONTROLLER_LAUNCH_MODE,
+    ) {
+        continueCoordinator.onContinue()
+
+        assertThat(eventReporter.selectPaymentOptionCalls.awaitItem()).isEqualTo(LINK_SELECTION)
+        assertThat(linkHandler.launchIfEligibleCalls.awaitItem()).isEqualTo(LINK_SELECTION)
+        assertThat(stateHolder.resultTurbine.awaitItem()).isEqualTo(
+            completeResult(selection = LINK_SELECTION, checkoutSessionResponse = null)
+        )
     }
 
     @Test
@@ -86,6 +164,8 @@ internal class DefaultSheetActivityContinueCoordinatorTest {
 
         runScenario(paymentMethodMetadata = CHECKOUT_SESSION_METADATA) {
             continueCoordinator.onContinue()
+            assertThat(linkHandler.launchIfEligibleCalls.awaitItem())
+                .isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
 
             assertThat(stateHolder.state.value.isProcessing).isTrue()
             assertThat(stateHolder.updateProcessingTurbine.awaitItem()).isTrue()
@@ -111,6 +191,8 @@ internal class DefaultSheetActivityContinueCoordinatorTest {
 
         runScenario(paymentMethodMetadata = CHECKOUT_SESSION_METADATA) {
             continueCoordinator.onContinue()
+            assertThat(linkHandler.launchIfEligibleCalls.awaitItem())
+                .isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
             selectionHolder.setSelection(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
             testScope.runCurrent()
 
@@ -135,6 +217,8 @@ internal class DefaultSheetActivityContinueCoordinatorTest {
 
         runScenario(paymentMethodMetadata = CHECKOUT_SESSION_METADATA) {
             continueCoordinator.onContinue()
+            assertThat(linkHandler.launchIfEligibleCalls.awaitItem())
+                .isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
             testScope.runCurrent()
 
             assertThat(stateHolder.updateProcessingTurbine.awaitItem()).isTrue()
@@ -148,6 +232,8 @@ internal class DefaultSheetActivityContinueCoordinatorTest {
                 response.testBodyFromFile("checkout-session-init.json")
             }
             continueCoordinator.onContinue()
+            assertThat(linkHandler.launchIfEligibleCalls.awaitItem())
+                .isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
             testScope.runCurrent()
 
             assertThat(stateHolder.updateProcessingTurbine.awaitItem()).isTrue()
@@ -189,6 +275,8 @@ internal class DefaultSheetActivityContinueCoordinatorTest {
             manageInteractor.validate()
 
             continueCoordinator.onContinue()
+            assertThat(linkHandler.launchIfEligibleCalls.awaitItem())
+                .isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
             testScope.runCurrent()
 
             assertThat(stateHolder.updateProcessingTurbine.awaitItem()).isTrue()
@@ -204,6 +292,8 @@ internal class DefaultSheetActivityContinueCoordinatorTest {
         paymentMethodMetadata: PaymentMethodMetadata,
         selection: PaymentSelection? = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
         taxRegionUpdater: SheetTaxRegionUpdater = SheetTaxRegionUpdater(checkoutSessionTaxRegionUpdater()),
+        launchMode: EmbeddedLaunchMode = LAUNCH_MODE,
+        linkHandler: FakeSheetLinkPaymentMethodSelectionHandler = FakeSheetLinkPaymentMethodSelectionHandler(),
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val selectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle()).apply {
@@ -231,8 +321,10 @@ internal class DefaultSheetActivityContinueCoordinatorTest {
             selectionHolder = selectionHolder,
             customerStateHolder = customerStateHolder,
             linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
-            launchMode = LAUNCH_MODE,
+            launchMode = launchMode,
+            eventReporter = eventReporter,
             embeddedNavigatorProvider = Provider { navigator },
+            linkPaymentMethodSelectionHandler = linkHandler,
             coroutineScope = this,
         )
 
@@ -244,6 +336,8 @@ internal class DefaultSheetActivityContinueCoordinatorTest {
             testScope = this,
             navigator = navigator,
             eventReporter = eventReporter,
+            launchMode = launchMode,
+            linkHandler = linkHandler,
         ).block()
 
         backgroundScope.cancel()
@@ -252,6 +346,7 @@ internal class DefaultSheetActivityContinueCoordinatorTest {
         eventReporter.validate()
         stateHolder.validate()
         customerStateHolder.validate()
+        linkHandler.validate()
     }
 
     private fun checkoutSessionTaxRegionUpdater(): CheckoutSessionTaxRegionUpdater {
@@ -284,6 +379,8 @@ internal class DefaultSheetActivityContinueCoordinatorTest {
         val testScope: TestScope,
         val navigator: EmbeddedNavigator,
         val eventReporter: FakeEventReporter,
+        val launchMode: EmbeddedLaunchMode,
+        val linkHandler: FakeSheetLinkPaymentMethodSelectionHandler,
     ) {
         fun completeResult(
             selection: PaymentSelection? = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
@@ -297,14 +394,22 @@ internal class DefaultSheetActivityContinueCoordinatorTest {
                 linkAccountInfo = LinkAccountUpdate.Value(null),
                 checkoutSessionResponse = checkoutSessionResponse,
                 shouldInvokeSelectionCallback = false,
-                launchMode = LAUNCH_MODE,
+                launchMode = launchMode,
             )
         }
     }
 
     private companion object {
         const val ERROR_MESSAGE = "Tax region update failed"
-        val LAUNCH_MODE = EmbeddedLaunchMode.PaymentOptions
+        val LINK_SELECTION = PaymentSelection.Link(brand = LinkBrand.Link)
+        val LAUNCH_MODE = EmbeddedLaunchMode.PaymentOptions(
+            visibleWallets = WalletType.entries,
+            isFlowController = false,
+        )
+        val FLOW_CONTROLLER_LAUNCH_MODE = EmbeddedLaunchMode.PaymentOptions(
+            visibleWallets = WalletType.entries,
+            isFlowController = true,
+        )
         val CHECKOUT_SESSION_METADATA = PaymentMethodMetadataFactory.create(
             integrationMetadata = IntegrationMetadata.CheckoutSession(
                 collectedEmail = null,

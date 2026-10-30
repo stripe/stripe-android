@@ -25,6 +25,7 @@ import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
+import com.stripe.android.paymentelement.embedded.isFlowControllerPaymentOptions
 import com.stripe.android.paymentelement.embedded.manage.ManageScreenSavedPaymentMethodSelector
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -61,7 +62,7 @@ internal class ReadyEmbeddedSheetPresentation @AssistedInject constructor(
         )
 
         activity.lifecycleScope.launch {
-            sheetActivityStateHolder.result.collect(activity::finishWithResult)
+            sheetActivityStateHolder.result.collect(::finishWithResult)
         }
 
         activity.onBackPressedDispatcher.addCallback {
@@ -76,7 +77,7 @@ internal class ReadyEmbeddedSheetPresentation @AssistedInject constructor(
     }
 
     override fun onDismissed() {
-        activity.finishWithResult(createDismissalResult())
+        finishWithResult(createDismissalResult())
     }
 
     @Composable
@@ -85,16 +86,26 @@ internal class ReadyEmbeddedSheetPresentation @AssistedInject constructor(
             EmbeddedSheetReadyContent(
                 navigator = embeddedNavigator,
                 onResult = { result ->
-                    activity.finishWithResult(createNavigatorResult(result))
+                    finishWithResult(createNavigatorResult(result))
                 },
             )
         }
     }
 
     override fun onDestroy() {
-        if (activity.isFinishing) {
+        if (activity.isFinishing && !args.launchMode.isFlowControllerPaymentOptions) {
             eventReporter.onDismiss()
         }
+    }
+
+    private fun finishWithResult(result: EmbeddedActivityResult) {
+        if (args.launchMode.isFlowControllerPaymentOptions &&
+            result is EmbeddedActivityResult.Cancelled &&
+            !activity.isFinishing
+        ) {
+            eventReporter.onDismiss()
+        }
+        activity.finishWithResult(result)
     }
 
     private fun createDismissalResult(): EmbeddedActivityResult {
@@ -108,7 +119,7 @@ internal class ReadyEmbeddedSheetPresentation @AssistedInject constructor(
                 shouldInvokeSelectionCallback = false,
                 launchMode = launchMode,
             )
-            is EmbeddedLaunchMode.PaymentOptions -> createPaymentOptionsCancellationResult()
+            is EmbeddedLaunchMode.PaymentOptions -> createPaymentOptionsCancellationResult(launchMode)
         }
     }
 
@@ -119,7 +130,7 @@ internal class ReadyEmbeddedSheetPresentation @AssistedInject constructor(
                 shouldInvokeSelectionCallback = result == true,
                 launchMode = launchMode,
             )
-            is EmbeddedLaunchMode.PaymentOptions -> createPaymentOptionsCancellationResult()
+            is EmbeddedLaunchMode.PaymentOptions -> createPaymentOptionsCancellationResult(launchMode)
         }
     }
 
@@ -139,11 +150,13 @@ internal class ReadyEmbeddedSheetPresentation @AssistedInject constructor(
         )
     }
 
-    private fun createPaymentOptionsCancellationResult(): EmbeddedActivityResult {
+    private fun createPaymentOptionsCancellationResult(
+        launchMode: EmbeddedLaunchMode.PaymentOptions,
+    ): EmbeddedActivityResult {
         return EmbeddedActivityResult.Cancelled(
             customerState = customerStateHolder.customer.value,
             linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
-            launchMode = EmbeddedLaunchMode.PaymentOptions,
+            launchMode = launchMode,
         )
     }
 

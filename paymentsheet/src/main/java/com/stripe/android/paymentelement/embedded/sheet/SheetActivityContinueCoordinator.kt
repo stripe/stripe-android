@@ -8,7 +8,9 @@ import com.stripe.android.lpmfoundations.paymentmethod.checkoutSessionResponse
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
+import com.stripe.android.paymentelement.embedded.isFlowControllerPaymentOptions
 import com.stripe.android.paymentsheet.CustomerStateHolder
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import kotlinx.coroutines.CoroutineScope
@@ -28,7 +30,9 @@ internal class DefaultSheetActivityContinueCoordinator @Inject constructor(
     private val customerStateHolder: CustomerStateHolder,
     private val linkAccountHolder: LinkAccountHolder,
     private val launchMode: EmbeddedLaunchMode,
+    private val eventReporter: EventReporter,
     private val embeddedNavigatorProvider: Provider<EmbeddedNavigator>,
+    private val linkPaymentMethodSelectionHandler: SheetLinkPaymentMethodSelectionHandler,
     @ViewModelScope private val coroutineScope: CoroutineScope,
 ) : SheetActivityContinueCoordinator {
 
@@ -37,6 +41,10 @@ internal class DefaultSheetActivityContinueCoordinator @Inject constructor(
         if (stateHolder.state.value.isProcessing || embeddedNavigatorProvider.get().isTransitioning) return
 
         val selection = selectionHolder.selection.value
+        if (launchMode.isFlowControllerPaymentOptions && selection != null) {
+            eventReporter.onSelectPaymentOption(selection)
+        }
+        if (linkPaymentMethodSelectionHandler.launchIfEligible(selection)) return
         val taxRegionUpdate = taxRegionUpdater.prepareUpdate(
             checkoutSessionResponse = paymentMethodMetadata.checkoutSessionResponse,
             selection = selection,

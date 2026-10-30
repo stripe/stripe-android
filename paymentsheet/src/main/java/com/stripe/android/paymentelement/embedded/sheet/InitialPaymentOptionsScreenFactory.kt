@@ -7,10 +7,12 @@ import com.stripe.android.core.strings.orEmpty
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodOrientation
+import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.form.OnClickOverrideDelegate
+import com.stripe.android.paymentelement.embedded.isFlowControllerPaymentOptions
 import com.stripe.android.paymentelement.embedded.manage.EmbeddedManageScreenInteractorFactory
 import com.stripe.android.paymentelement.embedded.manage.EmbeddedUpdateScreenInteractorFactory
 import com.stripe.android.paymentsheet.CustomerStateHolder
@@ -20,6 +22,7 @@ import com.stripe.android.paymentsheet.FormHelper.FormType
 import com.stripe.android.paymentsheet.PaymentOptionsItem
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.model.MandateText
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.paymentMethodType
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
@@ -78,7 +81,9 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
     private fun createVerticalInitialScreens(): List<EmbeddedNavigator.Screen> {
         val canOpenDirectForm = launchMode is EmbeddedLaunchMode.PaymentOptions ||
             selectionHolder.selection.value == null
-        if (walletsInteractor.canShowDirectForm && canOpenDirectForm) {
+        // A saved payment method can be added after launch (e.g. tap to add), which must show the list.
+        val hasSavedPaymentMethods = customerStateHolder.paymentMethods.value.isNotEmpty()
+        if (walletsInteractor.canShowDirectForm && canOpenDirectForm && !hasSavedPaymentMethods) {
             val paymentMethodCode = paymentMethodMetadata.supportedPaymentMethodTypes().single()
             return listOf(formScreenFactory.createFormScreen(paymentMethodCode))
         }
@@ -137,8 +142,20 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
         return EmbeddedNavigator.Screen.HorizontalSavedPaymentOptions(
             interactor = createSavedPaymentMethodsInteractor(),
             sheetActivityState = sheetActivityStateHolder.state,
+            mandateText = selectionHolder.selection.mapAsStateFlow(::savedPaymentMethodsMandateText),
             onContinueClick = ::onContinueClick,
             onPrimaryButtonDisabledClick = sheetActivityStateHolder::onPrimaryButtonDisabledClick,
+        )
+    }
+
+    private fun savedPaymentMethodsMandateText(selection: PaymentSelection?): MandateText? {
+        val text = selection?.mandateText(
+            merchantName = paymentMethodMetadata.merchantName,
+            isSetupFlow = paymentMethodMetadata.stripeIntent is SetupIntent,
+        ) ?: return null
+        return MandateText(
+            text = text,
+            showAbovePrimaryButton = (selection as? PaymentSelection.Saved)?.showMandateAbovePrimaryButton == true,
         )
     }
 
@@ -173,9 +190,16 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
                 )
             },
             onUpdatePaymentMethod = ::navigateToUpdateScreen,
-            updateSelection = { selection, _ -> selectionHolder.setSelection(selection) },
+            updateSelection = ::onSavedPaymentMethodsSelectionUpdated,
             linkBrand = paymentMethodMetadata.effectiveLinkBrand(linkAccount),
         )
+    }
+
+    private fun onSavedPaymentMethodsSelectionUpdated(selection: PaymentSelection?, isUserInput: Boolean) {
+        selectionHolder.setSelection(selection)
+        if (isUserInput && selection?.requiresConfirmation != true) {
+            continueCoordinator.onContinue()
+        }
     }
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
@@ -184,6 +208,9 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
         if (onClickOverride != null) {
             onClickOverride()
             return
+        }
+        if (launchMode.isFlowControllerPaymentOptions) {
+            selectionHolder.selection.value?.let(eventReporter::onPressConfirmButton)
         }
         continueCoordinator.onContinue()
     }

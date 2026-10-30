@@ -11,6 +11,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
@@ -88,6 +89,7 @@ internal class EmbeddedSheetViewModelTest {
         val args = EmbeddedActivityArgs(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
             configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
+            googlePlacesApiKey = null,
             productUsage = setOf("PaymentSheet.FlowController"),
             paymentElementCallbackIdentifier = "EmbeddedSheetViewModelTest",
             statusBarColor = null,
@@ -103,7 +105,10 @@ internal class EmbeddedSheetViewModelTest {
                 lastUpdateReason = LinkAccountUpdate.Value.UpdateReason.LoggedOut,
             ),
             promotions = emptyList(),
-            launchMode = EmbeddedLaunchMode.PaymentOptions,
+            launchMode = EmbeddedLaunchMode.PaymentOptions(
+                visibleWallets = WalletType.entries,
+                isFlowController = false,
+            ),
             presentationState = EmbeddedActivityArgs.PresentationState.Ready,
         )
         private var controller = createController(null)

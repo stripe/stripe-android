@@ -3,14 +3,10 @@ package com.stripe.android.paymentsheet
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.core.Logger
 import com.stripe.android.isInstanceOf
-import com.stripe.android.link.LinkAccountUpdate
-import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.account.LinkAccountHolder
-import com.stripe.android.link.gate.FakeLinkGate
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
@@ -30,12 +26,10 @@ import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.Arg
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionInteractor
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
-import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.FakeErrorReporter
-import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.elements.CardDetailsSectionController
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.utils.FakeIsNfcScanningAvailable
@@ -52,7 +46,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Rule
 import org.junit.runner.RunWith
-import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 import kotlin.time.Duration
@@ -106,45 +99,6 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
         }
     }
 
-    @Test
-    fun `should not AutomaticallyLaunchCardScan if card form will be filled FlowController`() {
-        val viewModel = createPaymentOptionsViewModel()
-
-        viewModel.newPaymentSelection = NewPaymentOptionSelection.New(
-            CARD_PAYMENT_SELECTION
-        )
-
-        testFormElementsForCardCode(
-            viewModel = viewModel,
-        ) { formElements ->
-            assertThat(formElements[0].controller).isInstanceOf<CardDetailsSectionController>()
-
-            assertThat(
-                (formElements[0].controller as CardDetailsSectionController)
-                    .cardDetailsAction
-                    ?.shouldAutomaticallyLaunchCardScan
-            ).isFalse()
-        }
-    }
-
-    @Test
-    fun `should AutomaticallyLaunchCardScan if card form will be empty FlowController`() {
-        val viewModel = createPaymentOptionsViewModel()
-
-        viewModel.newPaymentSelection = null
-        testFormElementsForCardCode(
-            viewModel = viewModel,
-        ) { formElements ->
-            assertThat(formElements[0].controller).isInstanceOf<CardDetailsSectionController>()
-
-            assertThat(
-                (formElements[0].controller as CardDetailsSectionController)
-                    .cardDetailsAction
-                    ?.shouldAutomaticallyLaunchCardScan
-            ).isTrue()
-        }
-    }
-
     private fun testFormElementsForCardCode(
         viewModel: BaseSheetViewModel,
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(
@@ -163,41 +117,6 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
         val formElements = defaultFormHelper.formElementsForCode(PaymentMethod.Type.Card.code)
 
         block(formElements)
-    }
-
-    private fun createPaymentOptionsViewModel(
-        customer: CustomerState? = EMPTY_CUSTOMER_STATE.copy(paymentMethods = listOf(CARD_PAYMENT_METHOD)),
-        args: PaymentOptionContract.Args = PAYMENT_OPTION_CONTRACT_ARGS,
-    ): PaymentOptionsViewModel {
-        val viewModel = TestViewModelFactory.create(
-            savedStateHandle = SavedStateHandle(),
-        ) { linkHandler, thisSavedStateHandle ->
-            PaymentOptionsViewModel(
-                args = args,
-                eventReporter = FakeEventReporter(),
-                savedPaymentMethodRepository = FakeSavedPaymentMethodRepository(
-                    customer?.paymentMethods ?: emptyList()
-                ),
-                workContext = testDispatcher,
-                savedStateHandle = thisSavedStateHandle,
-                linkHandler = linkHandler,
-                cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
-                linkGateFactory = FakeLinkGate.Factory(),
-                linkPaymentLauncher = mock<LinkPaymentLauncher>(),
-                linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
-                tapToAddHelperFactory = FakeTapToAddHelper.Factory.noOp(),
-                isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = false),
-                mode = EventReporter.Mode.Complete,
-                errorReporter = FakeErrorReporter(),
-                customerStateHolderFactory = DefaultCustomerStateHolder.Factory,
-                customViewModelScope = coroutineScopeCleanupRule.track(CoroutineScope(Dispatchers.Unconfined)),
-                paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
-                placesClient = null,
-                stripeAutocompleteRepository = FakeStripeAutocompleteRepository(),
-                addressLauncherEventReporter = FakeAddressLauncherEventReporter(),
-            )
-        }
-        return viewModelStoreRule.track(viewModel)
     }
 
     private fun createPaymentSheetViewModel(
@@ -257,27 +176,4 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
         }
         return viewModelStoreRule.track(viewModel)
     }
-
-    private val PAYMENT_OPTION_CONTRACT_ARGS = PaymentOptionContract.Args(
-        state = PaymentSheetState.Full(
-            customer = EMPTY_CUSTOMER_STATE,
-            config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.asCommonConfiguration(),
-            paymentSelection = null,
-            validationError = null,
-            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-                stripeIntent = PaymentIntentFactory.create(),
-                isGooglePayReady = true,
-            ),
-        ),
-        configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
-        enableLogging = false,
-        productUsage = mock(),
-        paymentElementCallbackIdentifier = "PaymentOptionsViewModelTestCallbackIdentifier",
-        linkAccountInfo = LinkAccountUpdate.Value(
-            account = null,
-            lastUpdateReason = null
-        ),
-        walletButtonsRendered = false,
-        promotions = null,
-    )
 }

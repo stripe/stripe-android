@@ -47,7 +47,6 @@ import com.stripe.android.CardFundingFilter
 import com.stripe.android.common.ui.BottomSheetScaffold
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
-import com.stripe.android.paymentsheet.PaymentOptionsViewModel
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.MandateText
@@ -56,7 +55,6 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.PaymentSheetFlowType.Complete
-import com.stripe.android.paymentsheet.ui.PaymentSheetFlowType.Custom
 import com.stripe.android.paymentsheet.utils.DismissKeyboardOnProcessing
 import com.stripe.android.paymentsheet.utils.EventReporterProvider
 import com.stripe.android.paymentsheet.utils.PaymentSheetContentPadding
@@ -82,16 +80,6 @@ internal fun PaymentSheetScreen(
         contentVisible = contentVisible
     ) {
         PaymentSheetScreenContent(viewModel, type = Complete, scrollState = scrollState)
-    }
-}
-
-@Composable
-internal fun PaymentSheetScreen(
-    viewModel: PaymentOptionsViewModel,
-) {
-    val scrollState = rememberScrollState()
-    PaymentSheetScreen(viewModel, scrollState) {
-        PaymentSheetScreenContent(viewModel, type = Custom, scrollState = scrollState)
     }
 }
 

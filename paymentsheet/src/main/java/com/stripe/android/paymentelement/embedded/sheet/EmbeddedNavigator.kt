@@ -19,10 +19,12 @@ import com.stripe.android.paymentelement.embedded.form.EmbeddedFormInteractorFac
 import com.stripe.android.paymentelement.embedded.form.FormActivityError
 import com.stripe.android.paymentelement.embedded.form.FormActivityPrimaryButton
 import com.stripe.android.paymentelement.embedded.form.FormScreenContent
+import com.stripe.android.paymentelement.embedded.form.SheetMandate
 import com.stripe.android.paymentelement.embedded.form.USBankAccountMandate
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.model.MandateText
 import com.stripe.android.paymentsheet.navigation.NavigationHandler
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods.CvcRecollectionState
 import com.stripe.android.paymentsheet.ui.AddPaymentMethod
@@ -125,6 +127,16 @@ internal class EmbeddedNavigator private constructor(
                     onScreenShown(action.screen)
                 }
             }
+            is Action.ResetTo -> {
+                val previousScreen = screen.value
+                if (!navigationHandler.isTransitioning()) {
+                    navigationHandler.resetTo(action.screens)
+                    onScreenHidden(previousScreen)
+                    onScreenShown(screen.value)
+                } else {
+                    action.screens.forEach { (it as? Closeable)?.close() }
+                }
+            }
         }
     }
 
@@ -223,7 +235,7 @@ internal class EmbeddedNavigator private constructor(
             private val embeddedSelectionHolder: EmbeddedSelectionHolder,
             private val customerStateHolder: CustomerStateHolder,
             private val linkAccountHolder: LinkAccountHolder,
-            private val launchMode: EmbeddedLaunchMode.Form,
+            val launchMode: EmbeddedLaunchMode.Form,
         ) : Screen(), Closeable {
             override fun topBarState(): StateFlow<PaymentSheetTopBarState?> = stateFlowOf(
                 PaymentSheetTopBarStateFactory.create(
@@ -366,10 +378,12 @@ internal class EmbeddedNavigator private constructor(
             @Composable
             override fun Content(showsWalletsHeader: Boolean) {
                 val state by sheetActivityState.collectAsState()
+                val interactorState by interactor.state.collectAsState()
                 PaymentMethodVerticalLayoutUI(
                     interactor = interactor,
                     modifier = Modifier.padding(MaterialTheme.stripeFormInsets.getOuterFormInsets()),
                 )
+                SheetMandate(interactorState.mandate)
                 FormActivityError(state)
                 Spacer(Modifier.height(40.dp))
                 FormActivityPrimaryButton(
@@ -432,6 +446,7 @@ internal class EmbeddedNavigator private constructor(
         class HorizontalSavedPaymentOptions(
             private val interactor: SelectSavedPaymentMethodsInteractor,
             private val sheetActivityState: StateFlow<SheetActivityStateHolder.State>,
+            private val mandateText: StateFlow<MandateText?>,
             private val onContinueClick: () -> Unit,
             private val onPrimaryButtonDisabledClick: () -> Unit,
         ) : Screen(), Closeable {
@@ -467,6 +482,10 @@ internal class EmbeddedNavigator private constructor(
                     modifier = Modifier.padding(MaterialTheme.stripeFormInsets.getOuterFormInsets()),
                 )
                 val state by sheetActivityState.collectAsState()
+                val mandate by mandateText.collectAsState()
+                if (mandate?.showAbovePrimaryButton == true) {
+                    SheetMandate(mandate?.text)
+                }
                 FormActivityError(state)
                 Spacer(Modifier.height(40.dp))
                 FormActivityPrimaryButton(
@@ -474,6 +493,9 @@ internal class EmbeddedNavigator private constructor(
                     onClick = onContinueClick,
                     onDisabledClick = onPrimaryButtonDisabledClick,
                 )
+                if (mandate?.showAbovePrimaryButton == false) {
+                    SheetMandate(mandate?.text)
+                }
                 PaymentSheetContentPadding()
             }
 
@@ -491,6 +513,8 @@ internal class EmbeddedNavigator private constructor(
         data class GoToScreen(val screen: Screen) : Action()
 
         data class ReplaceCurrentScreen(val screen: Screen) : Action()
+
+        data class ResetTo(val screens: List<Screen>) : Action()
     }
 }
 

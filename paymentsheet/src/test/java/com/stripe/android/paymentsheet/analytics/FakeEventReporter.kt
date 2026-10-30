@@ -112,6 +112,15 @@ internal class FakeEventReporter : EventReporter {
     val pmmPromotionsDisplayed: ReceiveTurbine<Boolean> =
         _pmmPromotionsDisplayed
 
+    private val _dismissCalls = Turbine<Unit>()
+    val dismissCalls: ReceiveTurbine<Unit> = _dismissCalls
+
+    private val _selectPaymentOptionCalls = Turbine<PaymentSelection>()
+    val selectPaymentOptionCalls: ReceiveTurbine<PaymentSelection> = _selectPaymentOptionCalls
+
+    private val _paymentMethodFormShownCalls = Turbine<PaymentMethodCode>()
+    val paymentMethodFormShownCalls: ReceiveTurbine<PaymentMethodCode> = _paymentMethodFormShownCalls
+
     fun validate() {
         _paymentFailureCalls.ensureAllEventsConsumed()
         _paymentSuccessCalls.ensureAllEventsConsumed()
@@ -142,9 +151,13 @@ internal class FakeEventReporter : EventReporter {
         _billingAddressCompletedCalls.ensureAllEventsConsumed()
         _pmmPromotionsFetched.ensureAllEventsConsumed()
         _pmmPromotionsDisplayed.ensureAllEventsConsumed()
+        _dismissCalls.ensureAllEventsConsumed()
+        _selectPaymentOptionCalls.ensureAllEventsConsumed()
+        _paymentMethodFormShownCalls.ensureAllEventsConsumed()
     }
 
     override fun onDismiss() {
+        _dismissCalls.add(Unit)
     }
 
     override fun onShowExistingPaymentOptions() {
@@ -167,6 +180,7 @@ internal class FakeEventReporter : EventReporter {
     }
 
     override fun onPaymentMethodFormShown(code: PaymentMethodCode) {
+        _paymentMethodFormShownCalls.add(code)
     }
 
     override fun onPaymentMethodFormInteraction(code: PaymentMethodCode) {
@@ -184,6 +198,7 @@ internal class FakeEventReporter : EventReporter {
     }
 
     override fun onSelectPaymentOption(paymentSelection: PaymentSelection) {
+        _selectPaymentOptionCalls.add(paymentSelection)
     }
 
     override fun onWalletButtonTapped(walletType: String) {

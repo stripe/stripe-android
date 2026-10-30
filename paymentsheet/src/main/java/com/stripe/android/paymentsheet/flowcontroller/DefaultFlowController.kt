@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.flowcontroller
 
 import android.app.Activity
 import android.content.Context
+import android.os.Bundle
 import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
@@ -18,7 +19,6 @@ import androidx.lifecycle.lifecycleScope
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.exception.StripeException
-import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkActivityResult.Canceled.Reason
@@ -35,6 +35,8 @@ import com.stripe.android.link.model.toLoginState
 import com.stripe.android.link.utils.determineFallbackPaymentSelectionAfterLinkLogout
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.LinkBrand
+import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.WalletButtonsViewClickHandler
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
@@ -43,15 +45,18 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationTypeKey
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
+import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
+import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
+import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
+import com.stripe.android.paymentelement.embedded.linkAccountInfoOrNull
+import com.stripe.android.paymentelement.embedded.sheet.EmbeddedSheetContract
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.InitializedViaCompose
 import com.stripe.android.paymentsheet.LinkHandler
-import com.stripe.android.paymentsheet.PaymentOptionContract
 import com.stripe.android.paymentsheet.PaymentOptionResult
 import com.stripe.android.paymentsheet.PaymentOptionResultCallback
-import com.stripe.android.paymentsheet.PaymentOptionsActivityResult
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
@@ -72,6 +77,7 @@ import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.paymentsheet.utils.reportPaymentResult
+import com.stripe.android.paymentsheet.walletsVisibleInPaymentElement
 import com.stripe.android.uicore.utils.AnimationConstants
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -100,7 +106,6 @@ internal class DefaultFlowController @Inject internal constructor(
     private val linkAccountHolder: LinkAccountHolder,
     @Named(FLOW_CONTROLLER_LINK_LAUNCHER) private val flowControllerLinkLauncher: LinkPaymentLauncher,
     @Named(WALLETS_BUTTON_LINK_LAUNCHER) private val walletsButtonLinkLauncher: LinkPaymentLauncher,
-    @Named(ENABLE_LOGGING) private val enableLogging: Boolean,
     @Named(PRODUCT_USAGE) private val productUsage: Set<String>,
     private val configurationHandler: FlowControllerConfigurationHandler,
     private val errorReporter: ErrorReporter,
@@ -108,7 +113,7 @@ internal class DefaultFlowController @Inject internal constructor(
     @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
     private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper
 ) : PaymentSheet.FlowController {
-    private val paymentOptionActivityLauncher: ActivityResultLauncher<PaymentOptionContract.Args>
+    private val paymentOptionActivityLauncher: ActivityResultLauncher<EmbeddedActivityArgs>
 
     /**
      * [FlowControllerComponent] is hold to inject into [Activity]s and created
@@ -133,7 +138,7 @@ internal class DefaultFlowController @Inject internal constructor(
         confirmationHandler.register(activityResultCaller, lifecycleOwner)
 
         paymentOptionActivityLauncher = activityResultCaller.registerForActivityResult(
-            PaymentOptionContract(),
+            EmbeddedSheetContract,
             ::onPaymentOptionResult
         )
 
@@ -302,15 +307,25 @@ internal class DefaultFlowController @Inject internal constructor(
         state: State,
         paymentSelection: PaymentSelection?
     ) {
-        val args = PaymentOptionContract.Args(
-            state = state.paymentSheetState.copy(paymentSelection = paymentSelection),
-            configuration = state.config,
-            enableLogging = enableLogging,
+        val args = EmbeddedActivityArgs(
+            paymentMethodMetadata = state.paymentSheetState.paymentMethodMetadata,
+            configuration = state.config.asEmbeddedConfiguration(),
+            googlePlacesApiKey = state.config.googlePlacesApiKey,
             productUsage = productUsage,
-            linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
-            walletButtonsRendered = viewModel.walletButtonsRendered,
             paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
-            promotions = paymentMethodMessagePromotionsHelper.getPromotions()
+            statusBarColor = viewModel.statusBarColor,
+            selection = paymentSelection,
+            previousNewSelections = Bundle(),
+            customerState = state.paymentSheetState.customer,
+            linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
+            promotions = paymentMethodMessagePromotionsHelper.getPromotions().orEmpty(),
+            launchMode = EmbeddedLaunchMode.PaymentOptions(
+                visibleWallets = state.config.walletButtons.walletsVisibleInPaymentElement(
+                    walletButtonsRendered = viewModel.walletButtonsRendered,
+                ),
+                isFlowController = true,
+            ),
+            presentationState = EmbeddedActivityArgs.PresentationState.Ready,
         )
 
         val options = ActivityOptionsCompat.makeCustomAnimation(
@@ -551,28 +566,41 @@ internal class DefaultFlowController @Inject internal constructor(
 
     @JvmSynthetic
     internal fun onPaymentOptionResult(
-        result: PaymentOptionsActivityResult?
+        result: EmbeddedActivityResult
     ) {
         // update the current Link account state if the selected Link payment method includes an account update.
-        result?.linkAccountInfo?.let { linkAccountHolder.set(it) }
-        result?.paymentMethods?.let {
-            val currentState = viewModel.state
-            viewModel.state = currentState?.copyPaymentSheetState(
-                customer = currentState.paymentSheetState.customer?.copy(paymentMethods = it)
-            )
-        }
+        result.linkAccountInfoOrNull?.let { linkAccountHolder.set(it) }
         when (result) {
-            is PaymentOptionsActivityResult.Succeeded -> {
-                viewModel.paymentSelection = result.paymentSelection.also { it.hasAcknowledgedSepaMandate = true }
-                viewModel.autocompleteFilledAddress = result.autocompleteFilledAddress
-                onPaymentSelection(canceled = false)
+            is EmbeddedActivityResult.Complete -> {
+                updateCustomerState(result.customerState)
+                viewModel.paymentSelection = result.selection?.also { it.hasAcknowledgedSepaMandate = true }
+                onPaymentSelection(canceled = result.selection == null)
             }
-            null,
-            is PaymentOptionsActivityResult.Canceled -> {
-                viewModel.paymentSelection = result?.paymentSelection
+            is EmbeddedActivityResult.Cancelled -> {
+                updateCustomerState(result.customerState)
+                viewModel.paymentSelection = viewModel.paymentSelection?.rebindSavedPaymentMethod(
+                    paymentMethods = viewModel.state?.paymentSheetState?.customer?.paymentMethods.orEmpty()
+                )
+                onPaymentSelection(canceled = true)
+            }
+            is EmbeddedActivityResult.Error -> {
+                viewModel.paymentSelection = null
                 onPaymentSelection(canceled = true)
             }
         }
+    }
+
+    private fun updateCustomerState(customerState: CustomerState?) {
+        if (customerState == null) return
+        viewModel.updateState { it?.copyPaymentSheetState(customer = customerState) }
+    }
+
+    // The user could have removed or updated the selected saved payment method before canceling.
+    private fun PaymentSelection.rebindSavedPaymentMethod(
+        paymentMethods: List<PaymentMethod>,
+    ): PaymentSelection? {
+        if (this !is PaymentSelection.Saved) return this
+        return paymentMethods.firstOrNull { it.id == paymentMethod.id }?.let { copy(paymentMethod = it) }
     }
 
     private fun onPaymentSelection(canceled: Boolean) {
@@ -787,4 +815,35 @@ internal class DefaultFlowController @Inject internal constructor(
             return flowController
         }
     }
+}
+
+internal fun PaymentSheet.Configuration.asEmbeddedConfiguration(): EmbeddedPaymentElement.Configuration {
+    return EmbeddedPaymentElement.Configuration(
+        merchantDisplayName = merchantDisplayName,
+        customer = customer,
+        googlePay = googlePay,
+        defaultBillingDetails = defaultBillingDetails,
+        shippingDetails = shippingDetails,
+        allowsDelayedPaymentMethods = allowsDelayedPaymentMethods,
+        allowsPaymentMethodsRequiringShippingAddress = allowsPaymentMethodsRequiringShippingAddress,
+        appearance = appearance,
+        primaryButtonLabel = primaryButtonLabel,
+        billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+        preferredNetworks = preferredNetworks,
+        allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod,
+        paymentMethodOrder = paymentMethodOrder,
+        externalPaymentMethods = externalPaymentMethods,
+        cardBrandAcceptance = cardBrandAcceptance,
+        allowedCardFundingTypes = allowedCardFundingTypes,
+        customPaymentMethods = customPaymentMethods,
+        // Only read by the embedded view, which FlowController doesn't render.
+        embeddedViewDisplaysMandateText = true,
+        link = link,
+        // Ignored in EmbeddedLaunchMode.PaymentOptions.
+        formSheetAction = EmbeddedPaymentElement.FormSheetAction.Continue,
+        termsDisplay = termsDisplay,
+        opensCardScannerAutomatically = opensCardScannerAutomatically,
+        userOverrideCountry = userOverrideCountry,
+        apiConfiguration = apiConfiguration,
+    )
 }

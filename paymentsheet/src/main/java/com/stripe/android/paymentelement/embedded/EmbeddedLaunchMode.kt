@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.embedded
 
 import android.os.Parcelable
+import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.PaymentMethodCode
 import kotlinx.parcelize.Parcelize
 
@@ -14,5 +15,11 @@ internal sealed interface EmbeddedLaunchMode : Parcelable {
     data object Manage : EmbeddedLaunchMode
 
     @Parcelize
-    data object PaymentOptions : EmbeddedLaunchMode
+    data class PaymentOptions(
+        val visibleWallets: List<WalletType>,
+        val isFlowController: Boolean,
+    ) : EmbeddedLaunchMode
 }
+
+internal val EmbeddedLaunchMode.isFlowControllerPaymentOptions: Boolean
+    get() = (this as? EmbeddedLaunchMode.PaymentOptions)?.isFlowController == true

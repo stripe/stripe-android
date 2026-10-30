@@ -29,6 +29,7 @@ import com.stripe.android.link.ui.LinkButtonTestTag
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
@@ -104,7 +105,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
         assertThat(result.customerState).isEqualTo(PaymentSheetFixtures.EMPTY_CUSTOMER_STATE)
         assertThat(result.linkAccountInfo.lastUpdateReason)
             .isEqualTo(LinkAccountUpdate.Value.UpdateReason.LoggedOut)
-        assertThat(result.launchMode).isEqualTo(EmbeddedLaunchMode.PaymentOptions)
+        assertThat(result.launchMode).isEqualTo(PAYMENT_OPTIONS_LAUNCH_MODE)
     }
 
     @Test
@@ -174,9 +175,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
         val result = EmbeddedSheetContract.parseResult(scenario.result.resultCode, scenario.result.resultData)
         assertThat(result).isInstanceOf<EmbeddedActivityResult.Cancelled>()
         val cancelled = result as EmbeddedActivityResult.Cancelled
-        assertThat(cancelled.launchMode).isEqualTo(
-            EmbeddedLaunchMode.PaymentOptions
-        )
+        assertThat(cancelled.launchMode).isEqualTo(PAYMENT_OPTIONS_LAUNCH_MODE)
     }
 
     @Test
@@ -213,7 +212,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
                 .isEqualTo(previousNewSelection)
             assertThat(result.linkAccountInfo.lastUpdateReason)
                 .isEqualTo(LinkAccountUpdate.Value.UpdateReason.LoggedOut)
-            assertThat(result.launchMode).isEqualTo(EmbeddedLaunchMode.PaymentOptions)
+            assertThat(result.launchMode).isEqualTo(PAYMENT_OPTIONS_LAUNCH_MODE)
         }
     }
 
@@ -279,7 +278,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
         val result = scenario.awaitResult() as EmbeddedActivityResult.Complete
         assertThat(result.selection).isInstanceOf<PaymentSelection.New.Card>()
         assertThat(result.hasBeenConfirmed).isFalse()
-        assertThat(result.launchMode).isEqualTo(EmbeddedLaunchMode.PaymentOptions)
+        assertThat(result.launchMode).isEqualTo(PAYMENT_OPTIONS_LAUNCH_MODE)
     }
 
     @Test
@@ -296,22 +295,14 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
     }
 
     @Test
-    fun `horizontal saved payment options selects saved method and continues`() {
+    fun `horizontal saved payment options returns saved method on tap`() {
         val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
         launchHorizontal(customerState = customerStateWith(paymentMethod)) { scenario ->
             composeTestRule.onNodeWithTag(
                 "${SAVED_PAYMENT_METHOD_CARD_TEST_TAG}_\u2066···· 4242\u2069"
             ).performClick()
-            composeTestRule.onNodeWithTag(PRIMARY_BUTTON_TEST_TAG)
-                .performScrollTo()
-                .assertIsEnabled()
-                .performClick()
-            onIdle()
 
-            val result = EmbeddedSheetContract.parseResult(
-                scenario.result.resultCode,
-                scenario.result.resultData,
-            ) as EmbeddedActivityResult.Complete
+            val result = scenario.awaitResult() as EmbeddedActivityResult.Complete
             assertThat(result.selection).isEqualTo(PaymentSelection.Saved(paymentMethod))
         }
     }
@@ -619,6 +610,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
         return EmbeddedActivityArgs(
             paymentMethodMetadata = paymentMethodMetadata,
             configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
+            googlePlacesApiKey = null,
             productUsage = setOf("EmbeddedPaymentElement"),
             statusBarColor = null,
             paymentElementCallbackIdentifier = "PaymentOptionsTestIdentifier",
@@ -630,7 +622,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
                 lastUpdateReason = LinkAccountUpdate.Value.UpdateReason.LoggedOut,
             ),
             promotions = emptyList(),
-            launchMode = EmbeddedLaunchMode.PaymentOptions,
+            launchMode = PAYMENT_OPTIONS_LAUNCH_MODE,
             presentationState = presentationState,
         )
     }
@@ -734,6 +726,13 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
                     ),
                 ),
             )
+        )
+    }
+
+    private companion object {
+        val PAYMENT_OPTIONS_LAUNCH_MODE = EmbeddedLaunchMode.PaymentOptions(
+            visibleWallets = WalletType.entries,
+            isFlowController = false,
         )
     }
 }

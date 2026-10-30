@@ -14,6 +14,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.disabled
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityStateHolder
 import com.stripe.android.paymentsheet.ui.ErrorMessage
 import com.stripe.android.paymentsheet.ui.PrimaryButton
@@ -61,7 +62,14 @@ internal fun FormScreenContent(
 internal fun USBankAccountMandate(
     state: SheetActivityStateHolder.State
 ) {
-    state.mandateText?.let {
+    SheetMandate(state.mandateText)
+}
+
+@Composable
+internal fun SheetMandate(
+    mandateText: ResolvableString?
+) {
+    mandateText?.let {
         Mandate(
             mandateText = it.resolve(),
             modifier = Modifier

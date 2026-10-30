@@ -291,6 +291,45 @@ internal class EmbeddedNavigatorTest {
     }
 
     @Test
+    fun `ResetTo replaces back stack, closes removed screens, and reports shown screen`() = testScenario {
+        val (formScreen, formInteractor) = createFormScreen()
+        val paymentOptionsScreen = createPaymentOptionsScreen()
+        navigator.screen.test {
+            assertThat(awaitItem()).isEqualTo(initialScreen)
+            navigator.performAction(EmbeddedNavigator.Action.ReplaceCurrentScreen(formScreen))
+            assertThat(awaitItem()).isEqualTo(formScreen)
+
+            navigator.performAction(EmbeddedNavigator.Action.ResetTo(listOf(paymentOptionsScreen)))
+
+            assertThat(awaitItem()).isEqualTo(paymentOptionsScreen)
+            assertThat(navigator.canGoBack).isFalse()
+        }
+
+        assertThat(formInteractor.closeCalls.awaitItem()).isEqualTo(Unit)
+        assertThat(eventReporter.showNewPaymentOptionsCalls.awaitItem()).isEqualTo(Unit)
+        formInteractor.validate()
+    }
+
+    @Test
+    fun `ResetTo while transitioning closes dropped screens`() = testScenario {
+        val (formScreen, formInteractor) = createFormScreen()
+        val paymentOptionsInteractor = FakePaymentMethodVerticalLayoutInteractor.create()
+        val paymentOptionsScreen = createPaymentOptionsScreen(interactor = paymentOptionsInteractor)
+        navigator.screen.test {
+            assertThat(awaitItem()).isEqualTo(initialScreen)
+
+            navigator.performAction(EmbeddedNavigator.Action.GoToScreen(formScreen))
+            navigator.performAction(EmbeddedNavigator.Action.ResetTo(listOf(paymentOptionsScreen)))
+
+            assertThat(paymentOptionsInteractor.closeCalls.awaitItem()).isEqualTo(Unit)
+            assertThat(awaitItem()).isEqualTo(formScreen)
+        }
+
+        paymentOptionsInteractor.validate()
+        formInteractor.validate()
+    }
+
+    @Test
     fun `initial screen ManageUpdate calls onShowEditablePaymentOption`() = runTest {
         val eventReporter = FakeEventReporter()
         EmbeddedNavigator(
@@ -910,6 +949,7 @@ internal class EmbeddedNavigatorTest {
                     primaryButtonIcon = PrimaryButtonIcon.Lock,
                 )
             ),
+            mandateText = stateFlowOf(null),
             onContinueClick = {},
             onPrimaryButtonDisabledClick = {},
         )

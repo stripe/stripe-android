@@ -2,26 +2,34 @@ package com.stripe.android.paymentelement.embedded
 
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.common.taptoadd.FakeTapToAddHelper
+import com.stripe.android.common.taptoadd.TapToAddMode
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodMessageLearnMore
 import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.manage.ManageLaunchSavedPaymentMethodSelector
 import com.stripe.android.paymentelement.embedded.sheet.SheetTaxRegionUpdater
+import com.stripe.android.paymentsheet.FakeCustomerStateHolder
 import com.stripe.android.paymentsheet.addresselement.AUTOCOMPLETE_DEFAULT_COUNTRIES
 import com.stripe.android.paymentsheet.addresselement.BillingInlineAutocompleteAddressInteractor
+import com.stripe.android.paymentsheet.addresselement.FakePlacesClientProxy
 import com.stripe.android.paymentsheet.addresselement.FakeStripeAutocompleteRepository
 import com.stripe.android.paymentsheet.addresselement.PaymentElementAutocompleteAddressInteractor
 import com.stripe.android.paymentsheet.addresselement.analytics.FakeAddressLauncherEventReporter
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
+import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -52,6 +60,69 @@ internal class EmbeddedActivityModuleTest {
         }
 
     @Test
+    fun `autocomplete factory uses Google Places inline interactor when API key and places client are provided`() =
+        runScenario(
+            shouldUseAutocompleteProxyEndpoints = false,
+            googlePlacesApiKey = "gp_123",
+            placesClient = FakePlacesClientProxy(
+                findPredictionsResult = Result.failure(IllegalStateException("Not used")),
+                fetchPlaceResult = Result.failure(IllegalStateException("Not used")),
+            ),
+        ) {
+            assertThat(interactor).isInstanceOf(BillingInlineAutocompleteAddressInteractor::class.java)
+            assertThat(interactor.autocompleteConfig.googlePlacesApiKey).isEqualTo("gp_123")
+            assertThat(interactor.autocompleteConfig.isPlacesAvailable).isTrue()
+            assertThat(interactor.autocompleteConfig.isInlineAutocompleteEnabled).isTrue()
+            assertThat(interactor.autocompleteConfig.shouldUseStripeHostedAutocomplete).isFalse()
+        }
+
+    @Test
+    fun `autocomplete factory keeps API key with Stripe-hosted interactor when enabled`() = runScenario(
+        shouldUseAutocompleteProxyEndpoints = true,
+        googlePlacesApiKey = "gp_123",
+        placesClient = FakePlacesClientProxy(
+            findPredictionsResult = Result.failure(IllegalStateException("Not used")),
+            fetchPlaceResult = Result.failure(IllegalStateException("Not used")),
+        ),
+    ) {
+        assertThat(interactor).isInstanceOf(BillingInlineAutocompleteAddressInteractor::class.java)
+        assertThat(interactor.autocompleteConfig.googlePlacesApiKey).isEqualTo("gp_123")
+        assertThat(interactor.autocompleteConfig.shouldUseStripeHostedAutocomplete).isTrue()
+    }
+
+    @Test
+    fun `autocomplete factory reports places unavailable without places client`() = runScenario(
+        shouldUseAutocompleteProxyEndpoints = false,
+        googlePlacesApiKey = "gp_123",
+        placesClient = null,
+    ) {
+        assertThat(interactor).isInstanceOf(PaymentElementAutocompleteAddressInteractor::class.java)
+        assertThat(interactor.autocompleteConfig.googlePlacesApiKey).isEqualTo("gp_123")
+        assertThat(interactor.autocompleteConfig.isPlacesAvailable).isFalse()
+    }
+
+    @Test
+    fun `FlowController payment options report analytics in Custom mode`() {
+        val mode = EmbeddedActivityModule.provideEventReporterMode(
+            EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries, isFlowController = true)
+        )
+
+        assertThat(mode).isEqualTo(EventReporter.Mode.Custom)
+    }
+
+    @Test
+    fun `non-FlowController launches report analytics in Embedded mode`() {
+        listOf(
+            EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries, isFlowController = false),
+            EmbeddedLaunchMode.Manage,
+            EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
+        ).forEach { launchMode ->
+            assertThat(EmbeddedActivityModule.provideEventReporterMode(launchMode))
+                .isEqualTo(EventReporter.Mode.Embedded)
+        }
+    }
+
+    @Test
     fun `Manage launch provides the Manage launch selector`() {
         val selectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle())
         val manageLaunchSelector = ManageLaunchSavedPaymentMethodSelector(
@@ -74,7 +145,7 @@ internal class EmbeddedActivityModuleTest {
     @Test
     fun `non-Manage launches commit selection without creating the Manage launch selector`() = runTest {
         listOf(
-            EmbeddedLaunchMode.PaymentOptions,
+            EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries, isFlowController = false),
             EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
         ).forEach { launchMode ->
             val selectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle())
@@ -89,6 +160,36 @@ internal class EmbeddedActivityModuleTest {
             assertThat(selectionHolder.selection.value).isEqualTo(selection)
         }
     }
+
+    @Test
+    fun `FlowController payment options use Continue tap to add mode regardless of formSheetAction`() =
+        runTapToAddModeScenario(
+            launchMode = EmbeddedLaunchMode.PaymentOptions(
+                visibleWallets = WalletType.entries,
+                isFlowController = true,
+            ),
+            formSheetAction = EmbeddedPaymentElement.FormSheetAction.Confirm,
+            expectedMode = TapToAddMode.Continue,
+        )
+
+    @Test
+    fun `non-FlowController payment options use Complete tap to add mode when formSheetAction is Confirm`() =
+        runTapToAddModeScenario(
+            launchMode = EmbeddedLaunchMode.PaymentOptions(
+                visibleWallets = WalletType.entries,
+                isFlowController = false,
+            ),
+            formSheetAction = EmbeddedPaymentElement.FormSheetAction.Confirm,
+            expectedMode = TapToAddMode.Complete,
+        )
+
+    @Test
+    fun `form launches use Continue tap to add mode when formSheetAction is Continue`() =
+        runTapToAddModeScenario(
+            launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
+            formSheetAction = EmbeddedPaymentElement.FormSheetAction.Continue,
+            expectedMode = TapToAddMode.Continue,
+        )
 
     @Test
     fun `checkout sheets do not provide promotions or report promotion displays`() = runPromotionsScenario(
@@ -119,6 +220,8 @@ internal class EmbeddedActivityModuleTest {
 
     private fun runScenario(
         shouldUseAutocompleteProxyEndpoints: Boolean,
+        googlePlacesApiKey: String? = null,
+        placesClient: PlacesClientProxy? = null,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val eventReporter = FakeAddressLauncherEventReporter()
@@ -129,11 +232,36 @@ internal class EmbeddedActivityModuleTest {
                 shouldUseAutocompleteProxyEndpoints = shouldUseAutocompleteProxyEndpoints,
             ),
             eventReporter = eventReporter,
+            googlePlacesApiKey = googlePlacesApiKey,
+            placesClient = placesClient,
         )
 
         Scenario(factory.create()).block()
 
         eventReporter.validate()
+    }
+
+    private fun runTapToAddModeScenario(
+        launchMode: EmbeddedLaunchMode,
+        formSheetAction: EmbeddedPaymentElement.FormSheetAction,
+        expectedMode: TapToAddMode,
+    ) = runTest {
+        FakeTapToAddHelper.Factory.test {
+            EmbeddedActivityModule.providesTapToAddHelper(
+                coroutineScope = this@runTest,
+                configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.")
+                    .formSheetAction(formSheetAction)
+                    .build(),
+                tapToAddHelperFactory = tapToAddHelperFactory,
+                embeddedSelectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle()),
+                customerStateHolder = FakeCustomerStateHolder(),
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+                launchMode = launchMode,
+                statusBarColor = null,
+            )
+
+            assertThat(createCalls.awaitItem().tapToAddMode).isEqualTo(expectedMode)
+        }
     }
 
     private data class Scenario(

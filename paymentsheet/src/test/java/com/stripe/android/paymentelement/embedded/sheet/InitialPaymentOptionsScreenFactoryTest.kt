@@ -9,6 +9,7 @@ import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
@@ -77,6 +78,26 @@ internal class InitialPaymentOptionsScreenFactoryTest {
     }
 
     @Test
+    fun `vertical layout with one payment method opens payment options after a saved method is added`() =
+        testScenario(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+            ),
+            customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,
+        ) {
+            assertThat(factory.createInitialScreen().single()).isInstanceOf<EmbeddedNavigator.Screen.Form>()
+
+            customerStateHolder.setCustomerState(
+                PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
+                    paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+                )
+            )
+
+            assertThat(factory.createInitialScreen().single())
+                .isInstanceOf<EmbeddedNavigator.Screen.VerticalPaymentOptions>()
+        }
+
+    @Test
     fun `creates initial screen successfully without wallets`() = testScenario(
         isGooglePayReady = false,
     ) {
@@ -108,7 +129,7 @@ internal class InitialPaymentOptionsScreenFactoryTest {
 
     @Test
     fun `present reopens restored single payment method directly on its form`() = testScenario(
-        launchMode = EmbeddedLaunchMode.PaymentOptions,
+        launchMode = EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries, isFlowController = false),
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
         ),
@@ -126,7 +147,7 @@ internal class InitialPaymentOptionsScreenFactoryTest {
 
     @Test
     fun `present with saved payment methods retains payment options beneath restored form`() = testScenario(
-        launchMode = EmbeddedLaunchMode.PaymentOptions,
+        launchMode = EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries, isFlowController = false),
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
         ),
@@ -145,7 +166,7 @@ internal class InitialPaymentOptionsScreenFactoryTest {
 
     @Test
     fun `present with multiple payment methods retains payment options beneath restored form`() = testScenario(
-        launchMode = EmbeddedLaunchMode.PaymentOptions,
+        launchMode = EmbeddedLaunchMode.PaymentOptions(visibleWallets = WalletType.entries, isFlowController = false),
     ) {
         selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
 
@@ -470,6 +491,32 @@ internal class InitialPaymentOptionsScreenFactoryTest {
     }
 
     @Test
+    fun `FlowController continue click reports confirm button press`() = testScenario(
+        launchMode = EmbeddedLaunchMode.PaymentOptions(
+            visibleWallets = WalletType.entries,
+            isFlowController = true,
+        ),
+    ) {
+        selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+
+        factory.onContinueClick()
+
+        assertThat(eventReporter.pressConfirmButtonCalls.awaitItem())
+            .isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+        assertThat(continueCoordinator.onContinueCalls.awaitItem()).isEqualTo(Unit)
+    }
+
+    @Test
+    fun `non-FlowController continue click does not report confirm button press`() = testScenario {
+        selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+
+        factory.onContinueClick()
+
+        assertThat(continueCoordinator.onContinueCalls.awaitItem()).isEqualTo(Unit)
+        eventReporter.pressConfirmButtonCalls.expectNoEvents()
+    }
+
+    @Test
     fun `continue invokes override once without completing for an existing selection`() = testScenario {
         selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
         onClickOverrideDelegate.set { onClickOverrideCalls.add(Unit) }
@@ -509,7 +556,10 @@ internal class InitialPaymentOptionsScreenFactoryTest {
 
     @Suppress("LongMethod")
     private fun testScenario(
-        launchMode: EmbeddedLaunchMode = EmbeddedLaunchMode.PaymentOptions,
+        launchMode: EmbeddedLaunchMode = EmbeddedLaunchMode.PaymentOptions(
+            visibleWallets = WalletType.entries,
+            isFlowController = false,
+        ),
         isGooglePayReady: Boolean = true,
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
@@ -552,6 +602,7 @@ internal class InitialPaymentOptionsScreenFactoryTest {
         val linkAccountHolder = LinkAccountHolder(SavedStateHandle())
         val walletsInteractor = PaymentOptionsWalletsInteractor(
             paymentMethodMetadata = paymentMethodMetadata,
+            launchMode = launchMode,
             customerStateHolder = customerStateHolder,
             selectionHolder = selectionHolder,
             linkAccountHolder = linkAccountHolder,

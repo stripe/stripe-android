@@ -13,6 +13,7 @@ import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
@@ -277,12 +278,16 @@ internal class EmbeddedSheetActivityCoordinatorTest {
 
         fun createArgs(
             presentationState: EmbeddedActivityArgs.PresentationState,
-            launchMode: EmbeddedLaunchMode = EmbeddedLaunchMode.PaymentOptions,
+            launchMode: EmbeddedLaunchMode = EmbeddedLaunchMode.PaymentOptions(
+                visibleWallets = WalletType.entries,
+                isFlowController = false,
+            ),
             callbackIdentifier: String = "callback_identifier",
         ): EmbeddedActivityArgs {
             return EmbeddedActivityArgs(
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
                 configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
+                googlePlacesApiKey = null,
                 productUsage = setOf("EmbeddedPaymentElement"),
                 paymentElementCallbackIdentifier = callbackIdentifier,
                 statusBarColor = null,

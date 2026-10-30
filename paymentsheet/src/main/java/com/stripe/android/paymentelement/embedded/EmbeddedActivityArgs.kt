@@ -16,6 +16,7 @@ import kotlinx.parcelize.Parcelize
 internal data class EmbeddedActivityArgs(
     val paymentMethodMetadata: PaymentMethodMetadata,
     val configuration: EmbeddedPaymentElement.Configuration,
+    val googlePlacesApiKey: String?,
     val productUsage: Set<String>,
     val paymentElementCallbackIdentifier: String,
     val statusBarColor: Int?,

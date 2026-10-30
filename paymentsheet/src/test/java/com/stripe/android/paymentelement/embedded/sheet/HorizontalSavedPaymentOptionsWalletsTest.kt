@@ -3,11 +3,9 @@ package com.stripe.android.paymentelement.embedded.sheet
 import android.app.Application
 import android.os.Bundle
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performScrollTo
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
@@ -15,6 +13,7 @@ import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.ui.LinkButtonTestTag
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
@@ -27,7 +26,6 @@ import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.ui.GOOGLE_PAY_BUTTON_TEST_TAG
-import com.stripe.android.paymentsheet.ui.PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.testing.waitUntilWithIdle
@@ -70,10 +68,6 @@ internal class HorizontalSavedPaymentOptionsWalletsTest {
         composeTestRule.onNodeWithTag(PaymentOptionsItem.ViewType.GooglePay.name)
             .assertIsDisplayed()
             .performClick()
-        composeTestRule.onNodeWithTag(PRIMARY_BUTTON_TEST_TAG)
-            .performScrollTo()
-            .assertIsEnabled()
-            .performClick()
 
         val result = awaitResult()
         assertThat(result.selection).isEqualTo(PaymentSelection.GooglePay)
@@ -96,6 +90,7 @@ internal class HorizontalSavedPaymentOptionsWalletsTest {
                 ),
             ),
             configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
+            googlePlacesApiKey = null,
             productUsage = setOf("EmbeddedPaymentElement"),
             paymentElementCallbackIdentifier = "HorizontalSavedPaymentOptionsWalletsTestIdentifier",
             statusBarColor = null,
@@ -109,7 +104,10 @@ internal class HorizontalSavedPaymentOptionsWalletsTest {
                 lastUpdateReason = LinkAccountUpdate.Value.UpdateReason.LoggedOut,
             ),
             promotions = emptyList(),
-            launchMode = EmbeddedLaunchMode.PaymentOptions,
+            launchMode = EmbeddedLaunchMode.PaymentOptions(
+                visibleWallets = WalletType.entries,
+                isFlowController = false,
+            ),
             presentationState = EmbeddedActivityArgs.PresentationState.Ready,
         )
         ActivityScenario.launchActivityForResult<EmbeddedSheetActivity>(
