@@ -64,6 +64,40 @@ class CheckoutSessionResponseJsonParserTest {
     }
 
     @Test
+    fun `parses missing presentment currency`() {
+        val json = base()
+        json.remove("presentment_currency")
+
+        val result = requireNotNull(parse(json))
+
+        assertThat(result.currency).isNull()
+        assertThat((result.elementsSession?.stripeIntent as PaymentIntent).currency).isEqualTo("usd")
+    }
+
+    @Test
+    fun `parses null presentment currency`() {
+        val json = base().put("presentment_currency", JSONObject.NULL)
+
+        val result = requireNotNull(parse(json))
+
+        assertThat(result.currency).isNull()
+        assertThat((result.elementsSession?.stripeIntent as PaymentIntent).currency).isEqualTo("usd")
+    }
+
+    @Test
+    fun `parses absent session currencies for no payment required`() {
+        val json = base().put("payment_status", "no_payment_required")
+        json.remove("presentment_currency")
+        json.remove("integration_currency")
+
+        val result = requireNotNull(parse(json))
+
+        assertThat(result.currency).isNull()
+        assertThat(result.integrationCurrency).isNull()
+        assertThat(result.elementsSession?.stripeIntent).isInstanceOf(SetupIntent::class.java)
+    }
+
+    @Test
     fun `rejects empty integration currency`() {
         assertThat(parse(base().put("integration_currency", ""))).isNull()
     }

@@ -521,8 +521,8 @@ class CheckoutController @Inject internal constructor(
          */
         val orderSummaryItems: List<OrderSummaryItem>,
         /**
-         * The factor used to convert amounts in the smallest integration currency unit to the major
-         * currency unit (e.g., `100` for USD and `1` for JPY), or `null` if [currency] is unavailable.
+         * The factor used to convert amounts in the smallest presentment currency unit to the major
+         * currency unit (e.g., `100` for USD and `1` for JPY), or `null` if presentment currency is unavailable.
          */
         val minorUnitsAmountDivisor: Int?,
         /**

@@ -33,7 +33,7 @@ internal class DefaultCheckoutGooglePayPaymentDataUpdateMapper @Inject construct
 
         return GooglePayPaymentDataUpdateResponse(
             newTransactionInfo = GooglePayJsonFactory.TransactionInfo(
-                currencyCode = response.currency.uppercase(),
+                currencyCode = response.currencyForAmounts.uppercase(),
                 totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Estimated,
                 countryCode = countryCode?.takeIf { it.isNotEmpty() },
                 transactionId = response.stripeIntent()?.id,

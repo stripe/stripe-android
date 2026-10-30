@@ -28,7 +28,7 @@ internal class CheckoutSessionResponseJsonParser(
         require(json.requiredString("ui_mode") == "mobile_elements")
         val id = json.requiredString("id")
         val configId = json.optionalString("checkout_session_config_id")
-        val currency = json.requiredString("presentment_currency")
+        val currency = json.optionalString("presentment_currency")
         val paymentStatus = when (json.requiredString("payment_status")) {
             "paid" -> CheckoutSessionResponse.PaymentStatus.PAID
             "unpaid" -> CheckoutSessionResponse.PaymentStatus.UNPAID
@@ -44,9 +44,10 @@ internal class CheckoutSessionResponseJsonParser(
 
         val checkoutItems = json.requiredArray("items").objects().map(::parseCheckoutItem)
         require(checkoutItems.isNotEmpty())
+        val currencyForAmounts = currency ?: checkoutItems.first().oneTimePrice.items.first().price.currency
         require(
             checkoutItems.all { group ->
-                group.oneTimePrice.items.all { it.price.currency == currency }
+                group.oneTimePrice.items.all { it.price.currency == currencyForAmounts }
             }
         )
 
@@ -57,6 +58,7 @@ internal class CheckoutSessionResponseJsonParser(
             livemode = livemode,
             noPaymentRequired = paymentStatus == CheckoutSessionResponse.PaymentStatus.NO_PAYMENT_REQUIRED,
             amount = checkoutItems.sumOf { group -> group.oneTimePrice.items.sumOf { it.total } },
+            currency = currencyForAmounts,
         )
         val automaticTax = json.optionalObject("automatic_tax")
         val savedOptions = json.requiredObject("saved_payment_method_options")
@@ -94,7 +96,7 @@ internal class CheckoutSessionResponseJsonParser(
             checkoutItems = checkoutItems,
             totalSummary = parseTotalSummary(json.requiredObject("total_summary")),
             adaptivePricingInfo = json.optionalObject("adaptive_pricing_info")?.let {
-                parseAdaptivePricingInfo(it, currency)
+                parseAdaptivePricingInfo(it, currencyForAmounts)
             },
             taxMeta = automaticTax?.let {
                 CheckoutSessionResponse.TaxMeta(
@@ -251,6 +253,7 @@ internal class CheckoutSessionResponseJsonParser(
         livemode: Boolean,
         noPaymentRequired: Boolean,
         amount: Long,
+        currency: String,
     ): ElementsSession {
         val sessionId = json.requiredString("elements_session_id")
         val merchant = json.requiredObject("merchant_info")
@@ -263,7 +266,6 @@ internal class CheckoutSessionResponseJsonParser(
             .put("unactivated_payment_method_types", json.requiredArray("unactivated_payment_method_types"))
             .put("link_funding_sources", fundingSources)
             .put("country_code", json.optionalString("country_code"))
-        val currency = json.requiredString("presentment_currency")
         val options = json.optionalObject("payment_method_options") ?: JSONObject()
         json.optionalObject("setup_future_usage_for_payment_method_type")?.let { usage ->
             usage.keys().forEach { type ->

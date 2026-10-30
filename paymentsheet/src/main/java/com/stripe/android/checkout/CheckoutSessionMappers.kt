@@ -29,7 +29,7 @@ internal fun CheckoutSessionResponse.asCheckoutSession(
     availableExpressButtonTypes: List<ExpressButtonType>,
     locale: Locale = Locale.getDefault(),
 ): Session {
-    val presentmentCurrency = currency
+    val presentmentCurrency = currencyForAmounts
     return Session(
         id = id,
         businessName = businessName,
@@ -42,7 +42,7 @@ internal fun CheckoutSessionResponse.asCheckoutSession(
         discountAmounts = emptyList(),
         email = fixedEmail ?: collectedEmail,
         orderSummaryItems = checkoutItems.map { it.asOrderSummaryItem(locale) },
-        minorUnitsAmountDivisor = integrationCurrency?.let { 10.0.pow(currencyDigits(it)).toInt() },
+        minorUnitsAmountDivisor = currency?.let { 10.0.pow(currencyDigits(it)).toInt() },
         paymentOption = paymentOption,
         shippingAddress = collectedShippingAddress?.let {
             Session.ShippingAddress(collectedShippingName, it.asShippingAddress())

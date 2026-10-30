@@ -27,20 +27,32 @@ class CheckoutSessionMappersTest {
         ).session()
 
         assertThat(session.currency).isNull()
-        assertThat(session.minorUnitsAmountDivisor).isNull()
+        assertThat(session.minorUnitsAmountDivisor).isEqualTo(100)
         assertThat(session.totals.total.amount).isEqualTo("$10.00")
     }
 
     @Test
-    fun `divisor follows integration currency when presentment currency has different precision`() {
+    fun `divisor follows presentment currency when integration currency has different precision`() {
         val session = CheckoutSessionResponseFactory.create(
             currency = "usd",
             integrationCurrency = "jpy",
         ).session()
 
         assertThat(session.currency).isEqualTo("jpy")
-        assertThat(session.minorUnitsAmountDivisor).isEqualTo(1)
+        assertThat(session.minorUnitsAmountDivisor).isEqualTo(100)
         assertThat(session.totals.total.amount).isEqualTo("$10.00")
+    }
+
+    @Test
+    fun `maps absent session currencies using item currency for amounts`() {
+        val session = CheckoutSessionResponseFactory.create(
+            currency = null,
+            checkoutItems = listOf(CheckoutSessionResponseFactory.checkoutItem(currency = "jpy")),
+        ).session()
+
+        assertThat(session.currency).isNull()
+        assertThat(session.minorUnitsAmountDivisor).isNull()
+        assertThat(session.totals.total.amount).isEqualTo("¥1,000")
     }
 
     @Test

@@ -14,7 +14,7 @@ internal data class CheckoutSessionResponse(
     val id: String,
     val clientSecret: String,
     val configId: String?,
-    val currency: String,
+    val currency: String?,
     val integrationCurrency: String?,
     val paymentStatus: PaymentStatus,
     val status: Status,
@@ -74,6 +74,10 @@ internal data class CheckoutSessionResponse(
 
     val amount: Long
         get() = checkoutItems.sumOf { group -> group.oneTimePrice.items.sumOf { it.total } }
+
+    // Line-item currencies remain available when the session omits its presentment currency.
+    val currencyForAmounts: String
+        get() = currency ?: checkoutItems.first().oneTimePrice.items.first().price.currency
 
     val collectsTaxFromBillingAddress: Boolean
         get() = automaticTaxEnabled && taxAddressSource == TaxAddressSource.BILLING
