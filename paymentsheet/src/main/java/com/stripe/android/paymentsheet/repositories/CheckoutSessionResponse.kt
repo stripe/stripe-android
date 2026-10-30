@@ -43,11 +43,24 @@ internal data class CheckoutSessionResponse(
 
     @Parcelize
     data class PaymentResponse(
-        val status: String,
+        val status: Status,
         val paymentIntent: IntentReference?,
         val setupIntent: IntentReference?,
         val error: StripeError?,
-    ) : StripeModel
+    ) : StripeModel {
+        enum class Status(val code: String) {
+            SUCCEEDED("succeeded"),
+            REQUIRES_ACTION("requires_action"),
+            PROCESSING("processing"),
+            REQUIRES_CAPTURE("requires_capture"),
+            REQUIRES_PAYMENT_METHOD("requires_payment_method"),
+            CANCELED("canceled"),
+            REQUIRES_CONFIRMATION("requires_confirmation"),
+            PROCESSING_SYNC("processing_sync"),
+            REQUIRES_REAUTHORIZATION("requires_reauthorization"),
+            EXPIRED("expired"),
+        }
+    }
 
     fun withIntent(intent: StripeIntent): CheckoutSessionResponse = copy(
         paymentIntent = intent as? PaymentIntent,

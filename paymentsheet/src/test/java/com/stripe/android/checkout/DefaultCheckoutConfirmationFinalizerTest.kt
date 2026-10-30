@@ -109,7 +109,7 @@ internal class DefaultCheckoutConfirmationFinalizerTest {
         val stripeError = StripeError(type = "card_error", code = "card_declined", message = "Your card was declined.")
         val retrieved = confirmResponse.copy(
             paymentResponse = CheckoutSessionResponse.PaymentResponse(
-                status = "requires_payment_method",
+                status = CheckoutSessionResponse.PaymentResponse.Status.REQUIRES_PAYMENT_METHOD,
                 paymentIntent = null,
                 setupIntent = null,
                 error = stripeError,

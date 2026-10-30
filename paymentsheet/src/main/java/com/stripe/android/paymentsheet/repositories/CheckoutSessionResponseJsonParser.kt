@@ -52,7 +52,11 @@ internal class CheckoutSessionResponseJsonParser(
         val savedOptions = json.requiredObject("saved_payment_method_options")
         val paymentResponse = json.optionalObject("payment_response")?.let { response ->
             CheckoutSessionResponse.PaymentResponse(
-                status = response.requiredString("status"),
+                status = response.requiredString("status").let { status ->
+                    requireNotNull(CheckoutSessionResponse.PaymentResponse.Status.entries.find { it.code == status }) {
+                        "Unsupported payment_response status"
+                    }
+                },
                 paymentIntent = response.optionalObject("payment_intent")?.let(::parseIntentReference),
                 setupIntent = response.optionalObject("setup_intent")?.let(::parseIntentReference),
                 error = response.optionalObject("last_payment_error")?.let {
