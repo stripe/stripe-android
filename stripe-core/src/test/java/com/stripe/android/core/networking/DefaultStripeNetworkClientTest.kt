@@ -100,12 +100,12 @@ internal class DefaultStripeNetworkClientTest {
 
         client.executeRequest(
             FakeStripeRequest(
-                url = "https://api.stripe.com/v1/checkout_sessions/cs_test_123/init?expand[]=elements_session",
+                url = "https://api.stripe.com/v1/checkout_client/cs_test_123/init?expand[]=elements_session",
             )
         )
 
         verify(mockLogger).info(
-            "Request: POST /v1/checkout_sessions/[redacted]/init, Request-Id: req_123, Status Code: 200"
+            "Request: POST /v1/checkout_client/[redacted]/init, Request-Id: req_123, Status Code: 200"
         )
     }
 
