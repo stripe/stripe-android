@@ -9,7 +9,7 @@ import com.stripe.android.checkout.analytics.CheckoutConfirmationContext
 import com.stripe.android.checkout.analytics.CheckoutConfirmationContext.InvocationSource
 import com.stripe.android.checkout.analytics.CheckoutConfirmationContext.LinkUi
 import com.stripe.android.checkout.analytics.ConfirmOperation
-import com.stripe.android.checkout.analytics.toAnalyticsParams
+import com.stripe.android.checkout.analytics.toAnalyticsMap
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
@@ -96,7 +96,7 @@ internal class CheckoutAnalyticsPerformer @Inject constructor(
         val state = stateHolder.state
         val publishableKey = state?.paymentMethodMetadata?.apiConfiguration?.publishableKey
             ?: apiConfigurationProvider.get().publishableKey
-        val configurationParams = state?.configuration?.toAnalyticsParams().orEmpty()
+        val configurationParams = state?.configuration?.toAnalyticsMap().orEmpty()
         CoroutineScope(workContext).launch {
             analyticsRequestExecutor.executeAsync(
                 analyticsRequestFactory.createRequest(

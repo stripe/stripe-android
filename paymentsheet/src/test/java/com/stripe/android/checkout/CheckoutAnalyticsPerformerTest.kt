@@ -7,7 +7,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.analytics.CheckoutConfirmationContext.InvocationSource
-import com.stripe.android.checkout.analytics.toAnalyticsParams
+import com.stripe.android.checkout.analytics.toAnalyticsMap
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.ApiConfigurationPreview
@@ -103,7 +103,7 @@ internal class CheckoutAnalyticsPerformerTest {
                     .phone(privateValues[4])
             )
             .build()
-        val configurationParams = configuration.toAnalyticsParams()
+        val configurationParams = configuration.toAnalyticsMap()
         stateHolder.state = requireNotNull(stateHolder.state).copy(configuration = configuration)
 
         startReporting()
@@ -806,7 +806,7 @@ internal class CheckoutAnalyticsPerformerTest {
         )
 
         val confirmationConfigurationParams: Map<String, Any?> =
-            CheckoutControllerStateFactory.create().configuration.toAnalyticsParams()
+            CheckoutControllerStateFactory.create().configuration.toAnalyticsMap()
 
         val confirmationSpecKeys: Set<String> =
             sessionParams.keys + confirmationConfigurationParams.keys + setOf(
