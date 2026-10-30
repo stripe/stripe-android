@@ -856,115 +856,115 @@ class CheckoutController @Inject internal constructor(
         )
 
         /**
-         * An item or group of items the customer is purchasing.
+         * An item included in the order summary.
          */
         @CheckoutSessionPreview
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         sealed class OrderSummaryItem {
             /**
-             * A stable identifier for this order-summary item.
+             * The stable identity of this order summary item within its Checkout Session.
              */
             abstract val id: String
 
             /**
-             * A group of one-time-priced items.
+             * A group of one-time Prices.
              */
             @Poko
             @CheckoutSessionPreview
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             class OneTimePrice internal constructor(
                 /**
-                 * A stable key for this group.
+                 * A stable key that uniquely identifies this item within the Checkout Session.
                  */
                 val key: String,
                 /**
-                 * A description of this group, if available.
+                 * A description of the one-time Price group.
                  */
                 val description: String?,
                 /**
-                 * The individual items in this group.
+                 * The one-time Prices included in this group.
                  */
                 val items: List<Item>,
             ) : OrderSummaryItem() {
                 /**
-                 * A stable identifier for this group.
+                 * The stable identity of this group within its Checkout Session.
                  */
                 override val id: String get() = key
 
                 /**
-                 * A single line item in a [OneTimePrice] group.
+                 * A one-time Price included in the group.
                  */
                 @Poko
                 @CheckoutSessionPreview
                 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                 class Item internal constructor(
                     /**
-                     * A stable key for this item.
+                     * A stable key that identifies this item.
                      */
                     val key: String,
                     /**
-                     * The display name of the item.
+                     * The customer-facing name of the product.
                      */
                     val displayName: String,
                     /**
-                     * Image URLs for the item. May be empty.
+                     * URLs of images for the product.
                      */
                     val images: List<String>,
                     /**
-                     * The unit price rounded to the currency's standard number of decimal places.
+                     * The unit amount for the Price.
                      */
                     val unitAmount: Amount,
                     /**
-                     * The unit price with its full decimal precision, when provided by the Checkout Session.
+                     * The unit amount with additional decimal precision, if available.
                      */
                     val unitAmountDecimal: Amount?,
                     /**
-                     * A label describing the unit (e.g., "per seat"), if any.
+                     * The label that describes how units of the product are named.
                      */
                     val unitLabel: String?,
                     /**
-                     * The quantity of this item.
+                     * The quantity of the Price included in the Checkout Session.
                      */
                     val quantity: Int,
                     /**
-                     * The quantity adjustment configuration, if available.
+                     * The allowed quantity range when the customer can adjust the quantity.
                      */
                     val adjustableQuantity: AdjustableQuantity?,
                     /**
-                     * The subtotal, total, and tax breakdown for this item.
+                     * The computed amounts for this Price.
                      */
                     val amountDetails: AmountDetails,
                 ) {
                     /**
-                     * A stable identifier for this item.
+                     * The stable identity of this item within its group.
                      */
                     val id: String get() = key
 
                     /**
-                     * The amount breakdown for an order-summary item.
+                     * The computed amounts for a one-time Price.
                      */
                     @Poko
                     @CheckoutSessionPreview
                     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                     class AmountDetails internal constructor(
                         /**
-                         * The total after discounts and taxes.
+                         * The total amount for the Price.
                          */
                         val total: Amount,
                         /**
-                         * The subtotal before discounts and taxes.
+                         * The subtotal amount for the Price before exclusive tax.
                          */
                         val subtotal: Amount,
                         /**
-                         * The taxes applied to this item, or `null` before tax is computed.
+                         * The tax amounts applied to the Price, or `null` when no tax was applied.
                          */
                         val taxAmounts: List<TaxAmount>?,
                         /**
-                         * The total tax already included in the subtotal.
+                         * The tax amount included in the Price.
                          */
                         val taxInclusive: Amount,
                         /**
-                         * The total tax added on top of the subtotal.
+                         * The tax amount added to the Price.
                          */
                         val taxExclusive: Amount,
                     )
