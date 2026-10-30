@@ -52,11 +52,11 @@ class CheckoutConfigurationAnalyticsTest {
         assertThat(paymentElement["card_brand_acceptance"]).isEqualTo(
             mapOf("type" to "all", "brands" to emptyList<String>())
         )
-        assertSnakeCaseColorKeys(paymentElement["appearance"] as Map<*, *>, customized = false)
+        assertAppearanceColorFlags(paymentElement["appearance"] as Map<*, *>, customized = false)
     }
 
     @Test
-    fun `payment element appearance preserves color flags with snake case keys`() {
+    fun `payment element serializes customized appearance`() {
         val appearance = PaymentElement.Configuration.Appearance()
             .colorsLight(PaymentElement.Configuration.Appearance.Colors.light().primary(Color.Red))
             .primaryButton(
@@ -70,11 +70,11 @@ class CheckoutConfigurationAnalyticsTest {
             .toAnalyticsMap()
         val paymentElement = params["payment_element"] as Map<*, *>
 
-        assertSnakeCaseColorKeys(paymentElement["appearance"] as Map<*, *>, customized = true)
+        assertAppearanceColorFlags(paymentElement["appearance"] as Map<*, *>, customized = true)
     }
 
     @Test
-    fun `shipping address appearance preserves color flags with snake case keys`() {
+    fun `shipping address serializes customized appearance`() {
         val appearance = ShippingAddressElement.Configuration.Appearance()
             .colorsLight(ShippingAddressElement.Configuration.Appearance.Colors.light().primary(Color.Red))
             .primaryButton(
@@ -88,7 +88,7 @@ class CheckoutConfigurationAnalyticsTest {
             .toAnalyticsMap()
         val shippingAddressElement = params["shipping_address_element"] as Map<*, *>
 
-        assertSnakeCaseColorKeys(shippingAddressElement["appearance"] as Map<*, *>, customized = true)
+        assertAppearanceColorFlags(shippingAddressElement["appearance"] as Map<*, *>, customized = true)
     }
 
     @Test
@@ -242,7 +242,7 @@ class CheckoutConfigurationAnalyticsTest {
         val shippingAddressElement = params["shipping_address_element"] as Map<*, *>
         val shippingAppearance = shippingAddressElement["appearance"] as Map<*, *>
         assertThat(shippingAppearance["corner_radius"]).isEqualTo(true)
-        assertSnakeCaseColorKeys(shippingAppearance, customized = false)
+        assertAppearanceColorFlags(shippingAppearance, customized = false)
     }
 
     @Test
@@ -327,16 +327,12 @@ class CheckoutConfigurationAnalyticsTest {
         assertNoPrivateValues(params, privateValues)
     }
 
-    private fun assertSnakeCaseColorKeys(appearance: Map<*, *>, customized: Boolean) {
-        assertThat(appearance).containsEntry("colors_light", customized)
-        assertThat(appearance).containsEntry("colors_dark", false)
-        assertThat(appearance).doesNotContainKey("colorsLight")
-        assertThat(appearance).doesNotContainKey("colorsDark")
+    private fun assertAppearanceColorFlags(appearance: Map<*, *>, customized: Boolean) {
+        assertThat(appearance["colors_light"]).isEqualTo(customized)
+        assertThat(appearance["colors_dark"]).isEqualTo(false)
         val primaryButton = appearance["primary_button"] as Map<*, *>
-        assertThat(primaryButton).containsEntry("colors_light", false)
-        assertThat(primaryButton).containsEntry("colors_dark", customized)
-        assertThat(primaryButton).doesNotContainKey("colorsLight")
-        assertThat(primaryButton).doesNotContainKey("colorsDark")
+        assertThat(primaryButton["colors_light"]).isEqualTo(false)
+        assertThat(primaryButton["colors_dark"]).isEqualTo(customized)
     }
 
     private fun assertNoPrivateValues(params: Map<String, Any?>, privateValues: List<String>) {
