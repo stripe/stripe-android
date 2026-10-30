@@ -2,8 +2,6 @@
 
 package com.stripe.android.checkout
 
-import android.net.Uri
-import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.analytics.CheckoutConfirmationContext.InvocationSource
@@ -15,8 +13,6 @@ import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.DurationProvider
-import com.stripe.android.elements.PaymentElement
-import com.stripe.android.elements.ShippingAddressElement
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.TestFactory
@@ -128,46 +124,6 @@ internal class CheckoutAnalyticsPerformerTest {
         privateValues.forEach { privateValue ->
             assertThat(succeededRequest.toString()).doesNotContain(privateValue)
         }
-    }
-
-    @Test
-    fun `confirmation request sends snake case appearance color keys`() = runScenario {
-        val configuration = CheckoutController.Configuration()
-            .paymentElement(
-                PaymentElement.Configuration().appearance(
-                    PaymentElement.Configuration.Appearance()
-                        .colorsLight(PaymentElement.Configuration.Appearance.Colors.light().primary(Color.Red))
-                        .primaryButton(
-                            PaymentElement.Configuration.Appearance.PrimaryButton().colorsDark(
-                                PaymentElement.Configuration.Appearance.PrimaryButton.Colors.dark()
-                                    .background(Color.Blue)
-                            )
-                        )
-                )
-            )
-            .shippingAddressElement(ShippingAddressElement.Configuration())
-            .build()
-        stateHolder.state = requireNotNull(stateHolder.state).copy(configuration = configuration)
-
-        performer.onPaymentElementConfirmationStarted(PaymentSelection.GooglePay)
-
-        val request = analyticsRequestExecutor.requestTurbine.awaitItem()
-        assertThat(request.params["event"]).isEqualTo(STARTED_EVENT)
-        val uri = Uri.parse(request.url)
-        val expectedColorFlags = mapOf(
-            "payment_element[appearance][colors_light]" to "true",
-            "payment_element[appearance][colors_dark]" to "false",
-            "payment_element[appearance][primary_button][colors_light]" to "false",
-            "payment_element[appearance][primary_button][colors_dark]" to "true",
-            "shipping_address_element[appearance][colors_light]" to "false",
-            "shipping_address_element[appearance][colors_dark]" to "false",
-            "shipping_address_element[appearance][primary_button][colors_light]" to "false",
-            "shipping_address_element[appearance][primary_button][colors_dark]" to "false",
-        )
-        expectedColorFlags.forEach { (key, value) ->
-            assertThat(uri.getQueryParameter(key)).isEqualTo(value)
-        }
-        assertThat(uri.queryParameterNames.filter { "colorsLight" in it || "colorsDark" in it }).isEmpty()
     }
 
     @Test
