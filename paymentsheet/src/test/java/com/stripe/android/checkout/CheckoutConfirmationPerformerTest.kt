@@ -30,7 +30,6 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -204,8 +203,9 @@ internal class CheckoutConfirmationPerformerTest {
     ) {
         performer.confirm()
         assertRejection("Cannot confirm checkout while a payment flow is presented.")
-        confirmationHandler.state.value = ConfirmationHandler.State.Complete(
-            ConfirmationHandler.Result.Succeeded(PaymentIntentFixtures.PI_SUCCEEDED)
+        analyticsPerformer.reportConfirmationResult(
+            result = ConfirmationHandler.Result.Succeeded(PaymentIntentFixtures.PI_SUCCEEDED),
+            response = null,
         )
         testScheduler.runCurrent()
         analyticsRequestExecutor.requestTurbine.expectNoEvents()
@@ -247,8 +247,9 @@ internal class CheckoutConfirmationPerformerTest {
         assertRejection("Cannot confirm checkout while another confirmation is in progress.")
         assertThat(operationCoordinator.isUpdating.value).isTrue()
 
-        confirmationHandler.state.value = ConfirmationHandler.State.Complete(
-            ConfirmationHandler.Result.Succeeded(PaymentIntentFixtures.PI_SUCCEEDED)
+        analyticsPerformer.reportConfirmationResult(
+            result = ConfirmationHandler.Result.Succeeded(PaymentIntentFixtures.PI_SUCCEEDED),
+            response = null,
         )
         val request = analyticsRequestExecutor.awaitEvent("checkout_elements.confirm.succeeded")
         assertThat(request).containsAtLeastEntriesIn(
@@ -329,8 +330,9 @@ internal class CheckoutConfirmationPerformerTest {
         state = googlePayState(paymentSelection = PaymentSelection.GooglePay),
     ) {
         confirmAndAwaitStart()
-        confirmationHandler.state.value = ConfirmationHandler.State.Complete(
-            ConfirmationHandler.Result.Succeeded(PaymentIntentFixtures.PI_SUCCEEDED)
+        analyticsPerformer.reportConfirmationResult(
+            result = ConfirmationHandler.Result.Succeeded(PaymentIntentFixtures.PI_SUCCEEDED),
+            response = null,
         )
 
         val request = analyticsRequestExecutor.awaitEvent("checkout_elements.confirm.succeeded")
@@ -390,10 +392,19 @@ internal class CheckoutConfirmationPerformerTest {
         val sessionRefresher = FakeCheckoutSessionRefresher()
         val results = Turbine<CheckoutController.Result>()
         val resultThreads = Turbine<Thread>()
+        val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
+        val analyticsPerformer = TestCheckoutAnalyticsPerformerFactory.create(
+            savedStateHandle = savedStateHandle,
+            stateHolder = stateHolder,
+            analyticsRequestExecutor = analyticsRequestExecutor,
+            workContext = UnconfinedTestDispatcher(testScheduler),
+        )
         val operationCoordinator = CheckoutOperationCoordinator(
             confirmationHandler = confirmationHandler,
             sheetStateHolder = SheetStateHolder(savedStateHandle).apply { this.sheetIsOpen = sheetIsOpen },
             sessionRefresher = sessionRefresher,
+            confirmationFinalizer = { CheckoutConfirmationFinalizer.Result.Completed(it) },
+            resultReporter = analyticsPerformer,
             logger = Logger.noop(),
             resultCallback = {
                 results.add(it)
@@ -401,17 +412,6 @@ internal class CheckoutConfirmationPerformerTest {
             },
             viewModelScope = backgroundScope,
         )
-        val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
-        val analyticsPerformer = TestCheckoutAnalyticsPerformerFactory.create(
-            confirmationHandler = confirmationHandler,
-            savedStateHandle = savedStateHandle,
-            stateHolder = stateHolder,
-            analyticsRequestExecutor = analyticsRequestExecutor,
-            workContext = UnconfinedTestDispatcher(testScheduler),
-        )
-        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
-            analyticsPerformer.reportConfirmationResults()
-        }
         val performer = CheckoutConfirmationPerformer(
             confirmationHandler = confirmationHandler,
             stateHolder = stateHolder,
@@ -431,6 +431,7 @@ internal class CheckoutConfirmationPerformerTest {
             performer = performer,
             confirmationHandler = confirmationHandler,
             analyticsRequestExecutor = analyticsRequestExecutor,
+            analyticsPerformer = analyticsPerformer,
             stateHolder = stateHolder,
             operationCoordinator = operationCoordinator,
             results = results,
@@ -478,6 +479,7 @@ internal class CheckoutConfirmationPerformerTest {
         val performer: CheckoutConfirmationPerformer,
         val confirmationHandler: FakeConfirmationHandler,
         val analyticsRequestExecutor: FakeAnalyticsRequestExecutor,
+        val analyticsPerformer: CheckoutAnalyticsPerformer,
         val stateHolder: CheckoutControllerStateHolder,
         val operationCoordinator: CheckoutOperationCoordinator,
         val results: Turbine<CheckoutController.Result>,

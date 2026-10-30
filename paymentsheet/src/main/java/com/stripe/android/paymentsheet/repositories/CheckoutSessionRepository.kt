@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet.repositories
 
 import com.stripe.android.Stripe
 import com.stripe.android.checkout.CheckoutController.Address
-import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.exception.safeAnalyticsMessage
 import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
@@ -12,9 +11,7 @@ import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeRequest
 import com.stripe.android.core.networking.executeRequestWithResultParser
 import com.stripe.android.core.version.StripeSdkVersion
-import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethodUpdateParams
-import com.stripe.android.model.SetupIntent
 import com.stripe.android.networking.ConfirmationParamsUtils
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
@@ -99,12 +96,6 @@ internal class CheckoutSessionRepository @Inject constructor(
             check(response.status != CheckoutSessionResponse.Status.EXPIRED) {
                 "Checkout Session unexpectedly expired after confirmation."
             }
-            if (response.paymentResponse?.status == "requires_payment_method") {
-                throw InvalidRequestException(
-                    stripeError = response.paymentResponse.error,
-                    message = response.paymentResponse.error?.message ?: "Checkout requires a payment method.",
-                )
-            }
             val paymentReference = response.paymentResponse?.paymentIntent
             val setupReference = response.paymentResponse?.setupIntent
             val intent = when {
@@ -126,11 +117,7 @@ internal class CheckoutSessionRepository @Inject constructor(
                     }
                 )
             }
-            response.copy(
-                paymentIntent = intent as? PaymentIntent,
-                setupIntent = intent as? SetupIntent,
-                elementsSession = response.elementsSession?.copy(stripeIntent = intent),
-            )
+            response.withIntent(intent)
         }
     }
 
@@ -149,6 +136,30 @@ internal class CheckoutSessionRepository @Inject constructor(
                 )
             ),
             responseJsonParser = CheckoutClientPollResponseJsonParser,
+        )
+    }
+
+    /**
+     * Retrieves the full Checkout Session without retries, e.g. to read payment errors after polling.
+     */
+    suspend fun retrieve(
+        sessionId: String,
+        clientSecret: String,
+    ): Result<CheckoutSessionResponse> {
+        return executeRequestWithResultParser(
+            stripeErrorJsonParser = stripeErrorJsonParser,
+            stripeNetworkClient = stripeNetworkClient,
+            request = NonRetryingRequest(
+                apiRequestFactory.createGet(
+                    url = retrieveUrl(sessionId),
+                    options = apiRequestOptionsProvider.get(),
+                    params = elementsSessionClientParams.toCheckoutSessionMap() + mapOf(
+                        "timezone" to TimeZone.getDefault().id,
+                        "client_secret" to clientSecret,
+                    ),
+                )
+            ),
+            responseJsonParser = CheckoutSessionResponseJsonParser(clientSecret),
         )
     }
 
@@ -260,6 +271,9 @@ internal class CheckoutSessionRepository @Inject constructor(
         private fun updateUrl(sessionId: String): String =
             "${ApiRequest.API_HOST}/v1/checkout_client/$sessionId/update"
 
+        private fun retrieveUrl(sessionId: String): String =
+            "${ApiRequest.API_HOST}/v1/checkout_client/$sessionId/retrieve"
+
         private fun pollUrl(sessionId: String): String =
             "${ApiRequest.API_HOST}/v1/checkout_client/$sessionId/poll"
     }
@@ -272,7 +286,7 @@ private fun MutableMap<String, Any>.putIfNotEmpty(key: String, value: String?) {
 }
 
 /**
- * The poller owns retry and backoff decisions, so the network client must not also retry 429s.
+ * Callers own retry and backoff decisions, so the network client must not also retry 429s.
  */
 private class NonRetryingRequest(
     private val request: ApiRequest,

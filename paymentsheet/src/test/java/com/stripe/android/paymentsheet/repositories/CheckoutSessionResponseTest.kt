@@ -1,41 +1,34 @@
 package com.stripe.android.paymentsheet.repositories
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.model.PaymentIntentFixtures
-import com.stripe.android.model.SetupIntentFixtures
-import com.stripe.android.model.StripeIntent
 import org.junit.Test
 
 internal class CheckoutSessionResponseTest {
     @Test
-    fun `processing payment completes the session without claiming it is paid`() {
-        val intent = PaymentIntentFixtures.PI_SUCCEEDED.copy(status = StripeIntent.Status.Processing)
+    fun `poll response replaces session and payment status`() {
+        val original = CheckoutSessionResponseFactory.create()
 
-        val response = CheckoutSessionResponseFactory.create().withConfirmedIntent(intent)
+        val response = original.withPollResponse(
+            CheckoutClientPollResponse(
+                id = original.id,
+                confirmationStatus = CheckoutClientPollResponse.ConfirmationStatus.SUCCEEDED,
+                status = CheckoutSessionResponse.Status.COMPLETE,
+                paymentStatus = CheckoutSessionResponse.PaymentStatus.PAID,
+            )
+        )
 
-        assertThat(response.status).isEqualTo(CheckoutSessionResponse.Status.COMPLETE)
-        assertThat(response.paymentStatus).isEqualTo(CheckoutSessionResponse.PaymentStatus.UNPAID)
-        assertThat(response.paymentIntent).isEqualTo(intent)
+        assertThat(response).isEqualTo(
+            original.copy(
+                status = CheckoutSessionResponse.Status.COMPLETE,
+                paymentStatus = CheckoutSessionResponse.PaymentStatus.PAID,
+            )
+        )
     }
 
     @Test
-    fun `successful setup completes a no payment required session`() {
-        val intent = SetupIntentFixtures.SI_SUCCEEDED
-        val response = CheckoutSessionResponseFactory.create(
-            paymentStatus = CheckoutSessionResponse.PaymentStatus.NO_PAYMENT_REQUIRED,
-        ).withConfirmedIntent(intent)
+    fun `missing poll response keeps the response`() {
+        val original = CheckoutSessionResponseFactory.create()
 
-        assertThat(response.status).isEqualTo(CheckoutSessionResponse.Status.COMPLETE)
-        assertThat(response.paymentStatus).isEqualTo(CheckoutSessionResponse.PaymentStatus.NO_PAYMENT_REQUIRED)
-        assertThat(response.setupIntent).isEqualTo(intent)
-    }
-
-    @Test
-    fun `unfinished authentication leaves the session open`() {
-        val response = CheckoutSessionResponseFactory.create()
-            .withConfirmedIntent(PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2)
-
-        assertThat(response.status).isEqualTo(CheckoutSessionResponse.Status.OPEN)
-        assertThat(response.paymentStatus).isEqualTo(CheckoutSessionResponse.PaymentStatus.UNPAID)
+        assertThat(original.withPollResponse(null)).isSameInstanceAs(original)
     }
 }

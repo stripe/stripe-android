@@ -30,9 +30,7 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
-import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.MutableConfirmationMetadata
-import com.stripe.android.paymentelement.confirmation.intent.CheckoutSessionResponseKey
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationTypeKey
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -44,8 +42,6 @@ import com.stripe.android.paymentsheet.state.LinkDisabledState
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
 import com.stripe.android.utils.FakeDurationProvider
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -63,7 +59,7 @@ internal class CheckoutAnalyticsPerformerTest {
         startConfirmation(InvocationSource.Merchant, PaymentSelection.GooglePay, confirmParams())
 
         val success = successfulResult()
-        confirmationHandler.state.value = ConfirmationHandler.State.Complete(success)
+        complete(success)
 
         analyticsRequestExecutor.awaitConfirmationEvent(
             SUCCEEDED_EVENT,
@@ -71,8 +67,7 @@ internal class CheckoutAnalyticsPerformerTest {
             duration = CONFIRMATION_DURATION_SECONDS,
         )
 
-        confirmationHandler.state.value = ConfirmationHandler.State.Idle
-        confirmationHandler.state.value = ConfirmationHandler.State.Complete(success)
+        complete(success)
         analyticsRequestExecutor.requestTurbine.expectNoEvents()
     }
 
@@ -83,7 +78,7 @@ internal class CheckoutAnalyticsPerformerTest {
         assertThat(durationProvider.callsTurbine.awaitItem())
             .isEqualTo(FakeDurationProvider.Call.Start(DurationProvider.Key.CheckoutConfirmation, reset = true))
 
-        confirmationHandler.state.value = ConfirmationHandler.State.Complete(successfulResult())
+        complete(successfulResult())
 
         assertThat(durationProvider.callsTurbine.awaitItem())
             .isEqualTo(FakeDurationProvider.Call.End(DurationProvider.Key.CheckoutConfirmation))
@@ -110,7 +105,7 @@ internal class CheckoutAnalyticsPerformerTest {
             requestId = "req_failed_confirmation",
             message = privateMessage,
         )
-        confirmationHandler.state.value = ConfirmationHandler.State.Complete(
+        complete(
             ConfirmationHandler.Result.Failed(
                 cause = error,
                 message = privateMessage.resolvableString,
@@ -162,7 +157,7 @@ internal class CheckoutAnalyticsPerformerTest {
         startReporting()
         startConfirmation(InvocationSource.Merchant, PaymentSelection.GooglePay, confirmParams())
 
-        confirmationHandler.state.value = ConfirmationHandler.State.Complete(
+        complete(
             ConfirmationHandler.Result.Canceled(
                 ConfirmationHandler.Result.Canceled.Action.InformCancellation
             )
@@ -194,7 +189,7 @@ internal class CheckoutAnalyticsPerformerTest {
 
         val restoredPerformer = recreatePerformer()
         startReporting(restoredPerformer)
-        confirmationHandler.state.value = ConfirmationHandler.State.Complete(successfulResult())
+        complete(successfulResult())
 
         analyticsRequestExecutor.awaitConfirmationEvent(
             SUCCEEDED_EVENT,
@@ -218,7 +213,7 @@ internal class CheckoutAnalyticsPerformerTest {
         linkAccountHolder.set(LinkAccountUpdate.Value(null))
         startReporting(recreatePerformer())
 
-        confirmationHandler.state.value = ConfirmationHandler.State.Complete(
+        complete(
             ConfirmationHandler.Result.Failed(
                 cause = IllegalStateException("Unable to confirm"),
                 message = "Unable to confirm".resolvableString,
@@ -255,7 +250,7 @@ internal class CheckoutAnalyticsPerformerTest {
         startReporting()
         startConfirmation(InvocationSource.Merchant, nativeLinkSelection, expectedParams)
 
-        confirmationHandler.state.value = ConfirmationHandler.State.Complete(successfulResult())
+        complete(successfulResult())
 
         analyticsRequestExecutor.awaitConfirmationEvent(
             SUCCEEDED_EVENT,
@@ -288,7 +283,7 @@ internal class CheckoutAnalyticsPerformerTest {
         startReporting()
         startConfirmation(InvocationSource.Merchant, nativeLinkSelection, expectedParams)
 
-        confirmationHandler.state.value = ConfirmationHandler.State.Complete(successfulResult())
+        complete(successfulResult())
 
         analyticsRequestExecutor.awaitConfirmationEvent(
             SUCCEEDED_EVENT,
@@ -319,7 +314,7 @@ internal class CheckoutAnalyticsPerformerTest {
         startReporting()
         startConfirmation(InvocationSource.Merchant, nativeLinkSelection, expectedParams)
 
-        confirmationHandler.state.value = ConfirmationHandler.State.Complete(successfulResult())
+        complete(successfulResult())
 
         analyticsRequestExecutor.awaitConfirmationEvent(
             SUCCEEDED_EVENT,
@@ -354,7 +349,7 @@ internal class CheckoutAnalyticsPerformerTest {
         startReporting()
         startConfirmation(InvocationSource.Merchant, nativeLinkSelection, expectedParams)
 
-        confirmationHandler.state.value = ConfirmationHandler.State.Complete(successfulResult())
+        complete(successfulResult())
 
         analyticsRequestExecutor.awaitConfirmationEvent(
             SUCCEEDED_EVENT,
@@ -371,7 +366,7 @@ internal class CheckoutAnalyticsPerformerTest {
         startReporting()
         startConfirmation(InvocationSource.Merchant, inlineSignupSelection, expectedParams)
 
-        confirmationHandler.state.value = ConfirmationHandler.State.Complete(successfulResult())
+        complete(successfulResult())
 
         analyticsRequestExecutor.awaitConfirmationEvent(
             SUCCEEDED_EVENT,
@@ -392,7 +387,7 @@ internal class CheckoutAnalyticsPerformerTest {
         )
         startConfirmation(InvocationSource.Merchant, selection, expectedParams)
 
-        confirmationHandler.state.value = ConfirmationHandler.State.Complete(successfulResult())
+        complete(successfulResult())
 
         analyticsRequestExecutor.awaitConfirmationEvent(
             SUCCEEDED_EVENT,
@@ -410,7 +405,7 @@ internal class CheckoutAnalyticsPerformerTest {
         val selection = inlineSignupSelection.copy(linkInput = UserInput.SignIn("email@example.com"))
         startConfirmation(InvocationSource.Merchant, selection, expectedParams)
 
-        confirmationHandler.state.value = ConfirmationHandler.State.Complete(successfulResult())
+        complete(successfulResult())
 
         analyticsRequestExecutor.awaitConfirmationEvent(
             SUCCEEDED_EVENT,
@@ -445,7 +440,7 @@ internal class CheckoutAnalyticsPerformerTest {
             expectedParams,
         )
 
-        confirmationHandler.state.value = ConfirmationHandler.State.Complete(successfulResult())
+        complete(successfulResult())
 
         analyticsRequestExecutor.awaitConfirmationEvent(
             SUCCEEDED_EVENT,
@@ -462,7 +457,7 @@ internal class CheckoutAnalyticsPerformerTest {
         startReporting()
         startConfirmation(InvocationSource.Merchant, selection, expectedParams)
 
-        confirmationHandler.state.value = ConfirmationHandler.State.Complete(successfulResult())
+        complete(successfulResult())
 
         analyticsRequestExecutor.awaitConfirmationEvent(
             SUCCEEDED_EVENT,
@@ -480,7 +475,7 @@ internal class CheckoutAnalyticsPerformerTest {
         startReporting()
         startConfirmation(InvocationSource.Merchant, PaymentSelection.GooglePay, expectedParams)
 
-        confirmationHandler.state.value = ConfirmationHandler.State.Complete(successfulResult())
+        complete(successfulResult())
 
         analyticsRequestExecutor.awaitConfirmationEvent(
             SUCCEEDED_EVENT,
@@ -520,13 +515,8 @@ internal class CheckoutAnalyticsPerformerTest {
                 elementsSessionConfigId = "cfg_elements_confirmed",
             ),
         )
-        val resultWithResponse = successfulResult().copy(
-            metadata = MutableConfirmationMetadata().apply {
-                set(CheckoutSessionResponseKey, confirmationResponse)
-            }
-        )
 
-        confirmationHandler.state.value = ConfirmationHandler.State.Complete(resultWithResponse)
+        complete(successfulResult(), response = confirmationResponse)
 
         analyticsRequestExecutor.awaitConfirmationEvent(
             SUCCEEDED_EVENT,
@@ -550,7 +540,7 @@ internal class CheckoutAnalyticsPerformerTest {
         startReporting()
         startConfirmation(InvocationSource.Merchant, PaymentSelection.GooglePay, confirmParams())
 
-        confirmationHandler.state.value = ConfirmationHandler.State.Complete(
+        complete(
             ConfirmationHandler.Result.Failed(
                 cause = IllegalStateException("private failure details"),
                 message = "Unable to confirm".resolvableString,
@@ -613,7 +603,6 @@ internal class CheckoutAnalyticsPerformerTest {
         ),
         block: suspend Scenario.() -> Unit,
     ) = runTest {
-        val confirmationHandler = FakeConfirmationHandler()
         val savedStateHandle = SavedStateHandle()
         val stateHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle).apply {
             state = CheckoutControllerStateFactory.create(
@@ -632,46 +621,47 @@ internal class CheckoutAnalyticsPerformerTest {
         val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
         val durationProvider = FakeDurationProvider(CONFIRMATION_DURATION)
         val scenario = Scenario(
-            confirmationHandler = confirmationHandler,
             savedStateHandle = savedStateHandle,
             stateHolder = stateHolder,
             linkAccountHolder = linkAccountHolder,
             analyticsRequestExecutor = analyticsRequestExecutor,
             durationProvider = durationProvider,
             fallbackApiConfiguration = ApiConfiguration(FALLBACK_PUBLISHABLE_KEY).build(),
-            backgroundScope = backgroundScope,
             testScheduler = testScheduler,
         )
 
         scenario.block()
 
-        confirmationHandler.validate()
         analyticsRequestExecutor.validate()
     }
 
     private class Scenario(
-        val confirmationHandler: FakeConfirmationHandler,
         private val savedStateHandle: SavedStateHandle,
         val stateHolder: CheckoutControllerStateHolder,
         val linkAccountHolder: LinkAccountHolder,
         val analyticsRequestExecutor: FakeAnalyticsRequestExecutor,
         val durationProvider: FakeDurationProvider,
         private val fallbackApiConfiguration: ApiConfiguration.State,
-        private val backgroundScope: CoroutineScope,
         private val testScheduler: TestCoroutineScheduler,
     ) {
         val performer: CheckoutAnalyticsPerformer = createPerformer()
 
         fun recreatePerformer(): CheckoutAnalyticsPerformer = createPerformer()
 
+        private var reportingPerformer: CheckoutAnalyticsPerformer = performer
+
         fun startReporting(performer: CheckoutAnalyticsPerformer = this.performer) {
-            backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
-                performer.reportConfirmationResults()
-            }
+            reportingPerformer = performer
+        }
+
+        fun complete(
+            result: ConfirmationHandler.Result,
+            response: CheckoutSessionResponse? = null,
+        ) {
+            reportingPerformer.reportConfirmationResult(result, response)
         }
 
         private fun createPerformer(): CheckoutAnalyticsPerformer = TestCheckoutAnalyticsPerformerFactory.create(
-            confirmationHandler = confirmationHandler,
             savedStateHandle = savedStateHandle,
             stateHolder = stateHolder,
             linkAccountHolder = linkAccountHolder,

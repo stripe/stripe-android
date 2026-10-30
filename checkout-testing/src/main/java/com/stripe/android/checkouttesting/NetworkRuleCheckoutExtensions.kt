@@ -67,7 +67,7 @@ fun NetworkRule.checkoutConfirm(
     val paymentIntent = paymentResponse?.optJSONObject("payment_intent")
     val setupIntent = paymentResponse?.optJSONObject("setup_intent")
     val reference = paymentIntent ?: setupIntent
-    if (reference != null && paymentResponse?.optString("status") != "requires_payment_method") {
+    if (reference != null) {
         val intentType = if (paymentIntent != null) "payment" else "setup"
         enqueue(
             host("api.stripe.com"),
@@ -109,6 +109,20 @@ fun NetworkRule.checkoutPoll(
         host("api.stripe.com"),
         method("GET"),
         path("/v1/checkout_client/$sessionId/poll"),
+        *requestMatchers,
+        responseFactory = responseFactory,
+    )
+}
+
+fun NetworkRule.checkoutRetrieve(
+    vararg requestMatchers: RequestMatcher,
+    sessionId: String = DEFAULT_CHECKOUT_SESSION_ID,
+    responseFactory: (MockResponse) -> Unit = CheckoutInitResponseFactory::create,
+) {
+    enqueue(
+        host("api.stripe.com"),
+        method("GET"),
+        path("/v1/checkout_client/$sessionId/retrieve"),
         *requestMatchers,
         responseFactory = responseFactory,
     )

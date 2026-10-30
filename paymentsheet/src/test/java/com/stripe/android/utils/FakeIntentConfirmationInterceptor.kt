@@ -71,6 +71,7 @@ internal class FakeIntentConfirmationInterceptor : IntentConfirmationInterceptor
                 launcherArguments = IntentConfirmationDefinition.Args.NextAction(
                     intent = intent,
                     deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
+                    checkoutSessionResponse = null,
                 ),
                 receivesResultInProcess = false,
             )

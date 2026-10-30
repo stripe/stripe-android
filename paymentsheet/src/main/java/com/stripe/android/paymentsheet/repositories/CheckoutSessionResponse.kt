@@ -49,24 +49,16 @@ internal data class CheckoutSessionResponse(
         val error: StripeError?,
     ) : StripeModel
 
-    /** Reconcile the session with an Intent whose authentication has completed on this device. */
-    fun withConfirmedIntent(intent: StripeIntent): CheckoutSessionResponse {
-        val complete = when (intent) {
-            is PaymentIntent ->
-                intent.status == StripeIntent.Status.Succeeded || intent.status == StripeIntent.Status.Processing
-            is SetupIntent -> intent.status == StripeIntent.Status.Succeeded
-        }
-        return copy(
-            status = if (complete) Status.COMPLETE else status,
-            paymentStatus = if (intent is PaymentIntent && intent.status == StripeIntent.Status.Succeeded) {
-                PaymentStatus.PAID
-            } else {
-                paymentStatus
-            },
-            paymentIntent = intent as? PaymentIntent,
-            setupIntent = intent as? SetupIntent,
-            elementsSession = elementsSession?.copy(stripeIntent = intent),
-        )
+    fun withIntent(intent: StripeIntent): CheckoutSessionResponse = copy(
+        paymentIntent = intent as? PaymentIntent,
+        setupIntent = intent as? SetupIntent,
+        elementsSession = elementsSession?.copy(stripeIntent = intent),
+    )
+
+    /** Applies the server-reported Session state from polling, keeping this response when none was received. */
+    fun withPollResponse(pollResponse: CheckoutClientPollResponse?): CheckoutSessionResponse {
+        if (pollResponse == null) return this
+        return copy(status = pollResponse.status, paymentStatus = pollResponse.paymentStatus)
     }
 
     val fixedEmail: String?

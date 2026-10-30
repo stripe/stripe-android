@@ -2,6 +2,7 @@
 
 package com.stripe.android.checkout
 
+import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.LocalStripeException
 import com.stripe.android.core.exception.StripeException
@@ -10,6 +11,7 @@ import com.stripe.android.core.model.parsers.StripeErrorJsonParser
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.intent.CheckoutSessionResponseKey
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -27,6 +29,8 @@ internal class CheckoutOperationCoordinator @Inject constructor(
     private val confirmationHandler: ConfirmationHandler,
     private val sheetStateHolder: SheetStateHolder,
     private val sessionRefresher: CheckoutSessionRefresher,
+    private val confirmationFinalizer: CheckoutConfirmationFinalizer,
+    private val resultReporter: CheckoutConfirmationResultReporter,
     private val logger: Logger,
     private val resultCallback: CheckoutController.ResultCallback,
     @ViewModelScope private val viewModelScope: CoroutineScope,
@@ -100,21 +104,40 @@ internal class CheckoutOperationCoordinator @Inject constructor(
         confirmationHandler.state.collect { state ->
             if (state is ConfirmationHandler.State.Complete) {
                 completeConfirmation { wasRestored ->
-                    // A confirmation returning through an activity result has no fresh response to
-                    // commit, but the session changed server-side, so re-fetch it.
-                    val response = (state.result as? ConfirmationHandler.Result.Succeeded)
-                        ?.metadata?.get(CheckoutSessionResponseKey)
-                    refreshSession {
-                        if (response != null) {
-                            sessionRefresher.refresh(response)
-                        } else {
-                            sessionRefresher.refresh()
-                        }
-                    }
-                    state.result.asCheckoutResult(wasRestored)
+                    val (result, response) = finalizeConfirmation(state.result)
+                    resultReporter.reportConfirmationResult(result, response)
+                    result.asCheckoutResult(wasRestored)
                 }
             }
         }
+    }
+
+    /**
+     * Resolves an accepted confirmation to its final server state and commits it. Failed and canceled
+     * confirmations leave the session open, so the current session is re-fetched instead.
+     */
+    private suspend fun finalizeConfirmation(
+        result: ConfirmationHandler.Result,
+    ): Pair<ConfirmationHandler.Result, CheckoutSessionResponse?> {
+        val succeeded = result as? ConfirmationHandler.Result.Succeeded
+        val response = succeeded?.metadata?.get(CheckoutSessionResponseKey)
+        if (response == null) {
+            refreshSession { sessionRefresher.refresh() }
+            return result to null
+        }
+
+        // A next action returns a newer Intent than the one retrieved after /confirm.
+        val finalized = confirmationFinalizer.finalize(response.withIntent(succeeded.intent))
+        refreshSession { sessionRefresher.refresh(finalized.response) }
+        val finalResult = when (finalized) {
+            is CheckoutConfirmationFinalizer.Result.Completed -> result
+            is CheckoutConfirmationFinalizer.Result.Failed -> ConfirmationHandler.Result.Failed(
+                cause = finalized.error,
+                message = finalized.error.stripeErrorMessage(),
+                type = ConfirmationHandler.Result.Failed.ErrorType.Transaction(),
+            )
+        }
+        return finalResult to finalized.response
     }
 
     suspend fun failConfirmation(error: Throwable) {
