@@ -500,7 +500,7 @@ class CheckoutController @Inject internal constructor(
          */
         val livemode: Boolean,
         /**
-         * The three-letter ISO currency code (e.g., "usd").
+         * The three-letter integration currency code (e.g., "usd"), or `null` if unavailable.
          */
         val currency: String?,
         /**
@@ -521,8 +521,8 @@ class CheckoutController @Inject internal constructor(
          */
         val orderSummaryItems: List<OrderSummaryItem>,
         /**
-         * The factor used to convert amounts in the smallest currency unit to the major currency unit
-         * (e.g., `100` for USD and `1` for JPY).
+         * The factor used to convert amounts in the smallest integration currency unit to the major
+         * currency unit (e.g., `100` for USD and `1` for JPY), or `null` if [currency] is unavailable.
          */
         val minorUnitsAmountDivisor: Int?,
         /**

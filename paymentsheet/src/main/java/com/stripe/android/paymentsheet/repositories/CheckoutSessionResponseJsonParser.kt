@@ -76,7 +76,7 @@ internal class CheckoutSessionResponseJsonParser(
             clientSecret = clientSecret,
             configId = configId,
             currency = currency,
-            integrationCurrency = json.requiredString("integration_currency"),
+            integrationCurrency = json.optionalString("integration_currency")?.also { require(it.isNotEmpty()) },
             paymentStatus = paymentStatus,
             status = status,
             livemode = livemode,

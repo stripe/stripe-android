@@ -42,7 +42,7 @@ internal fun CheckoutSessionResponse.asCheckoutSession(
         discountAmounts = emptyList(),
         email = fixedEmail ?: collectedEmail,
         orderSummaryItems = checkoutItems.map { it.asOrderSummaryItem(locale) },
-        minorUnitsAmountDivisor = 10.0.pow(currencyDigits(presentmentCurrency)).toInt(),
+        minorUnitsAmountDivisor = integrationCurrency?.let { 10.0.pow(currencyDigits(it)).toInt() },
         paymentOption = paymentOption,
         shippingAddress = collectedShippingAddress?.let {
             Session.ShippingAddress(collectedShippingName, it.asShippingAddress())

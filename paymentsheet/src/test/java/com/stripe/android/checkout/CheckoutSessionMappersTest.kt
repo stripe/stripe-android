@@ -21,6 +21,29 @@ class CheckoutSessionMappersTest {
     }
 
     @Test
+    fun `maps absent integration currency without affecting presentment amounts`() {
+        val session = CheckoutSessionResponseFactory.create(
+            integrationCurrency = null,
+        ).session()
+
+        assertThat(session.currency).isNull()
+        assertThat(session.minorUnitsAmountDivisor).isNull()
+        assertThat(session.totals.total.amount).isEqualTo("$10.00")
+    }
+
+    @Test
+    fun `divisor follows integration currency when presentment currency has different precision`() {
+        val session = CheckoutSessionResponseFactory.create(
+            currency = "usd",
+            integrationCurrency = "jpy",
+        ).session()
+
+        assertThat(session.currency).isEqualTo("jpy")
+        assertThat(session.minorUnitsAmountDivisor).isEqualTo(1)
+        assertThat(session.totals.total.amount).isEqualTo("$10.00")
+    }
+
+    @Test
     fun `public session falls back to the customer email`() {
         val session = CheckoutSessionResponseFactory.create(
             customer = CheckoutSessionResponse.Customer("cus_test", "customer@example.com", emptyList(), false),

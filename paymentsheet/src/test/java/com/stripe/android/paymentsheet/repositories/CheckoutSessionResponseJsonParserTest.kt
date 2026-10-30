@@ -43,6 +43,32 @@ class CheckoutSessionResponseJsonParserTest {
     }
 
     @Test
+    fun `parses missing integration currency`() {
+        val json = base()
+        json.remove("integration_currency")
+
+        val result = requireNotNull(parse(json))
+
+        assertThat(result.integrationCurrency).isNull()
+        assertThat(result.currency).isEqualTo("usd")
+    }
+
+    @Test
+    fun `parses null integration currency`() {
+        val json = base().put("integration_currency", JSONObject.NULL)
+
+        val result = requireNotNull(parse(json))
+
+        assertThat(result.integrationCurrency).isNull()
+        assertThat(result.currency).isEqualTo("usd")
+    }
+
+    @Test
+    fun `rejects empty integration currency`() {
+        assertThat(parse(base().put("integration_currency", ""))).isNull()
+    }
+
+    @Test
     fun `rejects an intent reference without its client secret`() {
         val json = response("checkout-session-confirm.json")
         json.getJSONObject("payment_response").getJSONObject("payment_intent").remove("client_secret")

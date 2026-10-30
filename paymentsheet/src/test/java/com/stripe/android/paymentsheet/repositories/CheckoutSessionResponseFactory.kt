@@ -11,7 +11,7 @@ internal object CheckoutSessionResponseFactory {
         clientSecret: String = "${id}_secret_test",
         amount: Long = 1000L,
         currency: String = "usd",
-        integrationCurrency: String = currency,
+        integrationCurrency: String? = currency,
         paymentStatus: CheckoutSessionResponse.PaymentStatus = CheckoutSessionResponse.PaymentStatus.UNPAID,
         status: CheckoutSessionResponse.Status = CheckoutSessionResponse.Status.OPEN,
         liveMode: Boolean = false,
