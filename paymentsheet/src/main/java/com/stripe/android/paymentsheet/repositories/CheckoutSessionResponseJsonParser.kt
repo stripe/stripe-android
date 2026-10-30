@@ -29,18 +29,8 @@ internal class CheckoutSessionResponseJsonParser(
         val id = json.requiredString("id")
         val configId = json.optionalString("checkout_session_config_id")
         val currency = json.requiredString("presentment_currency")
-        val paymentStatus = when (json.requiredString("payment_status")) {
-            "paid" -> CheckoutSessionResponse.PaymentStatus.PAID
-            "unpaid" -> CheckoutSessionResponse.PaymentStatus.UNPAID
-            "no_payment_required" -> CheckoutSessionResponse.PaymentStatus.NO_PAYMENT_REQUIRED
-            else -> error("Unsupported payment_status")
-        }
-        val status = when (json.requiredString("status")) {
-            "open" -> CheckoutSessionResponse.Status.OPEN
-            "complete" -> CheckoutSessionResponse.Status.COMPLETE
-            "expired" -> CheckoutSessionResponse.Status.EXPIRED
-            else -> error("Unsupported status")
-        }
+        val paymentStatus = parsePaymentStatus(json.requiredString("payment_status"))
+        val status = parseStatus(json.requiredString("status"))
 
         val checkoutItems = json.requiredArray("items").objects().map(::parseCheckoutItem)
         require(checkoutItems.isNotEmpty())
@@ -361,4 +351,18 @@ internal class CheckoutSessionResponseJsonParser(
     private fun JSONObject.requiredFiniteDouble(name: String): Double = getDouble(name).also { require(it.isFinite()) }
     private fun JSONArray.objects(): List<JSONObject> = (0 until length()).map(::getJSONObject)
     private fun JSONArray.strings(): List<String> = (0 until length()).map(::getString)
+}
+
+internal fun parsePaymentStatus(value: String): CheckoutSessionResponse.PaymentStatus = when (value) {
+    "paid" -> CheckoutSessionResponse.PaymentStatus.PAID
+    "unpaid" -> CheckoutSessionResponse.PaymentStatus.UNPAID
+    "no_payment_required" -> CheckoutSessionResponse.PaymentStatus.NO_PAYMENT_REQUIRED
+    else -> error("Unsupported payment_status")
+}
+
+internal fun parseStatus(value: String): CheckoutSessionResponse.Status = when (value) {
+    "open" -> CheckoutSessionResponse.Status.OPEN
+    "complete" -> CheckoutSessionResponse.Status.COMPLETE
+    "expired" -> CheckoutSessionResponse.Status.EXPIRED
+    else -> error("Unsupported status")
 }

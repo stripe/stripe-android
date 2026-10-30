@@ -4,7 +4,10 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutInit
+import com.stripe.android.checkouttesting.checkoutPoll
 import com.stripe.android.checkouttesting.checkoutUpdate
+import com.stripe.android.core.exception.APIException
+import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
@@ -14,6 +17,7 @@ import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.hasBodyPart
 import com.stripe.android.networktesting.RequestMatchers.not
+import com.stripe.android.networktesting.RequestMatchers.query
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.android.utils.FakeFraudDetectionDataRepository
@@ -166,5 +170,58 @@ class CheckoutSessionRepositoryTest {
         assertThat(result.isFailure).isTrue()
         val params = analyticsRequestExecutor.getExecutedRequests().single().params
         assertThat(params).containsEntry("event", "elements.adaptive_pricing.currency_toggled.failed")
+    }
+
+    @Test
+    fun `poll sends only the client secret and parses the response`() = runTest {
+        networkRule.checkoutPoll(
+            query("client_secret=cs_test_abc123_secret_test"),
+        )
+
+        val result = repository.poll(
+            sessionId = DEFAULT_CHECKOUT_SESSION_ID,
+            clientSecret = "cs_test_abc123_secret_test",
+        )
+
+        assertThat(result.getOrThrow()).isEqualTo(
+            CheckoutClientPollResponse(
+                id = DEFAULT_CHECKOUT_SESSION_ID,
+                confirmationStatus = CheckoutClientPollResponse.ConfirmationStatus.SUCCEEDED,
+                status = CheckoutSessionResponse.Status.COMPLETE,
+                paymentStatus = CheckoutSessionResponse.PaymentStatus.PAID,
+            )
+        )
+    }
+
+    @Test
+    fun `poll does not retry rate limited requests`() = runTest {
+        networkRule.checkoutPoll { response ->
+            response.setResponseCode(429)
+            response.setHeader("Stripe-Should-Retry", "true")
+            response.setBody("""{"error": {"message": "Too many requests"}}""")
+        }
+
+        val result = repository.poll(
+            sessionId = DEFAULT_CHECKOUT_SESSION_ID,
+            clientSecret = "cs_test_abc123_secret_test",
+        )
+
+        assertThat((result.exceptionOrNull() as? StripeException)?.statusCode).isEqualTo(429)
+    }
+
+    @Test
+    fun `poll fails on unknown confirmation status`() = runTest {
+        networkRule.checkoutPoll { response ->
+            response.testBodyFromFile("checkout-session-poll.json") { json ->
+                json.put("confirmation_status", "processing")
+            }
+        }
+
+        val result = repository.poll(
+            sessionId = DEFAULT_CHECKOUT_SESSION_ID,
+            clientSecret = "cs_test_abc123_secret_test",
+        )
+
+        assertThat(result.exceptionOrNull()).isInstanceOf(APIException::class.java)
     }
 }

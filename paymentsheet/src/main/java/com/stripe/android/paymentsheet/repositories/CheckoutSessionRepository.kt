@@ -9,6 +9,7 @@ import com.stripe.android.core.model.parsers.StripeErrorJsonParser
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
+import com.stripe.android.core.networking.StripeRequest
 import com.stripe.android.core.networking.executeRequestWithResultParser
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.model.PaymentIntent
@@ -19,6 +20,7 @@ import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
+import java.io.OutputStream
 import java.util.TimeZone
 import javax.inject.Inject
 import javax.inject.Provider
@@ -132,6 +134,24 @@ internal class CheckoutSessionRepository @Inject constructor(
         }
     }
 
+    suspend fun poll(
+        sessionId: String,
+        clientSecret: String,
+    ): Result<CheckoutClientPollResponse> {
+        return executeRequestWithResultParser(
+            stripeErrorJsonParser = stripeErrorJsonParser,
+            stripeNetworkClient = stripeNetworkClient,
+            request = NonRetryingRequest(
+                apiRequestFactory.createGet(
+                    url = pollUrl(sessionId),
+                    options = apiRequestOptionsProvider.get(),
+                    params = mapOf("client_secret" to clientSecret),
+                )
+            ),
+            responseJsonParser = CheckoutClientPollResponseJsonParser,
+        )
+    }
+
     suspend fun detachPaymentMethod(
         sessionId: String,
         clientSecret: String,
@@ -239,6 +259,9 @@ internal class CheckoutSessionRepository @Inject constructor(
 
         private fun updateUrl(sessionId: String): String =
             "${ApiRequest.API_HOST}/v1/checkout_client/$sessionId/update"
+
+        private fun pollUrl(sessionId: String): String =
+            "${ApiRequest.API_HOST}/v1/checkout_client/$sessionId/poll"
     }
 }
 
@@ -246,4 +269,23 @@ private fun MutableMap<String, Any>.putIfNotEmpty(key: String, value: String?) {
     if (!value.isNullOrEmpty()) {
         put(key, value)
     }
+}
+
+/**
+ * The poller owns retry and backoff decisions, so the network client must not also retry 429s.
+ */
+private class NonRetryingRequest(
+    private val request: ApiRequest,
+) : StripeRequest() {
+    override val method: Method = request.method
+    override val mimeType: MimeType = request.mimeType
+    override val retryResponseCodes: Iterable<Int> = emptyList()
+    override val url: String = request.url
+    override val headers: Map<String, String> = request.headers
+
+    override var postHeaders: Map<String, String>? = request.postHeaders
+
+    override fun writePostBody(outputStream: OutputStream) = request.writePostBody(outputStream)
+
+    override fun toString(): String = request.toString()
 }
