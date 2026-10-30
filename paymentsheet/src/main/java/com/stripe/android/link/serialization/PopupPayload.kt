@@ -3,18 +3,18 @@ package com.stripe.android.link.serialization
 import android.content.Context
 import android.os.Build
 import android.util.Base64
-import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
+import kotlinx.serialization.EncodeDefault
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.jsonObject
 
 @Serializable
 internal data class PopupPayload(
@@ -47,7 +47,7 @@ internal data class PopupPayload(
     @SerialName("linkFundingSources")
     val linkFundingSources: List<String>,
     @SerialName("clientAttributionMetadata")
-    val clientAttributionMetadata: JsonObject
+    val clientAttributionMetadata: AttributionMetadata
 ) {
     @SerialName("path")
     val path: String = "mobile_pay"
@@ -94,6 +94,55 @@ internal data class PopupPayload(
         @SerialName("stripePreferredNetworks")
         val preferredNetworks: List<String>,
     )
+
+    @OptIn(ExperimentalSerializationApi::class)
+    @Serializable
+    data class AttributionMetadata(
+        @SerialName("merchant_integration_source")
+        val merchantIntegrationSource: String,
+        @SerialName("merchant_integration_subtype")
+        val merchantIntegrationSubtype: String,
+        @SerialName("merchant_integration_version")
+        val merchantIntegrationVersion: String,
+        @SerialName("client_session_id")
+        val clientSessionId: String,
+        @EncodeDefault(EncodeDefault.Mode.NEVER)
+        @SerialName("payment_method_selection_flow")
+        val paymentMethodSelectionFlow: String? = null,
+        @EncodeDefault(EncodeDefault.Mode.NEVER)
+        @SerialName("payment_intent_creation_flow")
+        val paymentIntentCreationFlow: String? = null,
+        @EncodeDefault(EncodeDefault.Mode.NEVER)
+        @SerialName("checkout_session_id")
+        val checkoutSessionId: String? = null,
+        @EncodeDefault(EncodeDefault.Mode.NEVER)
+        @SerialName("checkout_config_id")
+        val checkoutConfigId: String? = null,
+        @EncodeDefault(EncodeDefault.Mode.NEVER)
+        @SerialName("merchant_integration_additional_elements")
+        val configuredElements: List<String>? = null,
+        @EncodeDefault(EncodeDefault.Mode.NEVER)
+        @SerialName("elements_session_config_id")
+        val elementsSessionConfigId: String? = null,
+    ) {
+        companion object {
+            fun create(metadata: ClientAttributionMetadata): AttributionMetadata {
+                val params = metadata.toParamMap()
+                return AttributionMetadata(
+                    merchantIntegrationSource = params.getValue("merchant_integration_source") as String,
+                    merchantIntegrationSubtype = params.getValue("merchant_integration_subtype") as String,
+                    merchantIntegrationVersion = params.getValue("merchant_integration_version") as String,
+                    clientSessionId = params.getValue("client_session_id") as String,
+                    paymentMethodSelectionFlow = params["payment_method_selection_flow"] as String?,
+                    paymentIntentCreationFlow = params["payment_intent_creation_flow"] as String?,
+                    checkoutSessionId = params["checkout_session_id"] as String?,
+                    checkoutConfigId = params["checkout_config_id"] as String?,
+                    configuredElements = (metadata as? ClientAttributionMetadata.CheckoutSession)?.configuredElements,
+                    elementsSessionConfigId = params["elements_session_config_id"] as String?,
+                )
+            }
+        }
+    }
 
     enum class IntentMode(val type: String) {
         Payment("payment"),
@@ -160,9 +209,7 @@ internal data class PopupPayload(
                 setupFutureUsage = stripeIntent.isSetupForFutureUsage(passthroughModeEnabled),
                 flags = flags,
                 linkFundingSources = stripeIntent.linkFundingSources.map { it.uppercase() },
-                clientAttributionMetadata = Json.parseToJsonElement(
-                    StripeJsonUtils.mapToJsonObject(clientAttributionMetadata.toParamMap()).toString()
-                ).jsonObject,
+                clientAttributionMetadata = AttributionMetadata.create(clientAttributionMetadata),
             )
         }
 

@@ -24,6 +24,7 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
         require(json.requiredString("mode") == "modeless")
         val id = json.requiredString("session_id")
         val configId = json.optionalString("config_id")
+        val automaticPaymentMethodTypes = json.optionalBoolean("automatic_payment_method_types")
         val currency = json.requiredString("currency")
         val paymentStatus = when (json.requiredString("payment_status")) {
             "paid" -> CheckoutSessionResponse.PaymentStatus.PAID
@@ -64,7 +65,7 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
         CheckoutSessionResponse(
             id = id,
             configId = configId,
-            automaticPaymentMethodTypes = json.optionalBoolean("automatic_payment_method_types"),
+            automaticPaymentMethodTypes = automaticPaymentMethodTypes,
             currency = currency,
             paymentStatus = paymentStatus,
             status = status,
