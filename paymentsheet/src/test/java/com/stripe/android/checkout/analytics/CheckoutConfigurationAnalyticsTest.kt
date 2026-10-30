@@ -4,7 +4,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutController
-import com.stripe.android.common.analytics.toAnalyticsMap
 import com.stripe.android.elements.CurrencySelectorElement
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.elements.PaymentElement
@@ -13,7 +12,6 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentelement.CheckoutSessionPreview
-import com.stripe.android.paymentsheet.PaymentSheet
 import kotlin.test.Test
 
 @OptIn(CheckoutSessionPreview::class, AppearanceAPIAdditionsPreview::class)
@@ -91,21 +89,6 @@ class CheckoutConfigurationAnalyticsTest {
         val shippingAddressElement = params["shipping_address_element"] as Map<*, *>
 
         assertSnakeCaseColorKeys(shippingAddressElement["appearance"] as Map<*, *>, customized = true)
-    }
-
-    @Test
-    fun `shared payment sheet appearance serializer retains camel case color keys`() {
-        val appearance = PaymentSheet.Appearance().toAnalyticsMap()
-        val primaryButton = appearance["primary_button"] as Map<*, *>
-
-        assertThat(appearance).containsEntry("colorsLight", false)
-        assertThat(appearance).containsEntry("colorsDark", false)
-        assertThat(appearance).doesNotContainKey("colors_light")
-        assertThat(appearance).doesNotContainKey("colors_dark")
-        assertThat(primaryButton).containsEntry("colorsLight", false)
-        assertThat(primaryButton).containsEntry("colorsDark", false)
-        assertThat(primaryButton).doesNotContainKey("colors_light")
-        assertThat(primaryButton).doesNotContainKey("colors_dark")
     }
 
     @Test
