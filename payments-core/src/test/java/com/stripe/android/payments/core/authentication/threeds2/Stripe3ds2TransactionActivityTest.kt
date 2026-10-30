@@ -121,7 +121,9 @@ class Stripe3ds2TransactionActivityTest {
                 assertThat(root.paddingTop).isEqualTo(13)
                 assertThat(root.paddingEnd).isEqualTo(17)
                 assertThat(root.paddingBottom).isEqualTo(bottomInset)
-                assertThat(remainingInsets.isConsumed).isTrue()
+                // FragmentContainerView returns the original insets to its parent.
+                assertThat(remainingInsets.getInsets(WindowInsetsCompat.Type.systemBars()))
+                    .isEqualTo(insets.getInsets(WindowInsetsCompat.Type.systemBars()))
             }
         }
     }
