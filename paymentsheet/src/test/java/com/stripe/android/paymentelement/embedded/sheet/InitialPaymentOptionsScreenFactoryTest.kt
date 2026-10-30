@@ -2,8 +2,10 @@ package com.stripe.android.paymentelement.embedded.sheet
 
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.Turbine
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.taptoadd.FakeTapToAddHelper
+import com.stripe.android.common.taptoadd.TapToAddNextStep
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.LinkAccountHolder
@@ -11,10 +13,12 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
+import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationStateFixtures
 import com.stripe.android.paymentelement.embedded.form.EmbeddedFormInteractorFactory
 import com.stripe.android.paymentelement.embedded.form.OnClickDelegateOverrideImpl
 import com.stripe.android.paymentelement.embedded.manage.EmbeddedManageScreenInteractorFactory
@@ -26,10 +30,12 @@ import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInteractor
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.verticalmode.FakeManageScreenInteractor
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.FakeIsNfcScanningAvailable
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
@@ -46,6 +52,7 @@ import org.junit.Rule
 import org.junit.Test
 import javax.inject.Provider
 
+@Suppress("LargeClass")
 internal class InitialPaymentOptionsScreenFactoryTest {
     @get:Rule
     val coroutineTestRule = CoroutineTestRule()
@@ -507,6 +514,50 @@ internal class InitialPaymentOptionsScreenFactoryTest {
         onClickOverrideCalls.expectNoEvents()
     }
 
+    @Test
+    fun `FlowController TapToAdd ShowSavedPaymentMethods resets to horizontal saved options from nested add form`() {
+        val tapToAddHelper = FakeTapToAddHelper()
+        testScenario(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+            ),
+            customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
+                paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+            ),
+            tapToAddHelper = tapToAddHelper,
+        ) {
+            selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+            val screens = factory.createInitialScreen()
+            val savedOptionsScreen = screens.first()
+            val formScreen = screens.last()
+            assertThat(formScreen).isInstanceOf<EmbeddedNavigator.Screen.HorizontalPaymentOptions>()
+            navigator.performAction(EmbeddedNavigator.Action.ReplaceCurrentScreen(savedOptionsScreen))
+            assertThat(eventReporter.showExistingPaymentOptionsCalls.awaitItem()).isEqualTo(Unit)
+            navigator.performAction(EmbeddedNavigator.Action.GoToScreen(formScreen))
+            testScope.testScheduler.advanceUntilIdle()
+            assertThat(navigator.canGoBack).isTrue()
+            assertThat(eventReporter.showNewPaymentOptionsCalls.awaitItem()).isEqualTo(Unit)
+
+            sheetActivityStateHolder.result.test {
+                navigator.screen.test {
+                    assertThat(awaitItem()).isSameInstanceAs(formScreen)
+
+                    val savedSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+                    selectionHolder.setSelection(savedSelection)
+                    tapToAddHelper.emitNextStep(
+                        TapToAddNextStep.ShowSavedPaymentMethods(savedSelection)
+                    )
+
+                    assertThat(awaitItem()).isInstanceOf<EmbeddedNavigator.Screen.HorizontalSavedPaymentOptions>()
+                    assertThat(navigator.canGoBack).isFalse()
+                    assertThat(selectionHolder.selection.value).isEqualTo(savedSelection)
+                    assertThat(eventReporter.showExistingPaymentOptionsCalls.awaitItem()).isEqualTo(Unit)
+                }
+                expectNoEvents()
+            }
+        }
+    }
+
     @Suppress("LongMethod")
     private fun testScenario(
         launchMode: EmbeddedLaunchMode = EmbeddedLaunchMode.PaymentOptions,
@@ -520,6 +571,7 @@ internal class InitialPaymentOptionsScreenFactoryTest {
         ),
         customerState: CustomerState? = null,
         testDispatcher: TestDispatcher = UnconfinedTestDispatcher(),
+        tapToAddHelper: FakeTapToAddHelper = FakeTapToAddHelper.noOp(),
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val savedStateHandle = SavedStateHandle()
@@ -533,7 +585,27 @@ internal class InitialPaymentOptionsScreenFactoryTest {
         customerStateHolder.setCustomerState(customerState)
         val eventReporter = FakeEventReporter()
         val testScope = TestScope(testDispatcher)
-        val sheetActivityStateHolder = FakeSheetActivityStateHolder()
+        lateinit var navigator: EmbeddedNavigator
+        lateinit var factory: InitialPaymentOptionsScreenFactory
+        val linkAccountHolder = LinkAccountHolder(SavedStateHandle())
+        val errorReporter = FakeErrorReporter()
+        val sheetActivityStateHolder = DefaultSheetActivityStateHolder(
+            paymentMethodMetadata = paymentMethodMetadata,
+            selectionHolder = selectionHolder,
+            configuration = EmbeddedConfirmationStateFixtures.defaultState().configuration,
+            onClickDelegate = OnClickDelegateOverrideImpl(),
+            eventReporter = eventReporter,
+            coroutineScope = testScope,
+            confirmationHandler = FakeConfirmationHandler(),
+            tapToAddHelper = tapToAddHelper,
+            customerStateHolder = customerStateHolder,
+            linkAccountHolder = linkAccountHolder,
+            launchMode = EmbeddedLaunchMode.PaymentOptions,
+            embeddedNavigatorProvider = Provider { navigator },
+            savedPaymentMethodConfirmScreenFactoryProvider = Provider { error("Not expected") },
+            initialPaymentOptionsScreenFactoryProvider = Provider { factory },
+            errorReporter = errorReporter,
+        )
         val continueCoordinator = FakeSheetActivityContinueCoordinator()
         val onClickOverrideDelegate = OnClickDelegateOverrideImpl()
         val onClickOverrideCalls = Turbine<Unit>()
@@ -549,7 +621,6 @@ internal class InitialPaymentOptionsScreenFactoryTest {
         val manageInteractorFactory = EmbeddedManageScreenInteractorFactory {
             FakeManageScreenInteractor()
         }
-        val linkAccountHolder = LinkAccountHolder(SavedStateHandle())
         val walletsInteractor = PaymentOptionsWalletsInteractor(
             paymentMethodMetadata = paymentMethodMetadata,
             customerStateHolder = customerStateHolder,
@@ -587,7 +658,7 @@ internal class InitialPaymentOptionsScreenFactoryTest {
             onContinueClick = {},
             onPrimaryButtonDisabledClick = {},
         )
-        val navigator = EmbeddedNavigator(
+        navigator = EmbeddedNavigator(
             coroutineScope = testScope,
             eventReporter = eventReporter,
             initialScreen = initialScreen,
@@ -624,7 +695,7 @@ internal class InitialPaymentOptionsScreenFactoryTest {
             linkAccount = stateFlowOf(null),
         )
 
-        val factory = InitialPaymentOptionsScreenFactory(
+        factory = InitialPaymentOptionsScreenFactory(
             launchMode = launchMode,
             savedStateHandle = savedStateHandle,
             paymentMethodMetadata = paymentMethodMetadata,
@@ -657,7 +728,9 @@ internal class InitialPaymentOptionsScreenFactoryTest {
             onClickOverrideCalls = onClickOverrideCalls,
             eventReporter = eventReporter,
             testScope = testScope,
+            sheetActivityStateHolder = sheetActivityStateHolder,
         ).block()
+        errorReporter.ensureAllEventsConsumed()
         eventReporter.validate()
         continueCoordinator.validate()
         onClickOverrideCalls.ensureAllEventsConsumed()
@@ -673,6 +746,7 @@ internal class InitialPaymentOptionsScreenFactoryTest {
         val onClickOverrideCalls: Turbine<Unit>,
         val eventReporter: FakeEventReporter,
         val testScope: TestScope,
+        val sheetActivityStateHolder: SheetActivityStateHolder,
     )
 }
 
