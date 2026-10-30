@@ -23,6 +23,7 @@ internal class CurrencySelectorToggleAppearanceScreenshotTest {
     )
 
     private val options = CurrencySelectorOptions(
+        exchangeRateDetails = null,
         first = CurrencyOption(code = "USD", formattedAmount = "\$50.99", flag = FlagContent.Emoji("🇺🇸")),
         second = CurrencyOption(code = "EUR", formattedAmount = "€45.87", flag = FlagContent.Emoji("🇪🇺")),
         selectedCode = "USD",

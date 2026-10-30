@@ -6,7 +6,7 @@ import com.stripe.android.model.PaymentMethodCreateParams
 
 /**
  * Parameters for confirming a checkout session via the confirm API
- * (`/v1/payment_pages/{cs_id}/confirm`).
+ * (`/v1/checkout_client/{cs_id}/confirm`).
  *
  * [expectedPaymentMethodType] identifies the PaymentMethod being confirmed and is omitted when its type is unavailable.
  * [expectedAmount] is the checkout session amount and is included for every confirmation, including zero.
@@ -15,6 +15,7 @@ import com.stripe.android.model.PaymentMethodCreateParams
 internal data class ConfirmCheckoutSessionParams(
     private val paymentMethodId: String?,
     val paymentMethodData: PaymentMethodCreateParams?,
+    private val passiveCaptchaToken: String?,
     private val expectedPaymentMethodType: String?,
     private val clientAttributionMetadata: ClientAttributionMetadata,
     private val returnUrl: String,
@@ -35,13 +36,15 @@ internal data class ConfirmCheckoutSessionParams(
                 put("expected_payment_method_type", expectedPaymentMethodType)
             }
             put("client_attribution_metadata", clientAttributionMetadata.toParamMap())
+            passiveCaptchaToken?.let { put("passive_captcha_token", it) }
             put("return_url", returnUrl)
             put("expected_amount", expectedAmount)
-            if (savePaymentMethod != null) {
-                put("save_payment_method", savePaymentMethod)
+            val collected = buildMap {
+                collectedInformation?.let { putAll(it.toParamMap()) }
+                savePaymentMethod?.let { put("save_payment_method", it) }
             }
-            if (collectedInformation != null) {
-                put("collected_information", collectedInformation.toParamMap())
+            if (collected.isNotEmpty()) {
+                put("collected_information", collected)
             }
             if (shipping != null) {
                 put("shipping", shipping.toParamMap())

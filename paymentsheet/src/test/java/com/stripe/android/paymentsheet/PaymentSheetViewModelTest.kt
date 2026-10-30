@@ -88,7 +88,6 @@ import com.stripe.android.paymentsheet.addresselement.FakeStripeAutocompleteRepo
 import com.stripe.android.paymentsheet.addresselement.analytics.FakeAddressLauncherEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
-import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
 import com.stripe.android.paymentsheet.cvcrecollection.FakeCvcRecollectionHandler
 import com.stripe.android.paymentsheet.forms.FormFieldValues
@@ -98,7 +97,6 @@ import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState.UserErrorMessage
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddAnotherPaymentMethod
-import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPaymentMethod
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.Args
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcCompletionState
@@ -113,7 +111,7 @@ import com.stripe.android.paymentsheet.state.PaymentSheetLoadingException.Paymen
 import com.stripe.android.paymentsheet.state.WalletLocation
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.ui.CardBrandChoice
-import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_FORM_TEST_TAG
+import com.stripe.android.paymentsheet.ui.FORM_ELEMENT_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PaymentSheetScreen
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
@@ -785,7 +783,7 @@ internal class PaymentSheetViewModelTest {
                 ConfirmationHandler.Result.Failed(
                     cause = Exception("Test exception"),
                     message = PaymentsCoreR.string.stripe_internal_error.resolvableString,
-                    type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                    type = ConfirmationHandler.Result.Failed.ErrorType.Transaction(),
                 )
             )
 
@@ -1043,10 +1041,12 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `On confirmation result, with non-success outcome should report failure event`() = confirmationTest {
-        val viewModel = createViewModel()
+        val eventReporter = FakeEventReporter()
+        val viewModel = createViewModel(eventReporter = eventReporter)
         val selection = PaymentSelection.Saved(CARD_PAYMENT_METHOD)
         val error = APIException()
 
+        eventReporter.showExistingPaymentOptionsCalls.awaitItem()
         viewModel.updateSelection(selection)
         viewModel.checkout()
 
@@ -1065,18 +1065,55 @@ internal class PaymentSheetViewModelTest {
                 result = ConfirmationHandler.Result.Failed(
                     cause = error,
                     message = error.errorMessage,
-                    type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                    type = ConfirmationHandler.Result.Failed.ErrorType.Transaction(),
                 )
             )
-            verify(eventReporter)
-                .onPaymentFailure(
-                    paymentSelection = selection,
-                    error = PaymentSheetConfirmationError.Stripe(error),
-                )
+            val failureCall = eventReporter.paymentFailureCalls.awaitItem()
+            assertThat(failureCall.paymentSelection).isEqualTo(selection)
+            assertThat(failureCall.error.cause).isSameInstanceAs(error)
+            assertThat(failureCall.error.analyticsValue).isNull()
+            assertThat(failureCall.error.errorCode).isNull()
 
             val stripeIntent = awaitItem()?.stripeIntent
             assertThat(stripeIntent).isEqualTo(PAYMENT_INTENT)
         }
+        eventReporter.validate()
+    }
+
+    @Test
+    fun `Internal confirmation failure shows error without reporting payment failure`() =
+        assertRecoverableConfirmationFailure(ConfirmationHandler.Result.Failed.ErrorType.Internal)
+
+    @Test
+    fun `Merchant integration confirmation failure shows error without reporting payment failure`() =
+        assertRecoverableConfirmationFailure(ConfirmationHandler.Result.Failed.ErrorType.MerchantIntegration)
+
+    @Test
+    fun `Fatal confirmation failure closes sheet without reporting payment failure`() = confirmationTest {
+        val eventReporter = FakeEventReporter()
+        val viewModel = createViewModel(eventReporter = eventReporter)
+        val error = IllegalStateException("Fatal confirmation error")
+
+        eventReporter.showExistingPaymentOptionsCalls.awaitItem()
+        viewModel.updateSelection(PaymentSelection.Saved(CARD_PAYMENT_METHOD))
+        viewModel.checkout()
+        startTurbine.awaitItem()
+
+        viewModel.paymentSheetResult.test {
+            confirmationState.value = ConfirmationHandler.State.Complete(
+                ConfirmationHandler.Result.Failed(
+                    cause = error,
+                    message = "Unable to continue".resolvableString,
+                    type = ConfirmationHandler.Result.Failed.ErrorType.Fatal,
+                )
+            )
+
+            val result = awaitItem()
+            assertThat(result).isInstanceOf<PaymentSheetResult.Failed>()
+            assertThat((result as PaymentSheetResult.Failed).error).isSameInstanceAs(error)
+        }
+        eventReporter.paymentFailureCalls.expectNoEvents()
+        eventReporter.validate()
     }
 
     @Test
@@ -1096,19 +1133,20 @@ internal class PaymentSheetViewModelTest {
                 ConfirmationHandler.Result.Failed(
                     cause = InvalidDeferredIntentUsageException(),
                     message = "An error occurred!".resolvableString,
-                    type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                    type = ConfirmationHandler.Result.Failed.ErrorType.Transaction(),
                 )
             )
 
             val error = eventReporter.paymentFailureCalls.awaitItem().error
 
-            assertThat(error.analyticsValue).isEqualTo("invalidDeferredIntentUsage")
             assertThat(error.cause).isInstanceOf(InvalidDeferredIntentUsageException::class.java)
         }
 
     @Test
     fun `on confirmation result, should update emit generic error on IOExceptions`() = confirmationTest {
-        val viewModel = createViewModel()
+        val eventReporter = FakeEventReporter()
+        val viewModel = createViewModel(eventReporter = eventReporter)
+        eventReporter.showExistingPaymentOptionsCalls.awaitItem()
 
         viewModel.viewState.test {
             val error = IOException("very helpful error message")
@@ -1117,7 +1155,7 @@ internal class PaymentSheetViewModelTest {
                 result = ConfirmationHandler.Result.Failed(
                     cause = error,
                     message = R.string.stripe_something_went_wrong.resolvableString,
-                    type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                    type = ConfirmationHandler.Result.Failed.ErrorType.Transaction(),
                 )
             )
 
@@ -1132,6 +1170,8 @@ internal class PaymentSheetViewModelTest {
                     )
                 )
         }
+        eventReporter.paymentFailureCalls.expectNoEvents()
+        eventReporter.validate()
     }
 
     @Test
@@ -1146,7 +1186,7 @@ internal class PaymentSheetViewModelTest {
                 result = ConfirmationHandler.Result.Failed(
                     cause = error,
                     message = errorMessage.resolvableString,
-                    type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                    type = ConfirmationHandler.Result.Failed.ErrorType.Transaction(),
                 )
             )
 
@@ -1561,7 +1601,7 @@ internal class PaymentSheetViewModelTest {
         val viewModel = createViewModel(customer = EMPTY_CUSTOMER_STATE)
         viewModel.savedStateHandle[SAVE_PROCESSING] = true
         viewModel.navigationHandler.currentScreen.test {
-            assertThat(awaitItem()).isInstanceOf<AddFirstPaymentMethod>()
+            assertThat(awaitItem()).isInstanceOf<PaymentSheetScreen.VerticalModeForm>()
             viewModel.handleBackPressed()
         }
     }
@@ -1570,7 +1610,7 @@ internal class PaymentSheetViewModelTest {
     fun `handleBackPressed delivers cancelled when pressing back on last screen`() = runTest {
         val viewModel = createViewModel(customer = EMPTY_CUSTOMER_STATE)
         viewModel.navigationHandler.currentScreen.test {
-            assertThat(awaitItem()).isInstanceOf<AddFirstPaymentMethod>()
+            assertThat(awaitItem()).isInstanceOf<PaymentSheetScreen.VerticalModeForm>()
             viewModel.paymentSheetResult.test {
                 viewModel.handleBackPressed()
                 assertThat(awaitItem()).isEqualTo(PaymentSheetResult.Canceled())
@@ -1594,11 +1634,49 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `current screen is AddFirstPaymentMethod if payment methods is empty`() = runTest {
+    fun `current screen is VerticalModeForm if only card is supported and payment methods is empty`() = runTest {
         val viewModel = createViewModel(customer = EMPTY_CUSTOMER_STATE)
 
         viewModel.navigationHandler.currentScreen.test {
-            assertThat(awaitItem()).isInstanceOf<AddFirstPaymentMethod>()
+            assertThat(awaitItem()).isInstanceOf<PaymentSheetScreen.VerticalModeForm>()
+        }
+    }
+
+    @Test
+    fun `single non-card payment method uses vertical form without saved methods in automatic`() = runTest {
+        val viewModel = createViewModel(
+            args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
+                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.newBuilder()
+                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Automatic)
+                    .build(),
+            ),
+            stripeIntent = PAYMENT_INTENT.copy(paymentMethodTypes = listOf("cashapp")),
+            customer = EMPTY_CUSTOMER_STATE,
+        )
+
+        assertThat(viewModel.supportedPaymentMethodTypes).containsExactly("cashapp")
+
+        viewModel.navigationHandler.currentScreen.test {
+            assertThat(awaitItem()).isInstanceOf<PaymentSheetScreen.VerticalModeForm>()
+        }
+    }
+
+    @Test
+    fun `single non-card payment method uses vertical form without saved methods in horizontal`() = runTest {
+        val viewModel = createViewModel(
+            args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
+                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.newBuilder()
+                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
+                    .build(),
+            ),
+            stripeIntent = PAYMENT_INTENT.copy(paymentMethodTypes = listOf("cashapp")),
+            customer = EMPTY_CUSTOMER_STATE,
+        )
+
+        assertThat(viewModel.supportedPaymentMethodTypes).containsExactly("cashapp")
+
+        viewModel.navigationHandler.currentScreen.test {
+            assertThat(awaitItem()).isInstanceOf<PaymentSheetScreen.VerticalModeForm>()
         }
     }
 
@@ -1683,7 +1761,7 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `Sends correct event when navigating to AddFirstPaymentMethod screen`() = runTest {
+    fun `Sends correct event when navigating to initial form screen`() = runTest {
         val viewModel = createViewModel(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             customer = null,
@@ -1699,7 +1777,7 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `Sends correct event when navigating to AddFirstPaymentMethod screen with Link enabled`() = runTest {
+    fun `Sends correct event when navigating to initial form screen with Link enabled`() = runTest {
         val viewModel = createViewModel(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             linkState = LinkState(
@@ -1728,7 +1806,7 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `Sends correct event when navigating to AddFirstPaymentMethod screen with active Link session`() = runTest {
+    fun `Sends correct event when navigating to initial form screen with active Link session`() = runTest {
         val viewModel = createViewModel(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             linkState = LinkState(
@@ -2060,7 +2138,7 @@ internal class PaymentSheetViewModelTest {
                 ConfirmationHandler.Result.Failed(
                     cause = Exception(error),
                     message = error.resolvableString,
-                    type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                    type = ConfirmationHandler.Result.Failed.ErrorType.Transaction(),
                 )
             )
 
@@ -2076,7 +2154,7 @@ internal class PaymentSheetViewModelTest {
         val initialScreen = viewModel.navigationHandler.currentScreen.value
         composeRule.setContent { PaymentSheetScreen(viewModel) }
         composeRule.waitForIdle()
-        composeRule.onNodeWithTag(PAYMENT_SHEET_FORM_TEST_TAG).assertIsDisplayed()
+        composeRule.onNodeWithTag(FORM_ELEMENT_TEST_TAG).assertIsDisplayed()
         assertThat(viewModel.selection.value).isNull()
         returnFromWebLinkWithWallet(viewModel)
 
@@ -2087,7 +2165,7 @@ internal class PaymentSheetViewModelTest {
                 ConfirmationHandler.Result.Failed(
                     cause = IllegalStateException("Deferred setup failed"),
                     message = message,
-                    type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                    type = ConfirmationHandler.Result.Failed.ErrorType.Transaction(),
                 )
             )
             assertThat(awaitItem()).isEqualTo(PaymentSheetViewState.Reset(UserErrorMessage(message)))
@@ -2098,7 +2176,7 @@ internal class PaymentSheetViewModelTest {
         assertThat(viewModel.navigationHandler.currentScreen.value).isSameInstanceAs(initialScreen)
         assertThat(viewModel.selection.value).isNull()
         assertThat(viewModel.walletsProcessingState.value).isEqualTo(WalletsProcessingState.Idle(message))
-        composeRule.onNodeWithTag(PAYMENT_SHEET_FORM_TEST_TAG).assertIsDisplayed()
+        composeRule.onNodeWithTag(FORM_ELEMENT_TEST_TAG).assertIsDisplayed()
         composeRule.onNodeWithText("We don't accept this card").assertIsDisplayed()
 
         viewModel.updateSelection(CARD_PAYMENT_SELECTION)
@@ -2141,7 +2219,7 @@ internal class PaymentSheetViewModelTest {
         confirmationState.value = ConfirmationHandler.State.Confirming(linkOption)
         assertThat(viewModel.contentVisible.value).isFalse()
         composeRule.waitForIdle()
-        composeRule.onNodeWithTag(PAYMENT_SHEET_FORM_TEST_TAG).assertDoesNotExist()
+        composeRule.onNodeWithTag(FORM_ELEMENT_TEST_TAG).assertDoesNotExist()
 
         val walletPaymentMethod = CARD_PAYMENT_METHOD.copy(
             card = CARD_PAYMENT_METHOD.card?.copy(wallet = Wallet.LinkWallet("4242")),
@@ -2635,6 +2713,7 @@ internal class PaymentSheetViewModelTest {
             eventReporter = eventReporter,
         )
 
+        eventReporter.showExistingPaymentOptionsCalls.awaitItem()
         viewModel.checkoutWithGooglePay()
 
         val config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config
@@ -2658,17 +2737,25 @@ internal class PaymentSheetViewModelTest {
             )
         )
 
+        val error = IllegalStateException("This failed!")
         confirmationState.value = ConfirmationHandler.State.Complete(
             ConfirmationHandler.Result.Failed(
-                cause = IllegalStateException("This failed!"),
+                cause = error,
                 message = "This failed".resolvableString,
-                type = ConfirmationHandler.Result.Failed.ErrorType.GooglePay(errorCode = 10),
+                type = ConfirmationHandler.Result.Failed.ErrorType.Transaction(
+                    analyticsValue = "googlePay_10",
+                    errorCode = "10",
+                ),
             )
         )
 
         val paymentFailureCall = eventReporter.paymentFailureCalls.awaitItem()
 
         assertThat(paymentFailureCall.paymentSelection).isEqualTo(PaymentSelection.GooglePay)
+        assertThat(paymentFailureCall.error.cause).isSameInstanceAs(error)
+        assertThat(paymentFailureCall.error.analyticsValue).isEqualTo("googlePay_10")
+        assertThat(paymentFailureCall.error.errorCode).isEqualTo("10")
+        eventReporter.validate()
     }
 
     @Test
@@ -2735,7 +2822,10 @@ internal class PaymentSheetViewModelTest {
             ConfirmationHandler.Result.Failed(
                 cause = IllegalStateException("This failed!"),
                 message = "This failed".resolvableString,
-                type = ConfirmationHandler.Result.Failed.ErrorType.GooglePay(errorCode = 10),
+                type = ConfirmationHandler.Result.Failed.ErrorType.Transaction(
+                    analyticsValue = "googlePay_10",
+                    errorCode = "10",
+                ),
             )
         )
 
@@ -2816,7 +2906,10 @@ internal class PaymentSheetViewModelTest {
             ConfirmationHandler.Result.Failed(
                 cause = IllegalStateException("This failed!"),
                 message = "This failed".resolvableString,
-                type = ConfirmationHandler.Result.Failed.ErrorType.GooglePay(errorCode = 10),
+                type = ConfirmationHandler.Result.Failed.ErrorType.Transaction(
+                    analyticsValue = "googlePay_10",
+                    errorCode = "10",
+                ),
             )
         )
 
@@ -3773,6 +3866,41 @@ internal class PaymentSheetViewModelTest {
         val saved = (selection as? PaymentSelection.Saved) ?: return null
         val card = (saved.paymentMethodOptionsParams as? PaymentMethodOptionsParams.Card) ?: return null
         return card.cvc
+    }
+
+    private fun assertRecoverableConfirmationFailure(
+        type: ConfirmationHandler.Result.Failed.ErrorType,
+    ) = confirmationTest {
+        val eventReporter = FakeEventReporter()
+        val viewModel = createViewModel(eventReporter = eventReporter)
+        val message = "Unable to confirm payment".resolvableString
+
+        eventReporter.showExistingPaymentOptionsCalls.awaitItem()
+        viewModel.updateSelection(PaymentSelection.Saved(CARD_PAYMENT_METHOD))
+        viewModel.checkout()
+        val arguments = startTurbine.awaitItem()
+
+        viewModel.paymentSheetResult.test {
+            viewModel.viewState.test {
+                assertThat(awaitItem()).isEqualTo(PaymentSheetViewState.Reset())
+                confirmationState.value = ConfirmationHandler.State.Confirming(arguments.confirmationOption)
+                assertThat(awaitItem()).isEqualTo(PaymentSheetViewState.StartProcessing)
+
+                confirmationState.value = ConfirmationHandler.State.Complete(
+                    ConfirmationHandler.Result.Failed(
+                        cause = IllegalStateException("Confirmation error"),
+                        message = message,
+                        type = type,
+                    )
+                )
+
+                assertThat(awaitItem()).isEqualTo(PaymentSheetViewState.Reset(UserErrorMessage(message)))
+            }
+            expectNoEvents()
+        }
+
+        eventReporter.paymentFailureCalls.expectNoEvents()
+        eventReporter.validate()
     }
 
     private fun confirmationTest(

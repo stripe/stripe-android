@@ -35,14 +35,12 @@ internal fun CheckoutSessionResponse.asCheckoutSession(
         businessName = businessName,
         status = status.asStatus(paymentStatus),
         livemode = livemode,
-        currency = adaptivePricingInfo?.integrationCurrency ?: currency,
+        currency = integrationCurrency,
         presentmentDetails = adaptivePricingInfo?.let {
             Session.PresentmentDetails(it.activePresentmentCurrency)
         },
-        discountAmounts = recurringDetails?.totalDiscountAmounts.orEmpty().mapNotNull {
-            it.asDiscountAmount(presentmentCurrency, locale)
-        },
-        email = collectedEmail ?: customerEmail,
+        discountAmounts = emptyList(),
+        email = fixedEmail ?: collectedEmail,
         orderSummaryItems = checkoutItems.map { it.asOrderSummaryItem(locale) },
         minorUnitsAmountDivisor = 10.0.pow(currencyDigits(presentmentCurrency)).toInt(),
         paymentOption = paymentOption,
@@ -50,7 +48,7 @@ internal fun CheckoutSessionResponse.asCheckoutSession(
             Session.ShippingAddress(collectedShippingName, it.asShippingAddress())
         },
         tax = taxMeta.asTax(taxAddressSource),
-        taxAmounts = recurringDetails?.totalTaxAmounts?.map {
+        taxAmounts = totalSummary?.totalTaxAmounts?.map {
             it.asTaxAmount(presentmentCurrency, locale)
         },
         totals = totals(presentmentCurrency, locale),
@@ -125,21 +123,6 @@ private fun CheckoutSessionResponse.CheckoutItem.asOrderSummaryItem(locale: Loca
                 ),
             )
         },
-    )
-}
-
-private fun CheckoutSessionResponse.DiscountAmount.asDiscountAmount(
-    currency: String,
-    locale: Locale,
-): Session.DiscountAmount? {
-    if (amount <= 0) return null
-    val publicAmount = amount(amount.toDouble(), currency, locale)
-    return Session.DiscountAmount(
-        amount = publicAmount.amount,
-        minorUnitsAmount = publicAmount.minorUnitsAmount,
-        displayName = displayName ?: coupon.name ?: coupon.code,
-        promotionCode = promotionCode?.code,
-        percentOff = coupon.percentOff,
     )
 }
 

@@ -73,7 +73,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
             return ConfirmationDefinition.Action.Fail(
                 cause = error,
                 message = error.stripeErrorMessage(),
-                errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                errorType = ConfirmationHandler.Result.Failed.ErrorType.Transaction(),
             )
         }
 
@@ -125,7 +125,15 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
         shipping: ConfirmCheckoutSessionParams.Shipping?,
     ): ConfirmCheckoutSessionParams = ConfirmCheckoutSessionParams(
         paymentMethodId = (confirmationOption as? PaymentMethodConfirmationOption.Saved)?.paymentMethod?.id,
-        paymentMethodData = (confirmationOption as? PaymentMethodConfirmationOption.New)?.createParams,
+        paymentMethodData = (confirmationOption as? PaymentMethodConfirmationOption.New)?.createParams?.let { params ->
+            // CheckoutClient expects the captcha token at the top level; retain other Radar data.
+            params.copy(radarOptions = params.radarOptions?.copy(hCaptchaToken = null))
+        },
+        passiveCaptchaToken = when (confirmationOption) {
+            is PaymentMethodConfirmationOption.New ->
+                confirmationOption.createParams.radarOptions?.toParamMap()?.get("hcaptcha_token") as? String
+            is PaymentMethodConfirmationOption.Saved -> confirmationOption.confirmationChallengeState.hCaptchaToken
+        },
         expectedPaymentMethodType = when (confirmationOption) {
             is PaymentMethodConfirmationOption.New ->
                 PaymentMethod.Type.fromCode(confirmationOption.createParams.typeCode)?.code
@@ -146,6 +154,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
     ): ConfirmationDefinition.Action<Args> {
         return checkoutSessionRepository.confirm(
             id = integrationMetadata.id,
+            clientSecret = integrationMetadata.checkoutSessionResponse.clientSecret,
             params = params,
         ).fold(
             onSuccess = ::handleConfirmResponse,
@@ -153,7 +162,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
                 ConfirmationDefinition.Action.Fail(
                     cause = error,
                     message = error.stripeErrorMessage(),
-                    errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                    errorType = ConfirmationHandler.Result.Failed.ErrorType.Transaction(),
                 )
             }
         )
@@ -170,7 +179,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
                 return ConfirmationDefinition.Action.Fail(
                     cause = exception,
                     message = exception.stripeErrorMessage(),
-                    errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                    errorType = ConfirmationHandler.Result.Failed.ErrorType.Transaction(),
                 )
             }
 
@@ -180,7 +189,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
                     intent = intent,
                     metadata = MutableConfirmationMetadata().apply {
                         set(DeferredIntentConfirmationTypeKey, DeferredIntentConfirmationType.Server)
-                        set(CheckoutSessionResponseKey, response)
+                        set(CheckoutSessionResponseKey, response.withConfirmedIntent(intent))
                     },
                     completedFullPaymentFlow = true,
                 )
@@ -199,7 +208,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
                 ConfirmationDefinition.Action.Fail(
                     cause = exception,
                     message = exception.stripeErrorMessage(),
-                    errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                    errorType = ConfirmationHandler.Result.Failed.ErrorType.Transaction(),
                 )
             }
         }

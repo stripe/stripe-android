@@ -13,7 +13,6 @@ internal class PaymentMethodMetadataKtxTest {
     fun `toSaveConsentBehavior returns Enabled when checkout offer save is enabled`() {
         val offerSave = CheckoutSessionResponse.SavedPaymentMethodsOfferSave(
             enabled = true,
-            status = CheckoutSessionResponse.SavedPaymentMethodsOfferSave.Status.NOT_ACCEPTED,
         )
 
         val result = offerSave.toSaveConsentBehavior()
@@ -25,7 +24,6 @@ internal class PaymentMethodMetadataKtxTest {
     fun `toSaveConsentBehavior returns Disabled when checkout offer save is disabled`() {
         val offerSave = CheckoutSessionResponse.SavedPaymentMethodsOfferSave(
             enabled = false,
-            status = CheckoutSessionResponse.SavedPaymentMethodsOfferSave.Status.NOT_ACCEPTED,
         )
 
         val result = offerSave.toSaveConsentBehavior()

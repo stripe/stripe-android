@@ -82,7 +82,7 @@ internal class FakeIntentConfirmationInterceptor : IntentConfirmationInterceptor
             ConfirmationDefinition.Action.Fail(
                 cause = cause,
                 message = message.resolvableString,
-                errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                errorType = ConfirmationHandler.Result.Failed.ErrorType.Transaction(),
             )
         )
     }

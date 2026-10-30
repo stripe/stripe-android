@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -25,10 +26,15 @@ import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.testTag
@@ -54,13 +60,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import com.stripe.android.elements.CurrencySelectorElement
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.enabledStateAlpha
 import androidx.compose.ui.R as ComposeR
 import com.stripe.android.uicore.R as StripeUiCoreR
 
+private const val EXPANDED_DISCLOSURE_ROTATION = 180f
+
 internal const val TEST_TAG_CURRENCY_SELECTOR = "TEST_TAG_CURRENCY_SELECTOR"
 
 internal const val TEST_TAG_CURRENCY_OPTION_PREFIX = "TEST_TAG_CURRENCY_OPTION_"
+
+internal const val TEST_TAG_CURRENCY_SELECTOR_DISCLOSURE = "TEST_TAG_CURRENCY_SELECTOR_DISCLOSURE"
+internal const val TEST_TAG_CURRENCY_SELECTOR_DETAILS = "TEST_TAG_CURRENCY_SELECTOR_DETAILS"
 
 internal const val TEST_TAG_CURRENCY_SELECTOR_ERROR = "TEST_TAG_CURRENCY_SELECTOR_ERROR"
 
@@ -80,6 +92,7 @@ internal data class CurrencySelectorOptions(
     val second: CurrencyOption,
     val selectedCode: String,
     val exchangeRateText: String? = null,
+    val exchangeRateDetails: String?,
 )
 
 @OptIn(CheckoutSessionPreview::class)
@@ -169,17 +182,7 @@ internal fun CurrencySelectorToggle(
                 )
             }
         }
-        if (options.exchangeRateText != null) {
-            Text(
-                text = options.exchangeRateText,
-                style = captionStyle,
-                color = captionColor,
-                textAlign = TextAlign.Start,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 4.dp),
-            )
-        }
+        CurrencyDisclosure(options, captionStyle, captionColor)
         if (errorMessage != null) {
             Text(
                 text = errorMessage,
@@ -193,6 +196,59 @@ internal fun CurrencySelectorToggle(
                     .testTag(TEST_TAG_CURRENCY_SELECTOR_ERROR),
             )
         }
+    }
+}
+
+@Composable
+private fun CurrencyDisclosure(options: CurrencySelectorOptions, style: TextStyle, color: Color) {
+    val isIntegrationCurrency = options.selectedCode == options.second.code
+    val caption = options.exchangeRateText ?: if (isIntegrationCurrency) {
+        stringResource(R.string.stripe_currency_selector_bank_fees_disclaimer)
+    } else {
+        null
+    }
+    val details = options.exchangeRateDetails?.takeUnless { isIntegrationCurrency }
+    var expanded by rememberSaveable(options.selectedCode, details) { mutableStateOf(false) }
+    if (caption != null) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 4.dp)
+                .then(
+                    if (details != null) {
+                        Modifier.clickable(role = Role.Button) { expanded = !expanded }
+                    } else {
+                        Modifier
+                    }
+                )
+                .testTag(TEST_TAG_CURRENCY_SELECTOR_DISCLOSURE),
+        ) {
+            Text(text = caption, style = style, color = color, modifier = Modifier.weight(1f))
+            if (details != null) {
+                Icon(
+                    painter = painterResource(StripeUiCoreR.drawable.stripe_ic_chevron_down),
+                    contentDescription = stringResource(
+                        if (expanded) {
+                            R.string.stripe_currency_selector_hide_details
+                        } else {
+                            R.string.stripe_currency_selector_show_details
+                        }
+                    ),
+                    tint = color,
+                    modifier = Modifier.padding(start = 4.dp).size(16.dp)
+                        .rotate(if (expanded) EXPANDED_DISCLOSURE_ROTATION else 0f),
+                )
+            }
+        }
+    }
+    if (expanded && details != null) {
+        Text(
+            text = details,
+            style = style,
+            color = color,
+            modifier = Modifier.padding(top = 4.dp).testTag(TEST_TAG_CURRENCY_SELECTOR_DETAILS),
+        )
     }
 }
 

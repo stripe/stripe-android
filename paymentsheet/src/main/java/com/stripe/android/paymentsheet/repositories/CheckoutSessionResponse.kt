@@ -1,18 +1,22 @@
 package com.stripe.android.paymentsheet.repositories
 
+import com.stripe.android.core.StripeError
 import com.stripe.android.core.model.StripeModel
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
+import com.stripe.android.model.StripeIntent
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
 internal data class CheckoutSessionResponse(
     val id: String,
+    val clientSecret: String,
     val configId: String?,
     val automaticPaymentMethodTypes: Boolean?,
     val currency: String,
+    val integrationCurrency: String,
     val paymentStatus: PaymentStatus,
     val status: Status,
     val livemode: Boolean,
@@ -23,7 +27,7 @@ internal data class CheckoutSessionResponse(
     val customer: Customer?,
     val savedPaymentMethodsOfferSave: SavedPaymentMethodsOfferSave?,
     val checkoutItems: List<CheckoutItem>,
-    val recurringDetails: RecurringDetails?,
+    val totalSummary: TotalSummary?,
     val adaptivePricingInfo: AdaptivePricingInfo?,
     val taxMeta: TaxMeta?,
     val automaticTaxEnabled: Boolean,
@@ -33,7 +37,39 @@ internal data class CheckoutSessionResponse(
     val requiresBillingAddress: Boolean,
     val merchantCountry: String?,
     val businessName: String?,
+    val paymentResponse: PaymentResponse?,
 ) : StripeModel {
+    @Parcelize
+    data class IntentReference(val id: String, val clientSecret: String) : StripeModel
+
+    @Parcelize
+    data class PaymentResponse(
+        val status: String,
+        val paymentIntent: IntentReference?,
+        val setupIntent: IntentReference?,
+        val error: StripeError?,
+    ) : StripeModel
+
+    /** Reconcile the session with an Intent whose authentication has completed on this device. */
+    fun withConfirmedIntent(intent: StripeIntent): CheckoutSessionResponse {
+        val complete = when (intent) {
+            is PaymentIntent ->
+                intent.status == StripeIntent.Status.Succeeded || intent.status == StripeIntent.Status.Processing
+            is SetupIntent -> intent.status == StripeIntent.Status.Succeeded
+        }
+        return copy(
+            status = if (complete) Status.COMPLETE else status,
+            paymentStatus = if (intent is PaymentIntent && intent.status == StripeIntent.Status.Succeeded) {
+                PaymentStatus.PAID
+            } else {
+                paymentStatus
+            },
+            paymentIntent = intent as? PaymentIntent,
+            setupIntent = intent as? SetupIntent,
+            elementsSession = elementsSession?.copy(stripeIntent = intent),
+        )
+    }
+
     val fixedEmail: String?
         get() = customerEmail ?: customer?.email
 
@@ -51,9 +87,7 @@ internal data class CheckoutSessionResponse(
     enum class Status { OPEN, COMPLETE, EXPIRED }
 
     @Parcelize
-    data class SavedPaymentMethodsOfferSave(val enabled: Boolean, val status: Status) : StripeModel {
-        enum class Status { ACCEPTED, NOT_ACCEPTED }
-    }
+    data class SavedPaymentMethodsOfferSave(val enabled: Boolean) : StripeModel
 
     @Parcelize
     data class Customer(
@@ -104,24 +138,7 @@ internal data class CheckoutSessionResponse(
     ) : StripeModel
 
     @Parcelize
-    data class RecurringDetails(
-        val totalDiscountAmounts: List<DiscountAmount>,
-        val totalTaxAmounts: List<TaxAmount>,
-    ) : StripeModel
-
-    @Parcelize
-    data class DiscountAmount(
-        val amount: Long,
-        val displayName: String?,
-        val coupon: Coupon,
-        val promotionCode: PromotionCode?,
-    ) : StripeModel
-
-    @Parcelize
-    data class Coupon(val code: String, val name: String?, val percentOff: Double?) : StripeModel
-
-    @Parcelize
-    data class PromotionCode(val code: String?) : StripeModel
+    data class TotalSummary(val totalTaxAmounts: List<TaxAmount>) : StripeModel
 
     @Parcelize
     data class TaxAmount(val amount: Long, val inclusive: Boolean, val taxRate: TaxRate) : StripeModel
@@ -146,6 +163,7 @@ internal data class CheckoutSessionResponse(
         val activePresentmentCurrency: String,
         val integrationAmount: Long,
         val integrationCurrency: String,
+        val integrationDisclosureCaption: String?,
         val localCurrencyOptions: List<LocalCurrencyOption>,
     ) : StripeModel {
         val isActive: Boolean
@@ -155,9 +173,9 @@ internal data class CheckoutSessionResponse(
     @Parcelize
     data class LocalCurrencyOption(
         val amount: Long,
-        val conversionMarkupBps: Int?,
         val currency: String,
-        val presentmentExchangeRate: String,
+        val disclosureCaption: String?,
+        val disclosureDetails: String?,
     ) : StripeModel
 }
 

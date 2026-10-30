@@ -40,7 +40,7 @@ class PrimaryButtonScreenshotTest {
         paparazziRule.snapshot {
             PrimaryButton(
                 label = "Pay $50.99",
-                locked = false,
+                icon = PrimaryButtonIcon.None,
                 enabled = true,
             ) {}
         }
@@ -51,7 +51,7 @@ class PrimaryButtonScreenshotTest {
         paparazziRule.snapshot {
             PrimaryButton(
                 label = "Pay $50.99",
-                locked = false,
+                icon = PrimaryButtonIcon.None,
                 enabled = false,
             ) {}
         }
@@ -62,7 +62,7 @@ class PrimaryButtonScreenshotTest {
         paparazziRule.snapshot {
             PrimaryButton(
                 label = "Pay $50.99",
-                locked = true,
+                icon = PrimaryButtonIcon.Lock,
                 enabled = true,
             ) {}
         }
@@ -73,7 +73,7 @@ class PrimaryButtonScreenshotTest {
         paparazziRule.snapshot {
             PrimaryButton(
                 label = "Pay $50.99",
-                locked = true,
+                icon = PrimaryButtonIcon.Lock,
                 enabled = false,
             ) {}
         }
@@ -85,7 +85,7 @@ class PrimaryButtonScreenshotTest {
             PrimaryButton(
                 label = "Pay $50.99",
                 processingState = PrimaryButtonProcessingState.Processing,
-                locked = false,
+                icon = PrimaryButtonIcon.None,
                 enabled = true
             ) {}
         }
@@ -97,7 +97,7 @@ class PrimaryButtonScreenshotTest {
             PrimaryButton(
                 label = "Pay $50.99",
                 processingState = PrimaryButtonProcessingState.Processing,
-                locked = false,
+                icon = PrimaryButtonIcon.None,
                 enabled = false
             ) {}
         }
@@ -109,7 +109,7 @@ class PrimaryButtonScreenshotTest {
             PrimaryButton(
                 label = "Pay $50.99",
                 processingState = PrimaryButtonProcessingState.Processing,
-                locked = false,
+                icon = PrimaryButtonIcon.None,
                 enabled = false,
                 subduedWhileProcessing = false,
             ) {}
@@ -122,7 +122,7 @@ class PrimaryButtonScreenshotTest {
             PrimaryButton(
                 label = "Pay $50.99",
                 processingState = PrimaryButtonProcessingState.Completed,
-                locked = false,
+                icon = PrimaryButtonIcon.None,
                 enabled = false
             ) {}
         }
@@ -134,7 +134,7 @@ class PrimaryButtonScreenshotTest {
             PrimaryButton(
                 label = "Pay $50.99",
                 processingState = PrimaryButtonProcessingState.Idle(null),
-                locked = false,
+                icon = PrimaryButtonIcon.None,
                 enabled = true
             ) {}
         }
@@ -146,7 +146,7 @@ class PrimaryButtonScreenshotTest {
             PrimaryButton(
                 label = "Pay $50.99",
                 processingState = PrimaryButtonProcessingState.Idle(null),
-                locked = false,
+                icon = PrimaryButtonIcon.None,
                 enabled = false
             ) {}
         }
@@ -158,7 +158,7 @@ class PrimaryButtonScreenshotTest {
             PrimaryButton(
                 label = "Pay $50.99",
                 processingState = PrimaryButtonProcessingState.Processing,
-                locked = false,
+                icon = PrimaryButtonIcon.None,
                 enabled = true
             ) {}
         }
@@ -170,7 +170,7 @@ class PrimaryButtonScreenshotTest {
             PrimaryButton(
                 label = "Pay $50.99",
                 processingState = PrimaryButtonProcessingState.Completed,
-                locked = false,
+                icon = PrimaryButtonIcon.None,
                 enabled = true
             ) {}
         }

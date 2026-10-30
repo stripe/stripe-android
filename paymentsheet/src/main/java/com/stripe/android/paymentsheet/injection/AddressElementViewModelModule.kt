@@ -24,6 +24,7 @@ import com.stripe.android.paymentsheet.addresselement.analytics.CheckoutShipping
 import com.stripe.android.paymentsheet.addresselement.analytics.StandaloneAddressElementEventReporter
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse.TaxAddressSource
+import com.stripe.android.paymentsheet.repositories.ElementsSessionClientParams
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import dagger.Binds
 import dagger.Module
@@ -44,6 +45,13 @@ internal class AddressElementViewModelModule {
     companion object {
         internal const val INLINE_PLACES_CLIENT = "inline_places_client"
     }
+
+    @Provides
+    fun provideElementsSessionClientParams(context: Context): ElementsSessionClientParams =
+        ElementsSessionClientParams(
+            mobileAppId = context.packageName,
+            mobileSessionIdProvider = { AnalyticsRequestFactory.sessionId.toString() },
+        )
 
     @Provides
     @Named(PRODUCT_USAGE)

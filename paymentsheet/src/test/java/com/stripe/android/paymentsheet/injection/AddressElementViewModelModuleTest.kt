@@ -31,6 +31,7 @@ import com.stripe.android.paymentsheet.addresselement.analytics.FakeAddressLaunc
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
+import com.stripe.android.paymentsheet.repositories.CheckoutStripeRepositoryFactory
 import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
@@ -125,8 +126,9 @@ class AddressElementViewModelModuleTest {
                     bodyPart("tax_region[postal_code]", "94103"),
                 ) { response ->
                     response.testBodyFromFile("checkout-session-init.json") { json ->
-                        json.getJSONArray("checkout_items").getJSONObject(0)
+                        json.getJSONArray("items").getJSONObject(0)
                             .getJSONObject("one_time_price").getJSONArray("items").getJSONObject(0)
+                            .getJSONObject("amount_details")
                             .put("total", 5099)
                     }
                 }
@@ -172,8 +174,9 @@ class AddressElementViewModelModuleTest {
 
                 networkRule.checkoutUpdate { response ->
                     response.testBodyFromFile("checkout-session-init.json") { json ->
-                        json.getJSONArray("checkout_items").getJSONObject(0)
+                        json.getJSONArray("items").getJSONObject(0)
                             .getJSONObject("one_time_price").getJSONArray("items").getJSONObject(0)
+                            .getJSONObject("amount_details")
                             .put("total", 5099)
                     }
                 }
@@ -396,6 +399,8 @@ class AddressElementViewModelModuleTest {
     private fun createTaxRegionUpdater(): CheckoutSessionTaxRegionUpdater {
         return CheckoutSessionTaxRegionUpdater(
             CheckoutSessionRepository(
+                stripeRepository = CheckoutStripeRepositoryFactory.create(),
+                elementsSessionClientParams = CheckoutStripeRepositoryFactory.clientParams(),
                 fraudDetectionDataRepository = FakeFraudDetectionDataRepository.create(),
                 stripeNetworkClient = DefaultStripeNetworkClient(),
                 analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),

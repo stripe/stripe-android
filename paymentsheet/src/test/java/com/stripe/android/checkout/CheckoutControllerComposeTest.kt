@@ -70,8 +70,9 @@ internal class CheckoutControllerComposeTest {
     fun `background promotion update succeeds with PaymentElement Content mounted`() = runScenario { controller ->
         networkRule.checkoutUpdate(bodyPart("promotion_code", "10OFF")) { response ->
             successResponse(response) { json ->
-                json.getJSONArray("checkout_items").getJSONObject(0)
+                json.getJSONArray("items").getJSONObject(0)
                     .getJSONObject("one_time_price").getJSONArray("items").getJSONObject(0)
+                    .getJSONObject("amount_details")
                     .put("total", 4099).put("subtotal", 4099)
             }
         }
@@ -165,7 +166,7 @@ internal class CheckoutControllerComposeTest {
     private fun successResponse(response: MockResponse, modifier: (JSONObject) -> Unit) {
         response.testBodyFromFile("checkout-session-init.json") { json ->
             json.put("customer_email", "checkout@example.com")
-            json.getJSONObject("elements_session").remove("link_settings")
+            json.remove("link_settings")
             modifier(json)
         }
     }

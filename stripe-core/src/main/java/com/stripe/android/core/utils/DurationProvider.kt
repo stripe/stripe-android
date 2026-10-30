@@ -35,6 +35,7 @@ interface DurationProvider {
         PaymentSheetLoadRetrieveInitialPaymentSelection,
         PaymentSheetLoadComputePaymentMethodTypes,
         Checkout,
+        CheckoutConfirmation,
         LinkSignup,
         ConfirmButtonClicked,
         NfcScan,

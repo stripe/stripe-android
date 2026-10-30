@@ -32,6 +32,7 @@ import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.paymentsheet.ui.AddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.FakeAddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.FakeUpdatePaymentMethodInteractor
+import com.stripe.android.paymentsheet.ui.PrimaryButtonIcon
 import com.stripe.android.paymentsheet.ui.PrimaryButtonProcessingState
 import com.stripe.android.paymentsheet.ui.SelectSavedPaymentMethodsInteractor
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
@@ -554,7 +555,7 @@ internal class EmbeddedNavigatorTest {
                     isEnabled = false,
                     processingState = PrimaryButtonProcessingState.Idle(null),
                     isProcessing = false,
-                    shouldDisplayLockIcon = true,
+                    primaryButtonIcon = PrimaryButtonIcon.Lock,
                 )
             ),
             onContinueClick = {},
@@ -711,7 +712,7 @@ internal class EmbeddedNavigatorTest {
                 isEnabled = false,
                 processingState = PrimaryButtonProcessingState.Processing,
                 isProcessing = true,
-                shouldDisplayLockIcon = true,
+                primaryButtonIcon = PrimaryButtonIcon.Lock,
             )
         )
         val (screen, interactor) = createSavedPaymentMethodConfirmScreen(
@@ -865,7 +866,7 @@ internal class EmbeddedNavigatorTest {
                     isEnabled = false,
                     processingState = PrimaryButtonProcessingState.Idle(null),
                     isProcessing = isProcessing,
-                    shouldDisplayLockIcon = true,
+                    primaryButtonIcon = PrimaryButtonIcon.Lock,
                 )
             ),
             onContinueClick = {},
@@ -886,7 +887,7 @@ internal class EmbeddedNavigatorTest {
                     isEnabled = false,
                     processingState = PrimaryButtonProcessingState.Idle(null),
                     isProcessing = isProcessing,
-                    shouldDisplayLockIcon = true,
+                    primaryButtonIcon = PrimaryButtonIcon.Lock,
                 )
             ),
             onContinueClick = {},
@@ -906,7 +907,7 @@ internal class EmbeddedNavigatorTest {
                     isEnabled = false,
                     processingState = PrimaryButtonProcessingState.Idle(null),
                     isProcessing = isProcessing,
-                    shouldDisplayLockIcon = true,
+                    primaryButtonIcon = PrimaryButtonIcon.Lock,
                 )
             ),
             onContinueClick = {},

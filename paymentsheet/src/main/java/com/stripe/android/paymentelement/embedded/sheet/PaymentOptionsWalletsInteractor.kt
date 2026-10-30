@@ -30,8 +30,11 @@ internal class PaymentOptionsWalletsInteractor @Inject constructor(
     val walletsState: StateFlow<WalletsState?> = combineAsStateFlow(
         sheetActivityStateHolder.state,
         linkAccountHolder.linkAccountInfo,
-    ) { sheetState, linkAccountInfo ->
+        selectionHolder.selection,
+    ) { sheetState, linkAccountInfo, currentSelection ->
         val linkAccount = linkAccountInfo.account
+        val hasLinkWithSelectedPayment = currentSelection is PaymentSelection.Link &&
+            currentSelection.selectedPayment != null
         WalletsState.create(
             isLinkAvailable = paymentMethodMetadata.shouldShowLinkButton,
             linkEmail = linkAccount?.email,
@@ -56,7 +59,7 @@ internal class PaymentOptionsWalletsInteractor @Inject constructor(
             },
             paymentDetails = linkAccount?.displayablePaymentDetails,
             enableDefaultValues = paymentMethodMetadata.linkState?.configuration
-                ?.enableDisplayableDefaultValuesInEce == true,
+                ?.enableDisplayableDefaultValuesInEce == true && hasLinkWithSelectedPayment.not(),
             cardBrandFilter = paymentMethodMetadata.cardBrandFilter,
             cardFundingFilter = paymentMethodMetadata.cardFundingFilter,
             linkBrand = paymentMethodMetadata.effectiveLinkBrand(linkAccount),

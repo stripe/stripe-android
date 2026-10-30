@@ -4,10 +4,13 @@ import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
+import com.stripe.android.challenge.passive.PassiveChallengeActivityContract
+import com.stripe.android.challenge.passive.PassiveChallengeActivityResult
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
 import com.stripe.android.checkouttesting.checkoutConfirm
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.core.exception.LocalStripeException
+import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.core.version.StripeSdkVersion
@@ -18,6 +21,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixt
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.Address
+import com.stripe.android.model.AndroidVerificationObject
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntent
@@ -27,6 +31,7 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodSelectionFlow
+import com.stripe.android.model.RadarOptions
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.StripeIntent
@@ -39,19 +44,26 @@ import com.stripe.android.networktesting.RequestMatchers.hasBodyPart
 import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.FakeIsEligibleForConfirmationChallenge
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
+import com.stripe.android.paymentelement.confirmation.challenge.PassiveChallengeConfirmationDefinition
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
+import com.stripe.android.paymentsheet.repositories.CheckoutStripeRepositoryFactory
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
+import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.SetupIntentFactory
 import com.stripe.android.utils.FakeFraudDetectionDataRepository
+import com.stripe.android.utils.FakePassiveChallengeWarmer
 import kotlinx.coroutines.test.runTest
+import org.json.JSONObject
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
@@ -70,6 +82,129 @@ class CheckoutSessionConfirmationInterceptorTest {
     val ruleChain: RuleChain = RuleChain
         .outerRule(networkRule)
         .around(PaymentConfigurationTestRule(applicationContext))
+
+    @Test
+    fun `successful confirmation ignores an earlier payment error`() = runScenario {
+        networkRule.checkoutConfirm { response ->
+            response.testBodyFromFile("checkout-session-confirm.json") { json ->
+                json.put("status", "open").put("payment_status", "unpaid")
+                json.getJSONObject("payment_response").put(
+                    "last_payment_error",
+                    JSONObject().put("message", "An earlier decline").put("code", "card_declined"),
+                )
+            }
+        }
+
+        val result = interceptNewPm() as ConfirmationDefinition.Action.Complete
+        val response = requireNotNull(result.metadata[CheckoutSessionResponseKey])
+
+        assertThat(response.status).isEqualTo(CheckoutSessionResponse.Status.COMPLETE)
+        assertThat(response.paymentStatus).isEqualTo(CheckoutSessionResponse.PaymentStatus.PAID)
+    }
+
+    @Test
+    fun `requires action without an intent fails explicitly`() = runScenario {
+        networkRule.checkoutConfirm { response ->
+            response.testBodyFromFile("checkout-session-confirm.json") { json ->
+                json.put("payment_response", JSONObject().put("status", "requires_action"))
+            }
+        }
+
+        val result = interceptNewPm() as ConfirmationDefinition.Action.Fail
+
+        assertThat(result.cause.message).isEqualTo("CheckoutClient requires an action without a supported Intent.")
+    }
+
+    @Test
+    fun `expired confirmation fails explicitly`() = runScenario {
+        networkRule.checkoutConfirm { response ->
+            response.testBodyFromFile("checkout-session-confirm.json") { json ->
+                json.put("status", "expired")
+                json.remove("payment_response")
+            }
+        }
+
+        val result = interceptNewPm() as ConfirmationDefinition.Action.Fail
+
+        assertThat(result.cause.message).isEqualTo("Checkout Session unexpectedly expired after confirmation.")
+    }
+
+    @Test
+    fun `requires payment method without a payment error fails explicitly`() = runScenario {
+        networkRule.checkoutConfirm { response ->
+            response.testBodyFromFile("checkout-session-confirm.json") { json ->
+                json.put("payment_response", JSONObject().put("status", "requires_payment_method"))
+            }
+        }
+
+        val result = interceptNewPm() as ConfirmationDefinition.Action.Fail
+
+        assertThat(result.cause.message).isEqualTo("Checkout requires a payment method.")
+    }
+
+    @Test
+    fun `new card challenge token is moved to Checkout confirm and attestation is preserved`(
+        @TestParameter(value = ["captcha_token", "", "null"]) token: String?,
+    ) = runScenario {
+        val option = completeChallenge(
+            option = NEW_PM_OPTION.copy(
+                createParams = NEW_PM_OPTION.createParams.copy(
+                    radarOptions = RadarOptions(
+                        hCaptchaToken = null,
+                        androidVerificationObject = AndroidVerificationObject(
+                            appId = "com.stripe.test",
+                            androidVerificationToken = "attestation_token",
+                        ),
+                    ),
+                ),
+            ),
+            token = token,
+        ) as PaymentMethodConfirmationOption.New
+        assertThat(option.createParams.radarOptions?.toParamMap()?.get("hcaptcha_token")).isEqualTo(token)
+        assertThat(option.confirmationChallengeState.passiveChallengeComplete).isTrue()
+
+        networkRule.checkoutConfirm(
+            captchaMatcher(token),
+            not(hasBodyPart("payment_method_data[radar_options][hcaptcha_token]")),
+            bodyPart("payment_method_data[radar_options][android_verification_object][app_id]", "com.stripe.test"),
+            bodyPart(
+                "payment_method_data[radar_options][android_verification_object][android_verification_token]",
+                "attestation_token",
+            ),
+            bodyPart("payment_method_data[card][number]", "4242424242424242"),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-confirm.json")
+        }
+
+        val result = interceptor.intercept(PaymentIntentFactory.create(), option, shippingValues = null)
+
+        assertThat(result).isInstanceOf<ConfirmationDefinition.Action.Complete<IntentConfirmationDefinition.Args>>()
+    }
+
+    @Test
+    fun `saved and transformed card challenge tokens reach Checkout confirm`(
+        @TestParameter transformed: Boolean,
+        @TestParameter(value = ["captcha_token", "", "null"]) token: String?,
+    ) = runScenario {
+        val option = completeChallenge(
+            option = SAVED_PM_OPTION.copy(newPMTransformedForConfirmation = transformed),
+            token = token,
+        ) as PaymentMethodConfirmationOption.Saved
+        assertThat(option.confirmationChallengeState.hCaptchaToken).isEqualTo(token)
+        assertThat(option.confirmationChallengeState.passiveChallengeComplete).isTrue()
+
+        networkRule.checkoutConfirm(
+            captchaMatcher(token),
+            bodyPart("payment_method", option.paymentMethod.id),
+            doesNotContainBodyPartsWithPrefix("payment_method_data"),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-confirm.json")
+        }
+
+        val result = interceptor.intercept(PaymentIntentFactory.create(), option, shippingValues = null)
+
+        assertThat(result).isInstanceOf<ConfirmationDefinition.Action.Complete<IntentConfirmationDefinition.Args>>()
+    }
 
     @Test
     fun `confirmation sends actual payment method type`(
@@ -112,6 +247,7 @@ class CheckoutSessionConfirmationInterceptorTest {
             networkRule.checkoutConfirm(
                 *paymentMethodMatchers.toTypedArray(),
                 bodyPart("expected_payment_method_type", type.code),
+                *commonRequestMatchers(),
             ) { response ->
                 response.testBodyFromFile(
                     if (setup) "checkout-session-confirm-setup.json" else "checkout-session-confirm.json"
@@ -283,11 +419,15 @@ class CheckoutSessionConfirmationInterceptorTest {
 
     @Test
     fun `intercept with requires_action payment intent returns Launch action`() = runScenario {
-        networkRule.checkoutConfirm { response ->
-            response.testBodyFromFile("checkout-session-confirm.json") { json ->
-                json.getJSONObject("payment_intent").put("status", "requires_action")
+        networkRule.checkoutConfirm(
+                intentResponseFactory = { response ->
+                    response.testBodyFromFile("checkout-payment-intent.json") { json ->
+                        json.put("status", "requires_action")
+                    }
+                },
+            ) { response ->
+                response.testBodyFromFile("checkout-session-confirm.json")
             }
-        }
 
         val result = interceptNewPm()
 
@@ -314,7 +454,7 @@ class CheckoutSessionConfirmationInterceptorTest {
         assertThat(result).isInstanceOf<ConfirmationDefinition.Action.Fail<IntentConfirmationDefinition.Args>>()
 
         val failAction = result as ConfirmationDefinition.Action.Fail
-        assertThat(failAction.errorType).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Payment)
+        assertThat(failAction.errorType).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Transaction())
     }
 
     @Test
@@ -331,7 +471,7 @@ class CheckoutSessionConfirmationInterceptorTest {
         assertThat(result).isInstanceOf<ConfirmationDefinition.Action.Fail<IntentConfirmationDefinition.Args>>()
         val failAction = result as ConfirmationDefinition.Action.Fail
         assertThat(failAction.cause.message).contains("Invalid billing address")
-        assertThat(failAction.errorType).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Payment)
+        assertThat(failAction.errorType).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Transaction())
     }
 
     @Test
@@ -341,8 +481,9 @@ class CheckoutSessionConfirmationInterceptorTest {
         ) {
             networkRule.checkoutUpdate { response ->
                 response.testBodyFromFile("checkout-session-confirm.json") { json ->
-                    json.getJSONArray("checkout_items").getJSONObject(0)
+                    json.getJSONArray("items").getJSONObject(0)
                         .getJSONObject("one_time_price").getJSONArray("items").getJSONObject(0)
+                        .getJSONObject("amount_details")
                         .put("total", 5399)
                 }
             }
@@ -357,7 +498,7 @@ class CheckoutSessionConfirmationInterceptorTest {
             val error = failAction.cause as LocalStripeException
             assertThat(error.analyticsValue()).isEqualTo("checkoutSessionTotalChanged")
             assertThat(error.stripeError?.code).isEqualTo("checkout_session_total_changed")
-            assertThat(failAction.errorType).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Payment)
+            assertThat(failAction.errorType).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Transaction())
         }
 
     @Test
@@ -407,7 +548,7 @@ class CheckoutSessionConfirmationInterceptorTest {
 
         val failAction = result as ConfirmationDefinition.Action.Fail
         assertThat(failAction.cause).isInstanceOf<IllegalStateException>()
-        assertThat(failAction.errorType).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Payment)
+        assertThat(failAction.errorType).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Transaction())
     }
 
     @Test
@@ -429,7 +570,15 @@ class CheckoutSessionConfirmationInterceptorTest {
     @Test
     fun `intercept with both intents prefers paymentIntent`() = runScenario {
         networkRule.checkoutConfirm { response ->
-            response.testBodyFromFile("checkout-session-confirm-both-intents.json")
+            response.testBodyFromFile("checkout-session-confirm.json") { json ->
+                // Synthetic boundary case: recorded confirmations return only one intent type.
+                json.getJSONObject("payment_response").put(
+                    "setup_intent",
+                    JSONObject()
+                        .put("id", "seti_123")
+                        .put("client_secret", "seti_123_secret_example"),
+                )
+            }
         }
 
         val result = interceptNewPm()
@@ -442,11 +591,15 @@ class CheckoutSessionConfirmationInterceptorTest {
 
     @Test
     fun `intercept with requires_action setup intent returns Launch action`() = runScenario {
-        networkRule.checkoutConfirm { response ->
-            response.testBodyFromFile("checkout-session-confirm-setup.json") { json ->
-                json.getJSONObject("setup_intent").put("status", "requires_action")
+        networkRule.checkoutConfirm(
+                intentResponseFactory = { response ->
+                    response.testBodyFromFile("checkout-setup-intent.json") { json ->
+                        json.put("status", "requires_action")
+                    }
+                },
+            ) { response ->
+                response.testBodyFromFile("checkout-session-confirm-setup.json")
             }
-        }
 
         val result = interceptNewPm()
 
@@ -484,10 +637,14 @@ class CheckoutSessionConfirmationInterceptorTest {
     @Test
     fun `intercept with saved payment method and requires_action payment intent returns Launch action`() =
         runScenario {
-            networkRule.checkoutConfirm { response ->
-                response.testBodyFromFile("checkout-session-confirm.json") { json ->
-                    json.getJSONObject("payment_intent").put("status", "requires_action")
-                }
+            networkRule.checkoutConfirm(
+                intentResponseFactory = { response ->
+                    response.testBodyFromFile("checkout-payment-intent.json") { json ->
+                        json.put("status", "requires_action")
+                    }
+                },
+            ) { response ->
+                response.testBodyFromFile("checkout-session-confirm.json")
             }
 
             val result = interceptSavedPm()
@@ -515,7 +672,7 @@ class CheckoutSessionConfirmationInterceptorTest {
         assertThat(result).isInstanceOf<ConfirmationDefinition.Action.Fail<IntentConfirmationDefinition.Args>>()
 
         val failAction = result as ConfirmationDefinition.Action.Fail
-        assertThat(failAction.errorType).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Payment)
+        assertThat(failAction.errorType).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Transaction())
     }
 
     @Test
@@ -524,7 +681,7 @@ class CheckoutSessionConfirmationInterceptorTest {
             customerMetadata = SAVE_ENABLED_CUSTOMER_METADATA,
         ) {
             networkRule.checkoutConfirm(
-                bodyPart("save_payment_method", "true"),
+                bodyPart("collected_information[save_payment_method]", "true"),
             ) { response ->
                 response.testBodyFromFile("checkout-session-confirm.json")
             }
@@ -538,7 +695,7 @@ class CheckoutSessionConfirmationInterceptorTest {
             customerMetadata = SAVE_ENABLED_CUSTOMER_METADATA,
         ) {
             networkRule.checkoutConfirm(
-                bodyPart("save_payment_method", "false"),
+                bodyPart("collected_information[save_payment_method]", "false"),
             ) { response ->
                 response.testBodyFromFile("checkout-session-confirm.json")
             }
@@ -551,7 +708,7 @@ class CheckoutSessionConfirmationInterceptorTest {
         customerMetadata = SAVE_DISABLED_CUSTOMER_METADATA,
     ) {
         networkRule.checkoutConfirm(
-            not(hasBodyPart("save_payment_method")),
+            not(hasBodyPart("collected_information[save_payment_method]")),
         ) { response ->
             response.testBodyFromFile("checkout-session-confirm.json")
         }
@@ -562,7 +719,7 @@ class CheckoutSessionConfirmationInterceptorTest {
     @Test
     fun `intercept with new payment method omits savePaymentMethod for guest`() = runScenario {
         networkRule.checkoutConfirm(
-            not(hasBodyPart("save_payment_method")),
+            not(hasBodyPart("collected_information[save_payment_method]")),
         ) { response ->
             response.testBodyFromFile("checkout-session-confirm.json")
         }
@@ -655,7 +812,7 @@ class CheckoutSessionConfirmationInterceptorTest {
     ) {
         networkRule.checkoutConfirm(
             bodyPart("expected_amount", "0"),
-            not(hasBodyPart("save_payment_method")),
+            not(hasBodyPart("collected_information[save_payment_method]")),
         ) { response ->
             response.testBodyFromFile("checkout-session-confirm-setup.json")
         }
@@ -679,7 +836,7 @@ class CheckoutSessionConfirmationInterceptorTest {
     @Test
     fun `intercept with saved payment method passes null for savePaymentMethod`() = runScenario {
         networkRule.checkoutConfirm(
-            not(hasBodyPart("save_payment_method")),
+            not(hasBodyPart("collected_information[save_payment_method]")),
         ) { response ->
             response.testBodyFromFile("checkout-session-confirm.json")
         }
@@ -911,6 +1068,84 @@ class CheckoutSessionConfirmationInterceptorTest {
         interceptSavedPm()
     }
 
+    @Test
+    fun `intercept propagates intent retrieval failure`() = runScenario {
+        networkRule.checkoutConfirm(
+            intentResponseFactory = { response ->
+                response.setResponseCode(400)
+                response.setBody("""{"error":{"message":"Intent retrieval failed"}}""")
+            },
+        ) { response ->
+            response.testBodyFromFile("checkout-session-confirm.json")
+        }
+
+        val result = interceptNewPm() as ConfirmationDefinition.Action.Fail
+
+        assertThat(result.cause.message).isEqualTo("Intent retrieval failed")
+        assertThat(result.errorType).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Transaction())
+    }
+
+    @Test
+    fun `intercept propagates CheckoutClient payment error`() = runScenario {
+        networkRule.checkoutConfirm { response ->
+            response.testBodyFromFile("checkout-session-confirm.json") { json ->
+                json.getJSONObject("payment_response").put("status", "requires_payment_method").put(
+                    "last_payment_error",
+                    JSONObject().put("message", "Card declined").put("code", "card_declined"),
+                )
+            }
+        }
+
+        val result = interceptNewPm() as ConfirmationDefinition.Action.Fail
+
+        assertThat(result.cause.message).isEqualTo("Card declined")
+        assertThat(result.errorType).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Transaction())
+    }
+
+    private fun completeChallenge(
+        option: PaymentMethodConfirmationOption,
+        token: String?,
+    ): PaymentMethodConfirmationOption {
+        val errorReporter = FakeErrorReporter()
+        val warmer = FakePassiveChallengeWarmer()
+        val definition = PassiveChallengeConfirmationDefinition(
+            errorReporter = errorReporter,
+            passiveChallengeWarmer = warmer,
+            productUsage = emptySet(),
+            isEligibleForConfirmationChallenge = FakeIsEligibleForConfirmationChallenge(),
+        )
+        val result = definition.toResult(
+            confirmationOption = option,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
+            launcherArgs = PassiveChallengeActivityContract.Args(
+                passiveCaptchaParams = requireNotNull(
+                    CONFIRMATION_PARAMETERS.paymentMethodMetadata.passiveCaptchaParams
+                ),
+                apiConfiguration = DEFAULT_API_CONFIG,
+                productUsage = emptySet(),
+            ),
+            result = token?.let { PassiveChallengeActivityResult.Success(it) }
+                ?: PassiveChallengeActivityResult.Failed(IllegalStateException("Challenge failed")),
+        ) as ConfirmationDefinition.Result.NextStep
+        errorReporter.ensureAllEventsConsumed()
+        warmer.ensureAllEventsConsumed()
+        return result.confirmationOption as PaymentMethodConfirmationOption
+    }
+
+    private fun captchaMatcher(token: String?): RequestMatcher = if (token == null) {
+        not(hasBodyPart("passive_captcha_token"))
+    } else {
+        bodyPart("passive_captcha_token", token)
+    }
+
+    private fun commonRequestMatchers(): Array<RequestMatcher> = arrayOf(
+        bodyPart("client_secret", "cs_test_abc123_secret_test"),
+        bodyPart("locale", CheckoutStripeRepositoryFactory.clientParams().locale),
+        not(hasBodyPart("timezone")),
+        bodyPart("mobile_session_id", AnalyticsRequestFactory.sessionId.toString()),
+        bodyPart("mobile_app_id", "com.stripe.android.paymentsheet.test"),
+    )
+
     private fun runScenario(
         customerMetadata: CustomerMetadata? = null,
         collectedEmail: String? = null,
@@ -918,6 +1153,8 @@ class CheckoutSessionConfirmationInterceptorTest {
         block: suspend Scenario.() -> Unit,
     ) {
         val checkoutSessionRepository = CheckoutSessionRepository(
+            stripeRepository = CheckoutStripeRepositoryFactory.create(),
+            elementsSessionClientParams = CheckoutStripeRepositoryFactory.clientParams(),
             fraudDetectionDataRepository = FakeFraudDetectionDataRepository.create(),
             stripeNetworkClient = DefaultStripeNetworkClient(),
             analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),

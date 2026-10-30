@@ -2,6 +2,8 @@ package com.stripe.android.checkout
 
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.utils.simulateProcessDeath
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -10,6 +12,20 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 @Suppress("RestrictedApi")
 internal class CheckoutControllerSavedStateTest {
+    @Test
+    fun `checkout secret survives process restoration`() {
+        val parentHandle = SavedStateHandle()
+        val savedState = CheckoutControllerSavedState(parentHandle, INTEGRATION_NAME)
+        savedState.handle[VALUE_KEY] = CheckoutSessionResponseFactory.create(
+            clientSecret = "cs_test_restored_secret_original",
+        )
+
+        val restored = CheckoutControllerSavedState(parentHandle.simulateProcessDeath(), INTEGRATION_NAME)
+        val response = restored.handle.get<CheckoutSessionResponse>(VALUE_KEY)
+
+        assertThat(response?.clientSecret).isEqualTo("cs_test_restored_secret_original")
+    }
+
     @Test
     fun `handle restores state from the parent namespace`() {
         val savedState = CheckoutControllerSavedState(

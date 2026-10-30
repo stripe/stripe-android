@@ -21,6 +21,7 @@ import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.ui.FakeUpdatePaymentMethodInteractor
+import com.stripe.android.paymentsheet.ui.PrimaryButtonIcon
 import com.stripe.android.paymentsheet.ui.PrimaryButtonProcessingState
 import com.stripe.android.paymentsheet.verticalmode.FakeManageScreenInteractor
 import com.stripe.android.testing.CoroutineTestRule
@@ -179,7 +180,7 @@ internal class EmbeddedSavedPaymentMethodMutatorFactoryTest {
                     isEnabled = false,
                     processingState = PrimaryButtonProcessingState.Idle(null),
                     isProcessing = false,
-                    shouldDisplayLockIcon = true,
+                    primaryButtonIcon = PrimaryButtonIcon.Lock,
                 )
             ),
             onContinueClick = {},

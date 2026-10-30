@@ -100,7 +100,7 @@ internal class LinkConfirmationDefinition @Inject constructor(
                 ConfirmationDefinition.Result.Failed(
                     cause = result.error,
                     message = result.error.stripeErrorMessage(),
-                    type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                    type = ConfirmationHandler.Result.Failed.ErrorType.Transaction(),
                 )
             }
             is LinkActivityResult.Canceled -> {

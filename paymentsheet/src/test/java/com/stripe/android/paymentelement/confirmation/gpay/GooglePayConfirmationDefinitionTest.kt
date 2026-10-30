@@ -202,7 +202,12 @@ class GooglePayConfirmationDefinitionTest {
 
         assertThat(failedResult.cause).isEqualTo(exception)
         assertThat(failedResult.message).isEqualTo(PaymentsCoreR.string.stripe_internal_error.resolvableString)
-        assertThat(failedResult.type).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.GooglePay(400))
+        assertThat(failedResult.type).isEqualTo(
+            ConfirmationHandler.Result.Failed.ErrorType.Transaction(
+                analyticsValue = "googlePay_400",
+                errorCode = "400",
+            )
+        )
     }
 
     @Test
@@ -228,7 +233,10 @@ class GooglePayConfirmationDefinitionTest {
         assertThat(failedResult.message)
             .isEqualTo(PaymentsCoreR.string.stripe_failure_connection_error.resolvableString)
         assertThat(failedResult.type).isEqualTo(
-            ConfirmationHandler.Result.Failed.ErrorType.GooglePay(GooglePayPaymentMethodLauncher.NETWORK_ERROR)
+            ConfirmationHandler.Result.Failed.ErrorType.Transaction(
+                analyticsValue = "googlePay_${GooglePayPaymentMethodLauncher.NETWORK_ERROR}",
+                errorCode = GooglePayPaymentMethodLauncher.NETWORK_ERROR.toString(),
+            )
         )
     }
 

@@ -45,12 +45,12 @@ class DefaultSavedPaymentMethodRepositoryTest {
     ) {
         networkRule.enqueue(
             method("POST"),
-            path("/v1/payment_pages/cs_123"),
+            path("/v1/checkout_client/cs_123/update"),
             bodyPart("payment_method_to_detach", "pm_123"),
-            bodyPart("elements_session_client[is_aggregation_expected]", "true"),
-            bodyPart("elements_session_client[locale]", clientParams.locale),
-            bodyPart("elements_session_client[mobile_session_id]", "test-session-id"),
-            bodyPart("elements_session_client[mobile_app_id]", clientParams.mobileAppId),
+            bodyPart("client_secret", "cs_test_abc123_secret_test"),
+            bodyPart("locale", clientParams.locale),
+            bodyPart("mobile_session_id", "test-session-id"),
+            bodyPart("mobile_app_id", clientParams.mobileAppId),
         ) { response ->
             response.testBodyFromFile("checkout-session-init.json")
         }
@@ -121,7 +121,7 @@ class DefaultSavedPaymentMethodRepositoryTest {
     ) {
         networkRule.enqueue(
             method("POST"),
-            path("/v1/payment_pages/cs_123"),
+            path("/v1/checkout_client/cs_123/update"),
             bodyPart("payment_method_to_update[payment_method_id]", "pm_123"),
             bodyPart("payment_method_to_update[expiry_details][exp_month]", "12"),
             bodyPart("payment_method_to_update[expiry_details][exp_year]", "2030"),
@@ -156,7 +156,7 @@ class DefaultSavedPaymentMethodRepositoryTest {
     ) {
         networkRule.enqueue(
             method("POST"),
-            path("/v1/payment_pages/cs_123"),
+            path("/v1/checkout_client/cs_123/update"),
             bodyPart("payment_method_to_update[payment_method_id]", "pm_123"),
         ) { response ->
             response.testBodyFromFile("checkout-session-init.json")
@@ -310,7 +310,7 @@ class DefaultSavedPaymentMethodRepositoryTest {
     ) {
         networkRule.enqueue(
             method("POST"),
-            path("/v1/payment_pages/cs_123"),
+            path("/v1/checkout_client/cs_123/update"),
             bodyPart("payment_method_to_detach", "pm_123"),
         ) { response ->
             response.setResponseCode(400)
@@ -343,6 +343,8 @@ class DefaultSavedPaymentMethodRepositoryTest {
             onRetrievePaymentMethod = { _ -> retrievePaymentMethodResult },
         )
         val checkoutSessionRepository = CheckoutSessionRepository(
+            stripeRepository = CheckoutStripeRepositoryFactory.create(),
+            elementsSessionClientParams = clientParams,
             fraudDetectionDataRepository = FakeFraudDetectionDataRepository.create(),
             stripeNetworkClient = DefaultStripeNetworkClient(),
             analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
@@ -360,7 +362,6 @@ class DefaultSavedPaymentMethodRepositoryTest {
         val repository = DefaultSavedPaymentMethodRepository(
             customerRepository = customerRepository,
             checkoutSessionRepository = checkoutSessionRepository,
-            elementsSessionClientParams = clientParams,
             apiConfigurationProvider = { DEFAULT_API_CONFIG },
         )
 
@@ -379,6 +380,7 @@ class DefaultSavedPaymentMethodRepositoryTest {
 
     companion object {
         private val CHECKOUT_SESSION_METADATA = CustomerMetadata.CheckoutSession(
+            clientSecret = "cs_test_abc123_secret_test",
             sessionId = "cs_123",
             customerId = "cus_123",
             removePaymentMethod = PaymentMethodRemovePermission.Full,
@@ -412,14 +414,17 @@ class DefaultSavedPaymentMethodRepositoryTest {
                     .getResource("checkout-session-init.json")
             )
             return JSONObject(resource.readText())
-                .put("session_id", "cs_123")
+                .put("id", "cs_123")
+                .put(
+                    "saved_payment_method_options",
+                    JSONObject().put("payment_method_remove", "enabled").put("payment_method_save", "disabled"),
+                )
                 .put(
                     "customer",
                     JSONObject(
                         """
                         {
                     "id": "cus_123",
-                    "can_detach_payment_method": true,
                     "payment_methods": [
                       {
                         "id": "pm_123",

@@ -144,7 +144,10 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
                             PaymentsCoreR.string.stripe_failure_connection_error.resolvableString
                         else -> PaymentsCoreR.string.stripe_internal_error.resolvableString
                     },
-                    type = ConfirmationHandler.Result.Failed.ErrorType.GooglePay(result.errorCode),
+                    type = ConfirmationHandler.Result.Failed.ErrorType.Transaction(
+                        analyticsValue = "googlePay_${result.errorCode}",
+                        errorCode = result.errorCode.toString(),
+                    ),
                 )
             }
             is GooglePayPaymentMethodLauncher.Result.Canceled -> {

@@ -2,6 +2,11 @@ package com.stripe.android.paymentsheet.ui
 
 import com.stripe.android.core.strings.ResolvableString
 
+internal enum class PrimaryButtonIcon {
+    Lock,
+    None,
+}
+
 internal object PrimaryButton {
     internal sealed class State(
         val isProcessing: Boolean
@@ -27,6 +32,6 @@ internal object PrimaryButton {
         val onClick: () -> Unit,
         val onDisabledClick: () -> Unit = {},
         val enabled: Boolean,
-        val lockVisible: Boolean,
+        val icon: PrimaryButtonIcon,
     )
 }

@@ -22,6 +22,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.ui.FakeAddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.paymentsheet.ui.PrimaryButtonIcon
 import com.stripe.android.paymentsheet.verticalmode.FakeManageScreenInteractor
 import com.stripe.android.paymentsheet.verticalmode.FakePaymentMethodVerticalLayoutInteractor
 import com.stripe.android.paymentsheet.verticalmode.FakeVerticalModeFormInteractor
@@ -43,7 +44,7 @@ class PrimaryButtonUiStateMapperTest {
             label = "US Bank Account FTW".resolvableString,
             onClick = {},
             enabled = false,
-            lockVisible = true,
+            icon = PrimaryButtonIcon.Lock,
         )
 
         val mapper = createMapper(
@@ -261,11 +262,11 @@ class PrimaryButtonUiStateMapperTest {
         val resultWithoutLock = mapper.forCustomFlow()
 
         resultWithLock.test {
-            assertThat(awaitItem()?.lockVisible).isTrue()
+            assertThat(awaitItem()?.icon).isEqualTo(PrimaryButtonIcon.Lock)
         }
 
         resultWithoutLock.test {
-            assertThat(awaitItem()?.lockVisible).isFalse()
+            assertThat(awaitItem()?.icon).isEqualTo(PrimaryButtonIcon.None)
         }
     }
 
@@ -409,7 +410,7 @@ class PrimaryButtonUiStateMapperTest {
                     formatArgs = arrayOf("12,34 \$US")
                 )
             )
-            assertThat(item?.lockVisible).isTrue()
+            assertThat(item?.icon).isEqualTo(PrimaryButtonIcon.Lock)
         }
     }
 
@@ -445,7 +446,7 @@ class PrimaryButtonUiStateMapperTest {
                     formatArgs = arrayOf("\$12.34")
                 )
             )
-            assertThat(item?.lockVisible).isTrue()
+            assertThat(item?.icon).isEqualTo(PrimaryButtonIcon.Lock)
         }
     }
 
@@ -467,7 +468,7 @@ class PrimaryButtonUiStateMapperTest {
         result.test {
             val item = awaitItem()
             assertThat(item?.label).isEqualTo(resolvableString(R.string.stripe_paymentsheet_confirm))
-            assertThat(item?.lockVisible).isFalse()
+            assertThat(item?.icon).isEqualTo(PrimaryButtonIcon.None)
         }
     }
 
@@ -500,7 +501,7 @@ class PrimaryButtonUiStateMapperTest {
                     formatArgs = arrayOf("\$12.34")
                 )
             )
-            assertThat(item?.lockVisible).isTrue()
+            assertThat(item?.icon).isEqualTo(PrimaryButtonIcon.Lock)
         }
     }
 
@@ -510,7 +511,7 @@ class PrimaryButtonUiStateMapperTest {
             label = "US Bank Account FTW".resolvableString,
             onClick = {},
             enabled = false,
-            lockVisible = true,
+            icon = PrimaryButtonIcon.Lock,
         )
 
         val mapper = createMapper(

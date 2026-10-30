@@ -3,10 +3,12 @@ package com.stripe.android.paymentsheet.paymentdatacollection.ach
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.paymentsheet.ui.PrimaryButtonIcon
 import com.stripe.android.ui.core.R as StripeUiCoreR
 
 internal fun USBankAccountFormArguments.handleScreenStateChanged(
     screenState: BankFormScreenState,
+    primaryButtonIcon: PrimaryButtonIcon,
     enabled: Boolean,
     canClickWhileDisabled: Boolean,
     onPrimaryButtonClick: () -> Unit,
@@ -19,6 +21,7 @@ internal fun USBankAccountFormArguments.handleScreenStateChanged(
     if (screenState.linkedBankAccount == null) {
         updatePrimaryButton(
             text = resolvableString(StripeUiCoreR.string.stripe_continue_button_label),
+            primaryButtonIcon = primaryButtonIcon,
             onClick = onPrimaryButtonClick,
             canClickWhileDisabled = canClickWhileDisabled,
             onDisabledClick = onDisabledClick,
@@ -35,6 +38,7 @@ internal fun USBankAccountFormArguments.handleScreenStateChanged(
 
 private fun USBankAccountFormArguments.updatePrimaryButton(
     text: ResolvableString,
+    primaryButtonIcon: PrimaryButtonIcon,
     canClickWhileDisabled: Boolean,
     onClick: () -> Unit,
     onDisabledClick: () -> Unit,
@@ -56,7 +60,7 @@ private fun USBankAccountFormArguments.updatePrimaryButton(
             },
             onDisabledClick = onDisabledClick,
             enabled = enabled,
-            lockVisible = isCompleteFlow,
+            icon = primaryButtonIcon,
         )
     }
 }

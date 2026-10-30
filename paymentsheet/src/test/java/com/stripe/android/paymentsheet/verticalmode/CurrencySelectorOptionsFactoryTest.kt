@@ -12,17 +12,75 @@ import kotlin.test.Test
 class CurrencySelectorOptionsFactoryTest {
 
     @Test
+    fun `selects the matching local currency and its complete disclosure`() {
+        val info = captionInfo().copy(
+            activePresentmentCurrency = "cad",
+            localCurrencyOptions = listOf(
+                CheckoutSessionResponse.LocalCurrencyOption(900, "eur", "EUR rate", "EUR details"),
+                CheckoutSessionResponse.LocalCurrencyOption(1400, "cad", "CAD rate", "CAD details"),
+            ),
+        )
+
+        val options = requireNotNull(CurrencySelectorOptionsFactory.create(info, Locale.CANADA, null))
+
+        assertThat(options.first.code).isEqualTo("CAD")
+        assertThat(options.exchangeRateText).isEqualTo("CAD rate")
+        assertThat(options.exchangeRateDetails).isEqualTo("CAD details")
+    }
+
+    @Test
+    fun `uses localized local currency caption verbatim`() {
+        val info = captionInfo()
+
+        assertThat(CurrencySelectorOptionsFactory.create(info, Locale.FRANCE, null)?.exchangeRateText)
+            .isEqualTo("Taux de change garanti")
+    }
+
+    @Test
+    fun `omits missing localized caption`() {
+        val info = captionInfo().let { info ->
+            info.copy(
+                localCurrencyOptions = listOf(info.localCurrencyOptions.single().copy(disclosureCaption = null)),
+            )
+        }
+
+        assertThat(CurrencySelectorOptionsFactory.create(info, Locale.FRANCE, null)?.exchangeRateText).isNull()
+    }
+
+    @Test
+    fun `uses localized integration currency caption verbatim`() {
+        val info = captionInfo().copy(
+            activePresentmentCurrency = "usd",
+            integrationDisclosureCaption = "Votre banque peut facturer des frais",
+        )
+
+        assertThat(CurrencySelectorOptionsFactory.create(info, Locale.FRANCE, null)?.exchangeRateText)
+            .isEqualTo("Votre banque peut facturer des frais")
+    }
+
+    private fun captionInfo() = CheckoutSessionResponse.AdaptivePricingInfo(
+        activePresentmentCurrency = "eur",
+        integrationAmount = 1000,
+        integrationCurrency = "usd",
+        integrationDisclosureCaption = null,
+        localCurrencyOptions = listOf(
+            CheckoutSessionResponse.LocalCurrencyOption(900, "eur", "Taux de change garanti", null),
+        ),
+    )
+
+    @Test
     fun `happy path - EUR integration with USD local option`() {
         val adaptivePricingInfo = CheckoutSessionResponse.AdaptivePricingInfo(
             activePresentmentCurrency = "usd",
             integrationAmount = 5099L,
             integrationCurrency = "eur",
+            integrationDisclosureCaption = null,
             localCurrencyOptions = listOf(
                 CheckoutSessionResponse.LocalCurrencyOption(
                     amount = 6106L,
-                    conversionMarkupBps = 150,
                     currency = "usd",
-                    presentmentExchangeRate = "1.19749",
+                    disclosureCaption = "1 EUR = 1.19749 USD",
+                    disclosureDetails = null,
                 )
             ),
         )
@@ -35,6 +93,7 @@ class CurrencySelectorOptionsFactoryTest {
 
         assertThat(result).isEqualTo(
             CurrencySelectorOptions(
+                exchangeRateDetails = null,
                 first = CurrencyOption(
                     code = "USD",
                     formattedAmount = "\$61.06",
@@ -57,6 +116,7 @@ class CurrencySelectorOptionsFactoryTest {
             activePresentmentCurrency = "eur",
             integrationAmount = 5099L,
             integrationCurrency = "eur",
+            integrationDisclosureCaption = null,
             localCurrencyOptions = emptyList(),
         )
 
@@ -75,12 +135,13 @@ class CurrencySelectorOptionsFactoryTest {
             activePresentmentCurrency = "eur",
             integrationAmount = 5099L,
             integrationCurrency = "eur",
+            integrationDisclosureCaption = null,
             localCurrencyOptions = listOf(
                 CheckoutSessionResponse.LocalCurrencyOption(
                     amount = 6106L,
-                    conversionMarkupBps = 150,
                     currency = "usd",
-                    presentmentExchangeRate = "1.19749",
+                    disclosureCaption = "1 EUR = 1.19749 USD",
+                    disclosureDetails = null,
                 )
             ),
         )
@@ -101,12 +162,13 @@ class CurrencySelectorOptionsFactoryTest {
             activePresentmentCurrency = "usd",
             integrationAmount = 5099L,
             integrationCurrency = "eur",
+            integrationDisclosureCaption = null,
             localCurrencyOptions = listOf(
                 CheckoutSessionResponse.LocalCurrencyOption(
                     amount = 6106L,
-                    conversionMarkupBps = 150,
                     currency = "usd",
-                    presentmentExchangeRate = "1.19749",
+                    disclosureCaption = "1 EUR = 1.19749 USD",
+                    disclosureDetails = null,
                 )
             ),
         )
@@ -126,12 +188,13 @@ class CurrencySelectorOptionsFactoryTest {
             activePresentmentCurrency = "usd",
             integrationAmount = 5000L,
             integrationCurrency = "jpy",
+            integrationDisclosureCaption = null,
             localCurrencyOptions = listOf(
                 CheckoutSessionResponse.LocalCurrencyOption(
                     amount = 3500L,
-                    conversionMarkupBps = 150,
                     currency = "usd",
-                    presentmentExchangeRate = "0.00680",
+                    disclosureCaption = "1 JPY = 0.00680 USD",
+                    disclosureDetails = null,
                 )
             ),
         )
@@ -153,12 +216,13 @@ class CurrencySelectorOptionsFactoryTest {
             activePresentmentCurrency = "eur",
             integrationAmount = 5099L,
             integrationCurrency = "usd",
+            integrationDisclosureCaption = null,
             localCurrencyOptions = listOf(
                 CheckoutSessionResponse.LocalCurrencyOption(
                     amount = 4575L,
-                    conversionMarkupBps = 400,
                     currency = "eur",
-                    presentmentExchangeRate = "0.897235",
+                    disclosureCaption = "1 USD = 0.897235 EUR",
+                    disclosureDetails = null,
                 )
             ),
         )
@@ -179,12 +243,13 @@ class CurrencySelectorOptionsFactoryTest {
             activePresentmentCurrency = "xaf",
             integrationAmount = 1000L,
             integrationCurrency = "xaf",
+            integrationDisclosureCaption = null,
             localCurrencyOptions = listOf(
                 CheckoutSessionResponse.LocalCurrencyOption(
                     amount = 1500L,
-                    conversionMarkupBps = 100,
                     currency = "usd",
-                    presentmentExchangeRate = "0.00167",
+                    disclosureCaption = "1 XAF = 0.00167 USD",
+                    disclosureDetails = null,
                 )
             ),
         )
@@ -205,12 +270,13 @@ class CurrencySelectorOptionsFactoryTest {
             activePresentmentCurrency = "xpf",
             integrationAmount = 500L,
             integrationCurrency = "xpf",
+            integrationDisclosureCaption = null,
             localCurrencyOptions = listOf(
                 CheckoutSessionResponse.LocalCurrencyOption(
                     amount = 600L,
-                    conversionMarkupBps = 100,
                     currency = "eur",
-                    presentmentExchangeRate = "0.00838",
+                    disclosureCaption = "1 XPF = 0.00838 EUR",
+                    disclosureDetails = null,
                 )
             ),
         )
@@ -231,12 +297,13 @@ class CurrencySelectorOptionsFactoryTest {
             activePresentmentCurrency = "USD",
             integrationAmount = 1000L,
             integrationCurrency = "EUR",
+            integrationDisclosureCaption = null,
             localCurrencyOptions = listOf(
                 CheckoutSessionResponse.LocalCurrencyOption(
                     amount = 1100L,
-                    conversionMarkupBps = 100,
                     currency = "USD",
-                    presentmentExchangeRate = "1.10000",
+                    disclosureCaption = "1 EUR = 1.10000 USD",
+                    disclosureDetails = null,
                 )
             ),
         )
@@ -263,12 +330,13 @@ class CurrencySelectorOptionsFactoryTest {
             activePresentmentCurrency = "usd",
             integrationAmount = 5099L,
             integrationCurrency = "eur",
+            integrationDisclosureCaption = null,
             localCurrencyOptions = listOf(
                 CheckoutSessionResponse.LocalCurrencyOption(
                     amount = 6106L,
-                    conversionMarkupBps = 150,
                     currency = "usd",
-                    presentmentExchangeRate = "1.19749",
+                    disclosureCaption = "1 EUR = 1.19749 USD",
+                    disclosureDetails = null,
                 )
             ),
         )
@@ -290,12 +358,13 @@ class CurrencySelectorOptionsFactoryTest {
             activePresentmentCurrency = "usd",
             integrationAmount = 5099L,
             integrationCurrency = "eur",
+            integrationDisclosureCaption = null,
             localCurrencyOptions = listOf(
                 CheckoutSessionResponse.LocalCurrencyOption(
                     amount = 6106L,
-                    conversionMarkupBps = 150,
                     currency = "usd",
-                    presentmentExchangeRate = "1.19749",
+                    disclosureCaption = "1 EUR = 1.19749 USD",
+                    disclosureDetails = null,
                 )
             ),
         )
@@ -312,12 +381,13 @@ class CurrencySelectorOptionsFactoryTest {
             activePresentmentCurrency = "usd",
             integrationAmount = 5099L,
             integrationCurrency = "eur",
+            integrationDisclosureCaption = null,
             localCurrencyOptions = listOf(
                 CheckoutSessionResponse.LocalCurrencyOption(
                     amount = 6106L,
-                    conversionMarkupBps = 150,
                     currency = "usd",
-                    presentmentExchangeRate = "1.19749",
+                    disclosureCaption = "1 EUR = 1.19749 USD",
+                    disclosureDetails = null,
                 )
             ),
         )

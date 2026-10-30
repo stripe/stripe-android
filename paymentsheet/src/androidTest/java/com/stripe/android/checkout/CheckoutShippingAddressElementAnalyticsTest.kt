@@ -61,12 +61,11 @@ internal class CheckoutShippingAddressElementAnalyticsTest {
                     CheckoutController.Configuration.Defaults.ContactDetails()
                         .name("Real Name")
                         .address(
-                            CheckoutController.Address()
+                            CheckoutController.Address(country = "US")
                                 .line1(initialLine1)
                                 .city("Boston")
                                 .state("MA")
                                 .postalCode("02115")
-                                .country("US")
                         )
                 )
             )
@@ -103,7 +102,7 @@ internal class CheckoutShippingAddressElementAnalyticsTest {
                 CheckoutController.Configuration.Defaults().shippingDetails(
                     CheckoutController.Configuration.Defaults.ContactDetails()
                         .name("Real Name")
-                        .address(CheckoutController.Address().country("US"))
+                        .address(CheckoutController.Address(country = "US"))
                 )
             )
 
@@ -225,7 +224,7 @@ internal class CheckoutShippingAddressElementAnalyticsTest {
 
     private fun createCheckoutInitResponse(response: MockResponse) {
         response.testBodyFromFile("checkout-session-init.json") { json ->
-            json.getJSONObject("elements_session").remove("link_settings")
+            json.remove("link_settings")
             json.put(
                 "shipping_address_collection",
                 JSONObject().put("allowed_countries", JSONArray().put("US")),

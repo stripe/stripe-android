@@ -32,7 +32,6 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.billingDetails
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
-import com.stripe.android.paymentsheet.repositories.ElementsSessionClientParams
 import com.stripe.android.paymentsheet.repositories.validateShippingCountry
 import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.paymentsheet.verticalmode.CurrencySelectorOptions
@@ -67,7 +66,6 @@ private val SERVER_UPDATE_TIMEOUT_MS = 20.seconds.inWholeMilliseconds
 class CheckoutController @Inject internal constructor(
     @ViewModelScope private val viewModelScope: CoroutineScope,
     private val checkoutSessionRepository: CheckoutSessionRepository,
-    private val elementsSessionClientParams: ElementsSessionClientParams,
     private val checkoutSessionTaxRegionUpdater: CheckoutSessionTaxRegionUpdater,
     private val errorReporter: ErrorReporter,
     private val checkoutStateLoader: CheckoutStateLoader,
@@ -121,8 +119,8 @@ class CheckoutController @Inject internal constructor(
             val sessionId = clientSecret.substringBefore("_secret_")
 
             checkoutSessionRepository.init(
-                clientParams = elementsSessionClientParams,
                 sessionId = sessionId,
+                clientSecret = clientSecret,
                 adaptivePricingAllowed = configurationState.currencySelectorElementConfiguration != null,
             ).mapCatching { response ->
                 val initialLoad = checkoutStateLoader.loadInitial(
@@ -161,14 +159,22 @@ class CheckoutController @Inject internal constructor(
     suspend fun applyPromotionCode(
         promotionCode: String,
     ): OperationResult = withCheckoutState { sessionId ->
-        checkoutSessionRepository.applyPromotionCode(sessionId, promotionCode.trim())
+        checkoutSessionRepository.applyPromotionCode(
+            sessionId = sessionId,
+            clientSecret = checkoutSessionResponse.clientSecret,
+            promotionCode = promotionCode.trim(),
+        )
     }.toOperationResult()
 
     /**
      * Removes the currently applied promotion code from the checkout session.
      */
     suspend fun removePromotionCode(): OperationResult = withCheckoutState { sessionId ->
-        checkoutSessionRepository.applyPromotionCode(sessionId, "")
+        checkoutSessionRepository.applyPromotionCode(
+            sessionId = sessionId,
+            clientSecret = checkoutSessionResponse.clientSecret,
+            promotionCode = "",
+        )
     }.toOperationResult()
 
     /**
@@ -298,8 +304,8 @@ class CheckoutController @Inject internal constructor(
             }.fold(
                 onSuccess = {
                     checkoutSessionRepository.init(
-                        clientParams = elementsSessionClientParams,
                         sessionId = sessionId,
+                        clientSecret = checkoutSessionResponse.clientSecret,
                         adaptivePricingAllowed = configuration.currencySelectorElementConfiguration != null,
                     )
                 },
@@ -339,13 +345,10 @@ class CheckoutController @Inject internal constructor(
         if (previousAddress == null) {
             kotlin.Result.success(checkoutSessionResponse)
         } else {
-            // The tax region endpoint requires a country, so retain the previous country only.
-            // Follow-up tracked in MOBILESDK-4944: https://jira.corp.stripe.com/browse/MOBILESDK-4944
-            // Send null once CheckoutClient supports clearing tax_region on the server.
             checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
                 checkoutSessionResponse = checkoutSessionResponse,
                 addressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
-                address = Address().country(previousAddress.country).build(),
+                address = null,
             )
         }
     }
@@ -405,7 +408,11 @@ class CheckoutController @Inject internal constructor(
 
     internal suspend fun updateCurrency(currency: String): kotlin.Result<Unit> {
         return withCheckoutState { sessionId ->
-            checkoutSessionRepository.updateCurrency(sessionId, currency)
+            checkoutSessionRepository.updateCurrency(
+                sessionId = sessionId,
+                clientSecret = checkoutSessionResponse.clientSecret,
+                currencyCode = currency,
+            )
         }
     }
 
@@ -457,7 +464,11 @@ class CheckoutController @Inject internal constructor(
                 )
             },
         ) {
-            kotlin.Result.success(checkoutSessionResponse)
+            checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
+                checkoutSessionResponse = checkoutSessionResponse,
+                addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+                address = null,
+            )
         }.toOperationResult()
     }
 
@@ -1334,12 +1345,15 @@ class CheckoutController @Inject internal constructor(
 
     /**
      * Builder for an address passed to [updateShippingAddress].
+     *
+     * @param country The two-letter country code (ISO 3166-1 alpha-2).
      */
     @CheckoutSessionPreview
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    class Address {
+    class Address(
+        private val country: String,
+    ) {
         private var city: String? = null
-        private var country: String? = null
         private var line1: String? = null
         private var line2: String? = null
         private var postalCode: String? = null
@@ -1350,13 +1364,6 @@ class CheckoutController @Inject internal constructor(
          */
         fun city(city: String?) = apply {
             this.city = city
-        }
-
-        /**
-         * Sets the two-letter country code (ISO 3166-1 alpha-2). Required.
-         */
-        fun country(country: String) = apply {
-            this.country = country
         }
 
         /**
@@ -1400,9 +1407,7 @@ class CheckoutController @Inject internal constructor(
         internal fun build(): State {
             return State(
                 city = city?.trim(),
-                country = requireNotNull(country?.trim()) {
-                    "Country is required."
-                },
+                country = country.trim(),
                 line1 = line1?.trim(),
                 line2 = line2?.trim(),
                 postalCode = postalCode?.trim(),

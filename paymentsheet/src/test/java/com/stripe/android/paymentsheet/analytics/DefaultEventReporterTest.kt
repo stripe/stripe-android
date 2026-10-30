@@ -1313,9 +1313,7 @@ class DefaultEventReporterTest {
             )
         )
 
-        val error = PaymentSheetConfirmationError.Stripe(
-            cause = RuntimeException("Payment failed")
-        )
+        val error = PaymentSheetConfirmationError(cause = RuntimeException("Payment failed"))
 
         eventReporter.onPaymentFailure(
             paymentSelection = PaymentSelection.GooglePay,
@@ -1332,6 +1330,34 @@ class DefaultEventReporterTest {
     }
 
     @Test
+    fun `onPaymentFailure includes transaction analytics values`() = runScenario {
+        paymentMethodMetadataStack.push(paymentMethodMetadataWithTestAnalyticsMetadata)
+        durationProvider.endCalls.push(
+            FakeDurationProvider.EndCall(
+                key = DurationProvider.Key.Checkout,
+                duration = 6.seconds,
+            )
+        )
+
+        eventReporter.onPaymentFailure(
+            paymentSelection = PaymentSelection.GooglePay,
+            error = PaymentSheetConfirmationError(
+                cause = LocalStripeException(
+                    displayMessage = "Payment failed",
+                    analyticsValue = "underlying_error",
+                    errorCode = "underlying_code",
+                ),
+                analyticsValue = "googlePay_12",
+                errorCode = "12",
+            ),
+        )
+
+        val request = analyticsRequestExecutor.requestTurbine.awaitItem()
+        assertThat(request.params).containsEntry("error_message", "googlePay_12")
+        assertThat(request.params).containsEntry("error_code", "12")
+    }
+
+    @Test
     fun `onPaymentFailure includes local error analytics values`() = runScenario {
         paymentMethodMetadataStack.push(paymentMethodMetadataWithTestAnalyticsMetadata)
         durationProvider.endCalls.push(
@@ -1340,12 +1366,12 @@ class DefaultEventReporterTest {
                 duration = 6.seconds,
             )
         )
-        val error = PaymentSheetConfirmationError.Stripe(
+        val error = PaymentSheetConfirmationError(
             cause = LocalStripeException(
                 displayMessage = "The estimated total changed.",
                 analyticsValue = "checkoutSessionTotalChanged",
                 errorCode = "checkout_session_total_changed",
-            )
+            ),
         )
 
         eventReporter.onPaymentFailure(

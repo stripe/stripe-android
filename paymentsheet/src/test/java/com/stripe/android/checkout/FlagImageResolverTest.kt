@@ -139,12 +139,13 @@ internal class FlagImageResolverTest {
                 activePresentmentCurrency = localCurrencies.firstOrNull() ?: integrationCurrency,
                 integrationAmount = 5099,
                 integrationCurrency = integrationCurrency,
+                integrationDisclosureCaption = null,
                 localCurrencyOptions = localCurrencies.map { currency ->
                     CheckoutSessionResponse.LocalCurrencyOption(
                         amount = 4594,
-                        conversionMarkupBps = 400,
                         currency = currency,
-                        presentmentExchangeRate = "0.900961",
+                        disclosureCaption = "0.900961",
+                        disclosureDetails = null,
                     )
                 },
             ),

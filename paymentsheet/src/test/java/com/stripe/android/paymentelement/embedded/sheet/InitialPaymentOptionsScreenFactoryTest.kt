@@ -13,6 +13,7 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
+import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.form.EmbeddedFormInteractorFactory
 import com.stripe.android.paymentelement.embedded.form.OnClickDelegateOverrideImpl
@@ -90,7 +91,8 @@ internal class InitialPaymentOptionsScreenFactoryTest {
     }
 
     @Test
-    fun `restored new selection starts with the form on top of the payment options back stack`() = testScenario(
+    fun `regular embedded keeps payment options beneath restored single method form`() = testScenario(
+        launchMode = EmbeddedLaunchMode.Form("card"),
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
         ),
@@ -102,6 +104,56 @@ internal class InitialPaymentOptionsScreenFactoryTest {
         assertThat(screens).hasSize(2)
         assertThat(screens.first()).isInstanceOf<EmbeddedNavigator.Screen.VerticalPaymentOptions>()
         assertThat(screens[1]).isInstanceOf<EmbeddedNavigator.Screen.Form>()
+    }
+
+    @Test
+    fun `present reopens restored single payment method directly on its form`() = testScenario(
+        launchMode = EmbeddedLaunchMode.PaymentOptions,
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+        ),
+    ) {
+        selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+
+        val screen = factory.createInitialScreen().single()
+
+        assertThat(screen).isInstanceOf<EmbeddedNavigator.Screen.Form>()
+        assertThat((screen as EmbeddedNavigator.Screen.Form).formInteractor.state.value.selectedPaymentMethodCode)
+            .isEqualTo("card")
+        assertThat(selectionHolder.selection.value).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+        continueCoordinator.onContinueCalls.expectNoEvents()
+    }
+
+    @Test
+    fun `present with saved payment methods retains payment options beneath restored form`() = testScenario(
+        launchMode = EmbeddedLaunchMode.PaymentOptions,
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+        ),
+        customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
+            paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+        ),
+    ) {
+        selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+
+        val screens = factory.createInitialScreen()
+
+        assertThat(screens).hasSize(2)
+        assertThat(screens.first()).isInstanceOf<EmbeddedNavigator.Screen.VerticalPaymentOptions>()
+        assertThat(screens.last()).isInstanceOf<EmbeddedNavigator.Screen.Form>()
+    }
+
+    @Test
+    fun `present with multiple payment methods retains payment options beneath restored form`() = testScenario(
+        launchMode = EmbeddedLaunchMode.PaymentOptions,
+    ) {
+        selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+
+        val screens = factory.createInitialScreen()
+
+        assertThat(screens).hasSize(2)
+        assertThat(screens.first()).isInstanceOf<EmbeddedNavigator.Screen.VerticalPaymentOptions>()
+        assertThat(screens.last()).isInstanceOf<EmbeddedNavigator.Screen.Form>()
     }
 
     @Test
@@ -275,6 +327,112 @@ internal class InitialPaymentOptionsScreenFactoryTest {
     }
 
     @Test
+    fun `horizontal layout restores custom selection over saved payment options screen`() = testScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            displayableCustomPaymentMethods = listOf(PaymentMethodFixtures.PAYPAL_CUSTOM_PAYMENT_METHOD),
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+        ),
+        customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
+            paymentMethods = PaymentMethodFixtures.createCards(1),
+        ),
+        testDispatcher = StandardTestDispatcher(),
+    ) {
+        val selection = PaymentMethodFixtures.createCustomPaymentMethod(
+            PaymentMethodFixtures.PAYPAL_CUSTOM_PAYMENT_METHOD,
+        )
+        selectionHolder.setSelection(selection)
+
+        val screens = factory.createInitialScreen()
+
+        assertThat(selectionHolder.selection.value).isEqualTo(selection)
+        assertThat(screens).hasSize(2)
+        assertThat(screens.first()).isInstanceOf<EmbeddedNavigator.Screen.HorizontalSavedPaymentOptions>()
+        assertThat(screens[1]).isInstanceOf<EmbeddedNavigator.Screen.HorizontalPaymentOptions>()
+
+        navigator.performAction(EmbeddedNavigator.Action.ReplaceCurrentScreen(screens.last()))
+        assertThat(eventReporter.showNewPaymentOptionsCalls.awaitItem()).isEqualTo(Unit)
+        testScope.runCurrent()
+
+        assertThat(navigator.screen.value).isSameInstanceAs(screens.last())
+        assertThat(selectionHolder.selection.value).isEqualTo(selection)
+    }
+
+    @Test
+    fun `horizontal layout restores external selection over saved payment options screen`() = testScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            externalPaymentMethodSpecs = listOf(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC),
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+        ),
+        customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
+            paymentMethods = PaymentMethodFixtures.createCards(1),
+        ),
+        testDispatcher = StandardTestDispatcher(),
+    ) {
+        val selection = PaymentMethodFixtures.createExternalPaymentMethod(
+            PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC,
+        )
+        selectionHolder.setSelection(selection)
+
+        val screens = factory.createInitialScreen()
+
+        assertThat(selectionHolder.selection.value).isEqualTo(selection)
+        assertThat(screens).hasSize(2)
+        assertThat(screens.first()).isInstanceOf<EmbeddedNavigator.Screen.HorizontalSavedPaymentOptions>()
+        assertThat(screens[1]).isInstanceOf<EmbeddedNavigator.Screen.HorizontalPaymentOptions>()
+
+        navigator.performAction(EmbeddedNavigator.Action.ReplaceCurrentScreen(screens.last()))
+        assertThat(eventReporter.showNewPaymentOptionsCalls.awaitItem()).isEqualTo(Unit)
+        testScope.runCurrent()
+
+        assertThat(navigator.screen.value).isSameInstanceAs(screens.last())
+        assertThat(selectionHolder.selection.value).isEqualTo(selection)
+    }
+
+    @Test
+    fun `horizontal layout restores custom selection with Google Pay and no saved methods`() = testScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            displayableCustomPaymentMethods = listOf(PaymentMethodFixtures.PAYPAL_CUSTOM_PAYMENT_METHOD),
+            isGooglePayReady = true,
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+        ),
+        testDispatcher = StandardTestDispatcher(),
+    ) {
+        val selection = PaymentMethodFixtures.createCustomPaymentMethod(
+            PaymentMethodFixtures.PAYPAL_CUSTOM_PAYMENT_METHOD,
+        )
+        selectionHolder.setSelection(selection)
+
+        val screens = factory.createInitialScreen()
+
+        assertThat(selectionHolder.selection.value).isEqualTo(selection)
+        assertThat(screens).hasSize(2)
+        assertThat(screens.first()).isInstanceOf<EmbeddedNavigator.Screen.HorizontalSavedPaymentOptions>()
+        assertThat(screens[1]).isInstanceOf<EmbeddedNavigator.Screen.HorizontalPaymentOptions>()
+    }
+
+    @Test
+    fun `horizontal layout restores external selection with Google Pay and no saved methods`() = testScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            externalPaymentMethodSpecs = listOf(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC),
+            isGooglePayReady = true,
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+        ),
+        testDispatcher = StandardTestDispatcher(),
+    ) {
+        val selection = PaymentMethodFixtures.createExternalPaymentMethod(
+            PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC,
+        )
+        selectionHolder.setSelection(selection)
+
+        val screens = factory.createInitialScreen()
+
+        assertThat(selectionHolder.selection.value).isEqualTo(selection)
+        assertThat(screens).hasSize(2)
+        assertThat(screens.first()).isInstanceOf<EmbeddedNavigator.Screen.HorizontalSavedPaymentOptions>()
+        assertThat(screens[1]).isInstanceOf<EmbeddedNavigator.Screen.HorizontalPaymentOptions>()
+    }
+
+    @Test
     fun `automatic layout with two payment methods resolves to horizontal`() = testScenario(
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
@@ -351,6 +509,7 @@ internal class InitialPaymentOptionsScreenFactoryTest {
 
     @Suppress("LongMethod")
     private fun testScenario(
+        launchMode: EmbeddedLaunchMode = EmbeddedLaunchMode.PaymentOptions,
         isGooglePayReady: Boolean = true,
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
@@ -466,6 +625,7 @@ internal class InitialPaymentOptionsScreenFactoryTest {
         )
 
         val factory = InitialPaymentOptionsScreenFactory(
+            launchMode = launchMode,
             savedStateHandle = savedStateHandle,
             paymentMethodMetadata = paymentMethodMetadata,
             customerStateHolder = customerStateHolder,

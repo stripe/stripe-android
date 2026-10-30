@@ -53,7 +53,7 @@ internal class IntentConfirmationDefinition(
             return ConfirmationDefinition.Action.Fail(
                 cause = IllegalStateException(e.message),
                 message = e.resolvableError,
-                errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                errorType = ConfirmationHandler.Result.Failed.ErrorType.Transaction(),
             )
         }
         val shippingValues = paymentMethodMetadata.shippingDetails?.toConfirmPaymentIntentShipping()
@@ -123,7 +123,7 @@ internal class IntentConfirmationDefinition(
             is InternalPaymentResult.Failed -> ConfirmationDefinition.Result.Failed(
                 cause = result.throwable,
                 message = result.throwable.stripeErrorMessage(),
-                type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                type = ConfirmationHandler.Result.Failed.ErrorType.Transaction(),
             )
             is InternalPaymentResult.Canceled -> ConfirmationDefinition.Result.Canceled(
                 action = ConfirmationHandler.Result.Canceled.Action.InformCancellation,

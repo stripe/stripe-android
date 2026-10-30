@@ -13,10 +13,10 @@ internal class FakeCheckoutSessionRefreshActions {
     }
 
     suspend fun fetch(
-        sessionId: String,
+        clientSecret: String,
         adaptivePricingAllowed: Boolean,
     ): Result<CheckoutSessionResponse> {
-        fetchCalls.add(FetchCall(sessionId, adaptivePricingAllowed))
+        fetchCalls.add(FetchCall(clientSecret, adaptivePricingAllowed))
         return fetchResponses.awaitItem().invoke()
     }
 
@@ -31,7 +31,7 @@ internal class FakeCheckoutSessionRefreshActions {
     }
 
     data class FetchCall(
-        val sessionId: String,
+        val clientSecret: String,
         val adaptivePricingAllowed: Boolean,
     )
 }

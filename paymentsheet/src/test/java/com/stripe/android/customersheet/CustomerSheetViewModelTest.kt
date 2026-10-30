@@ -39,6 +39,7 @@ import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.paymentsheet.ui.PrimaryButtonIcon
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.cardParamsUpdateAction
 import com.stripe.android.paymentsheet.ui.editCardDetailsInteractorHelper
@@ -1935,7 +1936,7 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
                         PrimaryButton.UIState(
                             label = "Continue".resolvableString,
                             enabled = true,
-                            lockVisible = false,
+                            icon = PrimaryButtonIcon.None,
                             onClick = {}
                         )
                     }

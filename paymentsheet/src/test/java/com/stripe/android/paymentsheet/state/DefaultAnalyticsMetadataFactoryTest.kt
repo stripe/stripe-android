@@ -132,6 +132,7 @@ class DefaultAnalyticsMetadataFactoryTest {
                 activePresentmentCurrency = "usd",
                 integrationAmount = 1000L,
                 integrationCurrency = "usd",
+                integrationDisclosureCaption = null,
                 localCurrencyOptions = emptyList(),
             ),
         )
@@ -153,12 +154,13 @@ class DefaultAnalyticsMetadataFactoryTest {
                 activePresentmentCurrency = "cad",
                 integrationAmount = 1000L,
                 integrationCurrency = "usd",
+                integrationDisclosureCaption = null,
                 localCurrencyOptions = listOf(
                     CheckoutSessionResponse.LocalCurrencyOption(
                         amount = 1400L,
-                        conversionMarkupBps = 150,
                         currency = "cad",
-                        presentmentExchangeRate = "1.4",
+                        disclosureCaption = "1 USD = 1.4 CAD",
+                        disclosureDetails = null,
                     ),
                 ),
             ),

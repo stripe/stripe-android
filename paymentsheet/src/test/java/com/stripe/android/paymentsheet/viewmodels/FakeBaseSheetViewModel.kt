@@ -23,6 +23,7 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.paymentsheet.ui.PrimaryButtonIcon
 import com.stripe.android.utils.FakeIsNfcScanningAvailable
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakeSavedPaymentMethodRepository
@@ -86,7 +87,7 @@ internal class FakeBaseSheetViewModel private constructor(
                             label = "Gimme money!".resolvableString,
                             onClick = {},
                             enabled = false,
-                            lockVisible = true,
+                            icon = PrimaryButtonIcon.Lock,
                         )
                     }
                 }

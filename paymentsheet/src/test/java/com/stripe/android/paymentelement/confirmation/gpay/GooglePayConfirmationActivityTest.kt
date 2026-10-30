@@ -120,7 +120,10 @@ internal class GooglePayConfirmationActivityTest {
             assertThat(failedResult.cause).isInstanceOf<IllegalStateException>()
             assertThat(failedResult.message).isEqualTo(PaymentsCoreR.string.stripe_internal_error.resolvableString)
             assertThat(failedResult.type).isEqualTo(
-                ConfirmationHandler.Result.Failed.ErrorType.GooglePay(GooglePayPaymentMethodLauncher.INTERNAL_ERROR)
+                ConfirmationHandler.Result.Failed.ErrorType.Transaction(
+                    analyticsValue = "googlePay_${GooglePayPaymentMethodLauncher.INTERNAL_ERROR}",
+                    errorCode = GooglePayPaymentMethodLauncher.INTERNAL_ERROR.toString(),
+                )
             )
         }
     }
@@ -165,7 +168,7 @@ internal class GooglePayConfirmationActivityTest {
 
             assertThat(failedResult.cause).isInstanceOf<IllegalStateException>()
             assertThat(failedResult.message).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
-            assertThat(failedResult.type).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Payment)
+            assertThat(failedResult.type).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Transaction())
         }
     }
 

@@ -688,9 +688,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     private fun processConfirmationFailure(failure: ConfirmationHandler.Result.Failed) {
         when (failure.type) {
-            ConfirmationHandler.Result.Failed.ErrorType.Payment,
-            ConfirmationHandler.Result.Failed.ErrorType.ExternalPaymentMethod,
-            is ConfirmationHandler.Result.Failed.ErrorType.GooglePay -> {
+            is ConfirmationHandler.Result.Failed.ErrorType.Transaction -> {
                 failure.toConfirmationError()?.let { confirmationError ->
                     handlePaymentFailed(
                         error = confirmationError,
@@ -720,7 +718,13 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         paymentMethodMetadata: PaymentMethodMetadata,
         customerStateHolder: CustomerStateHolder,
     ): List<PaymentSheetScreen> {
-        if (paymentMethodMetadata.paymentMethodOrientation() == PaymentMethodOrientation.Vertical) {
+        val isSinglePaymentMethodWithoutSavedPaymentMethods =
+            paymentMethodMetadata.supportedPaymentMethodTypes().size == 1 &&
+                customerStateHolder.paymentMethods.value.isEmpty()
+        if (
+            paymentMethodMetadata.paymentMethodOrientation() == PaymentMethodOrientation.Vertical ||
+            isSinglePaymentMethodWithoutSavedPaymentMethods
+        ) {
             return VerticalModeInitialScreenFactory.create(
                 viewModel = this,
                 paymentMethodMetadata = paymentMethodMetadata,

@@ -4,7 +4,7 @@ import com.stripe.android.model.PaymentMethod
 
 /**
  * Parameters for updating a saved card on a checkout session via the update API
- * (`/v1/payment_pages/{cs_id}` with `payment_method_to_update`).
+ * (`/v1/checkout_client/{cs_id}/update` with `payment_method_to_update`).
  *
  * Only card expiry and billing details can be updated; card brand and other card fields are not
  * supported by the endpoint.
@@ -31,7 +31,6 @@ internal data class CheckoutSessionUpdatePaymentMethodParams(
                     mapOf("exp_month" to expiryMonth, "exp_year" to expiryYear),
                 )
             }
-            put("elements_session_client[is_aggregation_expected]", "true")
         }
     }
 }

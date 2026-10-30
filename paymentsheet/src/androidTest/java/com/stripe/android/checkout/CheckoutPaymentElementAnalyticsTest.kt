@@ -20,9 +20,9 @@ import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedContentPage
 import com.stripe.android.paymentelement.EmbeddedFormPage
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.validateAnalyticsRequest
 import com.stripe.android.paymentsheet.utils.GooglePayRepositoryTestRule
 import com.stripe.android.paymentsheet.utils.TestRules
+import com.stripe.android.paymentsheet.validateAnalyticsRequest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.mockwebserver.MockResponse
@@ -152,18 +152,21 @@ internal class CheckoutPaymentElementAnalyticsTest {
                 bodyPart("tax_region[postal_code]", "94103"),
             ) { response ->
                 response.testBodyFromFile("checkout-session-confirm.json") { json ->
-                    json.getJSONArray("checkout_items").getJSONObject(0)
+                    json.getJSONArray("items").getJSONObject(0)
                         .getJSONObject("one_time_price").getJSONArray("items").getJSONObject(0)
+                        .getJSONObject("amount_details")
                         .put("total", UPDATED_TOTAL)
                 }
             }
             networkRule.checkoutInit(responseFactory = ::billingTaxCheckoutInitResponse)
-            networkRule.validateAnalyticsRequest(
+            networkRule.validateConfirmationStartedAnalyticsRequest(
+                invocationSource = "merchant",
+                selectedLpm = "google_pay",
+            )
+            networkRule.validateConfirmationResultAnalyticsRequest(
                 eventName = "checkout_elements.confirm.failed",
-                productUsage = setOf("checkout_elements"),
-                analyticsPayloadField("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID),
-                analyticsPayloadField("invocation_source", "merchant"),
-                analyticsPayloadField("selected_lpm", "google_pay"),
+                invocationSource = "merchant",
+                selectedLpm = "google_pay",
                 analyticsPayloadField("error_type", "checkoutSessionTotalChanged"),
                 analyticsPayloadField("error_code", "checkout_session_total_changed"),
             )
@@ -190,12 +193,13 @@ internal class CheckoutPaymentElementAnalyticsTest {
             networkRule = networkRule,
             checkoutInitResponse = { response ->
                 response.testBodyFromFile("checkout-session-init.json") { json ->
-                    json.getJSONObject("elements_session").remove("link_settings")
+                    json.remove("link_settings")
                     json.put(
-                        "tax_context",
+                        "automatic_tax",
                         JSONObject()
-                            .put("automatic_tax_enabled", true)
-                            .put("automatic_tax_address_source", "billing"),
+                            .put("enabled", true)
+                            .put("status", "ready")
+                            .put("address_source", "billing"),
                     )
                 }
             },
@@ -269,22 +273,17 @@ internal class CheckoutPaymentElementAnalyticsTest {
     private fun billingTaxCheckoutInitResponse(response: MockResponse) {
         response.testBodyFromFile("checkout-session-init.json") { json ->
             json.put("customer_email", "checkout@example.com")
-            json.put("account_settings", JSONObject().put("country", "US"))
-            json.getJSONObject("elements_session").remove("link_settings")
+            json.remove("link_settings")
             // Google Pay only returns a full billing address when billing collection is required.
             json.put("billing_address_collection", "required")
             json.put(
-                "tax_context",
+                "automatic_tax",
                 JSONObject()
-                    .put("automatic_tax_enabled", true)
-                    .put("automatic_tax_address_source", "session.billing"),
+                    .put("enabled", true)
+                    .put("status", "ready")
+                    .put("address_source", "billing"),
             )
-            json.put(
-                "tax_meta",
-                JSONObject()
-                    .put("computation_type", "automatic")
-                    .put("status", "requires_location_inputs"),
-            )
+            json.getJSONObject("automatic_tax").put("status", "requires_address")
         }
     }
 

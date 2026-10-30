@@ -21,6 +21,7 @@ import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
@@ -98,9 +99,8 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
                 paymentMethodMetadata = requireNotNull(state.expressCheckoutElementPaymentMethodMetadata),
             ),
         ) {
-            performer.confirm(expressButton)
+            val args = confirmAndAwaitStart()
 
-            val args = confirmationHandler.startTurbine.awaitItem()
             assertThat(args.confirmationOption).isInstanceOf<GooglePayConfirmationOption>()
             val option = args.confirmationOption as GooglePayConfirmationOption
             assertThat(option.config.shippingAddressParameters).isNull()
@@ -122,9 +122,8 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
                 shippingAddressRequired = true,
             ),
         ) {
-            performer.confirm(expressButton)
+            val args = confirmAndAwaitStart()
 
-            val args = confirmationHandler.startTurbine.awaitItem()
             val option = args.confirmationOption as GooglePayConfirmationOption
             assertThat(option.config.shippingAddressParameters).isEqualTo(
                 GooglePayJsonFactory.ShippingAddressParameters(
@@ -145,9 +144,8 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
                 paymentMethodMetadata = requireNotNull(state.expressCheckoutElementPaymentMethodMetadata),
             ),
         ) {
-            performer.confirm(expressButton)
+            val args = confirmAndAwaitStart()
 
-            val args = confirmationHandler.startTurbine.awaitItem()
             val option = args.confirmationOption as GooglePayConfirmationOption
             val billingDetails = option.config.billingDetailsCollectionConfiguration
             assertThat(billingDetails.name).isEqualTo(
@@ -176,9 +174,8 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
                 paymentMethodMetadata = requireNotNull(state.expressCheckoutElementPaymentMethodMetadata),
             ),
         ) {
-            performer.confirm(expressButton)
+            val args = confirmAndAwaitStart()
 
-            val args = confirmationHandler.startTurbine.awaitItem()
             val option = args.confirmationOption as GooglePayConfirmationOption
             assertThat(option.config.billingDetailsCollectionConfiguration.address).isEqualTo(
                 PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
@@ -205,9 +202,8 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
                 linkAccountInfo = LinkAccountUpdate.Value(null),
             ),
         ) {
-            performer.confirm(expressButton)
+            val args = confirmAndAwaitStart()
 
-            val args = confirmationHandler.startTurbine.awaitItem()
             assertThat(args.confirmationOption).isInstanceOf<LinkConfirmationOption>()
             val option = args.confirmationOption as LinkConfirmationOption
             assertThat(option.linkLaunchMode).isEqualTo(
@@ -297,6 +293,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
             stateHolder = stateHolder,
             expressButton = expressButton,
             results = results,
+            analyticsRequestExecutor = analyticsRequestExecutor,
         ).block()
 
         results.ensureAllEventsConsumed()
@@ -314,5 +311,13 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
         val stateHolder: CheckoutControllerStateHolder,
         val expressButton: ExpressButton,
         val results: Turbine<CheckoutController.Result>,
-    )
+        val analyticsRequestExecutor: FakeAnalyticsRequestExecutor,
+    ) {
+        suspend fun confirmAndAwaitStart(): ConfirmationHandler.Args {
+            performer.confirm(expressButton)
+            val args = confirmationHandler.startTurbine.awaitItem()
+            analyticsRequestExecutor.awaitEvent("checkout_elements.confirm.started")
+            return args
+        }
+    }
 }

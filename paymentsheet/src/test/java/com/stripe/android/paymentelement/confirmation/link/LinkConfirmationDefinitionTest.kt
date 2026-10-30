@@ -272,7 +272,7 @@ internal class LinkConfirmationDefinitionTest {
 
         assertThat(failedResult.cause).isEqualTo(exception)
         assertThat(failedResult.message).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
-        assertThat(failedResult.type).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Payment)
+        assertThat(failedResult.type).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Transaction())
 
         assertThat(storeScenario.markAsUsedCalls.awaitItem()).isNotNull()
         linkAccountHolder.set(LinkAccountUpdate.Value(null))

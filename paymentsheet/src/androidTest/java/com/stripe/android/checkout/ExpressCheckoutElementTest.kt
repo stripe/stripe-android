@@ -416,8 +416,9 @@ internal class ExpressCheckoutElementTest {
             enqueueSuccessfulGooglePayPayment(paymentMethod = paymentMethod)
             networkRule.checkoutUpdate { response ->
                 response.testBodyFromFile("checkout-session-confirm.json") { json ->
-                    json.getJSONArray("checkout_items").getJSONObject(0)
+                    json.getJSONArray("items").getJSONObject(0)
                         .getJSONObject("one_time_price").getJSONArray("items").getJSONObject(0)
+                        .getJSONObject("amount_details")
                         .put("total", 5399)
                 }
             }

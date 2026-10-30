@@ -35,7 +35,6 @@ import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
-import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.FakeStripeImageLoader
 import com.stripe.android.uicore.FormInsets
 import com.stripe.android.uicore.IconStyle
@@ -141,6 +140,7 @@ internal class CheckoutStateLoaderTest {
     fun `loadInitial loads only payment element metadata when ECE is not configured`() = runScenario {
         val state = loadInitial().state
 
+        assertThat(state.embeddedConfiguration).isNotNull()
         assertThat(state.paymentMethodMetadata).isNotNull()
         assertThat(state.expressCheckoutElementPaymentMethodMetadata).isNull()
     }
@@ -281,7 +281,7 @@ internal class CheckoutStateLoaderTest {
                     .shippingDetails(
                         CheckoutController.Configuration.Defaults.ContactDetails()
                             .name("John Shipping")
-                            .address(CheckoutController.Address().country("US").city("Seattle")),
+                            .address(CheckoutController.Address(country = "US").city("Seattle")),
                     )
                     .email("prefill@example.com"),
             )
@@ -292,7 +292,7 @@ internal class CheckoutStateLoaderTest {
             CheckoutCollectedDetails(
                 email = "prefill@example.com",
                 shippingName = "John Shipping",
-                shippingAddress = CheckoutController.Address().country("US").city("Seattle").build(),
+                shippingAddress = CheckoutController.Address(country = "US").city("Seattle").build(),
             ),
         )
     }
@@ -305,7 +305,7 @@ internal class CheckoutStateLoaderTest {
                 CheckoutController.Configuration.Defaults().shippingDetails(
                     CheckoutController.Configuration.Defaults.ContactDetails()
                         .name("John Shipping")
-                        .address(CheckoutController.Address().country("DE")),
+                        .address(CheckoutController.Address(country = "DE")),
                 ),
             )
             .build(),
@@ -650,12 +650,13 @@ internal class CheckoutStateLoaderTest {
         activePresentmentCurrency = "eur",
         integrationAmount = 5099,
         integrationCurrency = "usd",
+        integrationDisclosureCaption = null,
         localCurrencyOptions = listOf(
             CheckoutSessionResponse.LocalCurrencyOption(
                 amount = 4594,
-                conversionMarkupBps = 400,
                 currency = "eur",
-                presentmentExchangeRate = "0.900961",
+                disclosureCaption = "1 USD = 0.900961 EUR",
+                disclosureDetails = null,
             ),
         ),
     )
@@ -709,7 +710,6 @@ internal class CheckoutStateLoaderTest {
             delay = paymentElementLoaderDelay,
             loadCallRecorder = paymentElementLoaderLoadCalls,
         )
-        val errorReporter = FakeErrorReporter()
         val loader = CheckoutStateLoader(
             embeddedConfigurationFactory = CheckoutEmbeddedConfigurationFactory(appName = "Example, Inc."),
             commonConfigurationFactory = CheckoutCommonConfigurationFactory(appName = "Example, Inc."),
@@ -719,7 +719,6 @@ internal class CheckoutStateLoaderTest {
             stateHolder = stateHolder,
             customerStateHolder = customerStateHolder,
             internalRowSelectionCallback = { internalRowSelectionCallback },
-            errorReporter = errorReporter,
         )
 
         Scenario(
@@ -736,7 +735,6 @@ internal class CheckoutStateLoaderTest {
 
         paymentElementLoaderLoadCalls?.ensureAllEventsConsumed()
         imageLoader.ensureAllEventsConsumed()
-        errorReporter.ensureAllEventsConsumed()
     }
 
     private class Scenario(

@@ -106,7 +106,7 @@ internal fun FormActivityPrimaryButton(
                     }
                 },
             label = state.primaryButtonLabel.resolve(),
-            locked = state.shouldDisplayLockIcon,
+            icon = state.primaryButtonIcon,
             enabled = state.isEnabled,
             onClick = onClick,
             onProcessingCompleted = onProcessingCompleted,

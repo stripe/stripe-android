@@ -121,6 +121,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                     // We don't send load timings for these.
                     DurationProvider.Key.Loading,
                     DurationProvider.Key.Checkout,
+                    DurationProvider.Key.CheckoutConfirmation,
                     DurationProvider.Key.NfcScan,
                     DurationProvider.Key.NfcScanAttempt,
                     DurationProvider.Key.LinkSignup,
