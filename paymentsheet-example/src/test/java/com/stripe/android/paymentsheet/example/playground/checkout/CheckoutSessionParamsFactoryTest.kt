@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.example.playground.checkout
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.example.playground.checkout.settings.AdaptivePricingCountry
+import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutEmailCollection
 import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutPlaygroundDefinitions.session
 import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutPlaygroundSettings
 import com.stripe.android.paymentsheet.example.playground.settings.Currency
@@ -33,6 +34,31 @@ class CheckoutSessionParamsFactoryTest {
         assertThat(invoiceData.string("description")).isEqualTo("Checkout live post-purchase invoice")
         assertThat(invoiceData.getValue("metadata").jsonObject.string("suite"))
             .isEqualTo("checkout_live_billing_invoice")
+    }
+
+    @Test
+    fun `email collection is omitted by default`() = runScenario {
+        val params = createParams()
+
+        assertThat(params).doesNotContainKey("email_collection")
+    }
+
+    @Test
+    fun `email collection is always when selected`() = runScenario {
+        settings.update(session.emailCollection, CheckoutEmailCollection.Always)
+
+        val params = createParams()
+
+        assertThat(params.string("email_collection")).isEqualTo("always")
+    }
+
+    @Test
+    fun `email collection is if_required when selected`() = runScenario {
+        settings.update(session.emailCollection, CheckoutEmailCollection.IfRequired)
+
+        val params = createParams()
+
+        assertThat(params.string("email_collection")).isEqualTo("if_required")
     }
 
     @Test

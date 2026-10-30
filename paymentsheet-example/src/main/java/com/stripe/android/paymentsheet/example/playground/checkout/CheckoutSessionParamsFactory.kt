@@ -43,6 +43,7 @@ internal object CheckoutSessionParamsFactory {
             putCart(currency)
             putAllowedPaymentMethodTypes(settings)
             putInvoiceCreation(invoiceCreation)
+            settings[session.emailCollection].paramValue?.let { put("email_collection", it) }
             putTaxAndAddresses(automaticTax, billingAddressCollection, shippingAddressCollection)
             putCustomer(
                 customerId,
