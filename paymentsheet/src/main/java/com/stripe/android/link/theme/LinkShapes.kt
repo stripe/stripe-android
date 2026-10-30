@@ -10,5 +10,5 @@ data class LinkShapes(
     val extraSmall: RoundedCornerShape = RoundedCornerShape(4.dp),
     val default: RoundedCornerShape = RoundedCornerShape(12.dp),
     val primaryButton: RoundedCornerShape = RoundedCornerShape(12.dp),
-    val primaryButtonHeight: Dp = 56.dp,
+    val primaryButtonHeight: Dp = 52.dp,
 )

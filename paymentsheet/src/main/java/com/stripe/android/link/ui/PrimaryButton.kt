@@ -2,14 +2,18 @@ package com.stripe.android.link.ui
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.RestrictTo
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.Button
@@ -22,6 +26,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.testTag
@@ -37,7 +42,6 @@ import com.stripe.android.link.LinkAppearance
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.LinkTheme
-import com.stripe.android.link.theme.LinkThemeConfig.contentOnPrimaryButton
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
@@ -72,18 +76,28 @@ fun PrimaryButton(
                 elevation = ButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp, 0.dp),
                 shape = LinkTheme.shapes.primaryButton,
                 colors = ButtonDefaults.buttonColors(
-                    backgroundColor = LinkTheme.colors.buttonBrand,
-                    contentColor = LinkTheme.colors.onButtonBrand,
-                    disabledBackgroundColor = LinkTheme.colors.buttonBrand,
-                    disabledContentColor = LinkTheme.colors.onButtonBrand.copy(alpha = ContentAlpha.disabled),
-                )
+                    backgroundColor = LinkTheme.colors.buttonPrimary,
+                    contentColor = LinkTheme.colors.onButtonPrimary,
+                    disabledBackgroundColor = LinkTheme.colors.buttonPrimary,
+                    disabledContentColor = LinkTheme.colors.onButtonPrimary.copy(alpha = ContentAlpha.disabled),
+                ),
+                // Padding is applied inside the sheen so that the gradient covers the whole button.
+                contentPadding = PaddingValues(0.dp),
             ) {
-                PrimaryContent(
-                    state = state,
-                    label = label,
-                    iconStart = iconStart,
-                    iconEnd = iconEnd,
-                )
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(PrimaryButtonSheen)
+                        .padding(ButtonDefaults.ContentPadding),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    PrimaryContent(
+                        state = state,
+                        label = label,
+                        iconStart = iconStart,
+                        iconEnd = iconEnd,
+                    )
+                }
             }
 
             DisabledButton(
@@ -107,9 +121,9 @@ private fun PrimaryContent(
             modifier = Modifier
                 .size(20.dp)
                 .semantics { testTag = ProgressIndicatorTestTag },
-            backgroundColor = LinkTheme.colors.surfaceBackdrop.copy(alpha = 0.1f),
+            backgroundColor = LinkTheme.colors.onButtonPrimary.copy(alpha = 0.2f),
             strokeWidth = 4.dp,
-            filledColor = LinkTheme.colors.onButtonBrand,
+            filledColor = LinkTheme.colors.onButtonPrimary,
         )
         PrimaryButtonState.Completed -> Icon(
             painter = painterResource(id = R.drawable.stripe_link_complete),
@@ -119,14 +133,14 @@ private fun PrimaryContent(
                 .semantics {
                     testTag = CompletedIconTestTag
                 },
-            tint = LinkTheme.colors.onButtonBrand
+            tint = LinkTheme.colors.onButtonPrimary
         )
         else -> Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             PrimaryButtonIcon(iconStart)
             Text(
                 text = label,
                 modifier = Modifier.weight(1f),
-                color = LinkTheme.colors.onButtonBrand
+                color = LinkTheme.colors.onButtonPrimary
                     .copy(alpha = LocalContentAlpha.current),
                 textAlign = TextAlign.Center,
                 style = LinkTheme.typography.bodyEmphasized,
@@ -170,7 +184,7 @@ private fun PrimaryButtonIcon(
                 modifier = Modifier
                     .width(PrimaryButtonIconWidth)
                     .height(PrimaryButtonIconHeight),
-                tint = LinkTheme.colors.contentOnPrimaryButton.copy(alpha = LocalContentAlpha.current)
+                tint = LinkTheme.colors.onButtonPrimary.copy(alpha = LocalContentAlpha.current)
             )
         }
     }
@@ -210,6 +224,11 @@ internal fun completePaymentButtonLabel(
     is LinkLaunchMode.Authentication,
     is LinkLaunchMode.Authorization -> uiCoreR.string.stripe_continue_button_label.resolvableString
 }
+
+/** Subtle top-to-bottom sheen drawn over the primary button background. */
+private val PrimaryButtonSheen = Brush.verticalGradient(
+    listOf(Color.White.copy(alpha = 0.08f), Color.Transparent)
+)
 
 private val PrimaryButtonIconWidth = 13.dp
 private val PrimaryButtonIconHeight = 16.dp

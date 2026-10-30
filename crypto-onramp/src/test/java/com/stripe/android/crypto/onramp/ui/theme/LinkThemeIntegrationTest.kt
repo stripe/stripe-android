@@ -66,8 +66,8 @@ internal class LinkThemeIntegrationTest {
         }
 
         composeRule.runOnIdle {
-            assertThat(actualColors?.buttonBrand).isEqualTo(expectedPrimary)
-            assertThat(actualColors?.onButtonBrand).isEqualTo(Color.White)
+            assertThat(actualColors?.buttonPrimary).isEqualTo(expectedPrimary)
+            assertThat(actualColors?.onButtonPrimary).isEqualTo(Color.White)
             assertThat(actualShapes?.primaryButtonHeight).isEqualTo(64.dp)
             assertThat(actualUiMode).isEqualTo(expectedUiMode)
         }
