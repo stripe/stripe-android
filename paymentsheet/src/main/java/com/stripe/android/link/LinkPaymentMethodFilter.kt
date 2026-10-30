@@ -15,4 +15,16 @@ internal enum class LinkPaymentMethodFilter {
             else -> false
         }
     }
+
+    /**
+     * Whether this filter allows payment details of the given type, e.g. a type from
+     * [com.stripe.android.model.StripeIntent.linkFundingSources].
+     */
+    fun allows(paymentDetailsType: String): Boolean {
+        return when (paymentDetailsType.lowercase()) {
+            ConsumerPaymentDetails.Card.TYPE -> this == Card
+            ConsumerPaymentDetails.BankAccount.TYPE -> this == BankAccount
+            else -> this == Generic
+        }
+    }
 }

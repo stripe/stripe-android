@@ -109,7 +109,7 @@ internal class CheckoutPaymentElementAnalyticsTest {
         assertThat(
             controller.configure(
                 DEFAULT_CLIENT_SECRET,
-                configurationWithDefaultBillingCountry(null),
+                CheckoutController.Configuration().paymentElement(PaymentElement.Configuration()),
             )
         ).isInstanceOf(CheckoutController.OperationResult.Failed::class.java)
 
@@ -471,13 +471,13 @@ internal class CheckoutPaymentElementAnalyticsTest {
         }
     }
 
-    private fun configurationWithDefaultBillingCountry(country: String?): CheckoutController.Configuration =
+    private fun configurationWithDefaultBillingCountry(country: String): CheckoutController.Configuration =
         CheckoutController.Configuration()
             .paymentElement(PaymentElement.Configuration())
             .defaults(
                 CheckoutController.Configuration.Defaults().billingDetails(
                     CheckoutController.Configuration.Defaults.ContactDetails().address(
-                        CheckoutController.Address().apply { country?.let { country(it) } }
+                        CheckoutController.Address(country)
                     )
                 )
             )

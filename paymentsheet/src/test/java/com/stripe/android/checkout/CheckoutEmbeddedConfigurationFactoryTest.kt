@@ -381,9 +381,8 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
                     CheckoutController.Configuration.Defaults.ContactDetails()
                         .name("Jane Billing")
                         .address(
-                            CheckoutController.Address()
+                            CheckoutController.Address(country = "US")
                                 .city("Denver")
-                                .country("US")
                                 .line1("123 Main St")
                                 .line2("Apt 4")
                                 .postalCode("80202")

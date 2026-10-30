@@ -113,56 +113,50 @@ class CheckoutController @Inject internal constructor(
         // Without the delimiter, sessionId is the whole client secret, so keep it out of analytics.
         val analyticsSessionId = sessionId.takeIf { it.isNotEmpty() && "_secret_" in clientSecret }
         val initAnalytics = checkoutAnalyticsPerformer.createInitAttempt(analyticsSessionId)
-        // A failed reconfigure leaves the previous session in the holder; report this attempt's response.
-        var attemptResponse: CheckoutSessionResponse? = null
-        initAnalytics.started(response = null)
-        return withContext(Dispatchers.Main.immediate) {
-            // A re-configure would reload the session out from under the open sheet.
-            if (sheetStateHolder.sheetIsOpen) {
-                integrationLaunchedFailure()
-            } else {
-                operationCoordinator.runMutation {
-                    val configurationState = configuration.build()
-                    checkoutSessionRepository.init(
-                        sessionId = sessionId,
-                        clientSecret = clientSecret,
-                        adaptivePricingAllowed = configurationState.currencySelectorElementConfiguration != null,
-                    ).mapCatching { response ->
-                        attemptResponse = response
-                        val loaded = checkoutStateLoader.loadInitial(
-                            configuration = configurationState,
-                            checkoutSessionResponse = response,
-                        )
-                        val addressSource = response.taxAddressSource
-                        val taxAddress = when (addressSource) {
-                            CheckoutSessionResponse.TaxAddressSource.SHIPPING ->
-                                loaded.state.collectedDetails.shippingAddress
-                            CheckoutSessionResponse.TaxAddressSource.BILLING ->
-                                loaded.state.paymentSelection?.billingDetails?.address?.toCheckoutAddress()
-                                    ?: configurationState.defaults.billingDetails?.address
-                            null -> null
-                        }
-                        if (taxAddress != null && addressSource != null && response.automaticTaxEnabled) {
-                            val taxResponse = checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
-                                checkoutSessionResponse = response,
-                                addressSource = addressSource,
-                                address = taxAddress,
-                            ).getOrThrow()
-                            attemptResponse = taxResponse
-                            // The updated totals change payment method metadata, so rebuild it before publishing.
-                            checkoutStateLoader.reload(loaded.state.copy(checkoutSessionResponse = taxResponse))
-                        } else {
-                            checkoutStateLoader.publish(loaded)
-                        }
-                        // Read inside the lock before a queued mutation can change the published payment methods.
-                        stateHolder.state?.paymentMethodMetadata?.sortedSupportedPaymentMethods()?.map { it.code }
-                            ?: session.value?.availableExpressCheckoutPaymentMethods.orEmpty()
-                    }
+        return operationCoordinator.runMutation(
+            preflight = {
+                if (sheetStateHolder.sheetIsOpen) integrationLaunchedFailure() else kotlin.Result.success(Unit)
+            },
+            performOperation = initAnalytics::perform,
+            context = Dispatchers.Main.immediate,
+        ) {
+            val configurationState = configuration.build()
+            checkoutSessionRepository.init(
+                sessionId = sessionId,
+                clientSecret = clientSecret,
+                adaptivePricingAllowed = configurationState.currencySelectorElementConfiguration != null,
+            ).mapCatching { response ->
+                initAnalytics.updateResponse(response)
+                val loaded = checkoutStateLoader.loadInitial(
+                    configuration = configurationState,
+                    checkoutSessionResponse = response,
+                )
+                val addressSource = response.taxAddressSource
+                val taxAddress = when (addressSource) {
+                    CheckoutSessionResponse.TaxAddressSource.SHIPPING ->
+                        loaded.state.collectedDetails.shippingAddress
+                    CheckoutSessionResponse.TaxAddressSource.BILLING ->
+                        loaded.state.paymentSelection?.billingDetails?.address?.toCheckoutAddress()
+                            ?: configurationState.defaults.billingDetails?.address
+                    null -> null
                 }
+                if (taxAddress != null && addressSource != null && response.automaticTaxEnabled) {
+                    val taxResponse = checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
+                        checkoutSessionResponse = response,
+                        addressSource = addressSource,
+                        address = taxAddress,
+                    ).getOrThrow()
+                    initAnalytics.updateResponse(taxResponse)
+                    // The updated totals change payment method metadata, so rebuild it before publishing.
+                    checkoutStateLoader.reload(loaded.state.copy(checkoutSessionResponse = taxResponse))
+                } else {
+                    checkoutStateLoader.publish(loaded)
+                }
+                // Read inside the lock before a queued mutation can change the published payment methods.
+                stateHolder.state?.paymentMethodMetadata?.sortedSupportedPaymentMethods()?.map { it.code }
+                    ?: session.value?.availableExpressCheckoutPaymentMethods.orEmpty()
             }
-        }.onSuccess { orderedLpms -> initAnalytics.succeeded(attemptResponse, orderedLpms) }
-            .onFailure { initAnalytics.failed(attemptResponse, it) }
-            .toOperationResult()
+        }.toOperationResult()
     }
 
     /**
@@ -380,29 +374,29 @@ class CheckoutController @Inject internal constructor(
     private suspend fun withCheckoutState(
         additionalStateMutations: CheckoutControllerState.() -> CheckoutControllerState = { this },
         block: suspend CheckoutControllerState.(sessionId: String) -> kotlin.Result<CheckoutSessionResponse>,
-    ): kotlin.Result<Unit> = withContext(Dispatchers.Main.immediate) {
-        stateHolder.state
-            ?: return@withContext kotlin.Result.failure(
-                IllegalStateException("Cannot mutate checkout session before it is configured.")
-            )
-        if (sheetStateHolder.sheetIsOpen) {
-            return@withContext kotlin.Result.failure(
-                IllegalStateException("Cannot mutate checkout session while a payment flow is presented.")
-            )
-        }
-        operationCoordinator.runMutation {
-            runCatching {
-                // Re-read the latest committed state inside the lock so serialized mutations
-                // build on each other's results rather than a stale snapshot.
-                val state = requireNotNull(stateHolder.state)
-                val response = state.block(state.checkoutSessionResponse.id).getOrThrow()
-                val newState = state
-                    .copy(checkoutSessionResponse = response)
-                    .additionalStateMutations()
-                // reload resolves flag images (reusing newState's carried-over cache) and commits
-                // the fully reloaded state to the holder.
-                checkoutStateLoader.reload(newState)
+    ): kotlin.Result<Unit> = operationCoordinator.runMutation(
+        preflight = {
+            when {
+                stateHolder.state == null -> kotlin.Result.failure(
+                    IllegalStateException("Cannot mutate checkout session before it is configured.")
+                )
+                sheetStateHolder.sheetIsOpen -> integrationLaunchedFailure()
+                else -> kotlin.Result.success(Unit)
             }
+        },
+        context = Dispatchers.Main.immediate,
+    ) {
+        runCatching {
+            // Re-read the latest committed state inside the lock so serialized mutations
+            // build on each other's results rather than a stale snapshot.
+            val state = requireNotNull(stateHolder.state)
+            val response = state.block(state.checkoutSessionResponse.id).getOrThrow()
+            val newState = state
+                .copy(checkoutSessionResponse = response)
+                .additionalStateMutations()
+            // reload resolves flag images (reusing newState's carried-over cache) and commits
+            // the fully reloaded state to the holder.
+            checkoutStateLoader.reload(newState)
         }
     }
 
@@ -1359,12 +1353,15 @@ class CheckoutController @Inject internal constructor(
 
     /**
      * Builder for an address passed to [updateShippingAddress].
+     *
+     * @param country The two-letter country code (ISO 3166-1 alpha-2).
      */
     @CheckoutSessionPreview
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    class Address {
+    class Address(
+        private val country: String,
+    ) {
         private var city: String? = null
-        private var country: String? = null
         private var line1: String? = null
         private var line2: String? = null
         private var postalCode: String? = null
@@ -1375,13 +1372,6 @@ class CheckoutController @Inject internal constructor(
          */
         fun city(city: String?) = apply {
             this.city = city
-        }
-
-        /**
-         * Sets the two-letter country code (ISO 3166-1 alpha-2). Required.
-         */
-        fun country(country: String) = apply {
-            this.country = country
         }
 
         /**
@@ -1425,9 +1415,7 @@ class CheckoutController @Inject internal constructor(
         internal fun build(): State {
             return State(
                 city = city?.trim(),
-                country = requireNotNull(country?.trim()) {
-                    "Country is required."
-                },
+                country = country.trim(),
                 line1 = line1?.trim(),
                 line2 = line2?.trim(),
                 postalCode = postalCode?.trim(),

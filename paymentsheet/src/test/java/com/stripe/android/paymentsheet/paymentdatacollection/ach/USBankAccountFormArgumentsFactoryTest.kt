@@ -7,6 +7,8 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInteractor
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
+import com.stripe.android.paymentsheet.ui.PrimaryButtonIcon
+import com.stripe.android.uicore.utils.stateFlowOf
 import org.junit.Test
 
 internal class USBankAccountFormArgumentsFactoryTest {
@@ -32,6 +34,7 @@ internal class USBankAccountFormArgumentsFactoryTest {
             hostedSurface = "test_surface",
             integrationInputs = USBankAccountFormArgumentsFactory.IntegrationInputs(
                 isCompleteFlow = true,
+                primaryButtonIcon = stateFlowOf(PrimaryButtonIcon.None),
                 shippingDetails = null,
                 draftPaymentSelection = draftPaymentSelection,
                 autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
@@ -51,6 +54,7 @@ internal class USBankAccountFormArgumentsFactoryTest {
         assertThat(arguments.instantDebits).isTrue()
         assertThat(arguments.showCheckbox).isFalse()
         assertThat(arguments.isCompleteFlow).isTrue()
+        assertThat(arguments.primaryButtonIcon.value).isEqualTo(PrimaryButtonIcon.None)
         assertThat(arguments.isPaymentFlow).isTrue()
         assertThat(arguments.stripeIntentId).isEqualTo(metadata.stripeIntent.id)
         assertThat(arguments.clientSecret).isEqualTo(metadata.stripeIntent.clientSecret)

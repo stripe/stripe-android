@@ -5,6 +5,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import kotlin.time.Duration.Companion.milliseconds
@@ -95,6 +96,109 @@ internal class InitOperationTest {
             "duration", 0.1f,
             "error_type", "java.lang.IllegalStateException",
         )
+    }
+
+    @Test
+    fun `perform reports success with the latest response`() = runScenario(
+        sessionId = "cs_test_attempt",
+    ) {
+        val initialResponse = CheckoutSessionResponseFactory.create(
+            id = "cs_test_initial",
+            configId = "config_initial",
+            currency = "usd",
+        )
+        val latestResponse = CheckoutSessionResponseFactory.create(
+            id = "cs_test_latest",
+            configId = "config_after_tax",
+            currency = "eur",
+        )
+
+        val result = operation.perform {
+            assertThat(events.awaitItem().eventName).isEqualTo("checkout_elements.init.started")
+            operation.updateResponse(initialResponse)
+            operation.updateResponse(latestResponse)
+            timeSource += 1250.milliseconds
+            Result.success(listOf("paypal", "card"))
+        }
+
+        assertThat(result.getOrThrow()).containsExactly("paypal", "card")
+        val event = events.awaitItem()
+        assertThat(event.eventName).isEqualTo("checkout_elements.init.succeeded")
+        assertThat(event.params).containsEntry("checkout_config_id", "config_after_tax")
+        assertThat(event.params).containsEntry("currency", "eur")
+        assertThat(event.params).containsEntry("ordered_lpms", "paypal,card")
+        assertThat(event.params).containsEntry("duration", 1.25f)
+    }
+
+    @Test
+    fun `perform reports failure with the latest response`() = runScenario {
+        val initialResponse = CheckoutSessionResponseFactory.create(
+            id = "cs_test_initial",
+            configId = "config_initial",
+            currency = "usd",
+        )
+        val latestResponse = CheckoutSessionResponseFactory.create(
+            id = "cs_test_latest",
+            configId = "config_before_failure",
+            currency = "eur",
+        )
+        val expectedError = APIException(
+            stripeError = StripeError(type = "invalid_request_error", code = "resource_missing"),
+            requestId = "req_init_failed",
+            message = "private integration details",
+        )
+
+        val result = operation.perform {
+            assertThat(events.awaitItem().eventName).isEqualTo("checkout_elements.init.started")
+            operation.updateResponse(initialResponse)
+            operation.updateResponse(latestResponse)
+            timeSource += 500.milliseconds
+            Result.failure(expectedError)
+        }
+
+        assertThat(result.exceptionOrNull()).isSameInstanceAs(expectedError)
+        val event = events.awaitItem()
+        assertThat(event.eventName).isEqualTo("checkout_elements.init.failed")
+        assertThat(event.params).containsEntry("checkout_config_id", "config_before_failure")
+        assertThat(event.params).containsEntry("currency", "eur")
+        assertThat(event.params).containsEntry("request_id", "req_init_failed")
+        assertThat(event.params).doesNotContainKey("ordered_lpms")
+    }
+
+    @Test
+    fun `perform failure before a response includes only the attempted session identity`() =
+        runScenario(sessionId = "cs_test_new_attempt") {
+            val expectedError = IllegalArgumentException("Invalid configure arguments")
+
+            val result = operation.perform {
+                assertThat(events.awaitItem().eventName).isEqualTo("checkout_elements.init.started")
+                Result.failure(expectedError)
+            }
+
+            assertThat(result.exceptionOrNull()).isSameInstanceAs(expectedError)
+            val event = events.awaitItem()
+            assertThat(event.eventName).isEqualTo("checkout_elements.init.failed")
+            assertThat(event.params).containsEntry("checkout_session_id", "cs_test_new_attempt")
+            assertThat(event.params).doesNotContainKey("checkout_config_id")
+            assertThat(event.params).doesNotContainKey("currency")
+        }
+
+    @Test
+    fun `perform propagates cancellation failure without reporting failed outcome`() = runScenario {
+        val expectedCancellation = CancellationException("init canceled")
+
+        val actualCancellation = try {
+            operation.perform {
+                Result.failure<List<String>>(expectedCancellation)
+            }
+            error("perform should rethrow cancellation")
+        } catch (error: CancellationException) {
+            error
+        }
+
+        assertThat(actualCancellation).isSameInstanceAs(expectedCancellation)
+        assertThat(events.awaitItem().eventName).isEqualTo("checkout_elements.init.started")
+        events.expectNoEvents()
     }
 
     private fun runScenario(
