@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ActivityScenario
@@ -196,7 +197,11 @@ private fun ActivityScenario<MainActivity>.createCheckoutPresenter(
         if (renderPaymentElementContent) {
             val paymentElement = presenter.paymentElement()
             activity.setContent {
-                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                Column(
+                    modifier = Modifier
+                        .verticalScroll(rememberScrollState())
+                        .testTag(CHECKOUT_PAYMENT_ELEMENT_CONTENT_TEST_TAG),
+                ) {
                     paymentElement.Content()
                 }
             }
@@ -204,3 +209,5 @@ private fun ActivityScenario<MainActivity>.createCheckoutPresenter(
     }
     return presenter
 }
+
+internal const val CHECKOUT_PAYMENT_ELEMENT_CONTENT_TEST_TAG = "checkout_payment_element_content"
