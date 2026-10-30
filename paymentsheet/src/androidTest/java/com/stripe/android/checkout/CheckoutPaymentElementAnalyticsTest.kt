@@ -53,14 +53,6 @@ internal class CheckoutPaymentElementAnalyticsTest {
         networkRule = networkRule,
         setup = { controller ->
             networkRule.validateAnalyticsRequest(
-                eventName = "mc_load_started",
-                productUsage = setOf("checkout_elements"),
-            )
-            networkRule.validateAnalyticsRequest(
-                eventName = "mc_load_succeeded",
-                productUsage = setOf("checkout_elements"),
-            )
-            networkRule.validateAnalyticsRequest(
                 eventName = "mc_initial_displayed_payment_methods",
                 productUsage = setOf("checkout_elements"),
                 analyticsPayloadField("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID),
@@ -119,14 +111,6 @@ internal class CheckoutPaymentElementAnalyticsTest {
             checkoutInitResponse = ::billingTaxCheckoutInitResponse,
             setup = { controller ->
                 networkRule.validateAnalyticsRequest(
-                    eventName = "mc_load_started",
-                    productUsage = setOf("checkout_elements"),
-                )
-                networkRule.validateAnalyticsRequest(
-                    eventName = "mc_load_succeeded",
-                    productUsage = setOf("checkout_elements"),
-                )
-                networkRule.validateAnalyticsRequest(
                     eventName = "mc_initial_displayed_payment_methods",
                     productUsage = setOf("checkout_elements"),
                     analyticsPayloadField("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID),
@@ -170,15 +154,6 @@ internal class CheckoutPaymentElementAnalyticsTest {
                 analyticsPayloadField("error_type", "checkoutSessionTotalChanged"),
                 analyticsPayloadField("error_code", "checkout_session_total_changed"),
             )
-            // The Checkout Session is refreshed after confirmation fails.
-            networkRule.validateAnalyticsRequest(
-                eventName = "mc_load_started",
-                productUsage = setOf("checkout_elements"),
-            )
-            networkRule.validateAnalyticsRequest(
-                eventName = "mc_load_succeeded",
-                productUsage = setOf("checkout_elements"),
-            )
 
             contentPage.clickOnLpm("google_pay")
             confirm()
@@ -205,14 +180,6 @@ internal class CheckoutPaymentElementAnalyticsTest {
             },
             setup = { controller ->
                 networkRule.validateAnalyticsRequest(
-                    eventName = "mc_load_started",
-                    productUsage = setOf("checkout_elements"),
-                )
-                networkRule.validateAnalyticsRequest(
-                    eventName = "mc_load_succeeded",
-                    productUsage = setOf("checkout_elements"),
-                )
-                networkRule.validateAnalyticsRequest(
                     eventName = "mc_initial_displayed_payment_methods",
                     productUsage = setOf("checkout_elements"),
                     analyticsPayloadField("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID),
@@ -229,15 +196,6 @@ internal class CheckoutPaymentElementAnalyticsTest {
             contentPage.waitUntilVisible()
             networkRule.validateAnalyticsRequest(
                 eventName = "unexpected_error.checkout.saved_payment_method.missing_billing_address",
-                productUsage = setOf("checkout_elements"),
-            )
-            // Changing the selection reloads the payment element.
-            networkRule.validateAnalyticsRequest(
-                eventName = "mc_load_started",
-                productUsage = setOf("checkout_elements"),
-            )
-            networkRule.validateAnalyticsRequest(
-                eventName = "mc_load_succeeded",
                 productUsage = setOf("checkout_elements"),
             )
 
