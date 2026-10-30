@@ -13,16 +13,16 @@ import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.elements.PaymentElement
 import com.stripe.android.elements.ShippingAddressElement
 
-internal fun CheckoutController.Configuration.State.toAnalyticsParams(): Map<String, Any?> = buildMap {
+internal fun CheckoutController.Configuration.State.toAnalyticsMap(): Map<String, Any?> = buildMap {
     put("merchant_display_name", merchantDisplayName != null)
-    put("defaults", defaults.toAnalyticsParams())
-    put("payment_element", paymentElementConfiguration?.toAnalyticsParams())
-    put("express_checkout_element", expressCheckoutElementConfiguration?.toAnalyticsParams())
-    put("currency_selector_element", currencySelectorElementConfiguration?.toAnalyticsParams())
-    put("shipping_address_element", shippingAddressElementConfiguration?.toAnalyticsParams())
+    put("defaults", defaults.toAnalyticsMap())
+    put("payment_element", paymentElementConfiguration?.toAnalyticsMap())
+    put("express_checkout_element", expressCheckoutElementConfiguration?.toAnalyticsMap())
+    put("currency_selector_element", currencySelectorElementConfiguration?.toAnalyticsMap())
+    put("shipping_address_element", shippingAddressElementConfiguration?.toAnalyticsMap())
 }
 
-private fun CheckoutController.Configuration.Defaults.State.toAnalyticsParams(): Map<String, Any?> = mapOf(
+private fun CheckoutController.Configuration.Defaults.State.toAnalyticsMap(): Map<String, Any?> = mapOf(
     "billing_details" to mapOf(
         "name" to (billingDetails?.name != null),
         "address" to (billingDetails?.address != null),
@@ -35,26 +35,26 @@ private fun CheckoutController.Configuration.Defaults.State.toAnalyticsParams():
     "phone" to (phone != null),
 )
 
-private fun PaymentElement.Configuration.State.toAnalyticsParams(): Map<String, Any?> = mapOf(
+private fun PaymentElement.Configuration.State.toAnalyticsMap(): Map<String, Any?> = mapOf(
     "embedded_view_displays_mandate_text" to embeddedViewDisplaysMandateText,
     "payment_method_layout" to paymentMethodLayout.name.lowercase(),
     "opens_card_scanner_automatically" to opensCardScannerAutomatically,
     "preferred_networks" to preferredNetworks.map { it.code },
     "payment_method_order" to paymentMethodOrder.toList(),
-    "card_brand_acceptance" to cardBrandAcceptance.toAnalyticsParams(),
+    "card_brand_acceptance" to cardBrandAcceptance.toAnalyticsMap(),
     "terms_display" to buildMap {
         termsDisplay.forEach { (paymentMethodType, termsDisplayValue) ->
             put(paymentMethodType.code, termsDisplayValue.name.lowercase())
         }
     },
     "appearance" to appearance.asPaymentSheet().toAnalyticsMap(isEmbedded = true).withSnakeCaseColorKeys(),
-    "google_pay_configuration" to googlePayConfiguration.toAnalyticsParams(),
+    "google_pay_configuration" to googlePayConfiguration.toAnalyticsMap(),
     "link_configuration" to mapOf(
         "display" to linkConfiguration.display.toAnalyticsValue(),
     ),
 )
 
-private fun PaymentElement.Configuration.CardBrandAcceptance.toAnalyticsParams(): Map<String, Any?> = when (this) {
+private fun PaymentElement.Configuration.CardBrandAcceptance.toAnalyticsMap(): Map<String, Any?> = when (this) {
     is PaymentElement.Configuration.CardBrandAcceptance.All -> mapOf(
         "type" to "all",
         "brands" to emptyList<String>(),
@@ -69,7 +69,7 @@ private fun PaymentElement.Configuration.CardBrandAcceptance.toAnalyticsParams()
     )
 }
 
-private fun CheckoutGooglePayConfiguration.toAnalyticsParams(): Map<String, Any?> = mapOf(
+private fun CheckoutGooglePayConfiguration.toAnalyticsMap(): Map<String, Any?> = mapOf(
     "display" to display.name.lowercase(),
     "label" to (label != null),
     "button_type" to buttonType.name.lowercase(),
@@ -82,11 +82,11 @@ private fun PaymentElement.Configuration.LinkConfiguration.Display.toAnalyticsVa
     PaymentElement.Configuration.LinkConfiguration.Display.WalletButtonHidden -> "wallet_button_hidden"
 }
 
-private fun ExpressCheckoutElement.Configuration.State.toAnalyticsParams(): Map<String, Any?> = mapOf(
+private fun ExpressCheckoutElement.Configuration.State.toAnalyticsMap(): Map<String, Any?> = mapOf(
     "link_configuration" to mapOf(
         "display" to linkConfiguration.display.name.lowercase(),
     ),
-    "google_pay_configuration" to googlePayConfiguration.toAnalyticsParams(),
+    "google_pay_configuration" to googlePayConfiguration.toAnalyticsMap(),
     "appearance" to mapOf(
         "button_layout" to mapOf(
             "max_columns" to appearance.buttonLayout.maxColumns,
@@ -97,11 +97,11 @@ private fun ExpressCheckoutElement.Configuration.State.toAnalyticsParams(): Map<
     ),
 )
 
-private fun CurrencySelectorElement.Configuration.State.toAnalyticsParams(): Map<String, Any?> = mapOf(
-    "appearance" to appearance.toAnalyticsParams(),
+private fun CurrencySelectorElement.Configuration.State.toAnalyticsMap(): Map<String, Any?> = mapOf(
+    "appearance" to appearance.toAnalyticsMap(),
 )
 
-private fun CurrencySelectorElement.Configuration.Appearance.State.toAnalyticsParams(): Map<String, Any?> = mapOf(
+private fun CurrencySelectorElement.Configuration.Appearance.State.toAnalyticsMap(): Map<String, Any?> = mapOf(
     "content_vertical_padding_dp" to contentVerticalPaddingDp,
     "corner_radius_dp" to cornerRadiusDp,
     "border_width_dp" to borderWidthDp,
@@ -117,7 +117,7 @@ private fun CurrencySelectorElement.Configuration.Appearance.State.toAnalyticsPa
     "label_content" to labelContent.name.lowercase(),
 )
 
-private fun ShippingAddressElement.Configuration.State.toAnalyticsParams(): Map<String, Any?> = mapOf(
+private fun ShippingAddressElement.Configuration.State.toAnalyticsMap(): Map<String, Any?> = mapOf(
     "title" to (title != null),
     "button_title" to (buttonTitle != null),
     "appearance" to appearance.asPaymentSheet().toAnalyticsMap().withSnakeCaseColorKeys(),

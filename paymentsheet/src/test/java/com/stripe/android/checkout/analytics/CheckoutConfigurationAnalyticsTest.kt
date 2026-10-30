@@ -22,7 +22,7 @@ class CheckoutConfigurationAnalyticsTest {
     fun `default configuration reports presence and absent optional elements`() {
         val params = CheckoutController.Configuration()
             .build()
-            .toAnalyticsParams()
+            .toAnalyticsMap()
 
         assertThat(params["merchant_display_name"]).isEqualTo(false)
         assertThat(params["defaults"]).isEqualTo(
@@ -44,7 +44,7 @@ class CheckoutConfigurationAnalyticsTest {
         val params = CheckoutController.Configuration()
             .paymentElement(PaymentElement.Configuration())
             .build()
-            .toAnalyticsParams()
+            .toAnalyticsMap()
         val paymentElement = params["payment_element"] as Map<*, *>
 
         assertThat(paymentElement["payment_method_layout"]).isEqualTo("automatic")
@@ -69,7 +69,7 @@ class CheckoutConfigurationAnalyticsTest {
         val params = CheckoutController.Configuration()
             .paymentElement(PaymentElement.Configuration().appearance(appearance))
             .build()
-            .toAnalyticsParams()
+            .toAnalyticsMap()
         val paymentElement = params["payment_element"] as Map<*, *>
 
         assertSnakeCaseColorKeys(paymentElement["appearance"] as Map<*, *>, customized = true)
@@ -87,7 +87,7 @@ class CheckoutConfigurationAnalyticsTest {
         val params = CheckoutController.Configuration()
             .shippingAddressElement(ShippingAddressElement.Configuration().appearance(appearance))
             .build()
-            .toAnalyticsParams()
+            .toAnalyticsMap()
         val shippingAddressElement = params["shipping_address_element"] as Map<*, *>
 
         assertSnakeCaseColorKeys(shippingAddressElement["appearance"] as Map<*, *>, customized = true)
@@ -136,7 +136,7 @@ class CheckoutConfigurationAnalyticsTest {
         val params = CheckoutController.Configuration()
             .paymentElement(configuration)
             .build()
-            .toAnalyticsParams()
+            .toAnalyticsMap()
         val paymentElement = params["payment_element"] as Map<*, *>
 
         assertThat(paymentElement["embedded_view_displays_mandate_text"]).isEqualTo(false)
@@ -171,7 +171,7 @@ class CheckoutConfigurationAnalyticsTest {
                 )
             )
             .build()
-            .toAnalyticsParams()
+            .toAnalyticsMap()
         val paymentElement = params["payment_element"] as Map<*, *>
 
         assertThat(paymentElement["card_brand_acceptance"]).isEqualTo(
@@ -206,7 +206,7 @@ class CheckoutConfigurationAnalyticsTest {
         val params = CheckoutController.Configuration()
             .expressCheckoutElement(configuration)
             .build()
-            .toAnalyticsParams()
+            .toAnalyticsMap()
         val expressCheckoutElement = params["express_checkout_element"] as Map<*, *>
 
         assertThat(expressCheckoutElement["link_configuration"]).isEqualTo(mapOf("display" to "never"))
@@ -244,7 +244,7 @@ class CheckoutConfigurationAnalyticsTest {
             .currencySelectorElement(currencySelectorConfiguration)
             .shippingAddressElement(shippingAddressConfiguration)
             .build()
-            .toAnalyticsParams()
+            .toAnalyticsMap()
 
         val currencySelectorElement = params["currency_selector_element"] as Map<*, *>
         val currencyAppearance = currencySelectorElement["appearance"] as Map<*, *>
@@ -291,7 +291,7 @@ class CheckoutConfigurationAnalyticsTest {
             .merchantDisplayName(privateValues[0])
             .defaults(defaults)
             .build()
-            .toAnalyticsParams()
+            .toAnalyticsMap()
 
         assertThat(params["merchant_display_name"]).isEqualTo(true)
         assertThat(params["defaults"]).isEqualTo(
@@ -330,7 +330,7 @@ class CheckoutConfigurationAnalyticsTest {
                     .buttonTitle(privateValues[3])
             )
             .build()
-            .toAnalyticsParams()
+            .toAnalyticsMap()
 
         val paymentElement = params["payment_element"] as Map<*, *>
         val paymentGooglePay = paymentElement["google_pay_configuration"] as Map<*, *>
