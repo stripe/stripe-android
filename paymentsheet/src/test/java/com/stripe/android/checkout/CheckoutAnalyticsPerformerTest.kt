@@ -5,6 +5,7 @@ package com.stripe.android.checkout
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.analytics.CheckoutConfirmationContext.InvocationSource
+import com.stripe.android.checkout.analytics.toAnalyticsMap
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.ApiConfigurationPreview
@@ -74,6 +75,55 @@ internal class CheckoutAnalyticsPerformerTest {
         confirmationHandler.state.value = ConfirmationHandler.State.Idle
         confirmationHandler.state.value = ConfirmationHandler.State.Complete(success)
         analyticsRequestExecutor.requestTurbine.expectNoEvents()
+    }
+
+    @Test
+    fun `confirmation events include redacted configuration parameters`() = runScenario {
+        val privateValues = listOf(
+            "private merchant name",
+            "private billing name",
+            "private billing street",
+            "private@example.com",
+            "+15555550123",
+        )
+        val configuration = CheckoutController.Configuration()
+            .merchantDisplayName(privateValues[0])
+            .defaults(
+                CheckoutController.Configuration.Defaults()
+                    .billingDetails(
+                        CheckoutController.Configuration.Defaults.ContactDetails()
+                            .name(privateValues[1])
+                            .address(CheckoutController.Address(country = "US").line1(privateValues[2]))
+                    )
+                    .email(privateValues[3])
+                    .phone(privateValues[4])
+            )
+            .build()
+        val configurationParams = configuration.toAnalyticsMap()
+        stateHolder.state = requireNotNull(stateHolder.state).copy(configuration = configuration)
+
+        startReporting()
+        val startedRequest = startConfirmation(
+            invocationSource = InvocationSource.Merchant,
+            paymentSelection = PaymentSelection.GooglePay,
+            expectedParams = confirmParams(),
+            configurationParams = configurationParams,
+        )
+        privateValues.forEach { privateValue ->
+            assertThat(startedRequest.toString()).doesNotContain(privateValue)
+        }
+
+        confirmationHandler.state.value = ConfirmationHandler.State.Complete(successfulResult())
+
+        val succeededRequest = analyticsRequestExecutor.awaitConfirmationEvent(
+            SUCCEEDED_EVENT,
+            confirmParams(),
+            duration = CONFIRMATION_DURATION_SECONDS,
+            configurationParams = configurationParams,
+        )
+        privateValues.forEach { privateValue ->
+            assertThat(succeededRequest.toString()).doesNotContain(privateValue)
+        }
     }
 
     @Test
@@ -580,29 +630,35 @@ internal class CheckoutAnalyticsPerformerTest {
         invocationSource: InvocationSource,
         paymentSelection: PaymentSelection,
         expectedParams: Map<String, Any>,
-    ) {
+        configurationParams: Map<String, Any?> = confirmationConfigurationParams,
+    ): Map<String, *> {
         when (invocationSource) {
             InvocationSource.Merchant ->
                 performer.onPaymentElementConfirmationStarted(paymentSelection)
             InvocationSource.ExpressCheckoutElement ->
                 performer.onExpressCheckoutElementConfirmationStarted(paymentSelection)
         }
-        analyticsRequestExecutor.awaitConfirmationEvent(STARTED_EVENT, expectedParams)
+        return analyticsRequestExecutor.awaitConfirmationEvent(
+            STARTED_EVENT,
+            expectedParams,
+            configurationParams = configurationParams,
+        )
     }
 
     /**
-     * Asserts every confirm-event key from the Metrics spec exactly, so missing or unexpected spec keys fail.
-     * [params] entries override the default [sessionParams].
+     * Asserts every confirmation and configuration key exactly, so missing or unexpected keys fail.
+     * [params] entries override the default parameters.
      */
     private suspend fun FakeAnalyticsRequestExecutor.awaitConfirmationEvent(
         event: String,
         params: Map<String, Any>,
         duration: Float? = null,
+        configurationParams: Map<String, Any?> = confirmationConfigurationParams,
     ): Map<String, *> {
         val request = awaitEvent(event)
         assertThat(request).containsEntry("product_usage", "checkout_elements")
         assertThat(request).containsEntry("publishable_key", DEFAULT_METADATA_PUBLISHABLE_KEY)
-        val expected = sessionParams + params + listOfNotNull(duration?.let { "duration" to it })
+        val expected = sessionParams + configurationParams + params + listOfNotNull(duration?.let { "duration" to it })
         assertThat(request.filterKeys { it in confirmationSpecKeys }).containsExactlyEntriesIn(expected)
         return request
     }
@@ -705,18 +761,22 @@ internal class CheckoutAnalyticsPerformerTest {
             "automatic_tax_enabled" to false,
         )
 
-        val confirmationSpecKeys: Set<String> = sessionParams.keys + setOf(
-            "selected_lpm",
-            "is_saved_payment_method",
-            "link_context",
-            "link_ui",
-            "active_link_session",
-            "invocation_source",
-            "duration",
-            "error_type",
-            "error_code",
-            "request_id",
-        )
+        val confirmationConfigurationParams: Map<String, Any?> =
+            CheckoutControllerStateFactory.create().configuration.toAnalyticsMap()
+
+        val confirmationSpecKeys: Set<String> =
+            sessionParams.keys + confirmationConfigurationParams.keys + setOf(
+                "selected_lpm",
+                "is_saved_payment_method",
+                "link_context",
+                "link_ui",
+                "active_link_session",
+                "invocation_source",
+                "duration",
+                "error_type",
+                "error_code",
+                "request_id",
+            )
 
         fun confirmParams(
             selectedLpm: String = "google_pay",
