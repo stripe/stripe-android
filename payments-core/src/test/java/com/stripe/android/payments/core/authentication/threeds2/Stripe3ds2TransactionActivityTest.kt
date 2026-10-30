@@ -2,12 +2,17 @@ package com.stripe.android.payments.core.authentication.threeds2
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
+import androidx.core.graphics.Insets
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentAuthConfig
+import com.stripe.android.R
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.core.networking.ApiRequest
@@ -24,6 +29,7 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.stub
+import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 import kotlin.test.assertIs
@@ -75,6 +81,47 @@ class Stripe3ds2TransactionActivityTest {
                 assertIs<ChallengeProgressFragmentFactory>(
                     activity.supportFragmentManager.fragmentFactory
                 )
+            }
+        }
+    }
+
+    @Test
+    fun `navigation bar inset is applied below content without shifting it sideways`() {
+        runInsetsScenario(bottomInset = 78)
+    }
+
+    @Test
+    fun `zero navigation bar inset preserves horizontal padding`() {
+        runInsetsScenario(bottomInset = 0)
+    }
+
+    private fun runInsetsScenario(bottomInset: Int) {
+        val intent = Intent(
+            ApplicationProvider.getApplicationContext(),
+            Stripe3ds2TransactionActivity::class.java
+        ).putExtras(ARGS.toBundle())
+
+        Robolectric.buildActivity(Stripe3ds2TransactionActivity::class.java, intent).use { controller ->
+            // Do not resume: authentication must not start for this layout test.
+            val activity = controller.create().get()
+            val root = activity.findViewById<View>(R.id.fragment_container)
+            root.layoutDirection = View.LAYOUT_DIRECTION_LTR
+            root.setPaddingRelative(11, 13, 17, 19)
+            val insets = WindowInsetsCompat.Builder()
+                .setInsets(
+                    WindowInsetsCompat.Type.systemBars(),
+                    Insets.of(0, 24, 0, bottomInset)
+                )
+                .build()
+
+            repeat(2) {
+                val remainingInsets = ViewCompat.dispatchApplyWindowInsets(root, insets)
+
+                assertThat(root.paddingStart).isEqualTo(11)
+                assertThat(root.paddingTop).isEqualTo(13)
+                assertThat(root.paddingEnd).isEqualTo(17)
+                assertThat(root.paddingBottom).isEqualTo(bottomInset)
+                assertThat(remainingInsets.isConsumed).isTrue()
             }
         }
     }
