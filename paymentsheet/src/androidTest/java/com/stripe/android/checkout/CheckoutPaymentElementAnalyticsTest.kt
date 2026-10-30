@@ -13,7 +13,6 @@ import com.stripe.android.elements.PaymentElement
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.networktesting.AdvancedFraudSignalsTestRule
 import com.stripe.android.networktesting.NetworkRule
-import com.stripe.android.networktesting.RequestMatcher
 import com.stripe.android.networktesting.RequestMatchers.analyticsPayloadField
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.testBodyFromFile
@@ -53,8 +52,23 @@ internal class CheckoutPaymentElementAnalyticsTest {
     fun testSheetAnalyticsUsesCheckoutElementsProductUsageAndCheckoutSessionId() = runCheckoutPaymentElementScenario(
         networkRule = networkRule,
         setup = { controller ->
-            validateSuccessfulConfigureAnalytics(
+            networkRule.validateCheckoutInitStarted(DEFAULT_CHECKOUT_SESSION_ID)
+            networkRule.validateAnalyticsRequest(
+                eventName = "mc_load_started",
+                productUsage = setOf("checkout_elements"),
+            )
+            networkRule.validateAnalyticsRequest(
+                eventName = "mc_load_succeeded",
+                productUsage = setOf("checkout_elements"),
+            )
+            networkRule.validateCheckoutInitSucceeded(
+                DEFAULT_CHECKOUT_SESSION_ID,
                 analyticsPayloadField("ordered_lpms", "card,cashapp")
+            )
+            networkRule.validateAnalyticsRequest(
+                eventName = "mc_initial_displayed_payment_methods",
+                productUsage = setOf("checkout_elements"),
+                analyticsPayloadField("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID),
             )
             assertThat(
                 controller.configure(
@@ -120,7 +134,21 @@ internal class CheckoutPaymentElementAnalyticsTest {
             },
             checkoutInitResponse = ::billingTaxCheckoutInitResponse,
             setup = { controller ->
-                validateSuccessfulConfigureAnalytics()
+                networkRule.validateCheckoutInitStarted(DEFAULT_CHECKOUT_SESSION_ID)
+                networkRule.validateAnalyticsRequest(
+                    eventName = "mc_load_started",
+                    productUsage = setOf("checkout_elements"),
+                )
+                networkRule.validateAnalyticsRequest(
+                    eventName = "mc_load_succeeded",
+                    productUsage = setOf("checkout_elements"),
+                )
+                networkRule.validateCheckoutInitSucceeded(DEFAULT_CHECKOUT_SESSION_ID)
+                networkRule.validateAnalyticsRequest(
+                    eventName = "mc_initial_displayed_payment_methods",
+                    productUsage = setOf("checkout_elements"),
+                    analyticsPayloadField("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID),
+                )
                 assertThat(
                     controller.configure(
                         DEFAULT_CLIENT_SECRET,
@@ -193,7 +221,21 @@ internal class CheckoutPaymentElementAnalyticsTest {
                 }
             },
             setup = { controller ->
-                validateSuccessfulConfigureAnalytics()
+                networkRule.validateCheckoutInitStarted(DEFAULT_CHECKOUT_SESSION_ID)
+                networkRule.validateAnalyticsRequest(
+                    eventName = "mc_load_started",
+                    productUsage = setOf("checkout_elements"),
+                )
+                networkRule.validateAnalyticsRequest(
+                    eventName = "mc_load_succeeded",
+                    productUsage = setOf("checkout_elements"),
+                )
+                networkRule.validateCheckoutInitSucceeded(DEFAULT_CHECKOUT_SESSION_ID)
+                networkRule.validateAnalyticsRequest(
+                    eventName = "mc_initial_displayed_payment_methods",
+                    productUsage = setOf("checkout_elements"),
+                    analyticsPayloadField("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID),
+                )
                 assertThat(
                     controller.configure(
                         DEFAULT_CLIENT_SECRET,
@@ -274,8 +316,18 @@ internal class CheckoutPaymentElementAnalyticsTest {
     fun testFailedReconfigureUsesFreshResponseMetadataForInitFailureAnalytics() =
         runCheckoutPaymentElementScenario(
             networkRule = networkRule,
+            renderPaymentElementContent = false,
             setup = { controller ->
-                validateSuccessfulConfigureAnalytics()
+                networkRule.validateCheckoutInitStarted(DEFAULT_CHECKOUT_SESSION_ID)
+                networkRule.validateAnalyticsRequest(
+                    eventName = "mc_load_started",
+                    productUsage = setOf("checkout_elements"),
+                )
+                networkRule.validateAnalyticsRequest(
+                    eventName = "mc_load_succeeded",
+                    productUsage = setOf("checkout_elements"),
+                )
+                networkRule.validateCheckoutInitSucceeded(DEFAULT_CHECKOUT_SESSION_ID)
                 assertThat(
                     controller.configure(
                         DEFAULT_CLIENT_SECRET,
@@ -284,9 +336,42 @@ internal class CheckoutPaymentElementAnalyticsTest {
                 ).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
             },
         ) {
-            contentPage.waitUntilVisible()
-            enqueueFailedReconfigureResponses()
-            validateFailedReconfigureAnalytics()
+            networkRule.checkoutInit(sessionId = RECONFIGURED_SESSION_ID) { response ->
+                billingTaxCheckoutInitResponse(
+                    response = response,
+                    sessionId = RECONFIGURED_SESSION_ID,
+                    configId = RECONFIGURED_CONFIG_ID,
+                )
+            }
+            networkRule.checkoutUpdate(
+                bodyPart("tax_region[country]", "CA"),
+                sessionId = RECONFIGURED_SESSION_ID,
+            ) { response ->
+                response.setResponseCode(400)
+                response.setHeader("Request-Id", INIT_FAILURE_REQUEST_ID)
+                response.setBody(
+                    """
+                    {"error":{"type":"invalid_request_error","code":"invalid_tax_region","message":"Invalid tax region"}}
+                    """.trimIndent()
+                )
+            }
+            networkRule.validateCheckoutInitStarted(RECONFIGURED_SESSION_ID)
+            networkRule.validateAnalyticsRequest(
+                eventName = "mc_load_started",
+                productUsage = setOf("checkout_elements"),
+            )
+            networkRule.validateAnalyticsRequest(
+                eventName = "mc_load_succeeded",
+                productUsage = setOf("checkout_elements"),
+            )
+            networkRule.validateCheckoutInitFailed(
+                RECONFIGURED_SESSION_ID,
+                analyticsPayloadField("checkout_config_id", RECONFIGURED_CONFIG_ID),
+                analyticsPayloadField("automatic_tax_enabled", "true"),
+                analyticsPayloadField("error_type", "invalid_request_error"),
+                analyticsPayloadField("error_code", "invalid_tax_region"),
+                analyticsPayloadField("request_id", INIT_FAILURE_REQUEST_ID),
+            )
             assertThat(
                 controller.configure(
                     clientSecret = "${RECONFIGURED_SESSION_ID}_secret_example",
@@ -315,8 +400,18 @@ internal class CheckoutPaymentElementAnalyticsTest {
         sessionId: String,
     ) = runCheckoutPaymentElementScenario(
         networkRule = networkRule,
+        renderPaymentElementContent = false,
         setup = { controller ->
-            validateSuccessfulConfigureAnalytics()
+            networkRule.validateCheckoutInitStarted(DEFAULT_CHECKOUT_SESSION_ID)
+            networkRule.validateAnalyticsRequest(
+                eventName = "mc_load_started",
+                productUsage = setOf("checkout_elements"),
+            )
+            networkRule.validateAnalyticsRequest(
+                eventName = "mc_load_succeeded",
+                productUsage = setOf("checkout_elements"),
+            )
+            networkRule.validateCheckoutInitSucceeded(DEFAULT_CHECKOUT_SESSION_ID)
             assertThat(
                 controller.configure(
                     DEFAULT_CLIENT_SECRET,
@@ -325,7 +420,6 @@ internal class CheckoutPaymentElementAnalyticsTest {
             ).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
         },
     ) {
-        contentPage.waitUntilVisible()
         networkRule.checkoutInit(
             sessionId = sessionId,
             responseFactory = ::checkoutInitApiFailureResponse,
@@ -349,14 +443,6 @@ internal class CheckoutPaymentElementAnalyticsTest {
             response = response,
             sessionId = DEFAULT_CHECKOUT_SESSION_ID,
             configId = null,
-        )
-    }
-
-    private fun billingTaxCheckoutInitResponseWithNewConfigId(response: MockResponse) {
-        billingTaxCheckoutInitResponse(
-            response = response,
-            sessionId = RECONFIGURED_SESSION_ID,
-            configId = RECONFIGURED_CONFIG_ID,
         )
     }
 
@@ -385,38 +471,6 @@ internal class CheckoutPaymentElementAnalyticsTest {
         }
     }
 
-    private fun enqueueFailedReconfigureResponses() {
-        networkRule.checkoutInit(
-            sessionId = RECONFIGURED_SESSION_ID,
-            responseFactory = ::billingTaxCheckoutInitResponseWithNewConfigId,
-        )
-        networkRule.checkoutUpdate(
-            bodyPart("tax_region[country]", "CA"),
-            sessionId = RECONFIGURED_SESSION_ID,
-            responseFactory = ::checkoutUpdateApiFailureResponse,
-        )
-    }
-
-    private fun validateFailedReconfigureAnalytics() {
-        networkRule.validateCheckoutInitStarted(RECONFIGURED_SESSION_ID)
-        networkRule.validateAnalyticsRequest(
-            eventName = "mc_load_started",
-            productUsage = setOf("checkout_elements"),
-        )
-        networkRule.validateAnalyticsRequest(
-            eventName = "mc_load_succeeded",
-            productUsage = setOf("checkout_elements"),
-        )
-        networkRule.validateCheckoutInitFailed(
-            RECONFIGURED_SESSION_ID,
-            analyticsPayloadField("checkout_config_id", RECONFIGURED_CONFIG_ID),
-            analyticsPayloadField("automatic_tax_enabled", "true"),
-            analyticsPayloadField("error_type", "invalid_request_error"),
-            analyticsPayloadField("error_code", "invalid_tax_region"),
-            analyticsPayloadField("request_id", INIT_FAILURE_REQUEST_ID),
-        )
-    }
-
     private fun configurationWithDefaultBillingCountry(country: String?): CheckoutController.Configuration =
         CheckoutController.Configuration()
             .paymentElement(PaymentElement.Configuration())
@@ -428,37 +482,11 @@ internal class CheckoutPaymentElementAnalyticsTest {
                 )
             )
 
-    private fun checkoutUpdateApiFailureResponse(response: MockResponse) {
-        response.setResponseCode(400)
-        response.setHeader("Request-Id", INIT_FAILURE_REQUEST_ID)
-        response.setBody(
-            """{"error":{"type":"invalid_request_error","code":"invalid_tax_region","message":"Invalid tax region"}}"""
-        )
-    }
-
     private fun checkoutInitApiFailureResponse(response: MockResponse) {
         response.setResponseCode(400)
         response.setHeader("Request-Id", INIT_FAILURE_REQUEST_ID)
         response.setBody(
             """{"error":{"type":"invalid_request_error","code":"checkout_session_invalid","message":"Invalid session"}}"""
-        )
-    }
-
-    private fun validateSuccessfulConfigureAnalytics(vararg requestMatchers: RequestMatcher) {
-        networkRule.validateCheckoutInitStarted(DEFAULT_CHECKOUT_SESSION_ID)
-        networkRule.validateAnalyticsRequest(
-            eventName = "mc_load_started",
-            productUsage = setOf("checkout_elements"),
-        )
-        networkRule.validateAnalyticsRequest(
-            eventName = "mc_load_succeeded",
-            productUsage = setOf("checkout_elements"),
-        )
-        networkRule.validateCheckoutInitSucceeded(DEFAULT_CHECKOUT_SESSION_ID, *requestMatchers)
-        networkRule.validateAnalyticsRequest(
-            eventName = "mc_initial_displayed_payment_methods",
-            productUsage = setOf("checkout_elements"),
-            analyticsPayloadField("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID),
         )
     }
 
