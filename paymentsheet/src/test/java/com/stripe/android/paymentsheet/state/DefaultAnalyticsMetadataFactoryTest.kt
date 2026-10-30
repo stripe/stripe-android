@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.state
 
+import androidx.compose.ui.graphics.Color
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.SharedPaymentTokenSessionPreview
@@ -747,8 +748,10 @@ class DefaultAnalyticsMetadataFactoryTest {
         assertThat(mpeConfig).containsKey("appearance")
         val appearance = mpeConfig?.get("appearance") as? Map<*, *>
 
-        assertThat(appearance?.get("colorsLight")).isEqualTo(false)
-        assertThat(appearance?.get("colorsDark")).isEqualTo(false)
+        assertThat(appearance?.get("colors_light")).isEqualTo(false)
+        assertThat(appearance?.get("colors_dark")).isEqualTo(false)
+        assertThat(appearance).doesNotContainKey("colorsLight")
+        assertThat(appearance).doesNotContainKey("colorsDark")
         assertThat(appearance?.get("corner_radius")).isEqualTo(false)
         assertThat(appearance?.get("border_width")).isEqualTo(false)
         assertThat(appearance?.get("font")).isEqualTo(false)
@@ -757,11 +760,38 @@ class DefaultAnalyticsMetadataFactoryTest {
 
         assertThat(appearance).containsKey("primary_button")
         val primaryButton = appearance?.get("primary_button") as? Map<*, *>
-        assertThat(primaryButton?.get("colorsLight")).isEqualTo(false)
-        assertThat(primaryButton?.get("colorsDark")).isEqualTo(false)
+        assertThat(primaryButton?.get("colors_light")).isEqualTo(false)
+        assertThat(primaryButton?.get("colors_dark")).isEqualTo(false)
+        assertThat(primaryButton).doesNotContainKey("colorsLight")
+        assertThat(primaryButton).doesNotContainKey("colorsDark")
         assertThat(primaryButton?.get("corner_radius")).isEqualTo(false)
         assertThat(primaryButton?.get("border_width")).isEqualTo(false)
         assertThat(primaryButton?.get("font")).isEqualTo(false)
+    }
+
+    @Test
+    fun `create preserves distinct appearance color customization flags`() = runScenario {
+        val configuration = PaymentSheet.Configuration.Builder(merchantDisplayName = "Test Merchant")
+            .appearance(
+                PaymentSheet.Appearance(
+                    colorsLight = PaymentSheet.Colors.configureDefaultLight(primary = Color.Red),
+                    primaryButton = PaymentSheet.PrimaryButton(
+                        colorsDark = PaymentSheet.PrimaryButtonColors(background = 0, onBackground = 0, border = 0),
+                    ),
+                )
+            )
+            .build()
+        val resultMap = createAnalyticsMetadata(
+            configuration = PaymentElementLoader.Configuration.PaymentSheet(configuration = configuration)
+        )
+        val appearance = getMpeConfigValue(resultMap, "appearance") as Map<*, *>
+        val primaryButton = appearance["primary_button"] as Map<*, *>
+
+        assertThat(appearance).containsEntry("colors_light", true)
+        assertThat(appearance).containsEntry("colors_dark", false)
+        assertThat(primaryButton).containsEntry("colors_light", false)
+        assertThat(primaryButton).containsEntry("colors_dark", true)
+        assertThat(appearance).containsEntry("usage", true)
     }
 
     @Test

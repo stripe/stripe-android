@@ -1,9 +1,12 @@
 package com.stripe.android.customersheet.analytics
 
+import androidx.compose.ui.graphics.Color
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetFixtures
 import com.stripe.android.customersheet.CustomerSheetFixtures.createCustomerSheetSession
 import com.stripe.android.customersheet.CustomerSheetIntegration
+import com.stripe.android.paymentsheet.PaymentSheet
 import kotlin.test.Test
 
 class CustomerSheetEventTest {
@@ -20,15 +23,15 @@ class CustomerSheetEventTest {
             "google_pay_enabled" to true,
             "default_billing_details" to false,
             "appearance" to mapOf(
-                "colorsLight" to false,
-                "colorsDark" to false,
+                "colors_light" to false,
+                "colors_dark" to false,
                 "corner_radius" to false,
                 "border_width" to false,
                 "font" to false,
                 "size_scale_factor" to false,
                 "primary_button" to mapOf(
-                    "colorsLight" to false,
-                    "colorsDark" to false,
+                    "colors_light" to false,
+                    "colors_dark" to false,
                     "corner_radius" to false,
                     "border_width" to false,
                     "font" to false,
@@ -67,15 +70,15 @@ class CustomerSheetEventTest {
             "google_pay_enabled" to false,
             "default_billing_details" to false,
             "appearance" to mapOf(
-                "colorsLight" to false,
-                "colorsDark" to false,
+                "colors_light" to false,
+                "colors_dark" to false,
                 "corner_radius" to false,
                 "border_width" to false,
                 "font" to false,
                 "size_scale_factor" to false,
                 "primary_button" to mapOf(
-                    "colorsLight" to false,
-                    "colorsDark" to false,
+                    "colors_light" to false,
+                    "colors_dark" to false,
                     "corner_radius" to false,
                     "border_width" to false,
                     "font" to false,
@@ -104,16 +107,16 @@ class CustomerSheetEventTest {
     @Test
     fun `Init event should should mark all optional params present if they are there`() {
         val expectedPrimaryButton = mapOf(
-            "colorsLight" to true,
-            "colorsDark" to true,
+            "colors_light" to true,
+            "colors_dark" to true,
             "corner_radius" to true,
             "border_width" to true,
             "font" to true
         )
 
         val expectedAppearance = mapOf(
-            "colorsLight" to true,
-            "colorsDark" to true,
+            "colors_light" to true,
+            "colors_dark" to true,
             "corner_radius" to true,
             "border_width" to true,
             "font" to true,
@@ -153,6 +156,33 @@ class CustomerSheetEventTest {
                 "cs_config" to expectedConfigMap,
             )
         )
+    }
+
+    @Test
+    fun `Init event preserves distinct color customization flags with snake case keys`() {
+        val configuration = CustomerSheet.Configuration.builder(merchantDisplayName = "Test Merchant")
+            .appearance(
+                PaymentSheet.Appearance(
+                    colorsLight = PaymentSheet.Colors.configureDefaultLight(primary = Color.Red),
+                    primaryButton = PaymentSheet.PrimaryButton(
+                        colorsDark = PaymentSheet.PrimaryButtonColors(background = 0, onBackground = 0, border = 0),
+                    ),
+                )
+            )
+            .build()
+        val event = CustomerSheetEvent.Init(
+            configuration = configuration,
+            integrationType = CustomerSheetIntegration.Type.CustomerSession,
+        )
+        val config = event.additionalParams["cs_config"] as Map<*, *>
+        val appearance = config["appearance"] as Map<*, *>
+        val primaryButton = appearance["primary_button"] as Map<*, *>
+
+        assertThat(appearance).containsEntry("colors_light", true)
+        assertThat(appearance).containsEntry("colors_dark", false)
+        assertThat(primaryButton).containsEntry("colors_light", false)
+        assertThat(primaryButton).containsEntry("colors_dark", true)
+        assertThat(appearance).containsEntry("usage", true)
     }
 
     @Test
