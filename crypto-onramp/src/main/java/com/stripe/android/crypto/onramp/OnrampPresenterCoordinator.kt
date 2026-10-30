@@ -177,6 +177,12 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                 .collect { it.checkoutState?.let(::handleCheckoutStateChange) }
         }
 
+        lifecycleOwner.lifecycleScope.launch {
+            interactor.checkoutResults.collect { result ->
+                onrampCallbacksState.checkoutCallback.onResult(result)
+            }
+        }
+
         lifecycleOwner.lifecycle.addObserver(
             object : DefaultLifecycleObserver {
                 override fun onDestroy(owner: LifecycleOwner) {
@@ -493,10 +499,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                     handleNextAction(status.paymentIntent, status.platformKey)
                 }
             }
-            is CheckoutState.Status.Completed -> {
-                // Checkout finished - notify callback
-                onrampCallbacksState.checkoutCallback.onResult(status.result)
-            }
+            is CheckoutState.Status.Completed -> Unit // Results are delivered through checkoutResults.
         }
     }
 
