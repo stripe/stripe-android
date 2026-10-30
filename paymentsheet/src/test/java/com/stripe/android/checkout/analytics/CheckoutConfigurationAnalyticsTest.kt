@@ -4,6 +4,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutController
+import com.stripe.android.common.analytics.toAnalyticsMap
 import com.stripe.android.elements.CurrencySelectorElement
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.elements.PaymentElement
@@ -12,6 +13,7 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentsheet.PaymentSheet
 import kotlin.test.Test
 
 @OptIn(CheckoutSessionPreview::class, AppearanceAPIAdditionsPreview::class)
@@ -52,6 +54,58 @@ class CheckoutConfigurationAnalyticsTest {
         assertThat(paymentElement["card_brand_acceptance"]).isEqualTo(
             mapOf("type" to "all", "brands" to emptyList<String>())
         )
+        assertSnakeCaseColorKeys(paymentElement["appearance"] as Map<*, *>, customized = false)
+    }
+
+    @Test
+    fun `payment element appearance preserves color flags with snake case keys`() {
+        val appearance = PaymentElement.Configuration.Appearance()
+            .colorsLight(PaymentElement.Configuration.Appearance.Colors.light().primary(Color.Red))
+            .primaryButton(
+                PaymentElement.Configuration.Appearance.PrimaryButton().colorsDark(
+                    PaymentElement.Configuration.Appearance.PrimaryButton.Colors.dark().background(Color.Blue)
+                )
+            )
+        val params = CheckoutController.Configuration()
+            .paymentElement(PaymentElement.Configuration().appearance(appearance))
+            .build()
+            .toAnalyticsParams()
+        val paymentElement = params["payment_element"] as Map<*, *>
+
+        assertSnakeCaseColorKeys(paymentElement["appearance"] as Map<*, *>, customized = true)
+    }
+
+    @Test
+    fun `shipping address appearance preserves color flags with snake case keys`() {
+        val appearance = ShippingAddressElement.Configuration.Appearance()
+            .colorsLight(ShippingAddressElement.Configuration.Appearance.Colors.light().primary(Color.Red))
+            .primaryButton(
+                ShippingAddressElement.Configuration.Appearance.PrimaryButton().colorsDark(
+                    ShippingAddressElement.Configuration.Appearance.PrimaryButton.Colors.dark().background(Color.Blue)
+                )
+            )
+        val params = CheckoutController.Configuration()
+            .shippingAddressElement(ShippingAddressElement.Configuration().appearance(appearance))
+            .build()
+            .toAnalyticsParams()
+        val shippingAddressElement = params["shipping_address_element"] as Map<*, *>
+
+        assertSnakeCaseColorKeys(shippingAddressElement["appearance"] as Map<*, *>, customized = true)
+    }
+
+    @Test
+    fun `shared payment sheet appearance serializer retains camel case color keys`() {
+        val appearance = PaymentSheet.Appearance().toAnalyticsMap()
+        val primaryButton = appearance["primary_button"] as Map<*, *>
+
+        assertThat(appearance).containsEntry("colorsLight", false)
+        assertThat(appearance).containsEntry("colorsDark", false)
+        assertThat(appearance).doesNotContainKey("colors_light")
+        assertThat(appearance).doesNotContainKey("colors_dark")
+        assertThat(primaryButton).containsEntry("colorsLight", false)
+        assertThat(primaryButton).containsEntry("colorsDark", false)
+        assertThat(primaryButton).doesNotContainKey("colors_light")
+        assertThat(primaryButton).doesNotContainKey("colors_dark")
     }
 
     @Test
@@ -205,6 +259,7 @@ class CheckoutConfigurationAnalyticsTest {
         val shippingAddressElement = params["shipping_address_element"] as Map<*, *>
         val shippingAppearance = shippingAddressElement["appearance"] as Map<*, *>
         assertThat(shippingAppearance["corner_radius"]).isEqualTo(true)
+        assertSnakeCaseColorKeys(shippingAppearance, customized = false)
     }
 
     @Test
@@ -287,6 +342,18 @@ class CheckoutConfigurationAnalyticsTest {
         assertThat(shippingAddressElement["title"]).isEqualTo(true)
         assertThat(shippingAddressElement["button_title"]).isEqualTo(true)
         assertNoPrivateValues(params, privateValues)
+    }
+
+    private fun assertSnakeCaseColorKeys(appearance: Map<*, *>, customized: Boolean) {
+        assertThat(appearance).containsEntry("colors_light", customized)
+        assertThat(appearance).containsEntry("colors_dark", false)
+        assertThat(appearance).doesNotContainKey("colorsLight")
+        assertThat(appearance).doesNotContainKey("colorsDark")
+        val primaryButton = appearance["primary_button"] as Map<*, *>
+        assertThat(primaryButton).containsEntry("colors_light", false)
+        assertThat(primaryButton).containsEntry("colors_dark", customized)
+        assertThat(primaryButton).doesNotContainKey("colorsLight")
+        assertThat(primaryButton).doesNotContainKey("colorsDark")
     }
 
     private fun assertNoPrivateValues(params: Map<String, Any?>, privateValues: List<String>) {
