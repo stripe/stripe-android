@@ -5,8 +5,6 @@ import app.cash.turbine.Turbine
 import app.cash.turbine.TurbineTestContext
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
-import com.google.testing.junit.testparameterinjector.TestParameter
-import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddNextStep
 import com.stripe.android.core.strings.resolvableString
@@ -54,11 +52,9 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
 import javax.inject.Provider
 
 @Suppress("LargeClass")
-@RunWith(TestParameterInjector::class)
 internal class DefaultSheetActivityStateHolderTest {
     @get:Rule
     val coroutineTestRule = CoroutineTestRule()
@@ -83,31 +79,28 @@ internal class DefaultSheetActivityStateHolderTest {
     }
 
     @Test
-    fun `confirmation button uses experiment icon and logs exposure once`(
-        @TestParameter(value = ["control", "control_test", "treatment_no_padlock"]) variant: String,
-    ) = testScenario(
-        stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(isLiveMode = true),
-        experimentsData = experimentsData(variant),
-    ) {
-        stateHolder.state.test {
-            val expectedIcon = if (variant == "treatment_no_padlock") PrimaryButtonIcon.None else PrimaryButtonIcon.Lock
-            assertThat(awaitItem().primaryButtonIcon).isEqualTo(expectedIcon)
-            assertThat(eventReporter.experimentExposureCalls.awaitItem().experiment.group).isEqualTo(variant)
-
-            selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
-            assertThat(awaitItem().primaryButtonIcon).isEqualTo(expectedIcon)
-            stateHolder.updateProcessing(true)
-            assertThat(awaitItem().primaryButtonIcon).isEqualTo(expectedIcon)
-            eventReporter.experimentExposureCalls.expectNoEvents()
-        }
-    }
+    fun `control confirmation button keeps padlock and logs exposure once`() = assertConfirmationButtonIconAndExposure(
+        variant = "control",
+        expectedIcon = PrimaryButtonIcon.Lock,
+    )
 
     @Test
-    fun `continue button does not log experiment exposure`(
-        @TestParameter(value = ["control", "control_test", "treatment_no_padlock"]) variant: String,
-    ) = testScenario(
-        stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(isLiveMode = true),
-        experimentsData = experimentsData(variant),
+    fun `control_test confirmation button keeps padlock and logs exposure once`() =
+        assertConfirmationButtonIconAndExposure(
+            variant = "control_test",
+            expectedIcon = PrimaryButtonIcon.Lock,
+        )
+
+    @Test
+    fun `treatment_no_padlock confirmation button removes padlock and logs exposure once`() =
+        assertConfirmationButtonIconAndExposure(
+            variant = "treatment_no_padlock",
+            expectedIcon = PrimaryButtonIcon.None,
+        )
+
+    @Test
+    fun `continue button does not log experiment exposure`() = testScenario(
+        experimentsData = experimentsData("treatment_no_padlock"),
         config = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.")
             .formSheetAction(EmbeddedPaymentElement.FormSheetAction.Continue)
             .build(),
@@ -119,11 +112,8 @@ internal class DefaultSheetActivityStateHolderTest {
     }
 
     @Test
-    fun `payment options does not log experiment exposure`(
-        @TestParameter(value = ["control", "control_test", "treatment_no_padlock"]) variant: String,
-    ) = testScenario(
-        stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(isLiveMode = true),
-        experimentsData = experimentsData(variant),
+    fun `payment options does not log experiment exposure`() = testScenario(
+        experimentsData = experimentsData("treatment_no_padlock"),
         launchMode = EmbeddedLaunchMode.PaymentOptions,
     ) {
         stateHolder.state.test {
@@ -669,6 +659,22 @@ internal class DefaultSheetActivityStateHolderTest {
             formInteractor.validate()
             confirmInteractor.validate()
             paymentOptionsInteractor.validate()
+        }
+    }
+
+    private fun assertConfirmationButtonIconAndExposure(
+        variant: String,
+        expectedIcon: PrimaryButtonIcon,
+    ) = testScenario(experimentsData = experimentsData(variant)) {
+        stateHolder.state.test {
+            assertThat(awaitItem().primaryButtonIcon).isEqualTo(expectedIcon)
+            assertThat(eventReporter.experimentExposureCalls.awaitItem().experiment.group).isEqualTo(variant)
+
+            selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+            assertThat(awaitItem().primaryButtonIcon).isEqualTo(expectedIcon)
+            stateHolder.updateProcessing(true)
+            assertThat(awaitItem().primaryButtonIcon).isEqualTo(expectedIcon)
+            eventReporter.experimentExposureCalls.expectNoEvents()
         }
     }
 

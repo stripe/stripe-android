@@ -12,10 +12,6 @@ internal object PrimaryButtonExperiment {
         eventReporter: EventReporter,
         mode: EventReporter.Mode,
     ): PrimaryButtonIcon {
-        if (!metadata.stripeIntent.isLiveMode || mode == EventReporter.Mode.Custom) {
-            return PrimaryButtonIcon.Lock
-        }
-
         val experimentsData = metadata.experimentsData ?: return PrimaryButtonIcon.Lock
         val variant = experimentsData.experimentAssignments[
             ExperimentAssignment.OCS_MOBILE_REMOVE_PRIMARY_BUTTON_PADLOCK
