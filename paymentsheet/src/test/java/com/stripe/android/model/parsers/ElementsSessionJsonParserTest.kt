@@ -1,6 +1,8 @@
 package com.stripe.android.model.parsers
 
 import com.google.common.truth.Truth.assertThat
+import com.google.testing.junit.testparameterinjector.TestParameter
+import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.core.utils.FeatureFlags
@@ -25,8 +27,10 @@ import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
 import java.util.UUID
 
+@RunWith(TestParameterInjector::class)
 class ElementsSessionJsonParserTest {
 
     @get:Rule
@@ -231,6 +235,34 @@ class ElementsSessionJsonParserTest {
 
         assertThat(elementsSession.experimentsData).isNotNull()
         assertThat(elementsSession.experimentsData?.arbId).isEqualTo("232dd033-0b45-4456-b834-ecdcb02ab1fb")
+    }
+
+    @Test
+    fun `parses primary button padlock experiment assignments`(
+        @TestParameter(value = ["control", "control_test", "treatment_no_padlock", "treatment_replace_padlock"])
+        variant: String,
+    ) {
+        val json = JSONObject(ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON.toString()).put(
+            "experiments_data",
+            JSONObject().put("arb_id", "arb_123").put(
+                "experiment_assignments",
+                JSONObject().put("ocs_mobile_remove_primary_button_padlock", variant),
+            ),
+        )
+        val elementsSession = ElementsSessionJsonParser(
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = "secret",
+                externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
+                appId = APP_ID,
+            ),
+            isLiveMode = true,
+        ).parse(json)
+
+        assertThat(elementsSession?.experimentsData?.arbId).isEqualTo("arb_123")
+        assertThat(elementsSession?.experimentsData?.experimentAssignments).containsExactly(
+            ElementsSession.ExperimentAssignment.OCS_MOBILE_REMOVE_PRIMARY_BUTTON_PADLOCK, variant,
+        )
     }
 
     @Test
