@@ -373,6 +373,7 @@ internal class DefaultVerticalModeFormInteractorTest {
             ),
             embeddedNavigatorProvider = Provider { error("Not expected") },
             savedPaymentMethodConfirmScreenFactoryProvider = Provider { error("Not expected") },
+            initialScreenFactoryProvider = Provider { error("Not expected") },
         )
         val formHelperFactory = EmbeddedFormHelperFactory(
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
