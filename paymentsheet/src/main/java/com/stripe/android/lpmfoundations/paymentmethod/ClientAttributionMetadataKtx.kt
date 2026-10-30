@@ -13,9 +13,18 @@ internal fun ClientAttributionMetadata.Companion.create(
     isExpressCheckoutElement: Boolean,
 ): ClientAttributionMetadata {
     val paymentIntentCreationFlow = when (initializationMode) {
+        is PaymentElementLoader.InitializationMode.CheckoutSession -> null
+        is PaymentElementLoader.InitializationMode.CryptoOnramp,
+        is PaymentElementLoader.InitializationMode.StandaloneLink,
+        is PaymentElementLoader.InitializationMode.DeferredIntent -> PaymentIntentCreationFlow.Deferred
+        is PaymentElementLoader.InitializationMode.PaymentIntent,
+        is PaymentElementLoader.InitializationMode.SetupIntent -> PaymentIntentCreationFlow.Standard
+    }
+
+    return when (initializationMode) {
         is PaymentElementLoader.InitializationMode.CheckoutSession -> {
             val response = initializationMode.checkoutSessionResponse
-            return ClientAttributionMetadata.CheckoutSession(
+            ClientAttributionMetadata.CheckoutSession(
                 elementsSessionConfigId = elementsSessionConfigId,
                 paymentMethodSelectionFlow = when (response.automaticPaymentMethodTypes) {
                     true -> PaymentMethodSelectionFlow.Automatic
@@ -29,21 +38,15 @@ internal fun ClientAttributionMetadata.Companion.create(
                 stripeSdkVersion = StripeSdkVersion.VERSION_NAME,
             )
         }
-        is PaymentElementLoader.InitializationMode.CryptoOnramp,
-        is PaymentElementLoader.InitializationMode.StandaloneLink,
-        is PaymentElementLoader.InitializationMode.DeferredIntent -> PaymentIntentCreationFlow.Deferred
-        is PaymentElementLoader.InitializationMode.PaymentIntent,
-        is PaymentElementLoader.InitializationMode.SetupIntent -> PaymentIntentCreationFlow.Standard
+        else -> ClientAttributionMetadata.Elements(
+            elementsSessionConfigId = elementsSessionConfigId,
+            paymentIntentCreationFlow = paymentIntentCreationFlow,
+            paymentMethodSelectionFlow = if (automaticPaymentMethodsEnabled) {
+                PaymentMethodSelectionFlow.Automatic
+            } else {
+                PaymentMethodSelectionFlow.MerchantSpecified
+            },
+            stripeSdkVersion = StripeSdkVersion.VERSION_NAME,
+        )
     }
-
-    return ClientAttributionMetadata.Elements(
-        elementsSessionConfigId = elementsSessionConfigId,
-        paymentIntentCreationFlow = paymentIntentCreationFlow,
-        paymentMethodSelectionFlow = if (automaticPaymentMethodsEnabled) {
-            PaymentMethodSelectionFlow.Automatic
-        } else {
-            PaymentMethodSelectionFlow.MerchantSpecified
-        },
-        stripeSdkVersion = StripeSdkVersion.VERSION_NAME,
-    )
 }
