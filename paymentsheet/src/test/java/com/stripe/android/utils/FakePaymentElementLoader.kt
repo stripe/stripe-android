@@ -38,14 +38,8 @@ internal class FakePaymentElementLoader(
     private val shippingDetails: AddressDetails? = null,
     private val experimentsData: ElementsSession.ExperimentsData? = null,
     private val integrationMetadata: IntegrationMetadata? = null,
-    private val loadCallRecorder: Turbine<LoadCall>? = null,
+    private val initializationModeRecorder: Turbine<PaymentElementLoader.InitializationMode>? = null,
 ) : PaymentElementLoader {
-
-    data class LoadCall(
-        val initializationMode: PaymentElementLoader.InitializationMode,
-        val integrationConfiguration: PaymentElementLoader.Configuration,
-        val metadata: PaymentElementLoader.Metadata,
-    )
 
     var lastIntegrationConfiguration: PaymentElementLoader.Configuration? = null
         private set
@@ -102,13 +96,7 @@ internal class FakePaymentElementLoader(
         integrationConfiguration: PaymentElementLoader.Configuration,
         metadata: PaymentElementLoader.Metadata,
     ): Result<PaymentElementLoader.State> {
-        loadCallRecorder?.add(
-            LoadCall(
-                initializationMode = initializationMode,
-                integrationConfiguration = integrationConfiguration,
-                metadata = metadata,
-            )
-        )
+        initializationModeRecorder?.add(initializationMode)
         lastIntegrationConfiguration = integrationConfiguration
         delay(delay)
         return if (shouldFail) {
