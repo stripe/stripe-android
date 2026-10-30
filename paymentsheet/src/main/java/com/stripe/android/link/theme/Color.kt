@@ -47,7 +47,6 @@ data class LinkColors(
     val borderCritical: Color,
     val buttonPrimary: Color,
     val buttonTertiary: Color,
-    val buttonBrand: Color,
     val buttonCritical: Color,
     val textPrimary: Color,
     val textSecondary: Color,
@@ -56,13 +55,15 @@ data class LinkColors(
     val textBrand: Color,
     val textCritical: Color,
     val onButtonPrimary: Color,
-    val onButtonBrand: Color,
     val iconPrimary: Color,
     val iconSecondary: Color,
     val iconTertiary: Color,
     val iconWhite: Color,
-    val iconBrand: Color,
     val iconCritical: Color,
+    /**
+     * Color for interactive accents, e.g. tertiary buttons, radio buttons, and loading indicators.
+     */
+    val accent: Color,
     val outline: Color,
 ) {
     val buttonLinkBrand: Color get() = Brand200
@@ -95,7 +96,6 @@ internal object LinkThemeConfig {
         borderCritical = Critical500,
         buttonPrimary = Neutral900,
         buttonTertiary = Neutral0,
-        buttonBrand = Brand200,
         buttonCritical = Critical500,
         textPrimary = Neutral900,
         textSecondary = Neutral700,
@@ -103,14 +103,13 @@ internal object LinkThemeConfig {
         textWhite = Neutral0,
         textBrand = Brand600,
         onButtonPrimary = Neutral0,
-        onButtonBrand = Neutral900,
         textCritical = Critical600,
         iconPrimary = Neutral900,
         iconSecondary = Neutral700,
         iconTertiary = Neutral500,
         iconWhite = Neutral0,
-        iconBrand = Brand200,
         iconCritical = Critical500,
+        accent = Neutral900,
         outline = Color(0f, 0f, 0f, .2f),
     )
 
@@ -121,11 +120,10 @@ internal object LinkThemeConfig {
         surfaceTertiary = Neutral700,
         surfaceBackdrop = Neutral900,
         borderDefault = Neutral900,
-        borderSelected = Brand200,
+        borderSelected = Neutral0,
         borderCritical = Critical500,
         buttonPrimary = Neutral0,
         buttonTertiary = Neutral800,
-        buttonBrand = Brand200,
         buttonCritical = Critical600,
         textPrimary = Neutral0,
         textSecondary = Neutral300,
@@ -134,26 +132,29 @@ internal object LinkThemeConfig {
         textBrand = Brand200,
         textCritical = Critical400,
         onButtonPrimary = Neutral900,
-        onButtonBrand = Neutral900,
         iconPrimary = Neutral100,
         iconSecondary = Neutral500,
         iconTertiary = Neutral500,
         iconWhite = Neutral0,
-        iconBrand = Brand200,
         iconCritical = Critical500,
+        accent = Neutral0,
         outline = Color(1f, 1f, 1f, .2f),
     )
 
     /**
      * Workaround:
      *
-     * - The new Link theme primary button uses white on dark mode and dark on light mode
-     * - But we're still using Link green theming for buttons, regardless of dark mode
+     * - The Link theme primary button uses white on dark mode and dark on light mode
+     * - But [com.stripe.android.link.ui.LinkButton] still uses Link green theming, regardless of dark mode
      * - This means that the fixed button color is not consistent with variable text / divider colors,
-     *   so we need to keep them fixed until we migrate to the updated primary color styling.
+     *   so we need to keep them fixed until we migrate it to the updated primary color styling.
+     *
+     * Content color on the green [com.stripe.android.link.ui.LinkButton].
      */
     internal val LinkColors.contentOnPrimaryButton
         get() = Neutral900
+
+    /** Separator color on the green [com.stripe.android.link.ui.LinkButton]. */
     internal val LinkColors.separatorOnPrimaryButton
         get() = Brand400
 
@@ -169,7 +170,7 @@ internal object LinkThemeConfig {
         get() = run {
             val unselectedColor = if (isDark) Neutral700 else LinkTheme.colors.borderDefault
             RadioButtonDefaults.colors(
-                selectedColor = LinkTheme.colors.buttonBrand,
+                selectedColor = LinkTheme.colors.accent,
                 unselectedColor = unselectedColor,
                 disabledColor = unselectedColor.copy(alpha = ContentAlpha.disabled)
             )

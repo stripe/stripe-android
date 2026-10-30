@@ -159,7 +159,7 @@ private fun MerchantLogo(
         StripeImage(
             modifier = modifier,
             url = merchantLogoUrl,
-            debugPainter = ColorPainter(LinkTheme.colors.iconBrand),
+            debugPainter = ColorPainter(LinkTheme.colors.accent),
             imageLoader = imageLoader,
             contentDescription = null,
             loadingContent = {
