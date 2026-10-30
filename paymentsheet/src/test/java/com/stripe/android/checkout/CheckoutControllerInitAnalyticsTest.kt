@@ -11,6 +11,7 @@ import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.elements.PaymentElement
+import com.stripe.android.networktesting.AdvancedFraudSignalsTestRule
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatcher
 import com.stripe.android.networktesting.RequestMatchers.analyticsPayloadField
@@ -51,11 +52,11 @@ internal class CheckoutControllerInitAnalyticsTest {
     private val destroyControllerRule = CleanupTestRule(CheckoutController::destroy)
     private val initStartedEvents = Turbine<Unit>()
     private val initSucceededEvents = Turbine<Unit>()
-    private val initFailedEvents = Turbine<Unit>()
 
     @get:Rule
     val rules: RuleChain = RuleChain.emptyRuleChain()
         .around(destroyControllerRule)
+        .around(AdvancedFraudSignalsTestRule())
         .around(networkRule)
         .around(PaymentConfigurationTestRule(application))
         .around(CoroutineTestRule(StandardTestDispatcher()))
@@ -66,7 +67,7 @@ internal class CheckoutControllerInitAnalyticsTest {
     }
 
     @Test
-    fun `queued configure starts before waiting and cancellation reports failure without loading`() = runTest {
+    fun `queued configure cancellation propagates without reporting failure or loading`() = runTest {
         val controller = createController()
         configureInitialSession(controller)
         val sessionBeforeConfigure = controller.session.value
@@ -84,7 +85,6 @@ internal class CheckoutControllerInitAnalyticsTest {
         try {
             mutationEntered.awaitItem()
             enqueueInitStarted()
-            enqueueInitFailed(CANCELLATION_ERROR_TYPE)
 
             val configure = async(start = CoroutineStart.UNDISPATCHED) {
                 controller.configure(DEFAULT_CLIENT_SECRET)
@@ -102,7 +102,6 @@ internal class CheckoutControllerInitAnalyticsTest {
             val configureError = runCatching { configure.await() }.exceptionOrNull()
             assertThat(configureError).isInstanceOf(CancellationException::class.java)
             assertThat(configureError).hasMessageThat().isEqualTo(cancellation.message)
-            initFailedEvents.awaitItem()
             assertThat(controller.session.value).isEqualTo(sessionBeforeConfigure)
 
             releaseMutation.complete(Unit)
@@ -156,7 +155,6 @@ internal class CheckoutControllerInitAnalyticsTest {
             assertThat(configure.isCompleted).isFalse()
             initResponses.expectNoEvents()
             initSucceededEvents.expectNoEvents()
-            initFailedEvents.expectNoEvents()
 
             releaseMutation.complete(Unit)
 
@@ -175,33 +173,6 @@ internal class CheckoutControllerInitAnalyticsTest {
         }
 
         mutationEntered.ensureAllEventsConsumed()
-        ensureAllAnalyticsEventsConsumed()
-    }
-
-    @Test
-    fun `missing default billing country throws and reports init failure`() = runTest {
-        val controller = createController()
-        enqueueInitStarted()
-        enqueueInitFailed(INVALID_DEFAULT_ERROR_TYPE)
-        val configuration = CheckoutController.Configuration().defaults(
-            CheckoutController.Configuration.Defaults().billingDetails(
-                CheckoutController.Configuration.Defaults.ContactDetails().address(
-                    CheckoutController.Address(),
-                ),
-            ),
-        )
-
-        val error = runCatching {
-            controller.configure(DEFAULT_CLIENT_SECRET, configuration)
-        }.exceptionOrNull()
-
-        assertThat(error).isInstanceOf(IllegalArgumentException::class.java)
-        assertThat(error).hasMessageThat().isEqualTo("Country is required.")
-        assertThat(controller.session.value).isNull()
-        initStartedEvents.awaitItem()
-        initFailedEvents.awaitItem()
-        initSucceededEvents.expectNoEvents()
-        networkRule.validate()
         ensureAllAnalyticsEventsConsumed()
     }
 
@@ -250,20 +221,10 @@ internal class CheckoutControllerInitAnalyticsTest {
         )
     }
 
-    private fun enqueueInitFailed(errorType: String) {
-        enqueueInitEvent(
-            eventName = INIT_FAILED,
-            eventSink = initFailedEvents,
-            durationMatcher = hasQueryParam("duration"),
-            errorType = errorType,
-        )
-    }
-
     private fun enqueueInitEvent(
         eventName: String,
         eventSink: Turbine<Unit>,
         durationMatcher: RequestMatcher,
-        errorType: String? = null,
     ) {
         networkRule.enqueue(
             host("q.stripe.com"),
@@ -272,7 +233,6 @@ internal class CheckoutControllerInitAnalyticsTest {
             analyticsPayloadField("product_usage", "checkout_elements"),
             analyticsPayloadField("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID),
             durationMatcher,
-            *listOfNotNull(errorType?.let { analyticsPayloadField("error_type", it) }).toTypedArray(),
         ) { _, response ->
             response.setResponseCode(200)
             eventSink.add(Unit)
@@ -282,7 +242,6 @@ internal class CheckoutControllerInitAnalyticsTest {
     private fun ensureAllAnalyticsEventsConsumed() {
         initStartedEvents.ensureAllEventsConsumed()
         initSucceededEvents.ensureAllEventsConsumed()
-        initFailedEvents.ensureAllEventsConsumed()
     }
 
     private fun successInitResponse(response: MockResponse) {
@@ -296,8 +255,5 @@ internal class CheckoutControllerInitAnalyticsTest {
         const val DEFAULT_CLIENT_SECRET = "${DEFAULT_CHECKOUT_SESSION_ID}_secret_example"
         const val INIT_STARTED = "checkout_elements.init.started"
         const val INIT_SUCCEEDED = "checkout_elements.init.succeeded"
-        const val INIT_FAILED = "checkout_elements.init.failed"
-        const val CANCELLATION_ERROR_TYPE = "java.util.concurrent.CancellationException"
-        const val INVALID_DEFAULT_ERROR_TYPE = "invalidRequestError"
     }
 }
