@@ -22,6 +22,7 @@ import com.stripe.android.paymentsheet.ui.AddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.verticalmode.FakeManageScreenInteractor
 import com.stripe.android.paymentsheet.verticalmode.FakePaymentMethodVerticalLayoutInteractor
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormInteractor
+import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.StateFlow
 import org.junit.Test
 
@@ -53,6 +54,8 @@ internal class SheetWalletsHeaderTest {
             screen = EmbeddedNavigator.Screen.HorizontalSavedPaymentOptions(
                 interactor = FakeSelectSavedPaymentMethodsInteractor(),
                 sheetActivityState = FakeSheetActivityStateHolder().state,
+                mandateText = stateFlowOf(null),
+                isContinueButtonVisible = stateFlowOf(false),
                 onContinueClick = {},
                 onPrimaryButtonDisabledClick = {},
             ),
