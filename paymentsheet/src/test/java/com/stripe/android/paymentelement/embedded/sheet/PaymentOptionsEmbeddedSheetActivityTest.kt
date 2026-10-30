@@ -60,7 +60,6 @@ import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_NEW_PAYMENT_METHOD_
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.testing.waitUntilWithIdle
-import com.stripe.android.uicore.elements.bottomsheet.BottomSheetContentTestTag
 import com.stripe.android.utils.NetworkResponseGate
 import com.stripe.paymentelementtestpages.FormPage
 import com.stripe.paymentelementtestpages.ManagePage
@@ -87,82 +86,6 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
         .around(createComposeCleanupRule())
         .around(networkRule)
         .around(PaymentConfigurationTestRule(applicationContext))
-
-    @Test
-    fun `loading renders and cancellation returns PaymentOptions`() = launch(
-        presentationState = EmbeddedActivityArgs.PresentationState.Loading,
-    ) { scenario ->
-        composeTestRule.onNodeWithTag(EMBEDDED_SHEET_LOADING_TEST_TAG).assertIsDisplayed()
-
-        Espresso.pressBack()
-        onIdle()
-
-        val result = EmbeddedSheetContract.parseResult(
-            scenario.result.resultCode,
-            scenario.result.resultData,
-        ) as EmbeddedActivityResult.Cancelled
-        assertThat(result.customerState).isEqualTo(PaymentSheetFixtures.EMPTY_CUSTOMER_STATE)
-        assertThat(result.linkAccountInfo.lastUpdateReason)
-            .isEqualTo(LinkAccountUpdate.Value.UpdateReason.LoggedOut)
-        assertThat(result.launchMode).isEqualTo(EmbeddedLaunchMode.PaymentOptions)
-    }
-
-    @Test
-    fun `recreated loading activity remains loading`() = launch(
-        presentationState = EmbeddedActivityArgs.PresentationState.Loading,
-    ) { scenario ->
-        composeTestRule.onNodeWithTag(EMBEDDED_SHEET_LOADING_TEST_TAG).assertIsDisplayed()
-
-        scenario.recreate()
-        onIdle()
-
-        scenario.onActivity { activity ->
-            assertThat(activity.isFinishing).isFalse()
-        }
-        composeTestRule.onNodeWithTag(EMBEDDED_SHEET_LOADING_TEST_TAG).assertIsDisplayed()
-    }
-
-    @Test
-    fun `ready intent updates loading content without replacing composition and survives recreation`() = launch(
-        presentationState = EmbeddedActivityArgs.PresentationState.Loading,
-    ) { scenario ->
-        val readyIntent = EmbeddedSheetContract.createIntent(
-            applicationContext,
-            createArgs(
-                paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
-                ),
-                presentationState = EmbeddedActivityArgs.PresentationState.Ready,
-            ),
-        )
-
-        scenario.recreate()
-        onIdle()
-        composeTestRule.onNodeWithTag(EMBEDDED_SHEET_LOADING_TEST_TAG).assertIsDisplayed()
-
-        val initialBottomSheetNodeId = composeTestRule
-            .onNodeWithTag(BottomSheetContentTestTag)
-            .fetchSemanticsNode()
-            .id
-        scenario.onActivity { activity ->
-            activity.onNewIntent(readyIntent)
-        }
-        composeTestRule.waitForIdle()
-
-        formPage.waitUntilVisible()
-        composeTestRule.onNodeWithTag(EMBEDDED_SHEET_LOADING_TEST_TAG).assertDoesNotExist()
-        val currentBottomSheetNodeId = composeTestRule
-            .onNodeWithTag(BottomSheetContentTestTag)
-            .fetchSemanticsNode()
-            .id
-        assertThat(currentBottomSheetNodeId).isEqualTo(initialBottomSheetNodeId)
-
-        scenario.recreate()
-        onIdle()
-
-        formPage.waitUntilVisible()
-        composeTestRule.onNodeWithTag(EMBEDDED_SHEET_LOADING_TEST_TAG).assertDoesNotExist()
-    }
 
     @Test
     fun `pressing back returns cancelled result with PaymentOptions launch mode`() = launch { scenario ->

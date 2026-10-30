@@ -58,6 +58,9 @@ class PaymentElement @Inject internal constructor(
     /**
      * Presents a sheet for the customer to select or manage their payment method.
      *
+     * Shows a loading indicator while checkout is being configured or updated. If loading finishes
+     * without the data needed to display payment options, the sheet closes.
+     *
      * May be called from any thread. Calls from a background thread are dispatched to the main thread.
      */
     @AnyThread

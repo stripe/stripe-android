@@ -16,6 +16,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFact
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.createComposeCleanupRule
@@ -103,6 +104,30 @@ internal class EmbeddedSheetActivityCoordinatorTest {
 
         coordinator.onDestroy()
         assertThat(readyPresentation.onDestroyCalls.awaitItem()).isEqualTo(Unit)
+    }
+
+    @Test
+    fun `loading without configuration uses default appearance`() = runScenario(
+        initialArgs = createArgs(
+            presentationState = EmbeddedActivityArgs.PresentationState.Loading,
+        ).copy(paymentMethodMetadata = null, configuration = null),
+    ) {
+        assertThat(coordinator.appearance).isEqualTo(PaymentSheet.Appearance())
+    }
+
+    @Test
+    fun `ready transition applies configured appearance`() = runScenario(
+        initialArgs = createArgs(
+            presentationState = EmbeddedActivityArgs.PresentationState.Loading,
+        ).copy(paymentMethodMetadata = null, configuration = null),
+    ) {
+        val readyArgs = createArgs(presentationState = EmbeddedActivityArgs.PresentationState.Ready)
+        coordinator.handleNewIntent(createIntent(readyArgs))
+
+        assertThat(initialPresentation.onDestroyCalls.awaitItem()).isEqualTo(Unit)
+        presentationFactory.createCalls.awaitItem()
+        assertThat(readyPresentation.registerCalls.awaitItem()).isEqualTo(Unit)
+        assertThat(coordinator.appearance).isSameInstanceAs(requireNotNull(readyArgs.configuration).appearance)
     }
 
     @Test
@@ -219,7 +244,8 @@ internal class EmbeddedSheetActivityCoordinatorTest {
             createCalls.add(CreateCall(activity, args, activityResultCaller))
             return when (args.presentationState) {
                 EmbeddedActivityArgs.PresentationState.Loading -> initialPresentation
-                EmbeddedActivityArgs.PresentationState.Ready -> readyPresentation
+                EmbeddedActivityArgs.PresentationState.Ready,
+                EmbeddedActivityArgs.PresentationState.Failed -> readyPresentation
             }
         }
 

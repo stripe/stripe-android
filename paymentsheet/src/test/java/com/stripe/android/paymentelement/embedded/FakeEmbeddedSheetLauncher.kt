@@ -28,7 +28,7 @@ internal class FakeEmbeddedSheetLauncher : EmbeddedSheetLauncher {
     }
 
     override fun launchPaymentOptions(
-        paymentMethodMetadata: PaymentMethodMetadata,
+        paymentMethodMetadata: PaymentMethodMetadata?,
         customerState: CustomerState?,
         selection: PaymentSelection?,
         configuration: EmbeddedPaymentElement.Configuration?,

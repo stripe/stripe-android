@@ -38,6 +38,7 @@ internal interface EmbeddedSheetPresentation {
                     args = args,
                     activityResultCaller = activityResultCaller,
                 )
+                EmbeddedActivityArgs.PresentationState.Failed -> FailedEmbeddedSheetPresentation(activity)
                 EmbeddedActivityArgs.PresentationState.Ready ->
                     EmbeddedSheetViewModel.Factory { args }.createReadyPresentation(
                         activity = activity,
