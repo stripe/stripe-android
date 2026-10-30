@@ -12,6 +12,7 @@ import kotlin.time.Duration
  */
 internal abstract class CheckoutAnalyticsOperation<E>(
     private val operation: Operation,
+    private val sessionId: String?,
     private val report: (CheckoutAnalyticsEvent) -> Unit,
 ) {
     protected abstract val params: Map<String, Any?>
@@ -22,26 +23,28 @@ internal abstract class CheckoutAnalyticsOperation<E>(
     protected abstract fun analyticsError(error: E): CheckoutAnalyticsEvent.Error
 
     fun started(response: CheckoutSessionResponse?) {
-        reportOutcome(Outcome.Started, response, error = null)
+        reportOutcome(Outcome.Started, response, additionalParams = emptyMap(), error = null)
     }
 
     fun failed(response: CheckoutSessionResponse?, error: E) {
-        reportOutcome(Outcome.Failed, response, error = analyticsError(error))
+        reportOutcome(Outcome.Failed, response, additionalParams = emptyMap(), error = analyticsError(error))
     }
 
     protected fun reportOutcome(
         outcome: Outcome,
         response: CheckoutSessionResponse?,
+        additionalParams: Map<String, Any?>,
         error: CheckoutAnalyticsEvent.Error?,
     ) {
         report(
             CheckoutAnalyticsEvent(
                 operation = operation,
                 outcome = outcome,
+                sessionId = sessionId,
                 analyticsMetadata = DefaultAnalyticsMetadataFactory.create(response),
                 duration = if (outcome == Outcome.Started) null else elapsed(),
                 error = error,
-                operationParams = params,
+                operationParams = params + additionalParams,
             )
         )
     }

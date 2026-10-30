@@ -48,6 +48,8 @@ import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.utils.simulateProcessDeath
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
@@ -1656,7 +1658,6 @@ internal class CheckoutControllerTest {
     @Test
     fun `configure does not open a loading window when a payment flow is presented`() =
         runMutationScenario(sheetIsOpen = true, assertLoadingConsumed = true) {
-            // The guard fast-fails before entering the coordinator, so isUpdating never flips true.
             assertThat(isUpdatingTurbine.awaitItem()).isFalse()
 
             val result = controller.configure(DEFAULT_CLIENT_SECRET, configurationWithPaymentElement())
@@ -1748,6 +1749,48 @@ internal class CheckoutControllerTest {
             // A single loading window spanned both operations, with no flicker to false in between.
             assertThat(isUpdatingTurbine.awaitItem()).isFalse()
         }
+
+    @Test
+    fun `canceling queued configure preserves the session and propagates cancellation`() = runMutationScenario {
+        val sessionBeforeConfigure = controller.session.value
+        val mutationEntered = Turbine<Unit>()
+        val releaseMutation = CompletableDeferred<Unit>()
+        val mutationFailure = IllegalStateException("server update failed")
+        val mutation = async(Dispatchers.Default) {
+            controller.runServerUpdate {
+                mutationEntered.add(Unit)
+                releaseMutation.await()
+                Result.failure(mutationFailure)
+            }
+        }
+        try {
+            mutationEntered.awaitItem()
+            val configure = async {
+                controller.configure(DEFAULT_CLIENT_SECRET, configurationWithPaymentElement())
+            }
+            testScheduler.advanceUntilIdle()
+            assertThat(configure.isCompleted).isFalse()
+
+            val cancellation = CancellationException("configure canceled while queued")
+            configure.cancel(cancellation)
+            configure.join()
+
+            assertThat(configure.isCancelled).isTrue()
+            val configureError = runCatching { configure.await() }.exceptionOrNull()
+            assertThat(configureError).isInstanceOf(CancellationException::class.java)
+            assertThat(configureError).hasMessageThat().isEqualTo(cancellation.message)
+            assertThat(controller.session.value).isEqualTo(sessionBeforeConfigure)
+
+            releaseMutation.complete(Unit)
+            val mutationResult = mutation.await()
+            assertThat(mutationResult).isInstanceOf(CheckoutController.OperationResult.Failed::class.java)
+            assertThat((mutationResult as CheckoutController.OperationResult.Failed).error)
+                .isSameInstanceAs(mutationFailure)
+        } finally {
+            releaseMutation.complete(Unit)
+        }
+        mutationEntered.ensureAllEventsConsumed()
+    }
 
     // region allowedShippingCountries validation
 

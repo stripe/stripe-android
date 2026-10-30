@@ -58,6 +58,77 @@ internal class CheckoutOperationCoordinatorTest {
     }
 
     @Test
+    fun `runMutation returns the operation wrapper result`() = runScenario {
+        val result = coordinator.runMutation(
+            performOperation = { operation ->
+                operation().map { "$it wrapped" }
+            },
+        ) {
+            Result.success("result")
+        }
+
+        assertThat(result.getOrThrow()).isEqualTo("result wrapped")
+    }
+
+    @Test
+    fun `preflight rejection is reported without waiting for an active mutation`() = runScenario {
+        val preflightCalls = Turbine<Unit>()
+        val operationStarts = Turbine<Unit>()
+        val operationResults = Turbine<Result<String>>()
+        val blockCalls = Turbine<Unit>()
+        val expectedException = IllegalStateException("Rejected during preflight")
+        val firstMutationStarted = CompletableDeferred<Unit>()
+        val releaseFirstMutation = CompletableDeferred<Unit>()
+
+        coordinator.isUpdating.test {
+            assertThat(awaitItem()).isFalse()
+
+            val firstMutation = backgroundScope.async {
+                coordinator.runMutation {
+                    firstMutationStarted.complete(Unit)
+                    releaseFirstMutation.await()
+                    Result.success(Unit)
+                }
+            }
+            firstMutationStarted.await()
+            assertThat(awaitItem()).isTrue()
+
+            val rejectedMutation = backgroundScope.async {
+                coordinator.runMutation(
+                    preflight = {
+                        preflightCalls.add(Unit)
+                        Result.failure(expectedException)
+                    },
+                    performOperation = { operation ->
+                        operationStarts.add(Unit)
+                        operation().also(operationResults::add)
+                    },
+                ) {
+                    blockCalls.add(Unit)
+                    Result.success("must not run")
+                }
+            }
+            testScheduler.runCurrent()
+
+            assertThat(rejectedMutation.isCompleted).isTrue()
+            assertThat(rejectedMutation.await().exceptionOrNull()).isSameInstanceAs(expectedException)
+            preflightCalls.awaitItem()
+            operationStarts.awaitItem()
+            assertThat(operationResults.awaitItem().exceptionOrNull()).isSameInstanceAs(expectedException)
+            preflightCalls.ensureAllEventsConsumed()
+            operationStarts.ensureAllEventsConsumed()
+            operationResults.ensureAllEventsConsumed()
+            blockCalls.expectNoEvents()
+            blockCalls.ensureAllEventsConsumed()
+            expectNoEvents()
+
+            releaseFirstMutation.complete(Unit)
+            assertThat(firstMutation.await().isSuccess).isTrue()
+            assertThat(awaitItem()).isFalse()
+        }
+    }
+
+    @Test
     fun `isUpdating is true while a mutation runs and false after it completes`() = runScenario {
         val releaseMutation = CompletableDeferred<Unit>()
 

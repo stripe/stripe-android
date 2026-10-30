@@ -19,8 +19,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 
 @Singleton
 internal class CheckoutOperationCoordinator @Inject constructor(
@@ -43,21 +46,27 @@ internal class CheckoutOperationCoordinator @Inject constructor(
     val isUpdating: StateFlow<Boolean> = _isUpdating.asStateFlow()
 
     suspend fun <T> runMutation(
+        preflight: () -> Result<Unit> = { Result.success(Unit) },
+        performOperation: suspend (suspend () -> Result<T>) -> Result<T> = { it() },
+        context: CoroutineContext = EmptyCoroutineContext,
         block: suspend () -> Result<T>,
-    ): Result<T> {
-        synchronized(admissionLock) {
-            pendingMutations += 1
-            updateIsUpdating()
-        }
-
-        return try {
-            mutex.withLock {
-                block()
-            }
-        } finally {
+    ): Result<T> = performOperation {
+        withContext(context) {
+            preflight().exceptionOrNull()?.let { return@withContext Result.failure(it) }
             synchronized(admissionLock) {
-                pendingMutations -= 1
+                pendingMutations += 1
                 updateIsUpdating()
+            }
+
+            try {
+                mutex.withLock {
+                    block()
+                }
+            } finally {
+                synchronized(admissionLock) {
+                    pendingMutations -= 1
+                    updateIsUpdating()
+                }
             }
         }
     }
