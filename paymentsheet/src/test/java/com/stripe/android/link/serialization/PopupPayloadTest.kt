@@ -549,11 +549,9 @@ internal class PopupPayloadTest {
             "link_passthrough_mode_enabled" to true,
         ),
         linkFundingSources = listOf("CARD"),
-        clientAttributionMetadata = PopupPayload.AttributionMetadata.create(
-            PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA.copy(
-                stripeSdkVersion = "21.28.2",
-            )
-        ),
+        clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA.copy(
+            stripeSdkVersion = "21.28.2",
+        ).toParamMap(),
     )
 
     private fun getContext(locale: Locale): Context {
