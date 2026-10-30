@@ -49,11 +49,7 @@ internal class PrimaryButtonUiStateMapper(
                     onClick = onClick,
                     enabled = buttonsEnabled && selection != null &&
                         cvcRecollectionCompleteOrNotRequired(screen, cvcComplete, selection),
-                    icon = if (buyButtonState.buyButtonOverride?.lockEnabled != false) {
-                        PrimaryButtonIcon.Lock
-                    } else {
-                        PrimaryButtonIcon.None
-                    },
+                    icon = buyButtonState.buyButtonOverride?.icon ?: PrimaryButtonIcon.Lock,
                     canClickWhileDisabled = canClickWhenDisabled,
                     onDisabledClick = {
                         if (canClickWhenDisabled) {
