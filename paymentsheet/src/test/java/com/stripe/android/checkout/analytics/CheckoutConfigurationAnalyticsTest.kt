@@ -60,7 +60,7 @@ class CheckoutConfigurationAnalyticsTest {
             .embeddedViewDisplaysMandateText(false)
             .paymentMethodLayout(PaymentElement.Configuration.PaymentMethodLayout.Vertical)
             .opensCardScannerAutomatically(true)
-            .preferredNetworks(listOf(CardBrand.Amex, CardBrand.Visa))
+            .preferredNetworks(listOf(CardBrand.AmericanExpress, CardBrand.Visa))
             .paymentMethodOrder(listOf("klarna", "card"))
             .cardBrandAcceptance(
                 PaymentElement.Configuration.CardBrandAcceptance.allowed(
@@ -89,7 +89,7 @@ class CheckoutConfigurationAnalyticsTest {
         assertThat(paymentElement["payment_method_layout"]).isEqualTo("vertical")
         assertThat(paymentElement["opens_card_scanner_automatically"]).isEqualTo(true)
         assertThat(paymentElement["preferred_networks"])
-            .isEqualTo(listOf(CardBrand.Amex.code, CardBrand.Visa.code))
+            .isEqualTo(listOf(CardBrand.AmericanExpress.code, CardBrand.Visa.code))
         assertThat(paymentElement["payment_method_order"]).isEqualTo(listOf("klarna", "card"))
         assertThat(paymentElement["card_brand_acceptance"]).isEqualTo(
             mapOf("type" to "allowed", "brands" to listOf("amex"))
