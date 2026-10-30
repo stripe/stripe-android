@@ -502,7 +502,7 @@ class CheckoutController @Inject internal constructor(
         /**
          * The three-letter ISO currency code (e.g., "usd").
          */
-        val currency: String,
+        val currency: String?,
         /**
          * Details about the currency presented to the customer, or `null` if the session is not using
          * adaptive pricing.
@@ -524,7 +524,7 @@ class CheckoutController @Inject internal constructor(
          * The factor used to convert amounts in the smallest currency unit to the major currency unit
          * (e.g., `100` for USD and `1` for JPY).
          */
-        val minorUnitsAmountDivisor: Int,
+        val minorUnitsAmountDivisor: Int?,
         /**
          * The customer's currently selected payment option, or `null` if none has been selected yet.
          */
