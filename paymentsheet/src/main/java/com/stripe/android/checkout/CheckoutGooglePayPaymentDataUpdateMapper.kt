@@ -32,16 +32,18 @@ internal class DefaultCheckoutGooglePayPaymentDataUpdateMapper @Inject construct
         val displayItems = GooglePayDisplayItemsFactory.create(response, context)
 
         return GooglePayPaymentDataUpdateResponse(
-            newTransactionInfo = GooglePayJsonFactory.TransactionInfo(
-                currencyCode = response.currency.uppercase(),
-                totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Estimated,
-                countryCode = countryCode?.takeIf { it.isNotEmpty() },
-                transactionId = response.stripeIntent()?.id,
-                totalPrice = response.amount,
-                totalPriceLabel = context.getString(R.string.stripe_google_pay_total),
-                checkoutOption = GooglePayJsonFactory.TransactionInfo.CheckoutOption.Default,
-                displayItems = displayItems,
-            ),
+            newTransactionInfo = response.currency?.let { currency ->
+                GooglePayJsonFactory.TransactionInfo(
+                    currencyCode = currency.uppercase(),
+                    totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Estimated,
+                    countryCode = countryCode?.takeIf { it.isNotEmpty() },
+                    transactionId = response.stripeIntent()?.id,
+                    totalPrice = response.amount,
+                    totalPriceLabel = context.getString(R.string.stripe_google_pay_total),
+                    checkoutOption = GooglePayJsonFactory.TransactionInfo.CheckoutOption.Default,
+                    displayItems = displayItems,
+                )
+            },
             error = null,
         )
     }

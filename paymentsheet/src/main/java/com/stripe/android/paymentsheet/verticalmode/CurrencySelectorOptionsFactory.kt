@@ -14,6 +14,7 @@ internal object CurrencySelectorOptionsFactory {
         flagImages: Map<String, Bitmap>?,
     ): CurrencySelectorOptions? {
         val info = adaptivePricingInfo ?: return null
+        val presentmentCurrency = info.activePresentmentCurrency ?: return null
         val localOption = info.localCurrencyOptions.firstOrNull {
             it.currency.equals(info.activePresentmentCurrency, ignoreCase = true)
         } ?: info.localCurrencyOptions.firstOrNull() ?: return null
@@ -59,7 +60,7 @@ internal object CurrencySelectorOptionsFactory {
             flag = localFlag,
         )
 
-        val selectedCode = adaptivePricingInfo.activePresentmentCurrency.uppercase()
+        val selectedCode = presentmentCurrency.uppercase()
 
         val exchangeRateText = if (adaptivePricingInfo.isActive) {
             localOption.disclosureCaption

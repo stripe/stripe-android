@@ -42,7 +42,7 @@ internal fun LineItemsSection(session: Session) {
 
 @Composable
 internal fun TotalSummarySection(session: Session) {
-    val summary = session.totals
+    val summary = session.totals ?: return
     Column(modifier = Modifier.fillMaxWidth()) {
         Divider(modifier = Modifier.padding(vertical = 12.dp))
         SummaryRow("Subtotal", summary.subtotal.amount)

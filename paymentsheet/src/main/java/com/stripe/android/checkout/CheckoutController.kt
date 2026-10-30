@@ -500,9 +500,9 @@ class CheckoutController @Inject internal constructor(
          */
         val livemode: Boolean,
         /**
-         * The three-letter ISO currency code (e.g., "usd").
+         * The three-letter integration currency code (e.g., "usd"), or `null` if unavailable.
          */
-        val currency: String,
+        val currency: String?,
         /**
          * Details about the currency presented to the customer, or `null` if the session is not using
          * adaptive pricing.
@@ -521,10 +521,10 @@ class CheckoutController @Inject internal constructor(
          */
         val orderSummaryItems: List<OrderSummaryItem>,
         /**
-         * The factor used to convert amounts in the smallest currency unit to the major currency unit
-         * (e.g., `100` for USD and `1` for JPY).
+         * The factor used to convert amounts in the smallest presentment currency unit to the major
+         * currency unit (e.g., `100` for USD and `1` for JPY), or `null` if presentment currency is unavailable.
          */
-        val minorUnitsAmountDivisor: Int,
+        val minorUnitsAmountDivisor: Int?,
         /**
          * The customer's currently selected payment option, or `null` if none has been selected yet.
          */
@@ -542,9 +542,10 @@ class CheckoutController @Inject internal constructor(
          */
         val taxAmounts: List<TaxAmount>?,
         /**
-         * The tax and discount breakdown for the computed session total.
+         * The tax and discount breakdown for the computed session total, or `null` if presentment
+         * currency is unavailable.
          */
-        val totals: Totals,
+        val totals: Totals?,
         internal val currencySelectorOptions: CurrencySelectorOptions?,
         internal val availableExpressButtonTypes: List<ExpressButtonType>,
     ) {

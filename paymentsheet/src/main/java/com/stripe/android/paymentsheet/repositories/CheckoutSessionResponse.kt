@@ -14,8 +14,8 @@ internal data class CheckoutSessionResponse(
     val id: String,
     val clientSecret: String,
     val configId: String?,
-    val currency: String,
-    val integrationCurrency: String,
+    val currency: String?,
+    val integrationCurrency: String?,
     val paymentStatus: PaymentStatus,
     val status: Status,
     val livemode: Boolean,
@@ -159,14 +159,15 @@ internal data class CheckoutSessionResponse(
 
     @Parcelize
     data class AdaptivePricingInfo(
-        val activePresentmentCurrency: String,
+        val activePresentmentCurrency: String?,
         val integrationAmount: Long,
         val integrationCurrency: String,
         val integrationDisclosureCaption: String?,
         val localCurrencyOptions: List<LocalCurrencyOption>,
     ) : StripeModel {
         val isActive: Boolean
-            get() = !activePresentmentCurrency.equals(integrationCurrency, ignoreCase = true)
+            get() = activePresentmentCurrency != null &&
+                !activePresentmentCurrency.equals(integrationCurrency, ignoreCase = true)
     }
 
     @Parcelize

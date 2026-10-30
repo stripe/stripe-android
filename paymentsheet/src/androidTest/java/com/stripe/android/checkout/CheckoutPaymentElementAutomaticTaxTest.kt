@@ -470,7 +470,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
 
         immediateActionCalls.awaitItem()
         val session = checkNotNull(controller.session.value)
-        assertThat(session.totals.total.minorUnitsAmount).isEqualTo(INITIAL_TOTAL.toDouble())
+        assertThat(session.totals?.total?.minorUnitsAmount).isEqualTo(INITIAL_TOTAL.toDouble())
         assertThat(session.paymentOption?.paymentMethodType).isEqualTo("cashapp")
         assertThat(session.paymentOption?.billingDetails?.address?.line1)
             .isEqualTo(BILLING_ADDRESS_LINE_ONE)
@@ -478,7 +478,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
     }
 
     private fun assertSavedPaymentMethodSession(session: CheckoutController.Session) {
-        assertThat(session.totals.total.minorUnitsAmount).isEqualTo(UPDATED_TOTAL.toDouble())
+        assertThat(session.totals?.total?.minorUnitsAmount).isEqualTo(UPDATED_TOTAL.toDouble())
         assertThat(session.paymentOption?.paymentMethodType).isEqualTo("card")
         assertThat(session.paymentOption?.billingDetails?.address?.line1)
             .isEqualTo(SAVED_BILLING_ADDRESS_LINE_ONE)

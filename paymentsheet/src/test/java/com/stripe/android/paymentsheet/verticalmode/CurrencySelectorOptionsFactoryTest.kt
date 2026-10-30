@@ -12,6 +12,13 @@ import kotlin.test.Test
 class CurrencySelectorOptionsFactoryTest {
 
     @Test
+    fun `omits currency selector when presentment currency is absent`() {
+        val info = captionInfo().copy(activePresentmentCurrency = null)
+
+        assertThat(CurrencySelectorOptionsFactory.create(info, Locale.FRANCE, null)).isNull()
+    }
+
+    @Test
     fun `selects the matching local currency and its complete disclosure`() {
         val info = captionInfo().copy(
             activePresentmentCurrency = "cad",

@@ -43,6 +43,80 @@ class CheckoutSessionResponseJsonParserTest {
     }
 
     @Test
+    fun `parses missing integration currency`() {
+        val json = base()
+        json.remove("integration_currency")
+
+        val result = requireNotNull(parse(json))
+
+        assertThat(result.integrationCurrency).isNull()
+        assertThat(result.currency).isEqualTo("usd")
+    }
+
+    @Test
+    fun `parses null integration currency`() {
+        val json = base().put("integration_currency", JSONObject.NULL)
+
+        val result = requireNotNull(parse(json))
+
+        assertThat(result.integrationCurrency).isNull()
+        assertThat(result.currency).isEqualTo("usd")
+    }
+
+    @Test
+    fun `parses missing presentment currency`() {
+        val json = base()
+        json.remove("presentment_currency")
+
+        val result = requireNotNull(parse(json))
+
+        assertThat(result.currency).isNull()
+        assertThat((result.elementsSession?.stripeIntent as PaymentIntent).currency).isNull()
+        assertThat(result.adaptivePricingInfo?.activePresentmentCurrency).isNull()
+    }
+
+    @Test
+    fun `parses null presentment currency`() {
+        val json = base().put("presentment_currency", JSONObject.NULL)
+
+        val result = requireNotNull(parse(json))
+
+        assertThat(result.currency).isNull()
+        assertThat((result.elementsSession?.stripeIntent as PaymentIntent).currency).isNull()
+    }
+
+    @Test
+    fun `parses absent session currencies for no payment required`() {
+        val json = base().put("payment_status", "no_payment_required")
+        json.remove("presentment_currency")
+        json.remove("integration_currency")
+
+        val result = requireNotNull(parse(json))
+
+        assertThat(result.currency).isNull()
+        assertThat(result.integrationCurrency).isNull()
+        assertThat(result.elementsSession?.stripeIntent).isInstanceOf(SetupIntent::class.java)
+    }
+
+    @Test
+    fun `absent presentment currency does not require matching item currencies`() {
+        val json = base()
+        json.remove("presentment_currency")
+        item(json).getJSONObject("price").put("currency", "jpy")
+
+        val result = requireNotNull(parse(json))
+
+        assertThat(result.currency).isNull()
+        assertThat((result.elementsSession?.stripeIntent as PaymentIntent).currency).isNull()
+        assertThat(result.checkoutItems.single().oneTimePrice.items.single().price.currency).isEqualTo("jpy")
+    }
+
+    @Test
+    fun `rejects empty integration currency`() {
+        assertThat(parse(base().put("integration_currency", ""))).isNull()
+    }
+
+    @Test
     fun `rejects an intent reference without its client secret`() {
         val json = response("checkout-session-confirm.json")
         json.getJSONObject("payment_response").getJSONObject("payment_intent").remove("client_secret")

@@ -36,22 +36,22 @@ internal fun CheckoutSessionResponse.asCheckoutSession(
         status = status.asStatus(paymentStatus),
         livemode = livemode,
         currency = integrationCurrency,
-        presentmentDetails = adaptivePricingInfo?.let {
-            Session.PresentmentDetails(it.activePresentmentCurrency)
+        presentmentDetails = adaptivePricingInfo?.activePresentmentCurrency?.let {
+            Session.PresentmentDetails(it)
         },
         discountAmounts = emptyList(),
         email = fixedEmail ?: collectedEmail,
         orderSummaryItems = checkoutItems.map { it.asOrderSummaryItem(locale) },
-        minorUnitsAmountDivisor = 10.0.pow(currencyDigits(presentmentCurrency)).toInt(),
+        minorUnitsAmountDivisor = currency?.let { 10.0.pow(currencyDigits(it)).toInt() },
         paymentOption = paymentOption,
         shippingAddress = collectedShippingAddress?.let {
             Session.ShippingAddress(collectedShippingName, it.asShippingAddress())
         },
         tax = taxMeta.asTax(taxAddressSource),
-        taxAmounts = totalSummary?.totalTaxAmounts?.map {
-            it.asTaxAmount(presentmentCurrency, locale)
+        taxAmounts = presentmentCurrency?.let { currency ->
+            totalSummary?.totalTaxAmounts?.map { it.asTaxAmount(currency, locale) }
         },
-        totals = totals(presentmentCurrency, locale),
+        totals = presentmentCurrency?.let { totals(it, locale) },
         currencySelectorOptions = CurrencySelectorOptionsFactory.create(
             adaptivePricingInfo = adaptivePricingInfo,
             locale = locale,
