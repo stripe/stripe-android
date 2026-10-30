@@ -126,4 +126,5 @@
   <string name="stripe_onramp_kyc_document_source">Add document</string>
   <!-- Error when camera permission is denied by the user -->
   <string name="stripe_onramp_kyc_camera_permission">Allow camera access in Settings to take a photo.</string>
+  <string name="stripe_onramp_google_pay_not_configured">Google Pay is unavailable. Please choose another payment method.</string>
 </resources>

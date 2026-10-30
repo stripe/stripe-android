@@ -202,6 +202,7 @@ class OnrampCoordinator @Inject internal constructor(
 
     /**
      * Create a presenter for handling Link UI interactions.
+     * Call [configure] successfully before creating the presenter.
      *
      * @param activity The activity that will host the Link flows.
      * @return A presenter instance for handling Link UI operations.
