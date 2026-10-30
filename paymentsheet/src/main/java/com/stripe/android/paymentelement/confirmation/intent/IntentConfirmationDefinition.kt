@@ -18,6 +18,7 @@ import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.payments.paymentlauncher.PaymentLauncher
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.paymentsheet.addresselement.toConfirmPaymentIntentShipping
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import kotlinx.parcelize.Parcelize
 
 internal class IntentConfirmationDefinition(
@@ -118,6 +119,9 @@ internal class IntentConfirmationDefinition(
                     launcherArgs.deferredIntentConfirmationType?.let {
                         set(DeferredIntentConfirmationTypeKey, it)
                     }
+                    (launcherArgs as? Args.NextAction)?.checkoutSessionResponse?.let {
+                        set(CheckoutSessionResponseKey, it)
+                    }
                 }
             )
             is InternalPaymentResult.Failed -> ConfirmationDefinition.Result.Failed(
@@ -152,6 +156,11 @@ internal class IntentConfirmationDefinition(
         data class NextAction(
             val intent: StripeIntent,
             override val deferredIntentConfirmationType: DeferredIntentConfirmationType?,
+            /**
+             * The Checkout Session /confirm response, carried through the next action so the session can be
+             * polled and committed once it completes.
+             */
+            val checkoutSessionResponse: CheckoutSessionResponse?,
         ) : Args
 
         @Parcelize

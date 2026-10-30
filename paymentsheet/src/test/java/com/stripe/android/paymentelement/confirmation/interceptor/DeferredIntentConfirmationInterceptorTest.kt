@@ -279,6 +279,7 @@ class DeferredIntentConfirmationInterceptorTest {
                             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                         ),
                         deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
+                        checkoutSessionResponse = null,
                     ),
                     receivesResultInProcess = false,
                 )

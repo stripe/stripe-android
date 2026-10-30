@@ -9,7 +9,6 @@ import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
-import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.utils.FakeDurationProvider
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
@@ -17,7 +16,6 @@ import kotlin.coroutines.CoroutineContext
 @OptIn(ApiConfigurationPreview::class)
 internal object TestCheckoutAnalyticsPerformerFactory {
     fun create(
-        confirmationHandler: ConfirmationHandler,
         savedStateHandle: SavedStateHandle,
         stateHolder: CheckoutControllerStateHolder,
         analyticsRequestExecutor: AnalyticsRequestExecutor,
@@ -26,7 +24,6 @@ internal object TestCheckoutAnalyticsPerformerFactory {
         durationProvider: DurationProvider = FakeDurationProvider(),
         apiConfiguration: ApiConfiguration.State = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
     ): CheckoutAnalyticsPerformer = CheckoutAnalyticsPerformer(
-        confirmationHandler = confirmationHandler,
         savedStateHandle = savedStateHandle,
         stateHolder = stateHolder,
         linkAccountHolder = linkAccountHolder,

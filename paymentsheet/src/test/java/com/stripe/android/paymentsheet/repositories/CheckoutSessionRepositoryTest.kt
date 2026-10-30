@@ -5,6 +5,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.checkouttesting.checkoutPoll
+import com.stripe.android.checkouttesting.checkoutRetrieve
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.exception.StripeException
@@ -223,5 +224,39 @@ class CheckoutSessionRepositoryTest {
         )
 
         assertThat(result.exceptionOrNull()).isInstanceOf(APIException::class.java)
+    }
+
+    @Test
+    fun `retrieve sends CheckoutClient common params`() = runTest {
+        val expectedSessionId = AnalyticsRequestFactory.sessionId.toString()
+        networkRule.checkoutRetrieve(
+            query("client_secret", "cs_test_abc123_secret_test"),
+            query("locale", clientParams.locale),
+            query("timezone", java.util.TimeZone.getDefault().id),
+            query("mobile_session_id", expectedSessionId),
+            query("mobile_app_id", clientParams.mobileAppId),
+        )
+
+        val result = repository.retrieve(
+            sessionId = DEFAULT_CHECKOUT_SESSION_ID,
+            clientSecret = "cs_test_abc123_secret_test",
+        )
+
+        assertThat(result.getOrThrow().id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
+    }
+
+    @Test
+    fun `retrieve does not retry rate limited requests`() = runTest {
+        networkRule.checkoutRetrieve { response ->
+            response.setResponseCode(429)
+            response.setBody("""{"error": {"message": "Too many requests"}}""")
+        }
+
+        val result = repository.retrieve(
+            sessionId = DEFAULT_CHECKOUT_SESSION_ID,
+            clientSecret = "cs_test_abc123_secret_test",
+        )
+
+        assertThat((result.exceptionOrNull() as? StripeException)?.statusCode).isEqualTo(429)
     }
 }

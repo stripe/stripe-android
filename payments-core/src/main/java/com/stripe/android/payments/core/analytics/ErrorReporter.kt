@@ -401,6 +401,9 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         CHECKOUT_SESSION_GOOGLE_PAY_UNEXPECTED_CALLBACK_TRIGGER(
             partialEventName = "checkout.google_pay.unexpected_callback_trigger"
         ),
+        CHECKOUT_SESSION_CONFIRMATION_NOT_STARTED(
+            partialEventName = "checkout.confirmation.not_started"
+        ),
         GOOGLE_PAY_DYNAMIC_CALLBACK_MISSING_REQUEST(
             partialEventName = "google_pay.dynamic_callbacks.missing_request"
         ),

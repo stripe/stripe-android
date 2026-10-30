@@ -8,6 +8,9 @@ import android.content.res.Resources
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
+import com.stripe.android.checkout.CheckoutAnalyticsPerformer
+import com.stripe.android.checkout.CheckoutConfirmationFinalizer
+import com.stripe.android.checkout.CheckoutConfirmationResultReporter
 import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutControllerSavedState
 import com.stripe.android.checkout.CheckoutControllerStateHolder
@@ -15,6 +18,7 @@ import com.stripe.android.checkout.CheckoutOperationCoordinator
 import com.stripe.android.checkout.CheckoutPaymentOptionDisplayDataFactory
 import com.stripe.android.checkout.CheckoutPaymentSelectionHandler
 import com.stripe.android.checkout.CheckoutSessionRefresher
+import com.stripe.android.checkout.DefaultCheckoutConfirmationFinalizer
 import com.stripe.android.checkout.DefaultCheckoutPaymentOptionDisplayDataFactory
 import com.stripe.android.checkout.DefaultCheckoutSessionRefresher
 import com.stripe.android.common.di.ElementsSessionClientParamsModule
@@ -241,6 +245,14 @@ internal interface CheckoutControllerModule {
 
     @Binds
     fun bindsCheckoutSessionRefresher(impl: DefaultCheckoutSessionRefresher): CheckoutSessionRefresher
+
+    @Binds
+    fun bindsCheckoutConfirmationFinalizer(impl: DefaultCheckoutConfirmationFinalizer): CheckoutConfirmationFinalizer
+
+    @Binds
+    fun bindsCheckoutConfirmationResultReporter(
+        impl: CheckoutAnalyticsPerformer
+    ): CheckoutConfirmationResultReporter
 
     companion object {
         @Provides

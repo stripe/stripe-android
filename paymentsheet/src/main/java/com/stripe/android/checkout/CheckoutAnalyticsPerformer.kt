@@ -20,9 +20,9 @@ import com.stripe.android.model.ConsumerSession.VerificationSession.SessionState
 import com.stripe.android.model.ConsumerSession.VerificationSession.SessionType
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
-import com.stripe.android.paymentelement.confirmation.intent.CheckoutSessionResponseKey
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.utils.toConfirmationError
 import kotlinx.coroutines.CoroutineScope
@@ -34,7 +34,6 @@ import kotlin.coroutines.CoroutineContext
 
 @Singleton
 internal class CheckoutAnalyticsPerformer @Inject constructor(
-    private val confirmationHandler: ConfirmationHandler,
     private val savedStateHandle: SavedStateHandle,
     private val stateHolder: CheckoutControllerStateHolder,
     private val linkAccountHolder: LinkAccountHolder,
@@ -43,7 +42,7 @@ internal class CheckoutAnalyticsPerformer @Inject constructor(
     private val durationProvider: DurationProvider,
     private val apiConfigurationProvider: Provider<ApiConfiguration.State>,
     @IOContext private val workContext: CoroutineContext,
-) {
+) : CheckoutConfirmationResultReporter {
     private val analyticsRequestFactory = PaymentAnalyticsRequestFactory(
         context = context,
         defaultProductUsageTokens = setOf("checkout_elements"),
@@ -58,36 +57,24 @@ internal class CheckoutAnalyticsPerformer @Inject constructor(
         saveConfirmation(InvocationSource.ExpressCheckoutElement, paymentSelection)
     }
 
-    suspend fun reportConfirmationResults() {
-        confirmationHandler.state.collect { state ->
-            if (state is ConfirmationHandler.State.Complete) {
-                val confirmationContext = savedStateHandle.get<CheckoutConfirmationContext>(CONFIRMATION_CONTEXT_KEY)
-
-                if (confirmationContext != null) {
-                    reportConfirmationResult(state.result, confirmationContext)
-                }
-
-                savedStateHandle.remove<CheckoutConfirmationContext>(CONFIRMATION_CONTEXT_KEY)
-            }
-        }
-    }
-
-    private fun reportConfirmationResult(
+    override fun reportConfirmationResult(
         result: ConfirmationHandler.Result,
-        confirmationContext: CheckoutConfirmationContext,
+        response: CheckoutSessionResponse?,
     ) {
-        val confirmationResponse = (result as? ConfirmationHandler.Result.Succeeded)
-            ?.metadata?.get(CheckoutSessionResponseKey)
-        val response = confirmationResponse ?: stateHolder.state?.checkoutSessionResponse
+        val confirmationContext = savedStateHandle.get<CheckoutConfirmationContext>(CONFIRMATION_CONTEXT_KEY)
+            ?: return
+        savedStateHandle.remove<CheckoutConfirmationContext>(CONFIRMATION_CONTEXT_KEY)
+
         val operation = ConfirmOperation(confirmationContext, durationProvider, ::reportEvent)
+        val sessionResponse = response ?: stateHolder.state?.checkoutSessionResponse
 
         when (result) {
-            is ConfirmationHandler.Result.Succeeded -> operation.succeeded(response)
+            is ConfirmationHandler.Result.Succeeded -> operation.succeeded(sessionResponse)
             is ConfirmationHandler.Result.Failed -> operation.failed(
-                response,
+                sessionResponse,
                 result.toConfirmationError() ?: PaymentSheetConfirmationError(result.cause),
             )
-            is ConfirmationHandler.Result.Canceled -> operation.canceled(response)
+            is ConfirmationHandler.Result.Canceled -> operation.canceled(sessionResponse)
         }
     }
 

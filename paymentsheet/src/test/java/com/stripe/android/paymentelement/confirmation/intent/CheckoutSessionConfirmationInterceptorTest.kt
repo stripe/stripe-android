@@ -7,6 +7,7 @@ import com.google.testing.junit.testparameterinjector.TestParameter
 import com.stripe.android.challenge.passive.PassiveChallengeActivityContract
 import com.stripe.android.challenge.passive.PassiveChallengeActivityResult
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
+import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutConfirm
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.core.exception.LocalStripeException
@@ -84,22 +85,19 @@ class CheckoutSessionConfirmationInterceptorTest {
         .around(PaymentConfigurationTestRule(applicationContext))
 
     @Test
-    fun `successful confirmation ignores an earlier payment error`() = runScenario {
+    fun `open confirmation completes with the unmodified confirm response for polling`() = runScenario {
         networkRule.checkoutConfirm { response ->
             response.testBodyFromFile("checkout-session-confirm.json") { json ->
                 json.put("status", "open").put("payment_status", "unpaid")
-                json.getJSONObject("payment_response").put(
-                    "last_payment_error",
-                    JSONObject().put("message", "An earlier decline").put("code", "card_declined"),
-                )
             }
         }
 
         val result = interceptNewPm() as ConfirmationDefinition.Action.Complete
         val response = requireNotNull(result.metadata[CheckoutSessionResponseKey])
 
-        assertThat(response.status).isEqualTo(CheckoutSessionResponse.Status.COMPLETE)
-        assertThat(response.paymentStatus).isEqualTo(CheckoutSessionResponse.PaymentStatus.PAID)
+        assertThat(response.status).isEqualTo(CheckoutSessionResponse.Status.OPEN)
+        assertThat(response.paymentStatus).isEqualTo(CheckoutSessionResponse.PaymentStatus.UNPAID)
+        assertThat(result.completedFullPaymentFlow).isTrue()
     }
 
     @Test
@@ -130,16 +128,28 @@ class CheckoutSessionConfirmationInterceptorTest {
     }
 
     @Test
-    fun `requires payment method without a payment error fails explicitly`() = runScenario {
-        networkRule.checkoutConfirm { response ->
+    fun `requires payment method defers the outcome to polling`() = runScenario {
+        networkRule.checkoutConfirm(
+            intentResponseFactory = { response ->
+                response.testBodyFromFile("checkout-payment-intent.json") { json ->
+                    json.put("status", "requires_payment_method")
+                }
+            },
+        ) { response ->
             response.testBodyFromFile("checkout-session-confirm.json") { json ->
-                json.put("payment_response", JSONObject().put("status", "requires_payment_method"))
+                json.put("status", "open").put("payment_status", "unpaid")
+                json.getJSONObject("payment_response").put("status", "requires_payment_method").put(
+                    "last_payment_error",
+                    JSONObject().put("message", "Card declined").put("code", "card_declined"),
+                )
             }
         }
 
-        val result = interceptNewPm() as ConfirmationDefinition.Action.Fail
+        val result = interceptNewPm() as ConfirmationDefinition.Action.Complete
+        val response = requireNotNull(result.metadata[CheckoutSessionResponseKey])
 
-        assertThat(result.cause.message).isEqualTo("Checkout requires a payment method.")
+        assertThat(response.status).isEqualTo(CheckoutSessionResponse.Status.OPEN)
+        assertThat(response.paymentResponse?.error?.message).isEqualTo("Card declined")
     }
 
     @Test
@@ -437,6 +447,8 @@ class CheckoutSessionConfirmationInterceptorTest {
         val nextAction = launchAction.launcherArguments as IntentConfirmationDefinition.Args.NextAction
         assertThat(nextAction.deferredIntentConfirmationType)
             .isEqualTo(DeferredIntentConfirmationType.Server)
+        assertThat(nextAction.checkoutSessionResponse?.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
+        assertThat(nextAction.checkoutSessionResponse?.paymentIntent).isEqualTo(nextAction.intent)
         assertThat(launchAction.receivesResultInProcess).isFalse()
     }
 
@@ -1082,23 +1094,6 @@ class CheckoutSessionConfirmationInterceptorTest {
         val result = interceptNewPm() as ConfirmationDefinition.Action.Fail
 
         assertThat(result.cause.message).isEqualTo("Intent retrieval failed")
-        assertThat(result.errorType).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Transaction())
-    }
-
-    @Test
-    fun `intercept propagates CheckoutClient payment error`() = runScenario {
-        networkRule.checkoutConfirm { response ->
-            response.testBodyFromFile("checkout-session-confirm.json") { json ->
-                json.getJSONObject("payment_response").put("status", "requires_payment_method").put(
-                    "last_payment_error",
-                    JSONObject().put("message", "Card declined").put("code", "card_declined"),
-                )
-            }
-        }
-
-        val result = interceptNewPm() as ConfirmationDefinition.Action.Fail
-
-        assertThat(result.cause.message).isEqualTo("Card declined")
         assertThat(result.errorType).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Transaction())
     }
 

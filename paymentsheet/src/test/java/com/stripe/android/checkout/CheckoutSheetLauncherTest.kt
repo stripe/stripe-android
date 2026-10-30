@@ -1355,6 +1355,8 @@ internal class CheckoutSheetLauncherTest {
             confirmationHandler = confirmationHandler,
             sheetStateHolder = sheetStateHolder,
             sessionRefresher = sessionRefresher,
+            confirmationFinalizer = { CheckoutConfirmationFinalizer.Result.Completed(it) },
+            resultReporter = { _, _ -> },
             logger = logger,
             resultCallback = {},
             viewModelScope = backgroundScope,
