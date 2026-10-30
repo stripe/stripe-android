@@ -59,6 +59,24 @@ class CheckoutSessionResponseJsonParserTest {
     }
 
     @Test
+    fun `parses every payment response status`() {
+        CheckoutSessionResponse.PaymentResponse.Status.entries.forEach { status ->
+            val json = response("checkout-session-confirm.json")
+            json.getJSONObject("payment_response").put("status", status.code)
+
+            assertThat(parse(json)?.paymentResponse?.status).isEqualTo(status)
+        }
+    }
+
+    @Test
+    fun `rejects an unknown payment response status`() {
+        val json = response("checkout-session-confirm.json")
+        json.getJSONObject("payment_response").put("status", "requires_something_new")
+
+        assertThat(parse(json)).isNull()
+    }
+
+    @Test
     fun `preserves localized disclosure details`() {
         val json = response("checkout-session-adaptive-pricing-default.json")
         json.getJSONObject("adaptive_pricing_info").getJSONArray("local_currency_options").getJSONObject(0)

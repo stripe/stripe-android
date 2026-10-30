@@ -96,6 +96,8 @@ internal class CheckoutSessionRepository @Inject constructor(
             check(response.status != CheckoutSessionResponse.Status.EXPIRED) {
                 "Checkout Session unexpectedly expired after confirmation."
             }
+            val requiresAction =
+                response.paymentResponse?.status == CheckoutSessionResponse.PaymentResponse.Status.REQUIRES_ACTION
             val paymentReference = response.paymentResponse?.paymentIntent
             val setupReference = response.paymentResponse?.setupIntent
             val intent = when {
@@ -110,7 +112,7 @@ internal class CheckoutSessionRepository @Inject constructor(
                     expandFields = listOf("payment_method"),
                 ).getOrThrow()
                 else -> error(
-                    if (response.paymentResponse?.status == "requires_action") {
+                    if (requiresAction) {
                         "CheckoutClient requires an action without a supported Intent."
                     } else {
                         "No PaymentIntent or SetupIntent in checkout session confirm response"
