@@ -162,7 +162,6 @@ class CheckoutController @Inject internal constructor(
             }
         }.onSuccess { orderedLpms -> initAnalytics.succeeded(attemptResponse, orderedLpms) }
             .onFailure { initAnalytics.failed(attemptResponse, it) }
-            .map { }
             .toOperationResult()
     }
 
@@ -407,7 +406,7 @@ class CheckoutController @Inject internal constructor(
         }
     }
 
-    private fun kotlin.Result<Unit>.toOperationResult(): OperationResult = fold(
+    private fun <T> kotlin.Result<T>.toOperationResult(): OperationResult = fold(
         onSuccess = { OperationResult.Succeeded() },
         onFailure = { error ->
             OperationResult.Failed(
