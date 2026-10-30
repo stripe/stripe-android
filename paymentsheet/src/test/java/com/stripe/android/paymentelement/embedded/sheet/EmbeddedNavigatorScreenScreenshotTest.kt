@@ -230,6 +230,7 @@ internal class EmbeddedNavigatorScreenScreenshotTest {
         ).create(
             paymentMethodCode = "card",
             hasSavedPaymentMethods = false,
+            hasSavedPaymentMethodsForCode = false,
         )
 
         return EmbeddedNavigator.Screen.Form(

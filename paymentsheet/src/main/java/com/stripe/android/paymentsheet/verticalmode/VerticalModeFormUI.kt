@@ -55,6 +55,7 @@ internal fun VerticalModeFormUI(
 
         FormElement(
             enabled = enabled,
+            isValidating = state.isValidating,
             selectedPaymentMethodCode = state.selectedPaymentMethodCode,
             formElements = state.formUiElements,
             formArguments = state.formArguments,

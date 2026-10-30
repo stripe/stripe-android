@@ -41,7 +41,7 @@ internal interface AddPaymentMethodInteractor {
         private val formElements: List<FormElement>,
         val paymentSelection: PaymentSelection?,
         val processing: Boolean,
-        private val validating: Boolean,
+        val validating: Boolean,
         val incentive: PaymentMethodIncentive?,
         val usBankAccountFormArguments: USBankAccountFormArguments,
     ) {

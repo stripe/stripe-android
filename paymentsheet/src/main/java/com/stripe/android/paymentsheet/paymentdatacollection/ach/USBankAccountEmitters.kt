@@ -12,6 +12,7 @@ internal fun USBankAccountEmitters(
     viewModel: USBankAccountFormViewModel,
     usBankAccountFormArgs: USBankAccountFormArguments,
     onFormCompleted: () -> Unit,
+    isValidating: Boolean,
 ) {
     val screenState by viewModel.currentScreenState.collectAsState()
     val hasRequiredFields by viewModel.requiredFields.collectAsState()
@@ -34,6 +35,13 @@ internal fun USBankAccountEmitters(
     LaunchedEffect(hasRequiredFields) {
         if (hasRequiredFields) {
             onFormCompleted()
+        }
+    }
+
+    // Validation can be requested before the form registers its primary button disabled click handler.
+    LaunchedEffect(isValidating) {
+        if (isValidating) {
+            viewModel.validate()
         }
     }
 

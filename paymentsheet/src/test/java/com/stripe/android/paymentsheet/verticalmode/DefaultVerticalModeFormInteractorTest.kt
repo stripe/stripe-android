@@ -395,6 +395,7 @@ internal class DefaultVerticalModeFormInteractorTest {
         ).create(
             paymentMethodCode = paymentMethodCode,
             hasSavedPaymentMethods = hasSavedPaymentMethods,
+            hasSavedPaymentMethodsForCode = hasSavedPaymentMethods,
         )
     }
 

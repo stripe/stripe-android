@@ -187,10 +187,18 @@ internal interface EmbeddedActivityModule {
             launchMode: EmbeddedLaunchMode,
         ): EmbeddedNavigator {
             val initialBackStack = initialScreenFactory.create()
-            val initialForm = initialBackStack.last() as? EmbeddedNavigator.Screen.Form
-            if (launchMode.isFlowControllerPaymentOptions && initialForm != null) {
-                eventReporter.onPaymentMethodFormShown(initialForm.launchMode.selectedPaymentMethodCode)
-                eventReporter.onShowNewPaymentOptions()
+            if (launchMode.isFlowControllerPaymentOptions) {
+                // The navigator reports the sheet shown for its initial screen, so a form on it must be reported first.
+                when (val initialScreen = initialBackStack.last()) {
+                    is EmbeddedNavigator.Screen.Form -> {
+                        eventReporter.onPaymentMethodFormShown(initialScreen.launchMode.selectedPaymentMethodCode)
+                        eventReporter.onShowNewPaymentOptions()
+                    }
+                    is EmbeddedNavigator.Screen.HorizontalPaymentOptions -> {
+                        eventReporter.onPaymentMethodFormShown(initialScreen.selectedPaymentMethodCode)
+                    }
+                    else -> Unit
+                }
             }
             return EmbeddedNavigator(
                 coroutineScope = viewModelScope,

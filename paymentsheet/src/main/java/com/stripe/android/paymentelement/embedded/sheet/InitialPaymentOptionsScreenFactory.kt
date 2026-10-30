@@ -274,7 +274,7 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
                 eventReporter.onInitiallyDisplayedPaymentMethodVisibilitySnapshot(
                     visiblePaymentMethods = visiblePaymentMethods,
                     hiddenPaymentMethods = hiddenPaymentMethods,
-                    walletsState = null,
+                    walletsState = walletsInteractor.walletsState.value,
                     isVerticalLayout = true,
                 )
             },

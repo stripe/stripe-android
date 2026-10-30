@@ -41,6 +41,7 @@ import java.util.UUID
 @Composable
 internal fun PaymentElement(
     enabled: Boolean,
+    isValidating: Boolean,
     supportedPaymentMethods: List<SupportedPaymentMethod>,
     selectedItemCode: PaymentMethodCode,
     incentive: PaymentMethodIncentive?,
@@ -85,6 +86,7 @@ internal fun PaymentElement(
 
         FormElement(
             enabled = enabled,
+            isValidating = isValidating,
             selectedPaymentMethodCode = selectedItem.code,
             formElements = formElements,
             formArguments = formArguments,
@@ -99,6 +101,7 @@ internal fun PaymentElement(
 @Composable
 internal fun FormElement(
     enabled: Boolean,
+    isValidating: Boolean,
     selectedPaymentMethodCode: PaymentMethodCode,
     formElements: List<FormElement>,
     formArguments: FormArguments,
@@ -145,7 +148,8 @@ internal fun FormElement(
                     previouslyCompletedUSBankAccountForm = true
                 },
                 modifier = Modifier.padding(horizontalPaddingValues),
-                enabled = enabled
+                enabled = enabled,
+                isValidating = isValidating,
             )
         } else {
             PaymentMethodForm(

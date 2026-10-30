@@ -71,6 +71,9 @@ internal class EmbeddedAddPaymentMethodInteractorFactory @Inject constructor(
             ),
         )
 
+        // The form reports every press and focus, so only report the first interaction with each form.
+        var previouslyInteractedForm: PaymentMethodCode? = null
+
         return DefaultAddPaymentMethodInteractor(
             initiallySelectedPaymentMethodType = initialCode,
             selection = embeddedSelectionHolder.selection,
@@ -81,7 +84,12 @@ internal class EmbeddedAddPaymentMethodInteractorFactory @Inject constructor(
             createFormArguments = formHelper::createFormArguments,
             formElementsForCode = formHelper::formElementsForCode,
             clearErrorMessages = { sheetActivityStateHolder.updateError(null) },
-            reportFieldInteraction = eventReporter::onPaymentMethodFormInteraction,
+            reportFieldInteraction = { code ->
+                if (previouslyInteractedForm != code) {
+                    previouslyInteractedForm = code
+                    eventReporter.onPaymentMethodFormInteraction(code)
+                }
+            },
             onFormFieldValuesChanged = formHelper::onFormFieldValuesChanged,
             reportPaymentMethodTypeSelected = eventReporter::onSelectPaymentMethod,
             reportPromotionDisplayed = { code ->

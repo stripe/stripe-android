@@ -139,6 +139,26 @@ internal class EmbeddedAddPaymentMethodInteractorFactoryTest {
         }
     }
 
+    @Test
+    fun `field interaction is reported once per form`() = runScenario {
+        interactor.handleViewAction(AddPaymentMethodInteractor.ViewAction.ReportFieldInteraction("card"))
+        interactor.handleViewAction(AddPaymentMethodInteractor.ViewAction.ReportFieldInteraction("card"))
+
+        assertThat(eventReporter.formInteractionCalls.awaitItem()).isEqualTo("card")
+        eventReporter.formInteractionCalls.expectNoEvents()
+    }
+
+    @Test
+    fun `field interaction is reported again after interacting with a different form`() = runScenario {
+        interactor.handleViewAction(AddPaymentMethodInteractor.ViewAction.ReportFieldInteraction("card"))
+        interactor.handleViewAction(AddPaymentMethodInteractor.ViewAction.ReportFieldInteraction("cashapp"))
+        interactor.handleViewAction(AddPaymentMethodInteractor.ViewAction.ReportFieldInteraction("card"))
+
+        assertThat(eventReporter.formInteractionCalls.awaitItem()).isEqualTo("card")
+        assertThat(eventReporter.formInteractionCalls.awaitItem()).isEqualTo("cashapp")
+        assertThat(eventReporter.formInteractionCalls.awaitItem()).isEqualTo("card")
+    }
+
     private fun runScenario(
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
@@ -167,6 +187,7 @@ internal class EmbeddedAddPaymentMethodInteractorFactoryTest {
             selection = selectionHolder.selection,
         )
         val autocompleteAddressInteractorFactory = TestAutocompleteAddressInteractor.noOpFactory()
+        val eventReporter = FakeEventReporter()
         val factory = EmbeddedAddPaymentMethodInteractorFactory(
             paymentMethodMetadata = paymentMethodMetadata,
             embeddedSelectionHolder = selectionHolder,
@@ -174,7 +195,7 @@ internal class EmbeddedAddPaymentMethodInteractorFactoryTest {
             viewModelScope = viewModelScope,
             sheetActivityStateHolder = FakeSheetActivityStateHolder(),
             tapToAddHelper = FakeTapToAddHelper.noOp(),
-            eventReporter = FakeEventReporter(),
+            eventReporter = eventReporter,
             paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
             customerStateHolder = customerStateHolder,
             autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
@@ -185,15 +206,18 @@ internal class EmbeddedAddPaymentMethodInteractorFactoryTest {
             interactor = interactor,
             paymentMethodMetadata = paymentMethodMetadata,
             autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
+            eventReporter = eventReporter,
         ).apply { block() }
 
         interactor.close()
         viewModelScope.cancel()
+        eventReporter.validate()
     }
 
     private data class Scenario(
         val interactor: AddPaymentMethodInteractor,
         val paymentMethodMetadata: PaymentMethodMetadata,
         val autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory,
+        val eventReporter: FakeEventReporter,
     )
 }

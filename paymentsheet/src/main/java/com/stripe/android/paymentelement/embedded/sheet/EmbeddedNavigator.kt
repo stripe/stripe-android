@@ -286,13 +286,14 @@ internal class EmbeddedNavigator private constructor(
                 private val linkAccountHolder: LinkAccountHolder,
             ) {
                 fun create(launchMode: EmbeddedLaunchMode.Form): Form {
-                    val hasSavedPaymentMethods = customerStateHolder.paymentMethods.value.any {
-                        it.type?.code == launchMode.selectedPaymentMethodCode
-                    }
+                    val savedPaymentMethods = customerStateHolder.paymentMethods.value
                     return Form(
                         formInteractor = interactorFactory.create(
                             paymentMethodCode = launchMode.selectedPaymentMethodCode,
-                            hasSavedPaymentMethods = hasSavedPaymentMethods,
+                            hasSavedPaymentMethods = savedPaymentMethods.isNotEmpty(),
+                            hasSavedPaymentMethodsForCode = savedPaymentMethods.any {
+                                it.type?.code == launchMode.selectedPaymentMethodCode
+                            },
                         ),
                         sheetActivityStateHolder = sheetActivityStateHolder,
                         confirmationHelper = confirmationHelper,
@@ -405,6 +406,9 @@ internal class EmbeddedNavigator private constructor(
             private val onContinueClick: () -> Unit,
             private val onPrimaryButtonDisabledClick: () -> Unit,
         ) : Screen(), Closeable {
+            val selectedPaymentMethodCode: String
+                get() = interactor.state.value.selectedPaymentMethodCode
+
             override fun topBarState(): StateFlow<PaymentSheetTopBarState?> = stateFlowOf(
                 PaymentSheetTopBarStateFactory.create(
                     editable = PaymentSheetTopBarState.Editable.Never,

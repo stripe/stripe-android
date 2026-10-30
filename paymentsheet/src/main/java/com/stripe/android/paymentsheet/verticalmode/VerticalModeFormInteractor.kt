@@ -36,7 +36,7 @@ internal interface VerticalModeFormInteractor {
     data class State(
         val selectedPaymentMethodCode: String,
         val isProcessing: Boolean,
-        private val isValidating: Boolean,
+        val isValidating: Boolean,
         val usBankAccountFormArguments: USBankAccountFormArguments,
         val formArguments: FormArguments,
         private val formElements: List<FormElement>,

@@ -264,6 +264,7 @@ internal class FormActivityScreenShotTest {
         ).create(
             paymentMethodCode = "card",
             hasSavedPaymentMethods = false,
+            hasSavedPaymentMethodsForCode = false,
         )
 
         stateHolder.updateMandate(usBankMandate)

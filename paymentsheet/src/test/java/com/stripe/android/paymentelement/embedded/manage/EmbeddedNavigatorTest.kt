@@ -817,26 +817,45 @@ internal class EmbeddedNavigatorTest {
     }
 
     @Test
-    fun `Form Factory derives hasSavedPaymentMethods per code, ignoring saved methods of other types`() {
-        // A saved card is present, but the selected code is cashapp. A card-only check would resolve to
-        // true here; keying off the selected code correctly resolves to false.
+    fun `Form Factory shows set as default when saved payment methods are of other types`() {
+        // A saved card is present, but the selected code is us_bank_account. The customer already has a saved
+        // payment method, so a new one is not automatically set as default.
         val factory = createFormFactory(
             savedPaymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                    paymentMethodTypes = listOf("card", "cashapp"),
+                    paymentMethodTypes = listOf("card", "us_bank_account"),
                 ),
             ),
         )
 
         val screen = factory.create(
             EmbeddedLaunchMode.Form(
-                selectedPaymentMethodCode = "cashapp",
+                selectedPaymentMethodCode = "us_bank_account",
             )
         )
 
-        // setAsDefaultMatchesSaveForFutureUse is !hasSavedPaymentMethods, so true confirms the per-code
-        // derivation resolved to false for cashapp despite the saved card.
+        assertThat(screen.formInteractor.state.value.usBankAccountFormArguments.setAsDefaultMatchesSaveForFutureUse)
+            .isFalse()
+    }
+
+    @Test
+    fun `Form Factory matches set as default to save for future use when there are no saved payment methods`() {
+        val factory = createFormFactory(
+            savedPaymentMethods = emptyList(),
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    paymentMethodTypes = listOf("card", "us_bank_account"),
+                ),
+            ),
+        )
+
+        val screen = factory.create(
+            EmbeddedLaunchMode.Form(
+                selectedPaymentMethodCode = "us_bank_account",
+            )
+        )
+
         assertThat(screen.formInteractor.state.value.usBankAccountFormArguments.setAsDefaultMatchesSaveForFutureUse)
             .isTrue()
     }

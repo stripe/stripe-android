@@ -132,6 +132,23 @@ internal class PaymentOptionsEmbeddedSheetAnalyticsTest {
         }
     }
 
+    @Test
+    fun `initial horizontal form reports FlowController form shown`() {
+        val formShownRequest = expectAnalytics("mc_form_shown", analyticsPayloadField("selected_lpm", "cashapp"))
+        val showRequest = expectAnalytics("mc_custom_sheet_newpm_show")
+        expectAnalytics("mc_initial_displayed_payment_methods")
+
+        launch(
+            paymentMethodMetadata = paymentMethodMetadata(
+                paymentMethodTypes = listOf("cashapp", "alipay"),
+                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+            ),
+        ) {
+            awaitAnalytics(formShownRequest)
+            awaitAnalytics(showRequest)
+        }
+    }
+
     private fun expectAnalytics(
         eventName: String,
         vararg requestMatchers: RequestMatcher,
@@ -156,12 +173,15 @@ internal class PaymentOptionsEmbeddedSheetAnalyticsTest {
         }
     }
 
-    private fun paymentMethodMetadata(paymentMethodTypes: List<String>): PaymentMethodMetadata {
+    private fun paymentMethodMetadata(
+        paymentMethodTypes: List<String>,
+        paymentMethodLayout: PaymentSheet.PaymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+    ): PaymentMethodMetadata {
         return PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = paymentMethodTypes,
             ),
-            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+            paymentMethodLayout = paymentMethodLayout,
         )
     }
 

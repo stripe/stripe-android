@@ -77,7 +77,8 @@ internal fun USBankAccountForm(
     usBankAccountFormArgs: USBankAccountFormArguments,
     onCompleted: () -> Unit,
     modifier: Modifier = Modifier,
-    enabled: Boolean
+    enabled: Boolean,
+    isValidating: Boolean,
 ) {
     val viewModel = viewModel<USBankAccountFormViewModel>(
         factory = USBankAccountFormViewModel.Factory(usBankAccountFormArgs.autocompleteAddressInteractorFactory) {
@@ -116,6 +117,7 @@ internal fun USBankAccountForm(
         viewModel = viewModel,
         usBankAccountFormArgs = usBankAccountFormArgs,
         onFormCompleted = onCompleted,
+        isValidating = isValidating,
     )
 
     BankAccountForm(

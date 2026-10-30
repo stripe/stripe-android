@@ -32,6 +32,7 @@ internal fun AddPaymentMethod(
 
     PaymentElement(
         enabled = !state.processing,
+        isValidating = state.validating,
         supportedPaymentMethods = state.supportedPaymentMethods,
         selectedItemCode = state.selectedPaymentMethodCode,
         incentive = state.incentive,

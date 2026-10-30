@@ -37,7 +37,8 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
 ) {
     fun create(
         paymentMethodCode: PaymentMethodCode,
-        hasSavedPaymentMethods: Boolean
+        hasSavedPaymentMethods: Boolean,
+        hasSavedPaymentMethodsForCode: Boolean,
     ): DefaultVerticalModeFormInteractor {
         val coroutineScope = viewModelScope.childScope(Dispatchers.Default)
         val formHelperScope = coroutineScope.childScope(Dispatchers.Main)
@@ -92,7 +93,7 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
             reportFieldInteraction = eventReporter::onPaymentMethodFormInteraction,
             headerInformation = paymentMethodMetadata.formHeaderInformationForCode(
                 code = paymentMethodCode,
-                customerHasSavedPaymentMethods = hasSavedPaymentMethods
+                customerHasSavedPaymentMethods = hasSavedPaymentMethodsForCode
             ),
             processing = sheetActivityStateHolder.state.mapAsStateFlow { it.isProcessing },
             paymentMethodIncentive = bankFormInteractor.paymentMethodIncentiveInteractor.displayedIncentive,
