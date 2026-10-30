@@ -4,6 +4,8 @@ package com.stripe.android.checkout.analytics
 
 import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.asPaymentSheet
+import com.stripe.android.common.analytics.FIELD_COLORS_DARK
+import com.stripe.android.common.analytics.FIELD_COLORS_LIGHT
 import com.stripe.android.common.analytics.toAnalyticsMap
 import com.stripe.android.elements.CheckoutGooglePayConfiguration
 import com.stripe.android.elements.CurrencySelectorElement
@@ -45,7 +47,7 @@ private fun PaymentElement.Configuration.State.toAnalyticsParams(): Map<String, 
             put(paymentMethodType.code, termsDisplayValue.name.lowercase())
         }
     },
-    "appearance" to appearance.asPaymentSheet().toAnalyticsMap(isEmbedded = true),
+    "appearance" to appearance.asPaymentSheet().toAnalyticsMap(isEmbedded = true).withSnakeCaseColorKeys(),
     "google_pay_configuration" to googlePayConfiguration.toAnalyticsParams(),
     "link_configuration" to mapOf(
         "display" to linkConfiguration.display.toAnalyticsValue(),
@@ -118,5 +120,14 @@ private fun CurrencySelectorElement.Configuration.Appearance.State.toAnalyticsPa
 private fun ShippingAddressElement.Configuration.State.toAnalyticsParams(): Map<String, Any?> = mapOf(
     "title" to (title != null),
     "button_title" to (buttonTitle != null),
-    "appearance" to appearance.asPaymentSheet().toAnalyticsMap(),
+    "appearance" to appearance.asPaymentSheet().toAnalyticsMap().withSnakeCaseColorKeys(),
 )
+
+private fun Map<*, *>.withSnakeCaseColorKeys(): Map<String, Any?> = entries.associate { (key, value) ->
+    val analyticsKey = when (key) {
+        FIELD_COLORS_LIGHT -> "colors_light"
+        FIELD_COLORS_DARK -> "colors_dark"
+        else -> key as String
+    }
+    analyticsKey to if (value is Map<*, *>) value.withSnakeCaseColorKeys() else value
+}
