@@ -23,12 +23,15 @@ import kotlin.test.Test
 
 internal class DefaultEmbeddedPaymentOptionsPresenterTest {
     @Test
-    fun `present does nothing when state is null`() = runScenario {
+    fun `present launches payment options without metadata or configuration when state is null`() = runScenario {
         val launcher = FakeEmbeddedSheetLauncher()
         sheetStateHolder.sheetLauncher = launcher
 
         presenter.present()
 
+        assertThat(launcher.paymentOptionsCalls.awaitItem()).isEqualTo(
+            FakeEmbeddedSheetLauncher.PaymentOptionsCall(null, null, null, null)
+        )
         launcher.paymentOptionsCalls.ensureAllEventsConsumed()
         errorReporter.ensureAllEventsConsumed()
     }
@@ -126,7 +129,7 @@ internal class DefaultEmbeddedPaymentOptionsPresenterTest {
         ) = error("Not expected")
 
         override fun launchPaymentOptions(
-            paymentMethodMetadata: PaymentMethodMetadata,
+            paymentMethodMetadata: PaymentMethodMetadata?,
             customerState: CustomerState?,
             selection: PaymentSelection?,
             configuration: EmbeddedPaymentElement.Configuration?,
@@ -137,7 +140,7 @@ internal class DefaultEmbeddedPaymentOptionsPresenterTest {
         }
 
         data class PaymentOptionsCall(
-            val paymentMethodMetadata: PaymentMethodMetadata,
+            val paymentMethodMetadata: PaymentMethodMetadata?,
             val customerState: CustomerState?,
             val selection: PaymentSelection?,
             val configuration: EmbeddedPaymentElement.Configuration?,
