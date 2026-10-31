@@ -2,10 +2,12 @@ package com.stripe.android.connect
 
 import android.app.Application
 import android.content.Context
+import android.graphics.Outline
 import android.util.AttributeSet
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewOutlineProvider
 import android.webkit.ValueCallback
 import android.widget.FrameLayout
 import androidx.annotation.RestrictTo
@@ -26,6 +28,7 @@ import com.stripe.android.connect.webview.StripeConnectWebView
 import com.stripe.android.connect.webview.StripeConnectWebViewContainer
 import com.stripe.android.connect.webview.StripeConnectWebViewContainerState
 import com.stripe.android.connect.webview.StripeConnectWebViewContainerViewModel
+import com.stripe.android.connect.webview.StripeConnectWebViewLayout
 import com.stripe.android.connect.webview.StripeWebViewSpinner
 import com.stripe.android.core.Logger
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,15 +36,18 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@Suppress("TooManyFunctions")
 abstract class StripeComponentView<Listener, Props> internal constructor(
     context: Context,
     attrs: AttributeSet?,
     defStyleAttr: Int,
     private val embeddedComponent: StripeEmbeddedComponent,
+    private val webViewLayout: StripeConnectWebViewLayout,
     private var embeddedComponentManager: EmbeddedComponentManager?,
     listener: Listener?,
     props: Props?,
@@ -57,6 +63,16 @@ abstract class StripeComponentView<Listener, Props> internal constructor(
     private var viewModel: StripeConnectWebViewContainerViewModel? = null
 
     private var progressBar: StripeWebViewSpinner? = null
+    private var contentHeight = 0
+    private var isWebContentVisible = webViewLayout == StripeConnectWebViewLayout.FILLS_AVAILABLE_SPACE
+
+    private val roundedOutlineProvider = object : ViewOutlineProvider() {
+        var radius = 0f
+
+        override fun getOutline(view: View, outline: Outline) {
+            outline.setRoundRect(0, 0, view.width, view.height, radius)
+        }
+    }
 
     // See StripeConnectWebViewContainerViewModel for why we're getting a WebView from a ViewModel.
     private val webView: StripeConnectWebView? get() = viewModel?.webView
@@ -202,6 +218,7 @@ abstract class StripeComponentView<Listener, Props> internal constructor(
                         clock = AndroidClock(),
                         embeddedComponentManager = embeddedComponentManager,
                         embeddedComponent = embeddedComponent,
+                        webViewLayout = webViewLayout,
                     )
                 )
             }
@@ -226,8 +243,9 @@ abstract class StripeComponentView<Listener, Props> internal constructor(
             }
         addView(webView)
 
-        // Add progress bar on top of WebView.
-        addProgressBar()
+        if (webViewLayout == StripeConnectWebViewLayout.FILLS_AVAILABLE_SPACE) {
+            addProgressBar()
+        }
     }
 
     internal fun setPropsFromXml(props: Props) {
@@ -261,6 +279,14 @@ abstract class StripeComponentView<Listener, Props> internal constructor(
         _receivedCloseWebView.value = state.receivedCloseWebView
         setBackgroundColor(state.backgroundColor)
 
+        if (webViewLayout == StripeConnectWebViewLayout.SIZES_TO_CONTENT) {
+            roundedOutlineProvider.radius = resources.displayMetrics.density *
+                (state.appearance?.cornerRadius?.base ?: DEFAULT_CORNER_RADIUS_DP)
+            outlineProvider = roundedOutlineProvider
+            clipToOutline = true
+            invalidateOutline()
+        }
+
         webView?.let { bindWebView(it, state) }
         progressBar?.let { bindProgressBar(it, state) }
     }
@@ -270,7 +296,7 @@ abstract class StripeComponentView<Listener, Props> internal constructor(
         state: StripeConnectWebViewContainerState
     ) {
         webView.setBackgroundColor(state.backgroundColor)
-        webView.isVisible = !state.isNativeLoadingIndicatorVisible
+        webView.isVisible = isWebContentVisible && !state.isNativeLoadingIndicatorVisible
     }
 
     private fun bindProgressBar(progressBar: StripeWebViewSpinner, state: StripeConnectWebViewContainerState) {
@@ -295,7 +321,53 @@ abstract class StripeComponentView<Listener, Props> internal constructor(
         webView?.mobileInputReceived(input, resultCallback)
     }
 
+    internal fun requestContentHeightUpdate() {
+        viewModel?.requestContentHeightUpdate()
+    }
+
+    internal fun callSetterWithSerializableValue(setter: String, value: JsonElement) {
+        viewModel?.callSetterWithSerializableValue(setter, value)
+    }
+
+    internal fun publishContentHeight(height: Int) {
+        if (contentHeight != height) {
+            contentHeight = height
+            requestLayout()
+        }
+    }
+
+    internal fun revealWebContent() {
+        isWebContentVisible = true
+        webView?.isVisible = viewModel?.stateFlow?.value?.isNativeLoadingIndicatorVisible == false
+    }
+
+    internal fun reloadConcealedWebContent() {
+        isWebContentVisible = false
+        webView?.isVisible = false
+        webView?.reload()
+    }
+
+    internal open fun onComponentEvent(event: ComponentEvent) {}
+
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        if (webViewLayout == StripeConnectWebViewLayout.FILLS_AVAILABLE_SPACE) {
+            super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+            return
+        }
+
+        val resolvedHeight = resolveSize(contentHeight, heightMeasureSpec)
+        super.onMeasure(
+            widthMeasureSpec,
+            MeasureSpec.makeMeasureSpec(resolvedHeight, MeasureSpec.EXACTLY)
+        )
+    }
+
     private fun handleEvent(event: ComponentEvent) {
+        onComponentEvent(event)
         listener?.let { listenerDelegate.delegate(it, event) }
+    }
+
+    private companion object {
+        private const val DEFAULT_CORNER_RADIUS_DP = 8f
     }
 }
