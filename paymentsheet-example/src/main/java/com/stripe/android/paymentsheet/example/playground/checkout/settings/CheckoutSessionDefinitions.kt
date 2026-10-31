@@ -46,6 +46,12 @@ internal object CheckoutSessionDefinitions {
         defaultValue = "email@example.com",
         validate = optionalEmail,
     )
+    val emailCollection = choice(
+        key = "session.email_collection",
+        displayName = "Email collection",
+        options = CheckoutEmailCollection.entries.map { it.displayName to it },
+        serialize = CheckoutEmailCollection::serializedValue,
+    )
     val currency = choice(
         key = "session.currency",
         displayName = "Currency",
@@ -157,6 +163,7 @@ internal object CheckoutSessionDefinitions {
             paymentMethodSave,
             paymentMethodRemove,
             customerEmail,
+            emailCollection,
             currency,
             merchant,
             customSecretKey,
@@ -179,6 +186,16 @@ internal enum class CheckoutCustomer(
     Guest("Guest", "guest"),
     New("New", "new"),
     Returning("Returning", "returning"),
+}
+
+internal enum class CheckoutEmailCollection(
+    val displayName: String,
+    val serializedValue: String,
+    val paramValue: String?,
+) {
+    Default("Default", "", null),
+    Always("Always", "always", "always"),
+    IfRequired("If required", "if_required", "if_required"),
 }
 
 internal enum class AdaptivePricingCountry(
