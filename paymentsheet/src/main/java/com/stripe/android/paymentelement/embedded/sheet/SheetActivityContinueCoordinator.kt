@@ -18,6 +18,8 @@ import javax.inject.Provider
 
 internal interface SheetActivityContinueCoordinator {
     fun onContinue()
+
+    fun completeSelection()
 }
 
 internal class DefaultSheetActivityContinueCoordinator @Inject constructor(
@@ -29,6 +31,7 @@ internal class DefaultSheetActivityContinueCoordinator @Inject constructor(
     private val linkAccountHolder: LinkAccountHolder,
     private val launchMode: EmbeddedLaunchMode,
     private val embeddedNavigatorProvider: Provider<EmbeddedNavigator>,
+    private val linkPaymentMethodSelectionHandler: SheetLinkPaymentMethodSelectionHandler,
     @ViewModelScope private val coroutineScope: CoroutineScope,
 ) : SheetActivityContinueCoordinator {
 
@@ -36,6 +39,11 @@ internal class DefaultSheetActivityContinueCoordinator @Inject constructor(
         // Manage navigation is delayed for the ripple; do not start an update on the outgoing screen.
         if (stateHolder.state.value.isProcessing || embeddedNavigatorProvider.get().isTransitioning) return
 
+        if (linkPaymentMethodSelectionHandler.launchIfEligible(selectionHolder.selection.value)) return
+        completeSelection()
+    }
+
+    override fun completeSelection() {
         val selection = selectionHolder.selection.value
         val taxRegionUpdate = taxRegionUpdater.prepareUpdate(
             checkoutSessionResponse = paymentMethodMetadata.checkoutSessionResponse,

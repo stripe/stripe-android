@@ -35,6 +35,9 @@ internal class DefaultSheetActivityRegistrarTest {
             assertThat(activityResultCaller).isEqualTo(activityResultCaller)
             assertThat(lifecycleOwner).isEqualTo(lifecycleOwner)
         }
+        assertThat(linkHandler.registerCalls.awaitItem()).isEqualTo(
+            FakeSheetLinkPaymentMethodSelectionHandler.RegisterCall(activityResultCaller, lifecycleOwner)
+        )
         assertThat(confirmationHandler.bootstrapTurbine.awaitItem().paymentMethodMetadata)
             .isEqualTo(paymentMethodMetadata)
     }
@@ -54,6 +57,8 @@ internal class DefaultSheetActivityRegistrarTest {
         assertThat(confirmationHandler.registerTurbine.awaitItem()).isNotNull()
         assertThat(tapToAddHelper.registerCalls.awaitItem()).isNotNull()
         assertThat(tapToAddHelper.registerCalls.awaitItem()).isNotNull()
+        assertThat(linkHandler.registerCalls.awaitItem()).isNotNull()
+        assertThat(linkHandler.registerCalls.awaitItem()).isNotNull()
 
         confirmationHandler.bootstrapTurbine.awaitItem()
     }
@@ -64,6 +69,7 @@ internal class DefaultSheetActivityRegistrarTest {
     ) = runTest {
         val confirmationHandler = FakeConfirmationHandler()
         val tapToAddHelper = FakeTapToAddHelper()
+        val linkHandler = FakeSheetLinkPaymentMethodSelectionHandler()
         val activityResultCaller = mock<ActivityResultCaller>()
         val lifecycleOwner = TestLifecycleOwner(coroutineDispatcher = Dispatchers.Unconfined)
 
@@ -71,12 +77,14 @@ internal class DefaultSheetActivityRegistrarTest {
             confirmationHandler = confirmationHandler,
             tapToAddHelper = tapToAddHelper,
             paymentMethodMetadata = paymentMethodMetadata,
+            linkPaymentMethodSelectionHandler = linkHandler,
         )
 
         val scenario = Scenario(
             registrar = registrar,
             confirmationHandler = confirmationHandler,
             tapToAddHelper = tapToAddHelper,
+            linkHandler = linkHandler,
             activityResultCaller = activityResultCaller,
             lifecycleOwner = lifecycleOwner,
             paymentMethodMetadata = paymentMethodMetadata
@@ -85,12 +93,14 @@ internal class DefaultSheetActivityRegistrarTest {
         block(scenario)
         confirmationHandler.validate()
         tapToAddHelper.validate()
+        linkHandler.validate()
     }
 
     private class Scenario(
         val registrar: DefaultSheetActivityRegistrar,
         val confirmationHandler: FakeConfirmationHandler,
         val tapToAddHelper: FakeTapToAddHelper,
+        val linkHandler: FakeSheetLinkPaymentMethodSelectionHandler,
         val activityResultCaller: ActivityResultCaller,
         val lifecycleOwner: LifecycleOwner,
         val paymentMethodMetadata: PaymentMethodMetadata,
