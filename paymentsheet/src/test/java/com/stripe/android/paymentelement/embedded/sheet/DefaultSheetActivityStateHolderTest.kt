@@ -530,6 +530,41 @@ internal class DefaultSheetActivityStateHolderTest {
     }
 
     @Test
+    fun `TapToAddResult ShowSavedPaymentMethods resets to payment options screens for PaymentOptions launch mode`() {
+        val tapToAddHelper = FakeTapToAddHelper()
+        val expectedSelection = PaymentSelection.Saved(CARD_PAYMENT_METHOD)
+        val resetScreen = createHorizontalPaymentOptionsScreen()
+        val initialScreenFactory = FakeEmbeddedInitialScreenFactory(screens = listOf(resetScreen))
+        testScenario(
+            tapToAddHelper = tapToAddHelper,
+            launchMode = EmbeddedLaunchMode.PaymentOptions,
+            initialScreen = createHorizontalPaymentOptionsScreen(),
+            initialScreenFactory = initialScreenFactory,
+        ) {
+            stateHolder.result.test {
+                navigator.screen.test {
+                    assertThat(awaitItem()).isInstanceOf(
+                        EmbeddedNavigator.Screen.HorizontalPaymentOptions::class.java
+                    )
+
+                    tapToAddHelper.emitNextStep(
+                        TapToAddNextStep.ShowSavedPaymentMethods(
+                            paymentSelection = expectedSelection,
+                        )
+                    )
+
+                    assertThat(awaitItem()).isSameInstanceAs(resetScreen)
+                }
+
+                expectNoEvents()
+            }
+
+            assertThat(initialScreenFactory.createCalls.awaitItem()).isEqualTo(Unit)
+            initialScreenFactory.validate()
+        }
+    }
+
+    @Test
     fun `TapToAddResult confirm saved payment method replaces current screen`() {
         val tapToAddHelper = FakeTapToAddHelper()
         val interactorFactory = RecordingSavedPaymentMethodConfirmInteractorFactory()
@@ -638,6 +673,7 @@ internal class DefaultSheetActivityStateHolderTest {
         initialBackStack: List<EmbeddedNavigator.Screen> = listOf(initialScreen),
         savedPaymentMethodConfirmInteractorFactory: SavedPaymentMethodConfirmInteractor.Factory =
             FakeSavedPaymentMethodConfirmInteractor.Factory(),
+        initialScreenFactory: FakeEmbeddedInitialScreenFactory = FakeEmbeddedInitialScreenFactory(),
         block: suspend Scenario.() -> Unit
     ) = runTest {
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create(stripeIntent = stripeIntent)
@@ -665,6 +701,7 @@ internal class DefaultSheetActivityStateHolderTest {
             launchMode = launchMode,
             embeddedNavigatorProvider = Provider { navigator },
             savedPaymentMethodConfirmScreenFactoryProvider = Provider { screenFactory },
+            initialScreenFactoryProvider = Provider { initialScreenFactory },
         )
         screenFactory = SavedPaymentMethodConfirmScreenFactory(
             interactorFactory = savedPaymentMethodConfirmInteractorFactory,

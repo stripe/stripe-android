@@ -77,6 +77,28 @@ internal class InitialPaymentOptionsScreenFactoryTest {
     }
 
     @Test
+    fun `vertical layout with one payment method opens payment options after a saved method is added`() =
+        testScenario(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                isGooglePayReady = true,
+                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+            ),
+        ) {
+            // canShowDirectForm is fixed at construction from the customer state at that time, so this proves
+            // createInitialScreen() re-checks the current payment methods rather than trusting that stale value.
+            assertThat(factory.createInitialScreen().single()).isInstanceOf<EmbeddedNavigator.Screen.Form>()
+
+            customerStateHolder.setCustomerState(
+                PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
+                    paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+                )
+            )
+
+            assertThat(factory.createInitialScreen().single())
+                .isInstanceOf<EmbeddedNavigator.Screen.VerticalPaymentOptions>()
+        }
+
+    @Test
     fun `creates initial screen successfully without wallets`() = testScenario(
         isGooglePayReady = false,
     ) {

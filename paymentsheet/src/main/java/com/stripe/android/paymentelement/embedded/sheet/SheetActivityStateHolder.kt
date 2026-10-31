@@ -75,6 +75,7 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
     private val launchMode: EmbeddedLaunchMode,
     private val embeddedNavigatorProvider: Provider<EmbeddedNavigator>,
     private val savedPaymentMethodConfirmScreenFactoryProvider: Provider<SavedPaymentMethodConfirmScreenFactory>,
+    private val initialScreenFactoryProvider: Provider<EmbeddedInitialScreenFactory>,
 ) : SheetActivityStateHolder {
     private val _state = MutableStateFlow(
         SheetActivityStateHolder.State(
@@ -114,16 +115,29 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
                         )
                         null
                     }
-                    is TapToAddNextStep.ShowSavedPaymentMethods -> EmbeddedActivityResult.Complete(
-                        selection = result.paymentSelection,
-                        previousNewSelections = selectionHolder.previousNewSelections,
-                        hasBeenConfirmed = false,
-                        customerState = customerStateHolder.customer.value,
-                        linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
-                        checkoutSessionResponse = null,
-                        shouldInvokeSelectionCallback = false,
-                        launchMode = launchMode,
-                    )
+                    is TapToAddNextStep.ShowSavedPaymentMethods -> {
+                        if (launchMode is EmbeddedLaunchMode.PaymentOptions) {
+                            // The payment options picker stays open; return to its list (now including the
+                            // newly saved payment method) instead of closing the whole sheet.
+                            embeddedNavigatorProvider.get().performAction(
+                                EmbeddedNavigator.Action.ResetTo(
+                                    initialScreenFactoryProvider.get().create()
+                                )
+                            )
+                            null
+                        } else {
+                            EmbeddedActivityResult.Complete(
+                                selection = result.paymentSelection,
+                                previousNewSelections = selectionHolder.previousNewSelections,
+                                hasBeenConfirmed = false,
+                                customerState = customerStateHolder.customer.value,
+                                linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
+                                checkoutSessionResponse = null,
+                                shouldInvokeSelectionCallback = false,
+                                launchMode = launchMode,
+                            )
+                        }
+                    }
                     TapToAddNextStep.Complete -> EmbeddedActivityResult.Complete(
                         selection = null,
                         previousNewSelections = selectionHolder.previousNewSelections,
