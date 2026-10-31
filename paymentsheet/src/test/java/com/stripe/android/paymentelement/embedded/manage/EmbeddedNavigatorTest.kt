@@ -910,6 +910,8 @@ internal class EmbeddedNavigatorTest {
                     primaryButtonIcon = PrimaryButtonIcon.Lock,
                 )
             ),
+            mandateText = stateFlowOf(null),
+            isContinueButtonVisible = stateFlowOf(false),
             onContinueClick = {},
             onPrimaryButtonDisabledClick = {},
         )

@@ -3,11 +3,9 @@ package com.stripe.android.paymentelement.embedded.sheet
 import android.app.Application
 import android.os.Bundle
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performScrollTo
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
@@ -27,7 +25,6 @@ import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.ui.GOOGLE_PAY_BUTTON_TEST_TAG
-import com.stripe.android.paymentsheet.ui.PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.testing.waitUntilWithIdle
@@ -69,10 +66,6 @@ internal class HorizontalSavedPaymentOptionsWalletsTest {
         composeTestRule.onNodeWithTag(GOOGLE_PAY_BUTTON_TEST_TAG).assertDoesNotExist()
         composeTestRule.onNodeWithTag(PaymentOptionsItem.ViewType.GooglePay.name)
             .assertIsDisplayed()
-            .performClick()
-        composeTestRule.onNodeWithTag(PRIMARY_BUTTON_TEST_TAG)
-            .performScrollTo()
-            .assertIsEnabled()
             .performClick()
 
         val result = awaitResult()
