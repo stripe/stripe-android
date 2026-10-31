@@ -57,6 +57,7 @@ import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherFactory
 import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -66,7 +67,7 @@ import com.stripe.android.paymentsheet.R as PaymentSheetR
 internal class OnrampPresenterCoordinator @Inject constructor(
     private val interactor: OnrampInteractor,
     linkController: LinkController,
-    lifecycleOwner: LifecycleOwner,
+    private val lifecycleOwner: LifecycleOwner,
     private val activity: ComponentActivity,
     private val coroutineScope: CoroutineScope,
     private val onrampCallbackIdentifier: String,
@@ -335,8 +336,11 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         callback: OnrampPartnerTermsCallback?,
         @StringRes headingResId: Int,
     ) {
-        coroutineScope.launch {
-            when (val result = interactor.startPartnerTerms(declarationType)) {
+        lifecycleOwner.lifecycleScope.launch {
+            val result = interactor.startPartnerTerms(declarationType)
+            // The repository can return a failure result when the request is cancelled.
+            ensureActive()
+            when (result) {
                 is OnrampStartPartnerTermsResult.PresentationRequired -> {
                     presentHTMLConfirmation(
                         resultLauncher = resultLauncher,
