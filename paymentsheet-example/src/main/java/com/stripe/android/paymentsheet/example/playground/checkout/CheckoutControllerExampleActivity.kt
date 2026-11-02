@@ -2,6 +2,8 @@
 
 package com.stripe.android.paymentsheet.example.playground.checkout
 
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
@@ -224,6 +226,13 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
                     }
                 },
             )
+        }
+    }
+
+    companion object {
+        fun createTestIntent(context: Context, settingsJson: String): Intent {
+            return Intent(context, CheckoutControllerExampleActivity::class.java)
+                .putExtra(CheckoutControllerExampleViewModel.SETTINGS_JSON_KEY, settingsJson)
         }
     }
 }

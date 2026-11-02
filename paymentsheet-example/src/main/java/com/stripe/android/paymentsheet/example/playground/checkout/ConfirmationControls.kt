@@ -16,8 +16,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.stripe.android.checkout.CheckoutController.Session.PaymentOptionDisplayData
+
+internal const val CHECKOUT_CONFIRM_BUTTON_TEST_TAG = "checkout_confirm_button"
+internal const val CHECKOUT_CONFIRMATION_MESSAGE_TEST_TAG = "checkout_confirmation_message"
+internal const val CHECKOUT_COMPLETED_TEST_TAG = "checkout_completed"
 
 @Composable
 internal fun ConfirmationControls(
@@ -41,7 +46,11 @@ internal fun ConfirmationControls(
         paymentOption?.mandateText?.let { Text(text = it, style = MaterialTheme.typography.caption) }
     }
     confirmationMessage?.let { message ->
-        Text(text = message, color = MaterialTheme.colors.error)
+        Text(
+            text = message,
+            color = MaterialTheme.colors.error,
+            modifier = Modifier.testTag(CHECKOUT_CONFIRMATION_MESSAGE_TEST_TAG),
+        )
     }
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         OutlinedButton(
@@ -61,13 +70,19 @@ internal fun ConfirmationControls(
     Button(
         onClick = onConfirm,
         enabled = !isUpdating,
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .testTag(CHECKOUT_CONFIRM_BUTTON_TEST_TAG),
     ) { Text("Confirm") }
 }
 
 @Composable
 private fun CompletedControls(onBackToSettings: () -> Unit) {
-    Text("Payment complete!", style = MaterialTheme.typography.h6)
+    Text(
+        text = "Payment complete!",
+        style = MaterialTheme.typography.h6,
+        modifier = Modifier.testTag(CHECKOUT_COMPLETED_TEST_TAG),
+    )
     Button(
         onClick = onBackToSettings,
         modifier = Modifier.fillMaxWidth(),

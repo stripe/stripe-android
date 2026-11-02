@@ -13,6 +13,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.paymentsheet.example.Settings
 import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutCustomer
 import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutPlaygroundDefinitions
 import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutPlaygroundSettings
@@ -29,7 +30,13 @@ internal class CheckoutControllerExampleViewModel(
     private val savedStateHandle: SavedStateHandle,
     application: Application,
 ) : ViewModel() {
-    val settings = CheckoutPlaygroundSettings.create(application)
+    // Launch-supplied settings stay in memory so a run never rewrites the persisted settings.
+    val settings = savedStateHandle.get<String>(SETTINGS_JSON_KEY)?.let { json ->
+        CheckoutPlaygroundSettings.createInMemory(
+            json = json,
+            defaultBackendUrl = Settings(application).playgroundBackendUrl,
+        )
+    } ?: CheckoutPlaygroundSettings.create(application)
 
     val controller = CheckoutController.Builder(
         application = application,
@@ -202,6 +209,7 @@ internal class CheckoutControllerExampleViewModel(
     companion object {
         private const val TAG = "CheckoutControllerExample"
         private const val RUN_ACTIVE_KEY = "checkout_controller_run_active"
+        const val SETTINGS_JSON_KEY = "checkout_controller_settings_json"
 
         val factory = viewModelFactory {
             initializer {

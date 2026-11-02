@@ -13,8 +13,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+
+internal const val CHECKOUT_CREATE_SESSION_BUTTON_TEST_TAG = "checkout_create_session_button"
 
 @Composable
 internal fun SettingsActions(
@@ -24,7 +27,9 @@ internal fun SettingsActions(
     Button(
         onClick = onStart,
         enabled = canStart,
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .testTag(CHECKOUT_CREATE_SESSION_BUTTON_TEST_TAG),
     ) {
         Text("Create Checkout Session")
     }
