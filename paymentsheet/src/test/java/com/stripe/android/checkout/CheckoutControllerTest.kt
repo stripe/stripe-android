@@ -772,8 +772,7 @@ internal class CheckoutControllerTest {
         )
 
         assertThat(session.availableExpressCheckoutPaymentMethods)
-            .containsExactly("google_pay", "link")
-            .inOrder()
+            .isEqualTo(setOf("google_pay", "link"))
     }
 
     @Test
