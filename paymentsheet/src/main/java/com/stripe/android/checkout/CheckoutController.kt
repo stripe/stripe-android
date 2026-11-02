@@ -551,15 +551,18 @@ class CheckoutController @Inject internal constructor(
 
         /** Payment methods ready to be displayed in [ExpressCheckoutElement].
          *
-         * Possible values are `"google_pay"` and `"link"`.
+         * Possible values are [ExpressCheckoutElement.PaymentMethod.GooglePay] and
+         * [ExpressCheckoutElement.PaymentMethod.Link].
          *
          * When empty, Express Checkout Element will render empty content.
          */
-        val availableExpressCheckoutPaymentMethods: Set<String> =
+        val availableExpressCheckoutPaymentMethods: Set<ExpressCheckoutElement.PaymentMethod> =
             availableExpressButtonTypes.mapTo(mutableSetOf()) { type ->
                 when (type) {
-                    is ExpressButtonType.GooglePay -> "google_pay"
-                    ExpressButtonType.Link -> "link"
+                    is ExpressButtonType.GooglePay -> ExpressCheckoutElement.PaymentMethod.GooglePay(
+                        type = "google_pay"
+                    )
+                    ExpressButtonType.Link -> ExpressCheckoutElement.PaymentMethod.Link(type = "link")
                 }
             }
 

@@ -772,7 +772,12 @@ internal class CheckoutControllerTest {
         )
 
         assertThat(session.availableExpressCheckoutPaymentMethods)
-            .isEqualTo(setOf("google_pay", "link"))
+            .isEqualTo(
+                setOf(
+                    ExpressCheckoutElement.PaymentMethod.GooglePay(type = "google_pay"),
+                    ExpressCheckoutElement.PaymentMethod.Link(type = "link"),
+                )
+            )
     }
 
     @Test

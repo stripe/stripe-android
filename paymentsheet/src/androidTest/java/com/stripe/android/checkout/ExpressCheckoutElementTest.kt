@@ -48,7 +48,7 @@ internal class ExpressCheckoutElementTest {
             assertions = { controller ->
                 assertThat(
                     controller.session.value?.availableExpressCheckoutPaymentMethods
-                ).containsExactly("google_pay")
+                ).containsExactly(ExpressCheckoutElement.PaymentMethod.GooglePay(type = "google_pay"))
             },
             configurationUpdates = {
                 it.linkConfiguration(
@@ -102,7 +102,7 @@ internal class ExpressCheckoutElementTest {
             assertions = { controller ->
                 assertThat(
                     controller.session.value?.availableExpressCheckoutPaymentMethods
-                ).containsExactly("link")
+                ).containsExactly(ExpressCheckoutElement.PaymentMethod.Link(type = "link"))
             },
             configurationUpdates = {
                 it.googlePayConfiguration(
@@ -136,7 +136,10 @@ internal class ExpressCheckoutElementTest {
             assertions = { controller ->
                 assertThat(
                     controller.session.value?.availableExpressCheckoutPaymentMethods
-                ).containsExactly("google_pay", "link")
+                ).containsExactly(
+                    ExpressCheckoutElement.PaymentMethod.GooglePay(type = "google_pay"),
+                    ExpressCheckoutElement.PaymentMethod.Link(type = "link"),
+                )
             },
         ) {
             // Just testing load, no need to confirm.
@@ -212,7 +215,7 @@ internal class ExpressCheckoutElementTest {
             assertions = { controller ->
                 assertThat(
                     controller.session.value?.availableExpressCheckoutPaymentMethods
-                ).containsExactly("google_pay")
+                ).containsExactly(ExpressCheckoutElement.PaymentMethod.GooglePay(type = "google_pay"))
             },
         ) {
             page.assertGooglePayButtonExists()
