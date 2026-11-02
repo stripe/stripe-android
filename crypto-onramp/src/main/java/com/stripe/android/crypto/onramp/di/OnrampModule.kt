@@ -13,7 +13,7 @@ import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.utils.RealUserFacingLogger
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.crypto.onramp.DEFAULT_ONRAMP_INSTANCE_KEY
-import com.stripe.android.crypto.onramp.OnrampCallbackReferences
+import com.stripe.android.crypto.onramp.OnrampCallbackStore
 import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsService
 import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsServiceImpl
 import com.stripe.android.crypto.onramp.model.OnrampSessionClientSecretProvider
@@ -95,14 +95,10 @@ internal class OnrampModule {
 
     @Provides
     fun provideCheckoutHandler(
-        onrampCallbackIdentifier: String
+        callbackStore: OnrampCallbackStore
     ): OnrampSessionClientSecretProvider {
         return OnrampSessionClientSecretProvider { sessionId ->
-            val provider = OnrampCallbackReferences[onrampCallbackIdentifier]
-                ?.onrampSessionClientSecretProvider
-                ?: error("OnrampCallbackReferences not registered for key: $onrampCallbackIdentifier")
-
-            provider.getClientSecret(sessionId)
+            callbackStore.callbacks.onrampSessionClientSecretProvider.getClientSecret(sessionId)
         }
     }
 
