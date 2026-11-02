@@ -1,9 +1,11 @@
 package com.stripe.android.paymentsheet.viewmodels
 
+import com.stripe.android.common.analytics.experiment.PrimaryButtonExperiment
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods.CvcRecollectionState
@@ -18,6 +20,8 @@ import kotlinx.coroutines.flow.StateFlow
 
 internal class PrimaryButtonUiStateMapper(
     private val config: PaymentSheet.Configuration,
+    private val eventReporter: EventReporter,
+    private val mode: EventReporter.Mode,
     private val currentScreenFlow: StateFlow<PaymentSheetScreen>,
     private val buttonsEnabledFlow: StateFlow<Boolean>,
     private val paymentMethodMetadataFlow: StateFlow<PaymentMethodMetadata?>,
@@ -27,6 +31,8 @@ internal class PrimaryButtonUiStateMapper(
     private val onClick: () -> Unit,
     private val onDisabledClick: () -> Unit,
 ) {
+    // StateFlow transformations also run on value reads; expose each metadata session only once.
+    private val primaryButtonIcons = mutableMapOf<PaymentMethodMetadata, PrimaryButtonIcon>()
 
     fun forCompleteFlow(): StateFlow<PrimaryButton.UIState?> {
         return combineAsStateFlow(
@@ -40,7 +46,10 @@ internal class PrimaryButtonUiStateMapper(
             screen.buyButtonState.mapAsStateFlow { buyButtonState ->
                 val canClickWhenDisabled = screen.isFormScreen() && buttonsEnabled
 
-                customPrimaryButton ?: PrimaryButton.UIState(
+                if (customPrimaryButton != null) return@mapAsStateFlow customPrimaryButton
+                if (!buyButtonState.visible) return@mapAsStateFlow null
+
+                PrimaryButton.UIState(
                     label = buyButtonState.buyButtonOverride?.label ?: buyButtonLabel(
                         paymentMethodMetadata?.amount(),
                         config.primaryButtonLabel,
@@ -49,16 +58,28 @@ internal class PrimaryButtonUiStateMapper(
                     onClick = onClick,
                     enabled = buttonsEnabled && selection != null &&
                         cvcRecollectionCompleteOrNotRequired(screen, cvcComplete, selection),
-                    icon = buyButtonState.buyButtonOverride?.icon ?: PrimaryButtonIcon.Lock,
+                    icon = buyButtonState.buyButtonOverride?.icon ?: defaultPrimaryButtonIcon(paymentMethodMetadata),
                     canClickWhileDisabled = canClickWhenDisabled,
                     onDisabledClick = {
                         if (canClickWhenDisabled) {
                             onDisabledClick()
                         }
                     },
-                ).takeIf { buyButtonState.visible }
+                )
             }
         }.flatMapLatestAsStateFlow { it }
+    }
+
+    private fun defaultPrimaryButtonIcon(metadata: PaymentMethodMetadata?): PrimaryButtonIcon {
+        if (metadata == null) return PrimaryButtonIcon.Lock
+
+        return primaryButtonIcons.getOrPut(metadata) {
+            PrimaryButtonExperiment.getIcon(
+                metadata = metadata,
+                eventReporter = eventReporter,
+                mode = mode,
+            )
+        }
     }
 
     fun forCustomFlow(): StateFlow<PrimaryButton.UIState?> {

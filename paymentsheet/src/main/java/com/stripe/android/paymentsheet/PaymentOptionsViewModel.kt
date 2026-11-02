@@ -109,6 +109,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
     private val primaryButtonUiStateMapper = PrimaryButtonUiStateMapper(
         config = config,
+        eventReporter = eventReporter,
+        mode = mode,
         currentScreenFlow = navigationHandler.currentScreen,
         buttonsEnabledFlow = buttonsEnabled,
         paymentMethodMetadataFlow = stateFlowOf(args.state.paymentMethodMetadata),
