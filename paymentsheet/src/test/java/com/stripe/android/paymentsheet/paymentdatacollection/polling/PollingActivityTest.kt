@@ -75,9 +75,6 @@ internal class PollingActivityTest {
         val fakePoller = FakeIntentStatusPoller()
         val scenario = pollingScenario(
             poller = fakePoller,
-            args = defaultArgs.copy(
-                apiConfiguration = DEFAULT_API_CONFIG.copy(stripeAccountId = ApiKeyFixtures.OTHER_ACCOUNT_ID),
-            ),
         )
 
         scenario.onActivity {
@@ -86,17 +83,13 @@ internal class PollingActivityTest {
 
             val result = PaymentFlowResult.Unvalidated.fromIntent(scenario.getResult().resultData)
             assertThat(result.flowOutcome).isEqualTo(StripeIntentResult.Outcome.SUCCEEDED)
-            assertThat(result.stripeAccountId).isEqualTo(ApiKeyFixtures.OTHER_ACCOUNT_ID)
+            assertThat(result.stripeAccountId).isEqualTo(ApiKeyFixtures.FAKE_ACCOUNT_ID)
         }
     }
 
     @Test
     fun `Closes activity with correct result if polling is canceled`() {
-        val scenario = pollingScenario(
-            args = defaultArgs.copy(
-                apiConfiguration = DEFAULT_API_CONFIG.copy(stripeAccountId = ApiKeyFixtures.OTHER_ACCOUNT_ID),
-            ),
-        )
+        val scenario = pollingScenario()
 
         scenario.onActivity {
             composeTestRule
@@ -107,7 +100,7 @@ internal class PollingActivityTest {
 
             val result = PaymentFlowResult.Unvalidated.fromIntent(scenario.getResult().resultData)
             assertThat(result.flowOutcome).isEqualTo(StripeIntentResult.Outcome.CANCELED)
-            assertThat(result.stripeAccountId).isEqualTo(ApiKeyFixtures.OTHER_ACCOUNT_ID)
+            assertThat(result.stripeAccountId).isEqualTo(ApiKeyFixtures.FAKE_ACCOUNT_ID)
         }
     }
 

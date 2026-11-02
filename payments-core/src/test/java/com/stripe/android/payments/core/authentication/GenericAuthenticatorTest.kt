@@ -75,7 +75,7 @@ class GenericAuthenticatorTest {
     }
 }
 
-internal class FakeResumedNextActionHandler : PaymentNextActionHandler<StripeIntent>() {
+private class FakeResumedNextActionHandler : PaymentNextActionHandler<StripeIntent>() {
 
     val nextActionCalls = Turbine<ApiConfiguration.State>()
 

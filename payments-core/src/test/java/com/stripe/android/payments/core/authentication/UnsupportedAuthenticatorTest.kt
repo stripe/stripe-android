@@ -95,7 +95,7 @@ class UnsupportedAuthenticatorTest {
     private companion object {
         private val API_CONFIGURATION = ApiConfiguration.State(
             publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-            stripeAccountId = null,
+            stripeAccountId = ApiKeyFixtures.FAKE_STRIPE_ACCOUNT,
         )
     }
 }
