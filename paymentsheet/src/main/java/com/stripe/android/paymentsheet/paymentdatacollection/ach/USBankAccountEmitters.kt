@@ -15,6 +15,7 @@ internal fun USBankAccountEmitters(
 ) {
     val screenState by viewModel.currentScreenState.collectAsState()
     val hasRequiredFields by viewModel.requiredFields.collectAsState()
+    val primaryButtonIcon by usBankAccountFormArgs.primaryButtonIcon.collectAsState()
     val activityResultRegistryOwner = LocalActivityResultRegistryOwner.current
 
     LaunchedEffect(Unit) {
@@ -41,9 +42,10 @@ internal fun USBankAccountEmitters(
         viewModel.analyticsEvent.collect { usBankAccountFormArgs.onAnalyticsEvent(it) }
     }
 
-    LaunchedEffect(screenState, hasRequiredFields) {
+    LaunchedEffect(screenState, hasRequiredFields, primaryButtonIcon) {
         usBankAccountFormArgs.handleScreenStateChanged(
             screenState = screenState,
+            primaryButtonIcon = primaryButtonIcon,
             canClickWhileDisabled = !screenState.isProcessing,
             enabled = hasRequiredFields && !screenState.isProcessing,
             onPrimaryButtonClick = viewModel::handlePrimaryButtonClick,

@@ -1230,15 +1230,6 @@ class PaymentElement @Inject internal constructor(
                 }
 
                 /**
-                 * The corner radius used for tabs, inputs, buttons, and other components in Payment Element.
-                 *
-                 * @param cornerRadiusRes The corner radius resource ID.
-                 */
-                fun cornerRadiusDp(context: Context, @DimenRes cornerRadiusRes: Int): Shapes = apply {
-                    this.cornerRadiusDp = context.getRawValueFromDimenResource(cornerRadiusRes)
-                }
-
-                /**
                  * The border used for inputs, tabs, and other components in Payment Element.
                  *
                  * @param borderStrokeWidthDp The border width in dp.

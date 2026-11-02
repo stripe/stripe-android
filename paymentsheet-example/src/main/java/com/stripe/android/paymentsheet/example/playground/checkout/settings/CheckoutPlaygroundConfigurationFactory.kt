@@ -50,8 +50,9 @@ private fun CheckoutPlaygroundSettings.Snapshot.contactDetails(
         .apply {
             if (this@contactDetails[definitions.address.enabled]) {
                 address(
-                    CheckoutController.Address()
-                        .country(this@contactDetails[definitions.address.country].uppercase())
+                    CheckoutController.Address(
+                        country = this@contactDetails[definitions.address.country].uppercase(),
+                    )
                         .city(this@contactDetails[definitions.address.city])
                         .line1(this@contactDetails[definitions.address.line1])
                         .line2(this@contactDetails[definitions.address.line2])

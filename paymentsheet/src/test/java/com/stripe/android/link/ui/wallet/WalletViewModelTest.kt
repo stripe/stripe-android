@@ -20,7 +20,6 @@ import com.stripe.android.link.LinkDismissalCoordinator
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentMethodFilter
 import com.stripe.android.link.LinkScreen
-import com.stripe.android.link.NoPaymentMethodOptionsAvailable
 import com.stripe.android.link.RealLinkDismissalCoordinator
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT
@@ -1107,13 +1106,14 @@ class WalletViewModelTest {
     }
 
     @Test
-    fun `dismisses with error when no payment method options available`() = runTest(dispatcher) {
+    fun `navigates to NoFundingSources when no payment method options available`() = runTest(dispatcher) {
         val linkAccountManager = WalletLinkAccountManager()
         linkAccountManager.listPaymentDetailsResult = Result.success(
             ConsumerPaymentDetails(paymentDetails = listOf(TestFactory.CONSUMER_PAYMENT_DETAILS_CARD))
         )
 
         var dismissResult: LinkActivityResult? = null
+        var navigatedScreen: LinkScreen? = null
         val configuration = TestFactory.LINK_CONFIGURATION.copy(
             stripeIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(linkFundingSources = emptyList()),
             financialConnectionsAvailability = null
@@ -1125,14 +1125,14 @@ class WalletViewModelTest {
             linkLaunchMode = createPaymentMethodSelectionMode(
                 paymentMethodFilters = listOf(LinkPaymentMethodFilter.BankAccount)
             ),
+            navigateAndClearStack = { screen -> navigatedScreen = screen },
             dismissWithResult = { result -> dismissResult = result }
         )
 
         advanceUntilIdle()
 
-        assertThat(dismissResult).isInstanceOf(LinkActivityResult.Failed::class.java)
-        val failedResult = dismissResult as LinkActivityResult.Failed
-        assertThat(failedResult.error).isInstanceOf(NoPaymentMethodOptionsAvailable::class.java)
+        assertThat(navigatedScreen).isEqualTo(LinkScreen.NoFundingSources)
+        assertThat(dismissResult).isNull()
     }
 
     @Test

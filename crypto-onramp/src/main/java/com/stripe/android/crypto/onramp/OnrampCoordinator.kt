@@ -202,6 +202,7 @@ class OnrampCoordinator @Inject internal constructor(
 
     /**
      * Create a presenter for handling Link UI interactions.
+     * Call [configure] successfully before creating the presenter.
      *
      * @param activity The activity that will host the Link flows.
      * @return A presenter instance for handling Link UI operations.
@@ -209,9 +210,6 @@ class OnrampCoordinator @Inject internal constructor(
     fun createPresenter(
         activity: ComponentActivity
     ): Presenter {
-        // A finished host removes the global registration. Restore it before
-        // constructing launchers, which can synchronously deliver pending results.
-        callbackStore.restore()
         return presenterComponentFactory
             .build(
                 activity = activity,

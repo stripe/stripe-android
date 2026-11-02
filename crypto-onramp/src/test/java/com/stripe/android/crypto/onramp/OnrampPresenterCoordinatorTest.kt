@@ -7,8 +7,12 @@ import androidx.core.os.BundleCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import app.cash.turbine.Turbine
+import com.google.android.gms.wallet.IsReadyToPayRequest
+import com.google.android.gms.wallet.PaymentsClient
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.crypto.onramp.CheckoutState.Status
+import com.stripe.android.crypto.onramp.exception.GooglePayNotConfiguredException
 import com.stripe.android.crypto.onramp.model.KycQuestion
 import com.stripe.android.crypto.onramp.model.KycQuestionnaire
 import com.stripe.android.crypto.onramp.model.KycQuestionnaireAnswer
@@ -51,13 +55,19 @@ import com.stripe.android.crypto.onramp.ui.HTMLConfirmationContent
 import com.stripe.android.crypto.onramp.ui.HTMLConfirmationResult
 import com.stripe.android.crypto.onramp.ui.KycActivity
 import com.stripe.android.crypto.onramp.ui.KycScreenAction
+import com.stripe.android.googlepaylauncher.GooglePayAvailabilityClient
+import com.stripe.android.googlepaylauncher.GooglePayEnvironment
+import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
+import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.link.LinkController
 import com.stripe.android.model.CardBrand
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withContext
@@ -84,6 +94,7 @@ class OnrampPresenterCoordinatorTest {
     private val lifecycleOwner = TestLifecycleOwner()
     private val activity = Robolectric.buildActivity(ComponentActivity::class.java).create().get()
     private val testScope = TestScope()
+    private val checkoutResults = Channel<OnrampCheckoutResult>(Channel.UNLIMITED)
     private val checkoutCallback = mock<OnrampCheckoutCallback>()
     private val onrampSessionClientSecretProvider: suspend (String) -> String = { "cos_test_secret" }
     private val samsungPayLauncher = FakeSamsungPayLauncher()
@@ -109,12 +120,13 @@ class OnrampPresenterCoordinatorTest {
         // Verify startCheckout was called
         verify(interactor).startCheckout(onrampSessionId)
 
-        // Simulate the interactor emitting a completed checkout state (this will trigger the observer)
+        // Simulate the interactor completing checkout and emitting its result.
         onrampStateFlow.value = OnrampState(
             checkoutState = CheckoutState(
                 status = Status.Completed(OnrampCheckoutResult.Completed())
             )
         )
+        checkoutResults.send((onrampStateFlow.value.checkoutState!!.status as Status.Completed).result)
         testScope.testScheduler.advanceUntilIdle()
 
         // Then
@@ -135,6 +147,7 @@ class OnrampPresenterCoordinatorTest {
                 status = Status.Completed(OnrampCheckoutResult.Canceled())
             )
         )
+        checkoutResults.send((onrampStateFlow.value.checkoutState!!.status as Status.Completed).result)
         testScope.testScheduler.advanceUntilIdle()
 
         val callbackCaptor = argumentCaptor<OnrampCheckoutResult>()
@@ -155,6 +168,7 @@ class OnrampPresenterCoordinatorTest {
                 status = Status.Completed(OnrampCheckoutResult.Failed(error))
             )
         )
+        checkoutResults.send((onrampStateFlow.value.checkoutState!!.status as Status.Completed).result)
         testScope.testScheduler.advanceUntilIdle()
 
         val callbackCaptor = argumentCaptor<OnrampCheckoutResult>()
@@ -164,6 +178,68 @@ class OnrampPresenterCoordinatorTest {
             .isInstanceOf(OnrampCheckoutResult.Failed::class.java)
         assertThat((callbackCaptor.firstValue as OnrampCheckoutResult.Failed).error)
             .isSameInstanceAs(error)
+    }
+
+    @Test
+    fun `recreated presenter does not deliver a checkout result again`() = runTest {
+        val results = Turbine<OnrampCheckoutResult>()
+        val state = MutableStateFlow(OnrampState())
+        createCoordinator(onrampStateFlow = state, checkoutCallback = results::add)
+        val result = OnrampCheckoutResult.Completed()
+        state.value = OnrampState(checkoutState = CheckoutState(Status.Completed(result)))
+        checkoutResults.send(result)
+        testScope.testScheduler.advanceUntilIdle()
+        assertThat(results.awaitItem()).isSameInstanceAs(result)
+
+        lifecycleOwner.currentState = Lifecycle.State.DESTROYED
+        val recreatedOwner = TestLifecycleOwner()
+        try {
+            createCoordinator(
+                onrampStateFlow = state,
+                checkoutCallback = results::add,
+                lifecycleOwner = recreatedOwner,
+                activity = Robolectric.buildActivity(ComponentActivity::class.java).create().get(),
+            )
+            testScope.testScheduler.advanceUntilIdle()
+            results.expectNoEvents()
+
+            val nextResult = OnrampCheckoutResult.Completed()
+            state.value = OnrampState(checkoutState = CheckoutState(Status.Completed(nextResult)))
+            checkoutResults.send(nextResult)
+            testScope.testScheduler.advanceUntilIdle()
+            assertThat(results.awaitItem()).isSameInstanceAs(nextResult)
+            results.ensureAllEventsConsumed()
+        } finally {
+            recreatedOwner.currentState = Lifecycle.State.DESTROYED
+        }
+    }
+
+    @Test
+    fun `recreated presenter delivers checkout completed while no presenter was observing`() = runTest {
+        val results = Turbine<OnrampCheckoutResult>()
+        val state = MutableStateFlow(OnrampState())
+        createCoordinator(onrampStateFlow = state, checkoutCallback = results::add)
+        lifecycleOwner.currentState = Lifecycle.State.DESTROYED
+        val result = OnrampCheckoutResult.Completed()
+        state.value = OnrampState(checkoutState = CheckoutState(Status.Completed(result)))
+        checkoutResults.send(result)
+        testScope.testScheduler.advanceUntilIdle()
+        results.expectNoEvents()
+
+        val recreatedOwner = TestLifecycleOwner()
+        try {
+            createCoordinator(
+                onrampStateFlow = state,
+                checkoutCallback = results::add,
+                lifecycleOwner = recreatedOwner,
+                activity = Robolectric.buildActivity(ComponentActivity::class.java).create().get(),
+            )
+            testScope.testScheduler.advanceUntilIdle()
+            assertThat(results.awaitItem()).isSameInstanceAs(result)
+            results.ensureAllEventsConsumed()
+        } finally {
+            recreatedOwner.currentState = Lifecycle.State.DESTROYED
+        }
     }
 
     @Test
@@ -297,6 +373,89 @@ class OnrampPresenterCoordinatorTest {
             .throwable
         assertThat(error.message).isEqualTo("No ephemeral key found.")
         assertThat(callbackResult).isSameInstanceAs(expectedResult)
+    }
+
+    @Test
+    fun `Google Pay configured before presenter creation reports readiness and launches`() = runTest {
+        val factoryCalls = Turbine<Unit>()
+        val readinessRequests = Turbine<IsReadyToPayRequest>()
+        val readinessResults = Turbine<Boolean>()
+        PaymentConfiguration.init(activity, "pk_test_123")
+        GooglePayRepository.googlePayAvailabilityClientFactory = object : GooglePayAvailabilityClient.Factory {
+            override fun create(paymentsClient: PaymentsClient): GooglePayAvailabilityClient {
+                factoryCalls.add(Unit)
+                return object : GooglePayAvailabilityClient {
+                    override suspend fun isReady(request: IsReadyToPayRequest): Boolean {
+                        readinessRequests.add(request)
+                        return true
+                    }
+                }
+            }
+        }
+        try {
+            val configuration = OnrampConfiguration()
+                .merchantDisplayName("Stripe merchant")
+                .publishableKey("pk_test_123")
+                .googlePayConfig(
+                    GooglePayPaymentMethodLauncher.Config(GooglePayEnvironment.Test, "US", "Stripe merchant")
+                )
+                .build()
+            val state = MutableStateFlow(OnrampState(configurationState = configuration))
+            val coordinator = createCoordinator(
+                onrampStateFlow = state,
+                googlePayIsReadyCallback = readinessResults::add,
+            )
+            testScope.testScheduler.advanceUntilIdle()
+            factoryCalls.awaitItem()
+            readinessRequests.awaitItem()
+            assertThat(readinessResults.awaitItem()).isTrue()
+
+            // Unrelated state updates must not recreate the launcher or repeat readiness callbacks.
+            state.value = state.value.copy(cryptoCustomerId = "cc_123")
+            testScope.testScheduler.advanceUntilIdle()
+            factoryCalls.expectNoEvents()
+            readinessResults.expectNoEvents()
+
+            whenever(interactor.getOrFetchPlatformKey()).thenReturn(Result.success("pk_test_platform"))
+            coordinator.collectPaymentMethod(PaymentMethodSelection.GooglePay("usd", 1099))
+            testScope.testScheduler.advanceUntilIdle()
+
+            assertThat(shadowOf(activity).nextStartedActivityForResult.intent.component?.className)
+                .isEqualTo("com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherActivity")
+            verify(interactor).onGooglePayPresented("pk_test_platform")
+            factoryCalls.ensureAllEventsConsumed()
+            readinessRequests.ensureAllEventsConsumed()
+            readinessResults.ensureAllEventsConsumed()
+        } finally {
+            GooglePayRepository.resetFactory()
+        }
+    }
+
+    @Test
+    fun `Google Pay without configuration returns a failure`() = runTest {
+        val results = Turbine<OnrampCollectPaymentMethodResult>()
+        val expectedResult = OnrampCollectPaymentMethodResult.Failed(IllegalStateException("Not configured"))
+        whenever(interactor.getOrFetchPlatformKey()).thenReturn(Result.success("pk_test_platform"))
+        whenever(interactor.collectPaymentMethodFailure(any())).thenReturn(expectedResult)
+        val coordinator = createCoordinator(collectPaymentCallback = results::add)
+
+        coordinator.collectPaymentMethod(PaymentMethodSelection.GooglePay("usd", 1099))
+        testScope.testScheduler.advanceUntilIdle()
+
+        assertThat(results.awaitItem()).isSameInstanceAs(expectedResult)
+        val error = argumentCaptor<Throwable>()
+        verify(interactor).collectPaymentMethodFailure(error.capture())
+        assertThat(error.firstValue).isInstanceOf(GooglePayNotConfiguredException::class.java)
+        val configurationError = error.firstValue as GooglePayNotConfiguredException
+        assertThat(configurationError.code).isEqualTo("google_pay_not_configured")
+        assertThat(configurationError.userMessage).isEqualTo(
+            activity.getString(R.string.stripe_onramp_google_pay_not_configured)
+        )
+        assertThat(configurationError.developerMessage).contains("OnrampConfiguration.googlePayConfig")
+        assertThat(configurationError.developerMessage).contains("before creating the presenter")
+        verify(interactor, never()).onGooglePayPresented(any())
+        assertThat(shadowOf(activity).nextStartedActivityForResult).isNull()
+        results.ensureAllEventsConsumed()
     }
 
     @Test
@@ -799,6 +958,7 @@ class OnrampPresenterCoordinatorTest {
     private fun createCoordinator(
         onrampStateFlow: MutableStateFlow<OnrampState> = MutableStateFlow(OnrampState()),
         linkStateFlow: MutableStateFlow<LinkController.State> = MutableStateFlow(createFakeLinkState()),
+        googlePayIsReadyCallback: ((Boolean) -> Unit)? = null,
         samsungPayIsReadyCallback: ((Boolean, SamsungPayAvailabilityResult) -> Unit)? = null,
         collectPaymentCallback: OnrampCollectPaymentMethodCallback = OnrampCollectPaymentMethodCallback {},
         kycCallback: OnrampKycCallback? = null,
@@ -806,6 +966,9 @@ class OnrampPresenterCoordinatorTest {
         termsOfServiceCallback: OnrampPartnerTermsCallback? = null,
         userAttestationCallback: OnrampUserAttestationCallback? = null,
         verifyIdentityCallback: OnrampVerifyIdentityCallback = OnrampVerifyIdentityCallback {},
+        checkoutCallback: OnrampCheckoutCallback = this.checkoutCallback,
+        lifecycleOwner: TestLifecycleOwner = this.lifecycleOwner,
+        activity: ComponentActivity = this.activity,
     ): OnrampPresenterCoordinator {
         lifecycleOwner.currentState = Lifecycle.State.STARTED
 
@@ -824,6 +987,7 @@ class OnrampPresenterCoordinatorTest {
         ).thenReturn(linkPresenter)
 
         whenever(interactor.state).thenReturn(onrampStateFlow)
+        whenever(interactor.checkoutResults).thenReturn(checkoutResults.receiveAsFlow())
 
         val callbacks = OnrampCallbacks()
             .checkoutCallback(checkoutCallback)
@@ -833,13 +997,14 @@ class OnrampPresenterCoordinatorTest {
             .verifyKycCallback {}
             .onrampSessionClientSecretProvider(onrampSessionClientSecretProvider)
 
+        googlePayIsReadyCallback?.let(callbacks::googlePayIsReadyCallback)
         samsungPayIsReadyCallback?.let(callbacks::samsungPayIsReadyCallback)
         kycCallback?.let(callbacks::kycCallback)
         termsAndConditionsCallback?.let(callbacks::termsAndConditionsCallback)
         termsOfServiceCallback?.let(callbacks::termsOfServiceCallback)
         userAttestationCallback?.let(callbacks::userAttestationCallback)
 
-        OnrampCallbackReferences[DEFAULT_ONRAMP_INSTANCE_KEY] = callbacks.build()
+        val callbackStore = OnrampCallbackStore().apply { update(callbacks.build()) }
 
         return OnrampPresenterCoordinator(
             linkController = linkController,
@@ -848,6 +1013,7 @@ class OnrampPresenterCoordinatorTest {
             activity = activity,
             coroutineScope = testScope,
             onrampCallbackIdentifier = DEFAULT_ONRAMP_INSTANCE_KEY,
+            callbackStore = callbackStore,
             samsungPayLauncherFactory = samsungPayLauncherFactory,
         )
     }

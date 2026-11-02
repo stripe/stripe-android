@@ -61,12 +61,11 @@ internal class CheckoutShippingAddressElementAnalyticsTest {
                     CheckoutController.Configuration.Defaults.ContactDetails()
                         .name("Real Name")
                         .address(
-                            CheckoutController.Address()
+                            CheckoutController.Address(country = "US")
                                 .line1(initialLine1)
                                 .city("Boston")
                                 .state("MA")
                                 .postalCode("02115")
-                                .country("US")
                         )
                 )
             )
@@ -82,7 +81,6 @@ internal class CheckoutShippingAddressElementAnalyticsTest {
                 autocompleteResultSelected = false,
                 editDistance = null,
             )
-            validateCheckoutLoadRequests()
             page.clickSave()
 
             waitForShippingAddress(
@@ -103,7 +101,7 @@ internal class CheckoutShippingAddressElementAnalyticsTest {
                 CheckoutController.Configuration.Defaults().shippingDetails(
                     CheckoutController.Configuration.Defaults.ContactDetails()
                         .name("Real Name")
-                        .address(CheckoutController.Address().country("US"))
+                        .address(CheckoutController.Address(country = "US"))
                 )
             )
 
@@ -137,7 +135,6 @@ internal class CheckoutShippingAddressElementAnalyticsTest {
                 autocompleteResultSelected = true,
                 editDistance = 0,
             )
-            validateCheckoutLoadRequests()
             page.clickSave()
 
             waitForShippingAddress(
@@ -158,7 +155,6 @@ internal class CheckoutShippingAddressElementAnalyticsTest {
             checkoutInitResponse = ::createCheckoutInitResponse,
             renderPaymentElementContent = false,
             setup = { configuredController ->
-                validateCheckoutLoadRequests()
                 assertThat(configuredController.configure(DEFAULT_CLIENT_SECRET, configuration))
                     .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
             },
@@ -200,11 +196,6 @@ internal class CheckoutShippingAddressElementAnalyticsTest {
         }
     }
 
-    private fun validateCheckoutLoadRequests() {
-        validateCheckoutAnalyticsRequest("mc_load_started")
-        validateCheckoutAnalyticsRequest("mc_load_succeeded")
-    }
-
     private fun validateAddressElementAnalyticsRequest(
         eventName: String,
         vararg requestMatchers: RequestMatcher,
@@ -213,13 +204,6 @@ internal class CheckoutShippingAddressElementAnalyticsTest {
             eventName = eventName,
             productUsage = ADDRESS_ELEMENT_PRODUCT_USAGE,
             *requestMatchers,
-        )
-    }
-
-    private fun validateCheckoutAnalyticsRequest(eventName: String) {
-        networkRule.validateAnalyticsRequest(
-            eventName = eventName,
-            productUsage = CHECKOUT_PRODUCT_USAGE,
         )
     }
 
@@ -261,7 +245,6 @@ internal class CheckoutShippingAddressElementAnalyticsTest {
         const val PICKED_STATE = "CA"
         const val PICKED_POSTAL_CODE = "94103"
         val ADDRESS_ELEMENT_PRODUCT_USAGE = setOf("PaymentSheet.AddressController")
-        val CHECKOUT_PRODUCT_USAGE = setOf("checkout_elements")
         val AUTOCOMPLETE_RESPONSE = """
             {
               "source": "google",

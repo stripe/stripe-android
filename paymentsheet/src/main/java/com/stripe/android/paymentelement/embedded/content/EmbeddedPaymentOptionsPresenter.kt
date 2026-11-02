@@ -18,13 +18,7 @@ internal class DefaultEmbeddedPaymentOptionsPresenter @Inject constructor(
     private val errorReporter: ErrorReporter,
 ) : EmbeddedPaymentOptionsPresenter {
     override fun present() {
-        val state = state.value
-        if (state == null) {
-            errorReporter.report(
-                ErrorReporter.UnexpectedErrorEvent.EMBEDDED_PRESENT_PAYMENT_OPTIONS_NOT_CONFIGURED
-            )
-            return
-        }
+        val state = state.value ?: return
         val launcher = sheetStateHolder.sheetLauncher
         if (launcher == null) {
             errorReporter.report(

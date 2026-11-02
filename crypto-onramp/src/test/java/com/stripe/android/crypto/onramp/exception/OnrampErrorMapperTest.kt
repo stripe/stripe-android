@@ -1,6 +1,7 @@
 package com.stripe.android.crypto.onramp.exception
 
 import android.content.Context
+import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.crypto.onramp.R
@@ -68,6 +69,21 @@ class OnrampErrorMapperTest {
         )
 
         assertThat(secondMapping).isSameInstanceAs(firstMapping)
+    }
+
+    @Test
+    fun `Google Pay configuration error retains its specific type and code`() {
+        val error = GooglePayNotConfiguredException("Google Pay is unavailable.")
+
+        val mapped = error.toCryptoOnrampError(
+            context = ApplicationProvider.getApplicationContext(),
+            operation = Operation.CollectPaymentMethod,
+            publishableKey = "pk_test_123",
+        )
+
+        assertThat(mapped).isSameInstanceAs(error)
+        assertThat(error.code).isEqualTo("google_pay_not_configured")
+        assertThat(error.underlyingError).isNull()
     }
 
     private fun createContext(): Context {

@@ -4,10 +4,12 @@ package com.stripe.android.checkout
 
 import android.content.Context
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent
 import com.stripe.android.checkout.analytics.CheckoutConfirmationContext
 import com.stripe.android.checkout.analytics.CheckoutConfirmationContext.InvocationSource
 import com.stripe.android.checkout.analytics.CheckoutConfirmationContext.LinkUi
-import com.stripe.android.checkout.analytics.CheckoutConfirmationEvent
+import com.stripe.android.checkout.analytics.ConfirmOperation
+import com.stripe.android.checkout.analytics.toAnalyticsMap
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
@@ -22,7 +24,6 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.intent.CheckoutSessionResponseKey
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.state.DefaultAnalyticsMetadataFactory
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.utils.toConfirmationError
 import kotlinx.coroutines.CoroutineScope
@@ -79,43 +80,28 @@ internal class CheckoutAnalyticsPerformer @Inject constructor(
         val confirmationResponse = (result as? ConfirmationHandler.Result.Succeeded)
             ?.metadata?.get(CheckoutSessionResponseKey)
         val response = confirmationResponse ?: stateHolder.state?.checkoutSessionResponse
-        val analyticsMetadata = DefaultAnalyticsMetadataFactory.create(response)
-        val duration = durationProvider.end(DurationProvider.Key.CheckoutConfirmation)
+        val operation = ConfirmOperation(confirmationContext, durationProvider, ::reportEvent)
 
         when (result) {
-            is ConfirmationHandler.Result.Succeeded -> reportEvent(
-                CheckoutConfirmationEvent.Succeeded(
-                    confirmationContext = confirmationContext,
-                    analyticsMetadata = analyticsMetadata,
-                    duration = duration,
-                )
+            is ConfirmationHandler.Result.Succeeded -> operation.succeeded(response)
+            is ConfirmationHandler.Result.Failed -> operation.failed(
+                response,
+                result.toConfirmationError() ?: PaymentSheetConfirmationError(result.cause),
             )
-            is ConfirmationHandler.Result.Failed -> reportEvent(
-                CheckoutConfirmationEvent.Failed(
-                    confirmationContext = confirmationContext,
-                    analyticsMetadata = analyticsMetadata,
-                    duration = duration,
-                    error = result.toConfirmationError() ?: PaymentSheetConfirmationError(result.cause),
-                )
-            )
-            is ConfirmationHandler.Result.Canceled -> reportEvent(
-                CheckoutConfirmationEvent.Canceled(
-                    confirmationContext = confirmationContext,
-                    analyticsMetadata = analyticsMetadata,
-                    duration = duration,
-                )
-            )
+            is ConfirmationHandler.Result.Canceled -> operation.canceled(response)
         }
     }
 
-    private fun reportEvent(event: CheckoutConfirmationEvent) {
-        val publishableKey = stateHolder.state?.paymentMethodMetadata?.apiConfiguration?.publishableKey
+    private fun reportEvent(event: CheckoutAnalyticsEvent) {
+        val state = stateHolder.state
+        val publishableKey = state?.paymentMethodMetadata?.apiConfiguration?.publishableKey
             ?: apiConfigurationProvider.get().publishableKey
+        val configurationParams = state?.configuration?.toAnalyticsMap().orEmpty()
         CoroutineScope(workContext).launch {
             analyticsRequestExecutor.executeAsync(
                 analyticsRequestFactory.createRequest(
                     event = event,
-                    additionalParams = event.params,
+                    additionalParams = event.params + configurationParams,
                     publishableKeyOverride = publishableKey,
                 )
             )
@@ -141,11 +127,8 @@ internal class CheckoutAnalyticsPerformer @Inject constructor(
         )
         savedStateHandle[CONFIRMATION_CONTEXT_KEY] = confirmationContext
         durationProvider.start(DurationProvider.Key.CheckoutConfirmation)
-        reportEvent(
-            CheckoutConfirmationEvent.Started(
-                confirmationContext = confirmationContext,
-                analyticsMetadata = DefaultAnalyticsMetadataFactory.create(state?.checkoutSessionResponse),
-            )
+        ConfirmOperation(confirmationContext, durationProvider, ::reportEvent).started(
+            state?.checkoutSessionResponse
         )
     }
 

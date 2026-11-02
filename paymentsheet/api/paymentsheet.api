@@ -480,6 +480,13 @@ public final class com/stripe/android/link/ui/inline/ComposableSingletons$LinkOp
 	public final fun getLambda$1832128909$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 }
 
+public final class com/stripe/android/link/ui/nofundingsources/ComposableSingletons$NoFundingSourcesScreenKt {
+	public static final field INSTANCE Lcom/stripe/android/link/ui/nofundingsources/ComposableSingletons$NoFundingSourcesScreenKt;
+	public fun <init> ()V
+	public final fun getLambda$-1616419435$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$913975993$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+}
+
 public final class com/stripe/android/link/ui/oauth/ComposableSingletons$OAuthConsentScreenKt {
 	public static final field INSTANCE Lcom/stripe/android/link/ui/oauth/ComposableSingletons$OAuthConsentScreenKt;
 	public fun <init> ()V

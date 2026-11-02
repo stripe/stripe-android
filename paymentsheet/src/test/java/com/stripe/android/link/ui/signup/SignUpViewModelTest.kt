@@ -23,6 +23,7 @@ import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
@@ -378,6 +379,38 @@ internal class SignUpViewModelTest {
 
         assertThat(screens).containsExactly(LinkScreen.Wallet)
     }
+
+    @Test
+    fun `When signed up with verified account without funding sources then it navigates to NoFundingSources`() =
+        runTest(dispatcher) {
+            val screens = arrayListOf<LinkScreen>()
+            val linkAccountManager = FakeLinkAccountManager()
+            val viewModel = createViewModel(
+                configuration = TestFactory.LINK_CONFIGURATION.copy(
+                    stripeIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(linkFundingSources = listOf("bank_account"))
+                ),
+                linkAccountManager = linkAccountManager,
+                linkEventsReporter = object : SignUpLinkEventsReporter() {
+                    override fun onSignupCompleted(isInline: Boolean) = Unit
+                },
+                navigateAndClearStack = { screen ->
+                    screens.add(screen)
+                }
+            )
+
+            val linkAccount = LinkAccount(
+                mockConsumerSessionWithVerificationSession(
+                    ConsumerSession.VerificationSession.SessionType.Sms,
+                    ConsumerSession.VerificationSession.SessionState.Verified
+                ).copy(supportedPaymentDetailsTypes = listOf("CARD"))
+            )
+
+            linkAccountManager.signupResult = Result.success(linkAccount)
+
+            viewModel.performValidSignup()
+
+            assertThat(screens).containsExactly(LinkScreen.NoFundingSources)
+        }
 
     @Test
     fun `When signup succeeds then analytics event is sent`() = runTest(dispatcher) {

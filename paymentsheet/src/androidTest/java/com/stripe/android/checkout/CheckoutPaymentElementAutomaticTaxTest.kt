@@ -742,9 +742,8 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
         return checkoutConfiguration(paymentMethodLayout).defaults(
             CheckoutController.Configuration.Defaults().billingDetails(
                 CheckoutController.Configuration.Defaults.ContactDetails().address(
-                    CheckoutController.Address()
+                    CheckoutController.Address(country = "US")
                         .city(BILLING_ADDRESS_CITY)
-                        .country("US")
                         .line1(BILLING_ADDRESS_LINE_ONE)
                         .postalCode(BILLING_ADDRESS_ZIP)
                         .state(BILLING_ADDRESS_STATE)

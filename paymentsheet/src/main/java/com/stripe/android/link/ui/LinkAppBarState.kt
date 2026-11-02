@@ -44,6 +44,7 @@ internal data class LinkAppBarState(
                 LinkScreen.Wallet.route,
                 LinkScreen.Verification.route,
                 LinkScreen.OAuthConsent.route,
+                LinkScreen.NoFundingSources.route,
             )
 
             if (consumerIsSigningUp) {

@@ -602,15 +602,13 @@ internal class CheckoutGooglePayPaymentDataUpdateCallbackTest {
             iso3166AdministrativeArea = null,
         )
 
-        val BILLING_ADDRESS = CheckoutController.Address()
-            .country("US")
+        val BILLING_ADDRESS = CheckoutController.Address(country = "US")
             .city("New York")
             .postalCode("10011")
             .state("NY")
             .build()
 
-        val ADDRESS = CheckoutController.Address()
-            .country("US")
+        val ADDRESS = CheckoutController.Address(country = "US")
             .city("South San Francisco")
             .postalCode("94080")
             .state("CA")

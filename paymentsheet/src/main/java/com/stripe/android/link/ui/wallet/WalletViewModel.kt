@@ -20,7 +20,6 @@ import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.LinkScreen.UpdateCard.BillingDetailsUpdateFlow
-import com.stripe.android.link.NoPaymentMethodOptionsAvailable
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.account.linkAccountUpdate
 import com.stripe.android.link.confirmation.CompleteLinkFlow
@@ -170,12 +169,9 @@ internal class WalletViewModel(
                             presentAddBankAccount()
                         }
                         null -> {
-                            dismissWithResult(
-                                LinkActivityResult.Failed(
-                                    error = NoPaymentMethodOptionsAvailable(),
-                                    linkAccountUpdate = linkAccountManager.linkAccountUpdate
-                                )
-                            )
+                            // Nothing to pay with and nothing the user can add, e.g. because of the
+                            // integration's payment method filters.
+                            navigateAndClearStack(LinkScreen.NoFundingSources)
                         }
                     }
                 }
@@ -656,7 +652,7 @@ internal fun StripeIntent.isSetupForFutureUsage(passthroughModeEnabled: Boolean)
     }
 }
 
-private fun StripeIntent.secondaryButtonLabel(linkLaunchMode: LinkLaunchMode): ResolvableString? {
+internal fun StripeIntent.secondaryButtonLabel(linkLaunchMode: LinkLaunchMode): ResolvableString? {
     return when (linkLaunchMode) {
         is LinkLaunchMode.Full -> payAnotherWayLabel().takeIf { linkLaunchMode.showSecondaryButton }
         is LinkLaunchMode.Confirmation -> payAnotherWayLabel()

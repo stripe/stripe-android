@@ -24,6 +24,8 @@ import com.stripe.android.link.linkViewModel
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.LinkTheme
+import com.stripe.android.link.ui.nofundingsources.NoFundingSourcesScreen
+import com.stripe.android.link.ui.nofundingsources.NoFundingSourcesViewModel
 import com.stripe.android.link.ui.oauth.OAuthConsentScreen
 import com.stripe.android.link.ui.oauth.OAuthConsentViewModel
 import com.stripe.android.link.ui.paymentmenthod.PaymentMethodScreen
@@ -195,6 +197,18 @@ private fun Screens(
             )
         }
 
+        composable(LinkScreen.NoFundingSources.route) { backStackEntry ->
+            val linkAccount = rememberRouteLinkAccount(
+                backStackEntry = backStackEntry,
+                getLinkAccount = getLinkAccount,
+            ) ?: return@composable dismissWithResult(noLinkAccountResult())
+            NoFundingSourcesRoute(
+                linkAccount = linkAccount,
+                dismissWithResult = dismissWithResult,
+                changeEmail = changeEmail,
+            )
+        }
+
         composable(LinkScreen.OAuthConsent.route) { backStackEntry ->
             val linkAccount = rememberRouteLinkAccount(
                 backStackEntry = backStackEntry,
@@ -316,6 +330,25 @@ private fun WalletRoute(
         showBottomSheetContent = showBottomSheetContent,
         hideBottomSheetContent = hideBottomSheetContent,
         onLogoutClicked = onLogoutClicked,
+    )
+}
+
+@Composable
+private fun NoFundingSourcesRoute(
+    linkAccount: LinkAccount,
+    dismissWithResult: (LinkActivityResult) -> Unit,
+    changeEmail: () -> Unit,
+) {
+    val viewModel: NoFundingSourcesViewModel = linkViewModel { parentComponent ->
+        NoFundingSourcesViewModel.factory(
+            parentComponent = parentComponent,
+            linkAccount = linkAccount,
+            dismissWithResult = dismissWithResult,
+            logInToAnotherAccount = changeEmail,
+        )
+    }
+    NoFundingSourcesScreen(
+        viewModel = viewModel,
     )
 }
 

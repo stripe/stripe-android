@@ -32,6 +32,7 @@ import com.stripe.android.link.confirmation.LinkConfirmationHandler
 import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.ConsentPresentation
+import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.LinkAuthIntentInfo
 import com.stripe.android.link.ui.signup.SignUpViewModel
 import com.stripe.android.link.ui.wallet.AddPaymentMethodOptions
@@ -40,6 +41,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.ConsumerSessionRefresh
 import com.stripe.android.model.LinkAuthIntent
+import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.networking.RequestSurface
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
@@ -322,6 +324,61 @@ internal class LinkActivityViewModelTest {
         val state = vm.linkScreenState.value as ScreenState.FullScreen
         assertEquals(state.initialDestination, LinkScreen.Wallet)
     }
+
+    @Test
+    fun `onCreate should start with NoFundingSources screen when consumer can't use any funding sources`() = runTest {
+        val linkAccount = LinkAccount(
+            TestFactory.CONSUMER_SESSION.copy(supportedPaymentDetailsTypes = listOf("CARD"))
+        )
+        val linkAccountManager = FakeLinkAccountManager()
+        linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(linkAccount))
+        linkAccountManager.setAccountStatus(AccountStatus.Verified(consentPresentation = null))
+
+        val vm = createViewModel(
+            linkAccountManager = linkAccountManager,
+            linkConfiguration = TestFactory.LINK_CONFIGURATION.copy(
+                stripeIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(linkFundingSources = listOf("bank_account"))
+            ),
+        )
+
+        vm.onCreate(mock())
+
+        advanceUntilIdle()
+
+        val state = vm.linkScreenState.value as ScreenState.FullScreen
+        assertThat(state.initialDestination).isEqualTo(LinkScreen.NoFundingSources)
+    }
+
+    @Test
+    fun `onCreate should start with NoFundingSources screen when payment method filters exclude consumer types`() =
+        runTest {
+            val linkAccount = LinkAccount(
+                TestFactory.CONSUMER_SESSION.copy(supportedPaymentDetailsTypes = listOf("CARD"))
+            )
+            val linkAccountManager = FakeLinkAccountManager()
+            linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(linkAccount))
+            linkAccountManager.setAccountStatus(AccountStatus.Verified(consentPresentation = null))
+
+            val vm = createViewModel(
+                linkAccountManager = linkAccountManager,
+                linkConfiguration = TestFactory.LINK_CONFIGURATION.copy(
+                    stripeIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
+                        linkFundingSources = listOf("card", "bank_account")
+                    )
+                ),
+                linkLaunchMode = LinkLaunchMode.PaymentMethodSelection(
+                    selectedPayment = null,
+                    paymentMethodFilters = listOf(LinkPaymentMethodFilter.BankAccount),
+                ),
+            )
+
+            vm.onCreate(mock())
+
+            advanceUntilIdle()
+
+            val state = vm.linkScreenState.value as ScreenState.FullScreen
+            assertThat(state.initialDestination).isEqualTo(LinkScreen.NoFundingSources)
+        }
 
     @Test
     fun `onCreate should start with verification screen when account status is NeedsVerification`() = runTest {

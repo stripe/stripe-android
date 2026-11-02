@@ -24,6 +24,7 @@ import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.inline.SignUpConsentAction
+import com.stripe.android.link.walletScreen
 import com.stripe.android.link.withDismissalDisabled
 import com.stripe.android.model.EmailSource
 import com.stripe.android.paymentsheet.R
@@ -252,7 +253,7 @@ internal class SignUpViewModel @Inject constructor(
     private fun onAccountFetched(linkAccount: LinkAccount) {
         val targetScreen = when {
             linkAccount.completedSignup -> LinkScreen.PaymentMethod
-            linkAccount.isVerified -> LinkScreen.Wallet
+            linkAccount.isVerified -> configuration.walletScreen(linkAccount, linkLaunchMode)
             else -> LinkScreen.Verification
         }
 

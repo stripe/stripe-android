@@ -86,9 +86,11 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.parcelize.Parcelize
 import java.io.File
@@ -111,6 +113,10 @@ internal class OnrampInteractor @Inject constructor(
 ) {
     private val _state = MutableStateFlow(OnrampState())
     val state: StateFlow<OnrampState> = _state.asStateFlow()
+
+    // Retain results while no presenter is observing, including across activity recreation.
+    private val checkoutResultChannel = Channel<OnrampCheckoutResult>(Channel.UNLIMITED)
+    val checkoutResults = checkoutResultChannel.receiveAsFlow()
 
     private var analyticsService: OnrampAnalyticsService? = null
 
@@ -1309,28 +1315,12 @@ internal class OnrampInteractor @Inject constructor(
         trackError(Operation.PerformCheckout, mappedError)
 
         clearLaunchedNextAction()
-        clearPendingCheckout()
-
-        _state.update {
-            it.copy(
-                checkoutState = CheckoutState(
-                    Status.Completed(OnrampCheckoutResult.Failed(mappedError))
-                )
-            )
-        }
+        completeCheckout(OnrampCheckoutResult.Failed(mappedError))
     }
 
     fun onHandleNextActionCanceled() {
         clearLaunchedNextAction()
-        clearPendingCheckout()
-
-        _state.update {
-            it.copy(
-                checkoutState = CheckoutState(
-                    Status.Completed(OnrampCheckoutResult.Canceled())
-                )
-            )
-        }
+        completeCheckout(OnrampCheckoutResult.Canceled())
     }
 
     /**
@@ -1366,13 +1356,7 @@ internal class OnrampInteractor @Inject constructor(
         val onrampSessionId = resolveOnrampSessionId()
         if (onrampSessionId == null) {
             clearLaunchedNextAction()
-            _state.update {
-                it.copy(
-                    checkoutState = CheckoutState(
-                        Status.Completed(createAndTrackPaymentFailedCheckoutResult())
-                    )
-                )
-            }
+            completeCheckout(createAndTrackPaymentFailedCheckoutResult())
             return
         }
 
@@ -1451,10 +1435,16 @@ internal class OnrampInteractor @Inject constructor(
             )
 
         if (checkoutStatus is Status.Completed) {
-            clearPendingCheckout()
+            completeCheckout(checkoutStatus.result)
+        } else {
+            _state.update { it.copy(checkoutState = CheckoutState(checkoutStatus)) }
         }
+    }
 
-        _state.update { it.copy(checkoutState = CheckoutState(checkoutStatus)) }
+    private fun completeCheckout(result: OnrampCheckoutResult) {
+        clearPendingCheckout()
+        _state.update { it.copy(checkoutState = CheckoutState(Status.Completed(result))) }
+        checkoutResultChannel.trySend(result).getOrThrow()
     }
 
     fun markNextActionLaunched(status: Status.RequiresNextAction): Boolean {

@@ -13,6 +13,7 @@ import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.utils.StatusBarCompat
 import com.stripe.android.crypto.onramp.di.OnrampPresenterScope
+import com.stripe.android.crypto.onramp.exception.GooglePayNotConfiguredException
 import com.stripe.android.crypto.onramp.exception.PaymentFailedException
 import com.stripe.android.crypto.onramp.exception.SamsungPayException.Reason
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
@@ -71,11 +72,11 @@ internal class OnrampPresenterCoordinator @Inject constructor(
     private val activity: ComponentActivity,
     private val coroutineScope: CoroutineScope,
     private val onrampCallbackIdentifier: String,
+    private val callbackStore: OnrampCallbackStore,
     private val samsungPayLauncherFactory: SamsungPayLauncher.Factory,
 ) {
     private val onrampCallbacksState: OnrampCallbacks.State
-        get() = OnrampCallbackReferences[onrampCallbackIdentifier]
-            ?: error("OnrampCallbackReferences not registered for key: $onrampCallbackIdentifier")
+        get() = callbackStore.callbacks
     private val linkControllerState = linkController.state(activity)
 
     private val linkPresenter = linkController.createPresenter(
@@ -178,6 +179,12 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                 .collect { it.checkoutState?.let(::handleCheckoutStateChange) }
         }
 
+        lifecycleOwner.lifecycleScope.launch {
+            interactor.checkoutResults.collect { result ->
+                onrampCallbacksState.checkoutCallback.onResult(result)
+            }
+        }
+
         lifecycleOwner.lifecycle.addObserver(
             object : DefaultLifecycleObserver {
                 override fun onDestroy(owner: LifecycleOwner) {
@@ -191,7 +198,6 @@ internal class OnrampPresenterCoordinator @Inject constructor(
 
                     if (activity.isFinishing) {
                         KycSubmissionHandlerRegistry.remove(onrampCallbackIdentifier)
-                        OnrampCallbackReferences.remove(onrampCallbackIdentifier)
                     }
                 }
             }
@@ -401,8 +407,19 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                 coroutineScope.launch {
                     interactor.getOrFetchPlatformKey().fold(
                         onSuccess = {
+                            val launcher = googlePayPaymentMethodLauncher
+                            if (launcher == null) {
+                                onrampCallbacksState.collectPaymentCallback.onResult(
+                                    interactor.collectPaymentMethodFailure(
+                                        GooglePayNotConfiguredException(
+                                            activity.getString(R.string.stripe_onramp_google_pay_not_configured)
+                                        )
+                                    )
+                                )
+                                return@fold
+                            }
                             interactor.onGooglePayPresented(it)
-                            googlePayPaymentMethodLauncher?.present(
+                            launcher.present(
                                 currencyCode = selection.currencyCode,
                                 amount = selection.amount,
                                 clientAttributionMetadata = null,
@@ -497,10 +514,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                     handleNextAction(status.paymentIntent, status.platformKey)
                 }
             }
-            is CheckoutState.Status.Completed -> {
-                // Checkout finished - notify callback
-                onrampCallbacksState.checkoutCallback.onResult(status.result)
-            }
+            is CheckoutState.Status.Completed -> Unit // Results are delivered through checkoutResults.
         }
     }
 

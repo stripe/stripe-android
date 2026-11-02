@@ -11,6 +11,7 @@ import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutControllerSavedState
 import com.stripe.android.checkout.CheckoutControllerStateHolder
+import com.stripe.android.checkout.CheckoutLoadingEventReporter
 import com.stripe.android.checkout.CheckoutOperationCoordinator
 import com.stripe.android.checkout.CheckoutPaymentOptionDisplayDataFactory
 import com.stripe.android.checkout.CheckoutPaymentSelectionHandler
@@ -195,7 +196,7 @@ internal interface CheckoutControllerModule {
 
     @Binds
     @Singleton
-    fun bindsLoadingReporter(eventReporter: DefaultEventReporter): LoadingEventReporter
+    fun bindsLoadingReporter(eventReporter: CheckoutLoadingEventReporter): LoadingEventReporter
 
     @Binds
     fun bindsErrorReporter(errorReporter: RealErrorReporter): ErrorReporter

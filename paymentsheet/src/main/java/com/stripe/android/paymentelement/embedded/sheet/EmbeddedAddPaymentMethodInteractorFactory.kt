@@ -113,6 +113,7 @@ internal class EmbeddedAddPaymentMethodInteractorFactory @Inject constructor(
             selectedPaymentMethodCode = paymentMethodCode,
             hostedSurface = HOSTED_SURFACE_PAYMENT_ELEMENT,
             isCompleteFlow = false,
+            primaryButtonIcon = sheetActivityStateHolder.state.mapAsStateFlow { it.primaryButtonIcon },
             draftPaymentSelection = embeddedSelectionHolder.getPreviousNewSelection(paymentMethodCode),
             bankFormInteractor = bankFormInteractor,
             hasSavedPaymentMethods = hasSavedPaymentMethods,

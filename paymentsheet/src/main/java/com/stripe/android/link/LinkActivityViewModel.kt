@@ -513,7 +513,7 @@ internal class LinkActivityViewModel @Inject constructor(
                     } else {
                         // We have a verified account or we're relaunching after signing up
                         // and adding a payment then show the wallet.
-                        LinkScreen.Wallet
+                        linkConfiguration.walletScreen(linkAccount, linkLaunchMode)
                     }
                 ScreenState.FullScreen(linkScreen)
             }

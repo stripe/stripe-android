@@ -207,10 +207,10 @@ internal class DefaultAnalyticsMetadataFactory @Inject constructor(
 
         val primaryButtonConfigMap = buildMap<String, AnalyticsMetadata.Value> {
             put(
-                "colorsLight",
+                "colors_light",
                 SimpleBoolean(primaryButton.colorsLight != PaymentSheet.PrimaryButtonColors.defaultLight)
             )
-            put("colorsDark", SimpleBoolean(primaryButton.colorsDark != PaymentSheet.PrimaryButtonColors.defaultDark))
+            put("colors_dark", SimpleBoolean(primaryButton.colorsDark != PaymentSheet.PrimaryButtonColors.defaultDark))
             put("corner_radius", SimpleBoolean(primaryButtonConfig.shape.cornerRadiusDp != null))
             put("border_width", SimpleBoolean(primaryButtonConfig.shape.borderStrokeWidthDp != null))
             put("font", SimpleBoolean(primaryButtonConfig.typography.fontResId != null))
@@ -218,8 +218,8 @@ internal class DefaultAnalyticsMetadataFactory @Inject constructor(
         put("primary_button", Nested(primaryButtonConfigMap))
 
         val appearanceMap = buildMap<String, AnalyticsMetadata.Value> {
-            put("colorsLight", SimpleBoolean(colorsLight != PaymentSheet.Colors.defaultLight))
-            put("colorsDark", SimpleBoolean(colorsDark != PaymentSheet.Colors.defaultDark))
+            put("colors_light", SimpleBoolean(colorsLight != PaymentSheet.Colors.defaultLight))
+            put("colors_dark", SimpleBoolean(colorsDark != PaymentSheet.Colors.defaultDark))
             put("corner_radius", SimpleBoolean(shapes.cornerRadiusDp != StripeThemeDefaults.shapes.cornerRadius))
             val customizedBorderWidth = shapes.borderStrokeWidthDp != StripeThemeDefaults.shapes.borderStrokeWidth
             put("border_width", SimpleBoolean(customizedBorderWidth))

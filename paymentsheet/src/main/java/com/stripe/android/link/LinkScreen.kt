@@ -6,6 +6,8 @@ import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import com.stripe.android.link.LinkScreen.UpdateCard.BillingDetailsUpdateFlow
+import com.stripe.android.link.model.LinkAccount
+import com.stripe.android.link.model.supportedPaymentMethodTypes
 
 internal sealed class LinkScreen(
     protected val baseRoute: String,
@@ -23,6 +25,7 @@ internal sealed class LinkScreen(
     data object PaymentMethod : LinkScreen("paymentMethod")
     data object SignUp : LinkScreen("signUp")
     data object OAuthConsent : LinkScreen("oauthConsent")
+    data object NoFundingSources : LinkScreen("noFundingSources")
 
     data object UpdateCard : LinkScreen(
         baseRoute = "updateCard",
@@ -84,6 +87,29 @@ internal sealed class LinkScreen(
             return BillingDetailsUpdateFlow(cvc = cvc)
         }
     }
+}
+
+/**
+ * The screen to show a verified consumer: the wallet, or [LinkScreen.NoFundingSources] when none of the
+ * consumer's payment details types work with this business. We only learn which types the consumer can use
+ * after they authenticate, so we can't hide Link up front.
+ *
+ * The supported types are the intersection of the merchant's funding sources, the consumer's payment details
+ * types, and the [LinkLaunchMode.PaymentMethodSelection.paymentMethodFilters] set by the integration.
+ */
+internal fun LinkConfiguration.walletScreen(
+    linkAccount: LinkAccount,
+    linkLaunchMode: LinkLaunchMode,
+): LinkScreen {
+    val consumerTypes = linkAccount.supportedPaymentDetailsTypes
+    // Only show the error once we know the consumer's types, since an empty list means they aren't known yet.
+    if (consumerTypes.isEmpty()) return LinkScreen.Wallet
+
+    val paymentMethodFilters = (linkLaunchMode as? LinkLaunchMode.PaymentMethodSelection)?.paymentMethodFilters
+    val supportedTypes = stripeIntent.supportedPaymentMethodTypes(consumerTypes).filter { type ->
+        paymentMethodFilters == null || paymentMethodFilters.any { filter -> filter.allows(type) }
+    }
+    return if (supportedTypes.isEmpty()) LinkScreen.NoFundingSources else LinkScreen.Wallet
 }
 
 private fun String.appendParamValues(params: Map<String, String?>): String {

@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.customersheet.data.CustomerSheetDataResult
 import com.stripe.android.customersheet.data.CustomerSheetIntentDataSource
 import com.stripe.android.customersheet.data.FakeCustomerSheetIntentDataSource
@@ -24,11 +25,11 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class CustomerSheetSetupIntentInterceptorTest {
 
-    private val clientAttributionMetadata = ClientAttributionMetadata(
+    private val clientAttributionMetadata = ClientAttributionMetadata.Elements(
         elementsSessionConfigId = "test_session_id",
         paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
         paymentMethodSelectionFlow = PaymentMethodSelectionFlow.MerchantSpecified,
-        checkoutSessionId = null,
+        stripeSdkVersion = StripeSdkVersion.VERSION_NAME,
     )
 
     private val requestOptions = ApiRequest.Options(

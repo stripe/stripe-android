@@ -1,5 +1,6 @@
 package com.stripe.android.utils
 
+import app.cash.turbine.Turbine
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -37,6 +38,7 @@ internal class FakePaymentElementLoader(
     private val shippingDetails: AddressDetails? = null,
     private val experimentsData: ElementsSession.ExperimentsData? = null,
     private val integrationMetadata: IntegrationMetadata? = null,
+    private val initializationModeRecorder: Turbine<PaymentElementLoader.InitializationMode>? = null,
 ) : PaymentElementLoader {
 
     var lastIntegrationConfiguration: PaymentElementLoader.Configuration? = null
@@ -94,6 +96,7 @@ internal class FakePaymentElementLoader(
         integrationConfiguration: PaymentElementLoader.Configuration,
         metadata: PaymentElementLoader.Metadata,
     ): Result<PaymentElementLoader.State> {
+        initializationModeRecorder?.add(initializationMode)
         lastIntegrationConfiguration = integrationConfiguration
         delay(delay)
         return if (shouldFail) {

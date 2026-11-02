@@ -29,6 +29,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.PaymentElementTheme
+import com.stripe.android.paymentsheet.ui.PrimaryButtonIcon
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.paymentsheet.utils.ViewModelStoreOwnerContext
@@ -41,6 +42,7 @@ import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.LocaleTestRule
 import com.stripe.android.testing.SetupIntentFactory
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import com.stripe.android.utils.screenshots.PaymentSheetAppearance
 import kotlinx.coroutines.CoroutineScope
@@ -104,6 +106,7 @@ internal class CustomerSheetScreenshotTest {
         linkMode = null,
         onBehalfOf = null,
         isCompleteFlow = false,
+        primaryButtonIcon = stateFlowOf(PrimaryButtonIcon.None),
         isPaymentFlow = false,
         stripeIntentId = null,
         clientSecret = null,
