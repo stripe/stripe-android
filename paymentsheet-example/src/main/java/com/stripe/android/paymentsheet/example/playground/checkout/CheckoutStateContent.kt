@@ -42,3 +42,16 @@ internal fun ErrorContent(
         TextButton(onClick = onBack) { Text("Back to settings") }
     }
 }
+
+@Composable
+internal fun CompletedContent(onBack: () -> Unit) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text("Payment complete!", style = MaterialTheme.typography.h6)
+        Spacer(Modifier.height(16.dp))
+        Button(onClick = onBack) { Text("Back to settings") }
+    }
+}
