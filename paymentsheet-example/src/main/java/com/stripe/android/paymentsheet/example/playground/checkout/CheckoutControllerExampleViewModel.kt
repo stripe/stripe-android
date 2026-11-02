@@ -48,6 +48,9 @@ internal class CheckoutControllerExampleViewModel(
     private val _confirmationMessage = MutableStateFlow<String?>(null)
     val confirmationMessage: StateFlow<String?> = _confirmationMessage.asStateFlow()
 
+    private val _isConfirmationCompleted = MutableStateFlow(false)
+    val isConfirmationCompleted: StateFlow<Boolean> = _isConfirmationCompleted.asStateFlow()
+
     private val _operationMessage = MutableStateFlow<String?>(null)
     val operationMessage: StateFlow<String?> = _operationMessage.asStateFlow()
 
@@ -163,8 +166,7 @@ internal class CheckoutControllerExampleViewModel(
         Log.d(TAG, "Result: $result")
         _confirmationMessage.value = when (result) {
             is CheckoutController.Result.Completed -> {
-                savedStateHandle[RUN_ACTIVE_KEY] = false
-                _status.value = Status.Completed
+                _isConfirmationCompleted.value = true
                 null
             }
             is CheckoutController.Result.Canceled -> "Confirmation canceled"
@@ -181,6 +183,7 @@ internal class CheckoutControllerExampleViewModel(
 
     private fun clearMessages() {
         _confirmationMessage.value = null
+        _isConfirmationCompleted.value = false
         _operationMessage.value = null
     }
 
@@ -193,7 +196,6 @@ internal class CheckoutControllerExampleViewModel(
         data object Settings : Status
         data object Loading : Status
         data object Configured : Status
-        data object Completed : Status
         data class Error(val message: String) : Status
     }
 
