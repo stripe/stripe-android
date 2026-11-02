@@ -1,12 +1,10 @@
 package com.stripe.android.elements
 
-import android.content.Context
 import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.AnyThread
 import androidx.annotation.ColorInt
-import androidx.annotation.DimenRes
 import androidx.annotation.FontRes
 import androidx.annotation.RestrictTo
 import androidx.compose.ui.graphics.Color
@@ -28,7 +26,6 @@ import com.stripe.android.paymentsheet.addresselement.AddressElementActivityCont
 import com.stripe.android.paymentsheet.addresselement.AddressLauncher
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.uicore.StripeThemeDefaults
-import com.stripe.android.uicore.getRawValueFromDimenResource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -274,19 +271,9 @@ class ShippingAddressElement internal constructor(
                     this.cornerRadiusDp = cornerRadiusDp
                 }
 
-                /** Sets the component corner radius from a dimension resource. */
-                fun cornerRadiusDp(context: Context, @DimenRes cornerRadiusRes: Int): Shapes = apply {
-                    this.cornerRadiusDp = context.getRawValueFromDimenResource(cornerRadiusRes)
-                }
-
                 /** Sets the component border stroke width, in dp. */
                 fun borderStrokeWidthDp(borderStrokeWidthDp: Float): Shapes = apply {
                     this.borderStrokeWidthDp = borderStrokeWidthDp
-                }
-
-                /** Sets the component border stroke width from a dimension resource. */
-                fun borderStrokeWidthDp(context: Context, @DimenRes borderStrokeWidthRes: Int): Shapes = apply {
-                    this.borderStrokeWidthDp = context.getRawValueFromDimenResource(borderStrokeWidthRes)
                 }
 
                 /**
@@ -295,17 +282,6 @@ class ShippingAddressElement internal constructor(
                  */
                 fun bottomSheetCornerRadiusDp(bottomSheetCornerRadiusDp: Float): Shapes = apply {
                     this.bottomSheetCornerRadiusDp = bottomSheetCornerRadiusDp
-                }
-
-                /**
-                 * Sets the bottom-sheet corner radius from a dimension resource.
-                 * Defaults to the component corner radius.
-                 */
-                fun bottomSheetCornerRadiusDp(
-                    context: Context,
-                    @DimenRes bottomSheetCornerRadiusRes: Int,
-                ): Shapes = apply {
-                    this.bottomSheetCornerRadiusDp = context.getRawValueFromDimenResource(bottomSheetCornerRadiusRes)
                 }
 
                 @Parcelize
