@@ -7,7 +7,6 @@ import androidx.lifecycle.LifecycleRegistry
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentAuthConfig
 import com.stripe.android.core.ApiConfiguration
-import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.payments.core.authentication.threeds2.Stripe3DS2NextActionHandler
 import com.stripe.android.payments.core.authentication.threeds2.Stripe3ds2TransactionContract
@@ -61,8 +60,7 @@ class Stripe3DS2AuthenticatorTest {
                         Stripe3ds2TransactionContract.Args.fromIntent(intent)
                     )
                     args.stripeIntent == paymentIntent &&
-                        args.apiConfiguration == API_CONFIGURATION &&
-                        args.requestOptions == REQUEST_OPTIONS
+                        args.apiConfiguration == API_CONFIGURATION
                 },
                 eq(50000)
             )
@@ -84,8 +82,7 @@ class Stripe3DS2AuthenticatorTest {
             verify(mockLauncher).launch(
                 argWhere { args ->
                     args.stripeIntent == paymentIntent &&
-                        args.apiConfiguration == API_CONFIGURATION &&
-                        args.requestOptions == REQUEST_OPTIONS
+                        args.apiConfiguration == API_CONFIGURATION
                 }
             )
         }
@@ -95,10 +92,6 @@ class Stripe3DS2AuthenticatorTest {
         private val API_CONFIGURATION = ApiConfiguration.State(
             publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             stripeAccountId = ACCOUNT_ID,
-        )
-        private val REQUEST_OPTIONS = ApiRequest.Options(
-            apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-            stripeAccount = ACCOUNT_ID
         )
     }
 }

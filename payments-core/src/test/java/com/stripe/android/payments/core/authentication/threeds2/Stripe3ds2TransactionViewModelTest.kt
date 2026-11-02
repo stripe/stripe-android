@@ -13,9 +13,9 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentAuthConfig
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.Stripe3ds2AuthResultFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.copy
 import com.stripe.android.networking.StripeRepository
@@ -34,7 +34,9 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 
 @RunWith(RobolectricTestRunner::class)
@@ -89,7 +91,37 @@ class Stripe3ds2TransactionViewModelTest {
             args = ARGS.copy(nextActionData = ARGS.nextActionData.copy(publishableKey = ""))
         )
 
-        assertThat(viewModel.threeDS2RequestOptions).isEqualTo(ARGS.requestOptions)
+        assertThat(viewModel.threeDS2RequestOptions).isEqualTo(
+            ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, ApiKeyFixtures.FAKE_STRIPE_ACCOUNT)
+        )
+    }
+
+    @Test
+    fun `Browser fallback retains the configuration from state`() = runTest {
+        val configuration = ARGS.apiConfiguration.copy(stripeAccountId = ApiKeyFixtures.OTHER_STRIPE_ACCOUNT)
+        val authResult = Stripe3ds2AuthResultFixtures.CHALLENGE_COMPLETION.copy(
+            ares = null,
+            fallbackRedirectUrl = "https://example.com/3ds",
+        )
+        whenever(stripeRepository.start3ds2Auth(any(), any())).thenReturn(Result.success(authResult))
+
+        val nextStep = createViewModel(ARGS.copy(apiConfiguration = configuration)).start3ds2Flow()
+
+        val fallback = assertIs<NextStep.StartFallback>(nextStep)
+        assertThat(fallback.args.apiConfiguration).isEqualTo(configuration)
+    }
+
+    @Test
+    fun `Frictionless completion retains the account from state`() = runTest {
+        val authResult = Stripe3ds2AuthResultFixtures.CHALLENGE_COMPLETION.copy(
+            ares = requireNotNull(Stripe3ds2AuthResultFixtures.CHALLENGE_COMPLETION.ares).copy(transStatus = "Y"),
+        )
+        whenever(stripeRepository.start3ds2Auth(any(), any())).thenReturn(Result.success(authResult))
+
+        val nextStep = createViewModel().start3ds2Flow()
+
+        val completion = assertIs<NextStep.Complete>(nextStep)
+        assertThat(completion.result.stripeAccountId).isEqualTo(ARGS.apiConfiguration.stripeAccountId)
     }
 
     @Test
@@ -144,10 +176,9 @@ class Stripe3ds2TransactionViewModelTest {
             NEXT_ACTION_DATA.copy(
                 publishableKey = ApiKeyFixtures.CONNECTED_ACCOUNT_PUBLISHABLE_KEY,
             ),
-            ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, ApiKeyFixtures.FAKE_STRIPE_ACCOUNT),
             enableLogging = ENABLE_LOGGING,
             statusBarColor = null,
-            ApiConfiguration.State(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, ApiKeyFixtures.FAKE_STRIPE_ACCOUNT),
+            ApiKeyFixtures.DEFAULT_API_CONFIG,
             PRODUCT_USAGE
         )
     }
