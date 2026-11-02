@@ -1,6 +1,6 @@
 ---
 name: compose-tests
-description: Use when writing Compose UI tests in stripe-android — covers composeRule setup, Robolectric annotations, node assertions, and test tag patterns
+description: Use when writing Compose UI tests in stripe-android — covers composeRule setup, Robolectric annotations, node assertions, test tag patterns, and shared page objects (payment-element-test-pages)
 ---
 
 # Compose UI Tests
@@ -62,6 +62,14 @@ private fun runScenario(
 private data class TestScenario(val page: MyPage)
 ```
 
+## Page Objects
+
+Wrap node lookups and multi-step interactions for a screen in a page class (the `MyPage` above) instead of repeating finders in each test.
+
+- **Reuse shared pages first.** `payment-element-test-pages` (`com.stripe.paymentelementtestpages`) holds pages for PaymentSheet UI used across modules: `FormPage`, `VerticalModePage`, `SavedPaymentMethodsPage`, `ManagePage`, `EditPage`, `BillingDetailsPage`, `AddressElementPage`, `CurrencySelector`. Depend on it with `testImplementation` or `androidTestImplementation project(':payment-element-test-pages')`.
+- **Add to the shared module** when a page is for SDK UI that more than one module's tests drive, such as the card form filled by both `paymentsheet` and `paymentsheet-example` tests. Extend an existing page rather than adding a parallel one.
+- **Keep a page test-local** when it covers UI owned by one module or one test source set, such as an example app's own screen.
+
 ## Finding Nodes
 
 | Finder | Use when |
@@ -122,6 +130,7 @@ composeRule.waitUntilWithIdle(
 
 ## Common Mistakes
 
+- **Rewriting selectors a shared page already has**: check `payment-element-test-pages` before adding finders for SDK screens
 - **Missing `composeCleanupRule`** — causes resource leaks with Robolectric, flaky tests
 - **Missing `@RunWith(RobolectricTestRunner::class)`** — Compose tests need Android framework
 - **Using `onNodeWithText` for dynamic content** — prefer test tags for stability
