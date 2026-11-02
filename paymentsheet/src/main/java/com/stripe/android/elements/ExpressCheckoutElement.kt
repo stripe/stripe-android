@@ -7,7 +7,6 @@ import com.stripe.android.elements.ece.ExpressCheckoutElementContent
 import com.stripe.android.elements.ece.ExpressCheckoutElementInteractor
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.uicore.StripeThemeDefaults
-import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 
@@ -34,15 +33,23 @@ class ExpressCheckoutElement @Inject internal constructor(
         /** The payment method type, such as `"google_pay"` or `"link"`. */
         abstract val type: String
 
-        /** Google Pay. */
-        @Poko
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        class GooglePay internal constructor(override val type: String) : PaymentMethod()
+        class GooglePay internal constructor() : PaymentMethod() {
+            override val type: String = "google_pay"
 
-        /** Link. */
-        @Poko
+            override fun equals(other: Any?): Boolean = other is GooglePay
+
+            override fun hashCode(): Int = GooglePay::class.java.hashCode()
+        }
+
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        class Link internal constructor(override val type: String) : PaymentMethod()
+        class Link internal constructor() : PaymentMethod() {
+            override val type: String = "link"
+
+            override fun equals(other: Any?): Boolean = other is Link
+
+            override fun hashCode(): Int = Link::class.java.hashCode()
+        }
     }
 
     @CheckoutSessionPreview

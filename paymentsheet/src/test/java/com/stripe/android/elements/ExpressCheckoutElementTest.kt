@@ -14,7 +14,7 @@ internal class ExpressCheckoutElementTest {
     @Test
     fun `Google Pay payment method exposes its type`() {
         val paymentMethod: ExpressCheckoutElement.PaymentMethod =
-            ExpressCheckoutElement.PaymentMethod.GooglePay(type = "google_pay")
+            ExpressCheckoutElement.PaymentMethod.GooglePay()
 
         assertThat(paymentMethod.type).isEqualTo("google_pay")
     }
@@ -22,7 +22,7 @@ internal class ExpressCheckoutElementTest {
     @Test
     fun `Link payment method exposes its type`() {
         val paymentMethod: ExpressCheckoutElement.PaymentMethod =
-            ExpressCheckoutElement.PaymentMethod.Link(type = "link")
+            ExpressCheckoutElement.PaymentMethod.Link()
 
         assertThat(paymentMethod.type).isEqualTo("link")
     }

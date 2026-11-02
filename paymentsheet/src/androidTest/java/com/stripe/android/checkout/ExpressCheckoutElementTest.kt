@@ -48,7 +48,7 @@ internal class ExpressCheckoutElementTest {
             assertions = { controller ->
                 assertThat(
                     controller.session.value?.availableExpressCheckoutPaymentMethods
-                ).containsExactly(ExpressCheckoutElement.PaymentMethod.GooglePay(type = "google_pay"))
+                ).containsExactly(ExpressCheckoutElement.PaymentMethod.GooglePay())
             },
             configurationUpdates = {
                 it.linkConfiguration(
@@ -102,7 +102,7 @@ internal class ExpressCheckoutElementTest {
             assertions = { controller ->
                 assertThat(
                     controller.session.value?.availableExpressCheckoutPaymentMethods
-                ).containsExactly(ExpressCheckoutElement.PaymentMethod.Link(type = "link"))
+                ).containsExactly(ExpressCheckoutElement.PaymentMethod.Link())
             },
             configurationUpdates = {
                 it.googlePayConfiguration(
@@ -137,8 +137,8 @@ internal class ExpressCheckoutElementTest {
                 assertThat(
                     controller.session.value?.availableExpressCheckoutPaymentMethods
                 ).containsExactly(
-                    ExpressCheckoutElement.PaymentMethod.GooglePay(type = "google_pay"),
-                    ExpressCheckoutElement.PaymentMethod.Link(type = "link"),
+                    ExpressCheckoutElement.PaymentMethod.GooglePay(),
+                    ExpressCheckoutElement.PaymentMethod.Link(),
                 )
             },
         ) {
@@ -215,7 +215,7 @@ internal class ExpressCheckoutElementTest {
             assertions = { controller ->
                 assertThat(
                     controller.session.value?.availableExpressCheckoutPaymentMethods
-                ).containsExactly(ExpressCheckoutElement.PaymentMethod.GooglePay(type = "google_pay"))
+                ).containsExactly(ExpressCheckoutElement.PaymentMethod.GooglePay())
             },
         ) {
             page.assertGooglePayButtonExists()
