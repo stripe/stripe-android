@@ -92,7 +92,6 @@ internal class PaymentElementAutocompleteAddressInteractor(
                 }
             }
 
-            activeInlineInteractor = null
             return PaymentElementAutocompleteAddressInteractor(
                 launcher = launcher,
                 apiConfigurationProvider = apiConfigurationProvider,
