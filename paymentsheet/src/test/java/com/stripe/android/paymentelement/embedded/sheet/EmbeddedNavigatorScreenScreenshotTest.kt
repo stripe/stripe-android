@@ -13,6 +13,8 @@ import com.stripe.android.link.ui.LinkButtonState
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
+import com.stripe.android.model.ElementsSession
+import com.stripe.android.model.ElementsSession.ExperimentAssignment
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
@@ -101,6 +103,24 @@ internal class EmbeddedNavigatorScreenScreenshotTest {
 
         snapshot(
             screen = screen,
+            previousScreen = createVerticalPaymentOptionsScreen(),
+            walletsState = createWalletsState(),
+        )
+    }
+
+    @Test
+    fun displaysFormWithoutPadlock() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(isLiveMode = true),
+            experimentsData = ElementsSession.ExperimentsData(
+                arbId = "arb_123",
+                experimentAssignments = mapOf(
+                    ExperimentAssignment.OCS_MOBILE_REMOVE_PRIMARY_BUTTON_PADLOCK to "treatment_no_padlock",
+                ),
+            ),
+        )
+        snapshot(
+            screen = createFormScreen(metadata),
             previousScreen = createVerticalPaymentOptionsScreen(),
             walletsState = createWalletsState(),
         )
@@ -205,8 +225,9 @@ internal class EmbeddedNavigatorScreenScreenshotTest {
         snapshot(screen, walletsState = walletsState)
     }
 
-    private fun createFormScreen(): EmbeddedNavigator.Screen.Form {
-        val metadata = PaymentMethodMetadataFactory.create()
+    private fun createFormScreen(
+        metadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+    ): EmbeddedNavigator.Screen.Form {
         val selectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle())
         val stateHolder = createSheetActivityStateHolder(metadata, selectionHolder)
         val eventReporter = FakeEventReporter()

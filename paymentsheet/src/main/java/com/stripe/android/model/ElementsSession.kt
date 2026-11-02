@@ -277,6 +277,7 @@ internal data class ElementsSession(
         LINK_AB_TEST("link_ab_test"),
         OCS_MOBILE_NFC_SCANNING_FEATURE_HOLDBACK("ocs_mobile_nfc_scanning_feature_holdback"),
         OCS_MOBILE_PAYMENT_METHOD_MESSAGING_PROMOTIONS("ocs_mobile_payment_method_messaging_promotions"),
+        OCS_MOBILE_REMOVE_PRIMARY_BUTTON_PADLOCK("ocs_mobile_remove_primary_button_padlock"),
         CONNECTIONS_FC_LITE_VS_NATIVE("connections_fc_lite_vs_native"),
         CONNECTIONS_FC_LITE_VS_NATIVE_AA("connections_fc_lite_vs_native_aa"),
     }
