@@ -127,21 +127,8 @@ class CheckoutController @Inject internal constructor(
                     configuration = configurationState,
                     checkoutSessionResponse = response,
                 )
-                val addressSource = response.taxAddressSource
-                val taxAddress = when (addressSource) {
-                    CheckoutSessionResponse.TaxAddressSource.SHIPPING ->
-                        initialLoad.state.collectedDetails.shippingAddress
-                    CheckoutSessionResponse.TaxAddressSource.BILLING ->
-                        initialLoad.state.paymentSelection?.billingDetails?.address?.toCheckoutAddress()
-                            ?: configurationState.defaults.billingDetails?.address
-                    null -> null
-                }
-                if (taxAddress != null && addressSource != null && response.automaticTaxEnabled) {
-                    val updatedResponse = checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
-                        checkoutSessionResponse = response,
-                        addressSource = addressSource,
-                        address = taxAddress,
-                    ).getOrThrow()
+                val updatedResponse = updateInitialTaxIfNeeded(initialLoad.state)
+                if (updatedResponse != null) {
                     // The updated totals change payment method metadata, so rebuild it before publishing.
                     checkoutStateLoader.reload(initialLoad.state.copy(checkoutSessionResponse = updatedResponse))
                 } else {
@@ -150,6 +137,26 @@ class CheckoutController @Inject internal constructor(
             }
         }
     }.toOperationResult()
+
+    private suspend fun updateInitialTaxIfNeeded(
+        initialState: CheckoutControllerState,
+    ): CheckoutSessionResponse? {
+        val checkoutSessionResponse = initialState.checkoutSessionResponse
+        val addressSource = checkoutSessionResponse.taxAddressSource ?: return null
+        val taxAddress = when (addressSource) {
+            CheckoutSessionResponse.TaxAddressSource.SHIPPING -> initialState.collectedDetails.shippingAddress
+            CheckoutSessionResponse.TaxAddressSource.BILLING ->
+                initialState.paymentSelection?.billingDetails?.address?.toCheckoutAddress()
+                    ?: initialState.configuration.defaults.billingDetails?.address
+        } ?: return null
+        if (!checkoutSessionResponse.automaticTaxEnabled) return null
+
+        return checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
+            checkoutSessionResponse = checkoutSessionResponse,
+            addressSource = addressSource,
+            address = taxAddress,
+        ).getOrThrow()
+    }
 
     /**
      * Applies a promotion code to the checkout session.
