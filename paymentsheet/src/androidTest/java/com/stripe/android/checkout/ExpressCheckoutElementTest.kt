@@ -90,7 +90,7 @@ internal class ExpressCheckoutElementTest {
     @Test
     fun testSuccessfulNativeLinkPayment() {
         // This is called twice during load - once for ECE, once for PE
-        repeat (2) {
+        repeat(2) {
             networkRule.enqueueLinkAccountLookup()
         }
 
