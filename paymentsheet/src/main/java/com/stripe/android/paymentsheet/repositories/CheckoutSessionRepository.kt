@@ -11,9 +11,7 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.executeRequestWithResultParser
 import com.stripe.android.core.version.StripeSdkVersion
-import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethodUpdateParams
-import com.stripe.android.model.SetupIntent
 import com.stripe.android.networking.ConfirmationParamsUtils
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
@@ -124,12 +122,24 @@ internal class CheckoutSessionRepository @Inject constructor(
                     }
                 )
             }
-            response.copy(
-                paymentIntent = intent as? PaymentIntent,
-                setupIntent = intent as? SetupIntent,
-                elementsSession = response.elementsSession?.copy(stripeIntent = intent),
-            )
+            response.withIntent(intent)
         }
+    }
+
+    suspend fun poll(
+        sessionId: String,
+        clientSecret: String,
+    ): Result<CheckoutClientPollResponse> {
+        return executeRequestWithResultParser(
+            stripeErrorJsonParser = stripeErrorJsonParser,
+            stripeNetworkClient = stripeNetworkClient,
+            request = apiRequestFactory.createGet(
+                url = pollUrl(sessionId),
+                options = apiRequestOptionsProvider.get(),
+                params = mapOf("client_secret" to clientSecret),
+            ),
+            responseJsonParser = CheckoutClientPollResponseJsonParser,
+        )
     }
 
     suspend fun detachPaymentMethod(
@@ -239,6 +249,9 @@ internal class CheckoutSessionRepository @Inject constructor(
 
         private fun updateUrl(sessionId: String): String =
             "${ApiRequest.API_HOST}/v1/checkout_client/$sessionId/update"
+
+        private fun pollUrl(sessionId: String): String =
+            "${ApiRequest.API_HOST}/v1/checkout_client/$sessionId/poll"
     }
 }
 
