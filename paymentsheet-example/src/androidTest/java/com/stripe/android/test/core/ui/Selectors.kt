@@ -3,8 +3,6 @@ package com.stripe.android.test.core.ui
 import android.content.pm.PackageManager
 import android.os.SystemClock.sleep
 import androidx.compose.ui.test.ExperimentalTestApi
-import androidx.compose.ui.test.SemanticsNodeInteraction
-import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isToggleable
@@ -390,9 +388,7 @@ internal class Selectors(
             .performClick()
     }
 
-    fun getZip() = composeTestRule.onNodeWithText(
-        getResourceString(CoreR.string.stripe_address_label_zip_code)
-    )
+    fun getZip() = composeTestRule.zipCodeField()
 
     fun getPostalCode() = composeTestRule.onNodeWithText(
         getResourceString(CoreR.string.stripe_address_label_postal_code)
@@ -426,26 +422,11 @@ internal class Selectors(
         getResourceString(PaymentsUiCoreR.string.stripe_boleto_tax_id_label)
     )
 
-    fun getCardNumber() = composeTestRule.onNodeWithTextAfterWaiting(
-        InstrumentationRegistry.getInstrumentation().targetContext.resources.getString(
-            StripeR.string.stripe_acc_label_card_number
-        )
-    )
+    fun getCardNumber() = composeTestRule.cardNumberField()
 
-    fun getCardExpiration(): SemanticsNodeInteraction {
-        composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
-            composeTestRule.onAllNodes(
-                hasContentDescription("Expiration date", true)
-            ).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty()
-        }
-        return composeTestRule.onNodeWithContentDescription(label = "Expiration date", substring = true)
-    }
+    fun getCardExpiration() = composeTestRule.cardExpirationField()
 
-    fun getCardCvc() = composeTestRule.onNodeWithTextAfterWaiting(
-        InstrumentationRegistry.getInstrumentation().targetContext.resources.getString(
-            StripeR.string.stripe_cvc_number_hint
-        )
-    )
+    fun getCardCvc() = composeTestRule.cardCvcField()
 
     fun getCvcRecollectionScreenConfirm() = composeTestRule.onNode(
         hasTestTag(CVC_RECOLLECTION_SCREEN_CONFIRM)
@@ -459,15 +440,6 @@ internal class Selectors(
     fun selectCardBrand(cardBrand: String) {
         composeTestRule.onNodeWithContentDescription(cardBrand)
             .performClick()
-    }
-
-    private fun ComposeTestRule.onNodeWithTextAfterWaiting(text: String): SemanticsNodeInteraction {
-        waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
-            onAllNodes(hasText(text)).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty()
-        }
-        return this.onNodeWithText(
-            text
-        )
     }
 
     companion object {
