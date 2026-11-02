@@ -366,6 +366,7 @@ class PaymentSheetConfigurationKtxTest {
                 id = DEFAULT_CHECKOUT_SESSION_ID,
                 amount = 5099,
             ),
+            configuredElements = emptyList(),
         )
 
         assertFailsWith(
@@ -395,6 +396,7 @@ class PaymentSheetConfigurationKtxTest {
                 id = DEFAULT_CHECKOUT_SESSION_ID,
                 amount = 5099,
             ),
+            configuredElements = emptyList(),
         )
 
         // Should not throw
@@ -419,6 +421,7 @@ class PaymentSheetConfigurationKtxTest {
                 id = DEFAULT_CHECKOUT_SESSION_ID,
                 amount = 5099,
             ),
+            configuredElements = emptyList(),
         )
 
         configWithoutEmail.validate(
@@ -443,6 +446,7 @@ class PaymentSheetConfigurationKtxTest {
                 id = DEFAULT_CHECKOUT_SESSION_ID,
                 amount = 5099,
             ),
+            configuredElements = emptyList(),
         )
 
         assertFailsWith(
@@ -481,6 +485,7 @@ class PaymentSheetConfigurationKtxTest {
                 id = DEFAULT_CHECKOUT_SESSION_ID,
                 amount = 5099,
             ),
+            configuredElements = emptyList(),
         )
 
         assertFailsWith(

@@ -3,6 +3,7 @@ package com.stripe.android.link
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -299,11 +300,11 @@ internal object TestFactory {
         saveConsentBehavior = PaymentMethodSaveConsentBehavior.Disabled(null),
         forceSetupFutureUseBehaviorAndNewMandate = false,
         linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD"),
-        clientAttributionMetadata = ClientAttributionMetadata(
+        clientAttributionMetadata = ClientAttributionMetadata.Elements(
             elementsSessionConfigId = "elements_session_123",
             paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
             paymentMethodSelectionFlow = PaymentMethodSelectionFlow.Automatic,
-            checkoutSessionId = null,
+            stripeSdkVersion = StripeSdkVersion.VERSION_NAME,
         ),
         cardFundingFilter = PaymentSheetCardFundingFilter(PaymentSheet.CardFundingType.entries),
         linkBrand = LinkBrand.Link,

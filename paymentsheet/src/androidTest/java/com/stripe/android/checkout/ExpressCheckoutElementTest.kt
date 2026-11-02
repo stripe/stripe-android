@@ -13,6 +13,8 @@ import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdate
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
+import com.stripe.android.networktesting.RequestMatchers.hasBodyPart
+import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.utils.TestRules
@@ -64,6 +66,17 @@ internal class ExpressCheckoutElementTest {
             networkRule.checkoutConfirm(
                 bodyPart("payment_method", paymentMethod.id),
                 bodyPart("expected_amount", "5099"),
+                bodyPart("client_attribution_metadata[merchant_integration_source]", "mobile-checkout"),
+                bodyPart(
+                    "client_attribution_metadata[merchant_integration_subtype]",
+                    "mobile-express-checkout-element",
+                ),
+                bodyPart(
+                    "client_attribution_metadata[merchant_integration_additional_elements][]",
+                    "mobile-express-checkout-element",
+                ),
+                not(hasBodyPart("client_attribution_metadata[payment_method_selection_flow]")),
+                not(hasBodyPart("client_attribution_metadata[payment_intent_creation_flow]")),
             ) { response ->
                 response.testBodyFromFile("checkout-session-confirm.json")
             }

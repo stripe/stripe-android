@@ -4,15 +4,20 @@ import android.content.Context
 import android.os.LocaleList
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.networking.AnalyticsRequestFactory
+import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.TestFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
+import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodSelectionFlow
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.SetupIntentFactory
+import org.json.JSONObject
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -387,9 +392,109 @@ internal class PopupPayloadTest {
             stripeAccount = "str_123"
         )
 
-        assertThat(payload.clientAttributionMetadata).isEqualTo(
-            linkConfiguration.clientAttributionMetadata.toParamMap()
+        val json = PopupPayload.PopupPayloadJson.encodeToString(PopupPayload.serializer(), payload)
+        val attribution = JSONObject(json).getJSONObject("clientAttributionMetadata")
+
+        assertThat(StripeJsonUtils.jsonObjectToMap(attribution))
+            .isEqualTo(linkConfiguration.clientAttributionMetadata.toParamMap())
+    }
+
+    @Test
+    fun `create serializes checkout attribution elements as a JSON array`() {
+        val configuration = createLinkConfiguration().copy(
+            clientAttributionMetadata = ClientAttributionMetadata.CheckoutSession(
+                elementsSessionConfigId = "e961790f-43ed-4fcc-a534-74eeca28d042",
+                paymentMethodSelectionFlow = PaymentMethodSelectionFlow.Automatic,
+                checkoutSessionId = "cs_test_123",
+                checkoutConfigId = "checkout_config_123",
+                configuredElements = listOf(
+                    "mobile-payment-element",
+                    "mobile-shipping-address-element",
+                ),
+                isExpressCheckoutElement = false,
+                stripeSdkVersion = StripeSdkVersion.VERSION_NAME,
+            ),
         )
+        val payload = PopupPayload.create(
+            configuration = configuration,
+            context = getContext(Locale.CANADA),
+            paymentUserAgent = "Android",
+            publishableKey = "pk_123",
+            stripeAccount = "str_123",
+        )
+        val json = PopupPayload.PopupPayloadJson.encodeToString(PopupPayload.serializer(), payload)
+        val attribution = JSONObject(json).getJSONObject("clientAttributionMetadata")
+        val elements = attribution.getJSONArray("merchant_integration_additional_elements")
+
+        assertThat((0 until elements.length()).map { elements.getString(it) }).containsExactly(
+            "mobile-payment-element",
+            "mobile-shipping-address-element",
+        ).inOrder()
+        assertThat(attribution.getString("merchant_integration_source")).isEqualTo("mobile-checkout")
+        assertThat(attribution.getString("merchant_integration_subtype")).isEqualTo("mobile-payment-element")
+        assertThat(attribution.getString("checkout_session_id")).isEqualTo("cs_test_123")
+        assertThat(attribution.getString("checkout_config_id")).isEqualTo("checkout_config_123")
+        assertThat(attribution.has("payment_intent_creation_flow")).isFalse()
+        assertThat(StripeJsonUtils.jsonObjectToMap(attribution))
+            .isEqualTo(configuration.clientAttributionMetadata.toParamMap())
+    }
+
+    @Test
+    fun `create omits absent elements attribution fields`() {
+        val configuration = createLinkConfiguration().copy(
+            clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA.copy(
+                elementsSessionConfigId = null,
+                paymentMethodSelectionFlow = null,
+                paymentIntentCreationFlow = null,
+            ),
+        )
+        val payload = PopupPayload.create(
+            configuration = configuration,
+            context = getContext(Locale.CANADA),
+            paymentUserAgent = "Android",
+            publishableKey = "pk_123",
+            stripeAccount = "str_123",
+        )
+        val json = PopupPayload.PopupPayloadJson.encodeToString(PopupPayload.serializer(), payload)
+        val attribution = JSONObject(json).getJSONObject("clientAttributionMetadata")
+
+        assertThat(attribution.length()).isEqualTo(4)
+        assertThat(StripeJsonUtils.jsonObjectToMap(attribution))
+            .isEqualTo(configuration.clientAttributionMetadata.toParamMap())
+    }
+
+    @Test
+    fun `create preserves empty checkout elements and omits absent attribution fields`() {
+        val configuration = createLinkConfiguration().copy(
+            clientAttributionMetadata = ClientAttributionMetadata.CheckoutSession(
+                elementsSessionConfigId = null,
+                paymentMethodSelectionFlow = null,
+                checkoutSessionId = "cs_test_123",
+                checkoutConfigId = null,
+                configuredElements = emptyList(),
+                isExpressCheckoutElement = true,
+                stripeSdkVersion = StripeSdkVersion.VERSION_NAME,
+            ),
+        )
+        val payload = PopupPayload.create(
+            configuration = configuration,
+            context = getContext(Locale.CANADA),
+            paymentUserAgent = "Android",
+            publishableKey = "pk_123",
+            stripeAccount = "str_123",
+        )
+        val json = PopupPayload.PopupPayloadJson.encodeToString(PopupPayload.serializer(), payload)
+        val attribution = JSONObject(json).getJSONObject("clientAttributionMetadata")
+
+        assertThat(attribution.getJSONArray("merchant_integration_additional_elements").length()).isEqualTo(0)
+        assertThat(attribution.getString("merchant_integration_subtype"))
+            .isEqualTo("mobile-express-checkout-element")
+        assertThat(attribution.has("payment_method_selection_flow")).isFalse()
+        assertThat(attribution.has("payment_intent_creation_flow")).isFalse()
+        assertThat(attribution.has("checkout_config_id")).isFalse()
+        assertThat(attribution.has("elements_session_config_id")).isFalse()
+        assertThat(StripeJsonUtils.jsonObjectToMap(attribution))
+            .isEqualTo(configuration.clientAttributionMetadata.toParamMap())
     }
 
     private fun createLinkConfiguration(

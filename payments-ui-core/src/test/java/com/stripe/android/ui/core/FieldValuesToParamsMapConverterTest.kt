@@ -1,6 +1,7 @@
 package com.stripe.android.ui.core
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntentCreationFlow
@@ -131,11 +132,11 @@ class FieldValuesToParamsMapConverterTest {
                 emptyMap(),
                 PaymentMethod.Type.PayPal.code,
                 PaymentMethod.Type.PayPal.requiresMandate,
-                clientAttributionMetadata = ClientAttributionMetadata(
+                clientAttributionMetadata = ClientAttributionMetadata.Elements(
                     elementsSessionConfigId = "e961790f-43ed-4fcc-a534-74eeca28d042",
                     paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
                     paymentMethodSelectionFlow = PaymentMethodSelectionFlow.Automatic,
-                    checkoutSessionId = null,
+                    stripeSdkVersion = StripeSdkVersion.VERSION_NAME,
                 )
             )
 
@@ -587,11 +588,11 @@ class FieldValuesToParamsMapConverterTest {
             )
         )
 
-        val clientAttributionMetadata = ClientAttributionMetadata(
+        val clientAttributionMetadata = ClientAttributionMetadata.Elements(
             elementsSessionConfigId = "elements_session_123",
             paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
             paymentMethodSelectionFlow = PaymentMethodSelectionFlow.Automatic,
-            checkoutSessionId = null,
+            stripeSdkVersion = StripeSdkVersion.VERSION_NAME,
         )
     }
 }

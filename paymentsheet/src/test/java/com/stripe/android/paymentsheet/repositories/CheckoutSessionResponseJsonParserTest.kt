@@ -181,6 +181,34 @@ class CheckoutSessionResponseJsonParserTest {
     }
 
     @Test
+    fun `automatic payment method types is null when omitted`() {
+        val result = requireNotNull(parse(base()))
+
+        assertThat(result.automaticPaymentMethodTypes).isNull()
+    }
+
+    @Test
+    fun `automatic payment method types is null when explicitly null`() {
+        val result = requireNotNull(parse(base().put("automatic_payment_method_types", JSONObject.NULL)))
+
+        assertThat(result.automaticPaymentMethodTypes).isNull()
+    }
+
+    @Test
+    fun `parses automatic payment method types enabled`() {
+        val result = requireNotNull(parse(base().put("automatic_payment_method_types", true)))
+
+        assertThat(result.automaticPaymentMethodTypes).isTrue()
+    }
+
+    @Test
+    fun `parses automatic payment method types disabled`() {
+        val result = requireNotNull(parse(base().put("automatic_payment_method_types", false)))
+
+        assertThat(result.automaticPaymentMethodTypes).isFalse()
+    }
+
+    @Test
     fun `parses recorded checkout configuration fields`() {
         val result = parseResponse(baseFixture = "checkout-session-init.json")
         val elements = requireNotNull(result.elementsSession)

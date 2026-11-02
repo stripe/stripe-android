@@ -43,8 +43,9 @@ internal data class PopupPayload(
     val flags: Map<String, Boolean>,
     @SerialName("linkFundingSources")
     val linkFundingSources: List<String>,
+    @Serializable(with = ClientAttributionMetadataSerializer::class)
     @SerialName("clientAttributionMetadata")
-    val clientAttributionMetadata: Map<String, String>
+    val clientAttributionMetadata: Map<String, Any>
 ) {
     @SerialName("path")
     val path: String = "mobile_pay"

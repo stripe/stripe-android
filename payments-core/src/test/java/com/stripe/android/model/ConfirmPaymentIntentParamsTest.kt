@@ -1,6 +1,7 @@
 package com.stripe.android.model
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.testing.RadarOptionsFactory
 import kotlin.test.Test
 
@@ -599,11 +600,11 @@ class ConfirmPaymentIntentParamsTest {
 
     @Test
     fun toParamMap_withClientAttributionMetadata_shouldCreateExpectedMap() {
-        val clientAttributionMetadata = ClientAttributionMetadata(
+        val clientAttributionMetadata = ClientAttributionMetadata.Elements(
             elementsSessionConfigId = "e961790f-43ed-4fcc-a534-74eeca28d042",
             paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
             paymentMethodSelectionFlow = PaymentMethodSelectionFlow.Automatic,
-            checkoutSessionId = null,
+            stripeSdkVersion = StripeSdkVersion.VERSION_NAME,
         )
         val params = ConfirmPaymentIntentParams(
             clientSecret = CLIENT_SECRET,

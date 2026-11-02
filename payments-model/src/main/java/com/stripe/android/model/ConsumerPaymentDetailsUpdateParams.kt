@@ -11,7 +11,7 @@ data class ConsumerPaymentDetailsUpdateParams(
     val id: String,
     val isDefault: Boolean? = null,
     val cardPaymentMethodCreateParamsMap: Map<String, @RawValue Any>? = null,
-    val clientAttributionMetadataParams: Map<String, String>,
+    val clientAttributionMetadataParams: Map<String, @RawValue Any>,
 ) : StripeParamsModel, Parcelable {
 
     override fun toParamMap(): Map<String, Any> {

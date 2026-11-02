@@ -6,6 +6,7 @@ import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.gate.FakeLinkGate
 import com.stripe.android.link.model.AccountStatus
@@ -104,6 +105,7 @@ internal class DefaultCreateLinkStateTest {
                 automaticTaxEnabled = true,
                 taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
             ),
+            configuredElements = emptyList(),
         )
 
         val result = createLinkState(
@@ -213,6 +215,7 @@ internal class DefaultCreateLinkStateTest {
             collectedEmail = null,
             instancesKey = "DefaultCreateLinkStateTest",
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(elementsSession = elementsSession),
+            configuredElements = emptyList(),
         )
 
         val result = createLinkState(
@@ -375,6 +378,7 @@ internal class DefaultCreateLinkStateTest {
                 elementsSession = elementsSession,
                 customerEmail = customerEmail,
             ),
+            configuredElements = emptyList(),
         )
     }
 
@@ -461,11 +465,11 @@ internal class DefaultCreateLinkStateTest {
             clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value
         )
 
-        val DEFAULT_CLIENT_ATTRIBUTION_METADATA = ClientAttributionMetadata(
+        val DEFAULT_CLIENT_ATTRIBUTION_METADATA = ClientAttributionMetadata.Elements(
             elementsSessionConfigId = FakeElementsSessionRepository.DEFAULT_ELEMENTS_SESSION_CONFIG_ID,
             paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
             paymentMethodSelectionFlow = PaymentMethodSelectionFlow.MerchantSpecified,
-            checkoutSessionId = null,
+            stripeSdkVersion = StripeSdkVersion.VERSION_NAME,
         )
     }
 }

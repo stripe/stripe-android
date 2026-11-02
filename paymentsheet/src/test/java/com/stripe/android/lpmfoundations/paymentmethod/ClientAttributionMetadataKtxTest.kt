@@ -17,7 +17,7 @@ class ClientAttributionMetadataKtxTest {
 
         val clientAttributionMetadata = createClientAttributionMetadata(
             initializationMode = initializationMode,
-        )
+        ) as ClientAttributionMetadata.Elements
 
         assertThat(clientAttributionMetadata.paymentIntentCreationFlow)
             .isEqualTo(PaymentIntentCreationFlow.Standard)
@@ -29,7 +29,7 @@ class ClientAttributionMetadataKtxTest {
 
         val clientAttributionMetadata = createClientAttributionMetadata(
             initializationMode = initializationMode,
-        )
+        ) as ClientAttributionMetadata.Elements
 
         assertThat(clientAttributionMetadata.paymentIntentCreationFlow)
             .isEqualTo(PaymentIntentCreationFlow.Standard)
@@ -48,7 +48,7 @@ class ClientAttributionMetadataKtxTest {
 
         val clientAttributionMetadata = createClientAttributionMetadata(
             initializationMode = initializationMode,
-        )
+        ) as ClientAttributionMetadata.Elements
 
         assertThat(clientAttributionMetadata.paymentIntentCreationFlow)
             .isEqualTo(PaymentIntentCreationFlow.Deferred)
@@ -90,18 +90,20 @@ class ClientAttributionMetadataKtxTest {
     }
 
     @Test
-    fun `payment intent creation flow is null for checkout session`() {
+    fun `payment intent creation flow is omitted for checkout session`() {
         val initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
             collectedEmail = null,
             instancesKey = "instances_key",
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(id = "cs_test_456"),
+            configuredElements = emptyList(),
         )
 
         val clientAttributionMetadata = createClientAttributionMetadata(
             initializationMode = initializationMode,
         )
 
-        assertThat(clientAttributionMetadata.paymentIntentCreationFlow).isNull()
+        assertThat(clientAttributionMetadata.toParamMap())
+            .doesNotContainKey("payment_intent_creation_flow")
     }
 
     @Test
@@ -110,24 +112,114 @@ class ClientAttributionMetadataKtxTest {
             collectedEmail = null,
             instancesKey = "instances_key",
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(id = "cs_test_456"),
+            configuredElements = emptyList(),
         )
 
         val clientAttributionMetadata = createClientAttributionMetadata(
             initializationMode = initializationMode,
-        )
+        ) as ClientAttributionMetadata.CheckoutSession
 
         assertThat(clientAttributionMetadata.checkoutSessionId).isEqualTo("cs_test_456")
     }
 
     @Test
-    fun `checkout session ID is null for non-checkout-session modes`() {
+    fun `checkout session ID is omitted for non-checkout-session modes`() {
         val initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("cs_123")
 
         val clientAttributionMetadata = createClientAttributionMetadata(
             initializationMode = initializationMode,
         )
 
-        assertThat(clientAttributionMetadata.checkoutSessionId).isNull()
+        assertThat(clientAttributionMetadata.toParamMap()).doesNotContainKey("checkout_session_id")
+    }
+
+    @Test
+    fun `checkout session metadata includes checkout attribution and configured elements`() {
+        val configuredElements = listOf(
+            "mobile-payment-element",
+            "mobile-express-checkout-element",
+            "mobile-shipping-address-element",
+        )
+        val initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+            collectedEmail = null,
+            instancesKey = "instances_key",
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+                id = "cs_test_456",
+                configId = "cfg_test_123",
+                automaticPaymentMethodTypes = true,
+            ),
+            configuredElements = configuredElements,
+        )
+
+        val clientAttributionMetadata = createClientAttributionMetadata(
+            initializationMode = initializationMode,
+        )
+        val params = clientAttributionMetadata.toParamMap()
+
+        assertThat(params).doesNotContainKey("payment_intent_creation_flow")
+        assertThat(params["checkout_session_id"]).isEqualTo("cs_test_456")
+        assertThat(clientAttributionMetadata.paymentMethodSelectionFlow)
+            .isEqualTo(PaymentMethodSelectionFlow.Automatic)
+        assertThat(params["merchant_integration_source"]).isEqualTo("mobile-checkout")
+        assertThat(params["merchant_integration_subtype"]).isEqualTo("mobile-payment-element")
+        assertThat(params["checkout_config_id"]).isEqualTo("cfg_test_123")
+        assertThat(params["merchant_integration_additional_elements"]).isEqualTo(configuredElements)
+    }
+
+    @Test
+    fun `checkout session metadata uses express checkout subtype for express checkout element`() {
+        val initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+            collectedEmail = null,
+            instancesKey = "instances_key",
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(id = "cs_test_456"),
+            configuredElements = listOf("mobile-express-checkout-element"),
+        )
+
+        val clientAttributionMetadata = createClientAttributionMetadata(
+            initializationMode = initializationMode,
+            isExpressCheckoutElement = true,
+        )
+
+        assertThat(clientAttributionMetadata.toParamMap()["merchant_integration_subtype"])
+            .isEqualTo("mobile-express-checkout-element")
+    }
+
+    @Test
+    fun `checkout session payment method selection flow is merchant specified when response says false`() {
+        val initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+            collectedEmail = null,
+            instancesKey = "instances_key",
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+                automaticPaymentMethodTypes = false,
+            ),
+            configuredElements = listOf("mobile-payment-element"),
+        )
+
+        val clientAttributionMetadata = createClientAttributionMetadata(
+            initializationMode = initializationMode,
+            automaticPaymentMethodsEnabled = true,
+        )
+
+        assertThat(clientAttributionMetadata.paymentMethodSelectionFlow)
+            .isEqualTo(PaymentMethodSelectionFlow.MerchantSpecified)
+    }
+
+    @Test
+    fun `checkout session payment method selection flow is omitted when response omits automatic types`() {
+        val initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+            collectedEmail = null,
+            instancesKey = "instances_key",
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+            configuredElements = listOf("mobile-payment-element"),
+        )
+
+        val clientAttributionMetadata = createClientAttributionMetadata(
+            initializationMode = initializationMode,
+            automaticPaymentMethodsEnabled = true,
+        )
+
+        assertThat(clientAttributionMetadata.paymentMethodSelectionFlow).isNull()
+        assertThat(clientAttributionMetadata.toParamMap()).doesNotContainKey("payment_method_selection_flow")
     }
 
     private fun createClientAttributionMetadata(
@@ -136,12 +228,14 @@ class ClientAttributionMetadataKtxTest {
             PaymentElementLoader.InitializationMode.PaymentIntent(
                 "cs_123"
             ),
-        automaticPaymentMethodsEnabled: Boolean = false
+        automaticPaymentMethodsEnabled: Boolean = false,
+        isExpressCheckoutElement: Boolean = false,
     ): ClientAttributionMetadata {
         return ClientAttributionMetadata.create(
             elementsSessionConfigId = elementsSessionConfigId,
             initializationMode = initializationMode,
             automaticPaymentMethodsEnabled = automaticPaymentMethodsEnabled,
+            isExpressCheckoutElement = isExpressCheckoutElement,
         )
     }
 }

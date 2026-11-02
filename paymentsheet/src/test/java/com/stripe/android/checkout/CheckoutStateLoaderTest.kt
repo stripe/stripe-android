@@ -6,10 +6,12 @@ import android.os.Bundle
 import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
+import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.elements.CurrencySelectorElement
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.elements.PaymentElement
 import com.stripe.android.elements.ShippingAddressElement
@@ -179,19 +181,44 @@ internal class CheckoutStateLoaderTest {
     }
 
     @Test
-    fun `loadInitial loads payment element and ECE in parallel`() = runScenario(
-        configuration = CheckoutController.Configuration()
-            .paymentElement(PaymentElement.Configuration())
-            .expressCheckoutElement(ExpressCheckoutElement.Configuration())
-            .build(),
-        paymentElementLoaderDelay = 1.seconds,
-    ) {
-        val state = loadInitial().state
+    fun `loadInitial loads configured payment elements in parallel`() {
+        val initializationModes = Turbine<PaymentElementLoader.InitializationMode>()
 
-        assertThat(state.paymentMethodMetadata).isNotNull()
-        assertThat(state.expressCheckoutElementPaymentMethodMetadata).isNotNull()
-        assertThat(state.embeddedConfiguration).isNotNull()
-        assertThat(testScheduler.currentTime).isEqualTo(1.seconds.inWholeMilliseconds)
+        runScenario(
+            configuration = CheckoutController.Configuration()
+                .paymentElement(PaymentElement.Configuration())
+                .expressCheckoutElement(ExpressCheckoutElement.Configuration())
+                .shippingAddressElement(ShippingAddressElement.Configuration())
+                .currencySelectorElement(CurrencySelectorElement.Configuration())
+                .build(),
+            paymentElementLoaderDelay = 1.seconds,
+            initializationModes = initializationModes,
+        ) {
+            val state = loadInitial().state
+
+            assertThat(state.paymentMethodMetadata).isNotNull()
+            assertThat(state.expressCheckoutElementPaymentMethodMetadata).isNotNull()
+            assertThat(state.embeddedConfiguration).isNotNull()
+            assertThat(testScheduler.currentTime).isEqualTo(1.seconds.inWholeMilliseconds)
+
+            val recordedInitializationModes = listOf(
+                initializationModes.awaitItem(),
+                initializationModes.awaitItem(),
+            )
+            val expectedConfiguredElements = listOf(
+                "mobile-payment-element",
+                "mobile-express-checkout-element",
+                "mobile-shipping-address-element",
+                "mobile-currency-selector-element",
+            )
+            recordedInitializationModes.forEach { initializationMode ->
+                val checkoutSession = initializationMode as
+                    PaymentElementLoader.InitializationMode.CheckoutSession
+                assertThat(checkoutSession.configuredElements)
+                    .containsExactlyElementsIn(expectedConfiguredElements)
+                    .inOrder()
+            }
+        }
     }
 
     @Test
@@ -640,6 +667,7 @@ internal class CheckoutStateLoaderTest {
         customer: CustomerState? = null,
         internalRowSelectionCallback: (() -> Unit)? = null,
         paymentElementLoaderDelay: Duration = Duration.ZERO,
+        initializationModes: Turbine<PaymentElementLoader.InitializationMode>? = null,
         // When null, a RecordingSelectionChooser is used. Pass a factory to exercise the real
         // DefaultEmbeddedSelectionChooser (it needs the shared SavedStateHandle to track state).
         selectionChooser: ((SavedStateHandle) -> EmbeddedSelectionChooser)? = null,
@@ -677,6 +705,7 @@ internal class CheckoutStateLoaderTest {
             isGooglePayAvailable = isGooglePayAvailable,
             customer = customer,
             delay = paymentElementLoaderDelay,
+            initializationModeRecorder = initializationModes,
         )
         val loader = CheckoutStateLoader(
             embeddedConfigurationFactory = CheckoutEmbeddedConfigurationFactory(appName = "Example, Inc."),
@@ -701,6 +730,7 @@ internal class CheckoutStateLoaderTest {
             testScheduler = testScheduler,
         ).block()
 
+        initializationModes?.ensureAllEventsConsumed()
         imageLoader.ensureAllEventsConsumed()
     }
 
