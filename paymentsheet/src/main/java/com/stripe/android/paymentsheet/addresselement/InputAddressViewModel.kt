@@ -58,7 +58,10 @@ internal class InputAddressViewModel @Inject constructor(
 
     private val initialInputsAreTheSame = initialBillingAddress == initialShippingAddress
 
-    private val isNameHidden = args.config?.nameField == AddressLauncher.NameField.Never
+    // The customer can't edit a hidden name, so the address keeps the prefilled one.
+    private val hiddenName = args.config?.address?.name.takeIf {
+        args.config?.nameField == AddressLauncher.NameField.Never
+    }
 
     private val _shippingSameAsBillingState = MutableStateFlow(
         if (canUseShippingSameAsBilling()) {
@@ -226,17 +229,9 @@ internal class InputAddressViewModel @Inject constructor(
     private fun getCurrentAddress(): AddressDetails {
         val formValues = addressFormController.getCurrentFormValues()
 
-        return AddressDetails(
-            name = formValues[FormFieldId.Name]?.value,
-            address = PaymentSheet.Address(
-                city = formValues[FormFieldId.City]?.value,
-                country = formValues[FormFieldId.Country]?.value,
-                line1 = formValues[FormFieldId.Line1]?.value,
-                line2 = formValues[FormFieldId.Line2]?.value,
-                postalCode = formValues[FormFieldId.PostalCode]?.value,
-                state = formValues[FormFieldId.State]?.value
-            ),
-            phoneNumber = formValues[FormFieldId.Phone]?.value
+        return formValues.toAddressDetails(
+            hiddenName = hiddenName,
+            isCheckboxSelected = null,
         )
     }
 
@@ -251,23 +246,9 @@ internal class InputAddressViewModel @Inject constructor(
             return
         }
         if (!resultStateHolder.tryStartSaving()) return
-        val addressDetails = AddressDetails(
-            // The customer can't edit a hidden name, so the result keeps the prefilled one.
-            name = if (isNameHidden) {
-                args.config?.address?.name
-            } else {
-                completedFormValues[FormFieldId.Name]?.value
-            },
-            address = PaymentSheet.Address(
-                city = completedFormValues[FormFieldId.City]?.value,
-                country = completedFormValues[FormFieldId.Country]?.value,
-                line1 = completedFormValues[FormFieldId.Line1]?.value,
-                line2 = completedFormValues[FormFieldId.Line2]?.value,
-                postalCode = completedFormValues[FormFieldId.PostalCode]?.value,
-                state = completedFormValues[FormFieldId.State]?.value
-            ),
-            phoneNumber = completedFormValues[FormFieldId.Phone]?.value,
-            isCheckboxSelected = checkboxChecked
+        val addressDetails = completedFormValues.toAddressDetails(
+            hiddenName = hiddenName,
+            isCheckboxSelected = checkboxChecked,
         )
         val selectedAddress = autocompleteSelectedAddressDetails()
         eventReporter.onSaveStarted(

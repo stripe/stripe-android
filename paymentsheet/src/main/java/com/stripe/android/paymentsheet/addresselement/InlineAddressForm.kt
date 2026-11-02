@@ -21,16 +21,29 @@ fun InlineAddressForm(
     enabled: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    val formController = state.formController
-    val lastTextFieldIdentifier by formController.lastTextFieldIdentifier.collectAsState()
-
     PaymentElementTheme(appearance = appearance) {
-        FormUI(
-            hiddenIdentifiers = emptySet(),
+        AddressFormContent(
+            formController = state.formController,
             enabled = enabled,
-            elements = formController.elements,
-            lastTextFieldIdentifier = lastTextFieldIdentifier,
             modifier = modifier,
         )
     }
+}
+
+/** Renders the fields of [formController] in the current theme. */
+@Composable
+internal fun AddressFormContent(
+    formController: AddressFormController,
+    enabled: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    val lastTextFieldIdentifier by formController.lastTextFieldIdentifier.collectAsState()
+
+    FormUI(
+        hiddenIdentifiers = emptySet(),
+        enabled = enabled,
+        elements = formController.elements,
+        lastTextFieldIdentifier = lastTextFieldIdentifier,
+        modifier = modifier,
+    )
 }

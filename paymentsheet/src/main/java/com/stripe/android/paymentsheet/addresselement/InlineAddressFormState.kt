@@ -1,10 +1,7 @@
 package com.stripe.android.paymentsheet.addresselement
 
 import androidx.annotation.RestrictTo
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
-import com.stripe.android.uicore.elements.FormFieldId
-import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -46,7 +43,10 @@ class InlineAddressFormState(
      */
     val enteredAddress: StateFlow<AddressDetails> =
         formController.uncompletedFormValues.mapAsStateFlow { formValues ->
-            formValues.toAddressDetails(hiddenName = hiddenName)
+            formValues.toAddressDetails(
+                hiddenName = hiddenName,
+                isCheckboxSelected = null,
+            )
         }
 
     /**
@@ -54,7 +54,10 @@ class InlineAddressFormState(
      */
     val completeAddress: StateFlow<AddressDetails?> =
         formController.completeFormValues.mapAsStateFlow { formValues ->
-            formValues?.toAddressDetails(hiddenName = hiddenName)
+            formValues?.toAddressDetails(
+                hiddenName = hiddenName,
+                isCheckboxSelected = null,
+            )
         }
 
     /**
@@ -81,19 +84,4 @@ private object NoAutocompleteAddressInteractor : AutocompleteAddressInteractor {
     override fun register(onEvent: (AutocompleteAddressInteractor.Event) -> Unit) = Unit
 
     override fun onAutocomplete(country: String) = Unit
-}
-
-private fun Map<FormFieldId, FormFieldEntry>.toAddressDetails(hiddenName: String?): AddressDetails {
-    return AddressDetails(
-        name = hiddenName ?: this[FormFieldId.Name]?.value,
-        address = PaymentSheet.Address(
-            city = this[FormFieldId.City]?.value,
-            country = this[FormFieldId.Country]?.value,
-            line1 = this[FormFieldId.Line1]?.value,
-            line2 = this[FormFieldId.Line2]?.value,
-            postalCode = this[FormFieldId.PostalCode]?.value,
-            state = this[FormFieldId.State]?.value,
-        ),
-        phoneNumber = this[FormFieldId.Phone]?.value,
-    )
 }
