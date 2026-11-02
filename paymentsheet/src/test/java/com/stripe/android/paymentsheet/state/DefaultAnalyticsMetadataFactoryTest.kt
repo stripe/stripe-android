@@ -747,8 +747,8 @@ class DefaultAnalyticsMetadataFactoryTest {
         assertThat(mpeConfig).containsKey("appearance")
         val appearance = mpeConfig?.get("appearance") as? Map<*, *>
 
-        assertThat(appearance?.get("colorsLight")).isEqualTo(false)
-        assertThat(appearance?.get("colorsDark")).isEqualTo(false)
+        assertThat(appearance?.get("colors_light")).isEqualTo(false)
+        assertThat(appearance?.get("colors_dark")).isEqualTo(false)
         assertThat(appearance?.get("corner_radius")).isEqualTo(false)
         assertThat(appearance?.get("border_width")).isEqualTo(false)
         assertThat(appearance?.get("font")).isEqualTo(false)
@@ -757,8 +757,8 @@ class DefaultAnalyticsMetadataFactoryTest {
 
         assertThat(appearance).containsKey("primary_button")
         val primaryButton = appearance?.get("primary_button") as? Map<*, *>
-        assertThat(primaryButton?.get("colorsLight")).isEqualTo(false)
-        assertThat(primaryButton?.get("colorsDark")).isEqualTo(false)
+        assertThat(primaryButton?.get("colors_light")).isEqualTo(false)
+        assertThat(primaryButton?.get("colors_dark")).isEqualTo(false)
         assertThat(primaryButton?.get("corner_radius")).isEqualTo(false)
         assertThat(primaryButton?.get("border_width")).isEqualTo(false)
         assertThat(primaryButton?.get("font")).isEqualTo(false)

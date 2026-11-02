@@ -95,7 +95,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
             analyticsPayloadField(Uri.encode("mpe_config[embedded_view_displays_mandate_text]"), "true"),
             analyticsPayloadField(Uri.encode("mpe_config[open_card_scan_automatically]"), "false"),
             analyticsPayloadField(Uri.encode("mpe_config[appearance][embedded_payment_element][row_style]"), "flat_with_radio"),
-            analyticsPayloadField(Uri.encode("mpe_config[appearance][colorsDark]"), "false"),
+            analyticsPayloadField(Uri.encode("mpe_config[appearance][colors_dark]"), "false"),
         )
         validateAnalyticsRequest(eventName = "mc_embedded_sheet_newpm_show")
         validateAnalyticsRequest(eventName = "mc_carousel_payment_method_tapped")
