@@ -7,7 +7,8 @@ import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherE
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.ui.core.elements.autocomplete.model.AutocompletePrediction
 import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
-import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import java.util.Locale
 import java.util.UUID
 
@@ -83,7 +84,7 @@ internal class StripeHostedPlacesClientProxy(
                 source = responseSource,
             )
         }.onFailure { error ->
-            if (error is CancellationException) throw error
+            currentCoroutineContext().ensureActive()
             eventReporter.onAutocompleteError(sessionToken = token, country = country, error = error)
         }
     }
@@ -133,7 +134,7 @@ internal class StripeHostedPlacesClientProxy(
                 source = source,
             )
         }.onFailure { error ->
-            if (error is CancellationException) throw error
+            currentCoroutineContext().ensureActive()
             eventReporter.onAutocompleteError(sessionToken = token, country = country, error = error)
         }
     }

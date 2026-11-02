@@ -1,9 +1,14 @@
 package com.stripe.android.paymentsheet.addresselement
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.model.Address
 import com.stripe.android.paymentsheet.addresselement.analytics.FakeAddressLauncherEventReporter
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import java.util.Locale
@@ -478,36 +483,47 @@ class StripeHostedPlacesClientProxyTest {
     }
 
     @Test
-    fun `findAutocompletePredictions rethrows cancellation without firing onAutocompleteError`() = runTest {
-        val eventReporter = FakeAddressLauncherEventReporter()
-        val repository = FakeStripeAutocompleteRepository().apply {
-            predictionsResult = Result.failure(CancellationException("Cancelled"))
-        }
-        val proxy = createProxy(repository = repository, eventReporter = eventReporter)
+    fun `findAutocompletePredictions cancellation wrapped by the network layer does not fire onAutocompleteError`() =
+        runTest {
+            val eventReporter = FakeAddressLauncherEventReporter()
+            val repository = FakeStripeAutocompleteRepository().apply {
+                onBeforeFindAutocompletePredictions = { runCatching { awaitCancellation() } }
+                predictionsResult = Result.failure(
+                    APIConnectionException("Failed to execute", cause = CancellationException())
+                )
+            }
+            val proxy = createProxy(repository = repository, eventReporter = eventReporter)
+            var result: Result<*>? = null
 
-        val result = runCatching {
-            proxy.findAutocompletePredictions(query = "123 Main", country = "US", limit = 4)
-        }
+            val job = launch {
+                result = proxy.findAutocompletePredictions(query = "123 Main", country = "US", limit = 4)
+            }
+            runCurrent()
+            job.cancelAndJoin()
 
-        assertThat(result.exceptionOrNull()).isInstanceOf(CancellationException::class.java)
-        repository.findPredictionsCalls.awaitItem()
-        eventReporter.autocompleteSessionStartedCalls.awaitItem()
-        eventReporter.autocompleteFetchStartedCalls.awaitItem()
-        repository.ensureAllEventsConsumed()
-        eventReporter.validate()
-    }
+            assertThat(result).isNull()
+            repository.findPredictionsCalls.awaitItem()
+            eventReporter.autocompleteSessionStartedCalls.awaitItem()
+            eventReporter.autocompleteFetchStartedCalls.awaitItem()
+            repository.ensureAllEventsConsumed()
+            eventReporter.validate()
+        }
 
     @Test
-    fun `fetchPlace rethrows cancellation without firing onAutocompleteError`() = runTest {
+    fun `fetchPlace cancellation wrapped by the network layer does not fire onAutocompleteError`() = runTest {
         val eventReporter = FakeAddressLauncherEventReporter()
         val repository = defaultRepository().apply {
-            detailsResult = Result.failure(CancellationException("Cancelled"))
+            onBeforeFetchPlaceDetails = { runCatching { awaitCancellation() } }
+            detailsResult = Result.failure(APIConnectionException("Failed to execute", cause = CancellationException()))
         }
         val proxy = createProxy(repository = repository, eventReporter = eventReporter)
+        var result: Result<*>? = null
 
-        val result = runCatching { proxy.fetchPlace("place_123", Locale.US) }
+        val job = launch { result = proxy.fetchPlace("place_123", Locale.US) }
+        runCurrent()
+        job.cancelAndJoin()
 
-        assertThat(result.exceptionOrNull()).isInstanceOf(CancellationException::class.java)
+        assertThat(result).isNull()
         eventReporter.autocompleteDetailsFetchStartedCalls.awaitItem()
         repository.fetchPlaceDetailsCalls.awaitItem()
         repository.ensureAllEventsConsumed()
