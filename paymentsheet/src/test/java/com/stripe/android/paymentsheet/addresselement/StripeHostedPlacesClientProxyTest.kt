@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.addresselement
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.Address
 import com.stripe.android.paymentsheet.addresselement.analytics.FakeAddressLauncherEventReporter
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import java.util.Locale
@@ -472,6 +473,43 @@ class StripeHostedPlacesClientProxyTest {
         val errorCall = eventReporter.autocompleteErrorCalls.awaitItem()
         assertThat(errorCall.error).hasMessageThat().isEqualTo("Details error")
         assertThat(errorCall.country).isEqualTo("US")
+        repository.ensureAllEventsConsumed()
+        eventReporter.validate()
+    }
+
+    @Test
+    fun `findAutocompletePredictions rethrows cancellation without firing onAutocompleteError`() = runTest {
+        val eventReporter = FakeAddressLauncherEventReporter()
+        val repository = FakeStripeAutocompleteRepository().apply {
+            predictionsResult = Result.failure(CancellationException("Cancelled"))
+        }
+        val proxy = createProxy(repository = repository, eventReporter = eventReporter)
+
+        val result = runCatching {
+            proxy.findAutocompletePredictions(query = "123 Main", country = "US", limit = 4)
+        }
+
+        assertThat(result.exceptionOrNull()).isInstanceOf(CancellationException::class.java)
+        repository.findPredictionsCalls.awaitItem()
+        eventReporter.autocompleteSessionStartedCalls.awaitItem()
+        eventReporter.autocompleteFetchStartedCalls.awaitItem()
+        repository.ensureAllEventsConsumed()
+        eventReporter.validate()
+    }
+
+    @Test
+    fun `fetchPlace rethrows cancellation without firing onAutocompleteError`() = runTest {
+        val eventReporter = FakeAddressLauncherEventReporter()
+        val repository = defaultRepository().apply {
+            detailsResult = Result.failure(CancellationException("Cancelled"))
+        }
+        val proxy = createProxy(repository = repository, eventReporter = eventReporter)
+
+        val result = runCatching { proxy.fetchPlace("place_123", Locale.US) }
+
+        assertThat(result.exceptionOrNull()).isInstanceOf(CancellationException::class.java)
+        eventReporter.autocompleteDetailsFetchStartedCalls.awaitItem()
+        repository.fetchPlaceDetailsCalls.awaitItem()
         repository.ensureAllEventsConsumed()
         eventReporter.validate()
     }

@@ -3,6 +3,7 @@ package com.stripe.android.ui.core.elements.autocomplete
 import android.os.Build
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.tasks.Task
+import com.google.android.gms.tasks.TaskCompletionSource
 import com.google.android.gms.tasks.Tasks
 import com.google.android.libraries.places.api.model.AutocompletePrediction
 import com.google.android.libraries.places.api.model.Place
@@ -29,6 +30,8 @@ import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.uicore.elements.IsPlacesAvailable
 import com.stripe.android.utils.isInstanceOf
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -178,6 +181,48 @@ class PlacesClientProxyTest {
             assertThat(place.getOrNull())
                 .isNotNull()
         }
+
+    @Test
+    fun `findAutocompletePredictions cancellation propagates without reporting an error`() = runTest {
+        val errorReporter = FakeErrorReporter()
+        val proxy = DefaultPlacesClientProxy(
+            client = createGooglePlacesClient(
+                onFindAutocompletePredictions = { TaskCompletionSource<FindAutocompletePredictionsResponse>().task }
+            ),
+            errorReporter = errorReporter,
+        )
+        var result: Result<*>? = null
+
+        val job = launch {
+            result = proxy.findAutocompletePredictions("some query", "country", 3)
+        }
+        runCurrent()
+        job.cancelAndJoin()
+
+        assertThat(result).isNull()
+        errorReporter.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `fetchPlace cancellation propagates without reporting an error`() = runTest {
+        val errorReporter = FakeErrorReporter()
+        val proxy = DefaultPlacesClientProxy(
+            client = createGooglePlacesClient(
+                onFetchPlace = { TaskCompletionSource<FetchPlaceResponse>().task }
+            ),
+            errorReporter = errorReporter,
+        )
+        var result: Result<*>? = null
+
+        val job = launch {
+            result = proxy.fetchPlace(placeId = "placeId", locale = java.util.Locale.getDefault())
+        }
+        runCurrent()
+        job.cancelAndJoin()
+
+        assertThat(result).isNull()
+        errorReporter.ensureAllEventsConsumed()
+    }
 
     @Test
     fun `getPlacesPoweredByGoogleDrawable returns drawable when places is available`() {
