@@ -13,6 +13,7 @@ import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.utils.StatusBarCompat
 import com.stripe.android.crypto.onramp.di.OnrampPresenterScope
+import com.stripe.android.crypto.onramp.exception.GooglePayNotConfiguredException
 import com.stripe.android.crypto.onramp.exception.PaymentFailedException
 import com.stripe.android.crypto.onramp.exception.SamsungPayException.Reason
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
@@ -397,8 +398,19 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                 coroutineScope.launch {
                     interactor.getOrFetchPlatformKey().fold(
                         onSuccess = {
+                            val launcher = googlePayPaymentMethodLauncher
+                            if (launcher == null) {
+                                onrampCallbacksState.collectPaymentCallback.onResult(
+                                    interactor.collectPaymentMethodFailure(
+                                        GooglePayNotConfiguredException(
+                                            activity.getString(R.string.stripe_onramp_google_pay_not_configured)
+                                        )
+                                    )
+                                )
+                                return@fold
+                            }
                             interactor.onGooglePayPresented(it)
-                            googlePayPaymentMethodLauncher?.present(
+                            launcher.present(
                                 currencyCode = selection.currencyCode,
                                 amount = selection.amount,
                                 clientAttributionMetadata = null,
