@@ -48,7 +48,7 @@ internal class ExpressCheckoutElementTest {
             assertions = { controller ->
                 assertThat(
                     controller.session.value?.availableExpressCheckoutPaymentMethods
-                ).containsExactly("google_pay")
+                ).containsExactly(ExpressCheckoutElement.PaymentMethod.GooglePay())
             },
             configurationUpdates = {
                 it.linkConfiguration(
@@ -90,7 +90,7 @@ internal class ExpressCheckoutElementTest {
     @Test
     fun testSuccessfulNativeLinkPayment() {
         // This is called twice during load - once for ECE, once for PE
-        repeat (2) {
+        repeat(2) {
             networkRule.enqueueLinkAccountLookup()
         }
 
@@ -102,7 +102,7 @@ internal class ExpressCheckoutElementTest {
             assertions = { controller ->
                 assertThat(
                     controller.session.value?.availableExpressCheckoutPaymentMethods
-                ).containsExactly("link")
+                ).containsExactly(ExpressCheckoutElement.PaymentMethod.Link())
             },
             configurationUpdates = {
                 it.googlePayConfiguration(
@@ -136,7 +136,10 @@ internal class ExpressCheckoutElementTest {
             assertions = { controller ->
                 assertThat(
                     controller.session.value?.availableExpressCheckoutPaymentMethods
-                ).containsExactly("google_pay", "link")
+                ).containsExactly(
+                    ExpressCheckoutElement.PaymentMethod.GooglePay(),
+                    ExpressCheckoutElement.PaymentMethod.Link(),
+                )
             },
         ) {
             // Just testing load, no need to confirm.
@@ -212,7 +215,7 @@ internal class ExpressCheckoutElementTest {
             assertions = { controller ->
                 assertThat(
                     controller.session.value?.availableExpressCheckoutPaymentMethods
-                ).containsExactly("google_pay")
+                ).containsExactly(ExpressCheckoutElement.PaymentMethod.GooglePay())
             },
         ) {
             page.assertGooglePayButtonExists()

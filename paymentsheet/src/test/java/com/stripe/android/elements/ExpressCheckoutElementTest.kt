@@ -12,6 +12,22 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 internal class ExpressCheckoutElementTest {
     @Test
+    fun `Google Pay payment method exposes its type`() {
+        val paymentMethod: ExpressCheckoutElement.PaymentMethod =
+            ExpressCheckoutElement.PaymentMethod.GooglePay()
+
+        assertThat(paymentMethod.type).isEqualTo("google_pay")
+    }
+
+    @Test
+    fun `Link payment method exposes its type`() {
+        val paymentMethod: ExpressCheckoutElement.PaymentMethod =
+            ExpressCheckoutElement.PaymentMethod.Link()
+
+        assertThat(paymentMethod.type).isEqualTo("link")
+    }
+
+    @Test
     fun `configuration builds default values`() {
         val state = ExpressCheckoutElement.Configuration().build()
 
