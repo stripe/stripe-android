@@ -4,6 +4,7 @@ import android.app.Application
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import androidx.lifecycle.SavedStateHandle
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.StripeError
@@ -2002,6 +2003,40 @@ class OnrampInteractorTest {
     }
 
     @Test
+    fun `checkout results wait for an observer and are not replayed`() = runTest {
+        interactor.onHandleNextActionCanceled()
+        interactor.onHandleNextActionCanceled()
+
+        interactor.checkoutResults.test {
+            assertThat(awaitItem()).isInstanceOf(OnrampCheckoutResult.Canceled::class.java)
+            assertThat(awaitItem()).isInstanceOf(OnrampCheckoutResult.Canceled::class.java)
+            ensureAllEventsConsumed()
+        }
+
+        interactor.checkoutResults.test {
+            expectNoEvents()
+            interactor.onHandleNextActionCanceled()
+            assertThat(awaitItem()).isInstanceOf(OnrampCheckoutResult.Canceled::class.java)
+            ensureAllEventsConsumed()
+        }
+    }
+
+    @Test
+    fun `successful checkout emits a completed result`() = runTest {
+        stubCheckoutRequiresNextAction()
+        whenever(cryptoApiRepository.retrievePaymentIntent(any(), any())).thenReturn(
+            Result.success(paymentIntentRequiringCard3ds().copy(status = StripeIntent.Status.Succeeded))
+        )
+
+        interactor.startCheckout("cos_test_session_id")
+
+        interactor.checkoutResults.test {
+            assertThat(awaitItem()).isInstanceOf(OnrampCheckoutResult.Completed::class.java)
+            ensureAllEventsConsumed()
+        }
+    }
+
+    @Test
     fun testOnHandleNextActionError() = runTest {
         val error = RuntimeException("Payment failed")
         interactor.onLinkControllerState(mockLinkStateWithAccount())
@@ -2014,6 +2049,10 @@ class OnrampInteractorTest {
         val completedStatus = interactor.state.value.checkoutState?.status
         assertThat(completedStatus).isInstanceOf(CheckoutState.Status.Completed::class.java)
         val result = (completedStatus as CheckoutState.Status.Completed).result
+        interactor.checkoutResults.test {
+            assertThat(awaitItem()).isSameInstanceAs(result)
+            ensureAllEventsConsumed()
+        }
         assertThat(result).isInstanceOf(OnrampCheckoutResult.Failed::class.java)
         val unexpectedError = assertUnexpectedError<RuntimeException>(
             (result as OnrampCheckoutResult.Failed).error
@@ -2047,6 +2086,10 @@ class OnrampInteractorTest {
         val completedStatus = interactor.state.value.checkoutState?.status
         assertThat(completedStatus).isInstanceOf(CheckoutState.Status.Completed::class.java)
         val result = (completedStatus as CheckoutState.Status.Completed).result
+        interactor.checkoutResults.test {
+            assertThat(awaitItem()).isSameInstanceAs(result)
+            ensureAllEventsConsumed()
+        }
         assertThat(result).isInstanceOf(OnrampCheckoutResult.Canceled::class.java)
 
         interactor.startCheckout("cos_retry_session_id")
@@ -2246,6 +2289,10 @@ class OnrampInteractorTest {
         val checkoutStatus = interactor.state.value.checkoutState?.status
         assertThat(checkoutStatus).isInstanceOf(CheckoutState.Status.Completed::class.java)
         val result = (checkoutStatus as CheckoutState.Status.Completed).result
+        interactor.checkoutResults.test {
+            assertThat(awaitItem()).isSameInstanceAs(result)
+            ensureAllEventsConsumed()
+        }
         assertThat(result).isInstanceOf(OnrampCheckoutResult.Failed::class.java)
         val error = (result as OnrampCheckoutResult.Failed).error
         assertUnexpectedError<PaymentFailedException>(error)
@@ -2301,6 +2348,10 @@ class OnrampInteractorTest {
         val checkoutStatus = interactor.state.value.checkoutState?.status
         assertThat(checkoutStatus).isInstanceOf(CheckoutState.Status.Completed::class.java)
         val result = (checkoutStatus as CheckoutState.Status.Completed).result
+        interactor.checkoutResults.test {
+            assertThat(awaitItem()).isSameInstanceAs(result)
+            ensureAllEventsConsumed()
+        }
         assertThat(result).isInstanceOf(OnrampCheckoutResult.Failed::class.java)
         val error = (result as OnrampCheckoutResult.Failed).error
         assertUnexpectedError<PaymentFailedException>(error)
