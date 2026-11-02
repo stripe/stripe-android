@@ -5,6 +5,7 @@ import com.stripe.android.core.model.CountryCode
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerFixtures
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.ConsumerPaymentDetails.Display.Icon.Type as IconType
 import com.stripe.android.model.CvcCheck
 import org.json.JSONObject
 import org.junit.Test
@@ -251,7 +252,10 @@ class ConsumerPaymentDetailsJsonParserTest {
             ConsumerPaymentDetails.Display(
                 label = "Visa Credit",
                 sublabel = "•••• 4242",
-                icon = ConsumerPaymentDetails.Display.Icon(defaultUrl = "https://b.stripecdn.com/card-icon.png"),
+                icon = ConsumerPaymentDetails.Display.Icon(
+                    defaultUrl = "https://b.stripecdn.com/card-icon.png",
+                    type = IconType.CardBrand,
+                ),
             )
         )
     }
@@ -287,6 +291,34 @@ class ConsumerPaymentDetailsJsonParserTest {
 
         assertThat(paymentDetails).isInstanceOf(ConsumerPaymentDetails.BankAccount::class.java)
         assertThat(paymentDetails.display?.icon?.defaultUrl).isEqualTo("https://b.stripecdn.com/bank-icon.png")
+        assertThat(paymentDetails.display?.icon?.type).isEqualTo(IconType.Institution)
+    }
+
+    @Test
+    fun `parse card_art icon type`() {
+        assertThat(parseIcon(type = "card_art")?.type).isEqualTo(IconType.CardArt)
+    }
+
+    @Test
+    fun `parse card_brand icon type`() {
+        assertThat(parseIcon(type = "card_brand")?.type).isEqualTo(IconType.CardBrand)
+    }
+
+    @Test
+    fun `parse institution icon type`() {
+        assertThat(parseIcon(type = "institution")?.type).isEqualTo(IconType.Institution)
+    }
+
+    @Test
+    fun `parse generic icon type`() {
+        assertThat(parseIcon(type = "generic")?.type).isEqualTo(IconType.Generic)
+    }
+
+    @Test
+    fun `parse unknown icon type keeps icon url`() {
+        assertThat(parseIcon(type = "new_type")).isEqualTo(
+            ConsumerPaymentDetails.Display.Icon(defaultUrl = "https://b.stripecdn.com/icon.png", type = null)
+        )
     }
 
     @Test
@@ -326,7 +358,8 @@ class ConsumerPaymentDetailsJsonParserTest {
                             label = "Crypto",
                             sublabel = "0x••••22Dd",
                             icon = ConsumerPaymentDetails.Display.Icon(
-                                defaultUrl = "https://example.com/crypto-icon.png"
+                                defaultUrl = "https://example.com/crypto-icon.png",
+                                type = null,
                             )
                         ),
                         nextActionTypes = listOf("redirect_to_url")
@@ -573,6 +606,19 @@ class ConsumerPaymentDetailsJsonParserTest {
                 )
             )
         )
+    }
+
+    private fun parseIcon(type: String): ConsumerPaymentDetails.Display.Icon? {
+        return ConsumerPaymentDetailsJsonParser.parse(
+            cardJsonWithDisplay(
+                """
+                    {
+                      "label": "Visa Credit",
+                      "icon": { "default": "https://b.stripecdn.com/icon.png", "type": "$type" }
+                    }
+                """.trimIndent()
+            )
+        ).paymentDetails.single().display?.icon
     }
 
     private fun cardJsonWithDisplay(display: String) = JSONObject(

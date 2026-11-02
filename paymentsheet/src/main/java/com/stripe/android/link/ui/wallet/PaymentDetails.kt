@@ -356,7 +356,10 @@ internal fun RowScope.PaymentDetails(
                 modifier = modifier,
                 title = paymentDetails.displayName.resolve(),
                 subtitle = stringResource(R.string.stripe_link_payment_method_last4, paymentDetails.last4),
-                iconUrl = paymentDetails.display?.icon?.defaultUrl,
+                // Card brand icons duplicate the local brand logos, so only fetch other icons, like card art.
+                iconUrl = paymentDetails.display?.icon
+                    ?.takeIf { it.type != Display.Icon.Type.CardBrand }
+                    ?.defaultUrl,
                 icon = paymentDetails.brand.getCardBrandIconForVerticalMode(),
             )
         }

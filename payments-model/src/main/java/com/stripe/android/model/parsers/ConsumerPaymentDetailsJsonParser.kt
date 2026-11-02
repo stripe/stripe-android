@@ -47,6 +47,7 @@ private const val FIELD_LABEL = "label"
 private const val FIELD_SUBLABEL = "sublabel"
 private const val FIELD_ICON = "icon"
 private const val FIELD_DEFAULT_ICON = "default"
+private const val FIELD_ICON_TYPE = "type"
 private const val FIELD_NEXT_ACTION_TYPES = "next_action_types"
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -146,9 +147,15 @@ object ConsumerPaymentDetailsJsonParser : ModelJsonParser<ConsumerPaymentDetails
         )
     }
 
-    private fun parseIcon(display: JSONObject) = display.optJSONObject(FIELD_ICON)
-        ?.let { optString(it, FIELD_DEFAULT_ICON) }
-        ?.let { ConsumerPaymentDetails.Display.Icon(defaultUrl = it) }
+    private fun parseIcon(display: JSONObject): ConsumerPaymentDetails.Display.Icon? {
+        val icon = display.optJSONObject(FIELD_ICON) ?: return null
+        val defaultUrl = optString(icon, FIELD_DEFAULT_ICON) ?: return null
+        return ConsumerPaymentDetails.Display.Icon(
+            defaultUrl = defaultUrl,
+            // Unknown types are null so that new backend types don't drop the icon URL.
+            type = ConsumerPaymentDetails.Display.Icon.Type.fromCode(optString(icon, FIELD_ICON_TYPE)),
+        )
+    }
 
     private fun parseBillingAddress(json: JSONObject) =
         json.optJSONObject(FIELD_BILLING_ADDRESS)?.let { address ->

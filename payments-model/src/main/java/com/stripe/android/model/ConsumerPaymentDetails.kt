@@ -180,6 +180,25 @@ data class ConsumerPaymentDetails(
     ) : Parcelable {
         @Parcelize
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        data class Icon(val defaultUrl: String) : Parcelable
+        data class Icon(
+            val defaultUrl: String,
+            val type: Type?,
+        ) : Parcelable {
+
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            enum class Type(val code: String) {
+                CardArt("card_art"),
+                CardBrand("card_brand"),
+                Institution("institution"),
+                Generic("generic");
+
+                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                companion object {
+                    fun fromCode(code: String?): Type? {
+                        return entries.firstOrNull { it.code == code }
+                    }
+                }
+            }
+        }
     }
 }

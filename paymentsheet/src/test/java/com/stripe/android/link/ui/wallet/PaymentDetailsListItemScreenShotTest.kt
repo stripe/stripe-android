@@ -13,6 +13,8 @@ import com.stripe.android.core.model.CountryCode
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.ConsumerPaymentDetails.Display
+import com.stripe.android.model.ConsumerPaymentDetails.Display.Icon
 import com.stripe.android.model.CvcCheck
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
@@ -321,10 +323,12 @@ internal class PaymentDetailsListItemScreenShotTest {
 
     @Test
     fun testRemoteIcons() {
-        val cardIconUrl = "https://b.stripecdn.com/card-icon.png"
+        val cardArtUrl = "https://b.stripecdn.com/card-art.png"
         val bankIconUrl = "https://b.stripecdn.com/bank-icon.png"
+        val cardBrandIconUrl = "https://b.stripecdn.com/card-brand-icon.png"
 
-        // Given a card and bank account with loadable icons, and a card whose icon can't be loaded
+        // Given a card and bank account with loadable icons, a card whose icon can't be loaded, and a card whose
+        // loadable icon is a card brand icon
         val paymentDetails = listOf(
             remoteIconCard(
                 id = "1",
@@ -332,40 +336,39 @@ internal class PaymentDetailsListItemScreenShotTest {
                 brand = CardBrand.Visa,
                 last4 = "4242",
                 label = "Visa Credit",
-                iconUrl = cardIconUrl,
+                icon = Icon(defaultUrl = cardArtUrl, type = Icon.Type.CardArt),
             ),
-            ConsumerPaymentDetails.BankAccount(
-                id = "2",
-                last4 = "6789",
-                isDefault = false,
-                nickname = null,
-                bankAccountName = "Checking",
-                bankIconCode = null,
-                billingAddress = null,
-                billingEmailAddress = null,
-                display = remoteIconDisplay(label = "Checking", sublabel = "••6789", iconUrl = bankIconUrl),
-            ),
+            remoteIconBankAccount(icon = Icon(defaultUrl = bankIconUrl, type = Icon.Type.Institution)),
             remoteIconCard(
                 id = "3",
                 isDefault = false,
                 brand = CardBrand.AmericanExpress,
                 last4 = "0005",
                 label = "American Express Credit",
-                iconUrl = "https://b.stripecdn.com/unloadable-icon.png",
+                icon = Icon(defaultUrl = "https://b.stripecdn.com/unloadable-icon.png", type = Icon.Type.CardArt),
+            ),
+            remoteIconCard(
+                id = "4",
+                isDefault = false,
+                brand = CardBrand.MasterCard,
+                last4 = "4444",
+                label = "Mastercard Credit",
+                icon = Icon(defaultUrl = cardBrandIconUrl, type = Icon.Type.CardBrand),
             ),
         )
 
-        // ...and an image loader with card and bank account icons
+        // ...and an image loader with card art, bank account and card brand icons
         val images = {
             mapOf(
-                cardIconUrl to solidBitmap(color = Color.RED, width = 48, height = 32),
+                cardArtUrl to solidBitmap(color = Color.RED, width = 48, height = 32),
                 bankIconUrl to solidBitmap(color = Color.BLUE, width = 96, height = 96),
+                cardBrandIconUrl to solidBitmap(color = Color.GREEN, width = 48, height = 32),
             )
         }
 
         // When each payment method is displayed
-        // Then the card icon fills the rectangular icon area, the bank account icon fills the square icon area,
-        // and the card without a loadable icon shows its local brand icon
+        // Then the card art fills the rectangular icon area, the bank account icon fills the square icon area,
+        // and the card without a loadable icon and the card with a card brand icon show their local brand icons
         snapshotWithImageLoader(paymentDetails = paymentDetails, images = images)
     }
 
@@ -424,7 +427,7 @@ internal class PaymentDetailsListItemScreenShotTest {
         brand: CardBrand,
         last4: String,
         label: String,
-        iconUrl: String,
+        icon: Icon,
     ) = ConsumerPaymentDetails.Card(
         id = id,
         expiryYear = 2030,
@@ -436,13 +439,19 @@ internal class PaymentDetailsListItemScreenShotTest {
         networks = emptyList(),
         funding = ConsumerPaymentDetails.Card.Funding.Credit,
         nickname = null,
-        display = remoteIconDisplay(label = label, sublabel = "•••• $last4", iconUrl = iconUrl),
+        display = Display(label = label, sublabel = "•••• $last4", icon = icon),
     )
 
-    private fun remoteIconDisplay(label: String, sublabel: String, iconUrl: String) = ConsumerPaymentDetails.Display(
-        label = label,
-        sublabel = sublabel,
-        icon = ConsumerPaymentDetails.Display.Icon(defaultUrl = iconUrl),
+    private fun remoteIconBankAccount(icon: Icon) = ConsumerPaymentDetails.BankAccount(
+        id = "2",
+        last4 = "6789",
+        isDefault = false,
+        nickname = null,
+        bankAccountName = "Checking",
+        bankIconCode = null,
+        billingAddress = null,
+        billingEmailAddress = null,
+        display = Display(label = "Checking", sublabel = "••6789", icon = icon),
     )
 
     private fun solidBitmap(color: Int, width: Int, height: Int): Bitmap {
