@@ -5,11 +5,11 @@ import com.stripe.android.core.model.CountryCode
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerFixtures
 import com.stripe.android.model.ConsumerPaymentDetails
-import com.stripe.android.model.ConsumerPaymentDetails.Display.Icon.Type as IconType
 import com.stripe.android.model.CvcCheck
 import org.json.JSONObject
 import org.junit.Test
 import kotlin.test.assertEquals
+import com.stripe.android.model.ConsumerPaymentDetails.Display.Icon.Type as IconType
 
 class ConsumerPaymentDetailsJsonParserTest {
 
