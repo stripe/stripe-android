@@ -177,7 +177,7 @@ internal class CheckoutPlaygroundSettings private constructor(
     }
 
     companion object {
-        private const val PREFERENCES_NAME = "CheckoutControllerPlaygroundSettings"
+        private const val PREFERENCES_NAME = "CheckoutElementsControllerPlaygroundSettings"
         private const val PREFERENCES_KEY = "settings_v1"
         private const val RETURNING_CUSTOMER_ID_KEY = "returning_customer_id"
         private const val TAG = "CheckoutSettings"

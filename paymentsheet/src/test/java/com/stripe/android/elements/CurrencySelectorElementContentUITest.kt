@@ -13,7 +13,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.checkout.CheckoutController
+import com.stripe.android.checkout.CheckoutElementsController
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.checkouttesting.checkoutUpdate
@@ -48,7 +48,7 @@ internal class CurrencySelectorElementContentUITest {
     private val testDispatcher = StandardTestDispatcher()
 
     // Destroys built controllers when the test finishes, releasing each one's viewModelScope.
-    private val destroyControllerRule = CleanupTestRule(CheckoutController::destroy)
+    private val destroyControllerRule = CleanupTestRule(CheckoutElementsController::destroy)
 
     @get:Rule
     val ruleChain: RuleChain = RuleChain
@@ -85,7 +85,7 @@ internal class CurrencySelectorElementContentUITest {
 
     @Test
     fun currencySelectorConfiguredWithCurrencyCodeLabel_displaysCurrencyCodes() = runScenario(
-        configuration = CheckoutController.Configuration().currencySelectorElement(
+        configuration = CheckoutElementsController.Configuration().currencySelectorElement(
             CurrencySelectorElement.Configuration().appearance(
                 CurrencySelectorElement.Configuration.Appearance()
                     .labelContent(CurrencySelectorElement.Configuration.Appearance.LabelContent.CURRENCY_CODE)
@@ -107,14 +107,14 @@ internal class CurrencySelectorElementContentUITest {
         enqueueCheckoutInit()
         val result = controller.configure(
             DEFAULT_CLIENT_SECRET,
-            CheckoutController.Configuration().currencySelectorElement(
+            CheckoutElementsController.Configuration().currencySelectorElement(
                 CurrencySelectorElement.Configuration().appearance(
                     CurrencySelectorElement.Configuration.Appearance()
                         .labelContent(CurrencySelectorElement.Configuration.Appearance.LabelContent.CURRENCY_CODE)
                 )
             ),
         )
-        assertThat(result).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
+        assertThat(result).isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
 
         composeRule.onNodeWithTag("${TEST_TAG_CURRENCY_OPTION_PREFIX}USD")
             .assertContentDescriptionContains("USD")
@@ -177,7 +177,7 @@ internal class CurrencySelectorElementContentUITest {
     private fun runScenario(
         fixture: String = FIXTURE_WITH_ADAPTIVE_PRICING,
         setContent: Boolean = true,
-        configuration: CheckoutController.Configuration = CheckoutController.Configuration()
+        configuration: CheckoutElementsController.Configuration = CheckoutElementsController.Configuration()
             .currencySelectorElement(
                 CurrencySelectorElement.Configuration()
             ),
@@ -186,14 +186,14 @@ internal class CurrencySelectorElementContentUITest {
         enqueueCheckoutInit(fixture)
 
         val controller = destroyControllerRule.track(
-            CheckoutController.Builder(
+            CheckoutElementsController.Builder(
                 application = applicationContext,
                 savedStateHandle = SavedStateHandle(),
             ).build()
         )
 
         assertThat(controller.configure(DEFAULT_CLIENT_SECRET, configuration))
-            .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
+            .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
 
         val element = controller.createPresenter(composeRule.activity).currencySelectorElement()
         if (setContent) {
@@ -217,7 +217,7 @@ internal class CurrencySelectorElementContentUITest {
     }
 
     private class Scenario(
-        val controller: CheckoutController,
+        val controller: CheckoutElementsController,
     )
 
     private companion object {

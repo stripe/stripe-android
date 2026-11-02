@@ -23,11 +23,11 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 internal class ExpressCheckoutElementScenario(
-    val controller: CheckoutController,
+    val controller: CheckoutElementsController,
     private val countDownLatch: CountDownLatch,
 ) {
     /**
-     * Normally a test succeeds when [CheckoutController.ResultCallback] is invoked. Tests that
+     * Normally a test succeeds when [CheckoutElementsController.ResultCallback] is invoked. Tests that
      * intentionally do not confirm should call this after making their assertions.
      */
     fun markTestSucceeded() {
@@ -38,11 +38,11 @@ internal class ExpressCheckoutElementScenario(
 internal fun runExpressCheckoutElementScenario(
     networkRule: NetworkRule,
     initialCheckoutSessionResponseFactory: (MockResponse) -> Unit = CheckoutInitResponseFactory::create,
-    resultCallback: CheckoutController.ResultCallback = CheckoutController.ResultCallback {
+    resultCallback: CheckoutElementsController.ResultCallback = CheckoutElementsController.ResultCallback {
         error("Override + validate if expected.")
     },
     successTimeoutSeconds: Long = 5L,
-    assertions: (CheckoutController) -> Unit = {},
+    assertions: (CheckoutElementsController) -> Unit = {},
     configurationUpdates: (ExpressCheckoutElement.Configuration) -> ExpressCheckoutElement.Configuration = { it },
     block: suspend ExpressCheckoutElementScenario.() -> Unit,
 ) {
@@ -58,7 +58,7 @@ internal fun runExpressCheckoutElementScenario(
             TestApiKeys.PUBLISHABLE,
             TestApiKeys.ACCOUNT,
         )
-        val controller: CheckoutController = CheckoutController.Builder(
+        val controller: CheckoutElementsController = CheckoutElementsController.Builder(
             application = ApplicationProvider.getApplicationContext(),
             savedStateHandle = SavedStateHandle(),
         ).resultCallback { result ->
@@ -70,7 +70,7 @@ internal fun runExpressCheckoutElementScenario(
             assertThat(
                 controller.configure(
                     DEFAULT_CLIENT_SECRET,
-                    configuration = CheckoutController.Configuration()
+                    configuration = CheckoutElementsController.Configuration()
                         .paymentElement(PaymentElement.Configuration())
                         .expressCheckoutElement(
                             configurationUpdates(
@@ -78,7 +78,7 @@ internal fun runExpressCheckoutElementScenario(
                             )
                         )
                 )
-            ).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
+            ).isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
         }
         assertions(controller)
 

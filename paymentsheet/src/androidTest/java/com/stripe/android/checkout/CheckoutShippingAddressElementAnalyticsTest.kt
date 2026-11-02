@@ -53,15 +53,15 @@ internal class CheckoutShippingAddressElementAnalyticsTest {
     fun testManualEditOfPrefilledAddressReportsNoAutocompleteSelection() {
         val initialLine1 = "510 Townsend St"
         val updatedCity = "Cambridge"
-        val configuration = CheckoutController.Configuration()
+        val configuration = CheckoutElementsController.Configuration()
             .paymentElement(PaymentElement.Configuration())
             .shippingAddressElement(ShippingAddressElement.Configuration())
             .defaults(
-                CheckoutController.Configuration.Defaults().shippingDetails(
-                    CheckoutController.Configuration.Defaults.ContactDetails()
+                CheckoutElementsController.Configuration.Defaults().shippingDetails(
+                    CheckoutElementsController.Configuration.Defaults.ContactDetails()
                         .name("Real Name")
                         .address(
-                            CheckoutController.Address(country = "US")
+                            CheckoutElementsController.Address(country = "US")
                                 .line1(initialLine1)
                                 .city("Boston")
                                 .state("MA")
@@ -94,14 +94,14 @@ internal class CheckoutShippingAddressElementAnalyticsTest {
 
     @Test
     fun testHostedAutocompleteSelectionReportsSelectedResult() {
-        val configuration = CheckoutController.Configuration()
+        val configuration = CheckoutElementsController.Configuration()
             .paymentElement(PaymentElement.Configuration())
             .shippingAddressElement(ShippingAddressElement.Configuration())
             .defaults(
-                CheckoutController.Configuration.Defaults().shippingDetails(
-                    CheckoutController.Configuration.Defaults.ContactDetails()
+                CheckoutElementsController.Configuration.Defaults().shippingDetails(
+                    CheckoutElementsController.Configuration.Defaults.ContactDetails()
                         .name("Real Name")
-                        .address(CheckoutController.Address(country = "US"))
+                        .address(CheckoutElementsController.Address(country = "US"))
                 )
             )
 
@@ -147,7 +147,7 @@ internal class CheckoutShippingAddressElementAnalyticsTest {
     }
 
     private fun runCheckoutShippingAddressElementAnalyticsTest(
-        configuration: CheckoutController.Configuration,
+        configuration: CheckoutElementsController.Configuration,
         block: suspend CheckoutPaymentElementScenario.() -> Unit,
     ) {
         runCheckoutPaymentElementScenario(
@@ -156,7 +156,7 @@ internal class CheckoutShippingAddressElementAnalyticsTest {
             renderPaymentElementContent = false,
             setup = { configuredController ->
                 assertThat(configuredController.configure(DEFAULT_CLIENT_SECRET, configuration))
-                    .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
+                    .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
             },
             block = block,
         )
@@ -218,7 +218,7 @@ internal class CheckoutShippingAddressElementAnalyticsTest {
     }
 
     private fun waitForShippingAddress(
-        controller: CheckoutController,
+        controller: CheckoutElementsController,
         line1: String,
         city: String,
     ) {

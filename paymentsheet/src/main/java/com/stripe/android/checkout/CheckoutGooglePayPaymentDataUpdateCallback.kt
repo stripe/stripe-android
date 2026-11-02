@@ -16,7 +16,7 @@ import javax.inject.Inject
 internal class CheckoutGooglePayPaymentDataUpdateCallback @Inject constructor(
     private val context: Context,
     private val taxRegionUpdater: CheckoutSessionTaxRegionUpdater,
-    private val stateHolder: CheckoutControllerStateHolder,
+    private val stateHolder: CheckoutElementsControllerStateHolder,
     private val addressBuilder: CheckoutGooglePayPaymentDataUpdateAddressBuilder,
     private val mapper: CheckoutGooglePayPaymentDataUpdateMapper,
     private val errorReporter: ErrorReporter,
@@ -80,7 +80,7 @@ internal class CheckoutGooglePayPaymentDataUpdateCallback @Inject constructor(
 
     private suspend fun updateAddresses(
         countryCode: String?,
-        currentState: CheckoutControllerState,
+        currentState: CheckoutElementsControllerState,
         paymentDataUpdate: GooglePayPaymentDataUpdate,
         addressSources: List<CheckoutSessionResponse.TaxAddressSource>,
     ): GooglePayPaymentDataUpdateResponse {

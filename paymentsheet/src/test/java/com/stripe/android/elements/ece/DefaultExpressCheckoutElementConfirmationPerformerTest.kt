@@ -5,10 +5,10 @@ import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.checkout.CheckoutCommonConfigurationFactory
-import com.stripe.android.checkout.CheckoutController
-import com.stripe.android.checkout.CheckoutControllerState
-import com.stripe.android.checkout.CheckoutControllerStateFactory
-import com.stripe.android.checkout.CheckoutControllerStateHolder
+import com.stripe.android.checkout.CheckoutElementsController
+import com.stripe.android.checkout.CheckoutElementsControllerState
+import com.stripe.android.checkout.CheckoutElementsControllerStateFactory
+import com.stripe.android.checkout.CheckoutElementsControllerStateHolder
 import com.stripe.android.checkout.CheckoutOperationCoordinator
 import com.stripe.android.checkout.FakeCheckoutSessionRefresher
 import com.stripe.android.checkout.TestCheckoutAnalyticsPerformerFactory
@@ -57,15 +57,15 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
         assertThat(call.stripeException).isNull()
         assertThat(call.additionalNonPiiParams).isEmpty()
         val result = results.awaitItem()
-        assertThat(result).isInstanceOf<CheckoutController.Result.Failed>()
-        val error = (result as CheckoutController.Result.Failed).error
+        assertThat(result).isInstanceOf<CheckoutElementsController.Result.Failed>()
+        val error = (result as CheckoutElementsController.Result.Failed).error
         assertThat(error).isInstanceOf<IllegalStateException>()
         assertThat(error).hasMessageThat().isEqualTo("Cannot confirm checkout before it is configured.")
     }
 
     @Test
     fun `confirm reports unexpected error when confirmation args are null`() = runScenario(
-        state = CheckoutControllerStateFactory.create(
+        state = CheckoutElementsControllerStateFactory.create(
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(merchantCountry = null),
         ),
         expressButton = createGooglePayExpressButton(),
@@ -80,8 +80,8 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
         assertThat(call.stripeException).isNull()
         assertThat(call.additionalNonPiiParams).isEmpty()
         val result = results.awaitItem()
-        assertThat(result).isInstanceOf<CheckoutController.Result.Failed>()
-        val error = (result as CheckoutController.Result.Failed).error
+        assertThat(result).isInstanceOf<CheckoutElementsController.Result.Failed>()
+        val error = (result as CheckoutElementsController.Result.Failed).error
         assertThat(error).isInstanceOf<IllegalStateException>()
         assertThat(error).hasMessageThat().isEqualTo(
             "Cannot confirm checkout because the selected payment option cannot be confirmed."
@@ -184,7 +184,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
 
     @Test
     fun `confirm starts confirmation with a Link option`() {
-        val state = CheckoutControllerStateFactory.create(
+        val state = CheckoutElementsControllerStateFactory.create(
             expressCheckoutElementPaymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 linkState = LinkState(
                     configuration = LinkTestUtils.createLinkConfiguration(),
@@ -216,9 +216,9 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
     private fun createState(
         allowedShippingCountries: List<String>? = null,
         requiresBillingAddress: Boolean = false,
-    ): CheckoutControllerState {
-        return CheckoutControllerStateFactory.create(
-            configuration = CheckoutController.Configuration()
+    ): CheckoutElementsControllerState {
+        return CheckoutElementsControllerStateFactory.create(
+            configuration = CheckoutElementsController.Configuration()
                 .expressCheckoutElement(ExpressCheckoutElement.Configuration())
                 .build(),
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(
@@ -244,17 +244,17 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
 
     @Suppress("LongMethod")
     private fun runScenario(
-        state: CheckoutControllerState?,
+        state: CheckoutElementsControllerState?,
         expressButton: ExpressButton,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val confirmationHandler = FakeConfirmationHandler()
         val errorReporter = FakeErrorReporter()
         val savedStateHandle = SavedStateHandle()
-        val stateHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle)
+        val stateHolder = CheckoutElementsControllerStateFactory.createStateHolder(savedStateHandle)
         stateHolder.state = state
         val sessionRefresher = FakeCheckoutSessionRefresher()
-        val results = Turbine<CheckoutController.Result>()
+        val results = Turbine<CheckoutElementsController.Result>()
         val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
         val analyticsPerformer = TestCheckoutAnalyticsPerformerFactory.create(
             savedStateHandle = savedStateHandle,
@@ -305,9 +305,9 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
         val performer: DefaultExpressCheckoutElementConfirmationPerformer,
         val confirmationHandler: FakeConfirmationHandler,
         val errorReporter: FakeErrorReporter,
-        val stateHolder: CheckoutControllerStateHolder,
+        val stateHolder: CheckoutElementsControllerStateHolder,
         val expressButton: ExpressButton,
-        val results: Turbine<CheckoutController.Result>,
+        val results: Turbine<CheckoutElementsController.Result>,
         val analyticsRequestExecutor: FakeAnalyticsRequestExecutor,
     ) {
         suspend fun confirmAndAwaitStart(): ConfirmationHandler.Args {

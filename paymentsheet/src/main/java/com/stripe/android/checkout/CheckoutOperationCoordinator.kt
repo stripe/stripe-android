@@ -32,7 +32,7 @@ internal class CheckoutOperationCoordinator @Inject constructor(
     private val confirmationFinalizer: CheckoutConfirmationFinalizer,
     private val resultReporter: CheckoutConfirmationResultReporter,
     private val logger: Logger,
-    private val resultCallback: CheckoutController.ResultCallback,
+    private val resultCallback: CheckoutElementsController.ResultCallback,
     @ViewModelScope private val viewModelScope: CoroutineScope,
 ) {
     private val admissionLock = Any()
@@ -91,7 +91,7 @@ internal class CheckoutOperationCoordinator @Inject constructor(
         // Integrator callbacks may re-enter checkout, so deliver rejections outside the admission lock.
         result.onFailure { error ->
             resultCallback.onResult(
-                CheckoutController.Result.Failed(
+                CheckoutElementsController.Result.Failed(
                     error = error,
                     displayMessage = error.checkoutDisplayMessage(),
                 )
@@ -147,7 +147,7 @@ internal class CheckoutOperationCoordinator @Inject constructor(
     suspend fun failConfirmation(error: Throwable) {
         completeConfirmation {
             refreshSession { sessionRefresher.refresh() }
-            CheckoutController.Result.Failed(
+            CheckoutElementsController.Result.Failed(
                 error = error,
                 displayMessage = error.checkoutDisplayMessage(),
             )
@@ -155,7 +155,7 @@ internal class CheckoutOperationCoordinator @Inject constructor(
     }
 
     private suspend fun completeConfirmation(
-        mapResult: suspend (confirmationWasRestored: Boolean) -> CheckoutController.Result?,
+        mapResult: suspend (confirmationWasRestored: Boolean) -> CheckoutElementsController.Result?,
     ) {
         val wasRestored = synchronized(admissionLock) {
             if (!confirmationInFlight || confirmationCompletionClaimed) {
@@ -200,17 +200,17 @@ internal class CheckoutOperationCoordinator @Inject constructor(
 
 private fun ConfirmationHandler.Result.asCheckoutResult(
     confirmationWasRestored: Boolean,
-): CheckoutController.Result? {
+): CheckoutElementsController.Result? {
     return when (this) {
-        is ConfirmationHandler.Result.Succeeded -> CheckoutController.Result.Completed()
+        is ConfirmationHandler.Result.Succeeded -> CheckoutElementsController.Result.Completed()
         is ConfirmationHandler.Result.Canceled -> when (action) {
             ConfirmationHandler.Result.Canceled.Action.InformCancellation ->
-                CheckoutController.Result.Canceled()
+                CheckoutElementsController.Result.Canceled()
             ConfirmationHandler.Result.Canceled.Action.None ->
-                CheckoutController.Result.Canceled().takeIf { confirmationWasRestored }
+                CheckoutElementsController.Result.Canceled().takeIf { confirmationWasRestored }
             ConfirmationHandler.Result.Canceled.Action.ModifyPaymentDetails -> null
         }
-        is ConfirmationHandler.Result.Failed -> CheckoutController.Result.Failed(
+        is ConfirmationHandler.Result.Failed -> CheckoutElementsController.Result.Failed(
             error = cause,
             displayMessage = cause.checkoutDisplayMessage(),
         )

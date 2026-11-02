@@ -1,6 +1,6 @@
 package com.stripe.android.paymentelement.embedded.sheet
 
-import com.stripe.android.checkout.CheckoutController
+import com.stripe.android.checkout.CheckoutElementsController
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
 import com.stripe.android.checkout.toCheckoutAddress
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -15,7 +15,7 @@ internal typealias SheetTaxRegionUpdate = suspend () -> Result<CheckoutSessionRe
 internal typealias TaxRegionUpdate = suspend (
     CheckoutSessionResponse,
     CheckoutSessionResponse.TaxAddressSource,
-    CheckoutController.Address.State?,
+    CheckoutElementsController.Address.State?,
 ) -> Result<CheckoutSessionResponse>
 
 @OptIn(CheckoutSessionPreview::class)

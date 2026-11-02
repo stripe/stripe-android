@@ -33,7 +33,7 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.paymentsheet.example.databinding.ActivityMainBinding
 import com.stripe.android.paymentsheet.example.playground.PaymentSheetPlaygroundActivity
-import com.stripe.android.paymentsheet.example.playground.checkout.CheckoutControllerExampleActivity
+import com.stripe.android.paymentsheet.example.playground.checkout.CheckoutElementsControllerExampleActivity
 import com.stripe.android.paymentsheet.example.playground.embedded.EmbeddedExampleActivity
 import com.stripe.android.paymentsheet.example.samples.ui.SECTION_ALPHA
 import com.stripe.android.paymentsheet.example.samples.ui.addresselement.AddressElementExampleActivity
@@ -61,9 +61,9 @@ class MainActivity : AppCompatActivity() {
                 section = MenuItem.Section.Internal,
             ),
             MenuItem(
-                titleResId = R.string.checkout_controller_example_title,
-                subtitleResId = R.string.checkout_controller_example_subtitle,
-                klass = CheckoutControllerExampleActivity::class.java,
+                titleResId = R.string.checkout_elements_controller_example_title,
+                subtitleResId = R.string.checkout_elements_controller_example_subtitle,
+                klass = CheckoutElementsControllerExampleActivity::class.java,
                 section = MenuItem.Section.Internal,
             ),
             MenuItem(

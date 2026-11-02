@@ -47,8 +47,8 @@ internal class DefaultCheckoutSessionRefresherTest {
     private fun runScenario(
         block: suspend Scenario.() -> Unit,
     ) = runTest {
-        val stateHolder = CheckoutControllerStateFactory.createStateHolder(SavedStateHandle())
-        val initialState = CheckoutControllerStateFactory.create()
+        val stateHolder = CheckoutElementsControllerStateFactory.createStateHolder(SavedStateHandle())
+        val initialState = CheckoutElementsControllerStateFactory.create()
         stateHolder.state = initialState
         val refreshActions = FakeCheckoutSessionRefreshActions()
         val refresher = DefaultCheckoutSessionRefresher(
@@ -69,8 +69,8 @@ internal class DefaultCheckoutSessionRefresherTest {
 
     private data class Scenario(
         val refresher: DefaultCheckoutSessionRefresher,
-        val stateHolder: CheckoutControllerStateHolder,
-        val initialState: CheckoutControllerState,
+        val stateHolder: CheckoutElementsControllerStateHolder,
+        val initialState: CheckoutElementsControllerState,
         val refreshActions: FakeCheckoutSessionRefreshActions,
     )
 }
