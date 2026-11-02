@@ -464,7 +464,7 @@ class InlineAutocompleteControllerTest {
         delegate.onFocusLost()
         advanceTimeBy(500)
 
-        // Re-focus re-enables observation; isActive remains true
+        // Re-focus re-enables predictions
         delegate.onFocusGained()
         queryFlow.value = "123 Main S"
         advanceTimeBy(500)
