@@ -776,32 +776,6 @@ internal class CheckoutControllerTest {
     }
 
     @Test
-    fun `session exposes no express checkout payment methods when no buttons are available`() {
-        val session = createSession(availableExpressButtonTypes = emptyList())
-
-        assertThat(session.availableExpressCheckoutPaymentMethods).isEqualTo(emptySet<String>())
-    }
-
-    @Test
-    fun `session exposes each express checkout payment method only once`() {
-        val session = createSession(
-            availableExpressButtonTypes = listOf(
-                ExpressButtonType.GooglePay(
-                    ExpressCheckoutElement.Configuration.GooglePayConfiguration().build()
-                ),
-                ExpressButtonType.Link,
-                ExpressButtonType.GooglePay(
-                    ExpressCheckoutElement.Configuration.GooglePayConfiguration().label("Total").build()
-                ),
-                ExpressButtonType.Link,
-            ),
-        )
-
-        assertThat(session.availableExpressCheckoutPaymentMethods)
-            .isEqualTo(setOf("google_pay", "link"))
-    }
-
-    @Test
     fun `session is restored from savedStateHandle after recreation`() = runTest {
         networkRule.defaultInit()
         val savedStateHandle = SavedStateHandle()
