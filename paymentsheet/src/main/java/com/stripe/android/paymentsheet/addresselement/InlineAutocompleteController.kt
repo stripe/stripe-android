@@ -173,10 +173,6 @@ internal class InlineAutocompleteController(
 
     fun onFocusGained() {
         predictionsPaused = false
-        if (observeJob?.isActive == true) return
-        val q = queryFlow ?: return
-        val c = countryFlow ?: return
-        observeQueryChanges(q, c)
     }
 
     fun expandFormFromInline() {
@@ -187,12 +183,6 @@ internal class InlineAutocompleteController(
             query = queryFlow?.value,
             country = countryFlow?.value,
         )
-    }
-
-    fun dispose() {
-        observeJob?.cancel()
-        activeWork = ActiveWork.None
-        _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
     }
 
     private fun cancelPredictionWork() {

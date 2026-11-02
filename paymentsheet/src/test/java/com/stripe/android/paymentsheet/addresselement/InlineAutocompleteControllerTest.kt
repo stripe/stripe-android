@@ -592,22 +592,6 @@ class InlineAutocompleteControllerTest {
         }
 
     @Test
-    fun `dispose cancels query observation`() = runScenario {
-        fakePlacesClient.findPredictionsResult = Result.success(
-            FindAutocompletePredictionsResponse(emptyList())
-        )
-        delegate.observeQueryChanges(queryFlow, countryFlow)
-        delegate.onSearchActivated()
-
-        delegate.dispose()
-
-        queryFlow.value = "123 Main"
-        advanceTimeBy(500)
-
-        fakePlacesClient.findPredictionsCalls.expectNoEvents()
-    }
-
-    @Test
     fun `null country flow value defaults to empty string`() = runScenario(
         autocompleteCountries = emptySet()
     ) {
