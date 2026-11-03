@@ -92,6 +92,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.parcelize.Parcelize
 import java.io.File
 import java.util.UUID
@@ -154,6 +155,7 @@ internal class OnrampInteractor @Inject constructor(
                 checkoutState = currentState.checkoutState,
                 platformKeyCache = currentState.platformKeyCache,
                 selectedPaymentSource = currentState.selectedPaymentSource,
+                sessionToken = currentState.sessionToken,
             )
         }
 
@@ -814,8 +816,16 @@ internal class OnrampInteractor @Inject constructor(
         return when (val result = linkController.logOut()) {
             is LinkController.LogOutResult.Success -> {
                 savedStateHandle.remove<String>(KEY_GOOGLE_PAY_PLATFORM_KEY)
+                clearPendingCheckout()
+                clearLaunchedNextAction()
                 _state.update {
-                    it.copy(cryptoCustomerId = null, platformKeyCache = null, selectedPaymentSource = null)
+                    it.copy(
+                        cryptoCustomerId = null,
+                        platformKeyCache = null,
+                        selectedPaymentSource = null,
+                        checkoutState = null,
+                        sessionToken = Any(),
+                    )
                 }
                 analyticsService?.track(OnrampAnalyticsEvent.LinkLogout)
                 OnrampLogOutResult.Completed()
@@ -832,18 +842,33 @@ internal class OnrampInteractor @Inject constructor(
         result: LinkController.AuthorizeResult
     ): OnrampAuthorizeResult = when (result) {
         is LinkController.AuthorizeResult.Consented -> {
+            val sessionToken = _state.value.sessionToken
             val secret = consumerSessionClientSecret()
             if (secret != null) {
                 cryptoApiRepository.createCryptoCustomer(secret).fold(
                     onSuccess = { customerResponse ->
-                        _state.update { it.copy(cryptoCustomerId = customerResponse.id) }
-                        analyticsService?.track(OnrampAnalyticsEvent.LinkAuthorizationCompleted(consented = true))
-                        OnrampAuthorizeResult.Consented(customerResponse.id)
+                        val updated = _state.updateAndGet { current ->
+                            if (current.sessionToken === sessionToken) {
+                                current.copy(cryptoCustomerId = customerResponse.id)
+                            } else {
+                                current
+                            }
+                        }
+                        if (updated.sessionToken !== sessionToken) {
+                            OnrampAuthorizeResult.Canceled()
+                        } else {
+                            analyticsService?.track(OnrampAnalyticsEvent.LinkAuthorizationCompleted(consented = true))
+                            OnrampAuthorizeResult.Consented(customerResponse.id)
+                        }
                     },
                     onFailure = { error ->
-                        val mappedError = mapError(Operation.Authorize, error)
-                        trackError(Operation.Authorize, mappedError)
-                        OnrampAuthorizeResult.Failed(mappedError)
+                        if (_state.value.sessionToken !== sessionToken) {
+                            OnrampAuthorizeResult.Canceled()
+                        } else {
+                            val mappedError = mapError(Operation.Authorize, error)
+                            trackError(Operation.Authorize, mappedError)
+                            OnrampAuthorizeResult.Failed(mappedError)
+                        }
                     }
                 )
             } else {
@@ -1623,7 +1648,9 @@ internal data class OnrampState(
     val collectingPaymentMethodType: PaymentMethodType? = null,
     val checkoutState: CheckoutState? = null,
     val platformKeyCache: PlatformKeyCache? = null,
-    val selectedPaymentSource: SelectedPaymentSource? = null
+    val selectedPaymentSource: SelectedPaymentSource? = null,
+    // Invalidates in-flight authorization requests after successful logout.
+    val sessionToken: Any = Any(),
 )
 
 internal sealed interface SelectedPaymentSource {

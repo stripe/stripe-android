@@ -2209,7 +2209,10 @@ class OnrampInteractorTest {
 
         interactor.continueCheckout()
 
-        assertCheckoutFailedWithMissingCustomer()
+        val status = interactor.state.value.checkoutState?.status as CheckoutState.Status.Completed
+        assertThat(status.result).isInstanceOf(OnrampCheckoutResult.Failed::class.java)
+        assertThat(interactor.state.value.cryptoCustomerId).isNull()
+        assertThat(savedStateHandle.contains("onramp_pending_checkout")).isFalse()
         verify(cryptoApiRepository).getPlatformSettings(anyOrNull(), anyOrNull())
         verify(cryptoApiRepository).getOnrampSession(any(), any())
     }
@@ -2918,6 +2921,129 @@ class OnrampInteractorTest {
                 SDK: $sdkDebugDescription
                 """.trimIndent()
             )
+    }
+
+    @Test
+    fun newCheckoutAfterLogoutAndReauthentication() = runTest {
+        interactor.onLinkControllerState(mockLinkStateWithAccount())
+        stubCheckoutRequiresNextAction()
+        interactor.startCheckout("cos_old")
+        assertThat(interactor.state.value.checkoutState?.status)
+            .isInstanceOf(CheckoutState.Status.RequiresNextAction::class.java)
+        whenever(linkController.logOut()).thenReturn(mock<LinkController.LogOutResult.Success>())
+        interactor.logOut()
+        interactor.onLinkControllerState(LinkController.State())
+        assertThat(interactor.state.value.cryptoCustomerId).isNull()
+
+        interactor.configure(createConfigurationState(cryptoCustomerId = "cpt_123"))
+        interactor.onLinkControllerState(mockLinkStateWithAccount())
+        interactor.startCheckout("cos_new")
+
+        verify(cryptoApiRepository).getOnrampSession(eq("cos_new"), any())
+    }
+
+    @Test
+    fun logoutClearsPersistedCheckout() = runTest {
+        interactor.onLinkControllerState(mockLinkStateWithAccount())
+        stubCheckoutRequiresNextAction()
+        interactor.startCheckout("cos_old")
+        val status = interactor.state.value.checkoutState?.status as CheckoutState.Status.RequiresNextAction
+        assertThat(interactor.markNextActionLaunched(status)).isTrue()
+        assertThat(savedStateHandle.contains("onramp_pending_checkout")).isTrue()
+        assertThat(savedStateHandle.contains("onramp_launched_next_action")).isTrue()
+        whenever(linkController.logOut()).thenReturn(mock<LinkController.LogOutResult.Success>())
+
+        interactor.logOut()
+
+        assertThat(savedStateHandle.contains("onramp_pending_checkout")).isFalse()
+        assertThat(savedStateHandle.contains("onramp_launched_next_action")).isFalse()
+        assertThat(interactor.state.value.checkoutState).isNull()
+    }
+
+    @Test
+    fun authorizationResponseAfterLogoutDoesNotRestoreCustomer() = runTest {
+        interactor.onLinkControllerState(mockLinkStateWithAccount())
+        val response = CompletableDeferred<Result<CryptoCustomerResponse>>()
+        whenever(cryptoApiRepository.createCryptoCustomer(any())).doSuspendableAnswer { response.await() }
+        val authorization = async(start = CoroutineStart.UNDISPATCHED) {
+            interactor.handleAuthorizeResult(LinkController.AuthorizeResult.Consented)
+        }
+        verify(cryptoApiRepository).createCryptoCustomer("secret_123")
+        whenever(linkController.logOut()).thenReturn(mock<LinkController.LogOutResult.Success>())
+        interactor.logOut()
+        interactor.onLinkControllerState(LinkController.State())
+        assertThat(interactor.state.value.cryptoCustomerId).isNull()
+
+        response.complete(Result.success(CryptoCustomerResponse("crc_old_customer")))
+        val result = authorization.await()
+
+        assertThat(interactor.state.value.cryptoCustomerId).isNull()
+        assertThat(result).isInstanceOf(OnrampAuthorizeResult.Canceled::class.java)
+    }
+
+    @Test
+    fun authorizationResponseAfterFailedLogoutStillCompletes() = runTest {
+        interactor.onLinkControllerState(mockLinkStateWithAccount())
+        val response = CompletableDeferred<Result<CryptoCustomerResponse>>()
+        whenever(cryptoApiRepository.createCryptoCustomer(any())).doSuspendableAnswer { response.await() }
+        val authorization = async(start = CoroutineStart.UNDISPATCHED) {
+            interactor.handleAuthorizeResult(LinkController.AuthorizeResult.Consented)
+        }
+        verify(cryptoApiRepository).createCryptoCustomer("secret_123")
+        val logoutFailure = mock<LinkController.LogOutResult.Failed> {
+            on { error } doReturn Exception("Logout failed")
+        }
+        whenever(linkController.logOut()).thenReturn(logoutFailure)
+        assertThat(interactor.logOut()).isInstanceOf(OnrampLogOutResult.Failed::class.java)
+
+        response.complete(Result.success(CryptoCustomerResponse("crc_current")))
+
+        assertThat(authorization.await()).isInstanceOf(OnrampAuthorizeResult.Consented::class.java)
+        assertThat(interactor.state.value.cryptoCustomerId).isEqualTo("crc_current")
+    }
+
+    @Test
+    fun oldAuthorizationCannotReplaceNewCustomerAfterLogoutAndSignIn() = runTest {
+        interactor.onLinkControllerState(mockLinkStateWithAccount())
+        val response = CompletableDeferred<Result<CryptoCustomerResponse>>()
+        whenever(cryptoApiRepository.createCryptoCustomer(any())).doSuspendableAnswer { response.await() }
+        val authorization = async(start = CoroutineStart.UNDISPATCHED) {
+            interactor.handleAuthorizeResult(LinkController.AuthorizeResult.Consented)
+        }
+        verify(cryptoApiRepository).createCryptoCustomer("secret_123")
+        whenever(linkController.logOut()).thenReturn(mock<LinkController.LogOutResult.Success>())
+        interactor.logOut()
+        whenever(linkController.configure(any())).thenReturn(Result.success(Unit))
+        interactor.configure(createConfigurationState(cryptoCustomerId = "crc_new"))
+        interactor.onLinkControllerState(mockLinkStateWithAccount())
+
+        response.complete(Result.success(CryptoCustomerResponse("crc_old")))
+
+        assertThat(authorization.await()).isInstanceOf(OnrampAuthorizeResult.Canceled::class.java)
+        assertThat(interactor.state.value.cryptoCustomerId).isEqualTo("crc_new")
+    }
+
+    @Test
+    fun failedLogoutPreservesPendingCheckout() = runTest {
+        interactor.onLinkControllerState(mockLinkStateWithAccount())
+        stubCheckoutRequiresNextAction()
+        interactor.startCheckout("cos_old")
+        val pending = interactor.state.value.checkoutState
+        val logoutFailure = mock<LinkController.LogOutResult.Failed> {
+            on { error } doReturn Exception("Logout failed")
+        }
+        whenever(linkController.logOut()).thenReturn(logoutFailure)
+
+        assertThat(interactor.logOut()).isInstanceOf(OnrampLogOutResult.Failed::class.java)
+
+        assertThat(interactor.state.value.checkoutState).isEqualTo(pending)
+        assertThat(savedStateHandle.contains("onramp_pending_checkout")).isTrue()
+        whenever(cryptoApiRepository.retrievePaymentIntent(any(), any())).thenReturn(
+            Result.success(paymentIntentRequiringCard3ds().copy(status = StripeIntent.Status.Succeeded))
+        )
+        interactor.continueCheckout()
+        val completed = interactor.state.value.checkoutState?.status as CheckoutState.Status.Completed
+        assertThat(completed.result).isInstanceOf(OnrampCheckoutResult.Completed::class.java)
     }
 
     private suspend fun stubCheckoutRequiresNextAction() {
