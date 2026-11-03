@@ -866,7 +866,7 @@ internal class CheckoutElementsControllerTest {
 
         assertThat(result).isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
         assertThat(controller.session.value?.paymentOption).isNull()
-        assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isEqualTo(8000.0)
+        assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isEqualTo(8000L)
     }
 
     @Test
@@ -1052,7 +1052,7 @@ internal class CheckoutElementsControllerTest {
 
     @Test
     fun `applyPromotionCode sends promotion code and reloads on success`() = runMutationScenario {
-        assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isNotEqualTo(4099.0)
+        assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isNotEqualTo(4099L)
         assertThat((committedState().paymentMethodMetadata?.stripeIntent as? PaymentIntent)?.amount)
             .isNotEqualTo(4099L)
         networkRule.checkoutUpdate(
@@ -1070,7 +1070,7 @@ internal class CheckoutElementsControllerTest {
         val result = fromBackgroundThread { controller.applyPromotionCode("10OFF") }
 
         assertThat(result).isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
-        assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isEqualTo(4099.0)
+        assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isEqualTo(4099L)
         assertThat(committedState().checkoutSessionResponse.amount).isEqualTo(4099L)
         assertThat((committedState().paymentMethodMetadata?.stripeIntent as? PaymentIntent)?.amount)
             .isEqualTo(4099L)
@@ -1108,7 +1108,7 @@ internal class CheckoutElementsControllerTest {
 
     @Test
     fun `removePromotionCode sends empty promotion code on success`() = runMutationScenario {
-        assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isNotEqualTo(8000.0)
+        assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isNotEqualTo(8000L)
         networkRule.checkoutUpdate(
             bodyPart("promotion_code", ""),
             responseFactory = successResponseFactory(withTotal(8000)),
@@ -1117,7 +1117,7 @@ internal class CheckoutElementsControllerTest {
         val result = fromBackgroundThread { controller.removePromotionCode() }
 
         assertThat(result).isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
-        assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isEqualTo(8000.0)
+        assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isEqualTo(8000L)
     }
 
     @Test
@@ -1130,7 +1130,7 @@ internal class CheckoutElementsControllerTest {
         val result = controller.updateCurrency("usd")
 
         result.getOrThrow()
-        assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isEqualTo(5099.0)
+        assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isEqualTo(5099L)
     }
 
     @Test
@@ -1507,7 +1507,7 @@ internal class CheckoutElementsControllerTest {
 
             val state = committedState()
             assertThat(state.checkoutSessionResponse).isSameInstanceAs(response)
-            assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isEqualTo(6000.0)
+            assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isEqualTo(6000L)
             assertThat(state.collectedDetails.shippingName).isEqualTo("John")
             assertThat(state.collectedDetails.shippingAddress).isEqualTo(address)
             assertThat(state.paymentMethodMetadata?.shippingDetails?.name).isEqualTo("John")
@@ -1518,7 +1518,7 @@ internal class CheckoutElementsControllerTest {
 
     @Test
     fun `runServerUpdate refreshes the session after serverUpdate completes`() = runMutationScenario {
-        assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isNotEqualTo(8000.0)
+        assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isNotEqualTo(8000L)
         networkRule.checkoutInit(
             responseFactory = successResponseFactory(withTotal(8000)),
         )
@@ -1536,7 +1536,7 @@ internal class CheckoutElementsControllerTest {
         }
 
         assertThat(result).isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
-        assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isEqualTo(8000.0)
+        assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isEqualTo(8000L)
     }
 
     @Test
@@ -2146,11 +2146,11 @@ internal class CheckoutElementsControllerTest {
             tax = CheckoutElementsController.Session.Tax(CheckoutElementsController.Session.Tax.Status.Ready),
             taxAmounts = emptyList(),
             totals = CheckoutElementsController.Session.Totals(
-                subtotal = CheckoutElementsController.Session.Amount("$0.00", 0.0),
-                taxExclusive = CheckoutElementsController.Session.Amount("$0.00", 0.0),
-                taxInclusive = CheckoutElementsController.Session.Amount("$0.00", 0.0),
-                discount = CheckoutElementsController.Session.Amount("$0.00", 0.0),
-                total = CheckoutElementsController.Session.Amount("$0.00", 0.0),
+                subtotal = CheckoutElementsController.Session.Amount("$0.00", 0L),
+                taxExclusive = CheckoutElementsController.Session.Amount("$0.00", 0L),
+                taxInclusive = CheckoutElementsController.Session.Amount("$0.00", 0L),
+                discount = CheckoutElementsController.Session.Amount("$0.00", 0L),
+                total = CheckoutElementsController.Session.Amount("$0.00", 0L),
             ),
             currencySelectorOptions = null,
             availableExpressButtonTypes = availableExpressButtonTypes,

@@ -46,6 +46,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import kotlinx.parcelize.Parcelize
+import java.math.BigDecimal
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.time.Duration.Companion.seconds
@@ -674,7 +675,24 @@ class CheckoutElementsController @Inject internal constructor(
             /**
              * The unformatted amount in the smallest currency unit (e.g., cents for USD).
              */
-            val minorUnitsAmount: Double,
+            val minorUnitsAmount: Long,
+        )
+
+        /**
+         * A localized monetary amount that supports fractional minor units.
+         */
+        @Poko
+        @CheckoutSessionPreview
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        class DecimalAmount internal constructor(
+            /**
+             * A localized, currency-formatted string representing the amount.
+             */
+            val amount: String,
+            /**
+             * The unformatted amount in the smallest currency unit, including fractional units.
+             */
+            val minorUnitsAmount: BigDecimal,
         )
 
         /**
@@ -733,7 +751,7 @@ class CheckoutElementsController @Inject internal constructor(
             /**
              * The unformatted discount amount in the smallest currency unit.
              */
-            val minorUnitsAmount: Double,
+            val minorUnitsAmount: Long,
             /**
              * The display name of the discount.
              */
@@ -762,7 +780,7 @@ class CheckoutElementsController @Inject internal constructor(
             /**
              * The unformatted tax amount in the smallest currency unit.
              */
-            val minorUnitsAmount: Double,
+            val minorUnitsAmount: Long,
             /**
              * Whether this tax is already included in the price.
              */
@@ -910,7 +928,7 @@ class CheckoutElementsController @Inject internal constructor(
                     /**
                      * The unit amount with additional decimal precision, if available.
                      */
-                    val unitAmountDecimal: Amount?,
+                    val unitAmountDecimal: DecimalAmount?,
                     /**
                      * The label that describes how units of the product are named.
                      */
