@@ -18,11 +18,8 @@ import com.stripe.android.paymentsheet.example.playground.checkout.settings.Chec
 import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutPlaygroundSettings
 import com.stripe.android.paymentsheet.example.playground.checkout.settings.checkoutControllerConfiguration
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
@@ -48,11 +45,11 @@ internal class CheckoutControllerExampleViewModel(
     )
     val status: StateFlow<Status> = _status.asStateFlow()
 
-    private val _sessionComplete = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
-    val sessionComplete: SharedFlow<Unit> = _sessionComplete.asSharedFlow()
-
     private val _confirmationMessage = MutableStateFlow<String?>(null)
     val confirmationMessage: StateFlow<String?> = _confirmationMessage.asStateFlow()
+
+    private val _isConfirmationCompleted = MutableStateFlow(false)
+    val isConfirmationCompleted: StateFlow<Boolean> = _isConfirmationCompleted.asStateFlow()
 
     private val _operationMessage = MutableStateFlow<String?>(null)
     val operationMessage: StateFlow<String?> = _operationMessage.asStateFlow()
@@ -169,7 +166,7 @@ internal class CheckoutControllerExampleViewModel(
         Log.d(TAG, "Result: $result")
         _confirmationMessage.value = when (result) {
             is CheckoutController.Result.Completed -> {
-                _sessionComplete.tryEmit(Unit)
+                _isConfirmationCompleted.value = true
                 null
             }
             is CheckoutController.Result.Canceled -> "Confirmation canceled"
@@ -186,6 +183,7 @@ internal class CheckoutControllerExampleViewModel(
 
     private fun clearMessages() {
         _confirmationMessage.value = null
+        _isConfirmationCompleted.value = false
         _operationMessage.value = null
     }
 

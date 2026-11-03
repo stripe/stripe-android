@@ -3,7 +3,6 @@
 package com.stripe.android.paymentsheet.example.playground.checkout
 
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -22,7 +21,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.lifecycleScope
 import com.stripe.android.paymentsheet.example.playground.PlaygroundTheme
 import com.stripe.android.paymentsheet.example.playground.SearchSettingsField
 import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutPlaygroundDefinitions
@@ -30,7 +28,6 @@ import com.stripe.android.paymentsheet.example.playground.checkout.settings.Chec
 import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutPlaygroundScenariosUi
 import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutPlaygroundSettingsUi
 import com.stripe.android.paymentsheet.example.playground.checkout.settings.configurations
-import kotlinx.coroutines.launch
 
 internal class CheckoutControllerExampleActivity : AppCompatActivity() {
     private val viewModel: CheckoutControllerExampleViewModel by viewModels {
@@ -48,17 +45,11 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
         val currencySelectorElement = presenter.currencySelectorElement()
         val expressCheckoutElement = presenter.expressCheckoutElement()
 
-        lifecycleScope.launch {
-            viewModel.sessionComplete.collect {
-                Toast.makeText(this@CheckoutControllerExampleActivity, "Payment complete!", Toast.LENGTH_LONG).show()
-                finish()
-            }
-        }
-
         setContent {
             val status by viewModel.status.collectAsState()
             val session by viewModel.controller.session.collectAsState()
             val confirmationMessage by viewModel.confirmationMessage.collectAsState()
+            val isConfirmationCompleted by viewModel.isConfirmationCompleted.collectAsState()
             val operationMessage by viewModel.operationMessage.collectAsState()
             val isUpdating by viewModel.controller.isUpdating.collectAsState()
             val settingValues by viewModel.settings.values.collectAsState()
@@ -216,6 +207,7 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
                             ConfirmationControls(
                                 paymentOption = session?.paymentOption,
                                 confirmationMessage = confirmationMessage,
+                                isCompleted = isConfirmationCompleted,
                                 isUpdating = isUpdating,
                                 displayMandate = viewModel.displayMandate,
                                 onClearPaymentMethod = viewModel::clearPaymentOption,
@@ -225,6 +217,7 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
                                     viewModel.clearConfirmationMessage()
                                     presenter.confirm()
                                 },
+                                onBackToSettings = viewModel::returnToSettings,
                             )
                         }
                         else -> Unit
