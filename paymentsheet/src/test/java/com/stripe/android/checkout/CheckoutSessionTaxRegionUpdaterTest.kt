@@ -1,15 +1,16 @@
 package com.stripe.android.checkout
 
 import androidx.test.core.app.ApplicationProvider
+import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutElementsController.Address
-import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent
-import com.stripe.android.checkout.analytics.MeasuredOperation
-import com.stripe.android.checkout.analytics.updateServerStateIfNeeded
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
+import com.stripe.android.core.networking.StripeNetworkClient
+import com.stripe.android.core.networking.StripeRequest
+import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networktesting.NetworkRule
@@ -22,12 +23,17 @@ import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFacto
 import com.stripe.android.paymentsheet.repositories.CheckoutStripeRepositoryFactory
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.android.utils.FakeFraudDetectionDataRepository
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import kotlin.time.TimeSource
+import java.io.File
 
 @OptIn(CheckoutSessionPreview::class)
 @RunWith(RobolectricTestRunner::class)
@@ -74,7 +80,8 @@ internal class CheckoutSessionTaxRegionUpdaterTest {
             address = ADDRESS,
         )
 
-        assertThat(result.getOrThrow().id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
+        assertThat(result.result.getOrThrow().id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
+        assertThat(result.requestAttempted).isTrue()
     }
 
     @Test
@@ -87,7 +94,8 @@ internal class CheckoutSessionTaxRegionUpdaterTest {
             address = ADDRESS,
         )
 
-        assertThat(result.getOrThrow()).isSameInstanceAs(checkoutSessionResponse)
+        assertThat(result.result.getOrThrow()).isSameInstanceAs(checkoutSessionResponse)
+        assertThat(result.requestAttempted).isFalse()
     }
 
     @Test
@@ -98,7 +106,8 @@ internal class CheckoutSessionTaxRegionUpdaterTest {
             address = ADDRESS,
         )
 
-        assertThat(result.getOrThrow()).isSameInstanceAs(checkoutSessionResponse)
+        assertThat(result.result.getOrThrow()).isSameInstanceAs(checkoutSessionResponse)
+        assertThat(result.requestAttempted).isFalse()
     }
 
     @Test
@@ -114,91 +123,48 @@ internal class CheckoutSessionTaxRegionUpdaterTest {
             address = ADDRESS,
         )
 
-        assertThat(result.exceptionOrNull()?.message).contains("Invalid tax region")
+        assertThat(result.result.exceptionOrNull()?.message).contains("Invalid tax region")
+        assertThat(result.requestAttempted).isTrue()
     }
 
     @Test
-    fun `operation extension marks the tax update as requested when an update is required`() = runScenario {
-        networkRule.checkoutUpdate { response ->
-            response.testBodyFromFile("checkout-session-init.json")
+    fun `canceling the request preserves the attempted fact and cancellation`() {
+        val networkClient = FakeCancelingNetworkClient()
+        runScenario(stripeNetworkClient = networkClient) {
+            val outcomes = Turbine<TaxRegionUpdateOutcome>()
+            val update = testScope.launch {
+                outcomes.add(
+                    updater.updateServerStateIfNeeded(
+                        checkoutSessionResponse = checkoutSessionResponse,
+                        addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+                        address = ADDRESS,
+                    )
+                )
+            }
+            networkClient.requests.awaitItem()
+
+            update.cancelAndJoin()
+
+            val outcome = outcomes.awaitItem()
+            assertThat(outcome.requestAttempted).isTrue()
+            assertThat(outcome.result.exceptionOrNull()).isInstanceOf(CancellationException::class.java)
+            assertThat(runCatching { outcome.resultOrThrowCancellation() }.exceptionOrNull())
+                .isSameInstanceAs(outcome.result.exceptionOrNull())
+            networkClient.requests.ensureAllEventsConsumed()
+            outcomes.ensureAllEventsConsumed()
         }
-        val operation = measuredOperation()
-
-        val result = updater.updateServerStateIfNeeded(
-            operation = operation,
-            checkoutSessionResponse = checkoutSessionResponse,
-            addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
-            address = ADDRESS,
-        )
-
-        assertThat(result.getOrThrow().id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
-        operation.succeeded(operation.response)
-        assertThat(reportedEvents.single().params).containsEntry("did_request_tax_update", true)
-    }
-
-    @Test
-    fun `operation extension marks the tax update as requested when the request fails`() = runScenario {
-        networkRule.checkoutUpdate { response ->
-            response.setResponseCode(400)
-            response.setBody("""{"error":{"message":"Invalid tax region"}}""")
-        }
-        val operation = measuredOperation()
-
-        val result = updater.updateServerStateIfNeeded(
-            operation = operation,
-            checkoutSessionResponse = checkoutSessionResponse,
-            addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
-            address = ADDRESS,
-        )
-
-        assertThat(result.isFailure).isTrue()
-        operation.failed(checkoutSessionResponse, result.exceptionOrNull()!!)
-        assertThat(reportedEvents.single().params).containsEntry("did_request_tax_update", true)
-    }
-
-    @Test
-    fun `operation extension leaves the tax update unrequested when the address source does not match`() = runScenario {
-        val operation = measuredOperation()
-
-        val result = updater.updateServerStateIfNeeded(
-            operation = operation,
-            checkoutSessionResponse = checkoutSessionResponse,
-            addressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
-            address = ADDRESS,
-        )
-
-        assertThat(result.getOrThrow()).isSameInstanceAs(checkoutSessionResponse)
-        operation.succeeded(operation.response)
-        assertThat(reportedEvents.single().params).containsEntry("did_request_tax_update", false)
-    }
-
-    @Test
-    fun `operation extension leaves the tax update unrequested when automatic tax is disabled`() = runScenario(
-        automaticTaxEnabled = false,
-    ) {
-        val operation = measuredOperation()
-
-        val result = updater.updateServerStateIfNeeded(
-            operation = operation,
-            checkoutSessionResponse = checkoutSessionResponse,
-            addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
-            address = ADDRESS,
-        )
-
-        assertThat(result.getOrThrow()).isSameInstanceAs(checkoutSessionResponse)
-        operation.succeeded(operation.response)
-        assertThat(reportedEvents.single().params).containsEntry("did_request_tax_update", false)
     }
 
     private fun runScenario(
         automaticTaxEnabled: Boolean = true,
+        stripeNetworkClient: StripeNetworkClient = DefaultStripeNetworkClient(),
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val checkoutSessionRepository = CheckoutSessionRepository(
             stripeRepository = CheckoutStripeRepositoryFactory.create(),
             elementsSessionClientParams = CheckoutStripeRepositoryFactory.clientParams(),
             fraudDetectionDataRepository = FakeFraudDetectionDataRepository.create(),
-            stripeNetworkClient = DefaultStripeNetworkClient(),
+            stripeNetworkClient = stripeNetworkClient,
             analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
             paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
                 context = ApplicationProvider.getApplicationContext(),
@@ -214,33 +180,37 @@ internal class CheckoutSessionTaxRegionUpdaterTest {
 
         val updater = CheckoutSessionTaxRegionUpdater(checkoutSessionRepository)
 
-        val reportedEvents = mutableListOf<CheckoutAnalyticsEvent>()
         val scenario = Scenario(
-            reportedEvents = reportedEvents,
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(
                 automaticTaxEnabled = automaticTaxEnabled,
                 taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
             ),
             checkoutSessionRepository = checkoutSessionRepository,
             updater = updater,
+            testScope = this,
         )
 
         scenario.block()
     }
 
     private data class Scenario(
-        val reportedEvents: MutableList<CheckoutAnalyticsEvent>,
         val checkoutSessionResponse: CheckoutSessionResponse,
         val checkoutSessionRepository: CheckoutSessionRepository,
         val updater: CheckoutSessionTaxRegionUpdater,
-    ) {
-        fun measuredOperation() = MeasuredOperation(
-            operation = CheckoutAnalyticsEvent.Operation.UpdateBillingAddress,
-            startedParams = emptyMap(),
-            response = checkoutSessionResponse,
-            timeSource = TimeSource.Monotonic,
-            report = { reportedEvents += it },
-        )
+        val testScope: TestScope,
+    )
+
+    private class FakeCancelingNetworkClient : StripeNetworkClient {
+        val requests = Turbine<StripeRequest>()
+
+        override suspend fun executeRequest(request: StripeRequest): StripeResponse<String> {
+            requests.add(request)
+            awaitCancellation()
+        }
+
+        override suspend fun executeRequestForFile(request: StripeRequest, outputFile: File): StripeResponse<File> {
+            error("Not expected")
+        }
     }
 
     private companion object {

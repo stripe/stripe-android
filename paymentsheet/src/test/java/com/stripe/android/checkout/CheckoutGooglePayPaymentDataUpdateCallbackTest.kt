@@ -699,7 +699,7 @@ internal class CheckoutGooglePayPaymentDataUpdateCallbackTest {
                 )
                 updateServerStateIfNeededCalls.add(call)
 
-                updateResult(call)
+                TaxRegionUpdateOutcome(updateResult(call), requestAttempted = true)
             }
         }
 

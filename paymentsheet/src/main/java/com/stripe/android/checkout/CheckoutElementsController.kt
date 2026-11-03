@@ -18,7 +18,6 @@ import com.stripe.android.checkout.analytics.MeasuredOperation
 import com.stripe.android.checkout.analytics.analyticsParams
 import com.stripe.android.checkout.analytics.measureAddressUpdate
 import com.stripe.android.checkout.analytics.toAnalyticsMap
-import com.stripe.android.checkout.analytics.updateServerStateIfNeeded
 import com.stripe.android.checkout.injection.CheckoutElementsPresenterSubcomponent
 import com.stripe.android.checkout.injection.DaggerCheckoutElementsControllerComponent
 import com.stripe.android.common.exception.stripeErrorMessage
@@ -208,9 +207,8 @@ class CheckoutElementsController @Inject internal constructor(
         addressSource = addressSource,
         params = params,
         response = response,
-    ) { analytics ->
+    ) {
         checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
-            operation = analytics,
             checkoutSessionResponse = response,
             addressSource = addressSource,
             address = address,
@@ -281,11 +279,12 @@ class CheckoutElementsController @Inject internal constructor(
             if (built == null && collectedDetails.shippingAddress == null) {
                 kotlin.Result.success(checkoutSessionResponse)
             } else {
-                checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
-                    operation = analytics,
-                    checkoutSessionResponse = checkoutSessionResponse,
-                    addressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
-                    address = built,
+                analytics.reportAddressUpdateResult(
+                    checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
+                        checkoutSessionResponse = checkoutSessionResponse,
+                        addressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
+                        address = built,
+                    )
                 )
             }
         }.toOperationResult()
@@ -361,11 +360,12 @@ class CheckoutElementsController @Inject internal constructor(
                 }
                 return@withCheckoutState kotlin.Result.success(checkoutSessionResponse)
             }
-            checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
-                operation = analytics,
-                checkoutSessionResponse = checkoutSessionResponse,
-                addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
-                address = address,
+            analytics.reportAddressUpdateResult(
+                checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
+                    checkoutSessionResponse = checkoutSessionResponse,
+                    addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+                    address = address,
+                )
             ).onFailure {
                 stateHolder.state = stateHolder.state?.copy(
                     savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Failed(
@@ -567,11 +567,12 @@ class CheckoutElementsController @Inject internal constructor(
                 )
             },
         ) { analytics ->
-            checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
-                operation = analytics,
-                checkoutSessionResponse = checkoutSessionResponse,
-                addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
-                address = null,
+            analytics.reportAddressUpdateResult(
+                checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
+                    checkoutSessionResponse = checkoutSessionResponse,
+                    addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+                    address = null,
+                )
             )
         }.toOperationResult()
     }

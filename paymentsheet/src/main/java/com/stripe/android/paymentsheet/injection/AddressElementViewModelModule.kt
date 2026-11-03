@@ -2,11 +2,11 @@ package com.stripe.android.paymentsheet.injection
 
 import android.content.Context
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
+import com.stripe.android.checkout.TaxRegionUpdateOutcome
 import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent.InvocationSource
 import com.stripe.android.checkout.analytics.CheckoutOperationReporter
 import com.stripe.android.checkout.analytics.analyticsParams
 import com.stripe.android.checkout.analytics.measureAddressUpdate
-import com.stripe.android.checkout.analytics.updateServerStateIfNeeded
 import com.stripe.android.checkout.toCheckoutAddress
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.injection.IOContext
@@ -203,12 +203,14 @@ private class CheckoutShippingPrimaryButtonAction(
             addressSource = TaxAddressSource.SHIPPING,
             params = InvocationSource.ShippingAddressElement.analyticsParams(),
             response = checkoutSessionResponse,
-        ) { analytics ->
+        ) {
             if (address == null) {
-                Result.failure(IllegalArgumentException("Country is required."))
+                TaxRegionUpdateOutcome(
+                    result = Result.failure(IllegalArgumentException("Country is required.")),
+                    requestAttempted = false,
+                )
             } else {
                 taxRegionUpdater.updateServerStateIfNeeded(
-                    operation = analytics,
                     checkoutSessionResponse = checkoutSessionResponse,
                     addressSource = TaxAddressSource.SHIPPING,
                     address = address,

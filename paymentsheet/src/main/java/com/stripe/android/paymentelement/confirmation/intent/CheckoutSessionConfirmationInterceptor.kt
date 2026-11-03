@@ -102,7 +102,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
                 checkoutSessionResponse = checkoutSessionResponse,
                 addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
                 address = billingAddress,
-            ).getOrElse { error -> return Result.failure(error) }
+            ).resultOrThrowCancellation().getOrElse { error -> return Result.failure(error) }
         } else {
             checkoutSessionResponse
         }

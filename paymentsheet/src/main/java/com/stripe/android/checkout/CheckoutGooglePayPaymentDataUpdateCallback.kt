@@ -6,7 +6,6 @@ import com.stripe.android.checkout.analytics.CheckoutConfirmationContext
 import com.stripe.android.checkout.analytics.CheckoutOperationReporter
 import com.stripe.android.checkout.analytics.analyticsParams
 import com.stripe.android.checkout.analytics.measureAddressUpdate
-import com.stripe.android.checkout.analytics.updateServerStateIfNeeded
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.googlepaylauncher.GooglePayPaymentDataError
 import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdate
@@ -110,9 +109,8 @@ internal class CheckoutGooglePayPaymentDataUpdateCallback @Inject constructor(
                 addressSource = addressSource,
                 params = invocationSource(addressSource).analyticsParams(),
                 response = currentResponse,
-            ) { analytics ->
+            ) {
                 taxRegionUpdater.updateServerStateIfNeeded(
-                    operation = analytics,
                     checkoutSessionResponse = currentResponse,
                     addressSource = addressSource,
                     address = address,

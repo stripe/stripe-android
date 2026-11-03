@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.embedded.manage
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkout.TaxRegionUpdateOutcome
 import com.stripe.android.checkout.TestCheckoutOperationReporterFactory
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
@@ -254,7 +255,9 @@ internal class ManageLaunchSavedPaymentMethodSelectorTest {
         }
         val selector = ManageLaunchSavedPaymentMethodSelector(
             taxRegionUpdater = SheetTaxRegionUpdater(
-                updateTaxRegion = { _, _, _, _ -> updateTaxRegion() },
+                updateTaxRegion = { _, _, _ ->
+                    TaxRegionUpdateOutcome(updateTaxRegion(), requestAttempted = true)
+                },
                 operationReporter = TestCheckoutOperationReporterFactory.create(
                     analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
                     workContext = UnconfinedTestDispatcher(testScheduler),

@@ -1,5 +1,6 @@
 package com.stripe.android.checkout.analytics
 
+import com.stripe.android.checkout.TaxRegionUpdateOutcome
 import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent.Operation
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import kotlin.time.Duration
@@ -32,6 +33,11 @@ internal class MeasuredOperation(
 
     fun recordResponse(response: CheckoutSessionResponse?) {
         this.response = response
+    }
+
+    fun reportAddressUpdateResult(outcome: TaxRegionUpdateOutcome): Result<CheckoutSessionResponse> {
+        putCompletionParam(DID_REQUEST_TAX_UPDATE, outcome.requestAttempted)
+        return outcome.resultOrThrowCancellation().onSuccess(::recordResponse)
     }
 
     /** Adds a param reported with the operation's succeeded or failed event. */
