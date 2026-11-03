@@ -14,7 +14,6 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent.Operation
 import com.stripe.android.checkout.analytics.CheckoutOperationReporter
 import com.stripe.android.checkout.analytics.MeasuredOperation
-import com.stripe.android.checkout.analytics.measureAddressUpdate
 import com.stripe.android.checkout.analytics.toAnalyticsMap
 import com.stripe.android.checkout.injection.CheckoutElementsPresenterSubcomponent
 import com.stripe.android.checkout.injection.DaggerCheckoutElementsControllerComponent
@@ -192,16 +191,19 @@ class CheckoutElementsController @Inject internal constructor(
         params: Map<String, Any?>,
         response: CheckoutSessionResponse,
         address: Address.State,
-    ): CheckoutSessionResponse = operationReporter.measureAddressUpdate(
-        addressSource = addressSource,
+    ): CheckoutSessionResponse = operationReporter.measure(
+        operation = when (addressSource) {
+            CheckoutSessionResponse.TaxAddressSource.SHIPPING -> Operation.UpdateShippingAddress
+            CheckoutSessionResponse.TaxAddressSource.BILLING -> Operation.UpdateBillingAddress
+        },
         params = params,
         response = response,
-    ) {
+    ) { analytics ->
         checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
             checkoutSessionResponse = response,
             addressSource = addressSource,
             address = address,
-        )
+        ).onSuccess { analytics.recordResponse(it) }
     }.getOrThrow()
 
     /**

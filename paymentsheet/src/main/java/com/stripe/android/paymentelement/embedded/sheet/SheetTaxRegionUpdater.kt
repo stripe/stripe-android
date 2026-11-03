@@ -2,9 +2,8 @@ package com.stripe.android.paymentelement.embedded.sheet
 
 import com.stripe.android.checkout.CheckoutElementsController
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
+import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent.Operation
 import com.stripe.android.checkout.analytics.CheckoutOperationReporter
-import com.stripe.android.checkout.analytics.measureAddressUpdate
-import com.stripe.android.checkout.analytics.reportAddressUpdateWithoutRequest
 import com.stripe.android.checkout.toCheckoutAddress
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -48,8 +47,9 @@ internal class SheetTaxRegionUpdater internal constructor(
     ): SheetTaxRegionUpdate? {
         val initialResponse = checkoutSessionResponse ?: return null
         if (!initialResponse.collectsTaxFromBillingAddress) {
-            operationReporter.reportAddressUpdateWithoutRequest(
-                addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+            operationReporter.reportCompleted(
+                operation = Operation.UpdateBillingAddress,
+                params = emptyMap(),
                 response = initialResponse,
             )
             return null
@@ -57,15 +57,16 @@ internal class SheetTaxRegionUpdater internal constructor(
         val address = selection?.billingDetails?.address?.toCheckoutAddress()
 
         return {
-            operationReporter.measureAddressUpdate(
-                addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+            operationReporter.measure(
+                operation = Operation.UpdateBillingAddress,
+                params = emptyMap(),
                 response = initialResponse,
-            ) {
+            ) { analytics ->
                 updateTaxRegion(
                     initialResponse,
                     CheckoutSessionResponse.TaxAddressSource.BILLING,
                     address,
-                )
+                ).onSuccess { analytics.recordResponse(it) }
             }
         }
     }
