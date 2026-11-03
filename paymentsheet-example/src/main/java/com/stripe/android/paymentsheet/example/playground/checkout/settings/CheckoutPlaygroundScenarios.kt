@@ -75,27 +75,16 @@ internal object CheckoutPlaygroundScenarios {
         root.flatten()
     }
 
-    val leaves: List<CheckoutPlaygroundScenario.Leaf> by lazy { leafEntries.map { it.second } }
-
-    val leavesByPath: Map<String, CheckoutPlaygroundScenario.Leaf> by lazy { leafEntries.toMap() }
-
-    private val leafEntries: List<Pair<String, CheckoutPlaygroundScenario.Leaf>> by lazy {
-        fun CheckoutPlaygroundScenario.Group.flatten(
-            parents: List<String>,
-        ): List<Pair<String, CheckoutPlaygroundScenario.Leaf>> {
-            val path = parents + key
+    val leaves: List<CheckoutPlaygroundScenario.Leaf> by lazy {
+        fun CheckoutPlaygroundScenario.Group.flatten(): List<CheckoutPlaygroundScenario.Leaf> {
             return children.flatMap { child ->
                 when (child) {
-                    is CheckoutPlaygroundScenario.Group -> child.flatten(path)
-                    is CheckoutPlaygroundScenario.Leaf -> listOf((path + child.key).joinToString("/") to child)
+                    is CheckoutPlaygroundScenario.Group -> child.flatten()
+                    is CheckoutPlaygroundScenario.Leaf -> listOf(child)
                 }
             }
         }
-        root.flatten(emptyList())
-    }
-
-    fun pathOf(leaf: CheckoutPlaygroundScenario.Leaf): String {
-        return leavesByPath.entries.single { it.value === leaf }.key
+        root.flatten()
     }
 }
 

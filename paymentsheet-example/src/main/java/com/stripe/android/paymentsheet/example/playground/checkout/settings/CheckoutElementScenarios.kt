@@ -12,15 +12,13 @@ internal object CheckoutElementScenarios {
     private val session = CheckoutPlaygroundDefinitions.session
     private val controller = CheckoutPlaygroundDefinitions.Controller
 
-    val paymentElement = leaf("payment_element", "Payment Element — card only") {
-        regional(Merchant.US, Currency.USD, PaymentMethod.Type.Card)
-        set(controller.payment.shouldSetConfiguration, true)
-    }
-
     val group = group(
         "elements",
         "Elements",
-        paymentElement,
+        leaf("payment_element", "Payment Element — card only") {
+            regional(Merchant.US, Currency.USD, PaymentMethod.Type.Card)
+            set(controller.payment.shouldSetConfiguration, true)
+        },
         group(
             "ece",
             "ECE",

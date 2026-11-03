@@ -12,11 +12,13 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.paymentsheet.example.Settings
 import com.stripe.android.paymentsheet.example.playground.checkout.CHECKOUT_COMPLETED_TEST_TAG
 import com.stripe.android.paymentsheet.example.playground.checkout.CHECKOUT_CONFIRMATION_MESSAGE_TEST_TAG
 import com.stripe.android.paymentsheet.example.playground.checkout.CHECKOUT_CONFIRM_BUTTON_TEST_TAG
+import com.stripe.android.paymentsheet.example.playground.checkout.CHECKOUT_CREATE_SESSION_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.example.playground.checkout.CheckoutControllerExampleActivity
-import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutPlaygroundScenario
+import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutPlaygroundSettings
 import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT
@@ -24,25 +26,35 @@ import com.stripe.android.test.core.ui.ComposeButton
 import com.stripe.paymentelementtestpages.FormPage
 
 /**
- * Runs [scenario] in [CheckoutControllerExampleActivity] end to end against the playground backend.
+ * Runs [block] in [CheckoutControllerExampleActivity] end to end against the playground backend.
+ *
+ * @param settings applied on top of the example's defaults, not the device's saved settings.
  */
-internal fun runCheckoutScenario(
+internal fun runCheckoutTest(
     composeTestRule: ComposeTestRule,
-    scenario: CheckoutPlaygroundScenario.Leaf,
-    block: CheckoutScenarioContext.() -> Unit,
+    settings: CheckoutPlaygroundSettings.() -> Unit,
+    block: CheckoutTestContext.() -> Unit,
 ) {
     val context = ApplicationProvider.getApplicationContext<Context>()
+    val checkoutSettings = CheckoutPlaygroundSettings.createInMemory(
+        json = null,
+        defaultBackendUrl = Settings(context).playgroundBackendUrl,
+    ).apply(settings)
     ActivityScenario.launch<CheckoutControllerExampleActivity>(
-        CheckoutControllerExampleActivity.createTestIntent(context, scenario)
+        CheckoutControllerExampleActivity.createTestIntent(context, checkoutSettings.asJsonString())
     ).use {
-        val scenarioContext = CheckoutScenarioContext(composeTestRule)
-        scenarioContext.waitUntilConfigured()
-        scenarioContext.block()
+        val createSessionButton = ComposeButton(composeTestRule, hasTestTag(CHECKOUT_CREATE_SESSION_BUTTON_TEST_TAG))
+        createSessionButton.waitForEnabled()
+        createSessionButton.click()
+
+        val testContext = CheckoutTestContext(composeTestRule)
+        testContext.waitUntilConfigured()
+        testContext.block()
     }
 }
 
 @OptIn(ExperimentalTestApi::class)
-internal class CheckoutScenarioContext(
+internal class CheckoutTestContext(
     private val composeTestRule: ComposeTestRule,
 ) {
     private val confirmButton = ComposeButton(composeTestRule, hasTestTag(CHECKOUT_CONFIRM_BUTTON_TEST_TAG))

@@ -16,7 +16,6 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.paymentsheet.example.Settings
 import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutCustomer
 import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutPlaygroundDefinitions
-import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutPlaygroundScenarios
 import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutPlaygroundSettings
 import com.stripe.android.paymentsheet.example.playground.checkout.settings.checkoutControllerConfiguration
 import kotlinx.coroutines.Job
@@ -31,17 +30,12 @@ internal class CheckoutControllerExampleViewModel(
     private val savedStateHandle: SavedStateHandle,
     application: Application,
 ) : ViewModel() {
-    private val scenarioPath = savedStateHandle.get<String>(SCENARIO_PATH_KEY)
-
-    // Launch-supplied scenarios stay in memory so a run never rewrites the persisted settings.
-    val settings = scenarioPath?.let { path ->
-        val scenario = requireNotNull(CheckoutPlaygroundScenarios.leavesByPath[path]) {
-            "Unknown checkout scenario path: $path"
-        }
+    // Launch-supplied settings stay in memory so a run never rewrites the persisted settings.
+    val settings = savedStateHandle.get<String>(SETTINGS_JSON_KEY)?.let { json ->
         CheckoutPlaygroundSettings.createInMemory(
-            json = null,
+            json = json,
             defaultBackendUrl = Settings(application).playgroundBackendUrl,
-        ).apply { applyPreset(scenario.preset) }
+        )
     } ?: CheckoutPlaygroundSettings.create(application)
 
     val controller = CheckoutController.Builder(
@@ -79,10 +73,6 @@ internal class CheckoutControllerExampleViewModel(
             activeSnapshot.applyFeatureFlags()
         }
         savedStateHandle[RUN_ACTIVE_KEY] = _status.value is Status.Configured
-        if (scenarioPath != null && savedStateHandle.get<Boolean>(SCENARIO_STARTED_KEY) != true) {
-            savedStateHandle[SCENARIO_STARTED_KEY] = true
-            start()
-        }
     }
 
     fun returnToSettings() {
@@ -219,8 +209,7 @@ internal class CheckoutControllerExampleViewModel(
     companion object {
         private const val TAG = "CheckoutControllerExample"
         private const val RUN_ACTIVE_KEY = "checkout_controller_run_active"
-        private const val SCENARIO_STARTED_KEY = "checkout_controller_scenario_started"
-        const val SCENARIO_PATH_KEY = "checkout_controller_scenario_path"
+        const val SETTINGS_JSON_KEY = "checkout_controller_settings_json"
 
         val factory = viewModelFactory {
             initializer {
