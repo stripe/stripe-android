@@ -5,8 +5,8 @@ import android.net.Uri
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.StringRes
-import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.DefaultCardBrandFilter
@@ -18,6 +18,7 @@ import com.stripe.android.crypto.onramp.exception.GooglePayNotConfiguredExceptio
 import com.stripe.android.crypto.onramp.exception.PaymentFailedException
 import com.stripe.android.crypto.onramp.exception.SamsungPayException.Reason
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
+import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentMethodResult
 import com.stripe.android.crypto.onramp.model.OnrampKycResult
 import com.stripe.android.crypto.onramp.model.OnrampPartnerTermsCallback
 import com.stripe.android.crypto.onramp.model.OnrampPartnerTermsResult
@@ -59,14 +60,12 @@ import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherFactory
 import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import com.stripe.android.paymentsheet.R as PaymentSheetR
 
 @OnrampPresenterScope
-@Suppress("TooManyFunctions") // Includes callback entry points exposed for device lifecycle tests.
 internal class OnrampPresenterCoordinator @Inject constructor(
     private val interactor: OnrampInteractor,
     linkController: LinkController,
@@ -115,8 +114,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         )
     }
 
-    @VisibleForTesting
-    internal var samsungPayLauncher: SamsungPayLauncher? = null
+    private var samsungPayLauncher: SamsungPayLauncher? = null
 
     private val verifyKycResultLauncher: ActivityResultLauncher<VerifyKycActivityArgs> =
         activity.activityResultRegistry.register(
@@ -207,13 +205,17 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         )
     }
 
+    // Requests can finish after recreation; only presentation requires this host to remain alive.
     fun verifyIdentity() {
-        lifecycleOwner.lifecycleScope.launch {
+        coroutineScope.launch {
             val verification = interactor.startIdentityVerification()
-            ensureActive()
             when (verification) {
                 is OnrampStartVerificationResult.Completed -> {
                     verification.response.ephemeralKey?.let {
+                        if (lifecycleOwner.lifecycle.currentState == Lifecycle.State.DESTROYED) {
+                            onrampCallbacksState.verifyIdentityCallback.onResult(OnrampVerifyIdentityResult.Cancelled())
+                            return@launch
+                        }
                         identityVerificationSheet?.present(
                             verificationSessionId = verification.response.id,
                             ephemeralKeySecret = verification.response.ephemeralKey
@@ -237,12 +239,14 @@ internal class OnrampPresenterCoordinator @Inject constructor(
     }
 
     fun verifyKycInfo(updatedAddress: PaymentSheet.Address? = null) {
-        lifecycleOwner.lifecycleScope.launch {
+        coroutineScope.launch {
             val verification = interactor.startKycVerification(updatedAddress)
-            // A late response must not use the destroyed host's unregistered launcher or callbacks.
-            ensureActive()
             when (verification) {
                 is OnrampStartKycVerificationResult.Completed -> {
+                    if (lifecycleOwner.lifecycle.currentState == Lifecycle.State.DESTROYED) {
+                        onrampCallbacksState.verifyKycCallback.onResult(OnrampVerifyKycInfoResult.Cancelled())
+                        return@launch
+                    }
                     verifyKycResultLauncher.launch(
                         VerifyKycActivityArgs(verification.response, verification.appearance)
                     )
@@ -257,11 +261,14 @@ internal class OnrampPresenterCoordinator @Inject constructor(
     }
 
     fun presentUserAttestation() {
-        lifecycleOwner.lifecycleScope.launch {
+        coroutineScope.launch {
             val result = interactor.startUserAttestation()
-            ensureActive()
             when (result) {
                 is OnrampStartUserAttestationResult.Completed -> {
+                    if (lifecycleOwner.lifecycle.currentState == Lifecycle.State.DESTROYED) {
+                        onrampCallbacksState.userAttestationCallback?.onResult(OnrampUserAttestationResult.Cancelled())
+                        return@launch
+                    }
                     presentHTMLConfirmation(
                         resultLauncher = userAttestationResultLauncher,
                         html = result.attestation.text,
@@ -282,9 +289,8 @@ internal class OnrampPresenterCoordinator @Inject constructor(
 
     fun fulfillKycRequirements() {
         interactor.onKycFlowStarted()
-        lifecycleOwner.lifecycleScope.launch {
+        coroutineScope.launch {
             val result = interactor.retrieveKycRequirements()
-            ensureActive()
             result.fold(
                 onSuccess = { requirements ->
                     val callback = onrampCallbacksState.kycCallback
@@ -310,6 +316,10 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                                 IllegalArgumentException("Unsupported KYC requirement")
                             )
                         )
+                        return@fold
+                    }
+                    if (lifecycleOwner.lifecycle.currentState == Lifecycle.State.DESTROYED) {
+                        onrampCallbacksState.kycCallback?.onResult(OnrampKycResult.Cancelled())
                         return@fold
                     }
                     kycResultLauncher.launch(
@@ -412,9 +422,8 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                 )
             }
             is PaymentMethodSelection.GooglePay -> {
-                lifecycleOwner.lifecycleScope.launch {
+                coroutineScope.launch {
                     val result = interactor.getOrFetchPlatformKey()
-                    ensureActive()
                     result.fold(
                         onSuccess = {
                             val launcher = googlePayPaymentMethodLauncher
@@ -425,6 +434,12 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                                     )
                                 )
                                 onrampCallbacksState.collectPaymentCallback.onResult(payment)
+                                return@fold
+                            }
+                            if (lifecycleOwner.lifecycle.currentState == Lifecycle.State.DESTROYED) {
+                                onrampCallbacksState.collectPaymentCallback.onResult(
+                                    OnrampCollectPaymentMethodResult.Cancelled()
+                                )
                                 return@fold
                             }
                             interactor.onGooglePayPresented(it)
@@ -451,7 +466,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
     }
 
     private fun presentSamsungPay(selection: PaymentMethodSelection.SamsungPay) {
-        lifecycleOwner.lifecycleScope.launch {
+        coroutineScope.launch {
             val launcher = samsungPayLauncher
             if (launcher == null) {
                 handleSamsungPayPaymentSelection(
@@ -469,9 +484,14 @@ internal class OnrampPresenterCoordinator @Inject constructor(
             }
 
             val result = interactor.getOrFetchPlatformKey()
-            ensureActive()
             result.fold(
                 onSuccess = { platformPublishableKey ->
+                    if (lifecycleOwner.lifecycle.currentState == Lifecycle.State.DESTROYED) {
+                        onrampCallbacksState.collectPaymentCallback.onResult(
+                            OnrampCollectPaymentMethodResult.Cancelled()
+                        )
+                        return@fold
+                    }
                     launcher.present(
                         presentation = SamsungPayPresentation(
                             currencyCode = selection.currencyCode,
@@ -564,8 +584,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         }
     }
 
-    @VisibleForTesting
-    internal fun handleVerifyKycResult(result: VerifyKycActivityResult) {
+    private fun handleVerifyKycResult(result: VerifyKycActivityResult) {
         coroutineScope.launch {
             val verification = interactor.handleVerifyKycResult(result)
             onrampCallbacksState.verifyKycCallback.onResult(verification)
@@ -650,8 +669,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
     private fun clientEmail(): String? =
         interactor.state.value.linkControllerState?.internalLinkAccount?.email
 
-    @VisibleForTesting
-    internal fun handleAuthorizeResult(result: LinkController.AuthorizeResult) {
+    private fun handleAuthorizeResult(result: LinkController.AuthorizeResult) {
         coroutineScope.launch {
             val authorization = interactor.handleAuthorizeResult(result)
             onrampCallbacksState.authorizeCallback.onResult(authorization)
@@ -695,8 +713,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         }
     }
 
-    @VisibleForTesting
-    internal fun handleSamsungPayPaymentSelection(
+    private fun handleSamsungPayPaymentSelection(
         result: SamsungPayResult,
         platformPublishableKey: String?,
     ) {
