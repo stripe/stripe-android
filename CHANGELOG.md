@@ -3,6 +3,9 @@
 NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
 
+### Crypto Onramp
+* [Added] Public KYC collection APIs to collect outstanding requirements and receive submission results.
+
 ## 23.25.1 - 2026-10-26
 
 ### PaymentSheet
