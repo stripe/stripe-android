@@ -4,8 +4,7 @@ import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
-import com.google.testing.junit.testparameterinjector.TestParameter
-import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import com.stripe.android.common.analytics.experiment.FakePrimaryButtonExperiment
 import com.stripe.android.common.spms.CvcFormHelper
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
@@ -14,8 +13,6 @@ import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.CardBrand
-import com.stripe.android.model.ElementsSession
-import com.stripe.android.model.ElementsSession.ExperimentAssignment
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodOptionsParams
@@ -41,10 +38,8 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
-import org.junit.runner.RunWith
 import com.stripe.android.ui.core.R as StripeUiCoreR
 
-@RunWith(TestParameterInjector::class)
 internal class DefaultTapToAddConfirmationInteractorTest {
     private val cleanupRule = CleanupTestRule(DefaultTapToAddConfirmationInteractor::close)
 
@@ -556,63 +551,30 @@ internal class DefaultTapToAddConfirmationInteractorTest {
     }
 
     @Test
-    fun `confirmation icon follows experiment and reports the integration mode`(
-        @TestParameter("control", "control_test", "treatment_no_padlock") variant: String,
-        @TestParameter("Complete", "Embedded") eventMode: EventReporter.Mode,
-    ) = runScenario(
-        paymentMethod = PaymentMethodFactory.card(last4 = "4242"),
-        paymentMethodMetadata = experimentMetadata(variant),
-        eventMode = eventMode,
-    ) {
-        interactor.state.test {
-            val expectedIcon = if (variant == "treatment_no_padlock") PrimaryButtonIcon.None else PrimaryButtonIcon.Lock
-            assertThat(awaitItem().primaryButton.icon).isEqualTo(expectedIcon)
-        }
-
-        val exposure = eventReporter.experimentExposureCalls.awaitItem().experiment
-        assertThat(exposure.experiment).isEqualTo(ExperimentAssignment.OCS_MOBILE_REMOVE_PRIMARY_BUTTON_PADLOCK)
-        assertThat(exposure.arbId).isEqualTo("arb_123")
-        assertThat(exposure.group).isEqualTo(variant)
-        val expectedIntegration = if (eventMode == EventReporter.Mode.Complete) "paymentsheet" else "embedded"
-        assertThat(exposure.dimensions["in_app_elements_integration_type"]).isEqualTo(expectedIntegration)
-    }
+    fun `confirmation button uses experiment lock icon`() = assertExperimentIcon(PrimaryButtonIcon.Lock)
 
     @Test
-    fun `unsupported assignment keeps padlock without exposure`(
-        @TestParameter("treatment_replace_padlock", "unknown", "") variant: String,
-    ) = runScenario(
-        paymentMethod = PaymentMethodFactory.card(last4 = "4242"),
-        paymentMethodMetadata = experimentMetadata(variant),
-    ) {
-        interactor.state.test {
-            assertThat(awaitItem().primaryButton.icon).isEqualTo(PrimaryButtonIcon.Lock)
-        }
-    }
+    fun `confirmation button uses experiment no icon`() = assertExperimentIcon(PrimaryButtonIcon.None)
 
-    @Test
-    fun `missing assignment keeps padlock without exposure`() = runScenario(
+    private fun assertExperimentIcon(icon: PrimaryButtonIcon) = runScenario(
         paymentMethod = PaymentMethodFactory.card(last4 = "4242"),
-        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-            experimentsData = ElementsSession.ExperimentsData("arb_123", emptyMap()),
-        ),
+        primaryButtonIcon = icon,
     ) {
         interactor.state.test {
-            assertThat(awaitItem().primaryButton.icon).isEqualTo(PrimaryButtonIcon.Lock)
+            assertThat(awaitItem().primaryButton.icon).isEqualTo(icon)
         }
     }
 
     @Test
     fun `experiment icon is preserved through CVC and confirmation state updates`() = runScenario(
         paymentMethod = PaymentMethodFactory.card(last4 = "4242"),
-        paymentMethodMetadata = experimentMetadata("treatment_no_padlock"),
+        primaryButtonIcon = PrimaryButtonIcon.None,
         initialCvcState = CvcFormHelper.State.Incomplete,
     ) {
         interactor.state.test {
             val initialState = awaitItem()
             assertThat(initialState.primaryButton.icon).isEqualTo(PrimaryButtonIcon.None)
             assertThat(initialState.primaryButton.enabled).isFalse()
-            assertThat(eventReporter.experimentExposureCalls.awaitItem().experiment.group)
-                .isEqualTo("treatment_no_padlock")
 
             cvcFormHelper.updateState(CvcFormHelper.State.Complete(cvc = "123"))
             val cvcCompleteState = awaitItem()
@@ -633,14 +595,6 @@ internal class DefaultTapToAddConfirmationInteractorTest {
         }
     }
 
-    private fun experimentMetadata(variant: String): PaymentMethodMetadata = PaymentMethodMetadataFactory.create(
-        isTapToAddSupported = true,
-        experimentsData = ElementsSession.ExperimentsData(
-            arbId = "arb_123",
-            experimentAssignments = mapOf(ExperimentAssignment.OCS_MOBILE_REMOVE_PRIMARY_BUTTON_PADLOCK to variant),
-        ),
-    )
-
     private fun runScenario(
         paymentMethod: PaymentMethod,
         linkInput: UserInput? = null,
@@ -650,10 +604,11 @@ internal class DefaultTapToAddConfirmationInteractorTest {
         initialConfirmationState: ConfirmationHandler.State = ConfirmationHandler.State.Idle,
         initialCvcState: CvcFormHelper.State = CvcFormHelper.State.NotRequired,
         statusBarColor: Int? = null,
-        eventMode: EventReporter.Mode = EventReporter.Mode.Complete,
+        primaryButtonIcon: PrimaryButtonIcon = PrimaryButtonIcon.Lock,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val eventReporter = FakeEventReporter()
+        val primaryButtonExperiment = FakePrimaryButtonExperiment(icon = primaryButtonIcon)
         val cvcFormHelper = FakeCvcFormHelper(initialState = initialCvcState)
         FakeConfirmationHandler.test(
             initialState = initialConfirmationState,
@@ -669,13 +624,14 @@ internal class DefaultTapToAddConfirmationInteractorTest {
                 confirmationHandler = handler,
                 cvcFormHelper = cvcFormHelper,
                 eventReporter = eventReporter,
-                eventMode = eventMode,
+                primaryButtonExperiment = primaryButtonExperiment,
                 statusBarColor = statusBarColor,
                 onComplete = {
                     onCompleteCalls.add(Unit)
                 },
             )
             cleanupRule.track(interactor)
+            assertThat(primaryButtonExperiment.getIconCalls.awaitItem()).isEqualTo(paymentMethodMetadata)
 
             block(
                 Scenario(
@@ -689,6 +645,7 @@ internal class DefaultTapToAddConfirmationInteractorTest {
                 )
             )
 
+            primaryButtonExperiment.validate()
             eventReporter.validate()
             onCompleteCalls.ensureAllEventsConsumed()
         }

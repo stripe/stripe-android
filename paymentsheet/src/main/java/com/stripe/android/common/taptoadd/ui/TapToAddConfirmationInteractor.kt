@@ -94,7 +94,7 @@ internal class DefaultTapToAddConfirmationInteractor(
     private val confirmationHandler: ConfirmationHandler,
     private val cvcFormHelper: CvcFormHelper,
     private val eventReporter: EventReporter,
-    private val eventMode: EventReporter.Mode,
+    private val primaryButtonExperiment: PrimaryButtonExperiment,
     private val statusBarColor: Int?,
     private val onComplete: () -> Unit,
 ) : TapToAddConfirmationInteractor {
@@ -200,11 +200,7 @@ internal class DefaultTapToAddConfirmationInteractor(
                     primaryButtonLabel = null,
                     isForPaymentIntent = paymentMethodMetadata.stripeIntent is PaymentIntent
                 ),
-                icon = PrimaryButtonExperiment.getIcon(
-                    metadata = paymentMethodMetadata,
-                    eventReporter = eventReporter,
-                    mode = eventMode,
-                ),
+                icon = primaryButtonExperiment.getIcon(paymentMethodMetadata),
                 enabled = true,
                 state = TapToAddConfirmationInteractor.State.PrimaryButton.State.Idle,
             ),
@@ -290,7 +286,7 @@ internal class DefaultTapToAddConfirmationInteractor(
         private val cvcFormHelperFactory: CvcFormHelper.Factory,
         private val confirmationHandler: ConfirmationHandler,
         private val eventReporter: EventReporter,
-        private val eventMode: EventReporter.Mode,
+        private val primaryButtonExperiment: PrimaryButtonExperiment,
         @Named(STATUS_BAR_COLOR) private val statusBarColor: Int?,
         private val tapToAddNavigator: Provider<TapToAddNavigator>,
     ) : TapToAddConfirmationInteractor.Factory {
@@ -306,7 +302,7 @@ internal class DefaultTapToAddConfirmationInteractor(
                 linkInput = linkInput,
                 confirmationHandler = confirmationHandler,
                 eventReporter = eventReporter,
-                eventMode = eventMode,
+                primaryButtonExperiment = primaryButtonExperiment,
                 coroutineContext = coroutineContext,
                 cvcFormHelper = cvcFormHelperFactory.create(paymentMethod),
                 statusBarColor = statusBarColor,
