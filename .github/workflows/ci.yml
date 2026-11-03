@@ -11,6 +11,19 @@ env:
   GRADLE_OPTS: -Dkotlin.incremental=false
 
 jobs:
+  instrumentation-retry-tests:
+    name: Instrumentation retry tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+      - name: Test retry selection and shell integration
+        run: |
+          python3 -m unittest discover -s scripts/tests -v
+          bash -n scripts/retry_with_emulator_cleanup.sh
+
   end-to-end-tests:
     name: End-to-end tests
     runs-on: ubuntu-latest
