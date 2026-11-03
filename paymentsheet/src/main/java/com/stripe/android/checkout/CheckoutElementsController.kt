@@ -153,10 +153,9 @@ class CheckoutElementsController @Inject internal constructor(
      */
     suspend fun applyPromotionCode(
         promotionCode: String,
-    ): OperationResult = withCheckoutState { sessionId ->
+    ): OperationResult = withCheckoutState {
         checkoutSessionRepository.applyPromotionCode(
-            sessionId = sessionId,
-            clientSecret = checkoutSessionResponse.clientSecret,
+            checkoutSessionResponse = checkoutSessionResponse,
             promotionCode = promotionCode.trim(),
         )
     }.toOperationResult()
@@ -164,12 +163,8 @@ class CheckoutElementsController @Inject internal constructor(
     /**
      * Removes the currently applied promotion code from the checkout session.
      */
-    suspend fun removePromotionCode(): OperationResult = withCheckoutState { sessionId ->
-        checkoutSessionRepository.applyPromotionCode(
-            sessionId = sessionId,
-            clientSecret = checkoutSessionResponse.clientSecret,
-            promotionCode = "",
-        )
+    suspend fun removePromotionCode(): OperationResult = withCheckoutState {
+        checkoutSessionRepository.removePromotionCode(checkoutSessionResponse)
     }.toOperationResult()
 
     /**
@@ -402,10 +397,9 @@ class CheckoutElementsController @Inject internal constructor(
     )
 
     internal suspend fun updateCurrency(currency: String): kotlin.Result<Unit> {
-        return withCheckoutState { sessionId ->
+        return withCheckoutState {
             checkoutSessionRepository.updateCurrency(
-                sessionId = sessionId,
-                clientSecret = checkoutSessionResponse.clientSecret,
+                checkoutSessionResponse = checkoutSessionResponse,
                 currencyCode = currency,
             )
         }

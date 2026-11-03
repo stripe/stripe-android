@@ -2,6 +2,9 @@ package com.stripe.android.paymentsheet.repositories
 
 import com.stripe.android.Stripe
 import com.stripe.android.checkout.CheckoutElementsController.Address
+import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent
+import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent.Operation
+import com.stripe.android.checkout.analytics.MeasuredOperation
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.exception.safeAnalyticsMessage
 import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
@@ -180,16 +183,37 @@ internal class CheckoutSessionRepository @Inject constructor(
     }
 
     suspend fun applyPromotionCode(
-        sessionId: String,
-        clientSecret: String,
+        checkoutSessionResponse: CheckoutSessionResponse,
         promotionCode: String,
-    ): Result<CheckoutSessionResponse> = executePost(
-        clientSecret = clientSecret,
-        url = updateUrl(sessionId),
-        params = mapOf(
-            "promotion_code" to promotionCode,
-        ),
-    )
+    ): Result<CheckoutSessionResponse> = measure(
+        operation = Operation.ApplyPromotionCode,
+        checkoutSessionResponse = checkoutSessionResponse,
+        params = emptyMap(),
+    ) {
+        executePost(
+            clientSecret = checkoutSessionResponse.clientSecret,
+            url = updateUrl(checkoutSessionResponse.id),
+            params = mapOf(
+                "promotion_code" to promotionCode,
+            ),
+        )
+    }
+
+    suspend fun removePromotionCode(
+        checkoutSessionResponse: CheckoutSessionResponse,
+    ): Result<CheckoutSessionResponse> = measure(
+        operation = Operation.RemovePromotionCode,
+        checkoutSessionResponse = checkoutSessionResponse,
+        params = emptyMap(),
+    ) {
+        executePost(
+            clientSecret = checkoutSessionResponse.clientSecret,
+            url = updateUrl(checkoutSessionResponse.id),
+            params = mapOf(
+                "promotion_code" to "",
+            ),
+        )
+    }
 
     suspend fun updateTaxRegion(
         sessionId: String,
@@ -213,22 +237,53 @@ internal class CheckoutSessionRepository @Inject constructor(
     )
 
     suspend fun updateCurrency(
-        sessionId: String,
-        clientSecret: String,
+        checkoutSessionResponse: CheckoutSessionResponse,
         currencyCode: String,
-    ): Result<CheckoutSessionResponse> = executePost(
-        clientSecret = clientSecret,
-        url = updateUrl(sessionId),
-        params = mapOf(
-            "adaptive_pricing[currency]" to currencyCode,
-        ),
-    ).onSuccess {
+    ): Result<CheckoutSessionResponse> = measure(
+        operation = Operation.UpdateCurrency,
+        checkoutSessionResponse = checkoutSessionResponse,
+        params = mapOf("requested_currency" to currencyCode),
+    ) {
+        executePost(
+            clientSecret = checkoutSessionResponse.clientSecret,
+            url = updateUrl(checkoutSessionResponse.id),
+            params = mapOf(
+                "adaptive_pricing[currency]" to currencyCode,
+            ),
+        )
+    }.onSuccess {
         fireEvent(PaymentSheetEvent.AdaptivePricingCurrencyToggled())
     }.onFailure {
         fireEvent(PaymentSheetEvent.AdaptivePricingCurrencyToggledFailed(error = it.safeAnalyticsMessage))
     }
 
+    private suspend fun measure(
+        operation: Operation,
+        checkoutSessionResponse: CheckoutSessionResponse,
+        params: Map<String, Any?>,
+        block: suspend () -> Result<CheckoutSessionResponse>,
+    ): Result<CheckoutSessionResponse> {
+        val measuredOperation = MeasuredOperation(
+            operation = operation,
+            params = params,
+            report = ::fireEvent,
+        )
+        measuredOperation.started(checkoutSessionResponse)
+        return block()
+            .onSuccess { measuredOperation.succeeded(it) }
+            .onFailure { measuredOperation.failed(checkoutSessionResponse, it) }
+    }
+
     private fun fireEvent(event: PaymentSheetEvent) {
+        analyticsRequestExecutor.executeAsync(
+            paymentAnalyticsRequestFactory.createRequest(
+                event = event,
+                additionalParams = event.params,
+            )
+        )
+    }
+
+    private fun fireEvent(event: CheckoutAnalyticsEvent) {
         analyticsRequestExecutor.executeAsync(
             paymentAnalyticsRequestFactory.createRequest(
                 event = event,
