@@ -16,6 +16,7 @@ import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.analyticsPayloadField
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.hasBodyPart
+import com.stripe.android.networktesting.RequestMatchers.hasQueryParam
 import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -504,13 +505,46 @@ internal class CheckoutPaymentElementAnalyticsTest {
             networkRule.validateCheckoutOperationStarted(
                 "run_server_update",
                 DEFAULT_CHECKOUT_SESSION_ID,
+                not(hasQueryParam("merchant_update_duration")),
+                not(hasQueryParam("refresh_duration")),
             )
             networkRule.validateCheckoutOperationResult(
                 "checkout_elements.run_server_update.succeeded",
                 DEFAULT_CHECKOUT_SESSION_ID,
+                hasQueryParam("merchant_update_duration"),
+                hasQueryParam("refresh_duration"),
             )
             assertThat(controller.runServerUpdate { Result.success(Unit) })
                 .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
+
+            markTestSucceeded()
+        }
+
+    @Test
+    fun testFailedServerUpdateReportsMerchantUpdateDurationOnly() =
+        runCheckoutPaymentElementScenario(
+            networkRule = networkRule,
+            renderPaymentElementContent = false,
+            setup = { controller ->
+                networkRule.validateCheckoutInitStarted(DEFAULT_CHECKOUT_SESSION_ID)
+                networkRule.validateCheckoutInitSucceeded(DEFAULT_CHECKOUT_SESSION_ID)
+                assertThat(
+                    controller.configure(
+                        DEFAULT_CLIENT_SECRET,
+                        CheckoutElementsController.Configuration().paymentElement(PaymentElement.Configuration()),
+                    )
+                ).isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
+            },
+        ) {
+            networkRule.validateCheckoutOperationStarted("run_server_update", DEFAULT_CHECKOUT_SESSION_ID)
+            networkRule.validateCheckoutOperationResult(
+                "checkout_elements.run_server_update.failed",
+                DEFAULT_CHECKOUT_SESSION_ID,
+                hasQueryParam("merchant_update_duration"),
+                not(hasQueryParam("refresh_duration")),
+            )
+            assertThat(controller.runServerUpdate { Result.failure(IllegalStateException("merchant failed")) })
+                .isInstanceOf(CheckoutElementsController.OperationResult.Failed::class.java)
 
             markTestSucceeded()
         }
