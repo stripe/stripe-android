@@ -10,6 +10,7 @@ internal typealias ClassifierScores = FloatArray
  * the sum of all the values in the row.
  */
 internal fun ClassifierScores.softMax() {
-    val rowSumExp = this.fold(0F) { acc, element -> acc + exp(element) }
-    this.updateEach { exp(it) / rowSumExp }
+    val maximum = maxOrNull() ?: return
+    val rowSumExp = this.fold(0F) { acc, element -> acc + exp(element - maximum) }
+    this.updateEach { exp(it - maximum) / rowSumExp }
 }

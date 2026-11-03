@@ -21,15 +21,11 @@ import com.stripe.android.stripecardscan.payment.ml.ssd.extractPredictions
 import com.stripe.android.stripecardscan.payment.ml.ssd.rearrangeOCRArray
 import java.nio.ByteBuffer
 
-/**
- * We use the output from last two layers with feature maps 19x19 and 10x10
- * and for each feature map activation we have 6 priors, so total priors are
- * 19x19x6 + 10x10x6 = 2766
- */
-private const val NUM_OF_PRIORS = 3420
+/** Experimental fine-grid model: 38 x 24 locations with three priors each. */
+private const val NUM_OF_PRIORS = 2736
 
 /**
- * For each activation in our feature map, we have predictions for 6 bounding boxes
+ * For each activation in our feature map, we have predictions for 3 bounding boxes
  * of different aspect ratios
  */
 private const val NUM_OF_PRIORS_PER_ACTIVATION = 3
@@ -68,14 +64,16 @@ private val FEATURE_MAP_SIZES =
     OcrFeatureMapSizes(
         layerOneWidth = 38,
         layerOneHeight = 24,
-        layerTwoWidth = 19,
-        layerTwoHeight = 12
+        layerTwoWidth = 0,
+        layerTwoHeight = 0
     )
 
 /**
  * This value should never change, and is thread safe.
  */
 private val PRIORS = combinePriors(SSDOcr.Factory.TRAINED_IMAGE_SIZE)
+    .take(NUM_OF_PRIORS)
+    .toTypedArray()
 
 /**
  * This model performs SSD OCR recognition on a card.
