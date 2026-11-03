@@ -1,10 +1,12 @@
 #!/bin/bash
 
-# Retry a command, killing unhealthy emulators between attempts.
+# Retry a command, excluding completed instrumentation tests and cleaning up unhealthy emulators.
 # Usage: ./scripts/retry_with_emulator_cleanup.sh <retries> <command...>
 
 OUTPUT_LOG=$(mktemp)
-trap 'rm -f "$OUTPUT_LOG"' EXIT
+export STRIPE_INSTRUMENTATION_RETRY_STATE=$(mktemp)
+RETRY_HELPER="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/instrumentation_test_retry.py"
+trap 'rm -f "$OUTPUT_LOG" "$STRIPE_INSTRUMENTATION_RETRY_STATE"' EXIT
 
 function clear_corrupted_orchestrator_cache {
   if [ -f "$OUTPUT_LOG" ] && grep -qE "Failed to install split APK|Invalid File.*orchestrator" "$OUTPUT_LOG"; then
@@ -40,9 +42,12 @@ function retry {
 
   local count=0
   while true; do
+    python3 "$RETRY_HELPER" snapshot "$STRIPE_INSTRUMENTATION_RETRY_STATE" "$@" || return 1
     "$@" 2>&1 | tee "$OUTPUT_LOG"
     local exit=${PIPESTATUS[0]}
+    python3 "$RETRY_HELPER" update "$STRIPE_INSTRUMENTATION_RETRY_STATE" || return 1
     if [ $exit -eq 0 ]; then
+      python3 "$RETRY_HELPER" finish "$STRIPE_INSTRUMENTATION_RETRY_STATE" || return 1
       return 0
     fi
     count=$(($count + 1))
@@ -53,6 +58,7 @@ function retry {
       kill_unhealthy_emulators
     else
       echo "Retry $count/$retries exited $exit, no more retries left."
+      python3 "$RETRY_HELPER" finish "$STRIPE_INSTRUMENTATION_RETRY_STATE" || return 1
       return $exit
     fi
   done
