@@ -3,6 +3,9 @@ package com.stripe.android.checkout
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutElementsController.Address
+import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent
+import com.stripe.android.checkout.analytics.MeasuredOperation
+import com.stripe.android.checkout.analytics.updateServerStateIfNeeded
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.core.networking.ApiRequest
@@ -24,6 +27,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import kotlin.time.TimeSource
 
 @OptIn(CheckoutSessionPreview::class)
 @RunWith(RobolectricTestRunner::class)
@@ -113,6 +117,79 @@ internal class CheckoutSessionTaxRegionUpdaterTest {
         assertThat(result.exceptionOrNull()?.message).contains("Invalid tax region")
     }
 
+    @Test
+    fun `operation extension marks the tax update as requested when an update is required`() = runScenario {
+        networkRule.checkoutUpdate { response ->
+            response.testBodyFromFile("checkout-session-init.json")
+        }
+        val operation = measuredOperation()
+
+        val result = updater.updateServerStateIfNeeded(
+            operation = operation,
+            checkoutSessionResponse = checkoutSessionResponse,
+            addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+            address = ADDRESS,
+        )
+
+        assertThat(result.getOrThrow().id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
+        operation.succeeded(operation.response)
+        assertThat(reportedEvents.single().params).containsEntry("did_request_tax_update", true)
+    }
+
+    @Test
+    fun `operation extension marks the tax update as requested when the request fails`() = runScenario {
+        networkRule.checkoutUpdate { response ->
+            response.setResponseCode(400)
+            response.setBody("""{"error":{"message":"Invalid tax region"}}""")
+        }
+        val operation = measuredOperation()
+
+        val result = updater.updateServerStateIfNeeded(
+            operation = operation,
+            checkoutSessionResponse = checkoutSessionResponse,
+            addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+            address = ADDRESS,
+        )
+
+        assertThat(result.isFailure).isTrue()
+        operation.failed(checkoutSessionResponse, result.exceptionOrNull()!!)
+        assertThat(reportedEvents.single().params).containsEntry("did_request_tax_update", true)
+    }
+
+    @Test
+    fun `operation extension leaves the tax update unrequested when the address source does not match`() = runScenario {
+        val operation = measuredOperation()
+
+        val result = updater.updateServerStateIfNeeded(
+            operation = operation,
+            checkoutSessionResponse = checkoutSessionResponse,
+            addressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
+            address = ADDRESS,
+        )
+
+        assertThat(result.getOrThrow()).isSameInstanceAs(checkoutSessionResponse)
+        operation.succeeded(operation.response)
+        assertThat(reportedEvents.single().params).containsEntry("did_request_tax_update", false)
+    }
+
+    @Test
+    fun `operation extension leaves the tax update unrequested when automatic tax is disabled`() = runScenario(
+        automaticTaxEnabled = false,
+    ) {
+        val operation = measuredOperation()
+
+        val result = updater.updateServerStateIfNeeded(
+            operation = operation,
+            checkoutSessionResponse = checkoutSessionResponse,
+            addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+            address = ADDRESS,
+        )
+
+        assertThat(result.getOrThrow()).isSameInstanceAs(checkoutSessionResponse)
+        operation.succeeded(operation.response)
+        assertThat(reportedEvents.single().params).containsEntry("did_request_tax_update", false)
+    }
+
     private fun runScenario(
         automaticTaxEnabled: Boolean = true,
         block: suspend Scenario.() -> Unit,
@@ -137,7 +214,9 @@ internal class CheckoutSessionTaxRegionUpdaterTest {
 
         val updater = CheckoutSessionTaxRegionUpdater(checkoutSessionRepository)
 
+        val reportedEvents = mutableListOf<CheckoutAnalyticsEvent>()
         val scenario = Scenario(
+            reportedEvents = reportedEvents,
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(
                 automaticTaxEnabled = automaticTaxEnabled,
                 taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
@@ -150,10 +229,19 @@ internal class CheckoutSessionTaxRegionUpdaterTest {
     }
 
     private data class Scenario(
+        val reportedEvents: MutableList<CheckoutAnalyticsEvent>,
         val checkoutSessionResponse: CheckoutSessionResponse,
         val checkoutSessionRepository: CheckoutSessionRepository,
         val updater: CheckoutSessionTaxRegionUpdater,
-    )
+    ) {
+        fun measuredOperation() = MeasuredOperation(
+            operation = CheckoutAnalyticsEvent.Operation.UpdateBillingAddress,
+            startedParams = emptyMap(),
+            response = checkoutSessionResponse,
+            timeSource = TimeSource.Monotonic,
+            report = { reportedEvents += it },
+        )
+    }
 
     private companion object {
         val ADDRESS = Address.State(

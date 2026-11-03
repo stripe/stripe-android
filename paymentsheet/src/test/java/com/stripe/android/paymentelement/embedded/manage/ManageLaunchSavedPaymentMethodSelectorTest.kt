@@ -254,7 +254,7 @@ internal class ManageLaunchSavedPaymentMethodSelectorTest {
         }
         val selector = ManageLaunchSavedPaymentMethodSelector(
             taxRegionUpdater = SheetTaxRegionUpdater(
-                updateTaxRegion = { _, _, _ -> updateTaxRegion() },
+                updateTaxRegion = { _, _, _, _ -> updateTaxRegion() },
                 operationReporter = TestCheckoutOperationReporterFactory.create(
                     analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
                     workContext = UnconfinedTestDispatcher(testScheduler),

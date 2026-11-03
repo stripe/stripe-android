@@ -3,8 +3,10 @@
 package com.stripe.android.checkout
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent.InvocationSource
 import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent.Operation
 import com.stripe.android.checkout.analytics.CheckoutOperationReporter
+import com.stripe.android.checkout.analytics.analyticsParams
 import com.stripe.android.checkout.analytics.toAnalyticsMap
 import com.stripe.android.paymentsheet.analytics.FakeAnalyticsRequestExecutor
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
@@ -138,20 +140,56 @@ internal class CheckoutOperationReporterTest {
     }
 
     @Test
-    fun `reportCompleted reports started and succeeded with the session metadata`() = runScenario {
+    fun `reportCompleted reports started without the tax update flag then succeeded with the default`() = runScenario {
         val response = CheckoutSessionResponseFactory.create(id = "cs_test_completed", configId = "cfg_completed")
 
         reporter.reportCompleted(
             operation = Operation.UpdateBillingAddress,
-            params = emptyMap(),
+            params = mapOf("invocation_source" to "payment_element"),
             response = response,
         )
 
         val started = analyticsRequestExecutor.awaitEvent("checkout_elements.update_billing_address.started")
+        assertThat(started).containsEntry("invocation_source", "payment_element")
         assertThat(started).containsEntry("checkout_session_id", "cs_test_completed")
+        assertThat(started).doesNotContainKey("did_request_tax_update")
         assertThat(started).doesNotContainKey("duration")
         val succeeded = analyticsRequestExecutor.awaitEvent("checkout_elements.update_billing_address.succeeded")
+        assertThat(succeeded).containsEntry("invocation_source", "payment_element")
+        assertThat(succeeded).containsEntry("did_request_tax_update", false)
         assertThat(succeeded).containsEntry("checkout_session_id", "cs_test_completed")
+    }
+
+    @Test
+    fun `address operation rejected before work reports the tax update flag as false when failed`() = runScenario {
+        val response = CheckoutSessionResponseFactory.create(id = "cs_test_rejected")
+
+        reporter.measure(
+            operation = Operation.UpdateShippingAddress,
+            params = InvocationSource.Merchant.analyticsParams(),
+            response = response,
+        ) {
+            Result.failure<Unit>(IllegalStateException("Cannot mutate checkout session while presented."))
+        }
+
+        val started = analyticsRequestExecutor.awaitEvent("checkout_elements.update_shipping_address.started")
+        assertThat(started).doesNotContainKey("did_request_tax_update")
+        val failed = analyticsRequestExecutor.awaitEvent("checkout_elements.update_shipping_address.failed")
+        assertThat(failed).containsEntry("invocation_source", "merchant")
+        assertThat(failed).containsEntry("did_request_tax_update", false)
+    }
+
+    @Test
+    fun `operations without completion defaults do not report the tax update flag`() = runScenario {
+        reporter.reportCompleted(
+            operation = Operation.UpdateEmail,
+            params = emptyMap(),
+            response = CheckoutSessionResponseFactory.create(),
+        )
+
+        analyticsRequestExecutor.awaitEvent("checkout_elements.update_email.started")
+        val succeeded = analyticsRequestExecutor.awaitEvent("checkout_elements.update_email.succeeded")
+        assertThat(succeeded).doesNotContainKey("did_request_tax_update")
     }
 
     @Test

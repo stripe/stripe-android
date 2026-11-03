@@ -222,6 +222,8 @@ internal class CheckoutPaymentElementAnalyticsTest {
             // The selection is still reported as a billing address update, which sends no tax update.
             networkRule.validateCheckoutAddressUpdate(
                 operation = "update_billing_address",
+                invocationSource = "payment_element",
+                didRequestTaxUpdate = false,
             )
 
             // Billing-tax filtering keeps addressless saved payment methods out of the UI, so
@@ -371,12 +373,15 @@ internal class CheckoutPaymentElementAnalyticsTest {
             // configuration rather than the first configure's defaults-free one.
             networkRule.validateCheckoutAddressUpdateStarted(
                 "update_billing_address",
+                "merchant",
                 RECONFIGURED_SESSION_ID,
                 analyticsPayloadField("defaults[billing_details][address]", "true"),
             )
             networkRule.validateCheckoutAddressUpdateResult(
                 "update_billing_address",
                 "failed",
+                "merchant",
+                true,
                 RECONFIGURED_SESSION_ID,
                 analyticsPayloadField("defaults[billing_details][address]", "true"),
                 analyticsPayloadField("error_type", "invalid_request_error"),
@@ -429,6 +434,8 @@ internal class CheckoutPaymentElementAnalyticsTest {
             )
             networkRule.validateCheckoutAddressUpdate(
                 operation = "update_shipping_address",
+                invocationSource = "merchant",
+                didRequestTaxUpdate = true,
             )
             assertThat(
                 controller.updateShippingAddress(
@@ -448,6 +455,8 @@ internal class CheckoutPaymentElementAnalyticsTest {
             )
             networkRule.validateCheckoutAddressUpdate(
                 operation = "update_shipping_address",
+                invocationSource = "merchant",
+                didRequestTaxUpdate = true,
             )
             assertThat(controller.updateShippingAddress(name = null, address = null))
                 .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
@@ -477,6 +486,8 @@ internal class CheckoutPaymentElementAnalyticsTest {
             networkRule.validateCheckoutOperationEvent("clear_payment_option", DEFAULT_CHECKOUT_SESSION_ID)
             networkRule.validateCheckoutAddressUpdate(
                 operation = "update_billing_address",
+                invocationSource = "payment_element",
+                didRequestTaxUpdate = false,
             )
             assertThat(controller.clearPaymentOption())
                 .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)

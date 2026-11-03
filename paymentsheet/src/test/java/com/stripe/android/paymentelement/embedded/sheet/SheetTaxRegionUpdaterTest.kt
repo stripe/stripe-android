@@ -183,9 +183,13 @@ internal class SheetTaxRegionUpdaterTest {
 
         assertThat(update).isNull()
         val started = analyticsRequestExecutor.awaitEvent("checkout_elements.update_billing_address.started")
+        assertThat(started).containsEntry("invocation_source", "payment_element")
         assertThat(started).containsEntry("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID)
+        assertThat(started).doesNotContainKey("did_request_tax_update")
         val succeeded = analyticsRequestExecutor.awaitEvent("checkout_elements.update_billing_address.succeeded")
         assertThat(succeeded).containsKey("duration")
+        assertThat(succeeded).containsEntry("invocation_source", "payment_element")
+        assertThat(succeeded).containsEntry("did_request_tax_update", false)
         analyticsRequestExecutor.validate()
     }
 
@@ -206,9 +210,13 @@ internal class SheetTaxRegionUpdaterTest {
         assertThat(update.invoke().isSuccess).isTrue()
 
         val started = analyticsRequestExecutor.awaitEvent("checkout_elements.update_billing_address.started")
+        assertThat(started).containsEntry("invocation_source", "payment_element")
         assertThat(started).containsEntry("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID)
+        assertThat(started).doesNotContainKey("did_request_tax_update")
         val succeeded = analyticsRequestExecutor.awaitEvent("checkout_elements.update_billing_address.succeeded")
         assertThat(succeeded).containsKey("duration")
+        assertThat(succeeded).containsEntry("invocation_source", "payment_element")
+        assertThat(succeeded).containsEntry("did_request_tax_update", true)
         analyticsRequestExecutor.validate()
     }
 

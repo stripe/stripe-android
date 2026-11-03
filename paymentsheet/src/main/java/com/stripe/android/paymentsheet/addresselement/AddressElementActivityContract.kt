@@ -7,6 +7,7 @@ import android.os.Parcelable
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.os.BundleCompat
 import androidx.core.os.bundleOf
+import com.stripe.android.checkout.analytics.CheckoutConfigurationAnalytics
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.view.ActivityStarter
@@ -75,6 +76,7 @@ internal object AddressElementActivityContract {
             override val apiConfiguration: ApiConfiguration.State,
             override val config: AddressLauncher.Configuration?,
             val checkoutSessionResponse: CheckoutSessionResponse,
+            val checkoutConfigurationAnalytics: CheckoutConfigurationAnalytics,
         ) : Args()
 
         internal companion object {

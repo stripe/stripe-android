@@ -7,6 +7,7 @@ import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.GooglePayJsonFactory
+import com.stripe.android.checkout.analytics.CheckoutConfirmationContext
 import com.stripe.android.googlepaylauncher.GooglePayPaymentDataError
 import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdate
 import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdateResponse
@@ -324,16 +325,40 @@ internal class CheckoutGooglePayPaymentDataUpdateCallbackTest {
     }
 
     @Test
-    fun `shipping address update reports started and succeeded`() = addressOperationTest(
-        callbackTrigger = GooglePayPaymentDataUpdate.CallbackTrigger.ShippingAddress,
-        expectedOperation = "update_shipping_address",
-    )
+    fun `shipping address update from Express Checkout Element reports its invocation source`() =
+        invocationSourceTest(
+            callbackTrigger = GooglePayPaymentDataUpdate.CallbackTrigger.ShippingAddress,
+            confirmationInvocationSource = CheckoutConfirmationContext.InvocationSource.ExpressCheckoutElement,
+            expectedOperation = "update_shipping_address",
+            expectedInvocationSource = "express_checkout_element",
+        )
 
     @Test
-    fun `billing address update reports started and succeeded`() = addressOperationTest(
-        callbackTrigger = GooglePayPaymentDataUpdate.CallbackTrigger.PaymentMethod,
-        expectedOperation = "update_billing_address",
-    )
+    fun `shipping address update from Payment Element stays with the merchant`() =
+        invocationSourceTest(
+            callbackTrigger = GooglePayPaymentDataUpdate.CallbackTrigger.ShippingAddress,
+            confirmationInvocationSource = CheckoutConfirmationContext.InvocationSource.Merchant,
+            expectedOperation = "update_shipping_address",
+            expectedInvocationSource = "merchant",
+        )
+
+    @Test
+    fun `billing address update from Express Checkout Element reports its invocation source`() =
+        invocationSourceTest(
+            callbackTrigger = GooglePayPaymentDataUpdate.CallbackTrigger.PaymentMethod,
+            confirmationInvocationSource = CheckoutConfirmationContext.InvocationSource.ExpressCheckoutElement,
+            expectedOperation = "update_billing_address",
+            expectedInvocationSource = "express_checkout_element",
+        )
+
+    @Test
+    fun `billing address update from Payment Element reports the Payment Element`() =
+        invocationSourceTest(
+            callbackTrigger = GooglePayPaymentDataUpdate.CallbackTrigger.PaymentMethod,
+            confirmationInvocationSource = CheckoutConfirmationContext.InvocationSource.Merchant,
+            expectedOperation = "update_billing_address",
+            expectedInvocationSource = "payment_element",
+        )
 
     @Test
     fun `failed address update reports a failed operation`() = runScenario(
@@ -354,6 +379,7 @@ internal class CheckoutGooglePayPaymentDataUpdateCallbackTest {
             .isEqualTo(CheckoutSessionResponse.TaxAddressSource.SHIPPING)
         analyticsRequestExecutor.awaitEvent("checkout_elements.update_shipping_address.started")
         val failed = analyticsRequestExecutor.awaitEvent("checkout_elements.update_shipping_address.failed")
+        assertThat(failed).containsEntry("did_request_tax_update", true)
         assertThat(failed).containsEntry("error_type", "java.lang.IllegalStateException")
         assertThat(failed.toString()).doesNotContain("private failure details")
         analyticsRequestExecutor.validate()
@@ -442,10 +468,14 @@ internal class CheckoutGooglePayPaymentDataUpdateCallbackTest {
         }
     }
 
-    private fun addressOperationTest(
+    private fun invocationSourceTest(
         callbackTrigger: GooglePayPaymentDataUpdate.CallbackTrigger,
+        confirmationInvocationSource: CheckoutConfirmationContext.InvocationSource?,
         expectedOperation: String,
-    ) = runScenario {
+        expectedInvocationSource: String,
+    ) = runScenario(
+        confirmationInvocationSource = confirmationInvocationSource,
+    ) {
         val paymentDataUpdate = GooglePayPaymentDataUpdate(
             callbackTrigger = callbackTrigger,
             shippingAddress = SHIPPING_ADDRESS,
@@ -459,8 +489,12 @@ internal class CheckoutGooglePayPaymentDataUpdateCallbackTest {
         mapper.toResponseCalls.awaitItem()
         val started = analyticsRequestExecutor.awaitEvent("checkout_elements.$expectedOperation.started")
         assertThat(started).containsEntry("checkout_session_id", providedState?.checkoutSessionResponse?.id)
+        assertThat(started).containsEntry("invocation_source", expectedInvocationSource)
+        assertThat(started).doesNotContainKey("did_request_tax_update")
         val succeeded = analyticsRequestExecutor.awaitEvent("checkout_elements.$expectedOperation.succeeded")
         assertThat(succeeded).containsKey("duration")
+        assertThat(succeeded).containsEntry("invocation_source", expectedInvocationSource)
+        assertThat(succeeded).containsEntry("did_request_tax_update", true)
         analyticsRequestExecutor.validate()
     }
 
@@ -564,6 +598,7 @@ internal class CheckoutGooglePayPaymentDataUpdateCallbackTest {
             (FakeCheckoutSessionTaxRegionUpdater.UpdateServerStateIfNeededCall) -> Result<CheckoutSessionResponse>
         )? = null,
         requiresUpdate: (CheckoutSessionResponse.TaxAddressSource) -> Boolean = { true },
+        confirmationInvocationSource: CheckoutConfirmationContext.InvocationSource? = null,
         block: suspend Scenario.() -> Unit
     ) = runTest {
         val context = ApplicationProvider.getApplicationContext<Context>()
@@ -577,6 +612,9 @@ internal class CheckoutGooglePayPaymentDataUpdateCallbackTest {
         )
         val errorReporter = FakeErrorReporter()
         val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
+        val analyticsPerformer = mock<CheckoutAnalyticsPerformer> {
+            on { confirmationInvocationSource() } doAnswer { confirmationInvocationSource }
+        }
 
         val callback = CheckoutGooglePayPaymentDataUpdateCallback(
             context = context,
@@ -593,6 +631,7 @@ internal class CheckoutGooglePayPaymentDataUpdateCallbackTest {
                 analyticsRequestExecutor = analyticsRequestExecutor,
                 workContext = UnconfinedTestDispatcher(testScheduler),
             ),
+            analyticsPerformer = analyticsPerformer,
         )
 
         block(

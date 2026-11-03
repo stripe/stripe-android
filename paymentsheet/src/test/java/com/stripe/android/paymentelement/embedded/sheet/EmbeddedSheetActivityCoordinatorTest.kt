@@ -293,6 +293,7 @@ internal class EmbeddedSheetActivityCoordinatorTest {
                 promotions = emptyList(),
                 launchMode = launchMode,
                 presentationState = presentationState,
+                checkoutConfigurationAnalytics = null,
             )
         }
 

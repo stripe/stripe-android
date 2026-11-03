@@ -6,6 +6,7 @@ import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
 import com.stripe.android.checkout.TestCheckoutOperationReporterFactory
+import com.stripe.android.checkout.analytics.updateServerStateIfNeeded
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.common.exception.stripeErrorMessage
@@ -164,7 +165,7 @@ internal class DefaultSheetActivityContinueCoordinatorTest {
         val response = CheckoutSessionResponseFactory.create()
         runScenario(
             paymentMethodMetadata = CHECKOUT_SESSION_METADATA,
-            updateTaxRegion = { _, _, _ ->
+            updateTaxRegion = { _, _, _, _ ->
                 updateCalls.add(Unit)
                 Result.success(response)
             },
@@ -210,8 +211,8 @@ internal class DefaultSheetActivityContinueCoordinatorTest {
     ) = runTest {
         val checkoutSessionTaxRegionUpdater = checkoutSessionTaxRegionUpdater()
         val taxRegionUpdater = SheetTaxRegionUpdater(
-            updateTaxRegion = updateTaxRegion ?: { response, addressSource, address ->
-                checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(response, addressSource, address)
+            updateTaxRegion = updateTaxRegion ?: { operation, response, addressSource, address ->
+                checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(operation, response, addressSource, address)
             },
             operationReporter = TestCheckoutOperationReporterFactory.create(
                 analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),

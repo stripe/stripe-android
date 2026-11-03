@@ -53,6 +53,7 @@ internal class EmbeddedSheetViewModel @Inject constructor(
                 savedStateHandle = savedStateHandle,
                 promotions = args.promotions,
                 launchMode = args.launchMode,
+                checkoutConfigurationAnalytics = args.checkoutConfigurationAnalytics,
                 viewModelScope = customViewModelScope,
             )
 

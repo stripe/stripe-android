@@ -306,6 +306,7 @@ internal class EmbeddedSheetActivityTest {
                         selectedPaymentMethodCode = selectedPaymentMethodCode,
                     ),
                     presentationState = EmbeddedActivityArgs.PresentationState.Ready,
+                    checkoutConfigurationAnalytics = null,
                 ),
             )
         ).use { scenario ->

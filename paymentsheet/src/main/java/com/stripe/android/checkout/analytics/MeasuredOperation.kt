@@ -23,7 +23,7 @@ internal class MeasuredOperation(
     // Queued calls of the same operation overlap, so each attempt keeps its own start mark.
     private val startedAt = timeSource.markNow()
 
-    private val recordedCompletionParams = mutableMapOf<String, Any?>()
+    private val recordedCompletionParams = operation.defaultCompletionParams.toMutableMap()
 
     override val params: Map<String, Any?> = startedParams
 

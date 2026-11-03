@@ -57,7 +57,7 @@ internal class EmbeddedActivityModuleTest {
         val selectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle())
         val manageLaunchSelector = ManageLaunchSavedPaymentMethodSelector(
             taxRegionUpdater = SheetTaxRegionUpdater(
-                updateTaxRegion = { _, _, _ ->
+                updateTaxRegion = { _, _, _, _ ->
                     error("Tax update is not invoked by this selector test")
                 },
                 operationReporter = mock(),
