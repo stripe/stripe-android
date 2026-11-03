@@ -6,8 +6,8 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.checkout.CheckoutControllerStateFactory
-import com.stripe.android.checkout.CheckoutControllerStateHolder
+import com.stripe.android.checkout.CheckoutElementsControllerStateFactory
+import com.stripe.android.checkout.CheckoutElementsControllerStateHolder
 import com.stripe.android.checkout.CheckoutMandateState
 import com.stripe.android.elements.PaymentElement.Configuration.GooglePayConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -169,8 +169,8 @@ internal class PaymentElementTest {
     ) = runTest {
         val contentHelper = FakeEmbeddedContentHelper(MutableStateFlow(embeddedContent))
         val mandateState = CheckoutMandateState.initial()
-        val stateHolder = CheckoutControllerStateFactory.createStateHolder(SavedStateHandle()).apply {
-            state = CheckoutControllerStateFactory.create(mandateState = mandateState)
+        val stateHolder = CheckoutElementsControllerStateFactory.createStateHolder(SavedStateHandle()).apply {
+            state = CheckoutElementsControllerStateFactory.create(mandateState = mandateState)
         }
         Scenario(
             paymentElement = PaymentElement(contentHelper, stateHolder, backgroundScope),
@@ -184,7 +184,7 @@ internal class PaymentElementTest {
     private class Scenario(
         val paymentElement: PaymentElement,
         val contentHelper: FakeEmbeddedContentHelper,
-        val stateHolder: CheckoutControllerStateHolder,
+        val stateHolder: CheckoutElementsControllerStateHolder,
         val mandateState: CheckoutMandateState,
     )
 

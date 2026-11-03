@@ -27,7 +27,7 @@ internal class CheckoutLinkPaymentOptionsPresenter @Inject constructor(
     private val linkPaymentLauncher: LinkPaymentLauncher,
     private val activityResultRegistry: ActivityResultRegistry,
     private val lifecycleOwner: LifecycleOwner,
-    private val stateHolder: CheckoutControllerStateHolder,
+    private val stateHolder: CheckoutElementsControllerStateHolder,
     private val customerStateHolder: CustomerStateHolder,
     private val linkAccountHolder: LinkAccountHolder,
     private val sheetStateHolder: SheetStateHolder,

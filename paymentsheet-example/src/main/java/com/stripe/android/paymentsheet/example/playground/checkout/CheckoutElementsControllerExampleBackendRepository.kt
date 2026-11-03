@@ -9,7 +9,7 @@ import com.stripe.android.paymentsheet.example.playground.checkout.settings.Chec
 import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutPlaygroundSettings
 import com.stripe.android.paymentsheet.example.playground.settings.Merchant
 
-internal class CheckoutControllerExampleBackendRepository(
+internal class CheckoutElementsControllerExampleBackendRepository(
     private val applicationContext: Context,
 ) {
     private val defaultBackendUrl = Settings(applicationContext).playgroundBackendUrl
@@ -17,7 +17,7 @@ internal class CheckoutControllerExampleBackendRepository(
     suspend fun fetchCheckoutSession(
         settings: CheckoutPlaygroundSettings.Snapshot,
         backendUrl: String?,
-    ): Result<CheckoutControllerExampleBackendResponse> = runCatching {
+    ): Result<CheckoutElementsControllerExampleBackendResponse> = runCatching {
         val merchant = settings.backendMerchant()
         val backend = PlaygroundBackend(
             baseUrl = backendUrl ?: defaultBackendUrl,

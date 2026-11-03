@@ -22,7 +22,7 @@ import kotlin.test.Test
     com.stripe.android.paymentelement.CheckoutSessionPreview::class,
     com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview::class,
 )
-internal class CheckoutPresenterInitializerTest {
+internal class CheckoutElementsPresenterInitializerTest {
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule()
@@ -62,7 +62,7 @@ internal class CheckoutPresenterInitializerTest {
         val appearance = PaymentSheet.Appearance.Builder()
             .colorsLight(PaymentSheet.Colors.Builder.light().primary(0xFF123456.toInt()).build())
             .build()
-        val restoredState = CheckoutControllerStateFactory.create(
+        val restoredState = CheckoutElementsControllerStateFactory.create(
             embeddedConfiguration = com.stripe.android.paymentelement.EmbeddedPaymentElement.Configuration
                 .Builder("Example, Inc.")
                 .appearance(appearance)
@@ -70,14 +70,14 @@ internal class CheckoutPresenterInitializerTest {
         )
         val previousTheme = StripeThemeSnapshot()
         try {
-            val initializer = CheckoutPresenterInitializer(
+            val initializer = CheckoutElementsPresenterInitializer(
                 confirmationHandler = FakeConfirmationHandler(),
                 activityResultCaller = mock(),
                 lifecycleOwner = TestLifecycleOwner(),
                 sheetLauncher = FakeEmbeddedSheetLauncher(),
                 sheetStateHolder = SheetStateHolder(SavedStateHandle()),
-                stateHolder = CheckoutControllerStateFactory.createStateHolder(
-                    SavedStateHandle(mapOf(CheckoutControllerStateHolder.STATE_KEY to restoredState))
+                stateHolder = CheckoutElementsControllerStateFactory.createStateHolder(
+                    SavedStateHandle(mapOf(CheckoutElementsControllerStateHolder.STATE_KEY to restoredState))
                 ),
             )
 
@@ -98,8 +98,8 @@ internal class CheckoutPresenterInitializerTest {
         val activityResultCaller = mock<ActivityResultCaller>()
         val sheetLauncher = FakeEmbeddedSheetLauncher()
         val sheetStateHolder = SheetStateHolder(SavedStateHandle())
-        val stateHolder = CheckoutControllerStateFactory.createStateHolder(SavedStateHandle())
-        val initializer = CheckoutPresenterInitializer(
+        val stateHolder = CheckoutElementsControllerStateFactory.createStateHolder(SavedStateHandle())
+        val initializer = CheckoutElementsPresenterInitializer(
             confirmationHandler = confirmationHandler,
             activityResultCaller = activityResultCaller,
             lifecycleOwner = lifecycleOwner,
@@ -121,7 +121,7 @@ internal class CheckoutPresenterInitializerTest {
     }
 
     private class Scenario(
-        val initializer: CheckoutPresenterInitializer,
+        val initializer: CheckoutElementsPresenterInitializer,
         val confirmationHandler: FakeConfirmationHandler,
         val activityResultCaller: ActivityResultCaller,
         val lifecycleOwner: TestLifecycleOwner,

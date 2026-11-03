@@ -2,7 +2,7 @@ package com.stripe.android.checkout
 
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.checkout.CheckoutController.Address
+import com.stripe.android.checkout.CheckoutElementsController.Address
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.core.networking.ApiRequest

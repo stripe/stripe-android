@@ -70,7 +70,7 @@ internal class CheckoutConfirmationPerformerTest {
 
     @Test
     fun `confirm fails when there is no selection`() = runScenario(
-        state = CheckoutControllerStateFactory.create(paymentSelection = null),
+        state = CheckoutElementsControllerStateFactory.create(paymentSelection = null),
     ) {
         performer.confirm()
         assertRejection("Cannot confirm checkout without a selected payment option.")
@@ -79,7 +79,7 @@ internal class CheckoutConfirmationPerformerTest {
 
     @Test
     fun `confirm fails when there is no embedded configuration`() = runScenario(
-        state = CheckoutControllerStateFactory.create(
+        state = CheckoutElementsControllerStateFactory.create(
             embeddedConfiguration = null,
             paymentSelection = PaymentSelection.GooglePay,
         ),
@@ -92,7 +92,7 @@ internal class CheckoutConfirmationPerformerTest {
 
     @Test
     fun `confirm fails when there is no payment method metadata`() = runScenario(
-        state = CheckoutControllerStateFactory.create(
+        state = CheckoutElementsControllerStateFactory.create(
             paymentMethodMetadata = null,
             paymentSelection = PaymentSelection.GooglePay,
         ),
@@ -105,7 +105,7 @@ internal class CheckoutConfirmationPerformerTest {
 
     @Test
     fun `confirm fails when the selection cannot be converted to a confirmation option`() = runScenario(
-        state = CheckoutControllerStateFactory.create(
+        state = CheckoutElementsControllerStateFactory.create(
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(merchantCountry = null),
             paymentSelection = PaymentSelection.GooglePay,
         ),
@@ -169,7 +169,7 @@ internal class CheckoutConfirmationPerformerTest {
 
     @Test
     fun `confirm can retry after the payment option becomes confirmable`() = runScenario(
-        state = CheckoutControllerStateFactory.create(
+        state = CheckoutElementsControllerStateFactory.create(
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(merchantCountry = null),
             paymentSelection = PaymentSelection.GooglePay,
         ),
@@ -347,15 +347,15 @@ internal class CheckoutConfirmationPerformerTest {
 
     private fun googlePayState(
         paymentSelection: PaymentSelection?,
-    ): CheckoutControllerState {
-        return CheckoutControllerStateFactory.create(
+    ): CheckoutElementsControllerState {
+        return CheckoutElementsControllerStateFactory.create(
             paymentSelection = paymentSelection,
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(merchantCountry = "US"),
         )
     }
 
-    private fun linkState(): CheckoutControllerState {
-        return CheckoutControllerStateFactory.create(
+    private fun linkState(): CheckoutElementsControllerState {
+        return CheckoutElementsControllerStateFactory.create(
             paymentSelection = PaymentSelection.Link(brand = LinkBrand.Link),
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 linkState = LinkState(
@@ -369,8 +369,8 @@ internal class CheckoutConfirmationPerformerTest {
 
     private fun savedSepaState(
         embeddedViewDisplaysMandateText: Boolean,
-    ): CheckoutControllerState {
-        return CheckoutControllerStateFactory.create(
+    ): CheckoutElementsControllerState {
+        return CheckoutElementsControllerStateFactory.create(
             embeddedConfiguration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.")
                 .embeddedViewDisplaysMandateText(embeddedViewDisplaysMandateText)
                 .build(),
@@ -380,17 +380,17 @@ internal class CheckoutConfirmationPerformerTest {
 
     @Suppress("LongMethod")
     private fun runScenario(
-        state: CheckoutControllerState?,
+        state: CheckoutElementsControllerState?,
         statusBarColor: Int? = null,
         sheetIsOpen: Boolean = false,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val confirmationHandler = FakeConfirmationHandler()
         val savedStateHandle = SavedStateHandle()
-        val stateHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle)
+        val stateHolder = CheckoutElementsControllerStateFactory.createStateHolder(savedStateHandle)
         stateHolder.state = state
         val sessionRefresher = FakeCheckoutSessionRefresher()
-        val results = Turbine<CheckoutController.Result>()
+        val results = Turbine<CheckoutElementsController.Result>()
         val resultThreads = Turbine<Thread>()
         val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
         val analyticsPerformer = TestCheckoutAnalyticsPerformerFactory.create(
@@ -451,8 +451,8 @@ internal class CheckoutConfirmationPerformerTest {
     private fun createPresenter(
         performerProvider: Provider<CheckoutConfirmationPerformer>,
         coroutineScope: CoroutineScope,
-    ): CheckoutPresenter {
-        return CheckoutPresenter(
+    ): CheckoutElementsPresenter {
+        return CheckoutElementsPresenter(
             paymentElementProvider = Lazy { error("Unexpected payment element access") },
             currencySelectorElementProvider = Lazy { error("Unexpected currency selector access") },
             shippingAddressElementProvider = Lazy { error("Unexpected shipping address element access") },
@@ -474,15 +474,15 @@ internal class CheckoutConfirmationPerformerTest {
     }
 
     private class Scenario(
-        val presenter: CheckoutPresenter,
+        val presenter: CheckoutElementsPresenter,
         val performerProvider: FakeConfirmationPerformerProvider,
         val performer: CheckoutConfirmationPerformer,
         val confirmationHandler: FakeConfirmationHandler,
         val analyticsRequestExecutor: FakeAnalyticsRequestExecutor,
         val analyticsPerformer: CheckoutAnalyticsPerformer,
-        val stateHolder: CheckoutControllerStateHolder,
+        val stateHolder: CheckoutElementsControllerStateHolder,
         val operationCoordinator: CheckoutOperationCoordinator,
-        val results: Turbine<CheckoutController.Result>,
+        val results: Turbine<CheckoutElementsController.Result>,
         val resultThreads: Turbine<Thread>,
         val sessionRefresher: FakeCheckoutSessionRefresher,
         private val testScope: TestScope,
@@ -499,8 +499,8 @@ internal class CheckoutConfirmationPerformerTest {
         suspend fun assertRejection(message: String) {
             testScheduler.runCurrent()
             val result = results.awaitItem()
-            assertThat(result).isInstanceOf<CheckoutController.Result.Failed>()
-            val error = (result as CheckoutController.Result.Failed).error
+            assertThat(result).isInstanceOf<CheckoutElementsController.Result.Failed>()
+            val error = (result as CheckoutElementsController.Result.Failed).error
             assertThat(error).isInstanceOf<IllegalStateException>()
             assertThat(error).hasMessageThat().isEqualTo(message)
             assertThat(resultThreads.awaitItem()).isSameInstanceAs(Looper.getMainLooper().thread)

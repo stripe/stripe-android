@@ -17,7 +17,7 @@ import javax.inject.Named
 
 internal class CheckoutConfirmationPerformer @Inject constructor(
     private val confirmationHandler: ConfirmationHandler,
-    private val stateHolder: CheckoutControllerStateHolder,
+    private val stateHolder: CheckoutElementsControllerStateHolder,
     private val operationCoordinator: CheckoutOperationCoordinator,
     private val analyticsPerformer: CheckoutAnalyticsPerformer,
     private val commonConfigurationFactory: CheckoutCommonConfigurationFactory,
@@ -74,7 +74,7 @@ internal class CheckoutConfirmationPerformer @Inject constructor(
 
     @OptIn(CheckoutSessionPreview::class)
     private fun confirmationArgs(
-        state: CheckoutControllerState,
+        state: CheckoutElementsControllerState,
         paymentMethodMetadata: PaymentMethodMetadata,
         paymentSelection: PaymentSelection,
         configuration: CommonConfiguration,

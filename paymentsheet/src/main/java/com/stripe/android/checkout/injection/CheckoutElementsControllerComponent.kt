@@ -11,9 +11,9 @@ import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.checkout.CheckoutAnalyticsPerformer
 import com.stripe.android.checkout.CheckoutConfirmationFinalizer
 import com.stripe.android.checkout.CheckoutConfirmationResultReporter
-import com.stripe.android.checkout.CheckoutController
-import com.stripe.android.checkout.CheckoutControllerSavedState
-import com.stripe.android.checkout.CheckoutControllerStateHolder
+import com.stripe.android.checkout.CheckoutElementsController
+import com.stripe.android.checkout.CheckoutElementsControllerSavedState
+import com.stripe.android.checkout.CheckoutElementsControllerStateHolder
 import com.stripe.android.checkout.CheckoutLoadingEventReporter
 import com.stripe.android.checkout.CheckoutOperationCoordinator
 import com.stripe.android.checkout.CheckoutPaymentOptionDisplayDataFactory
@@ -114,7 +114,7 @@ import javax.inject.Singleton
 @Singleton
 @Component(
     modules = [
-        CheckoutControllerModule::class,
+        CheckoutElementsControllerModule::class,
         CheckoutModule::class,
         ExtendedPaymentElementConfirmationModule::class,
         SepaMandateConfirmationModule::class,
@@ -139,24 +139,24 @@ import javax.inject.Singleton
         ApiConfigurationResolverModule::class,
     ],
 )
-internal interface CheckoutControllerComponent {
-    val checkoutController: CheckoutController
+internal interface CheckoutElementsControllerComponent {
+    val checkoutElementsController: CheckoutElementsController
 
     @Component.Factory
     interface Factory {
         fun create(
             @BindsInstance application: Application,
             @BindsInstance @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,
-            @BindsInstance resultCallback: CheckoutController.ResultCallback,
+            @BindsInstance resultCallback: CheckoutElementsController.ResultCallback,
             @BindsInstance rowSelectionBehavior: PaymentElement.RowSelectionBehavior,
-            @BindsInstance checkoutControllerSavedState: CheckoutControllerSavedState,
-        ): CheckoutControllerComponent
+            @BindsInstance checkoutElementsControllerSavedState: CheckoutElementsControllerSavedState,
+        ): CheckoutElementsControllerComponent
     }
 }
 
 @Suppress("TooManyFunctions")
-@Module(subcomponents = [CheckoutPresenterSubcomponent::class])
-internal interface CheckoutControllerModule {
+@Module(subcomponents = [CheckoutElementsPresenterSubcomponent::class])
+internal interface CheckoutElementsControllerModule {
     @Binds
     fun bindPaymentElementLoader(loader: DefaultPaymentElementLoader): PaymentElementLoader
 
@@ -222,7 +222,7 @@ internal interface CheckoutControllerModule {
     fun bindsEmbeddedSelectionChooser(impl: DefaultEmbeddedSelectionChooser): EmbeddedSelectionChooser
 
     @Binds
-    fun bindsEmbeddedSelectionHolder(impl: CheckoutControllerStateHolder): EmbeddedSelectionHolder
+    fun bindsEmbeddedSelectionHolder(impl: CheckoutElementsControllerStateHolder): EmbeddedSelectionHolder
 
     @Binds
     fun bindsEmbeddedRowSelectionImmediateActionHandler(
@@ -258,9 +258,9 @@ internal interface CheckoutControllerModule {
     companion object {
         @Provides
         fun provideSavedStateHandle(
-            checkoutControllerSavedState: CheckoutControllerSavedState,
+            checkoutElementsControllerSavedState: CheckoutElementsControllerSavedState,
         ): SavedStateHandle {
-            return checkoutControllerSavedState.handle
+            return checkoutElementsControllerSavedState.handle
         }
 
         @Provides
@@ -311,7 +311,7 @@ internal interface CheckoutControllerModule {
 
         @Provides
         fun providePaymentMethodMetadata(
-            stateHolder: CheckoutControllerStateHolder,
+            stateHolder: CheckoutElementsControllerStateHolder,
         ): PaymentMethodMetadata? {
             return stateHolder.state?.paymentMethodMetadata
         }
@@ -353,7 +353,7 @@ internal interface CheckoutControllerModule {
 
         @Provides
         fun providePaymentMethodMetadataFlow(
-            stateHolder: CheckoutControllerStateHolder,
+            stateHolder: CheckoutElementsControllerStateHolder,
         ): StateFlow<PaymentMethodMetadata?> {
             return stateHolder.stateFlow.mapAsStateFlow { it?.paymentMethodMetadata }
         }
@@ -376,7 +376,7 @@ internal interface CheckoutControllerModule {
 
         @Provides
         fun provideSavedPaymentMethodSelectionState(
-            stateHolder: CheckoutControllerStateHolder,
+            stateHolder: CheckoutElementsControllerStateHolder,
         ): StateFlow<SavedPaymentMethodSelectionState> {
             return stateHolder.stateFlow.mapAsStateFlow {
                 it?.savedPaymentMethodSelectionState ?: SavedPaymentMethodSelectionState.Idle

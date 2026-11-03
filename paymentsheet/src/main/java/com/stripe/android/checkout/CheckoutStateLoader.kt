@@ -28,16 +28,16 @@ internal class CheckoutStateLoader @Inject constructor(
     private val flagImageResolver: FlagImageResolver,
     private val paymentElementLoader: PaymentElementLoader,
     private val selectionChooser: EmbeddedSelectionChooser,
-    private val stateHolder: CheckoutControllerStateHolder,
+    private val stateHolder: CheckoutElementsControllerStateHolder,
     private val customerStateHolder: CustomerStateHolder,
     private val internalRowSelectionCallback: Provider<InternalRowSelectionCallback?>,
 ) {
     /**
-     * Loads the initial state without publishing it, so [CheckoutController.configure] can finish
+     * Loads the initial state without publishing it, so [CheckoutElementsController.configure] can finish
      * its tax update before the session becomes observable.
      */
     suspend fun loadInitial(
-        configuration: CheckoutController.Configuration.State,
+        configuration: CheckoutElementsController.Configuration.State,
         checkoutSessionResponse: CheckoutSessionResponse,
     ): LoadedState {
         return load(
@@ -48,7 +48,7 @@ internal class CheckoutStateLoader @Inject constructor(
         )
     }
 
-    suspend fun reload(state: CheckoutControllerState) {
+    suspend fun reload(state: CheckoutElementsControllerState) {
         publish(
             load(
                 configuration = state.configuration,
@@ -70,7 +70,7 @@ internal class CheckoutStateLoader @Inject constructor(
     }
 
     private suspend fun load(
-        configuration: CheckoutController.Configuration.State,
+        configuration: CheckoutElementsController.Configuration.State,
         response: CheckoutSessionResponse,
         collectedDetails: CheckoutCollectedDetails,
         carryForward: CarryForward,
@@ -112,7 +112,7 @@ internal class CheckoutStateLoader @Inject constructor(
             embeddedConfig = paymentElementConfigs?.embeddedConfig,
         )
 
-        val state = CheckoutControllerState(
+        val state = CheckoutElementsControllerState(
             configuration = configuration,
             checkoutSessionResponse = response,
             flagImages = flagImages,
@@ -130,7 +130,7 @@ internal class CheckoutStateLoader @Inject constructor(
         return LoadedState(state = state, customer = loadResults.customer)
     }
 
-    private fun getConfiguredElements(configuration: CheckoutController.Configuration.State): List<String> {
+    private fun getConfiguredElements(configuration: CheckoutElementsController.Configuration.State): List<String> {
         return buildList {
             if (configuration.paymentElementConfiguration != null) {
                 add("mobile-payment-element")
@@ -215,7 +215,7 @@ internal class CheckoutStateLoader @Inject constructor(
     }
 
     private fun getPaymentElementConfigs(
-        configuration: CheckoutController.Configuration.State,
+        configuration: CheckoutElementsController.Configuration.State,
         response: CheckoutSessionResponse,
         collectedDetails: CheckoutCollectedDetails,
     ): PaymentElementConfigurations? {
@@ -249,7 +249,7 @@ internal class CheckoutStateLoader @Inject constructor(
     }
 
     data class LoadedState(
-        val state: CheckoutControllerState,
+        val state: CheckoutElementsControllerState,
         val customer: CustomerState?,
     )
 
@@ -291,7 +291,7 @@ internal class CheckoutStateLoader @Inject constructor(
                 mandateState = CheckoutMandateState.initial(),
             )
 
-            fun from(state: CheckoutControllerState) = CarryForward(
+            fun from(state: CheckoutElementsControllerState) = CarryForward(
                 isInitialLoad = false,
                 cachedFlagImages = state.flagImages,
                 previousSelection = state.paymentSelection,
@@ -305,7 +305,7 @@ internal class CheckoutStateLoader @Inject constructor(
 }
 
 @OptIn(CheckoutSessionPreview::class)
-private fun CheckoutController.Configuration.State.asInitialCollectedDetails(
+private fun CheckoutElementsController.Configuration.State.asInitialCollectedDetails(
     checkoutSessionResponse: CheckoutSessionResponse,
 ): CheckoutCollectedDetails {
     val shippingDetails = defaults.shippingDetails?.takeIf { details ->

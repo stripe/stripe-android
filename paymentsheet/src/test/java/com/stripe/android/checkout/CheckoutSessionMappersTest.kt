@@ -63,7 +63,7 @@ class CheckoutSessionMappersTest {
     fun `maps nested item using stable inner key and server computed amounts`() {
         val item = CheckoutSessionResponseFactory.create(
             checkoutItems = listOf(CheckoutSessionResponseFactory.checkoutItem(total = 2500, subtotal = 2400))
-        ).session().orderSummaryItems.single() as CheckoutController.Session.OrderSummaryItem.OneTimePrice
+        ).session().orderSummaryItems.single() as CheckoutElementsController.Session.OrderSummaryItem.OneTimePrice
 
         assertThat(item.key).isEqualTo("group_1")
         assertThat(item.items.single().key).isEqualTo("item_1")
@@ -89,7 +89,7 @@ class CheckoutSessionMappersTest {
         assertThat(usd.totals.total.amount).isEqualTo("$12.34")
         assertThat(jpy.totals.total.amount).isEqualTo("¥1,234")
         assertThat(
-            (decimal.orderSummaryItems.single() as CheckoutController.Session.OrderSummaryItem.OneTimePrice)
+            (decimal.orderSummaryItems.single() as CheckoutElementsController.Session.OrderSummaryItem.OneTimePrice)
                 .items.single().unitAmountDecimal?.amount
         ).contains("0.12345678901234")
     }
@@ -120,9 +120,9 @@ class CheckoutSessionMappersTest {
         val status = CheckoutSessionResponseFactory.create(
             status = CheckoutSessionResponse.Status.COMPLETE,
             paymentStatus = CheckoutSessionResponse.PaymentStatus.PAID,
-        ).session().status as CheckoutController.Session.Status.Complete
+        ).session().status as CheckoutElementsController.Session.Status.Complete
 
-        assertThat(status.paymentStatus).isEqualTo(CheckoutController.Session.Status.PaymentStatus.Paid)
+        assertThat(status.paymentStatus).isEqualTo(CheckoutElementsController.Session.Status.PaymentStatus.Paid)
     }
 
     @Test
@@ -137,12 +137,12 @@ class CheckoutSessionMappersTest {
         ).session()
 
         assertThat(absent.tax).isNull()
-        assertThat(pending.tax?.status).isEqualTo(CheckoutController.Session.Tax.Status.RequiresShippingAddress)
+        assertThat(pending.tax?.status).isEqualTo(CheckoutElementsController.Session.Tax.Status.RequiresShippingAddress)
     }
 
     @Test
     fun `server email takes precedence while shipping comes from local state`() {
-        val address = CheckoutController.Address.State("Denver", "US", "1 Main", null, "80202", "CO")
+        val address = CheckoutElementsController.Address.State("Denver", "US", "1 Main", null, "80202", "CO")
         val session = CheckoutSessionResponseFactory.create(customerEmail = "server@example.com").asCheckoutSession(
             collectedEmail = "local@example.com",
             collectedShippingName = "Jenny",

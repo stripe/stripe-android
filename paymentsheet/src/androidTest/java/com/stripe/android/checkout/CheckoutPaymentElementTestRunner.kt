@@ -27,16 +27,16 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 internal class CheckoutPaymentElementScenario(
-    private var presenter: CheckoutPresenter,
-    controller: CheckoutController,
+    private var presenter: CheckoutElementsPresenter,
+    controller: CheckoutElementsController,
     private var savedStateHandle: SavedStateHandle,
     private val rowSelectionBehavior: PaymentElement.RowSelectionBehavior,
-    private val resultCallback: CheckoutController.ResultCallback,
+    private val resultCallback: CheckoutElementsController.ResultCallback,
     private val countDownLatch: CountDownLatch,
     private val scenario: ActivityScenario<MainActivity>,
     private val renderPaymentElementContent: Boolean,
 ) {
-    var controller: CheckoutController = controller
+    var controller: CheckoutElementsController = controller
         private set
 
     fun presentPaymentOptions() {
@@ -58,7 +58,7 @@ internal class CheckoutPaymentElementScenario(
     fun recreateHost() {
         scenario.moveToState(Lifecycle.State.CREATED)
         scenario.recreate()
-        presenter = scenario.createCheckoutPresenter(
+        presenter = scenario.createCheckoutElementsPresenter(
             controller = controller,
             renderPaymentElementContent = renderPaymentElementContent,
         )
@@ -74,12 +74,12 @@ internal class CheckoutPaymentElementScenario(
         }
         scenario.recreate()
         scenario.onActivity {
-            controller = CheckoutController.Builder(
+            controller = CheckoutElementsController.Builder(
                 application = ApplicationProvider.getApplicationContext(),
                 savedStateHandle = savedStateHandle,
             ).rowSelectionBehavior(rowSelectionBehavior).resultCallback(resultCallback).build()
         }
-        presenter = scenario.createCheckoutPresenter(
+        presenter = scenario.createCheckoutElementsPresenter(
             controller = controller,
             renderPaymentElementContent = renderPaymentElementContent,
         )
@@ -87,7 +87,7 @@ internal class CheckoutPaymentElementScenario(
     }
 
     /**
-     * Normally a test succeeds when [CheckoutController.ResultCallback] is invoked. Tests that
+     * Normally a test succeeds when [CheckoutElementsController.ResultCallback] is invoked. Tests that
      * intentionally do not confirm should call this after making their assertions.
      */
     fun markTestSucceeded() {
@@ -97,7 +97,7 @@ internal class CheckoutPaymentElementScenario(
 
 internal fun runCheckoutPaymentElementScenario(
     networkRule: NetworkRule,
-    resultCallback: CheckoutController.ResultCallback = CheckoutController.ResultCallback {
+    resultCallback: CheckoutElementsController.ResultCallback = CheckoutElementsController.ResultCallback {
         error("Override + validate if expected.")
     },
     checkoutInitResponse: (MockResponse) -> Unit = { response ->
@@ -109,7 +109,7 @@ internal fun runCheckoutPaymentElementScenario(
     successTimeoutSeconds: Long = 5L,
     renderPaymentElementContent: Boolean = true,
     rowSelectionBehavior: PaymentElement.RowSelectionBehavior = PaymentElement.RowSelectionBehavior.default(),
-    setup: suspend (CheckoutController) -> Unit,
+    setup: suspend (CheckoutElementsController) -> Unit,
     block: suspend CheckoutPaymentElementScenario.() -> Unit,
 ) {
     val countDownLatch = CountDownLatch(1)
@@ -124,14 +124,14 @@ internal fun runCheckoutPaymentElementScenario(
             TestApiKeys.PUBLISHABLE,
             TestApiKeys.ACCOUNT,
         )
-        val onResult = CheckoutController.ResultCallback { result ->
+        val onResult = CheckoutElementsController.ResultCallback { result ->
             resultCallback.onResult(result)
             countDownLatch.countDown()
         }
         val savedStateHandle = SavedStateHandle()
-        lateinit var controller: CheckoutController
+        lateinit var controller: CheckoutElementsController
         scenario.onActivity {
-            controller = CheckoutController.Builder(
+            controller = CheckoutElementsController.Builder(
                 application = ApplicationProvider.getApplicationContext(),
                 savedStateHandle = savedStateHandle,
             ).rowSelectionBehavior(rowSelectionBehavior).resultCallback(onResult).build()
@@ -141,8 +141,8 @@ internal fun runCheckoutPaymentElementScenario(
             setup(controller)
         }
 
-        lateinit var presenter: CheckoutPresenter
-        presenter = scenario.createCheckoutPresenter(
+        lateinit var presenter: CheckoutElementsPresenter
+        presenter = scenario.createCheckoutElementsPresenter(
             controller = controller,
             renderPaymentElementContent = renderPaymentElementContent,
         )
@@ -181,17 +181,17 @@ private fun SavedStateHandle.restoreFromParcel(): SavedStateHandle {
     return try {
         parcel.writeBundle(savedStateProvider().saveState())
         parcel.setDataPosition(0)
-        SavedStateHandle.createHandle(parcel.readBundle(CheckoutController::class.java.classLoader), null)
+        SavedStateHandle.createHandle(parcel.readBundle(CheckoutElementsController::class.java.classLoader), null)
     } finally {
         parcel.recycle()
     }
 }
 
-private fun ActivityScenario<MainActivity>.createCheckoutPresenter(
-    controller: CheckoutController,
+private fun ActivityScenario<MainActivity>.createCheckoutElementsPresenter(
+    controller: CheckoutElementsController,
     renderPaymentElementContent: Boolean,
-): CheckoutPresenter {
-    lateinit var presenter: CheckoutPresenter
+): CheckoutElementsPresenter {
+    lateinit var presenter: CheckoutElementsPresenter
     onActivity { activity ->
         presenter = controller.createPresenter(activity)
         if (renderPaymentElementContent) {

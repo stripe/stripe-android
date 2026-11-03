@@ -43,7 +43,7 @@ internal class ExpressCheckoutElementTest {
         runExpressCheckoutElementScenario(
             networkRule = networkRule,
             resultCallback = { result ->
-                assertThat(result).isInstanceOf(CheckoutController.Result.Completed::class.java)
+                assertThat(result).isInstanceOf(CheckoutElementsController.Result.Completed::class.java)
             },
             assertions = { controller ->
                 assertThat(
@@ -97,7 +97,7 @@ internal class ExpressCheckoutElementTest {
         runExpressCheckoutElementScenario(
             networkRule = networkRule,
             resultCallback = { result ->
-                assertThat(result).isInstanceOf(CheckoutController.Result.Completed::class.java)
+                assertThat(result).isInstanceOf(CheckoutElementsController.Result.Completed::class.java)
             },
             assertions = { controller ->
                 assertThat(
@@ -157,8 +157,8 @@ internal class ExpressCheckoutElementTest {
         runExpressCheckoutElementScenario(
             networkRule = networkRule,
             resultCallback = { result ->
-                assertThat(result).isInstanceOf(CheckoutController.Result.Failed::class.java)
-                val error = (result as CheckoutController.Result.Failed).error
+                assertThat(result).isInstanceOf(CheckoutElementsController.Result.Failed::class.java)
+                val error = (result as CheckoutElementsController.Result.Failed).error
                 assertThat(error).hasMessageThat().isEqualTo(expectedErrorMessage)
             },
         ) {
@@ -185,8 +185,8 @@ internal class ExpressCheckoutElementTest {
         runExpressCheckoutElementScenario(
             networkRule = networkRule,
             resultCallback = { result ->
-                assertThat(result).isInstanceOf(CheckoutController.Result.Failed::class.java)
-                val error = (result as CheckoutController.Result.Failed).error
+                assertThat(result).isInstanceOf(CheckoutElementsController.Result.Failed::class.java)
+                val error = (result as CheckoutElementsController.Result.Failed).error
                 assertThat(error).hasMessageThat().isEqualTo(expectedErrorMessage)
             },
         ) {
@@ -234,7 +234,7 @@ internal class ExpressCheckoutElementTest {
             networkRule = networkRule,
             initialCheckoutSessionResponseFactory = ::createCheckoutInitResponseWithRequiredShippingAddress,
             resultCallback = { result ->
-                assertThat(result).isInstanceOf(CheckoutController.Result.Completed::class.java)
+                assertThat(result).isInstanceOf(CheckoutElementsController.Result.Completed::class.java)
             },
         ) {
             val paymentMethod = PaymentMethodFactory.card()
@@ -281,7 +281,7 @@ internal class ExpressCheckoutElementTest {
             initialCheckoutSessionResponseFactory =
                 ::createCheckoutInitResponseWithRequiredShippingAddressForAutomaticTax,
             resultCallback = { result ->
-                assertThat(result).isInstanceOf(CheckoutController.Result.Completed::class.java)
+                assertThat(result).isInstanceOf(CheckoutElementsController.Result.Completed::class.java)
             },
         ) {
             val paymentMethod = PaymentMethodFactory.card()
@@ -345,7 +345,7 @@ internal class ExpressCheckoutElementTest {
             networkRule = networkRule,
             initialCheckoutSessionResponseFactory = CheckoutInitResponseFactory::createWithRequiredBillingAddress,
             resultCallback = { result ->
-                assertThat(result).isInstanceOf(CheckoutController.Result.Completed::class.java)
+                assertThat(result).isInstanceOf(CheckoutElementsController.Result.Completed::class.java)
             },
         ) {
             val paymentMethod = createPaymentMethodWithBillingAddress()
@@ -371,7 +371,7 @@ internal class ExpressCheckoutElementTest {
             initialCheckoutSessionResponseFactory =
                 CheckoutInitResponseFactory::createWithRequiredBillingAddressForAutomaticTax,
             resultCallback = { result ->
-                assertThat(result).isInstanceOf(CheckoutController.Result.Completed::class.java)
+                assertThat(result).isInstanceOf(CheckoutElementsController.Result.Completed::class.java)
             },
         ) {
             val paymentMethod = createPaymentMethodWithBillingAddress()
@@ -407,8 +407,8 @@ internal class ExpressCheckoutElementTest {
             initialCheckoutSessionResponseFactory =
                 CheckoutInitResponseFactory::createWithRequiredBillingAddressForAutomaticTax,
             resultCallback = { result ->
-                assertThat(result).isInstanceOf(CheckoutController.Result.Failed::class.java)
-                val error = (result as CheckoutController.Result.Failed).error
+                assertThat(result).isInstanceOf(CheckoutElementsController.Result.Failed::class.java)
+                val error = (result as CheckoutElementsController.Result.Failed).error
                 assertThat(error).isInstanceOf(LocalStripeException::class.java)
                 assertThat((error as LocalStripeException).stripeError?.code)
                     .isEqualTo("checkout_session_total_changed")
@@ -445,7 +445,7 @@ internal class ExpressCheckoutElementTest {
             networkRule = networkRule,
             initialCheckoutSessionResponseFactory = CheckoutInitResponseFactory::createWithRequiredBillingAddress,
             resultCallback = { result ->
-                assertThat(result).isInstanceOf(CheckoutController.Result.Completed::class.java)
+                assertThat(result).isInstanceOf(CheckoutElementsController.Result.Completed::class.java)
             },
         ) {
             val paymentMethod = createPaymentMethodWithBillingAddress()

@@ -305,12 +305,14 @@ internal class CheckoutLinkPaymentOptionsPresenterTest {
                 signupMode = null,
             )
         )
-        val existingState = savedStateHandle.get<CheckoutControllerState>(CheckoutControllerStateHolder.STATE_KEY)
-        val state = existingState ?: CheckoutControllerStateFactory.create(
+        val existingState = savedStateHandle.get<CheckoutElementsControllerState>(
+            CheckoutElementsControllerStateHolder.STATE_KEY
+        )
+        val state = existingState ?: CheckoutElementsControllerStateFactory.create(
             paymentSelection = selection,
             paymentMethodMetadata = paymentMethodMetadata,
         )
-        val stateHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle).apply {
+        val stateHolder = CheckoutElementsControllerStateFactory.createStateHolder(savedStateHandle).apply {
             this.state = state
         }
         val customerStateHolder = DefaultCustomerStateHolder(
@@ -399,7 +401,7 @@ internal class CheckoutLinkPaymentOptionsPresenterTest {
         val linkAnalyticsHelper: FakeCheckoutLinkAnalyticsHelper,
         val linkStore: FakeLinkStore,
         val lifecycleOwner: TestLifecycleOwner,
-        val stateHolder: CheckoutControllerStateHolder,
+        val stateHolder: CheckoutElementsControllerStateHolder,
         val customerStateHolder: DefaultCustomerStateHolder,
         val sheetStateHolder: SheetStateHolder,
         val linkAccountHolder: LinkAccountHolder,

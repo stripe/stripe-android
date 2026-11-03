@@ -13,8 +13,8 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import com.stripe.android.checkout.CheckoutController
-import com.stripe.android.checkout.CheckoutControllerStateHolder
+import com.stripe.android.checkout.CheckoutElementsController
+import com.stripe.android.checkout.CheckoutElementsControllerStateHolder
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
@@ -35,7 +35,7 @@ import javax.inject.Inject
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class PaymentElement @Inject internal constructor(
     private val contentHelper: EmbeddedContentHelper,
-    private val stateHolder: CheckoutControllerStateHolder,
+    private val stateHolder: CheckoutElementsControllerStateHolder,
     @ViewModelScope private val coroutineScope: CoroutineScope,
 ) {
 
@@ -130,7 +130,7 @@ class PaymentElement @Inject internal constructor(
          * Defaults to `true`.
          *
          * When set to `false`, you must display
-         * [CheckoutController.Session.PaymentOptionDisplayData.mandateText] to the customer yourself,
+         * [CheckoutElementsController.Session.PaymentOptionDisplayData.mandateText] to the customer yourself,
          * near your "Buy" button, to comply with regulations.
          */
         fun embeddedViewDisplaysMandateText(

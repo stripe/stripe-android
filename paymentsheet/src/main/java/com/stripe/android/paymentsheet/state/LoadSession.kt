@@ -9,7 +9,7 @@ import javax.inject.Inject
 
 /**
  * Extracts session data from the [CheckoutSessionResponse] already loaded during
- * [CheckoutController.configure].
+ * [CheckoutElementsController.configure].
  *
  * The checkout session init response contains the elements session and customer data.
  */

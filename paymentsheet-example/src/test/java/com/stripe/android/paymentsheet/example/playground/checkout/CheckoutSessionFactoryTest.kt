@@ -16,7 +16,7 @@ class CheckoutSessionFactoryTest {
     fun `guest creates only a Checkout Session`() = runScenario {
         val result = factory.create(settings.snapshot())
 
-        assertThat(result).isEqualTo(CheckoutControllerExampleBackendResponse("cs_test", null))
+        assertThat(result).isEqualTo(CheckoutElementsControllerExampleBackendResponse("cs_test", null))
         assertThat(backend.checkoutSessionCalls.awaitItem()["customer"]).isNull()
         backend.createCustomerCalls.expectNoEvents()
         paymentMethodCreator.calls.expectNoEvents()

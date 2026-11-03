@@ -3,9 +3,9 @@ package com.stripe.android.checkout.injection
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.checkout.CheckoutControllerState
-import com.stripe.android.checkout.CheckoutControllerStateFactory
-import com.stripe.android.checkout.CheckoutControllerStateHolder
+import com.stripe.android.checkout.CheckoutElementsControllerState
+import com.stripe.android.checkout.CheckoutElementsControllerStateFactory
+import com.stripe.android.checkout.CheckoutElementsControllerStateHolder
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.content.EmbeddedContentHelperStateHolder
@@ -26,21 +26,21 @@ internal class PaymentElementModuleTest {
 
     @Test
     fun `embedded content is null when there is no embedded configuration`() = runScenario(
-        state = CheckoutControllerStateFactory.create(embeddedConfiguration = null),
+        state = CheckoutElementsControllerStateFactory.create(embeddedConfiguration = null),
     ) {
         assertThat(embeddedContentState.value).isNull()
     }
 
     @Test
     fun `embedded content is null when there is no payment method metadata`() = runScenario(
-        state = CheckoutControllerStateFactory.create(paymentMethodMetadata = null),
+        state = CheckoutElementsControllerStateFactory.create(paymentMethodMetadata = null),
     ) {
         assertThat(embeddedContentState.value).isNull()
     }
 
     @Test
     fun `embedded content uses the configured metadata and mandate setting`() = runScenario(
-        state = CheckoutControllerStateFactory.create(
+        state = CheckoutElementsControllerStateFactory.create(
             embeddedConfiguration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.")
                 .embeddedViewDisplaysMandateText(true)
                 .build(),
@@ -55,7 +55,7 @@ internal class PaymentElementModuleTest {
 
     @Test
     fun `embedded content omits mandate text when configured`() = runScenario(
-        state = CheckoutControllerStateFactory.create(
+        state = CheckoutElementsControllerStateFactory.create(
             embeddedConfiguration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.")
                 .embeddedViewDisplaysMandateText(false)
                 .build(),
@@ -66,12 +66,12 @@ internal class PaymentElementModuleTest {
 
     @Test
     fun `embedded content emits when an embedded configuration becomes available`() = runScenario(
-        state = CheckoutControllerStateFactory.create(embeddedConfiguration = null),
+        state = CheckoutElementsControllerStateFactory.create(embeddedConfiguration = null),
     ) {
         embeddedContentState.test {
             assertThat(awaitItem()).isNull()
 
-            val state = CheckoutControllerStateFactory.create()
+            val state = CheckoutElementsControllerStateFactory.create()
             stateHolder.state = state
 
             val content = requireNotNull(awaitItem())
@@ -107,12 +107,12 @@ internal class PaymentElementModuleTest {
 
     @Test
     fun `embedded content emits when payment method metadata becomes available`() = runScenario(
-        state = CheckoutControllerStateFactory.create(paymentMethodMetadata = null),
+        state = CheckoutElementsControllerStateFactory.create(paymentMethodMetadata = null),
     ) {
         embeddedContentState.test {
             assertThat(awaitItem()).isNull()
 
-            val state = CheckoutControllerStateFactory.create()
+            val state = CheckoutElementsControllerStateFactory.create()
             stateHolder.state = state
 
             val content = requireNotNull(awaitItem())
@@ -135,11 +135,11 @@ internal class PaymentElementModuleTest {
     }
 
     private fun runScenario(
-        state: CheckoutControllerState? = CheckoutControllerStateFactory.create(),
+        state: CheckoutElementsControllerState? = CheckoutElementsControllerStateFactory.create(),
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val errorReporter = FakeErrorReporter()
-        val stateHolder = CheckoutControllerStateFactory.createStateHolder(
+        val stateHolder = CheckoutElementsControllerStateFactory.createStateHolder(
             savedStateHandle = SavedStateHandle(),
             errorReporter = errorReporter,
         ).apply { this.state = state }
@@ -153,7 +153,7 @@ internal class PaymentElementModuleTest {
     }
 
     private data class Scenario(
-        val stateHolder: CheckoutControllerStateHolder,
+        val stateHolder: CheckoutElementsControllerStateHolder,
         val embeddedContentState: StateFlow<EmbeddedContentHelperStateHolder.State?>,
     )
 }

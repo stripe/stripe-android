@@ -4,7 +4,7 @@
 
 package com.stripe.android.paymentsheet.example.playground.checkout.settings
 
-import com.stripe.android.checkout.CheckoutController
+import com.stripe.android.checkout.CheckoutElementsController
 import com.stripe.android.elements.CurrencySelectorElement
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.elements.PaymentElement
@@ -12,28 +12,29 @@ import com.stripe.android.elements.ShippingAddressElement
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutPlaygroundDefinitions.Controller
 
-internal fun CheckoutPlaygroundSettings.Snapshot.checkoutControllerConfiguration(): CheckoutController.Configuration {
-    return CheckoutController.Configuration()
+internal fun CheckoutPlaygroundSettings.Snapshot.checkoutElementsControllerConfiguration():
+    CheckoutElementsController.Configuration {
+    return CheckoutElementsController.Configuration()
         .defaults(defaults())
         .apply {
-            if (this@checkoutControllerConfiguration[Controller.payment.shouldSetConfiguration]) {
+            if (this@checkoutElementsControllerConfiguration[Controller.payment.shouldSetConfiguration]) {
                 paymentElement(paymentElementConfiguration())
             }
-            if (this@checkoutControllerConfiguration[Controller.currencySelector.shouldSetConfiguration]) {
+            if (this@checkoutElementsControllerConfiguration[Controller.currencySelector.shouldSetConfiguration]) {
                 currencySelectorElement(currencySelectorConfiguration())
             }
-            if (this@checkoutControllerConfiguration[Controller.shippingAddress.shouldSetConfiguration]) {
+            if (this@checkoutElementsControllerConfiguration[Controller.shippingAddress.shouldSetConfiguration]) {
                 shippingAddressElement(shippingAddressElementConfiguration())
             }
-            if (this@checkoutControllerConfiguration[Controller.express.shouldSetConfiguration]) {
+            if (this@checkoutElementsControllerConfiguration[Controller.express.shouldSetConfiguration]) {
                 expressCheckoutElement(expressCheckoutConfiguration())
             }
-            this@checkoutControllerConfiguration[Controller.merchantDisplayName]?.let(::merchantDisplayName)
+            this@checkoutElementsControllerConfiguration[Controller.merchantDisplayName]?.let(::merchantDisplayName)
         }
 }
 
-private fun CheckoutPlaygroundSettings.Snapshot.defaults(): CheckoutController.Configuration.Defaults {
-    return CheckoutController.Configuration.Defaults()
+private fun CheckoutPlaygroundSettings.Snapshot.defaults(): CheckoutElementsController.Configuration.Defaults {
+    return CheckoutElementsController.Configuration.Defaults()
         .email(this[Controller.defaults.email])
         .apply {
             contactDetails(Controller.defaults.billing)?.let(::billingDetails)
@@ -43,14 +44,14 @@ private fun CheckoutPlaygroundSettings.Snapshot.defaults(): CheckoutController.C
 
 private fun CheckoutPlaygroundSettings.Snapshot.contactDetails(
     definitions: CheckoutContactDetailsDefinitions,
-): CheckoutController.Configuration.Defaults.ContactDetails? {
+): CheckoutElementsController.Configuration.Defaults.ContactDetails? {
     if (!this[definitions.enabled]) return null
-    return CheckoutController.Configuration.Defaults.ContactDetails()
+    return CheckoutElementsController.Configuration.Defaults.ContactDetails()
         .name(this[definitions.name])
         .apply {
             if (this@contactDetails[definitions.address.enabled]) {
                 address(
-                    CheckoutController.Address(
+                    CheckoutElementsController.Address(
                         country = this@contactDetails[definitions.address.country].uppercase(),
                     )
                         .city(this@contactDetails[definitions.address.city])
