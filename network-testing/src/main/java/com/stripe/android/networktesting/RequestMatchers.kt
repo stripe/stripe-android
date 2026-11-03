@@ -39,6 +39,15 @@ internal class CompositeRequestMatcher(
 }
 
 object RequestMatchers {
+    /** Checks the complete version on selected API hosts; leaves other protocols unchanged. */
+    fun stripeVersions(expectedVersions: Map<String, String>): RequestMatcher {
+        val snapshot = expectedVersions.toMap()
+        return ToStringRequestMatcher("stripeVersions($snapshot)") { request ->
+            val expected = snapshot[request.headers["original-host"]]
+            expected == null || request.headers["Stripe-Version"] == expected
+        }
+    }
+
     fun stripeApiKey(
         publishableKey: String = TestApiKeys.PUBLISHABLE,
         ephemeralKey: String = TestApiKeys.EPHEMERAL,

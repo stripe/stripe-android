@@ -67,6 +67,15 @@ internal sealed class ApiConfigurationTestType(
         updatePaymentConfigurationPublishableKey = false,
     )
 
+    data object ApiConfigurationWithBetas : ApiConfigurationTestType(
+        paymentConfigurationPublishableKey = null,
+        paymentConfigurationStripeAccount = null,
+        apiConfiguration = ApiConfiguration(TestApiKeys.PUBLISHABLE)
+            .stripeAccountId(TestApiKeys.ACCOUNT)
+            .betas(setOf("integration_beta=v1")),
+        updatePaymentConfigurationPublishableKey = false,
+    )
+
     private class Configured(
         paymentConfigurationPublishableKey: String?,
         paymentConfigurationStripeAccount: String?,
