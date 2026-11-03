@@ -47,6 +47,16 @@ def analytics_headers(device_info)
 end
 
 def device_info
+  if ENV['STRIPE_SYNTHETICS_DEVICE_MODEL']
+    return {
+      os_name: ENV.fetch('STRIPE_SYNTHETICS_OS_NAME', 'REL'),
+      os_release: ENV.fetch('STRIPE_SYNTHETICS_OS_RELEASE', '13'),
+      os_version: ENV.fetch('STRIPE_SYNTHETICS_OS_VERSION', '33'),
+      device_type: ENV.fetch('STRIPE_SYNTHETICS_DEVICE_TYPE', 'google_generic_MediumPhone.arm'),
+      model: ENV.fetch('STRIPE_SYNTHETICS_DEVICE_MODEL')
+    }
+  end
+
   manufacturer = adb_getprop('ro.product.manufacturer')
   brand = adb_getprop('ro.product.brand')
   model = adb_getprop('ro.product.model')
@@ -129,7 +139,8 @@ end
 
 options = {
   publishable_key: ENV['STRIPE_SYNTHETICS_PUBLISHABLE_KEY'],
-  dry_run: false
+  dry_run: false,
+  results_dir: nil
 }
 
 OptionParser.new do |opts|
@@ -150,6 +161,10 @@ OptionParser.new do |opts|
     options[:dry_run] = true
   end
 
+  opts.on('--results-dir PATH', 'Parse latency samples from downloaded Firebase Test Lab results') do |path|
+    options[:results_dir] = path
+  end
+
   opts.on('-h', '--help', 'Prints this help') do
     puts opts
     exit
@@ -159,8 +174,35 @@ end.parse!
 puts 'Configuration:'
 puts "  Publishable key: #{options[:publishable_key] ? '[provided]' : '[omitted]'}"
 puts "  Dry run:         #{options[:dry_run]}"
+puts "  Results dir:      #{options[:results_dir] || '[local adb run]'}"
 
-results = LatencyTestUtils.run_latency_tests(1)
+results = if options[:results_dir]
+            result_files = Dir.glob(File.join(options[:results_dir], '**', '*')).select do |path|
+              File.file?(path) && File.size(path) <= 64 * 1024 * 1024
+            end
+            raise "No Firebase Test Lab result files found in #{options[:results_dir]}" if result_files.empty?
+
+            logcat_files = result_files.select { |path| File.basename(path).downcase.include?('logcat') }
+            result_files = logcat_files unless logcat_files.empty?
+
+            output = result_files.sort.map do |path|
+              File.binread(path).encode('UTF-8', invalid: :replace, undef: :replace)
+            end.join("\n")
+
+            LatencyTestUtils.print_raw_result_debug_summary(output)
+            parsed_results = LatencyTestUtils.parse_latency_results(output)
+            started_tests = output.scan(/LATENCY_TEST_CASE_STARTED:\s*(.+?)\s*$/).flatten.uniq
+            unless LatencyTestUtils.valid_invocation_results?(
+              results: parsed_results,
+              sample_count: 1,
+              expected_test_count: started_tests.length
+            ) && started_tests.any?
+              raise 'Firebase Test Lab results did not contain a complete latency sample set.'
+            end
+            parsed_results
+          else
+            LatencyTestUtils.run_latency_tests(1)
+          end
 emit_synthetics_events(
   results: results,
   publishable_key: options[:publishable_key],

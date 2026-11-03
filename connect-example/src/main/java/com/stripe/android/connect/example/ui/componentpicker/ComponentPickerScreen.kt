@@ -175,6 +175,7 @@ private fun LazyItemScope.MenuRowItem(
     Row(
         modifier = Modifier
             .fillParentMaxWidth()
+            .testTag(menuItem.name)
             .clickable(onClick = { onMenuItemClick(menuItem) }),
         verticalAlignment = Alignment.CenterVertically,
     ) {
