@@ -62,10 +62,10 @@ internal class CheckoutPaymentElementTest {
                 assertThat(
                     controller.configure(
                         DEFAULT_CLIENT_SECRET,
-                        CheckoutController.Configuration().paymentElement(PaymentElement.Configuration()),
+                        CheckoutElementsController.Configuration().paymentElement(PaymentElement.Configuration()),
                     )
                 )
-                    .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
+                    .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
             },
         ) {
             // Open the card form, then back out without entering any details.
@@ -92,7 +92,7 @@ internal class CheckoutPaymentElementTest {
 
     @Test
     fun testSuccessfulCardPayment() {
-        var checkoutResult: CheckoutController.Result? = null
+        var checkoutResult: CheckoutElementsController.Result? = null
         runCheckoutPaymentElementScenario(
             networkRule = networkRule,
             resultCallback = { result -> checkoutResult = result },
@@ -108,10 +108,10 @@ internal class CheckoutPaymentElementTest {
                 assertThat(
                     controller.configure(
                         DEFAULT_CLIENT_SECRET,
-                        CheckoutController.Configuration().paymentElement(PaymentElement.Configuration()),
+                        CheckoutElementsController.Configuration().paymentElement(PaymentElement.Configuration()),
                     )
                 )
-                    .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
+                    .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
             },
         ) {
             networkRule.checkoutConfirm(
@@ -143,7 +143,7 @@ internal class CheckoutPaymentElementTest {
             confirm()
         }
 
-        assertThat(checkoutResult).isInstanceOf(CheckoutController.Result.Completed::class.java)
+        assertThat(checkoutResult).isInstanceOf(CheckoutElementsController.Result.Completed::class.java)
     }
 
     @Test
@@ -154,10 +154,10 @@ internal class CheckoutPaymentElementTest {
                 assertThat(
                     controller.configure(
                         DEFAULT_CLIENT_SECRET,
-                        CheckoutController.Configuration().paymentElement(PaymentElement.Configuration()),
+                        CheckoutElementsController.Configuration().paymentElement(PaymentElement.Configuration()),
                     )
                 )
-                    .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
+                    .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
             },
         ) {
             coroutineScope {
@@ -187,7 +187,7 @@ internal class CheckoutPaymentElementTest {
                 }
 
                 assertThat(update.await())
-                    .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
+                    .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
                 testRules.compose.waitUntilWithIdle {
                     !controller.isUpdating.value
                 }
@@ -205,7 +205,7 @@ internal class CheckoutPaymentElementTest {
                 json.getJSONObject("link_settings").put("link_mode", "LINK_PAYMENT_METHOD")
             }
         }
-        val configuration = CheckoutController.Configuration().paymentElement(
+        val configuration = CheckoutElementsController.Configuration().paymentElement(
             PaymentElement.Configuration()
                 .paymentMethodLayout(PaymentElement.Configuration.PaymentMethodLayout.Vertical)
                 .linkConfiguration(
@@ -246,7 +246,7 @@ internal class CheckoutPaymentElementTest {
             checkoutInitResponse = checkoutInitResponse,
             setup = { controller ->
                 assertThat(controller.configure(DEFAULT_CLIENT_SECRET, configuration))
-                    .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
+                    .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
             },
         ) {
             contentPage.clickOnLpm("link")
@@ -262,7 +262,7 @@ internal class CheckoutPaymentElementTest {
 
             networkRule.checkoutInit(responseFactory = checkoutInitResponse)
             assertThat(controller.configure(DEFAULT_CLIENT_SECRET, configuration))
-                .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
+                .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
             markTestSucceeded()
         }
     }
@@ -293,7 +293,7 @@ internal class CheckoutPaymentElementTest {
                 json.getJSONObject("link_settings").put("link_mode", "LINK_PAYMENT_METHOD")
             }
         }
-        val configuration = CheckoutController.Configuration().paymentElement(
+        val configuration = CheckoutElementsController.Configuration().paymentElement(
             PaymentElement.Configuration()
                 .paymentMethodLayout(PaymentElement.Configuration.PaymentMethodLayout.Vertical)
                 .linkConfiguration(
@@ -319,7 +319,7 @@ internal class CheckoutPaymentElementTest {
             checkoutInitResponse = checkoutInitResponse,
             setup = { controller ->
                 assertThat(controller.configure(DEFAULT_CLIENT_SECRET, configuration))
-                    .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
+                    .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
             },
         ) {
             // Just testing loading events, mark test succeeded once that has completed.

@@ -12,7 +12,7 @@ import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
-import com.stripe.android.checkout.CheckoutController.Session
+import com.stripe.android.checkout.CheckoutElementsController.Session
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.createComposeCleanupRule
 import kotlinx.coroutines.test.UnconfinedTestDispatcher

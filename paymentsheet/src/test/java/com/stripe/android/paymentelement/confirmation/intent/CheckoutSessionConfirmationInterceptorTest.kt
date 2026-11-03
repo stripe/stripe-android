@@ -7,6 +7,7 @@ import com.google.testing.junit.testparameterinjector.TestParameter
 import com.stripe.android.challenge.passive.PassiveChallengeActivityContract
 import com.stripe.android.challenge.passive.PassiveChallengeActivityResult
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
+import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutConfirm
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.core.exception.LocalStripeException
@@ -84,22 +85,19 @@ class CheckoutSessionConfirmationInterceptorTest {
         .around(PaymentConfigurationTestRule(applicationContext))
 
     @Test
-    fun `successful confirmation ignores an earlier payment error`() = runScenario {
+    fun `open confirmation completes with the unmodified confirm response for polling`() = runScenario {
         networkRule.checkoutConfirm { response ->
             response.testBodyFromFile("checkout-session-confirm.json") { json ->
                 json.put("status", "open").put("payment_status", "unpaid")
-                json.getJSONObject("payment_response").put(
-                    "last_payment_error",
-                    JSONObject().put("message", "An earlier decline").put("code", "card_declined"),
-                )
             }
         }
 
         val result = interceptNewPm() as ConfirmationDefinition.Action.Complete
         val response = requireNotNull(result.metadata[CheckoutSessionResponseKey])
 
-        assertThat(response.status).isEqualTo(CheckoutSessionResponse.Status.COMPLETE)
-        assertThat(response.paymentStatus).isEqualTo(CheckoutSessionResponse.PaymentStatus.PAID)
+        assertThat(response.status).isEqualTo(CheckoutSessionResponse.Status.OPEN)
+        assertThat(response.paymentStatus).isEqualTo(CheckoutSessionResponse.PaymentStatus.UNPAID)
+        assertThat(result.completedFullPaymentFlow).isTrue()
     }
 
     @Test
@@ -437,6 +435,8 @@ class CheckoutSessionConfirmationInterceptorTest {
         val nextAction = launchAction.launcherArguments as IntentConfirmationDefinition.Args.NextAction
         assertThat(nextAction.deferredIntentConfirmationType)
             .isEqualTo(DeferredIntentConfirmationType.Server)
+        assertThat(nextAction.checkoutSessionResponse?.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
+        assertThat(nextAction.checkoutSessionResponse?.paymentIntent).isEqualTo(nextAction.intent)
         assertThat(launchAction.receivesResultInProcess).isFalse()
     }
 

@@ -16,7 +16,7 @@ import com.stripe.android.paymentsheet.example.playground.checkout.CHECKOUT_COMP
 import com.stripe.android.paymentsheet.example.playground.checkout.CHECKOUT_CONFIRMATION_MESSAGE_TEST_TAG
 import com.stripe.android.paymentsheet.example.playground.checkout.CHECKOUT_CONFIRM_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.example.playground.checkout.CHECKOUT_CREATE_SESSION_BUTTON_TEST_TAG
-import com.stripe.android.paymentsheet.example.playground.checkout.CheckoutControllerExampleActivity
+import com.stripe.android.paymentsheet.example.playground.checkout.CheckoutElementsControllerExampleActivity
 import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutPlaygroundSettings
 import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON
@@ -25,7 +25,7 @@ import com.stripe.android.test.core.ui.ComposeButton
 import com.stripe.paymentelementtestpages.FormPage
 
 /**
- * Runs [block] in [CheckoutControllerExampleActivity] end to end against the playground backend.
+ * Runs [block] in [CheckoutElementsControllerExampleActivity] end to end against the playground backend.
  *
  * @param settings applied on top of the example's defaults, not the device's saved settings.
  */
@@ -36,8 +36,8 @@ internal fun runCheckoutTest(
 ) {
     val context = ApplicationProvider.getApplicationContext<Context>()
     val checkoutSettings = CheckoutPlaygroundSettings.createInMemory(json = null).apply(settings)
-    ActivityScenario.launch<CheckoutControllerExampleActivity>(
-        CheckoutControllerExampleActivity.createTestIntent(context, checkoutSettings.asJsonString())
+    ActivityScenario.launch<CheckoutElementsControllerExampleActivity>(
+        CheckoutElementsControllerExampleActivity.createTestIntent(context, checkoutSettings.asJsonString())
     ).use {
         val createSessionButton = ComposeButton(composeTestRule, hasTestTag(CHECKOUT_CREATE_SESSION_BUTTON_TEST_TAG))
         createSessionButton.waitForEnabled()

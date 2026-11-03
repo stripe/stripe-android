@@ -60,10 +60,10 @@ internal class CheckoutPaymentElementAnalyticsTest {
             assertThat(
                 controller.configure(
                     DEFAULT_CLIENT_SECRET,
-                    CheckoutController.Configuration().paymentElement(PaymentElement.Configuration()),
+                    CheckoutElementsController.Configuration().paymentElement(PaymentElement.Configuration()),
                 )
             )
-                .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
+                .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
         },
     ) {
         networkRule.validateAnalyticsRequest(
@@ -104,8 +104,8 @@ internal class CheckoutPaymentElementAnalyticsTest {
         runCheckoutPaymentElementScenario(
             networkRule = networkRule,
             resultCallback = { result ->
-                assertThat(result).isInstanceOf(CheckoutController.Result.Failed::class.java)
-                val failure = result as CheckoutController.Result.Failed
+                assertThat(result).isInstanceOf(CheckoutElementsController.Result.Failed::class.java)
+                val failure = result as CheckoutElementsController.Result.Failed
                 assertThat(failure.error).isInstanceOf(LocalStripeException::class.java)
             },
             checkoutInitResponse = ::billingTaxCheckoutInitResponse,
@@ -118,10 +118,10 @@ internal class CheckoutPaymentElementAnalyticsTest {
                 assertThat(
                     controller.configure(
                         DEFAULT_CLIENT_SECRET,
-                        CheckoutController.Configuration().paymentElement(PaymentElement.Configuration()),
+                        CheckoutElementsController.Configuration().paymentElement(PaymentElement.Configuration()),
                     )
                 )
-                    .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
+                    .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
             },
         ) {
             // Google Pay returns a new payment method, so its billing address is only synced to
@@ -187,10 +187,10 @@ internal class CheckoutPaymentElementAnalyticsTest {
                 assertThat(
                     controller.configure(
                         DEFAULT_CLIENT_SECRET,
-                        CheckoutController.Configuration().paymentElement(PaymentElement.Configuration()),
+                        CheckoutElementsController.Configuration().paymentElement(PaymentElement.Configuration()),
                     )
                 )
-                    .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
+                    .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
             },
         ) {
             contentPage.waitUntilVisible()

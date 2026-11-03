@@ -241,6 +241,7 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
                 launcherArguments = Args.NextAction(
                     intent = intent,
                     deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
+                    checkoutSessionResponse = null,
                 ),
                 receivesResultInProcess = false,
             )

@@ -3,8 +3,8 @@
 package com.stripe.android.checkout
 
 import android.graphics.Bitmap
-import com.stripe.android.checkout.CheckoutController.Session
-import com.stripe.android.checkout.CheckoutController.Session.PaymentOptionDisplayData
+import com.stripe.android.checkout.CheckoutElementsController.Session
+import com.stripe.android.checkout.CheckoutElementsController.Session.PaymentOptionDisplayData
 import com.stripe.android.elements.ece.ExpressButtonType
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
@@ -23,7 +23,7 @@ private const val EXTRA_DECIMAL_PRICE_PRECISION = 12
 internal fun CheckoutSessionResponse.asCheckoutSession(
     collectedEmail: String?,
     collectedShippingName: String?,
-    collectedShippingAddress: CheckoutController.Address.State?,
+    collectedShippingAddress: CheckoutElementsController.Address.State?,
     flagImages: Map<String, Bitmap>?,
     paymentOption: PaymentOptionDisplayData?,
     availableExpressButtonTypes: List<ExpressButtonType>,
@@ -153,7 +153,7 @@ private fun CheckoutSessionResponse.totals(currency: String, locale: Locale): Se
     )
 }
 
-private fun CheckoutController.Address.State.asShippingAddress() = Session.ShippingAddress.Address(
+private fun CheckoutElementsController.Address.State.asShippingAddress() = Session.ShippingAddress.Address(
     city = city,
     country = country,
     line1 = line1,

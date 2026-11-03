@@ -11,8 +11,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
-import com.stripe.android.checkout.CheckoutController
-import com.stripe.android.checkout.CheckoutControllerStateHolder
+import com.stripe.android.checkout.CheckoutElementsController
+import com.stripe.android.checkout.CheckoutElementsControllerStateHolder
 import com.stripe.android.checkout.ShippingAddressElementStateHolder
 import com.stripe.android.checkout.asPaymentSheet
 import com.stripe.android.checkout.toCheckoutAddress
@@ -37,7 +37,7 @@ import javax.inject.Provider
 internal fun interface CommitShippingAddress {
     suspend operator fun invoke(
         name: String?,
-        address: CheckoutController.Address.State,
+        address: CheckoutElementsController.Address.State,
         checkoutSessionResponse: CheckoutSessionResponse,
     ): Result<Unit>
 }
@@ -50,7 +50,7 @@ class ShippingAddressElement internal constructor(
     private val apiConfigurationProvider: Provider<ApiConfiguration.State>,
     @ViewModelScope private val coroutineScope: CoroutineScope,
     private val commitShippingAddress: CommitShippingAddress,
-    private val stateHolder: CheckoutControllerStateHolder,
+    private val stateHolder: CheckoutElementsControllerStateHolder,
     private val shippingAddressElementStateHolder: ShippingAddressElementStateHolder,
     private val errorReporter: ErrorReporter,
 ) {
@@ -60,8 +60,8 @@ class ShippingAddressElement internal constructor(
         lifecycleOwner: LifecycleOwner,
         apiConfigurationProvider: Provider<ApiConfiguration.State>,
         @ViewModelScope coroutineScope: CoroutineScope,
-        checkoutController: CheckoutController,
-        stateHolder: CheckoutControllerStateHolder,
+        checkoutElementsController: CheckoutElementsController,
+        stateHolder: CheckoutElementsControllerStateHolder,
         shippingAddressElementStateHolder: ShippingAddressElementStateHolder,
         errorReporter: ErrorReporter,
     ) : this(
@@ -69,7 +69,7 @@ class ShippingAddressElement internal constructor(
         lifecycleOwner = lifecycleOwner,
         apiConfigurationProvider = apiConfigurationProvider,
         coroutineScope = coroutineScope,
-        commitShippingAddress = CommitShippingAddress(checkoutController::commitShippingAddress),
+        commitShippingAddress = CommitShippingAddress(checkoutElementsController::commitShippingAddress),
         stateHolder = stateHolder,
         shippingAddressElementStateHolder = shippingAddressElementStateHolder,
         errorReporter = errorReporter,

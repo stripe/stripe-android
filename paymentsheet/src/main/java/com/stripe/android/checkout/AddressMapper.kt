@@ -5,7 +5,7 @@ import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 
 @OptIn(CheckoutSessionPreview::class)
-internal fun CheckoutController.Address.State.asPaymentSheet(): PaymentSheet.Address = PaymentSheet.Address(
+internal fun CheckoutElementsController.Address.State.asPaymentSheet(): PaymentSheet.Address = PaymentSheet.Address(
     city = city,
     country = country,
     line1 = line1,
@@ -15,8 +15,8 @@ internal fun CheckoutController.Address.State.asPaymentSheet(): PaymentSheet.Add
 )
 
 @OptIn(CheckoutSessionPreview::class)
-internal fun PaymentSheet.Address.toCheckoutAddress(): CheckoutController.Address.State? {
-    return CheckoutController.Address.State(
+internal fun PaymentSheet.Address.toCheckoutAddress(): CheckoutElementsController.Address.State? {
+    return CheckoutElementsController.Address.State(
         city = city,
         country = country?.takeIf { it.isNotBlank() } ?: return null,
         line1 = line1,
@@ -27,8 +27,8 @@ internal fun PaymentSheet.Address.toCheckoutAddress(): CheckoutController.Addres
 }
 
 @OptIn(CheckoutSessionPreview::class)
-internal fun Address.toCheckoutAddress(): CheckoutController.Address.State? {
-    return CheckoutController.Address.State(
+internal fun Address.toCheckoutAddress(): CheckoutElementsController.Address.State? {
+    return CheckoutElementsController.Address.State(
         city = city,
         country = country ?: return null,
         line1 = line1,

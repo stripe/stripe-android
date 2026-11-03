@@ -18,7 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import com.stripe.android.checkout.CheckoutController.Session.PaymentOptionDisplayData
+import com.stripe.android.checkout.CheckoutElementsController.Session.PaymentOptionDisplayData
 
 internal const val CHECKOUT_CONFIRM_BUTTON_TEST_TAG = "checkout_confirm_button"
 internal const val CHECKOUT_CONFIRMATION_MESSAGE_TEST_TAG = "checkout_confirmation_message"

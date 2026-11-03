@@ -19,9 +19,9 @@ import androidx.lifecycle.testing.TestLifecycleOwner
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutCollectedDetails
-import com.stripe.android.checkout.CheckoutController
-import com.stripe.android.checkout.CheckoutControllerStateFactory
-import com.stripe.android.checkout.CheckoutControllerStateHolder
+import com.stripe.android.checkout.CheckoutElementsController
+import com.stripe.android.checkout.CheckoutElementsControllerStateFactory
+import com.stripe.android.checkout.CheckoutElementsControllerStateHolder
 import com.stripe.android.checkout.ShippingAddressElementStateHolder
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
@@ -50,7 +50,7 @@ internal class ShippingAddressElementTest {
     @get:Rule
     val coroutineTestRule = CoroutineTestRule(StandardTestDispatcher())
 
-    private val configuredCheckoutConfiguration = CheckoutController.Configuration()
+    private val configuredCheckoutConfiguration = CheckoutElementsController.Configuration()
         .shippingAddressElement(ShippingAddressElement.Configuration())
         .build()
 
@@ -74,7 +74,7 @@ internal class ShippingAddressElementTest {
     @Test
     fun `present without shipping address element configuration reports and does not launch`() =
         runScenario(
-            configuration = CheckoutController.Configuration().build(),
+            configuration = CheckoutElementsController.Configuration().build(),
         ) {
             shippingAddressElement.present()
 
@@ -123,7 +123,7 @@ internal class ShippingAddressElementTest {
 
     @Test
     fun `present passes checkout session allowed shipping countries`() = runScenario {
-        stateHolder.state = CheckoutControllerStateFactory.create(
+        stateHolder.state = CheckoutElementsControllerStateFactory.create(
             configuration = configuredCheckoutConfiguration,
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(
                 allowedShippingCountries = listOf("US", "CA"),
@@ -140,12 +140,12 @@ internal class ShippingAddressElementTest {
 
     @Test
     fun `present prefills the form with the checkout session shipping address`() = runScenario {
-        stateHolder.state = CheckoutControllerStateFactory.create(
+        stateHolder.state = CheckoutElementsControllerStateFactory.create(
             configuration = configuredCheckoutConfiguration,
             collectedDetails = CheckoutCollectedDetails(
                 email = null,
                 shippingName = "Jenny Rosen",
-                shippingAddress = CheckoutController.Address.State(
+                shippingAddress = CheckoutElementsController.Address.State(
                     city = "San Francisco",
                     country = "US",
                     line1 = "510 Townsend St",
@@ -178,7 +178,7 @@ internal class ShippingAddressElementTest {
     @Test
     fun `present passes full ShippingAddressElement configuration to the address form`() {
         val appearance = configuredAppearance()
-        val configuration = CheckoutController.Configuration()
+        val configuration = CheckoutElementsController.Configuration()
             .shippingAddressElement(
                 ShippingAddressElement.Configuration()
                     .title("Shipping address")
@@ -272,7 +272,7 @@ internal class ShippingAddressElementTest {
             FakeCommitShippingAddress.Call(
                 name = addressDetails.name,
                 checkoutSessionResponse = updatedResponse,
-                address = CheckoutController.Address.State(
+                address = CheckoutElementsController.Address.State(
                     city = "San Francisco",
                     country = "US",
                     line1 = "510 Townsend St",
@@ -400,18 +400,18 @@ internal class ShippingAddressElementTest {
 
     private fun runScenario(
         configured: Boolean = true,
-        configuration: CheckoutController.Configuration.State = configuredCheckoutConfiguration,
+        configuration: CheckoutElementsController.Configuration.State = configuredCheckoutConfiguration,
         commitShippingAddress: FakeCommitShippingAddress = FakeCommitShippingAddress(
             CompletableDeferred(Result.success(Unit)),
         ),
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val savedStateHandle = SavedStateHandle()
-        val stateHolder = CheckoutControllerStateFactory.createStateHolder(
+        val stateHolder = CheckoutElementsControllerStateFactory.createStateHolder(
             savedStateHandle = savedStateHandle,
         )
         if (configured) {
-            stateHolder.state = CheckoutControllerStateFactory.create(
+            stateHolder.state = CheckoutElementsControllerStateFactory.create(
                 configuration = configuration,
             )
         }
@@ -552,7 +552,7 @@ internal class ShippingAddressElementTest {
         val shippingAddressElement: ShippingAddressElement,
         val activityLauncher: RecordingActivityResultLauncher,
         val lifecycleOwner: TestLifecycleOwner,
-        val stateHolder: CheckoutControllerStateHolder,
+        val stateHolder: CheckoutElementsControllerStateHolder,
         val shippingAddressElementStateHolder: ShippingAddressElementStateHolder,
         val commitShippingAddress: FakeCommitShippingAddress,
         val apiConfigurationProvider: RecordingProvider<ApiConfiguration.State>,

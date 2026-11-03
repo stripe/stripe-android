@@ -5,8 +5,8 @@ import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.checkout.CheckoutController
-import com.stripe.android.checkout.CheckoutControllerStateFactory
+import com.stripe.android.checkout.CheckoutElementsController
+import com.stripe.android.checkout.CheckoutElementsControllerStateFactory
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.elements.ExpressCheckoutElement.Configuration.GooglePayConfiguration
@@ -87,7 +87,7 @@ internal class DefaultExpressCheckoutElementEventReporterTest {
             ),
         )
         val googlePayConfiguration = GooglePayConfiguration().build()
-        val stateHolder = CheckoutControllerStateFactory.createStateHolder(
+        val stateHolder = CheckoutElementsControllerStateFactory.createStateHolder(
             savedStateHandle = SavedStateHandle(),
             availableExpressButtonTypesFactory = FakeAvailableExpressButtonTypesFactory(
                 availableExpressButtonTypes = listOf(
@@ -96,8 +96,8 @@ internal class DefaultExpressCheckoutElementEventReporterTest {
                 ),
             ),
         )
-        stateHolder.state = CheckoutControllerStateFactory.create(
-            configuration = CheckoutController.Configuration()
+        stateHolder.state = CheckoutElementsControllerStateFactory.create(
+            configuration = CheckoutElementsController.Configuration()
                 .expressCheckoutElement(expressCheckoutElementConfiguration)
                 .build(),
             expressCheckoutElementPaymentMethodMetadata = paymentMethodMetadata,
