@@ -55,6 +55,7 @@ internal class TestCard : BasePlaygroundTest() {
                 populateCardDetails()
             },
         )
+        error("Intentional failure: validate selective E2E retries (do not merge).")
     }
 
     @Test
