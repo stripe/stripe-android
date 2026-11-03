@@ -19,6 +19,7 @@ import com.stripe.android.stripecardscan.cardscan.result.MainLoopState
 import com.stripe.android.stripecardscan.payment.ml.CardOcr
 import com.stripe.android.stripecardscan.payment.ml.MLKitTextRecognizer
 import com.stripe.android.stripecardscan.payment.ml.SSDOcr
+import com.stripe.android.stripecardscan.payment.ml.SSDOcrModel
 import com.stripe.android.stripecardscan.payment.ml.SSDOcrModelManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -32,6 +33,7 @@ internal abstract class CardScanFlow(
     private val scanErrorListener: AnalyzerLoopErrorListener,
     private val enableMlKitTextRecognition: Boolean = false,
     private val disableSsdOcr: Boolean = false,
+    private val ssdOcrModel: SSDOcrModel,
 ) : ScanFlow<Unit?, CameraPreviewImage<Bitmap>>,
     AggregateResultListener<MainLoopAggregator.InterimResult, MainLoopAggregator.FinalResult> {
 
@@ -81,14 +83,14 @@ internal abstract class CardScanFlow(
         }
 
         if (!disableSsdOcr) {
-            val fetchedModel = SSDOcrModelManager.fetchModel(
+            val fetchedModel = SSDOcrModelManager(ssdOcrModel).fetchModel(
                 context,
                 forImmediateUse = true,
                 isOptional = false
             )
             // SSD loop: uses a built-in model, runs ~3x faster than ML Kit
             createAndRegisterLoop(
-                AnalyzerPool.of(SSDOcr.Factory(context, fetchedModel)),
+                AnalyzerPool.of(SSDOcr.Factory(context, fetchedModel, ssdOcrModel)),
                 aggregator, inputStream, coroutineScope,
             )
         }

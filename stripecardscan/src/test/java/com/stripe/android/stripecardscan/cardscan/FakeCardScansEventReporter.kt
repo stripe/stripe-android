@@ -4,6 +4,7 @@ import app.cash.turbine.Turbine
 import com.stripe.android.stripecardscan.scanui.CancellationReason
 
 class FakeCardScansEventReporter private constructor() : CardScanEventsReporter {
+    private val scanPresentedTurbine = Turbine<Unit>()
     private val scanStartedTurbine = Turbine<Unit>()
     private val scanSucceededTurbine = Turbine<Unit>()
     private val scanFailedTurbine = Turbine<Throwable?>()
@@ -12,6 +13,10 @@ class FakeCardScansEventReporter private constructor() : CardScanEventsReporter 
     private val scanMlKitFoundExpTurbine = Turbine<Unit>()
     private val scanDarkniteFoundPanTurbine = Turbine<Unit>()
     private val scanModelsDisagreeTurbine = Turbine<Unit>()
+
+    override fun scanPresented() {
+        scanPresentedTurbine.add(Unit)
+    }
 
     override fun scanStarted() {
         scanStartedTurbine.add(Unit)
@@ -46,6 +51,7 @@ class FakeCardScansEventReporter private constructor() : CardScanEventsReporter 
     }
 
     private fun ensureAllEventsConsumed() {
+        scanPresentedTurbine.ensureAllEventsConsumed()
         scanStartedTurbine.ensureAllEventsConsumed()
         scanSucceededTurbine.ensureAllEventsConsumed()
         scanFailedTurbine.ensureAllEventsConsumed()
@@ -59,6 +65,10 @@ class FakeCardScansEventReporter private constructor() : CardScanEventsReporter 
     class Scenario(
         val eventsReporter: FakeCardScansEventReporter,
     ) {
+        suspend fun awaitScanPresented() {
+            return eventsReporter.scanPresentedTurbine.awaitItem()
+        }
+
         suspend fun awaitScanStarted() {
             return eventsReporter.scanStartedTurbine.awaitItem()
         }

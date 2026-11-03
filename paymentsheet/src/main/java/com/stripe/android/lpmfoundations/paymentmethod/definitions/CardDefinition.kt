@@ -230,6 +230,7 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Custom {
             isStripeCardScanAllowed = metadata.isStripeCardScanAllowed,
             enableMlKitCardScan = metadata.enableMlKitCardScan,
             disableSsdOcrCardScan = metadata.disableSsdOcrCardScan,
+            useCompactSsdOcrCardScan = metadata.useCompactSsdOcrCardScan,
             apiConfiguration = metadata.apiConfiguration,
             automaticallyLaunchedCardScanFormDataHelper =
                 arguments.automaticallyLaunchedCardScanFormDataHelper,

@@ -58,6 +58,18 @@ internal class CardScanActivityTest {
         eventReporterScenario.awaitScanStarted()
     }
 
+    @Test
+    fun `late recognition cannot replace a canceled result`() = testScenario {
+        activityScenario.onActivity { activity ->
+            activity.cardScanEventsReporter = eventsReporter
+            activity.resultListener.userCanceled(CancellationReason.Back)
+            activity.resultListener.cardScanComplete(ScannedCard("4242424242424242"))
+            activity.resultListener.failed(IllegalStateException("late failure"))
+        }
+
+        eventReporterScenario.awaitScanCancelled()
+    }
+
     private fun testScenario(test: suspend TestParams.() -> Unit) = runTest {
         FakeCardScansEventReporter.test {
             val activityScenario = ActivityScenario.launch(CardScanActivity::class.java)

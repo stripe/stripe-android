@@ -279,6 +279,7 @@ internal class CardScanActionTest {
             isStripeCardScanAllowed = false,
             enableMlKitCardScan = false,
             disableSsdOcrCardScan = false,
+            useCompactSsdOcrCardScan = false,
             automaticallyLaunchedCardScanFormDataHelper = helper,
             backupAction = backupAction,
         )

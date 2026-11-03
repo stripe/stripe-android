@@ -3,6 +3,8 @@ package com.stripe.android.stripecardscan.cardscan
 import com.stripe.android.stripecardscan.scanui.CancellationReason
 
 internal interface CardScanEventsReporter {
+    fun scanPresented()
+
     fun scanStarted()
 
     fun scanSucceeded()

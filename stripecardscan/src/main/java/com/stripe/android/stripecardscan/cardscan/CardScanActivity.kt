@@ -29,6 +29,7 @@ import com.stripe.android.stripecardscan.databinding.StripeActivityCardscanBindi
 import com.stripe.android.stripecardscan.di.DaggerCardScanComponent
 import com.stripe.android.stripecardscan.payment.card.ScannedCard
 import com.stripe.android.stripecardscan.payment.ml.CardOcr
+import com.stripe.android.stripecardscan.payment.ml.SSDOcrModel
 import com.stripe.android.stripecardscan.scanui.CancellationReason
 import com.stripe.android.stripecardscan.scanui.ScanActivity
 import com.stripe.android.stripecardscan.scanui.ScanResultListener
@@ -72,6 +73,8 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
     @Inject
     lateinit var cardScanEventsReporter: CardScanEventsReporter
 
+    private var hasFinishedScan = false
+
     override val minimumAnalysisResolution = MINIMUM_RESOLUTION
 
     private val viewBinding by lazy {
@@ -109,6 +112,8 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
         object : CardScanResultListener {
 
             override fun cardScanComplete(card: ScannedCard) {
+                if (hasFinishedScan) return
+                hasFinishedScan = true
                 cardScanEventsReporter.scanSucceeded()
                 val intent = Intent()
                     .putExtra(
@@ -119,6 +124,8 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
             }
 
             override fun userCanceled(reason: CancellationReason) {
+                if (hasFinishedScan) return
+                hasFinishedScan = true
                 cardScanEventsReporter.scanCancelled(reason)
                 val intent = Intent()
                     .putExtra(
@@ -129,6 +136,8 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
             }
 
             override fun failed(cause: Throwable?) {
+                if (hasFinishedScan) return
+                hasFinishedScan = true
                 cardScanEventsReporter.scanFailed(cause)
                 val intent = Intent()
                     .putExtra(
@@ -147,8 +156,9 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
     private fun createScanFlow(
         enableMlKitTextRecognition: Boolean,
         disableSsdOcr: Boolean,
+        ssdOcrModel: SSDOcrModel,
     ): CardScanFlow {
-        return object : CardScanFlow(scanErrorListener, enableMlKitTextRecognition, disableSsdOcr) {
+        return object : CardScanFlow(scanErrorListener, enableMlKitTextRecognition, disableSsdOcr, ssdOcrModel) {
             /**
              * A final result was received from the aggregator. Set the result from this activity.
              */
@@ -226,6 +236,7 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
         scanFlow = createScanFlow(
             enableMlKitTextRecognition = cardScanConfiguration.enableMlKitTextRecognition,
             disableSsdOcr = cardScanConfiguration.disableSsdOcr,
+            ssdOcrModel = cardScanConfiguration.ssdOcrModel,
         )
 
         DaggerCardScanComponent.factory()
@@ -234,6 +245,8 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
                 cardScanConfiguration = cardScanConfiguration,
             )
             .inject(this)
+
+        cardScanEventsReporter.scanPresented()
 
         onBackPressedDispatcher.addCallback {
             resultListener.userCanceled(CancellationReason.Back)

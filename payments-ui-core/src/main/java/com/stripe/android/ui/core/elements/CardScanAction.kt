@@ -16,6 +16,7 @@ class CardScanAction(
     private val isStripeCardScanAllowed: Boolean,
     private val enableMlKitCardScan: Boolean,
     private val disableSsdOcrCardScan: Boolean,
+    private val useCompactSsdOcrCardScan: Boolean,
     private val apiConfiguration: ApiConfiguration.State,
     val automaticallyLaunchedCardScanFormDataHelper: AutomaticallyLaunchedCardScanFormDataHelper?,
     private val backupAction: CardDetailsAction?,
@@ -27,6 +28,7 @@ class CardScanAction(
             isStripeCardScanAllowed = isStripeCardScanAllowed,
             enableMlKitCardScan = enableMlKitCardScan,
             disableSsdOcrCardScan = disableSsdOcrCardScan,
+            useCompactSsdOcrCardScan = useCompactSsdOcrCardScan,
             apiConfiguration = apiConfiguration,
             onResult = { result ->
                 (result as? CardScanResult.Completed)?.scannedCard?.let { scannedCard ->

@@ -1,6 +1,7 @@
 package com.stripe.android.ui.core.cardscan
 
 import android.content.Intent
+import android.os.Parcel
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.compose.runtime.mutableStateOf
@@ -111,6 +112,44 @@ class CardScanStripeLauncherTest {
         assertThat(scanFailedCall.implementation).isEqualTo("stripe_card_scan")
     }
 
+    @Test
+    fun `launch preserves compact assignment across Activity parcel boundary`() = runScenario(
+        useCompactSsdOcrCardScan = true,
+    ) {
+        launcher.launch(ApplicationProvider.getApplicationContext())
+        val params = fakeActivityLauncher.launchCalls.awaitItem()
+        val parcel = Parcel.obtain()
+        try {
+            parcel.writeParcelable(params, 0)
+            parcel.setDataPosition(0)
+            @Suppress("DEPRECATION")
+            val restored = parcel.readParcelable<CardScanSheetParams>(CardScanSheetParams::class.java.classLoader)
+            assertThat(restored?.cardScanConfiguration?.useCompactSsdOcr).isTrue()
+        } finally {
+            parcel.recycle()
+        }
+        assertThat(fakeEventsReporter.scanStartedCalls.awaitItem().implementation).isEqualTo("stripe_card_scan")
+    }
+
+    @Test
+    fun `launch preserves original assignment across Activity parcel boundary`() = runScenario(
+        useCompactSsdOcrCardScan = false,
+    ) {
+        launcher.launch(ApplicationProvider.getApplicationContext())
+        val params = fakeActivityLauncher.launchCalls.awaitItem()
+        val parcel = Parcel.obtain()
+        try {
+            parcel.writeParcelable(params, 0)
+            parcel.setDataPosition(0)
+            @Suppress("DEPRECATION")
+            val restored = parcel.readParcelable<CardScanSheetParams>(CardScanSheetParams::class.java.classLoader)
+            assertThat(restored?.cardScanConfiguration?.useCompactSsdOcr).isFalse()
+        } finally {
+            parcel.recycle()
+        }
+        assertThat(fakeEventsReporter.scanStartedCalls.awaitItem().implementation).isEqualTo("stripe_card_scan")
+    }
+
     private class Scenario(
         val launcher: CardScanStripeLauncher,
         val fakeEventsReporter: FakeCardScanEventsReporter,
@@ -118,6 +157,7 @@ class CardScanStripeLauncherTest {
     )
 
     private fun runScenario(
+        useCompactSsdOcrCardScan: Boolean = false,
         block: suspend Scenario.() -> Unit
     ) = runTest {
         val fakeEventsReporter = FakeCardScanEventsReporter()
@@ -129,6 +169,7 @@ class CardScanStripeLauncherTest {
             enableMlKitCardScan = false,
             elementsSessionId = null,
             disableSsdOcrCardScan = false,
+            useCompactSsdOcrCardScan = useCompactSsdOcrCardScan,
             isLaunchingState = mutableStateOf(false),
         ).apply {
             activityLauncher = fakeActivityLauncher

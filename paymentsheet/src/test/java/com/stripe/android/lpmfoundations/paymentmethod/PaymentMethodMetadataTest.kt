@@ -1219,6 +1219,7 @@ internal class PaymentMethodMetadataTest {
             enableMlKitCardScan = false,
             elementsSessionId = "session_1234",
             disableSsdOcrCardScan = false,
+            useCompactSsdOcrCardScan = false,
             cardArts = emptyList(),
             shouldUseAutocompleteProxyEndpoints = false,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
@@ -1379,6 +1380,7 @@ internal class PaymentMethodMetadataTest {
             enableMlKitCardScan = false,
             elementsSessionId = "session_1234",
             disableSsdOcrCardScan = false,
+            useCompactSsdOcrCardScan = false,
             cardArts = emptyList(),
             shouldUseAutocompleteProxyEndpoints = false,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
@@ -2420,9 +2422,64 @@ internal class PaymentMethodMetadataTest {
         assertThat(metadata.requiresBillingAddressForAutomaticTax).isFalse()
     }
 
+    @Test
+    fun `createForPaymentElement compact SSD assignment enabled`() {
+        val metadata = createPaymentElementMetadata(
+            attestOnIntentConfirmationFlag = false,
+            compactSsdOcrFlag = true,
+        )
+        assertThat(metadata.useCompactSsdOcrCardScan).isTrue()
+    }
+
+    @Test
+    fun `createForPaymentElement compact SSD assignment disabled`() {
+        val metadata = createPaymentElementMetadata(
+            attestOnIntentConfirmationFlag = false,
+            compactSsdOcrFlag = false,
+        )
+        assertThat(metadata.useCompactSsdOcrCardScan).isFalse()
+    }
+
+    @Test
+    fun `createForPaymentElement compact SSD assignment missing`() {
+        val metadata = createPaymentElementMetadata(
+            attestOnIntentConfirmationFlag = false,
+            compactSsdOcrFlag = null,
+        )
+        assertThat(metadata.useCompactSsdOcrCardScan).isFalse()
+    }
+
+    @Test
+    fun `createForCustomerSheet compact SSD assignment enabled`() {
+        val metadata = createCustomerSheetMetadata(
+            attestOnIntentConfirmationFlag = false,
+            compactSsdOcrFlag = true,
+        )
+        assertThat(metadata.useCompactSsdOcrCardScan).isTrue()
+    }
+
+    @Test
+    fun `createForCustomerSheet compact SSD assignment disabled`() {
+        val metadata = createCustomerSheetMetadata(
+            attestOnIntentConfirmationFlag = false,
+            compactSsdOcrFlag = false,
+        )
+        assertThat(metadata.useCompactSsdOcrCardScan).isFalse()
+    }
+
+    @Test
+    fun `createForCustomerSheet compact SSD assignment missing`() {
+        val metadata = createCustomerSheetMetadata(
+            attestOnIntentConfirmationFlag = false,
+            compactSsdOcrFlag = null,
+        )
+        assertThat(metadata.useCompactSsdOcrCardScan).isFalse()
+    }
+
     private fun createPaymentElementMetadata(
         attestOnIntentConfirmationFlag: Boolean? = null,
         nfcScanningFlag: Boolean? = null,
+        compactSsdOcrFlag: Boolean? = null,
         preferNfcOverCameraScanFlag: Boolean? = null,
         elementsSession: ElementsSession? = null,
         initializationMode: PaymentElementLoader.InitializationMode =
@@ -2436,6 +2493,9 @@ internal class PaymentMethodMetadataTest {
                 )
             ).copy(
                 flags = buildMap {
+                    compactSsdOcrFlag?.let {
+                        put(ElementsSession.Flag.ELEMENTS_MOBILE_CARDSCAN_USE_COMPACT_SSDOCR, it)
+                    }
                     attestOnIntentConfirmationFlag?.let {
                         put(ElementsSession.Flag.ELEMENTS_MOBILE_ATTEST_ON_INTENT_CONFIRMATION, it)
                     }
@@ -2468,11 +2528,15 @@ internal class PaymentMethodMetadataTest {
     private fun createCustomerSheetMetadata(
         attestOnIntentConfirmationFlag: Boolean,
         nfcScanningFlag: Boolean? = null,
+        compactSsdOcrFlag: Boolean? = null,
     ): PaymentMethodMetadata {
         val elementsSession = createElementsSession(
             intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
         ).copy(
             flags = buildMap {
+                compactSsdOcrFlag?.let {
+                    put(ElementsSession.Flag.ELEMENTS_MOBILE_CARDSCAN_USE_COMPACT_SSDOCR, it)
+                }
                 put(
                     ElementsSession.Flag.ELEMENTS_MOBILE_ATTEST_ON_INTENT_CONFIRMATION,
                     attestOnIntentConfirmationFlag,
