@@ -1,12 +1,16 @@
 package com.stripe.android.checkout
 
 import androidx.test.core.app.ApplicationProvider
+import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutElementsController.Address
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
+import com.stripe.android.core.networking.StripeNetworkClient
+import com.stripe.android.core.networking.StripeRequest
+import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networktesting.NetworkRule
@@ -19,11 +23,17 @@ import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFacto
 import com.stripe.android.paymentsheet.repositories.CheckoutStripeRepositoryFactory
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.android.utils.FakeFraudDetectionDataRepository
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import java.io.File
 
 @OptIn(CheckoutSessionPreview::class)
 @RunWith(RobolectricTestRunner::class)
@@ -70,7 +80,8 @@ internal class CheckoutSessionTaxRegionUpdaterTest {
             address = ADDRESS,
         )
 
-        assertThat(result.getOrThrow().id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
+        assertThat(result.result.getOrThrow().id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
+        assertThat(result.requestAttempted).isTrue()
     }
 
     @Test
@@ -83,7 +94,8 @@ internal class CheckoutSessionTaxRegionUpdaterTest {
             address = ADDRESS,
         )
 
-        assertThat(result.getOrThrow()).isSameInstanceAs(checkoutSessionResponse)
+        assertThat(result.result.getOrThrow()).isSameInstanceAs(checkoutSessionResponse)
+        assertThat(result.requestAttempted).isFalse()
     }
 
     @Test
@@ -94,7 +106,8 @@ internal class CheckoutSessionTaxRegionUpdaterTest {
             address = ADDRESS,
         )
 
-        assertThat(result.getOrThrow()).isSameInstanceAs(checkoutSessionResponse)
+        assertThat(result.result.getOrThrow()).isSameInstanceAs(checkoutSessionResponse)
+        assertThat(result.requestAttempted).isFalse()
     }
 
     @Test
@@ -110,18 +123,48 @@ internal class CheckoutSessionTaxRegionUpdaterTest {
             address = ADDRESS,
         )
 
-        assertThat(result.exceptionOrNull()?.message).contains("Invalid tax region")
+        assertThat(result.result.exceptionOrNull()?.message).contains("Invalid tax region")
+        assertThat(result.requestAttempted).isTrue()
+    }
+
+    @Test
+    fun `canceling the request preserves the attempted fact and cancellation`() {
+        val networkClient = FakeCancelingNetworkClient()
+        runScenario(stripeNetworkClient = networkClient) {
+            val outcomes = Turbine<TaxRegionUpdateOutcome>()
+            val update = testScope.launch {
+                outcomes.add(
+                    updater.updateServerStateIfNeeded(
+                        checkoutSessionResponse = checkoutSessionResponse,
+                        addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+                        address = ADDRESS,
+                    )
+                )
+            }
+            networkClient.requests.awaitItem()
+
+            update.cancelAndJoin()
+
+            val outcome = outcomes.awaitItem()
+            assertThat(outcome.requestAttempted).isTrue()
+            assertThat(outcome.result.exceptionOrNull()).isInstanceOf(CancellationException::class.java)
+            assertThat(runCatching { outcome.resultOrThrowCancellation() }.exceptionOrNull())
+                .isSameInstanceAs(outcome.result.exceptionOrNull())
+            networkClient.requests.ensureAllEventsConsumed()
+            outcomes.ensureAllEventsConsumed()
+        }
     }
 
     private fun runScenario(
         automaticTaxEnabled: Boolean = true,
+        stripeNetworkClient: StripeNetworkClient = DefaultStripeNetworkClient(),
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val checkoutSessionRepository = CheckoutSessionRepository(
             stripeRepository = CheckoutStripeRepositoryFactory.create(),
             elementsSessionClientParams = CheckoutStripeRepositoryFactory.clientParams(),
             fraudDetectionDataRepository = FakeFraudDetectionDataRepository.create(),
-            stripeNetworkClient = DefaultStripeNetworkClient(),
+            stripeNetworkClient = stripeNetworkClient,
             analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
             paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
                 context = ApplicationProvider.getApplicationContext(),
@@ -144,6 +187,7 @@ internal class CheckoutSessionTaxRegionUpdaterTest {
             ),
             checkoutSessionRepository = checkoutSessionRepository,
             updater = updater,
+            testScope = this,
         )
 
         scenario.block()
@@ -153,7 +197,21 @@ internal class CheckoutSessionTaxRegionUpdaterTest {
         val checkoutSessionResponse: CheckoutSessionResponse,
         val checkoutSessionRepository: CheckoutSessionRepository,
         val updater: CheckoutSessionTaxRegionUpdater,
+        val testScope: TestScope,
     )
+
+    private class FakeCancelingNetworkClient : StripeNetworkClient {
+        val requests = Turbine<StripeRequest>()
+
+        override suspend fun executeRequest(request: StripeRequest): StripeResponse<String> {
+            requests.add(request)
+            awaitCancellation()
+        }
+
+        override suspend fun executeRequestForFile(request: StripeRequest, outputFile: File): StripeResponse<File> {
+            error("Not expected")
+        }
+    }
 
     private companion object {
         val ADDRESS = Address.State(

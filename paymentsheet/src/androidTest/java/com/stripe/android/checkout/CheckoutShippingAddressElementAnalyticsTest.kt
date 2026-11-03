@@ -160,6 +160,8 @@ internal class CheckoutShippingAddressElementAnalyticsTest {
                 // This session has no shipping-based automatic tax, so it sends no tax update.
                 networkRule.validateCheckoutAddressUpdate(
                     "update_shipping_address",
+                    "merchant",
+                    false,
                     DEFAULT_CHECKOUT_SESSION_ID,
                     analyticsPayloadField("defaults[shipping_details][address]", "true"),
                 )
@@ -195,7 +197,10 @@ internal class CheckoutShippingAddressElementAnalyticsTest {
         // shipping-based automatic tax, so it sends none.
         networkRule.validateCheckoutAddressUpdate(
             "update_shipping_address",
+            "shipping_address_element",
+            false,
             DEFAULT_CHECKOUT_SESSION_ID,
+            analyticsPayloadField("defaults[shipping_details][address]", "true"),
         )
         listOf(
             "elements.shipping_address.save_started",

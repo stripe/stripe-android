@@ -2,8 +2,11 @@ package com.stripe.android.paymentsheet.injection
 
 import android.content.Context
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
-import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent.Operation
+import com.stripe.android.checkout.TaxRegionUpdateOutcome
+import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent.InvocationSource
 import com.stripe.android.checkout.analytics.CheckoutOperationReporter
+import com.stripe.android.checkout.analytics.analyticsParams
+import com.stripe.android.checkout.analytics.measureAddressUpdate
 import com.stripe.android.checkout.toCheckoutAddress
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.injection.IOContext
@@ -87,7 +90,7 @@ internal class AddressElementViewModelModule {
                     timeSource = TimeSource.Monotonic,
                     workContext = workContext,
                     publishableKey = { args.apiConfiguration.publishableKey },
-                    configurationParams = { emptyMap() },
+                    configurationParams = { args.checkoutConfigurationAnalytics.params },
                 ),
             )
         }
@@ -196,13 +199,16 @@ private class CheckoutShippingPrimaryButtonAction(
     ): Result<AddressElementActivityContract.Result> {
         val address = addressDetails.address?.toCheckoutAddress()
 
-        return operationReporter.measure(
-            operation = Operation.UpdateShippingAddress,
-            params = emptyMap(),
+        return operationReporter.measureAddressUpdate(
+            addressSource = TaxAddressSource.SHIPPING,
+            params = InvocationSource.ShippingAddressElement.analyticsParams(),
             response = checkoutSessionResponse,
-        ) { analytics ->
-            val result = if (address == null) {
-                Result.failure(IllegalArgumentException("Country is required."))
+        ) {
+            if (address == null) {
+                TaxRegionUpdateOutcome(
+                    result = Result.failure(IllegalArgumentException("Country is required.")),
+                    requestAttempted = false,
+                )
             } else {
                 taxRegionUpdater.updateServerStateIfNeeded(
                     checkoutSessionResponse = checkoutSessionResponse,
@@ -210,7 +216,6 @@ private class CheckoutShippingPrimaryButtonAction(
                     address = address,
                 )
             }
-            result.onSuccess { analytics.recordResponse(it) }
         }.map { response ->
             AddressElementActivityContract.Result.CheckoutShippingSucceeded(
                 address = addressDetails,

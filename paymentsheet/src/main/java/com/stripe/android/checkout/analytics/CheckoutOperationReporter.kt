@@ -9,6 +9,8 @@ import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.state.DefaultAnalyticsMetadataFactory
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
@@ -47,15 +49,22 @@ internal class CheckoutOperationReporter(
         val measuredOperation = MeasuredOperation(operation, params, response, timeSource, ::report)
         measuredOperation.started(response)
         val result = try {
-            block(measuredOperation)
+            // Result-returning owners can catch a canceled request or reload.
+            block(measuredOperation).also { currentCoroutineContext().ensureActive() }
         } catch (error: CancellationException) {
             // A caller canceled while queued throws instead of returning a failure.
             measuredOperation.failed(measuredOperation.response, error)
             throw error
         }
-        return result
+        result
             .onSuccess { measuredOperation.succeeded(measuredOperation.response) }
             .onFailure { measuredOperation.failed(measuredOperation.response, it) }
+        if (operation == Operation.UpdateBillingAddress || operation == Operation.UpdateShippingAddress) {
+            result.exceptionOrNull()?.let { error ->
+                if (error is CancellationException) throw error
+            }
+        }
+        return result
     }
 
     /** Reports an operation that completed without doing any work. */

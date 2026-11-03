@@ -88,6 +88,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
                 selectedPaymentMethodCode = code,
             ),
             presentationState = EmbeddedActivityArgs.PresentationState.Ready,
+            checkoutConfigurationAnalytics = null,
         )
 
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
@@ -422,6 +423,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             promotions = emptyList(),
             launchMode = EmbeddedLaunchMode.Manage,
             presentationState = EmbeddedActivityArgs.PresentationState.Ready,
+            checkoutConfigurationAnalytics = null,
         )
 
         sheetLauncher.launchManage(
@@ -620,6 +622,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             promotions = emptyList(),
             launchMode = EmbeddedLaunchMode.PaymentOptions,
             presentationState = EmbeddedActivityArgs.PresentationState.Ready,
+            checkoutConfigurationAnalytics = null,
         )
 
         sheetLauncher.launchPaymentOptions(

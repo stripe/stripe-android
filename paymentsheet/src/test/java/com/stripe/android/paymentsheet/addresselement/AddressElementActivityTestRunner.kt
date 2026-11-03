@@ -89,6 +89,7 @@ internal class AddressElementActivityTestRunner(
             analyticsPayloadField("event", "checkout_elements.update_shipping_address.$outcome"),
             analyticsPayloadField("product_usage", "checkout_elements"),
             analyticsPayloadField("checkout_session_id", checkoutSessionId),
+            analyticsPayloadField("invocation_source", "shipping_address_element"),
             *requestMatchers,
         ) { response ->
             response.status = "HTTP/1.1 200 OK"

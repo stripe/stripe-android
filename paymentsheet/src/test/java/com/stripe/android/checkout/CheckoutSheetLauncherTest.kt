@@ -9,6 +9,8 @@ import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkout.analytics.CheckoutConfigurationAnalytics
+import com.stripe.android.checkout.analytics.toAnalyticsMap
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.account.LinkAccountHolder
@@ -101,6 +103,9 @@ internal class CheckoutSheetLauncherTest {
                 selectedPaymentMethodCode = code,
             ),
             presentationState = EmbeddedActivityArgs.PresentationState.Ready,
+            checkoutConfigurationAnalytics = CheckoutConfigurationAnalytics(
+                requireNotNull(selectionHolder.state).configuration.toAnalyticsMap()
+            ),
         )
 
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
@@ -401,6 +406,9 @@ internal class CheckoutSheetLauncherTest {
             promotions = emptyList(),
             launchMode = EmbeddedLaunchMode.Manage,
             presentationState = EmbeddedActivityArgs.PresentationState.Ready,
+            checkoutConfigurationAnalytics = CheckoutConfigurationAnalytics(
+                requireNotNull(selectionHolder.state).configuration.toAnalyticsMap()
+            ),
         )
 
         sheetLauncher.launchManage(
@@ -606,6 +614,9 @@ internal class CheckoutSheetLauncherTest {
             promotions = listOf(FakePaymentMethodMessagePromotionsHelper.klarnaPromotion),
             launchMode = EmbeddedLaunchMode.PaymentOptions,
             presentationState = EmbeddedActivityArgs.PresentationState.Ready,
+            checkoutConfigurationAnalytics = CheckoutConfigurationAnalytics(
+                requireNotNull(selectionHolder.state).configuration.toAnalyticsMap()
+            ),
         )
 
         sheetLauncher.launchPaymentOptions(

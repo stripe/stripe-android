@@ -5,7 +5,10 @@ package com.stripe.android.paymentsheet.injection
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkout.CheckoutElementsControllerStateFactory
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
+import com.stripe.android.checkout.analytics.CheckoutConfigurationAnalytics
+import com.stripe.android.checkout.analytics.toAnalyticsMap
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.networking.AnalyticsRequestFactory
@@ -232,12 +235,17 @@ class AddressElementViewModelModuleTest {
             val started = operationAnalyticsRequestExecutor.awaitEvent(
                 "checkout_elements.update_shipping_address.started"
             )
+            assertThat(started).containsEntry("invocation_source", "shipping_address_element")
             assertThat(started).containsEntry("product_usage", "checkout_elements")
             assertThat(started).containsEntry("checkout_session_id", checkoutSessionResponse.id)
+            assertThat(started).containsAtLeastEntriesIn(CHECKOUT_CONFIGURATION.toAnalyticsMap())
+            assertThat(started).doesNotContainKey("did_request_tax_update")
             val succeeded = operationAnalyticsRequestExecutor.awaitEvent(
                 "checkout_elements.update_shipping_address.succeeded"
             )
             assertThat(succeeded).containsKey("duration")
+            assertThat(succeeded).containsEntry("invocation_source", "shipping_address_element")
+            assertThat(succeeded).containsEntry("did_request_tax_update", true)
             operationAnalyticsRequestExecutor.validate()
         }
 
@@ -256,6 +264,8 @@ class AddressElementViewModelModuleTest {
                 "checkout_elements.update_shipping_address.succeeded"
             )
             assertThat(succeeded).containsKey("duration")
+            assertThat(succeeded).containsEntry("invocation_source", "shipping_address_element")
+            assertThat(succeeded).containsEntry("did_request_tax_update", false)
             operationAnalyticsRequestExecutor.validate()
         }
 
@@ -276,6 +286,8 @@ class AddressElementViewModelModuleTest {
             val failed = operationAnalyticsRequestExecutor.awaitEvent(
                 "checkout_elements.update_shipping_address.failed"
             )
+            assertThat(failed).containsEntry("invocation_source", "shipping_address_element")
+            assertThat(failed).containsEntry("did_request_tax_update", true)
             assertThat(failed).containsKey("error_type")
             operationAnalyticsRequestExecutor.validate()
         }
@@ -331,6 +343,7 @@ class AddressElementViewModelModuleTest {
                 apiConfiguration = DEFAULT_API_CONFIG,
                 config = AddressLauncher.Configuration(),
                 checkoutSessionResponse = checkoutSessionResponse,
+                checkoutConfigurationAnalytics = CHECKOUT_CONFIGURATION_ANALYTICS,
             ),
             addressLauncherEventReporter = addressLauncherEventReporter,
             analyticsRequestExecutor = analyticsRequestExecutor,
@@ -401,6 +414,7 @@ class AddressElementViewModelModuleTest {
                 apiConfiguration = DEFAULT_API_CONFIG,
                 config = AddressLauncher.Configuration(),
                 checkoutSessionResponse = checkoutSessionResponse,
+                checkoutConfigurationAnalytics = CHECKOUT_CONFIGURATION_ANALYTICS,
             ),
         ) {
             CheckoutShippingScenario(
@@ -506,6 +520,9 @@ class AddressElementViewModelModuleTest {
     )
 
     private companion object {
+        val CHECKOUT_CONFIGURATION = CheckoutElementsControllerStateFactory.create().configuration
+        val CHECKOUT_CONFIGURATION_ANALYTICS = CheckoutConfigurationAnalytics(CHECKOUT_CONFIGURATION.toAnalyticsMap())
+
         val EXPECTED_ADDRESS = AddressDetails(
             name = "Jenny Rosen",
             address = PaymentSheet.Address(

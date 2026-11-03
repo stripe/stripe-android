@@ -11,9 +11,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.AnnotatedString
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent.InvocationSource
 import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent.Operation
 import com.stripe.android.checkout.analytics.CheckoutOperationReporter
 import com.stripe.android.checkout.analytics.MeasuredOperation
+import com.stripe.android.checkout.analytics.analyticsParams
+import com.stripe.android.checkout.analytics.measureAddressUpdate
 import com.stripe.android.checkout.analytics.toAnalyticsMap
 import com.stripe.android.checkout.injection.CheckoutElementsPresenterSubcomponent
 import com.stripe.android.checkout.injection.DaggerCheckoutElementsControllerComponent
@@ -172,9 +175,14 @@ class CheckoutElementsController @Inject internal constructor(
         val selectionBillingAddress = initialState.paymentSelection?.billingDetails?.address?.toCheckoutAddress()
         val billingAddress = selectionBillingAddress ?: configuration.defaults.billingDetails?.address
         if (billingAddress != null) {
+            val invocationSource = if (selectionBillingAddress != null) {
+                InvocationSource.PaymentElement
+            } else {
+                InvocationSource.Merchant
+            }
             current = applyInitialAddress(
                 addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
-                params = configurationParams,
+                params = invocationSource.analyticsParams() + configurationParams,
                 response = current,
                 address = billingAddress,
             )
@@ -182,7 +190,7 @@ class CheckoutElementsController @Inject internal constructor(
         initialState.collectedDetails.shippingAddress?.let { shippingAddress ->
             current = applyInitialAddress(
                 addressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
-                params = configurationParams,
+                params = InvocationSource.Merchant.analyticsParams() + configurationParams,
                 response = current,
                 address = shippingAddress,
             )
@@ -195,19 +203,16 @@ class CheckoutElementsController @Inject internal constructor(
         params: Map<String, Any?>,
         response: CheckoutSessionResponse,
         address: Address.State,
-    ): CheckoutSessionResponse = operationReporter.measure(
-        operation = when (addressSource) {
-            CheckoutSessionResponse.TaxAddressSource.SHIPPING -> Operation.UpdateShippingAddress
-            CheckoutSessionResponse.TaxAddressSource.BILLING -> Operation.UpdateBillingAddress
-        },
+    ): CheckoutSessionResponse = operationReporter.measureAddressUpdate(
+        addressSource = addressSource,
         params = params,
         response = response,
-    ) { analytics ->
+    ) {
         checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
             checkoutSessionResponse = response,
             addressSource = addressSource,
             address = address,
-        ).onSuccess { analytics.recordResponse(it) }
+        )
     }.getOrThrow()
 
     /**
@@ -255,6 +260,7 @@ class CheckoutElementsController @Inject internal constructor(
         val built = address?.build()
         return withCheckoutState(
             operation = Operation.UpdateShippingAddress,
+            params = InvocationSource.Merchant.analyticsParams(),
             additionalStateMutations = {
                 copy(
                     collectedDetails = collectedDetails.copy(
@@ -263,7 +269,7 @@ class CheckoutElementsController @Inject internal constructor(
                     ),
                 )
             },
-        ) {
+        ) { analytics ->
             if (built != null) {
                 checkoutSessionResponse.validateShippingCountry(built.country).onFailure {
                     return@withCheckoutState kotlin.Result.failure(it)
@@ -273,10 +279,12 @@ class CheckoutElementsController @Inject internal constructor(
             if (built == null && collectedDetails.shippingAddress == null) {
                 kotlin.Result.success(checkoutSessionResponse)
             } else {
-                checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
-                    checkoutSessionResponse = checkoutSessionResponse,
-                    addressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
-                    address = built,
+                analytics.reportAddressUpdateResult(
+                    checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
+                        checkoutSessionResponse = checkoutSessionResponse,
+                        addressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
+                        address = built,
+                    )
                 )
             }
         }.toOperationResult()
@@ -328,8 +336,9 @@ class CheckoutElementsController @Inject internal constructor(
     ): kotlin.Result<Unit> {
         return withCheckoutState(
             operation = Operation.UpdateBillingAddress,
+            params = InvocationSource.PaymentElement.analyticsParams(),
             additionalStateMutations = { commitSelection(selection) },
-        ) {
+        ) { analytics ->
             stateHolder.state = copy(
                 savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Pending(
                     selection.paymentMethod.id,
@@ -351,10 +360,12 @@ class CheckoutElementsController @Inject internal constructor(
                 }
                 return@withCheckoutState kotlin.Result.success(checkoutSessionResponse)
             }
-            checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
-                checkoutSessionResponse = checkoutSessionResponse,
-                addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
-                address = address,
+            analytics.reportAddressUpdateResult(
+                checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
+                    checkoutSessionResponse = checkoutSessionResponse,
+                    addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+                    address = address,
+                )
             ).onFailure {
                 stateHolder.state = stateHolder.state?.copy(
                     savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Failed(
@@ -547,6 +558,7 @@ class CheckoutElementsController @Inject internal constructor(
         // Clearing the payment option also clears the billing tax region, reported as a billing update.
         return withCheckoutState(
             operation = Operation.UpdateBillingAddress,
+            params = InvocationSource.PaymentElement.analyticsParams(),
             additionalStateMutations = {
                 copy(
                     paymentSelection = null,
@@ -554,11 +566,13 @@ class CheckoutElementsController @Inject internal constructor(
                     previousNewSelections = Bundle(),
                 )
             },
-        ) {
-            checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
-                checkoutSessionResponse = checkoutSessionResponse,
-                addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
-                address = null,
+        ) { analytics ->
+            analytics.reportAddressUpdateResult(
+                checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
+                    checkoutSessionResponse = checkoutSessionResponse,
+                    addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+                    address = null,
+                )
             )
         }.toOperationResult()
     }

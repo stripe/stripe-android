@@ -436,6 +436,7 @@ internal class EmbeddedSheetActivityCheckoutTest {
                     promotions = emptyList(),
                     launchMode = EmbeddedLaunchMode.Manage,
                     presentationState = EmbeddedActivityArgs.PresentationState.Ready,
+                    checkoutConfigurationAnalytics = null,
                 ),
             )
         ).use { scenario ->

@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
 import androidx.core.os.BundleCompat
+import com.stripe.android.checkout.analytics.CheckoutConfigurationAnalytics
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethodMessagePromotion
@@ -26,6 +27,8 @@ internal data class EmbeddedActivityArgs(
     val promotions: List<PaymentMethodMessagePromotion>,
     val launchMode: EmbeddedLaunchMode,
     val presentationState: PresentationState,
+    // Configuration analytics for the Checkout operations the sheet reports; null outside Checkout.
+    val checkoutConfigurationAnalytics: CheckoutConfigurationAnalytics?,
 ) : Parcelable {
     internal enum class PresentationState {
         Loading,

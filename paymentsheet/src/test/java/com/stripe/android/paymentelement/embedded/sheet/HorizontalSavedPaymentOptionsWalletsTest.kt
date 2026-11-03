@@ -111,6 +111,7 @@ internal class HorizontalSavedPaymentOptionsWalletsTest {
             promotions = emptyList(),
             launchMode = EmbeddedLaunchMode.PaymentOptions,
             presentationState = EmbeddedActivityArgs.PresentationState.Ready,
+            checkoutConfigurationAnalytics = null,
         )
         ActivityScenario.launchActivityForResult<EmbeddedSheetActivity>(
             EmbeddedSheetContract.createIntent(context = applicationContext, input = args),

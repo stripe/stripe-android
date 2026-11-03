@@ -1,3 +1,5 @@
+@file:OptIn(com.stripe.android.paymentelement.CheckoutSessionPreview::class)
+
 package com.stripe.android.paymentsheet.addresselement
 
 import android.app.Activity
@@ -17,6 +19,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkout.CheckoutElementsControllerStateFactory
+import com.stripe.android.checkout.analytics.CheckoutConfigurationAnalytics
+import com.stripe.android.checkout.analytics.toAnalyticsMap
 import com.stripe.android.common.ui.PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.networktesting.NetworkRule
@@ -93,6 +98,9 @@ internal class AddressElementActivityTest {
             apiConfiguration = DEFAULT_API_CONFIG,
             config = null,
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+            checkoutConfigurationAnalytics = CheckoutConfigurationAnalytics(
+                CheckoutElementsControllerStateFactory.create().configuration.toAnalyticsMap()
+            ),
         )
 
         val intent = AddressElementActivityContract.CheckoutShipping.createIntent(
@@ -558,6 +566,9 @@ internal class AddressElementActivityTest {
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(
                 automaticTaxEnabled = true,
                 taxAddressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
+            ),
+            checkoutConfigurationAnalytics = CheckoutConfigurationAnalytics(
+                CheckoutElementsControllerStateFactory.create().configuration.toAnalyticsMap()
             ),
         ),
         block: AddressElementActivityTestRunner.Scenario.() -> Unit,

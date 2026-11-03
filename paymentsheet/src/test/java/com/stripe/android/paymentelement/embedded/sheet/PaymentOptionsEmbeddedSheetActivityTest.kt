@@ -632,6 +632,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
             promotions = emptyList(),
             launchMode = EmbeddedLaunchMode.PaymentOptions,
             presentationState = presentationState,
+            checkoutConfigurationAnalytics = null,
         )
     }
 

@@ -27,17 +27,31 @@ internal class CheckoutAnalyticsEvent(
         }
     }
 
-    enum class Operation(val code: String) {
+    /**
+     * [defaultCompletionParams] are completion params an operation reports unless it sets them, so a
+     * rejected operation still reports them.
+     */
+    enum class Operation(
+        val code: String,
+        val defaultCompletionParams: Map<String, Any?> = emptyMap(),
+    ) {
         Init("init"),
         Confirm("confirm"),
         ApplyPromotionCode("apply_promotion_code"),
         RemovePromotionCode("remove_promotion_code"),
         UpdateEmail("update_email"),
-        UpdateShippingAddress("update_shipping_address"),
-        UpdateBillingAddress("update_billing_address"),
+        UpdateShippingAddress("update_shipping_address", mapOf(DID_REQUEST_TAX_UPDATE to false)),
+        UpdateBillingAddress("update_billing_address", mapOf(DID_REQUEST_TAX_UPDATE to false)),
         UpdateCurrency("update_currency"),
         RunServerUpdate("run_server_update"),
         ClearPaymentOption("clear_payment_option"),
+    }
+
+    enum class InvocationSource(val code: String) {
+        Merchant("merchant"),
+        PaymentElement("payment_element"),
+        ExpressCheckoutElement("express_checkout_element"),
+        ShippingAddressElement("shipping_address_element"),
     }
 
     enum class Outcome(val code: String) {

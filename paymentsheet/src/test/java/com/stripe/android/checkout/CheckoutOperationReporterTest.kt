@@ -3,10 +3,14 @@
 package com.stripe.android.checkout
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent.InvocationSource
 import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent.Operation
 import com.stripe.android.checkout.analytics.CheckoutOperationReporter
+import com.stripe.android.checkout.analytics.analyticsParams
+import com.stripe.android.checkout.analytics.measureAddressUpdate
 import com.stripe.android.checkout.analytics.toAnalyticsMap
 import com.stripe.android.paymentsheet.analytics.FakeAnalyticsRequestExecutor
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse.TaxAddressSource
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.TimeoutCancellationException
@@ -105,7 +109,8 @@ internal class CheckoutOperationReporterTest {
         }
         caller.join()
 
-        assertThat(result?.exceptionOrNull()).isSameInstanceAs(cancellation)
+        assertThat(result).isNull()
+        assertThat(caller.isCancelled).isTrue()
         analyticsRequestExecutor.awaitEvent(INIT_STARTED_EVENT)
         analyticsRequestExecutor.awaitEvent(INIT_FAILED_EVENT)
     }
@@ -138,20 +143,127 @@ internal class CheckoutOperationReporterTest {
     }
 
     @Test
-    fun `reportCompleted reports started and succeeded with the session metadata`() = runScenario {
+    fun `reportCompleted reports started without the tax update flag then succeeded with the default`() = runScenario {
         val response = CheckoutSessionResponseFactory.create(id = "cs_test_completed", configId = "cfg_completed")
 
         reporter.reportCompleted(
             operation = Operation.UpdateBillingAddress,
-            params = emptyMap(),
+            params = mapOf("invocation_source" to "payment_element"),
             response = response,
         )
 
         val started = analyticsRequestExecutor.awaitEvent("checkout_elements.update_billing_address.started")
+        assertThat(started).containsEntry("invocation_source", "payment_element")
         assertThat(started).containsEntry("checkout_session_id", "cs_test_completed")
+        assertThat(started).doesNotContainKey("did_request_tax_update")
         assertThat(started).doesNotContainKey("duration")
         val succeeded = analyticsRequestExecutor.awaitEvent("checkout_elements.update_billing_address.succeeded")
+        assertThat(succeeded).containsEntry("invocation_source", "payment_element")
+        assertThat(succeeded).containsEntry("did_request_tax_update", false)
         assertThat(succeeded).containsEntry("checkout_session_id", "cs_test_completed")
+    }
+
+    @Test
+    fun `address operation rejected before work reports the tax update flag as false when failed`() = runScenario {
+        val response = CheckoutSessionResponseFactory.create(id = "cs_test_rejected")
+
+        reporter.measure(
+            operation = Operation.UpdateShippingAddress,
+            params = InvocationSource.Merchant.analyticsParams(),
+            response = response,
+        ) {
+            Result.failure<Unit>(IllegalStateException("Cannot mutate checkout session while presented."))
+        }
+
+        val started = analyticsRequestExecutor.awaitEvent("checkout_elements.update_shipping_address.started")
+        assertThat(started).doesNotContainKey("did_request_tax_update")
+        val failed = analyticsRequestExecutor.awaitEvent("checkout_elements.update_shipping_address.failed")
+        assertThat(failed).containsEntry("invocation_source", "merchant")
+        assertThat(failed).containsEntry("did_request_tax_update", false)
+    }
+
+    @Test
+    fun `address request failure reports the attempt with the starting response`() = runScenario {
+        val response = CheckoutSessionResponseFactory.create(configId = "cfg_starting")
+        val error = IllegalArgumentException("Rejected address")
+
+        val result = reporter.measureAddressUpdate(
+            addressSource = TaxAddressSource.BILLING,
+            response = response,
+        ) {
+            TaxRegionUpdateOutcome(Result.failure(error), requestAttempted = true)
+        }
+
+        assertThat(result.exceptionOrNull()).isSameInstanceAs(error)
+        analyticsRequestExecutor.awaitEvent("checkout_elements.update_billing_address.started")
+        val failed = analyticsRequestExecutor.awaitEvent("checkout_elements.update_billing_address.failed")
+        assertThat(failed).containsEntry("did_request_tax_update", true)
+        assertThat(failed).containsEntry("checkout_config_id", "cfg_starting")
+    }
+
+    @Test
+    fun `reload failure retains the successful tax response and attempted fact`() = runScenario {
+        val startingResponse = CheckoutSessionResponseFactory.create(configId = "cfg_starting")
+        val updatedResponse = CheckoutSessionResponseFactory.create(configId = "cfg_updated")
+        val reloadError = IllegalStateException("Reload failed")
+
+        reporter.measure(
+            operation = Operation.UpdateShippingAddress,
+            params = emptyMap(),
+            response = startingResponse,
+        ) { operation ->
+            operation.reportAddressUpdateResult(
+                TaxRegionUpdateOutcome(Result.success(updatedResponse), requestAttempted = true)
+            )
+            Result.failure<Unit>(reloadError)
+        }
+
+        analyticsRequestExecutor.awaitEvent("checkout_elements.update_shipping_address.started")
+        val failed = analyticsRequestExecutor.awaitEvent("checkout_elements.update_shipping_address.failed")
+        assertThat(failed).containsEntry("did_request_tax_update", true)
+        assertThat(failed).containsEntry("checkout_config_id", "cfg_updated")
+    }
+
+    @Test
+    fun `init reports nested address cancellation and propagates cancellation caught by its owner`() = runScenario {
+        var result: Result<Unit>? = null
+        val response = CheckoutSessionResponseFactory.create()
+        val caller = testScope.launch(UnconfinedTestDispatcher(testScope.testScheduler)) {
+            result = reporter.measure(Operation.Init, params = emptyMap(), response = null) {
+                runCatching {
+                    reporter.measureAddressUpdate(
+                        addressSource = TaxAddressSource.BILLING,
+                        response = response,
+                    ) {
+                        currentCoroutineContext().cancel()
+                        TaxRegionUpdateOutcome(Result.failure(CancellationException("Canceled")), requestAttempted = true)
+                    }.getOrThrow()
+                    Unit
+                }
+            }
+        }
+        caller.join()
+
+        assertThat(result).isNull()
+        assertThat(caller.isCancelled).isTrue()
+        analyticsRequestExecutor.awaitEvent(INIT_STARTED_EVENT)
+        analyticsRequestExecutor.awaitEvent("checkout_elements.update_billing_address.started")
+        val addressFailed = analyticsRequestExecutor.awaitEvent("checkout_elements.update_billing_address.failed")
+        assertThat(addressFailed).containsEntry("did_request_tax_update", true)
+        analyticsRequestExecutor.awaitEvent(INIT_FAILED_EVENT)
+    }
+
+    @Test
+    fun `operations without completion defaults do not report the tax update flag`() = runScenario {
+        reporter.reportCompleted(
+            operation = Operation.UpdateEmail,
+            params = emptyMap(),
+            response = CheckoutSessionResponseFactory.create(),
+        )
+
+        analyticsRequestExecutor.awaitEvent("checkout_elements.update_email.started")
+        val succeeded = analyticsRequestExecutor.awaitEvent("checkout_elements.update_email.succeeded")
+        assertThat(succeeded).doesNotContainKey("did_request_tax_update")
     }
 
     @Test

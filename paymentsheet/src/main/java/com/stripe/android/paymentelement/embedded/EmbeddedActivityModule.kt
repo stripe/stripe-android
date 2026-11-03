@@ -5,6 +5,7 @@ import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
+import com.stripe.android.checkout.analytics.CheckoutConfigurationAnalytics
 import com.stripe.android.checkout.analytics.CheckoutOperationReporter
 import com.stripe.android.common.spms.DefaultLinkFormElementFactory
 import com.stripe.android.common.spms.DefaultLinkInlineSignupAvailability
@@ -163,6 +164,7 @@ internal interface EmbeddedActivityModule {
             apiConfigurationProvider: Provider<ApiConfiguration.State>,
             analyticsRequestExecutor: AnalyticsRequestExecutor,
             @IOContext workContext: CoroutineContext,
+            checkoutConfigurationAnalytics: CheckoutConfigurationAnalytics?,
         ): CheckoutOperationReporter = CheckoutOperationReporter(
             context = context,
             apiConfigurationProvider = apiConfigurationProvider,
@@ -170,7 +172,7 @@ internal interface EmbeddedActivityModule {
             timeSource = TimeSource.Monotonic,
             workContext = workContext,
             publishableKey = { apiConfigurationProvider.get().publishableKey },
-            configurationParams = { emptyMap() },
+            configurationParams = { checkoutConfigurationAnalytics?.params.orEmpty() },
         )
 
         @Provides

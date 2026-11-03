@@ -2,8 +2,12 @@ package com.stripe.android.paymentelement.embedded.sheet
 
 import com.stripe.android.checkout.CheckoutElementsController
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
-import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent.Operation
+import com.stripe.android.checkout.TaxRegionUpdateOutcome
+import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent.InvocationSource
 import com.stripe.android.checkout.analytics.CheckoutOperationReporter
+import com.stripe.android.checkout.analytics.analyticsParams
+import com.stripe.android.checkout.analytics.measureAddressUpdate
+import com.stripe.android.checkout.analytics.reportAddressUpdateWithoutRequest
 import com.stripe.android.checkout.toCheckoutAddress
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -18,7 +22,7 @@ internal typealias TaxRegionUpdate = suspend (
     CheckoutSessionResponse,
     CheckoutSessionResponse.TaxAddressSource,
     CheckoutElementsController.Address.State?,
-) -> Result<CheckoutSessionResponse>
+) -> TaxRegionUpdateOutcome
 
 @OptIn(CheckoutSessionPreview::class)
 internal class SheetTaxRegionUpdater internal constructor(
@@ -30,9 +34,7 @@ internal class SheetTaxRegionUpdater internal constructor(
         taxRegionUpdater: CheckoutSessionTaxRegionUpdater,
         operationReporter: CheckoutOperationReporter,
     ) : this(
-        updateTaxRegion = { response, addressSource, address ->
-            taxRegionUpdater.updateServerStateIfNeeded(response, addressSource, address)
-        },
+        updateTaxRegion = taxRegionUpdater::updateServerStateIfNeeded,
         operationReporter = operationReporter,
     )
 
@@ -47,9 +49,9 @@ internal class SheetTaxRegionUpdater internal constructor(
     ): SheetTaxRegionUpdate? {
         val initialResponse = checkoutSessionResponse ?: return null
         if (!initialResponse.collectsTaxFromBillingAddress) {
-            operationReporter.reportCompleted(
-                operation = Operation.UpdateBillingAddress,
-                params = emptyMap(),
+            operationReporter.reportAddressUpdateWithoutRequest(
+                addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+                invocationSource = InvocationSource.PaymentElement,
                 response = initialResponse,
             )
             return null
@@ -57,16 +59,16 @@ internal class SheetTaxRegionUpdater internal constructor(
         val address = selection?.billingDetails?.address?.toCheckoutAddress()
 
         return {
-            operationReporter.measure(
-                operation = Operation.UpdateBillingAddress,
-                params = emptyMap(),
+            operationReporter.measureAddressUpdate(
+                addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+                params = InvocationSource.PaymentElement.analyticsParams(),
                 response = initialResponse,
-            ) { analytics ->
+            ) {
                 updateTaxRegion(
                     initialResponse,
                     CheckoutSessionResponse.TaxAddressSource.BILLING,
                     address,
-                ).onSuccess { analytics.recordResponse(it) }
+                )
             }
         }
     }
