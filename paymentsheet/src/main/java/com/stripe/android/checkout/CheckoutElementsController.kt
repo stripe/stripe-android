@@ -53,6 +53,9 @@ import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.time.Duration.Companion.seconds
+import kotlin.time.DurationUnit
+import kotlin.time.TimeMark
+import kotlin.time.TimeSource
 
 private val SERVER_UPDATE_TIMEOUT_MS = 20.seconds.inWholeMilliseconds
 
@@ -79,6 +82,7 @@ class CheckoutElementsController @Inject internal constructor(
     private val checkoutElementsPresenterSubcomponentFactory: CheckoutElementsPresenterSubcomponent.Factory,
     @PaymentElementCallbackIdentifier internal val paymentElementCallbackIdentifier: String,
     private val savedState: CheckoutElementsControllerSavedState,
+    private val timeSource: TimeSource,
     private val operationReporter: CheckoutOperationReporter,
 ) {
     /**
@@ -377,21 +381,35 @@ class CheckoutElementsController @Inject internal constructor(
         // Preserve the merchant's context while keeping the callback a child of the mutation's
         // timeout and cancellation scope.
         val callerContext = currentCoroutineContext().minusKey(Job)
-        return withCheckoutState(Operation.RunServerUpdate) {
-            withContext(callerContext) {
-                withTimeout(SERVER_UPDATE_TIMEOUT_MS) { serverUpdate() }
-            }.fold(
+        return withCheckoutState(Operation.RunServerUpdate) { analytics ->
+            val merchantUpdateStartedAt = timeSource.markNow()
+            val merchantUpdate = try {
+                withContext(callerContext) {
+                    withTimeout(SERVER_UPDATE_TIMEOUT_MS) { serverUpdate() }
+                }
+            } finally {
+                analytics.putCompletionParam("merchant_update_duration", merchantUpdateStartedAt.elapsedSeconds())
+            }
+            merchantUpdate.fold(
                 onSuccess = {
-                    checkoutSessionRepository.init(
-                        sessionId = checkoutSessionResponse.id,
-                        clientSecret = checkoutSessionResponse.clientSecret,
-                        adaptivePricingAllowed = configuration.currencySelectorElementConfiguration != null,
-                    )
+                    val refreshStartedAt = timeSource.markNow()
+                    try {
+                        checkoutSessionRepository.init(
+                            sessionId = checkoutSessionResponse.id,
+                            clientSecret = checkoutSessionResponse.clientSecret,
+                            adaptivePricingAllowed = configuration.currencySelectorElementConfiguration != null,
+                        )
+                    } finally {
+                        analytics.putCompletionParam("refresh_duration", refreshStartedAt.elapsedSeconds())
+                    }
                 },
                 onFailure = { kotlin.Result.failure(it) },
             )
         }.toOperationResult()
     }
+
+    // Matches the seconds format of an operation's own duration.
+    private fun TimeMark.elapsedSeconds(): Float = elapsedNow().toDouble(DurationUnit.SECONDS).toFloat()
 
     /**
      * Runs a reported Checkout operation behind the operation coordinator so operations run in
