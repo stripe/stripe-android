@@ -144,7 +144,8 @@ private fun GooglePrimaryButton(
         Box(modifier = modifier.testTag(GOOGLE_PAY_PRIMARY_BUTTON_TEST_TAG)) {
             PrimaryButton(
                 label = "",
-                icon = PrimaryButtonIcon.Lock,
+                // This button only renders processing/completed states, which never display an idle icon.
+                icon = PrimaryButtonIcon.None,
                 enabled = true,
                 processingState = processingState,
                 onProcessingCompleted = {
