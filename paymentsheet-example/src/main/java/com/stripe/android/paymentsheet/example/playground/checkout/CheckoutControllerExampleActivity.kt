@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentsheet.example.playground.PlaygroundTheme
 import com.stripe.android.paymentsheet.example.playground.SearchSettingsField
 import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutPlaygroundDefinitions
+import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutPlaygroundScenario
 import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutPlaygroundScenarios
 import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutPlaygroundScenariosUi
 import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutPlaygroundSettingsUi
@@ -230,9 +231,12 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
     }
 
     companion object {
-        fun createTestIntent(context: Context, settingsJson: String): Intent {
+        fun createTestIntent(context: Context, scenario: CheckoutPlaygroundScenario.Leaf): Intent {
             return Intent(context, CheckoutControllerExampleActivity::class.java)
-                .putExtra(CheckoutControllerExampleViewModel.SETTINGS_JSON_KEY, settingsJson)
+                .putExtra(
+                    CheckoutControllerExampleViewModel.SCENARIO_PATH_KEY,
+                    CheckoutPlaygroundScenarios.pathOf(scenario),
+                )
         }
     }
 }

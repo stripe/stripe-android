@@ -24,10 +24,7 @@ class CheckoutPlaygroundScenariosTest {
 
     @Test
     fun `catalog paths are unique`() {
-        val paths = CheckoutPlaygroundScenarios.root.leafPaths()
-
-        assertThat(paths).containsNoDuplicates()
-        assertThat(paths).hasSize(CheckoutPlaygroundScenarios.leaves.size)
+        assertThat(CheckoutPlaygroundScenarios.leavesByPath).hasSize(CheckoutPlaygroundScenarios.leaves.size)
     }
 
     @Test
@@ -108,17 +105,5 @@ class CheckoutPlaygroundScenariosTest {
         return CheckoutPlaygroundSettings.createInMemory().apply {
             applyPreset(leaf.preset)
         }.snapshot()
-    }
-}
-
-private fun CheckoutPlaygroundScenario.Group.leafPaths(
-    parents: List<String> = emptyList(),
-): List<String> {
-    val path = parents + key
-    return children.flatMap { child ->
-        when (child) {
-            is CheckoutPlaygroundScenario.Group -> child.leafPaths(path)
-            is CheckoutPlaygroundScenario.Leaf -> listOf((path + child.key).joinToString("/"))
-        }
     }
 }
