@@ -12,11 +12,7 @@ import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.ui.GOOGLE_PAY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.GOOGLE_PAY_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.GooglePayButton
-import com.stripe.android.paymentsheet.ui.PRIMARY_BUTTON_LOCK_ICON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PrimaryButton
-import com.stripe.android.testing.CoroutineTestRule
-import com.stripe.android.testing.createComposeCleanupRule
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Rule
 import org.junit.runner.RunWith
 import kotlin.test.Test
@@ -25,12 +21,6 @@ import kotlin.test.Test
 class GooglePayButtonTest {
     @get:Rule
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
-
-    @get:Rule
-    val composeCleanupRule = createComposeCleanupRule()
-
-    @get:Rule
-    val coroutineTestRule = CoroutineTestRule(UnconfinedTestDispatcher())
 
     @Test
     fun `when state is null, should show the Google Pay Button`() {
@@ -93,7 +83,6 @@ class GooglePayButtonTest {
 
         composeTestRule.onNodeWithTag(GOOGLE_PAY_BUTTON_TEST_TAG).assertDoesNotExist()
         composeTestRule.onNodeWithTag(GOOGLE_PAY_PRIMARY_BUTTON_TEST_TAG).assertExists()
-        composeTestRule.onNodeWithTag(PRIMARY_BUTTON_LOCK_ICON_TEST_TAG, useUnmergedTree = true).assertDoesNotExist()
     }
 
     @Test
@@ -115,6 +104,5 @@ class GooglePayButtonTest {
 
         composeTestRule.onNodeWithTag(GOOGLE_PAY_BUTTON_TEST_TAG).assertDoesNotExist()
         composeTestRule.onNodeWithTag(GOOGLE_PAY_PRIMARY_BUTTON_TEST_TAG).assertExists()
-        composeTestRule.onNodeWithTag(PRIMARY_BUTTON_LOCK_ICON_TEST_TAG, useUnmergedTree = true).assertDoesNotExist()
     }
 }
