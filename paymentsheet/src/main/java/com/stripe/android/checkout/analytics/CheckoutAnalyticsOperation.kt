@@ -21,7 +21,7 @@ internal abstract class CheckoutAnalyticsOperation<E>(
 
     protected abstract fun analyticsError(error: E): CheckoutAnalyticsEvent.Error
 
-    fun started(response: CheckoutSessionResponse?) {
+    open fun started(response: CheckoutSessionResponse?) {
         reportOutcome(Outcome.Started, response, error = null)
     }
 
