@@ -189,15 +189,12 @@ class CheckoutSessionRepositoryTest {
         }
 
         val result = repository.updateCurrency(
-            checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+            sessionId = DEFAULT_CHECKOUT_SESSION_ID,
+            clientSecret = "cs_test_abc123_secret_test",
             currencyCode = "eur",
         )
 
         assertThat(result.getOrThrow().clientSecret).isEqualTo("cs_test_abc123_secret_test")
-        analyticsRequestExecutor.awaitEvent("checkout_elements.update_currency.started")
-        analyticsRequestExecutor.awaitEvent("checkout_elements.update_currency.succeeded")
-        analyticsRequestExecutor.awaitEvent("elements.adaptive_pricing.currency_toggled")
-        analyticsRequestExecutor.validate()
     }
 
     @Test
@@ -208,59 +205,44 @@ class CheckoutSessionRepositoryTest {
         }
 
         val result = repository.updateCurrency(
-            checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+            sessionId = DEFAULT_CHECKOUT_SESSION_ID,
+            clientSecret = "cs_test_abc123_secret_test",
             currencyCode = "invalid",
         )
 
         assertThat(result.isFailure).isTrue()
-        analyticsRequestExecutor.awaitEvent("checkout_elements.update_currency.started")
-        analyticsRequestExecutor.awaitEvent("checkout_elements.update_currency.failed")
-        analyticsRequestExecutor.awaitEvent("elements.adaptive_pricing.currency_toggled.failed")
-        analyticsRequestExecutor.validate()
     }
 
     @Test
-    fun `updateCurrency reports requested currency on started and succeeded, then currency_toggled`() = runTest {
+    fun `updateCurrency fires currency_toggled on success`() = runTest {
         networkRule.checkoutUpdate { response ->
             response.testBodyFromFile("checkout-session-init.json")
         }
 
         repository.updateCurrency(
-            checkoutSessionResponse = eurCheckoutSessionResponse(),
-            currencyCode = "usd",
+            sessionId = DEFAULT_CHECKOUT_SESSION_ID,
+            clientSecret = "cs_test_abc123_secret_test",
+            currencyCode = "eur",
         ).getOrThrow()
 
-        val started = analyticsRequestExecutor.awaitEvent("checkout_elements.update_currency.started")
-        assertThat(started).containsEntry("requested_currency", "usd")
-        assertThat(started).containsEntry("currency", "eur")
-        assertThat(started).doesNotContainKey("duration")
-        val succeeded = analyticsRequestExecutor.awaitEvent("checkout_elements.update_currency.succeeded")
-        assertThat(succeeded).containsEntry("requested_currency", "usd")
-        assertThat(succeeded).containsEntry("currency", "usd")
-        assertThat(succeeded).containsKey("duration")
         analyticsRequestExecutor.awaitEvent("elements.adaptive_pricing.currency_toggled")
         analyticsRequestExecutor.validate()
     }
 
     @Test
-    fun `updateCurrency reports requested currency on started and failed, then currency_toggled_failed`() = runTest {
+    fun `updateCurrency fires currency_toggled_failed on failure`() = runTest {
         networkRule.checkoutUpdate { response ->
             response.setResponseCode(400)
-            response.setBody("""{"error": {"type": "invalid_request_error", "message": "Invalid currency"}}""")
+            response.setBody("""{"error": {"message": "Invalid currency"}}""")
         }
 
-        repository.updateCurrency(
-            checkoutSessionResponse = eurCheckoutSessionResponse(),
+        val result = repository.updateCurrency(
+            sessionId = DEFAULT_CHECKOUT_SESSION_ID,
+            clientSecret = "cs_test_abc123_secret_test",
             currencyCode = "invalid",
         )
 
-        val started = analyticsRequestExecutor.awaitEvent("checkout_elements.update_currency.started")
-        assertThat(started).containsEntry("requested_currency", "invalid")
-        val failed = analyticsRequestExecutor.awaitEvent("checkout_elements.update_currency.failed")
-        assertThat(failed).containsEntry("requested_currency", "invalid")
-        assertThat(failed).containsEntry("currency", "eur")
-        assertThat(failed).containsEntry("error_type", "invalid_request_error")
-        assertThat(failed).containsKey("duration")
+        assertThat(result.isFailure).isTrue()
         analyticsRequestExecutor.awaitEvent("elements.adaptive_pricing.currency_toggled.failed")
         analyticsRequestExecutor.validate()
     }
@@ -301,7 +283,4 @@ class CheckoutSessionRepositoryTest {
 
         assertThat(result.exceptionOrNull()).isInstanceOf(APIException::class.java)
     }
-
-    private fun eurCheckoutSessionResponse() =
-        CheckoutSessionResponseFactory.create(currency = "eur", integrationCurrency = "usd")
 }

@@ -237,21 +237,16 @@ internal class CheckoutSessionRepository @Inject constructor(
     )
 
     suspend fun updateCurrency(
-        checkoutSessionResponse: CheckoutSessionResponse,
+        sessionId: String,
+        clientSecret: String,
         currencyCode: String,
-    ): Result<CheckoutSessionResponse> = measure(
-        operation = Operation.UpdateCurrency,
-        checkoutSessionResponse = checkoutSessionResponse,
-        params = mapOf("requested_currency" to currencyCode),
-    ) {
-        executePost(
-            clientSecret = checkoutSessionResponse.clientSecret,
-            url = updateUrl(checkoutSessionResponse.id),
-            params = mapOf(
-                "adaptive_pricing[currency]" to currencyCode,
-            ),
-        )
-    }.onSuccess {
+    ): Result<CheckoutSessionResponse> = executePost(
+        clientSecret = clientSecret,
+        url = updateUrl(sessionId),
+        params = mapOf(
+            "adaptive_pricing[currency]" to currencyCode,
+        ),
+    ).onSuccess {
         fireEvent(PaymentSheetEvent.AdaptivePricingCurrencyToggled())
     }.onFailure {
         fireEvent(PaymentSheetEvent.AdaptivePricingCurrencyToggledFailed(error = it.safeAnalyticsMessage))
