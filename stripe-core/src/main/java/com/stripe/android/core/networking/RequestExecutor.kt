@@ -10,6 +10,7 @@ import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
+import org.json.JSONObject
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 suspend fun <Response : StripeModel> executeRequestWithModelJsonParser(
@@ -50,17 +51,16 @@ suspend fun <Response : StripeModel> executeRequestWithResultParser(
             if (response.isError) {
                 Result.failure(apiException(stripeErrorJsonParser, response))
             } else {
-                val parsedResponse = runCatching {
-                    responseJsonParser.parse(response.responseJson())
-                }.getOrNull()
-
-                if (parsedResponse != null) {
-                    Result.success(parsedResponse)
-                } else {
-                    Result.failure(
-                        APIException(message = "$responseJsonParser returns null for ${response.responseJson()}")
-                    )
-                }
+                runCatching {
+                    response.responseJson()
+                }.fold(
+                    onSuccess = { json ->
+                        responseJsonParser.parseForResult(json)
+                    },
+                    onFailure = { jsonError ->
+                        Result.failure(jsonError)
+                    }
+                )
             }
         },
         onFailure = {
@@ -123,6 +123,29 @@ suspend fun <Response> executeRequestWithKSerializerParser(
         },
         onFailure = {
             Result.failure(connectionException(request, it))
+        }
+    )
+}
+
+private fun <Response : StripeModel> ModelJsonParser<Response>.parseForResult(
+    json: JSONObject
+): Result<Response> {
+    return runCatching {
+        parse(json)
+    }.fold(
+        onSuccess = { parsedResponse ->
+            if (parsedResponse != null) {
+                Result.success(parsedResponse)
+            } else {
+                Result.failure(
+                    APIException(
+                        message = "$this returns null for $json"
+                    )
+                )
+            }
+        },
+        onFailure = { parseError ->
+            Result.failure(parseError)
         }
     )
 }
