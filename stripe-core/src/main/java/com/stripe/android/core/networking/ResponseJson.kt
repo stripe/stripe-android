@@ -13,6 +13,8 @@ fun StripeResponse<String>.responseJson(): JSONObject =
             JSONObject(it)
         } catch (e: JSONException) {
             throw APIException(
+                requestId = requestId?.value,
+                statusCode = code,
                 message =
                 """
                     Exception while parsing response body.
