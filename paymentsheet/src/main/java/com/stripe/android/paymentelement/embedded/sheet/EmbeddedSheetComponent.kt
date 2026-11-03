@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.embedded.sheet
 
 import android.app.Application
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.checkout.analytics.CheckoutConfigurationAnalytics
 import com.stripe.android.common.di.ElementsSessionClientParamsModule
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
@@ -68,6 +69,7 @@ internal interface EmbeddedSheetComponent {
             @BindsInstance savedStateHandle: SavedStateHandle,
             @BindsInstance promotions: List<PaymentMethodMessagePromotion>,
             @BindsInstance launchMode: EmbeddedLaunchMode,
+            @BindsInstance checkoutConfigurationAnalytics: CheckoutConfigurationAnalytics?,
             @BindsInstance
             @ViewModelScope
             viewModelScope: CoroutineScope,

@@ -32,6 +32,10 @@ internal class CheckoutAnalyticsPerformer @Inject constructor(
     private val durationProvider: DurationProvider,
     private val operationReporter: CheckoutOperationReporter,
 ) {
+    /** The element that started the in-flight confirmation, or null when none is in flight. */
+    fun confirmationInvocationSource(): InvocationSource? =
+        savedStateHandle.get<CheckoutConfirmationContext>(CONFIRMATION_CONTEXT_KEY)?.invocationSource
+
     fun onPaymentElementConfirmationStarted(paymentSelection: PaymentSelection) {
         saveConfirmation(InvocationSource.Merchant, paymentSelection)
     }

@@ -1,9 +1,14 @@
+@file:OptIn(com.stripe.android.paymentelement.CheckoutSessionPreview::class)
+
 package com.stripe.android.paymentsheet.addresselement
 
 import android.app.Application
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkout.CheckoutControllerStateFactory
+import com.stripe.android.checkout.analytics.CheckoutConfigurationAnalytics
+import com.stripe.android.checkout.analytics.toAnalyticsMap
 import com.stripe.android.common.ui.PRIMARY_BUTTON_LOADING_INDICATOR_TEST_TAG
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.ApiRequest
@@ -60,10 +65,15 @@ internal class AddressElementActivityAnalyticsTest {
             analyticsPayloadField("status_code", "400"),
             not(hasQueryParam("error_message")),
         )
+        val operationFailedRequest = expectUpdateShippingAddressAnalytics(
+            "failed",
+            analyticsPayloadField("did_request_tax_update", "true"),
+        )
         taxUpdate.releaseResponse.countDown()
 
         addressPage.assertErrorDisplayed(applicationContext.getString(R.string.stripe_something_went_wrong))
         awaitAnalytics(failedRequest)
+        awaitAnalytics(operationFailedRequest)
         addressPage.assertReadyToSave()
     }
 
@@ -77,10 +87,15 @@ internal class AddressElementActivityAnalyticsTest {
             analyticsPayloadField("status_code", "400"),
             not(hasQueryParam("error_message")),
         )
+        val operationFailedRequest = expectUpdateShippingAddressAnalytics(
+            "failed",
+            analyticsPayloadField("did_request_tax_update", "true"),
+        )
         taxUpdate.releaseResponse.countDown()
 
         addressPage.assertErrorDisplayed(applicationContext.getString(R.string.stripe_something_went_wrong))
         awaitAnalytics(failedRequest)
+        awaitAnalytics(operationFailedRequest)
         addressPage.assertReadyToSave()
 
         val canceledRequest = expectShippingAnalytics("elements.shipping_address.canceled")
@@ -204,11 +219,16 @@ internal class AddressElementActivityAnalyticsTest {
         assertDismissalBlocked()
 
         val completedRequest = expectShippingAnalytics("elements.shipping_address.save_completed")
+        val operationSucceededRequest = expectUpdateShippingAddressAnalytics(
+            "succeeded",
+            analyticsPayloadField("did_request_tax_update", "true"),
+        )
         taxUpdate.releaseResponse.countDown()
 
         val result = awaitResult() as AddressElementActivityContract.Result.CheckoutShippingSucceeded
         assertThat(result.checkoutSessionResponse.id).isEqualTo(checkoutSessionResponse.id)
         awaitAnalytics(completedRequest)
+        awaitAnalytics(operationSucceededRequest)
     }
 
     @Test
@@ -225,11 +245,16 @@ internal class AddressElementActivityAnalyticsTest {
         assertDismissalBlocked()
 
         val completedRequest = expectShippingAnalytics("elements.shipping_address.save_completed")
+        val operationSucceededRequest = expectUpdateShippingAddressAnalytics(
+            "succeeded",
+            analyticsPayloadField("did_request_tax_update", "true"),
+        )
         taxUpdate.releaseResponse.countDown()
 
         val result = awaitResult() as AddressElementActivityContract.Result.CheckoutShippingSucceeded
         assertThat(result.checkoutSessionResponse.id).isEqualTo(checkoutSessionResponse.id)
         awaitAnalytics(completedRequest)
+        awaitAnalytics(operationSucceededRequest)
     }
 
     private fun runTaxScenario(
@@ -264,6 +289,9 @@ internal class AddressElementActivityAnalyticsTest {
                     .address(SHIPPING_ADDRESS)
                     .build(),
                 checkoutSessionResponse = checkoutSessionResponse,
+                checkoutConfigurationAnalytics = CheckoutConfigurationAnalytics(
+                    CheckoutControllerStateFactory.create().configuration.toAnalyticsMap()
+                ),
             ),
         ) {
             awaitAnalytics(shownRequest)

@@ -11,7 +11,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.AnnotatedString
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent.InvocationSource
+import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent.Operation
 import com.stripe.android.checkout.analytics.CheckoutOperationReporter
+import com.stripe.android.checkout.analytics.InitOperation
+import com.stripe.android.checkout.analytics.MeasuredOperation
+import com.stripe.android.checkout.analytics.analyticsParams
+import com.stripe.android.checkout.analytics.measureAddressUpdate
+import com.stripe.android.checkout.analytics.toAnalyticsMap
+import com.stripe.android.checkout.analytics.updateServerStateIfNeeded
 import com.stripe.android.checkout.injection.CheckoutPresenterSubcomponent
 import com.stripe.android.checkout.injection.DaggerCheckoutControllerComponent
 import com.stripe.android.common.exception.stripeErrorMessage
@@ -50,6 +58,9 @@ import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.time.Duration.Companion.seconds
+import kotlin.time.DurationUnit
+import kotlin.time.TimeMark
+import kotlin.time.TimeSource
 
 private val SERVER_UPDATE_TIMEOUT_MS = 20.seconds.inWholeMilliseconds
 
@@ -77,6 +88,7 @@ class CheckoutController @Inject internal constructor(
     @PaymentElementCallbackIdentifier internal val paymentElementCallbackIdentifier: String,
     private val savedState: CheckoutControllerSavedState,
     private val checkoutAnalyticsPerformer: CheckoutAnalyticsPerformer,
+    private val timeSource: TimeSource,
     private val operationReporter: CheckoutOperationReporter,
 ) {
     /**
@@ -131,23 +143,14 @@ class CheckoutController @Inject internal constructor(
                         configuration = configurationState,
                         checkoutSessionResponse = response,
                     )
-                    val addressSource = response.taxAddressSource
-                    val taxAddress = when (addressSource) {
-                        CheckoutSessionResponse.TaxAddressSource.SHIPPING ->
-                            initialLoad.state.collectedDetails.shippingAddress
-                        CheckoutSessionResponse.TaxAddressSource.BILLING ->
-                            initialLoad.state.paymentSelection?.billingDetails?.address?.toCheckoutAddress()
-                                ?: configurationState.defaults.billingDetails?.address
-                        null -> null
-                    }
-                    if (taxAddress != null && addressSource != null && response.automaticTaxEnabled) {
-                        val updatedResponse = checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
-                            checkoutSessionResponse = response,
-                            addressSource = addressSource,
-                            address = taxAddress,
-                        ).getOrThrow()
-                        analytics.recordResponse(updatedResponse)
-                        // The updated totals change payment method metadata, so rebuild it before publishing.
+                    val updatedResponse = applyInitialAddresses(
+                        configuration = configurationState,
+                        initialState = initialLoad.state,
+                        response = response,
+                        initOperation = analytics,
+                    )
+                    // The tax updater returns the same response when it sends nothing.
+                    if (updatedResponse !== response) {
                         checkoutStateLoader.reload(initialLoad.state.copy(checkoutSessionResponse = updatedResponse))
                     } else {
                         checkoutStateLoader.publish(initialLoad)
@@ -162,15 +165,73 @@ class CheckoutController @Inject internal constructor(
     }.toOperationResult()
 
     /**
+     * Applies the addresses [initialState] starts with, each reported as its own address update, and
+     * sends the tax region for the one the session collects tax from. Returns the updated response, or
+     * [response] when no update is sent.
+     */
+    private suspend fun applyInitialAddresses(
+        configuration: Configuration.State,
+        initialState: CheckoutControllerState,
+        response: CheckoutSessionResponse,
+        initOperation: InitOperation,
+    ): CheckoutSessionResponse {
+        // Init events carry the configuration being applied, not the previously published one.
+        val configurationParams = configuration.toAnalyticsMap()
+        var current = response
+        val selectionBillingAddress = initialState.paymentSelection?.billingDetails?.address?.toCheckoutAddress()
+        val billingAddress = selectionBillingAddress ?: configuration.defaults.billingDetails?.address
+        if (billingAddress != null) {
+            val invocationSource = if (selectionBillingAddress != null) {
+                InvocationSource.PaymentElement
+            } else {
+                InvocationSource.Merchant
+            }
+            current = applyInitialAddress(
+                addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+                params = invocationSource.analyticsParams() + configurationParams,
+                response = current,
+                address = billingAddress,
+            ).also(initOperation::recordResponse)
+        }
+        initialState.collectedDetails.shippingAddress?.let { shippingAddress ->
+            current = applyInitialAddress(
+                addressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
+                params = InvocationSource.Merchant.analyticsParams() + configurationParams,
+                response = current,
+                address = shippingAddress,
+            ).also(initOperation::recordResponse)
+        }
+        return current
+    }
+
+    private suspend fun applyInitialAddress(
+        addressSource: CheckoutSessionResponse.TaxAddressSource,
+        params: Map<String, Any?>,
+        response: CheckoutSessionResponse,
+        address: Address.State,
+    ): CheckoutSessionResponse = operationReporter.measureAddressUpdate(
+        addressSource = addressSource,
+        params = params,
+        response = response,
+    ) { analytics ->
+        checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
+            operation = analytics,
+            checkoutSessionResponse = response,
+            addressSource = addressSource,
+            address = address,
+        )
+    }.getOrThrow()
+
+    /**
      * Applies a promotion code to the checkout session.
      *
      * @param promotionCode The promotion code to apply. Leading/trailing whitespace is trimmed.
      */
     suspend fun applyPromotionCode(
         promotionCode: String,
-    ): OperationResult = withCheckoutState { sessionId ->
+    ): OperationResult = withCheckoutState(Operation.ApplyPromotionCode) {
         checkoutSessionRepository.applyPromotionCode(
-            sessionId = sessionId,
+            sessionId = checkoutSessionResponse.id,
             clientSecret = checkoutSessionResponse.clientSecret,
             promotionCode = promotionCode.trim(),
         )
@@ -179,9 +240,11 @@ class CheckoutController @Inject internal constructor(
     /**
      * Removes the currently applied promotion code from the checkout session.
      */
-    suspend fun removePromotionCode(): OperationResult = withCheckoutState { sessionId ->
+    suspend fun removePromotionCode(): OperationResult = withCheckoutState(
+        operation = Operation.RemovePromotionCode,
+    ) {
         checkoutSessionRepository.applyPromotionCode(
-            sessionId = sessionId,
+            sessionId = checkoutSessionResponse.id,
             clientSecret = checkoutSessionResponse.clientSecret,
             promotionCode = "",
         )
@@ -201,19 +264,35 @@ class CheckoutController @Inject internal constructor(
         name: String?,
         address: Address?,
     ): OperationResult {
-        if (address == null) {
-            return clearShippingAddress().toOperationResult()
-        }
-        stateHolder.state?.checkoutSessionResponse
-            ?.validateShippingCountry(address.build().country)
-            ?.onFailure { return kotlin.Result.failure<Unit>(it).toOperationResult() }
-        return updateAddress(CheckoutSessionResponse.TaxAddressSource.SHIPPING, address) {
-            copy(
-                collectedDetails = collectedDetails.copy(
-                    shippingName = name,
-                    shippingAddress = it,
-                ),
-            )
+        val built = address?.build()
+        return withCheckoutState(
+            operation = Operation.UpdateShippingAddress,
+            params = InvocationSource.Merchant.analyticsParams(),
+            additionalStateMutations = {
+                copy(
+                    collectedDetails = collectedDetails.copy(
+                        shippingName = name.takeIf { built != null },
+                        shippingAddress = built,
+                    ),
+                )
+            },
+        ) { analytics ->
+            if (built != null) {
+                checkoutSessionResponse.validateShippingCountry(built.country).onFailure {
+                    return@withCheckoutState kotlin.Result.failure(it)
+                }
+            }
+            // Clearing an address that was never set has nothing to send.
+            if (built == null && collectedDetails.shippingAddress == null) {
+                kotlin.Result.success(checkoutSessionResponse)
+            } else {
+                checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
+                    operation = analytics,
+                    checkoutSessionResponse = checkoutSessionResponse,
+                    addressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
+                    address = built,
+                )
+            }
         }.toOperationResult()
     }
 
@@ -221,17 +300,23 @@ class CheckoutController @Inject internal constructor(
         name: String?,
         address: Address.State,
         updatedCheckoutSessionResponse: CheckoutSessionResponse,
-    ): kotlin.Result<Unit> = withCheckoutState(
-        additionalStateMutations = {
-            copy(
-                collectedDetails = collectedDetails.copy(
-                    shippingName = name,
-                    shippingAddress = address,
-                ),
-            )
-        },
-    ) {
-        kotlin.Result.success(updatedCheckoutSessionResponse)
+    ): kotlin.Result<Unit> = withContext(Dispatchers.Main.immediate) {
+        // Shipping Address Element reports update_shipping_address where it sends the tax update.
+        checkoutStatePreflight().onFailure { return@withContext kotlin.Result.failure(it) }
+        operationCoordinator.runMutation {
+            commitCheckoutState(
+                additionalStateMutations = {
+                    copy(
+                        collectedDetails = collectedDetails.copy(
+                            shippingName = name,
+                            shippingAddress = address,
+                        ),
+                    )
+                },
+            ) {
+                kotlin.Result.success(updatedCheckoutSessionResponse)
+            }
+        }
     }
 
     /**
@@ -243,6 +328,7 @@ class CheckoutController @Inject internal constructor(
         email: String?,
     ): OperationResult {
         return withCheckoutState(
+            operation = Operation.UpdateEmail,
             additionalStateMutations = {
                 copy(collectedDetails = collectedDetails.copy(email = email))
             },
@@ -255,8 +341,10 @@ class CheckoutController @Inject internal constructor(
         selection: PaymentSelection.Saved,
     ): kotlin.Result<Unit> {
         return withCheckoutState(
+            operation = Operation.UpdateBillingAddress,
+            params = InvocationSource.PaymentElement.analyticsParams(),
             additionalStateMutations = { commitSelection(selection) },
-        ) {
+        ) { analytics ->
             stateHolder.state = copy(
                 savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Pending(
                     selection.paymentMethod.id,
@@ -279,6 +367,7 @@ class CheckoutController @Inject internal constructor(
                 return@withCheckoutState kotlin.Result.success(checkoutSessionResponse)
             }
             checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
+                operation = analytics,
                 checkoutSessionResponse = checkoutSessionResponse,
                 addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
                 address = address,
@@ -308,98 +397,84 @@ class CheckoutController @Inject internal constructor(
         // Preserve the merchant's context while keeping the callback a child of the mutation's
         // timeout and cancellation scope.
         val callerContext = currentCoroutineContext().minusKey(Job)
-        return withCheckoutState { sessionId ->
-            withContext(callerContext) {
-                withTimeout(SERVER_UPDATE_TIMEOUT_MS) { serverUpdate() }
-            }.fold(
+        return withCheckoutState(Operation.RunServerUpdate) { analytics ->
+            val merchantUpdateStartedAt = timeSource.markNow()
+            val merchantUpdate = try {
+                withContext(callerContext) {
+                    withTimeout(SERVER_UPDATE_TIMEOUT_MS) { serverUpdate() }
+                }
+            } finally {
+                analytics.putCompletionParam("merchant_update_duration", merchantUpdateStartedAt.elapsedSeconds())
+            }
+            merchantUpdate.fold(
                 onSuccess = {
-                    checkoutSessionRepository.init(
-                        sessionId = sessionId,
-                        clientSecret = checkoutSessionResponse.clientSecret,
-                        adaptivePricingAllowed = configuration.currencySelectorElementConfiguration != null,
-                    )
+                    val refreshStartedAt = timeSource.markNow()
+                    try {
+                        checkoutSessionRepository.init(
+                            sessionId = checkoutSessionResponse.id,
+                            clientSecret = checkoutSessionResponse.clientSecret,
+                            adaptivePricingAllowed = configuration.currencySelectorElementConfiguration != null,
+                        )
+                    } finally {
+                        analytics.putCompletionParam("refresh_duration", refreshStartedAt.elapsedSeconds())
+                    }
                 },
                 onFailure = { kotlin.Result.failure(it) },
             )
         }.toOperationResult()
     }
 
-    private suspend fun updateAddress(
-        addressType: CheckoutSessionResponse.TaxAddressSource,
-        address: Address,
-        mutation: CheckoutControllerState.(Address.State) -> CheckoutControllerState,
-    ): kotlin.Result<Unit> {
-        val built = address.build()
-        return withCheckoutState(
-            additionalStateMutations = { mutation(built) },
-        ) {
-            checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
-                checkoutSessionResponse = checkoutSessionResponse,
-                addressSource = addressType,
-                address = built,
-            )
-        }
-    }
-
-    private suspend fun clearShippingAddress(): kotlin.Result<Unit> = withCheckoutState(
-        additionalStateMutations = {
-            copy(
-                collectedDetails = collectedDetails.copy(
-                    shippingName = null,
-                    shippingAddress = null,
-                ),
-            )
-        },
-    ) {
-        val previousAddress = collectedDetails.shippingAddress
-        if (previousAddress == null) {
-            kotlin.Result.success(checkoutSessionResponse)
-        } else {
-            checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
-                checkoutSessionResponse = checkoutSessionResponse,
-                addressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
-                address = null,
-            )
-        }
-    }
+    // Matches the seconds format of an operation's own duration.
+    private fun TimeMark.elapsedSeconds(): Float = elapsedNow().toDouble(DurationUnit.SECONDS).toFloat()
 
     /**
-     * Runs a mutation against the checkout session, serializing it behind the operation coordinator
-     * so mutations run in sequence. [block] produces the updated [CheckoutSessionResponse]; the
-     * result is folded into a new [CheckoutControllerState] (with any [additionalStateMutations]
-     * applied) and handed to [checkoutStateLoader] to reload the payment element and atomically
-     * commit the new state.
+     * Runs [operation] as a mutation against the checkout session. [block] produces the updated
+     * [CheckoutSessionResponse]; the result is folded into a new [CheckoutControllerState] (with any
+     * [additionalStateMutations] applied) and handed to [checkoutStateLoader] to reload the payment
+     * element and atomically commit the new state.
      *
      * Returns [kotlin.Result.failure] if the session hasn't been configured yet or a payment flow is
      * currently presented.
      */
     private suspend fun withCheckoutState(
+        operation: Operation,
+        params: Map<String, Any?> = emptyMap(),
         additionalStateMutations: CheckoutControllerState.() -> CheckoutControllerState = { this },
-        block: suspend CheckoutControllerState.(sessionId: String) -> kotlin.Result<CheckoutSessionResponse>,
+        block: suspend CheckoutControllerState.(MeasuredOperation) -> kotlin.Result<CheckoutSessionResponse>,
     ): kotlin.Result<Unit> = withContext(Dispatchers.Main.immediate) {
-        stateHolder.state
-            ?: return@withContext kotlin.Result.failure(
-                IllegalStateException("Cannot mutate checkout session before it is configured.")
-            )
-        if (sheetStateHolder.sheetIsOpen) {
-            return@withContext kotlin.Result.failure(
-                IllegalStateException("Cannot mutate checkout session while a payment flow is presented.")
-            )
-        }
-        operationCoordinator.runMutation {
-            runCatching {
-                // Re-read the latest committed state inside the lock so serialized mutations
-                // build on each other's results rather than a stale snapshot.
-                val state = requireNotNull(stateHolder.state)
-                val response = state.block(state.checkoutSessionResponse.id).getOrThrow()
-                val newState = state
-                    .copy(checkoutSessionResponse = response)
-                    .additionalStateMutations()
-                // reload resolves flag images (reusing newState's carried-over cache) and commits
-                // the fully reloaded state to the holder.
-                checkoutStateLoader.reload(newState)
+        operationReporter.measure(operation, params, stateHolder.state?.checkoutSessionResponse) { analytics ->
+            checkoutStatePreflight().onFailure { return@measure kotlin.Result.failure(it) }
+            operationCoordinator.runMutation {
+                commitCheckoutState(additionalStateMutations) {
+                    analytics.recordResponse(checkoutSessionResponse)
+                    block(analytics).onSuccess(analytics::recordResponse)
+                }
             }
         }
+    }
+
+    private fun checkoutStatePreflight(): kotlin.Result<Unit> = when {
+        stateHolder.state == null -> kotlin.Result.failure(
+            IllegalStateException("Cannot mutate checkout session before it is configured.")
+        )
+        sheetStateHolder.sheetIsOpen -> integrationLaunchedFailure()
+        else -> kotlin.Result.success(Unit)
+    }
+
+    private suspend fun commitCheckoutState(
+        additionalStateMutations: CheckoutControllerState.() -> CheckoutControllerState,
+        block: suspend CheckoutControllerState.() -> kotlin.Result<CheckoutSessionResponse>,
+    ): kotlin.Result<Unit> = runCatching {
+        // Re-read the latest committed state inside the lock so serialized mutations
+        // build on each other's results rather than a stale snapshot.
+        val state = requireNotNull(stateHolder.state)
+        val response = state.block().getOrThrow()
+        val newState = state
+            .copy(checkoutSessionResponse = response)
+            .additionalStateMutations()
+        // reload resolves flag images (reusing newState's carried-over cache) and commits
+        // the fully reloaded state to the holder.
+        checkoutStateLoader.reload(newState)
     }
 
     private fun kotlin.Result<Unit>.toOperationResult(): OperationResult = fold(
@@ -417,9 +492,12 @@ class CheckoutController @Inject internal constructor(
     )
 
     internal suspend fun updateCurrency(currency: String): kotlin.Result<Unit> {
-        return withCheckoutState { sessionId ->
+        return withCheckoutState(
+            operation = Operation.UpdateCurrency,
+            params = mapOf("requested_currency" to currency),
+        ) {
             checkoutSessionRepository.updateCurrency(
-                sessionId = sessionId,
+                sessionId = checkoutSessionResponse.id,
                 clientSecret = checkoutSessionResponse.clientSecret,
                 currencyCode = currency,
             )
@@ -465,7 +543,11 @@ class CheckoutController @Inject internal constructor(
      * currently presented.
      */
     suspend fun clearPaymentOption(): OperationResult {
+        operationReporter.reportEvent(Operation.ClearPaymentOption, stateHolder.state?.checkoutSessionResponse)
+        // Clearing the payment option also clears the billing tax region, reported as a billing update.
         return withCheckoutState(
+            operation = Operation.UpdateBillingAddress,
+            params = InvocationSource.PaymentElement.analyticsParams(),
             additionalStateMutations = {
                 copy(
                     paymentSelection = null,
@@ -473,8 +555,9 @@ class CheckoutController @Inject internal constructor(
                     previousNewSelections = Bundle(),
                 )
             },
-        ) {
+        ) { analytics ->
             checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
+                operation = analytics,
                 checkoutSessionResponse = checkoutSessionResponse,
                 addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
                 address = null,

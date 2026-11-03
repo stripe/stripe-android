@@ -19,6 +19,7 @@ import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
+import org.mockito.kotlin.mock
 import javax.inject.Provider
 
 @OptIn(CheckoutSessionPreview::class)
@@ -51,7 +52,10 @@ internal class EmbeddedUpdateScreenInteractorFactoryTest {
             customerStateHolder = customerStateHolder,
             selectionHolder = selectionHolder,
             savedPaymentMethodSelector = ManageLaunchSavedPaymentMethodSelector(
-                taxRegionUpdater = SheetTaxRegionUpdater { _, _, _ -> error("Not expected") },
+                taxRegionUpdater = SheetTaxRegionUpdater(
+                    updateTaxRegion = { _, _, _, _ -> error("Not expected") },
+                    operationReporter = mock(),
+                ),
                 paymentMethodMetadata = paymentMethodMetadata,
                 selectionHolder = selectionHolder,
             ),

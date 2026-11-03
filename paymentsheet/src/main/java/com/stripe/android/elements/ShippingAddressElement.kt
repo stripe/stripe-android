@@ -14,6 +14,8 @@ import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.checkout.ShippingAddressElementStateHolder
+import com.stripe.android.checkout.analytics.CheckoutConfigurationAnalytics
+import com.stripe.android.checkout.analytics.toAnalyticsMap
 import com.stripe.android.checkout.asPaymentSheet
 import com.stripe.android.checkout.toCheckoutAddress
 import com.stripe.android.checkout.toShippingDetails
@@ -146,6 +148,9 @@ class ShippingAddressElement internal constructor(
                 AddressElementActivityContract.Args.CheckoutShipping(
                     apiConfiguration = apiConfigurationProvider.get(),
                     checkoutSessionResponse = state.checkoutSessionResponse,
+                    checkoutConfigurationAnalytics = CheckoutConfigurationAnalytics(
+                        params = state.configuration.toAnalyticsMap(),
+                    ),
                     config = AddressLauncher.Configuration(
                         appearance = configuration.appearance.asPaymentSheet(),
                         buttonTitle = configuration.buttonTitle,

@@ -7,6 +7,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.lifecycleScope
+import com.stripe.android.checkout.analytics.CheckoutConfigurationAnalytics
+import com.stripe.android.checkout.analytics.toAnalyticsMap
 import com.stripe.android.checkout.injection.CheckoutPresenterScope
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ViewModelScope
@@ -217,6 +219,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
                 selectedPaymentMethodCode = code,
             ),
             presentationState = EmbeddedActivityArgs.PresentationState.Ready,
+            checkoutConfigurationAnalytics = checkoutConfigurationAnalytics(),
         )
         activityLauncher.launch(args)
     }
@@ -242,6 +245,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
             promotions = emptyList(),
             launchMode = EmbeddedLaunchMode.Manage,
             presentationState = EmbeddedActivityArgs.PresentationState.Ready,
+            checkoutConfigurationAnalytics = checkoutConfigurationAnalytics(),
         )
         activityLauncher.launch(args)
     }
@@ -336,6 +340,10 @@ internal class CheckoutSheetLauncher @Inject constructor(
             promotions = paymentMethodMessagePromotionsHelper.getPromotions().orEmpty(),
             launchMode = EmbeddedLaunchMode.PaymentOptions,
             presentationState = presentationState,
+            checkoutConfigurationAnalytics = checkoutConfigurationAnalytics(),
         )
     }
+
+    private fun checkoutConfigurationAnalytics(): CheckoutConfigurationAnalytics? =
+        selectionHolder.state?.configuration?.let { CheckoutConfigurationAnalytics(it.toAnalyticsMap()) }
 }

@@ -2,6 +2,7 @@ package com.stripe.android.checkout
 
 import androidx.test.espresso.Espresso
 import androidx.test.espresso.intent.rule.IntentsRule
+import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutInit
@@ -15,6 +16,9 @@ import com.stripe.android.networktesting.AdvancedFraudSignalsTestRule
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.analyticsPayloadField
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
+import com.stripe.android.networktesting.RequestMatchers.hasBodyPart
+import com.stripe.android.networktesting.RequestMatchers.hasQueryParam
+import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedContentPage
@@ -23,12 +27,17 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.utils.GooglePayRepositoryTestRule
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.validateAnalyticsRequest
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
 import okhttp3.mockwebserver.MockResponse
 import org.json.JSONObject
 import org.junit.Rule
 import org.junit.Test
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 import kotlin.time.Duration.Companion.seconds
 
 @OptIn(CheckoutSessionPreview::class)
@@ -216,6 +225,12 @@ internal class CheckoutPaymentElementAnalyticsTest {
                 eventName = "unexpected_error.checkout.saved_payment_method.missing_billing_address",
                 productUsage = setOf("checkout_elements"),
             )
+            // The selection is still reported as a billing address update, which sends no tax update.
+            networkRule.validateCheckoutAddressUpdate(
+                operation = "update_billing_address",
+                invocationSource = "payment_element",
+                didRequestTaxUpdate = false,
+            )
 
             // Billing-tax filtering keeps addressless saved payment methods out of the UI, so
             // select one directly.
@@ -247,6 +262,59 @@ internal class CheckoutPaymentElementAnalyticsTest {
     }
 
     @Test
+    fun testPromotionCodeAndEmailOperationsSendOperationAnalytics() = runCheckoutPaymentElementScenario(
+        networkRule = networkRule,
+        renderPaymentElementContent = false,
+        setup = { controller ->
+            networkRule.validateCheckoutOperationStarted("update_email", sessionId = null)
+            networkRule.validateCheckoutOperationResult(
+                "checkout_elements.update_email.failed",
+                sessionId = null,
+                analyticsPayloadField("error_type", "java.lang.IllegalStateException"),
+            )
+            assertThat(controller.updateEmail("checkout@example.com"))
+                .isInstanceOf(CheckoutController.OperationResult.Failed::class.java)
+
+            networkRule.validateCheckoutInitStarted(DEFAULT_CHECKOUT_SESSION_ID)
+            networkRule.validateCheckoutInitSucceeded(DEFAULT_CHECKOUT_SESSION_ID)
+            assertThat(
+                controller.configure(
+                    DEFAULT_CLIENT_SECRET,
+                    CheckoutController.Configuration().paymentElement(PaymentElement.Configuration()),
+                )
+            ).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
+        },
+    ) {
+        networkRule.checkoutUpdate(bodyPart("promotion_code", "10OFF"), responseFactory = ::checkoutUpdateResponse)
+        networkRule.validateCheckoutOperationStarted("apply_promotion_code", DEFAULT_CHECKOUT_SESSION_ID)
+        networkRule.validateCheckoutOperationResult(
+            "checkout_elements.apply_promotion_code.succeeded",
+            DEFAULT_CHECKOUT_SESSION_ID,
+        )
+        assertThat(controller.applyPromotionCode("10OFF"))
+            .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
+
+        networkRule.checkoutUpdate(responseFactory = ::checkoutUpdateResponse)
+        networkRule.validateCheckoutOperationStarted("remove_promotion_code", DEFAULT_CHECKOUT_SESSION_ID)
+        networkRule.validateCheckoutOperationResult(
+            "checkout_elements.remove_promotion_code.succeeded",
+            DEFAULT_CHECKOUT_SESSION_ID,
+        )
+        assertThat(controller.removePromotionCode())
+            .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
+
+        networkRule.validateCheckoutOperationStarted("update_email", DEFAULT_CHECKOUT_SESSION_ID)
+        networkRule.validateCheckoutOperationResult(
+            "checkout_elements.update_email.succeeded",
+            DEFAULT_CHECKOUT_SESSION_ID,
+        )
+        assertThat(controller.updateEmail("checkout@example.com"))
+            .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
+
+        markTestSucceeded()
+    }
+
+    @Test
     fun testConfigureApiFailureSendsInitFailureAnalytics() = runCheckoutPaymentElementScenario(
         networkRule = networkRule,
         checkoutInitResponse = ::checkoutInitApiFailureResponse,
@@ -267,6 +335,88 @@ internal class CheckoutPaymentElementAnalyticsTest {
             ).isInstanceOf(CheckoutController.OperationResult.Failed::class.java)
         },
     ) {
+        markTestSucceeded()
+    }
+
+    @Test
+    fun testQueuedMutationFailureUsesLatestCommittedResponseMetadata() = runCheckoutPaymentElementScenario(
+        networkRule = networkRule,
+        renderPaymentElementContent = false,
+        setup = { controller ->
+            networkRule.validateCheckoutInitStarted(DEFAULT_CHECKOUT_SESSION_ID)
+            networkRule.validateCheckoutInitSucceeded(DEFAULT_CHECKOUT_SESSION_ID)
+            assertThat(
+                controller.configure(
+                    DEFAULT_CLIENT_SECRET,
+                    CheckoutController.Configuration().paymentElement(PaymentElement.Configuration()),
+                )
+            ).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
+        },
+    ) {
+        val updatedConfigId = "cs_config_after_promotion"
+        val firstRequest = Turbine<Unit>()
+        val secondRequest = Turbine<Unit>()
+        val releaseFirstResponse = CountDownLatch(1)
+        networkRule.checkoutUpdate(bodyPart("promotion_code", "10OFF")) { response ->
+            firstRequest.add(Unit)
+            check(releaseFirstResponse.await(10, TimeUnit.SECONDS)) {
+                "Timed out waiting to release the promotion response"
+            }
+            response.testBodyFromFile("checkout-session-init.json") { json ->
+                json.put("customer_email", "checkout@example.com")
+                json.remove("link_settings")
+                json.put("checkout_session_config_id", updatedConfigId)
+            }
+        }
+        networkRule.validateCheckoutOperationStarted("apply_promotion_code", DEFAULT_CHECKOUT_SESSION_ID)
+        networkRule.validateCheckoutOperationResult(
+            "checkout_elements.apply_promotion_code.succeeded",
+            DEFAULT_CHECKOUT_SESSION_ID,
+            analyticsPayloadField("checkout_config_id", updatedConfigId),
+        )
+
+        coroutineScope {
+            val first = async { controller.applyPromotionCode("10OFF") }
+            try {
+                firstRequest.awaitItem()
+                networkRule.checkoutUpdate(bodyPart("adaptive_pricing[currency]", "eur")) { response ->
+                    secondRequest.add(Unit)
+                    response.setResponseCode(400)
+                    response.setBody(
+                        """{"error":{"type":"invalid_request_error","message":"Currency update failed"}}"""
+                    )
+                }
+                networkRule.validateCheckoutOperationStarted(
+                    "update_currency",
+                    DEFAULT_CHECKOUT_SESSION_ID,
+                    analyticsPayloadField("checkout_config_id", "checkout_config_123"),
+                )
+                networkRule.validateAnalyticsRequest(
+                    eventName = "elements.adaptive_pricing.currency_toggled.failed",
+                    productUsage = setOf("checkout_elements"),
+                )
+                networkRule.validateCheckoutOperationResult(
+                    "checkout_elements.update_currency.failed",
+                    DEFAULT_CHECKOUT_SESSION_ID,
+                    analyticsPayloadField("checkout_config_id", updatedConfigId),
+                    analyticsPayloadField("error_type", "invalid_request_error"),
+                )
+                val second = async(start = CoroutineStart.UNDISPATCHED) { controller.updateCurrency("eur") }
+                // The Main barrier ensures the second operation queues while the first response is held.
+                withContext(Dispatchers.Main) { }
+                assertThat(second.isCompleted).isFalse()
+                secondRequest.expectNoEvents()
+
+                releaseFirstResponse.countDown()
+                assertThat(first.await()).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
+                assertThat(second.await().isFailure).isTrue()
+                secondRequest.awaitItem()
+            } finally {
+                releaseFirstResponse.countDown()
+            }
+        }
+        firstRequest.ensureAllEventsConsumed()
+        secondRequest.ensureAllEventsConsumed()
         markTestSucceeded()
     }
 
@@ -301,11 +451,32 @@ internal class CheckoutPaymentElementAnalyticsTest {
                 response.setHeader("Request-Id", INIT_FAILURE_REQUEST_ID)
                 response.setBody(
                     """
-                    {"error":{"type":"invalid_request_error","code":"invalid_tax_region","message":"Invalid tax region"}}
+                    {"error":{"type":"invalid_request_error","code":"invalid_tax_region",
+                        "message":"Invalid tax region"}}
                     """.trimIndent()
                 )
             }
             networkRule.validateCheckoutInitStarted(RECONFIGURED_SESSION_ID)
+            // The default billing address triggers a tax update inside configure, reported as a merchant
+            // billing update that fails with the init. It carries the attempted (CA-defaulted)
+            // configuration rather than the first configure's defaults-free one.
+            networkRule.validateCheckoutAddressUpdateStarted(
+                "update_billing_address",
+                "merchant",
+                RECONFIGURED_SESSION_ID,
+                analyticsPayloadField("defaults[billing_details][address]", "true"),
+            )
+            networkRule.validateCheckoutAddressUpdateResult(
+                "update_billing_address",
+                "failed",
+                "merchant",
+                true,
+                RECONFIGURED_SESSION_ID,
+                analyticsPayloadField("defaults[billing_details][address]", "true"),
+                analyticsPayloadField("error_type", "invalid_request_error"),
+                analyticsPayloadField("error_code", "invalid_tax_region"),
+                analyticsPayloadField("request_id", INIT_FAILURE_REQUEST_ID),
+            )
             networkRule.validateCheckoutInitFailed(
                 RECONFIGURED_SESSION_ID,
                 analyticsPayloadField("checkout_config_id", RECONFIGURED_CONFIG_ID),
@@ -327,6 +498,169 @@ internal class CheckoutPaymentElementAnalyticsTest {
 
             markTestSucceeded()
         }
+
+    @Test
+    fun testAddressCurrencyAndClearOperationsSendOperationAnalytics() =
+        runCheckoutPaymentElementScenario(
+            networkRule = networkRule,
+            checkoutInitResponse = ::shippingTaxCheckoutInitResponse,
+            renderPaymentElementContent = false,
+            setup = { controller ->
+                networkRule.validateCheckoutInitStarted(DEFAULT_CHECKOUT_SESSION_ID)
+                networkRule.validateCheckoutInitSucceeded(DEFAULT_CHECKOUT_SESSION_ID)
+                assertThat(
+                    controller.configure(
+                        DEFAULT_CLIENT_SECRET,
+                        CheckoutController.Configuration().paymentElement(PaymentElement.Configuration()),
+                    )
+                ).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
+            },
+        ) {
+            networkRule.checkoutUpdate(
+                bodyPart("tax_region[country]", "US"),
+                bodyPart("tax_region[postal_code]", "94103"),
+                responseFactory = ::shippingTaxCheckoutInitResponse,
+            )
+            networkRule.validateCheckoutAddressUpdate(
+                operation = "update_shipping_address",
+                invocationSource = "merchant",
+                didRequestTaxUpdate = true,
+            )
+            assertThat(
+                controller.updateShippingAddress(
+                    name = "Jenny Rosen",
+                    address = CheckoutController.Address("US")
+                        .line1("510 Townsend St")
+                        .city("San Francisco")
+                        .state("CA")
+                        .postalCode("94103"),
+                )
+            ).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
+
+            // Clearing a set shipping address resets the tax region.
+            networkRule.checkoutUpdate(
+                not(hasBodyPart("tax_region[country]")),
+                responseFactory = ::shippingTaxCheckoutInitResponse,
+            )
+            networkRule.validateCheckoutAddressUpdate(
+                operation = "update_shipping_address",
+                invocationSource = "merchant",
+                didRequestTaxUpdate = true,
+            )
+            assertThat(controller.updateShippingAddress(name = null, address = null))
+                .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
+
+            networkRule.checkoutUpdate(
+                bodyPart("adaptive_pricing[currency]", "eur"),
+                responseFactory = ::shippingTaxCheckoutInitResponse,
+            )
+            networkRule.validateCheckoutOperationStarted(
+                "update_currency",
+                DEFAULT_CHECKOUT_SESSION_ID,
+                analyticsPayloadField("requested_currency", "eur"),
+            )
+            networkRule.validateAnalyticsRequest(
+                eventName = "elements.adaptive_pricing.currency_toggled",
+                productUsage = setOf("checkout_elements"),
+            )
+            networkRule.validateCheckoutOperationResult(
+                "checkout_elements.update_currency.succeeded",
+                DEFAULT_CHECKOUT_SESSION_ID,
+                analyticsPayloadField("requested_currency", "eur"),
+            )
+            assertThat(controller.updateCurrency("eur").isSuccess).isTrue()
+
+            // clear_payment_option is a single event; the billing tax reset it triggers is reported as
+            // a Payment Element billing update, which sends nothing for a shipping-tax session.
+            networkRule.validateCheckoutOperationEvent("clear_payment_option", DEFAULT_CHECKOUT_SESSION_ID)
+            networkRule.validateCheckoutAddressUpdate(
+                operation = "update_billing_address",
+                invocationSource = "payment_element",
+                didRequestTaxUpdate = false,
+            )
+            assertThat(controller.clearPaymentOption())
+                .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
+
+            markTestSucceeded()
+        }
+
+    @Test
+    fun testServerUpdateOperationSendsOperationAnalytics() =
+        runCheckoutPaymentElementScenario(
+            networkRule = networkRule,
+            renderPaymentElementContent = false,
+            setup = { controller ->
+                networkRule.validateCheckoutInitStarted(DEFAULT_CHECKOUT_SESSION_ID)
+                networkRule.validateCheckoutInitSucceeded(DEFAULT_CHECKOUT_SESSION_ID)
+                assertThat(
+                    controller.configure(
+                        DEFAULT_CLIENT_SECRET,
+                        CheckoutController.Configuration().paymentElement(PaymentElement.Configuration()),
+                    )
+                ).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
+            },
+        ) {
+            // The refresh after the merchant's update is an init request.
+            networkRule.checkoutInit(responseFactory = ::checkoutUpdateResponse)
+            networkRule.validateCheckoutOperationStarted(
+                "run_server_update",
+                DEFAULT_CHECKOUT_SESSION_ID,
+                not(hasQueryParam("merchant_update_duration")),
+                not(hasQueryParam("refresh_duration")),
+            )
+            networkRule.validateCheckoutOperationResult(
+                "checkout_elements.run_server_update.succeeded",
+                DEFAULT_CHECKOUT_SESSION_ID,
+                hasQueryParam("merchant_update_duration"),
+                hasQueryParam("refresh_duration"),
+            )
+            assertThat(controller.runServerUpdate { Result.success(Unit) })
+                .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
+
+            markTestSucceeded()
+        }
+
+    @Test
+    fun testFailedServerUpdateReportsMerchantUpdateDurationOnly() =
+        runCheckoutPaymentElementScenario(
+            networkRule = networkRule,
+            renderPaymentElementContent = false,
+            setup = { controller ->
+                networkRule.validateCheckoutInitStarted(DEFAULT_CHECKOUT_SESSION_ID)
+                networkRule.validateCheckoutInitSucceeded(DEFAULT_CHECKOUT_SESSION_ID)
+                assertThat(
+                    controller.configure(
+                        DEFAULT_CLIENT_SECRET,
+                        CheckoutController.Configuration().paymentElement(PaymentElement.Configuration()),
+                    )
+                ).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
+            },
+        ) {
+            networkRule.validateCheckoutOperationStarted("run_server_update", DEFAULT_CHECKOUT_SESSION_ID)
+            networkRule.validateCheckoutOperationResult(
+                "checkout_elements.run_server_update.failed",
+                DEFAULT_CHECKOUT_SESSION_ID,
+                hasQueryParam("merchant_update_duration"),
+                not(hasQueryParam("refresh_duration")),
+            )
+            assertThat(controller.runServerUpdate { Result.failure(IllegalStateException("merchant failed")) })
+                .isInstanceOf(CheckoutController.OperationResult.Failed::class.java)
+
+            markTestSucceeded()
+        }
+
+    private fun shippingTaxCheckoutInitResponse(response: MockResponse) {
+        createCheckoutInitResponseWithRequiredShippingAddress(response) { json ->
+            json.remove("link_settings")
+            json.put(
+                "automatic_tax",
+                JSONObject()
+                    .put("enabled", true)
+                    .put("status", "requires_address")
+                    .put("address_source", "shipping"),
+            )
+        }
+    }
 
     private fun billingTaxCheckoutInitResponse(response: MockResponse) {
         billingTaxCheckoutInitResponse(
@@ -373,11 +707,21 @@ internal class CheckoutPaymentElementAnalyticsTest {
             )
 
     // Matches the runner's init response so updates don't enable Link and trigger a consumer lookup.
+    private fun checkoutUpdateResponse(response: MockResponse) {
+        response.testBodyFromFile("checkout-session-init.json") { json ->
+            json.put("customer_email", "checkout@example.com")
+            json.remove("link_settings")
+        }
+    }
+
     private fun checkoutInitApiFailureResponse(response: MockResponse) {
         response.setResponseCode(400)
         response.setHeader("Request-Id", INIT_FAILURE_REQUEST_ID)
         response.setBody(
-            """{"error":{"type":"invalid_request_error","code":"checkout_session_invalid","message":"Invalid session"}}"""
+            """
+            {"error":{"type":"invalid_request_error","code":"checkout_session_invalid",
+                "message":"Invalid session"}}
+            """.trimIndent()
         )
     }
 

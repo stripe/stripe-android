@@ -1,6 +1,12 @@
 package com.stripe.android.checkout
 
 import android.content.Context
+import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent.InvocationSource
+import com.stripe.android.checkout.analytics.CheckoutConfirmationContext
+import com.stripe.android.checkout.analytics.CheckoutOperationReporter
+import com.stripe.android.checkout.analytics.analyticsParams
+import com.stripe.android.checkout.analytics.measureAddressUpdate
+import com.stripe.android.checkout.analytics.updateServerStateIfNeeded
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.googlepaylauncher.GooglePayPaymentDataError
 import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdate
@@ -11,6 +17,7 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import javax.inject.Inject
+import javax.inject.Provider
 
 @OptIn(CheckoutSessionPreview::class)
 internal class CheckoutGooglePayPaymentDataUpdateCallback @Inject constructor(
@@ -20,6 +27,9 @@ internal class CheckoutGooglePayPaymentDataUpdateCallback @Inject constructor(
     private val addressBuilder: CheckoutGooglePayPaymentDataUpdateAddressBuilder,
     private val mapper: CheckoutGooglePayPaymentDataUpdateMapper,
     private val errorReporter: ErrorReporter,
+    private val operationReporter: CheckoutOperationReporter,
+    // Provider breaks the cycle through ConfirmationHandler, which owns this callback.
+    private val analyticsPerformer: Provider<CheckoutAnalyticsPerformer>,
 ) : GooglePayPaymentDataUpdateCallback {
     override suspend fun onPaymentDataChanged(
         paymentDataUpdate: GooglePayPaymentDataUpdate,
@@ -87,16 +97,29 @@ internal class CheckoutGooglePayPaymentDataUpdateCallback @Inject constructor(
         var response = currentState.checkoutSessionResponse
 
         for (addressSource in addressSources) {
-            val address = when (val result = addressBuilder.build(paymentDataUpdate, addressSource)) {
-                is CheckoutGooglePayPaymentDataUpdateAddressBuilder.Result.Unavailable -> continue
-                is CheckoutGooglePayPaymentDataUpdateAddressBuilder.Result.Available -> result.address
+            val result = addressBuilder.build(paymentDataUpdate, addressSource)
+            // Matches iOS wallets: report an address update only when it sends a tax update.
+            if (
+                result !is CheckoutGooglePayPaymentDataUpdateAddressBuilder.Result.Available ||
+                !taxRegionUpdater.requiresUpdate(response, addressSource)
+            ) {
+                continue
             }
+            val address = result.address
 
-            response = taxRegionUpdater.updateServerStateIfNeeded(
-                checkoutSessionResponse = response,
+            val currentResponse = response
+            response = operationReporter.measureAddressUpdate(
                 addressSource = addressSource,
-                address = address,
-            ).getOrElse { error ->
+                params = invocationSource(addressSource).analyticsParams(),
+                response = currentResponse,
+            ) { analytics ->
+                taxRegionUpdater.updateServerStateIfNeeded(
+                    operation = analytics,
+                    checkoutSessionResponse = currentResponse,
+                    addressSource = addressSource,
+                    address = address,
+                )
+            }.getOrElse { error ->
                 return addressUpdateErrorResponse(addressSource, error)
             }
         }
@@ -106,6 +129,17 @@ internal class CheckoutGooglePayPaymentDataUpdateCallback @Inject constructor(
             response = response,
             paymentDataUpdate = paymentDataUpdate,
         )
+    }
+
+    private fun invocationSource(
+        addressSource: CheckoutSessionResponse.TaxAddressSource,
+    ): InvocationSource = when (analyticsPerformer.get().confirmationInvocationSource()) {
+        CheckoutConfirmationContext.InvocationSource.ExpressCheckoutElement -> InvocationSource.ExpressCheckoutElement
+        // Payment Element's Google Pay owns the billing address; shipping stays the merchant's.
+        CheckoutConfirmationContext.InvocationSource.Merchant, null -> when (addressSource) {
+            CheckoutSessionResponse.TaxAddressSource.BILLING -> InvocationSource.PaymentElement
+            CheckoutSessionResponse.TaxAddressSource.SHIPPING -> InvocationSource.Merchant
+        }
     }
 
     private fun addressUpdateErrorResponse(

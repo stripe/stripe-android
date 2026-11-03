@@ -61,6 +61,87 @@ internal fun NetworkRule.validateCheckoutOperationResult(
     )
 }
 
+/**
+ * Validates an operation reported as a single event with no started and succeeded or failed pair, such as
+ * clear_payment_option.
+ */
+internal fun NetworkRule.validateCheckoutOperationEvent(
+    operation: String,
+    sessionId: String?,
+    vararg requestMatchers: RequestMatcher,
+) {
+    validateCheckoutOperationAnalyticsRequest(
+        "checkout_elements.$operation",
+        sessionId,
+        not(hasQueryParam("duration")),
+        *requestMatchers,
+    )
+}
+
+/**
+ * Validates the started event of an update_shipping_address or update_billing_address operation.
+ * did_request_tax_update is reported only with succeeded or failed, so it must be absent here.
+ */
+internal fun NetworkRule.validateCheckoutAddressUpdateStarted(
+    operation: String,
+    invocationSource: String,
+    sessionId: String? = DEFAULT_CHECKOUT_SESSION_ID,
+    vararg requestMatchers: RequestMatcher,
+) {
+    validateCheckoutOperationStarted(
+        operation,
+        sessionId,
+        analyticsPayloadField("invocation_source", invocationSource),
+        not(hasQueryParam("did_request_tax_update")),
+        *requestMatchers,
+    )
+}
+
+/**
+ * Validates the succeeded or failed event of an update_shipping_address or update_billing_address operation.
+ * Every succeeded or failed event carries did_request_tax_update: false unless a tax update request was sent,
+ * including operations rejected before they did any work.
+ */
+internal fun NetworkRule.validateCheckoutAddressUpdateResult(
+    operation: String,
+    outcome: String,
+    invocationSource: String,
+    didRequestTaxUpdate: Boolean,
+    sessionId: String? = DEFAULT_CHECKOUT_SESSION_ID,
+    vararg requestMatchers: RequestMatcher,
+) {
+    validateCheckoutOperationResult(
+        "checkout_elements.$operation.$outcome",
+        sessionId,
+        analyticsPayloadField("invocation_source", invocationSource),
+        analyticsPayloadField("did_request_tax_update", didRequestTaxUpdate.toString()),
+        *requestMatchers,
+    )
+}
+
+/**
+ * Validates started and succeeded events of an update_shipping_address or update_billing_address
+ * operation. Both events carry the invocation source; only the succeeded event carries
+ * did_request_tax_update. [requestMatchers] apply to both events.
+ */
+internal fun NetworkRule.validateCheckoutAddressUpdate(
+    operation: String,
+    invocationSource: String,
+    didRequestTaxUpdate: Boolean,
+    sessionId: String? = DEFAULT_CHECKOUT_SESSION_ID,
+    vararg requestMatchers: RequestMatcher,
+) {
+    validateCheckoutAddressUpdateStarted(operation, invocationSource, sessionId, *requestMatchers)
+    validateCheckoutAddressUpdateResult(
+        operation,
+        "succeeded",
+        invocationSource,
+        didRequestTaxUpdate,
+        sessionId,
+        *requestMatchers,
+    )
+}
+
 internal fun NetworkRule.validateConfirmationStartedAnalyticsRequest(
     invocationSource: String,
     selectedLpm: String,

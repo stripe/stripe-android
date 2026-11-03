@@ -105,6 +105,7 @@ internal class EmbeddedSheetViewModelTest {
             promotions = emptyList(),
             launchMode = EmbeddedLaunchMode.PaymentOptions,
             presentationState = EmbeddedActivityArgs.PresentationState.Ready,
+            checkoutConfigurationAnalytics = null,
         )
         private var controller = createController(null)
         private var savedStateHandle = createViewModel()

@@ -5,6 +5,8 @@ import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
+import com.stripe.android.checkout.analytics.CheckoutConfigurationAnalytics
+import com.stripe.android.checkout.analytics.CheckoutOperationReporter
 import com.stripe.android.common.spms.DefaultLinkFormElementFactory
 import com.stripe.android.common.spms.DefaultLinkInlineSignupAvailability
 import com.stripe.android.common.spms.DefaultSavedPaymentMethodLinkFormHelper
@@ -14,7 +16,10 @@ import com.stripe.android.common.spms.SavedPaymentMethodLinkFormHelper
 import com.stripe.android.common.taptoadd.DefaultTapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddMode
+import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.ViewModelScope
+import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.utils.RealUserFacingLogger
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.link.account.LinkAccountHolder
@@ -77,6 +82,8 @@ import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Named
 import javax.inject.Provider
 import javax.inject.Singleton
+import kotlin.coroutines.CoroutineContext
+import kotlin.time.TimeSource
 
 @Suppress("TooManyFunctions")
 @Module
@@ -149,6 +156,24 @@ internal interface EmbeddedActivityModule {
         fun providesContext(application: Application): Context {
             return application
         }
+
+        @Provides
+        @Singleton
+        fun provideCheckoutOperationReporter(
+            context: Context,
+            apiConfigurationProvider: Provider<ApiConfiguration.State>,
+            analyticsRequestExecutor: AnalyticsRequestExecutor,
+            @IOContext workContext: CoroutineContext,
+            checkoutConfigurationAnalytics: CheckoutConfigurationAnalytics?,
+        ): CheckoutOperationReporter = CheckoutOperationReporter(
+            context = context,
+            apiConfigurationProvider = apiConfigurationProvider,
+            analyticsRequestExecutor = analyticsRequestExecutor,
+            timeSource = TimeSource.Monotonic,
+            workContext = workContext,
+            publishableKey = { apiConfigurationProvider.get().publishableKey },
+            configurationParams = { checkoutConfigurationAnalytics?.params.orEmpty() },
+        )
 
         @Provides
         @Singleton

@@ -200,6 +200,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
                 selectedPaymentMethodCode = code,
             ),
             presentationState = EmbeddedActivityArgs.PresentationState.Ready,
+            checkoutConfigurationAnalytics = null,
         )
         activityLauncher.launch(args)
     }
@@ -231,6 +232,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
             promotions = emptyList(),
             launchMode = EmbeddedLaunchMode.Manage,
             presentationState = EmbeddedActivityArgs.PresentationState.Ready,
+            checkoutConfigurationAnalytics = null,
         )
         activityLauncher.launch(args)
     }
@@ -262,6 +264,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
             promotions = emptyList(),
             launchMode = EmbeddedLaunchMode.PaymentOptions,
             presentationState = EmbeddedActivityArgs.PresentationState.Ready,
+            checkoutConfigurationAnalytics = null,
         )
         activityLauncher.launch(args)
     }

@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.embedded.sheet
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
+import com.stripe.android.checkout.TestCheckoutOperationReporterFactory
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.core.networking.ApiRequest
@@ -23,11 +24,13 @@ import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFacto
 import com.stripe.android.paymentsheet.repositories.CheckoutStripeRepositoryFactory
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.android.utils.FakeFraudDetectionDataRepository
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import com.stripe.android.paymentsheet.analytics.FakeAnalyticsRequestExecutor as FakeEventAnalyticsRequestExecutor
 
 @OptIn(CheckoutSessionPreview::class)
 @RunWith(RobolectricTestRunner::class)
@@ -166,6 +169,67 @@ internal class SheetTaxRegionUpdaterTest {
         assertThat(result.exceptionOrNull()?.message).contains("Invalid tax region")
     }
 
+    @Test
+    fun `prepareUpdate reports a billing sync without a tax update when billing does not drive tax`() = runScenario(
+        response = checkoutSessionResponse(
+            automaticTaxEnabled = true,
+            taxAddressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
+        ),
+    ) {
+        val update = updater.prepareUpdate(
+            checkoutSessionResponse = response,
+            selection = selectionWithAddress(ADDRESS),
+        )
+
+        assertThat(update).isNull()
+        val started = analyticsRequestExecutor.awaitEvent("checkout_elements.update_billing_address.started")
+        assertThat(started).containsEntry("invocation_source", "payment_element")
+        assertThat(started).containsEntry("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID)
+        assertThat(started).doesNotContainKey("did_request_tax_update")
+        val succeeded = analyticsRequestExecutor.awaitEvent("checkout_elements.update_billing_address.succeeded")
+        assertThat(succeeded).containsEntry("invocation_source", "payment_element")
+        assertThat(succeeded).containsEntry("did_request_tax_update", false)
+        analyticsRequestExecutor.validate()
+    }
+
+    @Test
+    fun `prepared update reports a billing sync that requests a tax update`() = runScenario {
+        networkRule.checkoutUpdate { response ->
+            response.testBodyFromFile("checkout-session-init.json")
+        }
+
+        val update = requireNotNull(
+            updater.prepareUpdate(
+                checkoutSessionResponse = response,
+                selection = selectionWithAddress(ADDRESS),
+            )
+        )
+        analyticsRequestExecutor.requestTurbine.expectNoEvents()
+
+        assertThat(update.invoke().isSuccess).isTrue()
+
+        val started = analyticsRequestExecutor.awaitEvent("checkout_elements.update_billing_address.started")
+        assertThat(started).containsEntry("invocation_source", "payment_element")
+        assertThat(started).doesNotContainKey("did_request_tax_update")
+        val succeeded = analyticsRequestExecutor.awaitEvent("checkout_elements.update_billing_address.succeeded")
+        assertThat(succeeded).containsEntry("invocation_source", "payment_element")
+        assertThat(succeeded).containsEntry("did_request_tax_update", true)
+        analyticsRequestExecutor.validate()
+    }
+
+    @Test
+    fun `prepareUpdate reports nothing without a checkout session response`() = runScenario(
+        response = null,
+    ) {
+        updater.prepareUpdate(
+            checkoutSessionResponse = response,
+            selection = selectionWithAddress(ADDRESS),
+        )
+
+        analyticsRequestExecutor.requestTurbine.expectNoEvents()
+        analyticsRequestExecutor.validate()
+    }
+
     private fun runScenario(
         block: suspend Scenario.() -> Unit,
     ) = runScenario(
@@ -180,13 +244,19 @@ internal class SheetTaxRegionUpdaterTest {
         response: CheckoutSessionResponse?,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
+        val analyticsRequestExecutor = FakeEventAnalyticsRequestExecutor()
         val updater = SheetTaxRegionUpdater(
             taxRegionUpdater = checkoutSessionTaxRegionUpdater(),
+            operationReporter = TestCheckoutOperationReporterFactory.create(
+                analyticsRequestExecutor = analyticsRequestExecutor,
+                workContext = UnconfinedTestDispatcher(testScheduler),
+            ),
         )
 
         Scenario(
             updater = updater,
             response = response,
+            analyticsRequestExecutor = analyticsRequestExecutor,
         ).block()
     }
 
@@ -223,6 +293,7 @@ internal class SheetTaxRegionUpdaterTest {
     private data class Scenario(
         val updater: SheetTaxRegionUpdater,
         val response: CheckoutSessionResponse?,
+        val analyticsRequestExecutor: FakeEventAnalyticsRequestExecutor,
     )
 
     private companion object {

@@ -2,7 +2,14 @@ package com.stripe.android.paymentsheet.injection
 
 import android.content.Context
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
+import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent.InvocationSource
+import com.stripe.android.checkout.analytics.CheckoutOperationReporter
+import com.stripe.android.checkout.analytics.analyticsParams
+import com.stripe.android.checkout.analytics.measureAddressUpdate
+import com.stripe.android.checkout.analytics.updateServerStateIfNeeded
 import com.stripe.android.checkout.toCheckoutAddress
+import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.networking.ApiRequest
@@ -32,6 +39,8 @@ import dagger.Provides
 import javax.inject.Named
 import javax.inject.Provider
 import javax.inject.Singleton
+import kotlin.coroutines.CoroutineContext
+import kotlin.time.TimeSource
 
 @Module(
     includes = [AddressElementViewModelModule.Bindings::class],
@@ -62,6 +71,10 @@ internal class AddressElementViewModelModule {
     internal fun providePrimaryButtonAction(
         args: AddressElementActivityContract.Args,
         taxRegionUpdater: CheckoutSessionTaxRegionUpdater,
+        context: Context,
+        apiConfigurationProvider: Provider<ApiConfiguration.State>,
+        analyticsRequestExecutor: AnalyticsRequestExecutor,
+        @IOContext workContext: CoroutineContext,
     ): AddressElementPrimaryButtonAction = when (args) {
         is AddressElementActivityContract.Args.Standalone -> {
             StandalonePrimaryButtonAction
@@ -70,6 +83,15 @@ internal class AddressElementViewModelModule {
             CheckoutShippingPrimaryButtonAction(
                 checkoutSessionResponse = args.checkoutSessionResponse,
                 taxRegionUpdater = taxRegionUpdater,
+                operationReporter = CheckoutOperationReporter(
+                    context = context,
+                    apiConfigurationProvider = apiConfigurationProvider,
+                    analyticsRequestExecutor = analyticsRequestExecutor,
+                    timeSource = TimeSource.Monotonic,
+                    workContext = workContext,
+                    publishableKey = { args.apiConfiguration.publishableKey },
+                    configurationParams = { args.checkoutConfigurationAnalytics.params },
+                ),
             )
         }
     }
@@ -170,18 +192,29 @@ private object StandalonePrimaryButtonAction : AddressElementPrimaryButtonAction
 private class CheckoutShippingPrimaryButtonAction(
     private val checkoutSessionResponse: CheckoutSessionResponse,
     private val taxRegionUpdater: CheckoutSessionTaxRegionUpdater,
+    private val operationReporter: CheckoutOperationReporter,
 ) : AddressElementPrimaryButtonAction {
     override suspend fun invoke(
         addressDetails: AddressDetails,
     ): Result<AddressElementActivityContract.Result> {
         val address = addressDetails.address?.toCheckoutAddress()
-            ?: return Result.failure(IllegalArgumentException("Country is required."))
 
-        return taxRegionUpdater.updateServerStateIfNeeded(
-            checkoutSessionResponse = checkoutSessionResponse,
+        return operationReporter.measureAddressUpdate(
             addressSource = TaxAddressSource.SHIPPING,
-            address = address,
-        ).map { response ->
+            params = InvocationSource.ShippingAddressElement.analyticsParams(),
+            response = checkoutSessionResponse,
+        ) { analytics ->
+            if (address == null) {
+                Result.failure(IllegalArgumentException("Country is required."))
+            } else {
+                taxRegionUpdater.updateServerStateIfNeeded(
+                    operation = analytics,
+                    checkoutSessionResponse = checkoutSessionResponse,
+                    addressSource = TaxAddressSource.SHIPPING,
+                    address = address,
+                )
+            }
+        }.map { response ->
             AddressElementActivityContract.Result.CheckoutShippingSucceeded(
                 address = addressDetails,
                 checkoutSessionResponse = response,

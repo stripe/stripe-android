@@ -237,6 +237,12 @@ internal class ExpressCheckoutElementAnalyticsTest {
             ) { response ->
                 createCheckoutInitResponseWithRequiredShippingAddressForAutomaticTax(response)
             }
+            // Reported from the Google Pay data-update callback during the Express Checkout confirmation.
+            networkRule.validateCheckoutAddressUpdate(
+                operation = "update_shipping_address",
+                invocationSource = "express_checkout_element",
+                didRequestTaxUpdate = true,
+            )
             validateAnalyticsRequest(eventName = "stripe_android.payment_intent_retrieval")
             networkRule.checkoutConfirm(
                 bodyPart("payment_method", paymentMethod.id),
