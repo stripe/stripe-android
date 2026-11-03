@@ -44,7 +44,13 @@ control model after evaluation. Actual compressed APK size is a separate metric.
 
 ## Measurement
 
-Every existing `cardscan_*` event from the scanner adds these fields:
+The scanner emits `cardscan_presented` after Activity setup, before camera permission
+and Google Play TFLite initialization. It identifies an attempt even if scanning
+cannot start. Presentation, camera-ready, milestone and terminal events share the
+same attempt ID. Repeated camera callbacks and duplicate terminal results are
+ignored; late recognition cannot replace a canceled Activity result.
+
+Every `cardscan_*` event from the scanner includes these fields:
 
 | Parameter | Meaning |
 |---|---|
@@ -62,10 +68,11 @@ before a scan starts. No card number, expiry, name or image is added to analytic
 Join events by `scan_session_id`, group by model/version and matching OCR settings:
 
 - Completion rate: attempts with `cardscan_success` / attempts with
-  `cardscan_scan_started`.
-- Failure and cancellation rates: corresponding terminal events joined to started
-  attempts; inspect `cancellation_reason`, and count permission denials separately
-  because they may have no started event.
+  `cardscan_presented`.
+- Failure and cancellation rates: corresponding terminal events joined to presented
+  attempts; inspect `cancellation_reason`. Report the fraction that reach
+  `cardscan_scan_started` separately to distinguish permission/runtime failures
+  from recognition failures.
 - Time to completion: p50/p90 of `cardscan_success.duration` (seconds), alongside
   completion rate so slow or unsuccessful scans are not hidden by survivor bias.
 - Time to first SSD PAN: `cardscan_darknite_found_pan.duration`, retaining the
@@ -164,7 +171,7 @@ validation is required before replacing the shipped model.
 ./gradlew :stripecardscan:testDebugUnitTest --tests '*CompactModelDecoderTest'
 ```
 
-The A/B wiring passes all 104 scanner unit tests, 225 parser/metadata tests,
+The A/B wiring and attempt-lifecycle hardening pass all 110 scanner unit tests, 225 parser/metadata tests,
 17 launcher/action tests and one Compose assignment-recomposition test. Both APKs
 build and include the expected hashes for both artifacts. Repository-wide
 `detekt apiCheck` passes without API baseline changes.
@@ -174,6 +181,11 @@ The managed `pixel2api33DebugAndroidTest` run attempted both `SSDOcrTest` and
 ATD image lacks the Google Play TFLite module: `No acceptable module
 com.google.android.gms.tflite_dynamite found` (local/remote version 0). This run
 provides no recognition-accuracy evidence for either arm.
+
+Bitrise ran all 16 scanner instrumentation tests successfully on its Google
+Play-enabled Android 13 emulator for commit `9c5cd4c9ced`, covering both original
+and compact model fixtures. This closes the runtime coverage gap for the model
+selection wiring; the managed AOSP limitation above still applies locally.
 
 Before the A/B wiring, both decoder unit tests passed. On a Pixel 10 Pro XL running Android 17 / API 37,
 `EmbossedModelDeviceTest` loaded this artifact through the Google Play TFLite runtime

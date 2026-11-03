@@ -73,6 +73,8 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
     @Inject
     lateinit var cardScanEventsReporter: CardScanEventsReporter
 
+    private var hasFinishedScan = false
+
     override val minimumAnalysisResolution = MINIMUM_RESOLUTION
 
     private val viewBinding by lazy {
@@ -110,6 +112,8 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
         object : CardScanResultListener {
 
             override fun cardScanComplete(card: ScannedCard) {
+                if (hasFinishedScan) return
+                hasFinishedScan = true
                 cardScanEventsReporter.scanSucceeded()
                 val intent = Intent()
                     .putExtra(
@@ -120,6 +124,8 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
             }
 
             override fun userCanceled(reason: CancellationReason) {
+                if (hasFinishedScan) return
+                hasFinishedScan = true
                 cardScanEventsReporter.scanCancelled(reason)
                 val intent = Intent()
                     .putExtra(
@@ -130,6 +136,8 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
             }
 
             override fun failed(cause: Throwable?) {
+                if (hasFinishedScan) return
+                hasFinishedScan = true
                 cardScanEventsReporter.scanFailed(cause)
                 val intent = Intent()
                     .putExtra(
@@ -237,6 +245,8 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
                 cardScanConfiguration = cardScanConfiguration,
             )
             .inject(this)
+
+        cardScanEventsReporter.scanPresented()
 
         onBackPressedDispatcher.addCallback {
             resultListener.userCanceled(CancellationReason.Back)

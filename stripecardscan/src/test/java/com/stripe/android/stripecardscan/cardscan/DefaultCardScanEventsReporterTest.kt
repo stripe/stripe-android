@@ -254,12 +254,13 @@ internal class DefaultCardScanEventsReporterTest {
     fun `repeated scans in one Elements Session receive distinct attempt IDs`() = runScenario { reporter, executor ->
         reporter.scanStarted()
         reporter.scanCancelled(CancellationReason.Back)
+        reporter.scanPresented()
         reporter.scanStarted()
         reporter.scanSucceeded()
         val events = executor.getExecutedRequests().map { it.params }
-        assertThat(events).hasSize(4)
+        assertThat(events).hasSize(5)
         assertThat(events[0]["scan_session_id"]).isEqualTo(events[1]["scan_session_id"])
-        assertThat(events[2]["scan_session_id"]).isEqualTo(events[3]["scan_session_id"])
+        assertThat(events[2]["scan_session_id"]).isEqualTo(events[4]["scan_session_id"])
         assertThat(events[0]["scan_session_id"]).isNotEqualTo(events[2]["scan_session_id"])
         events.forEach { assertThat(it["elements_session_id"]).isEqualTo(ELEMENTS_SESSION_ID) }
     }
@@ -276,6 +277,66 @@ internal class DefaultCardScanEventsReporterTest {
         assertThat(events).hasSize(2)
         assertThat(events.first()["scan_session_id"]).isEqualTo(events.last()["scan_session_id"])
         assertThat(events.last()["duration"]).isEqualTo(5f)
+    }
+
+    @Test
+    fun `presentation includes attempts canceled before camera starts`() = runScenario { reporter, executor ->
+        reporter.scanPresented()
+        reporter.scanCancelled(CancellationReason.CameraPermissionDenied)
+        val events = executor.getExecutedRequests().map { it.params }
+        assertThat(events.map { it["event"] }).containsExactly("cardscan_presented", "cardscan_cancel").inOrder()
+        assertThat(events.first()["scan_session_id"]).isEqualTo(events.last()["scan_session_id"])
+        assertThat(events.last()).doesNotContainKey("duration")
+    }
+
+    @Test
+    fun `runtime failure before camera starts retains presented attempt`() = runScenario { reporter, executor ->
+        reporter.scanPresented()
+        reporter.scanFailed(IllegalStateException("runtime unavailable"))
+        val events = executor.getExecutedRequests().map { it.params }
+        assertThat(events.map { it["event"] }).containsExactly("cardscan_presented", "cardscan_failed").inOrder()
+        assertThat(events.first()["scan_session_id"]).isEqualTo(events.last()["scan_session_id"])
+        assertThat(events.last()).doesNotContainKey("duration")
+    }
+
+    @Test
+    fun `presentation and camera milestones share one attempt`() = runScenario { reporter, executor ->
+        reporter.scanPresented()
+        reporter.scanPresented()
+        ShadowSystemClock.advanceBy(10, TimeUnit.SECONDS)
+        reporter.scanStarted()
+        ShadowSystemClock.advanceBy(2, TimeUnit.SECONDS)
+        reporter.scanDarkniteFoundPan()
+        reporter.scanSucceeded()
+        val events = executor.getExecutedRequests().map { it.params }
+        assertThat(events).hasSize(4)
+        events.forEach { assertThat(it["scan_session_id"]).isEqualTo(events.first()["scan_session_id"]) }
+        assertThat(events.last()["duration"]).isEqualTo(2f)
+    }
+
+    @Test
+    fun `late success and camera callbacks cannot reopen canceled attempt`() = runScenario { reporter, executor ->
+        reporter.scanPresented()
+        reporter.scanStarted()
+        reporter.scanCancelled(CancellationReason.Back)
+        reporter.scanSucceeded()
+        reporter.scanFailed(null)
+        reporter.scanStarted()
+        reporter.scanDarkniteFoundPan()
+        val events = executor.getExecutedRequests().map { it.params }
+        assertThat(events.map { it["event"] })
+            .containsExactly("cardscan_presented", "cardscan_scan_started", "cardscan_cancel").inOrder()
+    }
+
+    @Test
+    fun `permission cancellation cannot end another reporters timer`() = runScenario { reporter, executor ->
+        val durationProvider = DefaultDurationProvider.instance
+        durationProvider.start(DurationProvider.Key.CardScan)
+        reporter.scanPresented()
+        reporter.scanCancelled(CancellationReason.CameraPermissionDenied)
+        assertThat(executor.getExecutedRequests().last().params).doesNotContainKey("duration")
+        assertThat(durationProvider.elapsed(DurationProvider.Key.CardScan)).isNotNull()
+        durationProvider.end(DurationProvider.Key.CardScan)
     }
 
     private fun runScenario(
