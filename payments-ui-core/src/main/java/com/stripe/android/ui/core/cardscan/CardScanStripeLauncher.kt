@@ -31,6 +31,7 @@ internal class CardScanStripeLauncher(
     private val enableMlKitCardScan: Boolean,
     private val elementsSessionId: String?,
     private val disableSsdOcrCardScan: Boolean,
+    private val useCompactSsdOcrCardScan: Boolean,
     isLaunchingState: MutableState<Boolean>,
 ) : CardScanLauncher {
 
@@ -64,6 +65,7 @@ internal class CardScanStripeLauncher(
                     apiConfiguration = apiConfiguration,
                     enableMlKitTextRecognition = enableMlKitCardScan,
                     disableSsdOcr = disableSsdOcrCardScan,
+                    useCompactSsdOcr = useCompactSsdOcrCardScan,
                 )
             )
         )
@@ -126,6 +128,7 @@ internal class CardScanStripeLauncher(
             enableMlKitCardScan: Boolean = false,
             elementsSessionId: String? = null,
             disableSsdOcrCardScan: Boolean = false,
+            useCompactSsdOcrCardScan: Boolean,
             onResult: (CardScanResult) -> Unit,
         ): CardScanStripeLauncher {
             val context = LocalContext.current.applicationContext
@@ -137,6 +140,7 @@ internal class CardScanStripeLauncher(
                 enableMlKitCardScan,
                 elementsSessionId,
                 disableSsdOcrCardScan,
+                useCompactSsdOcrCardScan,
             ) {
                 CardScanStripeLauncher(
                     context = context,
@@ -145,6 +149,7 @@ internal class CardScanStripeLauncher(
                     enableMlKitCardScan = enableMlKitCardScan,
                     elementsSessionId = elementsSessionId,
                     disableSsdOcrCardScan = disableSsdOcrCardScan,
+                    useCompactSsdOcrCardScan = useCompactSsdOcrCardScan,
                     isLaunchingState = isLaunchingState,
                 )
             }
@@ -154,7 +159,7 @@ internal class CardScanStripeLauncher(
                 launcher._isLaunching = false
                 onResult(launcher.parseActivityResult(intent))
             }
-            return remember(activityLauncher) {
+            return remember(activityLauncher, launcher) {
                 launcher.apply { this.activityLauncher = activityLauncher }
             }
         }

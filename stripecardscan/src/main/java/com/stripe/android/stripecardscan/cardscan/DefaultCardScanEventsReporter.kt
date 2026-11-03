@@ -7,6 +7,7 @@ import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.stripecardscan.scanui.CancellationReason
+import java.util.UUID
 import javax.inject.Inject
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
@@ -18,13 +19,20 @@ internal class DefaultCardScanEventsReporter @Inject constructor(
     private val durationProvider: DurationProvider,
     private val cardScanConfiguration: CardScanConfiguration
 ) : CardScanEventsReporter {
+    private var scanSessionId = UUID.randomUUID().toString()
+    private var scanInProgress = false
+
     private var hasLoggedMlKitFoundPan = false
     private var hasLoggedMlKitFoundExp = false
     private var hasLoggedDarkniteFoundPan = false
     private var hasLoggedModelsDisagree = false
 
     override fun scanStarted() {
+        // Camera stream restarts belong to the same attempt until a terminal event.
+        if (scanInProgress) return
+        scanSessionId = UUID.randomUUID().toString()
         clearSessionState()
+        scanInProgress = true
         durationProvider.start(DurationProvider.Key.CardScan)
         fireEvent(
             eventName = "cardscan_scan_started"
@@ -103,11 +111,16 @@ internal class DefaultCardScanEventsReporter @Inject constructor(
         eventName: String,
         additionalParams: Map<String, Any> = emptyMap()
     ) {
-        val baseParams = cardScanConfiguration.elementsSessionId?.let {
-            mapOf(
-                "elements_session_id" to cardScanConfiguration.elementsSessionId
-            )
+        val elementsSessionParams = cardScanConfiguration.elementsSessionId?.let {
+            mapOf("elements_session_id" to it)
         } ?: emptyMap()
+        val baseParams = mapOf(
+            "scan_session_id" to scanSessionId,
+            "ssd_model" to cardScanConfiguration.ssdOcrModel.analyticsValue,
+            "ssd_model_version" to cardScanConfiguration.ssdOcrModel.version,
+            "ssd_ocr_enabled" to !cardScanConfiguration.disableSsdOcr,
+            "mlkit_enabled" to cardScanConfiguration.enableMlKitTextRecognition,
+        ) + elementsSessionParams
         analyticsRequestExecutor.executeAsync(
             analyticsRequestFactory.createRequest(
                 event = object : AnalyticsEvent {
@@ -137,6 +150,7 @@ internal class DefaultCardScanEventsReporter @Inject constructor(
     }
 
     private fun clearSessionState() {
+        scanInProgress = false
         hasLoggedMlKitFoundPan = false
         hasLoggedMlKitFoundExp = false
         hasLoggedDarkniteFoundPan = false

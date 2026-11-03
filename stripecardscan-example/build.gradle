@@ -39,7 +39,7 @@ dependencies {
 
 android {
     defaultConfig {
-        applicationId "com.stripe.android.stripecardscan.example.embossed"
+        applicationId "com.stripe.android.stripecardscan.example"
         versionCode 2
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"

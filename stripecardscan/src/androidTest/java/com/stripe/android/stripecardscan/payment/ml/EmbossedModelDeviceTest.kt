@@ -20,8 +20,8 @@ class EmbossedModelDeviceTest {
             BitmapFactory.decodeStream(it)
         }
         assertNotNull(bitmap)
-        val fetchedModel = SSDOcrModelManager.fetchModel(context, forImmediateUse = true)
-        val model = SSDOcr.Factory(context, fetchedModel).newInstance()
+        val fetchedModel = SSDOcrModelManager(SSDOcrModel.Compact).fetchModel(context, forImmediateUse = true)
+        val model = SSDOcr.Factory(context, fetchedModel, SSDOcrModel.Compact).newInstance()
         assertNotNull(model, "The phone runtime must load the compact INT8-weight model")
         try {
             val bounds = Rect(0, 0, bitmap.width, bitmap.height)

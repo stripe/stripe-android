@@ -29,6 +29,7 @@ import com.stripe.android.stripecardscan.databinding.StripeActivityCardscanBindi
 import com.stripe.android.stripecardscan.di.DaggerCardScanComponent
 import com.stripe.android.stripecardscan.payment.card.ScannedCard
 import com.stripe.android.stripecardscan.payment.ml.CardOcr
+import com.stripe.android.stripecardscan.payment.ml.SSDOcrModel
 import com.stripe.android.stripecardscan.scanui.CancellationReason
 import com.stripe.android.stripecardscan.scanui.ScanActivity
 import com.stripe.android.stripecardscan.scanui.ScanResultListener
@@ -147,8 +148,9 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
     private fun createScanFlow(
         enableMlKitTextRecognition: Boolean,
         disableSsdOcr: Boolean,
+        ssdOcrModel: SSDOcrModel,
     ): CardScanFlow {
-        return object : CardScanFlow(scanErrorListener, enableMlKitTextRecognition, disableSsdOcr) {
+        return object : CardScanFlow(scanErrorListener, enableMlKitTextRecognition, disableSsdOcr, ssdOcrModel) {
             /**
              * A final result was received from the aggregator. Set the result from this activity.
              */
@@ -226,6 +228,7 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
         scanFlow = createScanFlow(
             enableMlKitTextRecognition = cardScanConfiguration.enableMlKitTextRecognition,
             disableSsdOcr = cardScanConfiguration.disableSsdOcr,
+            ssdOcrModel = cardScanConfiguration.ssdOcrModel,
         )
 
         DaggerCardScanComponent.factory()

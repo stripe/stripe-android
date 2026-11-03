@@ -29,6 +29,60 @@ import java.util.UUID
 
 class ElementsSessionJsonParserTest {
 
+    @Test
+    fun `compact SSD flag is enabled`() {
+        val json = JSONObject(ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON.toString())
+            .put("flags", JSONObject().put("elements_mobile_cardscan_use_compact_ssdocr", true))
+        val session = ElementsSessionJsonParser(
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = "secret",
+                externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
+                appId = APP_ID,
+            ),
+            isLiveMode = false,
+        ).parse(json)
+
+        assertThat(session).isNotNull()
+        assertThat(session?.useCompactSsdOcrCardScan).isTrue()
+    }
+
+    @Test
+    fun `compact SSD flag is disabled`() {
+        val json = JSONObject(ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON.toString())
+            .put("flags", JSONObject().put("elements_mobile_cardscan_use_compact_ssdocr", false))
+        val session = ElementsSessionJsonParser(
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = "secret",
+                externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
+                appId = APP_ID,
+            ),
+            isLiveMode = false,
+        ).parse(json)
+
+        assertThat(session).isNotNull()
+        assertThat(session?.useCompactSsdOcrCardScan).isFalse()
+    }
+
+    @Test
+    fun `compact SSD flag is omitted`() {
+        val json = JSONObject(ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON.toString())
+            .put("flags", JSONObject())
+        val session = ElementsSessionJsonParser(
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = "secret",
+                externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
+                appId = APP_ID,
+            ),
+            isLiveMode = false,
+        ).parse(json)
+
+        assertThat(session).isNotNull()
+        assertThat(session?.useCompactSsdOcrCardScan).isFalse()
+    }
+
     @get:Rule
     val incentivesFeatureFlagRule = FeatureFlagTestRule(
         featureFlag = FeatureFlags.instantDebitsIncentives,

@@ -15,6 +15,7 @@ internal fun rememberCardScanLauncher(
     isStripeCardScanAllowed: Boolean = false,
     enableMlKitCardScan: Boolean = false,
     disableSsdOcrCardScan: Boolean = false,
+    useCompactSsdOcrCardScan: Boolean,
     apiConfiguration: ApiConfiguration.State,
     onResult: (CardScanResult) -> Unit,
     isStripeCardScanAvailable: IsStripeCardScanAvailable = DefaultIsStripeCardScanAvailable(),
@@ -33,6 +34,7 @@ internal fun rememberCardScanLauncher(
             enableMlKitCardScan = enableMlKitCardScan,
             elementsSessionId = elementsSessionId,
             disableSsdOcrCardScan = disableSsdOcrCardScan,
+            useCompactSsdOcrCardScan = useCompactSsdOcrCardScan,
             onResult = onResult,
         )
     } else {

@@ -45,14 +45,15 @@ class SSDOcrTest {
         val bitmap = testContext.resources.getDrawable(R.drawable.ocr_card_numbers, null)
             .toBitmap()
             .scale(Size(600, 375))
-        val fetcher = SSDOcrModelManager.getModelFetcher(appContext)
+        val fetcher = SSDOcrModelManager(SSDOcrModel.Original).getModelFetcher(appContext)
         assertNotNull(fetcher)
         assertTrue(fetcher is ResourceFetcher)
         fetcher.clearCache()
 
         val model = SSDOcr.Factory(
             appContext,
-            fetcher.fetchData(forImmediateUse = true, isOptional = false)
+            fetcher.fetchData(forImmediateUse = true, isOptional = false),
+            SSDOcrModel.Original,
         ).newInstance()
         assertNotNull(model)
 
@@ -82,14 +83,15 @@ class SSDOcrTest {
         val bitmap = testContext.resources.getDrawable(R.drawable.ocr_card_numbers_qr, null)
             .toBitmap()
             .scale(Size(600, 375))
-        val fetcher = SSDOcrModelManager.getModelFetcher(appContext)
+        val fetcher = SSDOcrModelManager(SSDOcrModel.Original).getModelFetcher(appContext)
         assertNotNull(fetcher)
         assertTrue(fetcher is ResourceFetcher)
         fetcher.clearCache()
 
         val model = SSDOcr.Factory(
             appContext,
-            fetcher.fetchData(forImmediateUse = true, isOptional = false)
+            fetcher.fetchData(forImmediateUse = true, isOptional = false),
+            SSDOcrModel.Original,
         ).newInstance()
         assertNotNull(model)
 
@@ -119,14 +121,15 @@ class SSDOcrTest {
         val bitmap = testContext.resources.getDrawable(R.drawable.ocr_card_numbers, null)
             .toBitmap()
             .scale(Size(600, 375))
-        val fetcher = SSDOcrModelManager.getModelFetcher(appContext)
+        val fetcher = SSDOcrModelManager(SSDOcrModel.Original).getModelFetcher(appContext)
         assertNotNull(fetcher)
         assertTrue(fetcher is ResourceFetcher)
         fetcher.clearCache()
 
         val model = SSDOcr.Factory(
             appContext,
-            fetcher.fetchData(forImmediateUse = true, isOptional = false)
+            fetcher.fetchData(forImmediateUse = true, isOptional = false),
+            SSDOcrModel.Original,
         ).newInstance()
         assertNotNull(model)
 

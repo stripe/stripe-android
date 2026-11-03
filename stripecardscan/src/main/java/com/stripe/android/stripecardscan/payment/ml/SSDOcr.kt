@@ -14,21 +14,11 @@ import com.stripe.android.stripecardscan.framework.ml.ssd.softMax
 import com.stripe.android.stripecardscan.framework.ml.ssd.toRectForm
 import com.stripe.android.stripecardscan.framework.util.reshape
 import com.stripe.android.stripecardscan.payment.card.isValidPan
-import com.stripe.android.stripecardscan.payment.ml.ssd.OcrFeatureMapSizes
 import com.stripe.android.stripecardscan.payment.ml.ssd.combinePriors
 import com.stripe.android.stripecardscan.payment.ml.ssd.determineLayoutAndFilter
 import com.stripe.android.stripecardscan.payment.ml.ssd.extractPredictions
 import com.stripe.android.stripecardscan.payment.ml.ssd.rearrangeOCRArray
 import java.nio.ByteBuffer
-
-/** Experimental fine-grid model: 38 x 24 locations with three priors each. */
-private const val NUM_OF_PRIORS = 2736
-
-/**
- * For each activation in our feature map, we have predictions for 3 bounding boxes
- * of different aspect ratios
- */
-private const val NUM_OF_PRIORS_PER_ACTIVATION = 3
 
 /**
  * We can detect a total of 10 numbers (0 - 9) plus the background class
@@ -41,16 +31,6 @@ private const val NUM_OF_CLASSES = 11
  */
 private const val NUM_OF_COORDINATES = 4
 
-/**
- * Represents the total number of data points for locations
- */
-private const val NUM_LOC = NUM_OF_COORDINATES * NUM_OF_PRIORS
-
-/**
- * Represents the total number of data points for classes
- */
-private const val NUM_CLASS = NUM_OF_CLASSES * NUM_OF_PRIORS
-
 private const val PROB_THRESHOLD = 0.50f
 private const val IOU_THRESHOLD = 0.50f
 private const val CENTER_VARIANCE = 0.1f
@@ -60,31 +40,26 @@ private const val LIMIT = 20
 @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
 internal const val VERTICAL_THRESHOLD = 2.0f
 
-private val FEATURE_MAP_SIZES =
-    OcrFeatureMapSizes(
-        layerOneWidth = 38,
-        layerOneHeight = 24,
-        layerTwoWidth = 0,
-        layerTwoHeight = 0
-    )
-
-/**
- * This value should never change, and is thread safe.
- */
-private val PRIORS = combinePriors(SSDOcr.Factory.TRAINED_IMAGE_SIZE)
-    .take(NUM_OF_PRIORS)
-    .toTypedArray()
-
 /**
  * This model performs SSD OCR recognition on a card.
  */
-internal class SSDOcr private constructor(interpreter: InterpreterWrapper) :
+internal class SSDOcr private constructor(
+    interpreter: InterpreterWrapper,
+    model: SSDOcrModel,
+) :
     TensorFlowLiteAnalyzer<
         CardOcr.Input,
         Array<ByteBuffer>,
         CardOcr.Prediction,
         Map<Int, Array<FloatArray>>
         >(interpreter) {
+
+    private val featureMapSizes = model.featureMapSizes
+    private val numClasses = NUM_OF_CLASSES * model.numberOfPriors
+    private val numLocations = NUM_OF_COORDINATES * model.numberOfPriors
+    private val priors = combinePriors(Factory.TRAINED_IMAGE_SIZE)
+        .take(model.numberOfPriors)
+        .toTypedArray()
 
     override suspend fun transformData(data: CardOcr.Input): Array<ByteBuffer> =
         arrayOf(data.ssdOcrImage.getData())
@@ -93,17 +68,17 @@ internal class SSDOcr private constructor(interpreter: InterpreterWrapper) :
         data: CardOcr.Input,
         mlOutput: Map<Int, Array<FloatArray>>
     ): CardOcr.Prediction {
-        val outputClasses = mlOutput[0] ?: arrayOf(FloatArray(NUM_CLASS))
-        val outputLocations = mlOutput[1] ?: arrayOf(FloatArray(NUM_LOC))
+        val outputClasses = mlOutput[0] ?: arrayOf(FloatArray(numClasses))
+        val outputLocations = mlOutput[1] ?: arrayOf(FloatArray(numLocations))
 
         val boxes = rearrangeOCRArray(
             locations = outputLocations,
-            featureMapSizes = FEATURE_MAP_SIZES,
-            numberOfPriors = NUM_OF_PRIORS_PER_ACTIVATION,
+            featureMapSizes = featureMapSizes,
+            numberOfPriors = SSDOcrModel.PRIORS_PER_ACTIVATION,
             locationsPerPrior = NUM_OF_COORDINATES
         ).reshape(NUM_OF_COORDINATES)
         boxes.adjustLocations(
-            priors = PRIORS,
+            priors = priors,
             centerVariance = CENTER_VARIANCE,
             sizeVariance = SIZE_VARIANCE
         )
@@ -111,8 +86,8 @@ internal class SSDOcr private constructor(interpreter: InterpreterWrapper) :
 
         val scores = rearrangeOCRArray(
             locations = outputClasses,
-            featureMapSizes = FEATURE_MAP_SIZES,
-            numberOfPriors = NUM_OF_PRIORS_PER_ACTIVATION,
+            featureMapSizes = featureMapSizes,
+            numberOfPriors = SSDOcrModel.PRIORS_PER_ACTIVATION,
             locationsPerPrior = NUM_OF_CLASSES
         ).reshape(NUM_OF_CLASSES)
         scores.forEach { it.softMax() }
@@ -148,8 +123,8 @@ internal class SSDOcr private constructor(interpreter: InterpreterWrapper) :
         data: Array<ByteBuffer>
     ): Map<Int, Array<FloatArray>> {
         val mlOutput = mapOf(
-            0 to arrayOf(FloatArray(NUM_CLASS)),
-            1 to arrayOf(FloatArray(NUM_LOC))
+            0 to arrayOf(FloatArray(numClasses)),
+            1 to arrayOf(FloatArray(numLocations))
         )
 
         @Suppress("UNCHECKED_CAST")
@@ -163,6 +138,7 @@ internal class SSDOcr private constructor(interpreter: InterpreterWrapper) :
     class Factory(
         context: Context,
         fetchedModel: FetchedData,
+        private val model: SSDOcrModel,
         threads: Int = DEFAULT_THREADS
     ) : TFLAnalyzerFactory<CardOcr.Input, CardOcr.Prediction, SSDOcr>(context, fetchedModel) {
         companion object {
@@ -177,6 +153,6 @@ internal class SSDOcr private constructor(interpreter: InterpreterWrapper) :
             .numThreads(threads)
             .build()
 
-        override suspend fun newInstance(): SSDOcr? = createInterpreter()?.let { SSDOcr(it) }
+        override suspend fun newInstance(): SSDOcr? = createInterpreter()?.let { SSDOcr(it, model) }
     }
 }

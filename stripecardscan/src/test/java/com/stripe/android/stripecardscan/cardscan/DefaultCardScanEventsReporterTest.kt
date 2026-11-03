@@ -195,7 +195,91 @@ internal class DefaultCardScanEventsReporterTest {
         assertThat(fakeAnalyticsRequestExecutor.getExecutedRequests()).isEmpty()
     }
 
+    @Test
+    fun `original scan events share attempt and model attribution`() = runScenario { reporter, executor ->
+        reporter.scanStarted()
+        reporter.scanDarkniteFoundPan()
+        reporter.scanSucceeded()
+
+        val events = executor.getExecutedRequests().map { it.params }
+        assertThat(events).hasSize(3)
+        val attempt = events.first()["scan_session_id"]
+        assertThat(attempt).isNotNull()
+        events.forEach {
+            assertThat(it["scan_session_id"]).isEqualTo(attempt)
+            assertThat(it["ssd_model"]).isEqualTo("original")
+            assertThat(it["ssd_model_version"]).isEqualTo("1.1.1.16")
+            assertThat(it["ssd_ocr_enabled"]).isEqualTo(true)
+            assertThat(it["mlkit_enabled"]).isEqualTo(false)
+        }
+    }
+
+    @Test
+    fun `compact failure retains assignment and ML Kit setting`() = runScenario(
+        configuration = CardScanConfiguration(
+            elementsSessionId = ELEMENTS_SESSION_ID,
+            useCompactSsdOcr = true,
+            enableMlKitTextRecognition = true,
+        ),
+    ) { reporter, executor ->
+        reporter.scanStarted()
+        reporter.scanFailed(null)
+        val events = executor.getExecutedRequests().map { it.params }
+        assertThat(events).hasSize(2)
+        events.forEach {
+            assertThat(it["ssd_model"]).isEqualTo("compact")
+            assertThat(it["ssd_model_version"]).isEqualTo("embossed-fine-w8-2026-11-02")
+            assertThat(it["ssd_ocr_enabled"]).isEqualTo(true)
+            assertThat(it["mlkit_enabled"]).isEqualTo(true)
+        }
+        assertThat(events.first()["scan_session_id"]).isEqualTo(events.last()["scan_session_id"])
+    }
+
+    @Test
+    fun `permission cancellation records assignment but SSD disabled`() = runScenario(
+        configuration = CardScanConfiguration(
+            elementsSessionId = ELEMENTS_SESSION_ID,
+            useCompactSsdOcr = true,
+            disableSsdOcr = true,
+        ),
+    ) { reporter, executor ->
+        reporter.scanCancelled(CancellationReason.CameraPermissionDenied)
+        val event = executor.getExecutedRequests().single().params
+        assertThat(event["ssd_model"]).isEqualTo("compact")
+        assertThat(event["ssd_ocr_enabled"]).isEqualTo(false)
+        assertThat(event["scan_session_id"]).isNotNull()
+    }
+
+    @Test
+    fun `repeated scans in one Elements Session receive distinct attempt IDs`() = runScenario { reporter, executor ->
+        reporter.scanStarted()
+        reporter.scanCancelled(CancellationReason.Back)
+        reporter.scanStarted()
+        reporter.scanSucceeded()
+        val events = executor.getExecutedRequests().map { it.params }
+        assertThat(events).hasSize(4)
+        assertThat(events[0]["scan_session_id"]).isEqualTo(events[1]["scan_session_id"])
+        assertThat(events[2]["scan_session_id"]).isEqualTo(events[3]["scan_session_id"])
+        assertThat(events[0]["scan_session_id"]).isNotEqualTo(events[2]["scan_session_id"])
+        events.forEach { assertThat(it["elements_session_id"]).isEqualTo(ELEMENTS_SESSION_ID) }
+    }
+
+    @Test
+    fun `camera stream restart preserves attempt and elapsed duration`() = runScenario { reporter, executor ->
+        reporter.scanStarted()
+        ShadowSystemClock.advanceBy(3, TimeUnit.SECONDS)
+        reporter.scanStarted()
+        ShadowSystemClock.advanceBy(2, TimeUnit.SECONDS)
+        reporter.scanSucceeded()
+
+        val events = executor.getExecutedRequests().map { it.params }
+        assertThat(events).hasSize(2)
+        assertThat(events.first()["scan_session_id"]).isEqualTo(events.last()["scan_session_id"])
+        assertThat(events.last()["duration"]).isEqualTo(5f)
+    }
+
     private fun runScenario(
+        configuration: CardScanConfiguration = CardScanConfiguration(ELEMENTS_SESSION_ID),
         testBlock: (DefaultCardScanEventsReporter, FakeAnalyticsRequestExecutor) -> Unit
     ) {
         val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
@@ -213,7 +297,7 @@ internal class DefaultCardScanEventsReporterTest {
                 pluginTypeProvider = { null }
             ),
             durationProvider = durationProvider,
-            cardScanConfiguration = CardScanConfiguration(ELEMENTS_SESSION_ID)
+            cardScanConfiguration = configuration
         )
 
         testBlock(eventsReporter, analyticsRequestExecutor)
