@@ -231,7 +231,7 @@ internal class StripeEndToEndTest {
             stripeRepository = stripeRepository,
             paymentController = StripePaymentController.create(
                 context,
-                publishableKey,
+                ApiKeyFixtures.DEFAULT_API_CONFIG.copy(publishableKey = publishableKey),
                 stripeRepository
             ),
             publishableKey = publishableKey,
