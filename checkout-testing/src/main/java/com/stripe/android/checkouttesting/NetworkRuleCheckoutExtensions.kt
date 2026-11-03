@@ -97,3 +97,19 @@ fun NetworkRule.checkoutConfirm(
         },
     )
 }
+
+fun NetworkRule.checkoutPoll(
+    vararg requestMatchers: RequestMatcher,
+    sessionId: String = DEFAULT_CHECKOUT_SESSION_ID,
+    responseFactory: (MockResponse) -> Unit = { response ->
+        response.testBodyFromFile("checkout-session-poll.json")
+    },
+) {
+    enqueue(
+        host("api.stripe.com"),
+        method("GET"),
+        path("/v1/checkout_client/$sessionId/poll"),
+        *requestMatchers,
+        responseFactory = responseFactory,
+    )
+}

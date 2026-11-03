@@ -33,7 +33,6 @@ import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFacto
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
 import com.stripe.android.testing.FakeErrorReporter
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -256,25 +255,23 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
         stateHolder.state = state
         val sessionRefresher = FakeCheckoutSessionRefresher()
         val results = Turbine<CheckoutController.Result>()
-        val operationCoordinator = CheckoutOperationCoordinator(
-            confirmationHandler = confirmationHandler,
-            sheetStateHolder = SheetStateHolder(savedStateHandle),
-            sessionRefresher = sessionRefresher,
-            logger = Logger.noop(),
-            resultCallback = results::add,
-            viewModelScope = backgroundScope,
-        )
         val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
         val analyticsPerformer = TestCheckoutAnalyticsPerformerFactory.create(
-            confirmationHandler = confirmationHandler,
             savedStateHandle = savedStateHandle,
             stateHolder = stateHolder,
             analyticsRequestExecutor = analyticsRequestExecutor,
             workContext = UnconfinedTestDispatcher(testScheduler),
         )
-        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
-            analyticsPerformer.reportConfirmationResults()
-        }
+        val operationCoordinator = CheckoutOperationCoordinator(
+            confirmationHandler = confirmationHandler,
+            sheetStateHolder = SheetStateHolder(savedStateHandle),
+            sessionRefresher = sessionRefresher,
+            confirmationFinalizer = { Result.success(it) },
+            resultReporter = analyticsPerformer,
+            logger = Logger.noop(),
+            resultCallback = results::add,
+            viewModelScope = backgroundScope,
+        )
         val performer = DefaultExpressCheckoutElementConfirmationPerformer(
             stateHolder = stateHolder,
             confirmationHandler = confirmationHandler,
