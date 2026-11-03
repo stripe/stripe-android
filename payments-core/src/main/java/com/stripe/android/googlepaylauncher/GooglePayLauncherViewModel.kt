@@ -23,6 +23,7 @@ import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.toRequestOptions
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.googlepaylauncher.GooglePayLauncher.BillingAddressConfig.Format
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -328,10 +329,10 @@ internal class GooglePayLauncherViewModel(
 
             return GooglePayLauncherViewModel(
                 paymentsClient = DefaultPaymentsClientFactory(context = application).create(googlePayEnvironment),
-                requestOptions = ApiRequest.Options(
-                    publishableKey,
-                    stripeAccountId
-                ),
+                requestOptions = ApiConfiguration.State(
+                    publishableKey = publishableKey,
+                    stripeAccountId = stripeAccountId,
+                ).toRequestOptions(idempotencyKey = null),
                 args = args,
                 stripeRepository = stripeRepository,
                 paymentController = StripePaymentController(

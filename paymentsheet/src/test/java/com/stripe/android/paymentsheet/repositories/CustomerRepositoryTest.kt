@@ -5,6 +5,7 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.toRequestOptions
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentMethod
@@ -697,10 +698,10 @@ internal class CustomerRepositoryTest {
         )
     }
 
-    private fun expectedRequestOptions() = ApiRequest.Options(
-        apiKey = "ephemeral_key",
-        stripeAccount = ApiKeyFixtures.FAKE_ACCOUNT_ID,
-    )
+    private fun expectedRequestOptions() = ApiConfiguration.State(
+        publishableKey = "ephemeral_key",
+        stripeAccountId = ApiKeyFixtures.FAKE_ACCOUNT_ID,
+    ).toRequestOptions(idempotencyKey = null)
 
     private suspend fun failsOnceStripeRepository(): StripeRepository {
         val repository = mock<StripeRepository>()

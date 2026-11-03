@@ -3,8 +3,9 @@ package com.stripe.android
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.exception.InvalidRequestException
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.toRequestOptions
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
@@ -192,7 +193,7 @@ internal class PaymentMethodEndToEndTest {
         val params = PaymentMethodCreateParamsFixtures.GRABPAY
         val paymentMethod = repository.createPaymentMethod(
             params,
-            ApiRequest.Options(ApiKeyFixtures.GRABPAY_PUBLISHABLE_KEY)
+            ApiConfiguration.State(ApiKeyFixtures.GRABPAY_PUBLISHABLE_KEY, null).toRequestOptions(idempotencyKey = null)
         ).getOrThrow()
         assertThat(paymentMethod.type)
             .isEqualTo(PaymentMethod.Type.GrabPay)
@@ -207,7 +208,7 @@ internal class PaymentMethodEndToEndTest {
             workContext = testDispatcher
         ).createPaymentMethod(
             PaymentMethodCreateParams.createPayPay(),
-            ApiRequest.Options(ApiKeyFixtures.PAY_PAY_PUBLISHABLE_KEY)
+            ApiConfiguration.State(ApiKeyFixtures.PAY_PAY_PUBLISHABLE_KEY, null).toRequestOptions(idempotencyKey = null)
         ).getOrThrow()
 
         assertThat(paymentMethod.type)
@@ -223,7 +224,7 @@ internal class PaymentMethodEndToEndTest {
             workContext = testDispatcher
         ).createPaymentMethod(
             PaymentMethodCreateParams.createPayPal(),
-            ApiRequest.Options(ApiKeyFixtures.PAYPAL_PUBLISHABLE_KEY)
+            ApiConfiguration.State(ApiKeyFixtures.PAYPAL_PUBLISHABLE_KEY, null).toRequestOptions(idempotencyKey = null)
         ).getOrThrow()
 
         assertThat(paymentMethod.type)

@@ -3,7 +3,7 @@ package com.stripe.android.payments.bankaccount.domain
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.core.exception.APIException
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.toRequestOptions
 import com.stripe.android.model.CreateFinancialConnectionsSessionForDeferredPaymentParams
 import com.stripe.android.model.CreateFinancialConnectionsSessionParams
 import com.stripe.android.model.FinancialConnectionsSession
@@ -60,10 +60,7 @@ class CreateFinancialConnectionsSessionTest {
                     customerEmailAddress = null,
                     linkMode = null,
                 ),
-                requestOptions = ApiRequest.Options(
-                    apiKey = DEFAULT_API_CONFIG.publishableKey,
-                    stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
-                )
+                requestOptions = DEFAULT_API_CONFIG.toRequestOptions(idempotencyKey = null)
             )
             assertThat((paymentIntent)).isEqualTo(Result.success(linkedAccountSession))
         }
@@ -100,10 +97,7 @@ class CreateFinancialConnectionsSessionTest {
                     customerEmailAddress = null,
                     linkMode = null,
                 ),
-                requestOptions = ApiRequest.Options(
-                    apiKey = DEFAULT_API_CONFIG.publishableKey,
-                    stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
-                )
+                requestOptions = DEFAULT_API_CONFIG.toRequestOptions(idempotencyKey = null)
             )
             assertThat(paymentIntent.exceptionOrNull()!!).isEqualTo(expectedException)
         }
@@ -163,10 +157,7 @@ class CreateFinancialConnectionsSessionTest {
                     hostedSurface = "payment_element",
                     linkMode = null,
                 ),
-                requestOptions = ApiRequest.Options(
-                    apiKey = DEFAULT_API_CONFIG.publishableKey,
-                    stripeAccount = DEFAULT_API_CONFIG.stripeAccountId
-                )
+                requestOptions = DEFAULT_API_CONFIG.toRequestOptions(idempotencyKey = null)
             )
             assertThat((paymentIntent)).isEqualTo(Result.success(linkedAccountSession))
         }
@@ -202,10 +193,7 @@ class CreateFinancialConnectionsSessionTest {
                     hostedSurface = "payment_element",
                     linkMode = null,
                 ),
-                requestOptions = ApiRequest.Options(
-                    apiKey = DEFAULT_API_CONFIG.publishableKey,
-                    stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
-                )
+                requestOptions = DEFAULT_API_CONFIG.toRequestOptions(idempotencyKey = null)
             )
             assertThat(paymentIntent.exceptionOrNull()!!).isEqualTo(expectedException)
         }
@@ -279,10 +267,7 @@ class CreateFinancialConnectionsSessionTest {
                     )
                 ),
                 requestOptions = eq(
-                    ApiRequest.Options(
-                        apiKey = DEFAULT_API_CONFIG.publishableKey,
-                        stripeAccount = DEFAULT_API_CONFIG.stripeAccountId
-                    )
+                    DEFAULT_API_CONFIG.toRequestOptions(idempotencyKey = null)
                 )
             )
             assertThat((deferredIntent)).isEqualTo(Result.success(linkedAccountSession))
@@ -335,10 +320,7 @@ class CreateFinancialConnectionsSessionTest {
                     )
                 ),
                 requestOptions = eq(
-                    ApiRequest.Options(
-                        apiKey = DEFAULT_API_CONFIG.publishableKey,
-                        stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
-                    )
+                    DEFAULT_API_CONFIG.toRequestOptions(idempotencyKey = null)
                 )
             )
             assertThat(paymentIntent.exceptionOrNull()!!).isEqualTo(expectedException)

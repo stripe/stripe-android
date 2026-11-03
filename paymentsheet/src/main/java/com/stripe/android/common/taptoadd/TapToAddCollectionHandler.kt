@@ -3,6 +3,7 @@ package com.stripe.android.common.taptoadd
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.exception.safeAnalyticsMessage
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.withRequestCredentials
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -357,9 +358,10 @@ internal class DefaultTapToAddCollectionHandler(
             }
         }
 
-        return ApiRequest.Options(
+        return paymentMethodMetadata.apiConfiguration.withRequestCredentials(
             apiKey = ephemeralKeySecret,
             stripeAccount = paymentMethodMetadata.apiConfiguration.stripeAccountId,
+            idempotencyKey = null,
         )
     }
 

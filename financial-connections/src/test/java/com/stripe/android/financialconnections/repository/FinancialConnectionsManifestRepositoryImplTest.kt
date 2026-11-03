@@ -1,8 +1,10 @@
 package com.stripe.android.financialconnections.repository
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.toRequestOptions
 import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.FinancialConnectionsPreCollectedConsent
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventContext
@@ -41,9 +43,10 @@ internal class FinancialConnectionsManifestRepositoryImplTest {
         requestExecutor = mockRequestExecutor,
         apiRequestFactory = apiRequestFactory,
         provideApiRequestOptions = {
-            ApiRequest.Options(
-                apiKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
-            )
+            ApiConfiguration.State(
+                publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+                stripeAccountId = null,
+            ).toRequestOptions(idempotencyKey = null)
         },
         logger = Logger.noop(),
         initialSync = initialSync,

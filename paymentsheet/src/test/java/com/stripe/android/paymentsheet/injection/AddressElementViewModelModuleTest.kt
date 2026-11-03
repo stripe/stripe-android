@@ -6,9 +6,10 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.common.exception.stripeErrorMessage
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestFactory
-import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
+import com.stripe.android.core.networking.toRequestOptions
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.model.Address
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
@@ -404,10 +405,10 @@ class AddressElementViewModelModuleTest {
                     publishableKey = "pk_test_123",
                 ),
                 apiRequestOptionsProvider = Provider {
-                    ApiRequest.Options(
-                        apiKey = "pk_test_123",
-                        stripeAccount = "acct_123",
-                    )
+                    ApiConfiguration.State(
+                        publishableKey = "pk_test_123",
+                        stripeAccountId = "acct_123",
+                    ).toRequestOptions(idempotencyKey = null)
                 },
             ),
         )

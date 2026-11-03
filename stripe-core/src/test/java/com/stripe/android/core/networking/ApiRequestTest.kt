@@ -1,5 +1,7 @@
 package com.stripe.android.core.networking
 
+import android.os.Parcel
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.ApiKeyFixtures
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -12,6 +14,24 @@ import kotlin.test.assertTrue
 
 @RunWith(RobolectricTestRunner::class)
 internal class ApiRequestTest {
+    @Test
+    fun optionsParcelRoundTripPreservesCredentialsAndIdempotency() {
+        val options = ApiConfiguration.State(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, "acct")
+            .toRequestOptions(idempotencyKey = "request-id")
+        val parcel = Parcel.obtain()
+        try {
+            parcel.writeParcelable(options, 0)
+            parcel.setDataPosition(0)
+
+            @Suppress("DEPRECATION")
+            val restored = parcel.readParcelable<ApiRequest.Options>(ApiRequest.Options::class.java.classLoader)
+
+            assertEquals(options, restored)
+        } finally {
+            parcel.recycle()
+        }
+    }
+
     @Test
     fun getContentType() {
         val contentType = FACTORY.createGet(
@@ -69,7 +89,10 @@ internal class ApiRequestTest {
             ),
             FACTORY.createPost(
                 PAYMENT_METHODS_URL,
-                ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, "acct"),
+                ApiConfiguration.State(
+                    publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+                    stripeAccountId = "acct",
+                ).toRequestOptions(idempotencyKey = null),
                 params
             )
         )
@@ -97,14 +120,20 @@ internal class ApiRequestTest {
 
     @Test
     fun optionsToStringDoesNotExposeApiKey() {
-        val options = ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+        val options = ApiConfiguration.State(
+            publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+            stripeAccountId = null,
+        ).toRequestOptions(idempotencyKey = null)
         val str = options.toString()
         assertFalse(str.contains(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY))
         assertFalse(str.contains("pk_test"))
     }
 
     private companion object {
-        private val OPTIONS = ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+        private val OPTIONS = ApiConfiguration.State(
+            publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+            stripeAccountId = null,
+        ).toRequestOptions(idempotencyKey = null)
 
         private val FACTORY = ApiRequest.Factory()
 

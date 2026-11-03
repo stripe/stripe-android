@@ -4,7 +4,8 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.AlipayAuthenticator
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.StripeIntentResult
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.core.networking.toRequestOptions
 import com.stripe.android.model.AlipayAuthResult
 import com.stripe.android.model.PaymentIntentFixtures
 import kotlinx.coroutines.test.runTest
@@ -134,6 +135,9 @@ internal class DefaultAlipayRepositoryTest {
 
     private companion object {
         private val INTENT = PaymentIntentFixtures.ALIPAY_REQUIRES_ACTION
-        private val REQUEST_OPTIONS = ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+        private val REQUEST_OPTIONS = ApiConfiguration.State(
+            publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+            stripeAccountId = null,
+        ).toRequestOptions(idempotencyKey = null)
     }
 }

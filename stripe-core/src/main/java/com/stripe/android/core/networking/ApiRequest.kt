@@ -2,6 +2,7 @@ package com.stripe.android.core.networking
 
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.ApiKeyValidator
 import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.AppInfo
@@ -93,11 +94,16 @@ data class ApiRequest internal constructor(
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
-    data class Options constructor(
+    @ConsistentCopyVisibility
+    data class Options private constructor(
         val apiKey: String,
-        val stripeAccount: String? = null,
-        val idempotencyKey: String? = null
+        val stripeAccount: String?,
+        val idempotencyKey: String?
     ) : Parcelable {
+
+        fun withApiKey(apiKey: String): Options = copy(apiKey = apiKey)
+
+        fun withStripeAccount(stripeAccount: String?): Options = copy(stripeAccount = stripeAccount)
 
         override fun toString(): String {
             return "Options(apiKey=***)"
@@ -116,6 +122,15 @@ data class ApiRequest internal constructor(
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         companion object {
             const val UNDEFINED_PUBLISHABLE_KEY = "pk_undefined"
+
+            fun create(
+                apiConfiguration: ApiConfiguration.State,
+                idempotencyKey: String?,
+            ): Options = Options(
+                apiKey = apiConfiguration.publishableKey,
+                stripeAccount = apiConfiguration.stripeAccountId,
+                idempotencyKey = idempotencyKey,
+            )
         }
     }
 

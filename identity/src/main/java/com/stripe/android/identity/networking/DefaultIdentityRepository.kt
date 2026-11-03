@@ -1,8 +1,12 @@
+@file:OptIn(ApiConfigurationPreview::class)
+
 package com.stripe.android.identity.networking
 
 import android.content.Context
 import android.util.Log
 import androidx.annotation.VisibleForTesting
+import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.core.ApiConfigurationPreview
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.model.StripeFile
@@ -17,6 +21,7 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeRequest
 import com.stripe.android.core.networking.responseJson
+import com.stripe.android.core.networking.toRequestOptions
 import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.identity.networking.models.ClearDataParam
 import com.stripe.android.identity.networking.models.ClearDataParam.Companion.createCollectedDataParamEntry
@@ -57,9 +62,10 @@ internal class DefaultIdentityRepository @Inject constructor(
     ): VerificationPage = executeRequestWithKSerializer(
         apiRequestFactory.createGet(
             url = "$BASE_URL/$IDENTITY_VERIFICATION_PAGES/${urlEncode(id)}",
-            options = ApiRequest.Options(
-                apiKey = ephemeralKey
-            ),
+            options = ApiConfiguration.State(
+                publishableKey = ephemeralKey,
+                stripeAccountId = null,
+            ).toRequestOptions(idempotencyKey = null),
             params = mapOf(
                 APP_IDENTIFIER to context.packageName
             )
@@ -75,9 +81,10 @@ internal class DefaultIdentityRepository @Inject constructor(
     ): VerificationPageData = executeRequestWithKSerializer(
         apiRequestFactory.createPost(
             url = "$BASE_URL/$IDENTITY_VERIFICATION_PAGES/${urlEncode(id)}/$DATA",
-            options = ApiRequest.Options(
-                apiKey = ephemeralKey
-            ),
+            options = ApiConfiguration.State(
+                publishableKey = ephemeralKey,
+                stripeAccountId = null,
+            ).toRequestOptions(idempotencyKey = null),
             params = mapOf(
                 collectedDataParam.createCollectedDataParamEntry(json),
                 clearDataParam.createCollectedDataParamEntry(json)
@@ -92,9 +99,10 @@ internal class DefaultIdentityRepository @Inject constructor(
     ): VerificationPageData = executeRequestWithKSerializer(
         apiRequestFactory.createPost(
             url = "$BASE_URL/$IDENTITY_VERIFICATION_PAGES/${urlEncode(id)}/$SUBMIT",
-            options = ApiRequest.Options(
-                apiKey = ephemeralKey
-            )
+            options = ApiConfiguration.State(
+                publishableKey = ephemeralKey,
+                stripeAccountId = null,
+            ).toRequestOptions(idempotencyKey = null)
         ),
         VerificationPageData.serializer()
     )
@@ -106,9 +114,10 @@ internal class DefaultIdentityRepository @Inject constructor(
     ) = executeRequestWithKSerializer(
         apiRequestFactory.createPost(
             url = "$BASE_URL/$IDENTITY_VERIFICATION_PAGES/${urlEncode(id)}/$TESTING/$VERIFY",
-            options = ApiRequest.Options(
-                apiKey = ephemeralKey
-            ),
+            options = ApiConfiguration.State(
+                publishableKey = ephemeralKey,
+                stripeAccountId = null,
+            ).toRequestOptions(idempotencyKey = null),
             params = mapOf(
                 SIMULATE_DELAY to simulateDelay
             )
@@ -123,9 +132,10 @@ internal class DefaultIdentityRepository @Inject constructor(
     ) = executeRequestWithKSerializer(
         apiRequestFactory.createPost(
             url = "$BASE_URL/$IDENTITY_VERIFICATION_PAGES/${urlEncode(id)}/$TESTING/$UNVERIFY",
-            options = ApiRequest.Options(
-                apiKey = ephemeralKey
-            ),
+            options = ApiConfiguration.State(
+                publishableKey = ephemeralKey,
+                stripeAccountId = null,
+            ).toRequestOptions(idempotencyKey = null),
             params = mapOf(
                 SIMULATE_DELAY to simulateDelay
             )
@@ -139,9 +149,10 @@ internal class DefaultIdentityRepository @Inject constructor(
     ) = executeRequestWithKSerializer(
         apiRequestFactory.createPost(
             url = "$BASE_URL/$IDENTITY_VERIFICATION_PAGES/${urlEncode(id)}/$PHONE_OTP/$GENERATE",
-            options = ApiRequest.Options(
-                apiKey = ephemeralKey
-            )
+            options = ApiConfiguration.State(
+                publishableKey = ephemeralKey,
+                stripeAccountId = null,
+            ).toRequestOptions(idempotencyKey = null)
         ),
         VerificationPageData.serializer()
     )
@@ -152,9 +163,10 @@ internal class DefaultIdentityRepository @Inject constructor(
     ) = executeRequestWithKSerializer(
         apiRequestFactory.createPost(
             url = "$BASE_URL/$IDENTITY_VERIFICATION_PAGES/${urlEncode(id)}/$PHONE_OTP/$CANNOT_VERIFY",
-            options = ApiRequest.Options(
-                apiKey = ephemeralKey
-            )
+            options = ApiConfiguration.State(
+                publishableKey = ephemeralKey,
+                stripeAccountId = null,
+            ).toRequestOptions(idempotencyKey = null)
         ),
         VerificationPageData.serializer()
     )
@@ -171,9 +183,10 @@ internal class DefaultIdentityRepository @Inject constructor(
                 file = imageFile,
                 purpose = filePurpose
             ),
-            options = ApiRequest.Options(
-                apiKey = ephemeralKey
-            ),
+            options = ApiConfiguration.State(
+                publishableKey = ephemeralKey,
+                stripeAccountId = null,
+            ).toRequestOptions(idempotencyKey = null),
             verificationId = verificationId
         ),
         responseJsonParser = stripeFileJsonParser,

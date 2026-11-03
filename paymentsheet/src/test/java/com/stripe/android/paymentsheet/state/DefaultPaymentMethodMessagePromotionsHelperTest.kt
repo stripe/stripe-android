@@ -4,6 +4,7 @@ import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.toRequestOptions
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
@@ -39,10 +40,7 @@ class DefaultPaymentMethodMessagePromotionsHelperTest {
         assertThat(request.country).isNull()
         assertThat(request.locale).isEqualTo(Locale.getDefault().language)
         assertThat(request.options).isEqualTo(
-            ApiRequest.Options(
-                apiKey = DEFAULT_API_CONFIG.publishableKey,
-                stripeAccount = DEFAULT_API_CONFIG.stripeAccountId
-            )
+            DEFAULT_API_CONFIG.toRequestOptions(idempotencyKey = null)
         )
     }
 

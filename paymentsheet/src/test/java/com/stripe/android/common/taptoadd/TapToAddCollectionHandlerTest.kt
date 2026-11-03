@@ -6,7 +6,9 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.common.taptoadd.ui.createTapToAddUxConfiguration
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.toRequestOptions
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
@@ -308,10 +310,10 @@ class TapToAddCollectionHandlerTest {
                 )
             )
             assertThat(updateCall.options).isEqualTo(
-                ApiRequest.Options(
-                    apiKey = "ek_123",
-                    stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
-                )
+                ApiConfiguration.State(
+                    publishableKey = "ek_123",
+                    stripeAccountId = DEFAULT_API_CONFIG.stripeAccountId,
+                ).toRequestOptions(idempotencyKey = null)
             )
 
             val collectionResult = result.await()

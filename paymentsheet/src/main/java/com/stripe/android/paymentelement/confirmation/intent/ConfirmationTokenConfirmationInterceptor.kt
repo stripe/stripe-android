@@ -116,7 +116,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                 clientAttributionMetadata,
             ),
             options = if (paymentMethod.customerId != null) {
-                requestOptions.copy(
+                requestOptions.withApiKey(
                     apiKey = ephemeralKeySecret ?: "".also {
                         userFacingLogger.logWarningWithoutPii(ERROR_MISSING_EPHEMERAL_KEY_SECRET)
                     }

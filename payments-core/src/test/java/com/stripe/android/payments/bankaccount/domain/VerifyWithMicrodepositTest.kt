@@ -1,8 +1,9 @@
 package com.stripe.android.payments.bankaccount.domain
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.exception.APIException
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.toRequestOptions
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.networking.StripeRepository
@@ -43,7 +44,7 @@ class VerifyWithMicrodepositTest {
                 clientSecret = clientSecret,
                 firstAmount = 12,
                 secondAmount = 34,
-                requestOptions = ApiRequest.Options(publishableKey)
+                requestOptions = ApiConfiguration.State(publishableKey, null).toRequestOptions(idempotencyKey = null)
             )
             assertThat((result)).isEqualTo(Result.success(paymentIntent))
         }
@@ -71,7 +72,7 @@ class VerifyWithMicrodepositTest {
             verify(stripeRepository).verifyPaymentIntentWithMicrodeposits(
                 clientSecret = clientSecret,
                 descriptorCode = "code",
-                requestOptions = ApiRequest.Options(publishableKey)
+                requestOptions = ApiConfiguration.State(publishableKey, null).toRequestOptions(idempotencyKey = null)
             )
             assertThat((result)).isEqualTo(Result.success(paymentIntent))
         }
@@ -99,7 +100,7 @@ class VerifyWithMicrodepositTest {
                 clientSecret = clientSecret,
                 firstAmount = 12,
                 secondAmount = 34,
-                requestOptions = ApiRequest.Options(publishableKey)
+                requestOptions = ApiConfiguration.State(publishableKey, null).toRequestOptions(idempotencyKey = null)
             )
             assertThat(result.exceptionOrNull()!!).isEqualTo(expectedException)
         }
@@ -129,7 +130,7 @@ class VerifyWithMicrodepositTest {
                 clientSecret = clientSecret,
                 firstAmount = 12,
                 secondAmount = 34,
-                requestOptions = ApiRequest.Options(publishableKey)
+                requestOptions = ApiConfiguration.State(publishableKey, null).toRequestOptions(idempotencyKey = null)
             )
             assertThat((result)).isEqualTo(Result.success(setupIntent))
         }
@@ -157,7 +158,7 @@ class VerifyWithMicrodepositTest {
             verify(stripeRepository).verifySetupIntentWithMicrodeposits(
                 clientSecret = clientSecret,
                 descriptorCode = "code",
-                requestOptions = ApiRequest.Options(publishableKey)
+                requestOptions = ApiConfiguration.State(publishableKey, null).toRequestOptions(idempotencyKey = null)
             )
             assertThat((result)).isEqualTo(Result.success(setupIntent))
         }
@@ -185,7 +186,7 @@ class VerifyWithMicrodepositTest {
                 clientSecret = clientSecret,
                 firstAmount = 12,
                 secondAmount = 34,
-                requestOptions = ApiRequest.Options(publishableKey)
+                requestOptions = ApiConfiguration.State(publishableKey, null).toRequestOptions(idempotencyKey = null)
             )
             assertThat(result.exceptionOrNull()!!).isEqualTo(expectedException)
         }

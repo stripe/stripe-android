@@ -1,7 +1,7 @@
 package com.stripe.android.payments.bankaccount.domain
 
 import com.stripe.android.core.ApiConfiguration
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.toRequestOptions
 import com.stripe.android.model.CreateFinancialConnectionsSessionForDeferredPaymentParams
 import com.stripe.android.model.CreateFinancialConnectionsSessionParams
 import com.stripe.android.model.FinancialConnectionsSession
@@ -37,10 +37,7 @@ internal class CreateFinancialConnectionsSession @Inject constructor(
                     clientSecret = clientSecret,
                     hostedSurface = hostedSurface
                 ),
-                requestOptions = ApiRequest.Options(
-                    apiKey = apiConfiguration.publishableKey,
-                    stripeAccount = apiConfiguration.stripeAccountId
-                )
+                requestOptions = apiConfiguration.toRequestOptions(idempotencyKey = null)
             ).getOrThrow()
         }
     }
@@ -65,10 +62,7 @@ internal class CreateFinancialConnectionsSession @Inject constructor(
                     clientSecret = clientSecret,
                     hostedSurface = hostedSurface
                 ),
-                requestOptions = ApiRequest.Options(
-                    apiKey = apiConfiguration.publishableKey,
-                    stripeAccount = apiConfiguration.stripeAccountId
-                )
+                requestOptions = apiConfiguration.toRequestOptions(idempotencyKey = null)
             ).getOrThrow()
         }
     }
@@ -108,10 +102,7 @@ internal class CreateFinancialConnectionsSession @Inject constructor(
                 currency = currency,
                 product = product,
             ),
-            requestOptions = ApiRequest.Options(
-                apiKey = apiConfiguration.publishableKey,
-                stripeAccount = apiConfiguration.stripeAccountId
-            )
+            requestOptions = apiConfiguration.toRequestOptions(idempotencyKey = null)
         )
     }
 

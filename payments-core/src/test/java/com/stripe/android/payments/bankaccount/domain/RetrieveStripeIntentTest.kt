@@ -3,7 +3,7 @@ package com.stripe.android.payments.bankaccount.domain
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.core.exception.APIException
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.toRequestOptions
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
@@ -39,10 +39,7 @@ class RetrieveStripeIntentTest {
             // Then
             verify(stripeRepository).retrieveStripeIntent(
                 clientSecret = "pi_1234_secret_5678",
-                options = ApiRequest.Options(
-                    apiKey = DEFAULT_API_CONFIG.publishableKey,
-                    stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
-                )
+                options = DEFAULT_API_CONFIG.toRequestOptions(idempotencyKey = null)
             )
 
             assertThat(intent).isInstanceOf(PaymentIntent::class.java)
@@ -68,10 +65,7 @@ class RetrieveStripeIntentTest {
             // Then
             verify(stripeRepository).retrieveStripeIntent(
                 clientSecret = "pi_invalid",
-                options = ApiRequest.Options(
-                    apiKey = DEFAULT_API_CONFIG.publishableKey,
-                    stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
-                )
+                options = DEFAULT_API_CONFIG.toRequestOptions(idempotencyKey = null)
             )
 
             assertThat(intent.exceptionOrNull()).isEqualTo(expectedException)
@@ -96,10 +90,7 @@ class RetrieveStripeIntentTest {
             // Then
             verify(stripeRepository).retrieveStripeIntent(
                 clientSecret = "seti_1234_secret_5678",
-                options = ApiRequest.Options(
-                    apiKey = DEFAULT_API_CONFIG.publishableKey,
-                    stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
-                )
+                options = DEFAULT_API_CONFIG.toRequestOptions(idempotencyKey = null)
             )
             assertThat(intent).isInstanceOf(SetupIntent::class.java)
         }
@@ -124,10 +115,7 @@ class RetrieveStripeIntentTest {
             // Then
             verify(stripeRepository).retrieveStripeIntent(
                 clientSecret = "seti_invalid",
-                options = ApiRequest.Options(
-                    apiKey = DEFAULT_API_CONFIG.publishableKey,
-                    stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
-                )
+                options = DEFAULT_API_CONFIG.toRequestOptions(idempotencyKey = null)
             )
 
             assertThat(intent.exceptionOrNull()).isEqualTo(expectedException)

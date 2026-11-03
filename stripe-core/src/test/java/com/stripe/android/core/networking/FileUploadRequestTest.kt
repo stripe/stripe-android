@@ -3,6 +3,7 @@ package com.stripe.android.core.networking
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.ApiKeyFixtures
 import com.stripe.android.core.FileFactory
 import com.stripe.android.core.model.StripeFileParams
@@ -81,6 +82,9 @@ class FileUploadRequestTest {
     }
 
     private companion object {
-        private val OPTIONS = ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+        private val OPTIONS = ApiConfiguration.State(
+            publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+            stripeAccountId = null,
+        ).toRequestOptions(idempotencyKey = null)
     }
 }

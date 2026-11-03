@@ -5,6 +5,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.toRequestOptions
 import com.stripe.android.link.FakeConsumersApiService
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.model.PaymentDetailsFixtures
@@ -339,7 +340,12 @@ class LinkApiRepositoryTest {
                 )
             },
             requestSurface = eq("android_payment_element"),
-            requestOptions = eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID)),
+            requestOptions = eq(
+                ApiConfiguration.State(
+                    publishableKey = PUBLISHABLE_KEY,
+                    stripeAccountId = STRIPE_ACCOUNT_ID,
+                ).toRequestOptions(idempotencyKey = null)
+            ),
         )
     }
 
@@ -441,7 +447,12 @@ class LinkApiRepositoryTest {
                     )
                 },
                 requestSurface = eq("android_payment_element"),
-                requestOptions = eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID)),
+                requestOptions = eq(
+                    ApiConfiguration.State(
+                        publishableKey = PUBLISHABLE_KEY,
+                        stripeAccountId = STRIPE_ACCOUNT_ID,
+                    ).toRequestOptions(idempotencyKey = null)
+                ),
             )
         }
 
@@ -607,10 +618,10 @@ class LinkApiRepositoryTest {
         assertThat(createDetailsCall.consumerSessionClientSecret).isEqualTo(secret)
         assertThat(createDetailsCall.requestSurface).isEqualTo("android_payment_element")
         assertThat(createDetailsCall.requestOptions).isEqualTo(
-            ApiRequest.Options(
-                apiKey = PUBLISHABLE_KEY,
-                stripeAccount = STRIPE_ACCOUNT_ID
-            )
+            ApiConfiguration.State(
+                publishableKey = PUBLISHABLE_KEY,
+                stripeAccountId = STRIPE_ACCOUNT_ID,
+            ).toRequestOptions(idempotencyKey = null)
         )
         assertThat(createDetailsCall.customerEphemeralKey).isEqualTo(ephemeralKey)
     }
@@ -724,7 +735,10 @@ class LinkApiRepositoryTest {
                 "expand" to listOf("payment_method"),
                 "client_attribution_metadata" to PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA.toParamMap(),
             ),
-            requestOptions = ApiRequest.Options(apiKey = PUBLISHABLE_KEY, stripeAccount = STRIPE_ACCOUNT_ID)
+            requestOptions = ApiConfiguration.State(
+                publishableKey = PUBLISHABLE_KEY,
+                stripeAccountId = STRIPE_ACCOUNT_ID,
+            ).toRequestOptions(idempotencyKey = null)
         )
         assertThat(savedLinkPaymentDetails.paymentDetails)
             .isEqualTo(
@@ -778,7 +792,10 @@ class LinkApiRepositoryTest {
                 "expand" to listOf("payment_method"),
                 "client_attribution_metadata" to PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA.toParamMap(),
             ),
-            requestOptions = ApiRequest.Options(apiKey = PUBLISHABLE_KEY, stripeAccount = STRIPE_ACCOUNT_ID)
+            requestOptions = ApiConfiguration.State(
+                publishableKey = PUBLISHABLE_KEY,
+                stripeAccountId = STRIPE_ACCOUNT_ID,
+            ).toRequestOptions(idempotencyKey = null)
         )
     }
 
@@ -846,7 +863,10 @@ class LinkApiRepositoryTest {
             connectionsMerchantName = null,
             accountPhoneNumber = null,
             emailAddress = null,
-            requestOptions = ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID),
+            requestOptions = ApiConfiguration.State(
+                publishableKey = PUBLISHABLE_KEY,
+                stripeAccountId = STRIPE_ACCOUNT_ID,
+            ).toRequestOptions(idempotencyKey = null),
             isResendSmsCode = false
         )
     }
@@ -925,7 +945,7 @@ class LinkApiRepositoryTest {
         verify(stripeRepository).listPaymentDetails(
             eq(secret),
             eq(setOf("card")),
-            eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID))
+            eq(ApiConfiguration.State(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID).toRequestOptions(idempotencyKey = null))
         )
     }
 
@@ -1000,7 +1020,7 @@ class LinkApiRepositoryTest {
         verify(stripeRepository).deletePaymentDetails(
             eq(secret),
             eq(id),
-            eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID))
+            eq(ApiConfiguration.State(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID).toRequestOptions(idempotencyKey = null))
         )
     }
 
@@ -1049,7 +1069,7 @@ class LinkApiRepositoryTest {
         verify(stripeRepository).updatePaymentDetails(
             eq(secret),
             eq(params),
-            eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID))
+            eq(ApiConfiguration.State(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID).toRequestOptions(idempotencyKey = null))
         )
     }
 

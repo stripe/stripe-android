@@ -1,8 +1,10 @@
 package com.stripe.android.paymentelement.confirmation.intent
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.toRequestOptions
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.customersheet.data.CustomerSheetDataResult
 import com.stripe.android.customersheet.data.CustomerSheetIntentDataSource
@@ -31,9 +33,10 @@ class CustomerSheetSetupIntentInterceptorTest {
         checkoutSessionId = null,
     )
 
-    private val requestOptions = ApiRequest.Options(
-        apiKey = "pk_test_123",
-    )
+    private val requestOptions = ApiConfiguration.State(
+        publishableKey = "pk_test_123",
+        stripeAccountId = null,
+    ).toRequestOptions(idempotencyKey = null)
 
     @Test
     fun `Successfully creates and confirms setup intent`() = runTest {

@@ -6,8 +6,8 @@ import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.core.networking.AnalyticsRequestFactory
-import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
+import com.stripe.android.core.networking.toRequestOptions
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networktesting.NetworkRule
@@ -43,10 +43,7 @@ class CheckoutSessionRepositoryTest {
             publishableKey = "pk_test_123",
         ),
         apiRequestOptionsProvider = {
-            ApiRequest.Options(
-                apiKey = DEFAULT_API_CONFIG.publishableKey,
-                stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
-            )
+            DEFAULT_API_CONFIG.toRequestOptions(idempotencyKey = null)
         },
     )
 

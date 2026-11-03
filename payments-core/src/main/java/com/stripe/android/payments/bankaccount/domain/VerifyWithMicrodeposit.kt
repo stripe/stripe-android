@@ -1,6 +1,7 @@
 package com.stripe.android.payments.bankaccount.domain
 
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.core.networking.toRequestOptions
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.networking.StripeRepository
@@ -24,7 +25,7 @@ internal class VerifyWithMicrodeposit @Inject constructor(
         clientSecret = clientSecret,
         firstAmount = firstAmount,
         secondAmount = secondAmount,
-        requestOptions = ApiRequest.Options(publishableKey)
+        requestOptions = ApiConfiguration.State(publishableKey, null).toRequestOptions(idempotencyKey = null)
     )
 
     /**
@@ -40,7 +41,7 @@ internal class VerifyWithMicrodeposit @Inject constructor(
     ): Result<PaymentIntent> = stripeRepository.verifyPaymentIntentWithMicrodeposits(
         clientSecret = clientSecret,
         descriptorCode = descriptorCode,
-        requestOptions = ApiRequest.Options(publishableKey)
+        requestOptions = ApiConfiguration.State(publishableKey, null).toRequestOptions(idempotencyKey = null)
     )
 
     /**
@@ -58,7 +59,7 @@ internal class VerifyWithMicrodeposit @Inject constructor(
         clientSecret = clientSecret,
         firstAmount = firstAmount,
         secondAmount = secondAmount,
-        requestOptions = ApiRequest.Options(publishableKey)
+        requestOptions = ApiConfiguration.State(publishableKey, null).toRequestOptions(idempotencyKey = null)
     )
 
     /**
@@ -74,6 +75,6 @@ internal class VerifyWithMicrodeposit @Inject constructor(
     ): Result<SetupIntent> = stripeRepository.verifySetupIntentWithMicrodeposits(
         clientSecret = clientSecret,
         descriptorCode = descriptorCode,
-        requestOptions = ApiRequest.Options(publishableKey)
+        requestOptions = ApiConfiguration.State(publishableKey, null).toRequestOptions(idempotencyKey = null)
     )
 }

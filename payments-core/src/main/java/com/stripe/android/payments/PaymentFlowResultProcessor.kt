@@ -11,6 +11,7 @@ import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.toRequestOptions
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
@@ -47,10 +48,10 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
             return@withContext Result.failure(it)
         }
 
-        val requestOptions = ApiRequest.Options(
-            apiKey = apiConfigProvider.get().publishableKey,
-            stripeAccount = result.stripeAccountId
-        )
+        val requestOptions = ApiConfiguration.State(
+            publishableKey = apiConfigProvider.get().publishableKey,
+            stripeAccountId = result.stripeAccountId,
+        ).toRequestOptions(idempotencyKey = null)
 
         val initialRetrieveIntentStartTime = clock.currentTimeMillis()
 
@@ -120,7 +121,7 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
                     val intent = cancelStripeIntentSource(
                         stripeIntentId = threeDS2Data?.threeDS2IntentId ?: stripeIntent.id.orEmpty(),
                         requestOptions = threeDS2Data?.publishableKey?.let {
-                            ApiRequest.Options(it)
+                            ApiConfiguration.State(it, null).toRequestOptions(idempotencyKey = null)
                         } ?: requestOptions,
                         sourceId = sourceId
                     ).getOrThrow()

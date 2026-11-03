@@ -1081,7 +1081,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
             apiRequest = apiRequestFactory.createGet(
                 url = getApiUrl("fpx/bank_statuses"),
                 // don't pass connected account
-                options = options.copy(stripeAccount = null),
+                options = options.withStripeAccount(stripeAccount = null),
                 params = mapOf("account_holder_type" to "individual"),
             ),
             jsonParser = FpxBankStatusesJsonParser(),
@@ -1097,7 +1097,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
         return fetchStripeModelResult(
             apiRequest = apiRequestFactory.createGet(
                 url = getEdgeUrl("card-metadata"),
-                options = options.copy(stripeAccount = null),
+                options = options.withStripeAccount(stripeAccount = null),
                 params = mapOf("key" to options.apiKey, "bin_prefix" to bin.value),
             ),
             jsonParser = CardMetadataJsonParser(bin, isNetwork = true),

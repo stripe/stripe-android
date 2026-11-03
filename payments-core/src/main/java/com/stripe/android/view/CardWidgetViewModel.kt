@@ -15,7 +15,8 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.BuildConfig.DEBUG
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.core.networking.toRequestOptions
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.networking.StripeRepository
 import kotlinx.coroutines.CoroutineDispatcher
@@ -58,10 +59,10 @@ internal class CardWidgetViewModel(
         val paymentConfig = paymentConfigProvider.get()
 
         val response = stripeRepository.retrieveCardElementConfig(
-            requestOptions = ApiRequest.Options(
-                apiKey = paymentConfig.publishableKey,
-                stripeAccount = paymentConfig.stripeAccountId,
-            ),
+            requestOptions = ApiConfiguration.State(
+                publishableKey = paymentConfig.publishableKey,
+                stripeAccountId = paymentConfig.stripeAccountId,
+            ).toRequestOptions(idempotencyKey = null),
             params = onBehalfOf?.let {
                 mapOf("on_behalf_of" to it)
             }

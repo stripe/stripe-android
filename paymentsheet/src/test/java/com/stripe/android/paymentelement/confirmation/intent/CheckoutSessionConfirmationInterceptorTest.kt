@@ -8,8 +8,8 @@ import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
 import com.stripe.android.checkouttesting.checkoutConfirm
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.core.exception.LocalStripeException
-import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
+import com.stripe.android.core.networking.toRequestOptions
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
@@ -926,10 +926,7 @@ class CheckoutSessionConfirmationInterceptorTest {
                 publishableKey = "pk_test_123",
             ),
             apiRequestOptionsProvider = {
-                ApiRequest.Options(
-                    apiKey = DEFAULT_API_CONFIG.publishableKey,
-                    stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
-                )
+                DEFAULT_API_CONFIG.toRequestOptions(idempotencyKey = null)
             },
         )
 

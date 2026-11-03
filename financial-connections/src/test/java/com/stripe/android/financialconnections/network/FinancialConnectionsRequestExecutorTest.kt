@@ -2,12 +2,14 @@ package com.stripe.android.financialconnections.network
 
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeRequest
 import com.stripe.android.core.networking.StripeResponse
+import com.stripe.android.core.networking.toRequestOptions
 import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.FinancialConnections
 import com.stripe.android.financialconnections.analytics.FakeFinancialConnectionsAnalyticsEventSender
@@ -65,7 +67,10 @@ internal class FinancialConnectionsRequestExecutorTest {
     ) {
         val request = ApiRequest.Factory().createPost(
             url = "https://api.stripe.com/v1/financial_connections/authorization_sessions/events",
-            options = ApiRequest.Options(apiKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY),
+            options = ApiConfiguration.State(
+                publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+                stripeAccountId = null,
+            ).toRequestOptions(idempotencyKey = null),
             params = emptyMap<String, Any>()
         )
 
@@ -114,7 +119,12 @@ internal class FinancialConnectionsRequestExecutorTest {
         val repository = FinancialConnectionsManifestRepository(
             requestExecutor = requestExecutor,
             apiRequestFactory = ApiRequest.Factory(),
-            provideApiRequestOptions = { ApiRequest.Options(apiKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
+            provideApiRequestOptions = {
+                ApiConfiguration.State(
+                    publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+                    stripeAccountId = null,
+                ).toRequestOptions(idempotencyKey = null)
+            },
             logger = Logger.noop(),
             locale = Locale.US,
             initialSync = null,

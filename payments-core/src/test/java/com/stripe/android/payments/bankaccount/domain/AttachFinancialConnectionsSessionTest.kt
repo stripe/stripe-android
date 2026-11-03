@@ -3,7 +3,7 @@ package com.stripe.android.payments.bankaccount.domain
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.core.exception.APIException
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.toRequestOptions
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.networking.StripeRepository
@@ -45,10 +45,7 @@ class AttachFinancialConnectionsSessionTest {
                 clientSecret = clientSecret,
                 paymentIntentId = "pi_1234",
                 financialConnectionsSessionId = linkedAccountSessionId,
-                requestOptions = ApiRequest.Options(
-                    apiKey = DEFAULT_API_CONFIG.publishableKey,
-                    stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
-                ),
+                requestOptions = DEFAULT_API_CONFIG.toRequestOptions(idempotencyKey = null),
                 expandFields = listOf("payment_method")
             )
             assertThat((result)).isEqualTo(Result.success(paymentIntent))
@@ -75,10 +72,7 @@ class AttachFinancialConnectionsSessionTest {
                 clientSecret = clientSecret,
                 paymentIntentId = "pi_1234",
                 financialConnectionsSessionId = linkedAccountSessionId,
-                requestOptions = ApiRequest.Options(
-                    apiKey = DEFAULT_API_CONFIG.publishableKey,
-                    stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
-                ),
+                requestOptions = DEFAULT_API_CONFIG.toRequestOptions(idempotencyKey = null),
                 expandFields = listOf("payment_method")
             )
             assertThat(result.exceptionOrNull()!!).isEqualTo(expectedException)
@@ -127,10 +121,7 @@ class AttachFinancialConnectionsSessionTest {
                 clientSecret = clientSecret,
                 setupIntentId = "seti_1234",
                 financialConnectionsSessionId = linkedAccountSessionId,
-                requestOptions = ApiRequest.Options(
-                    apiKey = DEFAULT_API_CONFIG.publishableKey,
-                    stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
-                ),
+                requestOptions = DEFAULT_API_CONFIG.toRequestOptions(idempotencyKey = null),
                 expandFields = listOf("payment_method")
             )
             assertThat((result)).isEqualTo(Result.success(setupIntent))
@@ -157,10 +148,7 @@ class AttachFinancialConnectionsSessionTest {
                 clientSecret = clientSecret,
                 setupIntentId = "seti_1234",
                 financialConnectionsSessionId = linkedAccountSessionId,
-                requestOptions = ApiRequest.Options(
-                    apiKey = DEFAULT_API_CONFIG.publishableKey,
-                    stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
-                ),
+                requestOptions = DEFAULT_API_CONFIG.toRequestOptions(idempotencyKey = null),
                 expandFields = listOf("payment_method")
             )
             assertThat(setupIntent.exceptionOrNull()!!).isEqualTo(expectedException)

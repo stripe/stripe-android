@@ -1,7 +1,8 @@
 package com.stripe.android.financialconnections.repository.api
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.core.networking.toRequestOptions
 import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.repository.CachedConsumerSession
 import kotlinx.coroutines.test.runTest
@@ -9,10 +10,10 @@ import org.junit.Test
 
 class RealProvideApiRequestOptionsTest {
 
-    private val merchantApiRequestOptions = ApiRequest.Options(
-        apiKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
-        stripeAccount = "acct_123",
-    )
+    private val merchantApiRequestOptions = ApiConfiguration.State(
+        publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+        stripeAccountId = "acct_123",
+    ).toRequestOptions(idempotencyKey = null)
 
     @Test
     fun `Provides consumer API options for a verified session`() = runTest {
@@ -29,7 +30,7 @@ class RealProvideApiRequestOptionsTest {
 
         val apiOptions = provideApiRequestOptions(useConsumerPublishableKey = true)
         assertThat(apiOptions).isEqualTo(
-            ApiRequest.Options(apiKey = "pk_123")
+            ApiConfiguration.State("pk_123", null).toRequestOptions(idempotencyKey = null)
         )
     }
 

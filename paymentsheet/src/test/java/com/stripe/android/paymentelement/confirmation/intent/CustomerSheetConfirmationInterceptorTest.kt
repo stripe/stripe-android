@@ -2,10 +2,11 @@ package com.stripe.android.paymentelement.confirmation.intent
 
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.InvalidRequestException
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.toRequestOptions
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.customersheet.FakeStripeRepository
 import com.stripe.android.isInstanceOf
@@ -40,9 +41,10 @@ class CustomerSheetConfirmationInterceptorTest {
         checkoutSessionId = null,
     )
 
-    private val requestOptions = ApiRequest.Options(
-        apiKey = "pk_test_123",
-    )
+    private val requestOptions = ApiConfiguration.State(
+        publishableKey = "pk_test_123",
+        stripeAccountId = null,
+    ).toRequestOptions(idempotencyKey = null)
 
     @Test
     fun `Rejects non-SetupIntent for new payment method`() = test {

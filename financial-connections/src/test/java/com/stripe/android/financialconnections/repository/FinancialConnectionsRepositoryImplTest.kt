@@ -1,11 +1,13 @@
 package com.stripe.android.financialconnections.repository
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeResponse
+import com.stripe.android.core.networking.toRequestOptions
 import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
@@ -35,7 +37,7 @@ class FinancialConnectionsRepositoryImplTest {
             logger = Logger.noop(),
         ),
         provideApiRequestOptions = {
-            ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+            ApiConfiguration.State(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, null).toRequestOptions(idempotencyKey = null)
         },
         apiRequestFactory = apiRequestFactory,
         fraudDetectionDataRepository = fraudDetectionDataRepository,

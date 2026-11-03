@@ -7,6 +7,8 @@ import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.toRequestOptions
+import com.stripe.android.core.networking.withRequestCredentials
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.confirmation.createPaymentMethodCreateParams
@@ -563,15 +565,13 @@ internal class LinkApiRepository @Inject constructor(
         customApiKey: String? = null,
     ): ApiRequest.Options {
         return if (customApiKey != null) {
-            ApiRequest.Options(
+            apiConfiguration.withRequestCredentials(
                 apiKey = customApiKey,
                 stripeAccount = null,
+                idempotencyKey = null,
             )
         } else {
-            ApiRequest.Options(
-                apiKey = apiConfiguration.publishableKey,
-                stripeAccount = apiConfiguration.stripeAccountId,
-            )
+            apiConfiguration.toRequestOptions(idempotencyKey = null)
         }
     }
 

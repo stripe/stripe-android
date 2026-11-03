@@ -14,8 +14,10 @@ import com.stripe.android.PaymentController
 import com.stripe.android.PaymentIntentResult
 import com.stripe.android.SetupIntentResult
 import com.stripe.android.StripePaymentController
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.toRequestOptions
 import com.stripe.android.googlepaylauncher.GooglePayLauncherViewModel.Companion.HAS_LAUNCHED_KEY
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
@@ -347,9 +349,9 @@ class GooglePayLauncherViewModelTest {
             "pi_123_secret_456",
             GOOGLE_PAY_CONFIG
         )
-        val REQUEST_OPTIONS = ApiRequest.Options(
-            ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-            "account"
-        )
+        val REQUEST_OPTIONS = ApiConfiguration.State(
+            publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+            stripeAccountId = "account",
+        ).toRequestOptions(idempotencyKey = null)
     }
 }

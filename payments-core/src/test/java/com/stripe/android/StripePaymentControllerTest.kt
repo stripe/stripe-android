@@ -7,9 +7,11 @@ import androidx.activity.ComponentActivity
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.StripePaymentController.Companion.EXPAND_PAYMENT_METHOD
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.toRequestOptions
 import com.stripe.android.model.AlipayAuthResult
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntent
@@ -325,9 +327,9 @@ internal class StripePaymentControllerTest {
 
     private companion object {
         private const val ACCOUNT_ID = ApiKeyFixtures.FAKE_STRIPE_ACCOUNT
-        private val REQUEST_OPTIONS = ApiRequest.Options(
-            apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-            stripeAccount = ACCOUNT_ID
-        )
+        private val REQUEST_OPTIONS = ApiConfiguration.State(
+            publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+            stripeAccountId = ACCOUNT_ID,
+        ).toRequestOptions(idempotencyKey = null)
     }
 }

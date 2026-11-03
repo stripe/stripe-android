@@ -18,6 +18,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.toRequestOptions
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.CancelCaptchaChallengeParams
 import com.stripe.android.model.PaymentIntent
@@ -226,7 +227,8 @@ internal class IntentConfirmationChallengeActivityTest {
                     userAgent = "fake-user-agent",
                     stripeRepository = object : AbsFakeStripeRepository() {},
                     errorReporter = FakeErrorReporter(),
-                    requestOptions = ApiRequest.Options("pk_test_123"),
+                        requestOptions = ApiConfiguration.State("pk_test_123", null)
+                            .toRequestOptions(idempotencyKey = null),
                     fireAndForgetScope = TestScope(testDispatcher),
                     logger = Logger.noop(),
                 ) as T
@@ -281,7 +283,8 @@ internal class IntentConfirmationChallengeActivityTest {
                         }
                     },
                     errorReporter = FakeErrorReporter(),
-                    requestOptions = ApiRequest.Options("pk_test_123"),
+                        requestOptions = ApiConfiguration.State("pk_test_123", null)
+                            .toRequestOptions(idempotencyKey = null),
                     fireAndForgetScope = TestScope(testDispatcher),
                     logger = Logger.noop(),
                 ) as T

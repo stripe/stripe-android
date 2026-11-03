@@ -23,6 +23,7 @@ import com.stripe.android.core.networking.FileUploadRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeRequest
 import com.stripe.android.core.networking.StripeResponse
+import com.stripe.android.core.networking.toRequestOptions
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.model.AddressFixtures
 import com.stripe.android.model.BankAccountTokenParamsFixtures
@@ -403,10 +404,10 @@ internal class StripeApiRepositoryTest {
         requireNotNull(
             stripeApiRepository.createSource(
                 SourceParams.createCardParams(CARD_PARAMS),
-                ApiRequest.Options(
-                    ApiKeyFixtures.CONNECTED_ACCOUNT_PUBLISHABLE_KEY,
-                    connectAccountId
-                )
+                ApiConfiguration.State(
+                    publishableKey = ApiKeyFixtures.CONNECTED_ACCOUNT_PUBLISHABLE_KEY,
+                    stripeAccountId = connectAccountId,
+                ).toRequestOptions(idempotencyKey = null)
             )
         )
     }
@@ -512,10 +513,10 @@ internal class StripeApiRepositoryTest {
                 stripeApiRepository.makeApiRequest(
                     DEFAULT_API_REQUEST_FACTORY.createPost(
                         StripeApiRepository.sourcesUrl,
-                        ApiRequest.Options(
-                            ApiKeyFixtures.CONNECTED_ACCOUNT_PUBLISHABLE_KEY,
-                            connectAccountId
-                        ),
+                        ApiConfiguration.State(
+                            publishableKey = ApiKeyFixtures.CONNECTED_ACCOUNT_PUBLISHABLE_KEY,
+                            stripeAccountId = connectAccountId,
+                        ).toRequestOptions(idempotencyKey = null),
                         SourceParams.createCardParams(CARD_PARAMS).toParamMap()
                     ),
                     onResponse = {}
@@ -573,7 +574,10 @@ internal class StripeApiRepositoryTest {
             requireNotNull(
                 create().confirmPaymentIntent(
                     confirmPaymentIntentParams,
-                    ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+                    ApiConfiguration.State(
+                        publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                        stripeAccountId = null,
+                    ).toRequestOptions(idempotencyKey = null)
                 ).getOrNull()
             )
 
@@ -616,7 +620,10 @@ internal class StripeApiRepositoryTest {
             requireNotNull(
                 create(setOf(productUsage)).confirmPaymentIntent(
                     confirmPaymentIntentParams,
-                    ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+                    ApiConfiguration.State(
+                        publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                        stripeAccountId = null,
+                    ).toRequestOptions(idempotencyKey = null)
                 ).getOrNull()
             )
 
@@ -653,7 +660,10 @@ internal class StripeApiRepositoryTest {
             requireNotNull(
                 create(setOf(productUsage)).confirmPaymentIntent(
                     confirmPaymentIntentParams,
-                    ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+                    ApiConfiguration.State(
+                        publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                        stripeAccountId = null,
+                    ).toRequestOptions(idempotencyKey = null)
                 )
             )
 
@@ -687,7 +697,10 @@ internal class StripeApiRepositoryTest {
             requireNotNull(
                 create(setOf(productUsage)).confirmPaymentIntent(
                     confirmPaymentIntentParams,
-                    ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+                    ApiConfiguration.State(
+                        publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                        stripeAccountId = null,
+                    ).toRequestOptions(idempotencyKey = null)
                 )
             )
 
@@ -720,7 +733,7 @@ internal class StripeApiRepositoryTest {
 
             val result = create().confirmPaymentIntent(
                 confirmPaymentIntentParams,
-                ApiRequest.Options("pk_live_123")
+                ApiConfiguration.State("pk_live_123", null).toRequestOptions(idempotencyKey = null)
             )
 
             assertThat(result.isFailure).isTrue()
@@ -756,7 +769,10 @@ internal class StripeApiRepositoryTest {
             requireNotNull(
                 create(setOf(stripeApiRequestProductUsage)).confirmPaymentIntent(
                     confirmPaymentIntentParams,
-                    ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+                    ApiConfiguration.State(
+                        publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                        stripeAccountId = null,
+                    ).toRequestOptions(idempotencyKey = null)
                 ).getOrNull()
             )
 
@@ -800,7 +816,10 @@ internal class StripeApiRepositoryTest {
             requireNotNull(
                 create(setOf(productUsage)).confirmPaymentIntent(
                     confirmPaymentIntentParams,
-                    ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+                    ApiConfiguration.State(
+                        publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                        stripeAccountId = null,
+                    ).toRequestOptions(idempotencyKey = null)
                 ).getOrNull()
             )
 
@@ -832,7 +851,7 @@ internal class StripeApiRepositoryTest {
 
             create().confirmPaymentIntent(
                 confirmPaymentIntentParams = confirmPaymentIntentParams,
-                options = ApiRequest.Options(apiKey)
+                options = ApiConfiguration.State(apiKey, null).toRequestOptions(idempotencyKey = null)
             )
 
             verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
@@ -881,7 +900,7 @@ internal class StripeApiRepositoryTest {
                 )
             create().confirmSetupIntent(
                 confirmSetupIntentParams = confirmSetupIntentParams,
-                options = ApiRequest.Options(apiKey)
+                options = ApiConfiguration.State(apiKey, null).toRequestOptions(idempotencyKey = null)
             )
 
             verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
@@ -916,7 +935,10 @@ internal class StripeApiRepositoryTest {
             requireNotNull(
                 create(setOf(productUsage)).confirmSetupIntent(
                     confirmSetupIntentParams,
-                    ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+                    ApiConfiguration.State(
+                        publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                        stripeAccountId = null,
+                    ).toRequestOptions(idempotencyKey = null)
                 ).getOrNull()
             )
 
@@ -955,7 +977,10 @@ internal class StripeApiRepositoryTest {
             requireNotNull(
                 create(setOf(productUsage)).confirmSetupIntent(
                     confirmSetupIntentParams,
-                    ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+                    ApiConfiguration.State(
+                        publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                        stripeAccountId = null,
+                    ).toRequestOptions(idempotencyKey = null)
                 )
             )
 
@@ -991,7 +1016,10 @@ internal class StripeApiRepositoryTest {
             requireNotNull(
                 create(setOf(productUsage)).confirmSetupIntent(
                     confirmSetupIntentParams,
-                    ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+                    ApiConfiguration.State(
+                        publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                        stripeAccountId = null,
+                    ).toRequestOptions(idempotencyKey = null)
                 )
             )
 
@@ -1033,7 +1061,10 @@ internal class StripeApiRepositoryTest {
             requireNotNull(
                 create(setOf(productUsage)).confirmSetupIntent(
                     confirmSetupIntentParams,
-                    ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+                    ApiConfiguration.State(
+                        publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                        stripeAccountId = null,
+                    ).toRequestOptions(idempotencyKey = null)
                 ).getOrNull()
             )
 
@@ -1063,7 +1094,7 @@ internal class StripeApiRepositoryTest {
             requireNotNull(
                 stripeApiRepository.confirmPaymentIntent(
                     confirmPaymentIntentParams,
-                    ApiRequest.Options(publishableKey)
+                    ApiConfiguration.State(publishableKey, null).toRequestOptions(idempotencyKey = null)
                 ).getOrNull()
             )
         }
@@ -1076,7 +1107,7 @@ internal class StripeApiRepositoryTest {
 
             stripeApiRepository.retrievePaymentIntent(
                 clientSecret,
-                ApiRequest.Options(publishableKey)
+                ApiConfiguration.State(publishableKey, null).toRequestOptions(idempotencyKey = null)
             ).getOrThrow()
         }
 
@@ -1253,7 +1284,10 @@ internal class StripeApiRepositoryTest {
             "type" to PaymentMethod.Type.Card.code
         )
 
-        val options = ApiRequest.Options(ApiKeyFixtures.FAKE_EPHEMERAL_KEY)
+        val options = ApiConfiguration.State(
+            publishableKey = ApiKeyFixtures.FAKE_EPHEMERAL_KEY,
+            stripeAccountId = null,
+        ).toRequestOptions(idempotencyKey = null)
         val url = DEFAULT_API_REQUEST_FACTORY.createGet(
             StripeApiRepository.paymentMethodsUrl,
             options,
@@ -1276,7 +1310,10 @@ internal class StripeApiRepositoryTest {
                     PaymentMethod.Type.Card
                 ),
                 productUsageTokens = emptySet(),
-                requestOptions = ApiRequest.Options(ApiKeyFixtures.FAKE_EPHEMERAL_KEY),
+                requestOptions = ApiConfiguration.State(
+                    publishableKey = ApiKeyFixtures.FAKE_EPHEMERAL_KEY,
+                    stripeAccountId = null,
+                ).toRequestOptions(idempotencyKey = null),
                 apiConfiguration = API_CONFIGURATION,
             ).getOrThrow()
         assertThat(paymentMethods)
@@ -1311,7 +1348,10 @@ internal class StripeApiRepositoryTest {
             "type" to PaymentMethod.Type.Card.code
         )
 
-        val options = ApiRequest.Options(ApiKeyFixtures.FAKE_EPHEMERAL_KEY)
+        val options = ApiConfiguration.State(
+            publishableKey = ApiKeyFixtures.FAKE_EPHEMERAL_KEY,
+            stripeAccountId = null,
+        ).toRequestOptions(idempotencyKey = null)
         val url = DEFAULT_API_REQUEST_FACTORY.createGet(
             StripeApiRepository.paymentMethodsUrl,
             options,
@@ -1334,7 +1374,10 @@ internal class StripeApiRepositoryTest {
                     PaymentMethod.Type.Card
                 ),
                 productUsageTokens = emptySet(),
-                requestOptions = ApiRequest.Options(ApiKeyFixtures.FAKE_EPHEMERAL_KEY),
+                requestOptions = ApiConfiguration.State(
+                    publishableKey = ApiKeyFixtures.FAKE_EPHEMERAL_KEY,
+                    stripeAccountId = null,
+                ).toRequestOptions(idempotencyKey = null),
                 apiConfiguration = API_CONFIGURATION,
             ).getOrThrow()
         assertThat(paymentMethods)
@@ -1350,7 +1393,10 @@ internal class StripeApiRepositoryTest {
             customerId = customerId,
         )
         val stripeResponse = StripeResponse(200, responseBody)
-        val options = ApiRequest.Options(ApiKeyFixtures.FAKE_EPHEMERAL_KEY)
+        val options = ApiConfiguration.State(
+            publishableKey = ApiKeyFixtures.FAKE_EPHEMERAL_KEY,
+            stripeAccountId = null,
+        ).toRequestOptions(idempotencyKey = null)
         val url = StripeApiRepository.getRetrieveCustomerPaymentMethodUrl(
             customerId,
             paymentMethodId
@@ -1398,7 +1444,10 @@ internal class StripeApiRepositoryTest {
                 customerId = customerId,
             )
             val stripeResponse = StripeResponse(200, responseBody)
-            val options = ApiRequest.Options(ApiKeyFixtures.FAKE_EPHEMERAL_KEY)
+            val options = ApiConfiguration.State(
+                publishableKey = ApiKeyFixtures.FAKE_EPHEMERAL_KEY,
+                stripeAccountId = null,
+            ).toRequestOptions(idempotencyKey = null)
             val url = StripeApiRepository.getSavedPaymentMethodFromCardPresentPaymentMethod(
                 customerId,
                 cardPresentPaymentMethodId
@@ -1433,7 +1482,7 @@ internal class StripeApiRepositoryTest {
     @Test
     fun getFpxBankStatus_withFpxKey() = runTest {
         val fpxBankStatuses = stripeApiRepository.getFpxBankStatus(
-            ApiRequest.Options(ApiKeyFixtures.FPX_PUBLISHABLE_KEY)
+            ApiConfiguration.State(ApiKeyFixtures.FPX_PUBLISHABLE_KEY, null).toRequestOptions(idempotencyKey = null)
         ).getOrThrow()
         assertThat(fpxBankStatuses.size())
             .isEqualTo(27)
@@ -1442,10 +1491,10 @@ internal class StripeApiRepositoryTest {
     @Test
     fun getFpxBankStatus_withFpxKey_ignoresStripeAccountId() = runTest {
         val fpxBankStatuses = stripeApiRepository.getFpxBankStatus(
-            ApiRequest.Options(
-                apiKey = ApiKeyFixtures.FPX_PUBLISHABLE_KEY,
-                stripeAccount = "acct_1234"
-            )
+            ApiConfiguration.State(
+                publishableKey = ApiKeyFixtures.FPX_PUBLISHABLE_KEY,
+                stripeAccountId = "acct_1234",
+            ).toRequestOptions(idempotencyKey = null)
         ).getOrThrow()
         assertThat(fpxBankStatuses.size())
             .isEqualTo(27)
@@ -1456,7 +1505,10 @@ internal class StripeApiRepositoryTest {
         val cardMetadata =
             stripeApiRepository.getCardMetadata(
                 BinFixtures.VISA,
-                ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+                ApiConfiguration.State(
+                    publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+                    stripeAccountId = null,
+                ).toRequestOptions(idempotencyKey = null)
             ).getOrThrow()
         assertThat(cardMetadata.bin)
             .isEqualTo(BinFixtures.VISA)
@@ -1470,7 +1522,10 @@ internal class StripeApiRepositoryTest {
             val exception = stripeApiRepository.cancelPaymentIntentSource(
                 paymentIntentId = "pi_1FejpSH8dsfnfKo38L276wr6",
                 sourceId = "src_1FejpbH8dsfnfKo3KR7EqCzJ",
-                options = ApiRequest.Options(ApiKeyFixtures.FPX_PUBLISHABLE_KEY),
+                options = ApiConfiguration.State(
+                    publishableKey = ApiKeyFixtures.FPX_PUBLISHABLE_KEY,
+                    stripeAccountId = null,
+                ).toRequestOptions(idempotencyKey = null),
             ).exceptionOrNull() as InvalidRequestException
 
             assertThat(exception.message).isEqualTo(
@@ -1958,7 +2013,10 @@ internal class StripeApiRepositoryTest {
 
             create().refreshPaymentIntent(
                 clientSecret,
-                ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+                ApiConfiguration.State(
+                    publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                    stripeAccountId = null,
+                ).toRequestOptions(idempotencyKey = null)
             ).getOrThrow()
 
             verify(stripeNetworkClient).executeRequest(
@@ -1986,7 +2044,10 @@ internal class StripeApiRepositoryTest {
 
             create().refreshSetupIntent(
                 clientSecret,
-                ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+                ApiConfiguration.State(
+                    publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                    stripeAccountId = null,
+                ).toRequestOptions(idempotencyKey = null)
             ).getOrThrow()
 
             verify(stripeNetworkClient).executeRequest(
@@ -2575,10 +2636,10 @@ internal class StripeApiRepositoryTest {
                 currency = "usd",
                 country = "us",
                 locale = Locale.getDefault().toLanguageTag(),
-                requestOptions = ApiRequest.Options(
-                    apiKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
-                    stripeAccount = "accountId"
-                )
+                requestOptions = ApiConfiguration.State(
+                    publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+                    stripeAccountId = "accountId",
+                ).toRequestOptions(idempotencyKey = null)
             )
 
             verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
@@ -2638,7 +2699,7 @@ internal class StripeApiRepositoryTest {
         // Dashboard uses user key
         create().confirmPaymentIntent(
             confirmPaymentIntentParams = confirmPaymentIntentParams,
-            options = DEFAULT_OPTIONS.copy(
+            options = DEFAULT_OPTIONS.withApiKey(
                 apiKey = "uk_12345"
             )
         )
@@ -2679,7 +2740,7 @@ internal class StripeApiRepositoryTest {
 
         create().confirmPaymentIntent(
             confirmPaymentIntentParams = confirmParams,
-            options = DEFAULT_OPTIONS.copy(apiKey = "uk_12345"),
+            options = DEFAULT_OPTIONS.withApiKey(apiKey = "uk_12345"),
         )
 
         // Only one request — no PM creation needed for saved card.
@@ -2721,7 +2782,7 @@ internal class StripeApiRepositoryTest {
 
             create().confirmPaymentIntent(
                 confirmPaymentIntentParams = confirmParams,
-                options = DEFAULT_OPTIONS.copy(apiKey = "uk_12345"),
+                options = DEFAULT_OPTIONS.withApiKey(apiKey = "uk_12345"),
             )
 
             verify(stripeNetworkClient, times(1))
@@ -3408,7 +3469,10 @@ internal class StripeApiRepositoryTest {
         private val CARD_PARAMS =
             CardParams("4242424242424242", 1, 2050, "123")
 
-        private val DEFAULT_OPTIONS = ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+        private val DEFAULT_OPTIONS = ApiConfiguration.State(
+            publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+            stripeAccountId = null,
+        ).toRequestOptions(idempotencyKey = null)
         private val API_CONFIGURATION = ApiConfiguration.State(
             publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             stripeAccountId = ApiKeyFixtures.FAKE_STRIPE_ACCOUNT,

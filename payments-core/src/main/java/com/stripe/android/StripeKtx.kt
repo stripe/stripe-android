@@ -12,7 +12,8 @@ import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.model.StripeFile
 import com.stripe.android.core.model.StripeFileParams
 import com.stripe.android.core.model.StripeModel
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.toRequestOptions
+import com.stripe.android.core.networking.withRequestCredentials
 import com.stripe.android.exception.CardException
 import com.stripe.android.hcaptcha.performPassiveHCaptcha
 import com.stripe.android.model.AccountParams
@@ -68,10 +69,7 @@ suspend fun Stripe.confirmAlipayPayment(
         paymentController.confirmAndAuthenticateAlipay(
             confirmPaymentIntentParams,
             authenticator,
-            ApiRequest.Options(
-                apiKey = publishableKey,
-                stripeAccount = stripeAccountId
-            )
+            getApiConfiguration(stripeAccountId).toRequestOptions(idempotencyKey = null)
         )
     }
 }
@@ -108,11 +106,7 @@ suspend fun Stripe.createPaymentMethod(
     return runApiRequest {
         stripeRepository.createPaymentMethod(
             paymentMethodCreateParams,
-            ApiRequest.Options(
-                apiKey = publishableKey,
-                stripeAccount = stripeAccountId,
-                idempotencyKey = idempotencyKey
-            )
+            getApiConfiguration(stripeAccountId).toRequestOptions(idempotencyKey = idempotencyKey)
         )
     }
 }
@@ -154,10 +148,10 @@ suspend fun Stripe.updatePaymentMethod(
         stripeRepository.updatePaymentMethod(
             paymentMethodId,
             paymentMethodUpdateParams,
-            ApiRequest.Options(
+            getApiConfiguration(stripeAccountId).withRequestCredentials(
                 apiKey = ephemeralKeySecret,
                 stripeAccount = stripeAccountId,
-                idempotencyKey = idempotencyKey
+                idempotencyKey = idempotencyKey,
             )
         )
     }
@@ -195,11 +189,7 @@ suspend fun Stripe.createSource(
     return runApiRequest {
         stripeRepository.createSource(
             sourceParams,
-            ApiRequest.Options(
-                apiKey = publishableKey,
-                stripeAccount = stripeAccountId,
-                idempotencyKey = idempotencyKey
-            )
+            getApiConfiguration(stripeAccountId).toRequestOptions(idempotencyKey = idempotencyKey)
         )
     }
 }
@@ -456,11 +446,7 @@ suspend fun Stripe.createFile(
     return runApiRequest {
         stripeRepository.createFile(
             fileParams,
-            ApiRequest.Options(
-                apiKey = publishableKey,
-                stripeAccount = stripeAccountId,
-                idempotencyKey = idempotencyKey
-            )
+            getApiConfiguration(stripeAccountId).toRequestOptions(idempotencyKey = idempotencyKey)
         )
     }
 }
@@ -489,10 +475,7 @@ suspend fun Stripe.createRadarSession(
 ): RadarSession {
     return runApiRequest {
         stripeRepository.createRadarSession(
-            ApiRequest.Options(
-                apiKey = publishableKey,
-                stripeAccount = stripeAccountId,
-            )
+            getApiConfiguration(stripeAccountId).toRequestOptions(idempotencyKey = null)
         ).flatMap { radarSession ->
             val siteKey = radarSession.passiveCaptchaSiteKey
             if (siteKey.isNullOrEmpty()) {
@@ -515,10 +498,7 @@ suspend fun Stripe.createRadarSession(
                 radarSessionToken = radarSession.id,
                 hcaptchaToken = hCaptchaToken,
                 hcaptchaEKey = null, // TODO (awush): we don't yet get this value from hCaptcha
-                ApiRequest.Options(
-                    apiKey = publishableKey,
-                    stripeAccount = stripeAccountId
-                )
+                getApiConfiguration(stripeAccountId).toRequestOptions(idempotencyKey = null)
             )
         }.map { radarSession ->
             RadarSession(id = radarSession.id)
@@ -558,10 +538,7 @@ suspend fun Stripe.retrievePaymentIntent(
     return runApiRequest {
         stripeRepository.retrievePaymentIntent(
             clientSecret,
-            ApiRequest.Options(
-                apiKey = publishableKey,
-                stripeAccount = stripeAccountId
-            ),
+            getApiConfiguration(stripeAccountId).toRequestOptions(idempotencyKey = null),
             expand,
         )
     }
@@ -599,10 +576,7 @@ suspend fun Stripe.retrieveSetupIntent(
     return runApiRequest {
         stripeRepository.retrieveSetupIntent(
             clientSecret,
-            ApiRequest.Options(
-                apiKey = publishableKey,
-                stripeAccount = stripeAccountId
-            ),
+            getApiConfiguration(stripeAccountId).toRequestOptions(idempotencyKey = null),
             expand,
         )
     }
@@ -641,10 +615,7 @@ suspend fun Stripe.retrieveSource(
         stripeRepository.retrieveSource(
             sourceId,
             clientSecret,
-            ApiRequest.Options(
-                apiKey = publishableKey,
-                stripeAccount = stripeAccountId
-            )
+            getApiConfiguration(stripeAccountId).toRequestOptions(idempotencyKey = null)
         )
     }
 }
@@ -680,11 +651,7 @@ suspend fun Stripe.confirmSetupIntent(
     return runApiRequest {
         stripeRepository.confirmSetupIntent(
             confirmSetupIntentParams,
-            ApiRequest.Options(
-                apiKey = publishableKey,
-                stripeAccount = stripeAccountId,
-                idempotencyKey = idempotencyKey
-            ),
+            getApiConfiguration(stripeAccountId).toRequestOptions(idempotencyKey = idempotencyKey),
             expand,
         )
     }
@@ -713,10 +680,7 @@ suspend fun Stripe.confirmWeChatPayPayment(
     return runApiRequest {
         paymentController.confirmWeChatPay(
             confirmPaymentIntentParams,
-            ApiRequest.Options(
-                apiKey = publishableKey,
-                stripeAccount = stripeAccountId
-            )
+            getApiConfiguration(stripeAccountId).toRequestOptions(idempotencyKey = null)
         )
     }
 }
@@ -750,11 +714,7 @@ suspend fun Stripe.confirmPaymentIntent(
     return runApiRequest {
         stripeRepository.confirmPaymentIntent(
             confirmPaymentIntentParams,
-            ApiRequest.Options(
-                apiKey = publishableKey,
-                stripeAccount = stripeAccountId,
-                idempotencyKey = idempotencyKey
-            )
+            getApiConfiguration(stripeAccountId).toRequestOptions(idempotencyKey = idempotencyKey)
         )
     }
 }
@@ -922,10 +882,7 @@ suspend fun Stripe.verifyPaymentIntentWithMicrodeposits(
             clientSecret = clientSecret,
             firstAmount = firstAmount,
             secondAmount = secondAmount,
-            requestOptions = ApiRequest.Options(
-                apiKey = publishableKey,
-                stripeAccount = stripeAccountId
-            )
+            requestOptions = getApiConfiguration(stripeAccountId).toRequestOptions(idempotencyKey = null)
         )
     }
 }
@@ -963,10 +920,7 @@ suspend fun Stripe.verifyPaymentIntentWithMicrodeposits(
         stripeRepository.verifyPaymentIntentWithMicrodeposits(
             clientSecret = clientSecret,
             descriptorCode = descriptorCode,
-            requestOptions = ApiRequest.Options(
-                apiKey = publishableKey,
-                stripeAccount = stripeAccountId
-            )
+            requestOptions = getApiConfiguration(stripeAccountId).toRequestOptions(idempotencyKey = null)
         )
     }
 }
@@ -1008,10 +962,7 @@ suspend fun Stripe.verifySetupIntentWithMicrodeposits(
             clientSecret = clientSecret,
             firstAmount = firstAmount,
             secondAmount = secondAmount,
-            requestOptions = ApiRequest.Options(
-                apiKey = publishableKey,
-                stripeAccount = stripeAccountId
-            )
+            requestOptions = getApiConfiguration(stripeAccountId).toRequestOptions(idempotencyKey = null)
         )
     }
 }
@@ -1049,10 +1000,7 @@ suspend fun Stripe.verifySetupIntentWithMicrodeposits(
         stripeRepository.verifySetupIntentWithMicrodeposits(
             clientSecret = clientSecret,
             descriptorCode = descriptorCode,
-            requestOptions = ApiRequest.Options(
-                apiKey = publishableKey,
-                stripeAccount = stripeAccountId
-            )
+            requestOptions = getApiConfiguration(stripeAccountId).toRequestOptions(idempotencyKey = null)
         )
     }
 }
@@ -1077,10 +1025,7 @@ suspend fun Stripe.retrievePossibleBrands(
     return runApiRequest {
         stripeRepository.retrieveCardMetadata(
             cardNumber = cardNumber,
-            requestOptions = ApiRequest.Options(
-                apiKey = publishableKey,
-                stripeAccount = stripeAccountId
-            )
+            requestOptions = getApiConfiguration(stripeAccountId).toRequestOptions(idempotencyKey = null)
         ).map { metadata ->
             val brands = metadata.accountRanges.map { it.brand }
             PossibleBrands(brands = brands.distinct())
@@ -1100,7 +1045,7 @@ suspend fun Stripe.attachPaymentMethod(
         customerId = customerId,
         paymentMethodId = paymentMethodId,
         productUsageTokens = emptySet(),
-        requestOptions = ApiRequest.Options(
+        requestOptions = getApiConfiguration(stripeAccountId).withRequestCredentials(
             apiKey = ephemeralKeySecret,
             stripeAccount = stripeAccountId,
             idempotencyKey = idempotencyKey,

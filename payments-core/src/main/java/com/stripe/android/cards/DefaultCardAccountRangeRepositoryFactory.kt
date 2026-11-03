@@ -6,6 +6,7 @@ import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
+import com.stripe.android.core.networking.toRequestOptions
 import com.stripe.android.model.AccountRange
 import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
@@ -75,9 +76,10 @@ class DefaultCardAccountRangeRepositoryFactory @Inject constructor(
             inMemorySource = InMemoryCardAccountRangeSource(store),
             remoteSource = RemoteCardAccountRangeSource(
                 stripeRepository,
-                ApiRequest.Options(
-                    publishableKey
-                ),
+                ApiConfiguration.State(
+                    publishableKey = publishableKey,
+                    stripeAccountId = null,
+                ).toRequestOptions(idempotencyKey = null),
                 store,
                 DefaultAnalyticsRequestExecutor(),
                 PaymentAnalyticsRequestFactory(appContext, publishableKey, productUsageTokens)
@@ -110,9 +112,10 @@ class DefaultCardAccountRangeRepositoryFactory @Inject constructor(
                         publishableKeyProvider = { publishableKey },
                         requestSurface = requestSurface,
                     ),
-                    ApiRequest.Options(
-                        publishableKey
-                    ),
+                    ApiConfiguration.State(
+                        publishableKey = publishableKey,
+                        stripeAccountId = null,
+                    ).toRequestOptions(idempotencyKey = null),
                     store,
                     DefaultAnalyticsRequestExecutor(),
                     PaymentAnalyticsRequestFactory(appContext, publishableKey, productUsageTokens)

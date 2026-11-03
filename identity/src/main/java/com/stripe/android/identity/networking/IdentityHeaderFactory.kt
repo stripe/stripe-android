@@ -1,9 +1,14 @@
+@file:OptIn(ApiConfigurationPreview::class)
+
 package com.stripe.android.identity.networking
 
+import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.core.ApiConfigurationPreview
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.HEADER_CONTENT_TYPE
 import com.stripe.android.core.networking.RequestHeadersFactory
 import com.stripe.android.core.networking.StripeRequest
+import com.stripe.android.core.networking.toRequestOptions
 
 /**
  * Factory to to create headers for Identity requests.
@@ -15,11 +20,10 @@ internal object IdentityHeaderFactory {
     private var ephemeralKey: String? = null
         set(value) {
             field = value
-            apiOptions = ApiRequest.Options(
-                apiKey = requireNotNull(value),
-                stripeAccount = null,
-                idempotencyKey = null
-            )
+            apiOptions = ApiConfiguration.State(
+                publishableKey = requireNotNull(value),
+                stripeAccountId = null,
+            ).toRequestOptions(idempotencyKey = null)
         }
     private var apiOptions: ApiRequest.Options? = null
 

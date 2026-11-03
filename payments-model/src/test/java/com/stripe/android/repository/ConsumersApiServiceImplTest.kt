@@ -1,11 +1,15 @@
+@file:OptIn(ApiConfigurationPreview::class)
+
 package com.stripe.android.repository
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ConsumerFixtures
+import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.core.ApiConfigurationPreview
 import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.exception.APIException
-import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
+import com.stripe.android.core.networking.toRequestOptions
 import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.model.ConsumerPaymentDetails
@@ -507,7 +511,10 @@ class ConsumersApiServiceImplTest {
     }
 
     private companion object {
-        private val DEFAULT_OPTIONS = ApiRequest.Options(TestApiKeys.PUBLISHABLE, TestApiKeys.ACCOUNT)
+        private val DEFAULT_OPTIONS = ApiConfiguration.State(
+            publishableKey = TestApiKeys.PUBLISHABLE,
+            stripeAccountId = TestApiKeys.ACCOUNT,
+        ).toRequestOptions(idempotencyKey = null)
         private const val DEFAULT_SESSION_ID = "sess_123"
     }
 }

@@ -1,6 +1,8 @@
 package com.stripe.android.polling
 
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.toRequestOptions
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.PaymentIntentFactory
@@ -16,10 +18,10 @@ internal fun createIntentStatusPoller(
 ): DefaultIntentStatusPoller {
     return DefaultIntentStatusPoller(
         stripeRepository = FakeStripeRepository(enqueuedStatuses, isSetupIntent),
-        requestOptions = ApiRequest.Options(
-            apiKey = "key",
-            stripeAccount = "acct_123",
-        ),
+        requestOptions = ApiConfiguration.State(
+            publishableKey = "key",
+            stripeAccountId = "acct_123",
+        ).toRequestOptions(idempotencyKey = null),
         config = IntentStatusPoller.Config(
             clientSecret = "secret",
             pollingInterval = pollingInterval,

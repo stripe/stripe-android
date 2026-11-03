@@ -13,7 +13,8 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentAuthConfig
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.core.networking.toRequestOptions
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.Stripe3ds2AuthResultFixtures
 import com.stripe.android.model.StripeIntent
@@ -63,7 +64,12 @@ class Stripe3ds2TransactionViewModelTest {
 
             verify(stripeRepository).start3ds2Auth(
                 any(),
-                eq(ApiRequest.Options(ApiKeyFixtures.CONNECTED_ACCOUNT_PUBLISHABLE_KEY))
+                eq(
+                    ApiConfiguration.State(
+                        publishableKey = ApiKeyFixtures.CONNECTED_ACCOUNT_PUBLISHABLE_KEY,
+                        stripeAccountId = null,
+                    ).toRequestOptions(idempotencyKey = null)
+                )
             )
         }
 
@@ -81,7 +87,12 @@ class Stripe3ds2TransactionViewModelTest {
 
             verify(stripeRepository).start3ds2Auth(
                 any(),
-                eq(ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, ApiKeyFixtures.FAKE_STRIPE_ACCOUNT))
+                eq(
+                    ApiConfiguration.State(
+                        publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+                        stripeAccountId = ApiKeyFixtures.FAKE_STRIPE_ACCOUNT,
+                    ).toRequestOptions(idempotencyKey = null)
+                )
             )
         }
 
@@ -92,7 +103,10 @@ class Stripe3ds2TransactionViewModelTest {
         )
 
         assertThat(viewModel.threeDS2RequestOptions).isEqualTo(
-            ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY, ApiKeyFixtures.FAKE_STRIPE_ACCOUNT)
+            ApiConfiguration.State(
+                publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+                stripeAccountId = ApiKeyFixtures.FAKE_STRIPE_ACCOUNT,
+            ).toRequestOptions(idempotencyKey = null)
         )
     }
 

@@ -13,6 +13,7 @@ import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
+import com.stripe.android.core.networking.toRequestOptions
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
@@ -388,10 +389,10 @@ constructor(
         val sourceId = result.sourceId.orEmpty()
         val clientSecret = result.clientSecret.orEmpty()
 
-        val requestOptions = ApiRequest.Options(
-            apiKey = publishableKeyProvider(),
-            stripeAccount = result.stripeAccountId
-        )
+        val requestOptions = ApiConfiguration.State(
+            publishableKey = publishableKeyProvider(),
+            stripeAccountId = result.stripeAccountId,
+        ).toRequestOptions(idempotencyKey = null)
 
         analyticsRequestExecutor.executeAsync(
             paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.AuthSourceResult)

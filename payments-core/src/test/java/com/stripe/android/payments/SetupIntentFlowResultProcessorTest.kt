@@ -7,7 +7,7 @@ import com.stripe.android.SetupIntentResult
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.toRequestOptions
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
@@ -111,7 +111,10 @@ internal class SetupIntentFlowResultProcessorTest {
             )
 
             val clientSecret = "pi_3L8WOsLu5o3P18Zp191FpRSy_secret_5JIwIT1ooCwRm28AwreUAc6N4"
-            val requestOptions = ApiRequest.Options(apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+            val requestOptions = ApiConfiguration.State(
+                publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                stripeAccountId = null,
+            ).toRequestOptions(idempotencyKey = null)
 
             val result = processor.processResult(
                 PaymentFlowResult.Unvalidated(
@@ -147,7 +150,10 @@ internal class SetupIntentFlowResultProcessorTest {
             )
 
             val clientSecret = "pi_3L8WOsLu5o3P18Zp191FpRSy_secret_5JIwIT1ooCwRm28AwreUAc6N4"
-            val requestOptions = ApiRequest.Options(apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+            val requestOptions = ApiConfiguration.State(
+                publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                stripeAccountId = null,
+            ).toRequestOptions(idempotencyKey = null)
 
             val result = processor.processResult(
                 PaymentFlowResult.Unvalidated(
@@ -185,7 +191,10 @@ internal class SetupIntentFlowResultProcessorTest {
             val clientSecret = requireNotNull(
                 intent.clientSecret
             )
-            val requestOptions = ApiRequest.Options(apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+            val requestOptions = ApiConfiguration.State(
+                publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                stripeAccountId = null,
+            ).toRequestOptions(idempotencyKey = null)
 
             val result = processor.processResult(
                 PaymentFlowResult.Unvalidated(

@@ -4,9 +4,10 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
-import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
+import com.stripe.android.core.networking.toRequestOptions
 import com.stripe.android.googlepaylauncher.injection.InternalGooglePayPaymentMethodLauncherFactory
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.LinkPaymentLauncher
@@ -69,10 +70,10 @@ internal suspend fun createIntentConfirmationInterceptor(
     },
     preparePaymentMethodHandlerProvider: Provider<PreparePaymentMethodHandler?> = Provider { null }
 ): IntentConfirmationInterceptor {
-    val requestOptions = ApiRequest.Options(
-        apiKey = publishableKeyProvider(),
-        stripeAccount = null,
-    )
+    val requestOptions = ApiConfiguration.State(
+        publishableKey = publishableKeyProvider(),
+        stripeAccountId = null,
+    ).toRequestOptions(idempotencyKey = null)
     val deferredIntentCallbackRetriever = DeferredIntentCallbackRetriever(
         intentCreationCallbackProvider = intentCreationCallbackProvider,
         intentCreateIntentWithConfirmationTokenCallback = intentCreationConfirmationTokenCallbackProvider,
@@ -156,10 +157,7 @@ internal suspend fun createIntentConfirmationInterceptor(
                         publishableKey = "pk",
                     ),
                     apiRequestOptionsProvider = {
-                        ApiRequest.Options(
-                            apiKey = DEFAULT_API_CONFIG.publishableKey,
-                            stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
-                        )
+                        DEFAULT_API_CONFIG.toRequestOptions(idempotencyKey = null)
                     },
                 )
                 return CheckoutSessionConfirmationInterceptor(

@@ -2,6 +2,7 @@ package com.stripe.android.core.networking
 
 import android.os.Build
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.ApiKeyFixtures
 import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.AppInfo
@@ -40,7 +41,10 @@ class RequestHeadersFactoriesTest {
         val stripeAccount = "acct_123abc"
         val headers = createBasePaymentApiHeaders(
             locale = Locale.US,
-            options = ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, stripeAccount)
+            options = ApiConfiguration.State(
+                publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                stripeAccountId = stripeAccount,
+            ).toRequestOptions(idempotencyKey = null)
         )
 
         assertThat(headers[HEADER_AUTHORIZATION])
@@ -129,7 +133,10 @@ class RequestHeadersFactoriesTest {
         val stripeAccount = "acct_123abc"
         val headers = createBasePaymentApiHeaders(
             locale = Locale.SIMPLIFIED_CHINESE,
-            options = ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, stripeAccount)
+            options = ApiConfiguration.State(
+                publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                stripeAccountId = stripeAccount,
+            ).toRequestOptions(idempotencyKey = null)
         )
 
         assertThat(headers[HEADER_AUTHORIZATION])
@@ -210,6 +217,9 @@ class RequestHeadersFactoriesTest {
 
     private companion object {
         private const val BOUNDARY = "TEST_BOUNDARY"
-        private val OPTIONS = ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+        private val OPTIONS = ApiConfiguration.State(
+            publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+            stripeAccountId = null,
+        ).toRequestOptions(idempotencyKey = null)
     }
 }

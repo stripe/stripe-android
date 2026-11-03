@@ -10,6 +10,7 @@ import com.stripe.android.challenge.confirmation.analytics.IntentConfirmationCha
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.toRequestOptions
 import com.stripe.android.model.CancelCaptchaChallengeParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
@@ -364,7 +365,10 @@ internal class IntentConfirmationChallengeViewModelTest {
     }
 
     private companion object {
-        private val REQUEST_OPTIONS = ApiRequest.Options("pk_test_vOo1umqsYxSrP5UXfOeL3ecm")
+        private val REQUEST_OPTIONS = ApiConfiguration.State(
+            publishableKey = "pk_test_vOo1umqsYxSrP5UXfOeL3ecm",
+            stripeAccountId = null,
+        ).toRequestOptions(idempotencyKey = null)
 
         val TEST_ARGS = IntentConfirmationChallengeArgs(
             apiConfiguration = ApiConfiguration.State("pk_test_123", "acct_123"),

@@ -3,7 +3,9 @@ package com.stripe.android.networking
 import android.net.Uri
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.toRequestOptions
 import com.stripe.android.model.CardParamsFixtures
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -15,7 +17,10 @@ class PaymentApiRequestTest {
     fun url_withCardData_createsProperQueryString() {
         val url = ApiRequest.Factory().createGet(
             url = StripeApiRepository.sourcesUrl,
-            options = ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY),
+            options = ApiConfiguration.State(
+                publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+                stripeAccountId = null,
+            ).toRequestOptions(idempotencyKey = null),
             params = CardParamsFixtures.MINIMUM.toParamMap()
         ).url
 

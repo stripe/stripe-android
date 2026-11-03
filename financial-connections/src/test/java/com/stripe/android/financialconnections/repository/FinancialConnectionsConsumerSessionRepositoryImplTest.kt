@@ -2,10 +2,12 @@ package com.stripe.android.financialconnections.repository
 
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.frauddetection.FraudDetectionData
 import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.toRequestOptions
 import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.ApiKeyFixtures.consumerSession
 import com.stripe.android.financialconnections.ApiKeyFixtures.consumerSessionSignup
@@ -42,9 +44,10 @@ class FinancialConnectionsConsumerSessionRepositoryImplTest {
     private val consumersApiService: ConsumersApiService = mock()
     private val financialConnectionsConsumersApiService: FinancialConnectionsConsumersApiService =
         mock()
-    private val apiOptions: ApiRequest.Options = ApiRequest.Options(
-        apiKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
-    )
+    private val apiOptions: ApiRequest.Options = ApiConfiguration.State(
+        publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+        stripeAccountId = null,
+    ).toRequestOptions(idempotencyKey = null)
     private val logger: Logger = mock()
     private val locale: Locale = Locale.getDefault()
     private val consumerSessionRepository = RealConsumerSessionRepository(SavedStateHandle())

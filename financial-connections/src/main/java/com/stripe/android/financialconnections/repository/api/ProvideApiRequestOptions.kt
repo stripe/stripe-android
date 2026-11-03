@@ -1,6 +1,8 @@
 package com.stripe.android.financialconnections.repository.api
 
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.toRequestOptions
 import com.stripe.android.financialconnections.domain.IsLinkWithStripe
 import com.stripe.android.financialconnections.repository.ConsumerSessionProvider
 import javax.inject.Inject
@@ -30,7 +32,7 @@ internal class RealProvideApiRequestOptions @Inject constructor(
         val consumerPublishableKey = session?.publishableKey?.takeIf { isLinkWithStripe() }
 
         return consumerPublishableKey?.let {
-            ApiRequest.Options(apiKey = it)
+            ApiConfiguration.State(it, null).toRequestOptions(idempotencyKey = null)
         }
     }
 }

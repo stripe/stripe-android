@@ -22,6 +22,7 @@ import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.toRequestOptions
 import com.stripe.android.model.Address
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.GooglePayFixtures
@@ -137,10 +138,7 @@ class GooglePayPaymentMethodLauncherViewModelTest {
             )
         )
         assertThat(stripeRepository.getRequestOptions()).isEqualTo(
-            ApiRequest.Options(
-                apiKey = ARGS.apiConfiguration.publishableKey,
-                stripeAccount = ARGS.apiConfiguration.stripeAccountId
-            )
+            ARGS.apiConfiguration.toRequestOptions(idempotencyKey = null)
         )
     }
 
