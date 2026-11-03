@@ -853,7 +853,7 @@ class CheckoutElementsController @Inject internal constructor(
          */
         @CheckoutSessionPreview
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        sealed class OrderSummaryItem {
+        abstract class OrderSummaryItem private constructor() {
             /**
              * The stable identity of this order summary item within its Checkout Session.
              */
