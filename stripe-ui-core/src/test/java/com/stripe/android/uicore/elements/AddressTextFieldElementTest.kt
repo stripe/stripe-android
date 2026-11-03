@@ -12,7 +12,6 @@ class AddressTextFieldElementTest {
         val element = AddressTextFieldElement(
             identifier = FormFieldId.OneLineAddress,
             label = "Address".resolvableString,
-            addressInputMode = AddressInputMode.NoAutocomplete(),
             inlineAutocompleteHandler = null,
             reportsFormValue = false,
             initialQuery = "",
