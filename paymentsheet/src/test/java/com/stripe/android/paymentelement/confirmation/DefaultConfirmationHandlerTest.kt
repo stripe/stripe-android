@@ -60,6 +60,65 @@ class DefaultConfirmationHandlerTest {
     }
 
     @Test
+    fun `Does not register launchers for an already destroyed owner`() = test(shouldRegister = false) {
+        val owner = fakeLifecycleOwner()
+        owner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+
+        confirmationHandler.register(DummyActivityResultCaller.noOp(), owner)
+
+        someDefinitionScenario.createLauncherCalls.expectNoEvents()
+        someOtherDefinitionScenario.createLauncherCalls.expectNoEvents()
+    }
+
+    @Test
+    fun `Replacing registration cleans up old launchers and ignores the old lifecycle`() = test(
+        shouldRegister = false,
+    ) {
+        val caller = DummyActivityResultCaller.noOp()
+        val oldOwner = fakeLifecycleOwner()
+        val newOwner = fakeLifecycleOwner()
+        confirmationHandler.register(caller, oldOwner)
+        someDefinitionScenario.createLauncherCalls.awaitItem()
+        someOtherDefinitionScenario.createLauncherCalls.awaitItem()
+
+        confirmationHandler.register(caller, newOwner)
+
+        someDefinitionScenario.unregisterCalls.awaitItem()
+        someOtherDefinitionScenario.unregisterCalls.awaitItem()
+        assertThat(someDefinitionScenario.createLauncherCalls.awaitItem().lifecycleOwner)
+            .isSameInstanceAs(newOwner)
+        assertThat(someOtherDefinitionScenario.createLauncherCalls.awaitItem().lifecycleOwner)
+            .isSameInstanceAs(newOwner)
+
+        oldOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+        someDefinitionScenario.unregisterCalls.expectNoEvents()
+        someOtherDefinitionScenario.unregisterCalls.expectNoEvents()
+
+        newOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+        someDefinitionScenario.unregisterCalls.awaitItem()
+        someOtherDefinitionScenario.unregisterCalls.awaitItem()
+    }
+
+    @Test
+    fun `Registering the same owner twice unregisters each set of launchers once`() = test(shouldRegister = false) {
+        val caller = DummyActivityResultCaller.noOp()
+        val owner = fakeLifecycleOwner()
+        confirmationHandler.register(caller, owner)
+        someDefinitionScenario.createLauncherCalls.awaitItem()
+        someOtherDefinitionScenario.createLauncherCalls.awaitItem()
+
+        confirmationHandler.register(caller, owner)
+
+        someDefinitionScenario.unregisterCalls.awaitItem()
+        someOtherDefinitionScenario.unregisterCalls.awaitItem()
+        someDefinitionScenario.createLauncherCalls.awaitItem()
+        someOtherDefinitionScenario.createLauncherCalls.awaitItem()
+        owner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+        someDefinitionScenario.unregisterCalls.awaitItem()
+        someOtherDefinitionScenario.unregisterCalls.awaitItem()
+    }
+
+    @Test
     fun `On lifecycle destroyed, should unregister all launchers`() = test(
         shouldRegister = false,
         someDefinitionAction = ConfirmationDefinition.Action.Launch(

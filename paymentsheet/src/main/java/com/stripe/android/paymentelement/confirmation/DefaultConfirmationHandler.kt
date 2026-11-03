@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.confirmation
 import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.core.Logger
@@ -54,6 +55,9 @@ internal class DefaultConfirmationHandler(
     )
     override val state: StateFlow<ConfirmationHandler.State> = _state.asStateFlow()
 
+    private var registeredLifecycleOwner: LifecycleOwner? = null
+    private var unregisterObserver: DefaultLifecycleObserver? = null
+
     init {
         if (hasReloadedFromProcessDeath) {
             coroutineScope.launch {
@@ -80,6 +84,14 @@ internal class DefaultConfirmationHandler(
         activityResultCaller: ActivityResultCaller,
         lifecycleOwner: LifecycleOwner,
     ) {
+        unregisterObserver?.let { observer ->
+            registeredLifecycleOwner?.lifecycle?.removeObserver(observer)
+            mediators.forEach { it.unregister() }
+        }
+        unregisterObserver = null
+        registeredLifecycleOwner = null
+        if (lifecycleOwner.lifecycle.currentState == Lifecycle.State.DESTROYED) return
+
         mediators.forEach { mediator ->
             mediator.register(
                 activityResultCaller = activityResultCaller,
@@ -88,16 +100,20 @@ internal class DefaultConfirmationHandler(
             )
         }
 
-        lifecycleOwner.lifecycle.addObserver(
-            object : DefaultLifecycleObserver {
-                override fun onDestroy(owner: LifecycleOwner) {
-                    mediators.forEach { mediator ->
-                        mediator.unregister()
-                    }
-                    super.onDestroy(owner)
+        val observer = object : DefaultLifecycleObserver {
+            override fun onDestroy(owner: LifecycleOwner) {
+                if (unregisterObserver !== this) return
+                unregisterObserver = null
+                registeredLifecycleOwner = null
+                owner.lifecycle.removeObserver(this)
+                mediators.forEach { mediator ->
+                    mediator.unregister()
                 }
             }
-        )
+        }
+        registeredLifecycleOwner = lifecycleOwner
+        unregisterObserver = observer
+        lifecycleOwner.lifecycle.addObserver(observer)
     }
 
     override fun bootstrap(paymentMethodMetadata: PaymentMethodMetadata) {
