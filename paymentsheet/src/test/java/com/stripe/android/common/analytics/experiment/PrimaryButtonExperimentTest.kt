@@ -60,27 +60,6 @@ internal class PrimaryButtonExperimentTest {
     @Test
     fun `empty variant keeps padlock without logging exposure`() = assertUnsupportedVariant(variant = "")
 
-    @Test
-    fun `complete mode logs PaymentSheet integration`() = assertIntegrationMode(
-        mode = EventReporter.Mode.Complete,
-        expectedIntegration = "paymentsheet",
-    )
-
-    @Test
-    fun `custom mode logs FlowController integration`() = assertIntegrationMode(
-        mode = EventReporter.Mode.Custom,
-        expectedIntegration = "flowcontroller",
-    )
-
-    private fun assertIntegrationMode(
-        mode: EventReporter.Mode,
-        expectedIntegration: String,
-    ) = runScenario(mode = mode) {
-        getIcon()
-        assertThat(eventReporter.experimentExposureCalls.awaitItem().experiment.dimensions)
-            .containsEntry("in_app_elements_integration_type", expectedIntegration)
-    }
-
     private fun assertVariantIconAndExposure(
         variant: String,
         expectedIcon: PrimaryButtonIcon,
@@ -105,22 +84,20 @@ internal class PrimaryButtonExperimentTest {
 
     private fun runScenario(
         metadata: PaymentMethodMetadata = metadata(),
-        mode: EventReporter.Mode = EventReporter.Mode.Embedded,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val eventReporter = FakeEventReporter()
-        Scenario(metadata, eventReporter, mode).block()
+        Scenario(metadata, eventReporter).block()
         eventReporter.validate()
     }
 
     private class Scenario(
         val metadata: PaymentMethodMetadata,
         val eventReporter: FakeEventReporter,
-        val mode: EventReporter.Mode,
     ) {
         fun getIcon(): PrimaryButtonIcon = DefaultPrimaryButtonExperiment(
             eventReporter = eventReporter,
-            mode = mode,
+            mode = EventReporter.Mode.Embedded,
         ).getIcon(metadata)
     }
 

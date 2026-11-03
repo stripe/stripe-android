@@ -6,7 +6,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
-import com.stripe.android.common.analytics.experiment.DefaultPrimaryButtonExperiment
+import com.stripe.android.common.analytics.experiment.FakePrimaryButtonExperiment
 import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.LinkAccountHolder
@@ -14,8 +14,6 @@ import com.stripe.android.link.ui.LinkButtonState
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
-import com.stripe.android.model.ElementsSession
-import com.stripe.android.model.ElementsSession.ExperimentAssignment
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
@@ -32,13 +30,13 @@ import com.stripe.android.paymentsheet.FakeCustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInteractor
-import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.FakeAddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.FakeUpdatePaymentMethodInteractor
+import com.stripe.android.paymentsheet.ui.PrimaryButtonIcon
 import com.stripe.android.paymentsheet.utils.EventReporterProvider
 import com.stripe.android.paymentsheet.utils.ViewModelStoreOwnerContext
 import com.stripe.android.paymentsheet.verticalmode.FakeManageScreenInteractor
@@ -112,17 +110,13 @@ internal class EmbeddedNavigatorScreenScreenshotTest {
 
     @Test
     fun displaysFormWithoutPadlock() {
-        val metadata = PaymentMethodMetadataFactory.create(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(isLiveMode = true),
-            experimentsData = ElementsSession.ExperimentsData(
-                arbId = "arb_123",
-                experimentAssignments = mapOf(
-                    ExperimentAssignment.OCS_MOBILE_REMOVE_PRIMARY_BUTTON_PADLOCK to "treatment_no_padlock",
-                ),
-            ),
-        )
         snapshot(
-            screen = createFormScreen(metadata),
+            screen = createFormScreen(
+                metadata = PaymentMethodMetadataFactory.create(
+                    stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(isLiveMode = true),
+                ),
+                primaryButtonIcon = PrimaryButtonIcon.None,
+            ),
             previousScreen = createVerticalPaymentOptionsScreen(),
             walletsState = createWalletsState(),
         )
@@ -229,9 +223,10 @@ internal class EmbeddedNavigatorScreenScreenshotTest {
 
     private fun createFormScreen(
         metadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+        primaryButtonIcon: PrimaryButtonIcon = PrimaryButtonIcon.Lock,
     ): EmbeddedNavigator.Screen.Form {
         val selectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle())
-        val stateHolder = createSheetActivityStateHolder(metadata, selectionHolder)
+        val stateHolder = createSheetActivityStateHolder(metadata, selectionHolder, primaryButtonIcon)
         val eventReporter = FakeEventReporter()
         val interactor = EmbeddedFormInteractorFactory(
             paymentMethodMetadata = metadata,
@@ -312,6 +307,7 @@ internal class EmbeddedNavigatorScreenScreenshotTest {
     private fun createSheetActivityStateHolder(
         metadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         selectionHolder: DefaultEmbeddedSelectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle()),
+        primaryButtonIcon: PrimaryButtonIcon = PrimaryButtonIcon.Lock,
     ): DefaultSheetActivityStateHolder {
         return DefaultSheetActivityStateHolder(
             paymentMethodMetadata = metadata,
@@ -320,7 +316,7 @@ internal class EmbeddedNavigatorScreenScreenshotTest {
             coroutineScope = TestScope(UnconfinedTestDispatcher()),
             onClickDelegate = OnClickDelegateOverrideImpl(),
             eventReporter = FakeEventReporter(),
-            primaryButtonExperiment = DefaultPrimaryButtonExperiment(FakeEventReporter(), EventReporter.Mode.Embedded),
+            primaryButtonExperiment = FakePrimaryButtonExperiment(icon = primaryButtonIcon),
             confirmationHandler = FakeConfirmationHandler(),
             tapToAddHelper = FakeTapToAddHelper.noOp(),
             customerStateHolder = FakeCustomerStateHolder(),
