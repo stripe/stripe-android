@@ -6,6 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.StringRes
 import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.DefaultCardBrandFilter
@@ -58,7 +59,6 @@ import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherFactory
 import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -322,7 +322,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         presentPartnerTermsIfNeeded(
             declarationType = PartnerDeclarationType.TransactionTerms,
             resultLauncher = termsAndConditionsResultLauncher,
-            callback = onrampCallbacksState.termsAndConditionsCallback,
+            getCallback = { onrampCallbacksState.termsAndConditionsCallback },
             headingResId = PaymentSheetR.string.stripe_link_onramp_terms_and_conditions_screen_title,
         )
     }
@@ -331,7 +331,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         presentPartnerTermsIfNeeded(
             declarationType = PartnerDeclarationType.TermsOfService,
             resultLauncher = termsOfServiceResultLauncher,
-            callback = onrampCallbacksState.termsOfServiceCallback,
+            getCallback = { onrampCallbacksState.termsOfServiceCallback },
             headingResId = PaymentSheetR.string.stripe_link_onramp_terms_of_service_screen_title,
         )
     }
@@ -339,15 +339,18 @@ internal class OnrampPresenterCoordinator @Inject constructor(
     private fun presentPartnerTermsIfNeeded(
         declarationType: PartnerDeclarationType,
         resultLauncher: ActivityResultLauncher<HTMLConfirmationActivityArgs>,
-        callback: OnrampPartnerTermsCallback?,
+        getCallback: () -> OnrampPartnerTermsCallback?,
         @StringRes headingResId: Int,
     ) {
-        lifecycleOwner.lifecycleScope.launch {
+        coroutineScope.launch {
             val result = interactor.startPartnerTerms(declarationType)
-            // The repository can return a failure result when the request is cancelled.
-            ensureActive()
+            val callback = getCallback()
             when (result) {
                 is OnrampStartPartnerTermsResult.PresentationRequired -> {
+                    if (lifecycleOwner.lifecycle.currentState == Lifecycle.State.DESTROYED) {
+                        callback?.onResult(OnrampPartnerTermsResult.Cancelled())
+                        return@launch
+                    }
                     presentHTMLConfirmation(
                         resultLauncher = resultLauncher,
                         html = result.terms.declaration.text,

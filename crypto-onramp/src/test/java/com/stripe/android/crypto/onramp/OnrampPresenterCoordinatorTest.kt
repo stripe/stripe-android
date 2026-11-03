@@ -10,6 +10,7 @@ import app.cash.turbine.Turbine
 import com.google.android.gms.wallet.IsReadyToPayRequest
 import com.google.android.gms.wallet.PaymentsClient
 import com.google.common.truth.Truth.assertThat
+import com.google.testing.junit.testparameterinjector.TestParameter
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.crypto.onramp.CheckoutState.Status
 import com.stripe.android.crypto.onramp.exception.GooglePayNotConfiguredException
@@ -62,15 +63,12 @@ import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.link.LinkController
 import com.stripe.android.model.CardBrand
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.withContext
 import org.junit.After
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -82,12 +80,12 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.Robolectric
-import org.robolectric.RobolectricTestRunner
+import org.robolectric.RobolectricTestParameterInjector
 import org.robolectric.Shadows.shadowOf
 
-@RunWith(RobolectricTestRunner::class)
+@RunWith(RobolectricTestParameterInjector::class)
 @Suppress("LargeClass")
-class OnrampPresenterCoordinatorTest {
+internal class OnrampPresenterCoordinatorTest {
     private val linkController: LinkController = mock()
     private val interactor: OnrampInteractor = mock()
 
@@ -693,55 +691,81 @@ class OnrampPresenterCoordinatorTest {
         results.ensureAllEventsConsumed()
     }
 
-    @Test
-    fun `terms response after host destruction does not present`() = testScope.runTest {
-        val response = CompletableDeferred<OnrampStartPartnerTermsResult>()
-        whenever(interactor.startPartnerTerms(PartnerDeclarationType.TermsOfService))
-            .doSuspendableAnswer { withContext(NonCancellable) { response.await() } }
-        val results = Turbine<OnrampPartnerTermsResult>()
-        val coordinator = createCoordinator(termsOfServiceCallback = OnrampPartnerTermsCallback(results::add))
+    enum class TermsResponse { Required, NotRequired, Failed }
 
-        coordinator.presentTermsOfServiceIfNeeded()
+    @Test
+    fun `late terms response reaches replacement callback without presenting`(
+        @TestParameter declarationType: PartnerDeclarationType,
+        @TestParameter outcome: TermsResponse,
+    ) = testScope.runTest {
+        val response = CompletableDeferred<OnrampStartPartnerTermsResult>()
+        whenever(interactor.startPartnerTerms(declarationType)).doSuspendableAnswer { response.await() }
+        val oldResults = Turbine<OnrampPartnerTermsResult>()
+        val newResults = Turbine<OnrampPartnerTermsResult>()
+        val store = OnrampCallbackStore()
+        val coordinator = createTermsCoordinator(declarationType, oldResults, store)
+        when (declarationType) {
+            PartnerDeclarationType.TransactionTerms -> coordinator.presentTermsAndConditionsIfNeeded()
+            PartnerDeclarationType.TermsOfService -> coordinator.presentTermsOfServiceIfNeeded()
+        }
         testScheduler.runCurrent()
-        verify(interactor).startPartnerTerms(PartnerDeclarationType.TermsOfService)
+        verify(interactor).startPartnerTerms(declarationType)
         lifecycleOwner.currentState = Lifecycle.State.DESTROYED
-        response.complete(
-            OnrampStartPartnerTermsResult.PresentationRequired(
-                terms = PartnerTerms.Required(
-                    PartnerTerms.Declaration("decl_test", PartnerDeclarationType.TermsOfService, "terms")
-                ),
-                appearance = null,
-            )
-        )
-        testScheduler.advanceUntilIdle()
-
-        assertThat(shadowOf(activity).nextStartedActivity).isNull()
-        results.ensureAllEventsConsumed()
-    }
-
-    @Test
-    fun `terms cancellation after host destruction does not invoke callback`() = testScope.runTest {
-        val response = CompletableDeferred<OnrampStartPartnerTermsResult>()
-        whenever(interactor.startPartnerTerms(PartnerDeclarationType.TransactionTerms))
-            .doSuspendableAnswer {
-                try {
-                    response.await()
-                } catch (error: CancellationException) {
-                    OnrampStartPartnerTermsResult.Failed(error)
+        val recreatedOwner = TestLifecycleOwner()
+        val recreatedActivity = Robolectric.buildActivity(ComponentActivity::class.java).create().get()
+        val error = IllegalStateException("Request failed")
+        try {
+            createTermsCoordinator(declarationType, newResults, store, recreatedOwner, recreatedActivity)
+            response.complete(
+                when (outcome) {
+                    TermsResponse.Required -> OnrampStartPartnerTermsResult.PresentationRequired(
+                        terms = PartnerTerms.Required(PartnerTerms.Declaration("decl_test", declarationType, "Terms")),
+                        appearance = null,
+                    )
+                    TermsResponse.NotRequired -> OnrampStartPartnerTermsResult.NotRequired
+                    TermsResponse.Failed -> OnrampStartPartnerTermsResult.Failed(error)
                 }
+            )
+            testScheduler.advanceUntilIdle()
+            val result = newResults.awaitItem()
+            when (outcome) {
+                TermsResponse.Required ->
+                    assertThat(result).isInstanceOf(OnrampPartnerTermsResult.Cancelled::class.java)
+                TermsResponse.NotRequired ->
+                    assertThat(result).isInstanceOf(OnrampPartnerTermsResult.NotRequired::class.java)
+                TermsResponse.Failed ->
+                    assertThat((result as OnrampPartnerTermsResult.Failed).error).isSameInstanceAs(error)
             }
-        val results = Turbine<OnrampPartnerTermsResult>()
-        val coordinator = createCoordinator(termsAndConditionsCallback = OnrampPartnerTermsCallback(results::add))
-
-        coordinator.presentTermsAndConditionsIfNeeded()
-        testScheduler.runCurrent()
-        verify(interactor).startPartnerTerms(PartnerDeclarationType.TransactionTerms)
-        lifecycleOwner.currentState = Lifecycle.State.DESTROYED
-        response.complete(OnrampStartPartnerTermsResult.Failed(CancellationException("Host destroyed")))
-        testScheduler.advanceUntilIdle()
-
-        results.ensureAllEventsConsumed()
+            oldResults.ensureAllEventsConsumed()
+            newResults.ensureAllEventsConsumed()
+            assertThat(shadowOf(activity).nextStartedActivityForResult).isNull()
+            assertThat(shadowOf(recreatedActivity).nextStartedActivityForResult).isNull()
+        } finally {
+            recreatedOwner.currentState = Lifecycle.State.DESTROYED
+        }
     }
+
+    private fun createTermsCoordinator(
+        declarationType: PartnerDeclarationType,
+        results: Turbine<OnrampPartnerTermsResult>,
+        store: OnrampCallbackStore,
+        owner: TestLifecycleOwner = lifecycleOwner,
+        host: ComponentActivity = activity,
+    ): OnrampPresenterCoordinator = createCoordinator(
+        termsAndConditionsCallback = if (declarationType == PartnerDeclarationType.TransactionTerms) {
+            OnrampPartnerTermsCallback(results::add)
+        } else {
+            null
+        },
+        termsOfServiceCallback = if (declarationType == PartnerDeclarationType.TermsOfService) {
+            OnrampPartnerTermsCallback(results::add)
+        } else {
+            null
+        },
+        callbackStore = store,
+        lifecycleOwner = owner,
+        activity = host,
+    )
 
     @Test
     fun `terms of service not required invokes callback without presenting`() = runTest {
@@ -969,6 +993,7 @@ class OnrampPresenterCoordinatorTest {
         checkoutCallback: OnrampCheckoutCallback = this.checkoutCallback,
         lifecycleOwner: TestLifecycleOwner = this.lifecycleOwner,
         activity: ComponentActivity = this.activity,
+        callbackStore: OnrampCallbackStore = OnrampCallbackStore(),
     ): OnrampPresenterCoordinator {
         lifecycleOwner.currentState = Lifecycle.State.STARTED
 
@@ -1004,7 +1029,7 @@ class OnrampPresenterCoordinatorTest {
         termsOfServiceCallback?.let(callbacks::termsOfServiceCallback)
         userAttestationCallback?.let(callbacks::userAttestationCallback)
 
-        val callbackStore = OnrampCallbackStore().apply { update(callbacks.build()) }
+        callbackStore.update(callbacks.build())
 
         return OnrampPresenterCoordinator(
             linkController = linkController,
