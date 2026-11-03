@@ -19,6 +19,7 @@ copy_test_results ".*/build/reports/tests/testDebugUnitTest$"
 copy_test_results ".*/build/reports/androidTests/connected$"
 copy_test_results ".*/build/reports/androidTests/managedDevice$"
 copy_test_results ".*/build/outputs/androidTest-results/managedDevice$"
+copy_test_results ".*/build/outputs/managed_device_android_test_additional_output$"
 copy_test_results ".*/build/test-results/testDebugUnitTest$"
 copy_test_results ".*/build/instrumentation-test-results$"
 

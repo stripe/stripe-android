@@ -42,7 +42,7 @@ internal class LinkTest(
     private val networkRule = NetworkRule(validationTimeout = 5.seconds)
 
     @get:Rule
-    val testRules: TestRules = TestRules.create(networkRule = networkRule)
+    val testRules: TestRules = TestRules.create(networkRule = networkRule, profile = true)
 
     private val composeTestRule = testRules.compose
 

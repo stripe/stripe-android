@@ -71,7 +71,7 @@ internal class FlowControllerTest(
     private val networkRule = NetworkRule()
 
     @get:Rule
-    val testRules: TestRules = TestRules.create(networkRule = networkRule)
+    val testRules: TestRules = TestRules.create(networkRule = networkRule, profile = true)
 
     private val composeTestRule = testRules.compose
 
