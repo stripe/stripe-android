@@ -3,9 +3,6 @@
 NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
 
-### PaymentSheet
-* [Fixed] Fixed input focus loss during passive captcha warm-up in PaymentSheet.
-
 ## 23.25.1 - 2026-10-26
 
 ### PaymentSheet
