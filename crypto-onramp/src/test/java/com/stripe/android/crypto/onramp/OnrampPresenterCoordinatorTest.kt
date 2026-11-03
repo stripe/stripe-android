@@ -20,6 +20,7 @@ import com.stripe.android.crypto.onramp.model.KycQuestionnaireSubmission
 import com.stripe.android.crypto.onramp.model.KycRequirement
 import com.stripe.android.crypto.onramp.model.KycRequirementSubmission
 import com.stripe.android.crypto.onramp.model.KycRequirements
+import com.stripe.android.crypto.onramp.model.KycRetrieveResponse
 import com.stripe.android.crypto.onramp.model.KycSubmission
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.OnrampCheckoutCallback
@@ -31,6 +32,7 @@ import com.stripe.android.crypto.onramp.model.OnrampKycCallback
 import com.stripe.android.crypto.onramp.model.OnrampKycResult
 import com.stripe.android.crypto.onramp.model.OnrampPartnerTermsCallback
 import com.stripe.android.crypto.onramp.model.OnrampPartnerTermsResult
+import com.stripe.android.crypto.onramp.model.OnrampStartKycVerificationResult
 import com.stripe.android.crypto.onramp.model.OnrampStartPartnerTermsResult
 import com.stripe.android.crypto.onramp.model.OnrampStartUserAttestationResult
 import com.stripe.android.crypto.onramp.model.OnrampStartVerificationResult
@@ -62,16 +64,22 @@ import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.link.LinkController
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.DateOfBirth
+import com.stripe.android.paymentsheet.PaymentSheet
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withContext
 import org.junit.After
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.doSuspendableAnswer
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
@@ -99,6 +107,54 @@ class OnrampPresenterCoordinatorTest {
     fun tearDown() {
         samsungPayLauncher.ensureAllEventsConsumed()
         samsungPayLauncherFactory.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `late KYC response after host destruction does not launch and recreated host can retry`() = testScope.runTest {
+        val response = CompletableDeferred<OnrampStartKycVerificationResult>()
+        val requests = Turbine<Unit>()
+        whenever(interactor.startKycVerification(null)).doSuspendableAnswer {
+            requests.add(Unit)
+            // Model a response that still arrives after its caller has been cancelled.
+            withContext(NonCancellable) { response.await() }
+        }
+        val coordinator = createCoordinator()
+        coordinator.verifyKycInfo()
+        testScope.testScheduler.advanceUntilIdle()
+        requests.awaitItem()
+
+        lifecycleOwner.currentState = Lifecycle.State.DESTROYED
+        val result = OnrampStartKycVerificationResult.Completed(
+            response = KycRetrieveResponse(
+                firstName = "Test",
+                lastName = "User",
+                idNumberLastFour = "0000",
+                idType = "social_security_number",
+                dateOfBirth = DateOfBirth(day = 1, month = 1, year = 1990),
+                address = PaymentSheet.Address(country = "US"),
+            ),
+            appearance = null,
+        )
+        response.complete(result)
+        testScope.testScheduler.advanceUntilIdle()
+        assertThat(shadowOf(activity).nextStartedActivityForResult).isNull()
+
+        val recreatedOwner = TestLifecycleOwner()
+        val recreatedActivity = Robolectric.buildActivity(ComponentActivity::class.java).create().get()
+        try {
+            val recreatedCoordinator = createCoordinator(
+                lifecycleOwner = recreatedOwner,
+                activity = recreatedActivity,
+            )
+            recreatedCoordinator.verifyKycInfo()
+            testScope.testScheduler.advanceUntilIdle()
+            requests.awaitItem()
+            assertThat(shadowOf(recreatedActivity).nextStartedActivityForResult.intent.component?.className)
+                .isEqualTo("com.stripe.android.crypto.onramp.ui.VerifyKycInfoActivity")
+            requests.ensureAllEventsConsumed()
+        } finally {
+            recreatedOwner.currentState = Lifecycle.State.DESTROYED
+        }
     }
 
     @Test

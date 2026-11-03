@@ -44,8 +44,16 @@ dependencies {
     testImplementation testLibs.truth
     testImplementation testLibs.turbine
 
+    androidTestImplementation project(":payments-core-testing")
+    androidTestImplementation project(":network-testing")
     androidTestImplementation testLibs.androidx.junit
     androidTestImplementation testLibs.espresso.core
+    androidTestImplementation testLibs.androidx.coreKtx
+    androidTestImplementation testLibs.androidx.testRunner
+    androidTestImplementation testLibs.kotlin.coroutines
+    androidTestImplementation testLibs.testParameterInjector
+    androidTestImplementation testLibs.truth
+    androidTestImplementation testLibs.turbine
 }
 
 android {
@@ -57,6 +65,7 @@ android {
 
     defaultConfig {
         minSdkVersion 24
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildFeatures {
