@@ -60,6 +60,8 @@ internal class CheckoutPaymentElementUnconfiguredTest {
         runCheckoutPaymentElementScenario(
             networkRule = networkRule,
             setup = { controller ->
+                networkRule.validateCheckoutInitStarted(DEFAULT_CHECKOUT_SESSION_ID)
+                networkRule.validateCheckoutInitSucceeded(DEFAULT_CHECKOUT_SESSION_ID)
                 assertThat(controller.configure(DEFAULT_CLIENT_SECRET, CheckoutController.Configuration()))
                     .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
             },

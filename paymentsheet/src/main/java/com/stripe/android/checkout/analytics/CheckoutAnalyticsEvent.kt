@@ -28,6 +28,7 @@ internal class CheckoutAnalyticsEvent(
 
     enum class Operation(val code: String) {
         Confirm("confirm"),
+        Init("init"),
     }
 
     enum class Outcome(val code: String) {

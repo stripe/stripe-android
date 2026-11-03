@@ -7,8 +7,8 @@ import com.stripe.android.paymentsheet.state.DefaultAnalyticsMetadataFactory
 import kotlin.time.Duration
 
 /**
- * Reports the outcomes of a Checkout operation, with [E] as its failure input. Subclasses own the
- * success payload because it varies by operation.
+ * Reports the outcomes of a Checkout operation, with [E] as its failure input. Subclasses own their
+ * timing and operation-specific payloads.
  */
 internal abstract class CheckoutAnalyticsOperation<E>(
     private val operation: Operation,
@@ -24,6 +24,12 @@ internal abstract class CheckoutAnalyticsOperation<E>(
     fun started(response: CheckoutSessionResponse?) {
         reportOutcome(Outcome.Started, response, error = null)
     }
+
+    fun succeeded(response: CheckoutSessionResponse?) {
+        reportOutcome(Outcome.Succeeded, response, error = null)
+    }
+
+    protected open fun outcomeParams(outcome: Outcome): Map<String, Any?> = params
 
     fun failed(response: CheckoutSessionResponse?, error: E) {
         reportOutcome(Outcome.Failed, response, error = analyticsError(error))
@@ -41,7 +47,7 @@ internal abstract class CheckoutAnalyticsOperation<E>(
                 analyticsMetadata = DefaultAnalyticsMetadataFactory.create(response),
                 duration = if (outcome == Outcome.Started) null else elapsed(),
                 error = error,
-                operationParams = params,
+                operationParams = outcomeParams(outcome),
             )
         )
     }

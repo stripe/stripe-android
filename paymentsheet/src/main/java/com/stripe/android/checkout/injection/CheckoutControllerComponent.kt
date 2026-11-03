@@ -18,12 +18,17 @@ import com.stripe.android.checkout.CheckoutPaymentSelectionHandler
 import com.stripe.android.checkout.CheckoutSessionRefresher
 import com.stripe.android.checkout.DefaultCheckoutPaymentOptionDisplayDataFactory
 import com.stripe.android.checkout.DefaultCheckoutSessionRefresher
+import com.stripe.android.checkout.analytics.CheckoutOperationReporter
+import com.stripe.android.checkout.analytics.toAnalyticsMap
 import com.stripe.android.common.di.ElementsSessionClientParamsModule
 import com.stripe.android.common.nfcscan.NfcScanningAvailabilityModule
 import com.stripe.android.common.taptoadd.TapToAddConnectionModule
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
+import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.ViewModelScope
+import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.utils.DefaultDurationProvider
 import com.stripe.android.core.utils.DurationProvider
@@ -105,7 +110,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Named
+import javax.inject.Provider
 import javax.inject.Singleton
+import kotlin.coroutines.CoroutineContext
+import kotlin.time.TimeSource
 
 @Singleton
 @Component(
@@ -263,6 +271,28 @@ internal interface CheckoutControllerModule {
         fun provideViewModelScope(): CoroutineScope {
             return CoroutineScope(SupervisorJob() + Dispatchers.Main)
         }
+
+        @Provides
+        @Singleton
+        fun provideCheckoutOperationReporter(
+            context: Context,
+            apiConfigurationProvider: Provider<ApiConfiguration.State>,
+            analyticsRequestExecutor: AnalyticsRequestExecutor,
+            @IOContext workContext: CoroutineContext,
+            stateHolder: CheckoutControllerStateHolder,
+            timeSource: TimeSource,
+        ): CheckoutOperationReporter = CheckoutOperationReporter(
+            context = context,
+            apiConfigurationProvider = apiConfigurationProvider,
+            analyticsRequestExecutor = analyticsRequestExecutor,
+            timeSource = timeSource,
+            workContext = workContext,
+            publishableKey = {
+                stateHolder.state?.paymentMethodMetadata?.apiConfiguration?.publishableKey
+                    ?: apiConfigurationProvider.get().publishableKey
+            },
+            configurationParams = { stateHolder.state?.configuration?.toAnalyticsMap().orEmpty() },
+        )
 
         @Provides
         fun provideDurationProvider(): DurationProvider {

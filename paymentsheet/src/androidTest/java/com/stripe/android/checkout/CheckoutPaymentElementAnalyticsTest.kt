@@ -52,6 +52,11 @@ internal class CheckoutPaymentElementAnalyticsTest {
     fun testSheetAnalyticsUsesCheckoutElementsProductUsageAndCheckoutSessionId() = runCheckoutPaymentElementScenario(
         networkRule = networkRule,
         setup = { controller ->
+            networkRule.validateCheckoutInitStarted(DEFAULT_CHECKOUT_SESSION_ID)
+            networkRule.validateCheckoutInitSucceeded(
+                DEFAULT_CHECKOUT_SESSION_ID,
+                analyticsPayloadField("ordered_lpms", "card,cashapp")
+            )
             networkRule.validateAnalyticsRequest(
                 eventName = "mc_initial_displayed_payment_methods",
                 productUsage = setOf("checkout_elements"),
@@ -62,8 +67,7 @@ internal class CheckoutPaymentElementAnalyticsTest {
                     DEFAULT_CLIENT_SECRET,
                     CheckoutController.Configuration().paymentElement(PaymentElement.Configuration()),
                 )
-            )
-                .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
+            ).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
         },
     ) {
         networkRule.validateAnalyticsRequest(
@@ -89,6 +93,18 @@ internal class CheckoutPaymentElementAnalyticsTest {
         contentPage.clickOnLpm("card")
         formPage.waitUntilVisible()
 
+        networkRule.validateCheckoutInitStarted(DEFAULT_CHECKOUT_SESSION_ID)
+        networkRule.validateCheckoutInitFailed(
+            DEFAULT_CHECKOUT_SESSION_ID,
+            analyticsPayloadField("error_type", "java.lang.IllegalStateException"),
+        )
+        assertThat(
+            controller.configure(
+                DEFAULT_CLIENT_SECRET,
+                CheckoutController.Configuration().paymentElement(PaymentElement.Configuration()),
+            )
+        ).isInstanceOf(CheckoutController.OperationResult.Failed::class.java)
+
         networkRule.validateAnalyticsRequest(
             eventName = "mc_dismiss",
             productUsage = setOf("checkout_elements"),
@@ -110,6 +126,8 @@ internal class CheckoutPaymentElementAnalyticsTest {
             },
             checkoutInitResponse = ::billingTaxCheckoutInitResponse,
             setup = { controller ->
+                networkRule.validateCheckoutInitStarted(DEFAULT_CHECKOUT_SESSION_ID)
+                networkRule.validateCheckoutInitSucceeded(DEFAULT_CHECKOUT_SESSION_ID)
                 networkRule.validateAnalyticsRequest(
                     eventName = "mc_initial_displayed_payment_methods",
                     productUsage = setOf("checkout_elements"),
@@ -120,8 +138,7 @@ internal class CheckoutPaymentElementAnalyticsTest {
                         DEFAULT_CLIENT_SECRET,
                         CheckoutController.Configuration().paymentElement(PaymentElement.Configuration()),
                     )
-                )
-                    .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
+                ).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
             },
         ) {
             // Google Pay returns a new payment method, so its billing address is only synced to
@@ -179,6 +196,8 @@ internal class CheckoutPaymentElementAnalyticsTest {
                 }
             },
             setup = { controller ->
+                networkRule.validateCheckoutInitStarted(DEFAULT_CHECKOUT_SESSION_ID)
+                networkRule.validateCheckoutInitSucceeded(DEFAULT_CHECKOUT_SESSION_ID)
                 networkRule.validateAnalyticsRequest(
                     eventName = "mc_initial_displayed_payment_methods",
                     productUsage = setOf("checkout_elements"),
@@ -189,8 +208,7 @@ internal class CheckoutPaymentElementAnalyticsTest {
                         DEFAULT_CLIENT_SECRET,
                         CheckoutController.Configuration().paymentElement(PaymentElement.Configuration()),
                     )
-                )
-                    .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
+                ).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
             },
         ) {
             contentPage.waitUntilVisible()
@@ -228,8 +246,103 @@ internal class CheckoutPaymentElementAnalyticsTest {
         }
     }
 
+    @Test
+    fun testConfigureApiFailureSendsInitFailureAnalytics() = runCheckoutPaymentElementScenario(
+        networkRule = networkRule,
+        checkoutInitResponse = ::checkoutInitApiFailureResponse,
+        renderPaymentElementContent = false,
+        setup = { controller ->
+            networkRule.validateCheckoutInitStarted(DEFAULT_CHECKOUT_SESSION_ID)
+            networkRule.validateCheckoutInitFailed(
+                sessionId = DEFAULT_CHECKOUT_SESSION_ID,
+                analyticsPayloadField("error_type", "invalid_request_error"),
+                analyticsPayloadField("error_code", "checkout_session_invalid"),
+                analyticsPayloadField("request_id", INIT_FAILURE_REQUEST_ID),
+            )
+            assertThat(
+                controller.configure(
+                    DEFAULT_CLIENT_SECRET,
+                    CheckoutController.Configuration().paymentElement(PaymentElement.Configuration()),
+                )
+            ).isInstanceOf(CheckoutController.OperationResult.Failed::class.java)
+        },
+    ) {
+        markTestSucceeded()
+    }
+
+    @Test
+    fun testFailedReconfigureUsesFreshResponseMetadataForInitFailureAnalytics() =
+        runCheckoutPaymentElementScenario(
+            networkRule = networkRule,
+            renderPaymentElementContent = false,
+            setup = { controller ->
+                networkRule.validateCheckoutInitStarted(DEFAULT_CHECKOUT_SESSION_ID)
+                networkRule.validateCheckoutInitSucceeded(DEFAULT_CHECKOUT_SESSION_ID)
+                assertThat(
+                    controller.configure(
+                        DEFAULT_CLIENT_SECRET,
+                        CheckoutController.Configuration().paymentElement(PaymentElement.Configuration()),
+                    )
+                ).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
+            },
+        ) {
+            networkRule.checkoutInit(sessionId = RECONFIGURED_SESSION_ID) { response ->
+                billingTaxCheckoutInitResponse(
+                    response = response,
+                    sessionId = RECONFIGURED_SESSION_ID,
+                    configId = RECONFIGURED_CONFIG_ID,
+                )
+            }
+            networkRule.checkoutUpdate(
+                bodyPart("tax_region[country]", "CA"),
+                sessionId = RECONFIGURED_SESSION_ID,
+            ) { response ->
+                response.setResponseCode(400)
+                response.setHeader("Request-Id", INIT_FAILURE_REQUEST_ID)
+                response.setBody(
+                    """
+                    {"error":{"type":"invalid_request_error","code":"invalid_tax_region","message":"Invalid tax region"}}
+                    """.trimIndent()
+                )
+            }
+            networkRule.validateCheckoutInitStarted(RECONFIGURED_SESSION_ID)
+            networkRule.validateCheckoutInitFailed(
+                RECONFIGURED_SESSION_ID,
+                analyticsPayloadField("checkout_config_id", RECONFIGURED_CONFIG_ID),
+                analyticsPayloadField("automatic_tax_enabled", "true"),
+                // Proves the event carries the attempted (CA-defaulted) configuration, not the
+                // first configure's defaults-free one.
+                analyticsPayloadField("defaults[billing_details][address]", "true"),
+                analyticsPayloadField("error_type", "invalid_request_error"),
+                analyticsPayloadField("error_code", "invalid_tax_region"),
+                analyticsPayloadField("request_id", INIT_FAILURE_REQUEST_ID),
+            )
+            assertThat(
+                controller.configure(
+                    clientSecret = "${RECONFIGURED_SESSION_ID}_secret_example",
+                    configuration = configurationWithDefaultBillingCountry("CA"),
+                )
+            ).isInstanceOf(CheckoutController.OperationResult.Failed::class.java)
+            assertThat(controller.session.value?.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
+
+            markTestSucceeded()
+        }
+
     private fun billingTaxCheckoutInitResponse(response: MockResponse) {
+        billingTaxCheckoutInitResponse(
+            response = response,
+            sessionId = DEFAULT_CHECKOUT_SESSION_ID,
+            configId = null,
+        )
+    }
+
+    private fun billingTaxCheckoutInitResponse(
+        response: MockResponse,
+        sessionId: String,
+        configId: String?,
+    ) {
         response.testBodyFromFile("checkout-session-init.json") { json ->
+            json.put("id", sessionId)
             json.put("customer_email", "checkout@example.com")
             json.remove("link_settings")
             // Google Pay only returns a full billing address when billing collection is required.
@@ -241,12 +354,38 @@ internal class CheckoutPaymentElementAnalyticsTest {
                     .put("status", "ready")
                     .put("address_source", "billing"),
             )
+            configId?.let {
+                json.put("checkout_session_config_id", it)
+            }
             json.getJSONObject("automatic_tax").put("status", "requires_address")
         }
+    }
+
+    private fun configurationWithDefaultBillingCountry(country: String): CheckoutController.Configuration =
+        CheckoutController.Configuration()
+            .paymentElement(PaymentElement.Configuration())
+            .defaults(
+                CheckoutController.Configuration.Defaults().billingDetails(
+                    CheckoutController.Configuration.Defaults.ContactDetails().address(
+                        CheckoutController.Address(country)
+                    )
+                )
+            )
+
+    // Matches the runner's init response so updates don't enable Link and trigger a consumer lookup.
+    private fun checkoutInitApiFailureResponse(response: MockResponse) {
+        response.setResponseCode(400)
+        response.setHeader("Request-Id", INIT_FAILURE_REQUEST_ID)
+        response.setBody(
+            """{"error":{"type":"invalid_request_error","code":"checkout_session_invalid","message":"Invalid session"}}"""
+        )
     }
 
     private companion object {
         const val DEFAULT_CLIENT_SECRET = "${DEFAULT_CHECKOUT_SESSION_ID}_secret_example"
         const val UPDATED_TOTAL = 5399
+        const val INIT_FAILURE_REQUEST_ID = "req_checkout_init_failed"
+        const val RECONFIGURED_SESSION_ID = "cs_test_reconfigured"
+        const val RECONFIGURED_CONFIG_ID = "cs_config_reconfigured"
     }
 }
