@@ -12,7 +12,6 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
-import com.stripe.android.paymentsheet.example.Settings
 import com.stripe.android.paymentsheet.example.playground.checkout.CHECKOUT_COMPLETED_TEST_TAG
 import com.stripe.android.paymentsheet.example.playground.checkout.CHECKOUT_CONFIRMATION_MESSAGE_TEST_TAG
 import com.stripe.android.paymentsheet.example.playground.checkout.CHECKOUT_CONFIRM_BUTTON_TEST_TAG
@@ -36,10 +35,7 @@ internal fun runCheckoutTest(
     block: CheckoutTestContext.() -> Unit,
 ) {
     val context = ApplicationProvider.getApplicationContext<Context>()
-    val checkoutSettings = CheckoutPlaygroundSettings.createInMemory(
-        json = null,
-        defaultBackendUrl = Settings(context).playgroundBackendUrl,
-    ).apply(settings)
+    val checkoutSettings = CheckoutPlaygroundSettings.createInMemory(json = null).apply(settings)
     ActivityScenario.launch<CheckoutControllerExampleActivity>(
         CheckoutControllerExampleActivity.createTestIntent(context, checkoutSettings.asJsonString())
     ).use {
