@@ -25,6 +25,10 @@ internal abstract class CheckoutAnalyticsOperation<E>(
         reportOutcome(Outcome.Started, response, error = null)
     }
 
+    fun succeeded(response: CheckoutSessionResponse?) {
+        reportOutcome(Outcome.Succeeded, response, error = null)
+    }
+
     fun failed(response: CheckoutSessionResponse?, error: E) {
         reportOutcome(Outcome.Failed, response, error = analyticsError(error))
     }

@@ -1,8 +1,6 @@
 package com.stripe.android.checkout.analytics
 
 import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent.Operation
-import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent.Outcome
-import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import kotlin.time.Duration
 import kotlin.time.TimeSource
 
@@ -18,8 +16,4 @@ internal class MeasuredOperation(
 
     override fun analyticsError(error: Throwable): CheckoutAnalyticsEvent.Error =
         CheckoutAnalyticsEvent.Error.from(error)
-
-    fun succeeded(response: CheckoutSessionResponse?) {
-        reportOutcome(Outcome.Succeeded, response, error = null)
-    }
 }
