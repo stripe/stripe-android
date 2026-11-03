@@ -10,6 +10,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.common.analytics.experiment.DefaultPrimaryButtonExperiment
 import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
@@ -147,6 +148,7 @@ internal class FormActivityScreenShotTest {
             coroutineScope = TestScope(UnconfinedTestDispatcher()),
             onClickDelegate = OnClickDelegateOverrideImpl(),
             eventReporter = FakeEventReporter(),
+            primaryButtonExperiment = DefaultPrimaryButtonExperiment(FakeEventReporter(), EventReporter.Mode.Embedded),
             confirmationHandler = confirmationHandler,
             tapToAddHelper = FakeTapToAddHelper.noOp(),
             customerStateHolder = customerStateHolder,
@@ -228,6 +230,7 @@ internal class FormActivityScreenShotTest {
             coroutineScope = TestScope(UnconfinedTestDispatcher()),
             onClickDelegate = OnClickDelegateOverrideImpl(),
             eventReporter = FakeEventReporter(),
+            primaryButtonExperiment = DefaultPrimaryButtonExperiment(FakeEventReporter(), EventReporter.Mode.Embedded),
             confirmationHandler = confirmationHandler,
             tapToAddHelper = FakeTapToAddHelper.noOp(),
             customerStateHolder = FakeCustomerStateHolder(),

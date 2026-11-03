@@ -5,6 +5,7 @@ import app.cash.turbine.Turbine
 import app.cash.turbine.TurbineTestContext
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.common.analytics.experiment.DefaultPrimaryButtonExperiment
 import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddNextStep
 import com.stripe.android.core.strings.resolvableString
@@ -31,6 +32,7 @@ import com.stripe.android.paymentelement.embedded.form.OnClickOverrideDelegate
 import com.stripe.android.paymentelement.embedded.form.confirmationStateComplete
 import com.stripe.android.paymentelement.embedded.form.confirmationStateConfirming
 import com.stripe.android.paymentsheet.FakeCustomerStateHolder
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.FakeAddPaymentMethodInteractor
@@ -726,6 +728,7 @@ internal class DefaultSheetActivityStateHolderTest {
             coroutineScope = viewModelScope,
             onClickDelegate = onClickOverrideDelegate,
             eventReporter = eventReporter,
+            primaryButtonExperiment = DefaultPrimaryButtonExperiment(eventReporter, EventReporter.Mode.Embedded),
             confirmationHandler = confirmationHandler,
             tapToAddHelper = tapToAddHelper,
             customerStateHolder = customerStateHolder,
