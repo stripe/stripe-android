@@ -1,6 +1,8 @@
 package com.stripe.android.checkout
 
 import android.content.Context
+import com.stripe.android.checkout.analytics.CheckoutOperationReporter
+import com.stripe.android.checkout.analytics.measureAddressUpdate
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.googlepaylauncher.GooglePayPaymentDataError
 import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdate
@@ -20,6 +22,7 @@ internal class CheckoutGooglePayPaymentDataUpdateCallback @Inject constructor(
     private val addressBuilder: CheckoutGooglePayPaymentDataUpdateAddressBuilder,
     private val mapper: CheckoutGooglePayPaymentDataUpdateMapper,
     private val errorReporter: ErrorReporter,
+    private val operationReporter: CheckoutOperationReporter,
 ) : GooglePayPaymentDataUpdateCallback {
     override suspend fun onPaymentDataChanged(
         paymentDataUpdate: GooglePayPaymentDataUpdate,
@@ -87,16 +90,27 @@ internal class CheckoutGooglePayPaymentDataUpdateCallback @Inject constructor(
         var response = currentState.checkoutSessionResponse
 
         for (addressSource in addressSources) {
-            val address = when (val result = addressBuilder.build(paymentDataUpdate, addressSource)) {
-                is CheckoutGooglePayPaymentDataUpdateAddressBuilder.Result.Unavailable -> continue
-                is CheckoutGooglePayPaymentDataUpdateAddressBuilder.Result.Available -> result.address
+            val result = addressBuilder.build(paymentDataUpdate, addressSource)
+            // Matches iOS wallets: report an address update only when it sends a tax update.
+            if (
+                result !is CheckoutGooglePayPaymentDataUpdateAddressBuilder.Result.Available ||
+                !taxRegionUpdater.requiresUpdate(response, addressSource)
+            ) {
+                continue
             }
+            val address = result.address
 
-            response = taxRegionUpdater.updateServerStateIfNeeded(
-                checkoutSessionResponse = response,
+            val currentResponse = response
+            response = operationReporter.measureAddressUpdate(
                 addressSource = addressSource,
-                address = address,
-            ).getOrElse { error ->
+                response = currentResponse,
+            ) {
+                taxRegionUpdater.updateServerStateIfNeeded(
+                    checkoutSessionResponse = currentResponse,
+                    addressSource = addressSource,
+                    address = address,
+                )
+            }.getOrElse { error ->
                 return addressUpdateErrorResponse(addressSource, error)
             }
         }

@@ -5,6 +5,7 @@ import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
+import com.stripe.android.checkout.TestCheckoutOperationReporterFactory
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.common.exception.stripeErrorMessage
@@ -38,6 +39,7 @@ import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.android.utils.FakeFraudDetectionDataRepository
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -162,7 +164,7 @@ internal class DefaultSheetActivityContinueCoordinatorTest {
         val response = CheckoutSessionResponseFactory.create()
         runScenario(
             paymentMethodMetadata = CHECKOUT_SESSION_METADATA,
-            taxRegionUpdater = SheetTaxRegionUpdater { _, _, _ ->
+            updateTaxRegion = { _, _, _ ->
                 updateCalls.add(Unit)
                 Result.success(response)
             },
@@ -203,9 +205,19 @@ internal class DefaultSheetActivityContinueCoordinatorTest {
     private fun runScenario(
         paymentMethodMetadata: PaymentMethodMetadata,
         selection: PaymentSelection? = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
-        taxRegionUpdater: SheetTaxRegionUpdater = SheetTaxRegionUpdater(checkoutSessionTaxRegionUpdater()),
+        updateTaxRegion: TaxRegionUpdate? = null,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
+        val checkoutSessionTaxRegionUpdater = checkoutSessionTaxRegionUpdater()
+        val taxRegionUpdater = SheetTaxRegionUpdater(
+            updateTaxRegion = updateTaxRegion ?: { response, addressSource, address ->
+                checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(response, addressSource, address)
+            },
+            operationReporter = TestCheckoutOperationReporterFactory.create(
+                analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
+                workContext = UnconfinedTestDispatcher(testScheduler),
+            ),
+        )
         val selectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle()).apply {
             setSelection(selection)
         }

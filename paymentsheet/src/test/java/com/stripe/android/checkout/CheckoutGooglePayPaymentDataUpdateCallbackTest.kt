@@ -12,10 +12,12 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdate
 import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdateResponse
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.paymentsheet.analytics.FakeAnalyticsRequestExecutor
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.testing.FakeErrorReporter
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withContext
 import org.junit.Test
@@ -305,6 +307,59 @@ internal class CheckoutGooglePayPaymentDataUpdateCallbackTest {
     }
 
     @Test
+    fun `address update is not reported when the session does not require an update`() = runScenario(
+        requiresUpdate = { false },
+    ) {
+        val paymentDataUpdate = GooglePayPaymentDataUpdate(
+            callbackTrigger = GooglePayPaymentDataUpdate.CallbackTrigger.Initialize,
+            shippingAddress = SHIPPING_ADDRESS,
+            billingAddress = BILLING_GOOGLE_PAY_ADDRESS,
+        )
+
+        onPaymentDataChanged(paymentDataUpdate)
+
+        assertBuildCalls(GooglePayPaymentDataUpdate.CallbackTrigger.Initialize, paymentDataUpdate)
+        assertThat(mapper.toResponseCalls.awaitItem().response).isEqualTo(providedState?.checkoutSessionResponse)
+        analyticsRequestExecutor.requestTurbine.expectNoEvents()
+    }
+
+    @Test
+    fun `shipping address update reports started and succeeded`() = addressOperationTest(
+        callbackTrigger = GooglePayPaymentDataUpdate.CallbackTrigger.ShippingAddress,
+        expectedOperation = "update_shipping_address",
+    )
+
+    @Test
+    fun `billing address update reports started and succeeded`() = addressOperationTest(
+        callbackTrigger = GooglePayPaymentDataUpdate.CallbackTrigger.PaymentMethod,
+        expectedOperation = "update_billing_address",
+    )
+
+    @Test
+    fun `failed address update reports a failed operation`() = runScenario(
+        updateResult = Result.failure(IllegalStateException("private failure details")),
+    ) {
+        val paymentDataUpdate = GooglePayPaymentDataUpdate(
+            callbackTrigger = GooglePayPaymentDataUpdate.CallbackTrigger.ShippingAddress,
+            shippingAddress = SHIPPING_ADDRESS,
+            billingAddress = null,
+        )
+
+        val response = onPaymentDataChanged(paymentDataUpdate)
+
+        assertThat(response.error?.reason).isEqualTo(GooglePayPaymentDataError.Reason.ShippingAddressInvalid)
+        assertThat(addressBuilder.buildCalls.awaitItem().addressSource)
+            .isEqualTo(CheckoutSessionResponse.TaxAddressSource.SHIPPING)
+        assertThat(taxRegionUpdater.updateServerStateIfNeededCalls.awaitItem().addressSource)
+            .isEqualTo(CheckoutSessionResponse.TaxAddressSource.SHIPPING)
+        analyticsRequestExecutor.awaitEvent("checkout_elements.update_shipping_address.started")
+        val failed = analyticsRequestExecutor.awaitEvent("checkout_elements.update_shipping_address.failed")
+        assertThat(failed).containsEntry("error_type", "java.lang.IllegalStateException")
+        assertThat(failed.toString()).doesNotContain("private failure details")
+        analyticsRequestExecutor.validate()
+    }
+
+    @Test
     fun `onPaymentDataChanged for shipping option maps state without updating tax region`() = unsupportedCallbackTest(
         callbackTrigger = GooglePayPaymentDataUpdate.CallbackTrigger.ShippingOption,
         expectedTriggerParam = "shipping_option",
@@ -385,6 +440,28 @@ internal class CheckoutGooglePayPaymentDataUpdateCallbackTest {
             assertThat(toResponseCall.response).isEqualTo(providedState?.checkoutSessionResponse)
             assertThat(toResponseCall.paymentDataUpdate).isEqualTo(paymentDataUpdate)
         }
+    }
+
+    private fun addressOperationTest(
+        callbackTrigger: GooglePayPaymentDataUpdate.CallbackTrigger,
+        expectedOperation: String,
+    ) = runScenario {
+        val paymentDataUpdate = GooglePayPaymentDataUpdate(
+            callbackTrigger = callbackTrigger,
+            shippingAddress = SHIPPING_ADDRESS,
+            billingAddress = BILLING_GOOGLE_PAY_ADDRESS,
+        )
+
+        onPaymentDataChanged(paymentDataUpdate)
+
+        assertBuildCalls(callbackTrigger, paymentDataUpdate)
+        taxRegionUpdater.updateServerStateIfNeededCalls.awaitItem()
+        mapper.toResponseCalls.awaitItem()
+        val started = analyticsRequestExecutor.awaitEvent("checkout_elements.$expectedOperation.started")
+        assertThat(started).containsEntry("checkout_session_id", providedState?.checkoutSessionResponse?.id)
+        val succeeded = analyticsRequestExecutor.awaitEvent("checkout_elements.$expectedOperation.succeeded")
+        assertThat(succeeded).containsKey("duration")
+        analyticsRequestExecutor.validate()
     }
 
     private fun successTest(
@@ -486,6 +563,7 @@ internal class CheckoutGooglePayPaymentDataUpdateCallbackTest {
         updateResultProvider: (
             (FakeCheckoutSessionTaxRegionUpdater.UpdateServerStateIfNeededCall) -> Result<CheckoutSessionResponse>
         )? = null,
+        requiresUpdate: (CheckoutSessionResponse.TaxAddressSource) -> Boolean = { true },
         block: suspend Scenario.() -> Unit
     ) = runTest {
         val context = ApplicationProvider.getApplicationContext<Context>()
@@ -494,9 +572,11 @@ internal class CheckoutGooglePayPaymentDataUpdateCallbackTest {
         )
         val mapper = FakeCheckoutGooglePayPaymentDataUpdateMapper(mapperResponse)
         val taxRegionUpdater = FakeCheckoutSessionTaxRegionUpdater(
-            updateResultProvider ?: { updateResult }
+            updateResult = updateResultProvider ?: { updateResult },
+            requiresUpdate = requiresUpdate,
         )
         val errorReporter = FakeErrorReporter()
+        val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
 
         val callback = CheckoutGooglePayPaymentDataUpdateCallback(
             context = context,
@@ -509,6 +589,10 @@ internal class CheckoutGooglePayPaymentDataUpdateCallbackTest {
             addressBuilder = addressBuilder,
             mapper = mapper,
             errorReporter = errorReporter,
+            operationReporter = TestCheckoutOperationReporterFactory.create(
+                analyticsRequestExecutor = analyticsRequestExecutor,
+                workContext = UnconfinedTestDispatcher(testScheduler),
+            ),
         )
 
         block(
@@ -518,6 +602,7 @@ internal class CheckoutGooglePayPaymentDataUpdateCallbackTest {
                 mapper = mapper,
                 taxRegionUpdater = taxRegionUpdater,
                 errorReporter = errorReporter,
+                analyticsRequestExecutor = analyticsRequestExecutor,
                 providedMapperResponse = mapperResponse,
                 providedState = state,
                 providedUpdateResult = updateResult,
@@ -536,6 +621,7 @@ internal class CheckoutGooglePayPaymentDataUpdateCallbackTest {
         val mapper: FakeCheckoutGooglePayPaymentDataUpdateMapper,
         val taxRegionUpdater: FakeCheckoutSessionTaxRegionUpdater,
         val errorReporter: FakeErrorReporter,
+        val analyticsRequestExecutor: FakeAnalyticsRequestExecutor,
         val providedMapperResponse: GooglePayPaymentDataUpdateResponse,
         val providedState: CheckoutElementsControllerState?,
         val providedUpdateResult: Result<CheckoutSessionResponse>,
@@ -550,12 +636,16 @@ internal class CheckoutGooglePayPaymentDataUpdateCallbackTest {
     }
 
     private class FakeCheckoutSessionTaxRegionUpdater(
-        private val updateResult: (UpdateServerStateIfNeededCall) -> Result<CheckoutSessionResponse>
+        private val updateResult: (UpdateServerStateIfNeededCall) -> Result<CheckoutSessionResponse>,
+        private val requiresUpdate: (CheckoutSessionResponse.TaxAddressSource) -> Boolean = { true },
     ) {
         val mocked = mock<CheckoutSessionTaxRegionUpdater>()
         val updateServerStateIfNeededCalls = Turbine<UpdateServerStateIfNeededCall>()
 
         init {
+            whenever(mocked.requiresUpdate(any(), any())) doAnswer { invocation ->
+                requiresUpdate(invocation.getArgument(1))
+            }
             whenever {
                 mocked.updateServerStateIfNeeded(
                     checkoutSessionResponse = any(),

@@ -16,6 +16,9 @@ internal abstract class CheckoutAnalyticsOperation<E>(
 ) {
     protected abstract val params: Map<String, Any?>
 
+    /** Params reported only with the succeeded or failed outcome. */
+    protected open val completionParams: Map<String, Any?> = emptyMap()
+
     /** Called once, on the terminal outcome; may end a shared timer. */
     protected abstract fun elapsed(): Duration?
 
@@ -23,6 +26,10 @@ internal abstract class CheckoutAnalyticsOperation<E>(
 
     fun started(response: CheckoutSessionResponse?) {
         reportOutcome(Outcome.Started, response, error = null)
+    }
+
+    fun succeeded(response: CheckoutSessionResponse?) {
+        reportOutcome(Outcome.Succeeded, response, error = null)
     }
 
     fun failed(response: CheckoutSessionResponse?, error: E) {
@@ -41,7 +48,7 @@ internal abstract class CheckoutAnalyticsOperation<E>(
                 analyticsMetadata = DefaultAnalyticsMetadataFactory.create(response),
                 duration = if (outcome == Outcome.Started) null else elapsed(),
                 error = error,
-                operationParams = params,
+                operationParams = if (outcome == Outcome.Started) params else params + completionParams,
             )
         )
     }

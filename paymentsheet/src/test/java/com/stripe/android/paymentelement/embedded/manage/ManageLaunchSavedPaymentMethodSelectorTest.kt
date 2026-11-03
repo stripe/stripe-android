@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.embedded.manage
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkout.TestCheckoutOperationReporterFactory
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -12,6 +13,7 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.sheet.SheetTaxRegionUpdater
+import com.stripe.android.paymentsheet.analytics.FakeAnalyticsRequestExecutor
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
@@ -20,10 +22,14 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.async
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
 @OptIn(CheckoutSessionPreview::class)
+@RunWith(RobolectricTestRunner::class)
 internal class ManageLaunchSavedPaymentMethodSelectorTest {
 
     @Test
@@ -247,7 +253,13 @@ internal class ManageLaunchSavedPaymentMethodSelectorTest {
             setSelection(INITIAL_SELECTION)
         }
         val selector = ManageLaunchSavedPaymentMethodSelector(
-            taxRegionUpdater = SheetTaxRegionUpdater(updateTaxRegion = { _, _, _ -> updateTaxRegion() }),
+            taxRegionUpdater = SheetTaxRegionUpdater(
+                updateTaxRegion = { _, _, _ -> updateTaxRegion() },
+                operationReporter = TestCheckoutOperationReporterFactory.create(
+                    analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
+                    workContext = UnconfinedTestDispatcher(testScheduler),
+                ),
+            ),
             paymentMethodMetadata = paymentMethodMetadata,
             selectionHolder = selectionHolder,
         )
