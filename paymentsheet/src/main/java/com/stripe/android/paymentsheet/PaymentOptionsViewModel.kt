@@ -11,6 +11,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.analytics.SessionSavedStateHandler
 import com.stripe.android.cards.CardAccountRangeRepository
+import com.stripe.android.common.analytics.experiment.PrimaryButtonExperiment
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.common.nfcscan.IsNfcScanningAvailable
 import com.stripe.android.common.taptoadd.TapToAddHelper
@@ -83,6 +84,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     tapToAddHelperFactory: TapToAddHelper.Factory,
     override val isNfcScanningAvailable: IsNfcScanningAvailable,
     mode: EventReporter.Mode,
+    primaryButtonExperiment: PrimaryButtonExperiment,
     customerStateHolderFactory: CustomerStateHolder.Factory,
     @ViewModelScope customViewModelScope: CoroutineScope,
     private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper,
@@ -109,8 +111,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
     private val primaryButtonUiStateMapper = PrimaryButtonUiStateMapper(
         config = config,
-        eventReporter = eventReporter,
-        mode = mode,
+        primaryButtonExperiment = primaryButtonExperiment,
         currentScreenFlow = navigationHandler.currentScreen,
         buttonsEnabledFlow = buttonsEnabled,
         paymentMethodMetadataFlow = stateFlowOf(args.state.paymentMethodMetadata),

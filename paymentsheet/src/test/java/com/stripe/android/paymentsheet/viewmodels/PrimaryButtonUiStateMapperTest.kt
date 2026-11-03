@@ -2,17 +2,17 @@ package com.stripe.android.paymentsheet.viewmodels
 
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.cash.turbine.Turbine
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
-import com.google.testing.junit.testparameterinjector.TestParameter
+import com.stripe.android.common.analytics.experiment.FakePrimaryButtonExperiment
+import com.stripe.android.common.analytics.experiment.PrimaryButtonExperiment
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.CardBrand
-import com.stripe.android.model.ElementsSession
-import com.stripe.android.model.ElementsSession.ExperimentAssignment
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
@@ -20,8 +20,6 @@ import com.stripe.android.paymentsheet.FakeCvcRecollectionInteractor
 import com.stripe.android.paymentsheet.FakeSelectSavedPaymentMethodsInteractor
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.ui.FakeAddPaymentMethodInteractor
@@ -39,9 +37,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestParameterInjector
 
-@RunWith(RobolectricTestParameterInjector::class)
+@RunWith(AndroidJUnit4::class)
 class PrimaryButtonUiStateMapperTest {
 
     @Test
@@ -668,54 +665,34 @@ class PrimaryButtonUiStateMapperTest {
         }
 
     @Test
-    fun `confirmation icon follows experiment and logs PaymentSheet exposure`(
-        @TestParameter("control", "control_test", "treatment_no_padlock") variant: String,
-    ) = runExperimentScenario(metadata = experimentMetadata(variant)) {
-        val result = mapper.forCompleteFlow()
-        result.test {
-            val expectedIcon = if (variant == "treatment_no_padlock") PrimaryButtonIcon.None else PrimaryButtonIcon.Lock
-            assertThat(awaitItem()?.icon).isEqualTo(expectedIcon)
-            assertThat(result.value?.icon).isEqualTo(expectedIcon)
-        }
+    fun `confirmation button uses experiment lock icon`() = assertExperimentIcon(PrimaryButtonIcon.Lock)
 
-        val exposure = eventReporter.experimentExposureCalls.awaitItem().experiment
-        assertThat(exposure.experiment).isEqualTo(ExperimentAssignment.OCS_MOBILE_REMOVE_PRIMARY_BUTTON_PADLOCK)
-        assertThat(exposure.arbId).isEqualTo("arb_123")
-        assertThat(exposure.group).isEqualTo(variant)
-        assertThat(exposure.dimensions["in_app_elements_integration_type"]).isEqualTo("paymentsheet")
+    @Test
+    fun `confirmation button uses experiment no icon`() = assertExperimentIcon(PrimaryButtonIcon.None)
+
+    private fun assertExperimentIcon(icon: PrimaryButtonIcon) = runExperimentScenario(icon = icon) {
+        mapper.forCompleteFlow().test {
+            assertThat(awaitItem()?.icon).isEqualTo(icon)
+        }
+        assertThat(experiment.getIconCalls.awaitItem()).isEqualTo(metadata)
     }
 
     @Test
-    fun `unsupported assignment preserves lock without exposure`(
-        @TestParameter("treatment_replace_padlock", "unknown", "") variant: String,
-    ) = runExperimentScenario(metadata = experimentMetadata(variant)) {
+    fun `missing metadata preserves lock without accessing experiment`() = runExperimentScenario(metadata = null) {
         mapper.forCompleteFlow().test {
             assertThat(awaitItem()?.icon).isEqualTo(PrimaryButtonIcon.Lock)
         }
     }
 
     @Test
-    fun `missing metadata or experiments preserves lock without exposure`(
-        @TestParameter missingMetadata: Boolean,
-    ) = runExperimentScenario(
-        metadata = if (missingMetadata) null else PaymentMethodMetadataFactory.create(experimentsData = null),
-    ) {
-        mapper.forCompleteFlow().test {
-            assertThat(awaitItem()?.icon).isEqualTo(PrimaryButtonIcon.Lock)
-        }
-    }
-
-    @Test
-    fun `hidden button does not expose experiment`() = runExperimentScenario(
-        screen = PaymentSheetScreen.Loading,
-    ) {
+    fun `hidden button does not access experiment`() = runExperimentScenario(screen = PaymentSheetScreen.Loading) {
         mapper.forCompleteFlow().test {
             assertThat(awaitItem()).isNull()
         }
     }
 
     @Test
-    fun `custom button preserves icon without exposing experiment`() = runExperimentScenario(
+    fun `custom button preserves icon without accessing experiment`() = runExperimentScenario(
         customButton = PrimaryButton.UIState(
             label = "Custom".resolvableString,
             onClick = {},
@@ -729,7 +706,7 @@ class PrimaryButtonUiStateMapperTest {
     }
 
     @Test
-    fun `screen icon override does not expose experiment`() = runExperimentScenario(
+    fun `screen icon override does not access experiment`() = runExperimentScenario(
         screen = PaymentSheetScreen.CvcRecollection(FakeCvcRecollectionInteractor()),
     ) {
         mapper.forCompleteFlow().test {
@@ -738,7 +715,7 @@ class PrimaryButtonUiStateMapperTest {
     }
 
     @Test
-    fun `custom flow does not expose experiment`() = runExperimentScenario(
+    fun `custom flow does not access experiment`() = runExperimentScenario(
         screen = PaymentSheetScreen.AddFirstPaymentMethod(
             FakeAddPaymentMethodInteractor(initialState = FakeAddPaymentMethodInteractor.createState()),
         ),
@@ -749,49 +726,42 @@ class PrimaryButtonUiStateMapperTest {
     }
 
     @Test
-    fun `metadata arriving after loading updates icon and exposes experiment once`() = runTest {
-        val metadata = MutableStateFlow<PaymentMethodMetadata?>(null)
-        val buttonsEnabled = MutableStateFlow(true)
-        val eventReporter = FakeEventReporter()
+    fun `metadata arriving after loading uses experiment icon`() = runTest {
+        val metadataFlow = MutableStateFlow<PaymentMethodMetadata?>(null)
+        val experiment = FakePrimaryButtonExperiment(icon = PrimaryButtonIcon.None)
         val mapper = createMapper(
             currentScreenFlow = stateFlowOf(
                 PaymentSheetScreen.SelectSavedPaymentMethods(FakeSelectSavedPaymentMethodsInteractor())
             ),
-            buttonsEnabledFlow = buttonsEnabled,
-            paymentMethodMetadataFlow = metadata,
+            buttonsEnabledFlow = stateFlowOf(true),
+            paymentMethodMetadataFlow = metadataFlow,
             selectionFlow = stateFlowOf(cardSelection()),
             customPrimaryButtonUiStateFlow = stateFlowOf(null),
             cvcFlow = stateFlowOf(true),
-            eventReporter = eventReporter,
+            primaryButtonExperiment = experiment,
         )
-
-        val result = mapper.forCompleteFlow()
-        result.test {
+        mapper.forCompleteFlow().test {
             assertThat(awaitItem()?.icon).isEqualTo(PrimaryButtonIcon.Lock)
-            eventReporter.experimentExposureCalls.expectNoEvents()
+            experiment.getIconCalls.expectNoEvents()
 
-            metadata.value = experimentMetadata("treatment_no_padlock")
+            val metadata = PaymentMethodMetadataFactory.create()
+            metadataFlow.value = metadata
             assertThat(awaitItem()?.icon).isEqualTo(PrimaryButtonIcon.None)
-            assertThat(eventReporter.experimentExposureCalls.awaitItem().experiment.group)
-                .isEqualTo("treatment_no_padlock")
-
-            buttonsEnabled.value = false
-            assertThat(awaitItem()?.enabled).isFalse()
-            assertThat(result.value?.icon).isEqualTo(PrimaryButtonIcon.None)
-            eventReporter.experimentExposureCalls.expectNoEvents()
+            assertThat(experiment.getIconCalls.awaitItem()).isEqualTo(metadata)
         }
-        eventReporter.validate()
+        experiment.validate()
     }
 
     private fun runExperimentScenario(
-        metadata: PaymentMethodMetadata? = experimentMetadata("treatment_no_padlock"),
+        metadata: PaymentMethodMetadata? = PaymentMethodMetadataFactory.create(),
+        icon: PrimaryButtonIcon = PrimaryButtonIcon.None,
         screen: PaymentSheetScreen = PaymentSheetScreen.SelectSavedPaymentMethods(
             FakeSelectSavedPaymentMethodsInteractor()
         ),
         customButton: PrimaryButton.UIState? = null,
         block: suspend ExperimentScenario.() -> Unit,
     ) = runTest {
-        val eventReporter = FakeEventReporter()
+        val experiment = FakePrimaryButtonExperiment(icon = icon)
         val mapper = createMapper(
             currentScreenFlow = stateFlowOf(screen),
             buttonsEnabledFlow = stateFlowOf(true),
@@ -799,22 +769,16 @@ class PrimaryButtonUiStateMapperTest {
             selectionFlow = stateFlowOf(cardSelection()),
             customPrimaryButtonUiStateFlow = stateFlowOf(customButton),
             cvcFlow = stateFlowOf(true),
-            eventReporter = eventReporter,
+            primaryButtonExperiment = experiment,
         )
-        ExperimentScenario(mapper, eventReporter).block()
-        eventReporter.validate()
+        ExperimentScenario(mapper, experiment, metadata).block()
+        experiment.validate()
     }
 
     private data class ExperimentScenario(
         val mapper: PrimaryButtonUiStateMapper,
-        val eventReporter: FakeEventReporter,
-    )
-
-    private fun experimentMetadata(variant: String): PaymentMethodMetadata = PaymentMethodMetadataFactory.create(
-        experimentsData = ElementsSession.ExperimentsData(
-            arbId = "arb_123",
-            experimentAssignments = mapOf(ExperimentAssignment.OCS_MOBILE_REMOVE_PRIMARY_BUTTON_PADLOCK to variant),
-        ),
+        val experiment: FakePrimaryButtonExperiment,
+        val metadata: PaymentMethodMetadata?,
     )
 
     private fun clickableWhileDisabledTest(
@@ -888,12 +852,11 @@ class PrimaryButtonUiStateMapperTest {
         customPrimaryButtonUiStateFlow: StateFlow<PrimaryButton.UIState?>,
         cvcFlow: StateFlow<Boolean>,
         onDisabledClick: () -> Unit = {},
-        eventReporter: FakeEventReporter = FakeEventReporter(),
+        primaryButtonExperiment: PrimaryButtonExperiment = FakePrimaryButtonExperiment(),
     ): PrimaryButtonUiStateMapper {
         return PrimaryButtonUiStateMapper(
             config = config,
-            eventReporter = eventReporter,
-            mode = EventReporter.Mode.Complete,
+            primaryButtonExperiment = primaryButtonExperiment,
             currentScreenFlow = currentScreenFlow,
             buttonsEnabledFlow = buttonsEnabledFlow,
             paymentMethodMetadataFlow = paymentMethodMetadataFlow,
