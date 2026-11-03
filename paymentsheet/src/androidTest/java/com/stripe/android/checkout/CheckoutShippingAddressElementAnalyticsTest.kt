@@ -155,6 +155,15 @@ internal class CheckoutShippingAddressElementAnalyticsTest {
             checkoutInitResponse = ::createCheckoutInitResponse,
             renderPaymentElementContent = false,
             setup = { configuredController ->
+                networkRule.validateCheckoutInitStarted(DEFAULT_CHECKOUT_SESSION_ID)
+                // The default shipping address is applied inside configure, reported as a merchant update.
+                // This session has no shipping-based automatic tax, so it sends no tax update.
+                networkRule.validateCheckoutAddressUpdate(
+                    "update_shipping_address",
+                    DEFAULT_CHECKOUT_SESSION_ID,
+                    analyticsPayloadField("defaults[shipping_details][address]", "true"),
+                )
+                networkRule.validateCheckoutInitSucceeded(DEFAULT_CHECKOUT_SESSION_ID)
                 assertThat(configuredController.configure(DEFAULT_CLIENT_SECRET, configuration))
                     .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
             },
@@ -182,6 +191,12 @@ internal class CheckoutShippingAddressElementAnalyticsTest {
             analyticsPayloadField(EDIT_DISTANCE_FIELD, it.toString())
         } ?: not(hasQueryParam(EDIT_DISTANCE_FIELD))
 
+        // The Shipping Address Element reports the tax update it sends on save; this session has no
+        // shipping-based automatic tax, so it sends none.
+        networkRule.validateCheckoutAddressUpdate(
+            "update_shipping_address",
+            DEFAULT_CHECKOUT_SESSION_ID,
+        )
         listOf(
             "elements.shipping_address.save_started",
             "elements.shipping_address.save_completed",

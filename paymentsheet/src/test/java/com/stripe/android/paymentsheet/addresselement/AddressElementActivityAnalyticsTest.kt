@@ -60,10 +60,12 @@ internal class AddressElementActivityAnalyticsTest {
             analyticsPayloadField("status_code", "400"),
             not(hasQueryParam("error_message")),
         )
+        val operationFailedRequest = expectUpdateShippingAddressAnalytics("failed")
         taxUpdate.releaseResponse.countDown()
 
         addressPage.assertErrorDisplayed(applicationContext.getString(R.string.stripe_something_went_wrong))
         awaitAnalytics(failedRequest)
+        awaitAnalytics(operationFailedRequest)
         addressPage.assertReadyToSave()
     }
 
@@ -77,10 +79,12 @@ internal class AddressElementActivityAnalyticsTest {
             analyticsPayloadField("status_code", "400"),
             not(hasQueryParam("error_message")),
         )
+        val operationFailedRequest = expectUpdateShippingAddressAnalytics("failed")
         taxUpdate.releaseResponse.countDown()
 
         addressPage.assertErrorDisplayed(applicationContext.getString(R.string.stripe_something_went_wrong))
         awaitAnalytics(failedRequest)
+        awaitAnalytics(operationFailedRequest)
         addressPage.assertReadyToSave()
 
         val canceledRequest = expectShippingAnalytics("elements.shipping_address.canceled")
@@ -204,11 +208,13 @@ internal class AddressElementActivityAnalyticsTest {
         assertDismissalBlocked()
 
         val completedRequest = expectShippingAnalytics("elements.shipping_address.save_completed")
+        val operationSucceededRequest = expectUpdateShippingAddressAnalytics("succeeded")
         taxUpdate.releaseResponse.countDown()
 
         val result = awaitResult() as AddressElementActivityContract.Result.CheckoutShippingSucceeded
         assertThat(result.checkoutSessionResponse.id).isEqualTo(checkoutSessionResponse.id)
         awaitAnalytics(completedRequest)
+        awaitAnalytics(operationSucceededRequest)
     }
 
     @Test
@@ -225,11 +231,13 @@ internal class AddressElementActivityAnalyticsTest {
         assertDismissalBlocked()
 
         val completedRequest = expectShippingAnalytics("elements.shipping_address.save_completed")
+        val operationSucceededRequest = expectUpdateShippingAddressAnalytics("succeeded")
         taxUpdate.releaseResponse.countDown()
 
         val result = awaitResult() as AddressElementActivityContract.Result.CheckoutShippingSucceeded
         assertThat(result.checkoutSessionResponse.id).isEqualTo(checkoutSessionResponse.id)
         awaitAnalytics(completedRequest)
+        awaitAnalytics(operationSucceededRequest)
     }
 
     private fun runTaxScenario(

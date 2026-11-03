@@ -1,14 +1,17 @@
 package com.stripe.android.checkout
 
 import androidx.test.espresso.intent.rule.IntentsRule
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.checkouttesting.CheckoutInitResponseFactory
+import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutConfirm
 import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.utils.FeatureFlags
+import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdate
 import com.stripe.android.networktesting.AdvancedFraudSignalsTestRule
 import com.stripe.android.networktesting.NetworkRule
@@ -43,6 +46,30 @@ internal class ExpressCheckoutElementAnalyticsTest {
     }
 
     private val page = ExpressCheckoutElementPage(testRules.compose)
+
+    @Test
+    fun testConfigureWithoutPaymentElementReportsAvailableExpressMethods() = runCheckoutPaymentElementScenario(
+        networkRule = networkRule,
+        renderPaymentElementContent = false,
+        setup = { controller ->
+            networkRule.validateCheckoutInitStarted(DEFAULT_CHECKOUT_SESSION_ID)
+            networkRule.validateCheckoutInitSucceeded(
+                sessionId = DEFAULT_CHECKOUT_SESSION_ID,
+                analyticsPayloadField("ordered_lpms", "google_pay"),
+            )
+
+            assertThat(
+                controller.configure(
+                    "${DEFAULT_CHECKOUT_SESSION_ID}_secret_example",
+                    CheckoutElementsController.Configuration().expressCheckoutElement(ExpressCheckoutElement.Configuration()),
+                )
+            ).isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
+            assertThat(controller.session.value?.availableExpressCheckoutPaymentMethods?.map { it.type })
+                .containsExactly("google_pay")
+        },
+    ) {
+        markTestSucceeded()
+    }
 
     @Test
     fun testSuccessfulGooglePayPayment() {
@@ -210,6 +237,10 @@ internal class ExpressCheckoutElementAnalyticsTest {
             ) { response ->
                 createCheckoutInitResponseWithRequiredShippingAddressForAutomaticTax(response)
             }
+            // Reported from the Google Pay data-update callback during the Express Checkout confirmation.
+            networkRule.validateCheckoutAddressUpdate(
+                operation = "update_shipping_address",
+            )
             validateAnalyticsRequest(eventName = "stripe_android.payment_intent_retrieval")
             networkRule.checkoutConfirm(
                 bodyPart("payment_method", paymentMethod.id),
@@ -321,7 +352,12 @@ internal class ExpressCheckoutElementAnalyticsTest {
         initialCheckoutSessionResponseFactory: (MockResponse) -> Unit = CheckoutInitResponseFactory::create,
         block: suspend ExpressCheckoutElementScenario.() -> Unit,
     ) {
+        networkRule.validateCheckoutInitStarted(DEFAULT_CHECKOUT_SESSION_ID)
         enqueueLoadingRequests(linkEnabled = linkEnabled)
+        networkRule.validateCheckoutInitSucceeded(
+            sessionId = DEFAULT_CHECKOUT_SESSION_ID,
+            analyticsPayloadField("ordered_lpms", "card,cashapp"),
+        )
         networkRule.validateAnalyticsRequest(
             eventName = "elements.express_checkout_element.init",
             productUsage = setOf("checkout_elements"),

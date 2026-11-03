@@ -1,3 +1,5 @@
+@file:OptIn(com.stripe.android.paymentelement.CheckoutSessionPreview::class)
+
 package com.stripe.android.paymentsheet.injection
 
 import androidx.test.core.app.ApplicationProvider
@@ -46,6 +48,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import javax.inject.Provider
+import com.stripe.android.paymentsheet.analytics.FakeAnalyticsRequestExecutor as FakeEventAnalyticsRequestExecutor
 
 @RunWith(RobolectricTestRunner::class)
 class AddressElementViewModelModuleTest {
@@ -215,6 +218,69 @@ class AddressElementViewModelModuleTest {
         }
 
     @Test
+    fun `providePrimaryButtonAction reports a checkout shipping update that requests a tax update`() =
+        runCheckoutShippingScenario {
+            networkRule.checkoutUpdate { response ->
+                response.testBodyFromFile("checkout-session-init.json")
+            }
+
+            viewModel.clickPrimaryButton(
+                completedFormValues = COMPLETED_FORM_VALUES,
+                checkboxChecked = true,
+            )
+
+            val started = operationAnalyticsRequestExecutor.awaitEvent(
+                "checkout_elements.update_shipping_address.started"
+            )
+            assertThat(started).containsEntry("product_usage", "checkout_elements")
+            assertThat(started).containsEntry("checkout_session_id", checkoutSessionResponse.id)
+            val succeeded = operationAnalyticsRequestExecutor.awaitEvent(
+                "checkout_elements.update_shipping_address.succeeded"
+            )
+            assertThat(succeeded).containsKey("duration")
+            operationAnalyticsRequestExecutor.validate()
+        }
+
+    @Test
+    fun `providePrimaryButtonAction reports a checkout shipping update that needs no tax update`() =
+        runCheckoutShippingScenario(
+            taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+        ) {
+            viewModel.clickPrimaryButton(
+                completedFormValues = COMPLETED_FORM_VALUES,
+                checkboxChecked = true,
+            )
+
+            operationAnalyticsRequestExecutor.awaitEvent("checkout_elements.update_shipping_address.started")
+            val succeeded = operationAnalyticsRequestExecutor.awaitEvent(
+                "checkout_elements.update_shipping_address.succeeded"
+            )
+            assertThat(succeeded).containsKey("duration")
+            operationAnalyticsRequestExecutor.validate()
+        }
+
+    @Test
+    fun `providePrimaryButtonAction reports a failed checkout shipping update`() =
+        runCheckoutShippingScenario {
+            networkRule.checkoutUpdate { response ->
+                response.setResponseCode(400)
+                response.setBody("""{"error":{"message":"Invalid tax region"}}""")
+            }
+
+            viewModel.clickPrimaryButton(
+                completedFormValues = COMPLETED_FORM_VALUES,
+                checkboxChecked = true,
+            )
+
+            operationAnalyticsRequestExecutor.awaitEvent("checkout_elements.update_shipping_address.started")
+            val failed = operationAnalyticsRequestExecutor.awaitEvent(
+                "checkout_elements.update_shipping_address.failed"
+            )
+            assertThat(failed).containsKey("error_type")
+            operationAnalyticsRequestExecutor.validate()
+        }
+
+    @Test
     fun `provideAddressElementEventReporter forwards standalone computed values`() = runTest {
         val addressLauncherEventReporter = FakeAddressLauncherEventReporter()
         val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
@@ -341,6 +407,7 @@ class AddressElementViewModelModuleTest {
                 checkoutSessionResponse = checkoutSessionResponse,
                 resultStateHolder = resultStateHolder,
                 viewModel = viewModel,
+                operationAnalyticsRequestExecutor = operationAnalyticsRequestExecutor,
             ).block()
 
             addressLauncherEventReporter.completedCalls.expectNoEvents()
@@ -357,6 +424,7 @@ class AddressElementViewModelModuleTest {
         TestAddressElementNavigator.test {
             val resultStateHolder = AddressElementResultStateHolder()
             val addressLauncherEventReporter = FakeAddressLauncherEventReporter()
+            val operationAnalyticsRequestExecutor = FakeEventAnalyticsRequestExecutor()
             val viewModel = InputAddressViewModel(
                 args = args,
                 navigator = navigator,
@@ -371,6 +439,10 @@ class AddressElementViewModelModuleTest {
                 primaryButtonAction = module.providePrimaryButtonAction(
                     args = args,
                     taxRegionUpdater = createTaxRegionUpdater(),
+                    context = ApplicationProvider.getApplicationContext(),
+                    apiConfigurationProvider = Provider { DEFAULT_API_CONFIG },
+                    analyticsRequestExecutor = operationAnalyticsRequestExecutor,
+                    workContext = UnconfinedTestDispatcher(testScheduler),
                 ),
             ).also(viewModelStoreRule::track)
 
@@ -381,6 +453,7 @@ class AddressElementViewModelModuleTest {
                 resultStateHolder = resultStateHolder,
                 viewModel = viewModel,
                 addressLauncherEventReporter = addressLauncherEventReporter,
+                operationAnalyticsRequestExecutor = operationAnalyticsRequestExecutor,
             ).block()
 
             addressLauncherEventReporter.validate()
@@ -422,12 +495,14 @@ class AddressElementViewModelModuleTest {
         val resultStateHolder: AddressElementResultStateHolder,
         val viewModel: InputAddressViewModel,
         val addressLauncherEventReporter: FakeAddressLauncherEventReporter,
+        val operationAnalyticsRequestExecutor: FakeEventAnalyticsRequestExecutor,
     )
 
     private data class CheckoutShippingScenario(
         val checkoutSessionResponse: CheckoutSessionResponse,
         val resultStateHolder: AddressElementResultStateHolder,
         val viewModel: InputAddressViewModel,
+        val operationAnalyticsRequestExecutor: FakeEventAnalyticsRequestExecutor,
     )
 
     private companion object {

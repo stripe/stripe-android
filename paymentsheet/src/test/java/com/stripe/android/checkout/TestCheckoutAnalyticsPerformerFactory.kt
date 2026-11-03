@@ -1,8 +1,10 @@
+@file:OptIn(com.stripe.android.paymentelement.CheckoutSessionPreview::class)
+
 package com.stripe.android.checkout
 
-import android.content.Context
 import androidx.lifecycle.SavedStateHandle
-import androidx.test.core.app.ApplicationProvider
+import com.stripe.android.checkout.analytics.CheckoutOperationReporter
+import com.stripe.android.checkout.analytics.toAnalyticsMap
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.ApiConfigurationPreview
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
@@ -10,8 +12,8 @@ import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.utils.FakeDurationProvider
-import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
+import kotlin.time.TimeSource
 
 @OptIn(ApiConfigurationPreview::class)
 internal object TestCheckoutAnalyticsPerformerFactory {
@@ -23,14 +25,23 @@ internal object TestCheckoutAnalyticsPerformerFactory {
         linkAccountHolder: LinkAccountHolder = LinkAccountHolder(savedStateHandle),
         durationProvider: DurationProvider = FakeDurationProvider(),
         apiConfiguration: ApiConfiguration.State = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
+        timeSource: TimeSource = TimeSource.Monotonic,
+        operationReporter: CheckoutOperationReporter = TestCheckoutOperationReporterFactory.create(
+            analyticsRequestExecutor = analyticsRequestExecutor,
+            workContext = workContext,
+            publishableKey = {
+                stateHolder.state?.paymentMethodMetadata?.apiConfiguration?.publishableKey
+                    ?: apiConfiguration.publishableKey
+            },
+            configurationParams = { stateHolder.state?.configuration?.toAnalyticsMap().orEmpty() },
+            apiConfiguration = apiConfiguration,
+            timeSource = timeSource,
+        ),
     ): CheckoutAnalyticsPerformer = CheckoutAnalyticsPerformer(
         savedStateHandle = savedStateHandle,
         stateHolder = stateHolder,
         linkAccountHolder = linkAccountHolder,
-        context = ApplicationProvider.getApplicationContext<Context>(),
-        analyticsRequestExecutor = analyticsRequestExecutor,
         durationProvider = durationProvider,
-        apiConfigurationProvider = Provider { apiConfiguration },
-        workContext = workContext,
+        operationReporter = operationReporter,
     )
 }

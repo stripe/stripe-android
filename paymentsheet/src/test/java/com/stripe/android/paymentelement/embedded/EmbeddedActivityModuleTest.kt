@@ -25,6 +25,7 @@ import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotio
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
+import org.mockito.kotlin.mock
 
 @OptIn(CheckoutSessionPreview::class)
 internal class EmbeddedActivityModuleTest {
@@ -55,9 +56,12 @@ internal class EmbeddedActivityModuleTest {
     fun `Manage launch provides the Manage launch selector`() {
         val selectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle())
         val manageLaunchSelector = ManageLaunchSavedPaymentMethodSelector(
-            taxRegionUpdater = SheetTaxRegionUpdater { _, _, _ ->
-                error("Tax update is not invoked by this selector test")
-            },
+            taxRegionUpdater = SheetTaxRegionUpdater(
+                updateTaxRegion = { _, _, _ ->
+                    error("Tax update is not invoked by this selector test")
+                },
+                operationReporter = mock(),
+            ),
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
             selectionHolder = selectionHolder,
         )

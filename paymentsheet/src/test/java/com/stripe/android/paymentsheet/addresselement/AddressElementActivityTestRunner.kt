@@ -77,6 +77,26 @@ internal class AddressElementActivityTestRunner(
         return requestReceived
     }
 
+    fun expectUpdateShippingAddressAnalytics(
+        outcome: String,
+        checkoutSessionId: String,
+        vararg requestMatchers: RequestMatcher,
+    ): CountDownLatch {
+        val requestReceived = CountDownLatch(1)
+        networkRule.enqueue(
+            host("q.stripe.com"),
+            method("GET"),
+            analyticsPayloadField("event", "checkout_elements.update_shipping_address.$outcome"),
+            analyticsPayloadField("product_usage", "checkout_elements"),
+            analyticsPayloadField("checkout_session_id", checkoutSessionId),
+            *requestMatchers,
+        ) { response ->
+            response.status = "HTTP/1.1 200 OK"
+            requestReceived.countDown()
+        }
+        return requestReceived
+    }
+
     internal inner class Scenario(
         val activityScenario: ActivityScenario<AddressElementActivity>,
         var activity: AddressElementActivity,
@@ -110,8 +130,10 @@ internal class AddressElementActivityTestRunner(
 
         fun startTaxUpdateWithAnalytics(taxUpdate: NetworkResponseGate) {
             val startedRequest = expectShippingAnalytics("elements.shipping_address.save_started")
+            val operationStartedRequest = expectUpdateShippingAddressAnalytics("started")
             startTaxUpdate(taxUpdate)
             awaitAnalytics(startedRequest)
+            awaitAnalytics(operationStartedRequest)
         }
 
         fun assertDirtyDismissal(
@@ -152,6 +174,15 @@ internal class AddressElementActivityTestRunner(
             checkoutSessionId = checkoutSessionResponse.id,
             country = country,
             autocompleteResultSelected = autocompleteResultSelected,
+            requestMatchers = requestMatchers,
+        )
+
+        fun expectUpdateShippingAddressAnalytics(
+            outcome: String,
+            vararg requestMatchers: RequestMatcher,
+        ): CountDownLatch = this@AddressElementActivityTestRunner.expectUpdateShippingAddressAnalytics(
+            outcome = outcome,
+            checkoutSessionId = checkoutSessionResponse.id,
             requestMatchers = requestMatchers,
         )
 

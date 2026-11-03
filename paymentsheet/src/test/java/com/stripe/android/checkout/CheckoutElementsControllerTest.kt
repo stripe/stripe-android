@@ -1781,12 +1781,8 @@ internal class CheckoutElementsControllerTest {
     fun `updateShippingAddress fails with IllegalArgumentException for disallowed country`() =
         runMutationScenario(
             initModifier = allowedShippingCountries(listOf("US", "CA")),
-            assertLoadingConsumed = true,
         ) {
             val before = controller.session.value
-
-            // Fast-fail returns before entering the coordinator, so isUpdating never flips true.
-            assertThat(isUpdatingTurbine.awaitItem()).isFalse()
 
             val result = controller.updateShippingAddress(
                 name = null,
