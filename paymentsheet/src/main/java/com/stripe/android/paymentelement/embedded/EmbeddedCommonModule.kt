@@ -31,6 +31,7 @@ import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.LoadingEventReporter
 import com.stripe.android.paymentsheet.injection.ApiConfigurationModule
+import com.stripe.android.paymentsheet.injection.PrimaryButtonExperimentModule
 import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.DefaultSavedPaymentMethodRepository
@@ -56,6 +57,7 @@ import kotlin.coroutines.CoroutineContext
         StripeNetworkClientModule::class,
         PaymentOptionCardArtModule::class,
         NfcScanningAvailabilityModule::class,
+        PrimaryButtonExperimentModule::class,
     ],
 )
 internal interface EmbeddedCommonModule {
