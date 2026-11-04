@@ -22,7 +22,7 @@ pipelines:
       run-financial-connections-and-crypto-instrumentation-tests: { }
       run-connections-e2e-tests-on-push: { }
       run-cardscan-and-google-pay-tests: { }
-      # run-paymentsheet-e2e: { }
+      run-paymentsheet-e2e: { }
       check-dependencies-and-publish-pom: { }
   pipeline-connect-e2e-debug-tests:
     stages:
