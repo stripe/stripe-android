@@ -12,6 +12,7 @@ import com.stripe.android.common.analytics.experiment.DefaultPaymentMethodMessag
 import com.stripe.android.common.analytics.experiment.LogFcLiteExperiment
 import com.stripe.android.common.analytics.experiment.LogLinkHoldbackExperiment
 import com.stripe.android.common.analytics.experiment.PaymentMethodMessagePromotionsExperimentHandler
+import com.stripe.android.common.analytics.experiment.PreselectLinkExperiment
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.common.model.asCommonConfiguration
@@ -659,6 +660,227 @@ internal class DefaultPaymentElementLoaderTest {
             assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
             assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
         }
+
+    @Test
+    fun `Link preselection treatment supplies final fallback for FlowController`() = testLinkPreselection(
+        expectedSelection = PaymentSelection.Link(brand = LinkBrand.Link),
+    )
+
+    @Test
+    fun `Link preselection works without a customer`() = testLinkPreselection(
+        hasCustomer = false,
+        expectedSelection = PaymentSelection.Link(brand = LinkBrand.Link),
+    )
+
+    @Test
+    fun `Link preselection falls back when last used payment method is unavailable`() = testLinkPreselection(
+        savedSelection = SavedSelection.PaymentMethod("pm_no_longer_available"),
+        expectedSelection = PaymentSelection.Link(brand = LinkBrand.Link),
+    )
+
+    @Test
+    fun `Link preselection treatment supplies final fallback for Embedded`() = testLinkPreselection(
+        mode = EventReporter.Mode.Embedded,
+        expectedSelection = PaymentSelection.Link(brand = LinkBrand.Link),
+    )
+
+    @Test
+    fun `Link preselection works for returning users needing verification`() = testLinkPreselection(
+        linkAccountState = AccountStatus.NeedsVerification(),
+        expectedSelection = PaymentSelection.Link(brand = LinkBrand.Link),
+    )
+
+    @Test
+    fun `Link preselection preserves the Link brand`() = testLinkPreselection(
+        linkBrand = LinkBrand.Onelink,
+        expectedSelection = PaymentSelection.Link(brand = LinkBrand.Onelink),
+    )
+
+    @Test
+    fun `Link preselection control keeps no selection and logs exposure`() = testLinkPreselection(
+        variant = "control",
+        expectedSelection = null,
+    )
+
+    @Test
+    fun `Link preselection control_test keeps no selection and logs exposure`() = testLinkPreselection(
+        variant = "control_test",
+        expectedSelection = null,
+    )
+
+    @Test
+    fun `Link preselection without assignment keeps no selection without exposure`() = testLinkPreselection(
+        variant = null,
+        expectedSelection = null,
+        expectsExposure = false,
+    )
+
+    @Test
+    fun `Link preselection with unknown assignment keeps no selection without exposure`() = testLinkPreselection(
+        variant = "unknown",
+        expectedSelection = null,
+        expectsExposure = false,
+    )
+
+    @Test
+    fun `Link preselection does not select unavailable Link`() = testLinkPreselection(
+        isLinkEnabled = false,
+        expectedSelection = null,
+    )
+
+    @Test
+    fun `Link preselection does not select hidden Link for a logged out user`() = testLinkPreselection(
+        linkDisplay = PaymentSheet.LinkConfiguration.Display.WalletButtonHidden,
+        expectedSelection = null,
+    )
+
+    @Test
+    fun `Link preselection can select Link for a returning user with WalletButtonHidden`() = testLinkPreselection(
+        linkDisplay = PaymentSheet.LinkConfiguration.Display.WalletButtonHidden,
+        linkAccountState = AccountStatus.Verified(consentPresentation = null),
+        expectedSelection = PaymentSelection.Link(brand = LinkBrand.Link),
+    )
+
+    @Test
+    fun `Link preselection respects Never display configuration`() = testLinkPreselection(
+        linkDisplay = PaymentSheet.LinkConfiguration.Display.Never,
+        expectedSelection = null,
+    )
+
+    @Test
+    fun `Link preselection does not select externally displayed wallets`() = testLinkPreselection(
+        isUsingWalletButtons = true,
+        expectedSelection = null,
+    )
+
+    @Test
+    fun `Link preselection does not replace Google Pay fallback`() = testLinkPreselection(
+        isGooglePayReady = true,
+        expectedSelection = PaymentSelection.GooglePay,
+    )
+
+    @Test
+    fun `Link preselection does not replace a customer payment method fallback`() = testLinkPreselection(
+        paymentMethods = PAYMENT_METHODS,
+        expectedSelection = PaymentSelection.Saved(PAYMENT_METHODS.first()),
+    )
+
+    @Test
+    fun `Link preselection preserves last used customer payment method over first available`() = testLinkPreselection(
+        savedSelection = SavedSelection.PaymentMethod(PAYMENT_METHODS.last().id),
+        paymentMethods = PAYMENT_METHODS,
+        expectedSelection = PaymentSelection.Saved(PAYMENT_METHODS.last()),
+    )
+
+    @Test
+    fun `Link preselection preserves last used Google Pay over customer payment methods`() = testLinkPreselection(
+        savedSelection = SavedSelection.GooglePay,
+        isGooglePayReady = true,
+        paymentMethods = PAYMENT_METHODS,
+        expectedSelection = PaymentSelection.GooglePay,
+    )
+
+    @Test
+    fun `Link preselection control preserves last used Link`() = testLinkPreselection(
+        variant = "control",
+        savedSelection = SavedSelection.Link,
+        expectedSelection = PaymentSelection.Link(brand = LinkBrand.Link),
+    )
+
+    @Test
+    fun `Link preselection does not affect PaymentSheet`() = testLinkPreselection(
+        mode = EventReporter.Mode.Complete,
+        expectedSelection = null,
+        expectsExposure = false,
+    )
+
+    @Test
+    fun `Link preselection does not affect testmode sessions`() = testLinkPreselection(
+        isLiveMode = false,
+        expectedSelection = null,
+        expectsExposure = false,
+    )
+
+    @OptIn(WalletButtonsPreview::class)
+    @Suppress("LongMethod")
+    private fun testLinkPreselection(
+        expectedSelection: PaymentSelection?,
+        variant: String? = "treatment",
+        mode: EventReporter.Mode = EventReporter.Mode.Custom,
+        isLiveMode: Boolean = true,
+        isLinkEnabled: Boolean = true,
+        linkBrand: LinkBrand = LinkBrand.Link,
+        linkDisplay: PaymentSheet.LinkConfiguration.Display = PaymentSheet.LinkConfiguration.Display.Automatic,
+        linkAccountState: AccountStatus = AccountStatus.SignedOut,
+        isGooglePayReady: Boolean = false,
+        isUsingWalletButtons: Boolean = false,
+        paymentMethods: List<PaymentMethod> = emptyList(),
+        hasCustomer: Boolean = true,
+        savedSelection: SavedSelection? = null,
+        expectsExposure: Boolean = true,
+    ) = runScenario(customerRepo = FakeCustomerRepository(paymentMethods = paymentMethods)) {
+        prefsRepository.setSavedSelection(savedSelection)
+        val reporter = FakeEventReporter()
+        val intent = if (isLinkEnabled) {
+            PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(isLiveMode = isLiveMode)
+        } else {
+            PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK.copy(isLiveMode = isLiveMode)
+        }
+        val loader = createPaymentElementLoader(
+            stripeIntent = intent,
+            isLiveMode = isLiveMode,
+            isGooglePayReady = isGooglePayReady,
+            linkAccountState = linkAccountState,
+            elementsSessionRepository = FakeElementsSessionRepository(
+                stripeIntent = intent,
+                error = null,
+                linkSettings = createLinkSettings(passthroughModeEnabled = false)
+                    .copy(linkBrand = linkBrand).takeIf { isLinkEnabled },
+                experimentsData = variant?.let {
+                    ElementsSession.ExperimentsData(
+                        arbId = "arb123",
+                        experimentAssignments = mapOf(ExperimentAssignment.OCS_MOBILE_PRESELECT_LINK to it),
+                    )
+                },
+            ),
+            preselectLinkExperiment = PreselectLinkExperiment(reporter, mode),
+        )
+        val customer = PaymentSheet.CustomerConfiguration("cus_123", "ek_123").takeIf { hasCustomer }
+        val link = PaymentSheet.LinkConfiguration(display = linkDisplay)
+        val googlePay = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.googlePay
+        val wallets = PaymentSheet.WalletButtonsConfiguration(willDisplayExternally = isUsingWalletButtons)
+        val config = if (mode == EventReporter.Mode.Embedded) {
+            PaymentElementLoader.Configuration.Embedded(
+                isRowSelectionImmediateAction = false,
+                configuration = EmbeddedPaymentElement.Configuration.Builder("Merchant")
+                    .customer(customer).link(link).googlePay(googlePay).build(),
+                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+            )
+        } else {
+            PaymentElementLoader.Configuration.PaymentSheet(
+                PaymentSheet.Configuration.Builder("Merchant")
+                    .customer(customer).link(link).googlePay(googlePay).walletButtons(wallets).build(),
+            )
+        }
+        val state = loader.load(
+            initializationMode = DEFAULT_INITIALIZATION_MODE,
+            integrationConfiguration = config,
+            metadata = PaymentElementLoader.Metadata(initializedViaCompose = false),
+        ).getOrThrow()
+
+        assertThat(state.paymentSelection).isEqualTo(expectedSelection)
+        if (expectsExposure) {
+            val exposure = reporter.experimentExposureCalls.awaitItem().experiment
+            assertThat(exposure.experiment).isEqualTo(ExperimentAssignment.OCS_MOBILE_PRESELECT_LINK)
+            assertThat(exposure.group).isEqualTo(variant)
+        } else {
+            reporter.experimentExposureCalls.expectNoEvents()
+        }
+        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
+        assertThat(eventReporter.loadSucceededTurbine.awaitItem().paymentSelection).isEqualTo(expectedSelection)
+        consumeLoadingEvents()
+        reporter.validate()
+    }
 
     @Test
     fun `isTapToAddSupported should be false when tap to add is not supported`() =
@@ -5182,6 +5404,10 @@ internal class DefaultPaymentElementLoaderTest {
         durationProvider: FakeDurationProvider = FakeDurationProvider(),
         paymentMethodMessageExperimentHandler: PaymentMethodMessagePromotionsExperimentHandler =
             FakePaymentMethodMessagePromotionsExperimentHandler(),
+        preselectLinkExperiment: PreselectLinkExperiment = PreselectLinkExperiment(
+            eventReporter = FakeEventReporter(),
+            mode = EventReporter.Mode.Complete,
+        ),
     ): DefaultPaymentElementLoader {
         val retrieveCustomerEmailImpl = DefaultRetrieveCustomerEmail(
             customerRepo,
@@ -5241,6 +5467,7 @@ internal class DefaultPaymentElementLoaderTest {
             tapToAddAvailabilityFactory = tapToAddAvailabilityFactory,
             durationProvider = durationProvider,
             paymentMethodMessagePromotionsExperimentHandler = paymentMethodMessageExperimentHandler,
+            preselectLinkExperiment = preselectLinkExperiment,
         )
     }
 

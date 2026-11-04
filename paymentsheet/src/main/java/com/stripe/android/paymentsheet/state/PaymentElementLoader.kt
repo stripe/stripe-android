@@ -9,6 +9,7 @@ import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.analytics.experiment.LogFcLiteExperiment
 import com.stripe.android.common.analytics.experiment.LogLinkHoldbackExperiment
 import com.stripe.android.common.analytics.experiment.PaymentMethodMessagePromotionsExperimentHandler
+import com.stripe.android.common.analytics.experiment.PreselectLinkExperiment
 import com.stripe.android.common.coroutines.runCatching
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
@@ -294,6 +295,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     private val tapToAddAvailabilityFactory: TapToAddAvailabilityFactory,
     private val durationProvider: DurationProvider,
     private val paymentMethodMessagePromotionsExperimentHandler: PaymentMethodMessagePromotionsExperimentHandler,
+    private val preselectLinkExperiment: PreselectLinkExperiment,
 ) : PaymentElementLoader {
 
     fun interface AnalyticsMetadataFactory {
@@ -460,12 +462,21 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             durationProvider.measureDuration(
                 DurationProvider.Key.PaymentSheetLoadRetrieveInitialPaymentSelection
             ) {
+                val supportsLinkPreselection =
+                    initializationMode !is PaymentElementLoader.InitializationMode.CheckoutSession &&
+                    (
+                        integrationConfiguration is PaymentElementLoader.Configuration.PaymentSheet ||
+                            integrationConfiguration is PaymentElementLoader.Configuration.Embedded
+                        )
+                val shouldPreselectLink = supportsLinkPreselection &&
+                    preselectLinkExperiment.isEnabled(paymentMethodMetadata, customer)
                 retrieveInitialPaymentSelection(
                     savedSelection = savedSelection,
                     metadata = paymentMethodMetadata,
                     customer = customer,
                     isGooglePayReady = isGooglePayReady,
-                    isUsingWalletButtons = configuration.walletButtons?.willDisplayExternally ?: false
+                    isUsingWalletButtons = configuration.walletButtons?.willDisplayExternally ?: false,
+                    shouldPreselectLink = shouldPreselectLink,
                 )
             }
         }
@@ -776,6 +787,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         customer: CustomerState?,
         isGooglePayReady: Boolean,
         isUsingWalletButtons: Boolean,
+        shouldPreselectLink: Boolean,
     ): PaymentSelection? {
         val isDefaultPaymentMethodEnabled = metadata.customerMetadata?.isPaymentMethodSetAsDefaultEnabled ?: false
         val primaryPaymentSelection = if (isDefaultPaymentMethodEnabled) {
@@ -813,6 +825,11 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             ?: customer?.paymentMethods?.firstOrNull()?.toPaymentSelection()
             ?: PaymentSelection.GooglePay.takeIf {
                 !isUsingWalletButtons && isGooglePayReady
+            }
+            ?: metadata.linkState?.configuration?.linkBrand?.let { brand ->
+                PaymentSelection.Link(brand = brand).takeIf {
+                    shouldPreselectLink && !isUsingWalletButtons && metadata.shouldShowLinkButton
+                }
             }
     }
 

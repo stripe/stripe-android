@@ -4,6 +4,7 @@ import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import com.stripe.android.common.analytics.experiment.LoggableExperiment
 import com.stripe.android.core.networking.AnalyticsEvent
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
@@ -255,9 +256,12 @@ internal class FakeEventReporter : EventReporter {
         )
     }
 
-    override fun onExperimentExposure(experiment: LoggableExperiment) {
+    override fun onExperimentExposure(
+        experiment: LoggableExperiment,
+        paymentMethodMetadata: PaymentMethodMetadata?,
+    ) {
         _experimentExposureCalls.add(
-            ExperimentExposureCall(experiment)
+            ExperimentExposureCall(experiment, paymentMethodMetadata)
         )
     }
 
@@ -403,7 +407,8 @@ internal class FakeEventReporter : EventReporter {
     )
 
     data class ExperimentExposureCall(
-        val experiment: LoggableExperiment
+        val experiment: LoggableExperiment,
+        val paymentMethodMetadata: PaymentMethodMetadata?,
     )
 
     data class RemovePaymentMethodCall(
