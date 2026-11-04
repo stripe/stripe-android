@@ -1,6 +1,7 @@
 package com.stripe.android.checkout
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.paymentsheet.model.CheckoutSessionClientSecret
 import org.junit.Assert.assertThrows
 import org.junit.Test
 

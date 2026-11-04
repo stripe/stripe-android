@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet.repositories
 
 import com.stripe.android.Stripe
 import com.stripe.android.checkout.CheckoutElementsController.Address
-import com.stripe.android.checkout.CheckoutSessionClientSecret
 import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent
 import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent.Operation
 import com.stripe.android.checkout.analytics.MeasuredOperation
@@ -21,6 +20,7 @@ import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
+import com.stripe.android.paymentsheet.model.CheckoutSessionClientSecret
 import java.util.TimeZone
 import javax.inject.Inject
 import javax.inject.Provider
