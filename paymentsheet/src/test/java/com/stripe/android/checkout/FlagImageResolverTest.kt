@@ -109,8 +109,7 @@ internal class FlagImageResolverTest {
         val result = resolver.resolve(response, cached = null)
 
         assertThat(result).isNull()
-        assertThat(analyticsRequestExecutor.getExecutedRequests()).isEmpty()
-        // No load calls; the scenario's ensureAllEventsConsumed verifies the skip.
+        // No load calls or analytics; the scenario's consumption checks verify the skip.
     }
 
     @Test
@@ -122,10 +121,7 @@ internal class FlagImageResolverTest {
         val result = resolver.resolve(response, cached = null)
 
         assertThat(result).isNull()
-        val requests = analyticsRequestExecutor.getExecutedRequests()
-        assertThat(requests).hasSize(1)
-        assertThat(requests.first().params["event"])
-            .isEqualTo("elements.adaptive_pricing.flag_image_load.failed")
+        analyticsRequestExecutor.awaitEvent("elements.adaptive_pricing.flag_image_load.failed")
         // Both currencies are fetched (US fails, EU succeeds); consume them for the scenario's check.
         loader.awaitLoadedUrls(2)
     }
@@ -187,6 +183,7 @@ internal class FlagImageResolverTest {
         ).block()
 
         loader.ensureAllEventsConsumed()
+        analyticsRequestExecutor.validate()
     }
 
     private class Scenario(
