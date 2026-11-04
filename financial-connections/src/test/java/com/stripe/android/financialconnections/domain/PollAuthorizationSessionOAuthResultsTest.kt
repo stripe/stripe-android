@@ -3,6 +3,7 @@ package com.stripe.android.financialconnections.domain
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
+import com.stripe.android.financialconnections.ThemeMode
 import com.stripe.android.financialconnections.model.MixedOAuthParams
 import com.stripe.android.financialconnections.repository.FinancialConnectionsRepository
 import kotlinx.coroutines.test.runTest
@@ -21,6 +22,7 @@ internal class PollAuthorizationSessionOAuthResultsTest {
             ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
             ApiKeyFixtures.DEFAULT_API_CONFIG,
             preCollectedConsent = null,
+            themeMode = ThemeMode.Automatic,
         )
     )
 

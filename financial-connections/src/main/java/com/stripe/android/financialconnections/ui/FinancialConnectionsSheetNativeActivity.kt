@@ -50,6 +50,7 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.Theme
+import com.stripe.android.financialconnections.ui.theme.toNightMode
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.navigation.NavigationEffects
@@ -79,9 +80,10 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity() {
     lateinit var browserManager: BrowserManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        val args = getArgs(intent)
+        args?.let { delegate.localNightMode = it.configuration.themeMode.toNightMode() }
         super.onCreate(savedInstanceState)
 
-        val args = getArgs(intent)
         if (args == null) {
             finish()
             return

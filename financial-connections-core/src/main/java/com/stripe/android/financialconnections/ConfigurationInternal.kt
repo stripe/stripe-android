@@ -15,6 +15,7 @@ data class FinancialConnectionsSheetConfiguration(
     val financialConnectionsSessionClientSecret: String,
     val apiConfiguration: ApiConfiguration.State,
     val preCollectedConsent: FinancialConnectionsPreCollectedConsent?,
+    val themeMode: ThemeMode,
 ) : Parcelable
 
 /**
