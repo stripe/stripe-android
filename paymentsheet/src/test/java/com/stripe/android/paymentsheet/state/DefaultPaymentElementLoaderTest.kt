@@ -5203,12 +5203,9 @@ internal class DefaultPaymentElementLoaderTest {
         ).apply {
             runTest {
                 block()
-                // Unrelated loader tests don't inspect these calls; the fallback tests validate their own fake.
-                preselectLinkExperiment.getSelectionCalls.cancelAndIgnoreRemainingEvents()
             }
             eventReporter.validate()
             customerRepository.ensureAllEventsConsumed()
-            preselectLinkExperiment.validate()
         }
     }
 
