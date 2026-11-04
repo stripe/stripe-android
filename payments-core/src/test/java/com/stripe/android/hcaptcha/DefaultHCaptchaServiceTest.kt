@@ -4,7 +4,6 @@ import android.os.Handler
 import androidx.fragment.app.FragmentActivity
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.hcaptcha.DefaultHCaptchaService.CachedResult
 import com.stripe.android.hcaptcha.DefaultHCaptchaServiceTest.FakeHCaptchaProvider.HCaptchaHandler
 import com.stripe.android.hcaptcha.analytics.CaptchaEventsReporter
 import com.stripe.android.isInstanceOf
@@ -17,7 +16,6 @@ import com.stripe.hcaptcha.config.HCaptchaSize
 import com.stripe.hcaptcha.task.OnFailureListener
 import com.stripe.hcaptcha.task.OnSuccessListener
 import kotlinx.coroutines.async
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -42,9 +40,9 @@ import kotlin.test.Test
 internal class DefaultHCaptchaServiceTest {
     @Test
     fun `module shares warmed token without sharing caller dependencies`() = runTest {
-        val cachedResult = MutableStateFlow<CachedResult>(CachedResult.Idle)
+        val storage = FakeHCaptchaCacheStorage()
         val serviceFactory = { provider: HCaptchaProvider, reporter: CaptchaEventsReporter, starter: WebViewStarter ->
-            HCaptchaModule.provideHCaptchaService(provider, reporter, starter, cachedResult)
+            HCaptchaModule.provideHCaptchaService(provider, reporter, starter, storage)
         }
         val siteKey = "site-key"
         TestContext.test(serviceFactory = serviceFactory) {
@@ -67,7 +65,7 @@ internal class DefaultHCaptchaServiceTest {
                 val result = service.performPassiveHCaptcha(activity, siteKey, null, null)
 
                 assertThat(result).isEqualTo(HCaptchaService.Result.Success("warmed-token"))
-                assertThat(cachedResult.value).isEqualTo(CachedResult.Idle)
+                assertThat(storage.value).isEqualTo(CachedResult.Idle)
                 assertThat(captchaEventsReporter.awaitCall())
                     .isEqualTo(FakeCaptchaEventsReporter.Call.AttachStart)
                 assertThat(captchaEventsReporter.awaitCall())
@@ -754,7 +752,7 @@ internal class DefaultHCaptchaServiceTest {
                             hCaptchaProvider = provider,
                             captchaEventsReporter = reporter,
                             webViewStarter = starter,
-                            cachedResult = MutableStateFlow<CachedResult>(CachedResult.Idle)
+                            storage = FakeHCaptchaCacheStorage()
                         )
                     },
                 block: suspend TestContext.() -> Unit
