@@ -2,9 +2,9 @@ package com.stripe.android.testing
 
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
-import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
+import org.junit.Assert.assertEquals
 
 class FakeAnalyticsRequestExecutor : AnalyticsRequestExecutor {
     private val _requestTurbine = Turbine<AnalyticsRequest>()
@@ -16,7 +16,7 @@ class FakeAnalyticsRequestExecutor : AnalyticsRequestExecutor {
 
     suspend fun awaitEvent(eventName: String): Map<String, *> {
         val params = requestTurbine.awaitItem().params
-        assertThat(params["event"]).isEqualTo(eventName)
+        assertEquals(eventName, params["event"])
         return params
     }
 
