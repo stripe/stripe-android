@@ -3,6 +3,9 @@
 NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
 
+### Crypto Onramp
+* [Added] Added `googlePayCardBrandAcceptance` and `linkCardBrandAcceptance` to `OnrampConfiguration` to configure accepted card brands independently for Google Pay and Link. Link applies this setting only in passthrough mode.
+
 ## 23.25.1 - 2026-10-26
 
 ### PaymentSheet
