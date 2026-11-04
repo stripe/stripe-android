@@ -40,7 +40,7 @@
   <!-- Text for choosing a photo from gallery -->
   <string name="stripe_choose_file">Επιλέξτε φωτογραφία</string>
   <!-- Close button text -->
-  <string name="stripe_close_button_text">κλείσιμο</string>
+  <string name="stripe_close_button_text">Κλείσιμο</string>
   <!-- Button to complete with test data -->
   <string name="stripe_complete_with_test_data">Ολοκληρώστε με δοκιμαστικά δεδομένα</string>
   <!-- Description for complete button on test mode -->
@@ -169,7 +169,7 @@
   <!-- Instructional text when user needs remove anything blocking the document -->
   <string name="stripe_keep_fully_visible">Οι λεπτομέρειες δεν είναι ορατές</string>
   <!-- Continue button text -->
-  <string name="stripe_kontinue">συνέχεια</string>
+  <string name="stripe_kontinue">Συνέχεια</string>
   <!-- Label for the ID field to collect last 4 of social security number for US ID -->
   <string name="stripe_last_4_of_ssn">Τελευταία 4 ψηφία του Αριθμού κοινωνικής ασφάλισης</string>
   <!-- Label for last (family) name field -->

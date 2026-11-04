@@ -26,6 +26,10 @@
   <string name="stripe_confirm_close_form_body">不會儲存您的付款資訊。</string>
   <!-- Used as the title for prompting the user if they want to close the sheet -->
   <string name="stripe_confirm_close_form_title">您確定要儲存此表單嗎？</string>
+  <!-- Fallback disclosure when paying in the merchant's currency instead of using Adaptive Pricing. -->
+  <string name="stripe_currency_selector_bank_fees_disclaimer">可能會採用閣下銀行的匯率及費用。</string>
+  <string name="stripe_currency_selector_hide_details">隱藏匯率詳情</string>
+  <string name="stripe_currency_selector_show_details">顯示匯率詳情</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header">儲存您的資訊，用 Link 安全地一鍵結賬</string>
   <!-- Label for a checkbox that when checked allows the payment information
@@ -64,6 +68,12 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_email_suggestion_update">是，更新</string>
   <!-- Title for a button that indicates a user can log in or sign up. -->
   <string name="stripe_link_log_in_or_sign_up">登入或註冊</string>
+  <!-- Label of a button that signs the user out of their current Link account so they can log in to a different one. -->
+  <string name="stripe_link_log_in_to_another_account">登入其他賬戶</string>
+  <!-- Message on a screen shown when none of the payment methods in the user's Link account can be used with this business. The placeholder is a Stripe brand name and should not be translated. -->
+  <string name="stripe_link_no_funding_sources_message">閣下的 %s 賬戶中沒有任何付款方式適用於此商家。</string>
+  <!-- Title of a screen shown when none of the payment methods in the user's Link account can be used with this business. The placeholder is a Stripe brand name and should not be translated. -->
+  <string name="stripe_link_no_funding_sources_title">閣下無法在此使用 %s 付款</string>
   <!-- Text displayed on a confirmation button on the CRS CARF declaration screen -->
   <string name="stripe_link_onramp_carf_declaration_accept_button_text">接受</string>
   <!-- Text displayed on a cancel button on the CRS CARF declaration screen -->
