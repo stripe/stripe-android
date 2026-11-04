@@ -9,12 +9,20 @@ import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import javax.inject.Inject
 
-internal class PreselectLinkExperiment @Inject constructor(
-    private val eventReporter: EventReporter,
-    private val mode: EventReporter.Mode,
-) {
+internal interface PreselectLinkExperiment {
     // Call only when the existing selection priorities have been exhausted.
     fun getSelection(
+        metadata: PaymentMethodMetadata,
+        customer: CustomerState?,
+        integrationConfiguration: PaymentElementLoader.Configuration,
+    ): PaymentSelection.Link?
+}
+
+internal class DefaultPreselectLinkExperiment @Inject constructor(
+    private val eventReporter: EventReporter,
+    private val mode: EventReporter.Mode,
+) : PreselectLinkExperiment {
+    override fun getSelection(
         metadata: PaymentMethodMetadata,
         customer: CustomerState?,
         integrationConfiguration: PaymentElementLoader.Configuration,
