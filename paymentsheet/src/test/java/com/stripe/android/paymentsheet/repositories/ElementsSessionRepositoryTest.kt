@@ -55,10 +55,12 @@ internal class ElementsSessionRepositoryTest {
             customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
-            apiConfiguration = DEFAULT_API_CONFIG,
+            apiConfiguration = DEFAULT_API_CONFIG.copy(betas = setOf("elements_beta=v1")),
         ).getOrThrow()
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
+        assertThat(requestCaptor.firstValue.headers["Stripe-Version"])
+            .isEqualTo("2020-03-02;elements_beta=v1")
         val requestOptions = (requestCaptor.firstValue as ApiRequest).options
         assertThat(requestOptions.apiKey).isEqualTo(DEFAULT_API_CONFIG.publishableKey)
         assertThat(requestOptions.stripeAccount).isEqualTo(DEFAULT_API_CONFIG.stripeAccountId)

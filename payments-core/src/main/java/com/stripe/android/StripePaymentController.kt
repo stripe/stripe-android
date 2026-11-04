@@ -330,6 +330,7 @@ constructor(
             ApiConfiguration.State(
                 publishableKey = requestOptions.apiKey,
                 stripeAccountId = requestOptions.stripeAccount,
+                betas = requestOptions.betas,
             )
         )
     }
@@ -460,6 +461,7 @@ constructor(
             ApiConfiguration.State(
                 publishableKey = requestOptions.apiKey,
                 stripeAccountId = requestOptions.stripeAccount,
+                betas = requestOptions.betas,
             )
         )
     }

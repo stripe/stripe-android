@@ -1,6 +1,7 @@
 package com.stripe.android.payments.core.authentication.threeds2
 
 import com.stripe.android.StripeIntentResult
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
@@ -8,6 +9,7 @@ import com.stripe.android.core.injection.LINEAR_DELAY
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.RetryDelaySupplier
+import com.stripe.android.core.networking.withRequestCredentials
 import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
@@ -31,7 +33,8 @@ internal class DefaultStripe3ds2ChallengeResultProcessor @Inject constructor(
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
     @Named(LINEAR_DELAY) private val retryDelaySupplier: RetryDelaySupplier,
     private val logger: Logger,
-    @IOContext private val workContext: CoroutineContext
+    @IOContext private val workContext: CoroutineContext,
+    private val apiConfiguration: ApiConfiguration.State,
 ) : Stripe3ds2ChallengeResultProcessor {
 
     override suspend fun process(
@@ -89,9 +92,10 @@ internal class DefaultStripe3ds2ChallengeResultProcessor @Inject constructor(
             )
         )
 
-        val requestOptions = ApiRequest.Options(
-            challengeResult.intentData.publishableKey,
-            challengeResult.intentData.accountId
+        val requestOptions = apiConfiguration.withRequestCredentials(
+            apiKey = challengeResult.intentData.publishableKey,
+            stripeAccount = challengeResult.intentData.accountId,
+            idempotencyKey = null,
         )
 
         val completionSucceeded = complete3ds2Auth(challengeResult, requestOptions)

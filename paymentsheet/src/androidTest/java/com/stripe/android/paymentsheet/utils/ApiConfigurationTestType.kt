@@ -33,7 +33,8 @@ internal sealed class ApiConfigurationTestType(
             },
             paymentConfigurationStripeAccount = paymentConfigurationStripeAccount,
             apiConfiguration = apiConfiguration?.let {
-                ApiConfiguration(publishableKey).stripeAccountId(it.build().stripeAccountId)
+                val state = it.build()
+                ApiConfiguration(publishableKey).stripeAccountId(state.stripeAccountId).betas(state.betas)
             },
             updatePaymentConfigurationPublishableKey = updatePaymentConfigurationPublishableKey,
         )
