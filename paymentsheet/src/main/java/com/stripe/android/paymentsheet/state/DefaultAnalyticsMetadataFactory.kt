@@ -170,6 +170,10 @@ internal class DefaultAnalyticsMetadataFactory @Inject constructor(
         put("default_billing_details", SimpleBoolean(defaultBillingDetails?.isFilledOut() == true))
         put("allows_delayed_payment_methods", SimpleBoolean(allowsDelayedPaymentMethods))
         putNonEmpty("payment_method_order", paymentMethodOrder)
+        put(
+            "allows_payment_methods_requiring_shipping_address",
+            SimpleBoolean(allowsPaymentMethodsRequiringShippingAddress)
+        )
         put("allows_removal_of_last_saved_payment_method", SimpleBoolean(allowsRemovalOfLastSavedPaymentMethod))
         putNonEmpty("preferred_networks", preferredNetworks.map { it.code })
         putNonEmpty("custom_payment_methods", customPaymentMethods.map { it.id })

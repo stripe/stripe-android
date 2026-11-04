@@ -1108,7 +1108,8 @@ class PaymentSheet internal constructor(
             fun allowsPaymentMethodsRequiringShippingAddress(
                 allowsPaymentMethodsRequiringShippingAddress: Boolean,
             ) = apply {
-                this.allowsPaymentMethodsRequiringShippingAddress = allowsPaymentMethodsRequiringShippingAddress
+                this.allowsPaymentMethodsRequiringShippingAddress =
+                    allowsPaymentMethodsRequiringShippingAddress
             }
 
             fun appearance(appearance: Appearance) =

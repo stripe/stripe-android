@@ -11,6 +11,7 @@ import javax.inject.Inject
 internal class CheckoutEmbeddedConfigurationFactory @Inject constructor(
     @AppName private val appName: String,
 ) {
+    @Suppress("DEPRECATION")
     fun create(
         configuration: CheckoutElementsController.Configuration.State,
         paymentElementConfiguration: PaymentElement.Configuration.State,
@@ -43,6 +44,7 @@ internal class CheckoutEmbeddedConfigurationFactory @Inject constructor(
             )
             .shippingDetails(collectedDetails.toShippingDetails())
             .allowsDelayedPaymentMethods(true)
+            .allowsPaymentMethodsRequiringShippingAddress(true)
             .build()
     }
 }

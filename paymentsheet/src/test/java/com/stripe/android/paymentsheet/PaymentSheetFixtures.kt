@@ -55,6 +55,7 @@ internal object PaymentSheetFixtures {
         googlePay = ConfigFixtures.GOOGLE_PAY,
         defaultBillingDetails = PaymentSheet.BillingDetails(name = "Skyler"),
         allowsDelayedPaymentMethods = true,
+        allowsPaymentMethodsRequiringShippingAddress = true,
         allowsRemovalOfLastSavedPaymentMethod = false,
         paymentMethodOrder = listOf("klarna", "afterpay", "card"),
         appearance = PaymentSheet.Appearance(

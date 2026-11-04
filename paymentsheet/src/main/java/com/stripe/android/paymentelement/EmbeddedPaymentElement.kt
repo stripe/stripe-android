@@ -366,7 +366,8 @@ class EmbeddedPaymentElement @Inject internal constructor(
             fun allowsPaymentMethodsRequiringShippingAddress(
                 allowsPaymentMethodsRequiringShippingAddress: Boolean,
             ) = apply {
-                this.allowsPaymentMethodsRequiringShippingAddress = allowsPaymentMethodsRequiringShippingAddress
+                this.allowsPaymentMethodsRequiringShippingAddress =
+                    allowsPaymentMethodsRequiringShippingAddress
             }
 
             /**
