@@ -18,6 +18,7 @@ import com.stripe.android.crypto.onramp.exception.GooglePayNotConfiguredExceptio
 import com.stripe.android.crypto.onramp.exception.PaymentFailedException
 import com.stripe.android.crypto.onramp.exception.SamsungPayException.Reason
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
+import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentMethodResult
 import com.stripe.android.crypto.onramp.model.OnrampKycResult
 import com.stripe.android.crypto.onramp.model.OnrampPartnerTermsCallback
 import com.stripe.android.crypto.onramp.model.OnrampPartnerTermsResult
@@ -204,23 +205,28 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         )
     }
 
+    // Requests can finish after recreation; only presentation requires this host to remain alive.
     fun verifyIdentity() {
         coroutineScope.launch {
-            when (val verification = interactor.startIdentityVerification()) {
+            val verification = interactor.startIdentityVerification()
+            when (verification) {
                 is OnrampStartVerificationResult.Completed -> {
                     verification.response.ephemeralKey?.let {
+                        if (lifecycleOwner.lifecycle.currentState == Lifecycle.State.DESTROYED) {
+                            onrampCallbacksState.verifyIdentityCallback.onResult(OnrampVerifyIdentityResult.Cancelled())
+                            return@launch
+                        }
                         identityVerificationSheet?.present(
                             verificationSessionId = verification.response.id,
                             ephemeralKeySecret = verification.response.ephemeralKey
                         )
                     } ?: run {
-                        onrampCallbacksState.verifyIdentityCallback.onResult(
-                            interactor.handleIdentityVerificationResult(
-                                IdentityVerificationSheet.VerificationFlowResult.Failed(
-                                    APIException(message = "No ephemeral key found.")
-                                )
+                        val result = interactor.handleIdentityVerificationResult(
+                            IdentityVerificationSheet.VerificationFlowResult.Failed(
+                                APIException(message = "No ephemeral key found.")
                             )
                         )
+                        onrampCallbacksState.verifyIdentityCallback.onResult(result)
                     }
                 }
                 is OnrampStartVerificationResult.Failed -> {
@@ -234,8 +240,13 @@ internal class OnrampPresenterCoordinator @Inject constructor(
 
     fun verifyKycInfo(updatedAddress: PaymentSheet.Address? = null) {
         coroutineScope.launch {
-            when (val verification = interactor.startKycVerification(updatedAddress)) {
+            val verification = interactor.startKycVerification(updatedAddress)
+            when (verification) {
                 is OnrampStartKycVerificationResult.Completed -> {
+                    if (lifecycleOwner.lifecycle.currentState == Lifecycle.State.DESTROYED) {
+                        onrampCallbacksState.verifyKycCallback.onResult(OnrampVerifyKycInfoResult.Cancelled())
+                        return@launch
+                    }
                     verifyKycResultLauncher.launch(
                         VerifyKycActivityArgs(verification.response, verification.appearance)
                     )
@@ -251,8 +262,13 @@ internal class OnrampPresenterCoordinator @Inject constructor(
 
     fun presentUserAttestation() {
         coroutineScope.launch {
-            when (val result = interactor.startUserAttestation()) {
+            val result = interactor.startUserAttestation()
+            when (result) {
                 is OnrampStartUserAttestationResult.Completed -> {
+                    if (lifecycleOwner.lifecycle.currentState == Lifecycle.State.DESTROYED) {
+                        onrampCallbacksState.userAttestationCallback?.onResult(OnrampUserAttestationResult.Cancelled())
+                        return@launch
+                    }
                     presentHTMLConfirmation(
                         resultLauncher = userAttestationResultLauncher,
                         html = result.attestation.text,
@@ -274,7 +290,8 @@ internal class OnrampPresenterCoordinator @Inject constructor(
     fun fulfillKycRequirements() {
         interactor.onKycFlowStarted()
         coroutineScope.launch {
-            interactor.retrieveKycRequirements().fold(
+            val result = interactor.retrieveKycRequirements()
+            result.fold(
                 onSuccess = { requirements ->
                     val callback = onrampCallbacksState.kycCallback
                     if (requirements.userActionRequired.isEmpty()) {
@@ -299,6 +316,10 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                                 IllegalArgumentException("Unsupported KYC requirement")
                             )
                         )
+                        return@fold
+                    }
+                    if (lifecycleOwner.lifecycle.currentState == Lifecycle.State.DESTROYED) {
+                        onrampCallbacksState.kycCallback?.onResult(OnrampKycResult.Cancelled())
                         return@fold
                     }
                     kycResultLauncher.launch(
@@ -408,16 +429,22 @@ internal class OnrampPresenterCoordinator @Inject constructor(
             }
             is PaymentMethodSelection.GooglePay -> {
                 coroutineScope.launch {
-                    interactor.getOrFetchPlatformKey().fold(
+                    val result = interactor.getOrFetchPlatformKey()
+                    result.fold(
                         onSuccess = {
                             val launcher = googlePayPaymentMethodLauncher
                             if (launcher == null) {
-                                onrampCallbacksState.collectPaymentCallback.onResult(
-                                    interactor.collectPaymentMethodFailure(
-                                        GooglePayNotConfiguredException(
-                                            activity.getString(R.string.stripe_onramp_google_pay_not_configured)
-                                        )
+                                val payment = interactor.collectPaymentMethodFailure(
+                                    GooglePayNotConfiguredException(
+                                        activity.getString(R.string.stripe_onramp_google_pay_not_configured)
                                     )
+                                )
+                                onrampCallbacksState.collectPaymentCallback.onResult(payment)
+                                return@fold
+                            }
+                            if (lifecycleOwner.lifecycle.currentState == Lifecycle.State.DESTROYED) {
+                                onrampCallbacksState.collectPaymentCallback.onResult(
+                                    OnrampCollectPaymentMethodResult.Cancelled()
                                 )
                                 return@fold
                             }
@@ -432,9 +459,8 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                             )
                         },
                         onFailure = { error ->
-                            onrampCallbacksState.collectPaymentCallback.onResult(
-                                interactor.collectPaymentMethodFailure(error)
-                            )
+                            val payment = interactor.collectPaymentMethodFailure(error)
+                            onrampCallbacksState.collectPaymentCallback.onResult(payment)
                         }
                     )
                 }
@@ -463,8 +489,15 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                 return@launch
             }
 
-            interactor.getOrFetchPlatformKey().fold(
+            val result = interactor.getOrFetchPlatformKey()
+            result.fold(
                 onSuccess = { platformPublishableKey ->
+                    if (lifecycleOwner.lifecycle.currentState == Lifecycle.State.DESTROYED) {
+                        onrampCallbacksState.collectPaymentCallback.onResult(
+                            OnrampCollectPaymentMethodResult.Cancelled()
+                        )
+                        return@fold
+                    }
                     launcher.present(
                         presentation = SamsungPayPresentation(
                             currencyCode = selection.currencyCode,
@@ -477,9 +510,8 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                     )
                 },
                 onFailure = { error ->
-                    onrampCallbacksState.collectPaymentCallback.onResult(
-                        interactor.handleSamsungPayPlatformKeyFailure(error),
-                    )
+                    val payment = interactor.handleSamsungPayPlatformKeyFailure(error)
+                    onrampCallbacksState.collectPaymentCallback.onResult(payment)
                 },
             )
         }
@@ -560,9 +592,8 @@ internal class OnrampPresenterCoordinator @Inject constructor(
 
     private fun handleVerifyKycResult(result: VerifyKycActivityResult) {
         coroutineScope.launch {
-            onrampCallbacksState.verifyKycCallback.onResult(
-                interactor.handleVerifyKycResult(result)
-            )
+            val verification = interactor.handleVerifyKycResult(result)
+            onrampCallbacksState.verifyKycCallback.onResult(verification)
         }
     }
 
@@ -646,25 +677,22 @@ internal class OnrampPresenterCoordinator @Inject constructor(
 
     private fun handleAuthorizeResult(result: LinkController.AuthorizeResult) {
         coroutineScope.launch {
-            onrampCallbacksState.authorizeCallback.onResult(
-                interactor.handleAuthorizeResult(result)
-            )
+            val authorization = interactor.handleAuthorizeResult(result)
+            onrampCallbacksState.authorizeCallback.onResult(authorization)
         }
     }
 
     private fun handleIdentityVerificationResult(result: IdentityVerificationSheet.VerificationFlowResult) {
         coroutineScope.launch {
-            onrampCallbacksState.verifyIdentityCallback.onResult(
-                interactor.handleIdentityVerificationResult(result)
-            )
+            val verification = interactor.handleIdentityVerificationResult(result)
+            onrampCallbacksState.verifyIdentityCallback.onResult(verification)
         }
     }
 
     private fun handlePresentPaymentResult(result: LinkController.PresentPaymentMethodsResult) {
         coroutineScope.launch {
-            onrampCallbacksState.collectPaymentCallback.onResult(
-                interactor.handlePresentPaymentMethodsResult(result, activity)
-            )
+            val payment = interactor.handlePresentPaymentMethodsResult(result, activity)
+            onrampCallbacksState.collectPaymentCallback.onResult(payment)
         }
     }
 
@@ -686,9 +714,8 @@ internal class OnrampPresenterCoordinator @Inject constructor(
 
     private fun handleGooglePayPaymentSelection(result: GooglePayPaymentMethodLauncher.Result) {
         coroutineScope.launch {
-            onrampCallbacksState.collectPaymentCallback.onResult(
-                interactor.handleGooglePayPaymentResult(result)
-            )
+            val payment = interactor.handleGooglePayPaymentResult(result)
+            onrampCallbacksState.collectPaymentCallback.onResult(payment)
         }
     }
 
@@ -697,9 +724,8 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         platformPublishableKey: String?,
     ) {
         coroutineScope.launch {
-            onrampCallbacksState.collectPaymentCallback.onResult(
-                interactor.handleSamsungPayPaymentResult(result, platformPublishableKey),
-            )
+            val payment = interactor.handleSamsungPayPaymentResult(result, platformPublishableKey)
+            onrampCallbacksState.collectPaymentCallback.onResult(payment)
         }
     }
 
@@ -711,13 +737,11 @@ internal class OnrampPresenterCoordinator @Inject constructor(
 
     private fun handleSamsungPayStatus(status: SamsungPayStatus) {
         coroutineScope.launch {
-            onrampCallbacksState.samsungPayIsReadyCallback?.let { callback ->
-                val availability = interactor.handleSamsungPayAvailability(status)
-                callback(
-                    availability is SamsungPayAvailabilityResult.Available,
-                    availability,
-                )
-            }
+            val availability = interactor.handleSamsungPayAvailability(status)
+            onrampCallbacksState.samsungPayIsReadyCallback?.invoke(
+                availability is SamsungPayAvailabilityResult.Available,
+                availability,
+            )
         }
     }
 }
