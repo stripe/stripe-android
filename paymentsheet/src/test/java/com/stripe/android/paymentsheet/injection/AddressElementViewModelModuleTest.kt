@@ -251,7 +251,7 @@ class AddressElementViewModelModuleTest {
                 editDistance = 1,
             )
         )
-        assertThat(analyticsRequestExecutor.getExecutedRequests()).isEmpty()
+        analyticsRequestExecutor.validate()
         addressLauncherEventReporter.validate()
     }
 
@@ -273,12 +273,12 @@ class AddressElementViewModelModuleTest {
 
         eventReporter.onShown(country = "CA")
 
-        val params = analyticsRequestExecutor.getExecutedRequests().single().params
-        assertThat(params).containsEntry("event", "elements.shipping_address.shown")
+        val params = analyticsRequestExecutor.awaitEvent("elements.shipping_address.shown")
         assertThat(params).containsEntry("checkout_session_id", checkoutSessionResponse.id)
         assertThat(params["address_data_blob"]).isEqualTo(
             mapOf("address_country_code" to "CA")
         )
+        analyticsRequestExecutor.validate()
         addressLauncherEventReporter.validate()
     }
 

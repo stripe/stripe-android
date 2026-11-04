@@ -1,20 +1,26 @@
 package com.stripe.android.testing
 
+import app.cash.turbine.ReceiveTurbine
+import app.cash.turbine.Turbine
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 
 class FakeAnalyticsRequestExecutor : AnalyticsRequestExecutor {
+    private val _requestTurbine = Turbine<AnalyticsRequest>()
+    val requestTurbine: ReceiveTurbine<AnalyticsRequest> = _requestTurbine
 
-    private val executedRequests = mutableListOf<AnalyticsRequest>()
     override fun executeAsync(request: AnalyticsRequest) {
-        executedRequests.add(request)
+        _requestTurbine.add(request)
     }
 
-    fun getExecutedRequests(): List<AnalyticsRequest> {
-        return executedRequests.toList()
+    suspend fun awaitEvent(eventName: String): Map<String, *> {
+        val params = requestTurbine.awaitItem().params
+        assertThat(params["event"]).isEqualTo(eventName)
+        return params
     }
 
-    fun clear() {
-        executedRequests.clear()
+    fun validate() {
+        _requestTurbine.ensureAllEventsConsumed()
     }
 }

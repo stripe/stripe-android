@@ -28,6 +28,7 @@ dependencies {
     implementation testLibs.androidx.core
     implementation testLibs.kotlin.coroutines
     implementation testLibs.mockito.kotlin
+    implementation testLibs.truth
     implementation testLibs.turbine
     implementation testLibs.leakCanaryInstrumentation
 

@@ -149,8 +149,8 @@ class CheckoutSessionRepositoryTest {
             currencyCode = "eur",
         ).getOrThrow()
 
-        val params = analyticsRequestExecutor.getExecutedRequests().single().params
-        assertThat(params).containsEntry("event", "elements.adaptive_pricing.currency_toggled")
+        analyticsRequestExecutor.awaitEvent("elements.adaptive_pricing.currency_toggled")
+        analyticsRequestExecutor.validate()
     }
 
     @Test
@@ -167,8 +167,8 @@ class CheckoutSessionRepositoryTest {
         )
 
         assertThat(result.isFailure).isTrue()
-        val params = analyticsRequestExecutor.getExecutedRequests().single().params
-        assertThat(params).containsEntry("event", "elements.adaptive_pricing.currency_toggled.failed")
+        analyticsRequestExecutor.awaitEvent("elements.adaptive_pricing.currency_toggled.failed")
+        analyticsRequestExecutor.validate()
     }
 
     @Test
