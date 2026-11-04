@@ -894,6 +894,12 @@ class PaymentSheet internal constructor(
          */
         internal val allowsDelayedPaymentMethods: Boolean = ConfigurationDefaults.allowsDelayedPaymentMethods,
         /**
+         * This option no longer has any effect. Payment methods do not require a shipping address to be available.
+         * Deprecated and will be removed in the next major version.
+         */
+        internal val allowsPaymentMethodsRequiringShippingAddress: Boolean =
+            ConfigurationDefaults.allowsPaymentMethodsRequiringShippingAddress,
+        /**
          * Describes the appearance of Payment Sheet.
          */
         internal val appearance: Appearance = ConfigurationDefaults.appearance,
@@ -988,6 +994,11 @@ class PaymentSheet internal constructor(
              */
             allowsDelayedPaymentMethods: Boolean = ConfigurationDefaults.allowsDelayedPaymentMethods,
             /**
+             * Deprecated. This option no longer has any effect and will be removed in the next major version.
+             */
+            allowsPaymentMethodsRequiringShippingAddress: Boolean =
+                ConfigurationDefaults.allowsPaymentMethodsRequiringShippingAddress,
+            /**
              * Describes the appearance of Payment Sheet.
              */
             appearance: Appearance = ConfigurationDefaults.appearance,
@@ -1023,6 +1034,7 @@ class PaymentSheet internal constructor(
             defaultBillingDetails = defaultBillingDetails,
             shippingDetails = shippingDetails,
             allowsDelayedPaymentMethods = allowsDelayedPaymentMethods,
+            allowsPaymentMethodsRequiringShippingAddress = allowsPaymentMethodsRequiringShippingAddress,
             appearance = appearance,
             primaryButtonLabel = primaryButtonLabel,
             billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
@@ -1045,6 +1057,8 @@ class PaymentSheet internal constructor(
             private var defaultBillingDetails: BillingDetails? = ConfigurationDefaults.billingDetails
             private var shippingDetails: AddressDetails? = ConfigurationDefaults.shippingDetails
             private var allowsDelayedPaymentMethods: Boolean = ConfigurationDefaults.allowsDelayedPaymentMethods
+            private var allowsPaymentMethodsRequiringShippingAddress: Boolean =
+                ConfigurationDefaults.allowsPaymentMethodsRequiringShippingAddress
             private var appearance: Appearance = ConfigurationDefaults.appearance
             private var primaryButtonLabel: String? = ConfigurationDefaults.primaryButtonLabel
             private var billingDetailsCollectionConfiguration =
@@ -1086,6 +1100,16 @@ class PaymentSheet internal constructor(
 
             fun allowsDelayedPaymentMethods(allowsDelayedPaymentMethods: Boolean) =
                 apply { this.allowsDelayedPaymentMethods = allowsDelayedPaymentMethods }
+
+            /**
+             * This option no longer affects payment-method availability.
+             */
+            @Deprecated("This option no longer has any effect and will be removed in the next major version.")
+            fun allowsPaymentMethodsRequiringShippingAddress(
+                allowsPaymentMethodsRequiringShippingAddress: Boolean,
+            ) = apply {
+                this.allowsPaymentMethodsRequiringShippingAddress = allowsPaymentMethodsRequiringShippingAddress
+            }
 
             fun appearance(appearance: Appearance) =
                 apply { this.appearance = appearance }
@@ -1253,6 +1277,7 @@ class PaymentSheet internal constructor(
                 defaultBillingDetails = defaultBillingDetails,
                 shippingDetails = shippingDetails,
                 allowsDelayedPaymentMethods = allowsDelayedPaymentMethods,
+                allowsPaymentMethodsRequiringShippingAddress = allowsPaymentMethodsRequiringShippingAddress,
                 appearance = appearance,
                 primaryButtonLabel = primaryButtonLabel,
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
@@ -1287,12 +1312,14 @@ class PaymentSheet internal constructor(
             CardFundingFilteringPrivatePreview::class,
             AddressAutocompletePreview::class,
         )
+        @Suppress("DEPRECATION")
         internal fun newBuilder(): Builder = Builder(merchantDisplayName)
             .customer(customer)
             .googlePay(googlePay)
             .defaultBillingDetails(defaultBillingDetails)
             .shippingDetails(shippingDetails)
             .allowsDelayedPaymentMethods(allowsDelayedPaymentMethods)
+            .allowsPaymentMethodsRequiringShippingAddress(allowsPaymentMethodsRequiringShippingAddress)
             .appearance(appearance)
             .billingDetailsCollectionConfiguration(billingDetailsCollectionConfiguration)
             .preferredNetworks(preferredNetworks)

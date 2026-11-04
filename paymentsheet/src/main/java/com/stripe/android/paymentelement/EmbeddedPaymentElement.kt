@@ -250,6 +250,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
         internal val defaultBillingDetails: PaymentSheet.BillingDetails?,
         internal val shippingDetails: AddressDetails?,
         internal val allowsDelayedPaymentMethods: Boolean,
+        internal val allowsPaymentMethodsRequiringShippingAddress: Boolean,
         internal val appearance: PaymentSheet.Appearance,
         internal val primaryButtonLabel: String?,
         internal val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
@@ -280,6 +281,8 @@ class EmbeddedPaymentElement @Inject internal constructor(
             private var defaultBillingDetails: PaymentSheet.BillingDetails? = ConfigurationDefaults.billingDetails
             private var shippingDetails: AddressDetails? = ConfigurationDefaults.shippingDetails
             private var allowsDelayedPaymentMethods: Boolean = ConfigurationDefaults.allowsDelayedPaymentMethods
+            private var allowsPaymentMethodsRequiringShippingAddress: Boolean =
+                ConfigurationDefaults.allowsPaymentMethodsRequiringShippingAddress
             private var appearance: PaymentSheet.Appearance = ConfigurationDefaults.appearance
             private var primaryButtonLabel: String? = ConfigurationDefaults.primaryButtonLabel
             private var billingDetailsCollectionConfiguration =
@@ -355,6 +358,16 @@ class EmbeddedPaymentElement @Inject internal constructor(
              */
             fun allowsDelayedPaymentMethods(allowsDelayedPaymentMethods: Boolean) =
                 apply { this.allowsDelayedPaymentMethods = allowsDelayedPaymentMethods }
+
+            /**
+             * This option no longer affects payment-method availability.
+             */
+            @Deprecated("This option no longer has any effect and will be removed in the next major version.")
+            fun allowsPaymentMethodsRequiringShippingAddress(
+                allowsPaymentMethodsRequiringShippingAddress: Boolean,
+            ) = apply {
+                this.allowsPaymentMethodsRequiringShippingAddress = allowsPaymentMethodsRequiringShippingAddress
+            }
 
             /**
              * Describes the appearance of the embedded payment element.
@@ -543,6 +556,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
                 defaultBillingDetails = defaultBillingDetails,
                 shippingDetails = shippingDetails,
                 allowsDelayedPaymentMethods = allowsDelayedPaymentMethods,
+                allowsPaymentMethodsRequiringShippingAddress = allowsPaymentMethodsRequiringShippingAddress,
                 appearance = appearance,
                 primaryButtonLabel = primaryButtonLabel,
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
@@ -567,12 +581,14 @@ class EmbeddedPaymentElement @Inject internal constructor(
             ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi::class,
             CardFundingFilteringPrivatePreview::class,
         )
+        @Suppress("DEPRECATION")
         internal fun newBuilder(): Builder = Builder(merchantDisplayName)
             .customer(customer)
             .googlePay(googlePay)
             .defaultBillingDetails(defaultBillingDetails)
             .shippingDetails(shippingDetails)
             .allowsDelayedPaymentMethods(allowsDelayedPaymentMethods)
+            .allowsPaymentMethodsRequiringShippingAddress(allowsPaymentMethodsRequiringShippingAddress)
             .appearance(appearance)
             .billingDetailsCollectionConfiguration(billingDetailsCollectionConfiguration)
             .preferredNetworks(preferredNetworks)

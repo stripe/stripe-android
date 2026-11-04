@@ -32,6 +32,7 @@ class PaymentSheetConfigurationTest {
                 address = PaymentSheet.Address(country = "US"),
             ),
             allowsDelayedPaymentMethods = true,
+            allowsPaymentMethodsRequiringShippingAddress = true,
             appearance = PaymentSheet.Appearance(
                 colorsLight = PaymentSheet.Colors.configureDefaultLight(primary = Color.Red),
             ),
@@ -105,6 +106,6 @@ class PaymentSheetConfigurationTest {
         // When a new property is added, this count will change, signaling that:
         // 1. newBuilder() needs to propagate the new property
         // 2. The round-trip test above needs a non-default value for it
-        assertThat(propertyCount).isEqualTo(24)
+        assertThat(propertyCount).isEqualTo(25)
     }
 }

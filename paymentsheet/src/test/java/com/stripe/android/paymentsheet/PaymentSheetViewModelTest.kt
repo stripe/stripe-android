@@ -1223,12 +1223,14 @@ internal class PaymentSheetViewModelTest {
         }
     }
 
+    @Suppress("DEPRECATION")
     @Test
     fun `Verify supported payment methods include affirm and afterpay without shipping details`() {
         val viewModel = createViewModel(
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
                 config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.newBuilder()
                     .shippingDetails(null)
+                    .allowsPaymentMethodsRequiringShippingAddress(false)
                     .build()
             ),
             stripeIntent = PaymentIntentFixtures.PI_WITH_SHIPPING.copy(
