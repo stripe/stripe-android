@@ -22,9 +22,9 @@ import javax.inject.Named
 
 internal class PassiveChallengeConfirmationDefinition @Inject constructor(
     private val errorReporter: ErrorReporter,
-    private val passiveChallengeWarmer: PassiveChallengeWarmer,
     @Named(PRODUCT_USAGE) private val productUsage: Set<String>,
-    private val isEligibleForConfirmationChallenge: IsEligibleForConfirmationChallenge
+    private val isEligibleForConfirmationChallenge: IsEligibleForConfirmationChallenge,
+    private val passiveChallengeWarmer: PassiveChallengeWarmer,
 ) : ConfirmationDefinition<
     PaymentMethodConfirmationOption,
     ActivityResultLauncher<PassiveChallengeActivityContract.Args>,
@@ -40,11 +40,7 @@ internal class PassiveChallengeConfirmationDefinition @Inject constructor(
     override fun bootstrap(paymentMethodMetadata: PaymentMethodMetadata) {
         if (FeatureFlags.disablePassiveCaptchaWarmup.isEnabled) return
         val passiveCaptchaParams = paymentMethodMetadata.passiveCaptchaParams ?: return
-        passiveChallengeWarmer.start(
-            passiveCaptchaParams = passiveCaptchaParams,
-            apiConfiguration = paymentMethodMetadata.apiConfiguration,
-            productUsage = productUsage
-        )
+        passiveChallengeWarmer.start(passiveCaptchaParams)
     }
 
     override fun canConfirm(
@@ -83,7 +79,7 @@ internal class PassiveChallengeConfirmationDefinition @Inject constructor(
         lifecycleOwner: LifecycleOwner,
         onResult: (PassiveChallengeActivityResult) -> Unit
     ): ActivityResultLauncher<PassiveChallengeActivityContract.Args> {
-        passiveChallengeWarmer.register(activityResultCaller)
+        passiveChallengeWarmer.register(activityResultCaller, lifecycleOwner)
         return activityResultCaller.registerForActivityResult(PassiveChallengeActivityContract(), onResult)
     }
 
@@ -160,6 +156,6 @@ internal class PassiveChallengeConfirmationDefinition @Inject constructor(
 
     override fun unregister(launcher: ActivityResultLauncher<PassiveChallengeActivityContract.Args>) {
         passiveChallengeWarmer.unregister()
-        super.unregister(launcher)
+        launcher.unregister()
     }
 }
