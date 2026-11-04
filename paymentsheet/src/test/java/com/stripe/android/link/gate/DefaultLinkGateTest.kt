@@ -5,6 +5,7 @@ import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.TestFactory
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
+import com.stripe.android.networking.RequestSurface
 import com.stripe.android.testing.FeatureFlagTestRule
 import org.junit.Rule
 import org.junit.Test
@@ -53,6 +54,41 @@ internal class DefaultLinkGateTest {
         attestationFeatureFlagTestRule.setEnabled(false)
         val gateWithoutAttestation = gate(isLiveMode = false, useAttestationEndpoints = false)
         assertThat(gateWithoutAttestation.useNativeLink).isFalse()
+    }
+
+    @Test
+    fun `useNativeLink - identity surface - returns true in live mode without attestation`() {
+        val gate = gate(
+            isLiveMode = true,
+            useAttestationEndpoints = false,
+            requestSurface = RequestSurface.IdentityProduct,
+        )
+
+        assertThat(gate.useNativeLink).isTrue()
+    }
+
+    @Test
+    fun `useNativeLink - identity surface - test mode - returns true without attestation when feature flag not set`() {
+        nativeLinkFeatureFlagTestRule.setEnabled(null)
+        val gate = gate(
+            isLiveMode = false,
+            useAttestationEndpoints = false,
+            requestSurface = RequestSurface.IdentityProduct,
+        )
+
+        assertThat(gate.useNativeLink).isTrue()
+    }
+
+    @Test
+    fun `useNativeLink - identity surface - test mode - returns false when feature flag disabled`() {
+        nativeLinkFeatureFlagTestRule.setEnabled(false)
+        val gate = gate(
+            isLiveMode = false,
+            useAttestationEndpoints = false,
+            requestSurface = RequestSurface.IdentityProduct,
+        )
+
+        assertThat(gate.useNativeLink).isFalse()
     }
 
     // useNativeLink tests for live mode
@@ -300,7 +336,8 @@ internal class DefaultLinkGateTest {
         isLiveMode: Boolean = true,
         useAttestationEndpoints: Boolean = true,
         suppress2faModal: Boolean = false,
-        disableRuxInFlowController: Boolean = false
+        disableRuxInFlowController: Boolean = false,
+        requestSurface: RequestSurface = RequestSurface.PaymentElement,
     ): DefaultLinkGate {
         val newIntent = when (val intent = TestFactory.LINK_CONFIGURATION.stripeIntent) {
             is PaymentIntent -> {
@@ -316,7 +353,8 @@ internal class DefaultLinkGateTest {
                 suppress2faModal = suppress2faModal,
                 stripeIntent = newIntent,
                 disableRuxInFlowController = disableRuxInFlowController
-            )
+            ),
+            requestSurface = requestSurface,
         )
     }
 }
