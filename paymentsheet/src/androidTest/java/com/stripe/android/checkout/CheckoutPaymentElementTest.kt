@@ -13,7 +13,9 @@ import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.link.ui.wallet.LinkWalletPage
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
+import com.stripe.android.networktesting.RequestMatchers.hasBodyPart
 import com.stripe.android.networktesting.RequestMatchers.method
+import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -133,6 +135,48 @@ internal class CheckoutPaymentElementTest {
                     "payment_method_data[payment_user_agent]",
                     "stripe-android/${StripeSdkVersion.VERSION_NAME};checkout_elements",
                 ),
+                not(hasBodyPart("payment_method_data[billing_details][email]")),
+                not(hasBodyPart("collected_information[email]")),
+            ) { response ->
+                response.testBodyFromFile("checkout-session-confirm.json")
+            }
+
+            contentPage.clickOnLpm("card")
+            formPage.fillOutCardDetails()
+            formPage.clickPrimaryButton()
+            confirm()
+        }
+
+        assertThat(checkoutResult).isInstanceOf(CheckoutElementsController.Result.Completed::class.java)
+    }
+
+    @Test
+    fun testCardPaymentSendsCollectedEmailOnlyAsCollectedInformation() {
+        var checkoutResult: CheckoutElementsController.Result? = null
+        runCheckoutPaymentElementScenario(
+            networkRule = networkRule,
+            resultCallback = { result -> checkoutResult = result },
+            checkoutInitResponse = { response ->
+                response.testBodyFromFile("checkout-session-init.json") { json ->
+                    json.remove("link_settings")
+                }
+            },
+            setup = { controller ->
+                assertThat(
+                    controller.configure(
+                        DEFAULT_CLIENT_SECRET,
+                        CheckoutElementsController.Configuration()
+                            .paymentElement(PaymentElement.Configuration())
+                            .defaults(CheckoutElementsController.Configuration.Defaults().email("local@example.com")),
+                    )
+                )
+                    .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
+            },
+        ) {
+            networkRule.checkoutConfirm(
+                bodyPart("payment_method_data[type]", "card"),
+                bodyPart("collected_information[email]", "local@example.com"),
+                not(hasBodyPart("payment_method_data[billing_details][email]")),
             ) { response ->
                 response.testBodyFromFile("checkout-session-confirm.json")
             }

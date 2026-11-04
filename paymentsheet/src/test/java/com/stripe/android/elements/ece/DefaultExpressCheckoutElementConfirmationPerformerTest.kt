@@ -159,7 +159,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
             assertThat(billingDetails.address).isEqualTo(
                 PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic
             )
-            assertThat(billingDetails.attachDefaultsToPaymentMethod).isTrue()
+            assertThat(billingDetails.attachDefaultsToPaymentMethod).isFalse()
         }
     }
 
