@@ -44,31 +44,8 @@ class CheckoutSessionRepositoryAnalyticsTest {
         stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
     )
 
-    private val repository = CheckoutSessionRepository(
-        stripeRepository = CheckoutStripeRepositoryFactory.create(),
-        elementsSessionClientParams = CheckoutStripeRepositoryFactory.clientParams(),
-        fraudDetectionDataRepository = FakeFraudDetectionDataRepository.create(),
-        stripeNetworkClient = DefaultStripeNetworkClient(),
-        analyticsRequestExecutor = DefaultAnalyticsRequestExecutor(
-            stripeNetworkClient = DefaultStripeNetworkClient(workContext = Dispatchers.IO),
-            workContext = Dispatchers.IO,
-            logger = Logger.noop(),
-        ),
-        paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
-            context = ApplicationProvider.getApplicationContext(),
-            publishableKey = DEFAULT_API_CONFIG.publishableKey,
-            defaultProductUsageTokens = setOf("checkout_elements"),
-        ),
-        apiRequestOptionsProvider = {
-            ApiRequest.Options(
-                apiKey = DEFAULT_API_CONFIG.publishableKey,
-                stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
-            )
-        },
-    )
-
     @Test
-    fun `init reports started and succeeded with the configuration params`() = runTest {
+    fun `init reports started and succeeded with the configuration params`() = runScenario {
         expectEvent(
             "init.started",
             analyticsPayloadField("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID),
@@ -97,12 +74,10 @@ class CheckoutSessionRepositoryAnalyticsTest {
             adaptivePricingAllowed = false,
             analyticsParams = CONFIGURATION_PARAMS,
         ).getOrThrow()
-
-        networkRule.validate()
     }
 
     @Test
-    fun `init reports started and failed with the error`() = runTest {
+    fun `init reports started and failed with the error`() = runScenario {
         expectEvent(
             "init.started",
             analyticsPayloadField("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID),
@@ -142,12 +117,10 @@ class CheckoutSessionRepositoryAnalyticsTest {
         )
 
         assertThat(result.isFailure).isTrue()
-
-        networkRule.validate()
     }
 
     @Test
-    fun `init does not report the client secret as the session id`() = runTest {
+    fun `init does not report the client secret as the session id`() = runScenario {
         expectEvent(
             "init.started",
             not(hasQueryParam("checkout_session_id")),
@@ -169,12 +142,10 @@ class CheckoutSessionRepositoryAnalyticsTest {
             adaptivePricingAllowed = false,
             analyticsParams = emptyMap(),
         )
-
-        networkRule.validate()
     }
 
     @Test
-    fun `applyPromotionCode reports started and succeeded with the session params`() = runTest {
+    fun `applyPromotionCode reports started and succeeded with the session params`() = runScenario {
         expectEvent(
             "apply_promotion_code.started",
             *CheckoutAnalyticsTestFixtures.sessionParams.asPayloadMatchers(),
@@ -193,12 +164,10 @@ class CheckoutSessionRepositoryAnalyticsTest {
             checkoutSessionResponse = checkoutSessionResponse,
             promotionCode = "10OFF",
         ).getOrThrow()
-
-        networkRule.validate()
     }
 
     @Test
-    fun `applyPromotionCode reports started and failed with the error`() = runTest {
+    fun `applyPromotionCode reports started and failed with the error`() = runScenario {
         expectEvent(
             "apply_promotion_code.started",
             *CheckoutAnalyticsTestFixtures.sessionParams.asPayloadMatchers(),
@@ -234,12 +203,10 @@ class CheckoutSessionRepositoryAnalyticsTest {
         )
 
         assertThat(result.isFailure).isTrue()
-
-        networkRule.validate()
     }
 
     @Test
-    fun `removePromotionCode reports started and succeeded`() = runTest {
+    fun `removePromotionCode reports started and succeeded`() = runScenario {
         expectEvent(
             "remove_promotion_code.started",
             *CheckoutAnalyticsTestFixtures.sessionParams.asPayloadMatchers(),
@@ -257,9 +224,36 @@ class CheckoutSessionRepositoryAnalyticsTest {
         repository.removePromotionCode(
             checkoutSessionResponse = checkoutSessionResponse,
         ).getOrThrow()
-
-        networkRule.validate()
     }
+
+    private fun runScenario(block: suspend Scenario.() -> Unit) = runTest {
+        val repository = CheckoutSessionRepository(
+            stripeRepository = CheckoutStripeRepositoryFactory.create(),
+            elementsSessionClientParams = CheckoutStripeRepositoryFactory.clientParams(),
+            fraudDetectionDataRepository = FakeFraudDetectionDataRepository.create(),
+            stripeNetworkClient = DefaultStripeNetworkClient(),
+            analyticsRequestExecutor = DefaultAnalyticsRequestExecutor(
+                stripeNetworkClient = DefaultStripeNetworkClient(workContext = coroutineContext + Dispatchers.IO),
+                workContext = coroutineContext + Dispatchers.IO,
+                logger = Logger.noop(),
+            ),
+            paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
+                context = ApplicationProvider.getApplicationContext(),
+                publishableKey = DEFAULT_API_CONFIG.publishableKey,
+                defaultProductUsageTokens = setOf("checkout_elements"),
+            ),
+            apiRequestOptionsProvider = {
+                ApiRequest.Options(
+                    apiKey = DEFAULT_API_CONFIG.publishableKey,
+                    stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
+                )
+            },
+        )
+
+        Scenario(repository).block()
+    }
+
+    private class Scenario(val repository: CheckoutSessionRepository)
 
     private fun expectEvent(operationAndOutcome: String, vararg matchers: RequestMatcher) {
         networkRule.enqueue(
