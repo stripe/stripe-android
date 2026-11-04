@@ -462,21 +462,17 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             durationProvider.measureDuration(
                 DurationProvider.Key.PaymentSheetLoadRetrieveInitialPaymentSelection
             ) {
-                val supportsLinkPreselection =
-                    initializationMode !is PaymentElementLoader.InitializationMode.CheckoutSession &&
-                    (
-                        integrationConfiguration is PaymentElementLoader.Configuration.PaymentSheet ||
-                            integrationConfiguration is PaymentElementLoader.Configuration.Embedded
-                        )
-                val shouldPreselectLink = supportsLinkPreselection &&
-                    preselectLinkExperiment.isEnabled(paymentMethodMetadata, customer)
                 retrieveInitialPaymentSelection(
                     savedSelection = savedSelection,
                     metadata = paymentMethodMetadata,
                     customer = customer,
                     isGooglePayReady = isGooglePayReady,
                     isUsingWalletButtons = configuration.walletButtons?.willDisplayExternally ?: false,
-                    shouldPreselectLink = shouldPreselectLink,
+                ) ?: preselectLinkExperiment.getSelection(
+                    metadata = paymentMethodMetadata,
+                    customer = customer,
+                    initializationMode = initializationMode,
+                    integrationConfiguration = integrationConfiguration,
                 )
             }
         }
@@ -787,7 +783,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         customer: CustomerState?,
         isGooglePayReady: Boolean,
         isUsingWalletButtons: Boolean,
-        shouldPreselectLink: Boolean,
     ): PaymentSelection? {
         val isDefaultPaymentMethodEnabled = metadata.customerMetadata?.isPaymentMethodSetAsDefaultEnabled ?: false
         val primaryPaymentSelection = if (isDefaultPaymentMethodEnabled) {
@@ -825,11 +820,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             ?: customer?.paymentMethods?.firstOrNull()?.toPaymentSelection()
             ?: PaymentSelection.GooglePay.takeIf {
                 !isUsingWalletButtons && isGooglePayReady
-            }
-            ?: metadata.linkState?.configuration?.linkBrand?.let { brand ->
-                PaymentSelection.Link(brand = brand).takeIf {
-                    shouldPreselectLink && !isUsingWalletButtons && metadata.shouldShowLinkButton
-                }
             }
     }
 

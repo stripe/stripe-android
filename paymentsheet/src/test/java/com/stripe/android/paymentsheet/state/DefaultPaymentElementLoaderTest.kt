@@ -726,43 +726,66 @@ internal class DefaultPaymentElementLoaderTest {
     fun `Link preselection does not select unavailable Link`() = testLinkPreselection(
         isLinkEnabled = false,
         expectedSelection = null,
+        expectsExposure = false,
     )
 
     @Test
     fun `Link preselection does not select hidden Link for a logged out user`() = testLinkPreselection(
         linkDisplay = PaymentSheet.LinkConfiguration.Display.WalletButtonHidden,
         expectedSelection = null,
+        expectsExposure = false,
     )
 
     @Test
-    fun `Link preselection can select Link for a returning user with WalletButtonHidden`() = testLinkPreselection(
+    fun `Link preselection excludes returning users with WalletButtonHidden`() = testLinkPreselection(
         linkDisplay = PaymentSheet.LinkConfiguration.Display.WalletButtonHidden,
         linkAccountState = AccountStatus.Verified(consentPresentation = null),
-        expectedSelection = PaymentSelection.Link(brand = LinkBrand.Link),
+        expectedSelection = null,
+        expectsExposure = false,
     )
 
     @Test
     fun `Link preselection respects Never display configuration`() = testLinkPreselection(
         linkDisplay = PaymentSheet.LinkConfiguration.Display.Never,
         expectedSelection = null,
+        expectsExposure = false,
     )
 
     @Test
     fun `Link preselection does not select externally displayed wallets`() = testLinkPreselection(
         isUsingWalletButtons = true,
         expectedSelection = null,
+        expectsExposure = false,
     )
 
     @Test
     fun `Link preselection does not replace Google Pay fallback`() = testLinkPreselection(
         isGooglePayReady = true,
         expectedSelection = PaymentSelection.GooglePay,
+        expectsExposure = false,
+    )
+
+    @Test
+    fun `Link preselection control does not expose sessions with Google Pay fallback`() = testLinkPreselection(
+        variant = "control",
+        isGooglePayReady = true,
+        expectedSelection = PaymentSelection.GooglePay,
+        expectsExposure = false,
+    )
+
+    @Test
+    fun `Link preselection control_test does not expose sessions with Google Pay fallback`() = testLinkPreselection(
+        variant = "control_test",
+        isGooglePayReady = true,
+        expectedSelection = PaymentSelection.GooglePay,
+        expectsExposure = false,
     )
 
     @Test
     fun `Link preselection does not replace a customer payment method fallback`() = testLinkPreselection(
         paymentMethods = PAYMENT_METHODS,
         expectedSelection = PaymentSelection.Saved(PAYMENT_METHODS.first()),
+        expectsExposure = false,
     )
 
     @Test
@@ -770,6 +793,7 @@ internal class DefaultPaymentElementLoaderTest {
         savedSelection = SavedSelection.PaymentMethod(PAYMENT_METHODS.last().id),
         paymentMethods = PAYMENT_METHODS,
         expectedSelection = PaymentSelection.Saved(PAYMENT_METHODS.last()),
+        expectsExposure = false,
     )
 
     @Test
@@ -778,6 +802,7 @@ internal class DefaultPaymentElementLoaderTest {
         isGooglePayReady = true,
         paymentMethods = PAYMENT_METHODS,
         expectedSelection = PaymentSelection.GooglePay,
+        expectsExposure = false,
     )
 
     @Test
@@ -785,6 +810,7 @@ internal class DefaultPaymentElementLoaderTest {
         variant = "control",
         savedSelection = SavedSelection.Link,
         expectedSelection = PaymentSelection.Link(brand = LinkBrand.Link),
+        expectsExposure = false,
     )
 
     @Test

@@ -2,25 +2,45 @@ package com.stripe.android.common.analytics.experiment
 
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.ElementsSession.ExperimentAssignment
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.CustomerState
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import javax.inject.Inject
 
 internal class PreselectLinkExperiment @Inject constructor(
     private val eventReporter: EventReporter,
     private val mode: EventReporter.Mode,
 ) {
-    // Call once at load time, before computing the initial selection for FlowController or Embedded.
-    fun isEnabled(metadata: PaymentMethodMetadata, customer: CustomerState?): Boolean {
-        if (mode == EventReporter.Mode.Complete || !metadata.stripeIntent.isLiveMode) return false
+    // Call only when the existing selection priorities have been exhausted.
+    fun getSelection(
+        metadata: PaymentMethodMetadata,
+        customer: CustomerState?,
+        initializationMode: PaymentElementLoader.InitializationMode,
+        integrationConfiguration: PaymentElementLoader.Configuration,
+    ): PaymentSelection.Link? {
+        if (mode == EventReporter.Mode.Complete || !metadata.stripeIntent.isLiveMode) return null
+        if (initializationMode is PaymentElementLoader.InitializationMode.CheckoutSession) return null
 
-        val experimentsData = metadata.experimentsData ?: return false
+        when (integrationConfiguration) {
+            is PaymentElementLoader.Configuration.PaymentSheet,
+            is PaymentElementLoader.Configuration.Embedded -> Unit
+            else -> return null
+        }
+
+        val configuration = integrationConfiguration.commonConfiguration
+        if (configuration.link.display != PaymentSheet.LinkConfiguration.Display.Automatic) return null
+        if (configuration.walletButtons?.willDisplayExternally == true) return null
+        val brand = metadata.linkState?.configuration?.linkBrand ?: return null
+
+        val experimentsData = metadata.experimentsData ?: return null
         val variant = experimentsData.experimentAssignments[ExperimentAssignment.OCS_MOBILE_PRESELECT_LINK]
         val isEnabled = when (variant) {
             "control", "control_test" -> false
             "treatment" -> true
             // Preserve existing behavior and do not log unimplemented variants.
-            else -> return false
+            else -> return null
         }
 
         eventReporter.onExperimentExposure(
@@ -33,6 +53,6 @@ internal class PreselectLinkExperiment @Inject constructor(
             ),
             paymentMethodMetadata = metadata,
         )
-        return isEnabled
+        return if (isEnabled) PaymentSelection.Link(brand = brand) else null
     }
 }
