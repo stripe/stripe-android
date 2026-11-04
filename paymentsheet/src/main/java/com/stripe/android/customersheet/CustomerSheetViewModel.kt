@@ -895,6 +895,7 @@ internal class CustomerSheetViewModel(
                 handleViewAction(CustomerSheetViewAction.OnUpdateCustomButtonUIState(it))
             },
             hostedSurface = CollectBankAccountLauncher.HOSTED_SURFACE_CUSTOMER_SHEET,
+            themeMode = paymentMethodMetadata.appearance.themeMode,
             onUpdatePrimaryButtonState = { /* no-op, CustomerSheetScreen does not use PrimaryButton.State */ },
             onError = { error ->
                 handleViewAction(CustomerSheetViewAction.OnFormError(error))

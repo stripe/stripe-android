@@ -1,20 +1,26 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.ach
 
 import com.google.common.truth.Truth.assertThat
+import com.google.testing.junit.testparameterinjector.TestParameter
+import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInteractor
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.ui.PrimaryButtonIcon
 import com.stripe.android.uicore.utils.stateFlowOf
 import org.junit.Test
+import org.junit.runner.RunWith
 
+@RunWith(TestParameterInjector::class)
 internal class USBankAccountFormArgumentsFactoryTest {
 
+    @OptIn(AppearanceAPIAdditionsPreview::class)
     @Test
-    fun `create combines metadata and host arguments`() {
+    fun `create combines metadata and host arguments`(@TestParameter themeMode: PaymentSheet.ThemeMode) {
         val incentive = PaymentMethodIncentive(
             identifier = "link_instant_debits",
             displayText = "$5",
@@ -24,6 +30,7 @@ internal class USBankAccountFormArgumentsFactoryTest {
             onBehalfOf = "acct_123",
             sellerBusinessName = "Rocket Rides",
             forceSetupFutureUseBehaviorAndNewMandate = true,
+            appearance = PaymentSheet.Appearance(themeMode = themeMode),
         )
         val draftPaymentSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION
         val autocompleteAddressInteractorFactory = TestAutocompleteAddressInteractor.noOpFactory()
@@ -51,6 +58,7 @@ internal class USBankAccountFormArgumentsFactoryTest {
         )
 
         assertThat(arguments.hostedSurface).isEqualTo("test_surface")
+        assertThat(arguments.themeMode).isEqualTo(themeMode)
         assertThat(arguments.instantDebits).isTrue()
         assertThat(arguments.showCheckbox).isFalse()
         assertThat(arguments.isCompleteFlow).isTrue()

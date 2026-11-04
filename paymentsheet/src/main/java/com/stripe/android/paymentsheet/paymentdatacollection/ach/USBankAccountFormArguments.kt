@@ -55,6 +55,7 @@ internal class USBankAccountFormArguments(
     val stripeIntentId: String?,
     val clientSecret: String?,
     val hostedSurface: String,
+    val themeMode: PaymentSheet.ThemeMode,
     val shippingDetails: AddressDetails?,
     val draftPaymentSelection: PaymentSelection?,
     val autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,

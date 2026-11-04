@@ -39,6 +39,7 @@ class CollectBankAccountForACHLauncherTest {
                 configuration = CONFIGURATION,
                 attachToIntent = true,
                 hostedSurface = null,
+                themeMode = ThemeMode.Automatic,
                 financialConnectionsAvailability = Lite,
                 preCollectedConsent = null
             )
@@ -66,6 +67,7 @@ class CollectBankAccountForACHLauncherTest {
                 configuration = CONFIGURATION,
                 attachToIntent = false,
                 hostedSurface = "payment_element",
+                themeMode = ThemeMode.Automatic,
                 financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
                 preCollectedConsent = null
             )
@@ -97,6 +99,7 @@ class CollectBankAccountForACHLauncherTest {
                 configuration = CONFIGURATION,
                 attachToIntent = true,
                 hostedSurface = null,
+                themeMode = ThemeMode.Automatic,
                 financialConnectionsAvailability = Lite,
                 preCollectedConsent = preCollectedConsent
             )
@@ -126,6 +129,7 @@ class CollectBankAccountForACHLauncherTest {
                 configuration = CONFIGURATION,
                 attachToIntent = false,
                 hostedSurface = "payment_element",
+                themeMode = ThemeMode.Automatic,
                 financialConnectionsAvailability = Full,
                 preCollectedConsent = null,
             )
@@ -150,6 +154,7 @@ class CollectBankAccountForACHLauncherTest {
                 configuration = CONFIGURATION,
                 attachToIntent = true,
                 hostedSurface = null,
+                themeMode = ThemeMode.Automatic,
                 financialConnectionsAvailability = Full,
                 preCollectedConsent = null
             )
@@ -174,6 +179,7 @@ class CollectBankAccountForACHLauncherTest {
                 configuration = CONFIGURATION,
                 attachToIntent = false,
                 hostedSurface = "payment_element",
+                themeMode = ThemeMode.Automatic,
                 financialConnectionsAvailability = Full,
                 preCollectedConsent = null
             )
@@ -203,6 +209,7 @@ class CollectBankAccountForACHLauncherTest {
                 configuration = CONFIGURATION,
                 attachToIntent = true,
                 hostedSurface = null,
+                themeMode = ThemeMode.Automatic,
                 financialConnectionsAvailability = Full,
                 preCollectedConsent = preCollectedConsent
             )
@@ -232,6 +239,7 @@ class CollectBankAccountForACHLauncherTest {
                 configuration = CONFIGURATION,
                 attachToIntent = false,
                 hostedSurface = "payment_element",
+                themeMode = ThemeMode.Automatic,
                 financialConnectionsAvailability = Full,
                 preCollectedConsent = null,
             )
@@ -265,6 +273,7 @@ class CollectBankAccountForACHLauncherTest {
                 amount = 1000,
                 currency = "usd",
                 hostedSurface = null,
+                themeMode = ThemeMode.Automatic,
                 financialConnectionsAvailability = Lite
             )
         )
@@ -291,6 +300,7 @@ class CollectBankAccountForACHLauncherTest {
                 customerId = "customer_id",
                 onBehalfOf = "on_behalf_of_id",
                 hostedSurface = null,
+                themeMode = ThemeMode.Automatic,
                 financialConnectionsAvailability = Full
             )
         )
@@ -303,6 +313,7 @@ class CollectBankAccountForACHLauncherTest {
         return CollectBankAccountForACHLauncher(
             mockHostActivityLauncher,
             hostedSurface = hostedSurface,
+            themeMode = ThemeMode.Automatic,
             financialConnectionsAvailability = financialConnectionsAvailability
         )
     }

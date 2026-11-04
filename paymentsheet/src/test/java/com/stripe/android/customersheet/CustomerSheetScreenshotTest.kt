@@ -113,6 +113,7 @@ internal class CustomerSheetScreenshotTest {
         shippingDetails = null,
         draftPaymentSelection = null,
         hostedSurface = CollectBankAccountLauncher.HOSTED_SURFACE_CUSTOMER_SHEET,
+        themeMode = PaymentSheet.ThemeMode.Automatic,
         onMandateTextChanged = { _, _ -> },
         onLinkedBankAccountChanged = { },
         onUpdatePrimaryButtonState = { },

@@ -40,6 +40,7 @@ class CollectBankAccountForInstantDebitsLauncherTest {
                 configuration = CONFIGURATION,
                 attachToIntent = true,
                 hostedSurface = HOSTED_SURFACE,
+                themeMode = ThemeMode.Automatic,
                 financialConnectionsAvailability = Full,
                 preCollectedConsent = null
             )
@@ -69,6 +70,7 @@ class CollectBankAccountForInstantDebitsLauncherTest {
                 configuration = CONFIGURATION,
                 attachToIntent = true,
                 hostedSurface = HOSTED_SURFACE,
+                themeMode = ThemeMode.Automatic,
                 financialConnectionsAvailability = Full,
                 preCollectedConsent = null
             )
@@ -80,6 +82,7 @@ class CollectBankAccountForInstantDebitsLauncherTest {
             hostActivityLauncher = mockHostActivityLauncher,
             financialConnectionsAvailability = Full,
             hostedSurface = HOSTED_SURFACE,
+            themeMode = ThemeMode.Automatic,
         )
     }
 

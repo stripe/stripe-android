@@ -105,6 +105,7 @@ interface CollectBankAccountLauncher {
             return CollectBankAccountForACHLauncher(
                 // L1 (public standalone) integration is not hosted by any Stripe surface.
                 hostedSurface = null,
+                themeMode = ThemeMode.Automatic,
                 hostActivityLauncher = activity.registerForActivityResult(CollectBankAccountContract()) {
                     callback(it.toUSBankAccountResult())
                 },
@@ -122,6 +123,7 @@ interface CollectBankAccountLauncher {
             return CollectBankAccountForACHLauncher(
                 // L1 (public standalone) integration is not hosted by any Stripe surface.
                 hostedSurface = null,
+                themeMode = ThemeMode.Automatic,
                 hostActivityLauncher = registerForReactNativeActivityResult(
                     activity,
                     signal,
@@ -146,6 +148,7 @@ interface CollectBankAccountLauncher {
             return CollectBankAccountForACHLauncher(
                 // L1 (public standalone) integration is not hosted by any Stripe surface.
                 hostedSurface = null,
+                themeMode = ThemeMode.Automatic,
                 hostActivityLauncher = fragment.registerForActivityResult(CollectBankAccountContract()) {
                     callback(it.toUSBankAccountResult())
                 },
@@ -159,12 +162,14 @@ interface CollectBankAccountLauncher {
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun createForPaymentSheet(
             hostedSurface: String,
+            themeMode: ThemeMode,
             financialConnectionsAvailability: FinancialConnectionsAvailability?,
             activityResultRegistryOwner: ActivityResultRegistryOwner,
             callback: (CollectBankAccountResultInternal) -> Unit,
         ): CollectBankAccountLauncher {
             return CollectBankAccountForACHLauncher(
                 hostedSurface = hostedSurface,
+                themeMode = themeMode,
                 hostActivityLauncher = activityResultRegistryOwner.activityResultRegistry.register(
                     LAUNCHER_KEY,
                     CollectBankAccountContract(),

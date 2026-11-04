@@ -15,6 +15,7 @@ class CollectBankAccountForInstantDebitsLauncher(
     private val hostActivityLauncher: ActivityResultLauncher<CollectBankAccountContract.Args>,
     private val financialConnectionsAvailability: FinancialConnectionsAvailability?,
     private val hostedSurface: String?,
+    private val themeMode: ThemeMode,
 ) : CollectBankAccountLauncher {
 
     override fun presentWithPaymentIntent(
@@ -32,6 +33,7 @@ class CollectBankAccountForInstantDebitsLauncher(
                 clientSecret = clientSecret,
                 configuration = configuration,
                 hostedSurface = hostedSurface,
+                themeMode = themeMode,
                 financialConnectionsAvailability = financialConnectionsAvailability,
                 attachToIntent = true,
                 preCollectedConsent = null,
@@ -67,6 +69,7 @@ class CollectBankAccountForInstantDebitsLauncher(
                 clientSecret = clientSecret,
                 configuration = configuration,
                 hostedSurface = hostedSurface,
+                themeMode = themeMode,
                 financialConnectionsAvailability = financialConnectionsAvailability,
                 attachToIntent = true,
                 preCollectedConsent = null,
@@ -109,6 +112,7 @@ class CollectBankAccountForInstantDebitsLauncher(
                 onBehalfOf = onBehalfOf,
                 amount = amount,
                 hostedSurface = hostedSurface,
+                themeMode = themeMode,
                 financialConnectionsAvailability = financialConnectionsAvailability,
                 currency = currency,
             )
@@ -135,6 +139,7 @@ class CollectBankAccountForInstantDebitsLauncher(
                 onBehalfOf = onBehalfOf,
                 financialConnectionsAvailability = financialConnectionsAvailability,
                 hostedSurface = hostedSurface,
+                themeMode = themeMode,
             )
         )
     }
@@ -151,6 +156,7 @@ class CollectBankAccountForInstantDebitsLauncher(
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun createForPaymentSheet(
             hostedSurface: String,
+            themeMode: ThemeMode,
             financialConnectionsAvailability: FinancialConnectionsAvailability?,
             activityResultRegistryOwner: ActivityResultRegistryOwner,
             callback: (CollectBankAccountForInstantDebitsResult) -> Unit,
@@ -159,6 +165,7 @@ class CollectBankAccountForInstantDebitsLauncher(
                 // TODO@carlosmuvi: if exposing this as an L1 (standalone) integration,
                 // use a separate method and ensure the correct hostedSurface is set.
                 hostedSurface = hostedSurface,
+                themeMode = themeMode,
                 financialConnectionsAvailability = financialConnectionsAvailability,
                 hostActivityLauncher = activityResultRegistryOwner.activityResultRegistry.register(
                     LAUNCHER_KEY,
