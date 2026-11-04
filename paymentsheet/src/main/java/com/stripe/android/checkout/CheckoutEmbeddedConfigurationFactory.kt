@@ -43,7 +43,6 @@ internal class CheckoutEmbeddedConfigurationFactory @Inject constructor(
             )
             .shippingDetails(collectedDetails.toShippingDetails())
             .allowsDelayedPaymentMethods(true)
-            .allowsPaymentMethodsRequiringShippingAddress(true)
             .build()
     }
 }

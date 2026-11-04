@@ -1,5 +1,8 @@
 # Migration Guide
 
+## Next major version
+- `allowsPaymentMethodsRequiringShippingAddress` has been removed from `PaymentSheet.Configuration` and the `PaymentSheet.Configuration.Builder` and `EmbeddedPaymentElement.Configuration.Builder` APIs. Remove the constructor argument or builder call from your integration. Payment methods no longer require a shipping address to be available.
+
 ## Migrating from versions < 23.17.0
 - Changes to `googlePlacesApiKey`:
   * `PaymentSheet.Configuration.Builder.googlePlacesApiKey`, `AddressLauncher.Configuration.Builder.googlePlacesApiKey`, and the `AddressLauncher.Configuration` constructor overloads that accept a Google Places API key are deprecated and will be removed in a future release.

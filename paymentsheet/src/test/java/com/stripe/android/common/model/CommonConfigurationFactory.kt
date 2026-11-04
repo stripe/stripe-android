@@ -14,7 +14,6 @@ internal object CommonConfigurationFactory {
         defaultBillingDetails: PaymentSheet.BillingDetails? = null,
         shippingDetails: AddressDetails? = null,
         allowsDelayedPaymentMethods: Boolean = true,
-        allowsPaymentMethodsRequiringShippingAddress: Boolean = true,
         billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
             PaymentSheet.BillingDetailsCollectionConfiguration(),
         preferredNetworks: List<CardBrand> = emptyList(),
@@ -38,7 +37,6 @@ internal object CommonConfigurationFactory {
         defaultBillingDetails = defaultBillingDetails,
         shippingDetails = shippingDetails,
         allowsDelayedPaymentMethods = allowsDelayedPaymentMethods,
-        allowsPaymentMethodsRequiringShippingAddress = allowsPaymentMethodsRequiringShippingAddress,
         billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
         preferredNetworks = preferredNetworks,
         allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod,

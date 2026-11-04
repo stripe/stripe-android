@@ -250,7 +250,6 @@ class EmbeddedPaymentElement @Inject internal constructor(
         internal val defaultBillingDetails: PaymentSheet.BillingDetails?,
         internal val shippingDetails: AddressDetails?,
         internal val allowsDelayedPaymentMethods: Boolean,
-        internal val allowsPaymentMethodsRequiringShippingAddress: Boolean,
         internal val appearance: PaymentSheet.Appearance,
         internal val primaryButtonLabel: String?,
         internal val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
@@ -281,8 +280,6 @@ class EmbeddedPaymentElement @Inject internal constructor(
             private var defaultBillingDetails: PaymentSheet.BillingDetails? = ConfigurationDefaults.billingDetails
             private var shippingDetails: AddressDetails? = ConfigurationDefaults.shippingDetails
             private var allowsDelayedPaymentMethods: Boolean = ConfigurationDefaults.allowsDelayedPaymentMethods
-            private var allowsPaymentMethodsRequiringShippingAddress: Boolean =
-                ConfigurationDefaults.allowsPaymentMethodsRequiringShippingAddress
             private var appearance: PaymentSheet.Appearance = ConfigurationDefaults.appearance
             private var primaryButtonLabel: String? = ConfigurationDefaults.primaryButtonLabel
             private var billingDetailsCollectionConfiguration =
@@ -358,20 +355,6 @@ class EmbeddedPaymentElement @Inject internal constructor(
              */
             fun allowsDelayedPaymentMethods(allowsDelayedPaymentMethods: Boolean) =
                 apply { this.allowsDelayedPaymentMethods = allowsDelayedPaymentMethods }
-
-            /**
-             * If `true`, allows payment methods that require a shipping address, like Afterpay and
-             * Affirm. Defaults to `false`.
-             *
-             * **Note**: The payment element considers this property `true` if `shipping` details are present
-             * on the PaymentIntent/SetupIntent when loaded.
-             */
-            fun allowsPaymentMethodsRequiringShippingAddress(
-                allowsPaymentMethodsRequiringShippingAddress: Boolean,
-            ) = apply {
-                this.allowsPaymentMethodsRequiringShippingAddress =
-                    allowsPaymentMethodsRequiringShippingAddress
-            }
 
             /**
              * Describes the appearance of the embedded payment element.
@@ -560,7 +543,6 @@ class EmbeddedPaymentElement @Inject internal constructor(
                 defaultBillingDetails = defaultBillingDetails,
                 shippingDetails = shippingDetails,
                 allowsDelayedPaymentMethods = allowsDelayedPaymentMethods,
-                allowsPaymentMethodsRequiringShippingAddress = allowsPaymentMethodsRequiringShippingAddress,
                 appearance = appearance,
                 primaryButtonLabel = primaryButtonLabel,
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
@@ -591,7 +573,6 @@ class EmbeddedPaymentElement @Inject internal constructor(
             .defaultBillingDetails(defaultBillingDetails)
             .shippingDetails(shippingDetails)
             .allowsDelayedPaymentMethods(allowsDelayedPaymentMethods)
-            .allowsPaymentMethodsRequiringShippingAddress(allowsPaymentMethodsRequiringShippingAddress)
             .appearance(appearance)
             .billingDetailsCollectionConfiguration(billingDetailsCollectionConfiguration)
             .preferredNetworks(preferredNetworks)

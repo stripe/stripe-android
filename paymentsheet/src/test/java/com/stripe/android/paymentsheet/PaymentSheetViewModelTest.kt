@@ -1224,12 +1224,11 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `Verify supported payment methods includes afterpay if no shipping and no allow flag`() {
+    fun `Verify supported payment methods include afterpay without shipping details`() {
         val viewModel = createViewModel(
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
                 config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.newBuilder()
                     .shippingDetails(null)
-                    .allowsPaymentMethodsRequiringShippingAddress(false)
                     .build()
             ),
             stripeIntent = PaymentIntentFixtures.PI_WITH_SHIPPING.copy(
@@ -1242,30 +1241,25 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `Verify supported payment methods include afterpay if allow flag but no shipping`() {
+    fun `Verify supported payment methods include affirm without shipping details`() {
         val viewModel = createViewModel(
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
                 config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.newBuilder()
-                    .allowsPaymentMethodsRequiringShippingAddress(true)
+                    .shippingDetails(null)
                     .build()
             ),
             stripeIntent = PaymentIntentFixtures.PI_WITH_SHIPPING.copy(
-                paymentMethodTypes = listOf("afterpay_clearpay"),
+                paymentMethodTypes = listOf("affirm"),
                 shipping = null,
             ),
         )
 
-        assertThat(viewModel.supportedPaymentMethodTypes).containsExactly("afterpay_clearpay")
+        assertThat(viewModel.supportedPaymentMethodTypes).containsExactly("affirm")
     }
 
     @Test
-    fun `Verify supported payment methods include afterpay if shipping but no allow flag`() {
+    fun `Verify supported payment methods include afterpay with shipping details`() {
         val viewModel = createViewModel(
-            args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
-                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.newBuilder()
-                    .allowsPaymentMethodsRequiringShippingAddress(true)
-                    .build()
-            ),
             stripeIntent = PaymentIntentFixtures.PI_WITH_SHIPPING.copy(
                 paymentMethodTypes = listOf("afterpay_clearpay"),
             ),

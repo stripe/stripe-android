@@ -59,7 +59,6 @@ internal data class PaymentMethodMetadata(
     val stripeIntent: StripeIntent,
     val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
     val allowsDelayedPaymentMethods: Boolean,
-    val allowsPaymentMethodsRequiringShippingAddress: Boolean,
     val allowsLinkInSavedPaymentMethods: Boolean,
     val availableWallets: List<WalletType>,
     val paymentMethodOrder: List<String>,
@@ -414,8 +413,6 @@ internal data class PaymentMethodMetadata(
                 stripeIntent = elementsSession.stripeIntent,
                 billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
                 allowsDelayedPaymentMethods = configuration.allowsDelayedPaymentMethods,
-                allowsPaymentMethodsRequiringShippingAddress = configuration
-                    .allowsPaymentMethodsRequiringShippingAddress,
                 allowsLinkInSavedPaymentMethods = elementsSession.enableLinkInSpm,
                 availableWallets = WalletType.listFrom(
                     elementsSession = elementsSession,
@@ -486,7 +483,6 @@ internal data class PaymentMethodMetadata(
                 stripeIntent = elementsSession.stripeIntent,
                 billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
                 allowsDelayedPaymentMethods = true,
-                allowsPaymentMethodsRequiringShippingAddress = false,
                 allowsLinkInSavedPaymentMethods = false,
                 availableWallets = WalletType.listFrom(
                     elementsSession = elementsSession,

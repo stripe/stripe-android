@@ -421,8 +421,6 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
                         billingDetailsCollectionConfiguration = configuration
                             .billingDetailsCollectionConfiguration,
                         allowsDelayedPaymentMethods = configuration.allowsDelayedPaymentMethods,
-                        allowsPaymentMethodsRequiringShippingAddress = configuration
-                            .allowsPaymentMethodsRequiringShippingAddress,
                         isGooglePayReady = true,
                         cbcEligibility = CardBrandChoiceEligibility.Ineligible,
                     ),

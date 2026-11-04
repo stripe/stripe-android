@@ -1080,7 +1080,6 @@ internal class FlowControllerTest(
                 configuration = apiConfigurationTestType.applyTo(
                     PaymentSheet.Configuration.Builder("Example, Inc.")
                         .allowsDelayedPaymentMethods(true)
-                        .allowsPaymentMethodsRequiringShippingAddress(true)
                         .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
                         .build()
                 ),

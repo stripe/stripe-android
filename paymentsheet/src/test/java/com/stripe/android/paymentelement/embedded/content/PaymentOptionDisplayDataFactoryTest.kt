@@ -378,7 +378,6 @@ internal class PaymentOptionDisplayDataFactoryTest {
             ),
             billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
             allowsDelayedPaymentMethods = false,
-            allowsPaymentMethodsRequiringShippingAddress = false,
             isGooglePayReady = true,
             cbcEligibility = CardBrandChoiceEligibility.Ineligible,
         )

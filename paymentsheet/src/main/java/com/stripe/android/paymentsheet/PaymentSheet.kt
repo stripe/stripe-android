@@ -894,18 +894,6 @@ class PaymentSheet internal constructor(
          */
         internal val allowsDelayedPaymentMethods: Boolean = ConfigurationDefaults.allowsDelayedPaymentMethods,
         /**
-         * If `true`, allows payment methods that require a shipping address, like Afterpay and
-         * Affirm. Defaults to `false`.
-         *
-         * Set this to `true` if you collect shipping addresses via [shippingDetails] or
-         * [FlowController.shippingDetails].
-         *
-         * **Note**: PaymentSheet considers this property `true` if `shipping` details are present
-         * on the PaymentIntent when PaymentSheet loads.
-         */
-        internal val allowsPaymentMethodsRequiringShippingAddress: Boolean =
-            ConfigurationDefaults.allowsPaymentMethodsRequiringShippingAddress,
-        /**
          * Describes the appearance of Payment Sheet.
          */
         internal val appearance: Appearance = ConfigurationDefaults.appearance,
@@ -1000,18 +988,6 @@ class PaymentSheet internal constructor(
              */
             allowsDelayedPaymentMethods: Boolean = ConfigurationDefaults.allowsDelayedPaymentMethods,
             /**
-             * If `true`, allows payment methods that require a shipping address, like Afterpay and
-             * Affirm. Defaults to `false`.
-             *
-             * Set this to `true` if you collect shipping addresses via [shippingDetails] or
-             * [FlowController.shippingDetails].
-             *
-             * **Note**: PaymentSheet considers this property `true` if `shipping` details are present
-             * on the PaymentIntent when PaymentSheet loads.
-             */
-            allowsPaymentMethodsRequiringShippingAddress: Boolean =
-                ConfigurationDefaults.allowsPaymentMethodsRequiringShippingAddress,
-            /**
              * Describes the appearance of Payment Sheet.
              */
             appearance: Appearance = ConfigurationDefaults.appearance,
@@ -1047,7 +1023,6 @@ class PaymentSheet internal constructor(
             defaultBillingDetails = defaultBillingDetails,
             shippingDetails = shippingDetails,
             allowsDelayedPaymentMethods = allowsDelayedPaymentMethods,
-            allowsPaymentMethodsRequiringShippingAddress = allowsPaymentMethodsRequiringShippingAddress,
             appearance = appearance,
             primaryButtonLabel = primaryButtonLabel,
             billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
@@ -1070,8 +1045,6 @@ class PaymentSheet internal constructor(
             private var defaultBillingDetails: BillingDetails? = ConfigurationDefaults.billingDetails
             private var shippingDetails: AddressDetails? = ConfigurationDefaults.shippingDetails
             private var allowsDelayedPaymentMethods: Boolean = ConfigurationDefaults.allowsDelayedPaymentMethods
-            private var allowsPaymentMethodsRequiringShippingAddress: Boolean =
-                ConfigurationDefaults.allowsPaymentMethodsRequiringShippingAddress
             private var appearance: Appearance = ConfigurationDefaults.appearance
             private var primaryButtonLabel: String? = ConfigurationDefaults.primaryButtonLabel
             private var billingDetailsCollectionConfiguration =
@@ -1113,13 +1086,6 @@ class PaymentSheet internal constructor(
 
             fun allowsDelayedPaymentMethods(allowsDelayedPaymentMethods: Boolean) =
                 apply { this.allowsDelayedPaymentMethods = allowsDelayedPaymentMethods }
-
-            fun allowsPaymentMethodsRequiringShippingAddress(
-                allowsPaymentMethodsRequiringShippingAddress: Boolean,
-            ) = apply {
-                this.allowsPaymentMethodsRequiringShippingAddress =
-                    allowsPaymentMethodsRequiringShippingAddress
-            }
 
             fun appearance(appearance: Appearance) =
                 apply { this.appearance = appearance }
@@ -1287,7 +1253,6 @@ class PaymentSheet internal constructor(
                 defaultBillingDetails = defaultBillingDetails,
                 shippingDetails = shippingDetails,
                 allowsDelayedPaymentMethods = allowsDelayedPaymentMethods,
-                allowsPaymentMethodsRequiringShippingAddress = allowsPaymentMethodsRequiringShippingAddress,
                 appearance = appearance,
                 primaryButtonLabel = primaryButtonLabel,
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
@@ -1328,7 +1293,6 @@ class PaymentSheet internal constructor(
             .defaultBillingDetails(defaultBillingDetails)
             .shippingDetails(shippingDetails)
             .allowsDelayedPaymentMethods(allowsDelayedPaymentMethods)
-            .allowsPaymentMethodsRequiringShippingAddress(allowsPaymentMethodsRequiringShippingAddress)
             .appearance(appearance)
             .billingDetailsCollectionConfiguration(billingDetailsCollectionConfiguration)
             .preferredNetworks(preferredNetworks)

@@ -32,7 +32,6 @@ internal object PaymentMethodMetadataFactory {
         billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
             PaymentSheet.BillingDetailsCollectionConfiguration(),
         allowsDelayedPaymentMethods: Boolean = true,
-        allowsPaymentMethodsRequiringShippingAddress: Boolean = false,
         allowsLinkInSavedPaymentMethods: Boolean = false,
         availableWallets: List<WalletType> = listOf(WalletType.GooglePay),
         paymentMethodOrder: List<String> = emptyList(),
@@ -88,7 +87,6 @@ internal object PaymentMethodMetadataFactory {
             stripeIntent = stripeIntent,
             billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
             allowsDelayedPaymentMethods = allowsDelayedPaymentMethods,
-            allowsPaymentMethodsRequiringShippingAddress = allowsPaymentMethodsRequiringShippingAddress,
             allowsLinkInSavedPaymentMethods = allowsLinkInSavedPaymentMethods,
             availableWallets = availableWallets,
             paymentMethodOrder = paymentMethodOrder,
