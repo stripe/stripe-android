@@ -14,7 +14,7 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import org.json.JSONObject
 
-internal class CheckoutLiveBackend(
+internal class CheckoutPlaygroundBackend(
     baseUrl: String,
     private val merchant: String,
 ) {

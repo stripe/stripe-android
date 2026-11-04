@@ -23,14 +23,14 @@ import kotlinx.coroutines.withTimeout
 import kotlinx.serialization.json.JsonObject
 import kotlin.time.Duration.Companion.seconds
 
-internal fun runCheckoutLiveTest(
+internal fun runCheckoutIntegrationTest(
     composeRule: ComposeTestRule,
     merchant: String,
     sessionParams: JsonObject,
     configuration: CheckoutElementsController.Configuration,
-    block: CheckoutLiveTestContext.() -> Unit,
+    block: CheckoutIntegrationTestContext.() -> Unit,
 ) {
-    val backend = CheckoutLiveBackend(
+    val backend = CheckoutPlaygroundBackend(
         baseUrl = "https://stp-mobile-playground-backend-v7.stripedemos.com/",
         merchant = merchant,
     )
@@ -72,7 +72,7 @@ internal fun runCheckoutLiveTest(
             }
             scenario.moveToState(Lifecycle.State.RESUMED)
 
-            CheckoutLiveTestContext(
+            CheckoutIntegrationTestContext(
                 composeRule = composeRule,
                 presenter = presenter,
                 checkoutResult = checkoutResult,
@@ -83,7 +83,7 @@ internal fun runCheckoutLiveTest(
     }
 }
 
-internal class CheckoutLiveTestContext(
+internal class CheckoutIntegrationTestContext(
     composeRule: ComposeTestRule,
     private val presenter: CheckoutElementsPresenter,
     private val checkoutResult: CompletableDeferred<CheckoutElementsController.Result>,

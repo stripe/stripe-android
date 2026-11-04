@@ -5,7 +5,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.elements.PaymentElement
 import com.stripe.android.paymentelement.CheckoutSessionPreview
-import com.stripe.android.paymentsheet.RequiresLiveBackend
+import com.stripe.android.paymentsheet.RequiresPlaygroundBackend
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
@@ -18,8 +18,8 @@ import org.junit.runner.RunWith
 
 @OptIn(CheckoutSessionPreview::class)
 @RunWith(AndroidJUnit4::class)
-@RequiresLiveBackend
-internal class CheckoutCardLiveTest {
+@RequiresPlaygroundBackend
+internal class CheckoutCardIntegrationTest {
     @get:Rule
     val composeRule = createEmptyComposeRule()
 
@@ -38,7 +38,7 @@ internal class CheckoutCardLiveTest {
         )
 
     @Test
-    fun testSuccessfulCardPayment() = runCheckoutLiveTest(
+    fun testSuccessfulCardPayment() = runCheckoutIntegrationTest(
         composeRule = composeRule,
         merchant = "US",
         sessionParams = cardOnlySessionParams(),
@@ -54,7 +54,7 @@ internal class CheckoutCardLiveTest {
     }
 
     @Test
-    fun testDeclinedCardReportsFailure() = runCheckoutLiveTest(
+    fun testDeclinedCardReportsFailure() = runCheckoutIntegrationTest(
         composeRule = composeRule,
         merchant = "US",
         sessionParams = cardOnlySessionParams(),

@@ -19,7 +19,7 @@ pipelines:
       check-and-test: { }
       run-instrumentation-and-ime-tests: { }
       run-paymentsheet-instrumentation-tests: { }
-      run-checkout-live-e2e: { }
+      run-checkout-integration-e2e: { }
       run-financial-connections-and-crypto-instrumentation-tests: { }
       run-connections-e2e-tests-on-push: { }
       run-cardscan-and-google-pay-tests: { }
@@ -387,7 +387,7 @@ workflows:
           title: Execute instrumentation tests
           timeout: 1200
           inputs:
-            - content: ./scripts/retry_with_emulator_cleanup.sh 3 ./gradlew -Pandroid.experimental.androidTest.numManagedDeviceShards=6 -Pandroid.experimental.testOptions.managedDevices.maxConcurrentDevices=6 -Pandroid.testInstrumentationRunnerArguments.notAnnotation=com.stripe.android.paymentsheet.RequiresIme,com.stripe.android.paymentsheet.RequiresLiveBackend :paymentsheet:pixel2api33DebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
+            - content: ./scripts/retry_with_emulator_cleanup.sh 3 ./gradlew -Pandroid.experimental.androidTest.numManagedDeviceShards=6 -Pandroid.experimental.testOptions.managedDevices.maxConcurrentDevices=6 -Pandroid.testInstrumentationRunnerArguments.notAnnotation=com.stripe.android.paymentsheet.RequiresIme,com.stripe.android.paymentsheet.RequiresPlaygroundBackend :paymentsheet:pixel2api33DebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
       - bundle::export_instrumentation_test_results:
           title: Export PaymentSheet instrumentation test results
           inputs:
@@ -397,22 +397,22 @@ workflows:
         stack: ubuntu-resolute-26.04-bitrise-2026-android
         machine_type_id: g2.linux.x-large
         stack_rollback_version: "1-14-0"
-  run-checkout-live-e2e:
+  run-checkout-integration-e2e:
     before_run:
       - prepare_all
     after_run:
       - conclude_all
     steps:
       - script@1:
-          title: Execute Checkout live E2E tests
+          title: Execute Checkout backend integration tests
           timeout: 1200
           inputs:
-            - content: ./scripts/retry_with_emulator_cleanup.sh 3 ./gradlew -PcheckoutLiveBackendTests=true -Pandroid.testInstrumentationRunnerArguments.annotation=com.stripe.android.paymentsheet.RequiresLiveBackend :paymentsheet:pixel2api33DebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
+            - content: ./scripts/retry_with_emulator_cleanup.sh 3 ./gradlew -PcheckoutIntegrationTests=true -Pandroid.testInstrumentationRunnerArguments.annotation=com.stripe.android.paymentsheet.RequiresPlaygroundBackend :paymentsheet:pixel2api33DebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
       - bundle::export_instrumentation_test_results:
-          title: Export Checkout live E2E test results
+          title: Export Checkout backend integration test results
           is_always_run: true
           inputs:
-            - test_title: Checkout live E2E tests
+            - test_title: Checkout backend integration tests
     meta:
       bitrise.io:
         stack: ubuntu-resolute-26.04-bitrise-2026-android
