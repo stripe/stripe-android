@@ -184,6 +184,7 @@ internal class EmbeddedSavedPaymentMethodMutatorFactoryTest {
                 )
             ),
             mandateText = stateFlowOf(null),
+            isContinueButtonVisible = stateFlowOf(false),
             onContinueClick = {},
             onPrimaryButtonDisabledClick = {},
         )

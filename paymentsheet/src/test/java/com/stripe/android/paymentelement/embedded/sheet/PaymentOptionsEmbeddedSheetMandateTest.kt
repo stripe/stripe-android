@@ -116,7 +116,7 @@ internal class PaymentOptionsEmbeddedSheetMandateTest {
     }
 
     @Test
-    fun `horizontal saved card shows Continue without a mandate`() = runScenario(
+    fun `horizontal saved card hides Continue and mandate`() = runScenario(
         paymentMethodMetadata = metadata(
             paymentMethodTypes = listOf("card", "us_bank_account"),
             layout = PaymentSheet.PaymentMethodLayout.Horizontal,
@@ -125,7 +125,7 @@ internal class PaymentOptionsEmbeddedSheetMandateTest {
         selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
     ) {
         composeTestRule.onNodeWithTag(SHEET_MANDATE_TEST_TAG).assertDoesNotExist()
-        composeTestRule.onNodeWithTag(PRIMARY_BUTTON_TEST_TAG).performScrollTo().assertIsDisplayed()
+        composeTestRule.onNodeWithTag(PRIMARY_BUTTON_TEST_TAG).assertDoesNotExist()
     }
 
     @Test
