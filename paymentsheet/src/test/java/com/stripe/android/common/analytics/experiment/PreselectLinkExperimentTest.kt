@@ -17,7 +17,6 @@ import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
@@ -32,7 +31,11 @@ internal class PreselectLinkExperimentTest {
     fun `supported variants log one exposure in eligible integrations`(
         @TestParameter("control", "control_test", "treatment") variant: String,
         @TestParameter("Custom", "Embedded") mode: EventReporter.Mode,
-    ) = runScenario(metadata = metadata(variant), mode = mode) {
+        @TestParameter isLiveMode: Boolean,
+    ) = runScenario(
+        metadata = metadata(variant = variant, isLiveMode = isLiveMode),
+        mode = mode,
+    ) {
         assertThat(getSelection()).isEqualTo(
             PaymentSelection.Link(brand = metadata.linkState!!.configuration.linkBrand)
                 .takeIf { variant == "treatment" },
@@ -81,15 +84,6 @@ internal class PreselectLinkExperimentTest {
 
     @Test
     fun `PaymentSheet does not change behavior or log exposure`() = runScenario(mode = EventReporter.Mode.Complete) {
-        assertThat(getSelection()).isNull()
-        eventReporter.experimentExposureCalls.expectNoEvents()
-    }
-
-    @Test
-    fun `test mode does not change behavior or log exposure`() = runScenario(
-        metadata = metadata().copy(stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD),
-    ) {
-        assertThat(metadata.stripeIntent.isLiveMode).isFalse()
         assertThat(getSelection()).isNull()
         eventReporter.experimentExposureCalls.expectNoEvents()
     }
@@ -159,20 +153,6 @@ internal class PreselectLinkExperimentTest {
     }
 
     @Test
-    fun `checkout initialization does not change behavior or log exposure`() = runScenario(
-        mode = EventReporter.Mode.Embedded,
-        initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
-            instancesKey = "instances_123",
-            checkoutSessionResponse = CheckoutSessionResponseFactory.create(liveMode = true),
-            collectedEmail = null,
-            configuredElements = emptyList(),
-        ),
-    ) {
-        assertThat(getSelection()).isNull()
-        eventReporter.experimentExposureCalls.expectNoEvents()
-    }
-
-    @Test
     fun `exposure includes Link login state and payment method availability`(
         @TestParameter loginState: LinkState.LoginState,
         @TestParameter hasSavedPaymentMethod: Boolean,
@@ -217,17 +197,13 @@ internal class PreselectLinkExperimentTest {
     private fun runScenario(
         metadata: PaymentMethodMetadata = metadata(),
         mode: EventReporter.Mode = EventReporter.Mode.Custom,
-        initializationMode: PaymentElementLoader.InitializationMode =
-            PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
-            ),
         integrationConfiguration: PaymentElementLoader.Configuration = integrationConfiguration(mode),
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val eventReporter = FakeEventReporter()
         Scenario(
             metadata, eventReporter, PreselectLinkExperiment(eventReporter, mode),
-            initializationMode, integrationConfiguration,
+            integrationConfiguration,
         ).block()
         eventReporter.validate()
     }
@@ -236,13 +212,11 @@ internal class PreselectLinkExperimentTest {
         val metadata: PaymentMethodMetadata,
         val eventReporter: FakeEventReporter,
         val experiment: PreselectLinkExperiment,
-        val initializationMode: PaymentElementLoader.InitializationMode,
         val integrationConfiguration: PaymentElementLoader.Configuration,
     ) {
         fun getSelection(customer: CustomerState? = null) = experiment.getSelection(
             metadata = metadata,
             customer = customer,
-            initializationMode = initializationMode,
             integrationConfiguration = integrationConfiguration,
         )
     }
@@ -265,10 +239,13 @@ internal class PreselectLinkExperimentTest {
         }
     }
 
-    private fun metadata(variant: String = "treatment"): PaymentMethodMetadata = PaymentMethodMetadataFactory.create(
+    private fun metadata(
+        variant: String = "treatment",
+        isLiveMode: Boolean = true,
+    ): PaymentMethodMetadata = PaymentMethodMetadataFactory.create(
         stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
             paymentMethodTypes = listOf("card"),
-            isLiveMode = true,
+            isLiveMode = isLiveMode,
         ),
         isGooglePayReady = false,
         linkState = LinkState(

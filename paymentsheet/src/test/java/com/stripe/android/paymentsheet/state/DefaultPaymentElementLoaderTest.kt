@@ -821,11 +821,67 @@ internal class DefaultPaymentElementLoaderTest {
     )
 
     @Test
-    fun `Link preselection does not affect testmode sessions`() = testLinkPreselection(
+    fun `Link preselection honors a backend assignment in test mode`() = testLinkPreselection(
+        isLiveMode = false,
+        expectedSelection = PaymentSelection.Link(brand = LinkBrand.Link),
+    )
+
+    @Test
+    fun `Link preselection without a backend assignment does not affect testmode sessions`() = testLinkPreselection(
+        variant = null,
         isLiveMode = false,
         expectedSelection = null,
         expectsExposure = false,
     )
+
+    @Test
+    fun `Link preselection treatment supplies final fallback for CheckoutSession`() = testLinkPreselection(
+        mode = EventReporter.Mode.Embedded,
+        initializationMode = checkoutInitializationMode(),
+        hasCustomer = false,
+        expectedSelection = PaymentSelection.Link(brand = LinkBrand.Link),
+    )
+
+    @Test
+    fun `Link preselection control keeps no selection and logs exposure for CheckoutSession`() = testLinkPreselection(
+        variant = "control",
+        mode = EventReporter.Mode.Embedded,
+        initializationMode = checkoutInitializationMode(variant = "control"),
+        hasCustomer = false,
+        expectedSelection = null,
+    )
+
+    @Test
+    fun `Link preselection control_test keeps no selection and logs exposure for CheckoutSession`() = testLinkPreselection(
+        variant = "control_test",
+        mode = EventReporter.Mode.Embedded,
+        initializationMode = checkoutInitializationMode(variant = "control_test"),
+        hasCustomer = false,
+        expectedSelection = null,
+    )
+
+    private fun checkoutInitializationMode(variant: String = "treatment"): PaymentElementLoader.InitializationMode {
+        val response = createCheckoutSessionResponse(
+            canDetachPaymentMethod = false,
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(isLiveMode = true),
+        )
+        return PaymentElementLoader.InitializationMode.CheckoutSession(
+            instancesKey = "instances_123",
+            checkoutSessionResponse = response.copy(
+                livemode = true,
+                customer = null,
+                elementsSession = requireNotNull(response.elementsSession).copy(
+                    linkSettings = createLinkSettings(passthroughModeEnabled = false),
+                    experimentsData = ElementsSession.ExperimentsData(
+                        arbId = "arb123",
+                        experimentAssignments = mapOf(ExperimentAssignment.OCS_MOBILE_PRESELECT_LINK to variant),
+                    ),
+                ),
+            ),
+            collectedEmail = null,
+            configuredElements = emptyList(),
+        )
+    }
 
     @OptIn(WalletButtonsPreview::class)
     @Suppress("LongMethod")
@@ -833,6 +889,7 @@ internal class DefaultPaymentElementLoaderTest {
         expectedSelection: PaymentSelection?,
         variant: String? = "treatment",
         mode: EventReporter.Mode = EventReporter.Mode.Custom,
+        initializationMode: PaymentElementLoader.InitializationMode = DEFAULT_INITIALIZATION_MODE,
         isLiveMode: Boolean = true,
         isLinkEnabled: Boolean = true,
         linkBrand: LinkBrand = LinkBrand.Link,
@@ -889,7 +946,7 @@ internal class DefaultPaymentElementLoaderTest {
             )
         }
         val state = loader.load(
-            initializationMode = DEFAULT_INITIALIZATION_MODE,
+            initializationMode = initializationMode,
             integrationConfiguration = config,
             metadata = PaymentElementLoader.Metadata(initializedViaCompose = false),
         ).getOrThrow()

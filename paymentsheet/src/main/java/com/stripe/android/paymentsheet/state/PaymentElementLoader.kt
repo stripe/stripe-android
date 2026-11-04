@@ -467,11 +467,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                     metadata = paymentMethodMetadata,
                     customer = customer,
                     isGooglePayReady = isGooglePayReady,
-                    isUsingWalletButtons = configuration.walletButtons?.willDisplayExternally ?: false,
-                ) ?: preselectLinkExperiment.getSelection(
-                    metadata = paymentMethodMetadata,
-                    customer = customer,
-                    initializationMode = initializationMode,
                     integrationConfiguration = integrationConfiguration,
                 )
             }
@@ -782,8 +777,10 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         metadata: PaymentMethodMetadata,
         customer: CustomerState?,
         isGooglePayReady: Boolean,
-        isUsingWalletButtons: Boolean,
+        integrationConfiguration: PaymentElementLoader.Configuration,
     ): PaymentSelection? {
+        val isUsingWalletButtons = integrationConfiguration.commonConfiguration.walletButtons?.willDisplayExternally
+            ?: false
         val isDefaultPaymentMethodEnabled = metadata.customerMetadata?.isPaymentMethodSetAsDefaultEnabled ?: false
         val primaryPaymentSelection = if (isDefaultPaymentMethodEnabled) {
             customer?.paymentMethods?.firstOrNull {
@@ -821,6 +818,11 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             ?: PaymentSelection.GooglePay.takeIf {
                 !isUsingWalletButtons && isGooglePayReady
             }
+            ?: preselectLinkExperiment.getSelection(
+                metadata = metadata,
+                customer = customer,
+                integrationConfiguration = integrationConfiguration,
+            )
     }
 
     private suspend fun retrieveSavedSelection(

@@ -17,11 +17,9 @@ internal class PreselectLinkExperiment @Inject constructor(
     fun getSelection(
         metadata: PaymentMethodMetadata,
         customer: CustomerState?,
-        initializationMode: PaymentElementLoader.InitializationMode,
         integrationConfiguration: PaymentElementLoader.Configuration,
     ): PaymentSelection.Link? {
-        if (mode == EventReporter.Mode.Complete || !metadata.stripeIntent.isLiveMode) return null
-        if (initializationMode is PaymentElementLoader.InitializationMode.CheckoutSession) return null
+        if (mode == EventReporter.Mode.Complete) return null
 
         when (integrationConfiguration) {
             is PaymentElementLoader.Configuration.PaymentSheet,
@@ -30,6 +28,7 @@ internal class PreselectLinkExperiment @Inject constructor(
         }
 
         val configuration = integrationConfiguration.commonConfiguration
+        // Exclude these cases because Link would be hidden in the Payment Element.
         if (configuration.link.display != PaymentSheet.LinkConfiguration.Display.Automatic) return null
         if (configuration.walletButtons?.willDisplayExternally == true) return null
         val brand = metadata.linkState?.configuration?.linkBrand ?: return null
