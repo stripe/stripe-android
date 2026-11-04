@@ -7,7 +7,6 @@ import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
-import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.PaymentAnalyticsEvent
@@ -18,7 +17,6 @@ import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Named
-import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
@@ -33,7 +31,6 @@ internal class WebIntentNextActionHandler @Inject constructor(
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
     @Named(ENABLE_LOGGING) private val enableLogging: Boolean,
     @UIContext private val uiContext: CoroutineContext,
-    private val apiConfigProvider: Provider<ApiConfiguration.State>,
     @Named(IS_INSTANT_APP) private val isInstantApp: Boolean,
     private val defaultReturnUrl: DefaultReturnUrl,
     private val redirectResolver: RedirectResolver,
@@ -42,7 +39,7 @@ internal class WebIntentNextActionHandler @Inject constructor(
     override suspend fun performNextActionOnResumed(
         host: AuthActivityStarterHost,
         actionable: StripeIntent,
-        requestOptions: ApiRequest.Options
+        apiConfiguration: ApiConfiguration.State
     ) {
         val webAuthParams = when (val nextActionData = actionable.nextActionData) {
             // can only triggered when `use_stripe_sdk=false`
@@ -72,7 +69,7 @@ internal class WebIntentNextActionHandler @Inject constructor(
             requestCode = StripePaymentController.getRequestCode(actionable),
             clientSecret = actionable.clientSecret.orEmpty(),
             authUrl = webAuthParams.authUrl,
-            stripeAccount = requestOptions.stripeAccount,
+            apiConfiguration = apiConfiguration,
             returnUrl = webAuthParams.returnUrl,
             shouldCancelSource = webAuthParams.shouldCancelSource,
             shouldCancelIntentOnUserNavigation = webAuthParams.shouldCancelIntentOnUserNavigation,
@@ -87,7 +84,7 @@ internal class WebIntentNextActionHandler @Inject constructor(
         requestCode: Int,
         clientSecret: String,
         authUrl: String,
-        stripeAccount: String?,
+        apiConfiguration: ApiConfiguration.State,
         returnUrl: String? = null,
         shouldCancelSource: Boolean = false,
         shouldCancelIntentOnUserNavigation: Boolean = true,
@@ -103,7 +100,7 @@ internal class WebIntentNextActionHandler @Inject constructor(
                 authUrl,
                 returnUrl,
                 enableLogging,
-                apiConfiguration = apiConfigProvider.get().copy(stripeAccountId = stripeAccount),
+                apiConfiguration = apiConfiguration,
                 shouldCancelSource = shouldCancelSource,
                 shouldCancelIntentOnUserNavigation = shouldCancelIntentOnUserNavigation,
                 statusBarColor = host.statusBarColor,

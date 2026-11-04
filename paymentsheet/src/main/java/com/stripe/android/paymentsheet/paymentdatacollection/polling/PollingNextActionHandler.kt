@@ -6,7 +6,6 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.VisibleForTesting
 import androidx.core.app.ActivityOptionsCompat
 import com.stripe.android.core.ApiConfiguration
-import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.PaymentFlowResult
@@ -46,12 +45,12 @@ internal class PollingNextActionHandler : PaymentNextActionHandler<StripeIntent>
     override suspend fun performNextActionOnResumed(
         host: AuthActivityStarterHost,
         actionable: StripeIntent,
-        requestOptions: ApiRequest.Options
+        apiConfiguration: ApiConfiguration.State
     ) {
         val args = getArgsForPaymentMethod(
             actionable = actionable,
             statusBarColor = host.statusBarColor,
-            requestOptions = requestOptions,
+            apiConfiguration = apiConfiguration,
             currentTimeMillis = System.currentTimeMillis(),
         )
 
@@ -65,12 +64,7 @@ internal class PollingNextActionHandler : PaymentNextActionHandler<StripeIntent>
         if (localPollingAuthenticator == null) {
             ErrorReporter.createFallbackInstance(
                 context = host.application,
-                apiConfigurationProvider = {
-                    ApiConfiguration.State(
-                        publishableKey = requestOptions.apiKey,
-                        stripeAccountId = requestOptions.stripeAccount,
-                    )
-                },
+                apiConfigurationProvider = { apiConfiguration },
             )
                 .report(ErrorReporter.UnexpectedErrorEvent.MISSING_POLLING_AUTHENTICATOR)
         } else {
@@ -82,7 +76,7 @@ internal class PollingNextActionHandler : PaymentNextActionHandler<StripeIntent>
     internal fun getArgsForPaymentMethod(
         actionable: StripeIntent,
         statusBarColor: Int?,
-        requestOptions: ApiRequest.Options,
+        apiConfiguration: ApiConfiguration.State,
         currentTimeMillis: Long,
     ): PollingContract.Args {
         val paymentMethodType = requireNotNull(actionable.paymentMethod?.type) {
@@ -90,11 +84,11 @@ internal class PollingNextActionHandler : PaymentNextActionHandler<StripeIntent>
         }
 
         return when (paymentMethodType) {
-            PaymentMethod.Type.Pix -> getArgsForPix(actionable, statusBarColor, requestOptions, currentTimeMillis)
+            PaymentMethod.Type.Pix -> getArgsForPix(actionable, statusBarColor, apiConfiguration, currentTimeMillis)
             else -> createArgsWithDefaultPollingInterval(
                 actionable = actionable,
                 statusBarColor = statusBarColor,
-                requestOptions = requestOptions,
+                apiConfiguration = apiConfiguration,
                 paymentMethodType = paymentMethodType,
             )
         }
@@ -103,7 +97,7 @@ internal class PollingNextActionHandler : PaymentNextActionHandler<StripeIntent>
     private fun createArgsWithDefaultPollingInterval(
         actionable: StripeIntent,
         statusBarColor: Int?,
-        requestOptions: ApiRequest.Options,
+        apiConfiguration: ApiConfiguration.State,
         paymentMethodType: PaymentMethod.Type,
     ): PollingContract.Args {
         val config = getDefaultPollingConfig(actionable, paymentMethodType)
@@ -115,7 +109,7 @@ internal class PollingNextActionHandler : PaymentNextActionHandler<StripeIntent>
             initialDelayInSeconds = config.initialDelayInSeconds,
             pollingIntervalInSeconds = DEFAULT_POLLING_INTERVAL_IN_SECONDS,
             ctaText = config.ctaText,
-            requestOptions = requestOptions,
+            apiConfiguration = apiConfiguration,
             qrCodeUrl = config.qrCodeUrl,
             paymentMethodType = paymentMethodType.code,
         )
@@ -171,7 +165,7 @@ internal class PollingNextActionHandler : PaymentNextActionHandler<StripeIntent>
     private fun getArgsForPix(
         actionable: StripeIntent,
         statusBarColor: Int?,
-        requestOptions: ApiRequest.Options,
+        apiConfiguration: ApiConfiguration.State,
         currentTimeMillis: Long,
     ): PollingContract.Args {
         val pixDetails = actionable.nextActionData as StripeIntent.NextActionData.DisplayPixDetails
@@ -183,7 +177,7 @@ internal class PollingNextActionHandler : PaymentNextActionHandler<StripeIntent>
             initialDelayInSeconds = PIX_INITIAL_DELAY_IN_SECONDS,
             pollingIntervalInSeconds = PIX_POLLING_INTERVAL_IN_SECONDS,
             ctaText = R.string.stripe_pix_confirm_payment,
-            requestOptions = requestOptions,
+            apiConfiguration = apiConfiguration,
             qrCodeUrl = pixDetails.hostedInstructionsUrl,
             paymentMethodType = PaymentMethod.Type.Pix.code,
         )
