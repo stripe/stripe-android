@@ -183,16 +183,25 @@ internal class OnrampInteractor @Inject constructor(
     }
 
     suspend fun authenticateUserWithToken(linkAuthTokenClientSecret: String): OnrampTokenAuthenticationResult {
+        val sessionToken = _state.value.sessionToken
         return when (
             val result = linkController.authenticateWithToken(linkAuthTokenClientSecret)
         ) {
             is LinkController.AuthenticateWithTokenResult.Success -> {
+                if (_state.value.sessionToken !== sessionToken) {
+                    return OnrampTokenAuthenticationResult.Failed(SessionChangedException())
+                }
                 val secret = consumerSessionClientSecret()
                 if (secret != null) {
                     cryptoApiRepository.createCryptoCustomer(consumerSessionClientSecret = secret)
                         .fold(
                             onSuccess = { customerResponse ->
-                                _state.update { it.copy(cryptoCustomerId = customerResponse.id) }
+                                val updated = updateForSession(sessionToken) {
+                                    it.copy(cryptoCustomerId = customerResponse.id)
+                                }
+                                if (!updated) {
+                                    return OnrampTokenAuthenticationResult.Failed(SessionChangedException())
+                                }
 
                                 analyticsService?.track(
                                     OnrampAnalyticsEvent.LinkUserAuthenticationWithTokenCompleted
@@ -246,6 +255,7 @@ internal class OnrampInteractor @Inject constructor(
     }
 
     suspend fun registerLinkUser(info: LinkUserInfo): OnrampRegisterLinkUserResult {
+        val sessionToken = _state.value.sessionToken
         val result = linkController.registerConsumer(
             email = info.email,
             phone = info.phone,
@@ -255,11 +265,16 @@ internal class OnrampInteractor @Inject constructor(
 
         return when (result) {
             is LinkController.RegisterConsumerResult.Success -> {
+                if (_state.value.sessionToken !== sessionToken) {
+                    return OnrampRegisterLinkUserResult.Failed(SessionChangedException())
+                }
                 val secret = consumerSessionClientSecret()
                 if (secret != null) {
                     cryptoApiRepository.createCryptoCustomer(secret).fold(
                         onSuccess = { customerResponse ->
-                            _state.update { it.copy(cryptoCustomerId = customerResponse.id) }
+                            if (!updateForSession(sessionToken) { it.copy(cryptoCustomerId = customerResponse.id) }) {
+                                return OnrampRegisterLinkUserResult.Failed(SessionChangedException())
+                            }
                             analyticsService?.track(OnrampAnalyticsEvent.LinkRegistrationCompleted)
                             OnrampRegisterLinkUserResult.Completed(customerResponse.id)
                         },
@@ -814,7 +829,7 @@ internal class OnrampInteractor @Inject constructor(
 
     suspend fun logOut(): OnrampLogOutResult {
         return when (val result = linkController.logOut()) {
-            is LinkController.LogOutResult.Success -> {
+            is LinkController.LogOutResult.Success -> synchronized(_state) {
                 savedStateHandle.remove<String>(KEY_GOOGLE_PAY_PLATFORM_KEY)
                 clearPendingCheckout()
                 clearLaunchedNextAction()
@@ -838,6 +853,13 @@ internal class OnrampInteractor @Inject constructor(
         }
     }
 
+    private inline fun updateForSession(sessionToken: Any, transform: (OnrampState) -> OnrampState): Boolean {
+        val updated = _state.updateAndGet { current ->
+            if (current.sessionToken === sessionToken) transform(current) else current
+        }
+        return updated.sessionToken === sessionToken
+    }
+
     suspend fun handleAuthorizeResult(
         result: LinkController.AuthorizeResult
     ): OnrampAuthorizeResult = when (result) {
@@ -847,14 +869,10 @@ internal class OnrampInteractor @Inject constructor(
             if (secret != null) {
                 cryptoApiRepository.createCryptoCustomer(secret).fold(
                     onSuccess = { customerResponse ->
-                        val updated = _state.updateAndGet { current ->
-                            if (current.sessionToken === sessionToken) {
-                                current.copy(cryptoCustomerId = customerResponse.id)
-                            } else {
-                                current
-                            }
+                        val updated = updateForSession(sessionToken) {
+                            it.copy(cryptoCustomerId = customerResponse.id)
                         }
-                        if (updated.sessionToken !== sessionToken) {
+                        if (!updated) {
                             OnrampAuthorizeResult.Canceled()
                         } else {
                             analyticsService?.track(OnrampAnalyticsEvent.LinkAuthorizationCompleted(consented = true))
@@ -1418,6 +1436,7 @@ internal class OnrampInteractor @Inject constructor(
         onrampSessionId: String,
         isContinuation: Boolean,
     ) {
+        val sessionToken = _state.value.sessionToken
         val platformKeyResult = if (_state.value.cryptoCustomerId == null) {
             Result.failure(MissingCryptoCustomerException())
         } else {
@@ -1425,6 +1444,7 @@ internal class OnrampInteractor @Inject constructor(
         }
         val checkoutStatus = platformKeyResult
             .flatMapCatching { platformApiKey ->
+                if (_state.value.sessionToken !== sessionToken) return
                 retrievePaymentIntent(
                     onrampSessionId = onrampSessionId,
                     onrampSessionClientSecret = checkoutHandler.getClientSecret(onrampSessionId),
@@ -1433,6 +1453,7 @@ internal class OnrampInteractor @Inject constructor(
             }
             .fold(
                 onSuccess = { (platformApiKey, paymentIntent) ->
+                    if (_state.value.sessionToken !== sessionToken) return
                     // If there is a checkout result, we're done. Otherwise, signal that next action is needed,
                     // which is handled by PaymentLauncher in the presenter.
                     paymentIntent.toCheckoutResult()
@@ -1453,6 +1474,7 @@ internal class OnrampInteractor @Inject constructor(
                         )
                 },
                 onFailure = { error ->
+                    if (_state.value.sessionToken !== sessionToken) return
                     val mappedError = mapError(Operation.PerformCheckout, error)
                     trackError(Operation.PerformCheckout, mappedError)
                     Status.Completed(OnrampCheckoutResult.Failed(mappedError))
@@ -1460,16 +1482,20 @@ internal class OnrampInteractor @Inject constructor(
             )
 
         if (checkoutStatus is Status.Completed) {
-            completeCheckout(checkoutStatus.result)
+            completeCheckout(checkoutStatus.result, sessionToken)
         } else {
-            _state.update { it.copy(checkoutState = CheckoutState(checkoutStatus)) }
+            updateForSession(sessionToken) { it.copy(checkoutState = CheckoutState(checkoutStatus)) }
         }
     }
 
-    private fun completeCheckout(result: OnrampCheckoutResult) {
-        clearPendingCheckout()
-        _state.update { it.copy(checkoutState = CheckoutState(Status.Completed(result))) }
-        checkoutResultChannel.trySend(result).getOrThrow()
+    private fun completeCheckout(result: OnrampCheckoutResult, sessionToken: Any = _state.value.sessionToken) {
+        synchronized(_state) {
+            if (!updateForSession(sessionToken) { it.copy(checkoutState = CheckoutState(Status.Completed(result))) }) {
+                return
+            }
+            clearPendingCheckout()
+            checkoutResultChannel.trySend(result).getOrThrow()
+        }
     }
 
     fun markNextActionLaunched(status: Status.RequiresNextAction): Boolean {
@@ -1598,7 +1624,7 @@ internal class OnrampInteractor @Inject constructor(
             .map { it.publishableKey }
             .onSuccess { platformPublishableKey ->
                 // Cache the key with the current consumer session
-                _state.update {
+                updateForSession(state.sessionToken) {
                     it.copy(
                         platformKeyCache = PlatformKeyCache(
                             publishableKey = platformPublishableKey,
@@ -1692,3 +1718,5 @@ internal fun LinkController.PaymentMethodType.toDisplayType(): PaymentMethodDisp
             PaymentMethodDisplayData.Type.Card
     }
 }
+
+private class SessionChangedException : IllegalStateException("The Onramp session ended during the operation")
