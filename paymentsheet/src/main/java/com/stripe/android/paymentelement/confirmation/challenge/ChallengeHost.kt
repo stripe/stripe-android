@@ -51,11 +51,7 @@ internal class ChallengeHost @Inject constructor() {
     fun unregister() {
         val previous = registration ?: return
         registration = null
-        previous.scope.cancel()
-        previous.activity.lifecycle.removeObserver(previous)
-        if (previous.lifecycleOwner !== previous.activity) {
-            previous.lifecycleOwner.lifecycle.removeObserver(previous)
-        }
+        previous.dispose()
     }
 
     private fun Any.findActivity(): FragmentActivity? = when (this) {
@@ -71,6 +67,14 @@ internal class ChallengeHost @Inject constructor() {
         private val lifecycleContext = lifecycleOwner.lifecycleScope.coroutineContext
         val scope = CoroutineScope(lifecycleContext + SupervisorJob(lifecycleContext[Job]))
         var warmUpJob: Job? = null
+
+        fun dispose() {
+            scope.cancel()
+            activity.lifecycle.removeObserver(this)
+            if (lifecycleOwner !== activity) {
+                lifecycleOwner.lifecycle.removeObserver(this)
+            }
+        }
 
         override fun onDestroy(owner: LifecycleOwner) {
             if (registration === this) {
