@@ -12,7 +12,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
-import androidx.test.platform.app.InstrumentationRegistry
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.paymentelement.EmbeddedContentPage
@@ -26,17 +25,18 @@ import kotlin.time.Duration.Companion.seconds
 
 internal fun runCheckoutLiveTest(
     composeRule: ComposeTestRule,
+    merchant: String,
     sessionParams: JsonObject,
     configuration: CheckoutElementsController.Configuration,
     block: CheckoutLiveTestContext.() -> Unit,
 ) {
     val backend = CheckoutLiveBackend(
-        baseUrl = InstrumentationRegistry.getArguments().getString("checkoutBackendUrl")
-            ?: "https://stp-mobile-playground-backend-v7.stripedemos.com/",
+        baseUrl = "https://stp-mobile-playground-backend-v7.stripedemos.com/",
+        merchant = merchant,
     )
     val (publishableKey, clientSecret) = runBlocking {
         withTimeout(OPERATION_TIMEOUT) {
-            backend.fetchPublishableKey() to backend.createCheckoutSession(sessionParams)
+            backend.fetchPublishableKey().getOrThrow() to backend.createCheckoutSession(sessionParams).getOrThrow()
         }
     }
     val checkoutResult = CompletableDeferred<CheckoutElementsController.Result>()

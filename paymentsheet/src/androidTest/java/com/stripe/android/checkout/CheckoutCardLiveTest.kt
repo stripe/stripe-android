@@ -19,7 +19,7 @@ import org.junit.runner.RunWith
 @OptIn(CheckoutSessionPreview::class)
 @RunWith(AndroidJUnit4::class)
 @RequiresLiveBackend
-internal class CheckoutPaymentElementLiveTest {
+internal class CheckoutCardLiveTest {
     @get:Rule
     val composeRule = createEmptyComposeRule()
 
@@ -40,6 +40,7 @@ internal class CheckoutPaymentElementLiveTest {
     @Test
     fun testSuccessfulCardPayment() = runCheckoutLiveTest(
         composeRule = composeRule,
+        merchant = "US",
         sessionParams = cardOnlySessionParams(),
         configuration = configuration,
     ) {
@@ -55,6 +56,7 @@ internal class CheckoutPaymentElementLiveTest {
     @Test
     fun testDeclinedCardReportsFailure() = runCheckoutLiveTest(
         composeRule = composeRule,
+        merchant = "US",
         sessionParams = cardOnlySessionParams(),
         configuration = configuration,
     ) {
