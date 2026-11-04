@@ -31,6 +31,7 @@ internal class CheckoutAnalyticsEvent(
         Init("init"),
         ApplyPromotionCode("apply_promotion_code"),
         RemovePromotionCode("remove_promotion_code"),
+        UpdateEmail("update_email"),
     }
 
     enum class Outcome(val code: String) {

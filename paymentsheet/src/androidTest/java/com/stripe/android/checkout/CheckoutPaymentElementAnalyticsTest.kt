@@ -15,6 +15,7 @@ import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.analyticsPayloadField
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.hasQueryParam
+import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedContentPage
@@ -253,6 +254,28 @@ internal class CheckoutPaymentElementAnalyticsTest {
         ) {
             markTestSucceeded()
         }
+
+    @Test
+    fun testUpdateEmailReportsStartedAndSucceededWithoutConfiguration() = runCheckoutPaymentElementScenario(
+        networkRule = networkRule,
+        renderPaymentElementContent = false,
+        setup = { controller ->
+            networkRule.validateCheckoutInitStartedAndSucceeded()
+            assertThat(
+                controller.configure(
+                    DEFAULT_CLIENT_SECRET,
+                    CheckoutElementsController.Configuration().paymentElement(PaymentElement.Configuration()),
+                )
+            ).isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
+        },
+    ) {
+        networkRule.validateCheckoutAnalyticsStarted("update_email", not(hasQueryParam("merchant_display_name")))
+        networkRule.validateCheckoutAnalyticsSucceeded("update_email", not(hasQueryParam("merchant_display_name")))
+
+        assertThat(controller.updateEmail("email@example.com"))
+            .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
+        markTestSucceeded()
+    }
 
     @Test
     fun testConfigureApiFailureReportsInitFailedAnalytics() = runCheckoutPaymentElementScenario(

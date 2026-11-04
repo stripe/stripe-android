@@ -80,15 +80,22 @@ internal class CheckoutAnalyticsPerformer @Inject constructor(
     }
 
     private fun reportEvent(event: CheckoutAnalyticsEvent) {
-        val state = stateHolder.state
-        val publishableKey = state?.paymentMethodMetadata?.apiConfiguration?.publishableKey
+        send(event, stateHolder.state?.configuration?.toAnalyticsMap().orEmpty())
+    }
+
+    /** Reports an operation event with the session payload only, without the configuration payload. */
+    fun reportOperation(event: CheckoutAnalyticsEvent) {
+        send(event, additionalParams = emptyMap())
+    }
+
+    private fun send(event: CheckoutAnalyticsEvent, additionalParams: Map<String, Any?>) {
+        val publishableKey = stateHolder.state?.paymentMethodMetadata?.apiConfiguration?.publishableKey
             ?: apiConfigurationProvider.get().publishableKey
-        val configurationParams = state?.configuration?.toAnalyticsMap().orEmpty()
         CoroutineScope(workContext).launch {
             analyticsRequestExecutor.executeAsync(
                 analyticsRequestFactory.createRequest(
                     event = event,
-                    additionalParams = event.params + configurationParams,
+                    additionalParams = event.params + additionalParams,
                     publishableKeyOverride = publishableKey,
                 )
             )
