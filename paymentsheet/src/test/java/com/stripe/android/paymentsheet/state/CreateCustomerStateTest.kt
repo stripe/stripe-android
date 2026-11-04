@@ -11,6 +11,7 @@ import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.paymentsheet.model.CheckoutSessionClientSecret
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
@@ -45,7 +46,7 @@ internal class CreateCustomerStateTest {
         val result = createCustomerState(
             initializationMode = initializationMode,
             customerMetadata = CustomerMetadata.CheckoutSession(
-                clientSecret = "cs_test_abc123_secret_test",
+                clientSecret = CheckoutSessionClientSecret("cs_test_abc123_secret_test"),
                 sessionId = checkoutSessionResponse.id,
                 customerId = "cus_checkout_123",
                 removePaymentMethod = PaymentMethodRemovePermission.None,
@@ -77,7 +78,7 @@ internal class CreateCustomerStateTest {
         val result = createCustomerState(
             initializationMode = initializationMode,
             customerMetadata = CustomerMetadata.CheckoutSession(
-                clientSecret = "cs_test_abc123_secret_test",
+                clientSecret = CheckoutSessionClientSecret("cs_test_abc123_secret_test"),
                 sessionId = checkoutSessionResponse.id,
                 customerId = "cus_checkout_empty",
                 removePaymentMethod = PaymentMethodRemovePermission.None,
@@ -173,7 +174,7 @@ internal class CreateCustomerStateTest {
         ),
     ).copy(
         customerMetadata = CustomerMetadata.CheckoutSession(
-            clientSecret = "cs_test_abc123_secret_test",
+            clientSecret = CheckoutSessionClientSecret("cs_test_abc123_secret_test"),
             sessionId = checkoutSessionResponse.id,
             customerId = "cus_checkout_automatic_tax",
             removePaymentMethod = PaymentMethodRemovePermission.None,

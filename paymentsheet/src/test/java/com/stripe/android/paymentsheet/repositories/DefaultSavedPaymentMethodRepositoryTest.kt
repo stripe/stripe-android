@@ -17,6 +17,7 @@ import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
+import com.stripe.android.paymentsheet.model.CheckoutSessionClientSecret
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeFraudDetectionDataRepository
@@ -380,7 +381,7 @@ class DefaultSavedPaymentMethodRepositoryTest {
 
     companion object {
         private val CHECKOUT_SESSION_METADATA = CustomerMetadata.CheckoutSession(
-            clientSecret = "cs_test_abc123_secret_test",
+            clientSecret = CheckoutSessionClientSecret("cs_test_abc123_secret_test"),
             sessionId = "cs_123",
             customerId = "cus_123",
             removePaymentMethod = PaymentMethodRemovePermission.Full,

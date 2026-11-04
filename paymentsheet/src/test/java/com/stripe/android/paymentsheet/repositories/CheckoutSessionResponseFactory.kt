@@ -4,6 +4,7 @@ import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
+import com.stripe.android.paymentsheet.model.CheckoutSessionClientSecret
 
 internal object CheckoutSessionResponseFactory {
     fun create(
@@ -38,7 +39,7 @@ internal object CheckoutSessionResponseFactory {
         configId: String? = null,
         automaticPaymentMethodTypes: Boolean? = null,
     ) = CheckoutSessionResponse(
-        clientSecret = clientSecret,
+        clientSecret = CheckoutSessionClientSecret(clientSecret),
         paymentResponse = null,
         id = id,
         configId = configId,

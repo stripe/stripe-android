@@ -20,7 +20,11 @@ internal interface CheckoutSessionRefresher {
 @OptIn(CheckoutSessionPreview::class)
 internal class DefaultCheckoutSessionRefresher internal constructor(
     private val stateHolder: CheckoutElementsControllerStateHolder,
-    private val fetchResponse: suspend (String, Boolean, Map<String, Any?>) -> Result<CheckoutSessionResponse>,
+    private val fetchResponse: suspend (
+        CheckoutSessionClientSecret,
+        Boolean,
+        Map<String, Any?>,
+    ) -> Result<CheckoutSessionResponse>,
     private val reloadState: suspend (CheckoutElementsControllerState) -> Unit,
 ) : CheckoutSessionRefresher {
 
@@ -33,7 +37,7 @@ internal class DefaultCheckoutSessionRefresher internal constructor(
         stateHolder = stateHolder,
         fetchResponse = { clientSecret, adaptivePricingAllowed, analyticsParams ->
             checkoutSessionRepository.init(
-                clientSecret = CheckoutSessionClientSecret(clientSecret),
+                clientSecret = clientSecret,
                 adaptivePricingAllowed = adaptivePricingAllowed,
                 analyticsParams = analyticsParams,
             )

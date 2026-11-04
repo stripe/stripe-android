@@ -10,6 +10,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentB
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.paymentsheet.model.CheckoutSessionClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.testing.PaymentMethodFactory
@@ -130,7 +131,7 @@ internal class DefaultCustomerStateHolderTest {
                 card = PaymentMethodFixtures.CARD_PAYMENT_METHOD.card?.copy(brand = CardBrand.MasterCard),
             ),
             customerMetadata = CustomerMetadata.CheckoutSession(
-                clientSecret = "cs_test_abc123_secret_test",
+                clientSecret = CheckoutSessionClientSecret("cs_test_abc123_secret_test"),
                 sessionId = "cs_123",
                 customerId = "cus_123",
                 removePaymentMethod = PaymentMethodRemovePermission.Full,

@@ -44,7 +44,7 @@ internal class CheckoutSessionRepository @Inject constructor(
     private val stripeErrorJsonParser = StripeErrorJsonParser()
 
     private suspend fun executePost(
-        clientSecret: String,
+        clientSecret: CheckoutSessionClientSecret,
         url: String,
         params: Map<String, *>,
     ): Result<CheckoutSessionResponse> {
@@ -56,7 +56,7 @@ internal class CheckoutSessionRepository @Inject constructor(
                 url = url,
                 options = options,
                 params = elementsSessionClientParams.toCheckoutSessionMap() + params +
-                    ("client_secret" to clientSecret),
+                    ("client_secret" to clientSecret.value),
             ),
             responseJsonParser = CheckoutSessionResponseJsonParser(clientSecret),
         )
@@ -72,7 +72,7 @@ internal class CheckoutSessionRepository @Inject constructor(
         params = analyticsParams + ("checkout_session_id" to clientSecret.sessionId),
     ) {
         executePost(
-            clientSecret = clientSecret.value,
+            clientSecret = clientSecret,
             url = initUrl(clientSecret.sessionId),
             params = mapOf(
                 "adaptive_pricing[allowed]" to adaptivePricingAllowed,
@@ -83,7 +83,7 @@ internal class CheckoutSessionRepository @Inject constructor(
 
     suspend fun confirm(
         id: String,
-        clientSecret: String,
+        clientSecret: CheckoutSessionClientSecret,
         params: ConfirmCheckoutSessionParams,
     ): Result<CheckoutSessionResponse> {
         fraudDetectionDataRepository.refresh()
@@ -136,7 +136,7 @@ internal class CheckoutSessionRepository @Inject constructor(
 
     suspend fun poll(
         sessionId: String,
-        clientSecret: String,
+        clientSecret: CheckoutSessionClientSecret,
     ): Result<CheckoutClientPollResponse> {
         return executeRequestWithResultParser(
             stripeErrorJsonParser = stripeErrorJsonParser,
@@ -144,7 +144,7 @@ internal class CheckoutSessionRepository @Inject constructor(
             request = apiRequestFactory.createGet(
                 url = pollUrl(sessionId),
                 options = apiRequestOptionsProvider.get(),
-                params = mapOf("client_secret" to clientSecret),
+                params = mapOf("client_secret" to clientSecret.value),
             ),
             responseJsonParser = CheckoutClientPollResponseJsonParser,
         )
@@ -152,7 +152,7 @@ internal class CheckoutSessionRepository @Inject constructor(
 
     suspend fun detachPaymentMethod(
         sessionId: String,
-        clientSecret: String,
+        clientSecret: CheckoutSessionClientSecret,
         paymentMethodId: String,
     ): Result<CheckoutSessionResponse> = executePost(
         clientSecret = clientSecret,
@@ -164,7 +164,7 @@ internal class CheckoutSessionRepository @Inject constructor(
 
     suspend fun updatePaymentMethod(
         sessionId: String,
-        clientSecret: String,
+        clientSecret: CheckoutSessionClientSecret,
         paymentMethodId: String,
         params: PaymentMethodUpdateParams,
     ): Result<CheckoutSessionResponse> {
@@ -222,7 +222,7 @@ internal class CheckoutSessionRepository @Inject constructor(
 
     suspend fun updateTaxRegion(
         sessionId: String,
-        clientSecret: String,
+        clientSecret: CheckoutSessionClientSecret,
         address: Address.State?,
     ): Result<CheckoutSessionResponse> = executePost(
         clientSecret = clientSecret,
@@ -243,7 +243,7 @@ internal class CheckoutSessionRepository @Inject constructor(
 
     suspend fun updateCurrency(
         sessionId: String,
-        clientSecret: String,
+        clientSecret: CheckoutSessionClientSecret,
         currencyCode: String,
     ): Result<CheckoutSessionResponse> = executePost(
         clientSecret = clientSecret,

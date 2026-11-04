@@ -14,6 +14,7 @@ import com.stripe.android.model.parsers.DeferredPaymentIntentJsonParser
 import com.stripe.android.model.parsers.DeferredSetupIntentJsonParser
 import com.stripe.android.model.parsers.ElementsSessionJsonParser
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
+import com.stripe.android.paymentsheet.model.CheckoutSessionClientSecret
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -21,7 +22,7 @@ import org.json.JSONObject
  * Parses CheckoutClient responses without depending on the legacy Elements Session wire format.
  */
 internal class CheckoutSessionResponseJsonParser(
-    private val clientSecret: String,
+    private val clientSecret: CheckoutSessionClientSecret,
 ) : ModelJsonParser<CheckoutSessionResponse> {
     @Suppress("CyclomaticComplexMethod", "LongMethod")
     override fun parse(json: JSONObject): CheckoutSessionResponse? = runCatching {

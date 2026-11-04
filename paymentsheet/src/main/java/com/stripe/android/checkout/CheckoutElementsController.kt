@@ -301,7 +301,7 @@ class CheckoutElementsController @Inject internal constructor(
             }.fold(
                 onSuccess = {
                     checkoutSessionRepository.init(
-                        clientSecret = CheckoutSessionClientSecret(checkoutSessionResponse.clientSecret),
+                        clientSecret = checkoutSessionResponse.clientSecret,
                         adaptivePricingAllowed = configuration.currencySelectorElementConfiguration != null,
                         analyticsParams = configuration.toAnalyticsMap(),
                     )

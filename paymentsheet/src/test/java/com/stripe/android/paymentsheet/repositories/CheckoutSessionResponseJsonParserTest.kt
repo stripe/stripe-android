@@ -8,6 +8,7 @@ import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
+import com.stripe.android.paymentsheet.model.CheckoutSessionClientSecret
 import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Test
@@ -566,7 +567,7 @@ class CheckoutSessionResponseJsonParserTest {
         val elements = requireNotNull(result.elementsSession)
         val intent = elements.stripeIntent as PaymentIntent
 
-        assertThat(result.clientSecret).isEqualTo("cs_test_abc123_secret_test")
+        assertThat(result.clientSecret).isSameInstanceAs(clientSecret)
         assertThat(elements.orderedPaymentMethodTypesAndWallets)
             .containsExactly("cashapp", "google_pay", "card", "link", "blik", "vipps").inOrder()
         assertThat(intent.paymentMethodTypes).containsExactly("cashapp", "card", "link", "blik").inOrder()
@@ -712,5 +713,7 @@ class CheckoutSessionResponseJsonParserTest {
         JSONObject().put("display_name", "Sales tax").put("percentage", 8.0).put("rate_type", "percentage")
     )
 
-    private fun parse(json: JSONObject) = CheckoutSessionResponseJsonParser("cs_test_abc123_secret_test").parse(json)
+    private val clientSecret = CheckoutSessionClientSecret("cs_test_abc123_secret_test")
+
+    private fun parse(json: JSONObject) = CheckoutSessionResponseJsonParser(clientSecret).parse(json)
 }

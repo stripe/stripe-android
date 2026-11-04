@@ -25,6 +25,7 @@ import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.model.CheckoutSessionClientSecret
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.asAddressModel
 import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.testing.AbsFakeStripeRepository
@@ -218,7 +219,7 @@ class TapToAddCollectionHandlerTest {
             hasCustomerConfiguration = true,
         ).copy(
             customerMetadata = CustomerMetadata.CheckoutSession(
-                clientSecret = "cs_test_abc123_secret_test",
+                clientSecret = CheckoutSessionClientSecret("cs_test_abc123_secret_test"),
                 sessionId = "cs_123",
                 customerId = "cus_123",
                 removePaymentMethod = PaymentMethodRemovePermission.Full,

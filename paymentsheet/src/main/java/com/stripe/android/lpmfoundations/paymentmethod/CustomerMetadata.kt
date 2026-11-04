@@ -6,6 +6,7 @@ import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.data.CustomerSheetSession
 import com.stripe.android.model.ElementsSession
+import com.stripe.android.paymentsheet.model.CheckoutSessionClientSecret
 import kotlinx.parcelize.Parcelize
 
 internal sealed class CustomerMetadata : Parcelable {
@@ -50,7 +51,7 @@ internal sealed class CustomerMetadata : Parcelable {
     @Parcelize
     data class CheckoutSession(
         val sessionId: String,
-        val clientSecret: String,
+        val clientSecret: CheckoutSessionClientSecret,
         val customerId: String,
         override val removePaymentMethod: PaymentMethodRemovePermission,
         override val saveConsent: PaymentMethodSaveConsentBehavior,

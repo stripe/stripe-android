@@ -84,7 +84,7 @@ class CheckoutSessionRepositoryTest {
             analyticsParams = emptyMap(),
         )
 
-        assertThat(result.getOrThrow().clientSecret).isEqualTo("cs_test_abc123_secret_test")
+        assertThat(result.getOrThrow().clientSecret.value).isEqualTo("cs_test_abc123_secret_test")
     }
 
     @Test
@@ -163,11 +163,11 @@ class CheckoutSessionRepositoryTest {
 
         val result = repository.detachPaymentMethod(
             sessionId = DEFAULT_CHECKOUT_SESSION_ID,
-            clientSecret = "cs_test_abc123_secret_test",
+            clientSecret = CheckoutSessionClientSecret("cs_test_abc123_secret_test"),
             paymentMethodId = "pm_123",
         )
 
-        assertThat(result.getOrThrow().clientSecret).isEqualTo("cs_test_abc123_secret_test")
+        assertThat(result.getOrThrow().clientSecret.value).isEqualTo("cs_test_abc123_secret_test")
     }
 
     @Test
@@ -257,11 +257,11 @@ class CheckoutSessionRepositoryTest {
 
         val result = repository.updateCurrency(
             sessionId = DEFAULT_CHECKOUT_SESSION_ID,
-            clientSecret = "cs_test_abc123_secret_test",
+            clientSecret = CheckoutSessionClientSecret("cs_test_abc123_secret_test"),
             currencyCode = "eur",
         )
 
-        assertThat(result.getOrThrow().clientSecret).isEqualTo("cs_test_abc123_secret_test")
+        assertThat(result.getOrThrow().clientSecret.value).isEqualTo("cs_test_abc123_secret_test")
     }
 
     @Test
@@ -273,7 +273,7 @@ class CheckoutSessionRepositoryTest {
 
         val result = repository.updateCurrency(
             sessionId = DEFAULT_CHECKOUT_SESSION_ID,
-            clientSecret = "cs_test_abc123_secret_test",
+            clientSecret = CheckoutSessionClientSecret("cs_test_abc123_secret_test"),
             currencyCode = "invalid",
         )
 
@@ -288,7 +288,7 @@ class CheckoutSessionRepositoryTest {
 
         repository.updateCurrency(
             sessionId = DEFAULT_CHECKOUT_SESSION_ID,
-            clientSecret = "cs_test_abc123_secret_test",
+            clientSecret = CheckoutSessionClientSecret("cs_test_abc123_secret_test"),
             currencyCode = "eur",
         ).getOrThrow()
 
@@ -305,7 +305,7 @@ class CheckoutSessionRepositoryTest {
 
         val result = repository.updateCurrency(
             sessionId = DEFAULT_CHECKOUT_SESSION_ID,
-            clientSecret = "cs_test_abc123_secret_test",
+            clientSecret = CheckoutSessionClientSecret("cs_test_abc123_secret_test"),
             currencyCode = "invalid",
         )
 
@@ -322,7 +322,7 @@ class CheckoutSessionRepositoryTest {
 
         val result = repository.poll(
             sessionId = DEFAULT_CHECKOUT_SESSION_ID,
-            clientSecret = "cs_test_abc123_secret_test",
+            clientSecret = CheckoutSessionClientSecret("cs_test_abc123_secret_test"),
         )
 
         assertThat(result.getOrThrow()).isEqualTo(
@@ -345,7 +345,7 @@ class CheckoutSessionRepositoryTest {
 
         val result = repository.poll(
             sessionId = DEFAULT_CHECKOUT_SESSION_ID,
-            clientSecret = "cs_test_abc123_secret_test",
+            clientSecret = CheckoutSessionClientSecret("cs_test_abc123_secret_test"),
         )
 
         assertThat(result.exceptionOrNull()).isInstanceOf(APIException::class.java)

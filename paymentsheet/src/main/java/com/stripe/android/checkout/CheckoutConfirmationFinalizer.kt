@@ -1,6 +1,7 @@
 package com.stripe.android.checkout
 
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.paymentsheet.model.CheckoutSessionClientSecret
 import com.stripe.android.paymentsheet.repositories.CheckoutClientPollResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutClientPollResponse.ConfirmationStatus
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
@@ -19,7 +20,10 @@ internal fun interface CheckoutConfirmationFinalizer {
 }
 
 internal class DefaultCheckoutConfirmationFinalizer internal constructor(
-    private val poll: suspend (sessionId: String, clientSecret: String) -> Result<CheckoutClientPollResponse>,
+    private val poll: suspend (
+        sessionId: String,
+        clientSecret: CheckoutSessionClientSecret,
+    ) -> Result<CheckoutClientPollResponse>,
     private val errorReporter: ErrorReporter,
 ) : CheckoutConfirmationFinalizer {
 

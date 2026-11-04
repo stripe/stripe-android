@@ -12,6 +12,7 @@ import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
+import com.stripe.android.paymentsheet.model.CheckoutSessionClientSecret
 import com.stripe.android.paymentsheet.model.SavedSelection
 import org.junit.Test
 
@@ -20,7 +21,7 @@ internal class CustomerMetadataTest {
     @Test
     fun `CheckoutSession should support card expiry and billing details but not card brand updates`() {
         val metadata = CustomerMetadata.CheckoutSession(
-            clientSecret = "cs_test_abc123_secret_test",
+            clientSecret = CheckoutSessionClientSecret("cs_test_abc123_secret_test"),
             sessionId = "cs_123",
             customerId = "cus_123",
             removePaymentMethod = PaymentMethodRemovePermission.Full,
