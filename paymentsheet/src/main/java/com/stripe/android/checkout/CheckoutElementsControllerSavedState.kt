@@ -4,7 +4,7 @@ import android.os.Bundle
 import androidx.lifecycle.SavedStateHandle
 
 @Suppress("RestrictedApi")
-internal class CheckoutControllerSavedState(
+internal class CheckoutElementsControllerSavedState(
     private val parentHandle: SavedStateHandle,
     private val integrationName: String,
 ) {

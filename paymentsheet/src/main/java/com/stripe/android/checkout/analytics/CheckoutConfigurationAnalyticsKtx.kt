@@ -2,7 +2,7 @@
 
 package com.stripe.android.checkout.analytics
 
-import com.stripe.android.checkout.CheckoutController
+import com.stripe.android.checkout.CheckoutElementsController
 import com.stripe.android.checkout.asPaymentSheet
 import com.stripe.android.common.analytics.toAnalyticsMap
 import com.stripe.android.elements.CheckoutGooglePayConfiguration
@@ -11,7 +11,7 @@ import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.elements.PaymentElement
 import com.stripe.android.elements.ShippingAddressElement
 
-internal fun CheckoutController.Configuration.State.toAnalyticsMap(): Map<String, Any?> = buildMap {
+internal fun CheckoutElementsController.Configuration.State.toAnalyticsMap(): Map<String, Any?> = buildMap {
     put("merchant_display_name", merchantDisplayName != null)
     put("defaults", defaults.toAnalyticsMap())
     put("payment_element", paymentElementConfiguration?.toAnalyticsMap())
@@ -20,7 +20,7 @@ internal fun CheckoutController.Configuration.State.toAnalyticsMap(): Map<String
     put("shipping_address_element", shippingAddressElementConfiguration?.toAnalyticsMap())
 }
 
-private fun CheckoutController.Configuration.Defaults.State.toAnalyticsMap(): Map<String, Any?> = mapOf(
+private fun CheckoutElementsController.Configuration.Defaults.State.toAnalyticsMap(): Map<String, Any?> = mapOf(
     "billing_details" to mapOf(
         "name" to (billingDetails?.name != null),
         "address" to (billingDetails?.address != null),

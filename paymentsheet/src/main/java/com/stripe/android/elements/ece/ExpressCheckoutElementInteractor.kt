@@ -3,7 +3,7 @@
 package com.stripe.android.elements.ece
 
 import androidx.lifecycle.SavedStateHandle
-import com.stripe.android.checkout.CheckoutControllerStateHolder
+import com.stripe.android.checkout.CheckoutElementsControllerStateHolder
 import com.stripe.android.checkout.injection.CheckoutIsUpdating
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.link.account.LinkAccountHolder
@@ -36,7 +36,7 @@ internal interface ExpressCheckoutElementInteractor {
 
 internal class DefaultExpressCheckoutElementInteractor @Inject constructor(
     linkAccountHolder: LinkAccountHolder,
-    stateHolder: CheckoutControllerStateHolder,
+    stateHolder: CheckoutElementsControllerStateHolder,
     private val savedStateHandle: SavedStateHandle,
     private val eventReporter: ExpressCheckoutElementEventReporter,
     private val expressCheckoutElementConfirmationPerformer: ExpressCheckoutElementConfirmationPerformer,

@@ -10,7 +10,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.JsonObject
 import org.junit.Test
 
-class CheckoutControllerExampleBackendRepositoryTest {
+class CheckoutElementsControllerExampleBackendRepositoryTest {
     @Test
     fun `selected merchant is used`() {
         val settings = CheckoutPlaygroundSettings.createInMemory().apply {

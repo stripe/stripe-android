@@ -3,7 +3,7 @@ package com.stripe.android.checkout
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.os.Parcelable
-import com.stripe.android.checkout.CheckoutController.Session
+import com.stripe.android.checkout.CheckoutElementsController.Session
 import com.stripe.android.elements.ece.AvailableExpressButtonTypesFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -16,8 +16,8 @@ import kotlinx.parcelize.Parcelize
 
 @OptIn(CheckoutSessionPreview::class)
 @Parcelize
-internal data class CheckoutControllerState(
-    val configuration: CheckoutController.Configuration.State,
+internal data class CheckoutElementsControllerState(
+    val configuration: CheckoutElementsController.Configuration.State,
     val checkoutSessionResponse: CheckoutSessionResponse,
     val flagImages: Map<String, Bitmap>?,
     val collectedDetails: CheckoutCollectedDetails,
@@ -59,9 +59,9 @@ internal data class CheckoutControllerState(
  * [SavedPaymentMethodSelectionState.Idle] when the selection changes.
  */
 @OptIn(CheckoutSessionPreview::class)
-internal fun CheckoutControllerState.commitSelection(
+internal fun CheckoutElementsControllerState.commitSelection(
     selection: PaymentSelection?,
-): CheckoutControllerState {
+): CheckoutElementsControllerState {
     val updatedPreviousNewSelections = Bundle(previousNewSelections).apply {
         stashNewSelection(selection)
     }

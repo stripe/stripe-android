@@ -13,7 +13,9 @@ internal class CheckoutSessionFactory(
     private val backend: CheckoutPlaygroundBackend,
     private val paymentMethodCreator: PlaygroundPaymentMethodCreator,
 ) {
-    suspend fun create(settings: CheckoutPlaygroundSettings.Snapshot): CheckoutControllerExampleBackendResponse {
+    suspend fun create(
+        settings: CheckoutPlaygroundSettings.Snapshot,
+    ): CheckoutElementsControllerExampleBackendResponse {
         val session = CheckoutPlaygroundDefinitions.session
         val customerId = when (settings[session.customer]) {
             CheckoutCustomer.Guest -> null
@@ -21,7 +23,7 @@ internal class CheckoutSessionFactory(
             CheckoutCustomer.Returning -> settings[session.customerId] ?: createReturningCustomer(settings)
         }
         val params = CheckoutSessionParamsFactory.create(settings, customerId)
-        return CheckoutControllerExampleBackendResponse(
+        return CheckoutElementsControllerExampleBackendResponse(
             clientSecret = backend.createCheckoutSession(params),
             customerId = customerId,
         )
@@ -76,7 +78,7 @@ internal fun interface PlaygroundPaymentMethodCreator {
     suspend fun createPaymentMethod(params: PaymentMethodCreateParams): String
 }
 
-internal data class CheckoutControllerExampleBackendResponse(
+internal data class CheckoutElementsControllerExampleBackendResponse(
     val clientSecret: String,
     val customerId: String?,
 )

@@ -20,13 +20,13 @@ internal fun CheckoutSessionResponse.toBillingDetailsCollectionConfiguration():
 )
 
 @OptIn(CheckoutSessionPreview::class)
-internal fun CheckoutController.Configuration.State.resolveMerchantDisplayName(
+internal fun CheckoutElementsController.Configuration.State.resolveMerchantDisplayName(
     checkoutSessionResponse: CheckoutSessionResponse,
     appName: String,
 ): String = merchantDisplayName ?: checkoutSessionResponse.businessName ?: appName
 
 @OptIn(CheckoutSessionPreview::class)
-internal fun CheckoutController.Configuration.State.toExpressCheckoutElementGooglePayConfiguration(
+internal fun CheckoutElementsController.Configuration.State.toExpressCheckoutElementGooglePayConfiguration(
     checkoutSessionResponse: CheckoutSessionResponse,
 ): PaymentSheet.GooglePayConfiguration? =
     expressCheckoutElementConfiguration?.let { configuration ->
@@ -56,7 +56,7 @@ internal fun PaymentElement.Configuration.State.toGooglePayConfiguration(
         }
 
 @OptIn(CheckoutSessionPreview::class)
-internal fun CheckoutController.Configuration.State.toBillingDetails(
+internal fun CheckoutElementsController.Configuration.State.toBillingDetails(
     checkoutSessionResponse: CheckoutSessionResponse,
     collectedEmail: String?,
 ): PaymentSheet.BillingDetails = PaymentSheet.BillingDetails(

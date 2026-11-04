@@ -12,7 +12,7 @@ internal class CheckoutEmbeddedConfigurationFactory @Inject constructor(
     @AppName private val appName: String,
 ) {
     fun create(
-        configuration: CheckoutController.Configuration.State,
+        configuration: CheckoutElementsController.Configuration.State,
         paymentElementConfiguration: PaymentElement.Configuration.State,
         checkoutSessionResponse: CheckoutSessionResponse,
         collectedDetails: CheckoutCollectedDetails,

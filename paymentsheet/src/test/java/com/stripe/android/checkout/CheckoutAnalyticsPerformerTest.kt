@@ -81,14 +81,14 @@ internal class CheckoutAnalyticsPerformerTest {
             "private@example.com",
             "+15555550123",
         )
-        val configuration = CheckoutController.Configuration()
+        val configuration = CheckoutElementsController.Configuration()
             .merchantDisplayName(privateValues[0])
             .defaults(
-                CheckoutController.Configuration.Defaults()
+                CheckoutElementsController.Configuration.Defaults()
                     .billingDetails(
-                        CheckoutController.Configuration.Defaults.ContactDetails()
+                        CheckoutElementsController.Configuration.Defaults.ContactDetails()
                             .name(privateValues[1])
-                            .address(CheckoutController.Address(country = "US").line1(privateValues[2]))
+                            .address(CheckoutElementsController.Address(country = "US").line1(privateValues[2]))
                     )
                     .email(privateValues[3])
                     .phone(privateValues[4])
@@ -660,8 +660,8 @@ internal class CheckoutAnalyticsPerformerTest {
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val savedStateHandle = SavedStateHandle()
-        val stateHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle).apply {
-            state = CheckoutControllerStateFactory.create(
+        val stateHolder = CheckoutElementsControllerStateFactory.createStateHolder(savedStateHandle).apply {
+            state = CheckoutElementsControllerStateFactory.create(
                 paymentSelection = PaymentSelection.GooglePay,
                 paymentMethodMetadata = paymentMethodMetadata,
                 checkoutSessionResponse = CheckoutSessionResponseFactory.create(
@@ -693,7 +693,7 @@ internal class CheckoutAnalyticsPerformerTest {
 
     private class Scenario(
         private val savedStateHandle: SavedStateHandle,
-        val stateHolder: CheckoutControllerStateHolder,
+        val stateHolder: CheckoutElementsControllerStateHolder,
         val linkAccountHolder: LinkAccountHolder,
         val analyticsRequestExecutor: FakeAnalyticsRequestExecutor,
         val durationProvider: FakeDurationProvider,
@@ -752,7 +752,7 @@ internal class CheckoutAnalyticsPerformerTest {
         )
 
         val confirmationConfigurationParams: Map<String, Any?> =
-            CheckoutControllerStateFactory.create().configuration.toAnalyticsMap()
+            CheckoutElementsControllerStateFactory.create().configuration.toAnalyticsMap()
 
         val confirmationSpecKeys: Set<String> =
             sessionParams.keys + confirmationConfigurationParams.keys + setOf(

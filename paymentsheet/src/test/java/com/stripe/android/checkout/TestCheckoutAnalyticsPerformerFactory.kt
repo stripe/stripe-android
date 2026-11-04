@@ -17,7 +17,7 @@ import kotlin.coroutines.CoroutineContext
 internal object TestCheckoutAnalyticsPerformerFactory {
     fun create(
         savedStateHandle: SavedStateHandle,
-        stateHolder: CheckoutControllerStateHolder,
+        stateHolder: CheckoutElementsControllerStateHolder,
         analyticsRequestExecutor: AnalyticsRequestExecutor,
         workContext: CoroutineContext,
         linkAccountHolder: LinkAccountHolder = LinkAccountHolder(savedStateHandle),

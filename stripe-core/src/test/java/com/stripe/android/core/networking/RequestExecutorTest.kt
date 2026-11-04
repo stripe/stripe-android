@@ -179,6 +179,28 @@ internal class RequestExecutorTest {
     }
 
     @Test
+    fun `executeRequestWithResultParser should return failure result on truncated response body`() = runTest {
+        val truncatedResponse = StripeResponse<String>(
+            code = HttpURLConnection.HTTP_OK,
+            body = """{"id": "test_id", "val""",
+            headers = mapOf("Request-Id" to listOf("req_truncated"))
+        )
+        whenever(mockNetworkClient.executeRequest(testRequest)).thenReturn(truncatedResponse)
+
+        val result = executeRequestWithResultParser(
+            stripeNetworkClient = mockNetworkClient,
+            stripeErrorJsonParser = mockErrorParser,
+            request = testRequest,
+            responseJsonParser = mockModelParser
+        )
+
+        assertTrue(result.isFailure)
+        val exception = result.exceptionOrNull() as APIException
+        assertEquals(HttpURLConnection.HTTP_OK, exception.statusCode)
+        assertTrue(exception.cause is org.json.JSONException)
+    }
+
+    @Test
     fun `executeRequestWithResultParser should return failure result on network failure`() = runTest {
         val networkException = RuntimeException("Network error")
         whenever(mockNetworkClient.executeRequest(testRequest)).thenThrow(networkException)

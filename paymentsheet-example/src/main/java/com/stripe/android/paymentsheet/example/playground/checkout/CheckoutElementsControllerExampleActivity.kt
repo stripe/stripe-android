@@ -29,9 +29,9 @@ import com.stripe.android.paymentsheet.example.playground.checkout.settings.Chec
 import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutPlaygroundSettingsUi
 import com.stripe.android.paymentsheet.example.playground.checkout.settings.configurations
 
-internal class CheckoutControllerExampleActivity : AppCompatActivity() {
-    private val viewModel: CheckoutControllerExampleViewModel by viewModels {
-        CheckoutControllerExampleViewModel.factory
+internal class CheckoutElementsControllerExampleActivity : AppCompatActivity() {
+    private val viewModel: CheckoutElementsControllerExampleViewModel by viewModels {
+        CheckoutElementsControllerExampleViewModel.factory
     }
 
     private val settingsImportExport = SettingsImportExport(this) { viewModel.settings }
@@ -69,7 +69,7 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
                 .firstOrNull { it.key == scenarioNavigationPath.lastOrNull() }
                 ?: CheckoutPlaygroundScenarios.root
             val navigateBack = {
-                if (status is CheckoutControllerExampleViewModel.Status.Settings) {
+                if (status is CheckoutElementsControllerExampleViewModel.Status.Settings) {
                     if (isBrowsingScenarios) {
                         scenarioNavigationPath = scenarioNavigationPath.dropLast(1)
                     } else if (isSearching) {
@@ -83,7 +83,7 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
             }
 
             BackHandler(
-                enabled = status !is CheckoutControllerExampleViewModel.Status.Settings ||
+                enabled = status !is CheckoutElementsControllerExampleViewModel.Status.Settings ||
                     navigationPath.isNotEmpty() || isSearching || isBrowsingScenarios
             ) { navigateBack() }
 
@@ -95,7 +95,8 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
                             title = {
                                 Text(
                                     when {
-                                        status !is CheckoutControllerExampleViewModel.Status.Settings -> "Checkout"
+                                        status !is CheckoutElementsControllerExampleViewModel.Status.Settings ->
+                                            "Checkout"
                                         isBrowsingScenarios -> currentScenarioGroup.displayName
                                         isSearching -> "Search settings"
                                         else -> currentConfiguration.displayName
@@ -103,7 +104,7 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
                                 )
                             },
                             navigationIcon = if (
-                                status !is CheckoutControllerExampleViewModel.Status.Settings ||
+                                status !is CheckoutElementsControllerExampleViewModel.Status.Settings ||
                                 navigationPath.isNotEmpty() || isSearching || isBrowsingScenarios
                             ) {
                                 {
@@ -116,7 +117,7 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
                             },
                             actions = {
                                 if (
-                                    status is CheckoutControllerExampleViewModel.Status.Settings &&
+                                    status is CheckoutElementsControllerExampleViewModel.Status.Settings &&
                                     navigationPath.isEmpty() && !isBrowsingScenarios
                                 ) {
                                     SettingsOverflowMenu(
@@ -132,7 +133,7 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
                             },
                         )
                         if (
-                            status is CheckoutControllerExampleViewModel.Status.Settings &&
+                            status is CheckoutElementsControllerExampleViewModel.Status.Settings &&
                             !isBrowsingScenarios
                         ) {
                             SearchSettingsField(
@@ -145,7 +146,7 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
                 },
                 content = {
                     when (val currentStatus = status) {
-                        CheckoutControllerExampleViewModel.Status.Settings -> {
+                        CheckoutElementsControllerExampleViewModel.Status.Settings -> {
                             if (isBrowsingScenarios) {
                                 CheckoutPlaygroundScenariosUi(
                                     group = currentScenarioGroup,
@@ -169,13 +170,13 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
                                 )
                             }
                         }
-                        CheckoutControllerExampleViewModel.Status.Loading -> LoadingContent()
-                        is CheckoutControllerExampleViewModel.Status.Error -> ErrorContent(
+                        CheckoutElementsControllerExampleViewModel.Status.Loading -> LoadingContent()
+                        is CheckoutElementsControllerExampleViewModel.Status.Error -> ErrorContent(
                             message = currentStatus.message,
                             onRetry = viewModel::retry,
                             onBack = viewModel::returnToSettings,
                         )
-                        CheckoutControllerExampleViewModel.Status.Configured -> {
+                        CheckoutElementsControllerExampleViewModel.Status.Configured -> {
                             session?.let { currentSession ->
                                 CheckoutContent(
                                     session = currentSession,
@@ -194,7 +195,7 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
                 },
                 bottomBarContent = {
                     when (status) {
-                        CheckoutControllerExampleViewModel.Status.Settings -> {
+                        CheckoutElementsControllerExampleViewModel.Status.Settings -> {
                             if (!isBrowsingScenarios) {
                                 SettingsActions(
                                     canStart = settingValues.isNotEmpty() &&
@@ -203,7 +204,7 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
                                 )
                             }
                         }
-                        CheckoutControllerExampleViewModel.Status.Configured -> {
+                        CheckoutElementsControllerExampleViewModel.Status.Configured -> {
                             ConfirmationControls(
                                 paymentOption = session?.paymentOption,
                                 confirmationMessage = confirmationMessage,

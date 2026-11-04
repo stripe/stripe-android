@@ -36,7 +36,7 @@ import kotlin.coroutines.CoroutineContext
 @Singleton
 internal class CheckoutAnalyticsPerformer @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
-    private val stateHolder: CheckoutControllerStateHolder,
+    private val stateHolder: CheckoutElementsControllerStateHolder,
     private val linkAccountHolder: LinkAccountHolder,
     context: Context,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,

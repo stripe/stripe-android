@@ -7,7 +7,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.lifecycleScope
-import com.stripe.android.checkout.injection.CheckoutPresenterScope
+import com.stripe.android.checkout.injection.CheckoutElementsPresenterScope
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.link.account.LinkAccountHolder
@@ -59,11 +59,11 @@ internal class CheckoutSheetLauncherState @Inject constructor(
 }
 
 @OptIn(CheckoutSessionPreview::class)
-@CheckoutPresenterScope
+@CheckoutElementsPresenterScope
 internal class CheckoutSheetLauncher @Inject constructor(
     activityResultCaller: ActivityResultCaller,
     private val lifecycleOwner: LifecycleOwner,
-    private val selectionHolder: CheckoutControllerStateHolder,
+    private val selectionHolder: CheckoutElementsControllerStateHolder,
     private val customerStateHolder: CustomerStateHolder,
     private val linkAccountHolder: LinkAccountHolder,
     private val sheetStateHolder: SheetStateHolder,

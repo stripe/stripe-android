@@ -8,14 +8,14 @@ import org.junit.Test
 
 class CheckoutPlaygroundConfigurationFactoryTest {
     @Test
-    fun `default tree builds CheckoutController configuration`() = runScenario {
-        val configuration = settings.snapshot().checkoutControllerConfiguration()
+    fun `default tree builds CheckoutElementsController configuration`() = runScenario {
+        val configuration = settings.snapshot().checkoutElementsControllerConfiguration()
 
         assertThat(configuration).isNotNull()
     }
 
     @Test
-    fun `nested overrides build CheckoutController configuration`() = runScenario {
+    fun `nested overrides build CheckoutElementsController configuration`() = runScenario {
         settings.update(CheckoutPlaygroundDefinitions.Controller.defaults.billing.enabled, true)
         settings.update(CheckoutPlaygroundDefinitions.Controller.defaults.billing.address.enabled, true)
         settings.update(
@@ -24,7 +24,7 @@ class CheckoutPlaygroundConfigurationFactoryTest {
         )
         settings.update(CheckoutPlaygroundDefinitions.Controller.currencySelector.appearance.cornerRadius, 8f)
 
-        val configuration = settings.snapshot().checkoutControllerConfiguration()
+        val configuration = settings.snapshot().checkoutElementsControllerConfiguration()
 
         assertThat(configuration).isNotNull()
     }

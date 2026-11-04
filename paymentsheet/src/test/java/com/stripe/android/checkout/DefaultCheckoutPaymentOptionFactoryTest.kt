@@ -12,7 +12,7 @@ import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.checkout.CheckoutController.Session.PaymentOptionDisplayData
+import com.stripe.android.checkout.CheckoutElementsController.Session.PaymentOptionDisplayData
 import com.stripe.android.core.reactnative.ReactNativeSdkInternal
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkAccountUpdate
@@ -414,12 +414,12 @@ internal class DefaultCheckoutPaymentOptionFactoryTest {
                 PaymentSelection.Saved(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD),
             )
 
-        fun createStateHolder(selection: PaymentSelection): CheckoutControllerStateHolder {
-            return CheckoutControllerStateFactory.createStateHolder(
+        fun createStateHolder(selection: PaymentSelection): CheckoutElementsControllerStateHolder {
+            return CheckoutElementsControllerStateFactory.createStateHolder(
                 savedStateHandle = SavedStateHandle(),
                 paymentOptionFactory = factory,
             ).apply {
-                state = CheckoutControllerStateFactory.create(
+                state = CheckoutElementsControllerStateFactory.create(
                     paymentSelection = selection,
                     paymentMethodMetadata = metadata,
                     mandateState = mandateState,

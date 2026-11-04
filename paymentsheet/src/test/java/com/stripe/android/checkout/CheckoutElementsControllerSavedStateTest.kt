@@ -11,16 +11,16 @@ import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 @Suppress("RestrictedApi")
-internal class CheckoutControllerSavedStateTest {
+internal class CheckoutElementsControllerSavedStateTest {
     @Test
     fun `checkout secret survives process restoration`() {
         val parentHandle = SavedStateHandle()
-        val savedState = CheckoutControllerSavedState(parentHandle, INTEGRATION_NAME)
+        val savedState = CheckoutElementsControllerSavedState(parentHandle, INTEGRATION_NAME)
         savedState.handle[VALUE_KEY] = CheckoutSessionResponseFactory.create(
             clientSecret = "cs_test_restored_secret_original",
         )
 
-        val restored = CheckoutControllerSavedState(parentHandle.simulateProcessDeath(), INTEGRATION_NAME)
+        val restored = CheckoutElementsControllerSavedState(parentHandle.simulateProcessDeath(), INTEGRATION_NAME)
         val response = restored.handle.get<CheckoutSessionResponse>(VALUE_KEY)
 
         assertThat(response?.clientSecret).isEqualTo("cs_test_restored_secret_original")
@@ -28,7 +28,7 @@ internal class CheckoutControllerSavedStateTest {
 
     @Test
     fun `handle restores state from the parent namespace`() {
-        val savedState = CheckoutControllerSavedState(
+        val savedState = CheckoutElementsControllerSavedState(
             parentHandle = parentHandleWithValue("restored"),
             integrationName = INTEGRATION_NAME,
         )
@@ -39,13 +39,13 @@ internal class CheckoutControllerSavedStateTest {
     @Test
     fun `handle state is persisted through the parent`() {
         val parentHandle = SavedStateHandle()
-        val savedState = CheckoutControllerSavedState(
+        val savedState = CheckoutElementsControllerSavedState(
             parentHandle = parentHandle,
             integrationName = INTEGRATION_NAME,
         )
         savedState.handle[VALUE_KEY] = "persisted"
 
-        val restored = CheckoutControllerSavedState(
+        val restored = CheckoutElementsControllerSavedState(
             parentHandle = parentHandle.simulateProcessDeath(),
             integrationName = INTEGRATION_NAME,
         )
@@ -57,8 +57,8 @@ internal class CheckoutControllerSavedStateTest {
     fun `instances do not share a child handle`() {
         val parentHandle = SavedStateHandle()
 
-        val first = CheckoutControllerSavedState(parentHandle, INTEGRATION_NAME)
-        val second = CheckoutControllerSavedState(parentHandle, INTEGRATION_NAME)
+        val first = CheckoutElementsControllerSavedState(parentHandle, INTEGRATION_NAME)
+        val second = CheckoutElementsControllerSavedState(parentHandle, INTEGRATION_NAME)
 
         assertThat(first.handle).isNotSameInstanceAs(second.handle)
     }
@@ -66,7 +66,7 @@ internal class CheckoutControllerSavedStateTest {
     @Test
     fun `clear removes the namespace from the parent`() {
         val parentHandle = SavedStateHandle()
-        val savedState = CheckoutControllerSavedState(parentHandle, INTEGRATION_NAME)
+        val savedState = CheckoutElementsControllerSavedState(parentHandle, INTEGRATION_NAME)
         savedState.handle[VALUE_KEY] = "value"
         parentHandle.savedStateProvider().saveState()
 
@@ -78,11 +78,11 @@ internal class CheckoutControllerSavedStateTest {
     @Test
     fun `clear prevents state restoration`() {
         val parentHandle = SavedStateHandle()
-        val savedState = CheckoutControllerSavedState(parentHandle, INTEGRATION_NAME)
+        val savedState = CheckoutElementsControllerSavedState(parentHandle, INTEGRATION_NAME)
         savedState.handle[VALUE_KEY] = "value"
 
         savedState.clear()
-        val restored = CheckoutControllerSavedState(
+        val restored = CheckoutElementsControllerSavedState(
             parentHandle = parentHandle.simulateProcessDeath(),
             integrationName = INTEGRATION_NAME,
         )
