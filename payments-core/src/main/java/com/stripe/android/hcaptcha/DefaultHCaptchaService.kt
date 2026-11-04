@@ -22,10 +22,9 @@ import kotlin.time.Duration.Companion.seconds
 internal class DefaultHCaptchaService(
     private val hCaptchaProvider: HCaptchaProvider,
     private val captchaEventsReporter: CaptchaEventsReporter,
-    private val webViewStarter: WebViewStarter
+    private val webViewStarter: WebViewStarter,
+    private val cachedResult: MutableStateFlow<CachedResult>
 ) : HCaptchaService {
-    private val cachedResult = MutableStateFlow<CachedResult>(CachedResult.Idle)
-
     override suspend fun warmUp(
         activity: FragmentActivity,
         siteKey: String,
