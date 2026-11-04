@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet.model
 import android.os.Parcelable
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
-import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -53,8 +52,8 @@ internal data class SetupIntentClientSecret(
 internal data class CheckoutSessionClientSecret(
     override val value: String
 ) : ClientSecret() {
-    @IgnoredOnParcel
-    val sessionId: String = value.substringBefore(DELIMITER, missingDelimiterValue = "")
+    val sessionId: String
+        get() = value.substringBefore(DELIMITER, missingDelimiterValue = "")
 
     init {
         validate()
