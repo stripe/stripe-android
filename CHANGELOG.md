@@ -4,7 +4,7 @@ NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
 
 ### Crypto Onramp
-* [Added] Added `googlePayCardBrandAcceptance` and `linkCardBrandAcceptance` to `OnrampConfiguration` to configure accepted card brands independently for Google Pay and Link. Link applies this setting only in passthrough mode.
+* [Added][15296](https://github.com/stripe/stripe-android/pull/15296) Added `googlePayCardBrandAcceptance` and `linkCardBrandAcceptance` to `OnrampConfiguration` to configure accepted card brands independently for Google Pay and Link. Link applies this setting only in passthrough mode.
 
 ### PaymentSheet
 * [FIXED][15254](https://github.com/stripe/stripe-android/pull/15254) Fixed an ANR during passive CAPTCHA warm-up in PaymentSheet.
