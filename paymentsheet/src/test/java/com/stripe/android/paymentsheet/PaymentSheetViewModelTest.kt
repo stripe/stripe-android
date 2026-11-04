@@ -1224,7 +1224,7 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `Verify supported payment methods include afterpay without shipping details`() {
+    fun `Verify supported payment methods include affirm and afterpay without shipping details`() {
         val viewModel = createViewModel(
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
                 config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.newBuilder()
@@ -1232,29 +1232,12 @@ internal class PaymentSheetViewModelTest {
                     .build()
             ),
             stripeIntent = PaymentIntentFixtures.PI_WITH_SHIPPING.copy(
-                paymentMethodTypes = listOf("afterpay_clearpay"),
+                paymentMethodTypes = listOf("affirm", "afterpay_clearpay"),
                 shipping = null,
             ),
         )
 
-        assertThat(viewModel.supportedPaymentMethodTypes).containsExactly("afterpay_clearpay")
-    }
-
-    @Test
-    fun `Verify supported payment methods include affirm without shipping details`() {
-        val viewModel = createViewModel(
-            args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
-                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.newBuilder()
-                    .shippingDetails(null)
-                    .build()
-            ),
-            stripeIntent = PaymentIntentFixtures.PI_WITH_SHIPPING.copy(
-                paymentMethodTypes = listOf("affirm"),
-                shipping = null,
-            ),
-        )
-
-        assertThat(viewModel.supportedPaymentMethodTypes).containsExactly("affirm")
+        assertThat(viewModel.supportedPaymentMethodTypes).containsExactly("affirm", "afterpay_clearpay")
     }
 
     @Test
