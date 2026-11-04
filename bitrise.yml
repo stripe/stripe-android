@@ -137,7 +137,6 @@ workflows:
       bitrise.io:
         stack: ubuntu-resolute-26.04-bitrise-2026-android
         machine_type_id: g2.linux.x-large
-        stack_rollback_version: "1-14-0"
   run-connections-e2e-data-tests:
     envs:
       - MAESTRO_TAGS: testmode-data
@@ -147,7 +146,6 @@ workflows:
       bitrise.io:
         stack: ubuntu-resolute-26.04-bitrise-2026-android
         machine_type_id: g2.linux.x-large
-        stack_rollback_version: "1-14-0"
   run-connections-e2e-token-tests:
     envs:
       - MAESTRO_TAGS: testmode-token
@@ -157,7 +155,6 @@ workflows:
       bitrise.io:
         stack: ubuntu-resolute-26.04-bitrise-2026-android
         machine_type_id: g2.linux.x-large
-        stack_rollback_version: "1-14-0"
   run-connections-e2e-payments-tests-on-push:
     envs:
       - MAESTRO_TAGS: testmode-payments
@@ -169,7 +166,6 @@ workflows:
       bitrise.io:
         stack: ubuntu-resolute-26.04-bitrise-2026-android
         machine_type_id: g2.linux.x-large
-        stack_rollback_version: "1-14-0"
   run-connections-e2e-data-tests-on-push:
     envs:
       - MAESTRO_TAGS: testmode-data
@@ -181,7 +177,6 @@ workflows:
       bitrise.io:
         stack: ubuntu-resolute-26.04-bitrise-2026-android
         machine_type_id: g2.linux.x-large
-        stack_rollback_version: "1-14-0"
   run-connections-e2e-token-tests-on-push:
     envs:
       - MAESTRO_TAGS: testmode-token
@@ -193,7 +188,6 @@ workflows:
       bitrise.io:
         stack: ubuntu-resolute-26.04-bitrise-2026-android
         machine_type_id: g2.linux.x-large
-        stack_rollback_version: "1-14-0"
   run-connections-e2e-tests-on-push:
     envs:
       - MAESTRO_TAGS: testmode
@@ -255,7 +249,6 @@ workflows:
       bitrise.io:
         stack: ubuntu-resolute-26.04-bitrise-2026-android
         machine_type_id: g2.linux.x-large
-        stack_rollback_version: "1-14-0"
   run-connections-e2e-livemode-tests:
     envs:
       - MAESTRO_TAGS: livemode-data
@@ -265,7 +258,6 @@ workflows:
       bitrise.io:
         stack: ubuntu-resolute-26.04-bitrise-2026-android
         machine_type_id: g2.linux.x-large
-        stack_rollback_version: "1-14-0"
   _run-connect-e2e-tests:
     before_run:
       - build-connect-debug
@@ -383,6 +375,10 @@ workflows:
       - conclude_all
     steps:
       - script@1:
+          title: Pin Android emulator version
+          inputs:
+            - content: ./scripts/retry.sh 3 ./scripts/pin_emulator_version.sh
+      - script@1:
           title: Execute instrumentation tests
           timeout: 1200
           inputs:
@@ -395,13 +391,16 @@ workflows:
       bitrise.io:
         stack: ubuntu-resolute-26.04-bitrise-2026-android
         machine_type_id: g2.linux.x-large
-        stack_rollback_version: "1-14-0"
   run-paymentsheet-ime-instrumentation-tests:
     before_run:
       - prepare_all
     after_run:
       - conclude_all
     steps:
+      - script@1:
+          title: Pin Android emulator version
+          inputs:
+            - content: ./scripts/retry.sh 3 ./scripts/pin_emulator_version.sh
       - script@1:
           title: Execute PaymentSheet IME instrumentation tests
           timeout: 1200
@@ -439,7 +438,6 @@ workflows:
       bitrise.io:
         stack: ubuntu-resolute-26.04-bitrise-2026-android
         machine_type_id: g2.linux.x-large
-        stack_rollback_version: "1-14-0"
   run-cardscan-and-google-pay-tests:
     before_run:
       - start_cardscan_emulator
@@ -494,13 +492,16 @@ workflows:
       bitrise.io:
         stack: ubuntu-resolute-26.04-bitrise-2026-android
         machine_type_id: g2.linux.x-large
-        stack_rollback_version: "1-14-0"
   run-paymentsheet-e2e:
     before_run:
       - prepare_all
     after_run:
       - conclude_all
     steps:
+      - script@1:
+          title: Pin Android emulator version
+          inputs:
+            - content: ./scripts/retry.sh 3 ./scripts/pin_emulator_version.sh
       - script@1:
           title: Execute PaymentSheet E2E tests
           timeout: 2400
@@ -520,7 +521,6 @@ workflows:
       bitrise.io:
         stack: ubuntu-resolute-26.04-bitrise-2026-android
         machine_type_id: g2.linux.x-large
-        stack_rollback_version: "1-14-0"
   run-paymentsheet-google-pay-e2e:
     before_run:
       - prepare_all
@@ -552,7 +552,6 @@ workflows:
       bitrise.io:
         stack: ubuntu-resolute-26.04-bitrise-2026-android
         machine_type_id: g2.linux.x-large
-        stack_rollback_version: "1-14-0"
   run-paymentsheet-latency-synthetics:
     before_run:
       - start_emulator
@@ -580,7 +579,6 @@ workflows:
       bitrise.io:
         stack: ubuntu-resolute-26.04-bitrise-2026-android
         machine_type_id: g2.linux.x-large
-        stack_rollback_version: "1-14-0"
   check-dependencies-and-publish-pom:
     envs:
       - INCLUDE_DEPENDENCIES_ON_FAILURE: true
@@ -621,6 +619,10 @@ workflows:
             - abi: "x86_64"
             - api_level: 33
             - tag: "google_apis"
+            # Pin the emulator binary itself to a known-good version, independent of
+            # whatever the Bitrise stack happens to bundle.
+            - emulator_build_number: "16428233" # emulator 37.2.12
+            - emulator_channel: "no update"
             - start_command_flags: >
                 -camera-back none
                 -camera-front none
@@ -639,6 +641,8 @@ workflows:
             - abi: "x86_64"
             - api_level: 33
             - tag: "google_apis_playstore"
+            - emulator_build_number: "16428233" # emulator 37.2.12
+            - emulator_channel: "no update"
             - start_command_flags: >
                -camera-back none
                -camera-front none
@@ -656,6 +660,8 @@ workflows:
             - abi: "x86_64"
             - api_level: 33
             - tag: "google_apis"
+            - emulator_build_number: "16428233" # emulator 37.2.12
+            - emulator_channel: "no update"
             - start_command_flags: >
                -camera-back none
                -camera-front none
@@ -672,6 +678,8 @@ workflows:
             - profile: "Nexus 6"
             - abi: "x86_64"
             - api_level: 28
+            - emulator_build_number: "16428233" # emulator 37.2.12
+            - emulator_channel: "no update"
             - start_command_flags: >
                 -camera-back none
                 -camera-front none
