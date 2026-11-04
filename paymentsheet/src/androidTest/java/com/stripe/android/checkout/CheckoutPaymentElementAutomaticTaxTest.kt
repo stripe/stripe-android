@@ -83,7 +83,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
 
     @Test
     fun testCancellingPaymentOptionsRebindsUpdatedSavedPaymentMethod() {
-        lateinit var controller: CheckoutController
+        lateinit var controller: CheckoutElementsController
         runCheckoutPaymentElementScenario(
             networkRule = networkRule,
             checkoutInitResponse = { response ->
@@ -108,7 +108,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
                             PaymentElement.Configuration.PaymentMethodLayout.Vertical
                         ),
                     )
-                ).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
+                ).isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
             },
         ) {
             assertThat(controller.session.value?.paymentOption?.billingDetails?.address?.postalCode)
@@ -160,14 +160,14 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
 
         waitForSessionTotal(controller, UPDATED_TOTAL)
         assertThat(controller.session.value?.tax?.status)
-            .isEqualTo(CheckoutController.Session.Tax.Status.Ready)
+            .isEqualTo(CheckoutElementsController.Session.Tax.Status.Ready)
         contentPage.assertHasSelectedLpm("card")
         markTestSucceeded()
     }
 
     @Test
     fun testPreselectedSavedPaymentMethodConfirmsWithTotalFromConfigureTaxUpdate() {
-        var checkoutResult: CheckoutController.Result? = null
+        var checkoutResult: CheckoutElementsController.Result? = null
         val savedPaymentMethodTaxResponse = automaticTaxResponse(
             total = UPDATED_TOTAL,
             taxStatus = TAX_STATUS_COMPLETE,
@@ -192,7 +192,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
                             PaymentElement.Configuration.PaymentMethodLayout.Vertical
                         ),
                     )
-                ).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
+                ).isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
             },
         ) {
             contentPage.assertHasSelectedSavedPaymentMethod(SAVED_PAYMENT_METHOD_ID)
@@ -207,7 +207,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
             confirm()
         }
 
-        assertThat(checkoutResult).isInstanceOf(CheckoutController.Result.Completed::class.java)
+        assertThat(checkoutResult).isInstanceOf(CheckoutElementsController.Result.Completed::class.java)
     }
 
     @Test
@@ -233,7 +233,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
             assertSavedPaymentMethodSpinnerCount(1)
             contentPage.assertHasSelectedLpm("cashapp")
             assertThat(controller.session.value?.totals?.total?.minorUnitsAmount)
-                .isEqualTo(INITIAL_TOTAL.toDouble())
+                .isEqualTo(INITIAL_TOTAL.toLong())
             immediateActionCalls.expectNoEvents()
 
             releaseTaxUpdateResponse.countDown()
@@ -324,7 +324,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
             assertSavedPaymentMethodSpinnerCount(0)
             contentPage.assertHasSelectedLpm("cashapp")
             assertThat(controller.session.value?.totals?.total?.minorUnitsAmount)
-                .isEqualTo(INITIAL_TOTAL.toDouble())
+                .isEqualTo(INITIAL_TOTAL.toLong())
             immediateActionCalls.expectNoEvents()
             contentPage.assertHasSavedPaymentMethodSelectionError(
                 applicationContext.getString(R.string.stripe_something_went_wrong)
@@ -470,15 +470,15 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
 
         immediateActionCalls.awaitItem()
         val session = checkNotNull(controller.session.value)
-        assertThat(session.totals.total.minorUnitsAmount).isEqualTo(INITIAL_TOTAL.toDouble())
+        assertThat(session.totals.total.minorUnitsAmount).isEqualTo(INITIAL_TOTAL.toLong())
         assertThat(session.paymentOption?.paymentMethodType).isEqualTo("cashapp")
         assertThat(session.paymentOption?.billingDetails?.address?.line1)
             .isEqualTo(BILLING_ADDRESS_LINE_ONE)
         contentPage.assertHasSelectedLpm("cashapp")
     }
 
-    private fun assertSavedPaymentMethodSession(session: CheckoutController.Session) {
-        assertThat(session.totals.total.minorUnitsAmount).isEqualTo(UPDATED_TOTAL.toDouble())
+    private fun assertSavedPaymentMethodSession(session: CheckoutElementsController.Session) {
+        assertThat(session.totals.total.minorUnitsAmount).isEqualTo(UPDATED_TOTAL.toLong())
         assertThat(session.paymentOption?.paymentMethodType).isEqualTo("card")
         assertThat(session.paymentOption?.billingDetails?.address?.line1)
             .isEqualTo(SAVED_BILLING_ADDRESS_LINE_ONE)
@@ -499,14 +499,14 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
         formPage.assertErrorIsShown(applicationContext.getString(R.string.stripe_something_went_wrong))
         formPage.waitUntilVisible()
         formPage.assertPrimaryButtonIsEnabled()
-        assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isEqualTo(INITIAL_TOTAL.toDouble())
+        assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isEqualTo(INITIAL_TOTAL.toLong())
 
         enqueueTaxUpdate(automaticTaxResponse(UPDATED_TOTAL, TAX_STATUS_COMPLETE))
         formPage.clickPrimaryButton()
 
         waitForSessionTotal(controller, UPDATED_TOTAL)
         assertThat(controller.session.value?.tax?.status)
-            .isEqualTo(CheckoutController.Session.Tax.Status.Ready)
+            .isEqualTo(CheckoutElementsController.Session.Tax.Status.Ready)
         contentPage.assertHasSelectedLpm("card")
         markTestSucceeded()
     }
@@ -566,7 +566,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
 
             waitForSessionTotal(controller, UPDATED_TOTAL)
             assertThat(controller.session.value?.tax?.status)
-                .isEqualTo(CheckoutController.Session.Tax.Status.Ready)
+                .isEqualTo(CheckoutElementsController.Session.Tax.Status.Ready)
             contentPage.assertHasSelectedLpm("card")
             markTestSucceeded()
         }
@@ -592,7 +592,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
 
             waitForSessionTotal(controller, UPDATED_TOTAL)
             assertThat(controller.session.value?.tax?.status)
-                .isEqualTo(CheckoutController.Session.Tax.Status.Ready)
+                .isEqualTo(CheckoutElementsController.Session.Tax.Status.Ready)
             contentPage.assertHasSelectedLpm("cashapp")
             markTestSucceeded()
         }
@@ -619,7 +619,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
 
             waitForSessionTotal(controller, UPDATED_TOTAL)
             assertThat(controller.session.value?.tax?.status)
-                .isEqualTo(CheckoutController.Session.Tax.Status.Ready)
+                .isEqualTo(CheckoutElementsController.Session.Tax.Status.Ready)
             contentPage.assertHasSelectedLpm("cashapp")
             markTestSucceeded()
         }
@@ -670,7 +670,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
     )
 
     private fun runAutomaticTaxTest(
-        configuration: CheckoutController.Configuration,
+        configuration: CheckoutElementsController.Configuration,
         checkoutInitResponse: (MockResponse) -> Unit,
         rowSelectionBehavior: PaymentElement.RowSelectionBehavior = PaymentElement.RowSelectionBehavior.default(),
         configureNetworkSetup: () -> Unit = {},
@@ -688,7 +688,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
                         clientSecret = DEFAULT_CLIENT_SECRET,
                         configuration = configuration,
                     )
-                ).isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
+                ).isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
             },
         ) {
             val scenario = Scenario(
@@ -705,7 +705,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
         private val checkoutScenario: CheckoutPaymentElementScenario,
         holdTaxUpdateResponse: Boolean,
     ) {
-        val controller: CheckoutController
+        val controller: CheckoutElementsController
             get() = checkoutScenario.controller
         val immediateActionCalls = Turbine<Unit>()
         val taxUpdateRequests = Turbine<Unit>()
@@ -730,19 +730,19 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
 
     private fun checkoutConfiguration(
         paymentMethodLayout: PaymentElement.Configuration.PaymentMethodLayout,
-    ): CheckoutController.Configuration {
-        return CheckoutController.Configuration().paymentElement(
+    ): CheckoutElementsController.Configuration {
+        return CheckoutElementsController.Configuration().paymentElement(
             PaymentElement.Configuration().paymentMethodLayout(paymentMethodLayout)
         )
     }
 
     private fun checkoutConfigurationWithDefaultBillingAddress(
         paymentMethodLayout: PaymentElement.Configuration.PaymentMethodLayout,
-    ): CheckoutController.Configuration {
+    ): CheckoutElementsController.Configuration {
         return checkoutConfiguration(paymentMethodLayout).defaults(
-            CheckoutController.Configuration.Defaults().billingDetails(
-                CheckoutController.Configuration.Defaults.ContactDetails().address(
-                    CheckoutController.Address(country = "US")
+            CheckoutElementsController.Configuration.Defaults().billingDetails(
+                CheckoutElementsController.Configuration.Defaults.ContactDetails().address(
+                    CheckoutElementsController.Address(country = "US")
                         .city(BILLING_ADDRESS_CITY)
                         .line1(BILLING_ADDRESS_LINE_ONE)
                         .postalCode(BILLING_ADDRESS_ZIP)
@@ -851,9 +851,9 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
         billingDetailsPage.zipCode.performScrollTo().assertTextContains(BILLING_ADDRESS_ZIP)
     }
 
-    private fun waitForSessionTotal(controller: CheckoutController, total: Long) {
+    private fun waitForSessionTotal(controller: CheckoutElementsController, total: Long) {
         testRules.compose.waitUntilWithIdle {
-            controller.session.value?.totals?.total?.minorUnitsAmount == total.toDouble()
+            controller.session.value?.totals?.total?.minorUnitsAmount == total.toLong()
         }
     }
 

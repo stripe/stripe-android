@@ -1327,7 +1327,7 @@ internal class CheckoutSheetLauncherTest {
         val lifecycleOwner = TestLifecycleOwner(initialState = initialLifecycleState)
         val savedStateHandle = SavedStateHandle()
         val linkAccountHolder = LinkAccountHolder(savedStateHandle)
-        val selectionHolder = CheckoutControllerStateFactory.createStateHolder(
+        val selectionHolder = CheckoutElementsControllerStateFactory.createStateHolder(
             savedStateHandle = savedStateHandle,
             paymentOptionFactory = DefaultCheckoutPaymentOptionDisplayDataFactory(
                 iconLoader = PaymentSelection.IconLoader(
@@ -1338,7 +1338,7 @@ internal class CheckoutSheetLauncherTest {
                 context = applicationContext,
                 linkAccountHolder = linkAccountHolder,
             ),
-        ).apply { state = CheckoutControllerStateFactory.create() }
+        ).apply { state = CheckoutElementsControllerStateFactory.create() }
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
         val customerStateHolder = DefaultCustomerStateHolder(
             savedStateHandle = savedStateHandle,
@@ -1355,6 +1355,8 @@ internal class CheckoutSheetLauncherTest {
             confirmationHandler = confirmationHandler,
             sheetStateHolder = sheetStateHolder,
             sessionRefresher = sessionRefresher,
+            confirmationFinalizer = { Result.success(it) },
+            resultReporter = { _, _ -> },
             logger = logger,
             resultCallback = {},
             viewModelScope = backgroundScope,
@@ -1431,7 +1433,7 @@ internal class CheckoutSheetLauncherTest {
     }
 
     private class Scenario(
-        val selectionHolder: CheckoutControllerStateHolder,
+        val selectionHolder: CheckoutElementsControllerStateHolder,
         val lifecycleOwner: TestLifecycleOwner,
         val customerStateHolder: CustomerStateHolder,
         val linkAccountHolder: LinkAccountHolder,

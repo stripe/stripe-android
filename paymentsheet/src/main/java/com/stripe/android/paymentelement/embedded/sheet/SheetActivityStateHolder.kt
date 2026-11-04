@@ -1,5 +1,6 @@
 package com.stripe.android.paymentelement.embedded.sheet
 
+import com.stripe.android.common.analytics.experiment.PrimaryButtonExperiment
 import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddNextStep
 import com.stripe.android.core.injection.ViewModelScope
@@ -67,6 +68,7 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
     private val configuration: EmbeddedPaymentElement.Configuration,
     private val onClickDelegate: OnClickOverrideDelegate,
     private val eventReporter: EventReporter,
+    private val primaryButtonExperiment: PrimaryButtonExperiment,
     @param:ViewModelScope private val coroutineScope: CoroutineScope,
     private val confirmationHandler: ConfirmationHandler,
     private val tapToAddHelper: TapToAddHelper,
@@ -85,7 +87,9 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
             primaryButtonIcon = if (launchMode !is EmbeddedLaunchMode.PaymentOptions &&
                 configuration.formSheetAction == EmbeddedPaymentElement.FormSheetAction.Confirm
             ) {
-                PrimaryButtonIcon.Lock
+                primaryButtonExperiment.getIcon(
+                    metadata = paymentMethodMetadata,
+                )
             } else {
                 PrimaryButtonIcon.None
             },

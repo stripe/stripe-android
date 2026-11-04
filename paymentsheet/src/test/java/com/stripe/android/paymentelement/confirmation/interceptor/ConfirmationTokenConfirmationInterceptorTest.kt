@@ -319,6 +319,7 @@ class ConfirmationTokenConfirmationInterceptorTest {
                     launcherArguments = IntentConfirmationDefinition.Args.NextAction(
                         intent = PaymentIntentFixtures.PI_REQUIRES_MASTERCARD_3DS2,
                         deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
+                        checkoutSessionResponse = null,
                     ),
                     receivesResultInProcess = false,
                 )

@@ -88,6 +88,7 @@ import javax.inject.Singleton
         PaymentOptionCardArtModule::class,
         NfcScanningAvailabilityModule::class,
         ApiConfigurationResolverModule::class,
+        PrimaryButtonExperimentModule::class,
     ]
 )
 internal abstract class PaymentSheetCommonModule {

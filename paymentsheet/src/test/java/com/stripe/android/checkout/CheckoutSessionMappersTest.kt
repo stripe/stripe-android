@@ -3,9 +3,11 @@
 package com.stripe.android.checkout
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkout.CheckoutElementsController.Session
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import org.junit.Test
+import java.math.BigDecimal
 import java.util.Locale
 
 class CheckoutSessionMappersTest {
@@ -52,23 +54,23 @@ class CheckoutSessionMappersTest {
         assertThat(session.livemode).isTrue()
         assertThat(session.email).isEqualTo("server@example.com")
         assertThat(session.minorUnitsAmountDivisor).isEqualTo(100)
-        assertThat(session.totals.subtotal.minorUnitsAmount).isEqualTo(1000.0)
-        assertThat(session.totals.taxInclusive.minorUnitsAmount).isEqualTo(20.0)
-        assertThat(session.totals.taxExclusive.minorUnitsAmount).isEqualTo(80.0)
-        assertThat(session.totals.discount.minorUnitsAmount).isEqualTo(0.0)
-        assertThat(session.totals.total.minorUnitsAmount).isEqualTo(1080.0)
+        assertThat(session.totals.subtotal.minorUnitsAmount).isEqualTo(1000L)
+        assertThat(session.totals.taxInclusive.minorUnitsAmount).isEqualTo(20L)
+        assertThat(session.totals.taxExclusive.minorUnitsAmount).isEqualTo(80L)
+        assertThat(session.totals.discount.minorUnitsAmount).isEqualTo(0L)
+        assertThat(session.totals.total.minorUnitsAmount).isEqualTo(1080L)
     }
 
     @Test
     fun `maps nested item using stable inner key and server computed amounts`() {
         val item = CheckoutSessionResponseFactory.create(
             checkoutItems = listOf(CheckoutSessionResponseFactory.checkoutItem(total = 2500, subtotal = 2400))
-        ).session().orderSummaryItems.single() as CheckoutController.Session.OrderSummaryItem.OneTimePrice
+        ).session().orderSummaryItems.single() as Session.OrderSummaryItem.OneTimePrice
 
         assertThat(item.key).isEqualTo("group_1")
         assertThat(item.items.single().key).isEqualTo("item_1")
-        assertThat(item.items.single().amountDetails.subtotal.minorUnitsAmount).isEqualTo(2400.0)
-        assertThat(item.items.single().amountDetails.total.minorUnitsAmount).isEqualTo(2500.0)
+        assertThat(item.items.single().amountDetails.subtotal.minorUnitsAmount).isEqualTo(2400L)
+        assertThat(item.items.single().amountDetails.total.minorUnitsAmount).isEqualTo(2500L)
     }
 
     @Test
@@ -79,7 +81,7 @@ class CheckoutSessionMappersTest {
             group.copy(
                 oneTimePrice = group.oneTimePrice.copy(
                     items = group.oneTimePrice.items.map {
-                        it.copy(unitAmountDecimal = 12.345678901234)
+                        it.copy(unitAmountDecimal = BigDecimal("12.345678901234"))
                     }
                 )
             )
@@ -89,9 +91,69 @@ class CheckoutSessionMappersTest {
         assertThat(usd.totals.total.amount).isEqualTo("$12.34")
         assertThat(jpy.totals.total.amount).isEqualTo("¥1,234")
         assertThat(
-            (decimal.orderSummaryItems.single() as CheckoutController.Session.OrderSummaryItem.OneTimePrice)
+            (decimal.orderSummaryItems.single() as Session.OrderSummaryItem.OneTimePrice)
                 .items.single().unitAmountDecimal?.amount
         ).contains("0.12345678901234")
+    }
+
+    @Test
+    fun `preserves integer amounts beyond double precision`() {
+        val amount = 9007199254740993L
+        val session = CheckoutSessionResponseFactory.create(amount = amount).session()
+        val item = (session.orderSummaryItems.single() as Session.OrderSummaryItem.OneTimePrice)
+            .items.single()
+
+        assertThat(session.totals.total.minorUnitsAmount).isEqualTo(amount)
+        assertThat(session.totals.total.amount).isEqualTo("$90,071,992,547,409.93")
+        assertThat(item.unitAmount.minorUnitsAmount).isEqualTo(amount)
+        assertThat(item.amountDetails.subtotal.minorUnitsAmount).isEqualTo(amount)
+        assertThat(item.unitAmountDecimal).isNull()
+    }
+
+    @Test
+    fun `preserves fractional minor units beyond double precision`() {
+        val amount = BigDecimal("9007199254740993.123456789012")
+        val group = CheckoutSessionResponseFactory.checkoutItem()
+        val decimalItem = group.copy(
+            oneTimePrice = group.oneTimePrice.copy(
+                items = group.oneTimePrice.items.map { it.copy(unitAmountDecimal = amount) }
+            )
+        )
+        val session = CheckoutSessionResponseFactory.create(checkoutItems = listOf(decimalItem)).session()
+        val item = (session.orderSummaryItems.single() as Session.OrderSummaryItem.OneTimePrice)
+            .items.single()
+
+        assertThat(item.unitAmountDecimal?.minorUnitsAmount).isEqualTo(amount)
+        assertThat(item.unitAmountDecimal?.amount).isEqualTo("$90,071,992,547,409.93123456789012")
+    }
+
+    @Test
+    fun `maps integer tax amounts for items and session`() {
+        val tax = CheckoutSessionResponse.TaxAmount(
+            amount = 9007199254740993L,
+            inclusive = false,
+            taxRate = CheckoutSessionResponse.TaxRate(
+                displayName = "Sales tax",
+                percentage = 8.25,
+                rateType = CheckoutSessionResponse.TaxRateType.PERCENTAGE,
+            ),
+        )
+        val group = CheckoutSessionResponseFactory.checkoutItem()
+        val taxedItem = group.copy(
+            oneTimePrice = group.oneTimePrice.copy(
+                items = group.oneTimePrice.items.map { it.copy(taxAmounts = listOf(tax)) }
+            )
+        )
+        val session = CheckoutSessionResponseFactory.create(
+            checkoutItems = listOf(taxedItem),
+            totalSummary = CheckoutSessionResponse.TotalSummary(listOf(tax)),
+        ).session()
+        val item = (session.orderSummaryItems.single() as Session.OrderSummaryItem.OneTimePrice)
+            .items.single()
+
+        assertThat(session.taxAmounts?.single()?.minorUnitsAmount).isEqualTo(tax.amount)
+        assertThat(session.taxAmounts?.single()?.amount).isEqualTo("$90,071,992,547,409.93")
+        assertThat(item.amountDetails.taxAmounts?.single()?.minorUnitsAmount).isEqualTo(tax.amount)
     }
 
     @Test
@@ -120,9 +182,9 @@ class CheckoutSessionMappersTest {
         val status = CheckoutSessionResponseFactory.create(
             status = CheckoutSessionResponse.Status.COMPLETE,
             paymentStatus = CheckoutSessionResponse.PaymentStatus.PAID,
-        ).session().status as CheckoutController.Session.Status.Complete
+        ).session().status as Session.Status.Complete
 
-        assertThat(status.paymentStatus).isEqualTo(CheckoutController.Session.Status.PaymentStatus.Paid)
+        assertThat(status.paymentStatus).isEqualTo(Session.Status.PaymentStatus.Paid)
     }
 
     @Test
@@ -137,12 +199,12 @@ class CheckoutSessionMappersTest {
         ).session()
 
         assertThat(absent.tax).isNull()
-        assertThat(pending.tax?.status).isEqualTo(CheckoutController.Session.Tax.Status.RequiresShippingAddress)
+        assertThat(pending.tax?.status).isEqualTo(Session.Tax.Status.RequiresShippingAddress)
     }
 
     @Test
     fun `server email takes precedence while shipping comes from local state`() {
-        val address = CheckoutController.Address.State("Denver", "US", "1 Main", null, "80202", "CO")
+        val address = CheckoutElementsController.Address.State("Denver", "US", "1 Main", null, "80202", "CO")
         val session = CheckoutSessionResponseFactory.create(customerEmail = "server@example.com").asCheckoutSession(
             collectedEmail = "local@example.com",
             collectedShippingName = "Jenny",

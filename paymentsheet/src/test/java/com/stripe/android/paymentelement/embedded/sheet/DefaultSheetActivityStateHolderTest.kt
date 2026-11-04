@@ -5,6 +5,7 @@ import app.cash.turbine.Turbine
 import app.cash.turbine.TurbineTestContext
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.common.analytics.experiment.FakePrimaryButtonExperiment
 import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddNextStep
 import com.stripe.android.core.strings.resolvableString
@@ -74,6 +75,49 @@ internal class DefaultSheetActivityStateHolderTest {
             )
             assertThat(state.primaryButtonIcon).isEqualTo(PrimaryButtonIcon.Lock)
         }
+    }
+
+    @Test
+    fun `confirmation button uses experiment lock icon`() = assertConfirmationButtonIcon(PrimaryButtonIcon.Lock)
+
+    @Test
+    fun `confirmation button uses experiment no icon`() = assertConfirmationButtonIcon(PrimaryButtonIcon.None)
+
+    @Test
+    fun `experiment icon is preserved through selection and processing updates`() = testScenario(
+        primaryButtonIcon = PrimaryButtonIcon.None,
+    ) {
+        stateHolder.state.test {
+            assertThat(awaitItem().primaryButtonIcon).isEqualTo(PrimaryButtonIcon.None)
+
+            selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+            assertThat(awaitItem().primaryButtonIcon).isEqualTo(PrimaryButtonIcon.None)
+            stateHolder.updateProcessing(true)
+            assertThat(awaitItem().primaryButtonIcon).isEqualTo(PrimaryButtonIcon.None)
+            primaryButtonExperiment.getIconCalls.expectNoEvents()
+        }
+    }
+
+    @Test
+    fun `continue button does not access experiment`() = testScenario(
+        config = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.")
+            .formSheetAction(EmbeddedPaymentElement.FormSheetAction.Continue)
+            .build(),
+    ) {
+        stateHolder.state.test {
+            assertThat(awaitItem().primaryButtonIcon).isEqualTo(PrimaryButtonIcon.None)
+        }
+        primaryButtonExperiment.getIconCalls.expectNoEvents()
+    }
+
+    @Test
+    fun `payment options does not access experiment`() = testScenario(
+        launchMode = EmbeddedLaunchMode.PaymentOptions,
+    ) {
+        stateHolder.state.test {
+            assertThat(awaitItem().primaryButtonIcon).isEqualTo(PrimaryButtonIcon.None)
+        }
+        primaryButtonExperiment.getIconCalls.expectNoEvents()
     }
 
     @Test
@@ -616,16 +660,24 @@ internal class DefaultSheetActivityStateHolderTest {
         }
     }
 
+    private fun assertConfirmationButtonIcon(icon: PrimaryButtonIcon) = testScenario(primaryButtonIcon = icon) {
+        stateHolder.state.test {
+            assertThat(awaitItem().primaryButtonIcon).isEqualTo(icon)
+        }
+    }
+
     private class Scenario(
         val selectionHolder: EmbeddedSelectionHolder,
         val stateHolder: DefaultSheetActivityStateHolder,
         val confirmationHandler: FakeConfirmationHandler,
         val onClickOverrideDelegate: OnClickOverrideDelegate,
         val navigator: EmbeddedNavigator,
+        val primaryButtonExperiment: FakePrimaryButtonExperiment,
     )
 
     private fun testScenario(
         stripeIntent: StripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+        primaryButtonIcon: PrimaryButtonIcon = PrimaryButtonIcon.Lock,
         config: EmbeddedPaymentElement.Configuration = EmbeddedConfirmationStateFixtures.defaultState().configuration,
         tapToAddHelper: FakeTapToAddHelper = FakeTapToAddHelper.noOp(),
         customerStateHolder: FakeCustomerStateHolder = FakeCustomerStateHolder(),
@@ -640,7 +692,11 @@ internal class DefaultSheetActivityStateHolderTest {
             FakeSavedPaymentMethodConfirmInteractor.Factory(),
         block: suspend Scenario.() -> Unit
     ) = runTest {
-        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(stripeIntent = stripeIntent)
+        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = stripeIntent,
+        )
+        val eventReporter = FakeEventReporter()
+        val primaryButtonExperiment = FakePrimaryButtonExperiment(icon = primaryButtonIcon)
         val selectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle())
         val onClickOverrideDelegate = OnClickDelegateOverrideImpl()
         val confirmationHandler = FakeConfirmationHandler()
@@ -657,7 +713,8 @@ internal class DefaultSheetActivityStateHolderTest {
             configuration = config,
             coroutineScope = viewModelScope,
             onClickDelegate = onClickOverrideDelegate,
-            eventReporter = FakeEventReporter(),
+            eventReporter = eventReporter,
+            primaryButtonExperiment = primaryButtonExperiment,
             confirmationHandler = confirmationHandler,
             tapToAddHelper = tapToAddHelper,
             customerStateHolder = customerStateHolder,
@@ -666,6 +723,13 @@ internal class DefaultSheetActivityStateHolderTest {
             embeddedNavigatorProvider = Provider { navigator },
             savedPaymentMethodConfirmScreenFactoryProvider = Provider { screenFactory },
         )
+        if (launchMode !is EmbeddedLaunchMode.PaymentOptions &&
+            config.formSheetAction == EmbeddedPaymentElement.FormSheetAction.Confirm
+        ) {
+            assertThat(primaryButtonExperiment.getIconCalls.awaitItem()).isEqualTo(paymentMethodMetadata)
+        } else {
+            primaryButtonExperiment.getIconCalls.expectNoEvents()
+        }
         screenFactory = SavedPaymentMethodConfirmScreenFactory(
             interactorFactory = savedPaymentMethodConfirmInteractorFactory,
             sheetActivityStateHolder = stateHolder,
@@ -682,7 +746,10 @@ internal class DefaultSheetActivityStateHolderTest {
             confirmationHandler = confirmationHandler,
             onClickOverrideDelegate = onClickOverrideDelegate,
             navigator = navigator,
+            primaryButtonExperiment = primaryButtonExperiment,
         ).block()
+        primaryButtonExperiment.validate()
+        eventReporter.experimentExposureCalls.ensureAllEventsConsumed()
     }
 
     private class RecordingSavedPaymentMethodConfirmInteractorFactory(

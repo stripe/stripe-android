@@ -144,7 +144,7 @@ private fun GooglePrimaryButton(
         Box(modifier = modifier.testTag(GOOGLE_PAY_PRIMARY_BUTTON_TEST_TAG)) {
             PrimaryButton(
                 label = "",
-                icon = PrimaryButtonIcon.Lock,
+                icon = PrimaryButtonIcon.None,
                 enabled = true,
                 processingState = processingState,
                 onProcessingCompleted = {

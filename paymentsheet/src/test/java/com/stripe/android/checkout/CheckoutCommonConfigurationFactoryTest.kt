@@ -1,7 +1,7 @@
 package com.stripe.android.checkout
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.checkout.CheckoutController.Address
+import com.stripe.android.checkout.CheckoutElementsController.Address
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.elements.ExpressCheckoutElement
@@ -48,7 +48,7 @@ internal class CheckoutCommonConfigurationFactoryTest {
             .build()
 
         val result = factory().create(
-            configuration = CheckoutController.Configuration().build(),
+            configuration = CheckoutElementsController.Configuration().build(),
             paymentElementConfiguration = paymentElementConfiguration,
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(merchantCountry = "US"),
             collectedDetails = collectedDetails(),
@@ -71,7 +71,7 @@ internal class CheckoutCommonConfigurationFactoryTest {
     @Test
     fun `createForPaymentElement returns null when payment element is not configured`() {
         val result = CheckoutCommonConfigurationFactory(appName = "Test App").createForPaymentElement(
-            configuration = CheckoutController.Configuration().build(),
+            configuration = CheckoutElementsController.Configuration().build(),
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
             collectedDetails = collectedDetails(),
         )
@@ -81,7 +81,7 @@ internal class CheckoutCommonConfigurationFactoryTest {
 
     @Test
     fun `matches the common configuration derived from the embedded configuration`() {
-        val configuration = CheckoutController.Configuration()
+        val configuration = CheckoutElementsController.Configuration()
             .paymentElement(
                 PaymentElement.Configuration()
                     .embeddedViewDisplaysMandateText(false)
@@ -126,7 +126,7 @@ internal class CheckoutCommonConfigurationFactoryTest {
 
     @Test
     fun `uses the provided merchant display name`() {
-        val configuration = CheckoutController.Configuration()
+        val configuration = CheckoutElementsController.Configuration()
             .paymentElement(PaymentElement.Configuration())
             .merchantDisplayName("Acme Corp")
             .build()
@@ -206,7 +206,7 @@ internal class CheckoutCommonConfigurationFactoryTest {
 
     @Test
     fun `maps Link configuration from payment element configuration`() {
-        val configuration = CheckoutController.Configuration().paymentElement(
+        val configuration = CheckoutElementsController.Configuration().paymentElement(
             PaymentElement.Configuration().linkConfiguration(
                 PaymentElement.Configuration.LinkConfiguration().display(
                     PaymentElement.Configuration.LinkConfiguration.Display.Never
@@ -226,7 +226,7 @@ internal class CheckoutCommonConfigurationFactoryTest {
 
     @Test
     fun `createForPaymentElement uses payment element configuration`() {
-        val configuration = CheckoutController.Configuration()
+        val configuration = CheckoutElementsController.Configuration()
             .paymentElement(
                 PaymentElement.Configuration()
                     .googlePayConfiguration(
@@ -270,14 +270,14 @@ internal class CheckoutCommonConfigurationFactoryTest {
 
     @Test
     fun `maps configured billing defaults to payment element and express checkout element`() {
-        val configuration = CheckoutController.Configuration()
+        val configuration = CheckoutElementsController.Configuration()
             .paymentElement(PaymentElement.Configuration())
             .defaults(
-                CheckoutController.Configuration.Defaults().phone("+15555551234").billingDetails(
-                    CheckoutController.Configuration.Defaults.ContactDetails()
+                CheckoutElementsController.Configuration.Defaults().phone("+15555551234").billingDetails(
+                    CheckoutElementsController.Configuration.Defaults.ContactDetails()
                         .name("Jane Billing")
                         .address(
-                            CheckoutController.Address(country = "US")
+                            CheckoutElementsController.Address(country = "US")
                                 .city("Denver")
                                 .line1("123 Main St")
                                 .line2("Apt 4")
@@ -318,7 +318,7 @@ internal class CheckoutCommonConfigurationFactoryTest {
 
     @Test
     fun `maps terms display to common configuration`() {
-        val configuration = CheckoutController.Configuration()
+        val configuration = CheckoutElementsController.Configuration()
             .paymentElement(
                 PaymentElement.Configuration().termsDisplay(
                     mapOf(PaymentMethod.Type.Card to TermsDisplay.NEVER)
@@ -339,7 +339,7 @@ internal class CheckoutCommonConfigurationFactoryTest {
 
     @Test
     fun `maps payment method order to common configuration`() {
-        val configuration = CheckoutController.Configuration()
+        val configuration = CheckoutElementsController.Configuration()
             .paymentElement(PaymentElement.Configuration().paymentMethodOrder(listOf("card", "klarna")))
             .build()
 
@@ -355,7 +355,7 @@ internal class CheckoutCommonConfigurationFactoryTest {
 
     @Test
     fun `maps preferred networks to common configuration`() {
-        val configuration = CheckoutController.Configuration()
+        val configuration = CheckoutElementsController.Configuration()
             .paymentElement(
                 PaymentElement.Configuration().preferredNetworks(
                     listOf(CardBrand.CartesBancaires, CardBrand.Visa)
@@ -376,7 +376,7 @@ internal class CheckoutCommonConfigurationFactoryTest {
 
     @Test
     fun `maps opens card scanner automatically to common configuration`() {
-        val configuration = CheckoutController.Configuration()
+        val configuration = CheckoutElementsController.Configuration()
             .paymentElement(PaymentElement.Configuration().opensCardScannerAutomatically(true))
             .build()
 
@@ -392,7 +392,7 @@ internal class CheckoutCommonConfigurationFactoryTest {
 
     @Test
     fun `maps card brand acceptance to common configuration`() {
-        val configuration = CheckoutController.Configuration()
+        val configuration = CheckoutElementsController.Configuration()
             .paymentElement(
                 PaymentElement.Configuration().cardBrandAcceptance(
                     PaymentElement.Configuration.CardBrandAcceptance.disallowed(
@@ -433,7 +433,7 @@ internal class CheckoutCommonConfigurationFactoryTest {
     @Test
     fun `customer email supplies express billing defaults when session email is absent`() {
         val result = factory().createForExpressCheckoutElement(
-            configuration = CheckoutController.Configuration()
+            configuration = CheckoutElementsController.Configuration()
                 .expressCheckoutElement(ExpressCheckoutElement.Configuration())
                 .build(),
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(
@@ -530,9 +530,9 @@ internal class CheckoutCommonConfigurationFactoryTest {
 
     @Test
     fun `clearing default phone leaves billing phone null`() {
-        val defaults = CheckoutController.Configuration.Defaults().phone("+15555551234")
+        val defaults = CheckoutElementsController.Configuration.Defaults().phone("+15555551234")
         assertThat(defaults.build().phone).isEqualTo("+15555551234")
-        val configuration = CheckoutController.Configuration()
+        val configuration = CheckoutElementsController.Configuration()
             .paymentElement(PaymentElement.Configuration())
             .defaults(defaults.phone(null))
             .expressCheckoutElement(ExpressCheckoutElement.Configuration())
@@ -555,8 +555,8 @@ internal class CheckoutCommonConfigurationFactoryTest {
     private fun controllerConfiguration(
         appearance: PaymentElement.Configuration.Appearance = PaymentElement.Configuration.Appearance(),
         googlePayConfiguration: GooglePayConfiguration? = null,
-    ): CheckoutController.Configuration.State {
-        val builder = CheckoutController.Configuration()
+    ): CheckoutElementsController.Configuration.State {
+        val builder = CheckoutElementsController.Configuration()
             .paymentElement(
                 PaymentElement.Configuration()
                     .appearance(appearance)

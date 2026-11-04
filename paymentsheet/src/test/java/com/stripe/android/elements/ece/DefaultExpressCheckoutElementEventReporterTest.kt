@@ -5,8 +5,8 @@ import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.checkout.CheckoutController
-import com.stripe.android.checkout.CheckoutControllerStateFactory
+import com.stripe.android.checkout.CheckoutElementsController
+import com.stripe.android.checkout.CheckoutElementsControllerStateFactory
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.elements.ExpressCheckoutElement.Configuration.GooglePayConfiguration
@@ -29,8 +29,7 @@ internal class DefaultExpressCheckoutElementEventReporterTest {
     fun `onEceDisplayed fires event with default params`() = runScenario {
         reporter.onEceDisplayed()
 
-        val loggedParams = executor.getExecutedRequests().single().params
-        assertThat(loggedParams).containsEntry("event", "elements.express_checkout_element.init")
+        val loggedParams = executor.awaitEvent("elements.express_checkout_element.init")
         assertThat(loggedParams).containsEntry("product_usage", "checkout_elements")
         assertThat(loggedParams).containsEntry("example_analytics_metadata", true)
         assertThat(loggedParams).containsEntry("ordered_lpms", "link,google_pay")
@@ -55,7 +54,7 @@ internal class DefaultExpressCheckoutElementEventReporterTest {
     ) {
         reporter.onEceDisplayed()
 
-        val loggedParams = executor.getExecutedRequests().single().params
+        val loggedParams = executor.awaitEvent("elements.express_checkout_element.init")
         assertThat(loggedParams).containsEntry(
             "ece_config",
             mapOf(
@@ -87,7 +86,7 @@ internal class DefaultExpressCheckoutElementEventReporterTest {
             ),
         )
         val googlePayConfiguration = GooglePayConfiguration().build()
-        val stateHolder = CheckoutControllerStateFactory.createStateHolder(
+        val stateHolder = CheckoutElementsControllerStateFactory.createStateHolder(
             savedStateHandle = SavedStateHandle(),
             availableExpressButtonTypesFactory = FakeAvailableExpressButtonTypesFactory(
                 availableExpressButtonTypes = listOf(
@@ -96,8 +95,8 @@ internal class DefaultExpressCheckoutElementEventReporterTest {
                 ),
             ),
         )
-        stateHolder.state = CheckoutControllerStateFactory.create(
-            configuration = CheckoutController.Configuration()
+        stateHolder.state = CheckoutElementsControllerStateFactory.create(
+            configuration = CheckoutElementsController.Configuration()
                 .expressCheckoutElement(expressCheckoutElementConfiguration)
                 .build(),
             expressCheckoutElementPaymentMethodMetadata = paymentMethodMetadata,
@@ -123,5 +122,6 @@ internal class DefaultExpressCheckoutElementEventReporterTest {
         )
 
         durationProvider.validate()
+        analyticsRequestExecutor.validate()
     }
 }

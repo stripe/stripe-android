@@ -30,8 +30,13 @@ class ExpressCheckoutElement @Inject internal constructor(
     /** Payment methods supported by the Express Checkout Element. */
     abstract class PaymentMethod private constructor() {
 
+        /** The payment method type, such as `"google_pay"` or `"link"`. */
+        abstract val type: String
+
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         class GooglePay internal constructor() : PaymentMethod() {
+            override val type: String = "google_pay"
+
             override fun equals(other: Any?): Boolean = other is GooglePay
 
             override fun hashCode(): Int = GooglePay::class.java.hashCode()
@@ -39,6 +44,8 @@ class ExpressCheckoutElement @Inject internal constructor(
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         class Link internal constructor() : PaymentMethod() {
+            override val type: String = "link"
+
             override fun equals(other: Any?): Boolean = other is Link
 
             override fun hashCode(): Int = Link::class.java.hashCode()

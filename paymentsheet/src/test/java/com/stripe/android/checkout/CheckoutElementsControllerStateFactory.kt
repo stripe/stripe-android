@@ -19,9 +19,9 @@ import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.testing.FakeErrorReporter
 
 @OptIn(CheckoutSessionPreview::class)
-internal object CheckoutControllerStateFactory {
+internal object CheckoutElementsControllerStateFactory {
     fun create(
-        configuration: CheckoutController.Configuration.State = CheckoutController.Configuration()
+        configuration: CheckoutElementsController.Configuration.State = CheckoutElementsController.Configuration()
             .paymentElement(PaymentElement.Configuration())
             .expressCheckoutElement(ExpressCheckoutElement.Configuration())
             .build(),
@@ -39,8 +39,8 @@ internal object CheckoutControllerStateFactory {
         previousNewSelections: Bundle = Bundle(),
         linkEagerPresentationSuppressed: Boolean = false,
         mandateState: CheckoutMandateState = CheckoutMandateState.initial(),
-    ): CheckoutControllerState {
-        return CheckoutControllerState(
+    ): CheckoutElementsControllerState {
+        return CheckoutElementsControllerState(
             configuration = configuration,
             checkoutSessionResponse = checkoutSessionResponse,
             flagImages = flagImages,
@@ -64,8 +64,8 @@ internal object CheckoutControllerStateFactory {
             CheckoutPaymentOptionDisplayDataFactory { _, _, _ -> null },
         availableExpressButtonTypesFactory: AvailableExpressButtonTypesFactory =
             FakeAvailableExpressButtonTypesFactory(),
-    ): CheckoutControllerStateHolder {
-        return CheckoutControllerStateHolder(
+    ): CheckoutElementsControllerStateHolder {
+        return CheckoutElementsControllerStateHolder(
             savedStateHandle = savedStateHandle,
             errorReporter = errorReporter,
             paymentOptionFactory = paymentOptionFactory,

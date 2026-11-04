@@ -3,7 +3,7 @@ package com.stripe.android.checkout.analytics
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.checkout.CheckoutController
+import com.stripe.android.checkout.CheckoutElementsController
 import com.stripe.android.elements.CurrencySelectorElement
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.elements.PaymentElement
@@ -18,7 +18,7 @@ import kotlin.test.Test
 class CheckoutConfigurationAnalyticsTest {
     @Test
     fun `default configuration reports presence and absent optional elements`() {
-        val params = CheckoutController.Configuration()
+        val params = CheckoutElementsController.Configuration()
             .build()
             .toAnalyticsMap()
 
@@ -39,7 +39,7 @@ class CheckoutConfigurationAnalyticsTest {
 
     @Test
     fun `default payment element records default choices`() {
-        val params = CheckoutController.Configuration()
+        val params = CheckoutElementsController.Configuration()
             .paymentElement(PaymentElement.Configuration())
             .build()
             .toAnalyticsMap()
@@ -64,7 +64,7 @@ class CheckoutConfigurationAnalyticsTest {
                     PaymentElement.Configuration.Appearance.PrimaryButton.Colors.dark().background(Color.Blue)
                 )
             )
-        val params = CheckoutController.Configuration()
+        val params = CheckoutElementsController.Configuration()
             .paymentElement(PaymentElement.Configuration().appearance(appearance))
             .build()
             .toAnalyticsMap()
@@ -82,7 +82,7 @@ class CheckoutConfigurationAnalyticsTest {
                     ShippingAddressElement.Configuration.Appearance.PrimaryButton.Colors.dark().background(Color.Blue)
                 )
             )
-        val params = CheckoutController.Configuration()
+        val params = CheckoutElementsController.Configuration()
             .shippingAddressElement(ShippingAddressElement.Configuration().appearance(appearance))
             .build()
             .toAnalyticsMap()
@@ -116,7 +116,7 @@ class CheckoutConfigurationAnalyticsTest {
                     .display(PaymentElement.Configuration.LinkConfiguration.Display.WalletButtonHidden)
             )
 
-        val params = CheckoutController.Configuration()
+        val params = CheckoutElementsController.Configuration()
             .paymentElement(configuration)
             .build()
             .toAnalyticsMap()
@@ -142,7 +142,7 @@ class CheckoutConfigurationAnalyticsTest {
 
     @Test
     fun `card brand acceptance records disallowed brands in order`() {
-        val params = CheckoutController.Configuration()
+        val params = CheckoutElementsController.Configuration()
             .paymentElement(
                 PaymentElement.Configuration().cardBrandAcceptance(
                     PaymentElement.Configuration.CardBrandAcceptance.disallowed(
@@ -186,7 +186,7 @@ class CheckoutConfigurationAnalyticsTest {
                     .cornerRadiusDp(6f)
             )
 
-        val params = CheckoutController.Configuration()
+        val params = CheckoutElementsController.Configuration()
             .expressCheckoutElement(configuration)
             .build()
             .toAnalyticsMap()
@@ -223,7 +223,7 @@ class CheckoutConfigurationAnalyticsTest {
                 )
             )
 
-        val params = CheckoutController.Configuration()
+        val params = CheckoutElementsController.Configuration()
             .currencySelectorElement(currencySelectorConfiguration)
             .shippingAddressElement(shippingAddressConfiguration)
             .build()
@@ -256,21 +256,21 @@ class CheckoutConfigurationAnalyticsTest {
             "private@example.com",
             "+15555550123",
         )
-        val defaults = CheckoutController.Configuration.Defaults()
+        val defaults = CheckoutElementsController.Configuration.Defaults()
             .billingDetails(
-                CheckoutController.Configuration.Defaults.ContactDetails()
+                CheckoutElementsController.Configuration.Defaults.ContactDetails()
                     .name(privateValues[1])
-                    .address(CheckoutController.Address(country = "US").line1(privateValues[2]))
+                    .address(CheckoutElementsController.Address(country = "US").line1(privateValues[2]))
             )
             .shippingDetails(
-                CheckoutController.Configuration.Defaults.ContactDetails()
+                CheckoutElementsController.Configuration.Defaults.ContactDetails()
                     .name(privateValues[3])
-                    .address(CheckoutController.Address(country = "US").line1(privateValues[4]))
+                    .address(CheckoutElementsController.Address(country = "US").line1(privateValues[4]))
             )
             .email(privateValues[5])
             .phone(privateValues[6])
 
-        val params = CheckoutController.Configuration()
+        val params = CheckoutElementsController.Configuration()
             .merchantDisplayName(privateValues[0])
             .defaults(defaults)
             .build()
@@ -296,7 +296,7 @@ class CheckoutConfigurationAnalyticsTest {
             "private shipping title",
             "private button title",
         )
-        val params = CheckoutController.Configuration()
+        val params = CheckoutElementsController.Configuration()
             .paymentElement(
                 PaymentElement.Configuration().googlePayConfiguration(
                     PaymentElement.Configuration.GooglePayConfiguration().label(privateValues[0])

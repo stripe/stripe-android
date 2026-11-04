@@ -103,6 +103,18 @@ internal sealed class LoggableExperiment(
         ).filterNotNullValues()
     )
 
+    data class OcsMobileRemovePrimaryButtonPadlock(
+        val experimentsData: ElementsSession.ExperimentsData,
+        override val group: String,
+        val metadata: PaymentMethodMetadata,
+        val mode: EventReporter.Mode,
+    ) : LoggableExperiment(
+        arbId = experimentsData.arbId,
+        experiment = ExperimentAssignment.OCS_MOBILE_REMOVE_PRIMARY_BUTTON_PADLOCK,
+        group = group,
+        dimensions = CommonElementsDimensions.getDimensions(metadata, mode),
+    )
+
     data class OcsMobileNfcScanningFeatureHoldback(
         val experimentsData: ElementsSession.ExperimentsData,
         override val group: String,

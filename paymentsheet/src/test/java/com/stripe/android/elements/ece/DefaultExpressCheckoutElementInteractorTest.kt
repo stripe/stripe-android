@@ -5,9 +5,9 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.checkout.CheckoutController
-import com.stripe.android.checkout.CheckoutControllerStateFactory
-import com.stripe.android.checkout.CheckoutControllerStateHolder
+import com.stripe.android.checkout.CheckoutElementsController
+import com.stripe.android.checkout.CheckoutElementsControllerStateFactory
+import com.stripe.android.checkout.CheckoutElementsControllerStateHolder
 import com.stripe.android.elements.CheckoutGooglePayConfiguration
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.elements.ExpressCheckoutElement.Configuration.GooglePayConfiguration
@@ -309,8 +309,8 @@ internal class DefaultExpressCheckoutElementInteractorTest {
         savedStateHandle: SavedStateHandle,
         configuration: ExpressCheckoutElement.Configuration? = ExpressCheckoutElement.Configuration(),
         requiresShippingAddress: Boolean = false,
-    ): CheckoutControllerStateHolder {
-        val stateHolder = CheckoutControllerStateHolder(
+    ): CheckoutElementsControllerStateHolder {
+        val stateHolder = CheckoutElementsControllerStateHolder(
             savedStateHandle = savedStateHandle,
             errorReporter = FakeErrorReporter(),
             paymentOptionFactory = { _, _, _ -> null },
@@ -318,11 +318,11 @@ internal class DefaultExpressCheckoutElementInteractorTest {
                 availableExpressButtonTypes = availableExpressButtonTypes,
             ),
         )
-        val configurationBuilder = CheckoutController.Configuration()
+        val configurationBuilder = CheckoutElementsController.Configuration()
         if (configuration != null) {
             configurationBuilder.expressCheckoutElement(configuration)
         }
-        stateHolder.state = CheckoutControllerStateFactory.create(
+        stateHolder.state = CheckoutElementsControllerStateFactory.create(
             expressCheckoutElementPaymentMethodMetadata = paymentMethodMetadata,
             configuration = configurationBuilder.build(),
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(

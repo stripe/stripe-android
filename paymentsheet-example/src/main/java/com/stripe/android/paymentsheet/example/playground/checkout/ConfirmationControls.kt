@@ -17,20 +17,26 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.stripe.android.checkout.CheckoutController.Session.PaymentOptionDisplayData
+import com.stripe.android.checkout.CheckoutElementsController.Session.PaymentOptionDisplayData
 
 @Composable
 internal fun ConfirmationControls(
     paymentOption: PaymentOptionDisplayData?,
     confirmationMessage: String?,
+    isCompleted: Boolean,
     isUpdating: Boolean,
     displayMandate: Boolean,
     onClearPaymentMethod: () -> Unit,
     onSelectPaymentMethod: () -> Unit,
     onSetShippingAddress: () -> Unit,
     onConfirm: () -> Unit,
+    onBackToSettings: () -> Unit,
 ) {
     PaymentOptionRow(paymentOption)
+    if (isCompleted) {
+        CompletedControls(onBackToSettings)
+        return
+    }
     if (displayMandate) {
         paymentOption?.mandateText?.let { Text(text = it, style = MaterialTheme.typography.caption) }
     }
@@ -57,6 +63,15 @@ internal fun ConfirmationControls(
         enabled = !isUpdating,
         modifier = Modifier.fillMaxWidth(),
     ) { Text("Confirm") }
+}
+
+@Composable
+private fun CompletedControls(onBackToSettings: () -> Unit) {
+    Text("Payment complete!", style = MaterialTheme.typography.h6)
+    Button(
+        onClick = onBackToSettings,
+        modifier = Modifier.fillMaxWidth(),
+    ) { Text("Back to settings") }
 }
 
 @Composable

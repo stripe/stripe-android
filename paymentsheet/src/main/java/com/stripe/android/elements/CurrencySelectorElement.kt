@@ -9,8 +9,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.stripe.android.checkout.CheckoutController
-import com.stripe.android.checkout.CheckoutControllerStateHolder
+import com.stripe.android.checkout.CheckoutElementsController
+import com.stripe.android.checkout.CheckoutElementsControllerStateHolder
 import com.stripe.android.checkout.CurrencySelectorViewModel
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.verticalmode.CurrencySelectorToggle
@@ -22,11 +22,11 @@ import javax.inject.Inject
 @CheckoutSessionPreview
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class CurrencySelectorElement @Inject internal constructor(
-    private val checkoutController: CheckoutController,
+    private val checkoutElementsController: CheckoutElementsController,
     private val viewModelFactory: CurrencySelectorViewModel.Factory,
-    private val stateHolder: CheckoutControllerStateHolder,
+    private val stateHolder: CheckoutElementsControllerStateHolder,
 ) {
-    private val viewModelKey = "CurrencySelectorViewModel:${System.identityHashCode(checkoutController)}"
+    private val viewModelKey = "CurrencySelectorViewModel:${System.identityHashCode(checkoutElementsController)}"
 
     @Composable
     fun Content() {
@@ -36,8 +36,8 @@ class CurrencySelectorElement @Inject internal constructor(
         )
         val state by stateHolder.stateFlow.collectAsState()
         val appearanceState = state?.configuration?.currencySelectorElementConfiguration?.appearance ?: return
-        val isUpdating by checkoutController.isUpdating.collectAsState()
-        val session by checkoutController.session.collectAsState()
+        val isUpdating by checkoutElementsController.isUpdating.collectAsState()
+        val session by checkoutElementsController.session.collectAsState()
         val currencySelectorOptions = session?.currencySelectorOptions ?: return
         val showCurrencyCode = appearanceState.labelContent == Configuration.Appearance.LabelContent.CURRENCY_CODE
         val errorMessage by viewModel.errorMessage.collectAsState()

@@ -61,6 +61,7 @@ import com.stripe.android.uicore.StripeTheme
 import kotlinx.coroutines.delay
 
 const val PRIMARY_BUTTON_TEST_TAG = "PRIMARY_BUTTON_TEST_TAG"
+internal const val PRIMARY_BUTTON_LOCK_ICON_TEST_TAG = "PRIMARY_BUTTON_LOCK_ICON_TEST_TAG"
 private const val FADE_ANIMATION_DURATION = 100
 private const val FADE_OUT_ANIMATION_DELAY = 90
 
@@ -270,6 +271,7 @@ private fun BoxScope.StaticIncompleteProcessing(
             contentDescription = null,
             modifier = Modifier
                 .align(Alignment.CenterEnd)
+                .testTag(PRIMARY_BUTTON_LOCK_ICON_TEST_TAG)
         )
     }
 }

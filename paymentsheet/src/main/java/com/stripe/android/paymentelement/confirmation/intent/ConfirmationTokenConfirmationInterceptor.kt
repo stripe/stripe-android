@@ -210,6 +210,7 @@ internal class ConfirmationTokenConfirmationInterceptor @AssistedInject construc
                     launcherArguments = Args.NextAction(
                         intent = intent,
                         deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
+                        checkoutSessionResponse = null,
                     ),
                     receivesResultInProcess = false,
                 )

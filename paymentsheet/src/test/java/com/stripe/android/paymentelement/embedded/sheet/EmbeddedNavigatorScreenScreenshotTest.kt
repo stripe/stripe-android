@@ -6,6 +6,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
+import com.stripe.android.common.analytics.experiment.FakePrimaryButtonExperiment
 import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.LinkAccountHolder
@@ -35,6 +36,7 @@ import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.FakeAddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.FakeUpdatePaymentMethodInteractor
+import com.stripe.android.paymentsheet.ui.PrimaryButtonIcon
 import com.stripe.android.paymentsheet.utils.EventReporterProvider
 import com.stripe.android.paymentsheet.utils.ViewModelStoreOwnerContext
 import com.stripe.android.paymentsheet.verticalmode.FakeManageScreenInteractor
@@ -101,6 +103,20 @@ internal class EmbeddedNavigatorScreenScreenshotTest {
 
         snapshot(
             screen = screen,
+            previousScreen = createVerticalPaymentOptionsScreen(),
+            walletsState = createWalletsState(),
+        )
+    }
+
+    @Test
+    fun displaysFormWithoutPadlock() {
+        snapshot(
+            screen = createFormScreen(
+                metadata = PaymentMethodMetadataFactory.create(
+                    stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(isLiveMode = true),
+                ),
+                primaryButtonIcon = PrimaryButtonIcon.None,
+            ),
             previousScreen = createVerticalPaymentOptionsScreen(),
             walletsState = createWalletsState(),
         )
@@ -205,10 +221,12 @@ internal class EmbeddedNavigatorScreenScreenshotTest {
         snapshot(screen, walletsState = walletsState)
     }
 
-    private fun createFormScreen(): EmbeddedNavigator.Screen.Form {
-        val metadata = PaymentMethodMetadataFactory.create()
+    private fun createFormScreen(
+        metadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+        primaryButtonIcon: PrimaryButtonIcon = PrimaryButtonIcon.Lock,
+    ): EmbeddedNavigator.Screen.Form {
         val selectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle())
-        val stateHolder = createSheetActivityStateHolder(metadata, selectionHolder)
+        val stateHolder = createSheetActivityStateHolder(metadata, selectionHolder, primaryButtonIcon)
         val eventReporter = FakeEventReporter()
         val interactor = EmbeddedFormInteractorFactory(
             paymentMethodMetadata = metadata,
@@ -289,6 +307,7 @@ internal class EmbeddedNavigatorScreenScreenshotTest {
     private fun createSheetActivityStateHolder(
         metadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         selectionHolder: DefaultEmbeddedSelectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle()),
+        primaryButtonIcon: PrimaryButtonIcon = PrimaryButtonIcon.Lock,
     ): DefaultSheetActivityStateHolder {
         return DefaultSheetActivityStateHolder(
             paymentMethodMetadata = metadata,
@@ -297,6 +316,7 @@ internal class EmbeddedNavigatorScreenScreenshotTest {
             coroutineScope = TestScope(UnconfinedTestDispatcher()),
             onClickDelegate = OnClickDelegateOverrideImpl(),
             eventReporter = FakeEventReporter(),
+            primaryButtonExperiment = FakePrimaryButtonExperiment(icon = primaryButtonIcon),
             confirmationHandler = FakeConfirmationHandler(),
             tapToAddHelper = FakeTapToAddHelper.noOp(),
             customerStateHolder = FakeCustomerStateHolder(),

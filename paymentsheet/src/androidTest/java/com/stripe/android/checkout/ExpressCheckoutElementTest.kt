@@ -43,12 +43,12 @@ internal class ExpressCheckoutElementTest {
         runExpressCheckoutElementScenario(
             networkRule = networkRule,
             resultCallback = { result ->
-                assertThat(result).isInstanceOf(CheckoutController.Result.Completed::class.java)
+                assertThat(result).isInstanceOf(CheckoutElementsController.Result.Completed::class.java)
             },
             assertions = { controller ->
                 assertThat(
                     controller.session.value?.availableExpressCheckoutPaymentMethods
-                ).containsExactly("google_pay")
+                ).containsExactly(ExpressCheckoutElement.PaymentMethod.GooglePay())
             },
             configurationUpdates = {
                 it.linkConfiguration(
@@ -90,19 +90,19 @@ internal class ExpressCheckoutElementTest {
     @Test
     fun testSuccessfulNativeLinkPayment() {
         // This is called twice during load - once for ECE, once for PE
-        repeat (2) {
+        repeat(2) {
             networkRule.enqueueLinkAccountLookup()
         }
 
         runExpressCheckoutElementScenario(
             networkRule = networkRule,
             resultCallback = { result ->
-                assertThat(result).isInstanceOf(CheckoutController.Result.Completed::class.java)
+                assertThat(result).isInstanceOf(CheckoutElementsController.Result.Completed::class.java)
             },
             assertions = { controller ->
                 assertThat(
                     controller.session.value?.availableExpressCheckoutPaymentMethods
-                ).containsExactly("link")
+                ).containsExactly(ExpressCheckoutElement.PaymentMethod.Link())
             },
             configurationUpdates = {
                 it.googlePayConfiguration(
@@ -136,7 +136,10 @@ internal class ExpressCheckoutElementTest {
             assertions = { controller ->
                 assertThat(
                     controller.session.value?.availableExpressCheckoutPaymentMethods
-                ).containsExactly("google_pay", "link")
+                ).containsExactly(
+                    ExpressCheckoutElement.PaymentMethod.GooglePay(),
+                    ExpressCheckoutElement.PaymentMethod.Link(),
+                )
             },
         ) {
             // Just testing load, no need to confirm.
@@ -154,8 +157,8 @@ internal class ExpressCheckoutElementTest {
         runExpressCheckoutElementScenario(
             networkRule = networkRule,
             resultCallback = { result ->
-                assertThat(result).isInstanceOf(CheckoutController.Result.Failed::class.java)
-                val error = (result as CheckoutController.Result.Failed).error
+                assertThat(result).isInstanceOf(CheckoutElementsController.Result.Failed::class.java)
+                val error = (result as CheckoutElementsController.Result.Failed).error
                 assertThat(error).hasMessageThat().isEqualTo(expectedErrorMessage)
             },
         ) {
@@ -182,8 +185,8 @@ internal class ExpressCheckoutElementTest {
         runExpressCheckoutElementScenario(
             networkRule = networkRule,
             resultCallback = { result ->
-                assertThat(result).isInstanceOf(CheckoutController.Result.Failed::class.java)
-                val error = (result as CheckoutController.Result.Failed).error
+                assertThat(result).isInstanceOf(CheckoutElementsController.Result.Failed::class.java)
+                val error = (result as CheckoutElementsController.Result.Failed).error
                 assertThat(error).hasMessageThat().isEqualTo(expectedErrorMessage)
             },
         ) {
@@ -212,7 +215,7 @@ internal class ExpressCheckoutElementTest {
             assertions = { controller ->
                 assertThat(
                     controller.session.value?.availableExpressCheckoutPaymentMethods
-                ).containsExactly("google_pay")
+                ).containsExactly(ExpressCheckoutElement.PaymentMethod.GooglePay())
             },
         ) {
             page.assertGooglePayButtonExists()
@@ -231,7 +234,7 @@ internal class ExpressCheckoutElementTest {
             networkRule = networkRule,
             initialCheckoutSessionResponseFactory = ::createCheckoutInitResponseWithRequiredShippingAddress,
             resultCallback = { result ->
-                assertThat(result).isInstanceOf(CheckoutController.Result.Completed::class.java)
+                assertThat(result).isInstanceOf(CheckoutElementsController.Result.Completed::class.java)
             },
         ) {
             val paymentMethod = PaymentMethodFactory.card()
@@ -278,7 +281,7 @@ internal class ExpressCheckoutElementTest {
             initialCheckoutSessionResponseFactory =
                 ::createCheckoutInitResponseWithRequiredShippingAddressForAutomaticTax,
             resultCallback = { result ->
-                assertThat(result).isInstanceOf(CheckoutController.Result.Completed::class.java)
+                assertThat(result).isInstanceOf(CheckoutElementsController.Result.Completed::class.java)
             },
         ) {
             val paymentMethod = PaymentMethodFactory.card()
@@ -342,7 +345,7 @@ internal class ExpressCheckoutElementTest {
             networkRule = networkRule,
             initialCheckoutSessionResponseFactory = CheckoutInitResponseFactory::createWithRequiredBillingAddress,
             resultCallback = { result ->
-                assertThat(result).isInstanceOf(CheckoutController.Result.Completed::class.java)
+                assertThat(result).isInstanceOf(CheckoutElementsController.Result.Completed::class.java)
             },
         ) {
             val paymentMethod = createPaymentMethodWithBillingAddress()
@@ -368,7 +371,7 @@ internal class ExpressCheckoutElementTest {
             initialCheckoutSessionResponseFactory =
                 CheckoutInitResponseFactory::createWithRequiredBillingAddressForAutomaticTax,
             resultCallback = { result ->
-                assertThat(result).isInstanceOf(CheckoutController.Result.Completed::class.java)
+                assertThat(result).isInstanceOf(CheckoutElementsController.Result.Completed::class.java)
             },
         ) {
             val paymentMethod = createPaymentMethodWithBillingAddress()
@@ -404,8 +407,8 @@ internal class ExpressCheckoutElementTest {
             initialCheckoutSessionResponseFactory =
                 CheckoutInitResponseFactory::createWithRequiredBillingAddressForAutomaticTax,
             resultCallback = { result ->
-                assertThat(result).isInstanceOf(CheckoutController.Result.Failed::class.java)
-                val error = (result as CheckoutController.Result.Failed).error
+                assertThat(result).isInstanceOf(CheckoutElementsController.Result.Failed::class.java)
+                val error = (result as CheckoutElementsController.Result.Failed).error
                 assertThat(error).isInstanceOf(LocalStripeException::class.java)
                 assertThat((error as LocalStripeException).stripeError?.code)
                     .isEqualTo("checkout_session_total_changed")
@@ -442,7 +445,7 @@ internal class ExpressCheckoutElementTest {
             networkRule = networkRule,
             initialCheckoutSessionResponseFactory = CheckoutInitResponseFactory::createWithRequiredBillingAddress,
             resultCallback = { result ->
-                assertThat(result).isInstanceOf(CheckoutController.Result.Completed::class.java)
+                assertThat(result).isInstanceOf(CheckoutElementsController.Result.Completed::class.java)
             },
         ) {
             val paymentMethod = createPaymentMethodWithBillingAddress()

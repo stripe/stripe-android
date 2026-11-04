@@ -1,6 +1,6 @@
 package com.stripe.android.checkout
 
-import com.stripe.android.checkout.CheckoutController.Configuration
+import com.stripe.android.checkout.CheckoutElementsController.Configuration
 import com.stripe.android.checkout.injection.AppName
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.model.CommonConfiguration
@@ -17,7 +17,7 @@ internal class CheckoutCommonConfigurationFactory @Inject constructor(
     @AppName private val appName: String,
 ) {
     fun create(
-        configuration: CheckoutController.Configuration.State,
+        configuration: CheckoutElementsController.Configuration.State,
         paymentElementConfiguration: PaymentElement.Configuration.State,
         checkoutSessionResponse: CheckoutSessionResponse,
         collectedDetails: CheckoutCollectedDetails,
@@ -35,7 +35,7 @@ internal class CheckoutCommonConfigurationFactory @Inject constructor(
     }
 
     fun createForExpressCheckoutElement(
-        configuration: CheckoutController.Configuration.State,
+        configuration: CheckoutElementsController.Configuration.State,
         checkoutSessionResponse: CheckoutSessionResponse,
         collectedDetails: CheckoutCollectedDetails,
     ): CommonConfiguration? {
@@ -61,13 +61,12 @@ internal class CheckoutCommonConfigurationFactory @Inject constructor(
                 } else {
                     PaymentSheetBillingDetails.AddressCollectionMode.Automatic
                 },
-                attachDefaultsToPaymentMethod = true,
             ),
         )
     }
 
     fun createForPaymentElement(
-        configuration: CheckoutController.Configuration.State,
+        configuration: CheckoutElementsController.Configuration.State,
         checkoutSessionResponse: CheckoutSessionResponse,
         collectedDetails: CheckoutCollectedDetails,
     ): CommonConfiguration? {
@@ -81,7 +80,7 @@ internal class CheckoutCommonConfigurationFactory @Inject constructor(
     }
 
     private fun createCommonConfiguration(
-        configuration: CheckoutController.Configuration.State,
+        configuration: CheckoutElementsController.Configuration.State,
         paymentElementConfiguration: PaymentElement.Configuration.State?,
         checkoutSessionResponse: CheckoutSessionResponse,
         collectedDetails: CheckoutCollectedDetails,

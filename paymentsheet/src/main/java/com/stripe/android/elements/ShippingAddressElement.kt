@@ -1,20 +1,18 @@
 package com.stripe.android.elements
 
-import android.content.Context
 import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.AnyThread
 import androidx.annotation.ColorInt
-import androidx.annotation.DimenRes
 import androidx.annotation.FontRes
 import androidx.annotation.RestrictTo
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
-import com.stripe.android.checkout.CheckoutController
-import com.stripe.android.checkout.CheckoutControllerStateHolder
+import com.stripe.android.checkout.CheckoutElementsController
+import com.stripe.android.checkout.CheckoutElementsControllerStateHolder
 import com.stripe.android.checkout.ShippingAddressElementStateHolder
 import com.stripe.android.checkout.asPaymentSheet
 import com.stripe.android.checkout.toCheckoutAddress
@@ -28,7 +26,6 @@ import com.stripe.android.paymentsheet.addresselement.AddressElementActivityCont
 import com.stripe.android.paymentsheet.addresselement.AddressLauncher
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.uicore.StripeThemeDefaults
-import com.stripe.android.uicore.getRawValueFromDimenResource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -40,7 +37,7 @@ import javax.inject.Provider
 internal fun interface CommitShippingAddress {
     suspend operator fun invoke(
         name: String?,
-        address: CheckoutController.Address.State,
+        address: CheckoutElementsController.Address.State,
         checkoutSessionResponse: CheckoutSessionResponse,
     ): Result<Unit>
 }
@@ -53,7 +50,7 @@ class ShippingAddressElement internal constructor(
     private val apiConfigurationProvider: Provider<ApiConfiguration.State>,
     @ViewModelScope private val coroutineScope: CoroutineScope,
     private val commitShippingAddress: CommitShippingAddress,
-    private val stateHolder: CheckoutControllerStateHolder,
+    private val stateHolder: CheckoutElementsControllerStateHolder,
     private val shippingAddressElementStateHolder: ShippingAddressElementStateHolder,
     private val errorReporter: ErrorReporter,
 ) {
@@ -63,8 +60,8 @@ class ShippingAddressElement internal constructor(
         lifecycleOwner: LifecycleOwner,
         apiConfigurationProvider: Provider<ApiConfiguration.State>,
         @ViewModelScope coroutineScope: CoroutineScope,
-        checkoutController: CheckoutController,
-        stateHolder: CheckoutControllerStateHolder,
+        checkoutElementsController: CheckoutElementsController,
+        stateHolder: CheckoutElementsControllerStateHolder,
         shippingAddressElementStateHolder: ShippingAddressElementStateHolder,
         errorReporter: ErrorReporter,
     ) : this(
@@ -72,7 +69,7 @@ class ShippingAddressElement internal constructor(
         lifecycleOwner = lifecycleOwner,
         apiConfigurationProvider = apiConfigurationProvider,
         coroutineScope = coroutineScope,
-        commitShippingAddress = CommitShippingAddress(checkoutController::commitShippingAddress),
+        commitShippingAddress = CommitShippingAddress(checkoutElementsController::commitShippingAddress),
         stateHolder = stateHolder,
         shippingAddressElementStateHolder = shippingAddressElementStateHolder,
         errorReporter = errorReporter,
@@ -274,19 +271,9 @@ class ShippingAddressElement internal constructor(
                     this.cornerRadiusDp = cornerRadiusDp
                 }
 
-                /** Sets the component corner radius from a dimension resource. */
-                fun cornerRadiusDp(context: Context, @DimenRes cornerRadiusRes: Int): Shapes = apply {
-                    this.cornerRadiusDp = context.getRawValueFromDimenResource(cornerRadiusRes)
-                }
-
                 /** Sets the component border stroke width, in dp. */
                 fun borderStrokeWidthDp(borderStrokeWidthDp: Float): Shapes = apply {
                     this.borderStrokeWidthDp = borderStrokeWidthDp
-                }
-
-                /** Sets the component border stroke width from a dimension resource. */
-                fun borderStrokeWidthDp(context: Context, @DimenRes borderStrokeWidthRes: Int): Shapes = apply {
-                    this.borderStrokeWidthDp = context.getRawValueFromDimenResource(borderStrokeWidthRes)
                 }
 
                 /**
@@ -295,17 +282,6 @@ class ShippingAddressElement internal constructor(
                  */
                 fun bottomSheetCornerRadiusDp(bottomSheetCornerRadiusDp: Float): Shapes = apply {
                     this.bottomSheetCornerRadiusDp = bottomSheetCornerRadiusDp
-                }
-
-                /**
-                 * Sets the bottom-sheet corner radius from a dimension resource.
-                 * Defaults to the component corner radius.
-                 */
-                fun bottomSheetCornerRadiusDp(
-                    context: Context,
-                    @DimenRes bottomSheetCornerRadiusRes: Int,
-                ): Shapes = apply {
-                    this.bottomSheetCornerRadiusDp = context.getRawValueFromDimenResource(bottomSheetCornerRadiusRes)
                 }
 
                 @Parcelize

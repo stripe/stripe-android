@@ -20,7 +20,9 @@ import com.stripe.android.paymentsheet.FormHelper.FormType
 import com.stripe.android.paymentsheet.PaymentOptionsItem
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.model.MandateText
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.mandateTextFromPaymentMethodMetadata
 import com.stripe.android.paymentsheet.model.paymentMethodType
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
@@ -137,8 +139,18 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
         return EmbeddedNavigator.Screen.HorizontalSavedPaymentOptions(
             interactor = createSavedPaymentMethodsInteractor(),
             sheetActivityState = sheetActivityStateHolder.state,
+            mandateText = selectionHolder.selection.mapAsStateFlow(::savedPaymentMethodsMandateText),
             onContinueClick = ::onContinueClick,
             onPrimaryButtonDisabledClick = sheetActivityStateHolder::onPrimaryButtonDisabledClick,
+        )
+    }
+
+    private fun savedPaymentMethodsMandateText(selection: PaymentSelection?): MandateText? {
+        val savedSelection = selection as? PaymentSelection.Saved ?: return null
+        val text = savedSelection.mandateTextFromPaymentMethodMetadata(paymentMethodMetadata) ?: return null
+        return MandateText(
+            text = text,
+            showAbovePrimaryButton = savedSelection.showMandateAbovePrimaryButton,
         )
     }
 

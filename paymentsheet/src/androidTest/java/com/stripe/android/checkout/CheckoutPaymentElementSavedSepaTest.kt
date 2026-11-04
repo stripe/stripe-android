@@ -169,11 +169,11 @@ internal class CheckoutPaymentElementSavedSepaTest {
 
     private fun runSavedSepaTest(
         paymentMethods: JSONArray,
-        configuration: CheckoutController.Configuration = checkoutConfiguration(PaymentElement.Configuration()),
+        configuration: CheckoutElementsController.Configuration = checkoutConfiguration(PaymentElement.Configuration()),
         renderPaymentElementContent: Boolean = true,
         block: suspend CheckoutPaymentElementScenario.() -> Unit,
     ) {
-        var checkoutResult: CheckoutController.Result? = null
+        var checkoutResult: CheckoutElementsController.Result? = null
         runCheckoutPaymentElementScenario(
             networkRule = networkRule,
             resultCallback = { result -> checkoutResult = result },
@@ -181,12 +181,12 @@ internal class CheckoutPaymentElementSavedSepaTest {
             renderPaymentElementContent = renderPaymentElementContent,
             setup = { controller ->
                 assertThat(controller.configure(DEFAULT_CLIENT_SECRET, configuration))
-                    .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
+                    .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
             },
             block = block,
         )
 
-        assertThat(checkoutResult).isInstanceOf(CheckoutController.Result.Completed::class.java)
+        assertThat(checkoutResult).isInstanceOf(CheckoutElementsController.Result.Completed::class.java)
     }
 
     private fun checkoutInitResponse(paymentMethods: JSONArray): (MockResponse) -> Unit = { response ->
@@ -240,8 +240,8 @@ internal class CheckoutPaymentElementSavedSepaTest {
 
     private fun checkoutConfiguration(
         paymentElementConfiguration: PaymentElement.Configuration,
-    ): CheckoutController.Configuration {
-        return CheckoutController.Configuration().paymentElement(paymentElementConfiguration)
+    ): CheckoutElementsController.Configuration {
+        return CheckoutElementsController.Configuration().paymentElement(paymentElementConfiguration)
     }
 
     private fun savedPaymentMethods(vararg paymentMethods: JSONObject): JSONArray {

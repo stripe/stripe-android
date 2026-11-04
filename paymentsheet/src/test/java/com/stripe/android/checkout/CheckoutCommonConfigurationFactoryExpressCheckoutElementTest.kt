@@ -25,7 +25,7 @@ internal class CheckoutCommonConfigurationFactoryExpressCheckoutElementTest {
 
     @Test
     fun `createForExpressCheckoutElement maps Link configuration from express checkout element configuration`() {
-        val configuration = CheckoutController.Configuration()
+        val configuration = CheckoutElementsController.Configuration()
             .paymentElement(
                 PaymentElement.Configuration().linkConfiguration(
                     PaymentElement.Configuration.LinkConfiguration().display(
@@ -54,7 +54,7 @@ internal class CheckoutCommonConfigurationFactoryExpressCheckoutElementTest {
 
     @Test
     fun `createForExpressCheckoutElement retains shared payment element options`() {
-        val configuration = CheckoutController.Configuration()
+        val configuration = CheckoutElementsController.Configuration()
             .paymentElement(
                 PaymentElement.Configuration()
                     .preferredNetworks(listOf(CardBrand.CartesBancaires))
@@ -83,7 +83,7 @@ internal class CheckoutCommonConfigurationFactoryExpressCheckoutElementTest {
 
     @Test
     fun `createForExpressCheckoutElement uses defaults when payment element is not configured`() {
-        val configuration = CheckoutController.Configuration()
+        val configuration = CheckoutElementsController.Configuration()
             .expressCheckoutElement(
                 ExpressCheckoutElement.Configuration()
                     .googlePayConfiguration(
@@ -123,7 +123,7 @@ internal class CheckoutCommonConfigurationFactoryExpressCheckoutElementTest {
     @Test
     fun `createForExpressCheckoutElement returns null when express checkout configuration is absent`() {
         val result = factory().createForExpressCheckoutElement(
-            configuration = CheckoutController.Configuration().build(),
+            configuration = CheckoutElementsController.Configuration().build(),
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
             collectedDetails = collectedDetails(),
         )
@@ -133,7 +133,7 @@ internal class CheckoutCommonConfigurationFactoryExpressCheckoutElementTest {
 
     @Test
     fun `createForExpressCheckoutElement uses automatic billing collection when session has email`() {
-        val configuration = CheckoutController.Configuration()
+        val configuration = CheckoutElementsController.Configuration()
             .expressCheckoutElement(ExpressCheckoutElement.Configuration())
             .build()
 
@@ -153,12 +153,12 @@ internal class CheckoutCommonConfigurationFactoryExpressCheckoutElementTest {
             .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic)
         assertThat(result?.billingDetailsCollectionConfiguration?.address)
             .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic)
-        assertThat(result?.billingDetailsCollectionConfiguration?.attachDefaultsToPaymentMethod).isTrue()
+        assertThat(result?.billingDetailsCollectionConfiguration?.attachDefaultsToPaymentMethod).isFalse()
     }
 
     @Test
     fun `createForExpressCheckoutElement collects full address when required by checkout session`() {
-        val configuration = CheckoutController.Configuration()
+        val configuration = CheckoutElementsController.Configuration()
             .expressCheckoutElement(ExpressCheckoutElement.Configuration())
             .build()
 
@@ -173,7 +173,7 @@ internal class CheckoutCommonConfigurationFactoryExpressCheckoutElementTest {
 
     @Test
     fun `createForExpressCheckoutElement always collects email when no email is provided`() {
-        val configuration = CheckoutController.Configuration()
+        val configuration = CheckoutElementsController.Configuration()
             .expressCheckoutElement(ExpressCheckoutElement.Configuration())
             .build()
 
@@ -189,9 +189,9 @@ internal class CheckoutCommonConfigurationFactoryExpressCheckoutElementTest {
 
     @Test
     fun `createForExpressCheckoutElement uses automatic email collection when default email is provided`() {
-        val configuration = CheckoutController.Configuration()
+        val configuration = CheckoutElementsController.Configuration()
             .defaults(
-                CheckoutController.Configuration.Defaults().email("default@example.com")
+                CheckoutElementsController.Configuration.Defaults().email("default@example.com")
             )
             .expressCheckoutElement(ExpressCheckoutElement.Configuration())
             .build()

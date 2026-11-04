@@ -12,6 +12,7 @@ import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.android.testing.FakeErrorReporter
 import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.lang.IllegalStateException
@@ -30,11 +31,7 @@ class DefaultLinkEventsReporterTest {
 
             testScheduler.advanceUntilIdle()
 
-            val loggedRequests = fakeAnalyticsRequestExecutor.getExecutedRequests()
-
-            assertThat(loggedRequests).hasSize(1)
-            val loggedParams = loggedRequests.first().params
-            assertThat(loggedParams.get("event")).isEqualTo("link.signup.failure")
+            val loggedParams = fakeAnalyticsRequestExecutor.awaitEvent("link.signup.failure")
             assertThat(loggedParams.get("error_message")).isEqualTo("unknown")
             assertThat(loggedParams.get("analytics_value")).isEqualTo("java.lang.IllegalStateException")
         }
@@ -50,17 +47,13 @@ class DefaultLinkEventsReporterTest {
 
             testScheduler.advanceUntilIdle()
 
-            val loggedRequests = fakeAnalyticsRequestExecutor.getExecutedRequests()
-
-            assertThat(loggedRequests).hasSize(1)
-            val loggedParams = loggedRequests.first().params
-            assertThat(loggedParams.get("event")).isEqualTo("link.signup.failure")
+            val loggedParams = fakeAnalyticsRequestExecutor.awaitEvent("link.signup.failure")
             assertThat(loggedParams.get("error_message")).isEqualTo(expectedMessage)
             assertThat(loggedParams.get("analytics_value")).isEqualTo("apiError")
         }
 
     private fun runScenario(
-        testBlock: (LinkEventsReporter, FakeAnalyticsRequestExecutor, TestCoroutineScheduler) -> Unit
+        testBlock: suspend (LinkEventsReporter, FakeAnalyticsRequestExecutor, TestCoroutineScheduler) -> Unit
     ) {
         val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
         val testScope = TestScope()
@@ -76,7 +69,11 @@ class DefaultLinkEventsReporterTest {
             durationProvider = FakeDurationProvider()
         )
 
-        testBlock(linkEventsReporter, analyticsRequestExecutor, testScope.testScheduler)
+        testScope.runTest {
+            testBlock(linkEventsReporter, analyticsRequestExecutor, testScope.testScheduler)
+        }
+
+        analyticsRequestExecutor.validate()
     }
 
     class FakeDurationProvider : DurationProvider {

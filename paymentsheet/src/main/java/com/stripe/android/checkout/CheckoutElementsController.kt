@@ -11,8 +11,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.AnnotatedString
 import androidx.lifecycle.SavedStateHandle
-import com.stripe.android.checkout.injection.CheckoutPresenterSubcomponent
-import com.stripe.android.checkout.injection.DaggerCheckoutControllerComponent
+import com.stripe.android.checkout.injection.CheckoutElementsPresenterSubcomponent
+import com.stripe.android.checkout.injection.DaggerCheckoutElementsControllerComponent
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.common.ui.PaymentElementActivityResultCaller
 import com.stripe.android.core.injection.ViewModelScope
@@ -46,6 +46,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import kotlinx.parcelize.Parcelize
+import java.math.BigDecimal
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.time.Duration.Companion.seconds
@@ -55,7 +56,7 @@ private val SERVER_UPDATE_TIMEOUT_MS = 20.seconds.inWholeMilliseconds
 /**
  * Controls a Stripe Checkout Session: load it with [configure], observe it through
  * [session], mutate it with the various `update`/`apply`/`select` methods, and present
- * payment UI with a [CheckoutPresenter] created via [createPresenter].
+ * payment UI with a [CheckoutElementsPresenter] created via [createPresenter].
  *
  * Create instances with [Builder].
  */
@@ -63,19 +64,18 @@ private val SERVER_UPDATE_TIMEOUT_MS = 20.seconds.inWholeMilliseconds
 @CheckoutSessionPreview
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Suppress("TooManyFunctions")
-class CheckoutController @Inject internal constructor(
+class CheckoutElementsController @Inject internal constructor(
     @ViewModelScope private val viewModelScope: CoroutineScope,
     private val checkoutSessionRepository: CheckoutSessionRepository,
     private val checkoutSessionTaxRegionUpdater: CheckoutSessionTaxRegionUpdater,
     private val errorReporter: ErrorReporter,
     private val checkoutStateLoader: CheckoutStateLoader,
-    private val stateHolder: CheckoutControllerStateHolder,
+    private val stateHolder: CheckoutElementsControllerStateHolder,
     private val sheetStateHolder: SheetStateHolder,
     private val operationCoordinator: CheckoutOperationCoordinator,
-    private val checkoutPresenterSubcomponentFactory: CheckoutPresenterSubcomponent.Factory,
+    private val checkoutElementsPresenterSubcomponentFactory: CheckoutElementsPresenterSubcomponent.Factory,
     @PaymentElementCallbackIdentifier internal val paymentElementCallbackIdentifier: String,
-    private val savedState: CheckoutControllerSavedState,
-    private val checkoutAnalyticsPerformer: CheckoutAnalyticsPerformer,
+    private val savedState: CheckoutElementsControllerSavedState,
 ) {
     /**
      * The latest [Session] data, or `null` until [configure] has completed successfully.
@@ -91,10 +91,6 @@ class CheckoutController @Inject internal constructor(
     init {
         viewModelScope.launch {
             operationCoordinator.observeConfirmationResults()
-        }
-
-        viewModelScope.launch {
-            checkoutAnalyticsPerformer.reportConfirmationResults()
         }
     }
 
@@ -158,10 +154,9 @@ class CheckoutController @Inject internal constructor(
      */
     suspend fun applyPromotionCode(
         promotionCode: String,
-    ): OperationResult = withCheckoutState { sessionId ->
+    ): OperationResult = withCheckoutState {
         checkoutSessionRepository.applyPromotionCode(
-            sessionId = sessionId,
-            clientSecret = checkoutSessionResponse.clientSecret,
+            checkoutSessionResponse = checkoutSessionResponse,
             promotionCode = promotionCode.trim(),
         )
     }.toOperationResult()
@@ -169,12 +164,8 @@ class CheckoutController @Inject internal constructor(
     /**
      * Removes the currently applied promotion code from the checkout session.
      */
-    suspend fun removePromotionCode(): OperationResult = withCheckoutState { sessionId ->
-        checkoutSessionRepository.applyPromotionCode(
-            sessionId = sessionId,
-            clientSecret = checkoutSessionResponse.clientSecret,
-            promotionCode = "",
-        )
+    suspend fun removePromotionCode(): OperationResult = withCheckoutState {
+        checkoutSessionRepository.removePromotionCode(checkoutSessionResponse)
     }.toOperationResult()
 
     /**
@@ -317,7 +308,7 @@ class CheckoutController @Inject internal constructor(
     private suspend fun updateAddress(
         addressType: CheckoutSessionResponse.TaxAddressSource,
         address: Address,
-        mutation: CheckoutControllerState.(Address.State) -> CheckoutControllerState,
+        mutation: CheckoutElementsControllerState.(Address.State) -> CheckoutElementsControllerState,
     ): kotlin.Result<Unit> {
         val built = address.build()
         return withCheckoutState(
@@ -356,7 +347,7 @@ class CheckoutController @Inject internal constructor(
     /**
      * Runs a mutation against the checkout session, serializing it behind the operation coordinator
      * so mutations run in sequence. [block] produces the updated [CheckoutSessionResponse]; the
-     * result is folded into a new [CheckoutControllerState] (with any [additionalStateMutations]
+     * result is folded into a new [CheckoutElementsControllerState] (with any [additionalStateMutations]
      * applied) and handed to [checkoutStateLoader] to reload the payment element and atomically
      * commit the new state.
      *
@@ -364,8 +355,8 @@ class CheckoutController @Inject internal constructor(
      * currently presented.
      */
     private suspend fun withCheckoutState(
-        additionalStateMutations: CheckoutControllerState.() -> CheckoutControllerState = { this },
-        block: suspend CheckoutControllerState.(sessionId: String) -> kotlin.Result<CheckoutSessionResponse>,
+        additionalStateMutations: CheckoutElementsControllerState.() -> CheckoutElementsControllerState = { this },
+        block: suspend CheckoutElementsControllerState.(sessionId: String) -> kotlin.Result<CheckoutSessionResponse>,
     ): kotlin.Result<Unit> = withContext(Dispatchers.Main.immediate) {
         stateHolder.state
             ?: return@withContext kotlin.Result.failure(
@@ -417,16 +408,16 @@ class CheckoutController @Inject internal constructor(
     }
 
     /**
-     * Creates a [CheckoutPresenter] bound to [activity], used to present the payment UI for this
+     * Creates a [CheckoutElementsPresenter] bound to [activity], used to present the payment UI for this
      * checkout session.
      *
      * @param activity The activity the payment UI will be presented from.
      */
     @MainThread
-    fun createPresenter(activity: ComponentActivity): CheckoutPresenter {
-        val subcomponent = checkoutPresenterSubcomponentFactory.create(
+    fun createPresenter(activity: ComponentActivity): CheckoutElementsPresenter {
+        val subcomponent = checkoutElementsPresenterSubcomponentFactory.create(
             activityResultCaller = PaymentElementActivityResultCaller(
-                key = "CheckoutController(instance = $paymentElementCallbackIdentifier)",
+                key = "CheckoutElementsController(instance = $paymentElementCallbackIdentifier)",
                 registryOwner = activity,
             ),
             lifecycleOwner = activity,
@@ -551,15 +542,13 @@ class CheckoutController @Inject internal constructor(
 
         /** Payment methods ready to be displayed in [ExpressCheckoutElement].
          *
-         * Possible values are `"google_pay"` and `"link"`.
-         *
          * When empty, Express Checkout Element will render empty content.
          */
-        val availableExpressCheckoutPaymentMethods: List<String> =
-            availableExpressButtonTypes.map { type ->
+        val availableExpressCheckoutPaymentMethods: Set<ExpressCheckoutElement.PaymentMethod> =
+            availableExpressButtonTypes.mapTo(mutableSetOf()) { type ->
                 when (type) {
-                    is ExpressButtonType.GooglePay -> "google_pay"
-                    ExpressButtonType.Link -> "link"
+                    is ExpressButtonType.GooglePay -> ExpressCheckoutElement.PaymentMethod.GooglePay()
+                    ExpressButtonType.Link -> ExpressCheckoutElement.PaymentMethod.Link()
                 }
             }
 
@@ -681,7 +670,24 @@ class CheckoutController @Inject internal constructor(
             /**
              * The unformatted amount in the smallest currency unit (e.g., cents for USD).
              */
-            val minorUnitsAmount: Double,
+            val minorUnitsAmount: Long,
+        )
+
+        /**
+         * A localized monetary amount that supports fractional minor units.
+         */
+        @Poko
+        @CheckoutSessionPreview
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        class DecimalAmount internal constructor(
+            /**
+             * A localized, currency-formatted string representing the amount.
+             */
+            val amount: String,
+            /**
+             * The unformatted amount in the smallest currency unit, including fractional units.
+             */
+            val minorUnitsAmount: BigDecimal,
         )
 
         /**
@@ -740,7 +746,7 @@ class CheckoutController @Inject internal constructor(
             /**
              * The unformatted discount amount in the smallest currency unit.
              */
-            val minorUnitsAmount: Double,
+            val minorUnitsAmount: Long,
             /**
              * The display name of the discount.
              */
@@ -769,7 +775,7 @@ class CheckoutController @Inject internal constructor(
             /**
              * The unformatted tax amount in the smallest currency unit.
              */
-            val minorUnitsAmount: Double,
+            val minorUnitsAmount: Long,
             /**
              * Whether this tax is already included in the price.
              */
@@ -860,7 +866,7 @@ class CheckoutController @Inject internal constructor(
          */
         @CheckoutSessionPreview
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        sealed class OrderSummaryItem {
+        abstract class OrderSummaryItem private constructor() {
             /**
              * The stable identity of this order summary item within its Checkout Session.
              */
@@ -917,7 +923,7 @@ class CheckoutController @Inject internal constructor(
                     /**
                      * The unit amount with additional decimal precision, if available.
                      */
-                    val unitAmountDecimal: Amount?,
+                    val unitAmountDecimal: DecimalAmount?,
                     /**
                      * The label that describes how units of the product are named.
                      */
@@ -1089,7 +1095,7 @@ class CheckoutController @Inject internal constructor(
     }
 
     /**
-     * Builds [CheckoutController] instances.
+     * Builds [CheckoutElementsController] instances.
      *
      * @param application The application context.
      * @param savedStateHandle The [SavedStateHandle] used to persist and restore controller state
@@ -1125,7 +1131,7 @@ class CheckoutController @Inject internal constructor(
         }
 
         /**
-         * Sets a unique name identifying this integration, allowing multiple [CheckoutController]
+         * Sets a unique name identifying this integration, allowing multiple [CheckoutElementsController]
          * instances to coexist.
          *
          * The name namespaces the controller's persisted state within [savedStateHandle] and its
@@ -1140,29 +1146,29 @@ class CheckoutController @Inject internal constructor(
         }
 
         /**
-         * Builds a [CheckoutController] from the current configuration.
+         * Builds a [CheckoutElementsController] from the current configuration.
          */
         @MainThread
-        fun build(): CheckoutController {
-            val checkoutControllerSavedState = CheckoutControllerSavedState(
+        fun build(): CheckoutElementsController {
+            val checkoutElementsControllerSavedState = CheckoutElementsControllerSavedState(
                 parentHandle = savedStateHandle,
                 integrationName = integrationName,
             )
-            val component = DaggerCheckoutControllerComponent.factory().create(
+            val component = DaggerCheckoutElementsControllerComponent.factory().create(
                 application = application,
                 paymentElementCallbackIdentifier = integrationName,
                 resultCallback = resultCallback,
                 rowSelectionBehavior = rowSelectionBehavior,
-                checkoutControllerSavedState = checkoutControllerSavedState,
+                checkoutElementsControllerSavedState = checkoutElementsControllerSavedState,
             )
 
-            return component.checkoutController
+            return component.checkoutElementsController
         }
     }
 
     /**
-     * Configuration options for a [CheckoutController], including per-element configuration and
-     * feature toggles. Build with the fluent setters and pass to [CheckoutController.configure].
+     * Configuration options for a [CheckoutElementsController], including per-element configuration and
+     * feature toggles. Build with the fluent setters and pass to [CheckoutElementsController.configure].
      */
     @CheckoutSessionPreview
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -1425,7 +1431,7 @@ class CheckoutController @Inject internal constructor(
     sealed interface OperationResult {
         /**
          * The operation succeeded.
-         * The updated session is available through the [CheckoutController.session] state flow.
+         * The updated session is available through the [CheckoutElementsController.session] state flow.
          */
         @CheckoutSessionPreview
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -1484,7 +1490,7 @@ class CheckoutController @Inject internal constructor(
 
     /**
      * Callback invoked with the [Result] of a checkout payment flow, including failures before
-     * confirmation starts. Each rejected [CheckoutPresenter.confirm] call delivers [Result.Failed]
+     * confirmation starts. Each rejected [CheckoutElementsPresenter.confirm] call delivers [Result.Failed]
      * with an [IllegalStateException] explaining the reason. An active confirmation continues and
      * delivers its own result.
      */

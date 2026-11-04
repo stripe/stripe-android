@@ -3,8 +3,8 @@
 package com.stripe.android.checkout
 
 import android.graphics.Bitmap
-import com.stripe.android.checkout.CheckoutController.Session
-import com.stripe.android.checkout.CheckoutController.Session.PaymentOptionDisplayData
+import com.stripe.android.checkout.CheckoutElementsController.Session
+import com.stripe.android.checkout.CheckoutElementsController.Session.PaymentOptionDisplayData
 import com.stripe.android.elements.ece.ExpressButtonType
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
@@ -23,7 +23,7 @@ private const val EXTRA_DECIMAL_PRICE_PRECISION = 12
 internal fun CheckoutSessionResponse.asCheckoutSession(
     collectedEmail: String?,
     collectedShippingName: String?,
-    collectedShippingAddress: CheckoutController.Address.State?,
+    collectedShippingAddress: CheckoutElementsController.Address.State?,
     flagImages: Map<String, Bitmap>?,
     paymentOption: PaymentOptionDisplayData?,
     availableExpressButtonTypes: List<ExpressButtonType>,
@@ -105,9 +105,9 @@ private fun CheckoutSessionResponse.CheckoutItem.asOrderSummaryItem(locale: Loca
                 key = item.innerItemKey,
                 displayName = item.price.product.name,
                 images = item.price.product.images,
-                unitAmount = amount(unitAmount.toDouble(), itemCurrency, locale),
+                unitAmount = amount(unitAmount, itemCurrency, locale),
                 unitAmountDecimal = item.unitAmountDecimal?.let {
-                    amount(it, itemCurrency, locale, supportsSubcentPrecision = true)
+                    decimalAmount(it, itemCurrency, locale)
                 },
                 unitLabel = item.unitLabel,
                 quantity = item.quantity,
@@ -115,11 +115,11 @@ private fun CheckoutSessionResponse.CheckoutItem.asOrderSummaryItem(locale: Loca
                     Session.AdjustableQuantity(true, requireNotNull(it.maximum), requireNotNull(it.minimum))
                 },
                 amountDetails = Session.OrderSummaryItem.OneTimePrice.Item.AmountDetails(
-                    total = amount(item.total.toDouble(), itemCurrency, locale),
-                    subtotal = amount(item.subtotal.toDouble(), itemCurrency, locale),
+                    total = amount(item.total, itemCurrency, locale),
+                    subtotal = amount(item.subtotal, itemCurrency, locale),
                     taxAmounts = item.taxAmounts.map { it.asTaxAmount(itemCurrency, locale) }.ifEmpty { null },
-                    taxInclusive = amount(item.taxInclusive.toDouble(), itemCurrency, locale),
-                    taxExclusive = amount(item.taxExclusive.toDouble(), itemCurrency, locale),
+                    taxInclusive = amount(item.taxInclusive, itemCurrency, locale),
+                    taxExclusive = amount(item.taxExclusive, itemCurrency, locale),
                 ),
             )
         },
@@ -130,7 +130,7 @@ private fun CheckoutSessionResponse.TaxAmount.asTaxAmount(
     currency: String,
     locale: Locale,
 ): Session.TaxAmount {
-    val publicAmount = amount(amount.toDouble(), currency, locale)
+    val publicAmount = amount(amount, currency, locale)
     return Session.TaxAmount(
         amount = publicAmount.amount,
         minorUnitsAmount = publicAmount.minorUnitsAmount,
@@ -145,15 +145,15 @@ private fun CheckoutSessionResponse.TaxAmount.asTaxAmount(
 private fun CheckoutSessionResponse.totals(currency: String, locale: Locale): Session.Totals {
     val items = checkoutItems.flatMap { it.oneTimePrice.items }
     return Session.Totals(
-        subtotal = amount(items.sumOf { it.subtotal }.toDouble(), currency, locale),
-        taxExclusive = amount(items.sumOf { it.taxExclusive }.toDouble(), currency, locale),
-        taxInclusive = amount(items.sumOf { it.taxInclusive }.toDouble(), currency, locale),
-        discount = amount(0.0, currency, locale),
-        total = amount(items.sumOf { it.total }.toDouble(), currency, locale),
+        subtotal = amount(items.sumOf { it.subtotal }, currency, locale),
+        taxExclusive = amount(items.sumOf { it.taxExclusive }, currency, locale),
+        taxInclusive = amount(items.sumOf { it.taxInclusive }, currency, locale),
+        discount = amount(0L, currency, locale),
+        total = amount(items.sumOf { it.total }, currency, locale),
     )
 }
 
-private fun CheckoutController.Address.State.asShippingAddress() = Session.ShippingAddress.Address(
+private fun CheckoutElementsController.Address.State.asShippingAddress() = Session.ShippingAddress.Address(
     city = city,
     country = country,
     line1 = line1,
@@ -167,13 +167,31 @@ private fun currencyDigits(currency: String): Int = CurrencyFormatter.getDefault
 )
 
 private fun amount(
-    minorUnitsAmount: Double,
+    minorUnitsAmount: Long,
     currency: String,
     locale: Locale,
-    supportsSubcentPrecision: Boolean = false,
-): Session.Amount {
+): Session.Amount = Session.Amount(
+    amount = formatAmount(BigDecimal.valueOf(minorUnitsAmount), currency, locale, supportsSubcentPrecision = false),
+    minorUnitsAmount = minorUnitsAmount,
+)
+
+private fun decimalAmount(
+    minorUnitsAmount: BigDecimal,
+    currency: String,
+    locale: Locale,
+): Session.DecimalAmount = Session.DecimalAmount(
+    amount = formatAmount(minorUnitsAmount, currency, locale, supportsSubcentPrecision = true),
+    minorUnitsAmount = minorUnitsAmount,
+)
+
+private fun formatAmount(
+    minorUnitsAmount: BigDecimal,
+    currency: String,
+    locale: Locale,
+    supportsSubcentPrecision: Boolean,
+): String {
     val digits = currencyDigits(currency)
-    val majorUnits = BigDecimal.valueOf(minorUnitsAmount).movePointLeft(digits)
+    val majorUnits = minorUnitsAmount.movePointLeft(digits)
     val formatter = NumberFormat.getCurrencyInstance(locale)
     formatter.currency = Currency.getInstance(currency.uppercase())
     formatter.minimumFractionDigits = digits
@@ -188,5 +206,5 @@ private fun amount(
             currencySymbol = this.currency.getSymbol(locale)
         }
     }
-    return Session.Amount(formatter.format(majorUnits), minorUnitsAmount)
+    return formatter.format(majorUnits)
 }

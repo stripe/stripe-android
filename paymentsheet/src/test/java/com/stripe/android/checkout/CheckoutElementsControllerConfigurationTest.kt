@@ -6,10 +6,10 @@ import com.stripe.android.paymentelement.CheckoutSessionPreview
 import org.junit.Test
 
 @OptIn(CheckoutSessionPreview::class)
-internal class CheckoutControllerConfigurationTest {
+internal class CheckoutElementsControllerConfigurationTest {
     @Test
     fun `payment element is not configured by default`() {
-        val configuration = CheckoutController.Configuration().build()
+        val configuration = CheckoutElementsController.Configuration().build()
 
         assertThat(configuration.paymentElementConfiguration).isNull()
     }
@@ -17,7 +17,7 @@ internal class CheckoutControllerConfigurationTest {
     @Test
     fun `payment element configuration is included when explicitly configured`() {
         val paymentElement = PaymentElement.Configuration().paymentMethodOrder(listOf("klarna", "card"))
-        val configuration = CheckoutController.Configuration()
+        val configuration = CheckoutElementsController.Configuration()
             .paymentElement(paymentElement)
             .build()
 
