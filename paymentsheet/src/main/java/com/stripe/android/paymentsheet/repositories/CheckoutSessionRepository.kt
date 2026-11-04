@@ -263,7 +263,7 @@ internal class CheckoutSessionRepository @Inject constructor(
         fireEvent(PaymentSheetEvent.AdaptivePricingCurrencyToggledFailed(error = it.safeAnalyticsMessage))
     }
 
-    suspend fun measure(
+    private suspend fun measure(
         operation: Operation,
         checkoutSessionResponse: CheckoutSessionResponse?,
         params: Map<String, Any?>,
@@ -289,7 +289,7 @@ internal class CheckoutSessionRepository @Inject constructor(
         )
     }
 
-    private fun fireEvent(event: CheckoutAnalyticsEvent) {
+    fun fireEvent(event: CheckoutAnalyticsEvent) {
         analyticsRequestExecutor.executeAsync(
             paymentAnalyticsRequestFactory.createRequest(
                 event = event,

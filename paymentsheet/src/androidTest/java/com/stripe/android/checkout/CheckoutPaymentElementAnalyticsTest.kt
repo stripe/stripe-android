@@ -256,7 +256,7 @@ internal class CheckoutPaymentElementAnalyticsTest {
         }
 
     @Test
-    fun testUpdateEmailReportsStartedAndSucceededWithoutConfiguration() = runCheckoutPaymentElementScenario(
+    fun testUpdateEmailReportsSucceededWithoutDurationOrConfiguration() = runCheckoutPaymentElementScenario(
         networkRule = networkRule,
         renderPaymentElementContent = false,
         setup = { controller ->
@@ -269,8 +269,14 @@ internal class CheckoutPaymentElementAnalyticsTest {
             ).isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
         },
     ) {
-        networkRule.validateCheckoutAnalyticsStarted("update_email", not(hasQueryParam("merchant_display_name")))
-        networkRule.validateCheckoutAnalyticsSucceeded("update_email", not(hasQueryParam("merchant_display_name")))
+        networkRule.validateAnalyticsRequest(
+            eventName = "checkout_elements.update_email.succeeded",
+            productUsage = setOf("checkout_elements"),
+            analyticsPayloadField("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID),
+            not(hasQueryParam("duration")),
+            not(hasQueryParam("error_type")),
+            not(hasQueryParam("merchant_display_name")),
+        )
 
         assertThat(controller.updateEmail("email@example.com"))
             .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
