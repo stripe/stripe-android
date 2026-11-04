@@ -401,10 +401,9 @@ class CheckoutElementsController @Inject internal constructor(
     )
 
     internal suspend fun updateCurrency(currency: String): kotlin.Result<Unit> {
-        return withCheckoutState { sessionId ->
+        return withCheckoutState {
             checkoutSessionRepository.updateCurrency(
-                sessionId = sessionId,
-                clientSecret = checkoutSessionResponse.clientSecret,
+                checkoutSessionResponse = checkoutSessionResponse,
                 currencyCode = currency,
             )
         }

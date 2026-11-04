@@ -39,8 +39,6 @@ class CheckoutSessionRepositoryTest {
         mobileSessionIdProvider = { AnalyticsRequestFactory.sessionId.toString() },
     )
 
-    private val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
-
     private val checkoutSessionResponse = CheckoutAnalyticsTestFixtures.sessionResponse(
         stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
     )
@@ -50,7 +48,7 @@ class CheckoutSessionRepositoryTest {
         elementsSessionClientParams = CheckoutStripeRepositoryFactory.clientParams(),
         fraudDetectionDataRepository = FakeFraudDetectionDataRepository.create(),
         stripeNetworkClient = DefaultStripeNetworkClient(),
-        analyticsRequestExecutor = analyticsRequestExecutor,
+        analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
         paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
             context = ApplicationProvider.getApplicationContext(),
             publishableKey = "pk_test_123",
@@ -153,8 +151,7 @@ class CheckoutSessionRepositoryTest {
         }
 
         val result = repository.updateCurrency(
-            sessionId = DEFAULT_CHECKOUT_SESSION_ID,
-            clientSecret = "cs_test_abc123_secret_test",
+            checkoutSessionResponse = checkoutSessionResponse,
             currencyCode = "eur",
         )
 
@@ -169,46 +166,11 @@ class CheckoutSessionRepositoryTest {
         }
 
         val result = repository.updateCurrency(
-            sessionId = DEFAULT_CHECKOUT_SESSION_ID,
-            clientSecret = "cs_test_abc123_secret_test",
+            checkoutSessionResponse = checkoutSessionResponse,
             currencyCode = "invalid",
         )
 
         assertThat(result.isFailure).isTrue()
-    }
-
-    @Test
-    fun `updateCurrency fires currency_toggled on success`() = runTest {
-        networkRule.checkoutUpdate { response ->
-            response.testBodyFromFile("checkout-session-init.json")
-        }
-
-        repository.updateCurrency(
-            sessionId = DEFAULT_CHECKOUT_SESSION_ID,
-            clientSecret = "cs_test_abc123_secret_test",
-            currencyCode = "eur",
-        ).getOrThrow()
-
-        analyticsRequestExecutor.awaitEvent("elements.adaptive_pricing.currency_toggled")
-        analyticsRequestExecutor.validate()
-    }
-
-    @Test
-    fun `updateCurrency fires currency_toggled_failed on failure`() = runTest {
-        networkRule.checkoutUpdate { response ->
-            response.setResponseCode(400)
-            response.setBody("""{"error": {"message": "Invalid currency"}}""")
-        }
-
-        val result = repository.updateCurrency(
-            sessionId = DEFAULT_CHECKOUT_SESSION_ID,
-            clientSecret = "cs_test_abc123_secret_test",
-            currencyCode = "invalid",
-        )
-
-        assertThat(result.isFailure).isTrue()
-        analyticsRequestExecutor.awaitEvent("elements.adaptive_pricing.currency_toggled.failed")
-        analyticsRequestExecutor.validate()
     }
 
     @Test

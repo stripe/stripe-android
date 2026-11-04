@@ -6,7 +6,6 @@ import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent
 import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent.Operation
 import com.stripe.android.checkout.analytics.MeasuredOperation
 import com.stripe.android.core.exception.InvalidRequestException
-import com.stripe.android.core.exception.safeAnalyticsMessage
 import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
@@ -19,7 +18,6 @@ import com.stripe.android.networking.ConfirmationParamsUtils
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.CheckoutSessionPreview
-import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
 import java.util.TimeZone
 import javax.inject.Inject
 import javax.inject.Provider
@@ -248,19 +246,20 @@ internal class CheckoutSessionRepository @Inject constructor(
     )
 
     suspend fun updateCurrency(
-        sessionId: String,
-        clientSecret: String,
+        checkoutSessionResponse: CheckoutSessionResponse,
         currencyCode: String,
-    ): Result<CheckoutSessionResponse> = executePost(
-        clientSecret = clientSecret,
-        url = updateUrl(sessionId),
-        params = mapOf(
-            "adaptive_pricing[currency]" to currencyCode,
-        ),
-    ).onSuccess {
-        fireEvent(PaymentSheetEvent.AdaptivePricingCurrencyToggled())
-    }.onFailure {
-        fireEvent(PaymentSheetEvent.AdaptivePricingCurrencyToggledFailed(error = it.safeAnalyticsMessage))
+    ): Result<CheckoutSessionResponse> = measure(
+        operation = Operation.UpdateCurrency,
+        checkoutSessionResponse = checkoutSessionResponse,
+        params = mapOf("requested_currency" to currencyCode),
+    ) {
+        executePost(
+            clientSecret = checkoutSessionResponse.clientSecret,
+            url = updateUrl(checkoutSessionResponse.id),
+            params = mapOf(
+                "adaptive_pricing[currency]" to currencyCode,
+            ),
+        )
     }
 
     private suspend fun measure(
@@ -278,15 +277,6 @@ internal class CheckoutSessionRepository @Inject constructor(
         return block()
             .onSuccess { measuredOperation.succeeded(it) }
             .onFailure { measuredOperation.failed(checkoutSessionResponse, it) }
-    }
-
-    private fun fireEvent(event: PaymentSheetEvent) {
-        analyticsRequestExecutor.executeAsync(
-            paymentAnalyticsRequestFactory.createRequest(
-                event = event,
-                additionalParams = event.params,
-            )
-        )
     }
 
     private fun fireEvent(event: CheckoutAnalyticsEvent) {

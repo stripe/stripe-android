@@ -373,16 +373,23 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         override val eventName: String = "elements.adaptive_pricing.currency_selector_init"
     }
 
-    class AdaptivePricingCurrencyToggled : PaymentSheetEvent() {
+    class AdaptivePricingCurrencyToggled(
+        checkoutSessionId: String?,
+    ) : PaymentSheetEvent() {
         override val eventName: String = "elements.adaptive_pricing.currency_toggled"
+        override val params: Map<String, Any?> = mapOf(
+            "checkout_session_id" to checkoutSessionId,
+        )
     }
 
     class AdaptivePricingCurrencyToggledFailed(
         error: String,
+        checkoutSessionId: String?,
     ) : PaymentSheetEvent() {
         override val eventName: String = "elements.adaptive_pricing.currency_toggled.failed"
         override val params: Map<String, Any?> = mapOf(
             FIELD_ERROR_MESSAGE to error,
+            "checkout_session_id" to checkoutSessionId,
         )
     }
 
