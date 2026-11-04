@@ -116,6 +116,7 @@ dependencies {
     androidTestImplementation project(':payments-core-testing')
     androidTestImplementation project(':payment-element-test-pages')
 
+    androidTestImplementation libs.fuel
     androidTestImplementation libs.places
     androidTestImplementation libs.terminal.core
     androidTestImplementation libs.terminal.tapToPay
@@ -149,6 +150,9 @@ dependencies {
 android {
     defaultConfig {
         testApplicationId "com.stripe.android.paymentsheet.test"
+        if (!providers.gradleProperty('checkoutLiveBackendTests').map { it.toBoolean() }.getOrElse(false)) {
+            testInstrumentationRunnerArguments notAnnotation: 'com.stripe.android.paymentsheet.RequiresLiveBackend'
+        }
     }
 
     buildFeatures {
