@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.AnnotatedString
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.checkout.analytics.toAnalyticsMap
 import com.stripe.android.checkout.injection.CheckoutElementsPresenterSubcomponent
 import com.stripe.android.checkout.injection.DaggerCheckoutElementsControllerComponent
 import com.stripe.android.common.exception.stripeErrorMessage
@@ -118,6 +119,7 @@ class CheckoutElementsController @Inject internal constructor(
                 sessionId = sessionId,
                 clientSecret = clientSecret,
                 adaptivePricingAllowed = configurationState.currencySelectorElementConfiguration != null,
+                analyticsParams = configurationState.toAnalyticsMap(),
             ).mapCatching { response ->
                 val initialLoad = checkoutStateLoader.loadInitial(
                     configuration = configurationState,
@@ -298,6 +300,7 @@ class CheckoutElementsController @Inject internal constructor(
                         sessionId = sessionId,
                         clientSecret = checkoutSessionResponse.clientSecret,
                         adaptivePricingAllowed = configuration.currencySelectorElementConfiguration != null,
+                        analyticsParams = configuration.toAnalyticsMap(),
                     )
                 },
                 onFailure = { kotlin.Result.failure(it) },

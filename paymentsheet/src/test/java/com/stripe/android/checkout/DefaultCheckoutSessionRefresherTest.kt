@@ -2,6 +2,7 @@ package com.stripe.android.checkout
 
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkout.analytics.toAnalyticsMap
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import kotlinx.coroutines.test.runTest
@@ -38,6 +39,7 @@ internal class DefaultCheckoutSessionRefresherTest {
             FakeCheckoutSessionRefreshActions.FetchCall(
                 clientSecret = initialState.checkoutSessionResponse.clientSecret,
                 adaptivePricingAllowed = false,
+                analyticsParams = initialState.configuration.toAnalyticsMap(),
             )
         )
         assertThat(refreshActions.reloadCalls.awaitItem())
