@@ -8,6 +8,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import kotlinx.parcelize.Parcelize
+import java.math.BigDecimal
 
 @Parcelize
 internal data class CheckoutSessionResponse(
@@ -103,7 +104,7 @@ internal data class CheckoutSessionResponse(
         val subtotal: Long,
         val total: Long,
         val unitAmount: Long?,
-        val unitAmountDecimal: Double?,
+        val unitAmountDecimal: BigDecimal?,
         val unitLabel: String?,
         val taxAmounts: List<TaxAmount>,
         val taxInclusive: Long,
