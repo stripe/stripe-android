@@ -1,9 +1,84 @@
 package com.stripe.android.model
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.KlarnaSdkPreview
 import kotlin.test.Test
 
 class PaymentMethodOptionsParamsTest {
+
+    @OptIn(KlarnaSdkPreview::class)
+    @Test
+    fun klarnaToParamMap_withInteroperabilityToken_shouldOnlyIncludeInteroperabilityToken() {
+        val params = PaymentMethodOptionsParams.Klarna(
+            interoperabilityToken = "test_interoperability_token",
+        )
+
+        assertThat(params.toParamMap()).isEqualTo(
+            mapOf("klarna" to mapOf("interoperability_token" to "test_interoperability_token"))
+        )
+    }
+
+    @OptIn(KlarnaSdkPreview::class)
+    @Test
+    fun klarnaToParamMap_withPartnerConfirmationToken_shouldOnlyIncludePartnerConfirmationToken() {
+        val params = PaymentMethodOptionsParams.Klarna(
+            partnerConfirmationToken = "test_partner_confirmation_token",
+        )
+
+        assertThat(params.toParamMap()).isEqualTo(
+            mapOf("klarna" to mapOf("partner_confirmation_token" to "test_partner_confirmation_token"))
+        )
+    }
+
+    @OptIn(KlarnaSdkPreview::class)
+    @Test
+    fun klarnaToParamMap_withBothTokens_shouldIncludeBothTokens() {
+        val params = PaymentMethodOptionsParams.Klarna(
+            interoperabilityToken = "test_interoperability_token",
+            partnerConfirmationToken = "test_partner_confirmation_token",
+        )
+
+        assertThat(params.toParamMap()).isEqualTo(
+            mapOf(
+                "klarna" to mapOf(
+                    "interoperability_token" to "test_interoperability_token",
+                    "partner_confirmation_token" to "test_partner_confirmation_token",
+                )
+            )
+        )
+    }
+
+    @OptIn(KlarnaSdkPreview::class)
+    @Test
+    fun klarnaToParamMap_withNullTokens_shouldHaveEmptyParams() {
+        val params = PaymentMethodOptionsParams.Klarna(
+            interoperabilityToken = null,
+            partnerConfirmationToken = null,
+        )
+
+        assertThat(params.toParamMap()).isEqualTo(emptyMap<String, Any>())
+    }
+
+    @OptIn(KlarnaSdkPreview::class)
+    @Test
+    fun klarnaSetupFutureUsage_shouldBeNull() {
+        val params = PaymentMethodOptionsParams.Klarna(interoperabilityToken = "test_interoperability_token")
+
+        assertThat(params.setupFutureUsage()).isNull()
+    }
+
+    @OptIn(KlarnaSdkPreview::class)
+    @Test
+    fun klarnaUpdateSetupFutureUsage_shouldPreserveTokens() {
+        val params = PaymentMethodOptionsParams.Klarna(
+            interoperabilityToken = "test_interoperability_token",
+            partnerConfirmationToken = "test_partner_confirmation_token",
+        )
+
+        assertThat(
+            params.updateSetupFutureUsageWithPmoSfu(ConfirmPaymentIntentParams.SetupFutureUsage.OffSession)
+        ).isSameInstanceAs(params)
+    }
 
     @Test
     fun cardToParamMap_withNetwork_shouldOnlyIncludeNetwork() {

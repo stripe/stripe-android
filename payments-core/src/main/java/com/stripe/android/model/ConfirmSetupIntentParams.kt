@@ -8,6 +8,7 @@ import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_MANDAT
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_MANDATE_ID
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_DATA
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_ID
+import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_OPTIONS
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_RADAR_OPTIONS
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_RETURN_URL
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_SET_AS_DEFAULT_PAYMENT_METHOD
@@ -60,7 +61,7 @@ constructor(
      *   https://docs.stripe.com/api/setup_intents/confirm#confirm_setup_intent-payment_method_options
      * ).
      */
-    val paymentMethodOptions: PaymentMethodOptionsParams? = null,
+    var paymentMethodOptions: PaymentMethodOptionsParams? = null,
     @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val radarOptions: RadarOptions? = null,
     private val clientAttributionMetadata: ClientAttributionMetadata? = null,
     /**
@@ -104,6 +105,7 @@ constructor(
             mandateData = mandateData,
             setAsDefaultPaymentMethod = setAsDefaultPaymentMethod,
             paymentMethodCode = paymentMethodCode,
+            paymentMethodOptions = paymentMethodOptions,
             radarOptions = radarOptions,
             clientAttributionMetadata = clientAttributionMetadata,
             confirmationTokenId = confirmationTokenId,
@@ -137,6 +139,10 @@ constructor(
         ).plus(
             radarOptions?.let {
                 mapOf(PARAM_RADAR_OPTIONS to it.toParamMap())
+            }.orEmpty()
+        ).plus(
+            paymentMethodOptions?.let {
+                mapOf(PARAM_PAYMENT_METHOD_OPTIONS to it.toParamMap())
             }.orEmpty()
         ).plus(
             paymentMethodParamMap

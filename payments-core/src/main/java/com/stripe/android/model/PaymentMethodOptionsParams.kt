@@ -2,6 +2,7 @@ package com.stripe.android.model
 
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
+import com.stripe.android.KlarnaSdkPreview
 import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
@@ -75,6 +76,34 @@ sealed class PaymentMethodOptionsParams(
             private const val PARAM_NETWORK = "network"
             private const val PARAM_SETUP_FUTURE_USAGE = "setup_future_usage"
             private const val PARAM_MOTO = "moto"
+        }
+    }
+
+    /**
+     * Options for confirming a Klarna payment method.
+     *
+     * @param interoperabilityToken A token for a pre-purchase interaction. Supported for
+     * PaymentIntent and SetupIntent confirmation.
+     * @param partnerConfirmationToken A token for an authorized payment. Supported only for
+     * PaymentIntent confirmation.
+     */
+    @KlarnaSdkPreview
+    @Parcelize
+    @Poko
+    class Klarna @JvmOverloads constructor(
+        var interoperabilityToken: String? = null,
+        var partnerConfirmationToken: String? = null,
+    ) : PaymentMethodOptionsParams(PaymentMethod.Type.Klarna) {
+        override fun createTypeParams(): List<Pair<String, Any?>> {
+            return listOf(
+                PARAM_INTEROPERABILITY_TOKEN to interoperabilityToken,
+                PARAM_PARTNER_CONFIRMATION_TOKEN to partnerConfirmationToken,
+            )
+        }
+
+        private companion object {
+            private const val PARAM_INTEROPERABILITY_TOKEN = "interoperability_token"
+            private const val PARAM_PARTNER_CONFIRMATION_TOKEN = "partner_confirmation_token"
         }
     }
 
@@ -251,6 +280,7 @@ sealed class PaymentMethodOptionsParams(
     }
 }
 
+@OptIn(KlarnaSdkPreview::class)
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun PaymentMethodOptionsParams.setupFutureUsage(): ConfirmPaymentIntentParams.SetupFutureUsage? {
     return when (this) {
@@ -258,6 +288,7 @@ fun PaymentMethodOptionsParams.setupFutureUsage(): ConfirmPaymentIntentParams.Se
         is PaymentMethodOptionsParams.Card -> setupFutureUsage
         is PaymentMethodOptionsParams.SepaDebit -> setupFutureUsage
         is PaymentMethodOptionsParams.Konbini -> setupFutureUsage
+        is PaymentMethodOptionsParams.Klarna -> null
         is PaymentMethodOptionsParams.Link -> setupFutureUsage
         is PaymentMethodOptionsParams.USBankAccount -> setupFutureUsage
         is PaymentMethodOptionsParams.WeChatPay -> setupFutureUsage
@@ -266,6 +297,7 @@ fun PaymentMethodOptionsParams.setupFutureUsage(): ConfirmPaymentIntentParams.Se
     }
 }
 
+@OptIn(KlarnaSdkPreview::class)
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun PaymentMethodOptionsParams?.updateSetupFutureUsageWithPmoSfu(
     pmoSfu: ConfirmPaymentIntentParams.SetupFutureUsage
@@ -283,6 +315,7 @@ fun PaymentMethodOptionsParams?.updateSetupFutureUsageWithPmoSfu(
         is PaymentMethodOptionsParams.Card -> this.copy(setupFutureUsage = sfuValueToSet)
         is PaymentMethodOptionsParams.SepaDebit -> this.copy(setupFutureUsage = sfuValueToSet)
         is PaymentMethodOptionsParams.Konbini -> this.copy(setupFutureUsage = sfuValueToSet)
+        is PaymentMethodOptionsParams.Klarna -> this
         is PaymentMethodOptionsParams.Link -> this.copy(setupFutureUsage = sfuValueToSet)
         is PaymentMethodOptionsParams.USBankAccount -> this.copy(setupFutureUsage = sfuValueToSet)
         is PaymentMethodOptionsParams.WeChatPay -> this.copy(setupFutureUsage = sfuValueToSet)

@@ -1,11 +1,52 @@
 package com.stripe.android.model
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.KlarnaSdkPreview
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.testing.RadarOptionsFactory
 import kotlin.test.Test
 
 class ConfirmSetupIntentParamsTest {
+
+    @OptIn(KlarnaSdkPreview::class)
+    @Test
+    fun toParamMap_withKlarnaInteroperabilityToken_shouldCreateExpectedMap() {
+        val params = ConfirmSetupIntentParams.createWithoutPaymentMethod(CLIENT_SECRET).apply {
+            paymentMethodOptions = PaymentMethodOptionsParams.Klarna(
+                interoperabilityToken = "test_interoperability_token",
+            )
+        }
+
+        assertThat(params.toParamMap()).isEqualTo(
+            mapOf(
+                "client_secret" to CLIENT_SECRET,
+                "use_stripe_sdk" to false,
+                "payment_method_options" to mapOf(
+                    "klarna" to mapOf("interoperability_token" to "test_interoperability_token")
+                ),
+            )
+        )
+    }
+
+    @OptIn(KlarnaSdkPreview::class)
+    @Test
+    fun withShouldUseStripeSdk_shouldPreserveKlarnaOptions() {
+        val params = ConfirmSetupIntentParams.createWithoutPaymentMethod(CLIENT_SECRET).apply {
+            paymentMethodOptions = PaymentMethodOptionsParams.Klarna(
+                interoperabilityToken = "test_interoperability_token",
+            )
+        }
+
+        assertThat(params.withShouldUseStripeSdk(true).toParamMap()).isEqualTo(
+            mapOf(
+                "client_secret" to CLIENT_SECRET,
+                "use_stripe_sdk" to true,
+                "payment_method_options" to mapOf(
+                    "klarna" to mapOf("interoperability_token" to "test_interoperability_token")
+                ),
+            )
+        )
+    }
 
     @Test
     fun shouldUseStripeSdk_shouldReturnExpectedValues() {

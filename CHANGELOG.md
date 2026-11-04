@@ -3,6 +3,9 @@
 NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
 
+### Payments
+* [Added] Added experimental Klarna token options for intent confirmation, requiring `KlarnaSdkPreview` opt-in.
+
 ### PaymentSheet
 * [FIXED][15254](https://github.com/stripe/stripe-android/pull/15254) Fixed an ANR during passive CAPTCHA warm-up in PaymentSheet.
 
