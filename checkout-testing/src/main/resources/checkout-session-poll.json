@@ -1,0 +1,7 @@
+{
+  "id": "cs_test_abc123",
+  "object": "checkout.session",
+  "confirmation_status": "succeeded",
+  "status": "complete",
+  "payment_status": "paid"
+}

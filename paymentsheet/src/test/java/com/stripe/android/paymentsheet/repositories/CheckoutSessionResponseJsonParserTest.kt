@@ -12,6 +12,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.math.BigDecimal
 
 @RunWith(TestParameterInjector::class)
 class CheckoutSessionResponseJsonParserTest {
@@ -249,13 +250,44 @@ class CheckoutSessionResponseJsonParserTest {
         val json = base()
         val item = item(json)
         item.put("unit_amount", 4000)
-        item.put("unit_amount_decimal", "4000.123456789012")
+        item.put("unit_amount_decimal", "9007199254740993.123456789012")
 
         val result = parse(json)!!.checkoutItems.single().oneTimePrice.items.single()
 
         assertThat(result.unitAmount).isEqualTo(4000)
         assertThat(result.price.unitAmount).isEqualTo(5099)
-        assertThat(result.unitAmountDecimal).isEqualTo(4000.123456789012)
+        assertThat(result.unitAmountDecimal).isEqualTo(BigDecimal("9007199254740993.123456789012"))
+    }
+
+    @Test
+    fun `accepts decimal unit amount without integer unit amounts`() {
+        val json = base()
+        val item = item(json)
+        item.remove("unit_amount")
+        item.getJSONObject("price").remove("unit_amount")
+        item.put("unit_amount_decimal", "0.123456789012")
+
+        val result = requireNotNull(parse(json)).checkoutItems.single().oneTimePrice.items.single()
+
+        assertThat(result.unitAmount).isNull()
+        assertThat(result.price.unitAmount).isNull()
+        assertThat(result.unitAmountDecimal).isEqualTo(BigDecimal("0.123456789012"))
+    }
+
+    @Test
+    fun `rejects negative decimal unit amount`() {
+        val json = base()
+        item(json).put("unit_amount_decimal", "-0.000000000001")
+
+        assertThat(parse(json)).isNull()
+    }
+
+    @Test
+    fun `rejects infinite decimal unit amount`() {
+        val json = base()
+        item(json).put("unit_amount_decimal", "Infinity")
+
+        assertThat(parse(json)).isNull()
     }
 
     @Test

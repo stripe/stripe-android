@@ -5,7 +5,7 @@ import android.os.Looper
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.checkout.CheckoutController.Session.PaymentOptionDisplayData
+import com.stripe.android.checkout.CheckoutElementsController.Session.PaymentOptionDisplayData
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.elements.ece.AvailableExpressButtonTypesFactory
@@ -32,7 +32,7 @@ import kotlin.test.Test
 
 @OptIn(CheckoutSessionPreview::class)
 @RunWith(RobolectricTestRunner::class)
-internal class CheckoutControllerStateHolderTest {
+internal class CheckoutElementsControllerStateHolderTest {
     @Test
     fun `background state reads reflect committed and cleared state`() = testScenario {
         suspend fun readState() = withContext(Dispatchers.IO) {
@@ -131,14 +131,14 @@ internal class CheckoutControllerStateHolderTest {
     @Test
     fun `configured default phone survives process death`() = runTest {
         val savedStateHandle = SavedStateHandle()
-        val stateHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle)
+        val stateHolder = CheckoutElementsControllerStateFactory.createStateHolder(savedStateHandle)
         stateHolder.state = committedState().copy(
-            configuration = CheckoutController.Configuration()
-                .defaults(CheckoutController.Configuration.Defaults().phone("+15555551234"))
+            configuration = CheckoutElementsController.Configuration()
+                .defaults(CheckoutElementsController.Configuration.Defaults().phone("+15555551234"))
                 .build(),
         )
 
-        val restoredStateHolder = CheckoutControllerStateFactory.createStateHolder(
+        val restoredStateHolder = CheckoutElementsControllerStateFactory.createStateHolder(
             savedStateHandle = savedStateHandle.simulateProcessDeath(),
         )
 
@@ -149,14 +149,14 @@ internal class CheckoutControllerStateHolderTest {
     @Test
     fun `null default phone survives process death`() = runTest {
         val savedStateHandle = SavedStateHandle()
-        val stateHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle)
+        val stateHolder = CheckoutElementsControllerStateFactory.createStateHolder(savedStateHandle)
         stateHolder.state = committedState().copy(
-            configuration = CheckoutController.Configuration()
-                .defaults(CheckoutController.Configuration.Defaults().phone(null))
+            configuration = CheckoutElementsController.Configuration()
+                .defaults(CheckoutElementsController.Configuration.Defaults().phone(null))
                 .build(),
         )
 
-        val restoredStateHolder = CheckoutControllerStateFactory.createStateHolder(
+        val restoredStateHolder = CheckoutElementsControllerStateFactory.createStateHolder(
             savedStateHandle = savedStateHandle.simulateProcessDeath(),
         )
 
@@ -167,14 +167,14 @@ internal class CheckoutControllerStateHolderTest {
     @Test
     fun `restored pending saved selection is reset to idle`() = runTest {
         val savedStateHandle = SavedStateHandle()
-        val stateHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle)
+        val stateHolder = CheckoutElementsControllerStateFactory.createStateHolder(savedStateHandle)
         stateHolder.state = committedState().copy(
             savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Pending(
                 "pm_restored",
             ),
         )
 
-        val restoredStateHolder = CheckoutControllerStateFactory.createStateHolder(
+        val restoredStateHolder = CheckoutElementsControllerStateFactory.createStateHolder(
             savedStateHandle = savedStateHandle.simulateProcessDeath(),
         )
 
@@ -214,7 +214,7 @@ internal class CheckoutControllerStateHolderTest {
     @Test
     fun `failed selection error survives saved state restoration`() = runTest {
         val handle = SavedStateHandle()
-        val holder = CheckoutControllerStateFactory.createStateHolder(handle)
+        val holder = CheckoutElementsControllerStateFactory.createStateHolder(handle)
         val error = APIConnectionException()
         holder.state = committedState(paymentSelection = PaymentSelection.GooglePay).copy(
             savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Failed(
@@ -222,7 +222,7 @@ internal class CheckoutControllerStateHolderTest {
             ),
         )
 
-        val restored = CheckoutControllerStateFactory.createStateHolder(handle.simulateProcessDeath())
+        val restored = CheckoutElementsControllerStateFactory.createStateHolder(handle.simulateProcessDeath())
 
         assertThat(restored.selection.value).isEqualTo(PaymentSelection.GooglePay)
         assertThat(restored.state?.savedPaymentMethodSelectionState)
@@ -326,8 +326,8 @@ internal class CheckoutControllerStateHolderTest {
                 putParcelable("cashapp", PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
             },
         )
-        val stateHolder = CheckoutControllerStateHolder(
-            savedStateHandle = SavedStateHandle(mapOf(CheckoutControllerStateHolder.STATE_KEY to restored)),
+        val stateHolder = CheckoutElementsControllerStateHolder(
+            savedStateHandle = SavedStateHandle(mapOf(CheckoutElementsControllerStateHolder.STATE_KEY to restored)),
             errorReporter = FakeErrorReporter(),
             paymentOptionFactory = { _, _, _ -> null },
             availableExpressButtonTypesFactory = FakeAvailableExpressButtonTypesFactory(),
@@ -346,8 +346,8 @@ internal class CheckoutControllerStateHolderTest {
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         expressCheckoutElementPaymentMethodMetadata: PaymentMethodMetadata? = PaymentMethodMetadataFactory.create(),
         requiresShippingAddress: Boolean = false,
-    ) = CheckoutControllerState(
-        configuration = CheckoutController.Configuration().build(),
+    ) = CheckoutElementsControllerState(
+        configuration = CheckoutElementsController.Configuration().build(),
         checkoutSessionResponse = CheckoutSessionResponseFactory.create(
             requiresShippingAddress = requiresShippingAddress,
         ),
@@ -373,7 +373,7 @@ internal class CheckoutControllerStateHolderTest {
     ) = runTest {
         val errorReporter = FakeErrorReporter()
         Scenario(
-            stateHolder = CheckoutControllerStateHolder(
+            stateHolder = CheckoutElementsControllerStateHolder(
                 savedStateHandle = SavedStateHandle(),
                 errorReporter = errorReporter,
                 paymentOptionFactory = paymentOptionFactory,
@@ -392,7 +392,7 @@ internal class CheckoutControllerStateHolderTest {
     }
 
     private class Scenario(
-        val stateHolder: CheckoutControllerStateHolder,
+        val stateHolder: CheckoutElementsControllerStateHolder,
         val errorReporter: FakeErrorReporter,
     )
 }

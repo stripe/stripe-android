@@ -17,7 +17,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.checkout.injection.DaggerCheckoutControllerComponent
+import com.stripe.android.checkout.injection.DaggerCheckoutElementsControllerComponent
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.checkouttesting.checkoutUpdate
@@ -47,7 +47,7 @@ import org.robolectric.RobolectricTestRunner
 
 @OptIn(CheckoutSessionPreview::class)
 @RunWith(RobolectricTestRunner::class)
-internal class CheckoutControllerComposeTest {
+internal class CheckoutElementsControllerComposeTest {
     private val application = ApplicationProvider.getApplicationContext<Application>()
 
     // Compose's default unconfined dispatcher resumes collectors on the emitter's IO thread.
@@ -80,10 +80,10 @@ internal class CheckoutControllerComposeTest {
         withContext(Dispatchers.IO) {
             assertThat(Thread.currentThread()).isNotSameInstanceAs(Looper.getMainLooper().thread)
             assertThat(controller.applyPromotionCode("10OFF"))
-                .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
+                .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
         }
 
-        composeRule.onNodeWithTag(TOTAL_TAG).assertTextEquals("4099.0")
+        composeRule.onNodeWithTag(TOTAL_TAG).assertTextEquals("4099")
         composeRule.onNodeWithTag(OPTION_TAG).assertTextEquals("card")
         composeRule.onNodeWithTag(ICON_TAG).assertIsDisplayed()
         composeRule.onNodeWithTag(TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT).assertIsDisplayed()
@@ -94,7 +94,7 @@ internal class CheckoutControllerComposeTest {
         withContext(Dispatchers.IO) {
             assertThat(Thread.currentThread()).isNotSameInstanceAs(Looper.getMainLooper().thread)
             assertThat(controller.clearPaymentOption())
-                .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
+                .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
         }
 
         composeRule.onNodeWithTag(OPTION_TAG).assertTextEquals("none")
@@ -103,28 +103,28 @@ internal class CheckoutControllerComposeTest {
     }
 
     private fun runScenario(
-        block: suspend (CheckoutController) -> Unit,
+        block: suspend (CheckoutElementsController) -> Unit,
     ) = runTest {
-        val savedState = CheckoutControllerSavedState(SavedStateHandle(), "checkout_compose_test")
-        val controller = DaggerCheckoutControllerComponent.factory().create(
+        val savedState = CheckoutElementsControllerSavedState(SavedStateHandle(), "checkout_compose_test")
+        val controller = DaggerCheckoutElementsControllerComponent.factory().create(
             application = application,
             paymentElementCallbackIdentifier = "checkout_compose_test",
             resultCallback = {},
             rowSelectionBehavior = PaymentElement.RowSelectionBehavior.default(),
-            checkoutControllerSavedState = savedState,
-        ).checkoutController
+            checkoutElementsControllerSavedState = savedState,
+        ).checkoutElementsController
         try {
             networkRule.checkoutInit { response -> successResponse(response) {} }
             assertThat(
                 controller.configure(
                     "${DEFAULT_CHECKOUT_SESSION_ID}_secret_example",
-                    CheckoutController.Configuration().paymentElement(PaymentElement.Configuration()),
+                    CheckoutElementsController.Configuration().paymentElement(PaymentElement.Configuration()),
                 )
             )
-                .isInstanceOf(CheckoutController.OperationResult.Succeeded::class.java)
-            CheckoutControllerStateFactory.createStateHolder(savedState.handle)
+                .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
+            CheckoutElementsControllerStateFactory.createStateHolder(savedState.handle)
                 .setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
-            assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isNotEqualTo(4099.0)
+            assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isNotEqualTo(4099L)
 
             composeRule.activityRule.scenario.moveToState(Lifecycle.State.CREATED)
             val presenter = controller.createPresenter(composeRule.activity)

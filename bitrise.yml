@@ -137,6 +137,7 @@ workflows:
       bitrise.io:
         stack: ubuntu-resolute-26.04-bitrise-2026-android
         machine_type_id: g2.linux.x-large
+        stack_rollback_version: "1-14-0"
   run-connections-e2e-data-tests:
     envs:
       - MAESTRO_TAGS: testmode-data
@@ -146,6 +147,7 @@ workflows:
       bitrise.io:
         stack: ubuntu-resolute-26.04-bitrise-2026-android
         machine_type_id: g2.linux.x-large
+        stack_rollback_version: "1-14-0"
   run-connections-e2e-token-tests:
     envs:
       - MAESTRO_TAGS: testmode-token
@@ -155,6 +157,7 @@ workflows:
       bitrise.io:
         stack: ubuntu-resolute-26.04-bitrise-2026-android
         machine_type_id: g2.linux.x-large
+        stack_rollback_version: "1-14-0"
   run-connections-e2e-payments-tests-on-push:
     envs:
       - MAESTRO_TAGS: testmode-payments
@@ -166,6 +169,7 @@ workflows:
       bitrise.io:
         stack: ubuntu-resolute-26.04-bitrise-2026-android
         machine_type_id: g2.linux.x-large
+        stack_rollback_version: "1-14-0"
   run-connections-e2e-data-tests-on-push:
     envs:
       - MAESTRO_TAGS: testmode-data
@@ -177,6 +181,7 @@ workflows:
       bitrise.io:
         stack: ubuntu-resolute-26.04-bitrise-2026-android
         machine_type_id: g2.linux.x-large
+        stack_rollback_version: "1-14-0"
   run-connections-e2e-token-tests-on-push:
     envs:
       - MAESTRO_TAGS: testmode-token
@@ -188,6 +193,7 @@ workflows:
       bitrise.io:
         stack: ubuntu-resolute-26.04-bitrise-2026-android
         machine_type_id: g2.linux.x-large
+        stack_rollback_version: "1-14-0"
   run-connections-e2e-tests-on-push:
     envs:
       - MAESTRO_TAGS: testmode
@@ -249,6 +255,7 @@ workflows:
       bitrise.io:
         stack: ubuntu-resolute-26.04-bitrise-2026-android
         machine_type_id: g2.linux.x-large
+        stack_rollback_version: "1-14-0"
   run-connections-e2e-livemode-tests:
     envs:
       - MAESTRO_TAGS: livemode-data
@@ -258,6 +265,7 @@ workflows:
       bitrise.io:
         stack: ubuntu-resolute-26.04-bitrise-2026-android
         machine_type_id: g2.linux.x-large
+        stack_rollback_version: "1-14-0"
   _run-connect-e2e-tests:
     before_run:
       - build-connect-debug
@@ -387,6 +395,7 @@ workflows:
       bitrise.io:
         stack: ubuntu-resolute-26.04-bitrise-2026-android
         machine_type_id: g2.linux.x-large
+        stack_rollback_version: "1-14-0"
   run-paymentsheet-ime-instrumentation-tests:
     before_run:
       - prepare_all
@@ -430,6 +439,7 @@ workflows:
       bitrise.io:
         stack: ubuntu-resolute-26.04-bitrise-2026-android
         machine_type_id: g2.linux.x-large
+        stack_rollback_version: "1-14-0"
   run-cardscan-and-google-pay-tests:
     before_run:
       - start_cardscan_emulator
@@ -484,6 +494,7 @@ workflows:
       bitrise.io:
         stack: ubuntu-resolute-26.04-bitrise-2026-android
         machine_type_id: g2.linux.x-large
+        stack_rollback_version: "1-14-0"
   run-paymentsheet-e2e:
     before_run:
       - prepare_all
@@ -509,6 +520,7 @@ workflows:
       bitrise.io:
         stack: ubuntu-resolute-26.04-bitrise-2026-android
         machine_type_id: g2.linux.x-large
+        stack_rollback_version: "1-14-0"
   run-paymentsheet-google-pay-e2e:
     before_run:
       - prepare_all
@@ -540,6 +552,7 @@ workflows:
       bitrise.io:
         stack: ubuntu-resolute-26.04-bitrise-2026-android
         machine_type_id: g2.linux.x-large
+        stack_rollback_version: "1-14-0"
   run-paymentsheet-latency-synthetics:
     before_run:
       - start_emulator
@@ -567,6 +580,7 @@ workflows:
       bitrise.io:
         stack: ubuntu-resolute-26.04-bitrise-2026-android
         machine_type_id: g2.linux.x-large
+        stack_rollback_version: "1-14-0"
   check-dependencies-and-publish-pom:
     envs:
       - INCLUDE_DEPENDENCIES_ON_FAILURE: true

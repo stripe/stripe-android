@@ -19,16 +19,14 @@ internal class DefaultNfcScanningEventReporterTest {
         assertThat(durationProvider.callsTurbine.awaitItem())
             .isEqualTo(FakeDurationProvider.Call.Start(DurationProvider.Key.NfcScan, reset = true))
 
-        val loggedParams = executor.getExecutedRequests().single().params
-        assertThat(loggedParams).containsEntry("event", "mc_nfc_scan_started")
+        executor.awaitEvent("mc_nfc_scan_started")
     }
 
     @Test
     fun `onNfcScanBlocked fires event`() = runScenario {
         reporter.onNfcScanBlocked()
 
-        val loggedParams = executor.getExecutedRequests().single().params
-        assertThat(loggedParams).containsEntry("event", "mc_nfc_scan_blocked")
+        executor.awaitEvent("mc_nfc_scan_blocked")
     }
 
     @Test
@@ -38,8 +36,7 @@ internal class DefaultNfcScanningEventReporterTest {
         assertThat(durationProvider.callsTurbine.awaitItem())
             .isEqualTo(FakeDurationProvider.Call.End(DurationProvider.Key.NfcScan))
 
-        val loggedParams = executor.getExecutedRequests().single().params
-        assertThat(loggedParams).containsEntry("event", "mc_nfc_scan_success")
+        val loggedParams = executor.awaitEvent("mc_nfc_scan_success")
         assertThat(loggedParams).containsEntry("duration", 1.0f)
         assertThat(loggedParams).containsEntry("number_of_attempts", 2)
     }
@@ -51,8 +48,7 @@ internal class DefaultNfcScanningEventReporterTest {
         assertThat(durationProvider.callsTurbine.awaitItem())
             .isEqualTo(FakeDurationProvider.Call.Start(DurationProvider.Key.NfcScanAttempt, reset = true))
 
-        val loggedParams = executor.getExecutedRequests().single().params
-        assertThat(loggedParams).containsEntry("event", "mc_nfc_scan_attempt_started")
+        val loggedParams = executor.awaitEvent("mc_nfc_scan_attempt_started")
         assertThat(loggedParams).containsEntry("manufacturer", "Google")
         assertThat(loggedParams).containsEntry("model", "Pixel 10")
         assertThat(loggedParams).containsEntry("sdk_version", 36)
@@ -65,8 +61,7 @@ internal class DefaultNfcScanningEventReporterTest {
         assertThat(durationProvider.callsTurbine.awaitItem())
             .isEqualTo(FakeDurationProvider.Call.End(DurationProvider.Key.NfcScanAttempt))
 
-        val loggedParams = executor.getExecutedRequests().single().params
-        assertThat(loggedParams).containsEntry("event", "mc_nfc_scan_attempt_succeeded")
+        val loggedParams = executor.awaitEvent("mc_nfc_scan_attempt_succeeded")
         assertThat(loggedParams).containsEntry("duration", 1.0f)
         assertThat(loggedParams).containsEntry("manufacturer", "Google")
         assertThat(loggedParams).containsEntry("model", "Pixel 10")
@@ -85,8 +80,7 @@ internal class DefaultNfcScanningEventReporterTest {
         assertThat(durationProvider.callsTurbine.awaitItem())
             .isEqualTo(FakeDurationProvider.Call.End(DurationProvider.Key.NfcScanAttempt))
 
-        val loggedParams = executor.getExecutedRequests().single().params
-        assertThat(loggedParams).containsEntry("event", "mc_nfc_scan_attempt_failed")
+        val loggedParams = executor.awaitEvent("mc_nfc_scan_attempt_failed")
         assertThat(loggedParams).containsEntry("duration", 1.0f)
         assertThat(loggedParams).containsEntry("error_code", "expiredCard")
         assertThat(loggedParams).containsEntry("manufacturer", "Google")
@@ -110,7 +104,7 @@ internal class DefaultNfcScanningEventReporterTest {
         assertThat(durationProvider.callsTurbine.awaitItem())
             .isEqualTo(FakeDurationProvider.Call.End(DurationProvider.Key.NfcScanAttempt))
 
-        val loggedParams = executor.getExecutedRequests().single().params
+        val loggedParams = executor.awaitEvent("mc_nfc_scan_attempt_failed")
         assertThat(loggedParams).containsEntry("error_code", "nfcCardReadFailed")
         assertThat(loggedParams).containsEntry("sw1", "64")
         assertThat(loggedParams).containsEntry("sw2", "00")
@@ -127,8 +121,7 @@ internal class DefaultNfcScanningEventReporterTest {
             assertThat(durationProvider.callsTurbine.awaitItem())
                 .isEqualTo(FakeDurationProvider.Call.End(DurationProvider.Key.NfcScan))
 
-            val loggedParams = executor.getExecutedRequests().single().params
-            assertThat(loggedParams).containsEntry("event", "mc_nfc_scan_canceled")
+            val loggedParams = executor.awaitEvent("mc_nfc_scan_canceled")
             assertThat(loggedParams).containsEntry("duration", 1.0f)
             assertThat(loggedParams).containsEntry("cancellation_reason", "scanning_timeout")
             assertThat(loggedParams).containsEntry("number_of_attempts", 3)
@@ -172,5 +165,6 @@ internal class DefaultNfcScanningEventReporterTest {
         )
 
         durationProvider.validate()
+        analyticsRequestExecutor.validate()
     }
 }

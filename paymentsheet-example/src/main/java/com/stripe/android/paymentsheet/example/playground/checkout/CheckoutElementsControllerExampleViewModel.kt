@@ -11,30 +11,27 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.stripe.android.checkout.CheckoutController
+import com.stripe.android.checkout.CheckoutElementsController
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutCustomer
 import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutPlaygroundDefinitions
 import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutPlaygroundSettings
-import com.stripe.android.paymentsheet.example.playground.checkout.settings.checkoutControllerConfiguration
+import com.stripe.android.paymentsheet.example.playground.checkout.settings.checkoutElementsControllerConfiguration
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 @Suppress("TooManyFunctions")
-internal class CheckoutControllerExampleViewModel(
-    private val repository: CheckoutControllerExampleBackendRepository,
+internal class CheckoutElementsControllerExampleViewModel(
+    private val repository: CheckoutElementsControllerExampleBackendRepository,
     private val savedStateHandle: SavedStateHandle,
     application: Application,
 ) : ViewModel() {
     val settings = CheckoutPlaygroundSettings.create(application)
 
-    val controller = CheckoutController.Builder(
+    val controller = CheckoutElementsController.Builder(
         application = application,
         savedStateHandle = savedStateHandle,
     ).resultCallback(::onConfirmationResult).build()
@@ -48,11 +45,11 @@ internal class CheckoutControllerExampleViewModel(
     )
     val status: StateFlow<Status> = _status.asStateFlow()
 
-    private val _sessionComplete = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
-    val sessionComplete: SharedFlow<Unit> = _sessionComplete.asSharedFlow()
-
     private val _confirmationMessage = MutableStateFlow<String?>(null)
     val confirmationMessage: StateFlow<String?> = _confirmationMessage.asStateFlow()
+
+    private val _isConfirmationCompleted = MutableStateFlow(false)
+    val isConfirmationCompleted: StateFlow<Boolean> = _isConfirmationCompleted.asStateFlow()
 
     private val _operationMessage = MutableStateFlow<String?>(null)
     val operationMessage: StateFlow<String?> = _operationMessage.asStateFlow()
@@ -131,19 +128,19 @@ internal class CheckoutControllerExampleViewModel(
                 onSuccess = { response ->
                     val configurationResult = controller.configure(
                         clientSecret = response.clientSecret,
-                        configuration = snapshot.checkoutControllerConfiguration(),
+                        configuration = snapshot.checkoutElementsControllerConfiguration(),
                     )
                     if (generation != configurationGeneration) return@launch
 
                     when (configurationResult) {
-                        is CheckoutController.OperationResult.Succeeded -> {
+                        is CheckoutElementsController.OperationResult.Succeeded -> {
                             if (snapshot[CheckoutPlaygroundDefinitions.session.customer] == CheckoutCustomer.New) {
                                 response.customerId?.let(settings::saveReturningCustomer)
                             }
                             savedStateHandle[RUN_ACTIVE_KEY] = true
                             _status.value = Status.Configured
                         }
-                        is CheckoutController.OperationResult.Failed -> {
+                        is CheckoutElementsController.OperationResult.Failed -> {
                             showError("Failed to configure", configurationResult.error)
                         }
                     }
@@ -155,25 +152,25 @@ internal class CheckoutControllerExampleViewModel(
 
     private fun runOperation(
         successMessage: String,
-        operation: suspend () -> CheckoutController.OperationResult,
+        operation: suspend () -> CheckoutElementsController.OperationResult,
     ) {
         viewModelScope.launch {
             _operationMessage.value = when (val result = operation()) {
-                is CheckoutController.OperationResult.Succeeded -> successMessage
-                is CheckoutController.OperationResult.Failed -> result.displayMessage ?: "Operation failed"
+                is CheckoutElementsController.OperationResult.Succeeded -> successMessage
+                is CheckoutElementsController.OperationResult.Failed -> result.displayMessage ?: "Operation failed"
             }
         }
     }
 
-    private fun onConfirmationResult(result: CheckoutController.Result) {
+    private fun onConfirmationResult(result: CheckoutElementsController.Result) {
         Log.d(TAG, "Result: $result")
         _confirmationMessage.value = when (result) {
-            is CheckoutController.Result.Completed -> {
-                _sessionComplete.tryEmit(Unit)
+            is CheckoutElementsController.Result.Completed -> {
+                _isConfirmationCompleted.value = true
                 null
             }
-            is CheckoutController.Result.Canceled -> "Confirmation canceled"
-            is CheckoutController.Result.Failed -> {
+            is CheckoutElementsController.Result.Canceled -> "Confirmation canceled"
+            is CheckoutElementsController.Result.Failed -> {
                 result.displayMessage?.let { "Confirmation failed: $it" } ?: "Confirmation failed"
             }
         }
@@ -186,6 +183,7 @@ internal class CheckoutControllerExampleViewModel(
 
     private fun clearMessages() {
         _confirmationMessage.value = null
+        _isConfirmationCompleted.value = false
         _operationMessage.value = null
     }
 
@@ -202,14 +200,14 @@ internal class CheckoutControllerExampleViewModel(
     }
 
     companion object {
-        private const val TAG = "CheckoutControllerExample"
-        private const val RUN_ACTIVE_KEY = "checkout_controller_run_active"
+        private const val TAG = "CheckoutElementsControllerExample"
+        private const val RUN_ACTIVE_KEY = "checkout_elements_controller_run_active"
 
         val factory = viewModelFactory {
             initializer {
                 val application = this[APPLICATION_KEY] as Application
-                CheckoutControllerExampleViewModel(
-                    repository = CheckoutControllerExampleBackendRepository(application),
+                CheckoutElementsControllerExampleViewModel(
+                    repository = CheckoutElementsControllerExampleBackendRepository(application),
                     savedStateHandle = createSavedStateHandle(),
                     application = application,
                 )

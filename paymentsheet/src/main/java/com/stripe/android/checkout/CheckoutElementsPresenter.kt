@@ -3,7 +3,7 @@ package com.stripe.android.checkout
 import androidx.annotation.AnyThread
 import androidx.annotation.MainThread
 import androidx.annotation.RestrictTo
-import com.stripe.android.checkout.injection.CheckoutPresenterScope
+import com.stripe.android.checkout.injection.CheckoutElementsPresenterScope
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.elements.CurrencySelectorElement
 import com.stripe.android.elements.ExpressCheckoutElement
@@ -19,8 +19,8 @@ import javax.inject.Provider
 
 @CheckoutSessionPreview
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-@CheckoutPresenterScope
-class CheckoutPresenter @Inject internal constructor(
+@CheckoutElementsPresenterScope
+class CheckoutElementsPresenter @Inject internal constructor(
     private val paymentElementProvider: Lazy<PaymentElement>,
     private val currencySelectorElementProvider: Lazy<CurrencySelectorElement>,
     private val shippingAddressElementProvider: Lazy<ShippingAddressElement>,
@@ -66,10 +66,10 @@ class CheckoutPresenter @Inject internal constructor(
     /**
      * Confirms the payment for the customer's currently selected payment option.
      *
-     * The result is delivered to the [CheckoutController.ResultCallback] supplied when building the
-     * [CheckoutController].
+     * The result is delivered to the [CheckoutElementsController.ResultCallback] supplied when building the
+     * [CheckoutElementsController].
      * If confirmation cannot start because checkout is not ready or another operation is in progress,
-     * the callback receives [CheckoutController.Result.Failed] with an [IllegalStateException]
+     * the callback receives [CheckoutElementsController.Result.Failed] with an [IllegalStateException]
      * explaining the reason. Each rejected call delivers its own failure without interrupting an
      * active payment flow.
      *

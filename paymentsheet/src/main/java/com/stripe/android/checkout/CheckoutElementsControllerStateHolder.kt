@@ -4,7 +4,7 @@ import android.os.Bundle
 import androidx.annotation.AnyThread
 import androidx.annotation.MainThread
 import androidx.lifecycle.SavedStateHandle
-import com.stripe.android.checkout.CheckoutController.Session
+import com.stripe.android.checkout.CheckoutElementsController.Session
 import com.stripe.android.elements.ece.AvailableExpressButtonTypesFactory
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -19,7 +19,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Owns [CheckoutController]'s [CheckoutControllerState] — the single source of truth for the
+ * Owns [CheckoutElementsController]'s [CheckoutElementsControllerState] — the single source of truth for the
  * controller — persisting it in [SavedStateHandle] so it survives process death. All observable
  * projections (e.g. [session]) are derived from the one [stateFlow]. Kept separate from the
  * controller so [CheckoutStateLoader] can commit loaded state directly rather than reaching back
@@ -27,13 +27,13 @@ import javax.inject.Singleton
  */
 @OptIn(CheckoutSessionPreview::class)
 @Singleton
-internal class CheckoutControllerStateHolder @Inject constructor(
+internal class CheckoutElementsControllerStateHolder @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val errorReporter: ErrorReporter,
     private val paymentOptionFactory: CheckoutPaymentOptionDisplayDataFactory,
     private val availableExpressButtonTypesFactory: AvailableExpressButtonTypesFactory,
 ) : EmbeddedSelectionHolder {
-    val stateFlow: StateFlow<CheckoutControllerState?> =
+    val stateFlow: StateFlow<CheckoutElementsControllerState?> =
         savedStateHandle.getStateFlow(STATE_KEY, null)
 
     /**
@@ -41,7 +41,7 @@ internal class CheckoutControllerStateHolder @Inject constructor(
      */
     @get:AnyThread
     @set:MainThread
-    var state: CheckoutControllerState?
+    var state: CheckoutElementsControllerState?
         get() = stateFlow.value
         set(value) {
             savedStateHandle[STATE_KEY] = value
@@ -98,11 +98,11 @@ internal class CheckoutControllerStateHolder @Inject constructor(
     }
 
     /**
-     * The selection lives on [CheckoutControllerState], so the mutators can only act once
+     * The selection lives on [CheckoutElementsControllerState], so the mutators can only act once
      * [CheckoutStateLoader] has committed a state. A call before then is a programming error (a
      * mis-ordered selection write); report it and no-op rather than silently dropping the value.
      */
-    private fun requireState(operation: String): CheckoutControllerState? {
+    private fun requireState(operation: String): CheckoutElementsControllerState? {
         return state ?: run {
             errorReporter.report(
                 errorEvent = ErrorReporter.UnexpectedErrorEvent.CHECKOUT_SELECTION_SET_BEFORE_LOAD,
@@ -113,6 +113,6 @@ internal class CheckoutControllerStateHolder @Inject constructor(
     }
 
     companion object {
-        const val STATE_KEY = "CheckoutController_InternalState"
+        const val STATE_KEY = "CheckoutElementsController_InternalState"
     }
 }

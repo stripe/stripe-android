@@ -1,7 +1,7 @@
 package com.stripe.android.checkout
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.checkout.CheckoutController.Address
+import com.stripe.android.checkout.CheckoutElementsController.Address
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.elements.ExpressCheckoutElement.Configuration.GooglePayConfiguration
 import com.stripe.android.elements.PaymentElement
@@ -34,7 +34,7 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
             .build()
 
         val result = factory().create(
-            configuration = CheckoutController.Configuration().build(),
+            configuration = CheckoutElementsController.Configuration().build(),
             paymentElementConfiguration = paymentElementConfiguration,
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(merchantCountry = "US"),
             collectedDetails = collectedDetails(),
@@ -47,7 +47,7 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
 
     @Test
     fun `uses the provided merchant display name`() {
-        val configuration = CheckoutController.Configuration()
+        val configuration = CheckoutElementsController.Configuration()
             .paymentElement(PaymentElement.Configuration())
             .merchantDisplayName("Acme Corp")
             .build()
@@ -178,7 +178,7 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
 
     @Test
     fun `maps payment element googlePayConfiguration using the checkout session country`() {
-        val configuration = CheckoutController.Configuration()
+        val configuration = CheckoutElementsController.Configuration()
             .paymentElement(
                 PaymentElement.Configuration().googlePayConfiguration(
                     PaymentElementGooglePayConfiguration()
@@ -232,7 +232,7 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
 
     @Test
     fun `maps preferred networks to embedded configuration`() {
-        val configuration = CheckoutController.Configuration()
+        val configuration = CheckoutElementsController.Configuration()
             .paymentElement(
                 PaymentElement.Configuration().preferredNetworks(
                     listOf(CardBrand.CartesBancaires, CardBrand.Visa)
@@ -253,7 +253,7 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
 
     @Test
     fun `maps opens card scanner automatically to embedded configuration`() {
-        val configuration = CheckoutController.Configuration()
+        val configuration = CheckoutElementsController.Configuration()
             .paymentElement(PaymentElement.Configuration().opensCardScannerAutomatically(true))
             .build()
 
@@ -269,7 +269,7 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
 
     @Test
     fun `maps card brand acceptance to embedded configuration`() {
-        val configuration = CheckoutController.Configuration()
+        val configuration = CheckoutElementsController.Configuration()
             .paymentElement(
                 PaymentElement.Configuration().cardBrandAcceptance(
                     PaymentElement.Configuration.CardBrandAcceptance.disallowed(
@@ -295,7 +295,7 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
 
     @Test
     fun `leaves googlePay null when payment element display is Never`() {
-        val configuration = CheckoutController.Configuration()
+        val configuration = CheckoutElementsController.Configuration()
             .paymentElement(
                 PaymentElement.Configuration().googlePayConfiguration(
                     PaymentElementGooglePayConfiguration()
@@ -317,7 +317,7 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
 
     @Test
     fun `maps Link display to embedded payment element configuration`() {
-        val configuration = CheckoutController.Configuration()
+        val configuration = CheckoutElementsController.Configuration()
             .paymentElement(
                 PaymentElement.Configuration().linkConfiguration(
                     PaymentElement.Configuration.LinkConfiguration().display(
@@ -339,7 +339,7 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
 
     @Test
     fun `maps terms display to embedded payment element configuration`() {
-        val configuration = CheckoutController.Configuration()
+        val configuration = CheckoutElementsController.Configuration()
             .paymentElement(
                 PaymentElement.Configuration().termsDisplay(
                     mapOf(PaymentMethod.Type.Card to TermsDisplay.NEVER)
@@ -374,14 +374,14 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
 
     @Test
     fun `populates billing details from configuration defaults`() {
-        val configuration = CheckoutController.Configuration()
+        val configuration = CheckoutElementsController.Configuration()
             .paymentElement(PaymentElement.Configuration())
             .defaults(
-                CheckoutController.Configuration.Defaults().phone("+15555551234").billingDetails(
-                    CheckoutController.Configuration.Defaults.ContactDetails()
+                CheckoutElementsController.Configuration.Defaults().phone("+15555551234").billingDetails(
+                    CheckoutElementsController.Configuration.Defaults.ContactDetails()
                         .name("Jane Billing")
                         .address(
-                            CheckoutController.Address(country = "US")
+                            CheckoutElementsController.Address(country = "US")
                                 .city("Denver")
                                 .line1("123 Main St")
                                 .line2("Apt 4")
@@ -444,7 +444,7 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
     }
 
     @Test
-    fun `sets attachDefaultsToPaymentMethod to true`() {
+    fun `does not attach defaults to payment method`() {
         val configuration = controllerConfiguration()
 
         val result = factory().create(
@@ -454,14 +454,14 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
             collectedDetails = collectedDetails(),
         )
 
-        assertThat(result.billingDetailsCollectionConfiguration.attachDefaultsToPaymentMethod).isTrue()
+        assertThat(result.billingDetailsCollectionConfiguration.attachDefaultsToPaymentMethod).isFalse()
     }
 
     @Test
     fun `clearing default phone leaves billing phone null`() {
-        val defaults = CheckoutController.Configuration.Defaults().phone("+15555551234")
+        val defaults = CheckoutElementsController.Configuration.Defaults().phone("+15555551234")
         assertThat(defaults.build().phone).isEqualTo("+15555551234")
-        val configuration = CheckoutController.Configuration()
+        val configuration = CheckoutElementsController.Configuration()
             .paymentElement(PaymentElement.Configuration())
             .defaults(defaults.phone(null))
             .build()
@@ -481,8 +481,8 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
     private fun controllerConfiguration(
         embeddedViewDisplaysMandateText: Boolean = true,
         appearance: PaymentElement.Configuration.Appearance = PaymentElement.Configuration.Appearance(),
-    ): CheckoutController.Configuration.State {
-        return CheckoutController.Configuration()
+    ): CheckoutElementsController.Configuration.State {
+        return CheckoutElementsController.Configuration()
             .paymentElement(
                 PaymentElement.Configuration()
                     .embeddedViewDisplaysMandateText(embeddedViewDisplaysMandateText)

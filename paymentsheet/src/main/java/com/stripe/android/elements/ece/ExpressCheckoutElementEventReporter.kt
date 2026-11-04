@@ -2,7 +2,7 @@
 
 package com.stripe.android.elements.ece
 
-import com.stripe.android.checkout.CheckoutControllerStateHolder
+import com.stripe.android.checkout.CheckoutElementsControllerStateHolder
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.utils.DurationProvider
@@ -20,7 +20,7 @@ internal class DefaultExpressCheckoutElementEventReporter @Inject constructor(
     private val analyticsRequestFactory: PaymentAnalyticsRequestFactory,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val durationProvider: DurationProvider,
-    private val stateHolder: CheckoutControllerStateHolder,
+    private val stateHolder: CheckoutElementsControllerStateHolder,
 ) : ExpressCheckoutElementEventReporter {
     override fun onEceDisplayed() {
         durationProvider.start(DurationProvider.Key.ExpressCheckoutElement)

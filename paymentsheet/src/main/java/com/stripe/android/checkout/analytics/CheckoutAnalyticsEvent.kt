@@ -28,6 +28,8 @@ internal class CheckoutAnalyticsEvent(
 
     enum class Operation(val code: String) {
         Confirm("confirm"),
+        ApplyPromotionCode("apply_promotion_code"),
+        RemovePromotionCode("remove_promotion_code"),
     }
 
     enum class Outcome(val code: String) {

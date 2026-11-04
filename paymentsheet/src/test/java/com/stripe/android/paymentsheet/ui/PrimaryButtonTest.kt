@@ -1,0 +1,66 @@
+package com.stripe.android.paymentsheet.ui
+
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
+import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.testing.createComposeCleanupRule
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import org.junit.Rule
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+
+@RunWith(RobolectricTestRunner::class)
+internal class PrimaryButtonTest {
+    @get:Rule
+    val composeRule = createComposeRule()
+
+    @get:Rule
+    val composeCleanupRule = createComposeCleanupRule()
+
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule(UnconfinedTestDispatcher())
+
+    @Test
+    fun `idle button displays the requested lock icon`() = runScenario(
+        processingState = PrimaryButtonProcessingState.Idle(null),
+    ) {
+        composeRule.onNodeWithTag(PRIMARY_BUTTON_LOCK_ICON_TEST_TAG, useUnmergedTree = true).assertIsDisplayed()
+    }
+
+    @Test
+    fun `processing button ignores the requested lock icon`() = assertLockIconIgnored(
+        processingState = PrimaryButtonProcessingState.Processing,
+    )
+
+    @Test
+    fun `completed button ignores the requested lock icon`() = assertLockIconIgnored(
+        processingState = PrimaryButtonProcessingState.Completed,
+    )
+
+    private fun assertLockIconIgnored(processingState: PrimaryButtonProcessingState) = runScenario(processingState) {
+        composeRule.onNodeWithTag(PRIMARY_BUTTON_TEST_TAG).assertIsDisplayed()
+        composeRule.onNodeWithTag(PRIMARY_BUTTON_LOCK_ICON_TEST_TAG, useUnmergedTree = true).assertDoesNotExist()
+    }
+
+    private fun runScenario(
+        processingState: PrimaryButtonProcessingState,
+        block: () -> Unit,
+    ) {
+        composeRule.setContent {
+            // Render the final state without waiting for the completion animation.
+            CompositionLocalProvider(LocalInspectionMode provides true) {
+                PrimaryButton(
+                    label = "Pay",
+                    icon = PrimaryButtonIcon.Lock,
+                    enabled = true,
+                    processingState = processingState,
+                ) {}
+            }
+        }
+        block()
+    }
+}

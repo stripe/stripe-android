@@ -1,6 +1,6 @@
 package com.stripe.android.checkout.injection
 
-import com.stripe.android.checkout.CheckoutControllerStateHolder
+import com.stripe.android.checkout.CheckoutElementsControllerStateHolder
 import com.stripe.android.checkout.CheckoutLinkPaymentOptionsPresenter
 import com.stripe.android.checkout.CheckoutSheetLauncher
 import com.stripe.android.link.LinkActivityContract
@@ -62,7 +62,7 @@ internal interface PaymentElementModule {
     companion object {
         @Provides
         fun provideEmbeddedContentState(
-            stateHolder: CheckoutControllerStateHolder,
+            stateHolder: CheckoutElementsControllerStateHolder,
         ): StateFlow<EmbeddedContentHelperStateHolder.State?> {
             return stateHolder.stateFlow.mapAsStateFlow { state ->
                 val embeddedConfiguration = state?.embeddedConfiguration
@@ -80,7 +80,7 @@ internal interface PaymentElementModule {
 
         @Provides
         @Named(CHECKOUT_LINK_PAYMENT_METHOD_SELECTION_LAUNCHER)
-        @CheckoutPresenterScope
+        @CheckoutElementsPresenterScope
         fun provideCheckoutLinkPaymentLauncher(
             linkAnalyticsComponentFactory: LinkAnalyticsComponent.Factory,
             linkActivityContract: LinkActivityContract,

@@ -183,34 +183,26 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
                 )
             }
 
-        return when {
-            intent.isConfirmed -> {
-                ConfirmationDefinition.Action.Complete(
+        // Only next actions are handled here. Whether the session completed comes from polling after
+        // confirmation, not from the Intent status.
+        return if (intent.requiresAction()) {
+            ConfirmationDefinition.Action.Launch(
+                launcherArguments = Args.NextAction(
                     intent = intent,
-                    metadata = MutableConfirmationMetadata().apply {
-                        set(DeferredIntentConfirmationTypeKey, DeferredIntentConfirmationType.Server)
-                        set(CheckoutSessionResponseKey, response.withConfirmedIntent(intent))
-                    },
-                    completedFullPaymentFlow = true,
-                )
-            }
-            intent.requiresAction() -> {
-                ConfirmationDefinition.Action.Launch(
-                    launcherArguments = Args.NextAction(
-                        intent = intent,
-                        deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
-                    ),
-                    receivesResultInProcess = false,
-                )
-            }
-            else -> {
-                val exception = IllegalStateException("Intent has not attempted confirm.")
-                ConfirmationDefinition.Action.Fail(
-                    cause = exception,
-                    message = exception.stripeErrorMessage(),
-                    errorType = ConfirmationHandler.Result.Failed.ErrorType.Transaction(),
-                )
-            }
+                    deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
+                    checkoutSessionResponse = response,
+                ),
+                receivesResultInProcess = false,
+            )
+        } else {
+            ConfirmationDefinition.Action.Complete(
+                intent = intent,
+                metadata = MutableConfirmationMetadata().apply {
+                    set(DeferredIntentConfirmationTypeKey, DeferredIntentConfirmationType.Server)
+                    set(CheckoutSessionResponseKey, response)
+                },
+                completedFullPaymentFlow = true,
+            )
         }
     }
 

@@ -769,7 +769,7 @@ private fun AddPaymentMethodRow(
         Text(
             text = stringResource(R.string.stripe_add_payment_method),
             modifier = Modifier.padding(horizontal = HorizontalPadding),
-            color = LinkTheme.colors.textBrand,
+            color = LinkTheme.colors.accent,
             style = LinkTheme.typography.bodyEmphasized,
         )
     }
@@ -873,7 +873,7 @@ private fun AlertMessage(
             ) {
                 Text(
                     text = android.R.string.ok.resolvableString.resolve(context),
-                    color = LinkTheme.colors.textBrand
+                    color = LinkTheme.colors.accent
                 )
             }
         }

@@ -17,14 +17,14 @@ internal interface CheckoutSessionRefresher {
 
 @OptIn(CheckoutSessionPreview::class)
 internal class DefaultCheckoutSessionRefresher internal constructor(
-    private val stateHolder: CheckoutControllerStateHolder,
+    private val stateHolder: CheckoutElementsControllerStateHolder,
     private val fetchResponse: suspend (String, Boolean) -> Result<CheckoutSessionResponse>,
-    private val reloadState: suspend (CheckoutControllerState) -> Unit,
+    private val reloadState: suspend (CheckoutElementsControllerState) -> Unit,
 ) : CheckoutSessionRefresher {
 
     @Inject
     internal constructor(
-        stateHolder: CheckoutControllerStateHolder,
+        stateHolder: CheckoutElementsControllerStateHolder,
         checkoutSessionRepository: CheckoutSessionRepository,
         checkoutStateLoader: CheckoutStateLoader,
     ) : this(

@@ -95,11 +95,10 @@ internal class PrimaryButtonExperimentTest {
         val metadata: PaymentMethodMetadata,
         val eventReporter: FakeEventReporter,
     ) {
-        fun getIcon(): PrimaryButtonIcon = PrimaryButtonExperiment.getIcon(
-            metadata = metadata,
+        fun getIcon(): PrimaryButtonIcon = DefaultPrimaryButtonExperiment(
             eventReporter = eventReporter,
             mode = EventReporter.Mode.Embedded,
-        )
+        ).getIcon(metadata)
     }
 
     private fun metadata(variant: String = "treatment_no_padlock"): PaymentMethodMetadata {

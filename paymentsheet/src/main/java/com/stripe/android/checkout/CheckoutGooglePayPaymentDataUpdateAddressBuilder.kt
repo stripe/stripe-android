@@ -11,7 +11,7 @@ internal interface CheckoutGooglePayPaymentDataUpdateAddressBuilder {
         data object Unavailable : Result
 
         data class Available(
-            val address: CheckoutController.Address.State,
+            val address: CheckoutElementsController.Address.State,
         ) : Result
     }
 
@@ -34,7 +34,7 @@ internal class DefaultCheckoutGooglePayPaymentDataUpdateAddressBuilder @Inject c
         } ?: return CheckoutGooglePayPaymentDataUpdateAddressBuilder.Result.Unavailable
 
         return CheckoutGooglePayPaymentDataUpdateAddressBuilder.Result.Available(
-            address = CheckoutController.Address(country = paymentAddress.countryCode)
+            address = CheckoutElementsController.Address(country = paymentAddress.countryCode)
                 .city(paymentAddress.locality.takeIf { it.isNotEmpty() })
                 .postalCode(paymentAddress.postalCode.takeIf { it.isNotEmpty() })
                 .state(paymentAddress.normalizedAdministrativeArea.takeIf { it.isNotEmpty() })

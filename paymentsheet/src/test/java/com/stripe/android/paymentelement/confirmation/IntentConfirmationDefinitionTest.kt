@@ -18,6 +18,7 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.paymentelement.confirmation.intent.CallbackNotFoundException
+import com.stripe.android.paymentelement.confirmation.intent.CheckoutSessionResponseKey
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationTypeKey
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationDefinition
@@ -29,6 +30,7 @@ import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.toConfirmPaymentIntentShipping
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.testing.FakePaymentLauncher
 import com.stripe.android.utils.FakeActivityResultLauncher
@@ -291,7 +293,8 @@ class IntentConfirmationDefinitionTest {
         assertThat(launchAction.launcherArguments).isEqualTo(
             IntentConfirmationDefinition.Args.NextAction(
                 intent = paymentIntent,
-                deferredIntentConfirmationType = DeferredIntentConfirmationType.Server
+                deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
+                checkoutSessionResponse = null,
             )
         )
     }
@@ -367,6 +370,7 @@ class IntentConfirmationDefinitionTest {
             arguments = IntentConfirmationDefinition.Args.NextAction(
                 intent = setupIntent,
                 deferredIntentConfirmationType = null,
+                checkoutSessionResponse = null,
             ),
             confirmationArgs = CONFIRMATION_PARAMETERS_WITH_SI,
             confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION,
@@ -419,6 +423,7 @@ class IntentConfirmationDefinitionTest {
             arguments = IntentConfirmationDefinition.Args.NextAction(
                 intent = paymentIntent,
                 deferredIntentConfirmationType = null,
+                checkoutSessionResponse = null,
             ),
             confirmationArgs = CONFIRMATION_PARAMETERS,
             confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION,
@@ -444,6 +449,7 @@ class IntentConfirmationDefinitionTest {
             arguments = IntentConfirmationDefinition.Args.NextAction(
                 intent = paymentIntent,
                 deferredIntentConfirmationType = null,
+                checkoutSessionResponse = null,
             ),
             confirmationArgs = CONFIRMATION_PARAMETERS,
             confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION,
@@ -469,6 +475,7 @@ class IntentConfirmationDefinitionTest {
             arguments = IntentConfirmationDefinition.Args.NextAction(
                 intent = setupIntent,
                 deferredIntentConfirmationType = null,
+                checkoutSessionResponse = null,
             ),
             confirmationArgs = CONFIRMATION_PARAMETERS_WITH_SI,
             confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION,
@@ -497,6 +504,7 @@ class IntentConfirmationDefinitionTest {
             arguments = IntentConfirmationDefinition.Args.NextAction(
                 intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                 deferredIntentConfirmationType = null,
+                checkoutSessionResponse = null,
             ),
             confirmationArgs = CONFIRMATION_PARAMETERS.copy(statusBarColor = 0x00FF00),
             confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION,
@@ -520,6 +528,7 @@ class IntentConfirmationDefinitionTest {
             launcherArgs = IntentConfirmationDefinition.Args.NextAction(
                 intent = PaymentIntentFixtures.PI_SUCCEEDED,
                 deferredIntentConfirmationType = DeferredIntentConfirmationType.Client,
+                checkoutSessionResponse = null,
             ),
             result = InternalPaymentResult.Completed(PaymentIntentFixtures.PI_SUCCEEDED),
         )
@@ -533,6 +542,32 @@ class IntentConfirmationDefinitionTest {
             }
         )
         assertThat(succeededResult.completedFullPaymentFlow).isTrue()
+    }
+
+    @Test
+    fun `On 'Completed' next action result, should carry the checkout session response`() {
+        val definition = createIntentConfirmationDefinition(
+            paymentLauncher = FakePaymentLauncher(),
+        )
+        val checkoutSessionResponse = CheckoutSessionResponseFactory.create()
+
+        val result = definition.toResult(
+            confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
+            launcherArgs = IntentConfirmationDefinition.Args.NextAction(
+                intent = PaymentIntentFixtures.PI_SUCCEEDED,
+                deferredIntentConfirmationType = DeferredIntentConfirmationType.Server,
+                checkoutSessionResponse = checkoutSessionResponse,
+            ),
+            result = InternalPaymentResult.Completed(PaymentIntentFixtures.PI_SUCCEEDED),
+        )
+
+        assertThat(result.asSucceeded().metadata).isEqualTo(
+            MutableConfirmationMetadata().apply {
+                set(DeferredIntentConfirmationTypeKey, DeferredIntentConfirmationType.Server)
+                set(CheckoutSessionResponseKey, checkoutSessionResponse)
+            }
+        )
     }
 
     @Test
@@ -551,6 +586,7 @@ class IntentConfirmationDefinitionTest {
             launcherArgs = IntentConfirmationDefinition.Args.NextAction(
                 intent = PaymentIntentFixtures.PI_SUCCEEDED,
                 deferredIntentConfirmationType = null,
+                checkoutSessionResponse = null,
             ),
             result = InternalPaymentResult.Failed(exception),
         )
@@ -576,6 +612,7 @@ class IntentConfirmationDefinitionTest {
             launcherArgs = IntentConfirmationDefinition.Args.NextAction(
                 intent = PaymentIntentFixtures.PI_SUCCEEDED,
                 deferredIntentConfirmationType = null,
+                checkoutSessionResponse = null,
             ),
             result = InternalPaymentResult.Canceled,
         )

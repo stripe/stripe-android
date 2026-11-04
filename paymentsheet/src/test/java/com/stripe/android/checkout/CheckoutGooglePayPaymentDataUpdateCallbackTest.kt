@@ -53,7 +53,7 @@ internal class CheckoutGooglePayPaymentDataUpdateCallbackTest {
 
     @Test
     fun `onPaymentDataChanged maps state when merchant country is unavailable`() = runScenario(
-        state = CheckoutControllerStateFactory.create(
+        state = CheckoutElementsControllerStateFactory.create(
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(merchantCountry = null),
         ),
         addressBuilderResult = CheckoutGooglePayPaymentDataUpdateAddressBuilder.Result.Unavailable,
@@ -113,7 +113,7 @@ internal class CheckoutGooglePayPaymentDataUpdateCallbackTest {
         val billingResponse = CheckoutSessionResponseFactory.create(id = "billing")
 
         runScenario(
-            state = CheckoutControllerStateFactory.create(checkoutSessionResponse = initialResponse),
+            state = CheckoutElementsControllerStateFactory.create(checkoutSessionResponse = initialResponse),
             addressBuilderResultProvider = { addressSource ->
                 when (addressSource) {
                     CheckoutSessionResponse.TaxAddressSource.SHIPPING ->
@@ -401,7 +401,7 @@ internal class CheckoutGooglePayPaymentDataUpdateCallbackTest {
                     CheckoutGooglePayPaymentDataUpdateAddressBuilder.Result.Available(ADDRESS)
                 }
             },
-            state = CheckoutControllerStateFactory.create(
+            state = CheckoutElementsControllerStateFactory.create(
                 checkoutSessionResponse = CheckoutSessionResponseFactory.create(
                     id = UUID.randomUUID().toString(),
                 )
@@ -473,7 +473,7 @@ internal class CheckoutGooglePayPaymentDataUpdateCallbackTest {
     }
 
     private fun runScenario(
-        state: CheckoutControllerState? = CheckoutControllerStateFactory.create(),
+        state: CheckoutElementsControllerState? = CheckoutElementsControllerStateFactory.create(),
         addressBuilderResult: CheckoutGooglePayPaymentDataUpdateAddressBuilder.Result =
             CheckoutGooglePayPaymentDataUpdateAddressBuilder.Result.Available(ADDRESS),
         addressBuilderResultProvider: (
@@ -501,7 +501,7 @@ internal class CheckoutGooglePayPaymentDataUpdateCallbackTest {
         val callback = CheckoutGooglePayPaymentDataUpdateCallback(
             context = context,
             taxRegionUpdater = taxRegionUpdater.mocked,
-            stateHolder = CheckoutControllerStateFactory.createStateHolder(
+            stateHolder = CheckoutElementsControllerStateFactory.createStateHolder(
                 savedStateHandle = SavedStateHandle(),
             ).apply {
                 this.state = state
@@ -537,7 +537,7 @@ internal class CheckoutGooglePayPaymentDataUpdateCallbackTest {
         val taxRegionUpdater: FakeCheckoutSessionTaxRegionUpdater,
         val errorReporter: FakeErrorReporter,
         val providedMapperResponse: GooglePayPaymentDataUpdateResponse,
-        val providedState: CheckoutControllerState?,
+        val providedState: CheckoutElementsControllerState?,
         val providedUpdateResult: Result<CheckoutSessionResponse>,
     ) {
         // Match Google Pay's work scope: state reads must be safe on a real background thread.
@@ -581,7 +581,7 @@ internal class CheckoutGooglePayPaymentDataUpdateCallbackTest {
         data class UpdateServerStateIfNeededCall(
             val checkoutSessionResponse: CheckoutSessionResponse,
             val addressSource: CheckoutSessionResponse.TaxAddressSource,
-            val address: CheckoutController.Address.State,
+            val address: CheckoutElementsController.Address.State,
         )
     }
 
@@ -602,13 +602,13 @@ internal class CheckoutGooglePayPaymentDataUpdateCallbackTest {
             iso3166AdministrativeArea = null,
         )
 
-        val BILLING_ADDRESS = CheckoutController.Address(country = "US")
+        val BILLING_ADDRESS = CheckoutElementsController.Address(country = "US")
             .city("New York")
             .postalCode("10011")
             .state("NY")
             .build()
 
-        val ADDRESS = CheckoutController.Address(country = "US")
+        val ADDRESS = CheckoutElementsController.Address(country = "US")
             .city("South San Francisco")
             .postalCode("94080")
             .state("CA")

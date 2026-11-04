@@ -1,7 +1,10 @@
 package com.stripe.android.paymentsheet.repositories
 
 import com.stripe.android.Stripe
-import com.stripe.android.checkout.CheckoutController.Address
+import com.stripe.android.checkout.CheckoutElementsController.Address
+import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent
+import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent.Operation
+import com.stripe.android.checkout.analytics.MeasuredOperation
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.exception.safeAnalyticsMessage
 import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
@@ -11,9 +14,7 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.executeRequestWithResultParser
 import com.stripe.android.core.version.StripeSdkVersion
-import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethodUpdateParams
-import com.stripe.android.model.SetupIntent
 import com.stripe.android.networking.ConfirmationParamsUtils
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
@@ -124,12 +125,24 @@ internal class CheckoutSessionRepository @Inject constructor(
                     }
                 )
             }
-            response.copy(
-                paymentIntent = intent as? PaymentIntent,
-                setupIntent = intent as? SetupIntent,
-                elementsSession = response.elementsSession?.copy(stripeIntent = intent),
-            )
+            response.withIntent(intent)
         }
+    }
+
+    suspend fun poll(
+        sessionId: String,
+        clientSecret: String,
+    ): Result<CheckoutClientPollResponse> {
+        return executeRequestWithResultParser(
+            stripeErrorJsonParser = stripeErrorJsonParser,
+            stripeNetworkClient = stripeNetworkClient,
+            request = apiRequestFactory.createGet(
+                url = pollUrl(sessionId),
+                options = apiRequestOptionsProvider.get(),
+                params = mapOf("client_secret" to clientSecret),
+            ),
+            responseJsonParser = CheckoutClientPollResponseJsonParser,
+        )
     }
 
     suspend fun detachPaymentMethod(
@@ -170,16 +183,37 @@ internal class CheckoutSessionRepository @Inject constructor(
     }
 
     suspend fun applyPromotionCode(
-        sessionId: String,
-        clientSecret: String,
+        checkoutSessionResponse: CheckoutSessionResponse,
         promotionCode: String,
-    ): Result<CheckoutSessionResponse> = executePost(
-        clientSecret = clientSecret,
-        url = updateUrl(sessionId),
-        params = mapOf(
-            "promotion_code" to promotionCode,
-        ),
-    )
+    ): Result<CheckoutSessionResponse> = measure(
+        operation = Operation.ApplyPromotionCode,
+        checkoutSessionResponse = checkoutSessionResponse,
+        params = emptyMap(),
+    ) {
+        executePost(
+            clientSecret = checkoutSessionResponse.clientSecret,
+            url = updateUrl(checkoutSessionResponse.id),
+            params = mapOf(
+                "promotion_code" to promotionCode,
+            ),
+        )
+    }
+
+    suspend fun removePromotionCode(
+        checkoutSessionResponse: CheckoutSessionResponse,
+    ): Result<CheckoutSessionResponse> = measure(
+        operation = Operation.RemovePromotionCode,
+        checkoutSessionResponse = checkoutSessionResponse,
+        params = emptyMap(),
+    ) {
+        executePost(
+            clientSecret = checkoutSessionResponse.clientSecret,
+            url = updateUrl(checkoutSessionResponse.id),
+            params = mapOf(
+                "promotion_code" to "",
+            ),
+        )
+    }
 
     suspend fun updateTaxRegion(
         sessionId: String,
@@ -218,7 +252,33 @@ internal class CheckoutSessionRepository @Inject constructor(
         fireEvent(PaymentSheetEvent.AdaptivePricingCurrencyToggledFailed(error = it.safeAnalyticsMessage))
     }
 
+    private suspend fun measure(
+        operation: Operation,
+        checkoutSessionResponse: CheckoutSessionResponse,
+        params: Map<String, Any?>,
+        block: suspend () -> Result<CheckoutSessionResponse>,
+    ): Result<CheckoutSessionResponse> {
+        val measuredOperation = MeasuredOperation(
+            operation = operation,
+            params = params,
+            report = ::fireEvent,
+        )
+        measuredOperation.started(checkoutSessionResponse)
+        return block()
+            .onSuccess { measuredOperation.succeeded(it) }
+            .onFailure { measuredOperation.failed(checkoutSessionResponse, it) }
+    }
+
     private fun fireEvent(event: PaymentSheetEvent) {
+        analyticsRequestExecutor.executeAsync(
+            paymentAnalyticsRequestFactory.createRequest(
+                event = event,
+                additionalParams = event.params,
+            )
+        )
+    }
+
+    private fun fireEvent(event: CheckoutAnalyticsEvent) {
         analyticsRequestExecutor.executeAsync(
             paymentAnalyticsRequestFactory.createRequest(
                 event = event,
@@ -239,6 +299,9 @@ internal class CheckoutSessionRepository @Inject constructor(
 
         private fun updateUrl(sessionId: String): String =
             "${ApiRequest.API_HOST}/v1/checkout_client/$sessionId/update"
+
+        private fun pollUrl(sessionId: String): String =
+            "${ApiRequest.API_HOST}/v1/checkout_client/$sessionId/poll"
     }
 }
 

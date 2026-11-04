@@ -6,6 +6,7 @@ import com.stripe.android.core.utils.DefaultDurationProvider
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.stripecardscan.scanui.CancellationReason
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -19,11 +20,7 @@ internal class DefaultCardScanEventsReporterTest {
     fun testScanStarted() = runScenario { defaultCardScanEventsReporter, fakeAnalyticsRequestExecutor ->
         defaultCardScanEventsReporter.scanStarted()
 
-        val loggedRequests = fakeAnalyticsRequestExecutor.getExecutedRequests()
-
-        assertThat(loggedRequests).hasSize(1)
-        val loggedParams = loggedRequests.first().params
-        assertThat(loggedParams["event"]).isEqualTo("cardscan_scan_started")
+        val loggedParams = fakeAnalyticsRequestExecutor.awaitEvent("cardscan_scan_started")
         assertThat(loggedParams["elements_session_id"]).isEqualTo(ELEMENTS_SESSION_ID)
     }
 
@@ -34,11 +31,8 @@ internal class DefaultCardScanEventsReporterTest {
 
         defaultCardScanEventsReporter.scanSucceeded()
 
-        val loggedRequests = fakeAnalyticsRequestExecutor.getExecutedRequests()
-
-        assertThat(loggedRequests).hasSize(2)
-        val loggedParams = loggedRequests.last().params
-        assertThat(loggedParams["event"]).isEqualTo("cardscan_success")
+        fakeAnalyticsRequestExecutor.awaitEvent("cardscan_scan_started")
+        val loggedParams = fakeAnalyticsRequestExecutor.awaitEvent("cardscan_success")
         assertThat(loggedParams["duration"]).isEqualTo(15f)
         assertThat(loggedParams["elements_session_id"]).isEqualTo(ELEMENTS_SESSION_ID)
     }
@@ -50,11 +44,8 @@ internal class DefaultCardScanEventsReporterTest {
 
         defaultCardScanEventsReporter.scanFailed(Throwable("oops"))
 
-        val loggedRequests = fakeAnalyticsRequestExecutor.getExecutedRequests()
-
-        assertThat(loggedRequests).hasSize(2)
-        val loggedParams = loggedRequests.last().params
-        assertThat(loggedParams["event"]).isEqualTo("cardscan_failed")
+        fakeAnalyticsRequestExecutor.awaitEvent("cardscan_scan_started")
+        val loggedParams = fakeAnalyticsRequestExecutor.awaitEvent("cardscan_failed")
         assertThat(loggedParams["duration"]).isEqualTo(11f)
         assertThat(loggedParams["error_message"]).isEqualTo("unknown")
         assertThat(loggedParams["elements_session_id"]).isEqualTo(ELEMENTS_SESSION_ID)
@@ -67,11 +58,8 @@ internal class DefaultCardScanEventsReporterTest {
 
         defaultCardScanEventsReporter.scanCancelled(CancellationReason.Back)
 
-        val loggedRequests = fakeAnalyticsRequestExecutor.getExecutedRequests()
-
-        assertThat(loggedRequests).hasSize(2)
-        val loggedParams = loggedRequests.last().params
-        assertThat(loggedParams["event"]).isEqualTo("cardscan_cancel")
+        fakeAnalyticsRequestExecutor.awaitEvent("cardscan_scan_started")
+        val loggedParams = fakeAnalyticsRequestExecutor.awaitEvent("cardscan_cancel")
         assertThat(loggedParams["duration"]).isEqualTo(4f)
         assertThat(loggedParams["cancellation_reason"]).isEqualTo("back")
         assertThat(loggedParams["elements_session_id"]).isEqualTo(ELEMENTS_SESSION_ID)
@@ -82,10 +70,8 @@ internal class DefaultCardScanEventsReporterTest {
         runScenario { defaultCardScanEventsReporter, fakeAnalyticsRequestExecutor ->
             defaultCardScanEventsReporter.scanCancelled(CancellationReason.CameraPermissionDenied)
 
-            val loggedRequests = fakeAnalyticsRequestExecutor.getExecutedRequests()
-
-            assertThat(loggedRequests).hasSize(1)
-            assertThat(loggedRequests.first().params["cancellation_reason"])
+            val loggedParams = fakeAnalyticsRequestExecutor.awaitEvent("cardscan_cancel")
+            assertThat(loggedParams["cancellation_reason"])
                 .isEqualTo("camera_permission_denied")
         }
 
@@ -93,10 +79,8 @@ internal class DefaultCardScanEventsReporterTest {
     fun testScanCancelledOnClosed() = runScenario { defaultCardScanEventsReporter, fakeAnalyticsRequestExecutor ->
         defaultCardScanEventsReporter.scanCancelled(CancellationReason.Closed)
 
-        val loggedRequests = fakeAnalyticsRequestExecutor.getExecutedRequests()
-
-        assertThat(loggedRequests).hasSize(1)
-        assertThat(loggedRequests.first().params["cancellation_reason"])
+        val loggedParams = fakeAnalyticsRequestExecutor.awaitEvent("cardscan_cancel")
+        assertThat(loggedParams["cancellation_reason"])
             .isEqualTo("closed")
     }
 
@@ -105,10 +89,8 @@ internal class DefaultCardScanEventsReporterTest {
         runScenario { defaultCardScanEventsReporter, fakeAnalyticsRequestExecutor ->
             defaultCardScanEventsReporter.scanCancelled(CancellationReason.UserCannotScan)
 
-            val loggedRequests = fakeAnalyticsRequestExecutor.getExecutedRequests()
-
-            assertThat(loggedRequests).hasSize(1)
-            assertThat(loggedRequests.first().params["cancellation_reason"])
+            val loggedParams = fakeAnalyticsRequestExecutor.awaitEvent("cardscan_cancel")
+            assertThat(loggedParams["cancellation_reason"])
                 .isEqualTo("user_cannot_scan")
         }
 
@@ -121,11 +103,8 @@ internal class DefaultCardScanEventsReporterTest {
         defaultCardScanEventsReporter.scanMlKitFoundPan()
         defaultCardScanEventsReporter.scanMlKitFoundPan()
 
-        val loggedRequests = fakeAnalyticsRequestExecutor.getExecutedRequests()
-
-        assertThat(loggedRequests).hasSize(2)
-        val loggedParams = loggedRequests.last().params
-        assertThat(loggedParams["event"]).isEqualTo("cardscan_mlkit_found_pan")
+        fakeAnalyticsRequestExecutor.awaitEvent("cardscan_scan_started")
+        val loggedParams = fakeAnalyticsRequestExecutor.awaitEvent("cardscan_mlkit_found_pan")
         assertThat(loggedParams["duration"]).isEqualTo(2f)
         assertThat(loggedParams["elements_session_id"]).isEqualTo(ELEMENTS_SESSION_ID)
     }
@@ -139,11 +118,8 @@ internal class DefaultCardScanEventsReporterTest {
         defaultCardScanEventsReporter.scanMlKitFoundExp()
         defaultCardScanEventsReporter.scanMlKitFoundExp()
 
-        val loggedRequests = fakeAnalyticsRequestExecutor.getExecutedRequests()
-
-        assertThat(loggedRequests).hasSize(2)
-        val loggedParams = loggedRequests.last().params
-        assertThat(loggedParams["event"]).isEqualTo("cardscan_mlkit_found_exp")
+        fakeAnalyticsRequestExecutor.awaitEvent("cardscan_scan_started")
+        val loggedParams = fakeAnalyticsRequestExecutor.awaitEvent("cardscan_mlkit_found_exp")
         assertThat(loggedParams["duration"]).isEqualTo(3f)
         assertThat(loggedParams["elements_session_id"]).isEqualTo(ELEMENTS_SESSION_ID)
     }
@@ -157,11 +133,8 @@ internal class DefaultCardScanEventsReporterTest {
         defaultCardScanEventsReporter.scanDarkniteFoundPan()
         defaultCardScanEventsReporter.scanDarkniteFoundPan()
 
-        val loggedRequests = fakeAnalyticsRequestExecutor.getExecutedRequests()
-
-        assertThat(loggedRequests).hasSize(2)
-        val loggedParams = loggedRequests.last().params
-        assertThat(loggedParams["event"]).isEqualTo("cardscan_darknite_found_pan")
+        fakeAnalyticsRequestExecutor.awaitEvent("cardscan_scan_started")
+        val loggedParams = fakeAnalyticsRequestExecutor.awaitEvent("cardscan_darknite_found_pan")
         assertThat(loggedParams["duration"]).isEqualTo(4f)
         assertThat(loggedParams["elements_session_id"]).isEqualTo(ELEMENTS_SESSION_ID)
     }
@@ -175,11 +148,8 @@ internal class DefaultCardScanEventsReporterTest {
         defaultCardScanEventsReporter.scanModelsDisagree()
         defaultCardScanEventsReporter.scanModelsDisagree()
 
-        val loggedRequests = fakeAnalyticsRequestExecutor.getExecutedRequests()
-
-        assertThat(loggedRequests).hasSize(2)
-        val loggedParams = loggedRequests.last().params
-        assertThat(loggedParams["event"]).isEqualTo("cardscan_models_disagree")
+        fakeAnalyticsRequestExecutor.awaitEvent("cardscan_scan_started")
+        val loggedParams = fakeAnalyticsRequestExecutor.awaitEvent("cardscan_models_disagree")
         assertThat(loggedParams["duration"]).isEqualTo(5f)
         assertThat(loggedParams["elements_session_id"]).isEqualTo(ELEMENTS_SESSION_ID)
     }
@@ -192,12 +162,12 @@ internal class DefaultCardScanEventsReporterTest {
         defaultCardScanEventsReporter.scanDarkniteFoundPan()
         defaultCardScanEventsReporter.scanModelsDisagree()
 
-        assertThat(fakeAnalyticsRequestExecutor.getExecutedRequests()).isEmpty()
+        fakeAnalyticsRequestExecutor.requestTurbine.expectNoEvents()
     }
 
     private fun runScenario(
-        testBlock: (DefaultCardScanEventsReporter, FakeAnalyticsRequestExecutor) -> Unit
-    ) {
+        testBlock: suspend (DefaultCardScanEventsReporter, FakeAnalyticsRequestExecutor) -> Unit
+    ) = runTest {
         val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
         val durationProvider = DefaultDurationProvider.instance
         // Clear any leftover state from prior tests sharing the singleton.
@@ -217,6 +187,8 @@ internal class DefaultCardScanEventsReporterTest {
         )
 
         testBlock(eventsReporter, analyticsRequestExecutor)
+
+        analyticsRequestExecutor.validate()
     }
 
     companion object {

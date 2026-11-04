@@ -68,7 +68,8 @@ internal object LinkTestUtils {
                 administrativeArea = null,
                 countryCode = CountryCode.US,
                 postalCode = "42424"
-            )
+            ),
+            display = null,
         ),
         confirmParams = mock(),
         originalParams = mock()

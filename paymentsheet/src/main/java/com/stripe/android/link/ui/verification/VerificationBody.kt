@@ -586,7 +586,7 @@ private fun ChangeEmailRow(
                     enabled = !isProcessing,
                     onClick = onChangeEmailClick
                 ),
-            color = LinkTheme.colors.textBrand,
+            color = LinkTheme.colors.accent,
             maxLines = 1,
             style = LinkTheme.typography.bodyEmphasized
         )
@@ -635,7 +635,7 @@ private fun TextButtonWithSpinner(
         Text(
             text = text,
             style = LinkTheme.typography.bodyEmphasized,
-            color = LinkTheme.colors.textBrand,
+            color = LinkTheme.colors.accent,
             modifier = Modifier
                 .alpha(textAlpha),
         )

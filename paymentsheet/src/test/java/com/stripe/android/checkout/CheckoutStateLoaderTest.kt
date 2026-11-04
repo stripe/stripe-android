@@ -67,7 +67,7 @@ internal class CheckoutStateLoaderTest {
 
     @Test
     fun `loadInitial skips element loading when no elements are configured`() = runScenario(
-        configuration = CheckoutController.Configuration().build(),
+        configuration = CheckoutElementsController.Configuration().build(),
         shouldFail = true,
         chosenSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
     ) {
@@ -86,7 +86,7 @@ internal class CheckoutStateLoaderTest {
     ) {
         val previousState = committedState(
             paymentSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
-        ).copy(configuration = CheckoutController.Configuration().build())
+        ).copy(configuration = CheckoutElementsController.Configuration().build())
         assertThat(previousState.paymentMethodMetadata).isNotNull()
         assertThat(previousState.embeddedConfiguration).isNotNull()
         assertThat(previousState.paymentSelection).isNotNull()
@@ -147,7 +147,7 @@ internal class CheckoutStateLoaderTest {
 
     @Test
     fun `loadInitial loads only ECE metadata when payment element is not configured`() = runScenario(
-        configuration = CheckoutController.Configuration()
+        configuration = CheckoutElementsController.Configuration()
             .expressCheckoutElement(ExpressCheckoutElement.Configuration())
             .build(),
         loaderSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
@@ -165,7 +165,7 @@ internal class CheckoutStateLoaderTest {
 
     @Test
     fun `reload loads only ECE metadata when payment element is not configured`() = runScenario(
-        configuration = CheckoutController.Configuration()
+        configuration = CheckoutElementsController.Configuration()
             .expressCheckoutElement(ExpressCheckoutElement.Configuration())
             .build(),
     ) {
@@ -185,7 +185,7 @@ internal class CheckoutStateLoaderTest {
         val initializationModes = Turbine<PaymentElementLoader.InitializationMode>()
 
         runScenario(
-            configuration = CheckoutController.Configuration()
+            configuration = CheckoutElementsController.Configuration()
                 .paymentElement(PaymentElement.Configuration())
                 .expressCheckoutElement(ExpressCheckoutElement.Configuration())
                 .shippingAddressElement(ShippingAddressElement.Configuration())
@@ -234,7 +234,7 @@ internal class CheckoutStateLoaderTest {
 
     @Test
     fun `loadInitial applies payment element appearance to the global theme`() = runScenario(
-        configuration = CheckoutController.Configuration()
+        configuration = CheckoutElementsController.Configuration()
             .paymentElement(
                 PaymentElement.Configuration().appearance(
                     PaymentElement.Configuration.Appearance().colorsLight(
@@ -258,7 +258,7 @@ internal class CheckoutStateLoaderTest {
 
     @Test
     fun `loadInitial passes payment method order to payment method metadata`() = runScenario(
-        configuration = CheckoutController.Configuration()
+        configuration = CheckoutElementsController.Configuration()
             .paymentElement(
                 PaymentElement.Configuration().paymentMethodOrder(listOf("klarna", "card"))
             )
@@ -272,13 +272,13 @@ internal class CheckoutStateLoaderTest {
 
     @Test
     fun `loadInitial keeps only mutable configuration defaults in collected details`() = runScenario(
-        configuration = CheckoutController.Configuration()
+        configuration = CheckoutElementsController.Configuration()
             .defaults(
-                CheckoutController.Configuration.Defaults()
+                CheckoutElementsController.Configuration.Defaults()
                     .shippingDetails(
-                        CheckoutController.Configuration.Defaults.ContactDetails()
+                        CheckoutElementsController.Configuration.Defaults.ContactDetails()
                             .name("John Shipping")
-                            .address(CheckoutController.Address(country = "US").city("Seattle")),
+                            .address(CheckoutElementsController.Address(country = "US").city("Seattle")),
                     )
                     .email("prefill@example.com"),
             )
@@ -289,20 +289,20 @@ internal class CheckoutStateLoaderTest {
             CheckoutCollectedDetails(
                 email = "prefill@example.com",
                 shippingName = "John Shipping",
-                shippingAddress = CheckoutController.Address(country = "US").city("Seattle").build(),
+                shippingAddress = CheckoutElementsController.Address(country = "US").city("Seattle").build(),
             ),
         )
     }
 
     @Test
     fun `loadInitial clears an invalid shipping default from collected details`() = runScenario(
-        configuration = CheckoutController.Configuration()
+        configuration = CheckoutElementsController.Configuration()
             .shippingAddressElement(ShippingAddressElement.Configuration())
             .defaults(
-                CheckoutController.Configuration.Defaults().shippingDetails(
-                    CheckoutController.Configuration.Defaults.ContactDetails()
+                CheckoutElementsController.Configuration.Defaults().shippingDetails(
+                    CheckoutElementsController.Configuration.Defaults.ContactDetails()
                         .name("John Shipping")
-                        .address(CheckoutController.Address(country = "DE")),
+                        .address(CheckoutElementsController.Address(country = "DE")),
                 ),
             )
             .build(),
@@ -591,7 +591,7 @@ internal class CheckoutStateLoaderTest {
             savedStateHandle = savedStateHandle,
             formHelperFactory = EmbeddedFormHelperFactory(
                 linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
-                embeddedSelectionHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle),
+                embeddedSelectionHolder = CheckoutElementsControllerStateFactory.createStateHolder(savedStateHandle),
                 cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
                 savedStateHandle = savedStateHandle,
                 isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = false),
@@ -599,7 +599,7 @@ internal class CheckoutStateLoaderTest {
             internalRowSelectionCallback = { null },
         )
 
-    private fun defaultConfiguration() = CheckoutController.Configuration()
+    private fun defaultConfiguration() = CheckoutElementsController.Configuration()
         .paymentElement(PaymentElement.Configuration())
         .build()
 
@@ -626,7 +626,7 @@ internal class CheckoutStateLoaderTest {
         previousNewSelections: Bundle = Bundle(),
         checkoutSessionResponse: CheckoutSessionResponse = CheckoutSessionResponseFactory.create(),
         linkEagerPresentationSuppressed: Boolean = false,
-    ) = CheckoutControllerState(
+    ) = CheckoutElementsControllerState(
         configuration = defaultConfiguration(),
         checkoutSessionResponse = checkoutSessionResponse,
         flagImages = null,
@@ -659,7 +659,7 @@ internal class CheckoutStateLoaderTest {
     )
 
     private fun runScenario(
-        configuration: CheckoutController.Configuration.State = defaultConfiguration(),
+        configuration: CheckoutElementsController.Configuration.State = defaultConfiguration(),
         loaderSelection: PaymentSelection? = null,
         chosenSelection: PaymentSelection? = null,
         shouldFail: Boolean = false,
@@ -686,7 +686,7 @@ internal class CheckoutStateLoaderTest {
             ),
         )
         val savedStateHandle = SavedStateHandle()
-        val stateHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle)
+        val stateHolder = CheckoutElementsControllerStateFactory.createStateHolder(savedStateHandle)
         val customerStateHolder = DefaultCustomerStateHolder(
             savedStateHandle = savedStateHandle,
             selection = stateHolder.selection,
@@ -736,9 +736,9 @@ internal class CheckoutStateLoaderTest {
 
     private class Scenario(
         val loader: CheckoutStateLoader,
-        private val configuration: CheckoutController.Configuration.State,
+        private val configuration: CheckoutElementsController.Configuration.State,
         private val defaultCheckoutSessionResponse: () -> CheckoutSessionResponse,
-        val stateHolder: CheckoutControllerStateHolder,
+        val stateHolder: CheckoutElementsControllerStateHolder,
         val customerStateHolder: CustomerStateHolder,
         val paymentElementLoader: FakePaymentElementLoader,
         val chooser: RecordingSelectionChooser,
