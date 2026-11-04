@@ -61,20 +61,13 @@ class PaymentMethodOptionsParamsTest {
 
     @OptIn(KlarnaSdkPreview::class)
     @Test
-    fun klarnaSetupFutureUsage_shouldBeNull() {
-        val params = PaymentMethodOptionsParams.Klarna(interoperabilityToken = "test_interoperability_token")
-
-        assertThat(params.setupFutureUsage()).isNull()
-    }
-
-    @OptIn(KlarnaSdkPreview::class)
-    @Test
-    fun klarnaUpdateSetupFutureUsage_shouldPreserveTokens() {
+    fun klarnaSetupFutureUsage_shouldBeUnsupportedAndPreserveTokens() {
         val params = PaymentMethodOptionsParams.Klarna(
             interoperabilityToken = "test_interoperability_token",
             partnerConfirmationToken = "test_partner_confirmation_token",
         )
 
+        assertThat(params.setupFutureUsage()).isNull()
         assertThat(
             params.updateSetupFutureUsageWithPmoSfu(ConfirmPaymentIntentParams.SetupFutureUsage.OffSession)
         ).isSameInstanceAs(params)
