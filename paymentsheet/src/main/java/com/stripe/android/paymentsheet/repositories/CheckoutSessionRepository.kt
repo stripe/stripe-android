@@ -65,8 +65,19 @@ internal class CheckoutSessionRepository @Inject constructor(
         sessionId: String,
         clientSecret: String,
         adaptivePricingAllowed: Boolean,
-    ): Result<CheckoutSessionResponse> {
-        return executePost(
+        analyticsParams: Map<String, Any?>,
+    ): Result<CheckoutSessionResponse> = measure(
+        operation = Operation.Init,
+        checkoutSessionResponse = null,
+        params = buildMap {
+            putAll(analyticsParams)
+            // Without the "_secret_" delimiter the session id is the whole client secret, which must not be logged.
+            if (sessionId != clientSecret) {
+                put("checkout_session_id", sessionId)
+            }
+        },
+    ) {
+        executePost(
             clientSecret = clientSecret,
             url = initUrl(sessionId),
             params = mapOf(
@@ -254,7 +265,7 @@ internal class CheckoutSessionRepository @Inject constructor(
 
     private suspend fun measure(
         operation: Operation,
-        checkoutSessionResponse: CheckoutSessionResponse,
+        checkoutSessionResponse: CheckoutSessionResponse?,
         params: Map<String, Any?>,
         block: suspend () -> Result<CheckoutSessionResponse>,
     ): Result<CheckoutSessionResponse> {

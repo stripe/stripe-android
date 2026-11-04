@@ -55,6 +55,7 @@ internal class SheetWalletsHeaderTest {
                 interactor = FakeSelectSavedPaymentMethodsInteractor(),
                 sheetActivityState = FakeSheetActivityStateHolder().state,
                 mandateText = stateFlowOf(null),
+                isContinueButtonVisible = stateFlowOf(false),
                 onContinueClick = {},
                 onPrimaryButtonDisabledClick = {},
             ),

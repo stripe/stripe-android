@@ -911,6 +911,7 @@ internal class EmbeddedNavigatorTest {
                 )
             ),
             mandateText = stateFlowOf(null),
+            isContinueButtonVisible = stateFlowOf(false),
             onContinueClick = {},
             onPrimaryButtonDisabledClick = {},
         )

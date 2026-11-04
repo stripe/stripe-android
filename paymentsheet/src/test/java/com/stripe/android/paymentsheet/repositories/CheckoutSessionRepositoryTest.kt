@@ -81,9 +81,95 @@ class CheckoutSessionRepositoryTest {
             sessionId = DEFAULT_CHECKOUT_SESSION_ID,
             clientSecret = "cs_test_abc123_secret_test",
             adaptivePricingAllowed = true,
+            analyticsParams = emptyMap(),
         )
 
         assertThat(result.getOrThrow().clientSecret).isEqualTo("cs_test_abc123_secret_test")
+    }
+
+    @Test
+    fun `init reports started and succeeded with the given analytics params`() = runTest {
+        networkRule.checkoutInit { response ->
+            response.testBodyFromFile("checkout-session-init.json")
+        }
+
+        repository.init(
+            sessionId = DEFAULT_CHECKOUT_SESSION_ID,
+            clientSecret = "cs_test_abc123_secret_test",
+            adaptivePricingAllowed = false,
+            analyticsParams = mapOf("merchant_display_name" to true),
+        ).getOrThrow()
+
+        val started = analyticsRequestExecutor.awaitEvent("checkout_elements.init.started")
+        assertThat(started).containsEntry("merchant_display_name", true)
+        assertThat(started).containsEntry("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID)
+        assertThat(started).doesNotContainKey("duration")
+        assertThat(started).doesNotContainKey("checkout_config_id")
+        val succeeded = analyticsRequestExecutor.awaitEvent("checkout_elements.init.succeeded")
+        assertThat(succeeded).containsAtLeastEntriesIn(INIT_RESPONSE_SESSION_PARAMS)
+        assertThat(succeeded).containsEntry("merchant_display_name", true)
+        assertThat(succeeded).containsKey("duration")
+        analyticsRequestExecutor.validate()
+    }
+
+    @Test
+    fun `init reports started and failed with the error`() = runTest {
+        networkRule.checkoutInit { response ->
+            response.setResponseCode(400)
+            response.addHeader("Request-Id", "req_123")
+            response.setBody(
+                """
+                    {
+                        "error": {
+                            "type": "invalid_request_error",
+                            "code": "checkout_session_invalid",
+                            "message": "Invalid session"
+                        }
+                    }
+                """.trimIndent()
+            )
+        }
+
+        val result = repository.init(
+            sessionId = DEFAULT_CHECKOUT_SESSION_ID,
+            clientSecret = "cs_test_abc123_secret_test",
+            adaptivePricingAllowed = false,
+            analyticsParams = mapOf("merchant_display_name" to true),
+        )
+
+        assertThat(result.isFailure).isTrue()
+        val started = analyticsRequestExecutor.awaitEvent("checkout_elements.init.started")
+        assertThat(started).containsEntry("merchant_display_name", true)
+        assertThat(started).containsEntry("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID)
+        val failed = analyticsRequestExecutor.awaitEvent("checkout_elements.init.failed")
+        assertThat(failed).containsEntry("merchant_display_name", true)
+        assertThat(failed).containsEntry("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID)
+        assertThat(failed).containsEntry("error_type", "invalid_request_error")
+        assertThat(failed).containsKey("duration")
+        analyticsRequestExecutor.validate()
+    }
+
+    @Test
+    fun `init does not report the client secret as the session id`() = runTest {
+        networkRule.checkoutInit(sessionId = MALFORMED_CLIENT_SECRET) { response ->
+            response.setResponseCode(400)
+            response.setBody("""{"error": {"type": "invalid_request_error", "message": "Invalid client secret"}}""")
+        }
+
+        repository.init(
+            sessionId = MALFORMED_CLIENT_SECRET,
+            clientSecret = MALFORMED_CLIENT_SECRET,
+            adaptivePricingAllowed = false,
+            analyticsParams = emptyMap(),
+        )
+
+        val started = analyticsRequestExecutor.awaitEvent("checkout_elements.init.started")
+        assertThat(started).doesNotContainKey("checkout_session_id")
+        assertThat(started.values).doesNotContain(MALFORMED_CLIENT_SECRET)
+        val failed = analyticsRequestExecutor.awaitEvent("checkout_elements.init.failed")
+        assertThat(failed).doesNotContainKey("checkout_session_id")
+        assertThat(failed.values).doesNotContain(MALFORMED_CLIENT_SECRET)
+        analyticsRequestExecutor.validate()
     }
 
     @Test
@@ -291,7 +377,9 @@ class CheckoutSessionRepositoryTest {
     }
 
     private companion object {
-        // Values come from checkout-session-init.json, the response parsed by the update request.
+        const val MALFORMED_CLIENT_SECRET = "cs_test_abc123_malformed"
+
+        // Values come from checkout-session-init.json, the response parsed by the init and update requests.
         val INIT_RESPONSE_SESSION_PARAMS: Map<String, Any> = mapOf(
             "checkout_session_id" to "cs_test_abc123",
             "checkout_config_id" to "checkout_config_123",

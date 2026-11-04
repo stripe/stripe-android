@@ -26,6 +26,10 @@
   <string name="stripe_confirm_close_form_body">Τα στοιχεία πληρωμής δε θα αποθηκευτούν.</string>
   <!-- Used as the title for prompting the user if they want to close the sheet -->
   <string name="stripe_confirm_close_form_title">Θέλετε να κλείσετε αυτή τη φόρμα;</string>
+  <!-- Fallback disclosure when paying in the merchant's currency instead of using Adaptive Pricing. -->
+  <string name="stripe_currency_selector_bank_fees_disclaimer">Ενδέχεται να ισχύουν η συναλλαγματική ισοτιμία και οι χρεώσεις της τράπεζάς σας.</string>
+  <string name="stripe_currency_selector_hide_details">Απόκρυψη λεπτομερειών συναλλαγματικής ισοτιμίας</string>
+  <string name="stripe_currency_selector_show_details">Εμφάνιση λεπτομερειών συναλλαγματικής ισοτιμίας</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header">Αποθήκευση των στοιχείων σας για ασφαλή ολοκλήρωση αγοράς με 1 κλικ μέσω Link</string>
   <!-- Label for a checkbox that when checked allows the payment information
