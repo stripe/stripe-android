@@ -50,7 +50,6 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeIsEligibleForConfirmationChallenge
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
-import com.stripe.android.paymentelement.confirmation.challenge.ChallengeHost
 import com.stripe.android.paymentelement.confirmation.challenge.PassiveChallengeConfirmationDefinition
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
@@ -63,7 +62,7 @@ import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.SetupIntentFactory
 import com.stripe.android.utils.FakeFraudDetectionDataRepository
-import com.stripe.android.utils.FakeHCaptchaService
+import com.stripe.android.utils.FakePassiveChallengeWarmer
 import kotlinx.coroutines.test.runTest
 import org.json.JSONObject
 import org.junit.Rule
@@ -1108,11 +1107,10 @@ class CheckoutSessionConfirmationInterceptorTest {
         token: String?,
     ): PaymentMethodConfirmationOption {
         val errorReporter = FakeErrorReporter()
-        val hCaptchaService = FakeHCaptchaService()
+        val passiveChallengeWarmer = FakePassiveChallengeWarmer()
         val definition = PassiveChallengeConfirmationDefinition(
             errorReporter = errorReporter,
-            challengeHost = ChallengeHost(),
-            hCaptchaService = hCaptchaService,
+            passiveChallengeWarmer = passiveChallengeWarmer,
             productUsage = emptySet(),
             isEligibleForConfirmationChallenge = FakeIsEligibleForConfirmationChallenge(),
         )
@@ -1130,7 +1128,7 @@ class CheckoutSessionConfirmationInterceptorTest {
                 ?: PassiveChallengeActivityResult.Failed(IllegalStateException("Challenge failed")),
         ) as ConfirmationDefinition.Result.NextStep
         errorReporter.ensureAllEventsConsumed()
-        hCaptchaService.ensureAllEventsConsumed()
+        passiveChallengeWarmer.ensureAllEventsConsumed()
         return result.confirmationOption as PaymentMethodConfirmationOption
     }
 

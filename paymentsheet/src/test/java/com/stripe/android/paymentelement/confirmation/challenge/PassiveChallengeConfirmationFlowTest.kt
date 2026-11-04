@@ -14,7 +14,7 @@ import com.stripe.android.paymentelement.confirmation.runLaunchTest
 import com.stripe.android.paymentelement.confirmation.runResultTest
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.RadarOptionsFactory
-import com.stripe.android.utils.FakeHCaptchaService
+import com.stripe.android.utils.FakePassiveChallengeWarmer
 import org.junit.Test
 
 internal class PassiveChallengeConfirmationFlowTest {
@@ -65,13 +65,11 @@ internal class PassiveChallengeConfirmationFlowTest {
     }
 
     private fun runScenario(block: Scenario.() -> Unit) {
-        val hCaptchaService = FakeHCaptchaService()
+        val passiveChallengeWarmer = FakePassiveChallengeWarmer()
         val errorReporter = FakeErrorReporter()
-        val challengeHost = ChallengeHost()
         val definition = PassiveChallengeConfirmationDefinition(
             errorReporter = errorReporter,
-            challengeHost = challengeHost,
-            hCaptchaService = hCaptchaService,
+            passiveChallengeWarmer = passiveChallengeWarmer,
             productUsage = setOf("PaymentSheet"),
             isEligibleForConfirmationChallenge = FakeIsEligibleForConfirmationChallenge(),
         )
@@ -93,8 +91,8 @@ internal class PassiveChallengeConfirmationFlowTest {
         try {
             Scenario(definition, confirmationOption, launcherArgs).block()
         } finally {
-            challengeHost.unregister()
-            hCaptchaService.ensureAllEventsConsumed()
+            passiveChallengeWarmer.registerCalls.takeItem()
+            passiveChallengeWarmer.ensureAllEventsConsumed()
             errorReporter.ensureAllEventsConsumed()
         }
     }

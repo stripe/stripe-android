@@ -5,10 +5,10 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.challenge.passive.PassiveChallengeActivityContract
 import com.stripe.android.challenge.passive.PassiveChallengeActivityResult
+import com.stripe.android.challenge.passive.warmer.PassiveChallengeWarmer
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.FeatureFlags
-import com.stripe.android.hcaptcha.HCaptchaService
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.RadarOptions
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
@@ -24,8 +24,7 @@ internal class PassiveChallengeConfirmationDefinition @Inject constructor(
     private val errorReporter: ErrorReporter,
     @Named(PRODUCT_USAGE) private val productUsage: Set<String>,
     private val isEligibleForConfirmationChallenge: IsEligibleForConfirmationChallenge,
-    private val challengeHost: ChallengeHost,
-    private val hCaptchaService: HCaptchaService,
+    private val passiveChallengeWarmer: PassiveChallengeWarmer,
 ) : ConfirmationDefinition<
     PaymentMethodConfirmationOption,
     ActivityResultLauncher<PassiveChallengeActivityContract.Args>,
@@ -41,13 +40,7 @@ internal class PassiveChallengeConfirmationDefinition @Inject constructor(
     override fun bootstrap(paymentMethodMetadata: PaymentMethodMetadata) {
         if (FeatureFlags.disablePassiveCaptchaWarmup.isEnabled) return
         val passiveCaptchaParams = paymentMethodMetadata.passiveCaptchaParams ?: return
-        challengeHost.launchWarmUp { host ->
-            hCaptchaService.warmUp(
-                activity = host,
-                siteKey = passiveCaptchaParams.siteKey,
-                rqData = passiveCaptchaParams.rqData
-            )
-        }
+        passiveChallengeWarmer.start(passiveCaptchaParams)
     }
 
     override fun canConfirm(
@@ -86,7 +79,7 @@ internal class PassiveChallengeConfirmationDefinition @Inject constructor(
         lifecycleOwner: LifecycleOwner,
         onResult: (PassiveChallengeActivityResult) -> Unit
     ): ActivityResultLauncher<PassiveChallengeActivityContract.Args> {
-        challengeHost.register(activityResultCaller, lifecycleOwner)
+        passiveChallengeWarmer.register(activityResultCaller, lifecycleOwner)
         return activityResultCaller.registerForActivityResult(PassiveChallengeActivityContract(), onResult)
     }
 
@@ -162,7 +155,7 @@ internal class PassiveChallengeConfirmationDefinition @Inject constructor(
     }
 
     override fun unregister(launcher: ActivityResultLauncher<PassiveChallengeActivityContract.Args>) {
-        challengeHost.unregister()
+        passiveChallengeWarmer.unregister()
         launcher.unregister()
     }
 }

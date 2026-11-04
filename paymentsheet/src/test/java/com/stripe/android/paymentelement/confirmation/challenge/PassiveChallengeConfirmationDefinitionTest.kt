@@ -1,6 +1,5 @@
 package com.stripe.android.paymentelement.confirmation.challenge
 
-import androidx.fragment.app.FragmentActivity
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.challenge.passive.PassiveChallengeActivityContract
 import com.stripe.android.challenge.passive.PassiveChallengeActivityResult
@@ -33,13 +32,12 @@ import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.utils.FakeActivityResultLauncher
-import com.stripe.android.utils.FakeHCaptchaService
+import com.stripe.android.utils.FakePassiveChallengeWarmer
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
@@ -131,6 +129,7 @@ internal class PassiveChallengeConfirmationDefinitionTest {
                 onResult = onResult,
             )
 
+            passiveChallengeWarmer.registerCalls.awaitItem()
             val registerCall = awaitRegisterCall()
 
             assertThat(awaitNextRegisteredLauncher()).isNotNull()
@@ -146,8 +145,17 @@ internal class PassiveChallengeConfirmationDefinitionTest {
     }
 
     @Test
-    fun `'createLauncher' registers the host activity`() = runScenario(registerHost = true) {
-        assertThat(challengeHost.host).isSameInstanceAs(activity)
+    fun `'createLauncher' registers the warmer with the caller and lifecycle owner`() = runScenario {
+        DummyActivityResultCaller.test {
+            val lifecycleOwner = fakeLifecycleOwner()
+            definition.createLauncher(activityResultCaller, lifecycleOwner) {}
+
+            val call = passiveChallengeWarmer.registerCalls.awaitItem()
+            assertThat(call.activityResultCaller).isSameInstanceAs(activityResultCaller)
+            assertThat(call.lifecycleOwner).isSameInstanceAs(lifecycleOwner)
+            awaitRegisterCall()
+            awaitNextRegisteredLauncher()
+        }
     }
 
     @Test
@@ -394,45 +402,31 @@ internal class PassiveChallengeConfirmationDefinitionTest {
     }
 
     @Test
-    fun `'bootstrap' warms captcha using the registered activity and parameters`() = runScenario(registerHost = true) {
+    fun `'bootstrap' passes captcha parameters to the warmer`() = runScenario {
         definition.bootstrap(PaymentMethodMetadataFactory.create(passiveCaptchaParams = passiveCaptchaParams))
 
-        val call = hCaptchaService.awaitWarmUpCall()
-        assertThat(call.activity).isSameInstanceAs(activity)
-        assertThat(call.siteKey).isEqualTo(passiveCaptchaParams.siteKey)
-        assertThat(call.rqData).isEqualTo(passiveCaptchaParams.rqData)
+        assertThat(passiveChallengeWarmer.startCalls.awaitItem()).isEqualTo(passiveCaptchaParams)
     }
 
     @Test
-    fun `'bootstrap' skips warm-up without passive captcha parameters`() = runScenario(registerHost = true) {
+    fun `'bootstrap' skips warm-up without passive captcha parameters`() = runScenario {
         definition.bootstrap(PaymentMethodMetadataFactory.create(passiveCaptchaParams = null))
     }
 
     @Test
-    fun `'bootstrap' skips warm-up when disabled`() = runScenario(registerHost = true) {
+    fun `'bootstrap' skips warm-up when disabled`() = runScenario {
         disablePassiveCaptchaWarmupRule.setEnabled(true)
 
         definition.bootstrap(PaymentMethodMetadataFactory.create(passiveCaptchaParams = passiveCaptchaParams))
     }
 
     @Test
-    fun `'bootstrap' skips warm-up without a supported host`() = runScenario {
-        DummyActivityResultCaller.test {
-            definition.createLauncher(activityResultCaller, fakeLifecycleOwner()) {}
-            awaitRegisterCall()
-            awaitNextRegisteredLauncher()
-
-            definition.bootstrap(PaymentMethodMetadataFactory.create(passiveCaptchaParams = passiveCaptchaParams))
-        }
-    }
-
-    @Test
-    fun `'unregister' clears the host and unregisters the confirmation launcher`() = runScenario(registerHost = true) {
+    fun `'unregister' unregisters the warmer and confirmation launcher`() = runScenario {
         val launcher = FakeActivityResultLauncher<PassiveChallengeActivityContract.Args>()
 
         definition.unregister(launcher)
 
-        assertThat(challengeHost.host).isNull()
+        passiveChallengeWarmer.unregisterCalls.awaitItem()
         launcher.unregisterCalls.awaitItem()
         launcher.unregisterCalls.ensureAllEventsConsumed()
         launcher.calls.ensureAllEventsConsumed()
@@ -535,37 +529,20 @@ internal class PassiveChallengeConfirmationDefinitionTest {
         assertThat(result).isFalse()
     }
 
-    private fun runScenario(
-        registerHost: Boolean = false,
-        block: suspend Scenario.() -> Unit,
-    ) = runTest {
-        val controller = if (registerHost) Robolectric.buildActivity(FragmentActivity::class.java).setup() else null
-        val challengeHost = ChallengeHost()
-        val hCaptchaService = FakeHCaptchaService()
+    private fun runScenario(block: suspend Scenario.() -> Unit) = runTest {
+        val passiveChallengeWarmer = FakePassiveChallengeWarmer()
         val errorReporter = FakeErrorReporter()
-        val scenario = Scenario(controller?.get(), challengeHost, hCaptchaService, errorReporter)
+        val scenario = Scenario(passiveChallengeWarmer, errorReporter)
         try {
-            DummyActivityResultCaller.test {
-                controller?.get()?.let { activity ->
-                    scenario.definition.createLauncher(activityResultCaller, activity) {}
-                    awaitRegisterCall()
-                    awaitNextRegisteredLauncher()
-                }
-                scenario.block()
-                testScheduler.runCurrent()
-            }
+            scenario.block()
         } finally {
-            challengeHost.unregister()
-            controller?.pause()?.stop()?.destroy()
-            hCaptchaService.ensureAllEventsConsumed()
+            passiveChallengeWarmer.ensureAllEventsConsumed()
             errorReporter.ensureAllEventsConsumed()
         }
     }
 
     private class Scenario(
-        val activity: FragmentActivity?,
-        val challengeHost: ChallengeHost,
-        val hCaptchaService: FakeHCaptchaService,
+        val passiveChallengeWarmer: FakePassiveChallengeWarmer,
         val errorReporter: FakeErrorReporter,
     ) {
         val passiveCaptchaParams = PassiveCaptchaParams(
@@ -605,8 +582,7 @@ internal class PassiveChallengeConfirmationDefinitionTest {
             return PassiveChallengeConfirmationDefinition(
                 errorReporter = errorReporter,
                 productUsage = productUsage,
-                challengeHost = challengeHost,
-                hCaptchaService = hCaptchaService,
+                passiveChallengeWarmer = passiveChallengeWarmer,
                 isEligibleForConfirmationChallenge = isEligibleForConfirmationChallenge,
             )
         }

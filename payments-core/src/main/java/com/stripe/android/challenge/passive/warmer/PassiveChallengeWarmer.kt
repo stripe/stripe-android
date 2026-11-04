@@ -2,38 +2,23 @@ package com.stripe.android.challenge.passive.warmer
 
 import androidx.activity.result.ActivityResultCaller
 import androidx.annotation.RestrictTo
-import com.stripe.android.core.ApiConfiguration
+import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.model.PassiveCaptchaParams
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 interface PassiveChallengeWarmer {
     /**
-     * Registers the passive challenge warmer with the given activity result caller.
-     * This sets up the necessary activity result launcher for handling
-     * passive challenge warming activities.
-     *
-     * @param activityResultCaller a caller class that can start confirmation activity flows
+     * Registers the host Activity and the lifecycle that owns warm-up work.
      */
-    fun register(activityResultCaller: ActivityResultCaller)
+    fun register(activityResultCaller: ActivityResultCaller, lifecycleOwner: LifecycleOwner)
 
     /**
-     * Starts the passive challenge warming process with the given captcha parameters.
-     * This method should be called after [register] has been invoked to set up the necessary
-     * activity result launcher.
-     *
-     * @param passiveCaptchaParams The parameters for the passive captcha challenge
-     * @param apiConfiguration The API configuration for Stripe requests
-     * @param productUsage Set of product usage strings for analytics
+     * Warms captcha on the registered host. Does nothing without a supported host.
      */
-    fun start(
-        passiveCaptchaParams: PassiveCaptchaParams,
-        apiConfiguration: ApiConfiguration.State,
-        productUsage: Set<String>
-    )
+    fun start(passiveCaptchaParams: PassiveCaptchaParams)
 
     /**
-     * Unregisters the activity result launcher and clears any internal references.
-     * This should be called to clean up resources when the warmer is no longer needed.
+     * Cancels warm-up work and releases the registered host.
      */
     fun unregister()
 }
