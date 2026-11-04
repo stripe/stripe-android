@@ -78,6 +78,7 @@ class CheckoutElementsController @Inject internal constructor(
     @PaymentElementCallbackIdentifier internal val paymentElementCallbackIdentifier: String,
     private val savedState: CheckoutElementsControllerSavedState,
 ) {
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
         /**
          * Deletes persisted authentication state associated with a customer.
