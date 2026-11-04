@@ -678,6 +678,18 @@ internal class CheckoutElementsControllerTest {
         }
 
     @Test
+    fun `configure with a malformed client secret fails without a request`() = runConfigureScenario(
+        clientSecret = "cs_test_malformed",
+        // No response is enqueued, so NetworkRule fails the test if a request is sent.
+        networkSetup = {},
+    ) {
+        val failure = result as CheckoutElementsController.OperationResult.Failed
+
+        assertThat(failure.error).isInstanceOf(IllegalArgumentException::class.java)
+        assertThat(controller.session.value).isNull()
+    }
+
+    @Test
     fun `configure returns failure when network request fails`() = runConfigureScenario(
         networkSetup = {
             networkRule.checkoutInit { response ->

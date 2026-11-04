@@ -111,13 +111,16 @@ class CheckoutElementsController @Inject internal constructor(
         if (sheetStateHolder.sheetIsOpen) {
             return@withContext integrationLaunchedFailure()
         }
+        val parsedClientSecret = try {
+            CheckoutSessionClientSecret(clientSecret)
+        } catch (e: IllegalArgumentException) {
+            return@withContext kotlin.Result.failure(e)
+        }
         operationCoordinator.runMutation {
             val configurationState = configuration.build()
-            val sessionId = clientSecret.substringBefore("_secret_")
 
             checkoutSessionRepository.init(
-                sessionId = sessionId,
-                clientSecret = clientSecret,
+                clientSecret = parsedClientSecret,
                 adaptivePricingAllowed = configurationState.currencySelectorElementConfiguration != null,
                 analyticsParams = configurationState.toAnalyticsMap(),
             ).mapCatching { response ->
@@ -291,14 +294,13 @@ class CheckoutElementsController @Inject internal constructor(
         // Preserve the merchant's context while keeping the callback a child of the mutation's
         // timeout and cancellation scope.
         val callerContext = currentCoroutineContext().minusKey(Job)
-        return withCheckoutState { sessionId ->
+        return withCheckoutState {
             withContext(callerContext) {
                 withTimeout(SERVER_UPDATE_TIMEOUT_MS) { serverUpdate() }
             }.fold(
                 onSuccess = {
                     checkoutSessionRepository.init(
-                        sessionId = sessionId,
-                        clientSecret = checkoutSessionResponse.clientSecret,
+                        clientSecret = CheckoutSessionClientSecret(checkoutSessionResponse.clientSecret),
                         adaptivePricingAllowed = configuration.currencySelectorElementConfiguration != null,
                         analyticsParams = configuration.toAnalyticsMap(),
                     )

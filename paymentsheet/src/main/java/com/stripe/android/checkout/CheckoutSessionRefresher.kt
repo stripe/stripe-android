@@ -32,8 +32,7 @@ internal class DefaultCheckoutSessionRefresher internal constructor(
         stateHolder = stateHolder,
         fetchResponse = { clientSecret, adaptivePricingAllowed, analyticsParams ->
             checkoutSessionRepository.init(
-                sessionId = clientSecret.substringBefore("_secret_"),
-                clientSecret = clientSecret,
+                clientSecret = CheckoutSessionClientSecret(clientSecret),
                 adaptivePricingAllowed = adaptivePricingAllowed,
                 analyticsParams = analyticsParams,
             )

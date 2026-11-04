@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.repositories
 
 import com.stripe.android.Stripe
 import com.stripe.android.checkout.CheckoutElementsController.Address
+import com.stripe.android.checkout.CheckoutSessionClientSecret
 import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent
 import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent.Operation
 import com.stripe.android.checkout.analytics.MeasuredOperation
@@ -62,24 +63,17 @@ internal class CheckoutSessionRepository @Inject constructor(
     }
 
     suspend fun init(
-        sessionId: String,
-        clientSecret: String,
+        clientSecret: CheckoutSessionClientSecret,
         adaptivePricingAllowed: Boolean,
         analyticsParams: Map<String, Any?>,
     ): Result<CheckoutSessionResponse> = measure(
         operation = Operation.Init,
         checkoutSessionResponse = null,
-        params = buildMap {
-            putAll(analyticsParams)
-            // Without the "_secret_" delimiter the session id is the whole client secret, which must not be logged.
-            if (sessionId != clientSecret) {
-                put("checkout_session_id", sessionId)
-            }
-        },
+        params = analyticsParams + ("checkout_session_id" to clientSecret.sessionId),
     ) {
         executePost(
-            clientSecret = clientSecret,
-            url = initUrl(sessionId),
+            clientSecret = clientSecret.value,
+            url = initUrl(clientSecret.sessionId),
             params = mapOf(
                 "adaptive_pricing[allowed]" to adaptivePricingAllowed,
                 "timezone" to TimeZone.getDefault().id,

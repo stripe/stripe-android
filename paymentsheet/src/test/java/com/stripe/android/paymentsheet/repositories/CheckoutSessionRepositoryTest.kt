@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.repositories
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutAnalyticsTestFixtures
+import com.stripe.android.checkout.CheckoutSessionClientSecret
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.checkouttesting.checkoutPoll
@@ -78,8 +79,7 @@ class CheckoutSessionRepositoryTest {
         }
 
         val result = repository.init(
-            sessionId = DEFAULT_CHECKOUT_SESSION_ID,
-            clientSecret = "cs_test_abc123_secret_test",
+            clientSecret = CheckoutSessionClientSecret("cs_test_abc123_secret_test"),
             adaptivePricingAllowed = true,
             analyticsParams = emptyMap(),
         )
@@ -94,8 +94,7 @@ class CheckoutSessionRepositoryTest {
         }
 
         repository.init(
-            sessionId = DEFAULT_CHECKOUT_SESSION_ID,
-            clientSecret = "cs_test_abc123_secret_test",
+            clientSecret = CheckoutSessionClientSecret("cs_test_abc123_secret_test"),
             adaptivePricingAllowed = false,
             analyticsParams = mapOf("merchant_display_name" to true),
         ).getOrThrow()
@@ -131,8 +130,7 @@ class CheckoutSessionRepositoryTest {
         }
 
         val result = repository.init(
-            sessionId = DEFAULT_CHECKOUT_SESSION_ID,
-            clientSecret = "cs_test_abc123_secret_test",
+            clientSecret = CheckoutSessionClientSecret("cs_test_abc123_secret_test"),
             adaptivePricingAllowed = false,
             analyticsParams = mapOf("merchant_display_name" to true),
         )
@@ -146,29 +144,6 @@ class CheckoutSessionRepositoryTest {
         assertThat(failed).containsEntry("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID)
         assertThat(failed).containsEntry("error_type", "invalid_request_error")
         assertThat(failed).containsKey("duration")
-        analyticsRequestExecutor.validate()
-    }
-
-    @Test
-    fun `init does not report the client secret as the session id`() = runTest {
-        networkRule.checkoutInit(sessionId = MALFORMED_CLIENT_SECRET) { response ->
-            response.setResponseCode(400)
-            response.setBody("""{"error": {"type": "invalid_request_error", "message": "Invalid client secret"}}""")
-        }
-
-        repository.init(
-            sessionId = MALFORMED_CLIENT_SECRET,
-            clientSecret = MALFORMED_CLIENT_SECRET,
-            adaptivePricingAllowed = false,
-            analyticsParams = emptyMap(),
-        )
-
-        val started = analyticsRequestExecutor.awaitEvent("checkout_elements.init.started")
-        assertThat(started).doesNotContainKey("checkout_session_id")
-        assertThat(started.values).doesNotContain(MALFORMED_CLIENT_SECRET)
-        val failed = analyticsRequestExecutor.awaitEvent("checkout_elements.init.failed")
-        assertThat(failed).doesNotContainKey("checkout_session_id")
-        assertThat(failed.values).doesNotContain(MALFORMED_CLIENT_SECRET)
         analyticsRequestExecutor.validate()
     }
 
@@ -377,8 +352,6 @@ class CheckoutSessionRepositoryTest {
     }
 
     private companion object {
-        const val MALFORMED_CLIENT_SECRET = "cs_test_abc123_malformed"
-
         // Values come from checkout-session-init.json, the response parsed by the init and update requests.
         val INIT_RESPONSE_SESSION_PARAMS: Map<String, Any> = mapOf(
             "checkout_session_id" to "cs_test_abc123",
