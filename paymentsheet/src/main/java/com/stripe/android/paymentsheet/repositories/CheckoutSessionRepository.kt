@@ -263,7 +263,7 @@ internal class CheckoutSessionRepository @Inject constructor(
         fireEvent(PaymentSheetEvent.AdaptivePricingCurrencyToggledFailed(error = it.safeAnalyticsMessage))
     }
 
-    private suspend fun measure(
+    suspend fun measure(
         operation: Operation,
         checkoutSessionResponse: CheckoutSessionResponse?,
         params: Map<String, Any?>,

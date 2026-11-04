@@ -12,7 +12,6 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.AnnotatedString
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent.Operation
-import com.stripe.android.checkout.analytics.MeasuredOperation
 import com.stripe.android.checkout.analytics.toAnalyticsMap
 import com.stripe.android.checkout.injection.CheckoutElementsPresenterSubcomponent
 import com.stripe.android.checkout.injection.DaggerCheckoutElementsControllerComponent
@@ -72,7 +71,6 @@ class CheckoutElementsController @Inject internal constructor(
     private val checkoutSessionRepository: CheckoutSessionRepository,
     private val checkoutSessionTaxRegionUpdater: CheckoutSessionTaxRegionUpdater,
     private val errorReporter: ErrorReporter,
-    private val checkoutAnalyticsPerformer: CheckoutAnalyticsPerformer,
     private val checkoutStateLoader: CheckoutStateLoader,
     private val stateHolder: CheckoutElementsControllerStateHolder,
     private val sheetStateHolder: SheetStateHolder,
@@ -228,26 +226,18 @@ class CheckoutElementsController @Inject internal constructor(
     suspend fun updateEmail(
         email: String?,
     ): OperationResult {
-        val operation = MeasuredOperation(
-            operation = Operation.UpdateEmail,
-            params = emptyMap(),
-            report = checkoutAnalyticsPerformer::reportOperation,
-        )
-        var startedResponse: CheckoutSessionResponse? = null
         return withCheckoutState(
             additionalStateMutations = {
                 copy(collectedDetails = collectedDetails.copy(email = email))
             },
         ) {
-            // Start inside the mutation lock so calls rejected before it report nothing.
-            startedResponse = checkoutSessionResponse
-            operation.started(checkoutSessionResponse)
-            kotlin.Result.success(checkoutSessionResponse)
-        }.onSuccess {
-            // The email change keeps the session response, so the one captured in the lock is what was published.
-            operation.succeeded(startedResponse)
-        }.onFailure { error ->
-            startedResponse?.let { operation.failed(it, error) }
+            checkoutSessionRepository.measure(
+                operation = Operation.UpdateEmail,
+                checkoutSessionResponse = checkoutSessionResponse,
+                params = emptyMap(),
+            ) {
+                kotlin.Result.success(checkoutSessionResponse)
+            }
         }.toOperationResult()
     }
 

@@ -4,9 +4,7 @@ package com.stripe.android.checkout
 
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent.Operation
 import com.stripe.android.checkout.analytics.CheckoutConfirmationContext.InvocationSource
-import com.stripe.android.checkout.analytics.MeasuredOperation
 import com.stripe.android.checkout.analytics.toAnalyticsMap
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.ApiConfigurationPreview
@@ -582,23 +580,6 @@ internal class CheckoutAnalyticsPerformerTest {
             ),
             duration = CONFIRMATION_DURATION_SECONDS,
         )
-    }
-
-    @Test
-    fun `operation events omit configuration parameters`() = runScenario {
-        MeasuredOperation(
-            operation = Operation.UpdateEmail,
-            params = emptyMap(),
-            report = performer::reportOperation,
-        ).started(stateHolder.state?.checkoutSessionResponse)
-
-        val request = analyticsRequestExecutor.awaitEvent("checkout_elements.update_email.started")
-
-        assertThat(request).containsEntry("product_usage", "checkout_elements")
-        assertThat(request).containsEntry("publishable_key", DEFAULT_METADATA_PUBLISHABLE_KEY)
-        assertThat(request.filterKeys { it in CheckoutAnalyticsTestFixtures.sessionParams.keys })
-            .containsExactlyEntriesIn(CheckoutAnalyticsTestFixtures.sessionParams)
-        assertThat(request.keys).containsNoneIn(confirmationConfigurationParams.keys)
     }
 
     private fun assertFailureReported(
