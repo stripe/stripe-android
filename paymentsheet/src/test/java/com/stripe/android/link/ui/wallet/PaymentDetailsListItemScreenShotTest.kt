@@ -397,7 +397,7 @@ internal class PaymentDetailsListItemScreenShotTest {
         paymentDetails: List<ConsumerPaymentDetails.PaymentDetails>,
         images: () -> Map<String, Bitmap>,
     ) {
-        paparazziRule.snapshotAfterEffects {
+        paparazziRule.snapshotAfterOffset {
             val imageLoader = remember { FakeStripeImageLoader(images = images()) }
 
             DefaultLinkTheme {

@@ -58,7 +58,7 @@ class PaparazziRule(
      * Snapshots [content] [offsetMillis] after it is first composed, with inspection mode disabled so that effects
      * run, e.g. `StripeImage` loading from `LocalStripeImageLoader`.
      */
-    fun snapshotAfterEffects(
+    fun snapshotAfterOffset(
         offsetMillis: Long = 500L,
         content: @Composable () -> Unit,
     ) {
