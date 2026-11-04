@@ -1,5 +1,6 @@
 package com.stripe.android.checkout
 
+import com.stripe.android.checkouttesting.CheckoutInitResponseFactory
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.networktesting.NetworkRule
