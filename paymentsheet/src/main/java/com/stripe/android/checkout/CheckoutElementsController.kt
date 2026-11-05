@@ -465,6 +465,10 @@ class CheckoutElementsController @Inject internal constructor(
                 )
             },
         ) {
+            LocalOperation(
+                operation = Operation.ClearPaymentOption,
+                report = checkoutSessionRepository::fireEvent,
+            ).invoked(checkoutSessionResponse)
             checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
                 checkoutSessionResponse = checkoutSessionResponse,
                 addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,

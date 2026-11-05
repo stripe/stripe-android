@@ -8,13 +8,13 @@ import kotlin.time.Duration
 
 internal class CheckoutAnalyticsEvent(
     val operation: Operation,
-    outcome: Outcome,
+    outcome: Outcome?,
     analyticsMetadata: AnalyticsMetadata,
     duration: Duration?,
     error: Error?,
     operationParams: Map<String, Any?>,
 ) : AnalyticsEvent {
-    override val eventName = "checkout_elements.${operation.code}.${outcome.code}"
+    override val eventName = listOfNotNull("checkout_elements", operation.code, outcome?.code).joinToString(".")
     val params: Map<String, Any?> = buildMap {
         putAll(operationParams)
         putAll(analyticsMetadata.paramsMap)
@@ -32,6 +32,7 @@ internal class CheckoutAnalyticsEvent(
         ApplyPromotionCode("apply_promotion_code"),
         RemovePromotionCode("remove_promotion_code"),
         UpdateEmail("update_email"),
+        ClearPaymentOption("clear_payment_option"),
     }
 
     enum class Outcome(val code: String) {
