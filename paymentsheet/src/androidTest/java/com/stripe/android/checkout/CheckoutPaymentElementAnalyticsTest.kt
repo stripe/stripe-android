@@ -408,7 +408,7 @@ internal class CheckoutPaymentElementAnalyticsTest {
     }
 
     @Test
-    fun testUpdateShippingAddressWithShippingAutomaticTaxReportsTaxUpdate() = runCheckoutPaymentElementScenario(
+    fun testClearAlreadyNullShippingAddressReportsSucceeded() = runCheckoutPaymentElementScenario(
         networkRule = networkRule,
         checkoutInitResponse = ::shippingTaxCheckoutInitResponse,
         renderPaymentElementContent = false,
@@ -435,7 +435,24 @@ internal class CheckoutPaymentElementAnalyticsTest {
 
         assertThat(controller.updateShippingAddress(name = null, address = null))
             .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
+        markTestSucceeded()
+    }
 
+    @Test
+    fun testUpdateShippingAddressWithShippingAutomaticTaxReportsTaxUpdate() = runCheckoutPaymentElementScenario(
+        networkRule = networkRule,
+        checkoutInitResponse = ::shippingTaxCheckoutInitResponse,
+        renderPaymentElementContent = false,
+        setup = { controller ->
+            networkRule.validateCheckoutInitStartedAndSucceeded()
+            assertThat(
+                controller.configure(
+                    DEFAULT_CLIENT_SECRET,
+                    CheckoutElementsController.Configuration().paymentElement(PaymentElement.Configuration()),
+                )
+            ).isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
+        },
+    ) {
         networkRule.validateCheckoutAnalyticsStarted(
             "update_shipping_address",
             analyticsPayloadField("invocation_source", "merchant"),
