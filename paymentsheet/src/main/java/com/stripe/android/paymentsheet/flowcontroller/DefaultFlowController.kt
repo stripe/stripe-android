@@ -18,7 +18,6 @@ import androidx.lifecycle.lifecycleScope
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.exception.StripeException
-import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkActivityResult.Canceled.Reason
@@ -43,15 +42,16 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationTypeKey
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
+import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
+import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
+import com.stripe.android.paymentelement.embedded.sheet.EmbeddedSheetContract
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.InitializedViaCompose
 import com.stripe.android.paymentsheet.LinkHandler
-import com.stripe.android.paymentsheet.PaymentOptionContract
 import com.stripe.android.paymentsheet.PaymentOptionResult
 import com.stripe.android.paymentsheet.PaymentOptionResultCallback
-import com.stripe.android.paymentsheet.PaymentOptionsActivityResult
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
@@ -100,7 +100,6 @@ internal class DefaultFlowController @Inject internal constructor(
     private val linkAccountHolder: LinkAccountHolder,
     @Named(FLOW_CONTROLLER_LINK_LAUNCHER) private val flowControllerLinkLauncher: LinkPaymentLauncher,
     @Named(WALLETS_BUTTON_LINK_LAUNCHER) private val walletsButtonLinkLauncher: LinkPaymentLauncher,
-    @Named(ENABLE_LOGGING) private val enableLogging: Boolean,
     @Named(PRODUCT_USAGE) private val productUsage: Set<String>,
     private val configurationHandler: FlowControllerConfigurationHandler,
     private val errorReporter: ErrorReporter,
@@ -108,7 +107,7 @@ internal class DefaultFlowController @Inject internal constructor(
     @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
     private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper
 ) : PaymentSheet.FlowController {
-    private val paymentOptionActivityLauncher: ActivityResultLauncher<PaymentOptionContract.Args>
+    private val paymentOptionActivityLauncher: ActivityResultLauncher<EmbeddedActivityArgs>
 
     /**
      * [FlowControllerComponent] is hold to inject into [Activity]s and created
@@ -133,7 +132,7 @@ internal class DefaultFlowController @Inject internal constructor(
         confirmationHandler.register(activityResultCaller, lifecycleOwner)
 
         paymentOptionActivityLauncher = activityResultCaller.registerForActivityResult(
-            PaymentOptionContract(),
+            EmbeddedSheetContract,
             ::onPaymentOptionResult
         )
 
@@ -302,15 +301,15 @@ internal class DefaultFlowController @Inject internal constructor(
         state: State,
         paymentSelection: PaymentSelection?
     ) {
-        val args = PaymentOptionContract.Args(
-            state = state.paymentSheetState.copy(paymentSelection = paymentSelection),
+        val args = FlowControllerSheetArgsFactory.create(
+            paymentSheetState = state.paymentSheetState,
             configuration = state.config,
-            enableLogging = enableLogging,
-            productUsage = productUsage,
+            paymentSelection = paymentSelection,
             linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
             walletButtonsRendered = viewModel.walletButtonsRendered,
+            productUsage = productUsage,
             paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
-            promotions = paymentMethodMessagePromotionsHelper.getPromotions()
+            promotions = paymentMethodMessagePromotionsHelper.getPromotions(),
         )
 
         val options = ActivityOptionsCompat.makeCustomAnimation(
@@ -551,25 +550,28 @@ internal class DefaultFlowController @Inject internal constructor(
 
     @JvmSynthetic
     internal fun onPaymentOptionResult(
-        result: PaymentOptionsActivityResult?
+        activityResult: EmbeddedActivityResult
     ) {
+        val result = FlowControllerPaymentOptionsResult.from(
+            result = activityResult,
+            initialPaymentSelection = viewModel.paymentSelection,
+        )
         // update the current Link account state if the selected Link payment method includes an account update.
-        result?.linkAccountInfo?.let { linkAccountHolder.set(it) }
-        result?.paymentMethods?.let {
+        result.linkAccountInfo?.let { linkAccountHolder.set(it) }
+        result.paymentMethods?.let {
             val currentState = viewModel.state
             viewModel.state = currentState?.copyPaymentSheetState(
                 customer = currentState.paymentSheetState.customer?.copy(paymentMethods = it)
             )
         }
         when (result) {
-            is PaymentOptionsActivityResult.Succeeded -> {
+            is FlowControllerPaymentOptionsResult.Selected -> {
                 viewModel.paymentSelection = result.paymentSelection.also { it.hasAcknowledgedSepaMandate = true }
                 viewModel.autocompleteFilledAddress = result.autocompleteFilledAddress
                 onPaymentSelection(canceled = false)
             }
-            null,
-            is PaymentOptionsActivityResult.Canceled -> {
-                viewModel.paymentSelection = result?.paymentSelection
+            is FlowControllerPaymentOptionsResult.Canceled -> {
+                viewModel.paymentSelection = result.paymentSelection
                 onPaymentSelection(canceled = true)
             }
         }

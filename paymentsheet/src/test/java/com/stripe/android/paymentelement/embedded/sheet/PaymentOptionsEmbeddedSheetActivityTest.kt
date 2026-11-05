@@ -104,7 +104,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
         assertThat(result.customerState).isEqualTo(PaymentSheetFixtures.EMPTY_CUSTOMER_STATE)
         assertThat(result.linkAccountInfo.lastUpdateReason)
             .isEqualTo(LinkAccountUpdate.Value.UpdateReason.LoggedOut)
-        assertThat(result.launchMode).isEqualTo(EmbeddedLaunchMode.PaymentOptions)
+        assertThat(result.launchMode).isEqualTo(EmbeddedLaunchMode.PaymentOptions(flowController = null))
     }
 
     @Test
@@ -175,7 +175,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
         assertThat(result).isInstanceOf<EmbeddedActivityResult.Cancelled>()
         val cancelled = result as EmbeddedActivityResult.Cancelled
         assertThat(cancelled.launchMode).isEqualTo(
-            EmbeddedLaunchMode.PaymentOptions
+            EmbeddedLaunchMode.PaymentOptions(flowController = null)
         )
     }
 
@@ -213,7 +213,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
                 .isEqualTo(previousNewSelection)
             assertThat(result.linkAccountInfo.lastUpdateReason)
                 .isEqualTo(LinkAccountUpdate.Value.UpdateReason.LoggedOut)
-            assertThat(result.launchMode).isEqualTo(EmbeddedLaunchMode.PaymentOptions)
+            assertThat(result.launchMode).isEqualTo(EmbeddedLaunchMode.PaymentOptions(flowController = null))
         }
     }
 
@@ -279,7 +279,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
         val result = scenario.awaitResult() as EmbeddedActivityResult.Complete
         assertThat(result.selection).isInstanceOf<PaymentSelection.New.Card>()
         assertThat(result.hasBeenConfirmed).isFalse()
-        assertThat(result.launchMode).isEqualTo(EmbeddedLaunchMode.PaymentOptions)
+        assertThat(result.launchMode).isEqualTo(EmbeddedLaunchMode.PaymentOptions(flowController = null))
     }
 
     @Test
@@ -625,7 +625,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
                 lastUpdateReason = LinkAccountUpdate.Value.UpdateReason.LoggedOut,
             ),
             promotions = emptyList(),
-            launchMode = EmbeddedLaunchMode.PaymentOptions,
+            launchMode = EmbeddedLaunchMode.PaymentOptions(flowController = null),
             presentationState = presentationState,
         )
     }

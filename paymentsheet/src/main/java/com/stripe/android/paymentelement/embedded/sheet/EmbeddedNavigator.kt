@@ -12,6 +12,7 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.account.LinkAccountHolder
+import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
@@ -21,9 +22,9 @@ import com.stripe.android.paymentelement.embedded.form.FormActivityPrimaryButton
 import com.stripe.android.paymentelement.embedded.form.FormScreenContent
 import com.stripe.android.paymentelement.embedded.form.SheetMandate
 import com.stripe.android.paymentelement.embedded.form.USBankAccountMandate
+import com.stripe.android.paymentelement.embedded.isFlowController
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.MandateText
 import com.stripe.android.paymentsheet.navigation.NavigationHandler
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods.CvcRecollectionState
@@ -60,25 +61,25 @@ import java.io.Closeable
 import javax.inject.Inject
 
 internal class EmbeddedNavigator private constructor(
-    private val eventReporter: EventReporter,
+    private val analytics: EmbeddedSheetAnalytics,
     private val navigationHandler: NavigationHandler<Screen>
 ) {
     constructor(
         coroutineScope: CoroutineScope,
         initialScreen: Screen,
-        eventReporter: EventReporter,
+        analytics: EmbeddedSheetAnalytics,
     ) : this(
         coroutineScope = coroutineScope,
         initialBackStack = listOf(initialScreen),
-        eventReporter = eventReporter,
+        analytics = analytics,
     )
 
     constructor(
         coroutineScope: CoroutineScope,
         initialBackStack: List<Screen>,
-        eventReporter: EventReporter,
+        analytics: EmbeddedSheetAnalytics,
     ) : this(
-        eventReporter = eventReporter,
+        analytics = analytics,
         navigationHandler = NavigationHandler(
             coroutineScope = coroutineScope,
             initialBackStack = initialBackStack,
@@ -99,13 +100,14 @@ internal class EmbeddedNavigator private constructor(
     val result: SharedFlow<Boolean?> = _result.asSharedFlow()
 
     init {
-        onScreenShown(screen.value)
+        analytics.onScreenShown(screen.value)
+        analytics.attach(screen)
     }
 
     fun performAction(action: Action) {
         when (action) {
             is Action.Back -> {
-                onScreenHidden(screen.value)
+                analytics.onScreenHidden(screen.value)
                 if (navigationHandler.canGoBack) {
                     navigationHandler.pop()
                 } else {
@@ -113,44 +115,23 @@ internal class EmbeddedNavigator private constructor(
                 }
             }
             is Action.Close -> {
-                onScreenHidden(screen.value)
+                analytics.onScreenHidden(screen.value)
                 _result.tryEmit(action.shouldInvokeRowSelectionCallback)
             }
             is Action.GoToScreen -> {
                 navigationHandler.transitionToWithDelay(action.screen)
-                onScreenShown(action.screen)
+                analytics.onScreenShown(action.screen)
             }
             is Action.ReplaceCurrentScreen -> {
                 val replacedScreen = screen.value
                 if (navigationHandler.replaceCurrentScreen(action.screen)) {
-                    onScreenHidden(replacedScreen)
-                    onScreenShown(action.screen)
+                    analytics.onScreenHidden(replacedScreen)
+                    analytics.onScreenShown(action.screen)
                 }
             }
-        }
-    }
-
-    private fun onScreenShown(screen: Screen) {
-        when (screen) {
-            is Screen.ManageAll -> eventReporter.onShowManageSavedPaymentMethods()
-            is Screen.ManageUpdate -> eventReporter.onShowEditablePaymentOption()
-            is Screen.Form -> Unit
-            is Screen.SavedPaymentMethodConfirm -> Unit
-            is Screen.VerticalPaymentOptions -> eventReporter.onShowNewPaymentOptions()
-            is Screen.HorizontalPaymentOptions -> eventReporter.onShowNewPaymentOptions()
-            is Screen.HorizontalSavedPaymentOptions -> eventReporter.onShowExistingPaymentOptions()
-        }
-    }
-
-    private fun onScreenHidden(screen: Screen) {
-        when (screen) {
-            is Screen.ManageAll -> Unit
-            is Screen.ManageUpdate -> eventReporter.onHideEditablePaymentOption()
-            is Screen.Form -> Unit
-            is Screen.SavedPaymentMethodConfirm -> Unit
-            is Screen.VerticalPaymentOptions -> Unit
-            is Screen.HorizontalPaymentOptions -> Unit
-            is Screen.HorizontalSavedPaymentOptions -> Unit
+            is Action.ResetTo -> {
+                navigationHandler.resetTo(action.screens)
+            }
         }
     }
 
@@ -227,6 +208,9 @@ internal class EmbeddedNavigator private constructor(
             private val linkAccountHolder: LinkAccountHolder,
             private val launchMode: EmbeddedLaunchMode.Form,
         ) : Screen(), Closeable {
+            val paymentMethodCode: PaymentMethodCode
+                get() = launchMode.selectedPaymentMethodCode
+
             override fun topBarState(): StateFlow<PaymentSheetTopBarState?> = stateFlowOf(
                 PaymentSheetTopBarStateFactory.create(
                     editable = PaymentSheetTopBarState.Editable.Never,
@@ -274,10 +258,15 @@ internal class EmbeddedNavigator private constructor(
                 private val embeddedSelectionHolder: EmbeddedSelectionHolder,
                 private val customerStateHolder: CustomerStateHolder,
                 private val linkAccountHolder: LinkAccountHolder,
+                private val sheetLaunchMode: EmbeddedLaunchMode,
             ) {
                 fun create(launchMode: EmbeddedLaunchMode.Form): Form {
-                    val hasSavedPaymentMethods = customerStateHolder.paymentMethods.value.any {
-                        it.type?.code == launchMode.selectedPaymentMethodCode
+                    val paymentMethods = customerStateHolder.paymentMethods.value
+                    // FlowController offers set as default whenever the customer has any saved payment method.
+                    val hasSavedPaymentMethods = if (sheetLaunchMode.isFlowController) {
+                        paymentMethods.isNotEmpty()
+                    } else {
+                        paymentMethods.any { it.type?.code == launchMode.selectedPaymentMethodCode }
                     }
                     return Form(
                         formInteractor = interactorFactory.create(
@@ -349,7 +338,7 @@ internal class EmbeddedNavigator private constructor(
             private val interactor: PaymentMethodVerticalLayoutInteractor,
             private val sheetActivityState: StateFlow<SheetActivityStateHolder.State>,
             private val onContinueClick: () -> Unit,
-            private val onPrimaryButtonDisabledClick: () -> Unit,
+            private val onPrimaryButtonDisabledClick: (() -> Unit)?,
         ) : Screen(), Closeable {
             override fun topBarState(): StateFlow<PaymentSheetTopBarState?> = stateFlowOf(
                 PaymentSheetTopBarStateFactory.create(
@@ -393,8 +382,11 @@ internal class EmbeddedNavigator private constructor(
             private val interactor: AddPaymentMethodInteractor,
             private val sheetActivityState: StateFlow<SheetActivityStateHolder.State>,
             private val onContinueClick: () -> Unit,
-            private val onPrimaryButtonDisabledClick: () -> Unit,
+            private val onPrimaryButtonDisabledClick: (() -> Unit)?,
         ) : Screen(), Closeable {
+            val selectedPaymentMethodCode: PaymentMethodCode
+                get() = interactor.state.value.selectedPaymentMethodCode
+
             override fun topBarState(): StateFlow<PaymentSheetTopBarState?> = stateFlowOf(
                 PaymentSheetTopBarStateFactory.create(
                     editable = PaymentSheetTopBarState.Editable.Never,
@@ -439,7 +431,7 @@ internal class EmbeddedNavigator private constructor(
             private val mandateText: StateFlow<MandateText?>,
             private val isContinueButtonVisible: StateFlow<Boolean>,
             private val onContinueClick: () -> Unit,
-            private val onPrimaryButtonDisabledClick: () -> Unit,
+            private val onPrimaryButtonDisabledClick: (() -> Unit)?,
         ) : Screen(), Closeable {
             override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
                 return interactor.state.mapAsStateFlow { state ->
@@ -507,6 +499,8 @@ internal class EmbeddedNavigator private constructor(
         data class GoToScreen(val screen: Screen) : Action()
 
         data class ReplaceCurrentScreen(val screen: Screen) : Action()
+
+        data class ResetTo(val screens: List<Screen>) : Action()
     }
 }
 
@@ -522,6 +516,7 @@ private fun successfulConfirmationResult(
     customerState = customerStateHolder.customer.value,
     linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
     checkoutSessionResponse = null,
+    autocompleteFilledAddress = null,
     shouldInvokeSelectionCallback = false,
     launchMode = launchMode,
 )

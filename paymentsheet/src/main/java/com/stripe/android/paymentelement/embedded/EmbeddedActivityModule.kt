@@ -33,7 +33,9 @@ import com.stripe.android.paymentelement.embedded.manage.EmbeddedSavedPaymentMet
 import com.stripe.android.paymentelement.embedded.manage.EmbeddedUpdateScreenInteractorFactory
 import com.stripe.android.paymentelement.embedded.manage.ManageLaunchSavedPaymentMethodSelector
 import com.stripe.android.paymentelement.embedded.manage.ManageScreenSavedPaymentMethodSelector
+import com.stripe.android.paymentelement.embedded.sheet.DEFAULT_CONTINUE_COORDINATOR
 import com.stripe.android.paymentelement.embedded.sheet.DefaultEmbeddedFormScreenFactory
+import com.stripe.android.paymentelement.embedded.sheet.DefaultEmbeddedSheetAnalytics
 import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetActivityConfirmationHelper
 import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetActivityContinueCoordinator
 import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetActivityRegistrar
@@ -41,21 +43,33 @@ import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetActivityStat
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedFormScreenFactory
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedInitialScreenFactory
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedNavigator
+import com.stripe.android.paymentelement.embedded.sheet.EmbeddedSheetAnalytics
+import com.stripe.android.paymentelement.embedded.sheet.FlowControllerEmbeddedSheetAnalytics
+import com.stripe.android.paymentelement.embedded.sheet.FlowControllerSheetActivityContinueCoordinator
+import com.stripe.android.paymentelement.embedded.sheet.FlowControllerSheetLinkLauncher
+import com.stripe.android.paymentelement.embedded.sheet.InitialPaymentOptionsScreenFactory
+import com.stripe.android.paymentelement.embedded.sheet.InitialPaymentOptionsScreensProvider
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityConfirmationHelper
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityContinueCoordinator
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityRegistrar
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityStateHolder
+import com.stripe.android.paymentelement.embedded.sheet.SheetLinkPaymentMethodLauncher
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.addresselement.AUTOCOMPLETE_DEFAULT_COUNTRIES
+import com.stripe.android.paymentsheet.addresselement.AutocompleteActivityLauncher
+import com.stripe.android.paymentsheet.addresselement.AutocompleteAppearanceContext
+import com.stripe.android.paymentsheet.addresselement.DefaultAutocompleteLauncher
 import com.stripe.android.paymentsheet.addresselement.PaymentElementAutocompleteAddressInteractor
 import com.stripe.android.paymentsheet.addresselement.StripeAutocompleteRepository
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.paymentsheet.addresselement.analytics.DefaultAddressLauncherEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.injection.createInlineAutocompletePlacesClient
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.NoOpPromotionsHelper
@@ -65,6 +79,7 @@ import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.paymentsheet.verticalmode.DefaultSavedPaymentMethodConfirmInteractor
 import com.stripe.android.paymentsheet.verticalmode.SavedPaymentMethodConfirmInteractor
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
+import com.stripe.android.uicore.elements.DefaultIsPlacesAvailable
 import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.utils.mapAsStateFlow
@@ -134,9 +149,20 @@ internal interface EmbeddedActivityModule {
     ): SheetActivityConfirmationHelper
 
     @Binds
-    fun bindsContinueCoordinator(
+    @Named(DEFAULT_CONTINUE_COORDINATOR)
+    fun bindsDefaultContinueCoordinator(
         continueCoordinator: DefaultSheetActivityContinueCoordinator
     ): SheetActivityContinueCoordinator
+
+    @Binds
+    fun bindsSheetLinkPaymentMethodLauncher(
+        launcher: FlowControllerSheetLinkLauncher
+    ): SheetLinkPaymentMethodLauncher
+
+    @Binds
+    fun bindsInitialPaymentOptionsScreensProvider(
+        factory: InitialPaymentOptionsScreenFactory
+    ): InitialPaymentOptionsScreensProvider
 
     @Binds
     fun bindsAddressLauncherEventReporter(
@@ -151,17 +177,53 @@ internal interface EmbeddedActivityModule {
         }
 
         @Provides
+        fun provideEventReporterMode(launchMode: EmbeddedLaunchMode): EventReporter.Mode {
+            return if (launchMode.isFlowController) {
+                EventReporter.Mode.Custom
+            } else {
+                EventReporter.Mode.Embedded
+            }
+        }
+
+        @Provides
+        @Singleton
+        fun provideEmbeddedSheetAnalytics(
+            launchMode: EmbeddedLaunchMode,
+            defaultAnalytics: Provider<DefaultEmbeddedSheetAnalytics>,
+            flowControllerAnalytics: Provider<FlowControllerEmbeddedSheetAnalytics>,
+        ): EmbeddedSheetAnalytics {
+            return if (launchMode.isFlowController) {
+                flowControllerAnalytics.get()
+            } else {
+                defaultAnalytics.get()
+            }
+        }
+
+        @Provides
         @Singleton
         fun provideEmbeddedNavigator(
             initialScreenFactory: EmbeddedInitialScreenFactory,
             @ViewModelScope viewModelScope: CoroutineScope,
-            eventReporter: EventReporter,
+            analytics: EmbeddedSheetAnalytics,
         ): EmbeddedNavigator {
             return EmbeddedNavigator(
                 coroutineScope = viewModelScope,
-                eventReporter = eventReporter,
+                analytics = analytics,
                 initialBackStack = initialScreenFactory.create(),
             )
+        }
+
+        @Provides
+        fun provideContinueCoordinator(
+            launchMode: EmbeddedLaunchMode,
+            @Named(DEFAULT_CONTINUE_COORDINATOR) defaultContinueCoordinator: Provider<SheetActivityContinueCoordinator>,
+            flowControllerContinueCoordinator: Provider<FlowControllerSheetActivityContinueCoordinator>,
+        ): SheetActivityContinueCoordinator {
+            return if (launchMode.isFlowController) {
+                flowControllerContinueCoordinator.get()
+            } else {
+                defaultContinueCoordinator.get()
+            }
         }
 
         @Provides
@@ -172,7 +234,7 @@ internal interface EmbeddedActivityModule {
             manageLaunchSelector: Provider<ManageLaunchSavedPaymentMethodSelector>,
         ): ManageScreenSavedPaymentMethodSelector = when (launchMode) {
             is EmbeddedLaunchMode.Manage -> manageLaunchSelector.get()
-            EmbeddedLaunchMode.PaymentOptions,
+            is EmbeddedLaunchMode.PaymentOptions,
             is EmbeddedLaunchMode.Form -> ImmediateSavedPaymentMethodSelector(selectionHolder)
         }
 
@@ -229,30 +291,77 @@ internal interface EmbeddedActivityModule {
 
         @Provides
         @Singleton
-        fun provideAutocompleteAddressInteractorFactory(
+        fun provideAutocompleteLauncher(
+            configuration: EmbeddedPaymentElement.Configuration,
+        ): AutocompleteActivityLauncher {
+            return DefaultAutocompleteLauncher(AutocompleteAppearanceContext.PaymentElement(configuration.appearance))
+        }
+
+        @Provides
+        @Singleton
+        fun providePaymentElementAutocompleteAddressInteractorFactory(
+            context: Context,
+            launchMode: EmbeddedLaunchMode,
+            autocompleteLauncher: AutocompleteActivityLauncher,
             stripeAutocompleteRepository: StripeAutocompleteRepository,
             @ViewModelScope coroutineScope: CoroutineScope,
             paymentMethodMetadata: PaymentMethodMetadata,
             eventReporter: AddressLauncherEventReporter,
+            errorReporter: ErrorReporter,
+        ): PaymentElementAutocompleteAddressInteractor.Factory {
+            val flowControllerOptions = launchMode.flowControllerOptions
+            return if (flowControllerOptions != null) {
+                // FlowController supports Google Places autocomplete in addition to Stripe-hosted inline autocomplete.
+                val isPlacesAvailable = DefaultIsPlacesAvailable()()
+                PaymentElementAutocompleteAddressInteractor.Factory(
+                    launcher = autocompleteLauncher,
+                    apiConfigurationProvider = { paymentMethodMetadata.apiConfiguration },
+                    autocompleteConfig = AutocompleteAddressInteractor.Config(
+                        googlePlacesApiKey = flowControllerOptions.googlePlacesApiKey,
+                        autocompleteCountries = AUTOCOMPLETE_DEFAULT_COUNTRIES,
+                        isPlacesAvailable = isPlacesAvailable,
+                        isInlineAutocompleteEnabled = true,
+                    ),
+                    placesClient = createInlineAutocompletePlacesClient(
+                        context = context,
+                        googlePlacesApiKey = flowControllerOptions.googlePlacesApiKey,
+                        errorReporter = errorReporter,
+                        isPlacesAvailable = isPlacesAvailable,
+                    ),
+                    stripeAutocompleteRepository = stripeAutocompleteRepository,
+                    coroutineScope = coroutineScope,
+                    shouldUseAutocompleteProxyEndpointsProvider = {
+                        paymentMethodMetadata.shouldUseAutocompleteProxyEndpoints
+                    },
+                    eventReporter = eventReporter,
+                )
+            } else {
+                PaymentElementAutocompleteAddressInteractor.Factory(
+                    // Embedded supports Stripe-hosted inline autocomplete, which does not launch an activity.
+                    launcher = null,
+                    apiConfigurationProvider = { paymentMethodMetadata.apiConfiguration },
+                    autocompleteConfig = AutocompleteAddressInteractor.Config(
+                        googlePlacesApiKey = null,
+                        autocompleteCountries = AUTOCOMPLETE_DEFAULT_COUNTRIES,
+                        isPlacesAvailable = false,
+                        isInlineAutocompleteEnabled = true,
+                    ),
+                    placesClient = null,
+                    stripeAutocompleteRepository = stripeAutocompleteRepository,
+                    coroutineScope = coroutineScope,
+                    shouldUseAutocompleteProxyEndpointsProvider = {
+                        paymentMethodMetadata.shouldUseAutocompleteProxyEndpoints
+                    },
+                    eventReporter = eventReporter,
+                )
+            }
+        }
+
+        @Provides
+        fun provideAutocompleteAddressInteractorFactory(
+            factory: PaymentElementAutocompleteAddressInteractor.Factory,
         ): AutocompleteAddressInteractor.Factory {
-            return PaymentElementAutocompleteAddressInteractor.Factory(
-                // Embedded supports Stripe-hosted inline autocomplete, which does not launch an activity.
-                launcher = null,
-                apiConfigurationProvider = { paymentMethodMetadata.apiConfiguration },
-                autocompleteConfig = AutocompleteAddressInteractor.Config(
-                    googlePlacesApiKey = null,
-                    autocompleteCountries = AUTOCOMPLETE_DEFAULT_COUNTRIES,
-                    isPlacesAvailable = false,
-                    isInlineAutocompleteEnabled = true,
-                ),
-                placesClient = null,
-                stripeAutocompleteRepository = stripeAutocompleteRepository,
-                coroutineScope = coroutineScope,
-                shouldUseAutocompleteProxyEndpointsProvider = {
-                    paymentMethodMetadata.shouldUseAutocompleteProxyEndpoints
-                },
-                eventReporter = eventReporter,
-            )
+            return factory
         }
 
         @Provides

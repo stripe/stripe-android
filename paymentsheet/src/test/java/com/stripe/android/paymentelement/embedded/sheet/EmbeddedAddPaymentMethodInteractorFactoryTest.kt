@@ -199,6 +199,7 @@ internal class EmbeddedAddPaymentMethodInteractorFactoryTest {
             paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
             customerStateHolder = customerStateHolder,
             autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
+            sheetAnalytics = DefaultEmbeddedSheetAnalytics(FakeEventReporter()),
         )
         val interactor = factory.create()
         assertThat(sheetActivityStateHolder.updateErrorTurbine.awaitItem()).isNull()

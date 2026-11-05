@@ -4,7 +4,9 @@ import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.SetupIntent
+import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
+import com.stripe.android.paymentelement.embedded.flowControllerOptions
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -22,7 +24,11 @@ internal class PaymentOptionsWalletsInteractor @Inject constructor(
     linkAccountHolder: LinkAccountHolder,
     private val continueCoordinator: SheetActivityContinueCoordinator,
     private val sheetActivityStateHolder: SheetActivityStateHolder,
+    launchMode: EmbeddedLaunchMode,
 ) {
+    private val visibleWallets: List<WalletType> = launchMode.flowControllerOptions?.visibleWallets
+        ?: WalletType.entries
+
     // Keep wallet placement stable while saved payment methods are added or removed.
     val canShowDirectForm: Boolean = paymentMethodMetadata.supportedPaymentMethodTypes().size == 1 &&
         customerStateHolder.paymentMethods.value.isEmpty()
@@ -36,9 +42,9 @@ internal class PaymentOptionsWalletsInteractor @Inject constructor(
         val hasLinkWithSelectedPayment = currentSelection is PaymentSelection.Link &&
             currentSelection.selectedPayment != null
         WalletsState.create(
-            isLinkAvailable = paymentMethodMetadata.shouldShowLinkButton,
+            isLinkAvailable = paymentMethodMetadata.shouldShowLinkButton && WalletType.Link in visibleWallets,
             linkEmail = linkAccount?.email,
-            isGooglePayReady = paymentMethodMetadata.isGooglePayReady,
+            isGooglePayReady = paymentMethodMetadata.isGooglePayReady && WalletType.GooglePay in visibleWallets,
             apiConfiguration = paymentMethodMetadata.apiConfiguration,
             buttonsEnabled = !sheetState.isProcessing,
             paymentMethodTypes = paymentMethodMetadata.supportedPaymentMethodTypes(),

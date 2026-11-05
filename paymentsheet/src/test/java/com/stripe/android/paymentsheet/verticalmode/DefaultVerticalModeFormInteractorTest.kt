@@ -25,7 +25,9 @@ import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationStateFixtures
 import com.stripe.android.paymentelement.embedded.form.EmbeddedFormInteractorFactory
 import com.stripe.android.paymentelement.embedded.form.OnClickDelegateOverrideImpl
+import com.stripe.android.paymentelement.embedded.sheet.DefaultEmbeddedSheetAnalytics
 import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetActivityStateHolder
+import com.stripe.android.paymentelement.embedded.sheet.InitialPaymentOptionsScreensProvider
 import com.stripe.android.paymentsheet.FakeCustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInteractor
@@ -40,6 +42,7 @@ import com.stripe.android.paymentsheet.utils.errorTest
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormInteractor.ViewAction
 import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.ui.core.elements.CardDetailsSectionController
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SetAsDefaultPaymentMethodElement
@@ -373,6 +376,9 @@ internal class DefaultVerticalModeFormInteractorTest {
             ),
             embeddedNavigatorProvider = Provider { error("Not expected") },
             savedPaymentMethodConfirmScreenFactoryProvider = Provider { error("Not expected") },
+            initialPaymentOptionsScreensProvider = { InitialPaymentOptionsScreensProvider { emptyList() } },
+            sheetAnalytics = DefaultEmbeddedSheetAnalytics(FakeEventReporter()),
+            errorReporter = FakeErrorReporter(),
         )
         val formHelperFactory = EmbeddedFormHelperFactory(
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
@@ -391,6 +397,7 @@ internal class DefaultVerticalModeFormInteractorTest {
             eventReporter = FakeEventReporter(),
             paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
             autocompleteAddressInteractorFactory = TestAutocompleteAddressInteractor.noOpFactory(),
+            sheetAnalytics = DefaultEmbeddedSheetAnalytics(FakeEventReporter()),
         ).create(
             paymentMethodCode = paymentMethodCode,
             hasSavedPaymentMethods = hasSavedPaymentMethods,

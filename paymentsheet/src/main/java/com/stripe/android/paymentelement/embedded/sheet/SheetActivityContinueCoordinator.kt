@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.embedded.sheet
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.link.account.LinkAccountHolder
+import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.checkoutSessionResponse
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
@@ -14,11 +15,14 @@ import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Named
 import javax.inject.Provider
 
 internal interface SheetActivityContinueCoordinator {
     fun onContinue()
 }
+
+internal const val DEFAULT_CONTINUE_COORDINATOR = "DefaultContinueCoordinator"
 
 internal class DefaultSheetActivityContinueCoordinator @Inject constructor(
     private val taxRegionUpdater: SheetTaxRegionUpdater,
@@ -71,8 +75,43 @@ internal class DefaultSheetActivityContinueCoordinator @Inject constructor(
             customerState = customerStateHolder.customer.value,
             linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
             checkoutSessionResponse = checkoutSessionResponse,
+            autocompleteFilledAddress = null,
             shouldInvokeSelectionCallback = false,
             launchMode = launchMode,
         )
+    }
+}
+
+/**
+ * Continues like [DefaultSheetActivityContinueCoordinator], but keeps FlowController's selection behavior: it reports
+ * the returned selection and opens the Link payment method picker for Link when the Link gate requires it.
+ */
+internal class FlowControllerSheetActivityContinueCoordinator @Inject constructor(
+    @Named(DEFAULT_CONTINUE_COORDINATOR) private val defaultContinueCoordinator: SheetActivityContinueCoordinator,
+    private val paymentMethodMetadata: PaymentMethodMetadata,
+    private val stateHolder: SheetActivityStateHolder,
+    private val selectionHolder: EmbeddedSelectionHolder,
+    private val embeddedNavigatorProvider: Provider<EmbeddedNavigator>,
+    private val sheetAnalytics: EmbeddedSheetAnalytics,
+    private val linkLauncher: SheetLinkPaymentMethodLauncher,
+    private val linkGateFactory: LinkGate.Factory,
+) : SheetActivityContinueCoordinator {
+    override fun onContinue() {
+        if (stateHolder.state.value.isProcessing || embeddedNavigatorProvider.get().isTransitioning) return
+
+        stateHolder.updateError(null)
+        val selection = selectionHolder.selection.value ?: return
+        sheetAnalytics.onSelectionReturned(selection)
+
+        val linkConfiguration = paymentMethodMetadata.linkState?.configuration
+        if (
+            selection is PaymentSelection.Link &&
+            linkConfiguration != null &&
+            linkGateFactory.create(linkConfiguration).showRuxInFlowController
+        ) {
+            linkLauncher.present(linkConfiguration)
+        } else {
+            defaultContinueCoordinator.onContinue()
+        }
     }
 }

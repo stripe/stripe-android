@@ -5,9 +5,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.CreationExtras
+import com.stripe.android.analytics.SessionSavedStateHandler
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
+import com.stripe.android.paymentelement.embedded.isFlowController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -64,7 +66,11 @@ internal class EmbeddedSheetViewModel @Inject constructor(
                 savedStateHandle[INITIALIZED_KEY] = true
             }
 
-            return component.viewModel as T
+            val viewModel = component.viewModel
+            if (args.launchMode.isFlowController) {
+                SessionSavedStateHandler.attachTo(viewModel, savedStateHandle)
+            }
+            return viewModel as T
         }
     }
 

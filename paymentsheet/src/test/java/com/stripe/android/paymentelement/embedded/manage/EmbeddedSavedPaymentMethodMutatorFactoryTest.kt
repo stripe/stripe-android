@@ -11,6 +11,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
+import com.stripe.android.paymentelement.embedded.sheet.DefaultEmbeddedSheetAnalytics
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedNavigator
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityStateHolder
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
@@ -114,7 +115,7 @@ internal class EmbeddedSavedPaymentMethodMutatorFactoryTest {
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(
             hasCustomerConfiguration = true,
         ),
-        launchMode: EmbeddedLaunchMode = EmbeddedLaunchMode.PaymentOptions,
+        launchMode: EmbeddedLaunchMode = EmbeddedLaunchMode.PaymentOptions(flowController = null),
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
@@ -137,7 +138,7 @@ internal class EmbeddedSavedPaymentMethodMutatorFactoryTest {
         val navigator = EmbeddedNavigator(
             coroutineScope = lifecycleScope,
             initialScreen = rootScreen,
-            eventReporter = eventReporter,
+            analytics = DefaultEmbeddedSheetAnalytics(eventReporter),
         )
         val repository = FakeSavedPaymentMethodRepository(paymentMethods = listOf(paymentMethod))
         val factory = EmbeddedSavedPaymentMethodMutatorFactory(

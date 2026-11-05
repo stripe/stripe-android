@@ -36,6 +36,7 @@ internal class EmbeddedAddPaymentMethodInteractorFactory @Inject constructor(
     private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper,
     private val customerStateHolder: CustomerStateHolder,
     private val autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory,
+    private val sheetAnalytics: EmbeddedSheetAnalytics,
 ) {
     @Suppress("LongMethod")
     fun create(): AddPaymentMethodInteractor {
@@ -81,7 +82,7 @@ internal class EmbeddedAddPaymentMethodInteractorFactory @Inject constructor(
             createFormArguments = formHelper::createFormArguments,
             formElementsForCode = formHelper::formElementsForCode,
             clearErrorMessages = { sheetActivityStateHolder.updateError(null) },
-            reportFieldInteraction = eventReporter::onPaymentMethodFormInteraction,
+            reportFieldInteraction = sheetAnalytics::onFormInteraction,
             onFormFieldValuesChanged = formHelper::onFormFieldValuesChanged,
             reportPaymentMethodTypeSelected = eventReporter::onSelectPaymentMethod,
             reportPromotionDisplayed = { code ->

@@ -9,6 +9,7 @@ import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
@@ -17,6 +18,7 @@ import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.form.EmbeddedFormInteractorFactory
 import com.stripe.android.paymentelement.embedded.form.OnClickDelegateOverrideImpl
+import com.stripe.android.paymentelement.embedded.isFlowController
 import com.stripe.android.paymentelement.embedded.manage.EmbeddedManageScreenInteractorFactory
 import com.stripe.android.paymentelement.embedded.manage.EmbeddedUpdateScreenInteractorFactory
 import com.stripe.android.paymentsheet.CustomerStateHolder
@@ -46,6 +48,7 @@ import org.junit.Rule
 import org.junit.Test
 import javax.inject.Provider
 
+@Suppress("LargeClass")
 internal class InitialPaymentOptionsScreenFactoryTest {
     @get:Rule
     val coroutineTestRule = CoroutineTestRule()
@@ -108,7 +111,7 @@ internal class InitialPaymentOptionsScreenFactoryTest {
 
     @Test
     fun `present reopens restored single payment method directly on its form`() = testScenario(
-        launchMode = EmbeddedLaunchMode.PaymentOptions,
+        launchMode = EmbeddedLaunchMode.PaymentOptions(flowController = null),
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
         ),
@@ -126,7 +129,7 @@ internal class InitialPaymentOptionsScreenFactoryTest {
 
     @Test
     fun `present with saved payment methods retains payment options beneath restored form`() = testScenario(
-        launchMode = EmbeddedLaunchMode.PaymentOptions,
+        launchMode = EmbeddedLaunchMode.PaymentOptions(flowController = null),
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
         ),
@@ -145,7 +148,7 @@ internal class InitialPaymentOptionsScreenFactoryTest {
 
     @Test
     fun `present with multiple payment methods retains payment options beneath restored form`() = testScenario(
-        launchMode = EmbeddedLaunchMode.PaymentOptions,
+        launchMode = EmbeddedLaunchMode.PaymentOptions(flowController = null),
     ) {
         selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
 
@@ -464,7 +467,7 @@ internal class InitialPaymentOptionsScreenFactoryTest {
 
     @Test
     fun `continue click delegates to continue coordinator`() = testScenario {
-        factory.onContinueClick()
+        factory.onPrimaryButtonClick()
 
         assertThat(continueCoordinator.onContinueCalls.awaitItem()).isEqualTo(Unit)
     }
@@ -474,7 +477,7 @@ internal class InitialPaymentOptionsScreenFactoryTest {
         selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
         onClickOverrideDelegate.set { onClickOverrideCalls.add(Unit) }
 
-        factory.onContinueClick()
+        factory.onPrimaryButtonClick()
 
         assertThat(onClickOverrideCalls.awaitItem()).isEqualTo(Unit)
         onClickOverrideCalls.expectNoEvents()
@@ -486,7 +489,7 @@ internal class InitialPaymentOptionsScreenFactoryTest {
         assertThat(selectionHolder.selection.value).isNull()
         onClickOverrideDelegate.set { onClickOverrideCalls.add(Unit) }
 
-        factory.onContinueClick()
+        factory.onPrimaryButtonClick()
 
         assertThat(onClickOverrideCalls.awaitItem()).isEqualTo(Unit)
         onClickOverrideCalls.expectNoEvents()
@@ -496,20 +499,263 @@ internal class InitialPaymentOptionsScreenFactoryTest {
     @Test
     fun `clearing override restores normal continuation`() = testScenario {
         onClickOverrideDelegate.set { onClickOverrideCalls.add(Unit) }
-        factory.onContinueClick()
+        factory.onPrimaryButtonClick()
         assertThat(onClickOverrideCalls.awaitItem()).isEqualTo(Unit)
         continueCoordinator.onContinueCalls.expectNoEvents()
 
         onClickOverrideDelegate.clear()
-        factory.onContinueClick()
+        factory.onPrimaryButtonClick()
 
         assertThat(continueCoordinator.onContinueCalls.awaitItem()).isEqualTo(Unit)
         onClickOverrideCalls.expectNoEvents()
     }
 
+    @Test
+    fun `FlowController horizontal opens saved payment methods if no new payment method was previously selected`() =
+        testScenario(
+            launchMode = FLOW_CONTROLLER_LAUNCH_MODE,
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                isGooglePayReady = true,
+                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+            ),
+        ) {
+            assertThat(factory.createInitialScreen().single())
+                .isInstanceOf<EmbeddedNavigator.Screen.HorizontalSavedPaymentOptions>()
+        }
+
+    @Test
+    fun `FlowController horizontal restores backstack when user previously selected a new payment method`() =
+        testScenario(
+            launchMode = FLOW_CONTROLLER_LAUNCH_MODE,
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+            ),
+            customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
+                paymentMethods = PaymentMethodFixtures.createCards(1),
+            ),
+            testDispatcher = StandardTestDispatcher(),
+        ) {
+            selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+
+            val screens = factory.createInitialScreen()
+
+            assertThat(screens).hasSize(2)
+            assertThat(screens.first()).isInstanceOf<EmbeddedNavigator.Screen.HorizontalSavedPaymentOptions>()
+            assertThat(screens[1]).isInstanceOf<EmbeddedNavigator.Screen.HorizontalPaymentOptions>()
+        }
+
+    @Test
+    fun `FlowController horizontal opens saved payment methods if payment methods is not empty`() = testScenario(
+        launchMode = FLOW_CONTROLLER_LAUNCH_MODE,
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            isGooglePayReady = false,
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+        ),
+        customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
+            paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+        ),
+    ) {
+        assertThat(factory.createInitialScreen().single())
+            .isInstanceOf<EmbeddedNavigator.Screen.HorizontalSavedPaymentOptions>()
+    }
+
+    @Test
+    fun `FlowController automatic layout with one payment method and a saved method opens saved payment methods`() =
+        testScenario(
+            launchMode = FLOW_CONTROLLER_LAUNCH_MODE,
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                isGooglePayReady = false,
+                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Automatic,
+            ),
+            customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
+                paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+            ),
+        ) {
+            assertThat(factory.createInitialScreen().single())
+                .isInstanceOf<EmbeddedNavigator.Screen.HorizontalSavedPaymentOptions>()
+        }
+
+    @Test
+    fun `FlowController horizontal opens form if only card is supported and payment methods is empty`() = testScenario(
+        launchMode = FLOW_CONTROLLER_LAUNCH_MODE,
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            isGooglePayReady = false,
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+        ),
+    ) {
+        val screen = factory.createInitialScreen().single()
+
+        assertThat(screen).isInstanceOf<EmbeddedNavigator.Screen.Form>()
+        assertThat((screen as EmbeddedNavigator.Screen.Form).paymentMethodCode).isEqualTo("card")
+    }
+
+    @Test
+    fun `FlowController automatic layout opens form if only card is supported and payment methods is empty`() =
+        testScenario(
+            launchMode = FLOW_CONTROLLER_LAUNCH_MODE,
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                isGooglePayReady = false,
+                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Automatic,
+            ),
+        ) {
+            assertThat(factory.createInitialScreen().single()).isInstanceOf<EmbeddedNavigator.Screen.Form>()
+        }
+
+    @Test
+    fun `FlowController single non-card payment method uses form without saved methods in horizontal`() =
+        testScenario(
+            launchMode = FLOW_CONTROLLER_LAUNCH_MODE,
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    paymentMethodTypes = listOf("cashapp"),
+                ),
+                isGooglePayReady = false,
+                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+            ),
+        ) {
+            val screen = factory.createInitialScreen().single() as EmbeddedNavigator.Screen.Form
+
+            assertThat(screen.paymentMethodCode).isEqualTo("cashapp")
+        }
+
+    @Test
+    fun `FlowController single non-card payment method uses form without saved methods in automatic`() =
+        testScenario(
+            launchMode = FLOW_CONTROLLER_LAUNCH_MODE,
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    paymentMethodTypes = listOf("cashapp"),
+                ),
+                isGooglePayReady = false,
+                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Automatic,
+            ),
+        ) {
+            val screen = factory.createInitialScreen().single() as EmbeddedNavigator.Screen.Form
+
+            assertThat(screen.paymentMethodCode).isEqualTo("cashapp")
+        }
+
+    @Test
+    fun `FlowController single horizontal method with Google Pay opens saved payment methods`() = testScenario(
+        launchMode = FLOW_CONTROLLER_LAUNCH_MODE,
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            isGooglePayReady = true,
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+        ),
+    ) {
+        assertThat(factory.createInitialScreen().single())
+            .isInstanceOf<EmbeddedNavigator.Screen.HorizontalSavedPaymentOptions>()
+    }
+
+    @Test
+    fun `FlowController horizontal multiple methods without saved methods or Google Pay opens add payment method`() =
+        testScenario(
+            launchMode = FLOW_CONTROLLER_LAUNCH_MODE,
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    paymentMethodTypes = listOf("card", "cashapp"),
+                ),
+                isGooglePayReady = false,
+                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+            ),
+        ) {
+            assertThat(factory.createInitialScreen().single())
+                .isInstanceOf<EmbeddedNavigator.Screen.HorizontalPaymentOptions>()
+        }
+
+    @Test
+    fun `FlowController unsupported payment methods do not prevent routing directly to the single form`() =
+        testScenario(
+            launchMode = FLOW_CONTROLLER_LAUNCH_MODE,
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    paymentMethodTypes = listOf("card", "unsupported_payment_method"),
+                ),
+                isGooglePayReady = false,
+                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+            ),
+        ) {
+            val screen = factory.createInitialScreen().single() as EmbeddedNavigator.Screen.Form
+
+            assertThat(screen.paymentMethodCode).isEqualTo("card")
+            assertThat(screen.title().value).isNull()
+        }
+
+    @Test
+    fun `FlowController vertical opens form if payment methods is empty and one payment method is supported`() =
+        testScenario(
+            launchMode = FLOW_CONTROLLER_LAUNCH_MODE,
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+            ),
+        ) {
+            assertThat(factory.createInitialScreen().single()).isInstanceOf<EmbeddedNavigator.Screen.Form>()
+        }
+
+    @Test
+    fun `FlowController vertical opens payment options if payment methods is not empty`() = testScenario(
+        launchMode = FLOW_CONTROLLER_LAUNCH_MODE,
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+        ),
+        customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
+            paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+        ),
+    ) {
+        assertThat(factory.createInitialScreen().single())
+            .isInstanceOf<EmbeddedNavigator.Screen.VerticalPaymentOptions>()
+    }
+
+    @Test
+    fun `FlowController vertical opens payment options if more than one payment method is supported`() = testScenario(
+        launchMode = FLOW_CONTROLLER_LAUNCH_MODE,
+    ) {
+        assertThat(factory.createInitialScreen().single())
+            .isInstanceOf<EmbeddedNavigator.Screen.VerticalPaymentOptions>()
+    }
+
+    @Test
+    fun `FlowController automatic layout with three payment methods opens vertical payment options`() = testScenario(
+        launchMode = FLOW_CONTROLLER_LAUNCH_MODE,
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "cashapp", "klarna"),
+            ),
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Automatic,
+        ),
+    ) {
+        assertThat(factory.createInitialScreen().single())
+            .isInstanceOf<EmbeddedNavigator.Screen.VerticalPaymentOptions>()
+    }
+
+    @Test
+    fun `FlowController primary button reports the press and continues`() = testScenario(
+        launchMode = FLOW_CONTROLLER_LAUNCH_MODE,
+    ) {
+        selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+
+        factory.onPrimaryButtonClick()
+
+        assertThat(eventReporter.pressConfirmButtonCalls.awaitItem())
+            .isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+        assertThat(continueCoordinator.onContinueCalls.awaitItem()).isEqualTo(Unit)
+    }
+
+    @Test
+    fun `FlowController primary button with an override does not report the press`() = testScenario(
+        launchMode = FLOW_CONTROLLER_LAUNCH_MODE,
+    ) {
+        selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+        onClickOverrideDelegate.set { onClickOverrideCalls.add(Unit) }
+
+        factory.onPrimaryButtonClick()
+
+        assertThat(onClickOverrideCalls.awaitItem()).isEqualTo(Unit)
+    }
+
     @Suppress("LongMethod")
     private fun testScenario(
-        launchMode: EmbeddedLaunchMode = EmbeddedLaunchMode.PaymentOptions,
+        launchMode: EmbeddedLaunchMode = EmbeddedLaunchMode.PaymentOptions(flowController = null),
         isGooglePayReady: Boolean = true,
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
@@ -557,6 +803,7 @@ internal class InitialPaymentOptionsScreenFactoryTest {
             linkAccountHolder = linkAccountHolder,
             continueCoordinator = continueCoordinator,
             sheetActivityStateHolder = sheetActivityStateHolder,
+            launchMode = launchMode,
         )
         val formScreenFactory = DefaultEmbeddedFormScreenFactory(
             formFactory = EmbeddedNavigator.Screen.Form.Factory(
@@ -570,12 +817,14 @@ internal class InitialPaymentOptionsScreenFactoryTest {
                     eventReporter = FakeEventReporter(),
                     paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
                     autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
+                    sheetAnalytics = DefaultEmbeddedSheetAnalytics(FakeEventReporter()),
                 ),
                 sheetActivityStateHolder = sheetActivityStateHolder,
                 confirmationHelper = FakeSheetActivityConfirmationHelper(),
                 embeddedSelectionHolder = selectionHolder,
                 customerStateHolder = customerStateHolder,
                 linkAccountHolder = linkAccountHolder,
+                sheetLaunchMode = launchMode,
             ),
         )
 
@@ -589,7 +838,7 @@ internal class InitialPaymentOptionsScreenFactoryTest {
         )
         val navigator = EmbeddedNavigator(
             coroutineScope = testScope,
-            eventReporter = eventReporter,
+            analytics = DefaultEmbeddedSheetAnalytics(eventReporter),
             initialScreen = initialScreen,
         )
         assertThat(eventReporter.showNewPaymentOptionsCalls.awaitItem()).isEqualTo(Unit)
@@ -605,6 +854,7 @@ internal class InitialPaymentOptionsScreenFactoryTest {
             paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
             customerStateHolder = customerStateHolder,
             autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
+            sheetAnalytics = DefaultEmbeddedSheetAnalytics(FakeEventReporter()),
         )
         val savedPaymentMethodMutator = SavedPaymentMethodMutator(
             paymentMethodMetadataFlow = stateFlowOf(paymentMethodMetadata),
@@ -645,6 +895,15 @@ internal class InitialPaymentOptionsScreenFactoryTest {
             onClickOverrideDelegate = onClickOverrideDelegate,
             savedPaymentMethodMutator = savedPaymentMethodMutator,
             walletsInteractor = walletsInteractor,
+            sheetAnalytics = if (launchMode.isFlowController) {
+                FlowControllerEmbeddedSheetAnalytics(
+                    savedStateHandle = savedStateHandle,
+                    eventReporter = eventReporter,
+                    coroutineScope = testScope,
+                )
+            } else {
+                DefaultEmbeddedSheetAnalytics(eventReporter)
+            },
         )
 
         Scenario(
@@ -674,6 +933,15 @@ internal class InitialPaymentOptionsScreenFactoryTest {
         val eventReporter: FakeEventReporter,
         val testScope: TestScope,
     )
+
+    private companion object {
+        val FLOW_CONTROLLER_LAUNCH_MODE = EmbeddedLaunchMode.PaymentOptions(
+            flowController = EmbeddedLaunchMode.FlowControllerOptions(
+                visibleWallets = WalletType.entries,
+                googlePlacesApiKey = null,
+            ),
+        )
+    }
 }
 
 private class FakeEmbeddedUpdateScreenInteractorFactory : EmbeddedUpdateScreenInteractorFactory {

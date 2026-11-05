@@ -65,6 +65,28 @@ internal class SheetWalletsHeaderTest {
     }
 
     @Test
+    fun `FlowController root horizontal saved payment options hides header`() {
+        val result = createState(
+            launchMode = EmbeddedLaunchMode.PaymentOptions(
+                flowController = EmbeddedLaunchMode.FlowControllerOptions(
+                    visibleWallets = WalletType.entries,
+                    googlePlacesApiKey = null,
+                ),
+            ),
+            screen = EmbeddedNavigator.Screen.HorizontalSavedPaymentOptions(
+                interactor = FakeSelectSavedPaymentMethodsInteractor(),
+                sheetActivityState = FakeSheetActivityStateHolder().state,
+                mandateText = stateFlowOf(null),
+                isContinueButtonVisible = stateFlowOf(false),
+                onContinueClick = {},
+                onPrimaryButtonDisabledClick = {},
+            ),
+        )
+
+        assertThat(result).isNull()
+    }
+
+    @Test
     fun `nested screen hides header`() {
         val result = createState(screen = createFormScreen(), canGoBack = true)
 
@@ -109,7 +131,7 @@ internal class SheetWalletsHeaderTest {
     }
 
     private fun createState(
-        launchMode: EmbeddedLaunchMode = EmbeddedLaunchMode.PaymentOptions,
+        launchMode: EmbeddedLaunchMode = EmbeddedLaunchMode.PaymentOptions(flowController = null),
         screen: EmbeddedNavigator.Screen,
         canGoBack: Boolean = false,
         walletsState: WalletsState? = createWalletsState(),

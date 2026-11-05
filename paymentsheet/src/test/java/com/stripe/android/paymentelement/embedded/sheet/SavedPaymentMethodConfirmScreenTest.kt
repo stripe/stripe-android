@@ -111,7 +111,7 @@ internal class SavedPaymentMethodConfirmScreenTest {
 
     @Test
     fun `completed processing preserves PaymentOptions launch mode`() = runTest {
-        val launchMode = EmbeddedLaunchMode.PaymentOptions
+        val launchMode = EmbeddedLaunchMode.PaymentOptions(flowController = null)
         runScenario(
             initialState = defaultState().copy(
                 isEnabled = false,
