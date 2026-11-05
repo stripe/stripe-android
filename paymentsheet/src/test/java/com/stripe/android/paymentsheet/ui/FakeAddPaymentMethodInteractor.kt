@@ -39,6 +39,7 @@ internal class FakeAddPaymentMethodInteractor(
                     loginState = LinkState.LoginState.LoggedOut,
                     signupMode = null,
                 ),
+                isInstantDebitsOnboardingEnabled = true,
             ),
             paymentMethodCode: PaymentMethodCode = metadata.supportedPaymentMethodTypes().first(),
             isValidating: Boolean = false,

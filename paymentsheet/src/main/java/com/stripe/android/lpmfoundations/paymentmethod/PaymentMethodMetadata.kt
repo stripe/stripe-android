@@ -76,6 +76,7 @@ internal data class PaymentMethodMetadata(
     val linkMode: LinkMode?,
     private val linkBrand: LinkBrand,
     val linkStateResult: LinkStateResult?,
+    val isInstantDebitsOnboardingEnabled: Boolean,
     val paymentMethodIncentive: PaymentMethodIncentive?,
     val financialConnectionsAvailability: FinancialConnectionsAvailability?,
     val cardBrandFilter: CardBrandFilter,
@@ -437,6 +438,9 @@ internal data class PaymentMethodMetadata(
                 linkMode = linkSettings?.linkMode,
                 linkBrand = elementsSession.linkBrand,
                 linkStateResult = linkStateResult,
+                isInstantDebitsOnboardingEnabled = linkSettings
+                    ?.linkSupportedPaymentMethodsOnboardingEnabled
+                    ?.contains("INSTANT_DEBITS") == true,
                 paymentMethodIncentive = linkSettings?.linkConsumerIncentive?.toPaymentMethodIncentive(),
                 isGooglePayReady = isGooglePayReady,
                 displayableCustomPaymentMethods = elementsSession.toDisplayableCustomPaymentMethods(configuration),
@@ -508,6 +512,7 @@ internal data class PaymentMethodMetadata(
                 linkMode = elementsSession.linkSettings?.linkMode,
                 linkBrand = elementsSession.linkBrand,
                 linkStateResult = null,
+                isInstantDebitsOnboardingEnabled = false,
                 paymentMethodIncentive = null,
                 externalPaymentMethodSpecs = emptyList(),
                 displayableCustomPaymentMethods = emptyList(),
