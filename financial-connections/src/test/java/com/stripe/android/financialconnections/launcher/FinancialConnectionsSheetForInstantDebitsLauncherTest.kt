@@ -5,6 +5,7 @@ import androidx.lifecycle.Lifecycle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
+import com.stripe.android.financialconnections.ThemeMode
 import com.stripe.android.financialconnections.intentBuilder
 import com.stripe.android.financialconnections.utils.FakeActivityResultRegistry
 import com.stripe.android.financialconnections.utils.TestFragment
@@ -19,6 +20,7 @@ class FinancialConnectionsSheetForInstantDebitsLauncherTest {
         financialConnectionsSessionClientSecret = "",
         apiConfiguration = ApiKeyFixtures.DEFAULT_API_CONFIG,
         preCollectedConsent = null,
+        themeMode = ThemeMode.Automatic,
     )
     private val encodedPaymentMethod = "{\"id\": \"pm_123\"}"
 

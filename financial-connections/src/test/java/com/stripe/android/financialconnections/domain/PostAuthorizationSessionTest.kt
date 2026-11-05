@@ -7,6 +7,7 @@ import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.ApiKeyFixtures.sessionManifest
 import com.stripe.android.financialconnections.ApiKeyFixtures.syncResponse
 import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
+import com.stripe.android.financialconnections.ThemeMode
 import com.stripe.android.financialconnections.di.APPLICATION_ID
 import com.stripe.android.financialconnections.exception.InstitutionPlannedDowntimeError
 import com.stripe.android.financialconnections.exception.InstitutionUnplannedDowntimeError
@@ -27,6 +28,7 @@ internal class PostAuthorizationSessionTest {
             ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
             ApiKeyFixtures.DEFAULT_API_CONFIG,
             preCollectedConsent = null,
+            themeMode = ThemeMode.Automatic,
         ),
         APPLICATION_ID
     )

@@ -2,6 +2,7 @@ package com.stripe.android.financialconnections.lite
 
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
+import com.stripe.android.financialconnections.ThemeMode
 import com.stripe.android.financialconnections.lite.repository.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.lite.repository.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccountList
@@ -18,6 +19,7 @@ internal object TextFixtures {
         financialConnectionsSessionClientSecret = "client_secret_123",
         apiConfiguration = DEFAULT_API_CONFIG,
         preCollectedConsent = null,
+        themeMode = ThemeMode.Automatic,
     )
 
     val syncResponse = SynchronizeSessionResponse(

@@ -8,6 +8,7 @@ import com.stripe.android.core.networking.AnalyticsRequestV2
 import com.stripe.android.core.networking.AnalyticsRequestV2Executor
 import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
+import com.stripe.android.financialconnections.ThemeMode
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Metadata
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
@@ -72,7 +73,8 @@ internal class DefaultFinancialConnectionsAnalyticsEventSenderTest {
         configuration = FinancialConnectionsSheetConfiguration(
             financialConnectionsSessionClientSecret = ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
             apiConfiguration = ApiKeyFixtures.DEFAULT_API_CONFIG,
-            preCollectedConsent = null
+            preCollectedConsent = null,
+            themeMode = ThemeMode.Automatic,
         ),
         locale = Locale.US,
         context = ApplicationProvider.getApplicationContext<Application>(),
