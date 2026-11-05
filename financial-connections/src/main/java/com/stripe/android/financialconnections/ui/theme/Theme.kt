@@ -3,9 +3,6 @@ package com.stripe.android.financialconnections.ui.theme
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
-import android.content.res.Configuration
-import android.content.res.Resources
-import android.view.ContextThemeWrapper
 import android.view.Window
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
@@ -40,6 +37,7 @@ import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.ThemeMode
 import com.stripe.android.financialconnections.ui.LocalNavHostController
 import com.stripe.android.model.LinkBrand
+import com.stripe.android.uicore.utils.withUiMode
 
 @Immutable
 internal sealed interface Theme {
@@ -324,33 +322,6 @@ private fun FinancialConnectionsThemeContent(
                 }
             }
         )
-    }
-}
-
-private fun Context.withUiMode(
-    configuration: Configuration,
-    isDark: Boolean,
-    inspectionMode: Boolean,
-): Context {
-    val config = Configuration(configuration).apply {
-        val nightMode = if (isDark) Configuration.UI_MODE_NIGHT_YES else Configuration.UI_MODE_NIGHT_NO
-        uiMode = (uiMode and Configuration.UI_MODE_NIGHT_MASK.inv()) or nightMode
-    }
-    if (config == resources.configuration) {
-        return this
-    }
-
-    return object : ContextThemeWrapper(this, theme) {
-        override fun getResources(): Resources {
-            @Suppress("DEPRECATION")
-            if (inspectionMode) {
-                val baseResources = this@withUiMode.resources
-                return Resources(baseResources.assets, baseResources.displayMetrics, config)
-            }
-            return super.getResources()
-        }
-    }.apply {
-        applyOverrideConfiguration(config)
     }
 }
 
