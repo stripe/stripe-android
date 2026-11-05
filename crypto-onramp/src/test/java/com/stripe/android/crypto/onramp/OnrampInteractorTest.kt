@@ -3066,7 +3066,10 @@ class OnrampInteractorTest {
 
         response.complete(Result.success(CryptoCustomerResponse("crc_old")))
 
-        assertThat(operation.await()).isInstanceOf(OnrampRegisterLinkUserResult.Failed::class.java)
+        val failed = operation.await() as OnrampRegisterLinkUserResult.Failed
+        val error = assertUnexpectedError<IllegalStateException>(failed.error)
+        assertThat(error.userMessage).isNotEmpty()
+        assertThat(error.underlyingError.message).isEqualTo("The Onramp session ended during the operation")
         assertThat(interactor.state.value.cryptoCustomerId).isNull()
     }
 
@@ -3089,7 +3092,16 @@ class OnrampInteractorTest {
 
         response.complete(LinkController.RegisterConsumerResult.Success)
 
-        assertThat(operation.await()).isInstanceOf(OnrampRegisterLinkUserResult.Failed::class.java)
+        val failed = operation.await() as OnrampRegisterLinkUserResult.Failed
+        val error = assertUnexpectedError<IllegalStateException>(failed.error)
+        assertThat(error.userMessage).isNotEmpty()
+        assertThat(error.underlyingError.message).isEqualTo("The Onramp session ended during the operation")
+        testAnalyticsService.assertContainsEvent(
+            OnrampAnalyticsEvent.ErrorOccurred(
+                operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.RegisterLinkUser,
+                error = failed.error,
+            )
+        )
         assertThat(interactor.state.value.cryptoCustomerId).isEqualTo("crc_new")
         verify(cryptoApiRepository, never()).createCryptoCustomer(any())
     }
@@ -3112,7 +3124,10 @@ class OnrampInteractorTest {
 
         response.complete(Result.success(CryptoCustomerResponse("crc_old")))
 
-        assertThat(operation.await()).isInstanceOf(OnrampTokenAuthenticationResult.Failed::class.java)
+        val failed = operation.await() as OnrampTokenAuthenticationResult.Failed
+        val error = assertUnexpectedError<IllegalStateException>(failed.error)
+        assertThat(error.userMessage).isNotEmpty()
+        assertThat(error.underlyingError.message).isEqualTo("The Onramp session ended during the operation")
         assertThat(interactor.state.value.cryptoCustomerId).isNull()
     }
 
@@ -3133,7 +3148,16 @@ class OnrampInteractorTest {
 
         response.complete(LinkController.AuthenticateWithTokenResult.Success)
 
-        assertThat(operation.await()).isInstanceOf(OnrampTokenAuthenticationResult.Failed::class.java)
+        val failed = operation.await() as OnrampTokenAuthenticationResult.Failed
+        val error = assertUnexpectedError<IllegalStateException>(failed.error)
+        assertThat(error.userMessage).isNotEmpty()
+        assertThat(error.underlyingError.message).isEqualTo("The Onramp session ended during the operation")
+        testAnalyticsService.assertContainsEvent(
+            OnrampAnalyticsEvent.ErrorOccurred(
+                operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.AuthenticateUserWithAuthToken,
+                error = failed.error,
+            )
+        )
         assertThat(interactor.state.value.cryptoCustomerId).isEqualTo("crc_new")
         verify(cryptoApiRepository, never()).createCryptoCustomer(any())
     }

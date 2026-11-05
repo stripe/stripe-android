@@ -189,7 +189,9 @@ internal class OnrampInteractor @Inject constructor(
         ) {
             is LinkController.AuthenticateWithTokenResult.Success -> {
                 if (_state.value.sessionToken !== sessionToken) {
-                    return OnrampTokenAuthenticationResult.Failed(SessionChangedException())
+                    val error = mapError(Operation.AuthenticateUserWithAuthToken, SessionChangedException())
+                    trackError(Operation.AuthenticateUserWithAuthToken, error)
+                    return OnrampTokenAuthenticationResult.Failed(error)
                 }
                 val secret = consumerSessionClientSecret()
                 if (secret != null) {
@@ -200,7 +202,9 @@ internal class OnrampInteractor @Inject constructor(
                                     it.copy(cryptoCustomerId = customerResponse.id)
                                 }
                                 if (!updated) {
-                                    return OnrampTokenAuthenticationResult.Failed(SessionChangedException())
+                                    val error = mapError(Operation.AuthenticateUserWithAuthToken, SessionChangedException())
+                                    trackError(Operation.AuthenticateUserWithAuthToken, error)
+                                    return OnrampTokenAuthenticationResult.Failed(error)
                                 }
 
                                 analyticsService?.track(
@@ -266,14 +270,18 @@ internal class OnrampInteractor @Inject constructor(
         return when (result) {
             is LinkController.RegisterConsumerResult.Success -> {
                 if (_state.value.sessionToken !== sessionToken) {
-                    return OnrampRegisterLinkUserResult.Failed(SessionChangedException())
+                    val error = mapError(Operation.RegisterLinkUser, SessionChangedException())
+                    trackError(Operation.RegisterLinkUser, error)
+                    return OnrampRegisterLinkUserResult.Failed(error)
                 }
                 val secret = consumerSessionClientSecret()
                 if (secret != null) {
                     cryptoApiRepository.createCryptoCustomer(secret).fold(
                         onSuccess = { customerResponse ->
                             if (!updateForSession(sessionToken) { it.copy(cryptoCustomerId = customerResponse.id) }) {
-                                return OnrampRegisterLinkUserResult.Failed(SessionChangedException())
+                                val error = mapError(Operation.RegisterLinkUser, SessionChangedException())
+                                trackError(Operation.RegisterLinkUser, error)
+                                return OnrampRegisterLinkUserResult.Failed(error)
                             }
                             analyticsService?.track(OnrampAnalyticsEvent.LinkRegistrationCompleted)
                             OnrampRegisterLinkUserResult.Completed(customerResponse.id)
