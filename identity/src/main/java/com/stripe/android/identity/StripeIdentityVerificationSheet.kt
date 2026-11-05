@@ -100,6 +100,7 @@ internal class StripeIdentityVerificationSheet internal constructor(
                 biometricConsent = configuration.biometricConsent,
                 primaryButtonStyle = configuration.primaryButtonStyle,
                 secondaryButtonStyle = configuration.secondaryButtonStyle,
+                networkedIdentity = configuration.networkedIdentity,
                 injectorKey = injectorKey,
                 presentTime = System.currentTimeMillis()
             )

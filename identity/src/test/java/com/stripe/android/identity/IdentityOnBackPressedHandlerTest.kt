@@ -14,8 +14,10 @@ import com.stripe.android.identity.navigation.ErrorDestination
 import com.stripe.android.identity.navigation.ErrorDestination.Companion.ARG_SHOULD_FAIL
 import com.stripe.android.identity.navigation.InitialLoadingDestination
 import com.stripe.android.identity.navigation.routeToScreenName
+import com.stripe.android.identity.networked.NetworkedIdentityState
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -55,6 +57,16 @@ class IdentityOnBackPressedHandlerTest {
 
         verifyNoInteractions(mockFlowFinishable)
         verifyNoInteractions(mockNavController)
+        verifyNoInteractions(mockNavController)
+    }
+
+    @Test
+    fun testBackPressDuringNetworkedIdentityAttempt() {
+        whenever(mockIdentityViewModel.networkedIdentityState)
+            .thenReturn(MutableStateFlow(NetworkedIdentityState.SavePending))
+        handler.handleOnBackPressed()
+
+        verifyNoInteractions(mockFlowFinishable)
         verifyNoInteractions(mockNavController)
     }
 
@@ -109,6 +121,28 @@ class IdentityOnBackPressedHandlerTest {
     }
 
     @Test
+    fun testBackPressOnConfirmationPageAfterResumingFromLoading() {
+        val loadingNavBackStackEntry = mock<NavBackStackEntry> {
+            on { destination } doReturn NavDestination("").also {
+                it.route = InitialLoadingDestination.ROUTE.route
+            }
+        }
+        val mockDestination = mock<NavDestination> {
+            on { route } doReturn ConfirmationDestination.ROUTE.route
+        }
+        handler.updateState(
+            destination = mockDestination,
+            args = null
+        )
+        whenever(mockNavController.previousBackStackEntry).thenReturn(loadingNavBackStackEntry)
+
+        handler.handleOnBackPressed()
+
+        verify(mockIdentityViewModel).sendSucceededAnalyticsRequestForNative()
+        verify(mockFlowFinishable).finishWithResult(eq(IdentityVerificationSheet.VerificationFlowResult.Completed))
+    }
+
+    @Test
     fun testBackPressOnConsentPage() = runBlocking {
         val mockDestination = mock<NavDestination> {
             on { route } doReturn ConsentDestination.ROUTE.route
@@ -130,6 +164,20 @@ class IdentityOnBackPressedHandlerTest {
         verify(mockFlowFinishable).finishWithResult(
             eq(IdentityVerificationSheet.VerificationFlowResult.Canceled)
         )
+    }
+
+    @Test
+    fun testBackPressOnConsentPageAfterNetworkedIdentitySubmitted() = runBlocking {
+        whenever(mockIdentityViewModel.isVerificationPageSubmitted).thenReturn(true)
+        val mockDestination = mock<NavDestination> {
+            on { route } doReturn ConsentDestination.ROUTE.route
+        }
+        handler.updateState(destination = mockDestination, args = null)
+
+        handler.handleOnBackPressed()
+
+        verify(mockIdentityViewModel).sendSucceededAnalyticsRequestForNative()
+        verify(mockFlowFinishable).finishWithResult(eq(IdentityVerificationSheet.VerificationFlowResult.Completed))
     }
 
     @Test

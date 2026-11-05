@@ -1,6 +1,7 @@
 package com.stripe.android.identity.networked
 
 import app.cash.turbine.Turbine
+import com.stripe.android.identity.networking.models.NetworkedIdentityRoute
 import com.stripe.android.identity.networking.models.Requirement
 import com.stripe.android.identity.networking.models.VerificationPageData
 import com.stripe.android.identity.networking.models.VerificationPageDataRequirements
@@ -11,6 +12,7 @@ internal class FakeNetworkedIdentityActions : NetworkedIdentityActions {
     val attachCalls = Turbine<TokenCall>()
     val prepareSaveCalls = Turbine<TokenCall>()
     val skipCalls = Turbine<SkipCall>()
+    val committedChecks = Turbine<CommittedCheck>()
 
     override suspend fun attachDocument(associationToken: String): Result<VerificationPageData> {
         val call = TokenCall(associationToken, CompletableDeferred())
@@ -30,10 +32,17 @@ internal class FakeNetworkedIdentityActions : NetworkedIdentityActions {
         return call.response.await()
     }
 
+    override suspend fun verificationIfCommitted(route: NetworkedIdentityRoute): Result<VerificationPageData?> {
+        val call = CommittedCheck(route, CompletableDeferred())
+        committedChecks.add(call)
+        return call.response.await()
+    }
+
     fun ensureAllEventsConsumed() {
         attachCalls.ensureAllEventsConsumed()
         prepareSaveCalls.ensureAllEventsConsumed()
         skipCalls.ensureAllEventsConsumed()
+        committedChecks.ensureAllEventsConsumed()
     }
 
     data class TokenCall(
@@ -42,6 +51,11 @@ internal class FakeNetworkedIdentityActions : NetworkedIdentityActions {
     )
 
     data class SkipCall(val response: CompletableDeferred<Result<VerificationPageData>>)
+
+    data class CommittedCheck(
+        val route: NetworkedIdentityRoute,
+        val response: CompletableDeferred<Result<VerificationPageData?>>
+    )
 }
 
 internal fun niActionPageData(id: String = "vs_target") = VerificationPageData(
