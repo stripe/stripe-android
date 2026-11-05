@@ -33,6 +33,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.features.common.IconSize
+import com.stripe.android.financialconnections.features.common.InstitutionIcon
 import com.stripe.android.financialconnections.features.common.ListItem
 import com.stripe.android.financialconnections.features.common.ShapedIcon
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
@@ -58,6 +59,7 @@ internal fun GenericScreenPreview(
         Surface(color = colors.background) {
             GenericScreen(
                 state = state,
+                isPrimaryButtonLoading = false,
                 onClickableTextClick = {},
                 onSecondaryButtonClick = {},
                 onPrimaryButtonClick = {},
@@ -69,6 +71,7 @@ internal fun GenericScreenPreview(
 @Composable
 internal fun GenericScreen(
     state: GenericScreenState,
+    isPrimaryButtonLoading: Boolean,
     onPrimaryButtonClick: () -> Unit,
     onSecondaryButtonClick: () -> Unit,
     onClickableTextClick: (String) -> Unit,
@@ -80,6 +83,7 @@ internal fun GenericScreen(
             {
                 GenericFooter(
                     payload = it,
+                    isPrimaryButtonLoading = isPrimaryButtonLoading,
                     onPrimaryButtonClick = onPrimaryButtonClick,
                     onSecondaryButtonClick = onSecondaryButtonClick,
                     onClickableTextClick = onClickableTextClick,
@@ -93,6 +97,7 @@ internal fun GenericScreen(
             state.screen.header?.let {
                 GenericHeader(
                     payload = it,
+                    isIconInstitutionLogo = state.isHeaderIconInstitutionLogo,
                     onClickableTextClick = onClickableTextClick,
                     modifier = Modifier.padding(horizontal = 24.dp),
                 )
@@ -171,6 +176,7 @@ internal fun GenericBody(
 @Composable
 internal fun GenericHeader(
     payload: Header,
+    isIconInstitutionLogo: Boolean,
     onClickableTextClick: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -194,28 +200,42 @@ internal fun GenericHeader(
         }
 
         payload.icon?.default?.let { iconUrl ->
-            ShapedIcon(
-                modifier = iconModifier.align(payload.alignment.toComposeAlignment()),
-                backgroundShape = iconShape,
-                flushed = isBrandIcon,
-                url = iconUrl,
-                contentDescription = null,
-                // A brand icon is an institution's logo, so stand in for it with the institution
-                // placeholder rather than the person icon ShapedIcon otherwise defaults to. The
-                // debug painter replaces the image itself, so it needs the full-bleed tile; the
-                // error painter is tinted and padded, so it takes the glyph.
-                debugPainter = painterResource(
-                    id = if (isBrandIcon) {
-                        R.drawable.stripe_ic_brandicon_institution
-                    } else {
-                        R.drawable.stripe_ic_person
-                    }
-                ),
-                errorPainter = R.drawable.stripe_ic_bank
-                    .takeIf { isBrandIcon }
-                    ?.let { painterResource(id = it) },
-                iconSize = if (payload.alignment == Alignment.Center) IconSize.Large else IconSize.Medium,
-            )
+            if (isIconInstitutionLogo) {
+                // Match how institutions are shown elsewhere, such as in the institution picker.
+                // InstitutionIcon applies its modifier to the image inside StripeImage rather than
+                // to its outermost layout, so the alignment has to go on a wrapper.
+                Box(modifier = Modifier.align(payload.alignment.toComposeAlignment())) {
+                    InstitutionIcon(
+                        institutionIcon = iconUrl,
+                        // Matches the institution logo size on iOS.
+                        size = 72.dp,
+                        cornerRadius = 16.dp,
+                    )
+                }
+            } else {
+                ShapedIcon(
+                    modifier = iconModifier.align(payload.alignment.toComposeAlignment()),
+                    backgroundShape = iconShape,
+                    flushed = isBrandIcon,
+                    url = iconUrl,
+                    contentDescription = null,
+                    // A brand icon is an institution's logo, so stand in for it with the institution
+                    // placeholder rather than the person icon ShapedIcon otherwise defaults to. The
+                    // debug painter replaces the image itself, so it needs the full-bleed tile; the
+                    // error painter is tinted and padded, so it takes the glyph.
+                    debugPainter = painterResource(
+                        id = if (isBrandIcon) {
+                            R.drawable.stripe_ic_brandicon_institution
+                        } else {
+                            R.drawable.stripe_ic_person
+                        }
+                    ),
+                    errorPainter = R.drawable.stripe_ic_bank
+                        .takeIf { isBrandIcon }
+                        ?.let { painterResource(id = it) },
+                    iconSize = if (payload.alignment == Alignment.Center) IconSize.Large else IconSize.Medium,
+                )
+            }
         }
 
         if (payload.title != null) {
@@ -273,6 +293,7 @@ private fun GenericSubtitle(
 @Composable
 internal fun GenericFooter(
     payload: Footer,
+    isPrimaryButtonLoading: Boolean,
     modifier: Modifier = Modifier,
     onPrimaryButtonClick: () -> Unit,
     onSecondaryButtonClick: () -> Unit,
@@ -297,6 +318,7 @@ internal fun GenericFooter(
         payload.primaryCta?.let { action ->
             GenericButton(
                 type = FinancialConnectionsButton.Type.Primary,
+                loading = isPrimaryButtonLoading,
                 onClick = onPrimaryButtonClick,
                 action = action,
             )
@@ -305,6 +327,7 @@ internal fun GenericFooter(
         payload.secondaryCta?.let { secondaryCta ->
             GenericButton(
                 type = FinancialConnectionsButton.Type.Secondary,
+                loading = false,
                 onClick = onSecondaryButtonClick,
                 action = secondaryCta,
             )
@@ -328,10 +351,11 @@ internal fun GenericFooter(
 private fun GenericButton(
     onClick: () -> Unit,
     type: FinancialConnectionsButton.Type,
+    loading: Boolean,
     action: Footer.GenericInfoAction,
 ) {
     FinancialConnectionsButton(
-        loading = false,
+        loading = loading,
         type = type,
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
@@ -374,5 +398,6 @@ private fun Size?.toComposeSize() = when (this) {
 
 internal data class GenericScreenState(
     val screen: FinancialConnectionsGenericInfoScreen,
-    val inModal: Boolean
+    val inModal: Boolean,
+    val isHeaderIconInstitutionLogo: Boolean,
 )

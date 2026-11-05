@@ -75,6 +75,7 @@ private fun GenericErrorContent(
         Column(verticalArrangement = Arrangement.spacedBy(24.dp)) {
             GenericHeader(
                 payload = pane.toHeader(),
+                isIconInstitutionLogo = false,
                 onClickableTextClick = onClickableTextClick,
                 modifier = Modifier.padding(horizontal = 24.dp),
             )

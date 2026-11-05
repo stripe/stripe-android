@@ -152,6 +152,10 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                     is Message.UpdateTopAppBar -> {
                         updateTopAppBarState(message.update)
                     }
+
+                    is Message.TopAppBarLogoClicked -> {
+                        // Handled by the pane that made the logo clickable
+                    }
                 }
             }
         }
@@ -220,6 +224,15 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
             onCloseNoConfirmationClick(pane)
         } else {
             onCloseWithConfirmationClick(pane)
+        }
+    }
+
+    fun handleOnLogoClick() {
+        if (topAppBarState.value.logoClickable) {
+            val pane = currentPane.value
+            viewModelScope.launch {
+                nativeAuthFlowCoordinator().emit(Message.TopAppBarLogoClicked(pane))
+            }
         }
     }
 

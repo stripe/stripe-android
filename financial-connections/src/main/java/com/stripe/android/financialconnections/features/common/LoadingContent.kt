@@ -254,6 +254,7 @@ internal fun LoadingSpinnerPreview() {
                 FinancialConnectionsTopAppBar(
                     state = TopAppBarState(hideStripeLogo = false, linkBrand = LinkBrand.Link),
                     onCloseClick = {},
+                    onLogoClick = {},
                 )
             },
             content = {
@@ -275,6 +276,7 @@ internal fun LoadingShimmerPreview() {
                 FinancialConnectionsTopAppBar(
                     state = TopAppBarState(hideStripeLogo = false, linkBrand = LinkBrand.Link),
                     onCloseClick = {},
+                    onLogoClick = {},
                 )
             },
             content = {
@@ -317,6 +319,7 @@ internal fun LoadingShimmerWithPillPreview() {
                 FinancialConnectionsTopAppBar(
                     state = TopAppBarState(hideStripeLogo = false, linkBrand = LinkBrand.Link),
                     onCloseClick = {},
+                    onLogoClick = {},
                 )
             },
             content = {
