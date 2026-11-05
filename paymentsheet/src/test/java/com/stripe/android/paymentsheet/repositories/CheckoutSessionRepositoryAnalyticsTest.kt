@@ -204,6 +204,58 @@ class CheckoutSessionRepositoryAnalyticsTest {
         ).getOrThrow()
     }
 
+    @Test
+    fun `updateCurrency reports the requested currency on started and succeeded`() = runScenario {
+        expectEvent(
+            "update_currency.started",
+            *CheckoutAnalyticsTestFixtures.sessionParams.asPayloadMatchers(),
+            analyticsPayloadField("requested_currency", "eur"),
+            not(hasQueryParam("duration")),
+        )
+        expectEvent(
+            "update_currency.succeeded",
+            *INIT_RESPONSE_SESSION_PARAMS.asPayloadMatchers(),
+            analyticsPayloadField("requested_currency", "eur"),
+            hasQueryParam("duration"),
+        )
+        networkRule.checkoutUpdate { response ->
+            response.testBodyFromFile("checkout-session-init.json")
+        }
+
+        repository.updateCurrency(
+            checkoutSessionResponse = checkoutSessionResponse,
+            currencyCode = "eur",
+        ).getOrThrow()
+    }
+
+    @Test
+    fun `updateCurrency reports the requested currency and error type on started and failed`() = runScenario {
+        expectEvent(
+            "update_currency.started",
+            *CheckoutAnalyticsTestFixtures.sessionParams.asPayloadMatchers(),
+            analyticsPayloadField("requested_currency", "invalid"),
+            not(hasQueryParam("duration")),
+        )
+        expectEvent(
+            "update_currency.failed",
+            *CheckoutAnalyticsTestFixtures.sessionParams.asPayloadMatchers(),
+            analyticsPayloadField("requested_currency", "invalid"),
+            analyticsPayloadField("error_type", "invalid_request_error"),
+            hasQueryParam("duration"),
+        )
+        networkRule.checkoutUpdate { response ->
+            response.setResponseCode(400)
+            response.setBody("""{"error": {"type": "invalid_request_error", "message": "Invalid currency"}}""")
+        }
+
+        val result = repository.updateCurrency(
+            checkoutSessionResponse = checkoutSessionResponse,
+            currencyCode = "invalid",
+        )
+
+        assertThat(result.isFailure).isTrue()
+    }
+
     private fun runScenario(block: suspend Scenario.() -> Unit) = runTest {
         val repository = CheckoutSessionRepository(
             stripeRepository = CheckoutStripeRepositoryFactory.create(),
