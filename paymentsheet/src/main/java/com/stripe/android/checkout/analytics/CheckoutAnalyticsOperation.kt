@@ -34,7 +34,7 @@ internal abstract class CheckoutAnalyticsOperation<E>(
     }
 
     protected fun reportOutcome(
-        outcome: Outcome,
+        outcome: Outcome?,
         response: CheckoutSessionResponse?,
         error: CheckoutAnalyticsEvent.Error?,
     ) {
@@ -43,7 +43,7 @@ internal abstract class CheckoutAnalyticsOperation<E>(
                 operation = operation,
                 outcome = outcome,
                 analyticsMetadata = DefaultAnalyticsMetadataFactory.create(response),
-                duration = if (outcome == Outcome.Started) null else elapsed(),
+                duration = if (outcome == null || outcome == Outcome.Started) null else elapsed(),
                 error = error,
                 operationParams = params,
             )

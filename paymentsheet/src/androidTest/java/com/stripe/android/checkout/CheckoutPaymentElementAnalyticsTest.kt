@@ -284,6 +284,34 @@ internal class CheckoutPaymentElementAnalyticsTest {
     }
 
     @Test
+    fun testClearPaymentOptionReportsInvokedEvent() = runCheckoutPaymentElementScenario(
+        networkRule = networkRule,
+        renderPaymentElementContent = false,
+        setup = { controller ->
+            networkRule.validateCheckoutInitStartedAndSucceeded()
+            assertThat(
+                controller.configure(
+                    DEFAULT_CLIENT_SECRET,
+                    CheckoutElementsController.Configuration().paymentElement(PaymentElement.Configuration()),
+                )
+            ).isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
+        },
+    ) {
+        networkRule.validateAnalyticsRequest(
+            eventName = "checkout_elements.clear_payment_option",
+            productUsage = setOf("checkout_elements"),
+            analyticsPayloadField("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID),
+            not(hasQueryParam("duration")),
+            not(hasQueryParam("error_type")),
+            not(hasQueryParam("merchant_display_name")),
+        )
+
+        assertThat(controller.clearPaymentOption())
+            .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
+        markTestSucceeded()
+    }
+
+    @Test
     fun testConfigureApiFailureReportsInitFailedAnalytics() = runCheckoutPaymentElementScenario(
         networkRule = networkRule,
         checkoutInitResponse = ::checkoutInitApiFailureResponse,
