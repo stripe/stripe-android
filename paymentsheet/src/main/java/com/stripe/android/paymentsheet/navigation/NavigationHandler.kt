@@ -112,6 +112,7 @@ internal class NavigationHandler<T : Any>(
 
     fun resetTo(screens: List<T>): Boolean {
         if (isTransitioning.get()) {
+            screens.forEach { it.onClose() }
             return false
         }
 
