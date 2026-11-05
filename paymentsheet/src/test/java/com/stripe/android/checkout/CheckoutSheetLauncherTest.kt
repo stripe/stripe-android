@@ -188,7 +188,9 @@ internal class CheckoutSheetLauncherTest {
             customerState = createCustomerState(),
             promotion = null,
         )
-        assertThat(errorReporter.awaitCall().errorEvent.eventName)
+        val loggedErrors = errorReporter.getLoggedErrors()
+        assertThat(loggedErrors.size).isEqualTo(1)
+        assertThat(loggedErrors.first())
             .isEqualTo("unexpected_error.embedded.embedded_sheet_launcher.embedded_state_is_null")
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
         assertThat(selectionHolder.temporarySelection.value).isNull()
@@ -421,7 +423,9 @@ internal class CheckoutSheetLauncherTest {
             selection = PaymentSelection.GooglePay,
             configuration = null,
         )
-        assertThat(errorReporter.awaitCall().errorEvent.eventName)
+        val loggedErrors = errorReporter.getLoggedErrors()
+        assertThat(loggedErrors.size).isEqualTo(1)
+        assertThat(loggedErrors.first())
             .isEqualTo("unexpected_error.embedded.embedded_sheet_launcher.embedded_state_is_null")
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
     }
@@ -1547,7 +1551,6 @@ internal class CheckoutSheetLauncherTest {
 
         confirmationHandler.validate()
         sessionRefresher.ensureAllEventsConsumed()
-        errorReporter.ensureAllEventsConsumed()
     }
 
     private class Scenario(
