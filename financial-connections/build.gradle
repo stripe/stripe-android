@@ -79,6 +79,9 @@ dependencies {
     androidTestImplementation testLibs.androidx.testRunner
     androidTestImplementation testLibs.espresso.core
     androidTestImplementation testLibs.espresso.intents
+    androidTestImplementation testLibs.kotlin.coroutines
+    androidTestImplementation testLibs.testParameterInjector
+    androidTestImplementation testLibs.turbine
     androidTestImplementation testLibs.truth
 
     kspAndroidTest libs.showkaseProcessor
