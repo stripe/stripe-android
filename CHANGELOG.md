@@ -1,7 +1,10 @@
 # CHANGELOG
 
-NEXT_VERSION_BUMP: PATCH
+NEXT_VERSION_BUMP: MINOR
 ## XX.XX.XX - 20XX-XX-XX
+
+### Crypto Onramp
+* [Added][15269](https://github.com/stripe/stripe-android/pull/15269) Public KYC collection APIs to collect outstanding requirements and receive submission results.
 
 ## 23.25.2 - 2026-11-04
 
