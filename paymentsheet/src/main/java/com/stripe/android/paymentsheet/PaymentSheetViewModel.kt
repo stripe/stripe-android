@@ -13,6 +13,7 @@ import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.analytics.SessionSavedStateHandler
 import com.stripe.android.cards.CardAccountRangeRepository
+import com.stripe.android.common.analytics.experiment.PrimaryButtonExperiment
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.common.nfcscan.IsNfcScanningAvailable
@@ -107,6 +108,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     tapToAddHelperFactory: TapToAddHelper.Factory,
     override val isNfcScanningAvailable: IsNfcScanningAvailable,
     mode: EventReporter.Mode,
+    primaryButtonExperiment: PrimaryButtonExperiment,
     customerStateHolderFactory: CustomerStateHolder.Factory,
     @ViewModelScope customViewModelScope: CoroutineScope,
     private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper,
@@ -133,6 +135,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 ) {
     private val primaryButtonUiStateMapper = PrimaryButtonUiStateMapper(
         config = config,
+        primaryButtonExperiment = primaryButtonExperiment,
         currentScreenFlow = navigationHandler.currentScreen,
         buttonsEnabledFlow = buttonsEnabled,
         paymentMethodMetadataFlow = paymentMethodMetadata,
