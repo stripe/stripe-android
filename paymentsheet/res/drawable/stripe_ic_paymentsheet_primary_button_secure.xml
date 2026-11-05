@@ -1,0 +1,19 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="12dp"
+    android:height="14dp"
+    android:viewportWidth="12"
+    android:viewportHeight="14">
+    <path
+        android:pathData="M6,0.75C4.5,1.85 2.75,2.6 0.75,2.9V6.25C0.75,9.35 2.8,11.9 6,13.25C9.2,11.9 11.25,9.35 11.25,6.25V2.9C9.25,2.6 7.5,1.85 6,0.75Z"
+        android:fillColor="#00000000"
+        android:strokeColor="@color/stripe_paymentsheet_googlepay_primary_button_tint_color"
+        android:strokeWidth="1.5"
+        android:strokeLineJoin="round" />
+    <path
+        android:pathData="M3.5,6.75L5.25,8.5L8.5,5.25"
+        android:fillColor="#00000000"
+        android:strokeColor="@color/stripe_paymentsheet_googlepay_primary_button_tint_color"
+        android:strokeWidth="1.5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+</vector>
