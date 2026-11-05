@@ -65,6 +65,7 @@ class BillingInlineAutocompleteAddressInteractorTest {
             placesClient = fakePlaces,
             autocompleteConfig = config,
             coroutineScope = backgroundScope,
+            onFocusGained = {},
         )
         interactor.register { event -> eventCalls.add(event) }
 

@@ -56,6 +56,8 @@ internal class PaymentElementAutocompleteAddressInteractor(
         private val shouldUseAutocompleteProxyEndpointsProvider: () -> Boolean,
         private val eventReporter: AddressLauncherEventReporter,
     ) : AutocompleteAddressInteractor.Factory {
+        // Tracked by focus rather than creation: forms are rebuilt on tab switches while the visible
+        // form keeps its original interactor, so the last created one may not be on screen.
         private var activeInlineInteractor: BillingInlineAutocompleteAddressInteractor? = null
 
         val autocompleteFilledAddress: com.stripe.android.model.Address?
@@ -74,7 +76,6 @@ internal class PaymentElementAutocompleteAddressInteractor(
                     else -> placesClient
                 }
                 if (resolvedClient != null) {
-                    activeInlineInteractor?.dispose()
                     return BillingInlineAutocompleteAddressInteractor(
                         placesClient = resolvedClient,
                         autocompleteConfig = AutocompleteAddressInteractor.Config(
@@ -86,12 +87,11 @@ internal class PaymentElementAutocompleteAddressInteractor(
                                 autocompleteConfig.shouldUseStripeHostedAutocomplete,
                         ),
                         coroutineScope = coroutineScope,
-                    ).also { activeInlineInteractor = it }
+                        onFocusGained = { activeInlineInteractor = it },
+                    )
                 }
             }
 
-            activeInlineInteractor?.dispose()
-            activeInlineInteractor = null
             return PaymentElementAutocompleteAddressInteractor(
                 launcher = launcher,
                 apiConfigurationProvider = apiConfigurationProvider,

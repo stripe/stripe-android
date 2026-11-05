@@ -237,40 +237,51 @@ class PaymentElementAutocompleteAddressInteractorTest {
     }
 
     @Test
-    fun `Factory disposes previously created inline interactor on next create`() = test { scenario ->
-        val config = AutocompleteAddressInteractor.Config(
-            googlePlacesApiKey = "test-key",
-            autocompleteCountries = setOf("US"),
-            isPlacesAvailable = true,
-            isInlineAutocompleteEnabled = true,
-        )
+    fun `Factory keeps earlier inline interactor fetching predictions after next create`() = test { scenario ->
         val fakePlaces = FakePlacesClientProxy(
             findPredictionsResult = Result.success(FindAutocompletePredictionsResponse(emptyList())),
             fetchPlaceResult = Result.success(Address()),
         )
-        val factory = PaymentElementAutocompleteAddressInteractor.Factory(
-            launcher = scenario.launcher,
-            apiConfigurationProvider = { DEFAULT_API_CONFIG },
-            autocompleteConfig = config,
-            placesClient = fakePlaces,
-            stripeAutocompleteRepository = null,
-            coroutineScope = backgroundScope,
-            shouldUseAutocompleteProxyEndpointsProvider = { false },
-            eventReporter = FakeAddressLauncherEventReporter(),
-        )
+        val factory = createInlineFactory(scenario, fakePlaces)
         val queryFlow = MutableStateFlow("")
         val countryFlow = MutableStateFlow<String?>("US")
 
         val first = factory.create()
         first.observeQueryChanges(queryFlow, countryFlow)
 
-        // Creating a new interactor disposes the previous one, so its observation is cancelled.
+        // Forms are rebuilt on tab switches while the visible form keeps its original interactor.
         factory.create()
 
         queryFlow.value = "123 Main"
         advanceTimeBy(500)
 
-        // No predictions are fetched because the first interactor was disposed.
+        assertThat(fakePlaces.findPredictionsCalls.awaitItem().query).isEqualTo("123 Main")
+        fakePlaces.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `Factory autocompleteFilledAddress follows last focused inline interactor`() = test { scenario ->
+        val filledAddress = Address(line1 = "123 Main Street", country = "US")
+        val fakePlaces = FakePlacesClientProxy(
+            findPredictionsResult = Result.success(FindAutocompletePredictionsResponse(emptyList())),
+            fetchPlaceResult = Result.success(filledAddress),
+        )
+        val factory = createInlineFactory(scenario, fakePlaces)
+
+        val first = factory.create()
+        val second = factory.create()
+
+        first.onFocusGained()
+        first.onPredictionSelected("place_1")
+        advanceTimeBy(100)
+
+        assertThat(fakePlaces.fetchPlaceCalls.awaitItem().placeId).isEqualTo("place_1")
+        fakePlaces.resetSessionCalls.awaitItem()
+        assertThat(factory.autocompleteFilledAddress).isEqualTo(filledAddress)
+
+        second.onFocusGained()
+
+        assertThat(factory.autocompleteFilledAddress).isNull()
         fakePlaces.ensureAllEventsConsumed()
     }
 
@@ -411,6 +422,25 @@ class PaymentElementAutocompleteAddressInteractorTest {
             test(this)
         }
     }
+
+    private fun TestScope.createInlineFactory(
+        scenario: TestAutocompleteLauncher.Scenario,
+        placesClient: FakePlacesClientProxy,
+    ) = PaymentElementAutocompleteAddressInteractor.Factory(
+        launcher = scenario.launcher,
+        apiConfigurationProvider = { DEFAULT_API_CONFIG },
+        autocompleteConfig = AutocompleteAddressInteractor.Config(
+            googlePlacesApiKey = "test-key",
+            autocompleteCountries = setOf("US"),
+            isPlacesAvailable = true,
+            isInlineAutocompleteEnabled = true,
+        ),
+        placesClient = placesClient,
+        stripeAutocompleteRepository = null,
+        coroutineScope = backgroundScope,
+        shouldUseAutocompleteProxyEndpointsProvider = { false },
+        eventReporter = FakeAddressLauncherEventReporter(),
+    )
 
     private fun createInteractor(
         launcher: AutocompleteLauncher = TestAutocompleteLauncher.noOp(),
