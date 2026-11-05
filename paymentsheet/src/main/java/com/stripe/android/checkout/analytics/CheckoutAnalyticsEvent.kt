@@ -31,6 +31,7 @@ internal class CheckoutAnalyticsEvent(
         Init("init"),
         ApplyPromotionCode("apply_promotion_code"),
         RemovePromotionCode("remove_promotion_code"),
+        UpdateCurrency("update_currency"),
         UpdateEmail("update_email"),
         ClearPaymentOption("clear_payment_option"),
         RunServerUpdate("run_server_update"),

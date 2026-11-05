@@ -22,6 +22,7 @@ import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.testBodyFromFile
+import com.stripe.android.paymentsheet.model.CheckoutSessionClientSecret
 import com.stripe.android.utils.FakeFraudDetectionDataRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
@@ -48,6 +49,7 @@ class CheckoutSessionRepositoryAnalyticsTest {
     fun `init reports started and succeeded with the configuration params`() = runScenario {
         expectEvent(
             "init.started",
+            doesNotContainValue(CLIENT_SECRET),
             analyticsPayloadField("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID),
             analyticsPayloadField("merchant_display_name", "true"),
             analyticsPayloadField("defaults[email]", "true"),
@@ -58,6 +60,7 @@ class CheckoutSessionRepositoryAnalyticsTest {
         )
         expectEvent(
             "init.succeeded",
+            doesNotContainValue(CLIENT_SECRET),
             *INIT_RESPONSE_SESSION_PARAMS.asPayloadMatchers(),
             analyticsPayloadField("merchant_display_name", "true"),
             analyticsPayloadField("defaults[email]", "true"),
@@ -69,8 +72,7 @@ class CheckoutSessionRepositoryAnalyticsTest {
         }
 
         repository.init(
-            sessionId = DEFAULT_CHECKOUT_SESSION_ID,
-            clientSecret = "cs_test_abc123_secret_test",
+            clientSecret = CheckoutSessionClientSecret(CLIENT_SECRET),
             adaptivePricingAllowed = false,
             analyticsParams = CONFIGURATION_PARAMS,
         ).getOrThrow()
@@ -80,12 +82,14 @@ class CheckoutSessionRepositoryAnalyticsTest {
     fun `init reports started and failed with the error`() = runScenario {
         expectEvent(
             "init.started",
+            doesNotContainValue(CLIENT_SECRET),
             analyticsPayloadField("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID),
             analyticsPayloadField("merchant_display_name", "true"),
             not(hasQueryParam("duration")),
         )
         expectEvent(
             "init.failed",
+            doesNotContainValue(CLIENT_SECRET),
             analyticsPayloadField("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID),
             analyticsPayloadField("merchant_display_name", "true"),
             analyticsPayloadField("error_type", "invalid_request_error"),
@@ -110,38 +114,12 @@ class CheckoutSessionRepositoryAnalyticsTest {
         }
 
         val result = repository.init(
-            sessionId = DEFAULT_CHECKOUT_SESSION_ID,
-            clientSecret = "cs_test_abc123_secret_test",
+            clientSecret = CheckoutSessionClientSecret(CLIENT_SECRET),
             adaptivePricingAllowed = false,
             analyticsParams = mapOf("merchant_display_name" to true),
         )
 
         assertThat(result.isFailure).isTrue()
-    }
-
-    @Test
-    fun `init does not report the client secret as the session id`() = runScenario {
-        expectEvent(
-            "init.started",
-            not(hasQueryParam("checkout_session_id")),
-            doesNotContainValue(MALFORMED_CLIENT_SECRET),
-        )
-        expectEvent(
-            "init.failed",
-            not(hasQueryParam("checkout_session_id")),
-            doesNotContainValue(MALFORMED_CLIENT_SECRET),
-        )
-        networkRule.checkoutInit(sessionId = MALFORMED_CLIENT_SECRET) { response ->
-            response.setResponseCode(400)
-            response.setBody("""{"error": {"type": "invalid_request_error", "message": "Invalid client secret"}}""")
-        }
-
-        repository.init(
-            sessionId = MALFORMED_CLIENT_SECRET,
-            clientSecret = MALFORMED_CLIENT_SECRET,
-            adaptivePricingAllowed = false,
-            analyticsParams = emptyMap(),
-        )
     }
 
     @Test
@@ -226,6 +204,58 @@ class CheckoutSessionRepositoryAnalyticsTest {
         ).getOrThrow()
     }
 
+    @Test
+    fun `updateCurrency reports the requested currency on started and succeeded`() = runScenario {
+        expectEvent(
+            "update_currency.started",
+            *CheckoutAnalyticsTestFixtures.sessionParams.asPayloadMatchers(),
+            analyticsPayloadField("requested_currency", "eur"),
+            not(hasQueryParam("duration")),
+        )
+        expectEvent(
+            "update_currency.succeeded",
+            *INIT_RESPONSE_SESSION_PARAMS.asPayloadMatchers(),
+            analyticsPayloadField("requested_currency", "eur"),
+            hasQueryParam("duration"),
+        )
+        networkRule.checkoutUpdate { response ->
+            response.testBodyFromFile("checkout-session-init.json")
+        }
+
+        repository.updateCurrency(
+            checkoutSessionResponse = checkoutSessionResponse,
+            currencyCode = "eur",
+        ).getOrThrow()
+    }
+
+    @Test
+    fun `updateCurrency reports the requested currency and error type on started and failed`() = runScenario {
+        expectEvent(
+            "update_currency.started",
+            *CheckoutAnalyticsTestFixtures.sessionParams.asPayloadMatchers(),
+            analyticsPayloadField("requested_currency", "invalid"),
+            not(hasQueryParam("duration")),
+        )
+        expectEvent(
+            "update_currency.failed",
+            *CheckoutAnalyticsTestFixtures.sessionParams.asPayloadMatchers(),
+            analyticsPayloadField("requested_currency", "invalid"),
+            analyticsPayloadField("error_type", "invalid_request_error"),
+            hasQueryParam("duration"),
+        )
+        networkRule.checkoutUpdate { response ->
+            response.setResponseCode(400)
+            response.setBody("""{"error": {"type": "invalid_request_error", "message": "Invalid currency"}}""")
+        }
+
+        val result = repository.updateCurrency(
+            checkoutSessionResponse = checkoutSessionResponse,
+            currencyCode = "invalid",
+        )
+
+        assertThat(result.isFailure).isTrue()
+    }
+
     private fun runScenario(block: suspend Scenario.() -> Unit) = runTest {
         val repository = CheckoutSessionRepository(
             stripeRepository = CheckoutStripeRepositoryFactory.create(),
@@ -277,7 +307,7 @@ class CheckoutSessionRepositoryAnalyticsTest {
     }
 
     private companion object {
-        const val MALFORMED_CLIENT_SECRET = "cs_test_abc123_malformed"
+        const val CLIENT_SECRET = "cs_test_abc123_secret_test"
 
         // Nested maps are flattened into bracketed query keys, e.g. defaults[billing_details][name].
         val CONFIGURATION_PARAMS: Map<String, Any?> = mapOf(

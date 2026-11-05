@@ -13,6 +13,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
+import com.stripe.android.financialconnections.ThemeMode
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkDismissalCoordinator
@@ -473,6 +474,7 @@ internal class WalletViewModel(
                             stripeAccountId = null,
                         ),
                         preCollectedConsent = null,
+                        themeMode = ThemeMode.Automatic,
                     )
                 }
                 .fold(

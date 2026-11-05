@@ -50,7 +50,6 @@ internal sealed class IntegrationMetadata : Parcelable {
 
     @Parcelize
     data class CheckoutSession(
-        val id: String,
         val instancesKey: String,
         val checkoutSessionResponse: CheckoutSessionResponse,
         val collectedEmail: String?,

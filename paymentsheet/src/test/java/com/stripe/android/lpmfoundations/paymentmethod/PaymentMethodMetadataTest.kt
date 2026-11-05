@@ -2325,7 +2325,6 @@ internal class PaymentMethodMetadataTest {
             ),
             integrationMetadata = IntegrationMetadata.CheckoutSession(
                 collectedEmail = null,
-                id = "cs_123",
                 instancesKey = "key",
                 checkoutSessionResponse = checkoutSessionResponse,
             ),
@@ -2349,7 +2348,6 @@ internal class PaymentMethodMetadataTest {
             ),
             integrationMetadata = IntegrationMetadata.CheckoutSession(
                 collectedEmail = null,
-                id = "cs_123",
                 instancesKey = "key",
                 checkoutSessionResponse = checkoutSessionResponse,
             ),
@@ -2373,7 +2371,6 @@ internal class PaymentMethodMetadataTest {
             ),
             integrationMetadata = IntegrationMetadata.CheckoutSession(
                 collectedEmail = null,
-                id = "cs_123",
                 instancesKey = "key",
                 checkoutSessionResponse = checkoutSessionResponse,
             ),
@@ -2397,7 +2394,6 @@ internal class PaymentMethodMetadataTest {
             ),
             integrationMetadata = IntegrationMetadata.CheckoutSession(
                 collectedEmail = null,
-                id = "cs_123",
                 instancesKey = "key",
                 checkoutSessionResponse = checkoutSessionResponse,
             ),

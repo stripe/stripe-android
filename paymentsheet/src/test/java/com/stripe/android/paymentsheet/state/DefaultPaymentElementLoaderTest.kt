@@ -83,6 +83,7 @@ import com.stripe.android.paymentsheet.analytics.FakeLogFcLiteExperiment
 import com.stripe.android.paymentsheet.analytics.FakeLogLinkHoldbackExperiment
 import com.stripe.android.paymentsheet.analytics.FakePaymentMethodMessagePromotionsExperimentHandler
 import com.stripe.android.paymentsheet.injection.FakeApiConfigurationResolver
+import com.stripe.android.paymentsheet.model.CheckoutSessionClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.toSavedSelection
@@ -1416,7 +1417,9 @@ internal class DefaultPaymentElementLoaderTest {
         ).put("ordered_payment_method_types_and_wallets", JSONArray(listOf("card")))
         json.getJSONObject("link_settings").put("link_mode", "LINK_CARD_BRAND")
             .remove("link_passthrough_mode_enabled")
-        val response = requireNotNull(CheckoutSessionResponseJsonParser("cs_secret").parse(json))
+        val response = requireNotNull(
+            CheckoutSessionResponseJsonParser(CheckoutSessionClientSecret("cs_test_abc123_secret_test")).parse(json)
+        )
         assertThat(response.elementsSession?.stripeIntent?.paymentMethodTypes).doesNotContain("link")
 
         val result = createPaymentElementLoader().load(
@@ -2010,7 +2013,6 @@ internal class DefaultPaymentElementLoaderTest {
             .isEqualTo(
                 IntegrationMetadata.CheckoutSession(
                     collectedEmail = null,
-                    id = checkoutSession.checkoutSessionResponse.id,
                     instancesKey = "DefaultPaymentElementLoaderTest",
                     checkoutSessionResponse = checkoutSession.checkoutSessionResponse,
                 )

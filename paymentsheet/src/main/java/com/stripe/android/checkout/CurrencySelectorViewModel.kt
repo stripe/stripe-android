@@ -7,6 +7,7 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.checkout.CheckoutElementsController.Session
 import com.stripe.android.common.exception.stripeErrorMessage
+import com.stripe.android.core.exception.safeAnalyticsMessage
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
@@ -45,10 +46,20 @@ internal class CurrencySelectorViewModel(
     }
 
     fun onCurrencySelected(currencyCode: String) {
+        val checkoutSessionId = session.value?.id
         viewModelScope.launch {
             updateCurrency(currencyCode)
+                .onSuccess {
+                    fireEvent(PaymentSheetEvent.AdaptivePricingCurrencyToggled(checkoutSessionId))
+                }
                 .onFailure { throwable ->
                     _errorMessage.value = throwable.stripeErrorMessage()
+                    fireEvent(
+                        PaymentSheetEvent.AdaptivePricingCurrencyToggledFailed(
+                            error = throwable.safeAnalyticsMessage,
+                            checkoutSessionId = checkoutSessionId,
+                        )
+                    )
                 }
         }
     }

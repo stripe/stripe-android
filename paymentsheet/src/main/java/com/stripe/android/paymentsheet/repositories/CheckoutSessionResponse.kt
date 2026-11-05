@@ -7,13 +7,13 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentsheet.model.CheckoutSessionClientSecret
 import kotlinx.parcelize.Parcelize
 import java.math.BigDecimal
 
 @Parcelize
 internal data class CheckoutSessionResponse(
-    val id: String,
-    val clientSecret: String,
+    val clientSecret: CheckoutSessionClientSecret,
     val configId: String?,
     val automaticPaymentMethodTypes: Boolean?,
     val currency: String,
@@ -40,6 +40,9 @@ internal data class CheckoutSessionResponse(
     val businessName: String?,
     val paymentResponse: PaymentResponse?,
 ) : StripeModel {
+    val id: String
+        get() = clientSecret.sessionId
+
     @Parcelize
     data class IntentReference(val id: String, val clientSecret: String) : StripeModel
 

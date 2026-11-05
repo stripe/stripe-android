@@ -30,6 +30,7 @@ import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.paymentsheet.model.CheckoutSessionClientSecret
 import com.stripe.android.paymentsheet.model.PaymentOptionResource
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.billingDetails
@@ -113,13 +114,16 @@ class CheckoutElementsController @Inject internal constructor(
         if (sheetStateHolder.sheetIsOpen) {
             return@withContext integrationLaunchedFailure()
         }
+        val parsedClientSecret = try {
+            CheckoutSessionClientSecret(clientSecret)
+        } catch (e: IllegalArgumentException) {
+            return@withContext kotlin.Result.failure(e)
+        }
         operationCoordinator.runMutation {
             val configurationState = configuration.build()
-            val sessionId = clientSecret.substringBefore("_secret_")
 
             checkoutSessionRepository.init(
-                sessionId = sessionId,
-                clientSecret = clientSecret,
+                clientSecret = parsedClientSecret,
                 adaptivePricingAllowed = configurationState.currencySelectorElementConfiguration != null,
                 analyticsParams = configurationState.toAnalyticsMap(),
             ).mapCatching { response ->
@@ -298,7 +302,7 @@ class CheckoutElementsController @Inject internal constructor(
         // Preserve the merchant's context while keeping the callback a child of the mutation's
         // timeout and cancellation scope.
         val callerContext = currentCoroutineContext().minusKey(Job)
-        return withCheckoutState { sessionId ->
+        return withCheckoutState {
             checkoutSessionRepository.measure(
                 operation = Operation.RunServerUpdate,
                 checkoutSessionResponse = checkoutSessionResponse,
@@ -309,7 +313,6 @@ class CheckoutElementsController @Inject internal constructor(
                         withTimeout(SERVER_UPDATE_TIMEOUT_MS) { serverUpdate() }
                     }.getOrThrow()
                     checkoutSessionRepository.init(
-                        sessionId = sessionId,
                         clientSecret = checkoutSessionResponse.clientSecret,
                         adaptivePricingAllowed = configuration.currencySelectorElementConfiguration != null,
                         analyticsParams = configuration.toAnalyticsMap(),
@@ -370,7 +373,7 @@ class CheckoutElementsController @Inject internal constructor(
      */
     private suspend fun withCheckoutState(
         additionalStateMutations: CheckoutElementsControllerState.() -> CheckoutElementsControllerState = { this },
-        block: suspend CheckoutElementsControllerState.(sessionId: String) -> kotlin.Result<CheckoutSessionResponse>,
+        block: suspend CheckoutElementsControllerState.() -> kotlin.Result<CheckoutSessionResponse>,
     ): kotlin.Result<Unit> = withContext(Dispatchers.Main.immediate) {
         stateHolder.state
             ?: return@withContext kotlin.Result.failure(
@@ -386,7 +389,7 @@ class CheckoutElementsController @Inject internal constructor(
                 // Re-read the latest committed state inside the lock so serialized mutations
                 // build on each other's results rather than a stale snapshot.
                 val state = requireNotNull(stateHolder.state)
-                val response = state.block(state.checkoutSessionResponse.id).getOrThrow()
+                val response = state.block().getOrThrow()
                 val newState = state
                     .copy(checkoutSessionResponse = response)
                     .additionalStateMutations()
@@ -412,10 +415,9 @@ class CheckoutElementsController @Inject internal constructor(
     )
 
     internal suspend fun updateCurrency(currency: String): kotlin.Result<Unit> {
-        return withCheckoutState { sessionId ->
+        return withCheckoutState {
             checkoutSessionRepository.updateCurrency(
-                sessionId = sessionId,
-                clientSecret = checkoutSessionResponse.clientSecret,
+                checkoutSessionResponse = checkoutSessionResponse,
                 currencyCode = currency,
             )
         }
