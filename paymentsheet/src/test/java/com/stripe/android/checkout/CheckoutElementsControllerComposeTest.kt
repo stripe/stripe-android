@@ -83,7 +83,7 @@ internal class CheckoutElementsControllerComposeTest {
                 .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
         }
 
-        composeRule.onNodeWithTag(TOTAL_TAG).assertTextEquals("4099.0")
+        composeRule.onNodeWithTag(TOTAL_TAG).assertTextEquals("4099")
         composeRule.onNodeWithTag(OPTION_TAG).assertTextEquals("card")
         composeRule.onNodeWithTag(ICON_TAG).assertIsDisplayed()
         composeRule.onNodeWithTag(TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT).assertIsDisplayed()
@@ -124,7 +124,7 @@ internal class CheckoutElementsControllerComposeTest {
                 .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
             CheckoutElementsControllerStateFactory.createStateHolder(savedState.handle)
                 .setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
-            assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isNotEqualTo(4099.0)
+            assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isNotEqualTo(4099L)
 
             composeRule.activityRule.scenario.moveToState(Lifecycle.State.CREATED)
             val presenter = controller.createPresenter(composeRule.activity)

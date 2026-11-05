@@ -139,9 +139,9 @@ internal class CheckoutSessionResponseJsonParser(
         )
         val unitAmount = json.optionalLong("unit_amount")?.also { require(it >= 0) }
         val unitAmountDecimal = json.optionalString("unit_amount_decimal")?.let {
-            it.toDoubleOrNull() ?: error("Invalid unit_amount_decimal")
+            it.toBigDecimalOrNull() ?: error("Invalid unit_amount_decimal")
         }?.also {
-            require(it.isFinite() && it >= 0)
+            require(it.signum() >= 0)
         }
         require(unitAmount != null || price.unitAmount != null || unitAmountDecimal != null)
         val adjustableQuantity = json.optionalObject("adjustable_quantity")?.let { adjustable ->

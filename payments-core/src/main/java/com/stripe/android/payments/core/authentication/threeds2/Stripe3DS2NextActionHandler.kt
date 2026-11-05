@@ -7,7 +7,6 @@ import androidx.annotation.VisibleForTesting
 import com.stripe.android.PaymentAuthConfig
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.injection.ENABLE_LOGGING
-import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.core.authentication.PaymentNextActionHandler
@@ -16,7 +15,6 @@ import com.stripe.android.stripe3ds2.transaction.SdkTransactionId
 import com.stripe.android.view.AuthActivityStarterHost
 import javax.inject.Inject
 import javax.inject.Named
-import javax.inject.Provider
 import javax.inject.Singleton
 
 /**
@@ -26,7 +24,6 @@ import javax.inject.Singleton
 internal class Stripe3DS2NextActionHandler @Inject constructor(
     private val config: PaymentAuthConfig,
     @Named(ENABLE_LOGGING) private val enableLogging: Boolean,
-    private val apiConfigProvider: Provider<ApiConfiguration.State>,
     @Named(PRODUCT_USAGE) private val productUsage: Set<String>
 ) : PaymentNextActionHandler<StripeIntent>() {
 
@@ -62,7 +59,7 @@ internal class Stripe3DS2NextActionHandler @Inject constructor(
     override suspend fun performNextActionOnResumed(
         host: AuthActivityStarterHost,
         actionable: StripeIntent,
-        requestOptions: ApiRequest.Options
+        apiConfiguration: ApiConfiguration.State
     ) {
         stripe3ds2CompletionStarterFactory(host).start(
             Stripe3ds2TransactionContract.Args(
@@ -70,10 +67,9 @@ internal class Stripe3DS2NextActionHandler @Inject constructor(
                 config.stripe3ds2Config,
                 actionable,
                 actionable.nextActionData as StripeIntent.NextActionData.SdkData.Use3DS2,
-                requestOptions,
                 enableLogging = enableLogging,
                 host.statusBarColor,
-                apiConfigProvider.get(),
+                apiConfiguration,
                 productUsage
             )
         )

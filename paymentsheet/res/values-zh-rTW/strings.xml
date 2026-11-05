@@ -26,6 +26,10 @@
   <string name="stripe_confirm_close_form_body">不會儲存您的付款資訊。</string>
   <!-- Used as the title for prompting the user if they want to close the sheet -->
   <string name="stripe_confirm_close_form_title">您確定要儲存此表單嗎？</string>
+  <!-- Fallback disclosure when paying in the merchant's currency instead of using Adaptive Pricing. -->
+  <string name="stripe_currency_selector_bank_fees_disclaimer">可能適用您銀行的匯率與手續費。</string>
+  <string name="stripe_currency_selector_hide_details">隱藏匯率詳細資料</string>
+  <string name="stripe_currency_selector_show_details">顯示匯率詳細資料</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header">儲存您的資訊，用 Link 安全地一鍵結帳</string>
   <!-- Label for a checkbox that when checked allows the payment information

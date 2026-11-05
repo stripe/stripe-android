@@ -61,7 +61,6 @@ internal class CheckoutCommonConfigurationFactory @Inject constructor(
                 } else {
                     PaymentSheetBillingDetails.AddressCollectionMode.Automatic
                 },
-                attachDefaultsToPaymentMethod = true,
             ),
         )
     }

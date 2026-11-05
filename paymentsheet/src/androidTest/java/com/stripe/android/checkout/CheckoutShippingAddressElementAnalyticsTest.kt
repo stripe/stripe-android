@@ -155,6 +155,7 @@ internal class CheckoutShippingAddressElementAnalyticsTest {
             checkoutInitResponse = ::createCheckoutInitResponse,
             renderPaymentElementContent = false,
             setup = { configuredController ->
+                networkRule.validateCheckoutInitStartedAndSucceeded()
                 assertThat(configuredController.configure(DEFAULT_CLIENT_SECRET, configuration))
                     .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
             },

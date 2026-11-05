@@ -26,6 +26,10 @@
   <string name="stripe_confirm_close_form_body">Hindi mase-save ang iyong impormasyon ng pagbabayad.</string>
   <!-- Used as the title for prompting the user if they want to close the sheet -->
   <string name="stripe_confirm_close_form_title">Gusto mo bang isara ang form na ito?</string>
+  <!-- Fallback disclosure when paying in the merchant's currency instead of using Adaptive Pricing. -->
+  <string name="stripe_currency_selector_bank_fees_disclaimer">Maaaring mag-apply ang rate ng palitan at mga bayarin sa iyong bangko.</string>
+  <string name="stripe_currency_selector_hide_details">Itago ang mga detalye ng rate ng palitan</string>
+  <string name="stripe_currency_selector_show_details">Ipakita ang mga detalye ng rate ng palitan</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header">I-save ang iyong impormasyon para sa ligtas na 1-click na pag-checkout sa Link</string>
   <!-- Label for a checkbox that when checked allows the payment information
@@ -64,6 +68,12 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_email_suggestion_update">Oo, update</string>
   <!-- Title for a button that indicates a user can log in or sign up. -->
   <string name="stripe_link_log_in_or_sign_up">Mag-log in o mag-sign up</string>
+  <!-- Label of a button that signs the user out of their current Link account so they can log in to a different one. -->
+  <string name="stripe_link_log_in_to_another_account">Mag-log in sa ibang account</string>
+  <!-- Message on a screen shown when none of the payment methods in the user's Link account can be used with this business. The placeholder is a Stripe brand name and should not be translated. -->
+  <string name="stripe_link_no_funding_sources_message">Wala sa mga pamamaraan sa pagbabayad sa iyong %s account ang gumagana sa negosyong ito.</string>
+  <!-- Title of a screen shown when none of the payment methods in the user's Link account can be used with this business. The placeholder is a Stripe brand name and should not be translated. -->
+  <string name="stripe_link_no_funding_sources_title">Hindi ka makakapagbayad gamit ang %s dito</string>
   <!-- Text displayed on a confirmation button on the CRS CARF declaration screen -->
   <string name="stripe_link_onramp_carf_declaration_accept_button_text">Tanggapin</string>
   <!-- Text displayed on a cancel button on the CRS CARF declaration screen -->

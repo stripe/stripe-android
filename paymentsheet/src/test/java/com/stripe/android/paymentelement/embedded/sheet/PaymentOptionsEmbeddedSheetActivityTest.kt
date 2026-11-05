@@ -296,23 +296,18 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
     }
 
     @Test
-    fun `horizontal saved payment options selects saved method and continues`() {
+    fun `horizontal saved payment options returns saved card when tapped`() {
         val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
         launchHorizontal(customerState = customerStateWith(paymentMethod)) { scenario ->
+            composeTestRule.onNodeWithTag(PRIMARY_BUTTON_TEST_TAG).assertDoesNotExist()
+
             composeTestRule.onNodeWithTag(
                 "${SAVED_PAYMENT_METHOD_CARD_TEST_TAG}_\u2066···· 4242\u2069"
             ).performClick()
-            composeTestRule.onNodeWithTag(PRIMARY_BUTTON_TEST_TAG)
-                .performScrollTo()
-                .assertIsEnabled()
-                .performClick()
-            onIdle()
 
-            val result = EmbeddedSheetContract.parseResult(
-                scenario.result.resultCode,
-                scenario.result.resultData,
-            ) as EmbeddedActivityResult.Complete
+            val result = scenario.awaitResult() as EmbeddedActivityResult.Complete
             assertThat(result.selection).isEqualTo(PaymentSelection.Saved(paymentMethod))
+            assertThat(result.hasBeenConfirmed).isFalse()
         }
     }
 

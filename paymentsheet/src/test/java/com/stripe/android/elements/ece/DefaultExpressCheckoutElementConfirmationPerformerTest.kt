@@ -28,10 +28,10 @@ import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOptio
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.analytics.FakeAnalyticsRequestExecutor
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
+import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.android.testing.FakeErrorReporter
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -159,7 +159,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
             assertThat(billingDetails.address).isEqualTo(
                 PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic
             )
-            assertThat(billingDetails.attachDefaultsToPaymentMethod).isTrue()
+            assertThat(billingDetails.attachDefaultsToPaymentMethod).isFalse()
         }
     }
 

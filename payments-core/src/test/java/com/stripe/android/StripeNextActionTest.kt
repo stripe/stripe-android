@@ -131,7 +131,7 @@ internal class StripeNextActionTest {
             callback.ensureAllEventsConsumed()
             networkClient.requests.expectNoEvents()
             networkClient.requests.ensureAllEventsConsumed()
-            assertThat(analyticsRequestExecutor.getExecutedRequests()).isEmpty()
+            analyticsRequestExecutor.validate()
         } finally {
             activityController.pause().stop().destroy()
         }

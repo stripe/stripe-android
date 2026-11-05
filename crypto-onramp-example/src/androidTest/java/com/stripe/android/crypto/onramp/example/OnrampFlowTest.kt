@@ -52,6 +52,17 @@ internal class OnrampFlowTest {
     }
 
     @Test
+    fun kycVerificationCanBeRetriedAfterActivityRecreation() {
+        page.loginAndAuthenticateWithOtp()
+        page.clickTag(KYC_SECTION_TAG)
+        page.clickTag(VERIFY_KYC_BUTTON_TAG)
+
+        onrampRule.recreateHostActivity()
+
+        page.confirmKycVerification()
+    }
+
+    @Test
     fun freshUserKycCanBeCollectedAndVerifiedAfterCancellation() {
         val user = page.registerAndAuthenticateFreshUser(country = "US")
 

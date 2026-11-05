@@ -24,7 +24,7 @@ import com.stripe.android.link.theme.LinkTheme
 @Composable
 internal fun LinkSpinner(
     modifier: Modifier = Modifier,
-    filledColor: Color = LinkTheme.colors.iconBrand,
+    filledColor: Color = LinkTheme.colors.accent,
     backgroundColor: Color = LinkTheme.colors.surfaceTertiary,
     strokeWidth: Dp = 6.dp
 ) {

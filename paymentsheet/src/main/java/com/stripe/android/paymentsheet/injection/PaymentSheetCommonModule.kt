@@ -89,6 +89,7 @@ import javax.inject.Singleton
         NfcScanningAvailabilityModule::class,
         ApiConfigurationResolverModule::class,
         PreselectLinkExperimentModule::class,
+        PrimaryButtonExperimentModule::class,
     ]
 )
 internal abstract class PaymentSheetCommonModule {

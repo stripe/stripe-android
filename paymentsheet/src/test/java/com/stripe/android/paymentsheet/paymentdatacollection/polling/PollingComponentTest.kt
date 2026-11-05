@@ -6,7 +6,7 @@ import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
@@ -39,7 +39,7 @@ internal class PollingComponentTest {
     // Keep the ViewModel's clock paused while the test waits for real network I/O.
     // Otherwise runTest can advance its timeout and trigger a second request.
     @Test
-    fun `Polling uses request options bound in the component`() = runTest(
+    fun `Polling uses configuration bound in the component`() = runTest(
         UnconfinedTestDispatcher(TestCoroutineScheduler())
     ) {
         val application = ApplicationProvider.getApplicationContext<Application>()
@@ -47,7 +47,7 @@ internal class PollingComponentTest {
             application = application,
             config = IntentStatusPoller.Config(CLIENT_SECRET, 1.seconds),
             ioDispatcher = Dispatchers.IO,
-            requestOptions = REQUEST_OPTIONS,
+            apiConfiguration = API_CONFIGURATION,
         )
         networkRule.enqueue(
             method("GET"),
@@ -66,7 +66,7 @@ internal class PollingComponentTest {
                 initialDelay = 0.seconds,
                 pollingInterval = 1.seconds,
                 ctaText = R.string.stripe_blik_confirm_payment,
-                requestOptions = REQUEST_OPTIONS,
+                apiConfiguration = API_CONFIGURATION,
                 qrCodeUrl = null,
                 paymentMethodType = "blik",
             ),
@@ -83,9 +83,9 @@ internal class PollingComponentTest {
 
     private companion object {
         const val CLIENT_SECRET = "pi_polling_secret_example"
-        val REQUEST_OPTIONS = ApiRequest.Options(
-            apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-            stripeAccount = ApiKeyFixtures.FAKE_ACCOUNT_ID,
+        val API_CONFIGURATION = ApiConfiguration.State(
+            publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+            stripeAccountId = ApiKeyFixtures.FAKE_ACCOUNT_ID,
         )
     }
 }

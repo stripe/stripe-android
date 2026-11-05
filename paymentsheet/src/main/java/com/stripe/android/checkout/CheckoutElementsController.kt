@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.AnnotatedString
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.checkout.analytics.toAnalyticsMap
 import com.stripe.android.checkout.injection.CheckoutElementsPresenterSubcomponent
 import com.stripe.android.checkout.injection.DaggerCheckoutElementsControllerComponent
 import com.stripe.android.common.exception.stripeErrorMessage
@@ -46,6 +47,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import kotlinx.parcelize.Parcelize
+import java.math.BigDecimal
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.time.Duration.Companion.seconds
@@ -117,6 +119,7 @@ class CheckoutElementsController @Inject internal constructor(
                 sessionId = sessionId,
                 clientSecret = clientSecret,
                 adaptivePricingAllowed = configurationState.currencySelectorElementConfiguration != null,
+                analyticsParams = configurationState.toAnalyticsMap(),
             ).mapCatching { response ->
                 val initialLoad = checkoutStateLoader.loadInitial(
                     configuration = configurationState,
@@ -153,10 +156,9 @@ class CheckoutElementsController @Inject internal constructor(
      */
     suspend fun applyPromotionCode(
         promotionCode: String,
-    ): OperationResult = withCheckoutState { sessionId ->
+    ): OperationResult = withCheckoutState {
         checkoutSessionRepository.applyPromotionCode(
-            sessionId = sessionId,
-            clientSecret = checkoutSessionResponse.clientSecret,
+            checkoutSessionResponse = checkoutSessionResponse,
             promotionCode = promotionCode.trim(),
         )
     }.toOperationResult()
@@ -164,12 +166,8 @@ class CheckoutElementsController @Inject internal constructor(
     /**
      * Removes the currently applied promotion code from the checkout session.
      */
-    suspend fun removePromotionCode(): OperationResult = withCheckoutState { sessionId ->
-        checkoutSessionRepository.applyPromotionCode(
-            sessionId = sessionId,
-            clientSecret = checkoutSessionResponse.clientSecret,
-            promotionCode = "",
-        )
+    suspend fun removePromotionCode(): OperationResult = withCheckoutState {
+        checkoutSessionRepository.removePromotionCode(checkoutSessionResponse)
     }.toOperationResult()
 
     /**
@@ -302,6 +300,7 @@ class CheckoutElementsController @Inject internal constructor(
                         sessionId = sessionId,
                         clientSecret = checkoutSessionResponse.clientSecret,
                         adaptivePricingAllowed = configuration.currencySelectorElementConfiguration != null,
+                        analyticsParams = configuration.toAnalyticsMap(),
                     )
                 },
                 onFailure = { kotlin.Result.failure(it) },
@@ -674,7 +673,24 @@ class CheckoutElementsController @Inject internal constructor(
             /**
              * The unformatted amount in the smallest currency unit (e.g., cents for USD).
              */
-            val minorUnitsAmount: Double,
+            val minorUnitsAmount: Long,
+        )
+
+        /**
+         * A localized monetary amount that supports fractional minor units.
+         */
+        @Poko
+        @CheckoutSessionPreview
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        class DecimalAmount internal constructor(
+            /**
+             * A localized, currency-formatted string representing the amount.
+             */
+            val amount: String,
+            /**
+             * The unformatted amount in the smallest currency unit, including fractional units.
+             */
+            val minorUnitsAmount: BigDecimal,
         )
 
         /**
@@ -733,7 +749,7 @@ class CheckoutElementsController @Inject internal constructor(
             /**
              * The unformatted discount amount in the smallest currency unit.
              */
-            val minorUnitsAmount: Double,
+            val minorUnitsAmount: Long,
             /**
              * The display name of the discount.
              */
@@ -762,7 +778,7 @@ class CheckoutElementsController @Inject internal constructor(
             /**
              * The unformatted tax amount in the smallest currency unit.
              */
-            val minorUnitsAmount: Double,
+            val minorUnitsAmount: Long,
             /**
              * Whether this tax is already included in the price.
              */
@@ -910,7 +926,7 @@ class CheckoutElementsController @Inject internal constructor(
                     /**
                      * The unit amount with additional decimal precision, if available.
                      */
-                    val unitAmountDecimal: Amount?,
+                    val unitAmountDecimal: DecimalAmount?,
                     /**
                      * The label that describes how units of the product are named.
                      */

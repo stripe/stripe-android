@@ -47,6 +47,7 @@ private const val FIELD_LABEL = "label"
 private const val FIELD_SUBLABEL = "sublabel"
 private const val FIELD_ICON = "icon"
 private const val FIELD_DEFAULT_ICON = "default"
+private const val FIELD_ICON_TYPE = "type"
 private const val FIELD_NEXT_ACTION_TYPES = "next_action_types"
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -91,6 +92,7 @@ object ConsumerPaymentDetailsJsonParser : ModelJsonParser<ConsumerPaymentDetails
                         billingEmailAddress = optString(json, FIELD_BILLING_EMAIL_ADDRESS),
                         isDefault = isDefault,
                         nickname = nickname,
+                        display = parseOptionalDisplay(json),
                     )
                 }
                 "bank_account" -> {
@@ -103,7 +105,8 @@ object ConsumerPaymentDetailsJsonParser : ModelJsonParser<ConsumerPaymentDetails
                         isDefault = isDefault,
                         nickname = nickname,
                         billingAddress = parseBillingAddress(json),
-                        billingEmailAddress = optString(json, FIELD_BILLING_EMAIL_ADDRESS)
+                        billingEmailAddress = optString(json, FIELD_BILLING_EMAIL_ADDRESS),
+                        display = parseOptionalDisplay(json),
                     )
                 }
                 else -> {
@@ -128,9 +131,31 @@ object ConsumerPaymentDetailsJsonParser : ModelJsonParser<ConsumerPaymentDetails
     private fun parseDisplay(display: JSONObject) = ConsumerPaymentDetails.Display(
         label = display.getString(FIELD_LABEL),
         sublabel = display.optString(FIELD_SUBLABEL).takeIf { it.isNotBlank() },
-        icon = display.optJSONObject(FIELD_ICON)
-            ?.let { ConsumerPaymentDetails.Display.Icon(defaultUrl = it.getString(FIELD_DEFAULT_ICON)) }
+        icon = parseIcon(display),
     )
+
+    /**
+     * Unlike [parseDisplay], a missing or incomplete display is not an error for types with dedicated details.
+     */
+    private fun parseOptionalDisplay(json: JSONObject): ConsumerPaymentDetails.Display? {
+        val display = json.optJSONObject(FIELD_DISPLAY) ?: return null
+        val label = optString(display, FIELD_LABEL) ?: return null
+        return ConsumerPaymentDetails.Display(
+            label = label,
+            sublabel = display.optString(FIELD_SUBLABEL).takeIf { it.isNotBlank() },
+            icon = parseIcon(display),
+        )
+    }
+
+    private fun parseIcon(display: JSONObject): ConsumerPaymentDetails.Display.Icon? {
+        val icon = display.optJSONObject(FIELD_ICON) ?: return null
+        val defaultUrl = optString(icon, FIELD_DEFAULT_ICON) ?: return null
+        return ConsumerPaymentDetails.Display.Icon(
+            defaultUrl = defaultUrl,
+            // Unknown types are null so that new backend types don't drop the icon URL.
+            type = ConsumerPaymentDetails.Display.Icon.Type.fromCode(optString(icon, FIELD_ICON_TYPE)),
+        )
+    }
 
     private fun parseBillingAddress(json: JSONObject) =
         json.optJSONObject(FIELD_BILLING_ADDRESS)?.let { address ->

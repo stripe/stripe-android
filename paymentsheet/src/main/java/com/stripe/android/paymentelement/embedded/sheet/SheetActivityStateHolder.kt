@@ -68,6 +68,7 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
     private val configuration: EmbeddedPaymentElement.Configuration,
     private val onClickDelegate: OnClickOverrideDelegate,
     private val eventReporter: EventReporter,
+    private val primaryButtonExperiment: PrimaryButtonExperiment,
     @param:ViewModelScope private val coroutineScope: CoroutineScope,
     private val confirmationHandler: ConfirmationHandler,
     private val tapToAddHelper: TapToAddHelper,
@@ -86,10 +87,8 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
             primaryButtonIcon = if (launchMode !is EmbeddedLaunchMode.PaymentOptions &&
                 configuration.formSheetAction == EmbeddedPaymentElement.FormSheetAction.Confirm
             ) {
-                PrimaryButtonExperiment.getIcon(
+                primaryButtonExperiment.getIcon(
                     metadata = paymentMethodMetadata,
-                    eventReporter = eventReporter,
-                    mode = EventReporter.Mode.Embedded,
                 )
             } else {
                 PrimaryButtonIcon.None

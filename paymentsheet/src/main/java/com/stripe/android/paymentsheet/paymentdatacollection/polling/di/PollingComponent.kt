@@ -1,10 +1,11 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.polling.di
 
 import android.app.Application
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
-import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.networking.PaymentElementRequestSurfaceModule
+import com.stripe.android.payments.core.injection.ApiRequestOptionsModule
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.polling.IntentStatusPoller
 import dagger.BindsInstance
@@ -15,6 +16,7 @@ import javax.inject.Singleton
 @Singleton
 @Component(
     modules = [
+        ApiRequestOptionsModule::class,
         CoroutineContextModule::class,
         PollingViewModelModule::class,
         StripeRepositoryModule::class,
@@ -31,7 +33,7 @@ internal interface PollingComponent {
             @BindsInstance application: Application,
             @BindsInstance config: IntentStatusPoller.Config,
             @BindsInstance ioDispatcher: CoroutineDispatcher,
-            @BindsInstance requestOptions: ApiRequest.Options,
+            @BindsInstance apiConfiguration: ApiConfiguration.State,
         ): PollingComponent
     }
 }

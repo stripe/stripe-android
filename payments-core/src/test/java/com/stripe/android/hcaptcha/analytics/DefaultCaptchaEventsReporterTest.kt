@@ -9,6 +9,7 @@ import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.hcaptcha.HCaptchaError
 import com.stripe.hcaptcha.HCaptchaException
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -23,11 +24,7 @@ internal class DefaultCaptchaEventsReporterTest {
     fun testInit() = runScenario { defaultChallengeEventsReporter, fakeAnalyticsRequestExecutor, _ ->
         defaultChallengeEventsReporter.init(SITE_KEY)
 
-        val loggedRequests = fakeAnalyticsRequestExecutor.getExecutedRequests()
-
-        assertThat(loggedRequests).hasSize(1)
-        val loggedParams = loggedRequests.first().params
-        assertThat(loggedParams["event"]).isEqualTo("elements.captcha.passive.init")
+        val loggedParams = fakeAnalyticsRequestExecutor.awaitEvent("elements.captcha.passive.init")
         assertThat(loggedParams["site_key"]).isEqualTo(SITE_KEY)
     }
 
@@ -35,11 +32,7 @@ internal class DefaultCaptchaEventsReporterTest {
     fun testExecute() = runScenario { defaultChallengeEventsReporter, fakeAnalyticsRequestExecutor, _ ->
         defaultChallengeEventsReporter.execute(SITE_KEY)
 
-        val loggedRequests = fakeAnalyticsRequestExecutor.getExecutedRequests()
-
-        assertThat(loggedRequests).hasSize(1)
-        val loggedParams = loggedRequests.first().params
-        assertThat(loggedParams["event"]).isEqualTo("elements.captcha.passive.execute")
+        val loggedParams = fakeAnalyticsRequestExecutor.awaitEvent("elements.captcha.passive.execute")
         assertThat(loggedParams["site_key"]).isEqualTo(SITE_KEY)
     }
 
@@ -50,11 +43,8 @@ internal class DefaultCaptchaEventsReporterTest {
 
         defaultChallengeEventsReporter.success(SITE_KEY)
 
-        val loggedRequests = fakeAnalyticsRequestExecutor.getExecutedRequests()
-
-        assertThat(loggedRequests).hasSize(2)
-        val loggedParams = loggedRequests.last().params
-        assertThat(loggedParams["event"]).isEqualTo("elements.captcha.passive.success")
+        fakeAnalyticsRequestExecutor.awaitEvent("elements.captcha.passive.init")
+        val loggedParams = fakeAnalyticsRequestExecutor.awaitEvent("elements.captcha.passive.success")
         assertThat(loggedParams["duration"]).isEqualTo(15000f)
         assertThat(loggedParams["site_key"]).isEqualTo(SITE_KEY)
     }
@@ -63,11 +53,7 @@ internal class DefaultCaptchaEventsReporterTest {
     fun testSuccessWithoutInit() = runScenario { defaultChallengeEventsReporter, fakeAnalyticsRequestExecutor, _ ->
         defaultChallengeEventsReporter.success(SITE_KEY)
 
-        val loggedRequests = fakeAnalyticsRequestExecutor.getExecutedRequests()
-
-        assertThat(loggedRequests).hasSize(1)
-        val loggedParams = loggedRequests.first().params
-        assertThat(loggedParams["event"]).isEqualTo("elements.captcha.passive.success")
+        val loggedParams = fakeAnalyticsRequestExecutor.awaitEvent("elements.captcha.passive.success")
         assertThat(loggedParams["site_key"]).isEqualTo(SITE_KEY)
         assertThat(loggedParams).doesNotContainKey("duration")
     }
@@ -80,11 +66,8 @@ internal class DefaultCaptchaEventsReporterTest {
 
             defaultChallengeEventsReporter.error(Throwable("test error"), SITE_KEY)
 
-            val loggedRequests = fakeAnalyticsRequestExecutor.getExecutedRequests()
-
-            assertThat(loggedRequests).hasSize(2)
-            val loggedParams = loggedRequests.last().params
-            assertThat(loggedParams["event"]).isEqualTo("elements.captcha.passive.error")
+            fakeAnalyticsRequestExecutor.awaitEvent("elements.captcha.passive.init")
+            val loggedParams = fakeAnalyticsRequestExecutor.awaitEvent("elements.captcha.passive.error")
             assertThat(loggedParams["duration"]).isEqualTo(11000f)
             assertThat(loggedParams["error_message"]).isEqualTo("test error")
             assertThat(loggedParams["site_key"]).isEqualTo(SITE_KEY)
@@ -102,11 +85,8 @@ internal class DefaultCaptchaEventsReporterTest {
 
             defaultChallengeEventsReporter.error(null, SITE_KEY)
 
-            val loggedRequests = fakeAnalyticsRequestExecutor.getExecutedRequests()
-
-            assertThat(loggedRequests).hasSize(2)
-            val loggedParams = loggedRequests.last().params
-            assertThat(loggedParams["event"]).isEqualTo("elements.captcha.passive.error")
+            fakeAnalyticsRequestExecutor.awaitEvent("elements.captcha.passive.init")
+            val loggedParams = fakeAnalyticsRequestExecutor.awaitEvent("elements.captcha.passive.error")
             assertThat(loggedParams["duration"]).isEqualTo(8000f)
             assertThat(loggedParams["error_message"]).isNull()
             assertThat(loggedParams["site_key"]).isEqualTo(SITE_KEY)
@@ -121,11 +101,7 @@ internal class DefaultCaptchaEventsReporterTest {
         runScenario { defaultChallengeEventsReporter, fakeAnalyticsRequestExecutor, fakeErrorReporter ->
             defaultChallengeEventsReporter.error(Throwable("test error"), SITE_KEY)
 
-            val loggedRequests = fakeAnalyticsRequestExecutor.getExecutedRequests()
-
-            assertThat(loggedRequests).hasSize(1)
-            val loggedParams = loggedRequests.first().params
-            assertThat(loggedParams["event"]).isEqualTo("elements.captcha.passive.error")
+            val loggedParams = fakeAnalyticsRequestExecutor.awaitEvent("elements.captcha.passive.error")
             assertThat(loggedParams["error_message"]).isEqualTo("test error")
             assertThat(loggedParams["site_key"]).isEqualTo(SITE_KEY)
             assertThat(loggedParams["duration"]).isEqualTo(0f)
@@ -144,11 +120,8 @@ internal class DefaultCaptchaEventsReporterTest {
             val hCaptchaException = HCaptchaException(HCaptchaError.NETWORK_ERROR, "Network error")
             defaultChallengeEventsReporter.error(hCaptchaException, SITE_KEY)
 
-            val loggedRequests = fakeAnalyticsRequestExecutor.getExecutedRequests()
-
-            assertThat(loggedRequests).hasSize(2)
-            val loggedParams = loggedRequests.last().params
-            assertThat(loggedParams["event"]).isEqualTo("elements.captcha.passive.error")
+            fakeAnalyticsRequestExecutor.awaitEvent("elements.captcha.passive.init")
+            val loggedParams = fakeAnalyticsRequestExecutor.awaitEvent("elements.captcha.passive.error")
             assertThat(loggedParams["duration"]).isEqualTo(12000f)
             assertThat(loggedParams["error_message"]).isEqualTo("Network error")
             assertThat(loggedParams["site_key"]).isEqualTo(SITE_KEY)
@@ -185,9 +158,7 @@ internal class DefaultCaptchaEventsReporterTest {
         runScenario(durationProvider) { defaultChallengeEventsReporter, fakeAnalyticsRequestExecutor, _ ->
             defaultChallengeEventsReporter.attachStart()
 
-            val loggedRequests = fakeAnalyticsRequestExecutor.getExecutedRequests()
-
-            assertThat(loggedRequests).isEmpty()
+            fakeAnalyticsRequestExecutor.requestTurbine.expectNoEvents()
             assertThat(startCalled).isTrue()
         }
     }
@@ -198,11 +169,7 @@ internal class DefaultCaptchaEventsReporterTest {
         ShadowSystemClock.advanceBy(5, TimeUnit.MILLISECONDS)
         defaultChallengeEventsReporter.attachEnd(SITE_KEY, isReady = true)
 
-        val loggedRequests = fakeAnalyticsRequestExecutor.getExecutedRequests()
-
-        assertThat(loggedRequests).hasSize(1)
-        val loggedParams = loggedRequests.first().params
-        assertThat(loggedParams["event"]).isEqualTo("elements.captcha.passive.attach")
+        val loggedParams = fakeAnalyticsRequestExecutor.awaitEvent("elements.captcha.passive.attach")
         assertThat(loggedParams["site_key"]).isEqualTo(SITE_KEY)
         assertThat(loggedParams["is_ready"]).isEqualTo(true)
         assertThat(loggedParams["duration"]).isEqualTo(5)
@@ -214,11 +181,7 @@ internal class DefaultCaptchaEventsReporterTest {
         ShadowSystemClock.advanceBy(5, TimeUnit.MILLISECONDS)
         defaultChallengeEventsReporter.attachEnd(SITE_KEY, isReady = false)
 
-        val loggedRequests = fakeAnalyticsRequestExecutor.getExecutedRequests()
-
-        assertThat(loggedRequests).hasSize(1)
-        val loggedParams = loggedRequests.first().params
-        assertThat(loggedParams["event"]).isEqualTo("elements.captcha.passive.attach")
+        val loggedParams = fakeAnalyticsRequestExecutor.awaitEvent("elements.captcha.passive.attach")
         assertThat(loggedParams["site_key"]).isEqualTo(SITE_KEY)
         assertThat(loggedParams["is_ready"]).isEqualTo(false)
         assertThat(loggedParams["duration"]).isEqualTo(5)
@@ -226,8 +189,8 @@ internal class DefaultCaptchaEventsReporterTest {
 
     private fun runScenario(
         durationProvider: DurationProvider = DefaultDurationProvider.instance,
-        testBlock: (DefaultCaptchaEventsReporter, FakeAnalyticsRequestExecutor, FakeErrorReporter) -> Unit
-    ) {
+        testBlock: suspend (DefaultCaptchaEventsReporter, FakeAnalyticsRequestExecutor, FakeErrorReporter) -> Unit
+    ) = runTest {
         val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
         val fakeErrorReporter = FakeErrorReporter()
         val eventsReporter = DefaultCaptchaEventsReporter(
@@ -245,6 +208,8 @@ internal class DefaultCaptchaEventsReporterTest {
         )
 
         testBlock(eventsReporter, analyticsRequestExecutor, fakeErrorReporter)
+
+        analyticsRequestExecutor.validate()
     }
 
     companion object {

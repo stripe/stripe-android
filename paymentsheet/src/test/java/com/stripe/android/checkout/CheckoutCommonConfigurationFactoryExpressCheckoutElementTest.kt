@@ -153,7 +153,7 @@ internal class CheckoutCommonConfigurationFactoryExpressCheckoutElementTest {
             .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic)
         assertThat(result?.billingDetailsCollectionConfiguration?.address)
             .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic)
-        assertThat(result?.billingDetailsCollectionConfiguration?.attachDefaultsToPaymentMethod).isTrue()
+        assertThat(result?.billingDetailsCollectionConfiguration?.attachDefaultsToPaymentMethod).isFalse()
     }
 
     @Test

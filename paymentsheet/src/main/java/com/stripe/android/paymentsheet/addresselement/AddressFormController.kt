@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.addresselement
 
 import com.stripe.android.core.model.CountryUtils
-import com.stripe.android.uicore.elements.AddressFieldConfiguration
 import com.stripe.android.uicore.elements.AutocompleteAddressElement
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.FormElement
@@ -18,7 +17,7 @@ internal class AddressFormController(
         identifier = FormFieldId.Generic("address"),
         initialValues = initialValues,
         countryCodes = config?.allowedCountries ?: CountryUtils.supportedBillingCountries,
-        nameConfig = AddressFieldConfiguration.REQUIRED,
+        nameConfig = config.nameFieldConfiguration(),
         phoneNumberConfig = parsePhoneNumberConfig(config?.additionalFields?.phone),
         shippingValuesMap = null,
         sameAsShippingElement = null,

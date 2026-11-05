@@ -26,6 +26,10 @@
   <string name="stripe_confirm_close_form_body">귀하의 결제 정보가 저장되지 않습니다.</string>
   <!-- Used as the title for prompting the user if they want to close the sheet -->
   <string name="stripe_confirm_close_form_title">이 양식을 닫으시겠습니까?</string>
+  <!-- Fallback disclosure when paying in the merchant's currency instead of using Adaptive Pricing. -->
+  <string name="stripe_currency_selector_bank_fees_disclaimer">이용하시는 은행의 환율 및 수수료가 적용될 수 있습니다.</string>
+  <string name="stripe_currency_selector_hide_details">환율 세부 정보 숨기기</string>
+  <string name="stripe_currency_selector_show_details">환율 세부 정보 표시</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header">Link로 안전한 원클릭 결제를 위해 사용자 정보 저장</string>
   <!-- Label for a checkbox that when checked allows the payment information
@@ -64,6 +68,12 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_email_suggestion_update">예, 업데이트합니다</string>
   <!-- Title for a button that indicates a user can log in or sign up. -->
   <string name="stripe_link_log_in_or_sign_up">로그인 또는 등록</string>
+  <!-- Label of a button that signs the user out of their current Link account so they can log in to a different one. -->
+  <string name="stripe_link_log_in_to_another_account">다른 계정으로 로그인</string>
+  <!-- Message on a screen shown when none of the payment methods in the user's Link account can be used with this business. The placeholder is a Stripe brand name and should not be translated. -->
+  <string name="stripe_link_no_funding_sources_message">%s 계정의 어떤 결제 방식도 이 비즈니스에서 사용할 수 없습니다.</string>
+  <!-- Title of a screen shown when none of the payment methods in the user's Link account can be used with this business. The placeholder is a Stripe brand name and should not be translated. -->
+  <string name="stripe_link_no_funding_sources_title">여기에서는 %s 방식으로 결제할 수 없습니다</string>
   <!-- Text displayed on a confirmation button on the CRS CARF declaration screen -->
   <string name="stripe_link_onramp_carf_declaration_accept_button_text">수락</string>
   <!-- Text displayed on a cancel button on the CRS CARF declaration screen -->
