@@ -280,12 +280,7 @@ class CheckoutElementsController @Inject internal constructor(
                             .CHECKOUT_SAVED_PAYMENT_METHOD_MISSING_BILLING_ADDRESS,
                     )
                 }
-                return@withCheckoutState kotlin.Result.success(checkoutSessionResponse).also {
-                    reportLocalAddressUpdate(
-                        addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
-                        invocationSource = "payment_element",
-                    )
-                }
+                return@withCheckoutState kotlin.Result.success(checkoutSessionResponse)
             }
             updateAddress(
                 addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,

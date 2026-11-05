@@ -203,15 +203,6 @@ internal class CheckoutPaymentElementAnalyticsTest {
                 eventName = "unexpected_error.checkout.saved_payment_method.missing_billing_address",
                 productUsage = setOf("checkout_elements"),
             )
-            networkRule.validateAnalyticsRequest(
-                eventName = "checkout_elements.update_billing_address.succeeded",
-                productUsage = setOf("checkout_elements"),
-                analyticsPayloadField("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID),
-                analyticsPayloadField("invocation_source", "payment_element"),
-                analyticsPayloadField("did_request_tax_update", "false"),
-                not(hasQueryParam("duration")),
-                not(hasQueryParam("error_type")),
-            )
 
             // Billing-tax filtering keeps addressless saved payment methods out of the UI, so
             // select one directly.
