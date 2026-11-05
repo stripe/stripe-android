@@ -652,7 +652,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
     }
 
     @Test
-    fun `launchPaymentOptions silently returns if metadata is null`() = testScenario {
+    fun `launchPaymentOptions logs error and returns if metadata is null`() = testScenario {
         sheetLauncher.launchPaymentOptions(
             paymentMethodMetadata = null,
             customerState = null,
@@ -660,12 +660,14 @@ internal class DefaultEmbeddedSheetLauncherTest {
             configuration = EmbeddedConfigurationFactory.create(),
         )
 
-        assertThat(errorReporter.getLoggedErrors()).isEmpty()
+        assertThat(errorReporter.awaitCall().errorEvent.eventName)
+            .isEqualTo("unexpected_error.embedded.embedded_sheet_launcher.embedded_state_is_null")
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
+        errorReporter.ensureAllEventsConsumed()
     }
 
     @Test
-    fun `launchPaymentOptions silently returns if state is unavailable`() = testScenario {
+    fun `launchPaymentOptions logs error and returns if state is unavailable`() = testScenario {
         sheetLauncher.launchPaymentOptions(
             paymentMethodMetadata = null,
             customerState = null,
@@ -673,8 +675,10 @@ internal class DefaultEmbeddedSheetLauncherTest {
             configuration = null,
         )
 
-        assertThat(errorReporter.getLoggedErrors()).isEmpty()
+        assertThat(errorReporter.awaitCall().errorEvent.eventName)
+            .isEqualTo("unexpected_error.embedded.embedded_sheet_launcher.embedded_state_is_null")
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
+        errorReporter.ensureAllEventsConsumed()
     }
 
     @Test
