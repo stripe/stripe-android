@@ -11,6 +11,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.AnnotatedString
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent.Operation
+import com.stripe.android.checkout.analytics.LocalOperation
 import com.stripe.android.checkout.analytics.toAnalyticsMap
 import com.stripe.android.checkout.injection.CheckoutElementsPresenterSubcomponent
 import com.stripe.android.checkout.injection.DaggerCheckoutElementsControllerComponent
@@ -230,7 +232,12 @@ class CheckoutElementsController @Inject internal constructor(
                 copy(collectedDetails = collectedDetails.copy(email = email))
             },
         ) {
-            kotlin.Result.success(checkoutSessionResponse)
+            kotlin.Result.success(checkoutSessionResponse).also {
+                LocalOperation(
+                    operation = Operation.UpdateEmail,
+                    report = checkoutSessionRepository::fireEvent,
+                ).succeeded(checkoutSessionResponse)
+            }
         }.toOperationResult()
     }
 

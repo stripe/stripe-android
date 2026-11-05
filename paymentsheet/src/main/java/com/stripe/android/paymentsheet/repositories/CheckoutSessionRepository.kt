@@ -289,7 +289,7 @@ internal class CheckoutSessionRepository @Inject constructor(
         )
     }
 
-    private fun fireEvent(event: CheckoutAnalyticsEvent) {
+    fun fireEvent(event: CheckoutAnalyticsEvent) {
         analyticsRequestExecutor.executeAsync(
             paymentAnalyticsRequestFactory.createRequest(
                 event = event,
