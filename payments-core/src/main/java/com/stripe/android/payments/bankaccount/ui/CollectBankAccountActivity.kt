@@ -12,7 +12,6 @@ import com.stripe.android.financialconnections.launcher.FinancialConnectionsShee
 import com.stripe.android.payments.bankaccount.domain.BuildFinancialConnectionsLauncher
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal.Failed
-import com.stripe.android.payments.bankaccount.toFinancialConnectionsThemeMode
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewEffect.FinishWithResult
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewEffect.OpenConnectionsFlow
 
@@ -54,7 +53,7 @@ class CollectBankAccountActivity : AppCompatActivity() {
                     when (viewEffect) {
                         is OpenConnectionsFlow -> {
                             viewEffect.launch(
-                                themeMode = args.themeMode.toFinancialConnectionsThemeMode(),
+                                themeMode = args.themeMode,
                             )
                         }
                         is FinishWithResult -> viewEffect.launch()

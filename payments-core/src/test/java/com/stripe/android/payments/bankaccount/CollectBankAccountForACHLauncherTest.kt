@@ -3,6 +3,7 @@ package com.stripe.android.payments.bankaccount
 import androidx.activity.result.ActivityResultLauncher
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.financialconnections.FinancialConnectionsPreCollectedConsent
+import com.stripe.android.financialconnections.ThemeMode
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability.Full

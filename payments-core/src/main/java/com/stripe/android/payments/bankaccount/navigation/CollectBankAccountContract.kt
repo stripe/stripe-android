@@ -10,8 +10,8 @@ import androidx.annotation.VisibleForTesting
 import androidx.core.os.bundleOf
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.financialconnections.FinancialConnectionsPreCollectedConsent
+import com.stripe.android.financialconnections.ThemeMode
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
-import com.stripe.android.payments.bankaccount.ThemeMode
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountActivity
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import kotlinx.parcelize.Parcelize

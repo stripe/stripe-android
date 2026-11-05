@@ -5,6 +5,7 @@ import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.financialconnections.FinancialConnectionsPreCollectedConsent
+import com.stripe.android.financialconnections.ThemeMode
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountForInstantDebitsResult
 import com.stripe.android.payments.bankaccount.navigation.toInstantDebitsResult
