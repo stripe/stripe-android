@@ -188,54 +188,14 @@ internal fun GenericHeader(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(20.dp),
     ) {
-        val iconShape = if (isBrandIcon) RoundedCornerShape(12.dp) else CircleShape
-
-        val iconModifier = if (isBrandIcon) {
-            Modifier
-                .shadow(8.dp, iconShape)
-                .clip(iconShape)
-                .background(color = colors.backgroundSecondary, shape = iconShape)
-        } else {
-            Modifier
-        }
-
         payload.icon?.default?.let { iconUrl ->
-            if (isIconInstitutionLogo) {
-                // Match how institutions are shown elsewhere, such as in the institution picker.
-                // InstitutionIcon applies its modifier to the image inside StripeImage rather than
-                // to its outermost layout, so the alignment has to go on a wrapper.
-                Box(modifier = Modifier.align(payload.alignment.toComposeAlignment())) {
-                    InstitutionIcon(
-                        institutionIcon = iconUrl,
-                        // Matches the institution logo size on iOS.
-                        size = 72.dp,
-                        cornerRadius = 16.dp,
-                    )
-                }
-            } else {
-                ShapedIcon(
-                    modifier = iconModifier.align(payload.alignment.toComposeAlignment()),
-                    backgroundShape = iconShape,
-                    flushed = isBrandIcon,
-                    url = iconUrl,
-                    contentDescription = null,
-                    // A brand icon is an institution's logo, so stand in for it with the institution
-                    // placeholder rather than the person icon ShapedIcon otherwise defaults to. The
-                    // debug painter replaces the image itself, so it needs the full-bleed tile; the
-                    // error painter is tinted and padded, so it takes the glyph.
-                    debugPainter = painterResource(
-                        id = if (isBrandIcon) {
-                            R.drawable.stripe_ic_brandicon_institution
-                        } else {
-                            R.drawable.stripe_ic_person
-                        }
-                    ),
-                    errorPainter = R.drawable.stripe_ic_bank
-                        .takeIf { isBrandIcon }
-                        ?.let { painterResource(id = it) },
-                    iconSize = if (payload.alignment == Alignment.Center) IconSize.Large else IconSize.Medium,
-                )
-            }
+            GenericHeaderIcon(
+                iconUrl = iconUrl,
+                isBrandIcon = isBrandIcon,
+                isIconInstitutionLogo = isIconInstitutionLogo,
+                alignment = payload.alignment,
+                modifier = Modifier.align(payload.alignment.toComposeAlignment()),
+            )
         }
 
         if (payload.title != null) {
@@ -257,6 +217,63 @@ internal fun GenericHeader(
                 onClickableTextClick = onClickableTextClick,
             )
         }
+    }
+}
+
+@Composable
+private fun GenericHeaderIcon(
+    iconUrl: String,
+    isBrandIcon: Boolean,
+    isIconInstitutionLogo: Boolean,
+    alignment: Alignment?,
+    modifier: Modifier,
+) {
+    if (isIconInstitutionLogo) {
+        // Match how institutions are shown elsewhere, such as in the institution picker.
+        // InstitutionIcon applies its modifier to the image inside StripeImage rather than
+        // to its outermost layout, so the alignment has to go on a wrapper.
+        Box(modifier = modifier) {
+            InstitutionIcon(
+                institutionIcon = iconUrl,
+                // Matches the institution logo size on iOS.
+                size = 72.dp,
+                cornerRadius = 16.dp,
+            )
+        }
+    } else {
+        val iconShape = if (isBrandIcon) RoundedCornerShape(12.dp) else CircleShape
+
+        val iconModifier = if (isBrandIcon) {
+            Modifier
+                .shadow(8.dp, iconShape)
+                .clip(iconShape)
+                .background(color = colors.backgroundSecondary, shape = iconShape)
+        } else {
+            Modifier
+        }
+
+        ShapedIcon(
+            modifier = modifier.then(iconModifier),
+            backgroundShape = iconShape,
+            flushed = isBrandIcon,
+            url = iconUrl,
+            contentDescription = null,
+            // A brand icon is an institution's logo, so stand in for it with the institution
+            // placeholder rather than the person icon ShapedIcon otherwise defaults to. The
+            // debug painter replaces the image itself, so it needs the full-bleed tile; the
+            // error painter is tinted and padded, so it takes the glyph.
+            debugPainter = painterResource(
+                id = if (isBrandIcon) {
+                    R.drawable.stripe_ic_brandicon_institution
+                } else {
+                    R.drawable.stripe_ic_person
+                }
+            ),
+            errorPainter = R.drawable.stripe_ic_bank
+                .takeIf { isBrandIcon }
+                ?.let { painterResource(id = it) },
+            iconSize = if (alignment == Alignment.Center) IconSize.Large else IconSize.Medium,
+        )
     }
 }
 
