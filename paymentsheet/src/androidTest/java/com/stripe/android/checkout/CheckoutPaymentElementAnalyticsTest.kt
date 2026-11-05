@@ -422,6 +422,9 @@ internal class CheckoutPaymentElementAnalyticsTest {
             ).isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
         },
     ) {
+        assertThat(controller.updateShippingAddress(name = null, address = null))
+            .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
+
         networkRule.validateCheckoutAnalyticsStarted(
             "update_shipping_address",
             analyticsPayloadField("invocation_source", "merchant"),

@@ -207,18 +207,7 @@ class CheckoutElementsController @Inject internal constructor(
                 )
             },
         ) {
-            measureShippingAddressUpdate(
-                didRequestTaxUpdate = checkoutSessionTaxRegionUpdater.requiresUpdate(
-                    checkoutSessionResponse = checkoutSessionResponse,
-                    addressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
-                ),
-            ) {
-                checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
-                    checkoutSessionResponse = checkoutSessionResponse,
-                    addressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
-                    address = built,
-                )
-            }
+            updateAddress(built)
         }.toOperationResult()
     }
 
@@ -349,37 +338,32 @@ class CheckoutElementsController @Inject internal constructor(
         },
     ) {
         val previousAddress = collectedDetails.shippingAddress
-        measureShippingAddressUpdate(
-            didRequestTaxUpdate = previousAddress != null &&
-                checkoutSessionTaxRegionUpdater.requiresUpdate(
-                    checkoutSessionResponse = checkoutSessionResponse,
-                    addressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
-                ),
-        ) {
-            if (previousAddress == null) {
-                kotlin.Result.success(checkoutSessionResponse)
-            } else {
-                checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
-                    checkoutSessionResponse = checkoutSessionResponse,
-                    addressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
-                    address = null,
-                )
-            }
+        if (previousAddress == null) {
+            kotlin.Result.success(checkoutSessionResponse)
+        } else {
+            updateAddress(null)
         }
     }
 
-    private suspend fun CheckoutElementsControllerState.measureShippingAddressUpdate(
-        didRequestTaxUpdate: Boolean,
-        block: suspend () -> kotlin.Result<CheckoutSessionResponse>,
+    private suspend fun CheckoutElementsControllerState.updateAddress(
+        address: Address.State?,
     ): kotlin.Result<CheckoutSessionResponse> = checkoutSessionRepository.measure(
         operation = Operation.UpdateShippingAddress,
         checkoutSessionResponse = checkoutSessionResponse,
         params = mapOf(
             "invocation_source" to "merchant",
-            "did_request_tax_update" to didRequestTaxUpdate,
+            "did_request_tax_update" to checkoutSessionTaxRegionUpdater.requiresUpdate(
+                checkoutSessionResponse = checkoutSessionResponse,
+                addressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
+            ),
         ),
-        block = block,
-    )
+    ) {
+        checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
+            checkoutSessionResponse = checkoutSessionResponse,
+            addressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
+            address = address,
+        )
+    }
 
     /**
      * Runs a mutation against the checkout session, serializing it behind the operation coordinator
