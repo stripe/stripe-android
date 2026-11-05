@@ -373,7 +373,7 @@ internal class DefaultVerticalModeFormInteractorTest {
                 selectedPaymentMethodCode = paymentMethodCode,
             ),
             embeddedNavigatorProvider = Provider { error("Not expected") },
-            initialPaymentOptionsScreenFactoryProvider = Provider { error("Not expected") },
+            initialScreensProvider = Provider { error("Not expected") },
             errorReporter = FakeErrorReporter(),
             savedPaymentMethodConfirmScreenFactoryProvider = Provider { error("Not expected") },
         )

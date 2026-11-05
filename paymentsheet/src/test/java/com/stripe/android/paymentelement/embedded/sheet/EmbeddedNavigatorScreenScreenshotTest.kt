@@ -324,7 +324,7 @@ internal class EmbeddedNavigatorScreenScreenshotTest {
             linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
             launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
             embeddedNavigatorProvider = Provider { error("Not expected") },
-            initialPaymentOptionsScreenFactoryProvider = Provider { error("Not expected") },
+            initialScreensProvider = Provider { error("Not expected") },
             errorReporter = FakeErrorReporter(),
             savedPaymentMethodConfirmScreenFactoryProvider = Provider { error("Not expected") },
         )

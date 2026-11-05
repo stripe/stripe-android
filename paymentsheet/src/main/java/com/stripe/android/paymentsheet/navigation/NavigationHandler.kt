@@ -111,21 +111,21 @@ internal class NavigationHandler<T : Any>(
     }
 
     fun resetTo(screens: List<T>): Boolean {
-        if (isTransitioning.get()) {
-            screens.forEach { it.onClose() }
-            return false
-        }
+        return if (!isTransitioning.get()) {
+            val previousBackStack = backStack.value
 
-        val previousBackStack = backStack.value
+            backStack.value = screens
 
-        backStack.value = screens
-
-        previousBackStack.forEach { oldScreen ->
-            if (oldScreen !in screens) {
-                oldScreen.onClose()
+            previousBackStack.forEach { oldScreen ->
+                if (oldScreen !in screens) {
+                    oldScreen.onClose()
+                }
             }
+            true
+        } else {
+            screens.forEach { it.onClose() }
+            false
         }
-        return true
     }
 
     fun pop() {
