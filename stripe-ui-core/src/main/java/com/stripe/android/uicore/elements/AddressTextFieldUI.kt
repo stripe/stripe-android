@@ -1,7 +1,6 @@
 package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -38,9 +37,6 @@ fun AddressTextFieldUI(
     modifier: Modifier = Modifier,
     enabled: Boolean,
     onSearchActivated: (() -> Unit)?,
-    onClick: () -> Unit = {
-        controller.launchAutocompleteScreen()
-    }
 ) {
     val label by controller.label.collectAsState()
     val inlineQuery by controller.inlineQuery.collectAsState()
@@ -52,7 +48,7 @@ fun AddressTextFieldUI(
     val isError = error != null
 
     val fieldModifier = modifier.fillMaxWidth().then(
-        if (isEditable) Modifier.focusRequester(focusRequester) else Modifier.clickable(enabled = enabled) { onClick() }
+        if (isEditable) Modifier.focusRequester(focusRequester) else Modifier
     )
 
     CompatTextField(

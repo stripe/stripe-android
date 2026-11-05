@@ -90,7 +90,7 @@ class AddressTextFieldControllerTest {
     }
 
     @Test
-    fun `non-inline mode - is not editable`() = runTest {
+    fun `without an inline autocomplete handler, field is not editable`() = runTest {
         val controller = createAddressController(inlineAutocompleteHandler = null)
 
         assertThat(controller.isEditable).isFalse()
@@ -118,7 +118,7 @@ class AddressTextFieldControllerTest {
     }
 
     @Test
-    fun `non-inline mode - query ignored when handler is null`() = runTest {
+    fun `query is ignored when inline autocomplete handler is null`() = runTest {
         val controller = createAddressController(inlineAutocompleteHandler = null)
 
         turbineScope {
@@ -202,7 +202,6 @@ class AddressTextFieldControllerTest {
     ): AddressTextFieldController {
         return AddressTextFieldController(
             label = resolvableString(value = "Name"),
-            addressInputMode = AddressInputMode.NoAutocomplete(),
             inlineAutocompleteHandler = inlineAutocompleteHandler,
             reportsFormValue = reportsFormValue,
             initialQuery = initialQuery,
