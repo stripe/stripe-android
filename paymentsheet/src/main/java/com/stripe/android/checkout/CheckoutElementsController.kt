@@ -196,13 +196,29 @@ class CheckoutElementsController @Inject internal constructor(
         stateHolder.state?.checkoutSessionResponse
             ?.validateShippingCountry(address.build().country)
             ?.onFailure { return kotlin.Result.failure<Unit>(it).toOperationResult() }
-        return updateAddress(CheckoutSessionResponse.TaxAddressSource.SHIPPING, address) {
-            copy(
-                collectedDetails = collectedDetails.copy(
-                    shippingName = name,
-                    shippingAddress = it,
+        val built = address.build()
+        return withCheckoutState(
+            additionalStateMutations = {
+                copy(
+                    collectedDetails = collectedDetails.copy(
+                        shippingName = name,
+                        shippingAddress = built,
+                    ),
+                )
+            },
+        ) {
+            measureShippingAddressUpdate(
+                didRequestTaxUpdate = checkoutSessionTaxRegionUpdater.requiresUpdate(
+                    checkoutSessionResponse = checkoutSessionResponse,
+                    addressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
                 ),
-            )
+            ) {
+                checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
+                    checkoutSessionResponse = checkoutSessionResponse,
+                    addressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
+                    address = built,
+                )
+            }
         }.toOperationResult()
     }
 
@@ -322,23 +338,6 @@ class CheckoutElementsController @Inject internal constructor(
         }.toOperationResult()
     }
 
-    private suspend fun updateAddress(
-        addressType: CheckoutSessionResponse.TaxAddressSource,
-        address: Address,
-        mutation: CheckoutElementsControllerState.(Address.State) -> CheckoutElementsControllerState,
-    ): kotlin.Result<Unit> {
-        val built = address.build()
-        return withCheckoutState(
-            additionalStateMutations = { mutation(built) },
-        ) {
-            checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
-                checkoutSessionResponse = checkoutSessionResponse,
-                addressSource = addressType,
-                address = built,
-            )
-        }
-    }
-
     private suspend fun clearShippingAddress(): kotlin.Result<Unit> = withCheckoutState(
         additionalStateMutations = {
             copy(
@@ -350,16 +349,37 @@ class CheckoutElementsController @Inject internal constructor(
         },
     ) {
         val previousAddress = collectedDetails.shippingAddress
-        if (previousAddress == null) {
-            kotlin.Result.success(checkoutSessionResponse)
-        } else {
-            checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
-                checkoutSessionResponse = checkoutSessionResponse,
-                addressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
-                address = null,
-            )
+        measureShippingAddressUpdate(
+            didRequestTaxUpdate = previousAddress != null &&
+                checkoutSessionTaxRegionUpdater.requiresUpdate(
+                    checkoutSessionResponse = checkoutSessionResponse,
+                    addressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
+                ),
+        ) {
+            if (previousAddress == null) {
+                kotlin.Result.success(checkoutSessionResponse)
+            } else {
+                checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
+                    checkoutSessionResponse = checkoutSessionResponse,
+                    addressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
+                    address = null,
+                )
+            }
         }
     }
+
+    private suspend fun CheckoutElementsControllerState.measureShippingAddressUpdate(
+        didRequestTaxUpdate: Boolean,
+        block: suspend () -> kotlin.Result<CheckoutSessionResponse>,
+    ): kotlin.Result<CheckoutSessionResponse> = checkoutSessionRepository.measure(
+        operation = Operation.UpdateShippingAddress,
+        checkoutSessionResponse = checkoutSessionResponse,
+        params = mapOf(
+            "invocation_source" to "merchant",
+            "did_request_tax_update" to didRequestTaxUpdate,
+        ),
+        block = block,
+    )
 
     /**
      * Runs a mutation against the checkout session, serializing it behind the operation coordinator
