@@ -3,6 +3,7 @@ package com.stripe.android.payments.bankaccount.domain
 import androidx.activity.ComponentActivity
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
+import com.stripe.android.financialconnections.ThemeMode
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForDataLauncher
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForInstantDebitsLauncher
@@ -37,6 +38,7 @@ class BuildFinancialConnectionsLauncherTest {
                 financialConnectionsSessionClientSecret = "test_secret",
                 apiConfiguration = ApiKeyFixtures.DEFAULT_API_CONFIG,
                 preCollectedConsent = null,
+                themeMode = ThemeMode.Automatic,
             ),
             elementsSessionContext = null
         )
@@ -70,6 +72,7 @@ class BuildFinancialConnectionsLauncherTest {
                 financialConnectionsSessionClientSecret = "test_secret",
                 apiConfiguration = ApiKeyFixtures.DEFAULT_API_CONFIG,
                 preCollectedConsent = null,
+                themeMode = ThemeMode.Automatic,
             ),
             elementsSessionContext = null
         )
@@ -103,6 +106,7 @@ class BuildFinancialConnectionsLauncherTest {
                 financialConnectionsSessionClientSecret = "test_secret",
                 apiConfiguration = ApiKeyFixtures.DEFAULT_API_CONFIG,
                 preCollectedConsent = null,
+                themeMode = ThemeMode.Automatic,
             ),
             elementsSessionContext = null
         )
@@ -136,6 +140,7 @@ class BuildFinancialConnectionsLauncherTest {
                 financialConnectionsSessionClientSecret = "test_secret",
                 apiConfiguration = ApiKeyFixtures.DEFAULT_API_CONFIG,
                 preCollectedConsent = null,
+                themeMode = ThemeMode.Automatic,
             ),
             elementsSessionContext = null
         )

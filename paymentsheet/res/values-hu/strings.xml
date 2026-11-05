@@ -26,6 +26,10 @@
   <string name="stripe_confirm_close_form_body">Fizetési adatai nem lesznek mentve.</string>
   <!-- Used as the title for prompting the user if they want to close the sheet -->
   <string name="stripe_confirm_close_form_title">Bezárja ezt az űrlapot?</string>
+  <!-- Fallback disclosure when paying in the merchant's currency instead of using Adaptive Pricing. -->
+  <string name="stripe_currency_selector_bank_fees_disclaimer">Átváltási árfolyam és banki díjak merülhetnek fel.</string>
+  <string name="stripe_currency_selector_hide_details">Átváltási árfolyam részleteinek elrejtése</string>
+  <string name="stripe_currency_selector_show_details">Átváltási árfolyam részleteinek megjelenítése</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header">Mentse el az adatait a biztonságos egykattintásos fizetéshez a Linkkel</string>
   <!-- Label for a checkbox that when checked allows the payment information
@@ -64,6 +68,12 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_email_suggestion_update">Igen, frissítés</string>
   <!-- Title for a button that indicates a user can log in or sign up. -->
   <string name="stripe_link_log_in_or_sign_up">Bejelentkezés vagy regisztrálás</string>
+  <!-- Label of a button that signs the user out of their current Link account so they can log in to a different one. -->
+  <string name="stripe_link_log_in_to_another_account">Jelentkezzen be egy másik számlára</string>
+  <!-- Message on a screen shown when none of the payment methods in the user's Link account can be used with this business. The placeholder is a Stripe brand name and should not be translated. -->
+  <string name="stripe_link_no_funding_sources_message">A(z) %s számláján lévő fizetési módok egyike sem működik ezzel a vállalkozással.</string>
+  <!-- Title of a screen shown when none of the payment methods in the user's Link account can be used with this business. The placeholder is a Stripe brand name and should not be translated. -->
+  <string name="stripe_link_no_funding_sources_title">Itt nem fizethet a(z) %s használatával</string>
   <!-- Text displayed on a confirmation button on the CRS CARF declaration screen -->
   <string name="stripe_link_onramp_carf_declaration_accept_button_text">Elfogadás</string>
   <!-- Text displayed on a cancel button on the CRS CARF declaration screen -->

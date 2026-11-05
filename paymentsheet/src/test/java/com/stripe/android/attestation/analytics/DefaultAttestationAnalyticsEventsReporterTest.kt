@@ -6,6 +6,7 @@ import com.stripe.android.core.utils.DefaultDurationProvider
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.attestation.AttestationError
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -19,11 +20,7 @@ internal class DefaultAttestationAnalyticsEventsReporterTest {
     fun testPrepare() = runScenario { eventsReporter, fakeAnalyticsRequestExecutor ->
         eventsReporter.prepare()
 
-        val loggedRequests = fakeAnalyticsRequestExecutor.getExecutedRequests()
-
-        assertThat(loggedRequests).hasSize(1)
-        val loggedParams = loggedRequests.first().params
-        assertThat(loggedParams).containsEntry("event", "elements.attestation.confirmation.prepare")
+        fakeAnalyticsRequestExecutor.awaitEvent("elements.attestation.confirmation.prepare")
     }
 
     @Test
@@ -33,11 +30,8 @@ internal class DefaultAttestationAnalyticsEventsReporterTest {
 
         eventsReporter.prepareFailed(error = RuntimeException("Test error"))
 
-        val loggedRequests = fakeAnalyticsRequestExecutor.getExecutedRequests()
-
-        assertThat(loggedRequests).hasSize(2)
-        val loggedParams = loggedRequests.last().params
-        assertThat(loggedParams).containsEntry("event", "elements.attestation.confirmation.prepare.failed")
+        fakeAnalyticsRequestExecutor.awaitEvent("elements.attestation.confirmation.prepare")
+        val loggedParams = fakeAnalyticsRequestExecutor.awaitEvent("elements.attestation.confirmation.prepare.failed")
         assertThat(loggedParams).containsEntry("duration", 10f)
         assertThat(loggedParams).containsEntry("error_message", "Test error")
         assertThat(loggedParams).doesNotContainKey("android_attestation_error_type")
@@ -55,7 +49,8 @@ internal class DefaultAttestationAnalyticsEventsReporterTest {
             )
         )
 
-        val loggedParams = fakeAnalyticsRequestExecutor.getExecutedRequests().last().params
+        fakeAnalyticsRequestExecutor.awaitEvent("elements.attestation.confirmation.prepare")
+        val loggedParams = fakeAnalyticsRequestExecutor.awaitEvent("elements.attestation.confirmation.prepare.failed")
         assertThat(loggedParams).containsEntry("android_attestation_error_type", "API_NOT_AVAILABLE")
         assertThat(loggedParams).containsEntry("android_attestation_error_retriable", false)
     }
@@ -67,11 +62,10 @@ internal class DefaultAttestationAnalyticsEventsReporterTest {
 
         eventsReporter.prepareSucceeded()
 
-        val loggedRequests = fakeAnalyticsRequestExecutor.getExecutedRequests()
-
-        assertThat(loggedRequests).hasSize(2)
-        val loggedParams = loggedRequests.last().params
-        assertThat(loggedParams).containsEntry("event", "elements.attestation.confirmation.prepare.succeeded")
+        fakeAnalyticsRequestExecutor.awaitEvent("elements.attestation.confirmation.prepare")
+        val loggedParams = fakeAnalyticsRequestExecutor.awaitEvent(
+            "elements.attestation.confirmation.prepare.succeeded"
+        )
         assertThat(loggedParams).containsEntry("duration", 15f)
     }
 
@@ -79,11 +73,7 @@ internal class DefaultAttestationAnalyticsEventsReporterTest {
     fun testRequestToken() = runScenario { eventsReporter, fakeAnalyticsRequestExecutor ->
         eventsReporter.requestToken()
 
-        val loggedRequests = fakeAnalyticsRequestExecutor.getExecutedRequests()
-
-        assertThat(loggedRequests).hasSize(1)
-        val loggedParams = loggedRequests.first().params
-        assertThat(loggedParams).containsEntry("event", "elements.attestation.confirmation.request_token")
+        fakeAnalyticsRequestExecutor.awaitEvent("elements.attestation.confirmation.request_token")
     }
 
     @Test
@@ -93,11 +83,10 @@ internal class DefaultAttestationAnalyticsEventsReporterTest {
 
         eventsReporter.requestTokenSucceeded()
 
-        val loggedRequests = fakeAnalyticsRequestExecutor.getExecutedRequests()
-
-        assertThat(loggedRequests).hasSize(2)
-        val loggedParams = loggedRequests.last().params
-        assertThat(loggedParams).containsEntry("event", "elements.attestation.confirmation.request_token.succeeded")
+        fakeAnalyticsRequestExecutor.awaitEvent("elements.attestation.confirmation.request_token")
+        val loggedParams = fakeAnalyticsRequestExecutor.awaitEvent(
+            "elements.attestation.confirmation.request_token.succeeded"
+        )
         assertThat(loggedParams).containsEntry("duration", 8f)
     }
 
@@ -108,11 +97,10 @@ internal class DefaultAttestationAnalyticsEventsReporterTest {
 
         eventsReporter.requestTokenFailed(error = RuntimeException("Request failed"))
 
-        val loggedRequests = fakeAnalyticsRequestExecutor.getExecutedRequests()
-
-        assertThat(loggedRequests).hasSize(2)
-        val loggedParams = loggedRequests.last().params
-        assertThat(loggedParams).containsEntry("event", "elements.attestation.confirmation.request_token.failed")
+        fakeAnalyticsRequestExecutor.awaitEvent("elements.attestation.confirmation.request_token")
+        val loggedParams = fakeAnalyticsRequestExecutor.awaitEvent(
+            "elements.attestation.confirmation.request_token.failed"
+        )
         assertThat(loggedParams).containsEntry("duration", 12f)
         assertThat(loggedParams).containsEntry("error_message", "Request failed")
         assertThat(loggedParams).doesNotContainKey("android_attestation_error_type")
@@ -130,15 +118,18 @@ internal class DefaultAttestationAnalyticsEventsReporterTest {
             )
         )
 
-        val loggedParams = fakeAnalyticsRequestExecutor.getExecutedRequests().last().params
+        fakeAnalyticsRequestExecutor.awaitEvent("elements.attestation.confirmation.request_token")
+        val loggedParams = fakeAnalyticsRequestExecutor.awaitEvent(
+            "elements.attestation.confirmation.request_token.failed"
+        )
         assertThat(loggedParams).containsEntry("android_attestation_error_type", "NETWORK_ERROR")
         assertThat(loggedParams).containsEntry("android_attestation_error_retriable", true)
     }
 
     private fun runScenario(
         durationProvider: DurationProvider = DefaultDurationProvider.instance,
-        testBlock: (DefaultAttestationAnalyticsEventsReporter, FakeAnalyticsRequestExecutor) -> Unit
-    ) {
+        testBlock: suspend (DefaultAttestationAnalyticsEventsReporter, FakeAnalyticsRequestExecutor) -> Unit
+    ) = runTest {
         val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
         val eventsReporter = DefaultAttestationAnalyticsEventsReporter(
             analyticsRequestExecutor = analyticsRequestExecutor,
@@ -154,5 +145,7 @@ internal class DefaultAttestationAnalyticsEventsReporterTest {
         )
 
         testBlock(eventsReporter, analyticsRequestExecutor)
+
+        analyticsRequestExecutor.validate()
     }
 }

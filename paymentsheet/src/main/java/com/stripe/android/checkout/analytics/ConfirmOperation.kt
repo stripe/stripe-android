@@ -36,10 +36,6 @@ internal class ConfirmOperation(
         )
     }
 
-    fun succeeded(response: CheckoutSessionResponse?) {
-        reportOutcome(Outcome.Succeeded, response, error = null)
-    }
-
     fun canceled(response: CheckoutSessionResponse?) {
         reportOutcome(Outcome.Canceled, response, error = null)
     }

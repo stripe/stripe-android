@@ -40,7 +40,7 @@
   <!-- Text for choosing a photo from gallery -->
   <string name="stripe_choose_file">Choisir une photo</string>
   <!-- Close button text -->
-  <string name="stripe_close_button_text">fermer</string>
+  <string name="stripe_close_button_text">Fermer</string>
   <!-- Button to complete with test data -->
   <string name="stripe_complete_with_test_data">Terminer avec les données de test</string>
   <!-- Description for complete button on test mode -->
@@ -169,7 +169,7 @@
   <!-- Instructional text when user needs remove anything blocking the document -->
   <string name="stripe_keep_fully_visible">Détails non visibles</string>
   <!-- Continue button text -->
-  <string name="stripe_kontinue">continuer</string>
+  <string name="stripe_kontinue">Continuer</string>
   <!-- Label for the ID field to collect last 4 of social security number for US ID -->
   <string name="stripe_last_4_of_ssn">4 derniers chiffres du numéro de sécurité sociale</string>
   <!-- Label for last (family) name field -->

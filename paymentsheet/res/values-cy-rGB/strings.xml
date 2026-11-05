@@ -20,6 +20,10 @@
   <string name="stripe_cashapp_afterpay_subtitle">Prynu nawr neu dalu wedyn gyda Cash App Afterpay</string>
   <!-- This shows the message on Buy Now Pay Later LPM, clearpay. -->
   <string name="stripe_clearpay_subtitle">Prynu nawr neu dalu wedyn gyda Clearpay</string>
+  <!-- Fallback disclosure when paying in the merchant's currency instead of using Adaptive Pricing. -->
+  <string name="stripe_currency_selector_bank_fees_disclaimer">Gall cyfradd gyfnewid a ffioedd eich banc fod yn berthnasol.</string>
+  <string name="stripe_currency_selector_hide_details">Cuddio manylion y gyfradd gyfnewid</string>
+  <string name="stripe_currency_selector_show_details">Dangos manylion y gyfradd gyfnewid</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header">Cadw\'ch manylion i dalu\'n ddiogel ag 1 clic gyda Link</string>
   <!-- Label for a checkbox that when checked allows the payment information
@@ -58,6 +62,12 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_email_suggestion_update">Ie, diweddaru</string>
   <!-- Title for a button that indicates a user can log in or sign up. -->
   <string name="stripe_link_log_in_or_sign_up">Mewngofnodi neu gofrestru</string>
+  <!-- Label of a button that signs the user out of their current Link account so they can log in to a different one. -->
+  <string name="stripe_link_log_in_to_another_account">Mewngofnodwch i gyfrif arall</string>
+  <!-- Message on a screen shown when none of the payment methods in the user's Link account can be used with this business. The placeholder is a Stripe brand name and should not be translated. -->
+  <string name="stripe_link_no_funding_sources_message">Does dim un o’r dulliau talu yn eich cyfrif %s yn gweithio gyda’r busnes hwn.</string>
+  <!-- Title of a screen shown when none of the payment methods in the user's Link account can be used with this business. The placeholder is a Stripe brand name and should not be translated. -->
+  <string name="stripe_link_no_funding_sources_title">Does dim modd talu gyda %s yma</string>
   <!-- Text displayed on a confirmation button on the CRS CARF declaration screen -->
   <string name="stripe_link_onramp_carf_declaration_accept_button_text">Derbyn</string>
   <!-- Text displayed on a cancel button on the CRS CARF declaration screen -->

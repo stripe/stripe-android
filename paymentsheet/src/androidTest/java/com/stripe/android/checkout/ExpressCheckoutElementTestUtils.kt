@@ -230,7 +230,6 @@ internal fun assertNativeLinkCalledWithRequiredBillingAddress() {
     assertThat(args?.configuration?.billingDetailsCollectionConfiguration).isEqualTo(
         PaymentSheet.BillingDetailsCollectionConfiguration(
             address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
-            attachDefaultsToPaymentMethod = true,
         )
     )
 }

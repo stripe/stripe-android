@@ -5,6 +5,7 @@ import com.stripe.android.core.ApiConfiguration
 internal object ApiKeyFixtures {
     const val FAKE_PUBLISHABLE_KEY = "pk_test_123"
     const val FAKE_STRIPE_ACCOUNT = "acct_123"
+    const val OTHER_STRIPE_ACCOUNT = "acct_456"
     const val DEFAULT_PUBLISHABLE_KEY = "pk_test_vOo1umqsYxSrP5UXfOeL3ecm"
 
     val DEFAULT_API_CONFIG = ApiConfiguration.State(

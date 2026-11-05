@@ -327,7 +327,10 @@ constructor(
         nextActionHandlerRegistry.getNextActionHandler(source).performNextAction(
             host,
             source,
-            requestOptions
+            ApiConfiguration.State(
+                publishableKey = requestOptions.apiKey,
+                stripeAccountId = requestOptions.stripeAccount,
+            )
         )
     }
 
@@ -454,7 +457,10 @@ constructor(
         nextActionHandlerRegistry.getNextActionHandler(stripeIntent).performNextAction(
             host,
             stripeIntent,
-            requestOptions
+            ApiConfiguration.State(
+                publishableKey = requestOptions.apiKey,
+                stripeAccountId = requestOptions.stripeAccount,
+            )
         )
     }
 

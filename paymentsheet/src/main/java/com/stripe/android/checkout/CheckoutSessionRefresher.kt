@@ -1,6 +1,8 @@
 package com.stripe.android.checkout
 
+import com.stripe.android.checkout.analytics.toAnalyticsMap
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentsheet.model.CheckoutSessionClientSecret
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import javax.inject.Inject
@@ -18,7 +20,11 @@ internal interface CheckoutSessionRefresher {
 @OptIn(CheckoutSessionPreview::class)
 internal class DefaultCheckoutSessionRefresher internal constructor(
     private val stateHolder: CheckoutElementsControllerStateHolder,
-    private val fetchResponse: suspend (String, Boolean) -> Result<CheckoutSessionResponse>,
+    private val fetchResponse: suspend (
+        CheckoutSessionClientSecret,
+        Boolean,
+        Map<String, Any?>,
+    ) -> Result<CheckoutSessionResponse>,
     private val reloadState: suspend (CheckoutElementsControllerState) -> Unit,
 ) : CheckoutSessionRefresher {
 
@@ -29,11 +35,11 @@ internal class DefaultCheckoutSessionRefresher internal constructor(
         checkoutStateLoader: CheckoutStateLoader,
     ) : this(
         stateHolder = stateHolder,
-        fetchResponse = { clientSecret, adaptivePricingAllowed ->
+        fetchResponse = { clientSecret, adaptivePricingAllowed, analyticsParams ->
             checkoutSessionRepository.init(
-                sessionId = clientSecret.substringBefore("_secret_"),
                 clientSecret = clientSecret,
                 adaptivePricingAllowed = adaptivePricingAllowed,
+                analyticsParams = analyticsParams,
             )
         },
         reloadState = checkoutStateLoader::reload,
@@ -44,6 +50,7 @@ internal class DefaultCheckoutSessionRefresher internal constructor(
         val response = fetchResponse(
             state.checkoutSessionResponse.clientSecret,
             state.configuration.currencySelectorElementConfiguration != null,
+            state.configuration.toAnalyticsMap(),
         ).getOrThrow()
 
         refresh(response)

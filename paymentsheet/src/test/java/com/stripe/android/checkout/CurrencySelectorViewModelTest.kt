@@ -7,6 +7,7 @@ import app.cash.turbine.Turbine
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutElementsController.Session
+import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -22,6 +23,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import java.io.IOException
 
 @OptIn(CheckoutSessionPreview::class)
 @RunWith(RobolectricTestRunner::class)
@@ -37,18 +39,15 @@ internal class CurrencySelectorViewModelTest {
 
     @Test
     fun `init fires currency selector init analytics event`() = runScenario {
-        val requests = fakeAnalyticsRequestExecutor.getExecutedRequests()
-        assertThat(requests).hasSize(1)
-        assertThat(requests.first().params["event"])
-            .isEqualTo("elements.adaptive_pricing.currency_selector_init")
+        fakeAnalyticsRequestExecutor.awaitEvent("elements.adaptive_pricing.currency_selector_init")
+        fakeAnalyticsRequestExecutor.validate()
     }
 
     @Test
     fun `init only fires analytics event once across config changes`() = runScenario(
         savedStateHandle = SavedStateHandle(mapOf("currency_selector_initialized" to true)),
     ) {
-        val requests = fakeAnalyticsRequestExecutor.getExecutedRequests()
-        assertThat(requests).isEmpty()
+        fakeAnalyticsRequestExecutor.validate()
     }
 
     @Test
@@ -106,6 +105,34 @@ internal class CurrencySelectorViewModelTest {
 
         assertThat(viewModel.errorMessage.value).isNull()
     }
+
+    @Test
+    fun `onCurrencySelected fires currency_toggled with checkout session id on success`() = runScenario {
+        updateCurrencyResult.add(Result.success(Unit))
+
+        viewModel.onCurrencySelected("eur")
+        assertThat(updateCurrencyCalls.awaitItem()).isEqualTo("eur")
+
+        fakeAnalyticsRequestExecutor.awaitEvent("elements.adaptive_pricing.currency_selector_init")
+        val toggled = fakeAnalyticsRequestExecutor.awaitEvent("elements.adaptive_pricing.currency_toggled")
+        assertThat(toggled).containsEntry("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID)
+        fakeAnalyticsRequestExecutor.validate()
+    }
+
+    @Test
+    fun `onCurrencySelected fires currency_toggled failed with checkout session id and error on failure`() =
+        runScenario {
+            updateCurrencyResult.add(Result.failure(IOException("offline")))
+
+            viewModel.onCurrencySelected("eur")
+            assertThat(updateCurrencyCalls.awaitItem()).isEqualTo("eur")
+
+            fakeAnalyticsRequestExecutor.awaitEvent("elements.adaptive_pricing.currency_selector_init")
+            val failed = fakeAnalyticsRequestExecutor.awaitEvent("elements.adaptive_pricing.currency_toggled.failed")
+            assertThat(failed).containsEntry("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID)
+            assertThat(failed).containsEntry("error_message", "ioException")
+            fakeAnalyticsRequestExecutor.validate()
+        }
 
     @Test
     fun `multiple currency selections track all calls`() = runScenario {

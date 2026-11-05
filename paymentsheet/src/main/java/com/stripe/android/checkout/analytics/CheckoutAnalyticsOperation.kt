@@ -21,8 +21,12 @@ internal abstract class CheckoutAnalyticsOperation<E>(
 
     protected abstract fun analyticsError(error: E): CheckoutAnalyticsEvent.Error
 
-    fun started(response: CheckoutSessionResponse?) {
+    open fun started(response: CheckoutSessionResponse?) {
         reportOutcome(Outcome.Started, response, error = null)
+    }
+
+    fun succeeded(response: CheckoutSessionResponse?) {
+        reportOutcome(Outcome.Succeeded, response, error = null)
     }
 
     fun failed(response: CheckoutSessionResponse?, error: E) {
@@ -30,7 +34,7 @@ internal abstract class CheckoutAnalyticsOperation<E>(
     }
 
     protected fun reportOutcome(
-        outcome: Outcome,
+        outcome: Outcome?,
         response: CheckoutSessionResponse?,
         error: CheckoutAnalyticsEvent.Error?,
     ) {
@@ -39,7 +43,7 @@ internal abstract class CheckoutAnalyticsOperation<E>(
                 operation = operation,
                 outcome = outcome,
                 analyticsMetadata = DefaultAnalyticsMetadataFactory.create(response),
-                duration = if (outcome == Outcome.Started) null else elapsed(),
+                duration = if (outcome == null || outcome == Outcome.Started) null else elapsed(),
                 error = error,
                 operationParams = params,
             )

@@ -8,13 +8,25 @@ import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
+import com.stripe.android.paymentsheet.model.CheckoutSessionClientSecret
 import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.math.BigDecimal
 
 @RunWith(TestParameterInjector::class)
 class CheckoutSessionResponseJsonParserTest {
+    @Test
+    fun `derives session identity from the retained client secret`() {
+        val json = base().apply { remove("id") }
+
+        val result = requireNotNull(parse(json))
+
+        assertThat(result.id).isEqualTo(clientSecret.sessionId)
+        assertThat(result.clientSecret).isSameInstanceAs(clientSecret)
+    }
+
     @Test
     fun `parses nested amounts without legacy flat amounts`() {
         val json = base()
@@ -249,13 +261,44 @@ class CheckoutSessionResponseJsonParserTest {
         val json = base()
         val item = item(json)
         item.put("unit_amount", 4000)
-        item.put("unit_amount_decimal", "4000.123456789012")
+        item.put("unit_amount_decimal", "9007199254740993.123456789012")
 
         val result = parse(json)!!.checkoutItems.single().oneTimePrice.items.single()
 
         assertThat(result.unitAmount).isEqualTo(4000)
         assertThat(result.price.unitAmount).isEqualTo(5099)
-        assertThat(result.unitAmountDecimal).isEqualTo(4000.123456789012)
+        assertThat(result.unitAmountDecimal).isEqualTo(BigDecimal("9007199254740993.123456789012"))
+    }
+
+    @Test
+    fun `accepts decimal unit amount without integer unit amounts`() {
+        val json = base()
+        val item = item(json)
+        item.remove("unit_amount")
+        item.getJSONObject("price").remove("unit_amount")
+        item.put("unit_amount_decimal", "0.123456789012")
+
+        val result = requireNotNull(parse(json)).checkoutItems.single().oneTimePrice.items.single()
+
+        assertThat(result.unitAmount).isNull()
+        assertThat(result.price.unitAmount).isNull()
+        assertThat(result.unitAmountDecimal).isEqualTo(BigDecimal("0.123456789012"))
+    }
+
+    @Test
+    fun `rejects negative decimal unit amount`() {
+        val json = base()
+        item(json).put("unit_amount_decimal", "-0.000000000001")
+
+        assertThat(parse(json)).isNull()
+    }
+
+    @Test
+    fun `rejects infinite decimal unit amount`() {
+        val json = base()
+        item(json).put("unit_amount_decimal", "Infinity")
+
+        assertThat(parse(json)).isNull()
     }
 
     @Test
@@ -444,7 +487,6 @@ class CheckoutSessionResponseJsonParserTest {
     fun `rejects legacy and malformed response boundaries`() {
         val mutations: List<(JSONObject) -> Unit> = listOf(
             { it.remove("ui_mode") },
-            { it.remove("id") },
             { it.getJSONObject("merchant_info").remove("country") },
             { it.remove("ordered_payment_method_types_and_wallets") },
             { it.put("items", JSONArray()) },
@@ -534,7 +576,6 @@ class CheckoutSessionResponseJsonParserTest {
         val elements = requireNotNull(result.elementsSession)
         val intent = elements.stripeIntent as PaymentIntent
 
-        assertThat(result.clientSecret).isEqualTo("cs_test_abc123_secret_test")
         assertThat(elements.orderedPaymentMethodTypesAndWallets)
             .containsExactly("cashapp", "google_pay", "card", "link", "blik", "vipps").inOrder()
         assertThat(intent.paymentMethodTypes).containsExactly("cashapp", "card", "link", "blik").inOrder()
@@ -680,5 +721,7 @@ class CheckoutSessionResponseJsonParserTest {
         JSONObject().put("display_name", "Sales tax").put("percentage", 8.0).put("rate_type", "percentage")
     )
 
-    private fun parse(json: JSONObject) = CheckoutSessionResponseJsonParser("cs_test_abc123_secret_test").parse(json)
+    private val clientSecret = CheckoutSessionClientSecret("cs_test_abc123_secret_test")
+
+    private fun parse(json: JSONObject) = CheckoutSessionResponseJsonParser(clientSecret).parse(json)
 }

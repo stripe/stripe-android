@@ -1107,10 +1107,10 @@ class CheckoutSessionConfirmationInterceptorTest {
         token: String?,
     ): PaymentMethodConfirmationOption {
         val errorReporter = FakeErrorReporter()
-        val warmer = FakePassiveChallengeWarmer()
+        val passiveChallengeWarmer = FakePassiveChallengeWarmer()
         val definition = PassiveChallengeConfirmationDefinition(
             errorReporter = errorReporter,
-            passiveChallengeWarmer = warmer,
+            passiveChallengeWarmer = passiveChallengeWarmer,
             productUsage = emptySet(),
             isEligibleForConfirmationChallenge = FakeIsEligibleForConfirmationChallenge(),
         )
@@ -1128,7 +1128,7 @@ class CheckoutSessionConfirmationInterceptorTest {
                 ?: PassiveChallengeActivityResult.Failed(IllegalStateException("Challenge failed")),
         ) as ConfirmationDefinition.Result.NextStep
         errorReporter.ensureAllEventsConsumed()
-        warmer.ensureAllEventsConsumed()
+        passiveChallengeWarmer.ensureAllEventsConsumed()
         return result.confirmationOption as PaymentMethodConfirmationOption
     }
 
@@ -1173,7 +1173,6 @@ class CheckoutSessionConfirmationInterceptorTest {
         val interceptor = CheckoutSessionConfirmationInterceptor(
             integrationMetadata = IntegrationMetadata.CheckoutSession(
                 collectedEmail = collectedEmail,
-                id = checkoutSessionResponse.id,
                 instancesKey = "test_key",
                 checkoutSessionResponse = checkoutSessionResponse,
             ),

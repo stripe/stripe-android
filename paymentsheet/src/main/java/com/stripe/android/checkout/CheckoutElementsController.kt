@@ -11,6 +11,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.AnnotatedString
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent.Operation
+import com.stripe.android.checkout.analytics.LocalOperation
+import com.stripe.android.checkout.analytics.toAnalyticsMap
 import com.stripe.android.checkout.injection.CheckoutElementsPresenterSubcomponent
 import com.stripe.android.checkout.injection.DaggerCheckoutElementsControllerComponent
 import com.stripe.android.common.exception.stripeErrorMessage
@@ -27,6 +30,7 @@ import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.paymentsheet.model.CheckoutSessionClientSecret
 import com.stripe.android.paymentsheet.model.PaymentOptionResource
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.billingDetails
@@ -46,6 +50,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import kotlinx.parcelize.Parcelize
+import java.math.BigDecimal
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.time.Duration.Companion.seconds
@@ -109,14 +114,18 @@ class CheckoutElementsController @Inject internal constructor(
         if (sheetStateHolder.sheetIsOpen) {
             return@withContext integrationLaunchedFailure()
         }
+        val parsedClientSecret = try {
+            CheckoutSessionClientSecret(clientSecret)
+        } catch (e: IllegalArgumentException) {
+            return@withContext kotlin.Result.failure(e)
+        }
         operationCoordinator.runMutation {
             val configurationState = configuration.build()
-            val sessionId = clientSecret.substringBefore("_secret_")
 
             checkoutSessionRepository.init(
-                sessionId = sessionId,
-                clientSecret = clientSecret,
+                clientSecret = parsedClientSecret,
                 adaptivePricingAllowed = configurationState.currencySelectorElementConfiguration != null,
+                analyticsParams = configurationState.toAnalyticsMap(),
             ).mapCatching { response ->
                 val initialLoad = checkoutStateLoader.loadInitial(
                     configuration = configurationState,
@@ -153,10 +162,9 @@ class CheckoutElementsController @Inject internal constructor(
      */
     suspend fun applyPromotionCode(
         promotionCode: String,
-    ): OperationResult = withCheckoutState { sessionId ->
+    ): OperationResult = withCheckoutState {
         checkoutSessionRepository.applyPromotionCode(
-            sessionId = sessionId,
-            clientSecret = checkoutSessionResponse.clientSecret,
+            checkoutSessionResponse = checkoutSessionResponse,
             promotionCode = promotionCode.trim(),
         )
     }.toOperationResult()
@@ -164,12 +172,8 @@ class CheckoutElementsController @Inject internal constructor(
     /**
      * Removes the currently applied promotion code from the checkout session.
      */
-    suspend fun removePromotionCode(): OperationResult = withCheckoutState { sessionId ->
-        checkoutSessionRepository.applyPromotionCode(
-            sessionId = sessionId,
-            clientSecret = checkoutSessionResponse.clientSecret,
-            promotionCode = "",
-        )
+    suspend fun removePromotionCode(): OperationResult = withCheckoutState {
+        checkoutSessionRepository.removePromotionCode(checkoutSessionResponse)
     }.toOperationResult()
 
     /**
@@ -232,7 +236,12 @@ class CheckoutElementsController @Inject internal constructor(
                 copy(collectedDetails = collectedDetails.copy(email = email))
             },
         ) {
-            kotlin.Result.success(checkoutSessionResponse)
+            kotlin.Result.success(checkoutSessionResponse).also {
+                LocalOperation(
+                    operation = Operation.UpdateEmail,
+                    report = checkoutSessionRepository::fireEvent,
+                ).succeeded(checkoutSessionResponse)
+            }
         }.toOperationResult()
     }
 
@@ -293,19 +302,23 @@ class CheckoutElementsController @Inject internal constructor(
         // Preserve the merchant's context while keeping the callback a child of the mutation's
         // timeout and cancellation scope.
         val callerContext = currentCoroutineContext().minusKey(Job)
-        return withCheckoutState { sessionId ->
-            withContext(callerContext) {
-                withTimeout(SERVER_UPDATE_TIMEOUT_MS) { serverUpdate() }
-            }.fold(
-                onSuccess = {
+        return withCheckoutState {
+            checkoutSessionRepository.measure(
+                operation = Operation.RunServerUpdate,
+                checkoutSessionResponse = checkoutSessionResponse,
+                params = emptyMap(),
+            ) {
+                runCatching {
+                    withContext(callerContext) {
+                        withTimeout(SERVER_UPDATE_TIMEOUT_MS) { serverUpdate() }
+                    }.getOrThrow()
                     checkoutSessionRepository.init(
-                        sessionId = sessionId,
                         clientSecret = checkoutSessionResponse.clientSecret,
                         adaptivePricingAllowed = configuration.currencySelectorElementConfiguration != null,
-                    )
-                },
-                onFailure = { kotlin.Result.failure(it) },
-            )
+                        analyticsParams = configuration.toAnalyticsMap(),
+                    ).getOrThrow()
+                }
+            }
         }.toOperationResult()
     }
 
@@ -360,7 +373,7 @@ class CheckoutElementsController @Inject internal constructor(
      */
     private suspend fun withCheckoutState(
         additionalStateMutations: CheckoutElementsControllerState.() -> CheckoutElementsControllerState = { this },
-        block: suspend CheckoutElementsControllerState.(sessionId: String) -> kotlin.Result<CheckoutSessionResponse>,
+        block: suspend CheckoutElementsControllerState.() -> kotlin.Result<CheckoutSessionResponse>,
     ): kotlin.Result<Unit> = withContext(Dispatchers.Main.immediate) {
         stateHolder.state
             ?: return@withContext kotlin.Result.failure(
@@ -376,7 +389,7 @@ class CheckoutElementsController @Inject internal constructor(
                 // Re-read the latest committed state inside the lock so serialized mutations
                 // build on each other's results rather than a stale snapshot.
                 val state = requireNotNull(stateHolder.state)
-                val response = state.block(state.checkoutSessionResponse.id).getOrThrow()
+                val response = state.block().getOrThrow()
                 val newState = state
                     .copy(checkoutSessionResponse = response)
                     .additionalStateMutations()
@@ -402,10 +415,9 @@ class CheckoutElementsController @Inject internal constructor(
     )
 
     internal suspend fun updateCurrency(currency: String): kotlin.Result<Unit> {
-        return withCheckoutState { sessionId ->
+        return withCheckoutState {
             checkoutSessionRepository.updateCurrency(
-                sessionId = sessionId,
-                clientSecret = checkoutSessionResponse.clientSecret,
+                checkoutSessionResponse = checkoutSessionResponse,
                 currencyCode = currency,
             )
         }
@@ -459,6 +471,10 @@ class CheckoutElementsController @Inject internal constructor(
                 )
             },
         ) {
+            LocalOperation(
+                operation = Operation.ClearPaymentOption,
+                report = checkoutSessionRepository::fireEvent,
+            ).invoked(checkoutSessionResponse)
             checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
                 checkoutSessionResponse = checkoutSessionResponse,
                 addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
@@ -674,7 +690,24 @@ class CheckoutElementsController @Inject internal constructor(
             /**
              * The unformatted amount in the smallest currency unit (e.g., cents for USD).
              */
-            val minorUnitsAmount: Double,
+            val minorUnitsAmount: Long,
+        )
+
+        /**
+         * A localized monetary amount that supports fractional minor units.
+         */
+        @Poko
+        @CheckoutSessionPreview
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        class DecimalAmount internal constructor(
+            /**
+             * A localized, currency-formatted string representing the amount.
+             */
+            val amount: String,
+            /**
+             * The unformatted amount in the smallest currency unit, including fractional units.
+             */
+            val minorUnitsAmount: BigDecimal,
         )
 
         /**
@@ -733,7 +766,7 @@ class CheckoutElementsController @Inject internal constructor(
             /**
              * The unformatted discount amount in the smallest currency unit.
              */
-            val minorUnitsAmount: Double,
+            val minorUnitsAmount: Long,
             /**
              * The display name of the discount.
              */
@@ -762,7 +795,7 @@ class CheckoutElementsController @Inject internal constructor(
             /**
              * The unformatted tax amount in the smallest currency unit.
              */
-            val minorUnitsAmount: Double,
+            val minorUnitsAmount: Long,
             /**
              * Whether this tax is already included in the price.
              */
@@ -910,7 +943,7 @@ class CheckoutElementsController @Inject internal constructor(
                     /**
                      * The unit amount with additional decimal precision, if available.
                      */
-                    val unitAmountDecimal: Amount?,
+                    val unitAmountDecimal: DecimalAmount?,
                     /**
                      * The label that describes how units of the product are named.
                      */

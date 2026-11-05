@@ -16,7 +16,6 @@ internal fun CheckoutSessionResponse.toBillingDetailsCollectionConfiguration():
     } else {
         PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic
     },
-    attachDefaultsToPaymentMethod = true,
 )
 
 @OptIn(CheckoutSessionPreview::class)

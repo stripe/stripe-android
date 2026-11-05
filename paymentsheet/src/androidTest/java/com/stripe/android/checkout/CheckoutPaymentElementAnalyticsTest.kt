@@ -4,7 +4,6 @@ import androidx.test.espresso.Espresso
 import androidx.test.espresso.intent.rule.IntentsRule
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
-import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.core.exception.LocalStripeException
 import com.stripe.android.core.networking.AnalyticsRequest
@@ -15,6 +14,8 @@ import com.stripe.android.networktesting.AdvancedFraudSignalsTestRule
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.analyticsPayloadField
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
+import com.stripe.android.networktesting.RequestMatchers.hasQueryParam
+import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedContentPage
@@ -52,6 +53,7 @@ internal class CheckoutPaymentElementAnalyticsTest {
     fun testSheetAnalyticsUsesCheckoutElementsProductUsageAndCheckoutSessionId() = runCheckoutPaymentElementScenario(
         networkRule = networkRule,
         setup = { controller ->
+            networkRule.validateCheckoutInitStartedAndSucceeded()
             networkRule.validateAnalyticsRequest(
                 eventName = "mc_initial_displayed_payment_methods",
                 productUsage = setOf("checkout_elements"),
@@ -110,6 +112,7 @@ internal class CheckoutPaymentElementAnalyticsTest {
             },
             checkoutInitResponse = ::billingTaxCheckoutInitResponse,
             setup = { controller ->
+                networkRule.validateCheckoutInitStartedAndSucceeded()
                 networkRule.validateAnalyticsRequest(
                     eventName = "mc_initial_displayed_payment_methods",
                     productUsage = setOf("checkout_elements"),
@@ -142,15 +145,16 @@ internal class CheckoutPaymentElementAnalyticsTest {
                         .put("total", UPDATED_TOTAL)
                 }
             }
-            networkRule.checkoutInit(responseFactory = ::billingTaxCheckoutInitResponse)
-            networkRule.validateConfirmationStartedAnalyticsRequest(
-                invocationSource = "merchant",
-                selectedLpm = "google_pay",
+            networkRule.checkoutInitWithAnalytics(responseFactory = ::billingTaxCheckoutInitResponse)
+            networkRule.validateCheckoutAnalyticsStarted(
+                "confirm",
+                analyticsPayloadField("invocation_source", "merchant"),
+                analyticsPayloadField("selected_lpm", "google_pay"),
             )
-            networkRule.validateConfirmationResultAnalyticsRequest(
-                eventName = "checkout_elements.confirm.failed",
-                invocationSource = "merchant",
-                selectedLpm = "google_pay",
+            networkRule.validateCheckoutAnalyticsFailed(
+                "confirm",
+                analyticsPayloadField("invocation_source", "merchant"),
+                analyticsPayloadField("selected_lpm", "google_pay"),
                 analyticsPayloadField("error_type", "checkoutSessionTotalChanged"),
                 analyticsPayloadField("error_code", "checkout_session_total_changed"),
             )
@@ -179,6 +183,7 @@ internal class CheckoutPaymentElementAnalyticsTest {
                 }
             },
             setup = { controller ->
+                networkRule.validateCheckoutInitStartedAndSucceeded()
                 networkRule.validateAnalyticsRequest(
                     eventName = "mc_initial_displayed_payment_methods",
                     productUsage = setOf("checkout_elements"),
@@ -228,6 +233,175 @@ internal class CheckoutPaymentElementAnalyticsTest {
         }
     }
 
+    @Test
+    fun testConfigureReportsInitStartedAndSucceededWithAttemptedConfiguration() =
+        runCheckoutPaymentElementScenario(
+            networkRule = networkRule,
+            renderPaymentElementContent = false,
+            setup = { controller ->
+                networkRule.validateCheckoutInitStartedAndSucceeded(
+                    analyticsPayloadField("merchant_display_name", "true"),
+                )
+                assertThat(
+                    controller.configure(
+                        DEFAULT_CLIENT_SECRET,
+                        CheckoutElementsController.Configuration()
+                            .merchantDisplayName("Example Merchant")
+                            .paymentElement(PaymentElement.Configuration()),
+                    )
+                ).isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
+            },
+        ) {
+            markTestSucceeded()
+        }
+
+    @Test
+    fun testUpdateEmailReportsSucceededWithoutDurationOrConfiguration() = runCheckoutPaymentElementScenario(
+        networkRule = networkRule,
+        renderPaymentElementContent = false,
+        setup = { controller ->
+            networkRule.validateCheckoutInitStartedAndSucceeded()
+            assertThat(
+                controller.configure(
+                    DEFAULT_CLIENT_SECRET,
+                    CheckoutElementsController.Configuration().paymentElement(PaymentElement.Configuration()),
+                )
+            ).isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
+        },
+    ) {
+        networkRule.validateAnalyticsRequest(
+            eventName = "checkout_elements.update_email.succeeded",
+            productUsage = setOf("checkout_elements"),
+            analyticsPayloadField("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID),
+            not(hasQueryParam("duration")),
+            not(hasQueryParam("error_type")),
+            not(hasQueryParam("merchant_display_name")),
+        )
+
+        assertThat(controller.updateEmail("email@example.com"))
+            .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
+        markTestSucceeded()
+    }
+
+    @Test
+    fun testClearPaymentOptionReportsInvokedEvent() = runCheckoutPaymentElementScenario(
+        networkRule = networkRule,
+        renderPaymentElementContent = false,
+        setup = { controller ->
+            networkRule.validateCheckoutInitStartedAndSucceeded()
+            assertThat(
+                controller.configure(
+                    DEFAULT_CLIENT_SECRET,
+                    CheckoutElementsController.Configuration().paymentElement(PaymentElement.Configuration()),
+                )
+            ).isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
+        },
+    ) {
+        networkRule.validateAnalyticsRequest(
+            eventName = "checkout_elements.clear_payment_option",
+            productUsage = setOf("checkout_elements"),
+            analyticsPayloadField("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID),
+            not(hasQueryParam("duration")),
+            not(hasQueryParam("error_type")),
+            not(hasQueryParam("merchant_display_name")),
+        )
+
+        assertThat(controller.clearPaymentOption())
+            .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
+        markTestSucceeded()
+    }
+
+    @Test
+    fun testRunServerUpdateReportsSucceeded() = runCheckoutPaymentElementScenario(
+        networkRule = networkRule,
+        renderPaymentElementContent = false,
+        setup = { controller ->
+            networkRule.validateCheckoutInitStartedAndSucceeded()
+            assertThat(
+                controller.configure(
+                    DEFAULT_CLIENT_SECRET,
+                    CheckoutElementsController.Configuration().paymentElement(PaymentElement.Configuration()),
+                )
+            ).isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
+        },
+    ) {
+        networkRule.validateCheckoutAnalyticsStarted(
+            "run_server_update",
+            not(hasQueryParam("merchant_update_duration")),
+            not(hasQueryParam("refresh_duration")),
+        )
+        networkRule.checkoutInitWithAnalytics(responseFactory = { response ->
+            response.testBodyFromFile("checkout-session-init.json") { json ->
+                json.remove("link_settings")
+            }
+        })
+        networkRule.validateCheckoutAnalyticsSucceeded(
+            "run_server_update",
+            not(hasQueryParam("merchant_update_duration")),
+            not(hasQueryParam("refresh_duration")),
+        )
+
+        assertThat(controller.runServerUpdate { Result.success(Unit) })
+            .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
+        markTestSucceeded()
+    }
+
+    @Test
+    fun testRunServerUpdateMerchantFailureReportsFailedWithoutRefresh() = runCheckoutPaymentElementScenario(
+        networkRule = networkRule,
+        renderPaymentElementContent = false,
+        setup = { controller ->
+            networkRule.validateCheckoutInitStartedAndSucceeded()
+            assertThat(
+                controller.configure(
+                    DEFAULT_CLIENT_SECRET,
+                    CheckoutElementsController.Configuration().paymentElement(PaymentElement.Configuration()),
+                )
+            ).isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
+        },
+    ) {
+        networkRule.validateCheckoutAnalyticsStarted(
+            "run_server_update",
+            not(hasQueryParam("merchant_update_duration")),
+            not(hasQueryParam("refresh_duration")),
+        )
+        networkRule.validateCheckoutAnalyticsFailed(
+            "run_server_update",
+            not(hasQueryParam("merchant_update_duration")),
+            not(hasQueryParam("refresh_duration")),
+            analyticsPayloadField("error_type", "java.lang.IllegalStateException"),
+        )
+
+        assertThat(controller.runServerUpdate { Result.failure(IllegalStateException("boom")) })
+            .isInstanceOf(CheckoutElementsController.OperationResult.Failed::class.java)
+        markTestSucceeded()
+    }
+
+    @Test
+    fun testConfigureApiFailureReportsInitFailedAnalytics() = runCheckoutPaymentElementScenario(
+        networkRule = networkRule,
+        checkoutInitResponse = ::checkoutInitApiFailureResponse,
+        renderPaymentElementContent = false,
+        setup = { controller ->
+            networkRule.validateCheckoutAnalyticsStarted("init", hasQueryParam("merchant_display_name"))
+            networkRule.validateCheckoutAnalyticsFailed(
+                "init",
+                hasQueryParam("merchant_display_name"),
+                analyticsPayloadField("error_type", "invalid_request_error"),
+                analyticsPayloadField("error_code", "checkout_session_invalid"),
+                analyticsPayloadField("request_id", INIT_FAILURE_REQUEST_ID),
+            )
+            assertThat(
+                controller.configure(
+                    DEFAULT_CLIENT_SECRET,
+                    CheckoutElementsController.Configuration().paymentElement(PaymentElement.Configuration()),
+                )
+            ).isInstanceOf(CheckoutElementsController.OperationResult.Failed::class.java)
+        },
+    ) {
+        markTestSucceeded()
+    }
+
     private fun billingTaxCheckoutInitResponse(response: MockResponse) {
         response.testBodyFromFile("checkout-session-init.json") { json ->
             json.put("customer_email", "checkout@example.com")
@@ -245,8 +419,19 @@ internal class CheckoutPaymentElementAnalyticsTest {
         }
     }
 
+    private fun checkoutInitApiFailureResponse(response: MockResponse) {
+        response.setResponseCode(400)
+        response.setHeader("Request-Id", INIT_FAILURE_REQUEST_ID)
+        response.setBody(
+            """
+            {"error":{"type":"invalid_request_error","code":"checkout_session_invalid","message":"Invalid session"}}
+            """.trimIndent()
+        )
+    }
+
     private companion object {
         const val DEFAULT_CLIENT_SECRET = "${DEFAULT_CHECKOUT_SESSION_ID}_secret_example"
         const val UPDATED_TOTAL = 5399
+        const val INIT_FAILURE_REQUEST_ID = "req_checkout_init_failed"
     }
 }

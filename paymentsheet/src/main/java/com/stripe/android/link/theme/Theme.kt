@@ -1,10 +1,6 @@
 package com.stripe.android.link.theme
 
-import android.content.Context
-import android.content.res.Configuration
-import android.content.res.Resources
 import androidx.annotation.RestrictTo
-import androidx.appcompat.view.ContextThemeWrapper
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Colors
@@ -14,12 +10,14 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.unit.dp
 import com.stripe.android.link.LinkAppearance
 import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.image.LocalStripeImageLoader
+import com.stripe.android.uicore.utils.withUiMode
 
 internal val LocalLinkAppearance = staticCompositionLocalOf<LinkAppearance.State?> { null }
 
@@ -55,10 +53,10 @@ fun DefaultLinkTheme(
             val overrides = if (isDark) it.darkColors else it.lightColors
             defaultColors.copy(
                 textBrand = overrides.primary,
-                onButtonBrand = overrides.contentOnPrimary,
-                buttonBrand = overrides.primary,
+                buttonPrimary = overrides.primary,
+                onButtonPrimary = overrides.contentOnPrimary,
                 borderSelected = overrides.borderSelected,
-                iconBrand = overrides.primary,
+                accent = overrides.primary,
             )
         }
         ?: defaultColors
@@ -79,15 +77,10 @@ fun DefaultLinkTheme(
 
     // Set context configuration so the correct resources are loaded.
     val baseContext = LocalContext.current
+    val configuration = LocalConfiguration.current
     val inspectionMode = LocalInspectionMode.current
-    val styleContext = remember(baseContext, isDark, inspectionMode) {
-        val uiMode =
-            if (isDark) {
-                Configuration.UI_MODE_NIGHT_YES
-            } else {
-                Configuration.UI_MODE_NIGHT_NO
-            }
-        baseContext.withUiMode(uiMode, inspectionMode)
+    val styleContext = remember(baseContext, configuration, isDark, inspectionMode) {
+        baseContext.withUiMode(configuration, isDark, inspectionMode)
     }
 
     CompositionLocalProvider(
@@ -115,32 +108,6 @@ internal fun LinkAppearance.Style?.isDarkTheme(isSystemDarkTheme: Boolean): Bool
         LinkAppearance.Style.AUTOMATIC, null -> isSystemDarkTheme
         LinkAppearance.Style.ALWAYS_LIGHT -> false
         LinkAppearance.Style.ALWAYS_DARK -> true
-    }
-}
-
-private fun Context.withUiMode(uiMode: Int, inspectionMode: Boolean): Context {
-    if (uiMode == this.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) {
-        return this
-    }
-    val config = Configuration(resources.configuration).apply {
-        this.uiMode = (uiMode and Configuration.UI_MODE_NIGHT_MASK.inv()) or uiMode
-    }
-    return object : ContextThemeWrapper(this, theme) {
-        override fun getResources(): Resources? {
-            @Suppress("DEPRECATION")
-            if (inspectionMode) {
-                // Workaround NPE thrown in BridgeContext#createConfigurationContext() when getting resources.
-                val baseResources = this@withUiMode.resources
-                return Resources(
-                    baseResources.assets,
-                    baseResources.displayMetrics,
-                    config
-                )
-            }
-            return super.getResources()
-        }
-    }.apply {
-        applyOverrideConfiguration(config)
     }
 }
 

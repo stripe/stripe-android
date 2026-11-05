@@ -2,8 +2,10 @@ package com.stripe.android.paymentsheet.repositories
 
 import com.stripe.android.Stripe
 import com.stripe.android.checkout.CheckoutElementsController.Address
+import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent
+import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent.Operation
+import com.stripe.android.checkout.analytics.MeasuredOperation
 import com.stripe.android.core.exception.InvalidRequestException
-import com.stripe.android.core.exception.safeAnalyticsMessage
 import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
@@ -16,7 +18,7 @@ import com.stripe.android.networking.ConfirmationParamsUtils
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.CheckoutSessionPreview
-import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
+import com.stripe.android.paymentsheet.model.CheckoutSessionClientSecret
 import java.util.TimeZone
 import javax.inject.Inject
 import javax.inject.Provider
@@ -40,7 +42,7 @@ internal class CheckoutSessionRepository @Inject constructor(
     private val stripeErrorJsonParser = StripeErrorJsonParser()
 
     private suspend fun executePost(
-        clientSecret: String,
+        clientSecret: CheckoutSessionClientSecret,
         url: String,
         params: Map<String, *>,
     ): Result<CheckoutSessionResponse> {
@@ -52,20 +54,24 @@ internal class CheckoutSessionRepository @Inject constructor(
                 url = url,
                 options = options,
                 params = elementsSessionClientParams.toCheckoutSessionMap() + params +
-                    ("client_secret" to clientSecret),
+                    ("client_secret" to clientSecret.value),
             ),
             responseJsonParser = CheckoutSessionResponseJsonParser(clientSecret),
         )
     }
 
     suspend fun init(
-        sessionId: String,
-        clientSecret: String,
+        clientSecret: CheckoutSessionClientSecret,
         adaptivePricingAllowed: Boolean,
-    ): Result<CheckoutSessionResponse> {
-        return executePost(
+        analyticsParams: Map<String, Any?>,
+    ): Result<CheckoutSessionResponse> = measure(
+        operation = Operation.Init,
+        checkoutSessionResponse = null,
+        params = analyticsParams + ("checkout_session_id" to clientSecret.sessionId),
+    ) {
+        executePost(
             clientSecret = clientSecret,
-            url = initUrl(sessionId),
+            url = initUrl(clientSecret.sessionId),
             params = mapOf(
                 "adaptive_pricing[allowed]" to adaptivePricingAllowed,
                 "timezone" to TimeZone.getDefault().id,
@@ -74,8 +80,7 @@ internal class CheckoutSessionRepository @Inject constructor(
     }
 
     suspend fun confirm(
-        id: String,
-        clientSecret: String,
+        clientSecret: CheckoutSessionClientSecret,
         params: ConfirmCheckoutSessionParams,
     ): Result<CheckoutSessionResponse> {
         fraudDetectionDataRepository.refresh()
@@ -89,7 +94,7 @@ internal class CheckoutSessionRepository @Inject constructor(
         )
         return executePost(
             clientSecret = clientSecret,
-            url = confirmUrl(id),
+            url = confirmUrl(clientSecret.sessionId),
             params = requestParams,
         ).mapCatching { response ->
             check(response.status != CheckoutSessionResponse.Status.EXPIRED) {
@@ -127,36 +132,33 @@ internal class CheckoutSessionRepository @Inject constructor(
     }
 
     suspend fun poll(
-        sessionId: String,
-        clientSecret: String,
+        clientSecret: CheckoutSessionClientSecret,
     ): Result<CheckoutClientPollResponse> {
         return executeRequestWithResultParser(
             stripeErrorJsonParser = stripeErrorJsonParser,
             stripeNetworkClient = stripeNetworkClient,
             request = apiRequestFactory.createGet(
-                url = pollUrl(sessionId),
+                url = pollUrl(clientSecret.sessionId),
                 options = apiRequestOptionsProvider.get(),
-                params = mapOf("client_secret" to clientSecret),
+                params = mapOf("client_secret" to clientSecret.value),
             ),
             responseJsonParser = CheckoutClientPollResponseJsonParser,
         )
     }
 
     suspend fun detachPaymentMethod(
-        sessionId: String,
-        clientSecret: String,
+        clientSecret: CheckoutSessionClientSecret,
         paymentMethodId: String,
     ): Result<CheckoutSessionResponse> = executePost(
         clientSecret = clientSecret,
-        url = updateUrl(sessionId),
+        url = updateUrl(clientSecret.sessionId),
         params = mapOf(
             "payment_method_to_detach" to paymentMethodId,
         ),
     )
 
     suspend fun updatePaymentMethod(
-        sessionId: String,
-        clientSecret: String,
+        clientSecret: CheckoutSessionClientSecret,
         paymentMethodId: String,
         params: PaymentMethodUpdateParams,
     ): Result<CheckoutSessionResponse> {
@@ -171,7 +173,7 @@ internal class CheckoutSessionRepository @Inject constructor(
         return if (updateParams.hasSupportedUpdates) {
             executePost(
                 clientSecret = clientSecret,
-                url = updateUrl(sessionId),
+                url = updateUrl(clientSecret.sessionId),
                 params = updateParams.toParamMap(),
             )
         } else {
@@ -180,24 +182,44 @@ internal class CheckoutSessionRepository @Inject constructor(
     }
 
     suspend fun applyPromotionCode(
-        sessionId: String,
-        clientSecret: String,
+        checkoutSessionResponse: CheckoutSessionResponse,
         promotionCode: String,
-    ): Result<CheckoutSessionResponse> = executePost(
-        clientSecret = clientSecret,
-        url = updateUrl(sessionId),
-        params = mapOf(
-            "promotion_code" to promotionCode,
-        ),
-    )
+    ): Result<CheckoutSessionResponse> = measure(
+        operation = Operation.ApplyPromotionCode,
+        checkoutSessionResponse = checkoutSessionResponse,
+        params = emptyMap(),
+    ) {
+        executePost(
+            clientSecret = checkoutSessionResponse.clientSecret,
+            url = updateUrl(checkoutSessionResponse.clientSecret.sessionId),
+            params = mapOf(
+                "promotion_code" to promotionCode,
+            ),
+        )
+    }
+
+    suspend fun removePromotionCode(
+        checkoutSessionResponse: CheckoutSessionResponse,
+    ): Result<CheckoutSessionResponse> = measure(
+        operation = Operation.RemovePromotionCode,
+        checkoutSessionResponse = checkoutSessionResponse,
+        params = emptyMap(),
+    ) {
+        executePost(
+            clientSecret = checkoutSessionResponse.clientSecret,
+            url = updateUrl(checkoutSessionResponse.clientSecret.sessionId),
+            params = mapOf(
+                "promotion_code" to "",
+            ),
+        )
+    }
 
     suspend fun updateTaxRegion(
-        sessionId: String,
-        clientSecret: String,
+        clientSecret: CheckoutSessionClientSecret,
         address: Address.State?,
     ): Result<CheckoutSessionResponse> = executePost(
         clientSecret = clientSecret,
-        url = updateUrl(sessionId),
+        url = updateUrl(clientSecret.sessionId),
         params = buildMap {
             if (address == null) {
                 put("tax_region", "")
@@ -213,22 +235,40 @@ internal class CheckoutSessionRepository @Inject constructor(
     )
 
     suspend fun updateCurrency(
-        sessionId: String,
-        clientSecret: String,
+        checkoutSessionResponse: CheckoutSessionResponse,
         currencyCode: String,
-    ): Result<CheckoutSessionResponse> = executePost(
-        clientSecret = clientSecret,
-        url = updateUrl(sessionId),
-        params = mapOf(
-            "adaptive_pricing[currency]" to currencyCode,
-        ),
-    ).onSuccess {
-        fireEvent(PaymentSheetEvent.AdaptivePricingCurrencyToggled())
-    }.onFailure {
-        fireEvent(PaymentSheetEvent.AdaptivePricingCurrencyToggledFailed(error = it.safeAnalyticsMessage))
+    ): Result<CheckoutSessionResponse> = measure(
+        operation = Operation.UpdateCurrency,
+        checkoutSessionResponse = checkoutSessionResponse,
+        params = mapOf("requested_currency" to currencyCode),
+    ) {
+        executePost(
+            clientSecret = checkoutSessionResponse.clientSecret,
+            url = updateUrl(checkoutSessionResponse.clientSecret.sessionId),
+            params = mapOf(
+                "adaptive_pricing[currency]" to currencyCode,
+            ),
+        )
     }
 
-    private fun fireEvent(event: PaymentSheetEvent) {
+    suspend fun measure(
+        operation: Operation,
+        checkoutSessionResponse: CheckoutSessionResponse?,
+        params: Map<String, Any?>,
+        block: suspend () -> Result<CheckoutSessionResponse>,
+    ): Result<CheckoutSessionResponse> {
+        val measuredOperation = MeasuredOperation(
+            operation = operation,
+            params = params,
+            report = ::fireEvent,
+        )
+        measuredOperation.started(checkoutSessionResponse)
+        return block()
+            .onSuccess { measuredOperation.succeeded(it) }
+            .onFailure { measuredOperation.failed(checkoutSessionResponse, it) }
+    }
+
+    fun fireEvent(event: CheckoutAnalyticsEvent) {
         analyticsRequestExecutor.executeAsync(
             paymentAnalyticsRequestFactory.createRequest(
                 event = event,

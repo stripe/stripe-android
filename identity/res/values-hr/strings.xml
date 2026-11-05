@@ -40,7 +40,7 @@
   <!-- Text for choosing a photo from gallery -->
   <string name="stripe_choose_file">Odaberi fotografiju</string>
   <!-- Close button text -->
-  <string name="stripe_close_button_text">zatvori</string>
+  <string name="stripe_close_button_text">Zatvori</string>
   <!-- Button to complete with test data -->
   <string name="stripe_complete_with_test_data">Dovršite s testnim podacima</string>
   <!-- Description for complete button on test mode -->

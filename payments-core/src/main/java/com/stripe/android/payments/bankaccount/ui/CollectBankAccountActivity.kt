@@ -7,6 +7,7 @@ import androidx.annotation.RestrictTo
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
+import com.stripe.android.financialconnections.ThemeMode
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetLauncher
 import com.stripe.android.payments.bankaccount.domain.BuildFinancialConnectionsLauncher
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
@@ -64,6 +65,7 @@ class CollectBankAccountActivity : AppCompatActivity() {
                 financialConnectionsSessionClientSecret = financialConnectionsSessionSecret,
                 apiConfiguration = apiConfiguration,
                 preCollectedConsent = preCollectedConsent,
+                themeMode = ThemeMode.Automatic,
             ),
             elementsSessionContext = elementsSessionContext
         )

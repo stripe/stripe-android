@@ -58,6 +58,8 @@ internal class InputAddressViewModel @Inject constructor(
 
     private val initialInputsAreTheSame = initialBillingAddress == initialShippingAddress
 
+    private val isNameHidden = args.config?.nameField == AddressLauncher.NameField.Never
+
     private val _shippingSameAsBillingState = MutableStateFlow(
         if (canUseShippingSameAsBilling()) {
             ShippingSameAsBillingState.Show(
@@ -250,7 +252,12 @@ internal class InputAddressViewModel @Inject constructor(
         }
         if (!resultStateHolder.tryStartSaving()) return
         val addressDetails = AddressDetails(
-            name = completedFormValues[FormFieldId.Name]?.value,
+            // The customer can't edit a hidden name, so the result keeps the prefilled one.
+            name = if (isNameHidden) {
+                args.config?.address?.name
+            } else {
+                completedFormValues[FormFieldId.Name]?.value
+            },
             address = PaymentSheet.Address(
                 city = completedFormValues[FormFieldId.City]?.value,
                 country = completedFormValues[FormFieldId.Country]?.value,

@@ -23,7 +23,8 @@ internal class CheckoutElementsControllerSavedStateTest {
         val restored = CheckoutElementsControllerSavedState(parentHandle.simulateProcessDeath(), INTEGRATION_NAME)
         val response = restored.handle.get<CheckoutSessionResponse>(VALUE_KEY)
 
-        assertThat(response?.clientSecret).isEqualTo("cs_test_restored_secret_original")
+        assertThat(response?.clientSecret?.value).isEqualTo("cs_test_restored_secret_original")
+        assertThat(response?.clientSecret?.sessionId).isEqualTo("cs_test_restored")
     }
 
     @Test

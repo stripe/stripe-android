@@ -23,6 +23,7 @@ class FinancialConnectionsSheetTest {
                 ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
                 ApiKeyFixtures.DEFAULT_API_CONFIG,
                 preCollectedConsent = null,
+                themeMode = ThemeMode.Automatic,
             )
         )
     }
@@ -41,6 +42,7 @@ class FinancialConnectionsSheetTest {
                 financialConnectionsSessionClientSecret = ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
                 apiConfiguration = ApiKeyFixtures.DEFAULT_API_CONFIG,
                 preCollectedConsent = preCollectedConsent,
+                themeMode = ThemeMode.Automatic,
             ),
             elementsSessionContext = null,
         )

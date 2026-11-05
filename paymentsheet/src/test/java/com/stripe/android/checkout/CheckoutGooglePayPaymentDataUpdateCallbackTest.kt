@@ -108,9 +108,9 @@ internal class CheckoutGooglePayPaymentDataUpdateCallbackTest {
 
     @Test
     fun `onPaymentDataChanged updates shipping and billing tax regions for initialization`() {
-        val initialResponse = CheckoutSessionResponseFactory.create(id = "initial")
-        val shippingResponse = CheckoutSessionResponseFactory.create(id = "shipping")
-        val billingResponse = CheckoutSessionResponseFactory.create(id = "billing")
+        val initialResponse = CheckoutSessionResponseFactory.create(id = "cs_initial")
+        val shippingResponse = CheckoutSessionResponseFactory.create(id = "cs_shipping")
+        val billingResponse = CheckoutSessionResponseFactory.create(id = "cs_billing")
 
         runScenario(
             state = CheckoutElementsControllerStateFactory.create(checkoutSessionResponse = initialResponse),
@@ -215,7 +215,7 @@ internal class CheckoutGooglePayPaymentDataUpdateCallbackTest {
 
     @Test
     fun `initialization returns payment method error when billing tax update fails after shipping succeeds`() {
-        val shippingResponse = CheckoutSessionResponseFactory.create(id = "shipping")
+        val shippingResponse = CheckoutSessionResponseFactory.create(id = "cs_shipping")
         runScenario(
             updateResultProvider = { call ->
                 when (call.addressSource) {
@@ -403,7 +403,7 @@ internal class CheckoutGooglePayPaymentDataUpdateCallbackTest {
             },
             state = CheckoutElementsControllerStateFactory.create(
                 checkoutSessionResponse = CheckoutSessionResponseFactory.create(
-                    id = UUID.randomUUID().toString(),
+                    id = "cs_${UUID.randomUUID()}",
                 )
             ),
             mapperResponse = GooglePayPaymentDataUpdateResponse(

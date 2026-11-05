@@ -421,7 +421,8 @@ class ConsumerPaymentDetailsCreateParamsTest {
             cvcCheck = CvcCheck.Pass,
             funding = ConsumerPaymentDetails.Card.Funding.Credit,
             billingAddress = billingAddress,
-            billingEmailAddress = "john@example.com"
+            billingEmailAddress = "john@example.com",
+            display = null,
         )
 
         assertThat(card.billingAddress).isEqualTo(billingAddress)

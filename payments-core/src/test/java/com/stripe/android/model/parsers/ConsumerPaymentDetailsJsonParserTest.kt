@@ -1,5 +1,6 @@
 package com.stripe.android.model.parsers
 
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerFixtures
@@ -8,6 +9,7 @@ import com.stripe.android.model.CvcCheck
 import org.json.JSONObject
 import org.junit.Test
 import kotlin.test.assertEquals
+import com.stripe.android.model.ConsumerPaymentDetails.Display.Icon.Type as IconType
 
 class ConsumerPaymentDetailsJsonParserTest {
 
@@ -37,7 +39,8 @@ class ConsumerPaymentDetailsJsonParserTest {
                             administrativeArea = null,
                             countryCode = CountryCode.US,
                             postalCode = "12312"
-                        )
+                        ),
+                        display = null,
                     )
                 )
             )
@@ -62,7 +65,8 @@ class ConsumerPaymentDetailsJsonParserTest {
                         networks = emptyList(),
                         funding = ConsumerPaymentDetails.Card.Funding.Credit,
                         nickname = null,
-                        billingAddress = null
+                        billingAddress = null,
+                        display = null,
                     )
                 )
             )
@@ -91,6 +95,7 @@ class ConsumerPaymentDetailsJsonParserTest {
                             postalCode = "94103"
                         ),
                         billingEmailAddress = null,
+                        display = null,
                     )
                 )
             ),
@@ -121,6 +126,7 @@ class ConsumerPaymentDetailsJsonParserTest {
                             postalCode = null
                         ),
                         billingEmailAddress = null,
+                        display = null,
                     )
                 )
             ),
@@ -154,7 +160,8 @@ class ConsumerPaymentDetailsJsonParserTest {
                             administrativeArea = null,
                             countryCode = CountryCode.US,
                             postalCode = "12312"
-                        )
+                        ),
+                        display = null,
                     ),
                     ConsumerPaymentDetails.Card(
                         id = "QAAAKIL",
@@ -175,7 +182,8 @@ class ConsumerPaymentDetailsJsonParserTest {
                             administrativeArea = null,
                             countryCode = CountryCode.US,
                             postalCode = "42424"
-                        )
+                        ),
+                        display = null,
                     ),
                     ConsumerPaymentDetails.BankAccount(
                         id = "wAAACGA",
@@ -194,6 +202,7 @@ class ConsumerPaymentDetailsJsonParserTest {
                             postalCode = null
                         ),
                         billingEmailAddress = null,
+                        display = null,
                     )
                 )
             ),
@@ -223,6 +232,116 @@ class ConsumerPaymentDetailsJsonParserTest {
     }
 
     @Test
+    fun `parse card with display icon`() {
+        val paymentDetails = ConsumerPaymentDetailsJsonParser.parse(
+            cardJsonWithDisplay(
+                """
+                    {
+                      "label": "Visa Credit",
+                      "sublabel": "•••• 4242",
+                      "icon": {
+                        "default": "https://b.stripecdn.com/card-icon.png",
+                        "type": "card_brand"
+                      }
+                    }
+                """.trimIndent()
+            )
+        ).paymentDetails.single()
+
+        assertThat(paymentDetails.display).isEqualTo(
+            ConsumerPaymentDetails.Display(
+                label = "Visa Credit",
+                sublabel = "•••• 4242",
+                icon = ConsumerPaymentDetails.Display.Icon(
+                    defaultUrl = "https://b.stripecdn.com/card-icon.png",
+                    type = IconType.CardBrand,
+                ),
+            )
+        )
+    }
+
+    @Test
+    fun `parse bank account with display icon`() {
+        val paymentDetails = ConsumerPaymentDetailsJsonParser.parse(
+            JSONObject(
+                """
+                    {
+                      "redacted_payment_details": {
+                        "id": "csmrpd_124",
+                        "type": "BANK_ACCOUNT",
+                        "is_default": false,
+                        "bank_account_details": {
+                          "bank_account_name": "Checking",
+                          "bank_icon_code": null,
+                          "last4": "6789"
+                        },
+                        "display": {
+                          "label": "Checking",
+                          "sublabel": "••6789",
+                          "icon": {
+                            "default": "https://b.stripecdn.com/bank-icon.png",
+                            "type": "institution"
+                          }
+                        }
+                      }
+                    }
+                """.trimIndent()
+            )
+        ).paymentDetails.single()
+
+        assertThat(paymentDetails).isInstanceOf(ConsumerPaymentDetails.BankAccount::class.java)
+        assertThat(paymentDetails.display?.icon?.defaultUrl).isEqualTo("https://b.stripecdn.com/bank-icon.png")
+        assertThat(paymentDetails.display?.icon?.type).isEqualTo(IconType.Institution)
+    }
+
+    @Test
+    fun `parse card_art icon type`() {
+        assertThat(parseIcon(type = "card_art")?.type).isEqualTo(IconType.CardArt)
+    }
+
+    @Test
+    fun `parse card_brand icon type`() {
+        assertThat(parseIcon(type = "card_brand")?.type).isEqualTo(IconType.CardBrand)
+    }
+
+    @Test
+    fun `parse institution icon type`() {
+        assertThat(parseIcon(type = "institution")?.type).isEqualTo(IconType.Institution)
+    }
+
+    @Test
+    fun `parse generic icon type`() {
+        assertThat(parseIcon(type = "generic")?.type).isEqualTo(IconType.Generic)
+    }
+
+    @Test
+    fun `parse unknown icon type keeps icon url`() {
+        assertThat(parseIcon(type = "new_type")).isEqualTo(
+            ConsumerPaymentDetails.Display.Icon(defaultUrl = "https://b.stripecdn.com/icon.png", type = null)
+        )
+    }
+
+    @Test
+    fun `parse card with display icon missing default has no icon`() {
+        val paymentDetails = ConsumerPaymentDetailsJsonParser.parse(
+            cardJsonWithDisplay("""{ "label": "Visa Credit", "icon": { "type": "card_brand" } }""")
+        ).paymentDetails.single()
+
+        assertThat(paymentDetails.display?.label).isEqualTo("Visa Credit")
+        assertThat(paymentDetails.display?.icon).isNull()
+    }
+
+    @Test
+    fun `parse card with display missing label has no display`() {
+        val paymentDetails = ConsumerPaymentDetailsJsonParser.parse(
+            cardJsonWithDisplay("""{ "icon": { "default": "https://b.stripecdn.com/card-icon.png" } }""")
+        ).paymentDetails.single()
+
+        assertThat(paymentDetails).isInstanceOf(ConsumerPaymentDetails.Card::class.java)
+        assertThat(paymentDetails.display).isNull()
+    }
+
+    @Test
     fun `parse generic payment type`() {
         assertEquals(
             ConsumerPaymentDetails(
@@ -239,7 +358,8 @@ class ConsumerPaymentDetailsJsonParserTest {
                             label = "Crypto",
                             sublabel = "0x••••22Dd",
                             icon = ConsumerPaymentDetails.Display.Icon(
-                                defaultUrl = "https://example.com/crypto-icon.png"
+                                defaultUrl = "https://example.com/crypto-icon.png",
+                                type = null,
                             )
                         ),
                         nextActionTypes = listOf("redirect_to_url")
@@ -356,7 +476,8 @@ class ConsumerPaymentDetailsJsonParserTest {
                     administrativeArea = null,
                     countryCode = CountryCode.US,
                     postalCode = "12312"
-                )
+                ),
+                display = null,
             )
         )
     )
@@ -457,7 +578,8 @@ class ConsumerPaymentDetailsJsonParserTest {
                             administrativeArea = null,
                             countryCode = CountryCode.US,
                             postalCode = "12312"
-                        )
+                        ),
+                        display = null,
                     ),
                     ConsumerPaymentDetails.Card(
                         id = "QAAAKIL",
@@ -478,10 +600,45 @@ class ConsumerPaymentDetailsJsonParserTest {
                             administrativeArea = null,
                             countryCode = CountryCode.US,
                             postalCode = "42424"
-                        )
+                        ),
+                        display = null,
                     )
                 )
             )
         )
     }
+
+    private fun parseIcon(type: String): ConsumerPaymentDetails.Display.Icon? {
+        return ConsumerPaymentDetailsJsonParser.parse(
+            cardJsonWithDisplay(
+                """
+                    {
+                      "label": "Visa Credit",
+                      "icon": { "default": "https://b.stripecdn.com/icon.png", "type": "$type" }
+                    }
+                """.trimIndent()
+            )
+        ).paymentDetails.single().display?.icon
+    }
+
+    private fun cardJsonWithDisplay(display: String) = JSONObject(
+        """
+            {
+              "redacted_payment_details": {
+                "id": "csmrpd_123",
+                "type": "CARD",
+                "is_default": false,
+                "card_details": {
+                  "brand": "VISA",
+                  "exp_month": 10,
+                  "exp_year": 2029,
+                  "funding": "CREDIT",
+                  "last4": "4242",
+                  "networks": ["VISA"]
+                },
+                "display": $display
+              }
+            }
+        """.trimIndent()
+    )
 }
