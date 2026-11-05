@@ -578,6 +578,35 @@ internal class DefaultSheetActivityStateHolderTest {
     }
 
     @Test
+    fun `PaymentOptions TapToAdd ShowSavedPaymentMethods resets the stack and keeps the sheet open`() {
+        val tapToAddHelper = FakeTapToAddHelper()
+        val previousScreen = createHorizontalPaymentOptionsScreen()
+        val currentScreen = createHorizontalPaymentOptionsScreen()
+        val resetScreen = createHorizontalPaymentOptionsScreen()
+        testScenario(
+            tapToAddHelper = tapToAddHelper,
+            launchMode = EmbeddedLaunchMode.PaymentOptions,
+            initialBackStack = listOf(previousScreen, currentScreen),
+            initialScreens = listOf(resetScreen),
+        ) {
+            stateHolder.result.test {
+                navigator.screen.test {
+                    assertThat(awaitItem()).isSameInstanceAs(currentScreen)
+                    assertThat(navigator.canGoBack).isTrue()
+
+                    tapToAddHelper.emitNextStep(
+                        TapToAddNextStep.ShowSavedPaymentMethods(PaymentSelection.Saved(CARD_PAYMENT_METHOD))
+                    )
+
+                    assertThat(awaitItem()).isSameInstanceAs(resetScreen)
+                    assertThat(navigator.canGoBack).isFalse()
+                }
+                expectNoEvents()
+            }
+        }
+    }
+
+    @Test
     fun `FlowController TapToAdd Complete reports error and keeps sheet open without confirmation`() {
         val tapToAddHelper = FakeTapToAddHelper()
         testScenario(
@@ -715,6 +744,7 @@ internal class DefaultSheetActivityStateHolderTest {
             FakeManageScreenInteractor()
         ),
         initialBackStack: List<EmbeddedNavigator.Screen> = listOf(initialScreen),
+        initialScreens: List<EmbeddedNavigator.Screen>? = null,
         savedPaymentMethodConfirmInteractorFactory: SavedPaymentMethodConfirmInteractor.Factory =
             FakeSavedPaymentMethodConfirmInteractor.Factory(),
         block: suspend Scenario.() -> Unit
@@ -749,7 +779,7 @@ internal class DefaultSheetActivityStateHolderTest {
             linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
             launchMode = launchMode,
             embeddedNavigatorProvider = Provider { navigator },
-            initialPaymentOptionsScreenFactoryProvider = Provider { error("Not expected") },
+            initialScreensProvider = Provider { checkNotNull(initialScreens) },
             errorReporter = errorReporter,
             savedPaymentMethodConfirmScreenFactoryProvider = Provider { screenFactory },
         )

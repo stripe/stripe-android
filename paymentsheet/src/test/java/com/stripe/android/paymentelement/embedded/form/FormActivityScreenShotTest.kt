@@ -156,7 +156,7 @@ internal class FormActivityScreenShotTest {
             linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
             launchMode = launchMode,
             embeddedNavigatorProvider = Provider { error("Not expected") },
-            initialPaymentOptionsScreenFactoryProvider = Provider { error("Not expected") },
+            initialScreensProvider = Provider { error("Not expected") },
             errorReporter = FakeErrorReporter(),
             savedPaymentMethodConfirmScreenFactoryProvider = Provider { error("Not expected") },
         )
@@ -242,7 +242,7 @@ internal class FormActivityScreenShotTest {
                 selectedPaymentMethodCode = "card",
             ),
             embeddedNavigatorProvider = Provider { error("Not expected") },
-            initialPaymentOptionsScreenFactoryProvider = Provider { error("Not expected") },
+            initialScreensProvider = Provider { error("Not expected") },
             errorReporter = FakeErrorReporter(),
             savedPaymentMethodConfirmScreenFactoryProvider = Provider { error("Not expected") },
         )
