@@ -213,25 +213,13 @@ internal fun GenericHeader(
         modifier = modifier.fillMaxWidth(),
     ) {
         payload.icon?.default?.let { iconUrl ->
-            if (isIconInstitutionLogo) {
-                // Match how institutions are shown elsewhere, such as in the institution picker.
-                // InstitutionIcon applies its modifier to the image inside StripeImage rather than
-                // to its outermost layout, so the alignment has to go on a wrapper.
-                Box(modifier = Modifier.align(alignment.toComposeAlignment())) {
-                    InstitutionIcon(
-                        institutionIcon = iconUrl,
-                        // Matches the institution logo size on iOS.
-                        size = 72.dp,
-                    )
-                }
-            } else {
-                GenericHeaderIcon(
-                    iconUrl = iconUrl,
-                    isBrandIcon = isBrandIcon,
-                    alignment = alignment,
-                    modifier = Modifier.align(alignment.toComposeAlignment()),
-                )
-            }
+            GenericHeaderIcon(
+                iconUrl = iconUrl,
+                isBrandIcon = isBrandIcon,
+                isIconInstitutionLogo = isIconInstitutionLogo,
+                alignment = alignment,
+                modifier = Modifier.align(alignment.toComposeAlignment()),
+            )
         }
 
         if (payload.title != null) {
@@ -295,9 +283,24 @@ private fun GenericSubtitle(
 private fun GenericHeaderIcon(
     iconUrl: String,
     isBrandIcon: Boolean,
+    isIconInstitutionLogo: Boolean,
     alignment: Alignment?,
     modifier: Modifier,
 ) {
+    if (isIconInstitutionLogo) {
+        // Match how institutions are shown elsewhere, such as in the institution picker.
+        // InstitutionIcon applies its modifier to the image inside StripeImage rather than
+        // to its outermost layout, so the alignment has to go on a wrapper.
+        Box(modifier = modifier) {
+            InstitutionIcon(
+                institutionIcon = iconUrl,
+                // Matches the institution logo size on iOS.
+                size = 72.dp,
+            )
+        }
+        return
+    }
+
     val iconShape = if (isBrandIcon) {
         RoundedCornerShape(if (FinancialConnectionsTheme.theme.isLink) 18.dp else 12.dp)
     } else {
