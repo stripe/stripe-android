@@ -14,6 +14,7 @@ import com.stripe.android.financialconnections.domain.AcceptConsent
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.TopAppBarLogoClicked
+import com.stripe.android.financialconnections.domain.PostAuthorizationSession
 import com.stripe.android.financialconnections.features.notice.FakePresentSheet
 import com.stripe.android.financialconnections.features.notice.FakePresentSheet.PresentCall
 import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.DataAccess
@@ -31,6 +32,7 @@ import com.stripe.android.financialconnections.networking.FakeFinancialConnectio
 import com.stripe.android.financialconnections.presentation.Async
 import com.stripe.android.financialconnections.test.readResourceAsString
 import com.stripe.android.financialconnections.ui.HandleClickableUrl
+import com.stripe.android.financialconnections.utils.TestHandleError
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import com.stripe.android.financialconnections.utils.UriUtils
 import com.stripe.android.testing.ViewModelStoreTestRule
@@ -105,7 +107,7 @@ internal class StreamlinedConsentViewModelTest {
     @Test
     fun `onContinueClick - accepts consent and navigates to the next pane`() = runScenario {
         repository.markConsentAcquiredProvider = {
-            ApiKeyFixtures.sessionManifest().copy(nextPane = Pane.PARTNER_AUTH)
+            ApiKeyFixtures.sessionManifest().copy(nextPane = Pane.NETWORKING_LINK_SIGNUP_PANE)
         }
 
         viewModel.onContinueClick()
@@ -118,10 +120,66 @@ internal class StreamlinedConsentViewModelTest {
             expectedParams = mapOf("pane" to "streamlined_consent"),
         )
         navigationManager.assertNavigatedTo(
-            destination = Destination.PartnerAuth,
+            destination = Destination.NetworkingLinkSignup,
             pane = Pane.STREAMLINED_CONSENT,
         )
         assertIs<Async.Success<*>>(viewModel.stateFlow.value.acceptConsent)
+    }
+
+    @Test
+    fun `onContinueClick - navigates to the partner auth drawer for OAuth institutions`() = runScenario {
+        repository.markConsentAcquiredProvider = {
+            ApiKeyFixtures.sessionManifest().copy(nextPane = Pane.PARTNER_AUTH)
+        }
+        repository.postAuthorizationSessionProvider = {
+            ApiKeyFixtures.authorizationSession().copy(_isOAuth = true)
+        }
+
+        viewModel.onContinueClick()
+
+        assertThat(eventTracker.publicEvents.awaitItem().name).isEqualTo(Name.CONSENT_ACQUIRED)
+        navigationManager.assertNavigatedTo(
+            destination = Destination.PartnerAuthDrawer,
+            pane = Pane.STREAMLINED_CONSENT,
+        )
+    }
+
+    @Test
+    fun `onContinueClick - navigates to full screen partner auth for non-OAuth institutions`() = runScenario {
+        repository.markConsentAcquiredProvider = {
+            ApiKeyFixtures.sessionManifest().copy(nextPane = Pane.PARTNER_AUTH)
+        }
+        repository.postAuthorizationSessionProvider = {
+            ApiKeyFixtures.authorizationSession().copy(_isOAuth = false)
+        }
+
+        viewModel.onContinueClick()
+
+        assertThat(eventTracker.publicEvents.awaitItem().name).isEqualTo(Name.CONSENT_ACQUIRED)
+        navigationManager.assertNavigatedTo(
+            destination = Destination.PartnerAuth,
+            pane = Pane.STREAMLINED_CONSENT,
+        )
+    }
+
+    @Test
+    fun `onContinueClick - shows an error when the auth session can't be created`() = runScenario {
+        val error = IllegalStateException("Institution unavailable")
+        repository.markConsentAcquiredProvider = {
+            ApiKeyFixtures.sessionManifest().copy(nextPane = Pane.PARTNER_AUTH)
+        }
+        repository.postAuthorizationSessionProvider = { throw error }
+
+        viewModel.onContinueClick()
+
+        assertThat(eventTracker.publicEvents.awaitItem().name).isEqualTo(Name.CONSENT_ACQUIRED)
+        handleError.assertError(
+            extraMessage = "Error creating session for institution",
+            error = error,
+            pane = Pane.STREAMLINED_CONSENT,
+            displayErrorScreen = true,
+        )
+        assertThat(navigationManager.emittedIntents).isEmpty()
     }
 
     @Test
@@ -210,7 +268,9 @@ internal class StreamlinedConsentViewModelTest {
         val repository = FakeFinancialConnectionsManifestRepository().apply {
             getSynchronizeSessionResponseProvider = {
                 SynchronizeSessionResponse(
-                    manifest = ApiKeyFixtures.sessionManifest(),
+                    manifest = ApiKeyFixtures.sessionManifest().copy(
+                        activeInstitution = ApiKeyFixtures.institution(),
+                    ),
                     text = text,
                     visual = ApiKeyFixtures.visual(),
                 )
@@ -220,6 +280,7 @@ internal class StreamlinedConsentViewModelTest {
         val navigationManager = TestNavigationManager()
         val presentSheet = FakePresentSheet()
         val nativeAuthFlowCoordinator = NativeAuthFlowCoordinator()
+        val handleError = TestHandleError()
 
         val viewModel = StreamlinedConsentViewModel(
             initialState = StreamlinedConsentState(),
@@ -234,6 +295,8 @@ internal class StreamlinedConsentViewModelTest {
                 logger = Logger.noop(),
             ),
             presentSheet = presentSheet,
+            postAuthorizationSession = PostAuthorizationSession(repository, configuration, "com.example.app"),
+            handleError = handleError,
             logger = Logger.noop(),
         ).also { viewModelStoreRule.track(it) }
 
@@ -244,6 +307,7 @@ internal class StreamlinedConsentViewModelTest {
             navigationManager = navigationManager,
             presentSheet = presentSheet,
             nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
+            handleError = handleError,
         ).apply { block() }
 
         presentSheet.ensureAllEventsConsumed()
@@ -257,6 +321,7 @@ internal class StreamlinedConsentViewModelTest {
         val navigationManager: TestNavigationManager,
         val presentSheet: FakePresentSheet,
         val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
+        val handleError: TestHandleError,
     )
 
     private companion object {

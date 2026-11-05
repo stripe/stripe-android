@@ -12,8 +12,10 @@ import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.domain.AcceptConsent
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
+import com.stripe.android.financialconnections.domain.HandleError
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.TopAppBarLogoClicked
+import com.stripe.android.financialconnections.domain.PostAuthorizationSession
 import com.stripe.android.financialconnections.features.consent.ConsentClickableText
 import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.DataAccess
 import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.Generic
@@ -45,6 +47,8 @@ internal class StreamlinedConsentViewModel @AssistedInject constructor(
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val handleClickableUrl: HandleClickableUrl,
     private val presentSheet: PresentSheet,
+    private val postAuthorizationSession: PostAuthorizationSession,
+    private val handleError: HandleError,
     private val logger: Logger,
 ) : FinancialConnectionsViewModel<StreamlinedConsentState>(initialState, nativeAuthFlowCoordinator) {
 
@@ -62,6 +66,15 @@ internal class StreamlinedConsentViewModel @AssistedInject constructor(
                     ?: sync.text?.consent?.dataAccessNotice,
             )
         }.execute { copy(payload = it) }
+
+        onAsync(StreamlinedConsentState::acceptConsent, onFail = {
+            eventTracker.logError(
+                extraMessage = "Error accepting consent",
+                error = it,
+                logger = logger,
+                pane = PANE,
+            )
+        })
 
         viewModelScope.launch {
             nativeAuthFlowCoordinator()
@@ -91,9 +104,42 @@ internal class StreamlinedConsentViewModel @AssistedInject constructor(
             eventTracker.track(Click(eventName = "click.agree", pane = PANE))
             val updatedManifest: FinancialConnectionsSessionManifest = acceptConsent()
             eventTracker.emitEvent(Name.CONSENT_ACQUIRED)
-            navigationManager.tryNavigateTo(updatedManifest.nextPane.destination(referrer = PANE))
+            navigateToNextPane(updatedManifest)
             updatedManifest
         }.execute { copy(acceptConsent = it) }
+    }
+
+    private suspend fun navigateToNextPane(manifest: FinancialConnectionsSessionManifest) {
+        if (manifest.nextPane != Pane.PARTNER_AUTH) {
+            navigationManager.tryNavigateTo(manifest.nextPane.destination(referrer = PANE))
+            return
+        }
+
+        // Like the institution picker, create the auth session up front so that we know whether to
+        // show the OAuth prepane as a drawer.
+        val sync = getOrFetchSync()
+        val authSession = runCatching {
+            postAuthorizationSession(
+                institution = requireNotNull(sync.manifest.activeInstitution),
+                sync = sync,
+            )
+        }.getOrElse { error ->
+            handleError(
+                extraMessage = "Error creating session for institution",
+                error = error,
+                pane = PANE,
+                displayErrorScreen = true,
+            )
+            return
+        }
+
+        navigationManager.tryNavigateTo(
+            if (authSession.isOAuth) {
+                Destination.PartnerAuthDrawer(referrer = PANE)
+            } else {
+                Destination.PartnerAuth(referrer = PANE)
+            }
+        )
     }
 
     fun onClickableTextClick(uri: String) {
