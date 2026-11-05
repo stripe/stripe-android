@@ -30,6 +30,7 @@ import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.model.CheckoutSessionClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
@@ -291,15 +292,13 @@ internal class EmbeddedSheetActivityCheckoutTest {
                 address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
             ),
             integrationMetadata = IntegrationMetadata.CheckoutSession(
-                id = checkoutSessionResponse.id,
                 instancesKey = "test_instances_key",
                 checkoutSessionResponse = checkoutSessionResponse,
                 collectedEmail = null,
             ),
         ).copy(
             customerMetadata = CustomerMetadata.CheckoutSession(
-                clientSecret = "cs_test_abc123_secret_test",
-                sessionId = checkoutSessionResponse.id,
+                clientSecret = CheckoutSessionClientSecret("cs_test_abc123_secret_test"),
                 customerId = requireNotNull(selectedCard.customerId),
                 removePaymentMethod = PaymentMethodRemovePermission.Full,
                 saveConsent = PaymentMethodSaveConsentBehavior.Legacy,

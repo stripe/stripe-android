@@ -99,7 +99,6 @@ internal class AutomaticTaxPaymentMethodRegistryTest {
             displayableCustomPaymentMethods = displayableCustomPaymentMethods,
             integrationMetadata = IntegrationMetadata.CheckoutSession(
                 collectedEmail = null,
-                id = checkoutSessionResponse.id,
                 instancesKey = "key",
                 checkoutSessionResponse = checkoutSessionResponse,
             ),
