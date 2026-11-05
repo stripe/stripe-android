@@ -188,9 +188,7 @@ internal class CheckoutSheetLauncherTest {
             customerState = createCustomerState(),
             promotion = null,
         )
-        val loggedErrors = errorReporter.getLoggedErrors()
-        assertThat(loggedErrors.size).isEqualTo(1)
-        assertThat(loggedErrors.first())
+        assertThat(errorReporter.awaitCall().errorEvent.eventName)
             .isEqualTo("unexpected_error.embedded.embedded_sheet_launcher.embedded_state_is_null")
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
         assertThat(selectionHolder.temporarySelection.value).isNull()
@@ -423,9 +421,7 @@ internal class CheckoutSheetLauncherTest {
             selection = PaymentSelection.GooglePay,
             configuration = null,
         )
-        val loggedErrors = errorReporter.getLoggedErrors()
-        assertThat(loggedErrors.size).isEqualTo(1)
-        assertThat(loggedErrors.first())
+        assertThat(errorReporter.awaitCall().errorEvent.eventName)
             .isEqualTo("unexpected_error.embedded.embedded_sheet_launcher.embedded_state_is_null")
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
     }
@@ -758,9 +754,7 @@ internal class CheckoutSheetLauncherTest {
         mutationGate.complete(Unit)
         runCurrent()
 
-        assertThat(errorReporter.getLoggedErrors()).containsExactly(
-            "unexpected_error.embedded.embedded_sheet_launcher.embedded_state_is_null"
-        )
+        assertThat(errorReporter.getLoggedErrors()).isEmpty()
         val failedArgs = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityArgs
         assertThat(failedArgs.presentationState).isEqualTo(EmbeddedActivityArgs.PresentationState.Failed)
         assertThat(failedArgs.launchMode).isEqualTo(EmbeddedLaunchMode.PaymentOptions)
@@ -900,51 +894,59 @@ internal class CheckoutSheetLauncherTest {
         val failedArgs = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityArgs
         assertThat(failedArgs.presentationState).isEqualTo(EmbeddedActivityArgs.PresentationState.Failed)
         assertThat(launcherState.isAwaitingPaymentOptionsReady).isFalse()
-        assertThat(errorReporter.getLoggedErrors()).containsExactly(
-            "unexpected_error.embedded.embedded_sheet_launcher.embedded_state_is_null"
-        )
+        assertThat(errorReporter.getLoggedErrors()).isEmpty()
     }
 
     @Test
-    fun `launchPaymentOptions shows loading then dismisses when metadata is unavailable while idle`() = testScenario {
+    fun `launchPaymentOptions does not launch before configure starts`() = testScenario {
         embeddedContentState.value = null
+        selectionHolder.state = null
+
+        sheetLauncher.launchPaymentOptions(
+            paymentMethodMetadata = null,
+            customerState = null,
+            selection = null,
+            configuration = null,
+        )
+        runCurrent()
+
+        assertThat(sheetStateHolder.sheetIsOpen).isFalse()
+        assertThat(launcherState.isAwaitingPaymentOptionsReady).isFalse()
+        assertThat(errorReporter.getLoggedErrors()).isEmpty()
+    }
+
+    @Test
+    fun `launchPaymentOptions does not launch when metadata is unavailable while idle`() = testScenario {
+        embeddedContentState.value = null
+
         sheetLauncher.launchPaymentOptions(
             paymentMethodMetadata = null,
             customerState = null,
             selection = null,
             configuration = EmbeddedConfigurationFactory.create(),
         )
-        val loadingArgs = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityArgs
-        assertThat(loadingArgs.presentationState).isEqualTo(EmbeddedActivityArgs.PresentationState.Loading)
         runCurrent()
 
-        val failedArgs = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityArgs
-        assertThat(failedArgs.presentationState).isEqualTo(EmbeddedActivityArgs.PresentationState.Failed)
+        assertThat(sheetStateHolder.sheetIsOpen).isFalse()
         assertThat(launcherState.isAwaitingPaymentOptionsReady).isFalse()
-        assertThat(errorReporter.getLoggedErrors()).containsExactly(
-            "unexpected_error.embedded.embedded_sheet_launcher.embedded_state_is_null"
-        )
+        assertThat(errorReporter.getLoggedErrors()).isEmpty()
     }
 
     @Test
-    fun `launchPaymentOptions shows loading then dismisses when configuration is unavailable`() = testScenario {
+    fun `launchPaymentOptions does not launch when configuration is unavailable while idle`() = testScenario {
         embeddedContentState.value = null
+
         sheetLauncher.launchPaymentOptions(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
             customerState = null,
             selection = null,
             configuration = null,
         )
-        val loadingArgs = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityArgs
-        assertThat(loadingArgs.presentationState).isEqualTo(EmbeddedActivityArgs.PresentationState.Loading)
         runCurrent()
 
-        val failedArgs = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityArgs
-        assertThat(failedArgs.presentationState).isEqualTo(EmbeddedActivityArgs.PresentationState.Failed)
+        assertThat(sheetStateHolder.sheetIsOpen).isFalse()
         assertThat(launcherState.isAwaitingPaymentOptionsReady).isFalse()
-        assertThat(errorReporter.getLoggedErrors()).containsExactly(
-            "unexpected_error.embedded.embedded_sheet_launcher.embedded_state_is_null"
-        )
+        assertThat(errorReporter.getLoggedErrors()).isEmpty()
     }
 
     @Test
@@ -1545,6 +1547,7 @@ internal class CheckoutSheetLauncherTest {
 
         confirmationHandler.validate()
         sessionRefresher.ensureAllEventsConsumed()
+        errorReporter.ensureAllEventsConsumed()
     }
 
     private class Scenario(

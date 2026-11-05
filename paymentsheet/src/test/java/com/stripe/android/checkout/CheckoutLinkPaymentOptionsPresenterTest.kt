@@ -77,19 +77,6 @@ internal class CheckoutLinkPaymentOptionsPresenterTest {
     }
 
     @Test
-    fun `missing state delegates to default presenter without launching Link`() = runScenario {
-        stateHolder.state = null
-
-        presenter.present()
-
-        verifyLinkWasNotPresented()
-        val call = sheetLauncher.paymentOptionsCalls.awaitItem()
-        assertThat(call.paymentMethodMetadata).isNull()
-        assertThat(call.configuration).isNull()
-        assertThat(sheetStateHolder.sheetIsOpen).isFalse()
-    }
-
-    @Test
     fun `missing metadata delegates to default presenter without launching Link`() = runScenario {
         stateHolder.state = requireNotNull(stateHolder.state).copy(paymentMethodMetadata = null)
 

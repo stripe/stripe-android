@@ -107,6 +107,27 @@ internal class EmbeddedSheetActivityCoordinatorTest {
     }
 
     @Test
+    fun `valid loading to failed transition replaces and registers failed presentation`() = runScenario {
+        val failedArgs = createArgs(
+            presentationState = EmbeddedActivityArgs.PresentationState.Failed,
+        ).copy(paymentMethodMetadata = null, configuration = null)
+        val failedIntent = createIntent(failedArgs)
+
+        coordinator.handleNewIntent(failedIntent)
+
+        assertThat(initialPresentation.onDestroyCalls.awaitItem()).isEqualTo(Unit)
+        val createCall = presentationFactory.createCalls.awaitItem()
+        assertThat(createCall.activity).isSameInstanceAs(activity)
+        assertThat(createCall.args).isEqualTo(failedArgs)
+        assertThat(createCall.activityResultCaller).isNotSameInstanceAs(activity)
+        assertThat(failedPresentation.registerCalls.awaitItem()).isEqualTo(Unit)
+        assertThat(activity.intent).isSameInstanceAs(failedIntent)
+
+        coordinator.onDestroy()
+        assertThat(failedPresentation.onDestroyCalls.awaitItem()).isEqualTo(Unit)
+    }
+
+    @Test
     fun `loading without configuration uses default appearance`() = runScenario(
         initialArgs = createArgs(
             presentationState = EmbeddedActivityArgs.PresentationState.Loading,
@@ -181,9 +202,11 @@ internal class EmbeddedSheetActivityCoordinatorTest {
         val activity = Robolectric.buildActivity(EmbeddedSheetActivity::class.java).get()
         val initialPresentation = FakeEmbeddedSheetPresentation()
         val readyPresentation = FakeEmbeddedSheetPresentation()
+        val failedPresentation = FakeEmbeddedSheetPresentation()
         val presentationFactory = FakeEmbeddedSheetPresentationFactory(
             initialPresentation = initialPresentation,
             readyPresentation = readyPresentation,
+            failedPresentation = failedPresentation,
         )
         val coordinator = EmbeddedSheetActivityCoordinator(
             activity = activity,
@@ -198,6 +221,7 @@ internal class EmbeddedSheetActivityCoordinatorTest {
             coordinator = coordinator,
             initialPresentation = initialPresentation,
             readyPresentation = readyPresentation,
+            failedPresentation = failedPresentation,
             presentationFactory = presentationFactory,
             createCall = createCall,
         ).block()
@@ -205,6 +229,7 @@ internal class EmbeddedSheetActivityCoordinatorTest {
         presentationFactory.ensureAllEventsConsumed()
         initialPresentation.ensureAllEventsConsumed()
         readyPresentation.ensureAllEventsConsumed()
+        failedPresentation.ensureAllEventsConsumed()
     }
 
     private data class Scenario(
@@ -213,6 +238,7 @@ internal class EmbeddedSheetActivityCoordinatorTest {
         val coordinator: EmbeddedSheetActivityCoordinator,
         val initialPresentation: FakeEmbeddedSheetPresentation,
         val readyPresentation: FakeEmbeddedSheetPresentation,
+        val failedPresentation: FakeEmbeddedSheetPresentation,
         val presentationFactory: FakeEmbeddedSheetPresentationFactory,
         val createCall: FakeEmbeddedSheetPresentationFactory.CreateCall,
     ) {
@@ -227,12 +253,15 @@ internal class EmbeddedSheetActivityCoordinatorTest {
             initialPresentation.onDestroyCalls.expectNoEvents()
             readyPresentation.registerCalls.expectNoEvents()
             readyPresentation.onDestroyCalls.expectNoEvents()
+            failedPresentation.registerCalls.expectNoEvents()
+            failedPresentation.onDestroyCalls.expectNoEvents()
         }
     }
 
     private class FakeEmbeddedSheetPresentationFactory(
         private val initialPresentation: EmbeddedSheetPresentation,
         private val readyPresentation: EmbeddedSheetPresentation,
+        private val failedPresentation: EmbeddedSheetPresentation,
     ) : EmbeddedSheetPresentationFactory {
         val createCalls = Turbine<CreateCall>()
 
@@ -244,8 +273,8 @@ internal class EmbeddedSheetActivityCoordinatorTest {
             createCalls.add(CreateCall(activity, args, activityResultCaller))
             return when (args.presentationState) {
                 EmbeddedActivityArgs.PresentationState.Loading -> initialPresentation
-                EmbeddedActivityArgs.PresentationState.Ready,
-                EmbeddedActivityArgs.PresentationState.Failed -> readyPresentation
+                EmbeddedActivityArgs.PresentationState.Ready -> readyPresentation
+                EmbeddedActivityArgs.PresentationState.Failed -> failedPresentation
             }
         }
 

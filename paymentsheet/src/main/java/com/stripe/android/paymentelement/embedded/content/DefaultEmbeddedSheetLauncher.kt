@@ -241,7 +241,8 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
         selection: PaymentSelection?,
         configuration: EmbeddedPaymentElement.Configuration?,
     ) {
-        if (configuration == null || paymentMethodMetadata == null) {
+        if (paymentMethodMetadata == null) return
+        if (configuration == null) {
             errorReporter.report(
                 ErrorReporter.UnexpectedErrorEvent.EMBEDDED_SHEET_LAUNCHER_EMBEDDED_STATE_IS_NULL
             )
