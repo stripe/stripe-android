@@ -827,13 +827,13 @@ internal class CheckoutSheetLauncherTest {
 
     @Test
     fun `launchPaymentOptions shows loading without initial state then shows configured options`() = testScenario {
+        val configuredState = requireNotNull(selectionHolder.state)
         embeddedContentState.value = null
         selectionHolder.state = null
         val configureGate = CompletableDeferred<Unit>()
         coroutineScope.launch {
             operationCoordinator.runMutation {
                 configureGate.await()
-                val configuredState = CheckoutControllerStateFactory.create()
                 selectionHolder.state = configuredState
                 embeddedContentState.value = EmbeddedContentHelperStateHolder.State(
                     paymentMethodMetadata = requireNotNull(configuredState.paymentMethodMetadata),
