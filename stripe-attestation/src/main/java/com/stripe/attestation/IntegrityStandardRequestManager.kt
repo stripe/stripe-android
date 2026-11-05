@@ -39,11 +39,11 @@ class IntegrityStandardRequestManager(
     private val cloudProjectNumber: Long,
     private val logError: (String, Throwable) -> Unit,
     private val factory: StandardIntegrityManagerFactory,
+    private val logger: Logger,
     private val mutex: Mutex = Mutex()
 ) : IntegrityRequestManager {
 
     private val standardIntegrityManager: StandardIntegrityManager by lazy { factory.create() }
-    private val logger = Logger.real()
     private var integrityTokenProvider: StandardIntegrityTokenProvider? = null
 
     override suspend fun prepare(): Result<Unit> = runCatching {

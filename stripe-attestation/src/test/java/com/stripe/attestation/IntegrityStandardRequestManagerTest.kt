@@ -11,6 +11,7 @@ import com.google.android.play.core.integrity.StandardIntegrityManager.StandardI
 import com.google.android.play.core.integrity.StandardIntegrityManager.StandardIntegrityTokenRequest
 import com.google.android.play.core.integrity.model.StandardIntegrityErrorCode
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.Logger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -71,7 +72,8 @@ class IntegrityStandardRequestManagerTest {
         val integrityStandardRequestManager = IntegrityStandardRequestManager(
             cloudProjectNumber = 123456789L,
             logError = { _, _ -> },
-            factory = countingFactory
+            factory = countingFactory,
+            logger = Logger.noop()
         )
 
         // Launch 10 concurrent prepare calls
@@ -133,7 +135,8 @@ class IntegrityStandardRequestManagerTest {
         val integrityStandardRequestManager = IntegrityStandardRequestManager(
             cloudProjectNumber = 123456789L,
             logError = { _, _ -> },
-            factory = factory
+            factory = factory,
+            logger = Logger.noop()
         )
 
         val prepareResult = integrityStandardRequestManager.prepare()
@@ -157,7 +160,8 @@ class IntegrityStandardRequestManagerTest {
     ) = IntegrityStandardRequestManager(
         cloudProjectNumber = 123456789L,
         logError = { _, _ -> },
-        factory = FakeStandardIntegrityManagerFactory(prepareTask)
+        factory = FakeStandardIntegrityManagerFactory(prepareTask),
+        logger = Logger.noop()
     )
 }
 

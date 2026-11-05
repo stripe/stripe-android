@@ -52,7 +52,8 @@ private object LinkIntegrityRequestManagerHolder {
                 logError = { message, error ->
                     Logger.getInstance(BuildConfig.DEBUG).error(message, error)
                 },
-                factory = RealStandardIntegrityManagerFactory(application)
+                factory = RealStandardIntegrityManagerFactory(application),
+                logger = Logger.getInstance(BuildConfig.DEBUG)
             ).also { instance = it }
         }
     }
