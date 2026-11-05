@@ -6,10 +6,9 @@ import kotlin.time.Duration
 
 internal class LocalOperation(
     operation: Operation,
+    override val params: Map<String, Any?>,
     report: (CheckoutAnalyticsEvent) -> Unit,
 ) : CheckoutAnalyticsOperation<Nothing>(operation, report) {
-    override val params: Map<String, Any?> = emptyMap()
-
     fun invoked(response: CheckoutSessionResponse?) {
         reportOutcome(outcome = null, response = response, error = null)
     }

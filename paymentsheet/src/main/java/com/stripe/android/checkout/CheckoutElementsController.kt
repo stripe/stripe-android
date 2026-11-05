@@ -244,6 +244,7 @@ class CheckoutElementsController @Inject internal constructor(
             kotlin.Result.success(checkoutSessionResponse).also {
                 LocalOperation(
                     operation = Operation.UpdateEmail,
+                    params = emptyMap(),
                     report = checkoutSessionRepository::fireEvent,
                 ).succeeded(checkoutSessionResponse)
             }
@@ -339,7 +340,16 @@ class CheckoutElementsController @Inject internal constructor(
     ) {
         val previousAddress = collectedDetails.shippingAddress
         if (previousAddress == null) {
-            kotlin.Result.success(checkoutSessionResponse)
+            kotlin.Result.success(checkoutSessionResponse).also {
+                LocalOperation(
+                    operation = Operation.UpdateShippingAddress,
+                    params = mapOf(
+                        "invocation_source" to "merchant",
+                        "did_request_tax_update" to false,
+                    ),
+                    report = checkoutSessionRepository::fireEvent,
+                ).succeeded(checkoutSessionResponse)
+            }
         } else {
             updateAddress(null)
         }
@@ -477,6 +487,7 @@ class CheckoutElementsController @Inject internal constructor(
         ) {
             LocalOperation(
                 operation = Operation.ClearPaymentOption,
+                params = emptyMap(),
                 report = checkoutSessionRepository::fireEvent,
             ).invoked(checkoutSessionResponse)
             checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
