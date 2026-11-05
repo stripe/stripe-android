@@ -312,6 +312,72 @@ internal class CheckoutPaymentElementAnalyticsTest {
     }
 
     @Test
+    fun testRunServerUpdateReportsSucceeded() = runCheckoutPaymentElementScenario(
+        networkRule = networkRule,
+        renderPaymentElementContent = false,
+        setup = { controller ->
+            networkRule.validateCheckoutInitStartedAndSucceeded()
+            assertThat(
+                controller.configure(
+                    DEFAULT_CLIENT_SECRET,
+                    CheckoutElementsController.Configuration().paymentElement(PaymentElement.Configuration()),
+                )
+            ).isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
+        },
+    ) {
+        networkRule.validateCheckoutAnalyticsStarted(
+            "run_server_update",
+            not(hasQueryParam("merchant_update_duration")),
+            not(hasQueryParam("refresh_duration")),
+        )
+        networkRule.checkoutInitWithAnalytics(responseFactory = { response ->
+            response.testBodyFromFile("checkout-session-init.json") { json ->
+                json.remove("link_settings")
+            }
+        })
+        networkRule.validateCheckoutAnalyticsSucceeded(
+            "run_server_update",
+            not(hasQueryParam("merchant_update_duration")),
+            not(hasQueryParam("refresh_duration")),
+        )
+
+        assertThat(controller.runServerUpdate { Result.success(Unit) })
+            .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
+        markTestSucceeded()
+    }
+
+    @Test
+    fun testRunServerUpdateMerchantFailureReportsFailedWithoutRefresh() = runCheckoutPaymentElementScenario(
+        networkRule = networkRule,
+        renderPaymentElementContent = false,
+        setup = { controller ->
+            networkRule.validateCheckoutInitStartedAndSucceeded()
+            assertThat(
+                controller.configure(
+                    DEFAULT_CLIENT_SECRET,
+                    CheckoutElementsController.Configuration().paymentElement(PaymentElement.Configuration()),
+                )
+            ).isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
+        },
+    ) {
+        networkRule.validateCheckoutAnalyticsStarted(
+            "run_server_update",
+            not(hasQueryParam("merchant_update_duration")),
+            not(hasQueryParam("refresh_duration")),
+        )
+        networkRule.validateCheckoutAnalyticsFailed(
+            "run_server_update",
+            not(hasQueryParam("merchant_update_duration")),
+            not(hasQueryParam("refresh_duration")),
+            analyticsPayloadField("error_type", "java.lang.IllegalStateException"),
+        )
+
+        assertThat(controller.runServerUpdate { Result.failure(IllegalStateException("boom")) })
+            .isInstanceOf(CheckoutElementsController.OperationResult.Failed::class.java)
+        markTestSucceeded()
+    }
+
+    @Test
     fun testConfigureApiFailureReportsInitFailedAnalytics() = runCheckoutPaymentElementScenario(
         networkRule = networkRule,
         checkoutInitResponse = ::checkoutInitApiFailureResponse,

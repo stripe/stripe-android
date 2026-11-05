@@ -34,6 +34,7 @@ internal class CheckoutAnalyticsEvent(
         UpdateCurrency("update_currency"),
         UpdateEmail("update_email"),
         ClearPaymentOption("clear_payment_option"),
+        RunServerUpdate("run_server_update"),
     }
 
     enum class Outcome(val code: String) {

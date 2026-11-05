@@ -303,18 +303,22 @@ class CheckoutElementsController @Inject internal constructor(
         // timeout and cancellation scope.
         val callerContext = currentCoroutineContext().minusKey(Job)
         return withCheckoutState {
-            withContext(callerContext) {
-                withTimeout(SERVER_UPDATE_TIMEOUT_MS) { serverUpdate() }
-            }.fold(
-                onSuccess = {
+            checkoutSessionRepository.measure(
+                operation = Operation.RunServerUpdate,
+                checkoutSessionResponse = checkoutSessionResponse,
+                params = emptyMap(),
+            ) {
+                runCatching {
+                    withContext(callerContext) {
+                        withTimeout(SERVER_UPDATE_TIMEOUT_MS) { serverUpdate() }
+                    }.getOrThrow()
                     checkoutSessionRepository.init(
                         clientSecret = checkoutSessionResponse.clientSecret,
                         adaptivePricingAllowed = configuration.currencySelectorElementConfiguration != null,
                         analyticsParams = configuration.toAnalyticsMap(),
-                    )
-                },
-                onFailure = { kotlin.Result.failure(it) },
-            )
+                    ).getOrThrow()
+                }
+            }
         }.toOperationResult()
     }
 

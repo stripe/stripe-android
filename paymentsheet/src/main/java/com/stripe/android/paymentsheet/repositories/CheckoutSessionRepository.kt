@@ -251,7 +251,7 @@ internal class CheckoutSessionRepository @Inject constructor(
         )
     }
 
-    private suspend fun measure(
+    suspend fun measure(
         operation: Operation,
         checkoutSessionResponse: CheckoutSessionResponse?,
         params: Map<String, Any?>,
