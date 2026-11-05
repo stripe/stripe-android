@@ -460,9 +460,24 @@ class LinkController @Inject internal constructor(
          */
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun authenticate(email: String?) {
+            authenticate(email = email, phoneNumber = null, content = null)
+        }
+
+        /**
+         * [IDENTITY ONLY] Authenticate with Link, like [authenticate], with the sign-up screen's copy and
+         * consent supplied by the caller.
+         *
+         * @param email The email address to use for Link account lookup, or null to ask for it.
+         * @param phoneNumber Prefills the sign-up screen's phone number, in E.164 format.
+         * @param content Replaces the sign-up screen's copy and consent action. Null keeps Link's own.
+         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun authenticate(email: String?, phoneNumber: String?, content: AuthenticationContent?) {
             interactor.authenticate(
                 launcher = coordinator.linkActivityResultLauncher,
-                email = email
+                email = email,
+                phoneNumber = phoneNumber,
+                content = content,
             )
         }
 
@@ -640,7 +655,7 @@ class LinkController @Inject internal constructor(
     }
 
     /**
-     * [CRYPTO ONRAMP ONLY] Result of authenticating with Link.
+     * [CRYPTO ONRAMP AND IDENTITY ONLY] Result of authenticating with Link.
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     sealed interface AuthenticationResult {
@@ -665,6 +680,31 @@ class LinkController @Inject internal constructor(
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Poko
         class Failed internal constructor(val error: Throwable) : AuthenticationResult
+    }
+
+    /**
+     * [IDENTITY ONLY] What Link's sign-up screen shows and records during [Presenter.authenticate].
+     *
+     * @param title Replaces the sign-up screen's title.
+     * @param subtitle Replaces the sign-up screen's message.
+     * @param consentAction The consent recorded when the user creates a Link account.
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @Parcelize
+    @Poko
+    class AuthenticationContent(
+        val title: String,
+        val subtitle: String,
+        val consentAction: AuthenticationConsentAction,
+    ) : Parcelable
+
+    /**
+     * [IDENTITY ONLY] The consent recorded when the user creates a Link account in Link's sign-up screen.
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    enum class AuthenticationConsentAction {
+        /** The user entered their phone number and email and chose to save their ID with Link. */
+        NetworkedIdentity,
     }
 
     /**
@@ -821,7 +861,7 @@ class LinkController @Inject internal constructor(
     }
 
     /**
-     * [CRYPTO ONRAMP ONLY] Callback for receiving results from [Presenter.authenticate] and
+     * [CRYPTO ONRAMP AND IDENTITY ONLY] Callback for receiving results from [Presenter.authenticate] and
      * [Presenter.authenticateExistingConsumer].
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

@@ -1,5 +1,7 @@
 package com.stripe.android.link.ui.inline
 
+import com.stripe.android.link.LinkController
+
 internal enum class SignUpConsentAction {
     Checkbox,
     CheckboxWithPrefilledEmail,
@@ -11,4 +13,11 @@ internal enum class SignUpConsentAction {
     DefaultOptInWithNonePrefilled,
     SignUpOptInMobileChecked,
     SignUpOptInMobilePrechecked,
+    EnteredPhoneNumberEmailClickedSaveWithLinkIdentity,
 }
+
+internal fun LinkController.AuthenticationConsentAction.toSignUpConsentAction(): SignUpConsentAction =
+    when (this) {
+        LinkController.AuthenticationConsentAction.NetworkedIdentity ->
+            SignUpConsentAction.EnteredPhoneNumberEmailClickedSaveWithLinkIdentity
+    }
