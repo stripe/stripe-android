@@ -7,15 +7,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.paymentelement.EmbeddedContentPage
-import com.stripe.android.paymentelement.EmbeddedFormPage
 import com.stripe.android.paymentsheet.MainActivity
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.runBlocking
@@ -24,11 +21,10 @@ import kotlinx.serialization.json.JsonObject
 import kotlin.time.Duration.Companion.seconds
 
 internal fun runCheckoutIntegrationTest(
-    composeRule: ComposeTestRule,
     merchant: String,
     sessionParams: JsonObject,
     configuration: CheckoutElementsController.Configuration,
-    block: CheckoutIntegrationTestContext.() -> Unit,
+    block: () -> Unit,
 ): CheckoutElementsController.Result {
     val backend = CheckoutPlaygroundBackend(
         baseUrl = "https://stp-mobile-playground-backend-v7.stripedemos.com/",
@@ -72,9 +68,7 @@ internal fun runCheckoutIntegrationTest(
             }
             scenario.moveToState(Lifecycle.State.RESUMED)
 
-            CheckoutIntegrationTestContext(
-                composeRule = composeRule,
-            ).block()
+            block()
 
             presenter.confirm()
             runBlocking {
@@ -84,13 +78,6 @@ internal fun runCheckoutIntegrationTest(
             scenario.onActivity { controller.destroy() }
         }
     }
-}
-
-internal class CheckoutIntegrationTestContext(
-    composeRule: ComposeTestRule,
-) {
-    val contentPage = EmbeddedContentPage(composeRule)
-    val formPage = EmbeddedFormPage(composeRule)
 }
 
 private val OPERATION_TIMEOUT = 30.seconds

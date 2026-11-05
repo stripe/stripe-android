@@ -5,6 +5,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.elements.PaymentElement
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentelement.EmbeddedContentPage
+import com.stripe.android.paymentelement.EmbeddedFormPage
 import com.stripe.android.paymentsheet.RequiresPlaygroundBackend
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
@@ -23,6 +25,9 @@ internal class CheckoutCardIntegrationTest {
     @get:Rule
     val composeRule = createEmptyComposeRule()
 
+    private val contentPage = EmbeddedContentPage(composeRule)
+    private val formPage = EmbeddedFormPage(composeRule)
+
     private val configuration = CheckoutElementsController.Configuration()
         .merchantDisplayName("Checkout E2E")
         .paymentElement(
@@ -38,35 +43,43 @@ internal class CheckoutCardIntegrationTest {
         )
 
     @Test
-    fun testSuccessfulCardPayment() {
-        val result = runScenario {
+    fun testSuccessfulCardPayment() = runScenario(
+        block = {
             contentPage.clickOnLpm("card")
             formPage.fillOutCardDetails(newCardNumber = "4242424242424242")
             formPage.clickPrimaryButton()
-        }
-        assertThat(result).isInstanceOf(CheckoutElementsController.Result.Completed::class.java)
-    }
+        },
+        check = { result ->
+            assertThat(result).isInstanceOf(CheckoutElementsController.Result.Completed::class.java)
+        },
+    )
 
     @Test
-    fun testDeclinedCardReportsFailure() {
-        val result = runScenario {
+    fun testDeclinedCardReportsFailure() = runScenario(
+        block = {
             contentPage.clickOnLpm("card")
             formPage.fillOutCardDetails(newCardNumber = "4000000000000002")
             formPage.clickPrimaryButton()
-        }
-        assertThat(result).isInstanceOf(CheckoutElementsController.Result.Failed::class.java)
-        assertThat((result as CheckoutElementsController.Result.Failed).displayMessage)
-            .contains("Your card was declined")
-    }
+        },
+        check = { result ->
+            assertThat(result).isInstanceOf(CheckoutElementsController.Result.Failed::class.java)
+            assertThat((result as CheckoutElementsController.Result.Failed).displayMessage)
+                .contains("Your card was declined")
+        },
+    )
 
-    private fun runScenario(block: CheckoutIntegrationTestContext.() -> Unit) =
-        runCheckoutIntegrationTest(
-            composeRule = composeRule,
+    private fun runScenario(
+        block: () -> Unit,
+        check: (CheckoutElementsController.Result) -> Unit,
+    ) {
+        val result = runCheckoutIntegrationTest(
             merchant = "US",
             sessionParams = cardOnlySessionParams(),
             configuration = configuration,
             block = block,
         )
+        check(result)
+    }
 
     private fun cardOnlySessionParams(): JsonObject {
         val lineItem = buildJsonObject {
