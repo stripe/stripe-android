@@ -330,7 +330,11 @@ internal class CheckoutPaymentElementAnalyticsTest {
             not(hasQueryParam("merchant_update_duration")),
             not(hasQueryParam("refresh_duration")),
         )
-        networkRule.checkoutInitWithAnalytics()
+        networkRule.checkoutInitWithAnalytics(responseFactory = { response ->
+            response.testBodyFromFile("checkout-session-init.json") { json ->
+                json.remove("link_settings")
+            }
+        })
         networkRule.validateCheckoutAnalyticsSucceeded(
             "run_server_update",
             not(hasQueryParam("merchant_update_duration")),
