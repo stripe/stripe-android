@@ -33,6 +33,7 @@ internal class CheckoutAnalyticsEvent(
         RemovePromotionCode("remove_promotion_code"),
         UpdateEmail("update_email"),
         ClearPaymentOption("clear_payment_option"),
+        RunServerUpdate("run_server_update"),
     }
 
     enum class Outcome(val code: String) {

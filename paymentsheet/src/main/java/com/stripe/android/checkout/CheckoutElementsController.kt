@@ -13,6 +13,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent.Operation
 import com.stripe.android.checkout.analytics.LocalOperation
+import com.stripe.android.checkout.analytics.ServerUpdateOperation
 import com.stripe.android.checkout.analytics.toAnalyticsMap
 import com.stripe.android.checkout.injection.CheckoutElementsPresenterSubcomponent
 import com.stripe.android.checkout.injection.DaggerCheckoutElementsControllerComponent
@@ -298,20 +299,26 @@ class CheckoutElementsController @Inject internal constructor(
         // Preserve the merchant's context while keeping the callback a child of the mutation's
         // timeout and cancellation scope.
         val callerContext = currentCoroutineContext().minusKey(Job)
+        val operation = ServerUpdateOperation(report = checkoutSessionRepository::fireEvent)
         return withCheckoutState { sessionId ->
-            withContext(callerContext) {
-                withTimeout(SERVER_UPDATE_TIMEOUT_MS) { serverUpdate() }
-            }.fold(
-                onSuccess = {
+            operation.started(checkoutSessionResponse)
+            runCatching {
+                operation.measureMerchantUpdate {
+                    withContext(callerContext) {
+                        withTimeout(SERVER_UPDATE_TIMEOUT_MS) { serverUpdate() }
+                    }
+                }.getOrThrow()
+                operation.measureRefresh {
                     checkoutSessionRepository.init(
                         sessionId = sessionId,
                         clientSecret = checkoutSessionResponse.clientSecret,
                         adaptivePricingAllowed = configuration.currencySelectorElementConfiguration != null,
                         analyticsParams = configuration.toAnalyticsMap(),
                     )
-                },
-                onFailure = { kotlin.Result.failure(it) },
-            )
+                }.getOrThrow()
+            }
+                .onSuccess { operation.succeeded(it) }
+                .onFailure { operation.failed(checkoutSessionResponse, it) }
         }.toOperationResult()
     }
 
