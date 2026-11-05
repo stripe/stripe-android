@@ -312,7 +312,7 @@ internal class CheckoutPaymentElementAnalyticsTest {
     }
 
     @Test
-    fun testRunServerUpdateReportsSucceededWithMerchantUpdateAndRefreshDurations() = runCheckoutPaymentElementScenario(
+    fun testRunServerUpdateReportsSucceeded() = runCheckoutPaymentElementScenario(
         networkRule = networkRule,
         renderPaymentElementContent = false,
         setup = { controller ->
@@ -333,8 +333,8 @@ internal class CheckoutPaymentElementAnalyticsTest {
         networkRule.checkoutInitWithAnalytics()
         networkRule.validateCheckoutAnalyticsSucceeded(
             "run_server_update",
-            hasQueryParam("merchant_update_duration"),
-            hasQueryParam("refresh_duration"),
+            not(hasQueryParam("merchant_update_duration")),
+            not(hasQueryParam("refresh_duration")),
         )
 
         assertThat(controller.runServerUpdate { Result.success(Unit) })
@@ -356,10 +356,14 @@ internal class CheckoutPaymentElementAnalyticsTest {
             ).isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
         },
     ) {
-        networkRule.validateCheckoutAnalyticsStarted("run_server_update")
+        networkRule.validateCheckoutAnalyticsStarted(
+            "run_server_update",
+            not(hasQueryParam("merchant_update_duration")),
+            not(hasQueryParam("refresh_duration")),
+        )
         networkRule.validateCheckoutAnalyticsFailed(
             "run_server_update",
-            hasQueryParam("merchant_update_duration"),
+            not(hasQueryParam("merchant_update_duration")),
             not(hasQueryParam("refresh_duration")),
             analyticsPayloadField("error_type", "java.lang.IllegalStateException"),
         )
