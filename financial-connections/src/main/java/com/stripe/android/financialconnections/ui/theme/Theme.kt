@@ -17,9 +17,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
@@ -33,6 +37,7 @@ import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.ThemeMode
 import com.stripe.android.financialconnections.ui.LocalNavHostController
 import com.stripe.android.model.LinkBrand
+import com.stripe.android.uicore.utils.withUiMode
 
 @Immutable
 internal sealed interface Theme {
@@ -263,6 +268,27 @@ private val FinancialConnectionsRippleConfiguration: RippleConfiguration
 @Composable
 internal fun FinancialConnectionsTheme(
     theme: Theme = Theme.default,
+    content: @Composable () -> Unit
+) {
+    val isDark = theme.mode.isDarkTheme(isSystemInDarkTheme())
+    val baseContext = LocalContext.current
+    val configuration = LocalConfiguration.current
+    val inspectionMode = LocalInspectionMode.current
+    val styleContext = remember(baseContext, configuration, isDark, inspectionMode) {
+        baseContext.withUiMode(configuration, isDark, inspectionMode)
+    }
+
+    CompositionLocalProvider(
+        LocalContext provides styleContext,
+        LocalConfiguration provides styleContext.resources.configuration,
+    ) {
+        FinancialConnectionsThemeContent(theme, content)
+    }
+}
+
+@Composable
+private fun FinancialConnectionsThemeContent(
+    theme: Theme,
     content: @Composable () -> Unit
 ) {
     CompositionLocalProvider(
