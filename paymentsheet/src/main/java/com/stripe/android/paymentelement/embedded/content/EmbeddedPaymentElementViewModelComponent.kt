@@ -30,6 +30,7 @@ import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PrefsRepository
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.ApiConfigurationResolverModule
 import com.stripe.android.paymentsheet.injection.LinkHoldbackExposureModule
 import com.stripe.android.paymentsheet.injection.PaymentMethodMessagePromotionsExperimentHandlerModule
@@ -212,6 +213,11 @@ internal interface EmbeddedPaymentElementViewModelModule {
 
     @Suppress("TooManyFunctions")
     companion object {
+        @Provides
+        fun provideEventReporterMode(): EventReporter.Mode {
+            return EventReporter.Mode.Embedded
+        }
+
         @Provides
         fun provideVerticalPaymentSelectionHandler(
             selectionHolder: EmbeddedSelectionHolder,

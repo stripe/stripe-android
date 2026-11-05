@@ -334,7 +334,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
             customerState = customerState,
             linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
             promotions = paymentMethodMessagePromotionsHelper.getPromotions().orEmpty(),
-            launchMode = EmbeddedLaunchMode.PaymentOptions,
+            launchMode = EmbeddedLaunchMode.PaymentOptions(flowController = null),
             presentationState = presentationState,
         )
     }

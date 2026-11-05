@@ -76,7 +76,7 @@ internal class EmbeddedInitialScreenFactoryTest {
 
     @Test
     fun `create returns payment options screen for payment options launch mode`() = runScenario(
-        launchMode = EmbeddedLaunchMode.PaymentOptions,
+        launchMode = EmbeddedLaunchMode.PaymentOptions(flowController = null),
     ) {
         assertThat(factory.create().single()).isInstanceOf<EmbeddedNavigator.Screen.HorizontalPaymentOptions>()
         assertThat(sheetActivityStateHolder.updateErrorTurbine.awaitItem()).isNull()
@@ -84,7 +84,7 @@ internal class EmbeddedInitialScreenFactoryTest {
 
     @Test
     fun `create returns vertical payment options screen for vertical layout with multiple PMs`() = runScenario(
-        launchMode = EmbeddedLaunchMode.PaymentOptions,
+        launchMode = EmbeddedLaunchMode.PaymentOptions(flowController = null),
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("card", "cashapp"),
@@ -101,7 +101,7 @@ internal class EmbeddedInitialScreenFactoryTest {
     @Test
     fun `create returns vertical payment options and form screens when selected payment method requires a form`() =
         runScenario(
-            launchMode = EmbeddedLaunchMode.PaymentOptions,
+            launchMode = EmbeddedLaunchMode.PaymentOptions(flowController = null),
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                     paymentMethodTypes = listOf("card", "cashapp"),
@@ -144,6 +144,7 @@ internal class EmbeddedInitialScreenFactoryTest {
             linkAccountHolder = linkAccountHolder,
             continueCoordinator = continueCoordinator,
             sheetActivityStateHolder = sheetActivityStateHolder,
+            launchMode = EmbeddedLaunchMode.PaymentOptions(flowController = null),
         )
         val autocompleteAddressInteractorFactory = TestAutocompleteAddressInteractor.noOpFactory()
         val formHelperFactory = EmbeddedFormHelperFactory(
@@ -164,12 +165,14 @@ internal class EmbeddedInitialScreenFactoryTest {
                 eventReporter = eventReporter,
                 paymentMethodMessagePromotionsHelper = promotionsHelper,
                 autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
+                sheetAnalytics = DefaultEmbeddedSheetAnalytics(FakeEventReporter()),
             ),
             sheetActivityStateHolder = sheetActivityStateHolder,
             confirmationHelper = FakeSheetActivityConfirmationHelper(),
             embeddedSelectionHolder = selectionHolder,
             customerStateHolder = customerStateHolder,
             linkAccountHolder = linkAccountHolder,
+            sheetLaunchMode = EmbeddedLaunchMode.PaymentOptions(flowController = null),
         )
         val manageInteractorFactory = FakeInitialScreenManageInteractorFactory()
         val updateInteractorFactory = FakeInitialScreenUpdateInteractorFactory()
@@ -190,6 +193,7 @@ internal class EmbeddedInitialScreenFactoryTest {
             paymentMethodMessagePromotionsHelper = promotionsHelper,
             customerStateHolder = customerStateHolder,
             autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
+            sheetAnalytics = DefaultEmbeddedSheetAnalytics(FakeEventReporter()),
         )
         val savedPaymentMethodMutator = SavedPaymentMethodMutator(
             paymentMethodMetadataFlow = stateFlowOf(paymentMethodMetadata),
@@ -212,7 +216,7 @@ internal class EmbeddedInitialScreenFactoryTest {
         val navigator = EmbeddedNavigator(
             coroutineScope = viewModelScope,
             initialScreen = EmbeddedNavigator.Screen.ManageAll(FakeManageScreenInteractor()),
-            eventReporter = navigatorEventReporter,
+            analytics = DefaultEmbeddedSheetAnalytics(navigatorEventReporter),
         )
         navigatorEventReporter.showManageSavedPaymentMethods.awaitItem()
         val initialPaymentOptionsScreenFactory = InitialPaymentOptionsScreenFactory(
@@ -236,6 +240,7 @@ internal class EmbeddedInitialScreenFactoryTest {
             onClickOverrideDelegate = OnClickDelegateOverrideImpl(),
             savedPaymentMethodMutator = savedPaymentMethodMutator,
             walletsInteractor = walletsInteractor,
+            sheetAnalytics = DefaultEmbeddedSheetAnalytics(eventReporter),
         )
         val factory = EmbeddedInitialScreenFactory(
             launchMode = launchMode,

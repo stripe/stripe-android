@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
+import com.stripe.android.paymentelement.embedded.isFlowController
 import com.stripe.android.paymentsheet.navigation.horizontalModeWalletsDividerSpacing
 import com.stripe.android.paymentsheet.navigation.verticalModeWalletsDividerSpacing
 import com.stripe.android.paymentsheet.state.WalletLocation
@@ -23,8 +24,13 @@ internal fun walletsHeaderState(
     val dividerSpacing = when (screen) {
         is EmbeddedNavigator.Screen.Form,
         is EmbeddedNavigator.Screen.VerticalPaymentOptions -> verticalModeWalletsDividerSpacing
-        is EmbeddedNavigator.Screen.HorizontalPaymentOptions,
-        is EmbeddedNavigator.Screen.HorizontalSavedPaymentOptions -> horizontalModeWalletsDividerSpacing
+        is EmbeddedNavigator.Screen.HorizontalPaymentOptions -> horizontalModeWalletsDividerSpacing
+        // FlowController shows wallets as saved payment options instead.
+        is EmbeddedNavigator.Screen.HorizontalSavedPaymentOptions -> if (launchMode.isFlowController) {
+            return null
+        } else {
+            horizontalModeWalletsDividerSpacing
+        }
         is EmbeddedNavigator.Screen.ManageAll,
         is EmbeddedNavigator.Screen.ManageUpdate,
         is EmbeddedNavigator.Screen.SavedPaymentMethodConfirm -> return null

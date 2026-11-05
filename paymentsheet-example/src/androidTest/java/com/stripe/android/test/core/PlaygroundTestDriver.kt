@@ -1212,7 +1212,7 @@ internal class PlaygroundTestDriver(
 
     /**
      * Here we wait for an activity different from the playground to be in view.  We
-     * don't specifically look for PaymentSheetActivity or PaymentOptionsActivity because
+     * don't specifically look for PaymentSheetActivity or EmbeddedSheetActivity because
      * that would require exposing the activities publicly.
      */
     private fun waitForNotPlaygroundActivity() {
@@ -1304,7 +1304,7 @@ internal class PlaygroundTestDriver(
         if (clickMultiStep) {
             selectors.multiStepSelect.click()
 
-            // PaymentOptionsActivity is now on screen
+            // EmbeddedSheetActivity is now on screen
             waitForNotPlaygroundActivity()
         }
     }

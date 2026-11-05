@@ -7,6 +7,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
+import com.stripe.android.paymentelement.embedded.sheet.EmbeddedSheetAnalytics
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityStateHolder
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher.Companion.HOSTED_SURFACE_PAYMENT_ELEMENT
 import com.stripe.android.paymentsheet.FormHelper
@@ -34,6 +35,7 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
     private val eventReporter: EventReporter,
     private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper,
     private val autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory,
+    private val sheetAnalytics: EmbeddedSheetAnalytics,
 ) {
     fun create(
         paymentMethodCode: PaymentMethodCode,
@@ -89,7 +91,7 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
             formElements = formElements,
             onFormFieldValuesChanged = formHelper::onFormFieldValuesChanged,
             usBankAccountArguments = usBankAccountFormArguments,
-            reportFieldInteraction = eventReporter::onPaymentMethodFormInteraction,
+            reportFieldInteraction = sheetAnalytics::onFormInteraction,
             headerInformation = paymentMethodMetadata.formHeaderInformationForCode(
                 code = paymentMethodCode,
                 customerHasSavedPaymentMethods = hasSavedPaymentMethods

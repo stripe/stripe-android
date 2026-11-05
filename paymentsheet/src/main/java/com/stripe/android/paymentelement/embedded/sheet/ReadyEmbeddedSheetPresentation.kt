@@ -25,11 +25,14 @@ import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
+import com.stripe.android.paymentelement.embedded.isFlowController
 import com.stripe.android.paymentelement.embedded.manage.ManageScreenSavedPaymentMethodSelector
 import com.stripe.android.paymentsheet.CustomerStateHolder
+import com.stripe.android.paymentsheet.addresselement.PaymentElementAutocompleteAddressInteractor
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBar
 import com.stripe.android.paymentsheet.utils.EventReporterProvider
+import com.stripe.android.paymentsheet.utils.applicationIsTaskOwner
 import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.strings.resolve
@@ -53,15 +56,20 @@ internal class ReadyEmbeddedSheetPresentation @AssistedInject constructor(
     private val sheetActivityStateHolder: SheetActivityStateHolder,
     private val savedPaymentMethodSelector: ManageScreenSavedPaymentMethodSelector,
     private val walletsInteractor: PaymentOptionsWalletsInteractor,
+    private val sheetAnalytics: EmbeddedSheetAnalytics,
+    private val autocompleteAddressInteractorFactory: PaymentElementAutocompleteAddressInteractor.Factory,
 ) : EmbeddedSheetPresentation {
+    private var finishedResult: EmbeddedActivityResult? = null
+
     override fun register() {
         sheetActivityRegistrar.registerAndBootstrap(
             activityResultCaller = activityResultCaller,
             lifecycleOwner = activity,
         )
+        sheetAnalytics.onPresented(isApplicationTaskOwner = activity.applicationIsTaskOwner())
 
         activity.lifecycleScope.launch {
-            sheetActivityStateHolder.result.collect(activity::finishWithResult)
+            sheetActivityStateHolder.result.collect(::finishWithResult)
         }
 
         activity.onBackPressedDispatcher.addCallback {
@@ -76,7 +84,7 @@ internal class ReadyEmbeddedSheetPresentation @AssistedInject constructor(
     }
 
     override fun onDismissed() {
-        activity.finishWithResult(createDismissalResult())
+        finishWithResult(createDismissalResult())
     }
 
     @Composable
@@ -85,7 +93,7 @@ internal class ReadyEmbeddedSheetPresentation @AssistedInject constructor(
             EmbeddedSheetReadyContent(
                 navigator = embeddedNavigator,
                 onResult = { result ->
-                    activity.finishWithResult(createNavigatorResult(result))
+                    finishWithResult(createNavigatorResult(result))
                 },
             )
         }
@@ -93,8 +101,21 @@ internal class ReadyEmbeddedSheetPresentation @AssistedInject constructor(
 
     override fun onDestroy() {
         if (activity.isFinishing) {
-            eventReporter.onDismiss()
+            sheetAnalytics.onClosed(finishedResult)
         }
+    }
+
+    private fun finishWithResult(result: EmbeddedActivityResult) {
+        if (activity.isFinishing) {
+            return
+        }
+        val finalResult = if (result is EmbeddedActivityResult.Complete && args.launchMode.isFlowController) {
+            result.copy(autocompleteFilledAddress = autocompleteAddressInteractorFactory.autocompleteFilledAddress)
+        } else {
+            result
+        }
+        finishedResult = finalResult
+        activity.finishWithResult(finalResult)
     }
 
     private fun createDismissalResult(): EmbeddedActivityResult {
@@ -134,6 +155,7 @@ internal class ReadyEmbeddedSheetPresentation @AssistedInject constructor(
             customerState = customerStateHolder.customer.value,
             linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
             checkoutSessionResponse = savedPaymentMethodSelector.checkoutSessionResponse,
+            autocompleteFilledAddress = null,
             shouldInvokeSelectionCallback = shouldInvokeSelectionCallback,
             launchMode = launchMode,
         )
@@ -143,7 +165,7 @@ internal class ReadyEmbeddedSheetPresentation @AssistedInject constructor(
         return EmbeddedActivityResult.Cancelled(
             customerState = customerStateHolder.customer.value,
             linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
-            launchMode = EmbeddedLaunchMode.PaymentOptions,
+            launchMode = args.launchMode,
         )
     }
 

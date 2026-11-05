@@ -112,7 +112,23 @@ internal class FakeEventReporter : EventReporter {
     val pmmPromotionsDisplayed: ReceiveTurbine<Boolean> =
         _pmmPromotionsDisplayed
 
+    private val _dismissCalls = Turbine<Unit>()
+    val dismissCalls: ReceiveTurbine<Unit> = _dismissCalls
+
+    private val _selectPaymentOptionCalls = Turbine<PaymentSelection>()
+    val selectPaymentOptionCalls: ReceiveTurbine<PaymentSelection> = _selectPaymentOptionCalls
+
+    private val _paymentMethodFormShownCalls = Turbine<PaymentMethodCode>()
+    val paymentMethodFormShownCalls: ReceiveTurbine<PaymentMethodCode> = _paymentMethodFormShownCalls
+
+    private val _paymentMethodFormInteractionCalls = Turbine<PaymentMethodCode>()
+    val paymentMethodFormInteractionCalls: ReceiveTurbine<PaymentMethodCode> = _paymentMethodFormInteractionCalls
+
     fun validate() {
+        _dismissCalls.ensureAllEventsConsumed()
+        _selectPaymentOptionCalls.ensureAllEventsConsumed()
+        _paymentMethodFormShownCalls.ensureAllEventsConsumed()
+        _paymentMethodFormInteractionCalls.ensureAllEventsConsumed()
         _paymentFailureCalls.ensureAllEventsConsumed()
         _paymentSuccessCalls.ensureAllEventsConsumed()
         _updatePaymentMethodSucceededCalls.ensureAllEventsConsumed()
@@ -145,6 +161,7 @@ internal class FakeEventReporter : EventReporter {
     }
 
     override fun onDismiss() {
+        _dismissCalls.add(Unit)
     }
 
     override fun onShowExistingPaymentOptions() {
@@ -167,9 +184,11 @@ internal class FakeEventReporter : EventReporter {
     }
 
     override fun onPaymentMethodFormShown(code: PaymentMethodCode) {
+        _paymentMethodFormShownCalls.add(code)
     }
 
     override fun onPaymentMethodFormInteraction(code: PaymentMethodCode) {
+        _paymentMethodFormInteractionCalls.add(code)
     }
 
     override fun onPaymentMethodFormCompleted(code: String) {
@@ -184,6 +203,7 @@ internal class FakeEventReporter : EventReporter {
     }
 
     override fun onSelectPaymentOption(paymentSelection: PaymentSelection) {
+        _selectPaymentOptionCalls.add(paymentSelection)
     }
 
     override fun onWalletButtonTapped(walletType: String) {

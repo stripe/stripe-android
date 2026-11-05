@@ -221,6 +221,7 @@ internal class CheckoutSheetLauncherTest {
             customerState = customerState,
             linkAccountInfo = LinkAccountUpdate.Value(null),
             checkoutSessionResponse = null,
+            autocompleteFilledAddress = null,
             shouldInvokeSelectionCallback = false,
             launchMode = EmbeddedLaunchMode.Form(
                 selectedPaymentMethodCode = "card",
@@ -245,6 +246,7 @@ internal class CheckoutSheetLauncherTest {
             customerState = null,
             linkAccountInfo = LinkAccountUpdate.Value(null),
             checkoutSessionResponse = null,
+            autocompleteFilledAddress = null,
             shouldInvokeSelectionCallback = false,
             launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "cashapp"),
         )
@@ -264,6 +266,7 @@ internal class CheckoutSheetLauncherTest {
             customerState = null,
             linkAccountInfo = LinkAccountUpdate.Value(null),
             checkoutSessionResponse = null,
+            autocompleteFilledAddress = null,
             shouldInvokeSelectionCallback = false,
             launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "cashapp"),
         )
@@ -284,6 +287,7 @@ internal class CheckoutSheetLauncherTest {
             customerState = null,
             linkAccountInfo = LinkAccountUpdate.Value(null),
             checkoutSessionResponse = response,
+            autocompleteFilledAddress = null,
             shouldInvokeSelectionCallback = false,
             launchMode = EmbeddedLaunchMode.Form(
                 selectedPaymentMethodCode = "card",
@@ -308,6 +312,7 @@ internal class CheckoutSheetLauncherTest {
             customerState = null,
             linkAccountInfo = LinkAccountUpdate.Value(null),
             checkoutSessionResponse = null,
+            autocompleteFilledAddress = null,
             shouldInvokeSelectionCallback = false,
             launchMode = EmbeddedLaunchMode.Form(
                 selectedPaymentMethodCode = "card",
@@ -370,6 +375,7 @@ internal class CheckoutSheetLauncherTest {
             customerState = null,
             linkAccountInfo = LinkAccountUpdate.Value(null),
             checkoutSessionResponse = null,
+            autocompleteFilledAddress = null,
             shouldInvokeSelectionCallback = false,
             launchMode = EmbeddedLaunchMode.Form(
                 selectedPaymentMethodCode = "card",
@@ -453,6 +459,7 @@ internal class CheckoutSheetLauncherTest {
             selection = selection,
             hasBeenConfirmed = false,
             checkoutSessionResponse = null,
+            autocompleteFilledAddress = null,
             shouldInvokeSelectionCallback = false,
             launchMode = EmbeddedLaunchMode.Manage,
         )
@@ -475,6 +482,7 @@ internal class CheckoutSheetLauncherTest {
             selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
             hasBeenConfirmed = false,
             checkoutSessionResponse = null,
+            autocompleteFilledAddress = null,
             shouldInvokeSelectionCallback = true,
             launchMode = EmbeddedLaunchMode.Manage,
         )
@@ -550,6 +558,7 @@ internal class CheckoutSheetLauncherTest {
         selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
         hasBeenConfirmed = false,
         checkoutSessionResponse = checkoutSessionResponse,
+        autocompleteFilledAddress = null,
         shouldInvokeSelectionCallback = shouldInvokeSelectionCallback,
         launchMode = EmbeddedLaunchMode.Manage,
     )
@@ -604,7 +613,7 @@ internal class CheckoutSheetLauncherTest {
             customerState = customerState,
             linkAccountInfo = LinkAccountUpdate.Value(null),
             promotions = listOf(FakePaymentMethodMessagePromotionsHelper.klarnaPromotion),
-            launchMode = EmbeddedLaunchMode.PaymentOptions,
+            launchMode = EmbeddedLaunchMode.PaymentOptions(flowController = null),
             presentationState = EmbeddedActivityArgs.PresentationState.Ready,
         )
 
@@ -639,7 +648,7 @@ internal class CheckoutSheetLauncherTest {
             configuration = initialState.configuration,
         )
         val loadingArgs = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityArgs
-        assertThat(loadingArgs.launchMode).isEqualTo(EmbeddedLaunchMode.PaymentOptions)
+        assertThat(loadingArgs.launchMode).isEqualTo(EmbeddedLaunchMode.PaymentOptions(flowController = null))
         assertThat(loadingArgs.presentationState).isEqualTo(EmbeddedActivityArgs.PresentationState.Loading)
 
         val refreshedMetadata = PaymentMethodMetadataFactory.create()
@@ -656,7 +665,7 @@ internal class CheckoutSheetLauncherTest {
         runCurrent()
 
         val readyArgs = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityArgs
-        assertThat(readyArgs.launchMode).isEqualTo(EmbeddedLaunchMode.PaymentOptions)
+        assertThat(readyArgs.launchMode).isEqualTo(EmbeddedLaunchMode.PaymentOptions(flowController = null))
         assertThat(readyArgs.presentationState).isEqualTo(EmbeddedActivityArgs.PresentationState.Ready)
         assertThat(readyArgs.paymentMethodMetadata).isEqualTo(refreshedMetadata)
         assertThat(readyArgs.configuration).isEqualTo(refreshedConfiguration)
@@ -788,7 +797,7 @@ internal class CheckoutSheetLauncherTest {
             EmbeddedActivityResult.Cancelled(
                 customerState = null,
                 linkAccountInfo = LinkAccountUpdate.Value(null),
-                launchMode = EmbeddedLaunchMode.PaymentOptions,
+                launchMode = EmbeddedLaunchMode.PaymentOptions(flowController = null),
             )
         )
         mutationGate.complete(Unit)
@@ -856,8 +865,9 @@ internal class CheckoutSheetLauncherTest {
             selection = null,
             hasBeenConfirmed = false,
             checkoutSessionResponse = null,
+            autocompleteFilledAddress = null,
             shouldInvokeSelectionCallback = false,
-            launchMode = EmbeddedLaunchMode.PaymentOptions,
+            launchMode = EmbeddedLaunchMode.PaymentOptions(flowController = null),
         )
 
         val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
@@ -883,8 +893,9 @@ internal class CheckoutSheetLauncherTest {
             selection = selection,
             hasBeenConfirmed = false,
             checkoutSessionResponse = null,
+            autocompleteFilledAddress = null,
             shouldInvokeSelectionCallback = false,
-            launchMode = EmbeddedLaunchMode.PaymentOptions,
+            launchMode = EmbeddedLaunchMode.PaymentOptions(flowController = null),
         )
 
         val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
@@ -909,8 +920,9 @@ internal class CheckoutSheetLauncherTest {
             selection = selection,
             hasBeenConfirmed = false,
             checkoutSessionResponse = null,
+            autocompleteFilledAddress = null,
             shouldInvokeSelectionCallback = false,
-            launchMode = EmbeddedLaunchMode.PaymentOptions,
+            launchMode = EmbeddedLaunchMode.PaymentOptions(flowController = null),
         )
 
         registerCall.callback.asCallbackFor<EmbeddedActivityResult>().onActivityResult(result)
@@ -956,8 +968,9 @@ internal class CheckoutSheetLauncherTest {
             selection = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION,
             hasBeenConfirmed = false,
             checkoutSessionResponse = response,
+            autocompleteFilledAddress = null,
             shouldInvokeSelectionCallback = false,
-            launchMode = EmbeddedLaunchMode.PaymentOptions,
+            launchMode = EmbeddedLaunchMode.PaymentOptions(flowController = null),
         )
         val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
 
@@ -979,7 +992,7 @@ internal class CheckoutSheetLauncherTest {
         val result = EmbeddedActivityResult.Cancelled(
             customerState = customerState,
             linkAccountInfo = LinkAccountUpdate.Value(null),
-            launchMode = EmbeddedLaunchMode.PaymentOptions,
+            launchMode = EmbeddedLaunchMode.PaymentOptions(flowController = null),
         )
 
         val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
@@ -1015,7 +1028,7 @@ internal class CheckoutSheetLauncherTest {
             EmbeddedActivityResult.Cancelled(
                 customerState = null,
                 linkAccountInfo = updatedLinkAccountInfo,
-                launchMode = EmbeddedLaunchMode.PaymentOptions,
+                launchMode = EmbeddedLaunchMode.PaymentOptions(flowController = null),
             )
         )
         assertThat(linkAccountHolder.linkAccountInfo.value).isEqualTo(updatedLinkAccountInfo)
@@ -1122,7 +1135,7 @@ internal class CheckoutSheetLauncherTest {
         val result = EmbeddedActivityResult.Cancelled(
             customerState = createCustomerState(paymentMethods = emptyList()),
             linkAccountInfo = LinkAccountUpdate.Value(null),
-            launchMode = EmbeddedLaunchMode.PaymentOptions,
+            launchMode = EmbeddedLaunchMode.PaymentOptions(flowController = null),
         )
         selectionHolder.session.test {
             assertThat(awaitItem()?.paymentOption).isNotNull()
@@ -1148,7 +1161,7 @@ internal class CheckoutSheetLauncherTest {
         val result = EmbeddedActivityResult.Cancelled(
             customerState = createCustomerState(paymentMethods = listOf(updatedPaymentMethod)),
             linkAccountInfo = LinkAccountUpdate.Value(null),
-            launchMode = EmbeddedLaunchMode.PaymentOptions,
+            launchMode = EmbeddedLaunchMode.PaymentOptions(flowController = null),
         )
         val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
         callback.onActivityResult(result)
@@ -1168,7 +1181,7 @@ internal class CheckoutSheetLauncherTest {
         val result = EmbeddedActivityResult.Cancelled(
             customerState = createCustomerState(paymentMethods = listOf(paymentMethod)),
             linkAccountInfo = LinkAccountUpdate.Value(null),
-            launchMode = EmbeddedLaunchMode.PaymentOptions,
+            launchMode = EmbeddedLaunchMode.PaymentOptions(flowController = null),
         )
         val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
         callback.onActivityResult(result)
@@ -1187,7 +1200,7 @@ internal class CheckoutSheetLauncherTest {
         )
         linkAccountHolder.set(linkAccountInfo)
         val result = EmbeddedActivityResult.Error(
-            launchMode = EmbeddedLaunchMode.PaymentOptions,
+            launchMode = EmbeddedLaunchMode.PaymentOptions(flowController = null),
         )
         val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
 
@@ -1466,7 +1479,7 @@ internal class CheckoutSheetLauncherTest {
                 EmbeddedActivityResult.Cancelled(
                     customerState = customerState,
                     linkAccountInfo = LinkAccountUpdate.Value(null),
-                    launchMode = EmbeddedLaunchMode.PaymentOptions,
+                    launchMode = EmbeddedLaunchMode.PaymentOptions(flowController = null),
                 )
             )
         }

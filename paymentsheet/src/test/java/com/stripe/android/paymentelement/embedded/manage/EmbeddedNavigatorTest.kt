@@ -18,6 +18,7 @@ import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.form.EmbeddedFormInteractorFactory
+import com.stripe.android.paymentelement.embedded.sheet.DefaultEmbeddedSheetAnalytics
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedNavigator
 import com.stripe.android.paymentelement.embedded.sheet.FakeSheetActivityConfirmationHelper
 import com.stripe.android.paymentelement.embedded.sheet.FakeSheetActivityStateHolder
@@ -135,7 +136,7 @@ internal class EmbeddedNavigatorTest {
         val manageInteractor = FakeManageScreenInteractor()
         EmbeddedNavigator(
             coroutineScope = scope,
-            eventReporter = eventReporter,
+            analytics = DefaultEmbeddedSheetAnalytics(eventReporter),
             initialScreen = EmbeddedNavigator.Screen.ManageAll(manageInteractor),
         )
         assertThat(eventReporter.showManageSavedPaymentMethods.awaitItem()).isEqualTo(Unit)
@@ -156,7 +157,7 @@ internal class EmbeddedNavigatorTest {
         val initialScreen = EmbeddedNavigator.Screen.ManageAll(manageInteractor)
         val navigator = EmbeddedNavigator(
             coroutineScope = scope,
-            eventReporter = eventReporter,
+            analytics = DefaultEmbeddedSheetAnalytics(eventReporter),
             initialScreen = initialScreen,
         )
         assertThat(eventReporter.showManageSavedPaymentMethods.awaitItem()).isEqualTo(Unit)
@@ -295,7 +296,7 @@ internal class EmbeddedNavigatorTest {
         val eventReporter = FakeEventReporter()
         EmbeddedNavigator(
             coroutineScope = this,
-            eventReporter = eventReporter,
+            analytics = DefaultEmbeddedSheetAnalytics(eventReporter),
             initialScreen = EmbeddedNavigator.Screen.ManageUpdate(
                 FakeUpdatePaymentMethodInteractor()
             ),
@@ -404,7 +405,7 @@ internal class EmbeddedNavigatorTest {
         val eventReporter = FakeEventReporter()
         EmbeddedNavigator(
             coroutineScope = this,
-            eventReporter = eventReporter,
+            analytics = DefaultEmbeddedSheetAnalytics(eventReporter),
             initialScreen = createPaymentOptionsScreen(),
         )
         assertThat(eventReporter.showNewPaymentOptionsCalls.awaitItem()).isEqualTo(Unit)
@@ -416,7 +417,7 @@ internal class EmbeddedNavigatorTest {
         val eventReporter = FakeEventReporter()
         EmbeddedNavigator(
             coroutineScope = this,
-            eventReporter = eventReporter,
+            analytics = DefaultEmbeddedSheetAnalytics(eventReporter),
             initialScreen = createHorizontalPaymentOptionsScreen(),
         )
         assertThat(eventReporter.showNewPaymentOptionsCalls.awaitItem()).isEqualTo(Unit)
@@ -428,7 +429,7 @@ internal class EmbeddedNavigatorTest {
         val eventReporter = FakeEventReporter()
         EmbeddedNavigator(
             coroutineScope = this,
-            eventReporter = eventReporter,
+            analytics = DefaultEmbeddedSheetAnalytics(eventReporter),
             initialScreen = createHorizontalSavedPaymentOptionsScreen(),
         )
 
@@ -565,7 +566,7 @@ internal class EmbeddedNavigatorTest {
 
         val navigator = EmbeddedNavigator(
             coroutineScope = scope,
-            eventReporter = eventReporter,
+            analytics = DefaultEmbeddedSheetAnalytics(eventReporter),
             initialBackStack = listOf(paymentOptionsScreen, formScreen),
         )
 
@@ -803,6 +804,34 @@ internal class EmbeddedNavigatorTest {
     }
 
     @Test
+    fun `FlowController Form Factory derives hasSavedPaymentMethods from saved methods of any type`() {
+        val factory = createFormFactory(
+            savedPaymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    paymentMethodTypes = listOf("card", "cashapp"),
+                ),
+            ),
+            sheetLaunchMode = EmbeddedLaunchMode.PaymentOptions(
+                flowController = EmbeddedLaunchMode.FlowControllerOptions(
+                    visibleWallets = emptyList(),
+                    googlePlacesApiKey = null,
+                ),
+            ),
+        )
+
+        val screen = factory.create(
+            EmbeddedLaunchMode.Form(
+                selectedPaymentMethodCode = "cashapp",
+            )
+        )
+
+        // setAsDefaultMatchesSaveForFutureUse is !hasSavedPaymentMethods, so false confirms the saved card counts.
+        assertThat(screen.formInteractor.state.value.usBankAccountFormArguments.setAsDefaultMatchesSaveForFutureUse)
+            .isFalse()
+    }
+
+    @Test
     fun `Form Factory derives hasSavedPaymentMethods false when there are no saved payment methods`() {
         val factory = createFormFactory(
             savedPaymentMethods = emptyList(),
@@ -823,6 +852,7 @@ internal class EmbeddedNavigatorTest {
     private fun createFormFactory(
         savedPaymentMethods: List<PaymentMethod>,
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+        sheetLaunchMode: EmbeddedLaunchMode = EmbeddedLaunchMode.PaymentOptions(flowController = null),
     ): EmbeddedNavigator.Screen.Form.Factory {
         val selectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle())
         val interactorFactory = EmbeddedFormInteractorFactory(
@@ -841,6 +871,7 @@ internal class EmbeddedNavigatorTest {
             eventReporter = FakeEventReporter(),
             paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
             autocompleteAddressInteractorFactory = TestAutocompleteAddressInteractor.noOpFactory(),
+            sheetAnalytics = DefaultEmbeddedSheetAnalytics(FakeEventReporter()),
         )
         val customerStateHolder = FakeCustomerStateHolder(paymentMethods = savedPaymentMethods)
         return EmbeddedNavigator.Screen.Form.Factory(
@@ -850,6 +881,7 @@ internal class EmbeddedNavigatorTest {
             embeddedSelectionHolder = selectionHolder,
             customerStateHolder = customerStateHolder,
             linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
+            sheetLaunchMode = sheetLaunchMode,
         )
     }
 
@@ -987,7 +1019,7 @@ internal class EmbeddedNavigatorTest {
         val eventReporter = FakeEventReporter()
         navigator = EmbeddedNavigator(
             coroutineScope = this,
-            eventReporter = eventReporter,
+            analytics = DefaultEmbeddedSheetAnalytics(eventReporter),
             initialScreen = initialScreen,
         )
 

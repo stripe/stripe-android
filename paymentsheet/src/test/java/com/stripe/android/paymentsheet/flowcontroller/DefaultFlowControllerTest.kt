@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.flowcontroller
 
 import android.app.Application
 import android.graphics.Color
+import android.os.Bundle
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.Lifecycle
@@ -37,6 +38,8 @@ import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
+import com.stripe.android.lpmfoundations.paymentmethod.WalletType
+import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
 import com.stripe.android.model.ClientAttributionMetadata
@@ -67,12 +70,15 @@ import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfi
 import com.stripe.android.paymentelement.confirmation.intent.InvalidDeferredIntentUsageException
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
 import com.stripe.android.paymentelement.confirmation.linkinline.LinkInlineSignupConfirmationOption
+import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
+import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
+import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
+import com.stripe.android.paymentelement.embedded.flowControllerOptions
+import com.stripe.android.paymentelement.embedded.sheet.EmbeddedSheetContract
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.LinkHandler
-import com.stripe.android.paymentsheet.PaymentOptionContract
 import com.stripe.android.paymentsheet.PaymentOptionResultCallback
-import com.stripe.android.paymentsheet.PaymentOptionsActivityResult
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER
@@ -144,7 +150,7 @@ internal class DefaultFlowControllerTest {
     private val eventReporter = mock<EventReporter>()
 
     private val paymentOptionActivityLauncher =
-        mock<ActivityResultLauncher<PaymentOptionContract.Args>>()
+        mock<ActivityResultLauncher<EmbeddedActivityArgs>>()
 
     private val flowControllerLinkPaymentLauncher = mock<LinkPaymentLauncher>()
     private val walletsButtonLinkPaymentLauncher = mock<LinkPaymentLauncher>()
@@ -176,7 +182,7 @@ internal class DefaultFlowControllerTest {
 
         whenever(
             activityResultCaller.registerForActivityResult(
-                any<PaymentOptionContract>(),
+                any<EmbeddedSheetContract>(),
                 any()
             )
         ).thenReturn(paymentOptionActivityLauncher)
@@ -300,7 +306,7 @@ internal class DefaultFlowControllerTest {
             val selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION
 
             flowController.onPaymentOptionResult(
-                PaymentOptionsActivityResult.Succeeded(
+                paymentOptionSelectedResult(
                     paymentSelection = selection,
                     linkAccountInfo = LinkAccountUpdate.Value(null)
                 )
@@ -553,28 +559,37 @@ internal class DefaultFlowControllerTest {
 
         flowController.presentPaymentOptions()
 
-        val expectedArgs = PaymentOptionContract.Args(
-            state = PaymentSheetState.Full(
-                customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,
-                config = PaymentSheet.Configuration("com.stripe.android.paymentsheet.test").asCommonConfiguration(),
-                paymentSelection = null,
-                validationError = null,
-                paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-                    hasCustomerConfiguration = true,
-                    allowsDelayedPaymentMethods = false,
-                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Automatic,
-                ),
-            ),
-            configuration = PaymentSheet.Configuration("com.stripe.android.paymentsheet.test"),
-            enableLogging = ENABLE_LOGGING,
-            productUsage = PRODUCT_USAGE,
-            linkAccountInfo = LinkAccountUpdate.Value(null),
-            paymentElementCallbackIdentifier = FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER,
-            walletButtonsRendered = false,
-            promotions = listOf(KLARNA_PROMOTION)
-        )
+        val argsCaptor = argumentCaptor<EmbeddedActivityArgs>()
+        verify(paymentOptionActivityLauncher).launch(argsCaptor.capture(), anyOrNull())
+        val args = argsCaptor.firstValue
 
-        verify(paymentOptionActivityLauncher).launch(eq(expectedArgs), anyOrNull())
+        assertThat(args.paymentMethodMetadata).isEqualTo(
+            PaymentMethodMetadataFactory.create(
+                hasCustomerConfiguration = true,
+                allowsDelayedPaymentMethods = false,
+                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Automatic,
+            )
+        )
+        assertThat(args.configuration).isEqualTo(
+            PaymentSheet.Configuration("com.stripe.android.paymentsheet.test").asEmbeddedSheetConfiguration()
+        )
+        assertThat(args.productUsage).isEqualTo(PRODUCT_USAGE)
+        assertThat(args.paymentElementCallbackIdentifier).isEqualTo(FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER)
+        assertThat(args.statusBarColor).isNull()
+        assertThat(args.selection).isNull()
+        assertThat(args.previousNewSelections.isEmpty).isTrue()
+        assertThat(args.customerState).isEqualTo(PaymentSheetFixtures.EMPTY_CUSTOMER_STATE)
+        assertThat(args.linkAccountInfo).isEqualTo(LinkAccountUpdate.Value(null))
+        assertThat(args.promotions).containsExactly(KLARNA_PROMOTION)
+        assertThat(args.launchMode).isEqualTo(
+            EmbeddedLaunchMode.PaymentOptions(
+                flowController = EmbeddedLaunchMode.FlowControllerOptions(
+                    visibleWallets = WalletType.entries,
+                    googlePlacesApiKey = null,
+                ),
+            )
+        )
+        assertThat(args.presentationState).isEqualTo(EmbeddedActivityArgs.PresentationState.Ready)
     }
 
     @Test
@@ -834,7 +849,7 @@ internal class DefaultFlowControllerTest {
             )
 
             flowController.onPaymentOptionResult(
-                PaymentOptionsActivityResult.Succeeded(
+                paymentOptionSelectedResult(
                     paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
                     linkAccountInfo = LinkAccountUpdate.Value(null)
                 )
@@ -863,7 +878,7 @@ internal class DefaultFlowControllerTest {
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
         )
 
-        flowController.onPaymentOptionResult(null)
+        flowController.onPaymentOptionResult(EmbeddedActivityResult.Error(launchMode = FLOW_CONTROLLER_LAUNCH_MODE))
 
         verify(paymentOptionResultCallback).onPaymentOptionResult(
             argThat {
@@ -887,7 +902,7 @@ internal class DefaultFlowControllerTest {
         // Add a saved card payment method so that we can make sure it is added when we open
         // up the payment option launcher
         flowController.onPaymentOptionResult(
-            PaymentOptionsActivityResult.Succeeded(
+            paymentOptionSelectedResult(
                 SAVE_NEW_CARD_SELECTION,
                 linkAccountInfo = LinkAccountUpdate.Value(null)
             )
@@ -897,7 +912,7 @@ internal class DefaultFlowControllerTest {
         verify(paymentOptionActivityLauncher).launch(
             argWhere {
                 // Make sure that paymentMethods contains the new added payment methods and the initial payment methods.
-                it.state.customer?.paymentMethods == initialPaymentMethods
+                it.customerState?.paymentMethods == initialPaymentMethods
             },
             anyOrNull(),
         )
@@ -912,11 +927,7 @@ internal class DefaultFlowControllerTest {
         )
 
         flowController.onPaymentOptionResult(
-            PaymentOptionsActivityResult.Canceled(
-                mostRecentError = null,
-                paymentSelection = null,
-                linkAccountInfo = LinkAccountUpdate.Value(null)
-            )
+            paymentOptionCanceledResult(linkAccountInfo = LinkAccountUpdate.Value(null))
         )
 
         verify(paymentOptionResultCallback).onPaymentOptionResult(
@@ -937,11 +948,7 @@ internal class DefaultFlowControllerTest {
         )
 
         flowController.onPaymentOptionResult(
-            PaymentOptionsActivityResult.Canceled(
-                mostRecentError = null,
-                paymentSelection = PaymentSelection.GooglePay,
-                linkAccountInfo = LinkAccountUpdate.Value(null)
-            )
+            paymentOptionCanceledResult(linkAccountInfo = LinkAccountUpdate.Value(null))
         )
 
         verify(paymentOptionResultCallback).onPaymentOptionResult(
@@ -1169,7 +1176,7 @@ internal class DefaultFlowControllerTest {
             val paymentSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION_WITH_LINK
 
             flowController.onPaymentOptionResult(
-                PaymentOptionsActivityResult.Succeeded(
+                paymentOptionSelectedResult(
                     paymentSelection,
                     linkAccountInfo = LinkAccountUpdate.Value(null)
                 )
@@ -1227,7 +1234,7 @@ internal class DefaultFlowControllerTest {
             val paymentSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION_WITH_LINK
 
             flowController.onPaymentOptionResult(
-                PaymentOptionsActivityResult.Succeeded(
+                paymentOptionSelectedResult(
                     paymentSelection,
                     linkAccountInfo = LinkAccountUpdate.Value(null)
                 )
@@ -1281,7 +1288,7 @@ internal class DefaultFlowControllerTest {
             val paymentSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION_WITH_LINK
 
             flowController.onPaymentOptionResult(
-                PaymentOptionsActivityResult.Succeeded(
+                paymentOptionSelectedResult(
                     paymentSelection = paymentSelection,
                     linkAccountInfo = LinkAccountUpdate.Value(null)
                 )
@@ -1351,7 +1358,7 @@ internal class DefaultFlowControllerTest {
         )
 
         flowController.onPaymentOptionResult(
-            PaymentOptionsActivityResult.Succeeded(
+            paymentOptionSelectedResult(
                 paymentSelection,
                 linkAccountInfo = LinkAccountUpdate.Value(null)
             )
@@ -1402,7 +1409,7 @@ internal class DefaultFlowControllerTest {
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
         )
         flowController.onPaymentOptionResult(
-            PaymentOptionsActivityResult.Succeeded(
+            paymentOptionSelectedResult(
                 PaymentSelection.GooglePay,
                 linkAccountInfo = LinkAccountUpdate.Value(null)
             )
@@ -1466,7 +1473,7 @@ internal class DefaultFlowControllerTest {
         }
 
         flowController.onPaymentOptionResult(
-            PaymentOptionsActivityResult.Succeeded(
+            paymentOptionSelectedResult(
                 paymentSelection = GENERIC_PAYMENT_SELECTION,
                 linkAccountInfo = LinkAccountUpdate.Value(null)
             )
@@ -1513,8 +1520,7 @@ internal class DefaultFlowControllerTest {
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
         )
         flowController.onPaymentOptionResult(
-            PaymentOptionsActivityResult
-                .Succeeded(
+            paymentOptionSelectedResult(
                     PaymentSelection.Link(brand = LinkBrand.Link),
                     linkAccountInfo = LinkAccountUpdate.Value(null),
                 )
@@ -1648,7 +1654,7 @@ internal class DefaultFlowControllerTest {
         val previousPaymentSelection = NEW_CARD_PAYMENT_SELECTION
 
         flowController.onPaymentOptionResult(
-            result = PaymentOptionsActivityResult.Succeeded(
+            activityResult = paymentOptionSelectedResult(
                 previousPaymentSelection,
                 linkAccountInfo = LinkAccountUpdate.Value(null)
             ),
@@ -1657,7 +1663,7 @@ internal class DefaultFlowControllerTest {
         flowController.presentPaymentOptions()
 
         verify(paymentOptionActivityLauncher).launch(
-            argWhere { it.state.paymentSelection == previousPaymentSelection },
+            argWhere { it.selection == previousPaymentSelection },
             anyOrNull(),
         )
     }
@@ -1675,7 +1681,7 @@ internal class DefaultFlowControllerTest {
         flowController.presentPaymentOptions()
 
         verify(paymentOptionActivityLauncher).launch(
-            argWhere { !it.walletButtonsRendered },
+            argWhere { it.launchMode.flowControllerOptions?.visibleWallets == WalletType.entries },
             anyOrNull(),
         )
     }
@@ -1693,7 +1699,7 @@ internal class DefaultFlowControllerTest {
         flowController.presentPaymentOptions()
 
         verify(paymentOptionActivityLauncher).launch(
-            argWhere { it.walletButtonsRendered },
+            argWhere { it.launchMode.flowControllerOptions?.visibleWallets?.isEmpty() == true },
             anyOrNull(),
         )
     }
@@ -1717,7 +1723,7 @@ internal class DefaultFlowControllerTest {
         val paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
 
         flowController.onPaymentOptionResult(
-            PaymentOptionsActivityResult.Succeeded(
+            paymentOptionSelectedResult(
                 paymentSelection,
                 linkAccountInfo = LinkAccountUpdate.Value(null)
             )
@@ -1748,7 +1754,7 @@ internal class DefaultFlowControllerTest {
         val paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
 
         flowController.onPaymentOptionResult(
-            PaymentOptionsActivityResult.Succeeded(
+            paymentOptionSelectedResult(
                 paymentSelection,
                 linkAccountInfo = LinkAccountUpdate.Value(null)
             )
@@ -1776,7 +1782,7 @@ internal class DefaultFlowControllerTest {
         val paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
 
         flowController.onPaymentOptionResult(
-            PaymentOptionsActivityResult.Succeeded(
+            paymentOptionSelectedResult(
                 paymentSelection,
                 linkAccountInfo = LinkAccountUpdate.Value(null)
             )
@@ -1814,8 +1820,7 @@ internal class DefaultFlowControllerTest {
 
         // Simulate that the user has selected a payment method
         flowController.onPaymentOptionResult(
-            PaymentOptionsActivityResult
-                .Succeeded(PaymentSelection.GooglePay, linkAccountInfo = LinkAccountUpdate.Value(null))
+            paymentOptionSelectedResult(PaymentSelection.GooglePay, linkAccountInfo = LinkAccountUpdate.Value(null))
         )
 
         // Not enqueueing any loader response, so that the call is considered in-flight
@@ -1871,8 +1876,7 @@ internal class DefaultFlowControllerTest {
 
         // Simulate that the user has selected a payment method
         flowController.onPaymentOptionResult(
-            PaymentOptionsActivityResult
-                .Succeeded(PaymentSelection.GooglePay, linkAccountInfo = LinkAccountUpdate.Value(null))
+            paymentOptionSelectedResult(PaymentSelection.GooglePay, linkAccountInfo = LinkAccountUpdate.Value(null))
         )
 
         mockLoader.enqueueFailure()
@@ -1955,7 +1959,7 @@ internal class DefaultFlowControllerTest {
         val savedSelection = PaymentSelection.Saved(paymentMethod)
 
         flowController.onPaymentOptionResult(
-            PaymentOptionsActivityResult.Succeeded(savedSelection, linkAccountInfo = LinkAccountUpdate.Value(null))
+            paymentOptionSelectedResult(savedSelection, linkAccountInfo = LinkAccountUpdate.Value(null))
         )
         flowController.confirm()
 
@@ -1985,7 +1989,7 @@ internal class DefaultFlowControllerTest {
             val savedSelection = PaymentSelection.Saved(paymentMethod)
 
             flowController.onPaymentOptionResult(
-                PaymentOptionsActivityResult.Succeeded(savedSelection, linkAccountInfo = LinkAccountUpdate.Value(null))
+                paymentOptionSelectedResult(savedSelection, linkAccountInfo = LinkAccountUpdate.Value(null))
             )
             flowController.confirm()
 
@@ -2018,7 +2022,7 @@ internal class DefaultFlowControllerTest {
             val savedSelection = PaymentSelection.Saved(paymentMethod)
 
             flowController.onPaymentOptionResult(
-                PaymentOptionsActivityResult.Succeeded(savedSelection, linkAccountInfo = LinkAccountUpdate.Value(null))
+                paymentOptionSelectedResult(savedSelection, linkAccountInfo = LinkAccountUpdate.Value(null))
             )
             flowController.confirm()
 
@@ -2066,8 +2070,7 @@ internal class DefaultFlowControllerTest {
         )
 
         flowController.onPaymentOptionResult(
-            PaymentOptionsActivityResult
-                .Succeeded(
+            paymentOptionSelectedResult(
                     paymentSelection = PaymentSelection.GooglePay,
                     linkAccountInfo = LinkAccountUpdate.Value(null)
                 )
@@ -2114,7 +2117,7 @@ internal class DefaultFlowControllerTest {
         val selection = createBacsPaymentSelection()
 
         flowController.onPaymentOptionResult(
-            PaymentOptionsActivityResult.Succeeded(
+            paymentOptionSelectedResult(
                 paymentSelection = selection,
                 linkAccountInfo = LinkAccountUpdate.Value(null)
             )
@@ -2247,7 +2250,7 @@ internal class DefaultFlowControllerTest {
         }
 
         flowController.onPaymentOptionResult(
-            PaymentOptionsActivityResult.Succeeded(
+            paymentOptionSelectedResult(
                 paymentSelection = PaymentSelection.Saved(
                     paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                     paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(
@@ -2299,7 +2302,7 @@ internal class DefaultFlowControllerTest {
         )
 
         flowController.onPaymentOptionResult(
-            PaymentOptionsActivityResult.Succeeded(
+            paymentOptionSelectedResult(
                 paymentSelection = PaymentSelection.New.Card(
                     paymentMethodCreateParams = card,
                     brand = CardBrand.Visa,
@@ -2506,7 +2509,6 @@ internal class DefaultFlowControllerTest {
             context = context,
             eventReporter = eventReporter,
             viewModel = viewModel,
-            enableLogging = ENABLE_LOGGING,
             productUsage = PRODUCT_USAGE,
             configurationHandler = FlowControllerConfigurationHandler(
                 paymentElementLoader = paymentElementLoader,
@@ -2568,6 +2570,35 @@ internal class DefaultFlowControllerTest {
         )
     }
 
+    private fun paymentOptionSelectedResult(
+        paymentSelection: PaymentSelection,
+        linkAccountInfo: LinkAccountUpdate.Value,
+        customerState: CustomerState? = null,
+        autocompleteFilledAddress: Address? = null,
+    ): EmbeddedActivityResult {
+        return EmbeddedActivityResult.Complete(
+            selection = paymentSelection,
+            previousNewSelections = Bundle(),
+            hasBeenConfirmed = false,
+            customerState = customerState,
+            linkAccountInfo = linkAccountInfo,
+            checkoutSessionResponse = null,
+            autocompleteFilledAddress = autocompleteFilledAddress,
+            shouldInvokeSelectionCallback = false,
+            launchMode = FLOW_CONTROLLER_LAUNCH_MODE,
+        )
+    }
+
+    private fun paymentOptionCanceledResult(
+        linkAccountInfo: LinkAccountUpdate.Value,
+        customerState: CustomerState? = null,
+    ): EmbeddedActivityResult {
+        return EmbeddedActivityResult.Cancelled(
+            customerState = customerState,
+            linkAccountInfo = linkAccountInfo,
+            launchMode = FLOW_CONTROLLER_LAUNCH_MODE,
+        )
+    }
     private companion object {
         private val NEW_CARD_PAYMENT_SELECTION = PaymentSelection.New.Card(
             PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
@@ -2619,7 +2650,12 @@ internal class DefaultFlowControllerTest {
             )
         )
 
-        private const val ENABLE_LOGGING = false
+        private val FLOW_CONTROLLER_LAUNCH_MODE = EmbeddedLaunchMode.PaymentOptions(
+            flowController = EmbeddedLaunchMode.FlowControllerOptions(
+                visibleWallets = WalletType.entries,
+                googlePlacesApiKey = null,
+            ),
+        )
         private val PRODUCT_USAGE = setOf("TestProductUsage")
 
         private val STATUS_BAR_COLOR = Color.GREEN

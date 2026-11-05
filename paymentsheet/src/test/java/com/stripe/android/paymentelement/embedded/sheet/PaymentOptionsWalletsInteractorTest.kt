@@ -17,6 +17,7 @@ import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
+import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
@@ -235,10 +236,109 @@ internal class PaymentOptionsWalletsInteractorTest {
         assertThat(continueCoordinator.onContinueCalls.awaitItem()).isEqualTo(Unit)
     }
 
+    @Test
+    fun `FlowController hides Link when only Google Pay is visible`() = runScenario(
+        launchMode = flowControllerLaunchMode(visibleWallets = listOf(WalletType.GooglePay)),
+    ) {
+        interactor.walletsState.test {
+            val state = awaitItem()!!
+            assertThat(state.googlePay(WalletLocation.HEADER)).isNotNull()
+            assertThat(state.link(WalletLocation.HEADER)).isNull()
+        }
+    }
+
+    @Test
+    fun `FlowController hides Google Pay when only Link is visible`() = runScenario(
+        launchMode = flowControllerLaunchMode(visibleWallets = listOf(WalletType.Link)),
+    ) {
+        interactor.walletsState.test {
+            val state = awaitItem()!!
+            assertThat(state.googlePay(WalletLocation.HEADER)).isNull()
+            assertThat(state.link(WalletLocation.HEADER)).isNotNull()
+        }
+    }
+
+    @Test
+    fun `FlowController shows no wallets when no wallets are visible`() = runScenario(
+        launchMode = flowControllerLaunchMode(visibleWallets = emptyList()),
+    ) {
+        interactor.walletsState.test {
+            assertThat(awaitItem()).isNull()
+        }
+    }
+
+    @Test
+    fun `FlowController wallets should not be available if visible but not available`() = runScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            isGooglePayReady = false,
+            linkState = null,
+        ),
+        launchMode = flowControllerLaunchMode(visibleWallets = WalletType.entries),
+    ) {
+        interactor.walletsState.test {
+            assertThat(awaitItem()).isNull()
+        }
+    }
+
+    @Test
+    fun `FlowController displays Link wallet button if customer has not saved PMs and Google Pay is not available`() =
+        runScenario(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    paymentMethodTypes = listOf("card", "cashapp"),
+                ),
+                isGooglePayReady = false,
+                linkState = LinkState(
+                    configuration = TestFactory.LINK_CONFIGURATION,
+                    loginState = LinkState.LoginState.LoggedOut,
+                    signupMode = null,
+                ),
+            ),
+            launchMode = flowControllerLaunchMode(visibleWallets = WalletType.entries),
+        ) {
+            interactor.walletsState.test {
+                val state = awaitItem()!!
+                assertThat(state.link(WalletLocation.HEADER)).isNotNull()
+                assertThat(state.googlePay(WalletLocation.HEADER)).isNull()
+            }
+        }
+
+    @Test
+    fun `FlowController does not select Link when user is logged out of their Link account`() = runScenario(
+        launchMode = flowControllerLaunchMode(visibleWallets = WalletType.entries),
+    ) {
+        interactor.walletsState.test {
+            assertThat(awaitItem()!!.link(WalletLocation.HEADER)).isNotNull()
+        }
+        assertThat(selectionHolder.selection.value).isNull()
+    }
+
+    @Test
+    fun `FlowController does not offer or select Link when the Link state can't be determined`() = runScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            isGooglePayReady = true,
+            linkState = null,
+        ),
+        launchMode = flowControllerLaunchMode(visibleWallets = WalletType.entries),
+    ) {
+        interactor.walletsState.test {
+            assertThat(awaitItem()!!.link(WalletLocation.HEADER)).isNull()
+        }
+        assertThat(selectionHolder.selection.value).isNull()
+    }
+
+    private fun flowControllerLaunchMode(visibleWallets: List<WalletType>) = EmbeddedLaunchMode.PaymentOptions(
+        flowController = EmbeddedLaunchMode.FlowControllerOptions(
+            visibleWallets = visibleWallets,
+            googlePlacesApiKey = null,
+        ),
+    )
+
     private fun runScenario(
         paymentMethodMetadata: PaymentMethodMetadata = createMetadata(paymentMethodTypes = listOf("card")),
         initialCustomerState: CustomerState? = null,
         initialSelection: PaymentSelection? = null,
+        launchMode: EmbeddedLaunchMode = EmbeddedLaunchMode.PaymentOptions(flowController = null),
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val savedStateHandle = SavedStateHandle()
@@ -261,6 +361,7 @@ internal class PaymentOptionsWalletsInteractorTest {
             linkAccountHolder = linkAccountHolder,
             continueCoordinator = continueCoordinator,
             sheetActivityStateHolder = sheetActivityStateHolder,
+            launchMode = launchMode,
         )
 
         Scenario(

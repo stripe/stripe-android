@@ -24,9 +24,11 @@ import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationStateFixtures
+import com.stripe.android.paymentelement.embedded.sheet.DefaultEmbeddedSheetAnalytics
 import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetActivityStateHolder
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedNavigator
 import com.stripe.android.paymentelement.embedded.sheet.FakeSheetActivityConfirmationHelper
+import com.stripe.android.paymentelement.embedded.sheet.InitialPaymentOptionsScreensProvider
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityStateHolder
 import com.stripe.android.paymentsheet.FakeCustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -40,6 +42,7 @@ import com.stripe.android.paymentsheet.verticalmode.FakeSavedPaymentMethodConfir
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormInteractor
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
+import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.LocaleTestRule
 import com.stripe.android.utils.FakeIsNfcScanningAvailable
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
@@ -156,6 +159,9 @@ internal class FormActivityScreenShotTest {
             launchMode = launchMode,
             embeddedNavigatorProvider = Provider { error("Not expected") },
             savedPaymentMethodConfirmScreenFactoryProvider = Provider { error("Not expected") },
+            initialPaymentOptionsScreensProvider = { InitialPaymentOptionsScreensProvider { emptyList() } },
+            sheetAnalytics = DefaultEmbeddedSheetAnalytics(FakeEventReporter()),
+            errorReporter = FakeErrorReporter(),
         )
         val screen = EmbeddedNavigator.Screen.SavedPaymentMethodConfirm(
             interactor = FakeSavedPaymentMethodConfirmInteractor(formEnabled = false),
@@ -240,6 +246,9 @@ internal class FormActivityScreenShotTest {
             ),
             embeddedNavigatorProvider = Provider { error("Not expected") },
             savedPaymentMethodConfirmScreenFactoryProvider = Provider { error("Not expected") },
+            initialPaymentOptionsScreensProvider = { InitialPaymentOptionsScreensProvider { emptyList() } },
+            sheetAnalytics = DefaultEmbeddedSheetAnalytics(FakeEventReporter()),
+            errorReporter = FakeErrorReporter(),
         )
         val formHelperFactory = EmbeddedFormHelperFactory(
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
@@ -259,6 +268,7 @@ internal class FormActivityScreenShotTest {
             eventReporter = eventReporter,
             paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
             autocompleteAddressInteractorFactory = TestAutocompleteAddressInteractor.noOpFactory(),
+            sheetAnalytics = DefaultEmbeddedSheetAnalytics(FakeEventReporter()),
         ).create(
             paymentMethodCode = "card",
             hasSavedPaymentMethods = false,

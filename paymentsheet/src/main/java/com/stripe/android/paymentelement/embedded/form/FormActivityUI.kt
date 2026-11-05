@@ -98,7 +98,7 @@ internal fun FormActivityError(
 @Composable
 internal fun FormActivityPrimaryButton(
     state: SheetActivityStateHolder.State,
-    onDisabledClick: () -> Unit,
+    onDisabledClick: (() -> Unit)?,
     onClick: () -> Unit,
     onProcessingCompleted: () -> Unit = {},
 ) {
@@ -120,7 +120,7 @@ internal fun FormActivityPrimaryButton(
             onProcessingCompleted = onProcessingCompleted,
             processingState = state.processingState
         )
-        if (!state.isEnabled && !state.isProcessing) {
+        if (onDisabledClick != null && !state.isEnabled && !state.isProcessing) {
             Box(
                 modifier = Modifier
                     .testTag(SHEET_PRIMARY_BUTTON_DISABLED_OVERLAY_TEST_TAG)

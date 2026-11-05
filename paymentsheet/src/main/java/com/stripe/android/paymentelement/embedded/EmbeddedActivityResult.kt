@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.os.Parcelable
 import androidx.core.os.BundleCompat
 import com.stripe.android.link.LinkAccountUpdate
+import com.stripe.android.model.Address
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.state.CustomerState
@@ -23,6 +24,7 @@ internal sealed interface EmbeddedActivityResult : Parcelable {
         val customerState: CustomerState?,
         val linkAccountInfo: LinkAccountUpdate.Value,
         val checkoutSessionResponse: CheckoutSessionResponse?,
+        val autocompleteFilledAddress: Address?,
         val shouldInvokeSelectionCallback: Boolean,
         override val launchMode: EmbeddedLaunchMode,
     ) : EmbeddedActivityResult

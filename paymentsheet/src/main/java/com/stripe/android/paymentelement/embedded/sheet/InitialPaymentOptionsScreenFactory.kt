@@ -11,6 +11,7 @@ import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.form.OnClickOverrideDelegate
+import com.stripe.android.paymentelement.embedded.isFlowController
 import com.stripe.android.paymentelement.embedded.manage.EmbeddedManageScreenInteractorFactory
 import com.stripe.android.paymentelement.embedded.manage.EmbeddedUpdateScreenInteractorFactory
 import com.stripe.android.paymentsheet.CustomerStateHolder
@@ -48,6 +49,10 @@ import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 import javax.inject.Provider
 
+internal fun interface InitialPaymentOptionsScreensProvider {
+    fun createInitialScreen(): List<EmbeddedNavigator.Screen>
+}
+
 internal class InitialPaymentOptionsScreenFactory @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val launchMode: EmbeddedLaunchMode,
@@ -69,8 +74,9 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
     private val savedPaymentMethodMutator: SavedPaymentMethodMutator,
     private val walletsInteractor: PaymentOptionsWalletsInteractor,
     private val linkAccountHolder: LinkAccountHolder,
-) {
-    fun createInitialScreen(): List<EmbeddedNavigator.Screen> {
+    private val sheetAnalytics: EmbeddedSheetAnalytics,
+) : InitialPaymentOptionsScreensProvider {
+    override fun createInitialScreen(): List<EmbeddedNavigator.Screen> {
         return when (paymentMethodMetadata.paymentMethodOrientation()) {
             PaymentMethodOrientation.Vertical -> createVerticalInitialScreens()
             PaymentMethodOrientation.Horizontal -> createHorizontalInitialScreens()
@@ -91,8 +97,8 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
         val paymentOptionsScreen = EmbeddedNavigator.Screen.VerticalPaymentOptions(
             interactor = createInteractor(formHelper, coroutineScope),
             sheetActivityState = sheetActivityStateHolder.state,
-            onContinueClick = ::onContinueClick,
-            onPrimaryButtonDisabledClick = sheetActivityStateHolder::onPrimaryButtonDisabledClick,
+            onContinueClick = ::onPrimaryButtonClick,
+            onPrimaryButtonDisabledClick = listPrimaryButtonDisabledClick(),
         )
         return buildList {
             add(paymentOptionsScreen)
@@ -109,6 +115,9 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
 
     private fun createHorizontalInitialScreens(): List<EmbeddedNavigator.Screen> {
         val hasSavedPaymentMethods = customerStateHolder.paymentMethods.value.isNotEmpty()
+        if (launchMode.isFlowController) {
+            return createFlowControllerHorizontalInitialScreens(hasSavedPaymentMethods)
+        }
         if (!hasSavedPaymentMethods &&
             (!paymentMethodMetadata.isGooglePayReady || walletsInteractor.canShowDirectForm)
         ) {
@@ -126,11 +135,35 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
         }
     }
 
+    // FlowController shows Google Pay as a saved payment option, so the saved screen opens whenever Google Pay is
+    // ready, and a single payment method without saved payment methods opens its form directly.
+    private fun createFlowControllerHorizontalInitialScreens(
+        hasSavedPaymentMethods: Boolean,
+    ): List<EmbeddedNavigator.Screen> {
+        val showSavedPaymentMethods = hasSavedPaymentMethods || paymentMethodMetadata.isGooglePayReady
+        val supportedPaymentMethodTypes = paymentMethodMetadata.supportedPaymentMethodTypes()
+        if (supportedPaymentMethodTypes.size == 1 && !hasSavedPaymentMethods && !showSavedPaymentMethods) {
+            return listOf(formScreenFactory.createFormScreen(supportedPaymentMethodTypes.single()))
+        }
+        if (!showSavedPaymentMethods) {
+            return listOf(createHorizontalScreen())
+        }
+        return buildList {
+            add(createHorizontalSavedPaymentMethodsScreen())
+            when (selectionHolder.selection.value) {
+                is PaymentSelection.New,
+                is PaymentSelection.CustomPaymentMethod,
+                is PaymentSelection.ExternalPaymentMethod -> add(createHorizontalScreen())
+                else -> Unit
+            }
+        }
+    }
+
     private fun createHorizontalScreen(): EmbeddedNavigator.Screen {
         return EmbeddedNavigator.Screen.HorizontalPaymentOptions(
             interactor = addPaymentMethodInteractorFactory.create(),
             sheetActivityState = sheetActivityStateHolder.state,
-            onContinueClick = ::onContinueClick,
+            onContinueClick = ::onPrimaryButtonClick,
             onPrimaryButtonDisabledClick = sheetActivityStateHolder::onPrimaryButtonDisabledClick,
         )
     }
@@ -143,9 +176,14 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
             isContinueButtonVisible = selectionHolder.selection.mapAsStateFlow { selection ->
                 selection?.requiresConfirmation == true
             },
-            onContinueClick = ::onContinueClick,
-            onPrimaryButtonDisabledClick = sheetActivityStateHolder::onPrimaryButtonDisabledClick,
+            onContinueClick = ::onPrimaryButtonClick,
+            onPrimaryButtonDisabledClick = listPrimaryButtonDisabledClick(),
         )
+    }
+
+    // FlowController only validates from the primary button on form screens.
+    private fun listPrimaryButtonDisabledClick(): (() -> Unit)? {
+        return sheetActivityStateHolder::onPrimaryButtonDisabledClick.takeUnless { launchMode.isFlowController }
     }
 
     private fun savedPaymentMethodsMandateText(selection: PaymentSelection?): MandateText? {
@@ -160,15 +198,20 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
     private fun createSavedPaymentMethodsInteractor(): SelectSavedPaymentMethodsInteractor {
         val linkAccount = linkAccountHolder.linkAccountInfo.value.account
         return DefaultSelectSavedPaymentMethodsInteractor(
-            paymentOptionsItems = combineAsStateFlow(
-                savedPaymentMethodMutator.paymentOptionsItems,
-                walletsInteractor.walletsState,
-            ) { items, walletsState ->
-                items.filter { item ->
-                    when (item) {
-                        is PaymentOptionsItem.GooglePay -> walletsState?.googlePay(WalletLocation.INLINE) != null
-                        is PaymentOptionsItem.Link -> walletsState?.link(WalletLocation.INLINE) != null
-                        else -> true
+            paymentOptionsItems = if (launchMode.isFlowController) {
+                // FlowController shows wallets as saved payment options rather than in a header.
+                savedPaymentMethodMutator.paymentOptionsItems
+            } else {
+                combineAsStateFlow(
+                    savedPaymentMethodMutator.paymentOptionsItems,
+                    walletsInteractor.walletsState,
+                ) { items, walletsState ->
+                    items.filter { item ->
+                        when (item) {
+                            is PaymentOptionsItem.GooglePay -> walletsState?.googlePay(WalletLocation.INLINE) != null
+                            is PaymentOptionsItem.Link -> walletsState?.link(WalletLocation.INLINE) != null
+                            else -> true
+                        }
                     }
                 }
             },
@@ -197,12 +240,27 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
         selectionHolder.setSelection(selection)
         // Continue is hidden unless the selection requires confirmation, so other selections return immediately.
         if (isUserInput && selection?.requiresConfirmation != true) {
-            onContinueClick()
+            continueSelection()
+        }
+    }
+
+    private fun onVerticalPaymentSelectionUpdated(selection: PaymentSelection?, isUserInput: Boolean) {
+        selectionHolder.setSelection(selection)
+        // FlowController returns a tapped row that doesn't need confirmation without waiting for Continue.
+        if (launchMode.isFlowController && isUserInput && selection?.requiresConfirmation != true) {
+            continueSelection()
         }
     }
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-    internal fun onContinueClick() {
+    internal fun onPrimaryButtonClick() {
+        if (onClickOverrideDelegate.onClickOverride == null) {
+            sheetAnalytics.onListPrimaryButtonPressed(selectionHolder.selection.value)
+        }
+        continueSelection()
+    }
+
+    private fun continueSelection() {
         val onClickOverride = onClickOverrideDelegate.onClickOverride
         if (onClickOverride != null) {
             onClickOverride()
@@ -253,7 +311,7 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
                 selectionHolder.setSelection(updatedSelection)
             },
             verticalPaymentSelectionHandler = ImmediateVerticalPaymentSelectionHandler(
-                updateSelection = { selection, _ -> selectionHolder.setSelection(selection) },
+                updateSelection = ::onVerticalPaymentSelectionUpdated,
                 completionAction = null,
             ),
             isCurrentScreen = isCurrentScreen<EmbeddedNavigator.Screen.VerticalPaymentOptions>(),
@@ -270,7 +328,7 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
                 eventReporter.onInitiallyDisplayedPaymentMethodVisibilitySnapshot(
                     visiblePaymentMethods = visiblePaymentMethods,
                     hiddenPaymentMethods = hiddenPaymentMethods,
-                    walletsState = null,
+                    walletsState = walletsInteractor.walletsState.value.takeIf { launchMode.isFlowController },
                     isVerticalLayout = true,
                 )
             },

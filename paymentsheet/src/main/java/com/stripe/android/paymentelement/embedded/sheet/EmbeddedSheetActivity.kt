@@ -8,6 +8,8 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.core.os.BundleCompat
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
+import com.stripe.android.paymentelement.embedded.isFlowController
+import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.paymentsheet.ui.PaymentElementTheme
 import com.stripe.android.paymentsheet.utils.renderEdgeToEdge
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
@@ -27,6 +29,9 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
             return
         }
 
+        if (activityArgs.launchMode.isFlowController) {
+            activityArgs.configuration.appearance.parseAppearance()
+        }
         renderEdgeToEdge()
         val coordinator = EmbeddedSheetActivityCoordinator(
             activity = this,

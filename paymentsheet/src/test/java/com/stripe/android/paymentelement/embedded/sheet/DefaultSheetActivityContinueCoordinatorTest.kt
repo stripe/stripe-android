@@ -221,7 +221,7 @@ internal class DefaultSheetActivityContinueCoordinatorTest {
                 onContinueClick = {},
                 onPrimaryButtonDisabledClick = {},
             ),
-            eventReporter = eventReporter,
+            analytics = DefaultEmbeddedSheetAnalytics(eventReporter),
         )
         assertThat(eventReporter.showNewPaymentOptionsCalls.awaitItem()).isEqualTo(Unit)
         val continueCoordinator = DefaultSheetActivityContinueCoordinator(
@@ -296,6 +296,7 @@ internal class DefaultSheetActivityContinueCoordinatorTest {
                 customerState = customerStateHolder.customer.value,
                 linkAccountInfo = LinkAccountUpdate.Value(null),
                 checkoutSessionResponse = checkoutSessionResponse,
+                autocompleteFilledAddress = null,
                 shouldInvokeSelectionCallback = false,
                 launchMode = LAUNCH_MODE,
             )
@@ -304,7 +305,7 @@ internal class DefaultSheetActivityContinueCoordinatorTest {
 
     private companion object {
         const val ERROR_MESSAGE = "Tax region update failed"
-        val LAUNCH_MODE = EmbeddedLaunchMode.PaymentOptions
+        val LAUNCH_MODE = EmbeddedLaunchMode.PaymentOptions(flowController = null)
         val CHECKOUT_SESSION_METADATA = PaymentMethodMetadataFactory.create(
             integrationMetadata = IntegrationMetadata.CheckoutSession(
                 collectedEmail = null,
