@@ -24,6 +24,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.common.analytics.experiment.FakePrimaryButtonExperiment
 import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkAccountUpdate
@@ -521,6 +522,7 @@ internal class PaymentOptionsActivityTest {
                 tapToAddHelperFactory = FakeTapToAddHelper.Factory.noOp(),
                 isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = false),
                 mode = EventReporter.Mode.Complete,
+                primaryButtonExperiment = FakePrimaryButtonExperiment(),
                 errorReporter = FakeErrorReporter(),
                 customerStateHolderFactory = DefaultCustomerStateHolder.Factory,
                 customViewModelScope = coroutineScopeCleanupRule.track(CoroutineScope(Dispatchers.Unconfined)),

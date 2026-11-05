@@ -60,7 +60,7 @@ internal data class CheckoutSessionClientSecret(
     }
 
     override fun validate() {
-        require(sessionId.isNotEmpty()) {
+        require(sessionId.startsWith("cs_")) {
             "Invalid Checkout Session client secret. " +
                 "Pass the client_secret from the Checkout Session created by your server."
         }

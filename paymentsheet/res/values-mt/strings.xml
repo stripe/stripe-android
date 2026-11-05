@@ -26,6 +26,10 @@
   <string name="stripe_confirm_close_form_body">L-informazzjoni tal-pagament tiegħek mhux se tiġi merfugħa.</string>
   <!-- Used as the title for prompting the user if they want to close the sheet -->
   <string name="stripe_confirm_close_form_title">Trid tagħlaq din il-formola?</string>
+  <!-- Fallback disclosure when paying in the merchant's currency instead of using Adaptive Pricing. -->
+  <string name="stripe_currency_selector_bank_fees_disclaimer">Ir-rata tal-kambju u l-miżati tal-bank tiegħek jistgħu japplikaw.</string>
+  <string name="stripe_currency_selector_hide_details">Aħbi d-dettalji tar-rata tal-kambju</string>
+  <string name="stripe_currency_selector_show_details">Uri d-dettalji tar-rata tal-kambju</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header">Erfa\' l-informazzjoni tiegħek biex tkun tista\' tħallas f\'pass wieħed grazzi għal Link</string>
   <!-- Label for a checkbox that when checked allows the payment information

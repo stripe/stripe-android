@@ -1736,6 +1736,61 @@ internal class CheckoutElementsControllerTest {
         }
 
     @Test
+    fun `queued mutation uses the preceding mutation's updated response`() =
+        runMutationScenario(
+            initModifier = { it.remove("customer_email") },
+        ) {
+            assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isNotEqualTo(4099L)
+            val firstRequest = Turbine<Unit>()
+            val releaseFirstResponse = CountDownLatch(1)
+            networkRule.checkoutUpdate(
+                bodyPart("promotion_code", "10OFF"),
+            ) { response ->
+                firstRequest.add(Unit)
+                check(releaseFirstResponse.await(10, TimeUnit.SECONDS)) {
+                    "Timed out waiting to release the first mutation response"
+                }
+                successResponseFactory(
+                    combine(
+                        withTotal(4099),
+                        { json ->
+                            json.remove("customer_email")
+                            json.getJSONObject("total_summary").put("due", 4099)
+                        },
+                    ),
+                ).invoke(response)
+            }
+
+            fromBackgroundThread {
+                coroutineScope {
+                    val first = async { controller.applyPromotionCode("10OFF") }
+                    try {
+                        firstRequest.awaitItem()
+                        val second = async(start = CoroutineStart.UNDISPATCHED) {
+                            controller.updateEmail("local@example.com")
+                        }
+                        withContext(Dispatchers.Main) { }
+                        assertThat(second.isCompleted).isFalse()
+
+                        releaseFirstResponse.countDown()
+
+                        assertThat(first.await())
+                            .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
+                        assertThat(second.await())
+                            .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
+                    } finally {
+                        releaseFirstResponse.countDown()
+                    }
+                }
+            }
+
+            assertThat(controller.session.value?.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
+            assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isEqualTo(4099L)
+            assertThat(controller.session.value?.email).isEqualTo("local@example.com")
+            firstRequest.ensureAllEventsConsumed()
+        }
+
+    @Test
     fun `configure is serialized behind an in-flight mutation and shares its loading window`() =
         runMutationScenario(assertLoadingConsumed = true) {
             val holdMutation = CountDownLatch(1)

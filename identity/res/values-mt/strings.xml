@@ -40,7 +40,7 @@
   <!-- Text for choosing a photo from gallery -->
   <string name="stripe_choose_file">Agħżel Ritratt</string>
   <!-- Close button text -->
-  <string name="stripe_close_button_text">agħlaq</string>
+  <string name="stripe_close_button_text">Agħlaq</string>
   <!-- Button to complete with test data -->
   <string name="stripe_complete_with_test_data">Imla b\'dejta ta\' prova</string>
   <!-- Description for complete button on test mode -->
@@ -169,7 +169,7 @@
   <!-- Instructional text when user needs remove anything blocking the document -->
   <string name="stripe_keep_fully_visible">Id-dettalji ma jidhrux</string>
   <!-- Continue button text -->
-  <string name="stripe_kontinue">kompli</string>
+  <string name="stripe_kontinue">Kompli</string>
   <!-- Label for the ID field to collect last 4 of social security number for US ID -->
   <string name="stripe_last_4_of_ssn">L-aħħar 4 ċifri tan-numru tas-Sigurtà Soċjali</string>
   <!-- Label for last (family) name field -->

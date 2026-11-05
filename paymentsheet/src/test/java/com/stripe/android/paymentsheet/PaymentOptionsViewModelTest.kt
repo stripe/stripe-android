@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.common.analytics.experiment.FakePrimaryButtonExperiment
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddHelper
@@ -1515,6 +1516,7 @@ internal class PaymentOptionsViewModelTest {
             tapToAddHelperFactory = tapToAddHelperFactory,
             isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = false),
             mode = EventReporter.Mode.Complete,
+            primaryButtonExperiment = FakePrimaryButtonExperiment(),
             errorReporter = errorReporter,
             customerStateHolderFactory = object : CustomerStateHolder.Factory {
                 override fun create(viewModel: BaseSheetViewModel): CustomerStateHolder {

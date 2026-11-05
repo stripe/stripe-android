@@ -26,6 +26,10 @@
   <string name="stripe_confirm_close_form_body">Vos informations de paiement ne seront pas enregistrées.</string>
   <!-- Used as the title for prompting the user if they want to close the sheet -->
   <string name="stripe_confirm_close_form_title">Voulez-vous vraiment fermer ce formulaire?</string>
+  <!-- Fallback disclosure when paying in the merchant's currency instead of using Adaptive Pricing. -->
+  <string name="stripe_currency_selector_bank_fees_disclaimer">Votre institution financière peut appliquer des taux de change et d’autres frais.</string>
+  <string name="stripe_currency_selector_hide_details">Masquer les détails du taux de change</string>
+  <string name="stripe_currency_selector_show_details">Afficher les détails du taux de change</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header">Enregistrer mes informations pour payer en un clic de façon sécurisée avec Link</string>
   <!-- Label for a checkbox that when checked allows the payment information

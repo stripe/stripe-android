@@ -26,6 +26,10 @@
   <string name="stripe_confirm_close_form_body">Thông tin thanh toán của bạn sẽ không lưu lại.</string>
   <!-- Used as the title for prompting the user if they want to close the sheet -->
   <string name="stripe_confirm_close_form_title">Bạn có muốn đóng biểu mẫu này không?</string>
+  <!-- Fallback disclosure when paying in the merchant's currency instead of using Adaptive Pricing. -->
+  <string name="stripe_currency_selector_bank_fees_disclaimer">Tỷ giá hối đoái và phí ngân hàng của bạn có thể áp dụng.</string>
+  <string name="stripe_currency_selector_hide_details">Ẩn chi tiết tỷ giá hối đoái</string>
+  <string name="stripe_currency_selector_show_details">Hiển thị chi tiết tỷ giá hối đoái</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header">Lưu thông tin của bạn để thanh toán an toàn bằng 1 cú nhấp chuột với Link</string>
   <!-- Label for a checkbox that when checked allows the payment information
@@ -64,6 +68,12 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_email_suggestion_update">Có, cập nhật</string>
   <!-- Title for a button that indicates a user can log in or sign up. -->
   <string name="stripe_link_log_in_or_sign_up">Đăng nhập hoặc đăng ký</string>
+  <!-- Label of a button that signs the user out of their current Link account so they can log in to a different one. -->
+  <string name="stripe_link_log_in_to_another_account">Đăng nhập vào tài khoản khác</string>
+  <!-- Message on a screen shown when none of the payment methods in the user's Link account can be used with this business. The placeholder is a Stripe brand name and should not be translated. -->
+  <string name="stripe_link_no_funding_sources_message">Không có phương thức thanh toán nào trong tài khoản %s của bạn hoạt động với doanh nghiệp này.</string>
+  <!-- Title of a screen shown when none of the payment methods in the user's Link account can be used with this business. The placeholder is a Stripe brand name and should not be translated. -->
+  <string name="stripe_link_no_funding_sources_title">Bạn không thể thanh toán bằng %s ở đây</string>
   <!-- Text displayed on a confirmation button on the CRS CARF declaration screen -->
   <string name="stripe_link_onramp_carf_declaration_accept_button_text">Chấp nhận</string>
   <!-- Text displayed on a cancel button on the CRS CARF declaration screen -->

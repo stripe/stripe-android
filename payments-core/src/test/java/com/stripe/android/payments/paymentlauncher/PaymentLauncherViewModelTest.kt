@@ -82,7 +82,7 @@ class PaymentLauncherViewModelTest {
             )
             assertThat(nextActionHandlerRegistry.getNextActionHandlerCalls.awaitItem()).isEqualTo(intent)
             assertThat(nextActionHandlerRegistry.handler.nextActionCalls.awaitItem()).isEqualTo(
-                FakeNextActionHandler.NextActionCall(authHost, intent, API_REQUEST_OPTIONS)
+                FakeNextActionHandler.NextActionCall(authHost, intent, API_CONFIGURATION)
             )
         }
 
@@ -111,7 +111,7 @@ class PaymentLauncherViewModelTest {
             )
             assertThat(nextActionHandlerRegistry.getNextActionHandlerCalls.awaitItem()).isEqualTo(intent)
             assertThat(nextActionHandlerRegistry.handler.nextActionCalls.awaitItem()).isEqualTo(
-                FakeNextActionHandler.NextActionCall(authHost, intent, API_REQUEST_OPTIONS)
+                FakeNextActionHandler.NextActionCall(authHost, intent, API_CONFIGURATION)
             )
         }
 
@@ -167,7 +167,7 @@ class PaymentLauncherViewModelTest {
             )
             assertThat(nextActionHandlerRegistry.getNextActionHandlerCalls.awaitItem()).isEqualTo(intent)
             assertThat(nextActionHandlerRegistry.handler.nextActionCalls.awaitItem()).isEqualTo(
-                FakeNextActionHandler.NextActionCall(authHost, intent, API_REQUEST_OPTIONS)
+                FakeNextActionHandler.NextActionCall(authHost, intent, API_CONFIGURATION)
             )
         }
 
@@ -196,7 +196,7 @@ class PaymentLauncherViewModelTest {
             )
             assertThat(nextActionHandlerRegistry.getNextActionHandlerCalls.awaitItem()).isEqualTo(intent)
             assertThat(nextActionHandlerRegistry.handler.nextActionCalls.awaitItem()).isEqualTo(
-                FakeNextActionHandler.NextActionCall(authHost, intent, API_REQUEST_OPTIONS)
+                FakeNextActionHandler.NextActionCall(authHost, intent, API_CONFIGURATION)
             )
         }
 
@@ -285,7 +285,7 @@ class PaymentLauncherViewModelTest {
             )
             assertThat(nextActionHandlerRegistry.getNextActionHandlerCalls.awaitItem()).isEqualTo(intent)
             assertThat(nextActionHandlerRegistry.handler.nextActionCalls.awaitItem()).isEqualTo(
-                FakeNextActionHandler.NextActionCall(authHost, intent, API_REQUEST_OPTIONS)
+                FakeNextActionHandler.NextActionCall(authHost, intent, API_CONFIGURATION)
             )
         }
 
@@ -313,7 +313,7 @@ class PaymentLauncherViewModelTest {
             assertThat(savedStateHandle.get<Boolean>(PaymentLauncherViewModel.KEY_HAS_STARTED)).isTrue()
             assertThat(nextActionHandlerRegistry.getNextActionHandlerCalls.awaitItem()).isEqualTo(intent)
             assertThat(nextActionHandlerRegistry.handler.nextActionCalls.awaitItem()).isEqualTo(
-                FakeNextActionHandler.NextActionCall(authHost, intent, API_REQUEST_OPTIONS)
+                FakeNextActionHandler.NextActionCall(authHost, intent, API_CONFIGURATION)
             )
             repository.retrieveStripeIntentCalls.expectNoEvents()
         }
@@ -327,7 +327,7 @@ class PaymentLauncherViewModelTest {
             assertThat(savedStateHandle.get<Boolean>(PaymentLauncherViewModel.KEY_HAS_STARTED)).isTrue()
             assertThat(nextActionHandlerRegistry.getNextActionHandlerCalls.awaitItem()).isEqualTo(intent)
             assertThat(nextActionHandlerRegistry.handler.nextActionCalls.awaitItem()).isEqualTo(
-                FakeNextActionHandler.NextActionCall(authHost, intent, API_REQUEST_OPTIONS)
+                FakeNextActionHandler.NextActionCall(authHost, intent, API_CONFIGURATION)
             )
             repository.retrieveStripeIntentCalls.expectNoEvents()
         }
@@ -335,7 +335,7 @@ class PaymentLauncherViewModelTest {
     @Test
     fun `verify paymentIntentProcessor is chosen correctly`() =
         runScenario(isPaymentIntent = true) {
-            val callbackAccount = "acct_callback"
+            val callbackAccount = ApiKeyFixtures.OTHER_STRIPE_ACCOUNT
             val caller = DummyActivityResultCaller.noOp()
             viewModel.register(caller, authHost.lifecycleOwner)
             val registration = nextActionHandlerRegistry.registrationCalls.awaitItem()
@@ -367,7 +367,7 @@ class PaymentLauncherViewModelTest {
     @Test
     fun `verify setupIntentProcessor is chosen correctly`() =
         runScenario(isPaymentIntent = false) {
-            val callbackAccount = "acct_callback"
+            val callbackAccount = ApiKeyFixtures.OTHER_STRIPE_ACCOUNT
             val caller = DummyActivityResultCaller.noOp()
             viewModel.register(caller, authHost.lifecycleOwner)
             val registration = nextActionHandlerRegistry.registrationCalls.awaitItem()
@@ -510,7 +510,7 @@ class PaymentLauncherViewModelTest {
             )
             assertThat(nextActionHandlerRegistry.getNextActionHandlerCalls.awaitItem()).isEqualTo(unredactedIntent)
             assertThat(nextActionHandlerRegistry.handler.nextActionCalls.awaitItem()).isEqualTo(
-                FakeNextActionHandler.NextActionCall(authHost, unredactedIntent, API_REQUEST_OPTIONS)
+                FakeNextActionHandler.NextActionCall(authHost, unredactedIntent, API_CONFIGURATION)
             )
         }
 
@@ -666,7 +666,7 @@ class PaymentLauncherViewModelTest {
             )
             assertThat(nextActionHandlerRegistry.getNextActionHandlerCalls.awaitItem()).isEqualTo(intent)
             assertThat(nextActionHandlerRegistry.handler.nextActionCalls.awaitItem()).isEqualTo(
-                FakeNextActionHandler.NextActionCall(authHost, intent, API_REQUEST_OPTIONS)
+                FakeNextActionHandler.NextActionCall(authHost, intent, API_CONFIGURATION)
             )
             assertThat(repository.retrievePaymentIntentCalls.awaitItem()).isEqualTo(
                 FakeStripeRepository.RetrieveIntentCall(CLIENT_SECRET, API_REQUEST_OPTIONS, EXPAND_PAYMENT_METHOD)
@@ -771,6 +771,7 @@ class PaymentLauncherViewModelTest {
             stripeApiRepository = repository,
             nextActionHandlerRegistry = nextActionHandlerRegistry,
             defaultReturnUrl = defaultReturnUrl,
+            apiConfiguration = API_CONFIGURATION,
             apiRequestOptionsProvider = { API_REQUEST_OPTIONS },
             lazyPaymentIntentFlowResultProcessor = { paymentIntentFlowResultProcessor },
             lazySetupIntentFlowResultProcessor = { setupIntentFlowResultProcessor },
@@ -866,7 +867,7 @@ class PaymentLauncherViewModelTest {
         val SETUP_CLIENT_SECRET = requireNotNull(SetupIntentFixtures.SI_SUCCEEDED.clientSecret)
         const val PM_ID = "pm_12345"
         const val RETURN_URL = "return://to.me"
-        const val TEST_STRIPE_ACCOUNT_ID = "acct_123"
+        const val TEST_STRIPE_ACCOUNT_ID = ApiKeyFixtures.FAKE_STRIPE_ACCOUNT
         val PRODUCT_USAGE = setOf("TestProductUsage")
         val API_CONFIGURATION = ApiConfiguration.State(
             publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,

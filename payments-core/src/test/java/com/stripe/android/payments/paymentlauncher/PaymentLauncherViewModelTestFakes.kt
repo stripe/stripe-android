@@ -8,6 +8,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.Turbine
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
@@ -153,9 +154,9 @@ internal object PaymentLauncherViewModelTestFakes {
         override suspend fun performNextActionOnResumed(
             host: AuthActivityStarterHost,
             actionable: StripeIntent,
-            requestOptions: ApiRequest.Options,
+            apiConfiguration: ApiConfiguration.State,
         ) {
-            nextActionCalls.add(NextActionCall(host, actionable, requestOptions))
+            nextActionCalls.add(NextActionCall(host, actionable, apiConfiguration))
         }
 
         override fun onNewActivityResultCaller(
@@ -180,7 +181,7 @@ internal object PaymentLauncherViewModelTestFakes {
         data class NextActionCall(
             val host: AuthActivityStarterHost,
             val intent: StripeIntent,
-            val options: ApiRequest.Options,
+            val apiConfiguration: ApiConfiguration.State,
         )
     }
 

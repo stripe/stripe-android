@@ -437,6 +437,7 @@ internal class EmbeddedNavigator private constructor(
             private val interactor: SelectSavedPaymentMethodsInteractor,
             private val sheetActivityState: StateFlow<SheetActivityStateHolder.State>,
             private val mandateText: StateFlow<MandateText?>,
+            private val isContinueButtonVisible: StateFlow<Boolean>,
             private val onContinueClick: () -> Unit,
             private val onPrimaryButtonDisabledClick: () -> Unit,
         ) : Screen(), Closeable {
@@ -473,16 +474,19 @@ internal class EmbeddedNavigator private constructor(
                 )
                 val state by sheetActivityState.collectAsState()
                 val mandate by mandateText.collectAsState()
+                val showContinueButton by isContinueButtonVisible.collectAsState()
                 if (mandate?.showAbovePrimaryButton == true) {
                     SheetMandate(mandate?.text)
                 }
                 FormActivityError(state)
-                Spacer(Modifier.height(40.dp))
-                FormActivityPrimaryButton(
-                    state = state,
-                    onClick = onContinueClick,
-                    onDisabledClick = onPrimaryButtonDisabledClick,
-                )
+                if (showContinueButton) {
+                    Spacer(Modifier.height(40.dp))
+                    FormActivityPrimaryButton(
+                        state = state,
+                        onClick = onContinueClick,
+                        onDisabledClick = onPrimaryButtonDisabledClick,
+                    )
+                }
                 if (mandate?.showAbovePrimaryButton == false) {
                     SheetMandate(mandate?.text)
                 }

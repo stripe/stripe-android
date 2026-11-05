@@ -26,6 +26,10 @@
   <string name="stripe_confirm_close_form_body">Your payment information will not be saved.</string>
   <!-- Used as the title for prompting the user if they want to close the sheet -->
   <string name="stripe_confirm_close_form_title">Do you want to close this form?</string>
+  <!-- Fallback disclosure when paying in the merchant's currency instead of using Adaptive Pricing. -->
+  <string name="stripe_currency_selector_bank_fees_disclaimer">Exchange rate and fees of your bank may apply.</string>
+  <string name="stripe_currency_selector_hide_details">Hide exchange rate details</string>
+  <string name="stripe_currency_selector_show_details">Show exchange rate details</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header">Save your info for secure 1-click checkout with Link</string>
   <!-- Label for a checkbox that when checked allows the payment information
@@ -458,8 +462,4 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_wallet_update_card">Update card</string>
   <!-- A text notice shown when the user selects an expired card. -->
   <string name="stripe_wallet_update_expired_card_error">This card has expired. Update your card info or choose a different payment method.</string>
-  <!-- Fallback disclosure when paying in the merchant's currency instead of using Adaptive Pricing. -->
-  <string name="stripe_currency_selector_bank_fees_disclaimer">Exchange rate and fees of your bank may apply.</string>
-  <string name="stripe_currency_selector_show_details">Show exchange rate details</string>
-  <string name="stripe_currency_selector_hide_details">Hide exchange rate details</string>
 </resources>
