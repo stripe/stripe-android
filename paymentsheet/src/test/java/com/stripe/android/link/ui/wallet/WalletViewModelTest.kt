@@ -10,6 +10,7 @@ import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
+import com.stripe.android.financialconnections.ThemeMode
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccountList
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.link.LinkAccountUpdate
@@ -209,6 +210,7 @@ class WalletViewModelTest {
                         stripeAccountId = null,
                     ),
                     preCollectedConsent = null,
+                    themeMode = ThemeMode.Automatic,
                 )
                 assertThat(addBankAccountState).isEqualTo(AddBankAccountState.Processing(expectedConfig))
             }
