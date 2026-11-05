@@ -105,6 +105,7 @@ internal class AccountPickerViewModel @AssistedInject constructor(
             val state = stateFlow.value
             val sync = getOrFetchSync()
             val dataAccessNotice = sync.text?.consent?.dataAccessNotice
+                ?: sync.text?.streamlinedConsentPane?.dataAccessNotice
             val manifest = sync.manifest
             val activeAuthSession = requireNotNull(manifest.activeAuthSession)
             val (partnerAccountList, millis) = measureTimeMillis {

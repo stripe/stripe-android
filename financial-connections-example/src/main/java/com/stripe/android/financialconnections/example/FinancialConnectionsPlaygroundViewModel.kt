@@ -17,9 +17,12 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.FinancialConnectionsSheetForTokenResult
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
+import com.stripe.android.financialconnections.example.FinancialConnectionsPlaygroundViewModel.Companion.HARDCODED_CLIENT_SECRET
+import com.stripe.android.financialconnections.example.FinancialConnectionsPlaygroundViewModel.Companion.HARDCODED_PUBLISHABLE_KEY
 import com.stripe.android.financialconnections.example.data.BackendRepository
 import com.stripe.android.financialconnections.example.data.Settings
 import com.stripe.android.financialconnections.example.data.model.AccountHolder
+import com.stripe.android.financialconnections.example.data.model.CreateLinkAccountSessionResponse
 import com.stripe.android.financialconnections.example.data.model.IssuedConsent
 import com.stripe.android.financialconnections.example.data.model.Merchant
 import com.stripe.android.financialconnections.example.data.model.toCreateAccountHolderBody
@@ -314,7 +317,8 @@ internal class FinancialConnectionsPlaygroundViewModel(
         viewModelScope.launch {
             showLoadingWithMessage("Fetching link account session from example backend!")
             kotlin.runCatching {
-                repository.createLinkAccountSession(settings.lasRequest().copy(accountHolder = accountHolder))
+                hardcodedLinkAccountSession()
+                    ?: repository.createLinkAccountSession(settings.lasRequest().copy(accountHolder = accountHolder))
             }
                 // Success creating session: open the financial connections sheet with received secret
                 .onSuccess {
@@ -347,7 +351,10 @@ internal class FinancialConnectionsPlaygroundViewModel(
         viewModelScope.launch {
             showLoadingWithMessage("Fetching link account session from example backend!")
             kotlin.runCatching {
-                repository.createLinkAccountSessionForToken(settings.lasRequest().copy(accountHolder = accountHolder))
+                hardcodedLinkAccountSession()
+                    ?: repository.createLinkAccountSessionForToken(
+                        settings.lasRequest().copy(accountHolder = accountHolder)
+                    )
             }
                 // Success creating session: open the financial connections sheet with received secret
                 .onSuccess {
@@ -402,6 +409,19 @@ internal class FinancialConnectionsPlaygroundViewModel(
                 )
             }.onFailure(::showError)
         }
+    }
+
+    /**
+     * Returns a session built from [HARDCODED_CLIENT_SECRET] and [HARDCODED_PUBLISHABLE_KEY] if both are set,
+     * so that a session created elsewhere can be opened without going through the example backend.
+     */
+    private fun hardcodedLinkAccountSession(): CreateLinkAccountSessionResponse? {
+        if (HARDCODED_CLIENT_SECRET.isBlank() || HARDCODED_PUBLISHABLE_KEY.isBlank()) return null
+        showLoadingWithMessage("Using hard-coded client secret and publishable key.")
+        return CreateLinkAccountSessionResponse(
+            clientSecret = HARDCODED_CLIENT_SECRET,
+            publishableKey = HARDCODED_PUBLISHABLE_KEY,
+        )
     }
 
     private fun showError(error: Throwable) {
@@ -642,6 +662,11 @@ internal class FinancialConnectionsPlaygroundViewModel(
 
     private companion object {
         const val MILLIS_PER_SECOND = 1_000L
+
+        // Set both to open an existing session in the Data and Token flows instead of creating one
+        // through the example backend. Don't commit real values.
+        const val HARDCODED_CLIENT_SECRET = ""
+        const val HARDCODED_PUBLISHABLE_KEY = ""
     }
 }
 

@@ -374,6 +374,7 @@ internal fun NoAccountsAvailableErrorContentPreview() {
                 FinancialConnectionsTopAppBar(
                     state = TopAppBarState(hideStripeLogo = false, linkBrand = LinkBrand.Link),
                     onCloseClick = {},
+                    onLogoClick = {},
                 )
             }
         ) {

@@ -146,7 +146,8 @@ internal fun GenericBottomSheetContent(
     onSecondaryButtonClick: () -> Unit,
 ) {
     GenericScreen(
-        state = GenericScreenState(screen, inModal = true),
+        state = GenericScreenState(screen, inModal = true, isHeaderIconInstitutionLogo = false),
+        isPrimaryButtonLoading = false,
         onPrimaryButtonClick = onPrimaryButtonClick,
         onSecondaryButtonClick = onSecondaryButtonClick,
         onClickableTextClick = onClickableTextClick,

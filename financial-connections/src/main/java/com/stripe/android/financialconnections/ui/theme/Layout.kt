@@ -268,6 +268,7 @@ internal fun LayoutPreview() {
                         isContentScrolled = state.canScrollBackward,
                     ),
                     onCloseClick = {},
+                    onLogoClick = {},
                 )
             },
             content = {

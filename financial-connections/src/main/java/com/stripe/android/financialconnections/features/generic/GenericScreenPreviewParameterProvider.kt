@@ -19,6 +19,7 @@ internal class GenericScreenPreviewParameterProvider : PreviewParameterProvider<
 
     internal fun canonical() = GenericScreenState(
         inModal = false,
+        isHeaderIconInstitutionLogo = false,
         screen = FinancialConnectionsGenericInfoScreen(
             id = "sampleScreen1",
             header = header(),
@@ -30,6 +31,7 @@ internal class GenericScreenPreviewParameterProvider : PreviewParameterProvider<
 
     private fun twoButtons() = GenericScreenState(
         inModal = false,
+        isHeaderIconInstitutionLogo = false,
         screen = FinancialConnectionsGenericInfoScreen(
             id = "sampleScreen1",
             header = header(),

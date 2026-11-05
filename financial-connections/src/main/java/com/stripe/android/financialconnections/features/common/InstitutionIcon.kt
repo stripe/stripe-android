@@ -31,7 +31,12 @@ internal fun InstitutionIcon(
 ) {
     val previewMode = LocalInspectionMode.current
     val isLink = FinancialConnectionsTheme.theme.isLink
-    val shape = RoundedCornerShape(if (isLink && size >= 64.dp) 18.dp else 12.dp)
+    val cornerRadius = when {
+        size < 64.dp -> 12.dp
+        isLink -> 18.dp
+        else -> 16.dp
+    }
+    val shape = RoundedCornerShape(cornerRadius)
     val iconModifier = modifier
         .size(size)
         .then(
