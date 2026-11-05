@@ -1,7 +1,10 @@
 # CHANGELOG
 
-NEXT_VERSION_BUMP: PATCH
+NEXT_VERSION_BUMP: MINOR
 ## XX.XX.XX - 20XX-XX-XX
+
+### Crypto Onramp
+* [Added][15296](https://github.com/stripe/stripe-android/pull/15296) Added `googlePayCardBrandAcceptance` and `linkCardBrandAcceptance` to `OnrampConfiguration` to configure accepted card brands independently for Google Pay and Link. Link applies this setting only in passthrough mode.
 
 ## 23.25.2 - 2026-11-04
 

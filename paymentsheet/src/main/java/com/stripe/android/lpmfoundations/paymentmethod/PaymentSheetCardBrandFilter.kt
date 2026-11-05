@@ -1,5 +1,6 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
@@ -7,7 +8,8 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-internal data class PaymentSheetCardBrandFilter(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class PaymentSheetCardBrandFilter(
     private val cardBrandAcceptance: PaymentSheet.CardBrandAcceptance
 ) : CardBrandFilter {
 
