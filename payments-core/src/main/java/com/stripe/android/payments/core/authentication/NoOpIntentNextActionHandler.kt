@@ -1,7 +1,7 @@
 package com.stripe.android.payments.core.authentication
 
 import com.stripe.android.PaymentRelayStarter
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.view.AuthActivityStarterHost
 import javax.inject.Inject
@@ -19,11 +19,11 @@ internal class NoOpIntentNextActionHandler @Inject constructor(
     override suspend fun performNextActionOnResumed(
         host: AuthActivityStarterHost,
         actionable: StripeIntent,
-        requestOptions: ApiRequest.Options
+        apiConfiguration: ApiConfiguration.State
     ) {
         val args = PaymentRelayStarter.Args.create(
             stripeIntent = actionable,
-            stripeAccountId = requestOptions.stripeAccount,
+            stripeAccountId = apiConfiguration.stripeAccountId,
         )
         paymentRelayStarterFactory(host).start(args)
     }

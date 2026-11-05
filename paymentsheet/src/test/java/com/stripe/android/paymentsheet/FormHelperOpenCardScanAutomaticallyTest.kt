@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.common.analytics.experiment.FakePrimaryButtonExperiment
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.core.Logger
@@ -188,6 +189,7 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
                 tapToAddHelperFactory = FakeTapToAddHelper.Factory.noOp(),
                 isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = false),
                 mode = EventReporter.Mode.Complete,
+                primaryButtonExperiment = FakePrimaryButtonExperiment(),
                 errorReporter = FakeErrorReporter(),
                 customerStateHolderFactory = DefaultCustomerStateHolder.Factory,
                 customViewModelScope = coroutineScopeCleanupRule.track(CoroutineScope(Dispatchers.Unconfined)),
@@ -246,6 +248,7 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
                 tapToAddHelperFactory = FakeTapToAddHelper.Factory.noOp(),
                 isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = false),
                 mode = EventReporter.Mode.Complete,
+                primaryButtonExperiment = FakePrimaryButtonExperiment(),
                 customerStateHolderFactory = DefaultCustomerStateHolder.Factory,
                 customViewModelScope = coroutineScopeCleanupRule.track(CoroutineScope(Dispatchers.Unconfined)),
                 paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),

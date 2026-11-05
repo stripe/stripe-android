@@ -5,7 +5,7 @@ import androidx.annotation.RestrictTo
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.withResumed
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.model.Source
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.core.ActivityResultLauncherHost
@@ -23,23 +23,23 @@ abstract class PaymentNextActionHandler<Actionable> : ActivityResultLauncherHost
      *
      * @param host the host([Activity] or [Fragment]) where client is calling from, used to redirect back to client
      * @param actionable the [StripeIntent] or [Source] object to perform next action on (e.g authenticate)
-     * @param requestOptions configurations for the API request which triggers the authentication
+     * @param apiConfiguration API credentials used to perform the next action
      */
     suspend fun performNextAction(
         host: AuthActivityStarterHost,
         actionable: Actionable,
-        requestOptions: ApiRequest.Options
+        apiConfiguration: ApiConfiguration.State
     ) {
         val lifecycleOwner = host.lifecycleOwner
 
         lifecycleOwner.awaitResumed()
-        performNextActionOnResumed(host, actionable, requestOptions)
+        performNextActionOnResumed(host, actionable, apiConfiguration)
     }
 
     protected abstract suspend fun performNextActionOnResumed(
         host: AuthActivityStarterHost,
         actionable: Actionable,
-        requestOptions: ApiRequest.Options
+        apiConfiguration: ApiConfiguration.State
     )
 }
 
