@@ -56,6 +56,7 @@ class CheckoutSessionRepositoryAnalyticsTest {
             analyticsPayloadField("defaults[billing_details][name]", "false"),
             not(hasQueryParam("payment_element")),
             not(hasQueryParam("checkout_config_id")),
+            not(hasQueryParam("ordered_lpms")),
             not(hasQueryParam("duration")),
         )
         expectEvent(
@@ -65,6 +66,7 @@ class CheckoutSessionRepositoryAnalyticsTest {
             analyticsPayloadField("merchant_display_name", "true"),
             analyticsPayloadField("defaults[email]", "true"),
             analyticsPayloadField("defaults[billing_details][name]", "false"),
+            analyticsPayloadField("ordered_lpms", "card,link,apple_pay,google_pay,cashapp"),
             hasQueryParam("duration"),
         )
         networkRule.checkoutInit { response ->
@@ -95,6 +97,7 @@ class CheckoutSessionRepositoryAnalyticsTest {
             analyticsPayloadField("error_type", "invalid_request_error"),
             analyticsPayloadField("error_code", "checkout_session_invalid"),
             analyticsPayloadField("request_id", "req_123"),
+            not(hasQueryParam("ordered_lpms")),
             hasQueryParam("duration"),
         )
         networkRule.checkoutInit { response ->

@@ -68,6 +68,11 @@ internal class CheckoutSessionRepository @Inject constructor(
         operation = Operation.Init,
         checkoutSessionResponse = null,
         params = analyticsParams + ("checkout_session_id" to clientSecret.sessionId),
+        succeededParams = { response ->
+            response.elementsSession?.orderedPaymentMethodTypesAndWallets
+                ?.let { mapOf("ordered_lpms" to it.joinToString(",")) }
+                .orEmpty()
+        },
     ) {
         executePost(
             clientSecret = clientSecret,
@@ -255,6 +260,7 @@ internal class CheckoutSessionRepository @Inject constructor(
         operation: Operation,
         checkoutSessionResponse: CheckoutSessionResponse?,
         params: Map<String, Any?>,
+        succeededParams: (CheckoutSessionResponse) -> Map<String, Any?> = { emptyMap() },
         block: suspend () -> Result<CheckoutSessionResponse>,
     ): Result<CheckoutSessionResponse> {
         val measuredOperation = MeasuredOperation(
@@ -264,7 +270,7 @@ internal class CheckoutSessionRepository @Inject constructor(
         )
         measuredOperation.started(checkoutSessionResponse)
         return block()
-            .onSuccess { measuredOperation.succeeded(it) }
+            .onSuccess { measuredOperation.succeeded(it, succeededParams(it)) }
             .onFailure { measuredOperation.failed(checkoutSessionResponse, it) }
     }
 

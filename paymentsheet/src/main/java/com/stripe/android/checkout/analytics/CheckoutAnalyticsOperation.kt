@@ -25,8 +25,8 @@ internal abstract class CheckoutAnalyticsOperation<E>(
         reportOutcome(Outcome.Started, response, error = null)
     }
 
-    fun succeeded(response: CheckoutSessionResponse?) {
-        reportOutcome(Outcome.Succeeded, response, error = null)
+    fun succeeded(response: CheckoutSessionResponse?, params: Map<String, Any?> = emptyMap()) {
+        reportOutcome(Outcome.Succeeded, response, error = null, outcomeParams = params)
     }
 
     fun failed(response: CheckoutSessionResponse?, error: E) {
@@ -37,6 +37,7 @@ internal abstract class CheckoutAnalyticsOperation<E>(
         outcome: Outcome?,
         response: CheckoutSessionResponse?,
         error: CheckoutAnalyticsEvent.Error?,
+        outcomeParams: Map<String, Any?> = emptyMap(),
     ) {
         report(
             CheckoutAnalyticsEvent(
@@ -45,7 +46,7 @@ internal abstract class CheckoutAnalyticsOperation<E>(
                 analyticsMetadata = DefaultAnalyticsMetadataFactory.create(response),
                 duration = if (outcome == null || outcome == Outcome.Started) null else elapsed(),
                 error = error,
-                operationParams = params,
+                operationParams = params + outcomeParams,
             )
         )
     }
