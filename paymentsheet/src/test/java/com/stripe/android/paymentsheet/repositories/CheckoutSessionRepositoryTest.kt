@@ -20,6 +20,7 @@ import com.stripe.android.networktesting.RequestMatchers.hasBodyPart
 import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.RequestMatchers.query
 import com.stripe.android.networktesting.testBodyFromFile
+import com.stripe.android.paymentsheet.model.CheckoutSessionClientSecret
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.android.utils.FakeFraudDetectionDataRepository
 import kotlinx.coroutines.test.runTest
@@ -76,13 +77,12 @@ class CheckoutSessionRepositoryTest {
         }
 
         val result = repository.init(
-            sessionId = DEFAULT_CHECKOUT_SESSION_ID,
-            clientSecret = "cs_test_abc123_secret_test",
+            clientSecret = CheckoutSessionClientSecret("cs_test_abc123_secret_test"),
             adaptivePricingAllowed = true,
             analyticsParams = emptyMap(),
         )
 
-        assertThat(result.getOrThrow().clientSecret).isEqualTo("cs_test_abc123_secret_test")
+        assertThat(result.getOrThrow().clientSecret.value).isEqualTo("cs_test_abc123_secret_test")
     }
 
     @Test
@@ -100,12 +100,11 @@ class CheckoutSessionRepositoryTest {
         }
 
         val result = repository.detachPaymentMethod(
-            sessionId = DEFAULT_CHECKOUT_SESSION_ID,
-            clientSecret = "cs_test_abc123_secret_test",
+            clientSecret = CheckoutSessionClientSecret("cs_test_abc123_secret_test"),
             paymentMethodId = "pm_123",
         )
 
-        assertThat(result.getOrThrow().clientSecret).isEqualTo("cs_test_abc123_secret_test")
+        assertThat(result.getOrThrow().clientSecret.value).isEqualTo("cs_test_abc123_secret_test")
     }
 
     @Test
@@ -122,7 +121,7 @@ class CheckoutSessionRepositoryTest {
             promotionCode = "10OFF",
         )
 
-        assertThat(result.getOrThrow().clientSecret).isEqualTo("cs_test_abc123_secret_test")
+        assertThat(result.getOrThrow().clientSecret.value).isEqualTo("cs_test_abc123_secret_test")
     }
 
     @Test
@@ -138,7 +137,7 @@ class CheckoutSessionRepositoryTest {
             checkoutSessionResponse = checkoutSessionResponse,
         )
 
-        assertThat(result.getOrThrow().clientSecret).isEqualTo("cs_test_abc123_secret_test")
+        assertThat(result.getOrThrow().clientSecret.value).isEqualTo("cs_test_abc123_secret_test")
     }
 
     @Test
@@ -155,7 +154,7 @@ class CheckoutSessionRepositoryTest {
             currencyCode = "eur",
         )
 
-        assertThat(result.getOrThrow().clientSecret).isEqualTo("cs_test_abc123_secret_test")
+        assertThat(result.getOrThrow().clientSecret.value).isEqualTo("cs_test_abc123_secret_test")
     }
 
     @Test
@@ -180,8 +179,7 @@ class CheckoutSessionRepositoryTest {
         )
 
         val result = repository.poll(
-            sessionId = DEFAULT_CHECKOUT_SESSION_ID,
-            clientSecret = "cs_test_abc123_secret_test",
+            clientSecret = CheckoutSessionClientSecret("cs_test_abc123_secret_test"),
         )
 
         assertThat(result.getOrThrow()).isEqualTo(
@@ -203,8 +201,7 @@ class CheckoutSessionRepositoryTest {
         }
 
         val result = repository.poll(
-            sessionId = DEFAULT_CHECKOUT_SESSION_ID,
-            clientSecret = "cs_test_abc123_secret_test",
+            clientSecret = CheckoutSessionClientSecret("cs_test_abc123_secret_test"),
         )
 
         assertThat(result.exceptionOrNull()).isInstanceOf(APIException::class.java)

@@ -9,6 +9,7 @@ import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.analytics.experiment.LogFcLiteExperiment
 import com.stripe.android.common.analytics.experiment.LogLinkHoldbackExperiment
 import com.stripe.android.common.analytics.experiment.PaymentMethodMessagePromotionsExperimentHandler
+import com.stripe.android.common.analytics.experiment.PreselectLinkExperiment
 import com.stripe.android.common.coroutines.runCatching
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
@@ -237,7 +238,6 @@ internal interface PaymentElementLoader {
 
             override fun integrationMetadata(paymentElementCallbacks: PaymentElementCallbacks?): IntegrationMetadata {
                 return IntegrationMetadata.CheckoutSession(
-                    id = checkoutSessionResponse.id,
                     instancesKey = instancesKey,
                     checkoutSessionResponse = checkoutSessionResponse,
                     collectedEmail = collectedEmail,
@@ -294,6 +294,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     private val tapToAddAvailabilityFactory: TapToAddAvailabilityFactory,
     private val durationProvider: DurationProvider,
     private val paymentMethodMessagePromotionsExperimentHandler: PaymentMethodMessagePromotionsExperimentHandler,
+    private val preselectLinkExperiment: PreselectLinkExperiment,
 ) : PaymentElementLoader {
 
     fun interface AnalyticsMetadataFactory {
@@ -465,7 +466,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                     metadata = paymentMethodMetadata,
                     customer = customer,
                     isGooglePayReady = isGooglePayReady,
-                    isUsingWalletButtons = configuration.walletButtons?.willDisplayExternally ?: false
+                    integrationConfiguration = integrationConfiguration,
                 )
             }
         }
@@ -775,8 +776,10 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         metadata: PaymentMethodMetadata,
         customer: CustomerState?,
         isGooglePayReady: Boolean,
-        isUsingWalletButtons: Boolean,
+        integrationConfiguration: PaymentElementLoader.Configuration,
     ): PaymentSelection? {
+        val isUsingWalletButtons = integrationConfiguration.commonConfiguration.walletButtons?.willDisplayExternally
+            ?: false
         val isDefaultPaymentMethodEnabled = metadata.customerMetadata?.isPaymentMethodSetAsDefaultEnabled ?: false
         val primaryPaymentSelection = if (isDefaultPaymentMethodEnabled) {
             customer?.paymentMethods?.firstOrNull {
@@ -814,6 +817,11 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             ?: PaymentSelection.GooglePay.takeIf {
                 !isUsingWalletButtons && isGooglePayReady
             }
+            ?: preselectLinkExperiment.getSelection(
+                metadata = metadata,
+                customer = customer,
+                integrationConfiguration = integrationConfiguration,
+            )
     }
 
     private suspend fun retrieveSavedSelection(

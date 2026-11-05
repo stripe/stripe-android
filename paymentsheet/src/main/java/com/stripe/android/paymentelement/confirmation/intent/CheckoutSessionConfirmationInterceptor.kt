@@ -153,7 +153,6 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
         params: ConfirmCheckoutSessionParams,
     ): ConfirmationDefinition.Action<Args> {
         return checkoutSessionRepository.confirm(
-            id = integrationMetadata.id,
             clientSecret = integrationMetadata.checkoutSessionResponse.clientSecret,
             params = params,
         ).fold(

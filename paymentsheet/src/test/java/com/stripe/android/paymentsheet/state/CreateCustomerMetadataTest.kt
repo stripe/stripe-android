@@ -26,7 +26,7 @@ internal class CreateCustomerMetadataTest {
         ),
     ) {
         val result = result as CustomerMetadata.CheckoutSession
-        assertThat(result.sessionId).isEqualTo("cs_test_123")
+        assertThat(result.clientSecret.sessionId).isEqualTo("cs_test_123")
         assertThat(result.customerId).isEqualTo("cus_checkout_1")
     }
 

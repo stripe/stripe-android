@@ -4,6 +4,7 @@ import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.paymentsheet.model.CheckoutSessionClientSecret
 import com.stripe.android.paymentsheet.repositories.CheckoutClientPollResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutClientPollResponse.ConfirmationStatus
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
@@ -41,7 +42,7 @@ internal class DefaultCheckoutConfirmationFinalizerTest {
 
         val result = finalizer.finalize(confirmResponse)
 
-        assertThat(api.pollCalls.awaitItem()).isEqualTo(PollCall(SESSION_ID, CLIENT_SECRET))
+        assertThat(api.pollCalls.awaitItem()).isEqualTo(PollCall(clientSecret))
         assertThat(result.getOrThrow()).isEqualTo(
             confirmResponse.copy(
                 status = CheckoutSessionResponse.Status.COMPLETE,
@@ -60,7 +61,7 @@ internal class DefaultCheckoutConfirmationFinalizerTest {
         val result = finalizer.finalize(confirmResponse)
 
         repeat(3) {
-            assertThat(api.pollCalls.awaitItem()).isEqualTo(PollCall(SESSION_ID, CLIENT_SECRET))
+            assertThat(api.pollCalls.awaitItem()).isEqualTo(PollCall(clientSecret))
         }
         assertThat(result.isSuccess).isTrue()
         assertThat(elapsed()).isEqualTo(1000.milliseconds)
@@ -72,7 +73,7 @@ internal class DefaultCheckoutConfirmationFinalizerTest {
 
         val result = finalizer.finalize(confirmResponse)
 
-        assertThat(api.pollCalls.awaitItem()).isEqualTo(PollCall(SESSION_ID, CLIENT_SECRET))
+        assertThat(api.pollCalls.awaitItem()).isEqualTo(PollCall(clientSecret))
         assertThat(result.getOrThrow()).isEqualTo(confirmResponse)
         assertThat(elapsed()).isEqualTo(30.seconds)
     }
@@ -93,7 +94,7 @@ internal class DefaultCheckoutConfirmationFinalizerTest {
         val result = finalizer.finalize(confirmResponse)
 
         repeat(2) {
-            assertThat(api.pollCalls.awaitItem()).isEqualTo(PollCall(SESSION_ID, CLIENT_SECRET))
+            assertThat(api.pollCalls.awaitItem()).isEqualTo(PollCall(clientSecret))
         }
         assertThat(result.getOrThrow()).isEqualTo(
             confirmResponse.copy(
@@ -110,7 +111,7 @@ internal class DefaultCheckoutConfirmationFinalizerTest {
 
         val result = finalizer.finalize(confirmResponse)
 
-        assertThat(api.pollCalls.awaitItem()).isEqualTo(PollCall(SESSION_ID, CLIENT_SECRET))
+        assertThat(api.pollCalls.awaitItem()).isEqualTo(PollCall(clientSecret))
         assertThat(result.exceptionOrNull()).hasMessageThat().isEqualTo("Checkout Session confirmation failed.")
     }
 
@@ -120,7 +121,7 @@ internal class DefaultCheckoutConfirmationFinalizerTest {
 
         val result = finalizer.finalize(confirmResponse)
 
-        assertThat(api.pollCalls.awaitItem()).isEqualTo(PollCall(SESSION_ID, CLIENT_SECRET))
+        assertThat(api.pollCalls.awaitItem()).isEqualTo(PollCall(clientSecret))
         assertThat(errorReporter.awaitCall().errorEvent)
             .isEqualTo(ErrorReporter.UnexpectedErrorEvent.CHECKOUT_SESSION_CONFIRMATION_NOT_STARTED)
         assertThat(result.exceptionOrNull()).hasMessageThat().isEqualTo(
@@ -177,8 +178,10 @@ internal class DefaultCheckoutConfirmationFinalizerTest {
         val pollCalls = Turbine<PollCall>()
         val pollResults = ArrayDeque<suspend () -> Result<CheckoutClientPollResponse>>()
 
-        suspend fun poll(sessionId: String, clientSecret: String): Result<CheckoutClientPollResponse> {
-            pollCalls.add(PollCall(sessionId, clientSecret))
+        suspend fun poll(
+            clientSecret: CheckoutSessionClientSecret,
+        ): Result<CheckoutClientPollResponse> {
+            pollCalls.add(PollCall(clientSecret))
             return pollResults.removeFirst().invoke()
         }
 
@@ -188,7 +191,9 @@ internal class DefaultCheckoutConfirmationFinalizerTest {
         }
     }
 
-    private data class PollCall(val sessionId: String, val clientSecret: String)
+    private data class PollCall(val clientSecret: CheckoutSessionClientSecret)
+
+    private val clientSecret = CheckoutSessionClientSecret(CLIENT_SECRET)
 
     private companion object {
         const val SESSION_ID = "cs_test_finalize"
