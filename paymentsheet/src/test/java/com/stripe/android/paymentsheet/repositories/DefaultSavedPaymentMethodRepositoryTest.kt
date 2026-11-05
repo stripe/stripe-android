@@ -48,7 +48,7 @@ class DefaultSavedPaymentMethodRepositoryTest {
             method("POST"),
             path("/v1/checkout_client/cs_123/update"),
             bodyPart("payment_method_to_detach", "pm_123"),
-            bodyPart("client_secret", "cs_test_abc123_secret_test"),
+            bodyPart("client_secret", "cs_123_secret_test"),
             bodyPart("locale", clientParams.locale),
             bodyPart("mobile_session_id", "test-session-id"),
             bodyPart("mobile_app_id", clientParams.mobileAppId),
@@ -381,8 +381,7 @@ class DefaultSavedPaymentMethodRepositoryTest {
 
     companion object {
         private val CHECKOUT_SESSION_METADATA = CustomerMetadata.CheckoutSession(
-            clientSecret = CheckoutSessionClientSecret("cs_test_abc123_secret_test"),
-            sessionId = "cs_123",
+            clientSecret = CheckoutSessionClientSecret("cs_123_secret_test"),
             customerId = "cus_123",
             removePaymentMethod = PaymentMethodRemovePermission.Full,
             saveConsent = PaymentMethodSaveConsentBehavior.Disabled(overrideAllowRedisplay = null),

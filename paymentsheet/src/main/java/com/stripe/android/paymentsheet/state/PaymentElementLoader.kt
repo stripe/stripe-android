@@ -237,7 +237,6 @@ internal interface PaymentElementLoader {
 
             override fun integrationMetadata(paymentElementCallbacks: PaymentElementCallbacks?): IntegrationMetadata {
                 return IntegrationMetadata.CheckoutSession(
-                    id = checkoutSessionResponse.id,
                     instancesKey = instancesKey,
                     checkoutSessionResponse = checkoutSessionResponse,
                     collectedEmail = collectedEmail,

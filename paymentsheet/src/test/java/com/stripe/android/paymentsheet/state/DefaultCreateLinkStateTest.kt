@@ -207,7 +207,6 @@ internal class DefaultCreateLinkStateTest {
         val elementsSession = createElementsSession()
         val customerMetadata = CustomerMetadata.CheckoutSession(
             clientSecret = CheckoutSessionClientSecret("cs_test_abc123_secret_test"),
-            sessionId = "cs_test_123",
             customerId = "cus_123",
             removePaymentMethod = PaymentMethodRemovePermission.None,
             saveConsent = PaymentMethodSaveConsentBehavior.Enabled,

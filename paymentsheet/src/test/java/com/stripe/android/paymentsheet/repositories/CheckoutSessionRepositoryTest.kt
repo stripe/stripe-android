@@ -162,7 +162,6 @@ class CheckoutSessionRepositoryTest {
         }
 
         val result = repository.detachPaymentMethod(
-            sessionId = DEFAULT_CHECKOUT_SESSION_ID,
             clientSecret = CheckoutSessionClientSecret("cs_test_abc123_secret_test"),
             paymentMethodId = "pm_123",
         )
@@ -256,7 +255,6 @@ class CheckoutSessionRepositoryTest {
         }
 
         val result = repository.updateCurrency(
-            sessionId = DEFAULT_CHECKOUT_SESSION_ID,
             clientSecret = CheckoutSessionClientSecret("cs_test_abc123_secret_test"),
             currencyCode = "eur",
         )
@@ -272,7 +270,6 @@ class CheckoutSessionRepositoryTest {
         }
 
         val result = repository.updateCurrency(
-            sessionId = DEFAULT_CHECKOUT_SESSION_ID,
             clientSecret = CheckoutSessionClientSecret("cs_test_abc123_secret_test"),
             currencyCode = "invalid",
         )
@@ -287,7 +284,6 @@ class CheckoutSessionRepositoryTest {
         }
 
         repository.updateCurrency(
-            sessionId = DEFAULT_CHECKOUT_SESSION_ID,
             clientSecret = CheckoutSessionClientSecret("cs_test_abc123_secret_test"),
             currencyCode = "eur",
         ).getOrThrow()
@@ -304,7 +300,6 @@ class CheckoutSessionRepositoryTest {
         }
 
         val result = repository.updateCurrency(
-            sessionId = DEFAULT_CHECKOUT_SESSION_ID,
             clientSecret = CheckoutSessionClientSecret("cs_test_abc123_secret_test"),
             currencyCode = "invalid",
         )
@@ -321,7 +316,6 @@ class CheckoutSessionRepositoryTest {
         )
 
         val result = repository.poll(
-            sessionId = DEFAULT_CHECKOUT_SESSION_ID,
             clientSecret = CheckoutSessionClientSecret("cs_test_abc123_secret_test"),
         )
 
@@ -344,7 +338,6 @@ class CheckoutSessionRepositoryTest {
         }
 
         val result = repository.poll(
-            sessionId = DEFAULT_CHECKOUT_SESSION_ID,
             clientSecret = CheckoutSessionClientSecret("cs_test_abc123_secret_test"),
         )
 

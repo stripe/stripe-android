@@ -27,7 +27,6 @@ internal class CheckoutSessionResponseJsonParser(
     @Suppress("CyclomaticComplexMethod", "LongMethod")
     override fun parse(json: JSONObject): CheckoutSessionResponse? = runCatching {
         require(json.requiredString("ui_mode") == "mobile_elements")
-        val id = json.requiredString("id")
         val configId = json.optionalString("checkout_session_config_id")
         val automaticPaymentMethodTypes = json.optionalBoolean("automatic_payment_method_types")
         val currency = json.requiredString("presentment_currency")
@@ -64,7 +63,6 @@ internal class CheckoutSessionResponseJsonParser(
         }
 
         CheckoutSessionResponse(
-            id = id,
             clientSecret = clientSecret,
             configId = configId,
             automaticPaymentMethodTypes = automaticPaymentMethodTypes,

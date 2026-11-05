@@ -47,7 +47,6 @@ internal class CreateCustomerStateTest {
             initializationMode = initializationMode,
             customerMetadata = CustomerMetadata.CheckoutSession(
                 clientSecret = CheckoutSessionClientSecret("cs_test_abc123_secret_test"),
-                sessionId = checkoutSessionResponse.id,
                 customerId = "cus_checkout_123",
                 removePaymentMethod = PaymentMethodRemovePermission.None,
                 saveConsent = PaymentMethodSaveConsentBehavior.Disabled(overrideAllowRedisplay = null),
@@ -79,7 +78,6 @@ internal class CreateCustomerStateTest {
             initializationMode = initializationMode,
             customerMetadata = CustomerMetadata.CheckoutSession(
                 clientSecret = CheckoutSessionClientSecret("cs_test_abc123_secret_test"),
-                sessionId = checkoutSessionResponse.id,
                 customerId = "cus_checkout_empty",
                 removePaymentMethod = PaymentMethodRemovePermission.None,
                 saveConsent = PaymentMethodSaveConsentBehavior.Disabled(overrideAllowRedisplay = null),
@@ -168,14 +166,12 @@ internal class CreateCustomerStateTest {
     ) = PaymentMethodMetadataFactory.create(
         integrationMetadata = IntegrationMetadata.CheckoutSession(
             collectedEmail = null,
-            id = checkoutSessionResponse.id,
             instancesKey = "instances_key",
             checkoutSessionResponse = checkoutSessionResponse,
         ),
     ).copy(
         customerMetadata = CustomerMetadata.CheckoutSession(
             clientSecret = CheckoutSessionClientSecret("cs_test_abc123_secret_test"),
-            sessionId = checkoutSessionResponse.id,
             customerId = "cus_checkout_automatic_tax",
             removePaymentMethod = PaymentMethodRemovePermission.None,
             saveConsent = PaymentMethodSaveConsentBehavior.Disabled(overrideAllowRedisplay = null),

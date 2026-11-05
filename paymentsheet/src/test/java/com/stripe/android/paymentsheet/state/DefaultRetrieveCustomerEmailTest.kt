@@ -182,7 +182,6 @@ internal class DefaultRetrieveCustomerEmailTest {
 
         val CHECKOUT_SESSION_METADATA = CustomerMetadata.CheckoutSession(
             clientSecret = CheckoutSessionClientSecret("cs_test_abc123_secret_test"),
-            sessionId = "cs_test_123",
             customerId = "cus_test_123",
             removePaymentMethod = PaymentMethodRemovePermission.None,
             saveConsent = PaymentMethodSaveConsentBehavior.Disabled(overrideAllowRedisplay = null),

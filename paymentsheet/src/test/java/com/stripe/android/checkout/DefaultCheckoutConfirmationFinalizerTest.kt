@@ -42,7 +42,7 @@ internal class DefaultCheckoutConfirmationFinalizerTest {
 
         val result = finalizer.finalize(confirmResponse)
 
-        assertThat(api.pollCalls.awaitItem()).isEqualTo(PollCall(SESSION_ID, clientSecret))
+        assertThat(api.pollCalls.awaitItem()).isEqualTo(PollCall(clientSecret))
         assertThat(result.getOrThrow()).isEqualTo(
             confirmResponse.copy(
                 status = CheckoutSessionResponse.Status.COMPLETE,
@@ -61,7 +61,7 @@ internal class DefaultCheckoutConfirmationFinalizerTest {
         val result = finalizer.finalize(confirmResponse)
 
         repeat(3) {
-            assertThat(api.pollCalls.awaitItem()).isEqualTo(PollCall(SESSION_ID, clientSecret))
+            assertThat(api.pollCalls.awaitItem()).isEqualTo(PollCall(clientSecret))
         }
         assertThat(result.isSuccess).isTrue()
         assertThat(elapsed()).isEqualTo(1000.milliseconds)
@@ -73,7 +73,7 @@ internal class DefaultCheckoutConfirmationFinalizerTest {
 
         val result = finalizer.finalize(confirmResponse)
 
-        assertThat(api.pollCalls.awaitItem()).isEqualTo(PollCall(SESSION_ID, clientSecret))
+        assertThat(api.pollCalls.awaitItem()).isEqualTo(PollCall(clientSecret))
         assertThat(result.getOrThrow()).isEqualTo(confirmResponse)
         assertThat(elapsed()).isEqualTo(30.seconds)
     }
@@ -94,7 +94,7 @@ internal class DefaultCheckoutConfirmationFinalizerTest {
         val result = finalizer.finalize(confirmResponse)
 
         repeat(2) {
-            assertThat(api.pollCalls.awaitItem()).isEqualTo(PollCall(SESSION_ID, clientSecret))
+            assertThat(api.pollCalls.awaitItem()).isEqualTo(PollCall(clientSecret))
         }
         assertThat(result.getOrThrow()).isEqualTo(
             confirmResponse.copy(
@@ -111,7 +111,7 @@ internal class DefaultCheckoutConfirmationFinalizerTest {
 
         val result = finalizer.finalize(confirmResponse)
 
-        assertThat(api.pollCalls.awaitItem()).isEqualTo(PollCall(SESSION_ID, clientSecret))
+        assertThat(api.pollCalls.awaitItem()).isEqualTo(PollCall(clientSecret))
         assertThat(result.exceptionOrNull()).hasMessageThat().isEqualTo("Checkout Session confirmation failed.")
     }
 
@@ -121,7 +121,7 @@ internal class DefaultCheckoutConfirmationFinalizerTest {
 
         val result = finalizer.finalize(confirmResponse)
 
-        assertThat(api.pollCalls.awaitItem()).isEqualTo(PollCall(SESSION_ID, clientSecret))
+        assertThat(api.pollCalls.awaitItem()).isEqualTo(PollCall(clientSecret))
         assertThat(errorReporter.awaitCall().errorEvent)
             .isEqualTo(ErrorReporter.UnexpectedErrorEvent.CHECKOUT_SESSION_CONFIRMATION_NOT_STARTED)
         assertThat(result.exceptionOrNull()).hasMessageThat().isEqualTo(
@@ -179,10 +179,9 @@ internal class DefaultCheckoutConfirmationFinalizerTest {
         val pollResults = ArrayDeque<suspend () -> Result<CheckoutClientPollResponse>>()
 
         suspend fun poll(
-            sessionId: String,
             clientSecret: CheckoutSessionClientSecret,
         ): Result<CheckoutClientPollResponse> {
-            pollCalls.add(PollCall(sessionId, clientSecret))
+            pollCalls.add(PollCall(clientSecret))
             return pollResults.removeFirst().invoke()
         }
 
@@ -192,7 +191,7 @@ internal class DefaultCheckoutConfirmationFinalizerTest {
         }
     }
 
-    private data class PollCall(val sessionId: String, val clientSecret: CheckoutSessionClientSecret)
+    private data class PollCall(val clientSecret: CheckoutSessionClientSecret)
 
     private val clientSecret = CheckoutSessionClientSecret(CLIENT_SECRET)
 

@@ -292,7 +292,6 @@ internal class EmbeddedSheetActivityCheckoutTest {
                 address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
             ),
             integrationMetadata = IntegrationMetadata.CheckoutSession(
-                id = checkoutSessionResponse.id,
                 instancesKey = "test_instances_key",
                 checkoutSessionResponse = checkoutSessionResponse,
                 collectedEmail = null,
@@ -300,7 +299,6 @@ internal class EmbeddedSheetActivityCheckoutTest {
         ).copy(
             customerMetadata = CustomerMetadata.CheckoutSession(
                 clientSecret = CheckoutSessionClientSecret("cs_test_abc123_secret_test"),
-                sessionId = checkoutSessionResponse.id,
                 customerId = requireNotNull(selectedCard.customerId),
                 removePaymentMethod = PaymentMethodRemovePermission.Full,
                 saveConsent = PaymentMethodSaveConsentBehavior.Legacy,

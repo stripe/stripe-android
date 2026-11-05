@@ -13,7 +13,6 @@ import java.math.BigDecimal
 
 @Parcelize
 internal data class CheckoutSessionResponse(
-    val id: String,
     val clientSecret: CheckoutSessionClientSecret,
     val configId: String?,
     val automaticPaymentMethodTypes: Boolean?,
@@ -41,6 +40,9 @@ internal data class CheckoutSessionResponse(
     val businessName: String?,
     val paymentResponse: PaymentResponse?,
 ) : StripeModel {
+    val id: String
+        get() = clientSecret.sessionId
+
     @Parcelize
     data class IntentReference(val id: String, val clientSecret: String) : StripeModel
 

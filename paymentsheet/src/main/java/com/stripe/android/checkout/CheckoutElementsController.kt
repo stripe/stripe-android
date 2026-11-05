@@ -362,7 +362,7 @@ class CheckoutElementsController @Inject internal constructor(
      */
     private suspend fun withCheckoutState(
         additionalStateMutations: CheckoutElementsControllerState.() -> CheckoutElementsControllerState = { this },
-        block: suspend CheckoutElementsControllerState.(sessionId: String) -> kotlin.Result<CheckoutSessionResponse>,
+        block: suspend CheckoutElementsControllerState.() -> kotlin.Result<CheckoutSessionResponse>,
     ): kotlin.Result<Unit> = withContext(Dispatchers.Main.immediate) {
         stateHolder.state
             ?: return@withContext kotlin.Result.failure(
@@ -378,7 +378,7 @@ class CheckoutElementsController @Inject internal constructor(
                 // Re-read the latest committed state inside the lock so serialized mutations
                 // build on each other's results rather than a stale snapshot.
                 val state = requireNotNull(stateHolder.state)
-                val response = state.block(state.checkoutSessionResponse.id).getOrThrow()
+                val response = state.block().getOrThrow()
                 val newState = state
                     .copy(checkoutSessionResponse = response)
                     .additionalStateMutations()
@@ -404,9 +404,8 @@ class CheckoutElementsController @Inject internal constructor(
     )
 
     internal suspend fun updateCurrency(currency: String): kotlin.Result<Unit> {
-        return withCheckoutState { sessionId ->
+        return withCheckoutState {
             checkoutSessionRepository.updateCurrency(
-                sessionId = sessionId,
                 clientSecret = checkoutSessionResponse.clientSecret,
                 currencyCode = currency,
             )

@@ -41,7 +41,6 @@ internal object CheckoutSessionResponseFactory {
     ) = CheckoutSessionResponse(
         clientSecret = CheckoutSessionClientSecret(clientSecret),
         paymentResponse = null,
-        id = id,
         configId = configId,
         automaticPaymentMethodTypes = automaticPaymentMethodTypes,
         currency = currency,

@@ -18,6 +18,16 @@ import java.math.BigDecimal
 @RunWith(TestParameterInjector::class)
 class CheckoutSessionResponseJsonParserTest {
     @Test
+    fun `derives session identity from the retained client secret`() {
+        val json = base().apply { remove("id") }
+
+        val result = requireNotNull(parse(json))
+
+        assertThat(result.id).isEqualTo(clientSecret.sessionId)
+        assertThat(result.clientSecret).isSameInstanceAs(clientSecret)
+    }
+
+    @Test
     fun `parses nested amounts without legacy flat amounts`() {
         val json = base()
         val item = item(json)
@@ -477,7 +487,6 @@ class CheckoutSessionResponseJsonParserTest {
     fun `rejects legacy and malformed response boundaries`() {
         val mutations: List<(JSONObject) -> Unit> = listOf(
             { it.remove("ui_mode") },
-            { it.remove("id") },
             { it.getJSONObject("merchant_info").remove("country") },
             { it.remove("ordered_payment_method_types_and_wallets") },
             { it.put("items", JSONArray()) },
@@ -567,7 +576,6 @@ class CheckoutSessionResponseJsonParserTest {
         val elements = requireNotNull(result.elementsSession)
         val intent = elements.stripeIntent as PaymentIntent
 
-        assertThat(result.clientSecret).isSameInstanceAs(clientSecret)
         assertThat(elements.orderedPaymentMethodTypesAndWallets)
             .containsExactly("cashapp", "google_pay", "card", "link", "blik", "vipps").inOrder()
         assertThat(intent.paymentMethodTypes).containsExactly("cashapp", "card", "link", "blik").inOrder()

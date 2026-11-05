@@ -21,7 +21,6 @@ internal fun interface CheckoutConfirmationFinalizer {
 
 internal class DefaultCheckoutConfirmationFinalizer internal constructor(
     private val poll: suspend (
-        sessionId: String,
         clientSecret: CheckoutSessionClientSecret,
     ) -> Result<CheckoutClientPollResponse>,
     private val errorReporter: ErrorReporter,
@@ -65,7 +64,7 @@ internal class DefaultCheckoutConfirmationFinalizer internal constructor(
         var lastResponse: CheckoutClientPollResponse? = null
         withTimeoutOrNull(POLL_TIMEOUT) {
             while (true) {
-                poll(response.id, response.clientSecret).onSuccess { lastResponse = it }
+                poll(response.clientSecret).onSuccess { lastResponse = it }
                 val status = lastResponse?.confirmationStatus
                 if (status != null && status != ConfirmationStatus.PENDING) break
                 delay(POLL_INTERVAL)

@@ -220,7 +220,6 @@ class TapToAddCollectionHandlerTest {
         ).copy(
             customerMetadata = CustomerMetadata.CheckoutSession(
                 clientSecret = CheckoutSessionClientSecret("cs_test_abc123_secret_test"),
-                sessionId = "cs_123",
                 customerId = "cus_123",
                 removePaymentMethod = PaymentMethodRemovePermission.Full,
                 saveConsent = PaymentMethodSaveConsentBehavior.Disabled(overrideAllowRedisplay = null),

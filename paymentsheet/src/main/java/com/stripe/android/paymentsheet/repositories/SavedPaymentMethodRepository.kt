@@ -48,7 +48,6 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
     ): Result<PaymentMethod> = when (customerMetadata) {
         is CustomerMetadata.CheckoutSession -> {
             checkoutSessionRepository.detachPaymentMethod(
-                sessionId = customerMetadata.sessionId,
                 clientSecret = customerMetadata.clientSecret,
                 paymentMethodId = paymentMethodId,
             ).map {
@@ -81,7 +80,6 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
     ): Result<PaymentMethod> = when (customerMetadata) {
         is CustomerMetadata.CheckoutSession -> {
             checkoutSessionRepository.updatePaymentMethod(
-                sessionId = customerMetadata.sessionId,
                 clientSecret = customerMetadata.clientSecret,
                 paymentMethodId = paymentMethodId,
                 params = params,

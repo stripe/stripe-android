@@ -222,8 +222,10 @@ internal class CheckoutElementsControllerTest {
     fun `configure parses session id from client secret`() = runConfigureScenario(
         clientSecret = "cs_test_custom_secret_example",
         networkSetup = {
-            // The request must hit the path for the parsed session id, not the response's id.
-            networkRule.checkoutInit(sessionId = "cs_test_custom", responseFactory = ::successResponse)
+            networkRule.checkoutInit(
+                sessionId = "cs_test_custom",
+                responseFactory = successResponseFactory { json -> json.put("id", "cs_test_custom") },
+            )
         },
     ) {
         assertThat(result).isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
@@ -1681,7 +1683,7 @@ internal class CheckoutElementsControllerTest {
         }
 
     @Test
-    fun `concurrent mutations are serialized so the second uses the first result's session id`() =
+    fun `concurrent mutations are serialized so the second uses the first result's tax state`() =
         runMutationScenario {
             val firstRequest = Turbine<Unit>()
             val secondRequest = Turbine<Unit>()
@@ -1693,16 +1695,15 @@ internal class CheckoutElementsControllerTest {
                 check(releaseFirstResponse.await(10, TimeUnit.SECONDS)) {
                     "Timed out waiting to release the first mutation response"
                 }
-                successResponseFactory { json -> json.put("id", "cs_test_after_promo") }.invoke(response)
+                successResponseFactory(automaticTaxFor("shipping")).invoke(response)
             }
-            // The second mutation must target the session id produced by the first, proving the
-            // mutex serialized them (an unserialized call would hit the original id and fail).
+            // Only the first mutation's response enables the second mutation's tax update.
             networkRule.checkoutUpdate(
-                bodyPart("adaptive_pricing[currency]", "eur"),
-                sessionId = "cs_test_after_promo",
+                bodyPart("tax_region[country]", "US"),
+                bodyPart("tax_region[postal_code]", "80202"),
             ) { response ->
                 secondRequest.add(Unit)
-                successResponseFactory { json -> json.put("id", "cs_test_after_promo") }.invoke(response)
+                successResponseFactory(automaticTaxFor("shipping")).invoke(response)
             }
 
             fromBackgroundThread {
@@ -1711,7 +1712,7 @@ internal class CheckoutElementsControllerTest {
                     try {
                         firstRequest.awaitItem()
                         val second = async(start = CoroutineStart.UNDISPATCHED) {
-                            controller.updateCurrency("eur")
+                            controller.updateShippingAddress(name = "John", address = fullAddress)
                         }
                         // The undispatched call queues its Main work before this barrier. Once
                         // the barrier runs, the second mutation has reached the coordinator.
@@ -1723,7 +1724,8 @@ internal class CheckoutElementsControllerTest {
 
                         assertThat(first.await())
                             .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
-                        second.await().getOrThrow()
+                        assertThat(second.await())
+                            .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
                         secondRequest.awaitItem()
                     } finally {
                         releaseFirstResponse.countDown()
@@ -1731,7 +1733,7 @@ internal class CheckoutElementsControllerTest {
                 }
             }
 
-            assertThat(controller.session.value?.id).isEqualTo("cs_test_after_promo")
+            assertThat(committedState().collectedDetails.shippingAddress).isEqualTo(fullAddress.build())
             firstRequest.ensureAllEventsConsumed()
             secondRequest.ensureAllEventsConsumed()
         }

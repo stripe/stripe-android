@@ -1173,7 +1173,6 @@ class CheckoutSessionConfirmationInterceptorTest {
         val interceptor = CheckoutSessionConfirmationInterceptor(
             integrationMetadata = IntegrationMetadata.CheckoutSession(
                 collectedEmail = collectedEmail,
-                id = checkoutSessionResponse.id,
                 instancesKey = "test_key",
                 checkoutSessionResponse = checkoutSessionResponse,
             ),

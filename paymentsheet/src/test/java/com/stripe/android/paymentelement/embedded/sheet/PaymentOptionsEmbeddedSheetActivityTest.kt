@@ -712,7 +712,6 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
         return PaymentMethodMetadataFactory.create(
             integrationMetadata = IntegrationMetadata.CheckoutSession(
                 collectedEmail = null,
-                id = response.id,
                 instancesKey = "test_instances_key",
                 checkoutSessionResponse = response,
             ),
