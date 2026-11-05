@@ -38,38 +38,35 @@ internal class CheckoutCardIntegrationTest {
         )
 
     @Test
-    fun testSuccessfulCardPayment() = runCheckoutIntegrationTest(
-        composeRule = composeRule,
-        merchant = "US",
-        sessionParams = cardOnlySessionParams(),
-        configuration = configuration,
-    ) {
-        contentPage.clickOnLpm("card")
-        formPage.fillOutCardDetails(newCardNumber = "4242424242424242")
-        formPage.clickPrimaryButton()
-
-        val result = confirmAndAwaitResult()
-
+    fun testSuccessfulCardPayment() {
+        val result = runScenario {
+            contentPage.clickOnLpm("card")
+            formPage.fillOutCardDetails(newCardNumber = "4242424242424242")
+            formPage.clickPrimaryButton()
+        }
         assertThat(result).isInstanceOf(CheckoutElementsController.Result.Completed::class.java)
     }
 
     @Test
-    fun testDeclinedCardReportsFailure() = runCheckoutIntegrationTest(
-        composeRule = composeRule,
-        merchant = "US",
-        sessionParams = cardOnlySessionParams(),
-        configuration = configuration,
-    ) {
-        contentPage.clickOnLpm("card")
-        formPage.fillOutCardDetails(newCardNumber = "4000000000000002")
-        formPage.clickPrimaryButton()
-
-        val result = confirmAndAwaitResult()
-
+    fun testDeclinedCardReportsFailure() {
+        val result = runScenario {
+            contentPage.clickOnLpm("card")
+            formPage.fillOutCardDetails(newCardNumber = "4000000000000002")
+            formPage.clickPrimaryButton()
+        }
         assertThat(result).isInstanceOf(CheckoutElementsController.Result.Failed::class.java)
         assertThat((result as CheckoutElementsController.Result.Failed).displayMessage)
             .contains("Your card was declined")
     }
+
+    private fun runScenario(block: CheckoutIntegrationTestContext.() -> Unit) =
+        runCheckoutIntegrationTest(
+            composeRule = composeRule,
+            merchant = "US",
+            sessionParams = cardOnlySessionParams(),
+            configuration = configuration,
+            block = block,
+        )
 
     private fun cardOnlySessionParams(): JsonObject {
         val lineItem = buildJsonObject {

@@ -29,7 +29,7 @@ internal fun runCheckoutIntegrationTest(
     sessionParams: JsonObject,
     configuration: CheckoutElementsController.Configuration,
     block: CheckoutIntegrationTestContext.() -> Unit,
-) {
+): CheckoutElementsController.Result {
     val backend = CheckoutPlaygroundBackend(
         baseUrl = "https://stp-mobile-playground-backend-v7.stripedemos.com/",
         merchant = merchant,
@@ -41,7 +41,7 @@ internal fun runCheckoutIntegrationTest(
     }
     val checkoutResult = CompletableDeferred<CheckoutElementsController.Result>()
 
-    ActivityScenario.launch(MainActivity::class.java).use { scenario ->
+    return ActivityScenario.launch(MainActivity::class.java).use { scenario ->
         scenario.moveToState(Lifecycle.State.CREATED)
         PaymentConfiguration.init(ApplicationProvider.getApplicationContext(), publishableKey)
 
@@ -74,9 +74,12 @@ internal fun runCheckoutIntegrationTest(
 
             CheckoutIntegrationTestContext(
                 composeRule = composeRule,
-                presenter = presenter,
-                checkoutResult = checkoutResult,
             ).block()
+
+            presenter.confirm()
+            runBlocking {
+                withTimeout(OPERATION_TIMEOUT) { checkoutResult.await() }
+            }
         } finally {
             scenario.onActivity { controller.destroy() }
         }
@@ -85,18 +88,9 @@ internal fun runCheckoutIntegrationTest(
 
 internal class CheckoutIntegrationTestContext(
     composeRule: ComposeTestRule,
-    private val presenter: CheckoutElementsPresenter,
-    private val checkoutResult: CompletableDeferred<CheckoutElementsController.Result>,
 ) {
     val contentPage = EmbeddedContentPage(composeRule)
     val formPage = EmbeddedFormPage(composeRule)
-
-    fun confirmAndAwaitResult(): CheckoutElementsController.Result {
-        presenter.confirm()
-        return runBlocking {
-            withTimeout(OPERATION_TIMEOUT) { checkoutResult.await() }
-        }
-    }
 }
 
-private val OPERATION_TIMEOUT = 60.seconds
+private val OPERATION_TIMEOUT = 30.seconds
