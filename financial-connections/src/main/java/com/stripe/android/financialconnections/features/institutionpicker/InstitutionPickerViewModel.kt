@@ -222,9 +222,14 @@ internal class InstitutionPickerViewModel @AssistedInject constructor(
                 // This implies that we have shown the institution picker first and haven't shown the consent
                 // pane yet. Mark the institution as selected and let the backend guide us to the consent pane.
                 val response = selectInstitution.invoke(institution)
+                val nextPane = response.manifest.nextPane
                 navigationManager.tryNavigateTo(
-                    route = response.manifest.nextPane.destination(referrer = PANE),
-                    popUpTo = PopUpToBehavior.Current(inclusive = true),
+                    route = nextPane.destination(referrer = PANE),
+                    // Streamlined consent is tied to the selected institution, so we
+                    // let the user go back to the institution picker to choose another one.
+                    popUpTo = PopUpToBehavior.Current(inclusive = true).takeIf {
+                        nextPane != Pane.STREAMLINED_CONSENT
+                    },
                 )
             }
         }.execute { async ->

@@ -34,6 +34,7 @@ import com.stripe.android.financialconnections.features.notice.NoticeSheet
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthScreen
 import com.stripe.android.financialconnections.features.reset.ResetScreen
 import com.stripe.android.financialconnections.features.streamlinedconsent.IDConsentContentScreen
+import com.stripe.android.financialconnections.features.streamlinedconsent.StreamlinedConsentScreen
 import com.stripe.android.financialconnections.features.success.SuccessScreen
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.bottomsheet.LifecycleAwareContent
@@ -106,6 +107,12 @@ internal sealed class Destination(
         route = Pane.ID_CONSENT_CONTENT.value,
         logPaneLaunched = true,
         composable = { IDConsentContentScreen() },
+    )
+
+    data object StreamlinedConsent : Destination(
+        route = Pane.STREAMLINED_CONSENT.value,
+        logPaneLaunched = true,
+        composable = { StreamlinedConsentScreen() },
     )
 
     data object PartnerAuthDrawer : Destination(
