@@ -30,6 +30,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.ThemeMode
 import com.stripe.android.financialconnections.browser.BrowserManager
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetNativeActivityArgs
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
@@ -50,7 +51,6 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.Theme
-import com.stripe.android.financialconnections.ui.theme.toNightMode
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.navigation.NavigationEffects
@@ -81,7 +81,6 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         val args = getArgs(intent)
-        args?.let { delegate.localNightMode = it.configuration.themeMode.toNightMode() }
         super.onCreate(savedInstanceState)
 
         if (args == null) {
@@ -330,16 +329,17 @@ private class ActivityVisibilityObserver(
 }
 
 private val FinancialConnectionsSheetNativeActivityArgs.theme: Theme
-    get() = initialSyncResponse.manifest.theme?.toLocalTheme() ?: Theme.default
+    get() = initialSyncResponse.manifest.theme.toLocalTheme(configuration.themeMode)
 
-internal fun FinancialConnectionsSessionManifest.Theme.toLocalTheme(): Theme {
+internal fun FinancialConnectionsSessionManifest.Theme?.toLocalTheme(themeMode: ThemeMode): Theme {
     return when (this) {
+        null,
         FinancialConnectionsSessionManifest.Theme.LIGHT,
         FinancialConnectionsSessionManifest.Theme.DASHBOARD_LIGHT -> {
-            Theme.DefaultLight
+            Theme.DefaultLight(themeMode)
         }
         FinancialConnectionsSessionManifest.Theme.LINK_LIGHT -> {
-            Theme.LinkLight
+            Theme.LinkLight(themeMode)
         }
     }
 }

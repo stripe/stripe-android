@@ -3,6 +3,9 @@ package com.stripe.android.financialconnections.ui.theme
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
+import android.content.res.Configuration
+import android.content.res.Resources
+import android.view.ContextThemeWrapper
 import android.view.Window
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
@@ -15,10 +18,15 @@ import androidx.compose.material.RippleConfiguration
 import androidx.compose.material.RippleDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
@@ -29,30 +37,37 @@ import androidx.compose.ui.window.DialogWindowProvider
 import androidx.core.view.WindowCompat
 import androidx.navigation.compose.rememberNavController
 import com.stripe.android.financialconnections.R
+import com.stripe.android.financialconnections.ThemeMode
 import com.stripe.android.financialconnections.ui.LocalNavHostController
 import com.stripe.android.model.LinkBrand
 
-internal enum class Theme {
-    DefaultLight,
-    LinkLight;
+@Immutable
+internal sealed interface Theme {
+    val mode: ThemeMode
+
+    @Immutable
+    data class DefaultLight(override val mode: ThemeMode) : Theme
+
+    @Immutable
+    data class LinkLight(override val mode: ThemeMode) : Theme
 
     val colors: FinancialConnectionsColors
         @Composable
         get() = when (this) {
-            DefaultLight -> if (isSystemInDarkTheme()) DarkThemeColors else Colors
-            LinkLight -> if (isSystemInDarkTheme()) InstantDebitsDarkModeColors else InstantDebitsColors
+            is DefaultLight -> if (isSystemInDarkTheme()) DarkThemeColors else Colors
+            is LinkLight -> if (isSystemInDarkTheme()) InstantDebitsDarkModeColors else InstantDebitsColors
         }
 
     fun icon(linkBrand: LinkBrand): Int = when (this) {
-        DefaultLight -> R.drawable.stripe_logo
-        LinkLight -> when (linkBrand) {
+        is DefaultLight -> R.drawable.stripe_logo
+        is LinkLight -> when (linkBrand) {
             LinkBrand.Onelink -> R.drawable.stripe_onelink_logo_monochrome
             LinkBrand.Link -> R.drawable.stripe_link_logo_monochrome
         }
     }
 
     companion object {
-        val default: Theme = DefaultLight
+        val default: Theme = DefaultLight(ThemeMode.Automatic)
     }
 }
 
@@ -257,6 +272,27 @@ internal fun FinancialConnectionsTheme(
     theme: Theme = Theme.default,
     content: @Composable () -> Unit
 ) {
+    val isDark = theme.mode.isDarkTheme(isSystemInDarkTheme())
+    val baseContext = LocalContext.current
+    val configuration = LocalConfiguration.current
+    val inspectionMode = LocalInspectionMode.current
+    val styleContext = remember(baseContext, configuration, isDark, inspectionMode) {
+        baseContext.withUiMode(configuration, isDark, inspectionMode)
+    }
+
+    CompositionLocalProvider(
+        LocalContext provides styleContext,
+        LocalConfiguration provides styleContext.resources.configuration,
+    ) {
+        FinancialConnectionsThemeContent(theme, content)
+    }
+}
+
+@Composable
+private fun FinancialConnectionsThemeContent(
+    theme: Theme,
+    content: @Composable () -> Unit
+) {
     CompositionLocalProvider(
         LocalNavHostController provides rememberNavController(),
         LocalTypography provides Typography,
@@ -288,6 +324,33 @@ internal fun FinancialConnectionsTheme(
                 }
             }
         )
+    }
+}
+
+private fun Context.withUiMode(
+    configuration: Configuration,
+    isDark: Boolean,
+    inspectionMode: Boolean,
+): Context {
+    val config = Configuration(configuration).apply {
+        val nightMode = if (isDark) Configuration.UI_MODE_NIGHT_YES else Configuration.UI_MODE_NIGHT_NO
+        uiMode = (uiMode and Configuration.UI_MODE_NIGHT_MASK.inv()) or nightMode
+    }
+    if (config == resources.configuration) {
+        return this
+    }
+
+    return object : ContextThemeWrapper(this, theme) {
+        override fun getResources(): Resources {
+            @Suppress("DEPRECATION")
+            if (inspectionMode) {
+                val baseResources = this@withUiMode.resources
+                return Resources(baseResources.assets, baseResources.displayMetrics, config)
+            }
+            return super.getResources()
+        }
+    }.apply {
+        applyOverrideConfiguration(config)
     }
 }
 

@@ -27,7 +27,11 @@ internal data class FinancialConnectionsSheetState(
 
     val theme: Theme
         // We can't rely on the value coming from the `manifest` here, because its initial value will be null
-        get() = if (isInstantDebits) LinkLight else DefaultLight
+        get() = if (isInstantDebits) {
+            LinkLight(initialArgs.configuration.themeMode)
+        } else {
+            DefaultLight(initialArgs.configuration.themeMode)
+        }
 
     val sessionSecret: String
         get() = initialArgs.configuration.financialConnectionsSessionClientSecret
