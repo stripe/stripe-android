@@ -183,14 +183,15 @@ internal class OnrampInteractor @Inject constructor(
     }
 
     suspend fun authenticateUserWithToken(linkAuthTokenClientSecret: String): OnrampTokenAuthenticationResult {
+        val operation = Operation.AuthenticateUserWithAuthToken
         val sessionToken = _state.value.sessionToken
         return when (
             val result = linkController.authenticateWithToken(linkAuthTokenClientSecret)
         ) {
             is LinkController.AuthenticateWithTokenResult.Success -> {
                 if (_state.value.sessionToken !== sessionToken) {
-                    val error = mapError(Operation.AuthenticateUserWithAuthToken, SessionChangedException())
-                    trackError(Operation.AuthenticateUserWithAuthToken, error)
+                    val error = mapError(operation, SessionChangedException())
+                    trackError(operation, error)
                     return OnrampTokenAuthenticationResult.Failed(error)
                 }
                 val secret = consumerSessionClientSecret()
@@ -202,8 +203,8 @@ internal class OnrampInteractor @Inject constructor(
                                     it.copy(cryptoCustomerId = customerResponse.id)
                                 }
                                 if (!updated) {
-                                    val error = mapError(Operation.AuthenticateUserWithAuthToken, SessionChangedException())
-                                    trackError(Operation.AuthenticateUserWithAuthToken, error)
+                                    val error = mapError(operation, SessionChangedException())
+                                    trackError(operation, error)
                                     return OnrampTokenAuthenticationResult.Failed(error)
                                 }
 
@@ -214,23 +215,20 @@ internal class OnrampInteractor @Inject constructor(
                                 OnrampTokenAuthenticationResult.Completed()
                             },
                             onFailure = { error ->
-                                val mappedError = mapError(Operation.AuthenticateUserWithAuthToken, error)
-                                trackError(Operation.AuthenticateUserWithAuthToken, mappedError)
+                                val mappedError = mapError(operation, error)
+                                trackError(operation, mappedError)
                                 OnrampTokenAuthenticationResult.Failed(mappedError)
                             }
                         )
                 } else {
-                    val error = mapError(
-                        operation = Operation.AuthenticateUserWithAuthToken,
-                        error = MissingConsumerSecretException(),
-                    )
-                    trackError(Operation.AuthenticateUserWithAuthToken, error)
+                    val error = mapError(operation, MissingConsumerSecretException())
+                    trackError(operation, error)
                     OnrampTokenAuthenticationResult.Failed(error)
                 }
             }
             is LinkController.AuthenticateWithTokenResult.Failed -> {
-                val error = mapError(Operation.AuthenticateUserWithAuthToken, result.error)
-                trackError(Operation.AuthenticateUserWithAuthToken, error)
+                val error = mapError(operation, result.error)
+                trackError(operation, error)
                 OnrampTokenAuthenticationResult.Failed(error)
             }
         }
