@@ -32,7 +32,7 @@ internal class CurrentLinkBrandTest {
         viewEffect = null,
         completed = false,
         initialPane = FinancialConnectionsSessionManifest.Pane.CONSENT,
-        theme = Theme.LinkLight,
+        theme = Theme.LinkLight(ThemeMode.Automatic),
         linkBrand = LinkBrand.Link,
         isLinkWithStripe = true,
         manualEntryUsesMicrodeposits = false,

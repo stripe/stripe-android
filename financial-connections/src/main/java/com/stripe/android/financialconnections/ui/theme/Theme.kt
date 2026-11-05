@@ -15,6 +15,7 @@ import androidx.compose.material.RippleConfiguration
 import androidx.compose.material.RippleDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
@@ -29,30 +30,37 @@ import androidx.compose.ui.window.DialogWindowProvider
 import androidx.core.view.WindowCompat
 import androidx.navigation.compose.rememberNavController
 import com.stripe.android.financialconnections.R
+import com.stripe.android.financialconnections.ThemeMode
 import com.stripe.android.financialconnections.ui.LocalNavHostController
 import com.stripe.android.model.LinkBrand
 
-internal enum class Theme {
-    DefaultLight,
-    LinkLight;
+@Immutable
+internal sealed interface Theme {
+    val mode: ThemeMode
+
+    @Immutable
+    data class DefaultLight(override val mode: ThemeMode) : Theme
+
+    @Immutable
+    data class LinkLight(override val mode: ThemeMode) : Theme
 
     val colors: FinancialConnectionsColors
         @Composable
         get() = when (this) {
-            DefaultLight -> if (isSystemInDarkTheme()) DarkThemeColors else Colors
-            LinkLight -> if (isSystemInDarkTheme()) InstantDebitsDarkModeColors else InstantDebitsColors
+            is DefaultLight -> if (isSystemInDarkTheme()) DarkThemeColors else Colors
+            is LinkLight -> if (isSystemInDarkTheme()) InstantDebitsDarkModeColors else InstantDebitsColors
         }
 
     fun icon(linkBrand: LinkBrand): Int = when (this) {
-        DefaultLight -> R.drawable.stripe_logo
-        LinkLight -> when (linkBrand) {
+        is DefaultLight -> R.drawable.stripe_logo
+        is LinkLight -> when (linkBrand) {
             LinkBrand.Onelink -> R.drawable.stripe_onelink_logo_monochrome
             LinkBrand.Link -> R.drawable.stripe_link_logo_monochrome
         }
     }
 
     companion object {
-        val default: Theme = DefaultLight
+        val default: Theme = DefaultLight(ThemeMode.Automatic)
     }
 }
 

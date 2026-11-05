@@ -46,6 +46,7 @@ import androidx.compose.ui.tooling.preview.datasource.CollectionPreviewParameter
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.stripe.android.financialconnections.ThemeMode
 import com.stripe.android.financialconnections.features.common.LoadingSpinner
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton.Type
@@ -222,7 +223,9 @@ internal object FinancialConnectionsButton {
     }
 }
 
-internal class ThemePreviewParameterProvider : CollectionPreviewParameterProvider<Theme>(Theme.entries)
+internal class ThemePreviewParameterProvider : CollectionPreviewParameterProvider<Theme>(
+    listOf(Theme.DefaultLight(ThemeMode.Automatic), Theme.LinkLight(ThemeMode.Automatic))
+)
 
 @Preview(group = "Components", name = "Button - primary - idle")
 @Composable
