@@ -282,6 +282,7 @@ internal class DefaultVerticalModeFormInteractorTest {
                     loginState = LinkState.LoginState.LoggedOut,
                     signupMode = null,
                 ),
+                isInstantDebitsOnboardingEnabled = true,
                 paymentMethodIncentive = incentive,
             ),
             paymentMethodCode = PaymentMethod.Type.Link.code,

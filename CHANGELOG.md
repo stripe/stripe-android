@@ -3,6 +3,9 @@
 NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
 
+### PaymentSheet
+* [FIXED][15315](https://github.com/stripe/stripe-android/pull/15315) Fixed an issue that caused the Bank payment method to be hidden unnecessarily.
+
 ## 23.25.2 - 2026-11-04
 
 ### PaymentSheet

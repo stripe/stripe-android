@@ -1291,6 +1291,7 @@ internal class PaymentSheetActivityTest {
                         loginState = LinkState.LoginState.LoggedOut,
                         signupMode = null,
                     ).takeIf { isLinkAvailable },
+                    isInstantDebitsOnboardingEnabled = isLinkAvailable,
                     delay = loadDelay,
                     paymentSelection = initialPaymentSelection,
                     cbcEligibility = cbcEligibility,

@@ -31,6 +31,7 @@ internal class FakePaymentElementLoader(
     private val isGooglePayAvailable: Boolean = false,
     private val delay: Duration = Duration.ZERO,
     private val linkState: LinkState? = null,
+    private val isInstantDebitsOnboardingEnabled: Boolean = false,
     private val validationError: PaymentSheetLoadingException? = null,
     private val cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
     private val passiveCaptchaParams: PassiveCaptchaParams? = null,
@@ -73,6 +74,7 @@ internal class FakePaymentElementLoader(
             isGooglePayReady = isGooglePayAvailable,
             cbcEligibility = cbcEligibility,
             linkState = linkState,
+            isInstantDebitsOnboardingEnabled = isInstantDebitsOnboardingEnabled,
             passiveCaptchaParams = passiveCaptchaParams,
             clientAttributionMetadata =
                 clientAttributionMetadata ?: PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
