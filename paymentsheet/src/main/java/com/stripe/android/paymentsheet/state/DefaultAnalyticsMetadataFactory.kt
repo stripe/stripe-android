@@ -264,6 +264,7 @@ internal class DefaultAnalyticsMetadataFactory @Inject constructor(
                 )
                 put("adaptive_pricing_active", SimpleBoolean(response.adaptivePricingInfo?.isActive == true))
                 put("automatic_tax_enabled", SimpleBoolean(response.automaticTaxEnabled))
+                putNonEmpty("ordered_lpms", response.elementsSession?.orderedPaymentMethodTypesAndWallets)
             }
         }.let { AnalyticsMetadata(it) }
     }

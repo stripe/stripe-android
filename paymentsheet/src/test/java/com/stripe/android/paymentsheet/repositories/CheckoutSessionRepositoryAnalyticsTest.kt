@@ -66,7 +66,6 @@ class CheckoutSessionRepositoryAnalyticsTest {
             analyticsPayloadField("merchant_display_name", "true"),
             analyticsPayloadField("defaults[email]", "true"),
             analyticsPayloadField("defaults[billing_details][name]", "false"),
-            analyticsPayloadField("ordered_lpms", "card,link,apple_pay,google_pay,cashapp"),
             hasQueryParam("duration"),
         )
         networkRule.checkoutInit { response ->
@@ -332,6 +331,7 @@ class CheckoutSessionRepositoryAnalyticsTest {
             "elements_session_config_id" to "cs_config_123",
             "adaptive_pricing_active" to false,
             "automatic_tax_enabled" to false,
+            "ordered_lpms" to "card,link,apple_pay,google_pay,cashapp",
         )
     }
 }
