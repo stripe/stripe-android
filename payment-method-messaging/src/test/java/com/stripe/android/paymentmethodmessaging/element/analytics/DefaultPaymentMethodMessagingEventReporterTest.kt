@@ -23,6 +23,7 @@ import com.stripe.android.paymentmethodmessaging.element.analytics.PaymentMethod
 import com.stripe.android.paymentmethodmessaging.element.analytics.PaymentMethodMessagingEvent.Companion.PMME_LOAD_SUCCEEDED
 import com.stripe.android.paymentmethodmessaging.element.analytics.PaymentMethodMessagingEvent.Companion.PMME_TAPPED
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest

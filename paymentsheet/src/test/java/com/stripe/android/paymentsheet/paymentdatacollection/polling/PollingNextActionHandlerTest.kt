@@ -4,7 +4,8 @@ import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.google.testing.junit.testparameterinjector.TestParameterValuesProvider
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.ApiKeyFixtures
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
@@ -20,12 +21,15 @@ internal class PollingNextActionHandlerTest {
         @TestParameter(valuesProvider = ExistingPaymentMethodCaseProvider::class)
         testCase: ExistingPaymentMethodCase,
     ) {
-        val requestOptions = ApiRequest.Options("pk_test_123")
+        val apiConfiguration = ApiConfiguration.State(
+            publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+            stripeAccountId = ApiKeyFixtures.FAKE_ACCOUNT_ID,
+        )
 
         val args = PollingNextActionHandler().getArgsForPaymentMethod(
             actionable = createIntent(testCase.paymentMethodType),
             statusBarColor = 0x123456,
-            requestOptions = requestOptions,
+            apiConfiguration = apiConfiguration,
             currentTimeMillis = 1_700_000_000_000,
         )
 
@@ -37,17 +41,20 @@ internal class PollingNextActionHandlerTest {
         assertThat(args.ctaText).isEqualTo(testCase.ctaText)
         assertThat(args.qrCodeUrl).isNull()
         assertThat(args.paymentMethodType).isEqualTo(testCase.paymentMethodType.code)
-        assertThat(args.requestOptions).isSameInstanceAs(requestOptions)
+        assertThat(args.apiConfiguration).isSameInstanceAs(apiConfiguration)
     }
 
     @Test
     fun `Pix uses hosted instructions and expiration time`() {
-        val requestOptions = ApiRequest.Options("pk_test_123")
+        val apiConfiguration = ApiConfiguration.State(
+            publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+            stripeAccountId = ApiKeyFixtures.FAKE_ACCOUNT_ID,
+        )
 
         val args = PollingNextActionHandler().getArgsForPaymentMethod(
             actionable = createPixIntent(expiresAt = 1_700_003_600),
             statusBarColor = 0x123456,
-            requestOptions = requestOptions,
+            apiConfiguration = apiConfiguration,
             currentTimeMillis = 1_700_000_000_000,
         )
 
@@ -59,7 +66,7 @@ internal class PollingNextActionHandlerTest {
         assertThat(args.ctaText).isEqualTo(R.string.stripe_pix_confirm_payment)
         assertThat(args.qrCodeUrl).isEqualTo("https://payments.stripe.com/pix/instructions/test")
         assertThat(args.paymentMethodType).isEqualTo("pix")
-        assertThat(args.requestOptions).isSameInstanceAs(requestOptions)
+        assertThat(args.apiConfiguration).isSameInstanceAs(apiConfiguration)
     }
 
     @Test
@@ -67,7 +74,10 @@ internal class PollingNextActionHandlerTest {
         val args = PollingNextActionHandler().getArgsForPaymentMethod(
             actionable = createPixIntent(expiresAt = null),
             statusBarColor = null,
-            requestOptions = ApiRequest.Options("pk_test_123"),
+            apiConfiguration = ApiConfiguration.State(
+                publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                stripeAccountId = ApiKeyFixtures.FAKE_ACCOUNT_ID,
+            ),
             currentTimeMillis = 1_700_000_000_000,
         )
 
@@ -79,7 +89,10 @@ internal class PollingNextActionHandlerTest {
         val args = PollingNextActionHandler().getArgsForPaymentMethod(
             actionable = createPixIntent(expiresAt = 1_699_999_999),
             statusBarColor = null,
-            requestOptions = ApiRequest.Options("pk_test_123"),
+            apiConfiguration = ApiConfiguration.State(
+                publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                stripeAccountId = ApiKeyFixtures.FAKE_ACCOUNT_ID,
+            ),
             currentTimeMillis = 1_700_000_000_000,
         )
 

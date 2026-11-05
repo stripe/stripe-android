@@ -444,7 +444,7 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
     }
 
     @Test
-    fun `sets attachDefaultsToPaymentMethod to true`() {
+    fun `does not attach defaults to payment method`() {
         val configuration = controllerConfiguration()
 
         val result = factory().create(
@@ -454,7 +454,7 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
             collectedDetails = collectedDetails(),
         )
 
-        assertThat(result.billingDetailsCollectionConfiguration.attachDefaultsToPaymentMethod).isTrue()
+        assertThat(result.billingDetailsCollectionConfiguration.attachDefaultsToPaymentMethod).isFalse()
     }
 
     @Test

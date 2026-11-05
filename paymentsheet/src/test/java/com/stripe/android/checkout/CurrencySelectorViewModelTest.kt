@@ -37,18 +37,15 @@ internal class CurrencySelectorViewModelTest {
 
     @Test
     fun `init fires currency selector init analytics event`() = runScenario {
-        val requests = fakeAnalyticsRequestExecutor.getExecutedRequests()
-        assertThat(requests).hasSize(1)
-        assertThat(requests.first().params["event"])
-            .isEqualTo("elements.adaptive_pricing.currency_selector_init")
+        fakeAnalyticsRequestExecutor.awaitEvent("elements.adaptive_pricing.currency_selector_init")
+        fakeAnalyticsRequestExecutor.validate()
     }
 
     @Test
     fun `init only fires analytics event once across config changes`() = runScenario(
         savedStateHandle = SavedStateHandle(mapOf("currency_selector_initialized" to true)),
     ) {
-        val requests = fakeAnalyticsRequestExecutor.getExecutedRequests()
-        assertThat(requests).isEmpty()
+        fakeAnalyticsRequestExecutor.validate()
     }
 
     @Test

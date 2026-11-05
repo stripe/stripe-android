@@ -40,7 +40,7 @@
   <!-- Text for choosing a photo from gallery -->
   <string name="stripe_choose_file">Chọn ảnh</string>
   <!-- Close button text -->
-  <string name="stripe_close_button_text">đóng</string>
+  <string name="stripe_close_button_text">Đóng</string>
   <!-- Button to complete with test data -->
   <string name="stripe_complete_with_test_data">Hoàn tất với dữ liệu kiểm tra</string>
   <!-- Description for complete button on test mode -->
@@ -169,7 +169,7 @@
   <!-- Instructional text when user needs remove anything blocking the document -->
   <string name="stripe_keep_fully_visible">Không thấy rõ thông tin chi tiết</string>
   <!-- Continue button text -->
-  <string name="stripe_kontinue">tiếp tục</string>
+  <string name="stripe_kontinue">Tiếp tục</string>
   <!-- Label for the ID field to collect last 4 of social security number for US ID -->
   <string name="stripe_last_4_of_ssn">4 số cuối của số An Sinh Xã Hội</string>
   <!-- Label for last (family) name field -->

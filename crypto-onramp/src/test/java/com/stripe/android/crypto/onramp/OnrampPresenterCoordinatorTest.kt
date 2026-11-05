@@ -10,6 +10,7 @@ import app.cash.turbine.Turbine
 import com.google.android.gms.wallet.IsReadyToPayRequest
 import com.google.android.gms.wallet.PaymentsClient
 import com.google.common.truth.Truth.assertThat
+import com.google.testing.junit.testparameterinjector.TestParameter
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.crypto.onramp.CheckoutState.Status
 import com.stripe.android.crypto.onramp.exception.GooglePayNotConfiguredException
@@ -20,7 +21,9 @@ import com.stripe.android.crypto.onramp.model.KycQuestionnaireSubmission
 import com.stripe.android.crypto.onramp.model.KycRequirement
 import com.stripe.android.crypto.onramp.model.KycRequirementSubmission
 import com.stripe.android.crypto.onramp.model.KycRequirements
+import com.stripe.android.crypto.onramp.model.KycRetrieveResponse
 import com.stripe.android.crypto.onramp.model.KycSubmission
+import com.stripe.android.crypto.onramp.model.OnrampAuthorizeResult
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.OnrampCheckoutCallback
 import com.stripe.android.crypto.onramp.model.OnrampCheckoutResult
@@ -31,6 +34,7 @@ import com.stripe.android.crypto.onramp.model.OnrampKycCallback
 import com.stripe.android.crypto.onramp.model.OnrampKycResult
 import com.stripe.android.crypto.onramp.model.OnrampPartnerTermsCallback
 import com.stripe.android.crypto.onramp.model.OnrampPartnerTermsResult
+import com.stripe.android.crypto.onramp.model.OnrampStartKycVerificationResult
 import com.stripe.android.crypto.onramp.model.OnrampStartPartnerTermsResult
 import com.stripe.android.crypto.onramp.model.OnrampStartUserAttestationResult
 import com.stripe.android.crypto.onramp.model.OnrampStartVerificationResult
@@ -38,10 +42,13 @@ import com.stripe.android.crypto.onramp.model.OnrampUserAttestationCallback
 import com.stripe.android.crypto.onramp.model.OnrampUserAttestationResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityCallback
 import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityResult
+import com.stripe.android.crypto.onramp.model.OnrampVerifyKycCallback
+import com.stripe.android.crypto.onramp.model.OnrampVerifyKycInfoResult
 import com.stripe.android.crypto.onramp.model.PartnerDeclarationType
 import com.stripe.android.crypto.onramp.model.PartnerTerms
 import com.stripe.android.crypto.onramp.model.PaymentMethodSelection
 import com.stripe.android.crypto.onramp.model.PaymentMethodType
+import com.stripe.android.crypto.onramp.model.RefreshKycInfo
 import com.stripe.android.crypto.onramp.model.SamsungPayAvailabilityResult
 import com.stripe.android.crypto.onramp.model.StartIdentityVerificationResponse
 import com.stripe.android.crypto.onramp.model.UserAttestation
@@ -54,7 +61,9 @@ import com.stripe.android.crypto.onramp.ui.HTMLConfirmationArgs
 import com.stripe.android.crypto.onramp.ui.HTMLConfirmationContent
 import com.stripe.android.crypto.onramp.ui.HTMLConfirmationResult
 import com.stripe.android.crypto.onramp.ui.KycActivity
+import com.stripe.android.crypto.onramp.ui.KycRefreshScreenAction
 import com.stripe.android.crypto.onramp.ui.KycScreenAction
+import com.stripe.android.crypto.onramp.ui.VerifyKycActivityResult
 import com.stripe.android.googlepaylauncher.GooglePayAvailabilityClient
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
@@ -62,6 +71,9 @@ import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.link.LinkController
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.DateOfBirth
+import com.stripe.android.paymentsheet.PaymentSheet
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -72,15 +84,16 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.doSuspendableAnswer
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.Robolectric
-import org.robolectric.RobolectricTestRunner
+import org.robolectric.RobolectricTestParameterInjector
 import org.robolectric.Shadows.shadowOf
 
-@RunWith(RobolectricTestRunner::class)
+@RunWith(RobolectricTestParameterInjector::class)
 @Suppress("LargeClass")
 class OnrampPresenterCoordinatorTest {
     private val linkController: LinkController = mock()
@@ -99,6 +112,432 @@ class OnrampPresenterCoordinatorTest {
     fun tearDown() {
         samsungPayLauncher.ensureAllEventsConsumed()
         samsungPayLauncherFactory.ensureAllEventsConsumed()
+    }
+
+    enum class Presentation {
+        Identity, KycVerification, Attestation, KycRequirements, GooglePay, SamsungPay;
+
+        internal fun start(presenter: OnrampPresenterCoordinator) {
+            when (this) {
+                Identity -> presenter.verifyIdentity()
+                KycVerification -> presenter.verifyKycInfo()
+                Attestation -> presenter.presentUserAttestation()
+                KycRequirements -> presenter.fulfillKycRequirements()
+                GooglePay -> presenter.collectPaymentMethod(PaymentMethodSelection.GooglePay("usd", 1099))
+                SamsungPay -> presenter.collectPaymentMethod(PaymentMethodSelection.SamsungPay("usd", 1099, "order"))
+            }
+        }
+    }
+
+    @Test
+    fun `late request delivers failure or cancellation to recreated host`(
+        @TestParameter operation: Presentation,
+        @TestParameter fails: Boolean,
+    ) = testScope.runTest {
+        val gate = CompletableDeferred<Unit>()
+        val requests = Turbine<Unit>()
+        val oldResults = Turbine<Any>()
+        val newResults = Turbine<Any>()
+        val store = OnrampCallbackStore()
+        val error = IllegalStateException("Request failed")
+        suspend fun awaitResponse() {
+            requests.add(Unit)
+            gate.await()
+        }
+        stubPresentationResponse(operation, fails, error, ::awaitResponse)
+        val availability = Turbine<String>()
+        installGooglePayAvailability(availability)
+        PaymentConfiguration.init(activity, "pk_test_123")
+        val configuration = presentationConfiguration(operation)
+        val recreatedOwner = TestLifecycleOwner()
+        val recreatedActivity = Robolectric.buildActivity(ComponentActivity::class.java).create().get()
+        try {
+            val coordinator = recordingCoordinator(oldResults, store, configuration = configuration)
+            testScope.testScheduler.advanceUntilIdle()
+            if (operation == Presentation.GooglePay) {
+                assertThat(availability.awaitItem()).isEqualTo("create")
+                assertThat(availability.awaitItem()).isEqualTo("ready")
+            }
+            if (operation == Presentation.SamsungPay) {
+                samsungPayLauncherFactory.createCalls.awaitItem()
+                samsungPayLauncher.statusCalls.awaitItem()
+            }
+            operation.start(coordinator)
+            testScope.testScheduler.advanceUntilIdle()
+            requests.awaitItem()
+            lifecycleOwner.currentState = Lifecycle.State.DESTROYED
+            if (operation == Presentation.SamsungPay) samsungPayLauncher.destroyCalls.awaitItem()
+            recordingCoordinator(newResults, store, recreatedOwner, recreatedActivity)
+            gate.complete(Unit)
+            testScope.testScheduler.advanceUntilIdle()
+
+            val result = newResults.awaitItem()
+            assertPresentationResult(operation, fails, error, result)
+            oldResults.expectNoEvents()
+            newResults.ensureAllEventsConsumed()
+            assertThat(shadowOf(activity).nextStartedActivityForResult).isNull()
+            assertThat(shadowOf(recreatedActivity).nextStartedActivityForResult).isNull()
+            samsungPayLauncher.presentCalls.expectNoEvents()
+            requests.ensureAllEventsConsumed()
+            availability.ensureAllEventsConsumed()
+        } finally {
+            gate.complete(Unit)
+            recreatedOwner.currentState = Lifecycle.State.DESTROYED
+            GooglePayRepository.resetFactory()
+        }
+    }
+
+    enum class KycTerminalResult { NotRequired, PendingPartner, PendingStripe, Unsupported }
+
+    @Test
+    fun `late KYC terminal result reaches replacement callback`(@TestParameter outcome: KycTerminalResult) =
+        testScope.runTest {
+            val gate = CompletableDeferred<Result<KycRequirements>>()
+            val requests = Turbine<Unit>()
+            whenever(interactor.retrieveKycRequirements()).doSuspendableAnswer {
+                requests.add(Unit)
+                gate.await()
+            }
+            val original = kycRequirements()
+            val requirement = original.userActionRequired.single()
+            val requirements = original.copy(
+                userActionRequired = emptyList(),
+                pendingPartnerAction = if (outcome == KycTerminalResult.PendingPartner) {
+                    listOf(requirement)
+                } else {
+                    emptyList()
+                },
+                pendingStripeAction = if (outcome == KycTerminalResult.PendingStripe) {
+                    listOf(requirement)
+                } else {
+                    emptyList()
+                },
+                unrecognizedActionOwner = if (outcome == KycTerminalResult.Unsupported) {
+                    listOf(requirement)
+                } else {
+                    emptyList()
+                },
+            )
+            val oldResults = Turbine<Any>()
+            val newResults = Turbine<Any>()
+            val store = OnrampCallbackStore()
+            val presenter = recordingCoordinator(oldResults, store)
+            presenter.fulfillKycRequirements()
+            testScope.testScheduler.advanceUntilIdle()
+            requests.awaitItem()
+            lifecycleOwner.currentState = Lifecycle.State.DESTROYED
+            store.update(recordingCallbacks(newResults))
+            gate.complete(Result.success(requirements))
+            testScope.testScheduler.advanceUntilIdle()
+            val expected = when (outcome) {
+                KycTerminalResult.NotRequired -> OnrampKycResult.NotRequired::class.java
+                KycTerminalResult.PendingPartner, KycTerminalResult.PendingStripe ->
+                    OnrampKycResult.PendingVerification::class.java
+                KycTerminalResult.Unsupported -> OnrampKycResult.Failed::class.java
+            }
+            assertThat(newResults.awaitItem()).isInstanceOf(expected)
+            oldResults.ensureAllEventsConsumed()
+            newResults.ensureAllEventsConsumed()
+            requests.ensureAllEventsConsumed()
+            assertThat(shadowOf(activity).nextStartedActivityForResult).isNull()
+        }
+
+    enum class ResultOperation { Authorization, KycConfirmation, SamsungPay }
+
+    @Test
+    fun `result processing resolves the replacement callback`(@TestParameter operation: ResultOperation) =
+        testScope.runTest {
+            val gate = CompletableDeferred<Unit>()
+            val requests = Turbine<Unit>()
+            val oldResults = Turbine<Any>()
+            val newResults = Turbine<Any>()
+            val store = OnrampCallbackStore()
+            val expected: Any = when (operation) {
+                ResultOperation.Authorization -> OnrampAuthorizeResult.Consented("crc_test")
+                ResultOperation.KycConfirmation -> OnrampVerifyKycInfoResult.Confirmed()
+                ResultOperation.SamsungPay -> OnrampCollectPaymentMethodResult.Cancelled()
+            }
+            stubResultProcessing(operation, gate, requests, expected)
+            val presenter = recordingCoordinator(
+                oldResults, store,
+                configuration = if (operation == ResultOperation.SamsungPay) {
+                    createConfigurationWithSamsungPay()
+                } else {
+                    createConfiguration()
+                },
+            )
+            testScope.testScheduler.advanceUntilIdle()
+            deliverOperationResult(operation, presenter)
+            testScope.testScheduler.advanceUntilIdle()
+            requests.awaitItem()
+            lifecycleOwner.currentState = Lifecycle.State.DESTROYED
+            if (operation == ResultOperation.SamsungPay) samsungPayLauncher.destroyCalls.awaitItem()
+            store.update(recordingCallbacks(newResults))
+            gate.complete(Unit)
+            testScope.testScheduler.advanceUntilIdle()
+            assertThat(newResults.awaitItem()).isSameInstanceAs(expected)
+            oldResults.ensureAllEventsConsumed()
+            newResults.ensureAllEventsConsumed()
+            requests.ensureAllEventsConsumed()
+        }
+
+    private suspend fun stubPresentationResponse(
+        operation: Presentation,
+        fails: Boolean,
+        error: Throwable,
+        awaitResponse: suspend () -> Unit,
+    ) {
+        when (operation) {
+            Presentation.Identity -> whenever(interactor.startIdentityVerification()).doSuspendableAnswer {
+                awaitResponse()
+                if (fails) {
+                    OnrampStartVerificationResult.Failed(error)
+                } else {
+                    OnrampStartVerificationResult.Completed(
+                        StartIdentityVerificationResponse("vs_test", "url", "ek_test")
+                    )
+                }
+            }
+            Presentation.KycVerification -> whenever(interactor.startKycVerification(null)).doSuspendableAnswer {
+                awaitResponse()
+                if (fails) OnrampStartKycVerificationResult.Failed(error) else kycVerificationResponse()
+            }
+            Presentation.Attestation -> whenever(interactor.startUserAttestation()).doSuspendableAnswer {
+                awaitResponse()
+                if (fails) {
+                    OnrampStartUserAttestationResult.Failed(error)
+                } else {
+                    OnrampStartUserAttestationResult.Completed(UserAttestation("Attestation", "1"), null)
+                }
+            }
+            Presentation.KycRequirements -> whenever(interactor.retrieveKycRequirements()).doSuspendableAnswer {
+                awaitResponse()
+                if (fails) Result.failure(error) else Result.success(kycRequirements())
+            }
+            Presentation.GooglePay, Presentation.SamsungPay -> {
+                whenever(interactor.getOrFetchPlatformKey()).doSuspendableAnswer {
+                    awaitResponse()
+                    if (fails) Result.failure(error) else Result.success("pk_test_platform")
+                }
+                whenever(interactor.collectPaymentMethodFailure(error))
+                    .thenReturn(OnrampCollectPaymentMethodResult.Failed(error))
+                whenever(interactor.handleSamsungPayPlatformKeyFailure(error))
+                    .thenReturn(OnrampCollectPaymentMethodResult.Failed(error))
+            }
+        }
+    }
+
+    private fun installGooglePayAvailability(availability: Turbine<String>) {
+        GooglePayRepository.googlePayAvailabilityClientFactory = object : GooglePayAvailabilityClient.Factory {
+            override fun create(paymentsClient: PaymentsClient): GooglePayAvailabilityClient {
+                availability.add("create")
+                return object : GooglePayAvailabilityClient {
+                    override suspend fun isReady(request: IsReadyToPayRequest): Boolean {
+                        availability.add("ready")
+                        return true
+                    }
+                }
+            }
+        }
+    }
+
+    private fun presentationConfiguration(operation: Presentation): OnrampConfiguration.State {
+        return when (operation) {
+            Presentation.GooglePay -> OnrampConfiguration().merchantDisplayName("Test")
+                .publishableKey("pk_test_123")
+                .googlePayConfig(GooglePayPaymentMethodLauncher.Config(GooglePayEnvironment.Test, "US", "Test"))
+                .build()
+            Presentation.SamsungPay -> createConfigurationWithSamsungPay()
+            else -> createConfiguration()
+        }
+    }
+
+    private fun assertPresentationResult(operation: Presentation, fails: Boolean, error: Throwable, result: Any) {
+        val (cancelledType, failedType) = when (operation) {
+            Presentation.Identity ->
+                OnrampVerifyIdentityResult.Cancelled::class.java to
+                    OnrampVerifyIdentityResult.Failed::class.java
+            Presentation.KycVerification ->
+                OnrampVerifyKycInfoResult.Cancelled::class.java to
+                    OnrampVerifyKycInfoResult.Failed::class.java
+            Presentation.Attestation ->
+                OnrampUserAttestationResult.Cancelled::class.java to
+                    OnrampUserAttestationResult.Failed::class.java
+            Presentation.KycRequirements ->
+                OnrampKycResult.Cancelled::class.java to
+                    OnrampKycResult.Failed::class.java
+            Presentation.GooglePay, Presentation.SamsungPay ->
+                OnrampCollectPaymentMethodResult.Cancelled::class.java to
+                    OnrampCollectPaymentMethodResult.Failed::class.java
+        }
+        assertThat(result).isInstanceOf(if (fails) failedType else cancelledType)
+        if (fails) {
+            val actualError = when (result) {
+                is OnrampVerifyIdentityResult.Failed -> result.error
+                is OnrampVerifyKycInfoResult.Failed -> result.error
+                is OnrampUserAttestationResult.Failed -> result.error
+                is OnrampKycResult.Failed -> result.error
+                is OnrampCollectPaymentMethodResult.Failed -> result.error
+                else -> error("Unexpected result: $result")
+            }
+            assertThat(actualError).isSameInstanceAs(error)
+        }
+    }
+
+    private suspend fun deliverOperationResult(
+        operation: ResultOperation,
+        presenter: OnrampPresenterCoordinator,
+    ) {
+        when (operation) {
+            ResultOperation.Authorization -> {
+                val callback = argumentCaptor<LinkController.AuthorizeCallback>()
+                verify(linkController).createPresenter(
+                    activity = any(), presentPaymentMethodsCallback = any(), authenticationCallback = any(),
+                    authorizeCallback = callback.capture(),
+                    presentCallback = any(),
+                    confirmSetupIntentCallback = any(),
+                )
+                callback.firstValue.onAuthorizeResult(LinkController.AuthorizeResult.Consented)
+            }
+            ResultOperation.KycConfirmation -> {
+                presenter.verifyKycInfo()
+                testScope.testScheduler.advanceUntilIdle()
+                val launched = shadowOf(activity).nextStartedActivityForResult
+                activity.activityResultRegistry.dispatchResult(
+                    launched.requestCode,
+                    VerifyKycActivityResult(
+                        KycRefreshScreenAction.Confirm(
+                            RefreshKycInfo(
+                                "Test", "User", "0000", "social_security_number", DateOfBirth(1, 1, 1990),
+                                PaymentSheet.Address(country = "US"),
+                            )
+                        )
+                    ),
+                )
+            }
+            ResultOperation.SamsungPay -> {
+                samsungPayLauncherFactory.createCalls.awaitItem()
+                samsungPayLauncher.statusCalls.awaitItem()
+                presenter.collectPaymentMethod(PaymentMethodSelection.SamsungPay("usd", 1099, "order"))
+                testScope.testScheduler.advanceUntilIdle()
+                samsungPayLauncher.presentCalls.awaitItem()
+                samsungPayLauncher.complete(SamsungPayResult.Completed("credential", null))
+            }
+        }
+    }
+
+    private suspend fun stubResultProcessing(
+        operation: ResultOperation,
+        gate: CompletableDeferred<Unit>,
+        requests: Turbine<Unit>,
+        expected: Any,
+    ) {
+        when (operation) {
+            ResultOperation.Authorization -> whenever(interactor.handleAuthorizeResult(any())).doSuspendableAnswer {
+                requests.add(Unit)
+                gate.await()
+                expected as OnrampAuthorizeResult
+            }
+            ResultOperation.KycConfirmation -> {
+                whenever(interactor.startKycVerification(null)).thenReturn(kycVerificationResponse())
+                whenever(interactor.handleVerifyKycResult(any())).doSuspendableAnswer {
+                    requests.add(Unit)
+                    gate.await()
+                    expected as OnrampVerifyKycInfoResult
+                }
+            }
+            ResultOperation.SamsungPay -> {
+                whenever(interactor.getOrFetchPlatformKey()).thenReturn(Result.success("pk_test_platform"))
+                whenever(interactor.handleSamsungPayPaymentResult(any(), any())).doSuspendableAnswer {
+                    requests.add(Unit)
+                    gate.await()
+                    expected as OnrampCollectPaymentMethodResult
+                }
+            }
+        }
+    }
+
+    private fun recordingCallbacks(results: Turbine<Any>): OnrampCallbacks.State = OnrampCallbacks()
+        .checkoutCallback { results.add(it) }
+        .authorizeCallback { results.add(it) }
+        .verifyIdentityCallback { results.add(it) }
+        .verifyKycCallback { results.add(it) }
+        .kycCallback { results.add(it) }
+        .userAttestationCallback { results.add(it) }
+        .collectPaymentCallback { results.add(it) }
+        .onrampSessionClientSecretProvider(onrampSessionClientSecretProvider)
+        .build()
+
+    private fun recordingCoordinator(
+        results: Turbine<Any>,
+        store: OnrampCallbackStore,
+        owner: TestLifecycleOwner = lifecycleOwner,
+        host: ComponentActivity = activity,
+        configuration: OnrampConfiguration.State = createConfiguration(),
+    ): OnrampPresenterCoordinator = createCoordinator(
+        onrampStateFlow = MutableStateFlow(OnrampState(configurationState = configuration)),
+        lifecycleOwner = owner,
+        activity = host,
+        callbackStore = store,
+    ).also { store.update(recordingCallbacks(results)) }
+
+    private fun kycVerificationResponse(): OnrampStartKycVerificationResult.Completed =
+        OnrampStartKycVerificationResult.Completed(
+            KycRetrieveResponse(
+                "Test", "User", "0000", "social_security_number", DateOfBirth(1, 1, 1990),
+                PaymentSheet.Address(country = "US"),
+            ),
+            appearance = null,
+        )
+
+    @Test
+    fun `late KYC response after host destruction does not launch and recreated host can retry`() = testScope.runTest {
+        val response = CompletableDeferred<OnrampStartKycVerificationResult>()
+        val requests = Turbine<Unit>()
+        whenever(interactor.startKycVerification(null)).doSuspendableAnswer {
+            requests.add(Unit)
+            response.await()
+        }
+        val results = Turbine<OnrampVerifyKycInfoResult>()
+        val coordinator = createCoordinator(verifyKycCallback = OnrampVerifyKycCallback(results::add))
+        coordinator.verifyKycInfo()
+        testScope.testScheduler.advanceUntilIdle()
+        requests.awaitItem()
+
+        lifecycleOwner.currentState = Lifecycle.State.DESTROYED
+        val result = OnrampStartKycVerificationResult.Completed(
+            response = KycRetrieveResponse(
+                firstName = "Test",
+                lastName = "User",
+                idNumberLastFour = "0000",
+                idType = "social_security_number",
+                dateOfBirth = DateOfBirth(day = 1, month = 1, year = 1990),
+                address = PaymentSheet.Address(country = "US"),
+            ),
+            appearance = null,
+        )
+        response.complete(result)
+        testScope.testScheduler.advanceUntilIdle()
+        assertThat(results.awaitItem()).isInstanceOf(OnrampVerifyKycInfoResult.Cancelled::class.java)
+        results.ensureAllEventsConsumed()
+        assertThat(shadowOf(activity).nextStartedActivityForResult).isNull()
+
+        val recreatedOwner = TestLifecycleOwner()
+        val recreatedActivity = Robolectric.buildActivity(ComponentActivity::class.java).create().get()
+        try {
+            val recreatedCoordinator = createCoordinator(
+                lifecycleOwner = recreatedOwner,
+                activity = recreatedActivity,
+            )
+            recreatedCoordinator.verifyKycInfo()
+            testScope.testScheduler.advanceUntilIdle()
+            requests.awaitItem()
+            assertThat(shadowOf(recreatedActivity).nextStartedActivityForResult.intent.component?.className)
+                .isEqualTo("com.stripe.android.crypto.onramp.ui.VerifyKycInfoActivity")
+            requests.ensureAllEventsConsumed()
+        } finally {
+            recreatedOwner.currentState = Lifecycle.State.DESTROYED
+        }
     }
 
     @Test
@@ -912,6 +1351,8 @@ class OnrampPresenterCoordinatorTest {
         userAttestationCallback: OnrampUserAttestationCallback? = null,
         verifyIdentityCallback: OnrampVerifyIdentityCallback = OnrampVerifyIdentityCallback {},
         checkoutCallback: OnrampCheckoutCallback = this.checkoutCallback,
+        verifyKycCallback: OnrampVerifyKycCallback = OnrampVerifyKycCallback {},
+        callbackStore: OnrampCallbackStore = OnrampCallbackStore(),
         lifecycleOwner: TestLifecycleOwner = this.lifecycleOwner,
         activity: ComponentActivity = this.activity,
     ): OnrampPresenterCoordinator {
@@ -939,7 +1380,7 @@ class OnrampPresenterCoordinatorTest {
             .verifyIdentityCallback(verifyIdentityCallback)
             .collectPaymentCallback(collectPaymentCallback)
             .authorizeCallback {}
-            .verifyKycCallback {}
+            .verifyKycCallback(verifyKycCallback)
             .onrampSessionClientSecretProvider(onrampSessionClientSecretProvider)
 
         googlePayIsReadyCallback?.let(callbacks::googlePayIsReadyCallback)
@@ -949,7 +1390,7 @@ class OnrampPresenterCoordinatorTest {
         termsOfServiceCallback?.let(callbacks::termsOfServiceCallback)
         userAttestationCallback?.let(callbacks::userAttestationCallback)
 
-        val callbackStore = OnrampCallbackStore().apply { update(callbacks.build()) }
+        callbackStore.update(callbacks.build())
 
         return OnrampPresenterCoordinator(
             linkController = linkController,

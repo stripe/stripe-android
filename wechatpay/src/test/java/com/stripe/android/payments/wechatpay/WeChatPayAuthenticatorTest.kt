@@ -6,7 +6,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.model.WeChat
 import com.stripe.android.payments.wechatpay.reflection.WeChatPayReflectionHelper
 import com.stripe.android.view.AuthActivityStarterHost
@@ -65,7 +65,7 @@ class WeChatPayAuthenticatorTest {
                 authenticator.performNextAction(
                     host,
                     PaymentIntentFixtures.PI_REQUIRES_BLIK_AUTHORIZE,
-                    REQUEST_OPTIONS
+                    API_CONFIGURATION
                 )
             }
         }
@@ -80,7 +80,7 @@ class WeChatPayAuthenticatorTest {
                 authenticator.performNextAction(
                     host,
                     PaymentIntentFixtures.PI_REQUIRES_BLIK_AUTHORIZE,
-                    REQUEST_OPTIONS
+                    API_CONFIGURATION
                 )
             }
         }
@@ -95,7 +95,7 @@ class WeChatPayAuthenticatorTest {
                 authenticator.performNextAction(
                     host,
                     PaymentIntentFixtures.PI_NO_NEXT_ACTION_DATA,
-                    REQUEST_OPTIONS
+                    API_CONFIGURATION
                 )
             }
         }
@@ -107,7 +107,7 @@ class WeChatPayAuthenticatorTest {
             authenticator.performNextAction(
                 host,
                 PaymentIntentFixtures.PI_REQUIRES_WECHAT_PAY_AUTHORIZE,
-                REQUEST_OPTIONS
+                API_CONFIGURATION
             )
             verify(mockWeChatPayAuthStarter).start(
                 argWhere {
@@ -134,9 +134,9 @@ class WeChatPayAuthenticatorTest {
     }
 
     private companion object {
-        private val REQUEST_OPTIONS = ApiRequest.Options(
-            apiKey = "TestKey",
-            stripeAccount = "TestAccountId"
+        private val API_CONFIGURATION = ApiConfiguration.State(
+            publishableKey = "TestKey",
+            stripeAccountId = "TestAccountId"
         )
     }
 }

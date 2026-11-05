@@ -1,14 +1,16 @@
 package com.stripe.android.challenge.passive.warmer
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.hcaptcha.HCaptchaModule
+import com.stripe.android.hcaptcha.HCaptchaService
 import dagger.Module
 import dagger.Provides
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-@Module
+@Module(includes = [HCaptchaModule::class])
 object PassiveChallengeWarmerModule {
     @Provides
-    fun providePassiveChallengeWarmer(): PassiveChallengeWarmer {
-        return DefaultPassiveChallengeWarmer()
+    fun providePassiveChallengeWarmer(hCaptchaService: HCaptchaService): PassiveChallengeWarmer {
+        return DefaultPassiveChallengeWarmer(hCaptchaService)
     }
 }

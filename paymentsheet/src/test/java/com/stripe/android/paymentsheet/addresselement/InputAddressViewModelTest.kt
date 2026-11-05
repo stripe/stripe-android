@@ -1608,6 +1608,56 @@ class InputAddressViewModelTest {
         isCheckboxSelected = isCheckboxSelected,
     )
 
+    @Test
+    fun `the name field is shown by default`() = runScenario {
+        val addressElement = viewModel.addressController().addressElementFlow.value
+
+        val fieldIdentifiers = addressElement.fields.value.map { it.identifier }
+
+        assertThat(fieldIdentifiers).contains(FormFieldId.Name)
+    }
+
+    @Test
+    fun `a hidden name field is not shown`() = runScenario(
+        config = AddressLauncher.Configuration.Builder()
+            .nameField(AddressLauncher.NameField.Never)
+            .build(),
+    ) {
+        val addressElement = viewModel.addressController().addressElementFlow.value
+
+        val fieldIdentifiers = addressElement.fields.value.map { it.identifier }
+
+        assertThat(fieldIdentifiers).doesNotContain(FormFieldId.Name)
+    }
+
+    @Test
+    fun `saving with a hidden name keeps the prefilled name`() {
+        val primaryButtonAction = RecordingPrimaryButtonAction(
+            result = Result.success(
+                AddressElementActivityContract.Result.StandaloneSucceeded(EXPECTED_ADDRESS)
+            )
+        )
+
+        runScenario(
+            config = AddressLauncher.Configuration.Builder()
+                .address(AddressDetails(name = "Jenny Rosen"))
+                .nameField(AddressLauncher.NameField.Never)
+                .build(),
+            primaryButtonAction = primaryButtonAction,
+        ) {
+            val formValuesWithoutName = COMPLETED_FORM_VALUES - FormFieldId.Name
+
+            viewModel.clickPrimaryButton(formValuesWithoutName, checkboxChecked = false)
+
+            val savedAddress = primaryButtonAction.calls.awaitItem()
+            assertThat(savedAddress.name).isEqualTo("Jenny Rosen")
+            assertThat(savedAddress.address?.line1).isEqualTo("510 Townsend St")
+            eventReporter.saveStartedCalls.awaitItem()
+            eventReporter.saveCompletedCalls.awaitItem()
+            primaryButtonAction.validate()
+        }
+    }
+
     private fun runPrimaryButtonScenario(
         address: AddressDetails? = null,
         block: suspend Scenario.(

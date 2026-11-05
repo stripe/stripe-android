@@ -535,6 +535,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
                             funding = ConsumerPaymentDetails.Card.Funding.Credit,
                             nickname = null,
                             billingAddress = null,
+                            display = null,
                         ),
                         confirmParams = expectedCreateParams,
                         originalParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
@@ -1083,7 +1084,8 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
                 administrativeArea = null,
                 countryCode = CountryCode.US,
                 postalCode = "42424"
-            )
+            ),
+            display = null,
         )
     }
 }

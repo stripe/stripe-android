@@ -26,6 +26,10 @@
   <string name="stripe_confirm_close_form_body">Teie makseteavet ei salvestata.</string>
   <!-- Used as the title for prompting the user if they want to close the sheet -->
   <string name="stripe_confirm_close_form_title">Kas soovite selle vormi sulgeda?</string>
+  <!-- Fallback disclosure when paying in the merchant's currency instead of using Adaptive Pricing. -->
+  <string name="stripe_currency_selector_bank_fees_disclaimer">Teie panga vahetuskurss ja tasud võivad kehtida.</string>
+  <string name="stripe_currency_selector_hide_details">Peida vahetuskursi üksikasjad</string>
+  <string name="stripe_currency_selector_show_details">Kuva vahetuskursi üksikasjad</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header">Salvesta oma teave, et võimaldada turvaline ühe klõpsuga makse lõpuleviimine Linkiga</string>
   <!-- Label for a checkbox that when checked allows the payment information

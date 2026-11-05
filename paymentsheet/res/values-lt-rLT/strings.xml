@@ -26,6 +26,10 @@
   <string name="stripe_confirm_close_form_body">Jūsų mokėjimo informacija nebus įrašyta.</string>
   <!-- Used as the title for prompting the user if they want to close the sheet -->
   <string name="stripe_confirm_close_form_title">Ar norite uždaryti šią formą?</string>
+  <!-- Fallback disclosure when paying in the merchant's currency instead of using Adaptive Pricing. -->
+  <string name="stripe_currency_selector_bank_fees_disclaimer">Gali būti taikomas jūsų banko valiutų keitimo kursas ir mokesčiai.</string>
+  <string name="stripe_currency_selector_hide_details">Slėpti valiutų keitimo kurso informaciją</string>
+  <string name="stripe_currency_selector_show_details">Rodyti valiutų keitimo kurso informaciją</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header">Išsaugokite savo informaciją saugiam atsiskaitymui vienu spustelėjimu su \"Link\"</string>
   <!-- Label for a checkbox that when checked allows the payment information

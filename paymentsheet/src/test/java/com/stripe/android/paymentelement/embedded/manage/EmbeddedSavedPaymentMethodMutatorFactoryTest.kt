@@ -183,6 +183,8 @@ internal class EmbeddedSavedPaymentMethodMutatorFactoryTest {
                     primaryButtonIcon = PrimaryButtonIcon.Lock,
                 )
             ),
+            mandateText = stateFlowOf(null),
+            isContinueButtonVisible = stateFlowOf(false),
             onContinueClick = {},
             onPrimaryButtonDisabledClick = {},
         )

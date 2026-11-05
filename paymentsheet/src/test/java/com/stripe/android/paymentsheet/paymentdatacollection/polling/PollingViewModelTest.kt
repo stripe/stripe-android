@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet.paymentdatacollection.polling
 
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.R
@@ -515,10 +514,7 @@ class PollingViewModelTest {
                 initialDelay = initialDelay,
                 pollingInterval = 1.seconds,
                 ctaText = R.string.stripe_blik_confirm_payment,
-                requestOptions = ApiRequest.Options(
-                    apiKey = DEFAULT_API_CONFIG.publishableKey,
-                    stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
-                ),
+                apiConfiguration = DEFAULT_API_CONFIG,
                 qrCodeUrl = qrCodeUrl,
                 paymentMethodType = paymentMethodType,
             ),

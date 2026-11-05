@@ -11,7 +11,6 @@ import com.stripe.android.auth.PaymentBrowserAuthContract
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
-import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
@@ -31,12 +30,10 @@ internal class VoucherNextActionHandlerTest {
     val networkRule = NetworkRule()
 
     @Test
-    fun `Hosted voucher delegates to web authentication with the caller account`() = runScenario {
-        handler.performNextAction(host, PaymentIntentFixtures.OXXO_REQUIRES_ACTION, REQUEST_OPTIONS)
+    fun `Hosted voucher delegates caller configuration to web authentication`() = runScenario {
+        handler.performNextAction(host, PaymentIntentFixtures.OXXO_REQUIRES_ACTION, API_CONFIGURATION)
 
-        val args = browserStarter.calls.awaitItem()
-        assertThat(args.apiConfiguration.publishableKey).isEqualTo(API_CONFIGURATION.publishableKey)
-        assertThat(args.apiConfiguration.stripeAccountId).isEqualTo(REQUEST_OPTIONS.stripeAccount)
+        assertThat(browserStarter.calls.awaitItem().apiConfiguration).isSameInstanceAs(API_CONFIGURATION)
         relayStarter.calls.expectNoEvents()
     }
 
@@ -50,10 +47,10 @@ internal class VoucherNextActionHandlerTest {
             )
         )
 
-        handler.performNextAction(host, intent, REQUEST_OPTIONS)
+        handler.performNextAction(host, intent, API_CONFIGURATION)
 
         assertThat(relayStarter.calls.awaitItem().toResult().stripeAccountId)
-            .isEqualTo(REQUEST_OPTIONS.stripeAccount)
+            .isEqualTo(API_CONFIGURATION.stripeAccountId)
         browserStarter.calls.expectNoEvents()
     }
 
@@ -73,7 +70,6 @@ internal class VoucherNextActionHandlerTest {
                 ),
                 enableLogging = false,
                 uiContext = UnconfinedTestDispatcher(testScheduler),
-                apiConfigProvider = { API_CONFIGURATION },
                 isInstantApp = false,
                 defaultReturnUrl = DefaultReturnUrl.create(context),
                 redirectResolver = RedirectResolver { error("Voucher authentication should not resolve redirects") },
@@ -124,11 +120,7 @@ internal class VoucherNextActionHandlerTest {
     private companion object {
         val API_CONFIGURATION = ApiConfiguration.State(
             publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-            stripeAccountId = null,
-        )
-        val REQUEST_OPTIONS = ApiRequest.Options(
-            apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-            stripeAccount = ApiKeyFixtures.FAKE_STRIPE_ACCOUNT,
+            stripeAccountId = ApiKeyFixtures.FAKE_STRIPE_ACCOUNT,
         )
     }
 }
