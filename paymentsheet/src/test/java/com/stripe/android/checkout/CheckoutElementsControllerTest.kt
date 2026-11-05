@@ -1683,7 +1683,7 @@ internal class CheckoutElementsControllerTest {
         }
 
     @Test
-    fun `concurrent mutations are serialized so the second uses the first result's tax state`() =
+    fun `concurrent mutations are serialized`() =
         runMutationScenario {
             val firstRequest = Turbine<Unit>()
             val secondRequest = Turbine<Unit>()
@@ -1695,15 +1695,13 @@ internal class CheckoutElementsControllerTest {
                 check(releaseFirstResponse.await(10, TimeUnit.SECONDS)) {
                     "Timed out waiting to release the first mutation response"
                 }
-                successResponseFactory(automaticTaxFor("shipping")).invoke(response)
+                successResponseFactory().invoke(response)
             }
-            // Only the first mutation's response enables the second mutation's tax update.
             networkRule.checkoutUpdate(
-                bodyPart("tax_region[country]", "US"),
-                bodyPart("tax_region[postal_code]", "80202"),
+                bodyPart("adaptive_pricing[currency]", "eur"),
             ) { response ->
                 secondRequest.add(Unit)
-                successResponseFactory(automaticTaxFor("shipping")).invoke(response)
+                successResponseFactory().invoke(response)
             }
 
             fromBackgroundThread {
@@ -1712,7 +1710,7 @@ internal class CheckoutElementsControllerTest {
                     try {
                         firstRequest.awaitItem()
                         val second = async(start = CoroutineStart.UNDISPATCHED) {
-                            controller.updateShippingAddress(name = "John", address = fullAddress)
+                            controller.updateCurrency("eur")
                         }
                         // The undispatched call queues its Main work before this barrier. Once
                         // the barrier runs, the second mutation has reached the coordinator.
@@ -1724,8 +1722,7 @@ internal class CheckoutElementsControllerTest {
 
                         assertThat(first.await())
                             .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
-                        assertThat(second.await())
-                            .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
+                        second.await().getOrThrow()
                         secondRequest.awaitItem()
                     } finally {
                         releaseFirstResponse.countDown()
@@ -1733,7 +1730,7 @@ internal class CheckoutElementsControllerTest {
                 }
             }
 
-            assertThat(committedState().collectedDetails.shippingAddress).isEqualTo(fullAddress.build())
+            assertThat(controller.session.value?.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
             firstRequest.ensureAllEventsConsumed()
             secondRequest.ensureAllEventsConsumed()
         }

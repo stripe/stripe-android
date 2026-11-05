@@ -89,12 +89,13 @@ class CheckoutSessionRepositoryTest {
 
     @Test
     fun `init reports started and succeeded with the given analytics params`() = runTest {
+        val clientSecret = CheckoutSessionClientSecret("cs_test_abc123_secret_test")
         networkRule.checkoutInit { response ->
             response.testBodyFromFile("checkout-session-init.json")
         }
 
         repository.init(
-            clientSecret = CheckoutSessionClientSecret("cs_test_abc123_secret_test"),
+            clientSecret = clientSecret,
             adaptivePricingAllowed = false,
             analyticsParams = mapOf("merchant_display_name" to true),
         ).getOrThrow()
@@ -104,15 +105,18 @@ class CheckoutSessionRepositoryTest {
         assertThat(started).containsEntry("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID)
         assertThat(started).doesNotContainKey("duration")
         assertThat(started).doesNotContainKey("checkout_config_id")
+        assertThat(started.values).doesNotContain(clientSecret.value)
         val succeeded = analyticsRequestExecutor.awaitEvent("checkout_elements.init.succeeded")
         assertThat(succeeded).containsAtLeastEntriesIn(INIT_RESPONSE_SESSION_PARAMS)
         assertThat(succeeded).containsEntry("merchant_display_name", true)
         assertThat(succeeded).containsKey("duration")
+        assertThat(succeeded.values).doesNotContain(clientSecret.value)
         analyticsRequestExecutor.validate()
     }
 
     @Test
     fun `init reports started and failed with the error`() = runTest {
+        val clientSecret = CheckoutSessionClientSecret("cs_test_abc123_secret_test")
         networkRule.checkoutInit { response ->
             response.setResponseCode(400)
             response.addHeader("Request-Id", "req_123")
@@ -130,7 +134,7 @@ class CheckoutSessionRepositoryTest {
         }
 
         val result = repository.init(
-            clientSecret = CheckoutSessionClientSecret("cs_test_abc123_secret_test"),
+            clientSecret = clientSecret,
             adaptivePricingAllowed = false,
             analyticsParams = mapOf("merchant_display_name" to true),
         )
@@ -139,11 +143,13 @@ class CheckoutSessionRepositoryTest {
         val started = analyticsRequestExecutor.awaitEvent("checkout_elements.init.started")
         assertThat(started).containsEntry("merchant_display_name", true)
         assertThat(started).containsEntry("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID)
+        assertThat(started.values).doesNotContain(clientSecret.value)
         val failed = analyticsRequestExecutor.awaitEvent("checkout_elements.init.failed")
         assertThat(failed).containsEntry("merchant_display_name", true)
         assertThat(failed).containsEntry("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID)
         assertThat(failed).containsEntry("error_type", "invalid_request_error")
         assertThat(failed).containsKey("duration")
+        assertThat(failed.values).doesNotContain(clientSecret.value)
         analyticsRequestExecutor.validate()
     }
 
