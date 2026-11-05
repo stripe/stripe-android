@@ -132,8 +132,6 @@ internal class EmbeddedNavigator private constructor(
                 if (navigationHandler.resetTo(action.screens)) {
                     onScreenHidden(previousScreen)
                     onScreenShown(action.screens.last())
-                } else {
-                    action.screens.forEach { (it as? Closeable)?.close() }
                 }
             }
         }
