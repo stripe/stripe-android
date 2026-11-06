@@ -384,7 +384,7 @@ workflows:
             - content: ./scripts/retry.sh 3 ./scripts/pin_emulator_version.sh $EMULATOR_BUILD_NUMBER $EMULATOR_VERSION
       - script@1:
           title: Execute PaymentSheet instrumentation and Checkout E2E tests
-          timeout: 1200
+          timeout: 1500
           inputs:
             - content: ./scripts/retry_with_emulator_cleanup.sh 2 ./gradlew -Pandroid.experimental.androidTest.numManagedDeviceShards=6 -Pandroid.experimental.testOptions.managedDevices.maxConcurrentDevices=6 -Pandroid.testInstrumentationRunnerArguments.notAnnotation=com.stripe.android.paymentsheet.RequiresIme :paymentsheet:pixel2api33DebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
       - bundle::export_instrumentation_test_results:
