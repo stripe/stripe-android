@@ -37,7 +37,7 @@ internal class FormValidationTest(
 ) {
     @get:Rule
     val testRules: TestRules = TestRules.create(
-        networkRule = NetworkRule(validateBetas = apiConfigurationTestType.validateBetas),
+        networkRule = NetworkRule(defaultMatcher = apiConfigurationTestType.defaultMatcher),
     ) {
         around(IntentsRule())
     }

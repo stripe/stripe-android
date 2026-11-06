@@ -33,7 +33,7 @@ internal class DefaultPaymentMethodsTest(
 
     @get:Rule
     val testRules: TestRules = TestRules.create(
-        networkRule = NetworkRule(validateBetas = apiConfigurationTestType.validateBetas),
+        networkRule = NetworkRule(defaultMatcher = apiConfigurationTestType.defaultMatcher),
     )
 
     private val composeTestRule = testRules.compose

@@ -34,7 +34,7 @@ internal class CustomPaymentMethodsAnalyticsTest(
     private val apiConfigurationTestType: ApiConfigurationTestType,
 ) {
     private val networkRule = NetworkRule(
-        validateBetas = apiConfigurationTestType.validateBetas,
+        defaultMatcher = apiConfigurationTestType.defaultMatcher,
         hostsToTrack = listOf(ApiRequest.API_HOST, AnalyticsRequest.HOST),
         validationTimeout = 5.seconds, // Analytics requests happen async.
     )

@@ -42,7 +42,7 @@ internal class PaymentSheetNextActionTest(
     // validate() a moment to see it.
     private val networkRule = NetworkRule(
         validationTimeout = 5.seconds,
-        validateBetas = apiConfigurationTestType.validateBetas,
+        defaultMatcher = apiConfigurationTestType.defaultMatcher,
     )
 
     @get:Rule

@@ -41,7 +41,7 @@ internal class PaymentSheetBillingConfigurationTest(
     @get:Rule
     val testRules: TestRules = TestRules.create(
         composeTestRule = composeTestRule,
-        networkRule = NetworkRule(validateBetas = apiConfigurationTestType.validateBetas),
+        networkRule = NetworkRule(defaultMatcher = apiConfigurationTestType.defaultMatcher),
     )
 
     private val networkRule = testRules.networkRule

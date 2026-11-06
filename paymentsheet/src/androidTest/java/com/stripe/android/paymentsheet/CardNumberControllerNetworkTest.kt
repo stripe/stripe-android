@@ -33,7 +33,7 @@ internal class CardNumberControllerNetworkTest(
     // but it's okay if it takes a bit to happen.
     private val networkRule = NetworkRule(
         validationTimeout = 5.seconds,
-        validateBetas = apiConfigurationTestType.validateBetas,
+        defaultMatcher = apiConfigurationTestType.defaultMatcher,
     )
 
     @get:Rule

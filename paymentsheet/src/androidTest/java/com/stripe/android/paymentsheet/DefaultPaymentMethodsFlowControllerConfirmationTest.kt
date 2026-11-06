@@ -33,7 +33,7 @@ internal class DefaultPaymentMethodsFlowControllerConfirmationTest(
 ) {
     @get:Rule
     val testRules: TestRules = TestRules.create(
-        networkRule = NetworkRule(validateBetas = apiConfigurationTestType.validateBetas),
+        networkRule = NetworkRule(defaultMatcher = apiConfigurationTestType.defaultMatcher),
     ) {
         around(IntentsRule())
     }

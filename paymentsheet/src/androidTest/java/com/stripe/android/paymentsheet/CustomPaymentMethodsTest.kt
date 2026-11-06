@@ -32,7 +32,7 @@ internal class CustomPaymentMethodsTest(
 ) {
     @get:Rule
     val testRules: TestRules = TestRules.create(
-        networkRule = NetworkRule(validateBetas = apiConfigurationTestType.validateBetas),
+        networkRule = NetworkRule(defaultMatcher = apiConfigurationTestType.defaultMatcher),
     )
 
     private val applicationContext = ApplicationProvider.getApplicationContext<Context>()

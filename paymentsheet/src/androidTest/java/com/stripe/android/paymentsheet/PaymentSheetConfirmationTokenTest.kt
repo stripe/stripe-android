@@ -36,7 +36,7 @@ internal class PaymentSheetConfirmationTokenTest(
 ) {
     @get:Rule
     val testRules: TestRules = TestRules.create(
-        networkRule = NetworkRule(validateBetas = apiConfigurationTestType.validateBetas),
+        networkRule = NetworkRule(defaultMatcher = apiConfigurationTestType.defaultMatcher),
     )
 
     private val networkRule = testRules.networkRule

@@ -35,7 +35,7 @@ internal class HCaptchaTokenTest(
     // but it's okay if it takes a bit to happen.
     private val networkRule = NetworkRule(
         validationTimeout = 5.seconds,
-        validateBetas = apiConfigurationTestType.validateBetas,
+        defaultMatcher = apiConfigurationTestType.defaultMatcher,
     )
     private val testRules: TestRules = TestRules.create(
         networkRule = networkRule,

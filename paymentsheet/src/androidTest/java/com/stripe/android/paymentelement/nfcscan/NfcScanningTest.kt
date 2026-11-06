@@ -24,7 +24,7 @@ internal class NfcScanningTest(
     @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
     private val apiConfigurationTestType: ApiConfigurationTestType,
 ) {
-    private val networkRule = NetworkRule(validateBetas = apiConfigurationTestType.validateBetas)
+    private val networkRule = NetworkRule(defaultMatcher = apiConfigurationTestType.defaultMatcher)
 
     @get:Rule
     val testRules: TestRules = TestRules.create(
