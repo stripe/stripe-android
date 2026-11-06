@@ -22,6 +22,7 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.LinkBrand
+import com.stripe.android.model.LinkDisabledReason
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PassiveCaptchaParamsFactory
@@ -38,7 +39,9 @@ import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
+import com.stripe.android.paymentsheet.state.LinkDisabledState
 import com.stripe.android.paymentsheet.state.LinkState
+import com.stripe.android.paymentsheet.state.LinkStateResult
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentIntentFactory
@@ -1197,6 +1200,7 @@ internal class PaymentMethodMetadataTest {
                 configuration = createLinkConfiguration(),
                 loginState = LinkState.LoginState.LoggedOut,
             ),
+            isInstantDebitsOnboardingEnabled = false,
             cardBrandFilter = PaymentSheetCardBrandFilter(cardBrandAcceptance),
             cardFundingFilter = PaymentSheetCardFundingFilter(allowedCardFundingTypes),
             paymentMethodIncentive = null,
@@ -1351,6 +1355,7 @@ internal class PaymentMethodMetadataTest {
             linkMode = null,
             linkBrand = LinkBrand.Link,
             linkStateResult = null,
+            isInstantDebitsOnboardingEnabled = false,
             cardBrandFilter = PaymentSheetCardBrandFilter(cardBrandAcceptance),
             cardFundingFilter = PaymentSheetCardFundingFilter(ConfigurationDefaults.allowedCardFundingTypes),
             paymentMethodIncentive = null,
@@ -1786,6 +1791,7 @@ internal class PaymentMethodMetadataTest {
                 loginState = LinkState.LoginState.LoggedOut,
                 signupMode = null,
             ),
+            isInstantDebitsOnboardingEnabled = true,
         )
 
         val displayedPaymentMethodTypes = metadata.supportedPaymentMethodTypes()
@@ -2160,6 +2166,50 @@ internal class PaymentMethodMetadataTest {
     }
 
     @Test
+    fun `createForPaymentElement enables Instant Debits onboarding when supported by elements session`() {
+        val metadata = createPaymentElementMetadata(
+            elementsSession = createElementsSession().copy(
+                linkSettings = createLinkSettings(onboardingEnabled = listOf("CARD", "INSTANT_DEBITS")),
+            ),
+        )
+
+        assertThat(metadata.isInstantDebitsOnboardingEnabled).isTrue()
+    }
+
+    @Test
+    fun `createForPaymentElement disables Instant Debits onboarding when not supported by elements session`() {
+        val metadata = createPaymentElementMetadata(
+            elementsSession = createElementsSession().copy(
+                linkSettings = createLinkSettings(onboardingEnabled = listOf("CARD")),
+            ),
+        )
+
+        assertThat(metadata.isInstantDebitsOnboardingEnabled).isFalse()
+    }
+
+    @Test
+    fun `createForPaymentElement disables Instant Debits onboarding when elements session has no link settings`() {
+        val metadata = createPaymentElementMetadata(
+            elementsSession = createElementsSession().copy(linkSettings = null),
+        )
+
+        assertThat(metadata.isInstantDebitsOnboardingEnabled).isFalse()
+    }
+
+    @Test
+    fun `createForPaymentElement enables Instant Debits onboarding when Link is disabled`() {
+        val metadata = createPaymentElementMetadata(
+            elementsSession = createElementsSession().copy(
+                linkSettings = createLinkSettings(onboardingEnabled = listOf("CARD", "INSTANT_DEBITS")),
+            ),
+            linkStateResult = LinkDisabledState(listOf(LinkDisabledReason.CardBrandFiltering)),
+        )
+
+        assertThat(metadata.linkState).isNull()
+        assertThat(metadata.isInstantDebitsOnboardingEnabled).isTrue()
+    }
+
+    @Test
     fun `createForPaymentElement enables NFC scanning when server flag is enabled`() {
         val metadata = createPaymentElementMetadata(
             nfcScanningFlag = true,
@@ -2424,6 +2474,7 @@ internal class PaymentMethodMetadataTest {
         initializationMode: PaymentElementLoader.InitializationMode =
             PaymentElementLoader.InitializationMode.PaymentIntent("cs_123"),
         integrationMetadata: IntegrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
+        linkStateResult: LinkStateResult? = null,
     ): PaymentMethodMetadata {
         val elementsSession = (
             elementsSession
@@ -2449,7 +2500,7 @@ internal class PaymentMethodMetadataTest {
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
             externalPaymentMethodSpecs = emptyList(),
             isGooglePayReady = false,
-            linkStateResult = null,
+            linkStateResult = linkStateResult,
             customerMetadata = null,
             initializationMode = initializationMode,
             clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
@@ -2458,6 +2509,25 @@ internal class PaymentMethodMetadataTest {
             isTapToAddAvailable = false,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
             apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
+        )
+    }
+
+    private fun createLinkSettings(onboardingEnabled: List<String>): ElementsSession.LinkSettings {
+        return ElementsSession.LinkSettings(
+            linkFundingSources = listOf("card", "bank_account"),
+            linkPassthroughModeEnabled = false,
+            linkMode = LinkMode.LinkPaymentMethod,
+            linkFlags = emptyMap(),
+            disableLinkSignup = false,
+            linkConsumerIncentive = null,
+            useAttestationEndpoints = false,
+            suppress2faModal = false,
+            disableLinkRuxInFlowController = false,
+            linkEnableDisplayableDefaultValuesInEce = false,
+            linkSignUpOptInFeatureEnabled = false,
+            linkSignUpOptInInitialValue = false,
+            linkSupportedPaymentMethodsOnboardingEnabled = onboardingEnabled,
+            linkBrand = LinkBrand.Link,
         )
     }
 

@@ -44,7 +44,7 @@ internal class CheckoutCardIntegrationTest {
 
     @Test
     fun testSuccessfulCardPayment() = runScenario(
-        block = {
+        setup = {
             contentPage.clickOnLpm("card")
             formPage.fillOutCardDetails(newCardNumber = "4242424242424242")
             formPage.clickPrimaryButton()
@@ -56,7 +56,7 @@ internal class CheckoutCardIntegrationTest {
 
     @Test
     fun testDeclinedCardReportsFailure() = runScenario(
-        block = {
+        setup = {
             contentPage.clickOnLpm("card")
             formPage.fillOutCardDetails(newCardNumber = "4000000000000002")
             formPage.clickPrimaryButton()
@@ -69,14 +69,14 @@ internal class CheckoutCardIntegrationTest {
     )
 
     private fun runScenario(
-        block: () -> Unit,
+        setup: () -> Unit,
         check: (CheckoutElementsController.Result) -> Unit,
     ) {
         val result = runCheckoutIntegrationTest(
             merchant = "US",
             sessionParams = cardOnlySessionParams(),
             configuration = configuration,
-            block = block,
+            block = setup,
         )
         check(result)
     }

@@ -157,6 +157,7 @@ internal class PaymentSheetScreenAddFirstPaymentMethodScreenshotTest {
                 loginState = LinkState.LoginState.LoggedOut,
                 signupMode = null,
             ),
+            isInstantDebitsOnboardingEnabled = true,
         )
         val interactor = FakeAddPaymentMethodInteractor(initialState = createState(metadata))
         val initialScreen = AddFirstPaymentMethod(interactor)

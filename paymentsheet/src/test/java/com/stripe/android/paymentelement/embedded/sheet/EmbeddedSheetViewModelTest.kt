@@ -115,7 +115,7 @@ internal class EmbeddedSheetViewModelTest {
             get() = LinkAccountHolder(savedStateHandle)
         val customerStateHolder: DefaultCustomerStateHolder
             get() = DefaultCustomerStateHolder(
-                customerMetadata = MutableStateFlow(args.paymentMethodMetadata.customerMetadata),
+                customerMetadata = MutableStateFlow(requireNotNull(args.paymentMethodMetadata).customerMetadata),
                 paymentMethodMetadataFlow = MutableStateFlow(args.paymentMethodMetadata),
                 savedStateHandle = savedStateHandle,
                 selection = selectionHolder.selection,

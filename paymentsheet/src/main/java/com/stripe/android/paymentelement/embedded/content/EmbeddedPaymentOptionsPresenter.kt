@@ -18,7 +18,7 @@ internal class DefaultEmbeddedPaymentOptionsPresenter @Inject constructor(
     private val errorReporter: ErrorReporter,
 ) : EmbeddedPaymentOptionsPresenter {
     override fun present() {
-        val state = state.value ?: return
+        val state = state.value
         val launcher = sheetStateHolder.sheetLauncher
         if (launcher == null) {
             errorReporter.report(
@@ -27,10 +27,10 @@ internal class DefaultEmbeddedPaymentOptionsPresenter @Inject constructor(
             return
         }
         launcher.launchPaymentOptions(
-            paymentMethodMetadata = state.paymentMethodMetadata,
+            paymentMethodMetadata = state?.paymentMethodMetadata,
             customerState = customerStateHolder.customer.value,
             selection = selectionHolder.selection.value,
-            configuration = state.configuration,
+            configuration = state?.configuration,
         )
     }
 }

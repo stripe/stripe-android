@@ -44,9 +44,9 @@ internal class EmbeddedSheetViewModel @Inject constructor(
             val savedStateHandle = extras.createSavedStateHandle()
             val customViewModelScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
             val component = DaggerEmbeddedSheetComponent.factory().build(
-                paymentMethodMetadata = args.paymentMethodMetadata,
+                paymentMethodMetadata = requireNotNull(args.paymentMethodMetadata),
                 statusBarColor = args.statusBarColor,
-                configuration = args.configuration,
+                configuration = requireNotNull(args.configuration),
                 productUsage = args.productUsage,
                 paymentElementCallbackIdentifier = args.paymentElementCallbackIdentifier,
                 application = extras.requireApplication(),

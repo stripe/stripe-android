@@ -8,6 +8,7 @@ import androidx.compose.runtime.setValue
 import com.stripe.android.common.ui.PaymentElementActivityResultCaller
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
+import com.stripe.android.paymentsheet.PaymentSheet
 
 internal class EmbeddedSheetActivityCoordinator(
     private val activity: EmbeddedSheetActivity,
@@ -24,6 +25,9 @@ internal class EmbeddedSheetActivityCoordinator(
             ),
         ),
     )
+
+    val appearance: PaymentSheet.Appearance
+        get() = state.args.configuration?.appearance ?: PaymentSheet.Appearance()
 
     fun register() {
         state.presentation.register()
@@ -48,7 +52,7 @@ internal class EmbeddedSheetActivityCoordinator(
             !activity.isFinishing &&
                 state.args.presentationState == EmbeddedActivityArgs.PresentationState.Loading &&
                 state.args.launchMode is EmbeddedLaunchMode.PaymentOptions &&
-                updatedArgs.presentationState == EmbeddedActivityArgs.PresentationState.Ready &&
+                updatedArgs.presentationState != EmbeddedActivityArgs.PresentationState.Loading &&
                 updatedArgs.launchMode is EmbeddedLaunchMode.PaymentOptions
         if (!isValidTransition) return
 

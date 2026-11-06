@@ -1,7 +1,14 @@
 # CHANGELOG
 
-NEXT_VERSION_BUMP: PATCH
+NEXT_VERSION_BUMP: MINOR
 ## XX.XX.XX - 20XX-XX-XX
+
+### Payments
+* [ADDED][15314](https://github.com/stripe/stripe-android/pull/15314) Klarna confirmation options for passing SDK-generated interoperability and partner confirmation tokens (private preview).
+
+### PaymentSheet
+* [FIXED][15315](https://github.com/stripe/stripe-android/pull/15315) Fixed an issue that caused the Bank payment method to be hidden unnecessarily.
+* [FIXED][15317](https://github.com/stripe/stripe-android/pull/15317) Fixed a memory leak where PaymentSheet could retain its Activity when closed before passive CAPTCHA warm-up finished.
 
 ## 23.25.2 - 2026-11-04
 
