@@ -13,6 +13,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent.Operation
 import com.stripe.android.checkout.analytics.LocalOperation
+import com.stripe.android.checkout.analytics.measureDuration
 import com.stripe.android.checkout.analytics.toAnalyticsMap
 import com.stripe.android.checkout.injection.CheckoutElementsPresenterSubcomponent
 import com.stripe.android.checkout.injection.DaggerCheckoutElementsControllerComponent
@@ -53,14 +54,9 @@ import kotlinx.parcelize.Parcelize
 import java.math.BigDecimal
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
-import kotlin.time.DurationUnit
-import kotlin.time.TimeSource
 
 private val SERVER_UPDATE_TIMEOUT_MS = 20.seconds.inWholeMilliseconds
-
-private fun Duration.inSeconds(): Float = toDouble(DurationUnit.SECONDS).toFloat()
 
 /**
  * Controls a Stripe Checkout Session: load it with [configure], observe it through
@@ -321,24 +317,17 @@ class CheckoutElementsController @Inject internal constructor(
                 params = analyticsParams,
             ) {
                 runCatching {
-                    val merchantUpdateStartedAt = TimeSource.Monotonic.markNow()
-                    try {
+                    analyticsParams.measureDuration("merchant_update_duration") {
                         withContext(callerContext) {
                             withTimeout(SERVER_UPDATE_TIMEOUT_MS) { serverUpdate() }
                         }.getOrThrow()
-                    } finally {
-                        analyticsParams["merchant_update_duration"] =
-                            merchantUpdateStartedAt.elapsedNow().inSeconds()
                     }
-                    val refreshStartedAt = TimeSource.Monotonic.markNow()
-                    try {
+                    analyticsParams.measureDuration("refresh_duration") {
                         checkoutSessionRepository.init(
                             clientSecret = checkoutSessionResponse.clientSecret,
                             adaptivePricingAllowed = configuration.currencySelectorElementConfiguration != null,
                             analyticsParams = configuration.toAnalyticsMap(),
                         ).getOrThrow()
-                    } finally {
-                        analyticsParams["refresh_duration"] = refreshStartedAt.elapsedNow().inSeconds()
                     }
                 }
             }
