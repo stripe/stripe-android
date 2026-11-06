@@ -40,6 +40,7 @@ internal class DefaultCheckoutSessionRefresher internal constructor(
                 clientSecret = clientSecret,
                 adaptivePricingAllowed = adaptivePricingAllowed,
                 analyticsParams = analyticsParams,
+                reportInitAnalytics = false,
             )
         },
         reloadState = checkoutStateLoader::reload,

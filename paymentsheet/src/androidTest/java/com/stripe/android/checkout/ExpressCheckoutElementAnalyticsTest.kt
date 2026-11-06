@@ -4,6 +4,7 @@ import androidx.test.espresso.intent.rule.IntentsRule
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.checkouttesting.CheckoutInitResponseFactory
 import com.stripe.android.checkouttesting.checkoutConfirm
+import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.ApiRequest
@@ -74,7 +75,7 @@ internal class ExpressCheckoutElementAnalyticsTest {
         runExpressCheckoutElementAnalyticsTest {
             enqueueSuccessfulNativeLinkPayment()
 
-            networkRule.checkoutInitWithAnalytics()
+            networkRule.checkoutInit()
 
             validateAnalyticsRequest(eventName = "link.popup.show")
             validateAnalyticsRequest(eventName = "link.popup.success")
@@ -102,7 +103,7 @@ internal class ExpressCheckoutElementAnalyticsTest {
 
             enqueueFailedGooglePayPayment(IllegalStateException("Google Pay failed"))
 
-            networkRule.checkoutInitWithAnalytics()
+            networkRule.checkoutInit()
             validateConfirmationStarted(selectedLpm = "google_pay")
             validateConfirmationFailed(
                 selectedLpm = "google_pay",
@@ -124,7 +125,7 @@ internal class ExpressCheckoutElementAnalyticsTest {
         runExpressCheckoutElementAnalyticsTest {
             enqueueCanceledGooglePayPayment()
 
-            networkRule.checkoutInitWithAnalytics()
+            networkRule.checkoutInit()
             validateConfirmationStarted(selectedLpm = "google_pay")
             validateConfirmationCanceled(
                 selectedLpm = "google_pay",
@@ -144,7 +145,7 @@ internal class ExpressCheckoutElementAnalyticsTest {
         runExpressCheckoutElementAnalyticsTest {
             enqueueFailedNativeLinkPayment(IllegalStateException("Link failed"))
 
-            networkRule.checkoutInitWithAnalytics()
+            networkRule.checkoutInit()
             validateAnalyticsRequest(eventName = "link.popup.show")
             validateAnalyticsRequest(
                 eventName = "link.popup.error",
@@ -291,7 +292,7 @@ internal class ExpressCheckoutElementAnalyticsTest {
                         .put("total", 5399)
                 }
             }
-            networkRule.checkoutInitWithAnalytics(
+            networkRule.checkoutInit(
                 responseFactory = CheckoutInitResponseFactory::createWithRequiredBillingAddressForAutomaticTax,
             )
             validateConfirmationStarted(selectedLpm = "google_pay")

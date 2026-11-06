@@ -126,6 +126,7 @@ class CheckoutElementsController @Inject internal constructor(
                 clientSecret = parsedClientSecret,
                 adaptivePricingAllowed = configurationState.currencySelectorElementConfiguration != null,
                 analyticsParams = configurationState.toAnalyticsMap(),
+                reportInitAnalytics = true,
             ).mapCatching { response ->
                 val initialLoad = checkoutStateLoader.loadInitial(
                     configuration = configurationState,
@@ -322,6 +323,7 @@ class CheckoutElementsController @Inject internal constructor(
                         clientSecret = checkoutSessionResponse.clientSecret,
                         adaptivePricingAllowed = configuration.currencySelectorElementConfiguration != null,
                         analyticsParams = configuration.toAnalyticsMap(),
+                        reportInitAnalytics = false,
                     ).getOrThrow()
                 }
             }

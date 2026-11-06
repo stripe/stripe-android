@@ -7,6 +7,7 @@ import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.core.Logger
+import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
@@ -76,6 +77,7 @@ class CheckoutSessionRepositoryAnalyticsTest {
             clientSecret = CheckoutSessionClientSecret(CLIENT_SECRET),
             adaptivePricingAllowed = false,
             analyticsParams = CONFIGURATION_PARAMS,
+            reportInitAnalytics = true,
         ).getOrThrow()
     }
 
@@ -119,9 +121,52 @@ class CheckoutSessionRepositoryAnalyticsTest {
             clientSecret = CheckoutSessionClientSecret(CLIENT_SECRET),
             adaptivePricingAllowed = false,
             analyticsParams = mapOf("merchant_display_name" to true),
+            reportInitAnalytics = true,
         )
 
         assertThat(result.isFailure).isTrue()
+    }
+
+    @Test
+    fun `init succeeds without reporting analytics when disabled`() = runScenario {
+        networkRule.checkoutInit { response ->
+            response.testBodyFromFile("checkout-session-init.json")
+        }
+
+        val result = repository.init(
+            clientSecret = CheckoutSessionClientSecret(CLIENT_SECRET),
+            adaptivePricingAllowed = false,
+            analyticsParams = CONFIGURATION_PARAMS,
+            reportInitAnalytics = false,
+        )
+
+        assertThat(result.getOrThrow().clientSecret.value).isEqualTo(CLIENT_SECRET)
+    }
+
+    @Test
+    fun `init fails without reporting analytics when disabled`() = runScenario {
+        networkRule.checkoutInit { response ->
+            response.setResponseCode(400)
+            response.setBody(
+                """
+                    {
+                        "error": {
+                            "type": "invalid_request_error",
+                            "message": "Invalid session"
+                        }
+                    }
+                """.trimIndent()
+            )
+        }
+
+        val result = repository.init(
+            clientSecret = CheckoutSessionClientSecret(CLIENT_SECRET),
+            adaptivePricingAllowed = false,
+            analyticsParams = CONFIGURATION_PARAMS,
+            reportInitAnalytics = false,
+        )
+
+        assertThat(result.exceptionOrNull()).isInstanceOf(APIException::class.java)
     }
 
     @Test

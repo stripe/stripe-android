@@ -80,6 +80,7 @@ class CheckoutSessionRepositoryTest {
             clientSecret = CheckoutSessionClientSecret("cs_test_abc123_secret_test"),
             adaptivePricingAllowed = true,
             analyticsParams = emptyMap(),
+            reportInitAnalytics = false,
         )
 
         assertThat(result.getOrThrow().clientSecret.value).isEqualTo("cs_test_abc123_secret_test")

@@ -64,19 +64,28 @@ internal class CheckoutSessionRepository @Inject constructor(
         clientSecret: CheckoutSessionClientSecret,
         adaptivePricingAllowed: Boolean,
         analyticsParams: Map<String, Any?>,
-    ): Result<CheckoutSessionResponse> = measure(
-        operation = Operation.Init,
-        checkoutSessionResponse = null,
-        params = analyticsParams + ("checkout_session_id" to clientSecret.sessionId),
-    ) {
-        executePost(
-            clientSecret = clientSecret,
-            url = initUrl(clientSecret.sessionId),
-            params = mapOf(
-                "adaptive_pricing[allowed]" to adaptivePricingAllowed,
-                "timezone" to TimeZone.getDefault().id,
-            ),
-        )
+        reportInitAnalytics: Boolean,
+    ): Result<CheckoutSessionResponse> {
+        val request: suspend () -> Result<CheckoutSessionResponse> = {
+            executePost(
+                clientSecret = clientSecret,
+                url = initUrl(clientSecret.sessionId),
+                params = mapOf(
+                    "adaptive_pricing[allowed]" to adaptivePricingAllowed,
+                    "timezone" to TimeZone.getDefault().id,
+                ),
+            )
+        }
+        return if (reportInitAnalytics) {
+            measure(
+                operation = Operation.Init,
+                checkoutSessionResponse = null,
+                params = analyticsParams + ("checkout_session_id" to clientSecret.sessionId),
+                block = request,
+            )
+        } else {
+            request()
+        }
     }
 
     suspend fun confirm(

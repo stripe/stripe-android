@@ -4,6 +4,7 @@ import androidx.test.espresso.Espresso
 import androidx.test.espresso.intent.rule.IntentsRule
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
+import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.core.exception.LocalStripeException
 import com.stripe.android.core.networking.AnalyticsRequest
@@ -145,7 +146,7 @@ internal class CheckoutPaymentElementAnalyticsTest {
                         .put("total", UPDATED_TOTAL)
                 }
             }
-            networkRule.checkoutInitWithAnalytics(responseFactory = ::billingTaxCheckoutInitResponse)
+            networkRule.checkoutInit(responseFactory = ::billingTaxCheckoutInitResponse)
             networkRule.validateCheckoutAnalyticsStarted(
                 "confirm",
                 analyticsPayloadField("invocation_source", "merchant"),
@@ -330,7 +331,7 @@ internal class CheckoutPaymentElementAnalyticsTest {
             not(hasQueryParam("merchant_update_duration")),
             not(hasQueryParam("refresh_duration")),
         )
-        networkRule.checkoutInitWithAnalytics(responseFactory = { response ->
+        networkRule.checkoutInit(responseFactory = { response ->
             response.testBodyFromFile("checkout-session-init.json") { json ->
                 json.remove("link_settings")
             }
