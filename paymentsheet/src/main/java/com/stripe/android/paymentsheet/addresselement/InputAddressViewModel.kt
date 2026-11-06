@@ -359,13 +359,7 @@ internal class InputAddressViewModel @Inject constructor(
     }
 
     private fun AddressDetails.takeIfUsable(): AddressDetails? {
-        val allowedCountries = args.config?.allowedCountries?.takeIf {
-            it.isNotEmpty()
-        } ?: CountryUtils.supportedBillingCountries
-
-        return takeIf {
-            address?.country == null || allowedCountries.contains(address.country)
-        }
+        return takeIfCountryAllowed(allowedCountries = args.config?.allowedCountries.orEmpty())
     }
 
     override fun onSearchActivated() {

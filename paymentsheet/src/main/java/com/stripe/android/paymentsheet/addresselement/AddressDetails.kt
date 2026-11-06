@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.addresselement
 
 import android.os.Parcelable
+import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.model.Address
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -57,6 +58,19 @@ internal fun AddressDetails.toIdentifierMap(
             )
     } else {
         emptyMap()
+    }
+}
+
+/**
+ * Returns this address, or null when its country isn't in [allowedCountries]. An empty
+ * [allowedCountries] allows every country the Address Element supports.
+ */
+internal fun AddressDetails.takeIfCountryAllowed(allowedCountries: Set<String>): AddressDetails? {
+    val countries = allowedCountries.ifEmpty { CountryUtils.supportedBillingCountries }
+    val country = address?.country
+
+    return takeIf {
+        country == null || countries.contains(country)
     }
 }
 

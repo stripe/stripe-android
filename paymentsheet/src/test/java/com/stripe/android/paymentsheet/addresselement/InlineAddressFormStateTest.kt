@@ -47,6 +47,29 @@ class InlineAddressFormStateTest {
     }
 
     @Test
+    fun `an initial address outside the allowed countries is not prefilled`() {
+        val state = createState(
+            initialAddress = AddressDetails(
+                name = "Jenny Rosen",
+                address = PaymentSheet.Address(
+                    city = "Toronto",
+                    country = "CA",
+                    line1 = "123 Main St",
+                    postalCode = "M5V 2T6",
+                    state = "ON",
+                ),
+            ),
+        )
+
+        val enteredAddress = state.enteredAddress.value
+
+        assertThat(enteredAddress.name).isEmpty()
+        assertThat(enteredAddress.address?.country).isEqualTo("US")
+        assertThat(enteredAddress.address?.line1).isEmpty()
+        assertThat(state.hasChanges()).isFalse()
+    }
+
+    @Test
     fun `completeAddress keeps the initial name when the name is hidden`() {
         val state = createState(
             initialAddress = AddressDetails(

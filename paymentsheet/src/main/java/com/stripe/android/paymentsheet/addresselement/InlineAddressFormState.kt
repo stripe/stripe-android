@@ -10,7 +10,8 @@ import kotlinx.coroutines.flow.StateFlow
  * or process death, so hold this in a `ViewModel`.
  *
  * @param initialAddress the address to prefill the fields with.
- * @param allowedCountries the countries to offer, or every country if empty.
+ * @param allowedCountries the countries to offer, or every country if empty. An [initialAddress]
+ *   in another country doesn't prefill the fields.
  * @param nameField whether to show the name field. A hidden name keeps the one in
  *   [initialAddress] in [enteredAddress] and [completeAddress].
  * @param phone whether to show the phone number field, and whether it is required.
@@ -22,8 +23,10 @@ class InlineAddressFormState(
     nameField: AddressLauncher.NameField,
     phone: AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration,
 ) {
+    private val prefilledAddress = initialAddress?.takeIfCountryAllowed(allowedCountries)
+
     internal val formController = AddressFormController(
-        initialValues = initialAddress?.toIdentifierMap() ?: emptyMap(),
+        initialValues = prefilledAddress?.toIdentifierMap() ?: emptyMap(),
         config = AddressLauncher.Configuration(
             allowedCountries = allowedCountries,
             additionalFields = AddressLauncher.AdditionalFieldsConfiguration(phone = phone),
