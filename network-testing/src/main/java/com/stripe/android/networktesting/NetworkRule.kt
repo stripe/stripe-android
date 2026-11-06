@@ -24,19 +24,14 @@ import kotlin.time.Duration
 class NetworkRule private constructor(
     private val hostsToTrack: Set<String>,
     validationTimeout: Duration?,
-    private val defaultMatcher: RequestMatcher,
 ) : TestRule {
     private val mockWebServer = TestMockWebServer(validationTimeout)
 
     @Volatile
-    private var betaMatcher = RequestMatchers.stripeBetas(emptySet())
-    private val sessionBetaMatcher = object : RequestMatcher {
-        override fun matches(request: TestRecordedRequest): Boolean = betaMatcher.matches(request)
-        override fun toString(): String = betaMatcher.toString()
-    }
+    private var expectedBetas: Set<String> = emptySet()
 
     fun expectStripeBetas(betas: Set<String>) {
-        betaMatcher = RequestMatchers.stripeBetas(betas)
+        expectedBetas = betas.toSet()
     }
 
     val baseUrl: HttpUrl
@@ -48,7 +43,6 @@ class NetworkRule private constructor(
     ) : this(
         hostsToTrack.map { it.hostFromUrl() }.toSet(),
         validationTimeout,
-        RequestMatchers.stripeApiKey(),
     )
 
     override fun apply(base: Statement, description: Description): Statement {
@@ -69,7 +63,7 @@ class NetworkRule private constructor(
         ensureResponseIsValidJson: Boolean = true,
         responseFactory: (MockResponse) -> Unit
     ) {
-        val matchers = withDefaultAuthorization(requestMatcher, applyDefaultAuthorization)
+        val matchers = withDefaultApiConfiguration(requestMatcher, applyDefaultAuthorization)
         mockWebServer.dispatcher.enqueue(*matchers) { response ->
             responseFactory(response)
             if (ensureResponseIsValidJson) {
@@ -84,7 +78,7 @@ class NetworkRule private constructor(
         ensureResponseIsValidJson: Boolean = true,
         responseFactory: (TestRecordedRequest, MockResponse) -> Unit
     ) {
-        val matchers = withDefaultAuthorization(requestMatcher, applyDefaultAuthorization)
+        val matchers = withDefaultApiConfiguration(requestMatcher, applyDefaultAuthorization)
         mockWebServer.dispatcher.enqueue(*matchers) { request, response ->
             responseFactory(request, response)
             if (ensureResponseIsValidJson) {
@@ -93,15 +87,20 @@ class NetworkRule private constructor(
         }
     }
 
-    private fun withDefaultAuthorization(
+    private fun withDefaultApiConfiguration(
         requestMatcher: Array<out RequestMatcher>,
         applyDefaultAuthorization: Boolean,
     ): Array<out RequestMatcher> {
-        return if (applyDefaultAuthorization) {
-            arrayOf(defaultMatcher, sessionBetaMatcher, *requestMatcher)
-        } else {
-            arrayOf(sessionBetaMatcher, *requestMatcher)
+        val configurationMatcher = object : RequestMatcher {
+            override fun matches(request: TestRecordedRequest): Boolean = matcher().matches(request)
+            override fun toString(): String = matcher().toString()
+
+            private fun matcher(): RequestMatcher = RequestMatchers.stripeApiConfiguration(
+                betas = expectedBetas,
+                applyDefaultAuthorization = applyDefaultAuthorization,
+            )
         }
+        return arrayOf(configurationMatcher, *requestMatcher)
     }
 
     fun validate() {

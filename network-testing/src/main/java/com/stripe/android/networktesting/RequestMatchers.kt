@@ -39,27 +39,15 @@ internal class CompositeRequestMatcher(
 }
 
 object RequestMatchers {
-    /** Requires session beta tokens on Stripe API requests, excluding card metadata. */
-    fun stripeBetas(betas: Set<String>): RequestMatcher {
-        val snapshot = betas.toSet()
-        return ToStringRequestMatcher("stripeBetas($snapshot)") { request ->
-            if (request.headers[ORIGINAL_HOST_HEADER] != API_HOST ||
-                path("/edge-internal/card-metadata").matches(request)
-            ) {
-                true
-            } else {
-                val tokens = request.headers["Stripe-Version"]?.split(';')?.drop(1).orEmpty()
-                tokens.containsAll(snapshot)
-            }
-        }
-    }
-
-    fun stripeApiKey(
+    fun stripeApiConfiguration(
         publishableKey: String = TestApiKeys.PUBLISHABLE,
         ephemeralKey: String = TestApiKeys.EPHEMERAL,
         accountId: String = TestApiKeys.ACCOUNT,
+        betas: Set<String> = emptySet(),
+        applyDefaultAuthorization: Boolean = true,
     ): RequestMatcher {
-        return ToStringRequestMatcher("stripeApiKey") { request ->
+        val expectedBetas = betas.toSet()
+        return ToStringRequestMatcher("stripeApiConfiguration(betas=$expectedBetas)") { request ->
             when (request.headers[ORIGINAL_HOST_HEADER]) {
                 API_HOST -> {
                     val authorization = request.headers[AUTHORIZATION_HEADER]
@@ -69,11 +57,18 @@ object RequestMatchers {
                         authorization == "Bearer $publishableKey" ||
                             authorization == "Bearer ${TestApiKeys.LIVE_PUBLISHABLE}"
                     }
-                    matchesApiKey && request.headers[STRIPE_ACCOUNT_HEADER] == accountId
+                    val matchesCredentials = !applyDefaultAuthorization ||
+                        (matchesApiKey && request.headers[STRIPE_ACCOUNT_HEADER] == accountId)
+                    val matchesBetas = path("/edge-internal/card-metadata").matches(request) ||
+                        request.headers["Stripe-Version"]?.split(';')?.drop(1).orEmpty().containsAll(expectedBetas)
+                    matchesCredentials && matchesBetas
                 }
                 ANALYTICS_HOST -> {
-                    request.headers[AUTHORIZATION_HEADER] == null &&
-                        request.queryParams[PUBLISHABLE_KEY_QUERY] == publishableKey
+                    !applyDefaultAuthorization ||
+                        (
+                            request.headers[AUTHORIZATION_HEADER] == null &&
+                                request.queryParams[PUBLISHABLE_KEY_QUERY] == publishableKey
+                            )
                 }
                 else -> true
             }
