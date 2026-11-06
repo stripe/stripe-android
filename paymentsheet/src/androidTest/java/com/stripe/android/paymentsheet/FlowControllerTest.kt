@@ -68,7 +68,7 @@ internal class FlowControllerTest(
     @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
     private val apiConfigurationTestType: ApiConfigurationTestType,
 ) {
-    private val networkRule = NetworkRule()
+    private val networkRule = NetworkRule(validateBetas = apiConfigurationTestType.validateBetas)
 
     @get:Rule
     val testRules: TestRules = TestRules.create(networkRule = networkRule)

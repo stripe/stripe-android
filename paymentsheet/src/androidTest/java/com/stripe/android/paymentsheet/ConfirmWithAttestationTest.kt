@@ -36,7 +36,9 @@ internal class ConfirmWithAttestationTest(
     @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
     private val apiConfigurationTestType: ApiConfigurationTestType,
 ) {
-    private val testRules: TestRules = TestRules.create()
+    private val testRules: TestRules = TestRules.create(
+        networkRule = NetworkRule(validateBetas = apiConfigurationTestType.validateBetas),
+    )
 
     @get:Rule
     val rules: RuleChain = RuleChain.emptyRuleChain()

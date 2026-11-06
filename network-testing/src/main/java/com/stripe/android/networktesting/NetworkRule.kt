@@ -34,10 +34,11 @@ class NetworkRule private constructor(
     constructor(
         hostsToTrack: List<String> = listOf(ApiRequest.API_HOST),
         validationTimeout: Duration? = null,
+        validateBetas: Boolean = false,
     ) : this(
         hostsToTrack.map { it.hostFromUrl() }.toSet(),
         validationTimeout,
-        RequestMatchers.stripeApiKey(),
+        if (validateBetas) RequestMatchers.stripeApiKey() else RequestMatchers.stripeApiKey(betas = emptySet()),
     )
 
     override fun apply(base: Statement, description: Description): Statement {

@@ -15,6 +15,9 @@ internal sealed class ApiConfigurationTestType(
     val apiConfiguration: ApiConfiguration?,
     private val updatePaymentConfigurationPublishableKey: Boolean,
 ) {
+    val validateBetas: Boolean
+        get() = apiConfiguration?.build()?.betas?.contains(INTEGRATION_BETA) == true
+
     fun initializePaymentConfiguration(context: Context) {
         PaymentConfiguration.clearInstance()
         context.getSharedPreferences(

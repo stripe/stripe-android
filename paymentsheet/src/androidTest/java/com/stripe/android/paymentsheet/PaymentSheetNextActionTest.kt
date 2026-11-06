@@ -40,7 +40,10 @@ internal class PaymentSheetNextActionTest(
 ) {
     // The retrieve happens after the sheet has already handed back its result, so give
     // validate() a moment to see it.
-    private val networkRule = NetworkRule(validationTimeout = 5.seconds)
+    private val networkRule = NetworkRule(
+        validationTimeout = 5.seconds,
+        validateBetas = apiConfigurationTestType.validateBetas,
+    )
 
     @get:Rule
     val testRules: TestRules = TestRules.create(networkRule = networkRule) {
