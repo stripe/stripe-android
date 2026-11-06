@@ -7,7 +7,7 @@ NEXT_VERSION_BUMP: MINOR
 * [ADDED][15314](https://github.com/stripe/stripe-android/pull/15314) Klarna confirmation options for passing SDK-generated interoperability and partner confirmation tokens (private preview).
 
 ### PaymentSheet
-* [ADDED][PR_NUMBER](PR_LINK) Added `PaymentSheet.Configuration.Builder.apiConfiguration` in public preview to configure API credentials for PaymentSheet and FlowController.
+* [ADDED][15327](https://github.com/stripe/stripe-android/pull/15327) Added `PaymentSheet.Configuration.Builder.apiConfiguration` in public preview to configure API credentials for PaymentSheet and FlowController.
 * [FIXED][15315](https://github.com/stripe/stripe-android/pull/15315) Fixed an issue that caused the Bank payment method to be hidden unnecessarily.
 * [FIXED][15317](https://github.com/stripe/stripe-android/pull/15317) Fixed a memory leak where PaymentSheet could retain its Activity when closed before passive CAPTCHA warm-up finished.
 
