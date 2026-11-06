@@ -901,7 +901,7 @@ internal class CheckoutSheetLauncherTest {
     }
 
     @Test
-    fun `launchPaymentOptions does not launch before configure starts`() = testScenario {
+    fun `launchPaymentOptions sends failed arguments before configure starts`() = testScenario {
         embeddedContentState.value = null
         selectionHolder.state = null
 
@@ -913,13 +913,16 @@ internal class CheckoutSheetLauncherTest {
         )
         runCurrent()
 
-        assertThat(sheetStateHolder.sheetIsOpen).isFalse()
+        val failedArgs = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityArgs
+        assertThat(failedArgs.presentationState).isEqualTo(EmbeddedActivityArgs.PresentationState.Failed)
+        assertThat(failedArgs.launchMode).isEqualTo(EmbeddedLaunchMode.PaymentOptions)
+        assertThat(sheetStateHolder.sheetIsOpen).isTrue()
         assertThat(launcherState.isAwaitingPaymentOptionsReady).isFalse()
         assertThat(errorReporter.getLoggedErrors()).isEmpty()
     }
 
     @Test
-    fun `launchPaymentOptions does not launch when metadata is unavailable while idle`() = testScenario {
+    fun `launchPaymentOptions sends failed arguments when metadata is unavailable while idle`() = testScenario {
         embeddedContentState.value = null
 
         sheetLauncher.launchPaymentOptions(
@@ -930,13 +933,16 @@ internal class CheckoutSheetLauncherTest {
         )
         runCurrent()
 
-        assertThat(sheetStateHolder.sheetIsOpen).isFalse()
+        val failedArgs = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityArgs
+        assertThat(failedArgs.presentationState).isEqualTo(EmbeddedActivityArgs.PresentationState.Failed)
+        assertThat(failedArgs.launchMode).isEqualTo(EmbeddedLaunchMode.PaymentOptions)
+        assertThat(sheetStateHolder.sheetIsOpen).isTrue()
         assertThat(launcherState.isAwaitingPaymentOptionsReady).isFalse()
         assertThat(errorReporter.getLoggedErrors()).isEmpty()
     }
 
     @Test
-    fun `launchPaymentOptions does not launch when configuration is unavailable while idle`() = testScenario {
+    fun `launchPaymentOptions sends failed arguments when configuration is unavailable while idle`() = testScenario {
         embeddedContentState.value = null
 
         sheetLauncher.launchPaymentOptions(
@@ -947,7 +953,10 @@ internal class CheckoutSheetLauncherTest {
         )
         runCurrent()
 
-        assertThat(sheetStateHolder.sheetIsOpen).isFalse()
+        val failedArgs = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityArgs
+        assertThat(failedArgs.presentationState).isEqualTo(EmbeddedActivityArgs.PresentationState.Failed)
+        assertThat(failedArgs.launchMode).isEqualTo(EmbeddedLaunchMode.PaymentOptions)
+        assertThat(sheetStateHolder.sheetIsOpen).isTrue()
         assertThat(launcherState.isAwaitingPaymentOptionsReady).isFalse()
         assertThat(errorReporter.getLoggedErrors()).isEmpty()
     }

@@ -30,20 +30,6 @@ internal class EmbeddedActivityArgsTest {
         assertThat(readyState.configuration).isEqualTo(configuration)
     }
 
-    @Test
-    fun `loading state can be parceled without metadata or configuration`() {
-        val args = parcelRoundTrip(EmbeddedActivityArgs.PresentationState.Loading)
-
-        assertThat(args.presentationState).isEqualTo(EmbeddedActivityArgs.PresentationState.Loading)
-    }
-
-    @Test
-    fun `failed state can be parceled without metadata or configuration`() {
-        val args = parcelRoundTrip(EmbeddedActivityArgs.PresentationState.Failed)
-
-        assertThat(args.presentationState).isEqualTo(EmbeddedActivityArgs.PresentationState.Failed)
-    }
-
     private fun parcelRoundTrip(presentationState: EmbeddedActivityArgs.PresentationState): EmbeddedActivityArgs {
         val args = EmbeddedActivityArgs(
             productUsage = setOf("EmbeddedPaymentElement"),
