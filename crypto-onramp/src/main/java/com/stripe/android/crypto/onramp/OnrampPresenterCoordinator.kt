@@ -343,7 +343,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         presentPartnerTermsIfNeeded(
             declarationType = PartnerDeclarationType.TransactionTerms,
             resultLauncher = termsAndConditionsResultLauncher,
-            callback = onrampCallbacksState.termsAndConditionsCallback,
+            getCallback = { onrampCallbacksState.termsAndConditionsCallback },
             headingResId = PaymentSheetR.string.stripe_link_onramp_terms_and_conditions_screen_title,
         )
     }
@@ -352,7 +352,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         presentPartnerTermsIfNeeded(
             declarationType = PartnerDeclarationType.TermsOfService,
             resultLauncher = termsOfServiceResultLauncher,
-            callback = onrampCallbacksState.termsOfServiceCallback,
+            getCallback = { onrampCallbacksState.termsOfServiceCallback },
             headingResId = PaymentSheetR.string.stripe_link_onramp_terms_of_service_screen_title,
         )
     }
@@ -360,12 +360,18 @@ internal class OnrampPresenterCoordinator @Inject constructor(
     private fun presentPartnerTermsIfNeeded(
         declarationType: PartnerDeclarationType,
         resultLauncher: ActivityResultLauncher<HTMLConfirmationActivityArgs>,
-        callback: OnrampPartnerTermsCallback?,
+        getCallback: () -> OnrampPartnerTermsCallback?,
         @StringRes headingResId: Int,
     ) {
         coroutineScope.launch {
-            when (val result = interactor.startPartnerTerms(declarationType)) {
+            val result = interactor.startPartnerTerms(declarationType)
+            val callback = getCallback()
+            when (result) {
                 is OnrampStartPartnerTermsResult.PresentationRequired -> {
+                    if (lifecycleOwner.lifecycle.currentState == Lifecycle.State.DESTROYED) {
+                        callback?.onResult(OnrampPartnerTermsResult.Cancelled())
+                        return@launch
+                    }
                     presentHTMLConfirmation(
                         resultLauncher = resultLauncher,
                         html = result.terms.declaration.text,
