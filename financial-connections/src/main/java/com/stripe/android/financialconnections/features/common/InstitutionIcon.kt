@@ -11,6 +11,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.ui.LocalImageLoader
@@ -22,11 +23,13 @@ internal fun InstitutionIcon(
     institutionIcon: String?,
     modifier: Modifier = Modifier,
     disablePlaceholder: Boolean = false,
+    size: Dp = 56.dp,
+    cornerRadius: Dp = 12.dp,
 ) {
     val previewMode = LocalInspectionMode.current
     val iconModifier = modifier
-        .size(56.dp)
-        .shadow(1.dp, RoundedCornerShape(12.dp), clip = true)
+        .size(size)
+        .shadow(1.dp, RoundedCornerShape(cornerRadius), clip = true)
 
     when {
         institutionIcon == null && disablePlaceholder -> {

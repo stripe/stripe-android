@@ -28,6 +28,7 @@ private val paneToDestination = mapOf(
     Pane.NOTICE to Destination.Notice,
     Pane.ACCOUNT_UPDATE_REQUIRED to Destination.AccountUpdateRequired,
     Pane.ID_CONSENT_CONTENT to Destination.IDConsentContent,
+    Pane.STREAMLINED_CONSENT to Destination.StreamlinedConsent,
 )
 
 internal val Pane.destination: Destination

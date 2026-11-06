@@ -15,8 +15,8 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsInstitu
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitutionSelected
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
-import com.stripe.android.financialconnections.model.IDConsentContentPane
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
+import com.stripe.android.financialconnections.model.TextUpdate
 import com.stripe.android.financialconnections.network.FinancialConnectionsRequestExecutor
 import com.stripe.android.financialconnections.network.NetworkConstants
 import com.stripe.android.financialconnections.network.NetworkConstants.PARAM_SELECTED_ACCOUNTS
@@ -349,7 +349,7 @@ private class FinancialConnectionsManifestRepositoryImpl(
         ).also { newResponse ->
             updateActiveInstitution("selectInstitution", institution)
             updateCachedManifest("selectInstitution", newResponse.manifest)
-            updateIDConsentContentPane("selectInstitution", newResponse.text?.idConsentContentPane)
+            updateInstitutionSelectedText("selectInstitution", newResponse.text)
         }
     }
 
@@ -606,15 +606,16 @@ private class FinancialConnectionsManifestRepositoryImpl(
         )
     }
 
-    private fun updateIDConsentContentPane(
+    private fun updateInstitutionSelectedText(
         source: String,
-        pane: IDConsentContentPane?
+        text: TextUpdate?
     ) {
-        logger.debug("SYNC_CACHE: updating local sync object from $source with ID consent content pane")
+        logger.debug("SYNC_CACHE: updating local sync object from $source with institution selected panes")
         val cachedResponse = cachedSynchronizeSessionResponse
         cachedSynchronizeSessionResponse = cachedResponse?.copy(
-            text = cachedResponse.text?.copy(
-                idConsentContentPane = pane,
+            text = (cachedResponse.text ?: TextUpdate()).copy(
+                idConsentContentPane = text?.idConsentContentPane,
+                streamlinedConsentPane = text?.streamlinedConsentPane,
             ),
         )
     }

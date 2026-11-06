@@ -4,6 +4,7 @@ import androidx.activity.OnBackPressedDispatcher
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -27,6 +28,8 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.tooling.preview.Preview
@@ -34,6 +37,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.navigation.bottomsheet.BottomSheetNavigator
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarState
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
@@ -52,7 +56,8 @@ private val LOGO_HEIGHT = 20.dp
 @Composable
 internal fun FinancialConnectionsTopAppBar(
     state: TopAppBarState,
-    onCloseClick: () -> Unit
+    onCloseClick: () -> Unit,
+    onLogoClick: () -> Unit,
 ) {
     val elevation = animateDpAsState(
         targetValue = if (state.isElevated) AppBarDefaults.TopAppBarElevation else 0.dp,
@@ -65,7 +70,9 @@ internal fun FinancialConnectionsTopAppBar(
         linkBrand = state.linkBrand,
         elevation = elevation,
         allowBackNavigation = state.allowBackNavigation,
+        logoClickable = state.logoClickable,
         onCloseClick = onCloseClick,
+        onLogoClick = onLogoClick,
     )
 }
 
@@ -76,7 +83,9 @@ private fun FinancialConnectionsTopAppBar(
     linkBrand: LinkBrand,
     elevation: State<Dp>,
     allowBackNavigation: Boolean,
+    logoClickable: Boolean,
     onCloseClick: () -> Unit,
+    onLogoClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val onBackPressedDispatcher = LocalOnBackPressedDispatcherOwner.current
@@ -94,6 +103,8 @@ private fun FinancialConnectionsTopAppBar(
                 hideStripeLogo = hideStripeLogo,
                 theme = theme,
                 linkBrand = linkBrand,
+                logoClickable = logoClickable,
+                onLogoClick = onLogoClick,
             )
         },
         elevation = 0.dp,
@@ -176,14 +187,29 @@ private fun Title(
     hideStripeLogo: Boolean,
     theme: Theme,
     linkBrand: LinkBrand,
+    logoClickable: Boolean,
+    onLogoClick: () -> Unit,
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         if (hideStripeLogo.not()) {
+            val learnMore = stringResource(R.string.stripe_top_app_bar_logo_learn_more)
             Image(
-                modifier = Modifier.height(LOGO_HEIGHT),
+                modifier = Modifier
+                    .height(LOGO_HEIGHT)
+                    .then(
+                        if (logoClickable) {
+                            Modifier.clickable(
+                                role = Role.Button,
+                                onClickLabel = learnMore,
+                                onClick = onLogoClick,
+                            )
+                        } else {
+                            Modifier
+                        }
+                    ),
                 contentScale = ContentScale.FillHeight,
                 painter = painterResource(id = theme.icon(linkBrand)),
                 colorFilter = if (isSystemInDarkTheme()) {
@@ -191,7 +217,8 @@ private fun Title(
                 } else {
                     null
                 },
-                contentDescription = null // decorative element
+                // The logo is decorative unless it can be clicked
+                contentDescription = learnMore.takeIf { logoClickable },
             )
         }
     }
@@ -223,6 +250,7 @@ internal fun TopAppBarWithStripeLogoPreview() {
         FinancialConnectionsTopAppBar(
             state = TopAppBarState(hideStripeLogo = false, linkBrand = LinkBrand.Link),
             onCloseClick = {},
+            onLogoClick = {},
         )
     }
 }
@@ -238,6 +266,7 @@ internal fun TopAppBarWithLinkLogoPreview() {
                 linkBrand = LinkBrand.Link,
             ),
             onCloseClick = {},
+            onLogoClick = {},
         )
     }
 }
@@ -249,6 +278,7 @@ internal fun TopAppBarNoStripeLogoPreview() {
         FinancialConnectionsTopAppBar(
             state = TopAppBarState(hideStripeLogo = true, linkBrand = LinkBrand.Link),
             onCloseClick = {},
+            onLogoClick = {},
         )
     }
 }

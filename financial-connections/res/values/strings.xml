@@ -96,6 +96,8 @@
   <!-- Success panes -->
   <string name="stripe_success_pane_title">Success</string>
   <string name="stripe_success_pane_title_microdeposits">Almost there</string>
+  <!-- Accessibility label for the logo in the top app bar, which can be tapped to learn more about Stripe. -->
+  <string name="stripe_top_app_bar_logo_learn_more">Learn more</string>
   <string name="stripe_validation_account_confirm_mismatch">Your account numbers don\'t match.</string>
   <string name="stripe_validation_account_required">Account number required.</string>
   <string name="stripe_validation_account_too_long">Invalid bank account number: must be at most 17 digits long.</string>

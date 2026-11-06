@@ -202,6 +202,7 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity() {
                         FinancialConnectionsTopAppBar(
                             state = topAppBarState,
                             onCloseClick = viewModel::handleOnCloseClick,
+                            onLogoClick = viewModel::handleOnLogoClick,
                         )
                     },
                 ) {
@@ -211,6 +212,7 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity() {
                     ) {
                         composable(Destination.Consent)
                         composable(Destination.IDConsentContent)
+                        composable(Destination.StreamlinedConsent)
                         composable(Destination.ManualEntry)
                         composable(Destination.PartnerAuth)
                         bottomSheet(Destination.PartnerAuthDrawer)

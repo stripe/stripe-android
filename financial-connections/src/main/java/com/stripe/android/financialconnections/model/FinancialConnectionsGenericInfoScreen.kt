@@ -90,6 +90,7 @@ internal data class FinancialConnectionsGenericInfoScreen(
         @SerialName("secondary_cta")
         val secondaryCta: GenericInfoAction? = null,
         @SerialName("below_cta")
+        @Serializable(with = MarkdownToHtmlSerializer::class)
         val belowCta: String? = null
     ) : Parcelable {
         @Parcelize
