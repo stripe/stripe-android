@@ -40,6 +40,7 @@ import com.stripe.android.paymentsheet.verticalmode.FakeSavedPaymentMethodConfir
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormInteractor
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
+import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.LocaleTestRule
 import com.stripe.android.utils.FakeIsNfcScanningAvailable
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
@@ -155,6 +156,8 @@ internal class FormActivityScreenShotTest {
             linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
             launchMode = launchMode,
             embeddedNavigatorProvider = Provider { error("Not expected") },
+            initialScreensProvider = Provider { error("Not expected") },
+            errorReporter = FakeErrorReporter(),
             savedPaymentMethodConfirmScreenFactoryProvider = Provider { error("Not expected") },
         )
         val screen = EmbeddedNavigator.Screen.SavedPaymentMethodConfirm(
@@ -239,6 +242,8 @@ internal class FormActivityScreenShotTest {
                 selectedPaymentMethodCode = "card",
             ),
             embeddedNavigatorProvider = Provider { error("Not expected") },
+            initialScreensProvider = Provider { error("Not expected") },
+            errorReporter = FakeErrorReporter(),
             savedPaymentMethodConfirmScreenFactoryProvider = Provider { error("Not expected") },
         )
         val formHelperFactory = EmbeddedFormHelperFactory(

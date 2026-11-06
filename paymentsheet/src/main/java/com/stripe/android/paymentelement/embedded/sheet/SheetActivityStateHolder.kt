@@ -15,6 +15,7 @@ import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.form.OnClickOverrideDelegate
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.amount
@@ -77,6 +78,8 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
     private val launchMode: EmbeddedLaunchMode,
     private val embeddedNavigatorProvider: Provider<EmbeddedNavigator>,
     private val savedPaymentMethodConfirmScreenFactoryProvider: Provider<SavedPaymentMethodConfirmScreenFactory>,
+    private val initialScreensProvider: Provider<List<@JvmSuppressWildcards EmbeddedNavigator.Screen>>,
+    private val errorReporter: ErrorReporter,
 ) : SheetActivityStateHolder {
     private val _state = MutableStateFlow(
         SheetActivityStateHolder.State(
@@ -108,6 +111,23 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
     init {
         coroutineScope.launch {
             tapToAddHelper.nextStep.collect { result ->
+                if (launchMode is EmbeddedLaunchMode.PaymentOptions) {
+                    when (result) {
+                        is TapToAddNextStep.ShowSavedPaymentMethods -> {
+                            embeddedNavigatorProvider.get().performAction(
+                                EmbeddedNavigator.Action.ResetToScreens(initialScreensProvider.get())
+                            )
+                            return@collect
+                        }
+                        TapToAddNextStep.Complete -> {
+                            errorReporter.report(
+                                ErrorReporter.UnexpectedErrorEvent.TAP_TO_ADD_FLOW_CONTROLLER_RECEIVED_COMPLETE_RESULT,
+                            )
+                            return@collect
+                        }
+                        else -> Unit
+                    }
+                }
                 val activityResult = when (result) {
                     is TapToAddNextStep.ConfirmSavedPaymentMethod -> {
                         val screen = savedPaymentMethodConfirmScreenFactoryProvider.get().create(
