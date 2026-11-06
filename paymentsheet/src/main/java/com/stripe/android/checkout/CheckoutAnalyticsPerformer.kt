@@ -46,7 +46,7 @@ internal class CheckoutAnalyticsPerformer @Inject constructor(
 ) : CheckoutConfirmationResultReporter {
     private val analyticsRequestFactory = PaymentAnalyticsRequestFactory(
         context = context,
-        defaultProductUsageTokens = setOf("checkout_elements"),
+        defaultProductUsageTokens = emptySet(),
         apiConfigurationProvider = apiConfigurationProvider,
     )
 
