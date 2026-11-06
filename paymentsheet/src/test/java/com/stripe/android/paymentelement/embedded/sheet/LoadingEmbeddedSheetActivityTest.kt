@@ -12,7 +12,6 @@ import androidx.test.espresso.Espresso.onIdle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkAccountUpdate
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
@@ -48,8 +47,6 @@ internal class LoadingEmbeddedSheetActivityTest {
 
     @Test
     fun `loading without state survives recreation and can be cancelled`() = launch(
-        paymentMethodMetadata = null,
-        configuration = null,
         presentationState = EmbeddedActivityArgs.PresentationState.Loading,
     ) { scenario ->
         composeTestRule.onNodeWithTag(EMBEDDED_SHEET_LOADING_TEST_TAG).assertIsDisplayed()
@@ -67,16 +64,12 @@ internal class LoadingEmbeddedSheetActivityTest {
 
     @Test
     fun `failed intent closes loading sheet without state`() = launch(
-        paymentMethodMetadata = null,
-        configuration = null,
         presentationState = EmbeddedActivityArgs.PresentationState.Loading,
     ) { scenario ->
         composeTestRule.onNodeWithTag(EMBEDDED_SHEET_LOADING_TEST_TAG).assertIsDisplayed()
         val failedIntent = EmbeddedSheetContract.createIntent(
             applicationContext,
             createArgs(
-                paymentMethodMetadata = null,
-                configuration = null,
                 presentationState = EmbeddedActivityArgs.PresentationState.Failed,
             ),
         )
@@ -90,8 +83,6 @@ internal class LoadingEmbeddedSheetActivityTest {
 
     @Test
     fun `failed initial intent closes sheet without state`() = launch(
-        paymentMethodMetadata = null,
-        configuration = null,
         presentationState = EmbeddedActivityArgs.PresentationState.Failed,
     ) { scenario ->
         val result = EmbeddedSheetContract.parseResult(scenario.result.resultCode, scenario.result.resultData)
@@ -134,17 +125,17 @@ internal class LoadingEmbeddedSheetActivityTest {
 
     @Test
     fun `ready intent updates loading content without replacing composition and survives recreation`() = launch(
-        paymentMethodMetadata = null,
-        configuration = null,
         presentationState = EmbeddedActivityArgs.PresentationState.Loading,
     ) { scenario ->
         val readyIntent = EmbeddedSheetContract.createIntent(
             applicationContext,
             createArgs(
-                paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+                presentationState = EmbeddedActivityArgs.PresentationState.Ready(
+                    paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+                    ),
+                    configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
                 ),
-                presentationState = EmbeddedActivityArgs.PresentationState.Ready,
             ),
         )
 
@@ -177,11 +168,6 @@ internal class LoadingEmbeddedSheetActivityTest {
     }
 
     private fun launch(
-        paymentMethodMetadata: PaymentMethodMetadata? = PaymentMethodMetadataFactory.create(
-            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
-        ),
-        configuration: EmbeddedPaymentElement.Configuration? =
-            EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
         presentationState: EmbeddedActivityArgs.PresentationState,
         block: (ActivityScenario<EmbeddedSheetActivity>) -> Unit,
     ) {
@@ -189,8 +175,6 @@ internal class LoadingEmbeddedSheetActivityTest {
             EmbeddedSheetContract.createIntent(
                 context = applicationContext,
                 input = createArgs(
-                    paymentMethodMetadata = paymentMethodMetadata,
-                    configuration = configuration,
                     presentationState = presentationState,
                 ),
             )
@@ -198,16 +182,9 @@ internal class LoadingEmbeddedSheetActivityTest {
     }
 
     private fun createArgs(
-        paymentMethodMetadata: PaymentMethodMetadata? = PaymentMethodMetadataFactory.create(
-            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
-        ),
         presentationState: EmbeddedActivityArgs.PresentationState,
-        configuration: EmbeddedPaymentElement.Configuration? =
-            EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
     ): EmbeddedActivityArgs {
         return EmbeddedActivityArgs(
-            paymentMethodMetadata = paymentMethodMetadata,
-            configuration = configuration,
             productUsage = setOf("EmbeddedPaymentElement"),
             statusBarColor = null,
             paymentElementCallbackIdentifier = "PaymentOptionsTestIdentifier",

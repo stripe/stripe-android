@@ -23,6 +23,7 @@ internal class EmbeddedSheetViewModel @Inject constructor(
     }
 
     class Factory(
+        private val readyState: EmbeddedActivityArgs.PresentationState.Ready,
         private val argsSupplier: () -> EmbeddedActivityArgs,
     ) : ViewModelProvider.Factory {
         fun createReadyPresentation(
@@ -44,9 +45,9 @@ internal class EmbeddedSheetViewModel @Inject constructor(
             val savedStateHandle = extras.createSavedStateHandle()
             val customViewModelScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
             val component = DaggerEmbeddedSheetComponent.factory().build(
-                paymentMethodMetadata = requireNotNull(args.paymentMethodMetadata),
+                paymentMethodMetadata = readyState.paymentMethodMetadata,
                 statusBarColor = args.statusBarColor,
-                configuration = requireNotNull(args.configuration),
+                configuration = readyState.configuration,
                 productUsage = args.productUsage,
                 paymentElementCallbackIdentifier = args.paymentElementCallbackIdentifier,
                 application = extras.requireApplication(),

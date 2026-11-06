@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.repositories
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutAnalyticsTestFixtures
+import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutFetch
 import com.stripe.android.checkouttesting.checkoutInit
@@ -283,6 +284,52 @@ class CheckoutSessionRepositoryAnalyticsTest {
             checkoutSessionResponse = checkoutSessionResponse,
             currencyCode = "invalid",
         )
+
+        assertThat(result.isFailure).isTrue()
+    }
+
+    @Test
+    fun `measure snapshots params on started and succeeded`() = runScenario {
+        expectEvent(
+            "run_server_update.started",
+            not(hasQueryParam("merchant_update_duration")),
+        )
+        expectEvent(
+            "run_server_update.succeeded",
+            analyticsPayloadField("merchant_update_duration", "1.5"),
+        )
+
+        val params = mutableMapOf<String, Any?>()
+        repository.measure(
+            operation = CheckoutAnalyticsEvent.Operation.RunServerUpdate,
+            checkoutSessionResponse = checkoutSessionResponse,
+            params = params,
+        ) {
+            params["merchant_update_duration"] = 1.5f
+            Result.success(checkoutSessionResponse)
+        }.getOrThrow()
+    }
+
+    @Test
+    fun `measure snapshots params on started and failed`() = runScenario {
+        expectEvent(
+            "run_server_update.started",
+            not(hasQueryParam("merchant_update_duration")),
+        )
+        expectEvent(
+            "run_server_update.failed",
+            analyticsPayloadField("merchant_update_duration", "1.5"),
+        )
+
+        val params = mutableMapOf<String, Any?>()
+        val result = repository.measure(
+            operation = CheckoutAnalyticsEvent.Operation.RunServerUpdate,
+            checkoutSessionResponse = checkoutSessionResponse,
+            params = params,
+        ) {
+            params["merchant_update_duration"] = 1.5f
+            Result.failure(IllegalStateException("boom"))
+        }
 
         assertThat(result.isFailure).isTrue()
     }

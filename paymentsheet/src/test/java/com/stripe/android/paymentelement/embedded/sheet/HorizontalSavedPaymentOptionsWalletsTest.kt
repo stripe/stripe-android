@@ -79,16 +79,6 @@ internal class HorizontalSavedPaymentOptionsWalletsTest {
     ) {
         val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
         val args = EmbeddedActivityArgs(
-            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
-                isGooglePayReady = isGooglePayReady,
-                linkState = LinkState(
-                    configuration = TestFactory.LINK_CONFIGURATION,
-                    loginState = LinkState.LoginState.LoggedOut,
-                    signupMode = null,
-                ),
-            ),
-            configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
             productUsage = setOf("EmbeddedPaymentElement"),
             paymentElementCallbackIdentifier = "HorizontalSavedPaymentOptionsWalletsTestIdentifier",
             statusBarColor = null,
@@ -103,7 +93,18 @@ internal class HorizontalSavedPaymentOptionsWalletsTest {
             ),
             promotions = emptyList(),
             launchMode = EmbeddedLaunchMode.PaymentOptions,
-            presentationState = EmbeddedActivityArgs.PresentationState.Ready,
+            presentationState = EmbeddedActivityArgs.PresentationState.Ready(
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+                    isGooglePayReady = isGooglePayReady,
+                    linkState = LinkState(
+                        configuration = TestFactory.LINK_CONFIGURATION,
+                        loginState = LinkState.LoginState.LoggedOut,
+                        signupMode = null,
+                    ),
+                ),
+                configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
+            ),
         )
         ActivityScenario.launchActivityForResult<EmbeddedSheetActivity>(
             EmbeddedSheetContract.createIntent(context = applicationContext, input = args),
