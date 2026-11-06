@@ -476,6 +476,22 @@ internal class DefaultPaymentElementLoader @Inject constructor(
 
         warnUnactivatedIfNeeded(stripeIntent)
 
+        when (integrationConfiguration) {
+            is PaymentElementLoader.Configuration.PaymentSheet,
+            is PaymentElementLoader.Configuration.Embedded -> pmMetadata.logUnavailablePaymentMethods(
+                logger = userFacingLogger,
+                paymentMethodTypes = stripeIntent.paymentMethodTypes +
+                    if (initializationMode is PaymentElementLoader.InitializationMode.CheckoutSession) {
+                        elementsSession.orderedPaymentMethodTypesAndWallets
+                    } else {
+                        emptyList()
+                    },
+            )
+            is PaymentElementLoader.Configuration.CryptoOnramp,
+            is PaymentElementLoader.Configuration.StandaloneLink,
+            is PaymentElementLoader.Configuration.ExpressCheckoutElement -> Unit
+        }
+
         if (!supportsIntent(pmMetadata)) {
             val requested = stripeIntent.paymentMethodTypes.joinToString(separator = ", ")
             throw PaymentSheetLoadingException.NoPaymentMethodTypesAvailable(requested)
