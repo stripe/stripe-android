@@ -621,10 +621,10 @@ internal class CheckoutAnalyticsPerformerTest {
         expectedParams: Map<String, Any>,
         configurationParams: Map<String, Any?> = confirmationConfigurationParams,
     ): Map<String, *> {
-        if (invocationSource == InvocationSource.ExpressCheckoutElement) {
-            performer.onExpressCheckoutElementConfirmationStarted(paymentSelection)
-        } else {
-            performer.onPaymentElementConfirmationStarted(paymentSelection)
+        when (invocationSource) {
+            InvocationSource.ExpressCheckoutElement ->
+                performer.onExpressCheckoutElementConfirmationStarted(paymentSelection)
+            else -> performer.onPaymentElementConfirmationStarted(paymentSelection)
         }
         return analyticsRequestExecutor.awaitConfirmationEvent(
             STARTED_EVENT,

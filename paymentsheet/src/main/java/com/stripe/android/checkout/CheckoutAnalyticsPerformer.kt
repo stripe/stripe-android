@@ -100,10 +100,9 @@ internal class CheckoutAnalyticsPerformer @Inject constructor(
         paymentSelection: PaymentSelection,
     ) {
         val state = stateHolder.state
-        val metadata = if (invocationSource == InvocationSource.ExpressCheckoutElement) {
-            state?.expressCheckoutElementPaymentMethodMetadata
-        } else {
-            state?.paymentMethodMetadata
+        val metadata = when (invocationSource) {
+            InvocationSource.ExpressCheckoutElement -> state?.expressCheckoutElementPaymentMethodMetadata
+            else -> state?.paymentMethodMetadata
         }
         val linkAccount = linkAccountHolder.linkAccountInfo.value.account
         val confirmationContext = CheckoutConfirmationContext(
