@@ -33,7 +33,7 @@ internal class FinancialConnectionsThemeScreenshotTest {
             DeviceConfig.NEXUS_5.copy(softButtons = false, nightMode = forcedTheme.systemNightMode),
         )
         val preview = ConsentPreviewParameterProvider().values.elementAt(
-            if (theme == Branding.LinkLight) 3 else 2,
+            if (theme == Branding.Link) 3 else 2,
         )
         paparazzi.snapshot {
             CompositionLocalProvider(LocalInspectionMode provides true) {
@@ -52,12 +52,12 @@ internal class FinancialConnectionsThemeScreenshotTest {
     }
 
     enum class Branding {
-        DefaultLight,
-        LinkLight;
+        Default,
+        Link;
 
         fun toTheme(mode: ThemeMode): Theme = when (this) {
-            DefaultLight -> Theme.DefaultLight(mode)
-            LinkLight -> Theme.LinkLight(mode)
+            Default -> Theme.Default(mode)
+            Link -> Theme.Link(mode)
         }
     }
 }
