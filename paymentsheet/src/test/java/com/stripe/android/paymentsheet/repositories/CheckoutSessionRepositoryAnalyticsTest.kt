@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.repositories
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutAnalyticsTestFixtures
+import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.checkouttesting.checkoutUpdate
@@ -254,6 +255,50 @@ class CheckoutSessionRepositoryAnalyticsTest {
             checkoutSessionResponse = checkoutSessionResponse,
             currencyCode = "invalid",
         )
+
+        assertThat(result.isFailure).isTrue()
+    }
+
+    @Test
+    fun `measure reports terminal params on succeeded and not on started`() = runScenario {
+        expectEvent(
+            "run_server_update.started",
+            not(hasQueryParam("merchant_update_duration")),
+        )
+        expectEvent(
+            "run_server_update.succeeded",
+            analyticsPayloadField("merchant_update_duration", "1.5"),
+        )
+
+        repository.measure(
+            operation = CheckoutAnalyticsEvent.Operation.RunServerUpdate,
+            checkoutSessionResponse = checkoutSessionResponse,
+            params = emptyMap(),
+            terminalParams = { mapOf("merchant_update_duration" to 1.5f) },
+        ) {
+            Result.success(checkoutSessionResponse)
+        }.getOrThrow()
+    }
+
+    @Test
+    fun `measure reports terminal params on failed`() = runScenario {
+        expectEvent(
+            "run_server_update.started",
+            not(hasQueryParam("merchant_update_duration")),
+        )
+        expectEvent(
+            "run_server_update.failed",
+            analyticsPayloadField("merchant_update_duration", "1.5"),
+        )
+
+        val result = repository.measure(
+            operation = CheckoutAnalyticsEvent.Operation.RunServerUpdate,
+            checkoutSessionResponse = checkoutSessionResponse,
+            params = emptyMap(),
+            terminalParams = { mapOf("merchant_update_duration" to 1.5f) },
+        ) {
+            Result.failure(IllegalStateException("boom"))
+        }
 
         assertThat(result.isFailure).isTrue()
     }

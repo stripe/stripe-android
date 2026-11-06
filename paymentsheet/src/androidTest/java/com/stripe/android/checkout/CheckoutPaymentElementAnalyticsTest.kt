@@ -337,8 +337,8 @@ internal class CheckoutPaymentElementAnalyticsTest {
         })
         networkRule.validateCheckoutAnalyticsSucceeded(
             "run_server_update",
-            not(hasQueryParam("merchant_update_duration")),
-            not(hasQueryParam("refresh_duration")),
+            hasQueryParam("merchant_update_duration"),
+            hasQueryParam("refresh_duration"),
         )
 
         assertThat(controller.runServerUpdate { Result.success(Unit) })
@@ -367,7 +367,7 @@ internal class CheckoutPaymentElementAnalyticsTest {
         )
         networkRule.validateCheckoutAnalyticsFailed(
             "run_server_update",
-            not(hasQueryParam("merchant_update_duration")),
+            hasQueryParam("merchant_update_duration"),
             not(hasQueryParam("refresh_duration")),
             analyticsPayloadField("error_type", "java.lang.IllegalStateException"),
         )

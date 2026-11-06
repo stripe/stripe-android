@@ -53,9 +53,14 @@ import kotlinx.parcelize.Parcelize
 import java.math.BigDecimal
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
+import kotlin.time.DurationUnit
+import kotlin.time.TimeSource
 
 private val SERVER_UPDATE_TIMEOUT_MS = 20.seconds.inWholeMilliseconds
+
+private fun Duration.inSeconds(): Float = toDouble(DurationUnit.SECONDS).toFloat()
 
 /**
  * Controls a Stripe Checkout Session: load it with [configure], observe it through
@@ -308,21 +313,39 @@ class CheckoutElementsController @Inject internal constructor(
         // Preserve the merchant's context while keeping the callback a child of the mutation's
         // timeout and cancellation scope.
         val callerContext = currentCoroutineContext().minusKey(Job)
+        var merchantUpdateDuration: Duration? = null
+        var refreshDuration: Duration? = null
         return withCheckoutState {
             checkoutSessionRepository.measure(
                 operation = Operation.RunServerUpdate,
                 checkoutSessionResponse = checkoutSessionResponse,
                 params = emptyMap(),
+                terminalParams = {
+                    buildMap {
+                        merchantUpdateDuration?.let { put("merchant_update_duration", it.inSeconds()) }
+                        refreshDuration?.let { put("refresh_duration", it.inSeconds()) }
+                    }
+                },
             ) {
                 runCatching {
-                    withContext(callerContext) {
-                        withTimeout(SERVER_UPDATE_TIMEOUT_MS) { serverUpdate() }
-                    }.getOrThrow()
-                    checkoutSessionRepository.init(
-                        clientSecret = checkoutSessionResponse.clientSecret,
-                        adaptivePricingAllowed = configuration.currencySelectorElementConfiguration != null,
-                        analyticsParams = configuration.toAnalyticsMap(),
-                    ).getOrThrow()
+                    val merchantUpdateStartedAt = TimeSource.Monotonic.markNow()
+                    try {
+                        withContext(callerContext) {
+                            withTimeout(SERVER_UPDATE_TIMEOUT_MS) { serverUpdate() }
+                        }.getOrThrow()
+                    } finally {
+                        merchantUpdateDuration = merchantUpdateStartedAt.elapsedNow()
+                    }
+                    val refreshStartedAt = TimeSource.Monotonic.markNow()
+                    try {
+                        checkoutSessionRepository.init(
+                            clientSecret = checkoutSessionResponse.clientSecret,
+                            adaptivePricingAllowed = configuration.currencySelectorElementConfiguration != null,
+                            analyticsParams = configuration.toAnalyticsMap(),
+                        ).getOrThrow()
+                    } finally {
+                        refreshDuration = refreshStartedAt.elapsedNow()
+                    }
                 }
             }
         }.toOperationResult()
