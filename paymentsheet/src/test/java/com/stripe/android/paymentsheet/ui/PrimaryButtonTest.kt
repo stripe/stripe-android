@@ -5,16 +5,15 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
-import com.google.testing.junit.testparameterinjector.TestParameter
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.createComposeCleanupRule
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestParameterInjector
+import org.robolectric.RobolectricTestRunner
 
-@RunWith(RobolectricTestParameterInjector::class)
+@RunWith(RobolectricTestRunner::class)
 internal class PrimaryButtonTest {
     @get:Rule
     val composeRule = createComposeRule()
@@ -33,10 +32,9 @@ internal class PrimaryButtonTest {
     }
 
     @Test
-    fun `idle button displays the requested secure icon`(@TestParameter enabled: Boolean) = runScenario(
+    fun `idle button displays the requested secure icon`() = runScenario(
         processingState = PrimaryButtonProcessingState.Idle(null),
         icon = PrimaryButtonIcon.Secure,
-        enabled = enabled,
     ) {
         composeRule.onNodeWithTag(PRIMARY_BUTTON_SECURE_ICON_TEST_TAG, useUnmergedTree = true).assertIsDisplayed()
         composeRule.onNodeWithTag(PRIMARY_BUTTON_LOCK_ICON_TEST_TAG, useUnmergedTree = true).assertDoesNotExist()
@@ -79,7 +77,6 @@ internal class PrimaryButtonTest {
     private fun runScenario(
         processingState: PrimaryButtonProcessingState,
         icon: PrimaryButtonIcon = PrimaryButtonIcon.Lock,
-        enabled: Boolean = true,
         block: () -> Unit,
     ) {
         composeRule.setContent {
@@ -88,7 +85,7 @@ internal class PrimaryButtonTest {
                 PrimaryButton(
                     label = "Pay",
                     icon = icon,
-                    enabled = enabled,
+                    enabled = true,
                     processingState = processingState,
                 ) {}
             }

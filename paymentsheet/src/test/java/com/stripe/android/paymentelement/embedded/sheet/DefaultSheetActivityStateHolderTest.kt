@@ -88,15 +88,15 @@ internal class DefaultSheetActivityStateHolderTest {
 
     @Test
     fun `experiment icon is preserved through selection and processing updates`() = testScenario(
-        primaryButtonIcon = PrimaryButtonIcon.Secure,
+        primaryButtonIcon = PrimaryButtonIcon.None,
     ) {
         stateHolder.state.test {
-            assertThat(awaitItem().primaryButtonIcon).isEqualTo(PrimaryButtonIcon.Secure)
+            assertThat(awaitItem().primaryButtonIcon).isEqualTo(PrimaryButtonIcon.None)
 
             selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
-            assertThat(awaitItem().primaryButtonIcon).isEqualTo(PrimaryButtonIcon.Secure)
+            assertThat(awaitItem().primaryButtonIcon).isEqualTo(PrimaryButtonIcon.None)
             stateHolder.updateProcessing(true)
-            assertThat(awaitItem().primaryButtonIcon).isEqualTo(PrimaryButtonIcon.Secure)
+            assertThat(awaitItem().primaryButtonIcon).isEqualTo(PrimaryButtonIcon.None)
             primaryButtonExperiment.getIconCalls.expectNoEvents()
         }
     }
