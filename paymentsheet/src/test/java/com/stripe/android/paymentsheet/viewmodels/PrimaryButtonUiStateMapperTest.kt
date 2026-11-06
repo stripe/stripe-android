@@ -670,6 +670,9 @@ class PrimaryButtonUiStateMapperTest {
     @Test
     fun `confirmation button uses experiment no icon`() = assertExperimentIcon(PrimaryButtonIcon.None)
 
+    @Test
+    fun `confirmation button uses experiment secure icon`() = assertExperimentIcon(PrimaryButtonIcon.Secure)
+
     private fun assertExperimentIcon(icon: PrimaryButtonIcon) = runExperimentScenario(icon = icon) {
         mapper.forCompleteFlow().test {
             assertThat(awaitItem()?.icon).isEqualTo(icon)

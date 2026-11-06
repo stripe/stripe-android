@@ -50,8 +50,9 @@ internal class PrimaryButtonExperimentTest {
     }
 
     @Test
-    fun `treatment_replace_padlock keeps padlock without logging exposure`() = assertUnsupportedVariant(
+    fun `treatment_replace_padlock shows secure icon and logs exposure`() = assertVariantIconAndExposure(
         variant = "treatment_replace_padlock",
+        expectedIcon = PrimaryButtonIcon.Secure,
     )
 
     @Test
