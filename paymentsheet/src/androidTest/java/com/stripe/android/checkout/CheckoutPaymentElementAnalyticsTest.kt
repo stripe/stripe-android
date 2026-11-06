@@ -234,6 +234,38 @@ internal class CheckoutPaymentElementAnalyticsTest {
     }
 
     @Test
+    fun testSelectingSavedPaymentMethodWithoutAutomaticTaxReportsSucceeded() = runCheckoutPaymentElementScenario(
+        networkRule = networkRule,
+        renderPaymentElementContent = false,
+        setup = { controller ->
+            networkRule.validateCheckoutInitStartedAndSucceeded()
+            assertThat(
+                controller.configure(
+                    DEFAULT_CLIENT_SECRET,
+                    CheckoutElementsController.Configuration().paymentElement(PaymentElement.Configuration()),
+                )
+            ).isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
+        },
+    ) {
+        networkRule.validateAnalyticsRequest(
+            eventName = "checkout_elements.update_billing_address.succeeded",
+            productUsage = setOf("checkout_elements"),
+            analyticsPayloadField("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID),
+            analyticsPayloadField("invocation_source", "payment_element"),
+            analyticsPayloadField("did_request_tax_update", "false"),
+            not(hasQueryParam("duration")),
+            not(hasQueryParam("error_type")),
+            not(hasQueryParam("merchant_display_name")),
+        )
+
+        withContext(Dispatchers.Main) {
+            controller.selectSavedPaymentMethod(PaymentSelection.Saved(createPaymentMethodWithBillingAddress()))
+                .getOrThrow()
+        }
+        markTestSucceeded()
+    }
+
+    @Test
     fun testSelectingSavedPaymentMethodWithBillingAutomaticTaxReportsTaxUpdate() = runCheckoutPaymentElementScenario(
         networkRule = networkRule,
         checkoutInitResponse = ::billingTaxCheckoutInitResponse,
