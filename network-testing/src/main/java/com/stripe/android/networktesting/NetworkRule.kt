@@ -27,11 +27,17 @@ class NetworkRule private constructor(
 ) : TestRule {
     private val mockWebServer = TestMockWebServer(validationTimeout)
 
-    @Volatile
-    private var expectedBetas: Set<String> = emptySet()
+    private val defaultMatcher = UpdatableRequestMatcher(RequestMatchers.stripeApiConfiguration())
+    private val customCredentialsMatcher = UpdatableRequestMatcher(
+        RequestMatchers.stripeApiConfiguration(applyDefaultAuthorization = false),
+    )
 
     fun expectStripeBetas(betas: Set<String>) {
-        expectedBetas = betas.toSet()
+        defaultMatcher.delegate = RequestMatchers.stripeApiConfiguration(betas = betas)
+        customCredentialsMatcher.delegate = RequestMatchers.stripeApiConfiguration(
+            betas = betas,
+            applyDefaultAuthorization = false,
+        )
     }
 
     val baseUrl: HttpUrl
@@ -91,15 +97,7 @@ class NetworkRule private constructor(
         requestMatcher: Array<out RequestMatcher>,
         applyDefaultAuthorization: Boolean,
     ): Array<out RequestMatcher> {
-        val configurationMatcher = object : RequestMatcher {
-            override fun matches(request: TestRecordedRequest): Boolean = matcher().matches(request)
-            override fun toString(): String = matcher().toString()
-
-            private fun matcher(): RequestMatcher = RequestMatchers.stripeApiConfiguration(
-                betas = expectedBetas,
-                applyDefaultAuthorization = applyDefaultAuthorization,
-            )
-        }
+        val configurationMatcher = if (applyDefaultAuthorization) defaultMatcher else customCredentialsMatcher
         return arrayOf(configurationMatcher, *requestMatcher)
     }
 
@@ -117,6 +115,13 @@ class NetworkRule private constructor(
             throw AssertionError("Parsing JSON failed")
         }
     }
+}
+
+private class UpdatableRequestMatcher(
+    @Volatile var delegate: RequestMatcher,
+) : RequestMatcher {
+    override fun matches(request: TestRecordedRequest): Boolean = delegate.matches(request)
+    override fun toString(): String = delegate.toString()
 }
 
 private class NetworkStatement(
