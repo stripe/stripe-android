@@ -4,42 +4,32 @@ import android.content.Context
 import android.os.Looper
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
+import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.GooglePayJsonFactory
-import com.stripe.android.checkouttesting.checkoutUpdate
-import com.stripe.android.core.networking.AnalyticsRequestExecutor
-import com.stripe.android.core.networking.ApiRequest
-import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.googlepaylauncher.GooglePayPaymentDataError
 import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdate
 import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdateResponse
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
-import com.stripe.android.networking.PaymentAnalyticsRequestFactory
-import com.stripe.android.networktesting.NetworkRule
-import com.stripe.android.networktesting.RequestMatchers.bodyPart
-import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.payments.core.analytics.ErrorReporter
-import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
-import com.stripe.android.paymentsheet.repositories.CheckoutStripeRepositoryFactory
 import com.stripe.android.testing.FakeErrorReporter
-import com.stripe.android.utils.FakeFraudDetectionDataRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withContext
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
+import org.mockito.kotlin.doAnswer
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
+import java.util.UUID
 
 @OptIn(CheckoutSessionPreview::class)
 @RunWith(RobolectricTestRunner::class)
 internal class CheckoutGooglePayPaymentDataUpdateCallbackTest {
-    @get:Rule
-    val networkRule = NetworkRule()
-
     @Test
     fun `onPaymentDataChanged returns error when state is not loaded`() = runScenario(
         state = null,
@@ -117,33 +107,65 @@ internal class CheckoutGooglePayPaymentDataUpdateCallbackTest {
     )
 
     @Test
-    fun `initialization retains shipping tax response through local billing update`() = runScenario(
-        addressBuilderResultProvider = { addressSource ->
-            CheckoutGooglePayPaymentDataUpdateAddressBuilder.Result.Available(
-                if (addressSource == CheckoutSessionResponse.TaxAddressSource.SHIPPING) ADDRESS else BILLING_ADDRESS
-            )
-        },
-    ) {
-        enqueueTaxUpdate()
-        val paymentDataUpdate = GooglePayPaymentDataUpdate(
-            callbackTrigger = GooglePayPaymentDataUpdate.CallbackTrigger.Initialize,
-            shippingAddress = SHIPPING_ADDRESS,
-            billingAddress = BILLING_GOOGLE_PAY_ADDRESS,
-        )
+    fun `onPaymentDataChanged updates shipping and billing tax regions for initialization`() {
+        val initialResponse = CheckoutSessionResponseFactory.create(id = "cs_initial")
+        val shippingResponse = CheckoutSessionResponseFactory.create(id = "cs_shipping")
+        val billingResponse = CheckoutSessionResponseFactory.create(id = "cs_billing")
 
-        assertThat(onPaymentDataChanged(paymentDataUpdate)).isEqualTo(providedMapperResponse)
-        assertBuildCalls(GooglePayPaymentDataUpdate.CallbackTrigger.Initialize, paymentDataUpdate)
-        val toResponseCall = mapper.toResponseCalls.awaitItem()
-        assertThat(toResponseCall.response).isNotSameInstanceAs(providedState?.checkoutSessionResponse)
-        assertThat(toResponseCall.response.customerEmail).isEqualTo(UPDATED_EMAIL)
-        assertThat(toResponseCall.response.amount).isEqualTo(UPDATED_AMOUNT)
-        assertThat(toResponseCall.response.taxAddressSource).isEqualTo(CheckoutSessionResponse.TaxAddressSource.SHIPPING)
-        assertThat(toResponseCall.paymentDataUpdate).isEqualTo(paymentDataUpdate)
+        runScenario(
+            state = CheckoutElementsControllerStateFactory.create(checkoutSessionResponse = initialResponse),
+            addressBuilderResultProvider = { addressSource ->
+                when (addressSource) {
+                    CheckoutSessionResponse.TaxAddressSource.SHIPPING ->
+                        CheckoutGooglePayPaymentDataUpdateAddressBuilder.Result.Available(ADDRESS)
+                    CheckoutSessionResponse.TaxAddressSource.BILLING ->
+                        CheckoutGooglePayPaymentDataUpdateAddressBuilder.Result.Available(BILLING_ADDRESS)
+                }
+            },
+            updateResultProvider = { call ->
+                Result.success(
+                    when (call.addressSource) {
+                        CheckoutSessionResponse.TaxAddressSource.SHIPPING -> shippingResponse
+                        CheckoutSessionResponse.TaxAddressSource.BILLING -> billingResponse
+                    }
+                )
+            },
+        ) {
+            val paymentDataUpdate = GooglePayPaymentDataUpdate(
+                callbackTrigger = GooglePayPaymentDataUpdate.CallbackTrigger.Initialize,
+                shippingAddress = SHIPPING_ADDRESS,
+                billingAddress = BILLING_GOOGLE_PAY_ADDRESS,
+            )
+
+            onPaymentDataChanged(paymentDataUpdate)
+
+            val shippingBuildCall = addressBuilder.buildCalls.awaitItem()
+            assertThat(shippingBuildCall.addressSource)
+                .isEqualTo(CheckoutSessionResponse.TaxAddressSource.SHIPPING)
+            val billingBuildCall = addressBuilder.buildCalls.awaitItem()
+            assertThat(billingBuildCall.addressSource)
+                .isEqualTo(CheckoutSessionResponse.TaxAddressSource.BILLING)
+
+            val shippingUpdateCall = taxRegionUpdater.updateServerStateIfNeededCalls.awaitItem()
+            assertThat(shippingUpdateCall.checkoutSessionResponse).isEqualTo(initialResponse)
+            assertThat(shippingUpdateCall.addressSource)
+                .isEqualTo(CheckoutSessionResponse.TaxAddressSource.SHIPPING)
+            assertThat(shippingUpdateCall.address).isEqualTo(ADDRESS)
+
+            val billingUpdateCall = taxRegionUpdater.updateServerStateIfNeededCalls.awaitItem()
+            assertThat(billingUpdateCall.checkoutSessionResponse).isEqualTo(shippingResponse)
+            assertThat(billingUpdateCall.addressSource)
+                .isEqualTo(CheckoutSessionResponse.TaxAddressSource.BILLING)
+            assertThat(billingUpdateCall.address).isEqualTo(BILLING_ADDRESS)
+
+            val toResponseCall = mapper.toResponseCalls.awaitItem()
+            assertThat(toResponseCall.response).isEqualTo(billingResponse)
+            assertThat(toResponseCall.paymentDataUpdate).isEqualTo(paymentDataUpdate)
+        }
     }
 
     @Test
     fun `initialization updates billing when shipping address is unavailable`() = runScenario(
-        state = taxState(CheckoutSessionResponse.TaxAddressSource.BILLING),
         addressBuilderResultProvider = { addressSource ->
             when (addressSource) {
                 CheckoutSessionResponse.TaxAddressSource.SHIPPING ->
@@ -153,23 +175,27 @@ internal class CheckoutGooglePayPaymentDataUpdateCallbackTest {
             }
         },
     ) {
-        enqueueTaxUpdate(BILLING_ADDRESS)
         val paymentDataUpdate = GooglePayPaymentDataUpdate(
             callbackTrigger = GooglePayPaymentDataUpdate.CallbackTrigger.Initialize,
             shippingAddress = null,
             billingAddress = BILLING_GOOGLE_PAY_ADDRESS,
         )
 
-        assertThat(onPaymentDataChanged(paymentDataUpdate)).isEqualTo(providedMapperResponse)
+        val response = onPaymentDataChanged(paymentDataUpdate)
+
+        assertThat(response).isEqualTo(providedMapperResponse)
         assertBuildCalls(GooglePayPaymentDataUpdate.CallbackTrigger.Initialize, paymentDataUpdate)
-        val response = mapper.toResponseCalls.awaitItem().response
-        assertThat(response.customerEmail).isEqualTo(UPDATED_EMAIL)
-        assertThat(response.amount).isEqualTo(UPDATED_AMOUNT)
+        val updateCall = taxRegionUpdater.updateServerStateIfNeededCalls.awaitItem()
+        assertThat(updateCall.addressSource).isEqualTo(CheckoutSessionResponse.TaxAddressSource.BILLING)
+        assertThat(updateCall.address).isEqualTo(BILLING_ADDRESS)
+        assertThat(updateCall.checkoutSessionResponse).isEqualTo(providedState?.checkoutSessionResponse)
+        assertThat(mapper.toResponseCalls.awaitItem().response).isEqualTo(providedUpdateResult.getOrNull())
     }
 
     @Test
-    fun `initialization stops before billing when shipping tax update fails`() = runScenario {
-        enqueueTaxUpdateFailure()
+    fun `initialization stops before billing when shipping tax update fails`() = runScenario(
+        updateResult = Result.failure(IllegalStateException("Unable to compute tax")),
+    ) {
         val paymentDataUpdate = GooglePayPaymentDataUpdate(
             callbackTrigger = GooglePayPaymentDataUpdate.CallbackTrigger.Initialize,
             shippingAddress = SHIPPING_ADDRESS,
@@ -183,20 +209,22 @@ internal class CheckoutGooglePayPaymentDataUpdateCallbackTest {
         assertThat(response.error?.reason).isEqualTo(GooglePayPaymentDataError.Reason.ShippingAddressInvalid)
         assertThat(addressBuilder.buildCalls.awaitItem().addressSource)
             .isEqualTo(CheckoutSessionResponse.TaxAddressSource.SHIPPING)
-        mapper.toResponseCalls.expectNoEvents()
+        assertThat(taxRegionUpdater.updateServerStateIfNeededCalls.awaitItem().addressSource)
+            .isEqualTo(CheckoutSessionResponse.TaxAddressSource.SHIPPING)
     }
 
     @Test
-    fun `initialization returns payment method error when billing tax update fails after local shipping succeeds`() =
+    fun `initialization returns payment method error when billing tax update fails after shipping succeeds`() {
+        val shippingResponse = CheckoutSessionResponseFactory.create(id = "cs_shipping")
         runScenario(
-            state = taxState(CheckoutSessionResponse.TaxAddressSource.BILLING),
-            addressBuilderResultProvider = { addressSource ->
-                CheckoutGooglePayPaymentDataUpdateAddressBuilder.Result.Available(
-                    if (addressSource == CheckoutSessionResponse.TaxAddressSource.SHIPPING) ADDRESS else BILLING_ADDRESS
-                )
+            updateResultProvider = { call ->
+                when (call.addressSource) {
+                    CheckoutSessionResponse.TaxAddressSource.SHIPPING -> Result.success(shippingResponse)
+                    CheckoutSessionResponse.TaxAddressSource.BILLING ->
+                        Result.failure(IllegalStateException("Unable to compute tax"))
+                }
             },
         ) {
-            enqueueTaxUpdateFailure(BILLING_ADDRESS)
             val paymentDataUpdate = GooglePayPaymentDataUpdate(
                 callbackTrigger = GooglePayPaymentDataUpdate.CallbackTrigger.Initialize,
                 shippingAddress = SHIPPING_ADDRESS,
@@ -209,8 +237,13 @@ internal class CheckoutGooglePayPaymentDataUpdateCallbackTest {
             assertThat(response.error?.intent).isEqualTo(GooglePayPaymentDataError.Intent.PaymentMethod)
             assertThat(response.error?.reason).isEqualTo(GooglePayPaymentDataError.Reason.OtherError)
             assertBuildCalls(GooglePayPaymentDataUpdate.CallbackTrigger.Initialize, paymentDataUpdate)
-            mapper.toResponseCalls.expectNoEvents()
+            assertThat(taxRegionUpdater.updateServerStateIfNeededCalls.awaitItem().addressSource)
+                .isEqualTo(CheckoutSessionResponse.TaxAddressSource.SHIPPING)
+            val billingUpdateCall = taxRegionUpdater.updateServerStateIfNeededCalls.awaitItem()
+            assertThat(billingUpdateCall.addressSource).isEqualTo(CheckoutSessionResponse.TaxAddressSource.BILLING)
+            assertThat(billingUpdateCall.checkoutSessionResponse).isEqualTo(shippingResponse)
         }
+    }
 
     @Test
     fun `onPaymentDataChanged updates tax region & responds successfully for shipping address change`() = successTest(
@@ -223,8 +256,9 @@ internal class CheckoutGooglePayPaymentDataUpdateCallbackTest {
     )
 
     @Test
-    fun `onPaymentDataChanged returns error when updating tax region fails`() = runScenario {
-        enqueueTaxUpdateFailure()
+    fun `onPaymentDataChanged returns error when updating tax region fails`() = runScenario(
+        updateResult = Result.failure(IllegalStateException("Unable to compute tax")),
+    ) {
         val paymentDataUpdate = GooglePayPaymentDataUpdate(
             callbackTrigger = GooglePayPaymentDataUpdate.CallbackTrigger.ShippingAddress,
             shippingAddress = SHIPPING_ADDRESS,
@@ -242,13 +276,13 @@ internal class CheckoutGooglePayPaymentDataUpdateCallbackTest {
         assertThat(error?.intent).isEqualTo(GooglePayPaymentDataError.Intent.ShippingAddress)
 
         assertThat(addressBuilder.buildCalls.awaitItem()).isNotNull()
+        assertThat(taxRegionUpdater.updateServerStateIfNeededCalls.awaitItem()).isNotNull()
     }
 
     @Test
     fun `onPaymentDataChanged returns payment method error when updating billing tax region fails`() = runScenario(
-        state = taxState(CheckoutSessionResponse.TaxAddressSource.BILLING),
+        updateResult = Result.failure(IllegalStateException("Unable to compute tax")),
     ) {
-        enqueueTaxUpdateFailure()
         val paymentDataUpdate = GooglePayPaymentDataUpdate(
             callbackTrigger = GooglePayPaymentDataUpdate.CallbackTrigger.PaymentMethod,
             shippingAddress = null,
@@ -266,6 +300,8 @@ internal class CheckoutGooglePayPaymentDataUpdateCallbackTest {
         assertThat(error?.intent).isEqualTo(GooglePayPaymentDataError.Intent.PaymentMethod)
 
         assertThat(addressBuilder.buildCalls.awaitItem()).isNotNull()
+        val updateCall = taxRegionUpdater.updateServerStateIfNeededCalls.awaitItem()
+        assertThat(updateCall.addressSource).isEqualTo(CheckoutSessionResponse.TaxAddressSource.BILLING)
     }
 
     @Test
@@ -279,17 +315,6 @@ internal class CheckoutGooglePayPaymentDataUpdateCallbackTest {
         callbackTrigger = GooglePayPaymentDataUpdate.CallbackTrigger.Offer,
         expectedTriggerParam = "offer",
     )
-
-    @Test
-    fun `shipping address change returns original response when automatic tax is disabled`() = runScenario(
-        state = CheckoutElementsControllerStateFactory.create(),
-    ) {
-        assertThat(onPaymentDataChanged(SHIPPING_ADDRESS_UPDATE)).isEqualTo(providedMapperResponse)
-        assertThat(addressBuilder.buildCalls.awaitItem().addressSource)
-            .isEqualTo(CheckoutSessionResponse.TaxAddressSource.SHIPPING)
-        assertThat(mapper.toResponseCalls.awaitItem().response)
-            .isSameInstanceAs(providedState?.checkoutSessionResponse)
-    }
 
     private fun unsupportedCallbackTest(
         callbackTrigger: GooglePayPaymentDataUpdate.CallbackTrigger,
@@ -363,25 +388,29 @@ internal class CheckoutGooglePayPaymentDataUpdateCallbackTest {
     }
 
     private fun successTest(
-        callbackTrigger: GooglePayPaymentDataUpdate.CallbackTrigger,
+        callbackTrigger: GooglePayPaymentDataUpdate.CallbackTrigger
     ) {
-        val addressSource = if (callbackTrigger == GooglePayPaymentDataUpdate.CallbackTrigger.PaymentMethod) {
-            CheckoutSessionResponse.TaxAddressSource.BILLING
-        } else {
-            CheckoutSessionResponse.TaxAddressSource.SHIPPING
-        }
         runScenario(
-            addressBuilderResultProvider = { source ->
-                if (callbackTrigger == GooglePayPaymentDataUpdate.CallbackTrigger.Initialize && source != addressSource) {
+            addressBuilderResultProvider = { addressSource ->
+                if (
+                    callbackTrigger == GooglePayPaymentDataUpdate.CallbackTrigger.Initialize &&
+                    addressSource == CheckoutSessionResponse.TaxAddressSource.BILLING
+                ) {
                     CheckoutGooglePayPaymentDataUpdateAddressBuilder.Result.Unavailable
                 } else {
                     CheckoutGooglePayPaymentDataUpdateAddressBuilder.Result.Available(ADDRESS)
                 }
             },
-            state = taxState(addressSource),
-            mapperResponse = GooglePayPaymentDataUpdateResponse(newTransactionInfo = TRANSACTION_INFO, error = null),
+            state = CheckoutElementsControllerStateFactory.create(
+                checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+                    id = "cs_${UUID.randomUUID()}",
+                )
+            ),
+            mapperResponse = GooglePayPaymentDataUpdateResponse(
+                newTransactionInfo = TRANSACTION_INFO,
+                error = null,
+            )
         ) {
-            enqueueTaxUpdate()
             val paymentDataUpdate = GooglePayPaymentDataUpdate(
                 callbackTrigger = callbackTrigger,
                 shippingAddress = SHIPPING_ADDRESS.takeUnless {
@@ -392,14 +421,32 @@ internal class CheckoutGooglePayPaymentDataUpdateCallbackTest {
                 },
             )
 
-            assertThat(onPaymentDataChanged(paymentDataUpdate)).isEqualTo(providedMapperResponse)
-            assertBuildCalls(callbackTrigger, paymentDataUpdate)
+            val response = onPaymentDataChanged(paymentDataUpdate)
+
+            assertThat(response).isEqualTo(providedMapperResponse)
+
+            assertBuildCalls(
+                callbackTrigger = callbackTrigger,
+                paymentDataUpdate = paymentDataUpdate,
+            )
+
+            val updateCall = taxRegionUpdater.updateServerStateIfNeededCalls.awaitItem()
+            val expectedAddressSource =
+                if (callbackTrigger == GooglePayPaymentDataUpdate.CallbackTrigger.PaymentMethod) {
+                    CheckoutSessionResponse.TaxAddressSource.BILLING
+                } else {
+                    CheckoutSessionResponse.TaxAddressSource.SHIPPING
+                }
+            assertThat(updateCall.addressSource).isEqualTo(expectedAddressSource)
+            assertThat(updateCall.address).isEqualTo(ADDRESS)
+            assertThat(updateCall.checkoutSessionResponse).isEqualTo(providedState?.checkoutSessionResponse)
+
             val toResponseCall = mapper.toResponseCalls.awaitItem()
             assertThat(toResponseCall.countryCode).isEqualTo(providedState?.checkoutSessionResponse?.merchantCountry)
-            assertThat(toResponseCall.response.customerEmail).isEqualTo(UPDATED_EMAIL)
-            assertThat(toResponseCall.response.amount).isEqualTo(UPDATED_AMOUNT)
-            assertThat(toResponseCall.response.taxAddressSource).isEqualTo(addressSource)
-            assertThat(toResponseCall.paymentDataUpdate).isEqualTo(paymentDataUpdate)
+            assertThat(toResponseCall.response).isEqualTo(providedUpdateResult.getOrNull())
+            assertThat(toResponseCall.paymentDataUpdate.callbackTrigger).isEqualTo(callbackTrigger)
+            assertThat(toResponseCall.paymentDataUpdate.shippingAddress).isEqualTo(paymentDataUpdate.shippingAddress)
+            assertThat(toResponseCall.paymentDataUpdate.billingAddress).isEqualTo(paymentDataUpdate.billingAddress)
         }
     }
 
@@ -425,28 +472,8 @@ internal class CheckoutGooglePayPaymentDataUpdateCallbackTest {
         }
     }
 
-    private fun checkoutSessionRepository(
-        context: Context,
-    ) = CheckoutSessionRepository(
-        stripeRepository = CheckoutStripeRepositoryFactory.create(),
-        elementsSessionClientParams = CheckoutStripeRepositoryFactory.clientParams(),
-        fraudDetectionDataRepository = FakeFraudDetectionDataRepository.create(),
-        stripeNetworkClient = DefaultStripeNetworkClient(),
-        analyticsRequestExecutor = AnalyticsRequestExecutor {},
-        paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
-            context = context,
-            publishableKey = DEFAULT_API_CONFIG.publishableKey,
-        ),
-        apiRequestOptionsProvider = {
-            ApiRequest.Options(
-                apiKey = DEFAULT_API_CONFIG.publishableKey,
-                stripeAccount = DEFAULT_API_CONFIG.stripeAccountId,
-            )
-        },
-    )
-
     private fun runScenario(
-        state: CheckoutElementsControllerState? = taxState(CheckoutSessionResponse.TaxAddressSource.SHIPPING),
+        state: CheckoutElementsControllerState? = CheckoutElementsControllerStateFactory.create(),
         addressBuilderResult: CheckoutGooglePayPaymentDataUpdateAddressBuilder.Result =
             CheckoutGooglePayPaymentDataUpdateAddressBuilder.Result.Available(ADDRESS),
         addressBuilderResultProvider: (
@@ -455,6 +482,10 @@ internal class CheckoutGooglePayPaymentDataUpdateCallbackTest {
         )? = null,
         mapperResponse: GooglePayPaymentDataUpdateResponse =
             GooglePayPaymentDataUpdateResponse(newTransactionInfo = null, error = null),
+        updateResult: Result<CheckoutSessionResponse> = Result.success(UPDATED_CHECKOUT_SESSION_RESPONSE),
+        updateResultProvider: (
+            (FakeCheckoutSessionTaxRegionUpdater.UpdateServerStateIfNeededCall) -> Result<CheckoutSessionResponse>
+        )? = null,
         block: suspend Scenario.() -> Unit
     ) = runTest {
         val context = ApplicationProvider.getApplicationContext<Context>()
@@ -462,11 +493,14 @@ internal class CheckoutGooglePayPaymentDataUpdateCallbackTest {
             addressBuilderResultProvider ?: { addressBuilderResult }
         )
         val mapper = FakeCheckoutGooglePayPaymentDataUpdateMapper(mapperResponse)
-        val taxRegionUpdater = CheckoutSessionTaxRegionUpdater(checkoutSessionRepository(context))
+        val taxRegionUpdater = FakeCheckoutSessionTaxRegionUpdater(
+            updateResultProvider ?: { updateResult }
+        )
         val errorReporter = FakeErrorReporter()
+
         val callback = CheckoutGooglePayPaymentDataUpdateCallback(
             context = context,
-            taxRegionUpdater = taxRegionUpdater,
+            taxRegionUpdater = taxRegionUpdater.mocked,
             stateHolder = CheckoutElementsControllerStateFactory.createStateHolder(
                 savedStateHandle = SavedStateHandle(),
             ).apply {
@@ -482,14 +516,17 @@ internal class CheckoutGooglePayPaymentDataUpdateCallbackTest {
                 callback = callback,
                 addressBuilder = addressBuilder,
                 mapper = mapper,
+                taxRegionUpdater = taxRegionUpdater,
                 errorReporter = errorReporter,
                 providedMapperResponse = mapperResponse,
                 providedState = state,
+                providedUpdateResult = updateResult,
             )
         )
 
         addressBuilder.ensureAllEventsConsumed()
         mapper.ensureAllEventsConsumed()
+        taxRegionUpdater.ensureAllEventsConsumed()
         errorReporter.ensureAllEventsConsumed()
     }
 
@@ -497,9 +534,11 @@ internal class CheckoutGooglePayPaymentDataUpdateCallbackTest {
         private val callback: CheckoutGooglePayPaymentDataUpdateCallback,
         val addressBuilder: FakeCheckoutGooglePayPaymentDataUpdateAddressBuilder,
         val mapper: FakeCheckoutGooglePayPaymentDataUpdateMapper,
+        val taxRegionUpdater: FakeCheckoutSessionTaxRegionUpdater,
         val errorReporter: FakeErrorReporter,
         val providedMapperResponse: GooglePayPaymentDataUpdateResponse,
         val providedState: CheckoutElementsControllerState?,
+        val providedUpdateResult: Result<CheckoutSessionResponse>,
     ) {
         // Match Google Pay's work scope: state reads must be safe on a real background thread.
         suspend fun onPaymentDataChanged(
@@ -510,48 +549,41 @@ internal class CheckoutGooglePayPaymentDataUpdateCallbackTest {
         }
     }
 
-    private fun taxState(addressSource: CheckoutSessionResponse.TaxAddressSource) =
-        CheckoutElementsControllerStateFactory.create(
-            checkoutSessionResponse = CheckoutSessionResponseFactory.create(
-                automaticTaxEnabled = true,
-                taxAddressSource = addressSource,
-            ),
-        )
+    private class FakeCheckoutSessionTaxRegionUpdater(
+        private val updateResult: (UpdateServerStateIfNeededCall) -> Result<CheckoutSessionResponse>
+    ) {
+        val mocked = mock<CheckoutSessionTaxRegionUpdater>()
+        val updateServerStateIfNeededCalls = Turbine<UpdateServerStateIfNeededCall>()
 
-    private fun Scenario.enqueueTaxUpdate(address: CheckoutElementsController.Address.State = ADDRESS) {
-        val sessionResponse = requireNotNull(providedState).checkoutSessionResponse
-        networkRule.checkoutUpdate(
-            bodyPart("tax_region[country]", address.country),
-            bodyPart("tax_region[city]", requireNotNull(address.city)),
-            bodyPart("tax_region[state]", requireNotNull(address.state)),
-            bodyPart("tax_region[postal_code]", requireNotNull(address.postalCode)),
-            bodyPart("client_secret", sessionResponse.clientSecret.value),
-        ) { response ->
-            response.testBodyFromFile("checkout-session-init.json") { json ->
-                json.put("customer_email", UPDATED_EMAIL)
-                json.getJSONObject("automatic_tax")
-                    .put("enabled", true)
-                    .put("status", "ready")
-                    .put(
-                        "address_source",
-                        if (sessionResponse.taxAddressSource ==
-                            CheckoutSessionResponse.TaxAddressSource.SHIPPING
-                        ) "shipping" else "billing",
-                    )
+        init {
+            whenever {
+                mocked.updateServerStateIfNeeded(
+                    checkoutSessionResponse = any(),
+                    addressSource = any(),
+                    invocationSource = any(),
+                    address = any()
+                )
+            } doAnswer { invocation ->
+                val call = UpdateServerStateIfNeededCall(
+                    checkoutSessionResponse = invocation.component1(),
+                    addressSource = invocation.component2(),
+                    address = invocation.component4(),
+                )
+                updateServerStateIfNeededCalls.add(call)
+
+                updateResult(call)
             }
         }
-    }
 
-    private fun enqueueTaxUpdateFailure(address: CheckoutElementsController.Address.State = ADDRESS) {
-        networkRule.checkoutUpdate(
-            bodyPart("tax_region[country]", address.country),
-            bodyPart("tax_region[city]", requireNotNull(address.city)),
-            bodyPart("tax_region[state]", requireNotNull(address.state)),
-            bodyPart("tax_region[postal_code]", requireNotNull(address.postalCode)),
-        ) { response ->
-            response.setResponseCode(400)
-            response.setBody("""{"error":{"message":"Unable to compute tax"}}""")
+        fun ensureAllEventsConsumed() {
+            updateServerStateIfNeededCalls.ensureAllEventsConsumed()
         }
+
+        data class UpdateServerStateIfNeededCall(
+            val checkoutSessionResponse: CheckoutSessionResponse,
+            val addressSource: CheckoutSessionResponse.TaxAddressSource,
+            val address: CheckoutElementsController.Address.State,
+        )
     }
 
     private companion object {
@@ -561,12 +593,6 @@ internal class CheckoutGooglePayPaymentDataUpdateCallbackTest {
             locality = "South San Francisco",
             postalCode = "94080",
             iso3166AdministrativeArea = null,
-        )
-
-        val SHIPPING_ADDRESS_UPDATE = GooglePayPaymentDataUpdate(
-            callbackTrigger = GooglePayPaymentDataUpdate.CallbackTrigger.ShippingAddress,
-            shippingAddress = SHIPPING_ADDRESS,
-            billingAddress = null,
         )
 
         val BILLING_GOOGLE_PAY_ADDRESS = GooglePayPaymentDataUpdate.GooglePayAddress(
@@ -589,8 +615,7 @@ internal class CheckoutGooglePayPaymentDataUpdateCallbackTest {
             .state("CA")
             .build()
 
-        const val UPDATED_EMAIL = "updated@example.com"
-        const val UPDATED_AMOUNT = 5099L
+        val UPDATED_CHECKOUT_SESSION_RESPONSE = CheckoutSessionResponseFactory.create(merchantCountry = "US")
 
         val TRANSACTION_INFO = GooglePayJsonFactory.TransactionInfo(
             currencyCode = "USD",
