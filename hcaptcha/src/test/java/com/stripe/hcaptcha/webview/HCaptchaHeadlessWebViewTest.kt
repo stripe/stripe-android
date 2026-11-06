@@ -2,6 +2,7 @@ package com.stripe.hcaptcha.webview
 
 import android.os.Build
 import androidx.fragment.app.FragmentActivity
+import com.google.common.truth.Truth.assertThat
 import com.stripe.hcaptcha.HCaptchaStateListener
 import com.stripe.hcaptcha.config.HCaptchaConfig
 import com.stripe.hcaptcha.config.HCaptchaInternalConfig
@@ -9,6 +10,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
@@ -23,6 +25,8 @@ class HCaptchaHeadlessWebViewTest {
         headlessWebView.onLoaded()
         headlessWebView.reset()
 
+        assertThat(shadowOf(headlessWebView.webViewHelper.webView).wasDestroyCalled()).isTrue()
+
         headlessWebView.reset()
         headlessWebView.startVerification(activity)
     }
@@ -33,8 +37,10 @@ class HCaptchaHeadlessWebViewTest {
         val headlessWebView = createHeadlessWebView(activity)
 
         headlessWebView.reset()
-        headlessWebView.onLoaded()
 
+        assertThat(shadowOf(headlessWebView.webViewHelper.webView).wasDestroyCalled()).isTrue()
+
+        headlessWebView.onLoaded()
         headlessWebView.startVerification(activity)
     }
 
