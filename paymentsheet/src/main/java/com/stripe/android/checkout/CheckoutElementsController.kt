@@ -13,7 +13,6 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent.Operation
 import com.stripe.android.checkout.analytics.LocalOperation
-import com.stripe.android.checkout.analytics.MeasuredOperation
 import com.stripe.android.checkout.analytics.toAnalyticsMap
 import com.stripe.android.checkout.injection.CheckoutElementsPresenterSubcomponent
 import com.stripe.android.checkout.injection.DaggerCheckoutElementsControllerComponent
@@ -314,23 +313,22 @@ class CheckoutElementsController @Inject internal constructor(
         // timeout and cancellation scope.
         val callerContext = currentCoroutineContext().minusKey(Job)
         return withCheckoutState {
-            val measuredOperation = MeasuredOperation(
+            checkoutSessionRepository.measure(
                 operation = Operation.RunServerUpdate,
+                checkoutSessionResponse = checkoutSessionResponse,
                 params = emptyMap(),
-                report = checkoutSessionRepository::fireEvent,
-            )
-            measuredOperation.started(checkoutSessionResponse)
-            runCatching {
-                withContext(callerContext) {
-                    withTimeout(SERVER_UPDATE_TIMEOUT_MS) { serverUpdate() }
-                }.getOrThrow()
-                checkoutSessionRepository.init(
-                    clientSecret = checkoutSessionResponse.clientSecret,
-                    adaptivePricingAllowed = configuration.currencySelectorElementConfiguration != null,
-                    analyticsParams = configuration.toAnalyticsMap(),
-                ).getOrThrow()
-            }.onSuccess { measuredOperation.succeeded(it) }
-                .onFailure { measuredOperation.failed(checkoutSessionResponse, it) }
+            ) {
+                runCatching {
+                    withContext(callerContext) {
+                        withTimeout(SERVER_UPDATE_TIMEOUT_MS) { serverUpdate() }
+                    }.getOrThrow()
+                    checkoutSessionRepository.init(
+                        clientSecret = checkoutSessionResponse.clientSecret,
+                        adaptivePricingAllowed = configuration.currencySelectorElementConfiguration != null,
+                        analyticsParams = configuration.toAnalyticsMap(),
+                    ).getOrThrow()
+                }
+            }
         }.toOperationResult()
     }
 
@@ -379,18 +377,17 @@ class CheckoutElementsController @Inject internal constructor(
             "did_request_tax_update" to didRequestTaxUpdate,
         )
         return if (didRequestTaxUpdate) {
-            val measuredOperation = MeasuredOperation(
+            checkoutSessionRepository.measure(
                 operation = addressSource.updateOperation(),
-                params = params,
-                report = checkoutSessionRepository::fireEvent,
-            )
-            measuredOperation.started(checkoutSessionResponse)
-            checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
                 checkoutSessionResponse = checkoutSessionResponse,
-                addressSource = addressSource,
-                address = address,
-            ).onSuccess { measuredOperation.succeeded(it) }
-                .onFailure { measuredOperation.failed(checkoutSessionResponse, it) }
+                params = params,
+            ) {
+                checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
+                    checkoutSessionResponse = checkoutSessionResponse,
+                    addressSource = addressSource,
+                    address = address,
+                )
+            }
         } else {
             kotlin.Result.success(checkoutSessionResponse).also {
                 LocalOperation(
