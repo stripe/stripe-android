@@ -207,7 +207,11 @@ class CheckoutElementsController @Inject internal constructor(
                 )
             },
         ) {
-            updateAddress(built)
+            updateAddress(
+                addressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
+                invocationSource = "merchant",
+                address = built,
+            )
         }.toOperationResult()
     }
 
@@ -278,9 +282,9 @@ class CheckoutElementsController @Inject internal constructor(
                 }
                 return@withCheckoutState kotlin.Result.success(checkoutSessionResponse)
             }
-            checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
-                checkoutSessionResponse = checkoutSessionResponse,
+            updateAddress(
                 addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+                invocationSource = "payment_element",
                 address = address,
             ).onFailure {
                 stateHolder.state = stateHolder.state?.copy(
@@ -351,28 +355,53 @@ class CheckoutElementsController @Inject internal constructor(
                 ).succeeded(checkoutSessionResponse)
             }
         } else {
-            updateAddress(null)
+            updateAddress(
+                addressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
+                invocationSource = "merchant",
+                address = null,
+            )
         }
     }
 
     private suspend fun CheckoutElementsControllerState.updateAddress(
+        addressSource: CheckoutSessionResponse.TaxAddressSource,
+        invocationSource: String,
         address: Address.State?,
-    ): kotlin.Result<CheckoutSessionResponse> = checkoutSessionRepository.measure(
-        operation = Operation.UpdateShippingAddress,
-        checkoutSessionResponse = checkoutSessionResponse,
-        params = mapOf(
-            "invocation_source" to "merchant",
-            "did_request_tax_update" to checkoutSessionTaxRegionUpdater.requiresUpdate(
-                checkoutSessionResponse = checkoutSessionResponse,
-                addressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
-            ),
-        ),
-    ) {
-        checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
+    ): kotlin.Result<CheckoutSessionResponse> {
+        val didRequestTaxUpdate = checkoutSessionTaxRegionUpdater.requiresUpdate(
             checkoutSessionResponse = checkoutSessionResponse,
-            addressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
-            address = address,
+            addressSource = addressSource,
         )
+        val params = mapOf(
+            "invocation_source" to invocationSource,
+            "did_request_tax_update" to didRequestTaxUpdate,
+        )
+        return if (didRequestTaxUpdate) {
+            checkoutSessionRepository.measure(
+                operation = addressSource.updateOperation(),
+                checkoutSessionResponse = checkoutSessionResponse,
+                params = params,
+            ) {
+                checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
+                    checkoutSessionResponse = checkoutSessionResponse,
+                    addressSource = addressSource,
+                    address = address,
+                )
+            }
+        } else {
+            kotlin.Result.success(checkoutSessionResponse).also {
+                LocalOperation(
+                    operation = addressSource.updateOperation(),
+                    params = params,
+                    report = checkoutSessionRepository::fireEvent,
+                ).succeeded(checkoutSessionResponse)
+            }
+        }
+    }
+
+    private fun CheckoutSessionResponse.TaxAddressSource.updateOperation(): Operation = when (this) {
+        CheckoutSessionResponse.TaxAddressSource.SHIPPING -> Operation.UpdateShippingAddress
+        CheckoutSessionResponse.TaxAddressSource.BILLING -> Operation.UpdateBillingAddress
     }
 
     /**
@@ -490,9 +519,9 @@ class CheckoutElementsController @Inject internal constructor(
                 params = emptyMap(),
                 report = checkoutSessionRepository::fireEvent,
             ).invoked(checkoutSessionResponse)
-            checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
-                checkoutSessionResponse = checkoutSessionResponse,
+            updateAddress(
                 addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+                invocationSource = "merchant",
                 address = null,
             )
         }.toOperationResult()
