@@ -348,15 +348,15 @@ internal class CheckoutPaymentElementAnalyticsTest {
             not(hasQueryParam("error_type")),
             not(hasQueryParam("merchant_display_name")),
         )
-        networkRule.validateCheckoutAnalyticsStarted(
-            "update_billing_address",
+        networkRule.validateAnalyticsRequest(
+            eventName = "checkout_elements.update_billing_address.succeeded",
+            productUsage = setOf("checkout_elements"),
+            analyticsPayloadField("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID),
             analyticsPayloadField("invocation_source", "merchant"),
             analyticsPayloadField("did_request_tax_update", "false"),
-        )
-        networkRule.validateCheckoutAnalyticsSucceeded(
-            "update_billing_address",
-            analyticsPayloadField("invocation_source", "merchant"),
-            analyticsPayloadField("did_request_tax_update", "false"),
+            not(hasQueryParam("duration")),
+            not(hasQueryParam("error_type")),
+            not(hasQueryParam("merchant_display_name")),
         )
 
         assertThat(controller.clearPaymentOption())
@@ -483,15 +483,15 @@ internal class CheckoutPaymentElementAnalyticsTest {
             ).isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
         },
     ) {
-        networkRule.validateCheckoutAnalyticsStarted(
-            "update_shipping_address",
+        networkRule.validateAnalyticsRequest(
+            eventName = "checkout_elements.update_shipping_address.succeeded",
+            productUsage = setOf("checkout_elements"),
+            analyticsPayloadField("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID),
             analyticsPayloadField("invocation_source", "merchant"),
             analyticsPayloadField("did_request_tax_update", "false"),
-        )
-        networkRule.validateCheckoutAnalyticsSucceeded(
-            "update_shipping_address",
-            analyticsPayloadField("invocation_source", "merchant"),
-            analyticsPayloadField("did_request_tax_update", "false"),
+            not(hasQueryParam("duration")),
+            not(hasQueryParam("error_type")),
+            not(hasQueryParam("merchant_display_name")),
         )
 
         assertThat(controller.updateShippingAddress(name = "Jane Doe", address = shippingAddress()))

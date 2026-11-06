@@ -1,6 +1,5 @@
 package com.stripe.android.checkout
 
-import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent.Operation
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
@@ -18,29 +17,6 @@ internal class CheckoutSessionTaxRegionUpdater @Inject constructor(
             checkoutSessionResponse.taxAddressSource == addressSource
     }
 
-    suspend fun updateAddress(
-        checkoutSessionResponse: CheckoutSessionResponse,
-        addressSource: CheckoutSessionResponse.TaxAddressSource,
-        invocationSource: String,
-        address: CheckoutElementsController.Address.State?,
-    ): Result<CheckoutSessionResponse> = checkoutSessionRepository.measure(
-        operation = addressSource.updateOperation(),
-        checkoutSessionResponse = checkoutSessionResponse,
-        params = mapOf(
-            "invocation_source" to invocationSource,
-            "did_request_tax_update" to requiresUpdate(
-                checkoutSessionResponse = checkoutSessionResponse,
-                addressSource = addressSource,
-            ),
-        ),
-    ) {
-        updateServerStateIfNeeded(
-            checkoutSessionResponse = checkoutSessionResponse,
-            addressSource = addressSource,
-            address = address,
-        )
-    }
-
     suspend fun updateServerStateIfNeeded(
         checkoutSessionResponse: CheckoutSessionResponse,
         addressSource: CheckoutSessionResponse.TaxAddressSource,
@@ -54,10 +30,5 @@ internal class CheckoutSessionTaxRegionUpdater @Inject constructor(
         } else {
             Result.success(checkoutSessionResponse)
         }
-    }
-
-    private fun CheckoutSessionResponse.TaxAddressSource.updateOperation(): Operation = when (this) {
-        CheckoutSessionResponse.TaxAddressSource.SHIPPING -> Operation.UpdateShippingAddress
-        CheckoutSessionResponse.TaxAddressSource.BILLING -> Operation.UpdateBillingAddress
     }
 }
