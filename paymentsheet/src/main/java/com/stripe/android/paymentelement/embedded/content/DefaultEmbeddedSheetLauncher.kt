@@ -44,7 +44,7 @@ internal interface EmbeddedSheetLauncher {
     )
 
     fun launchPaymentOptions(
-        paymentMethodMetadata: PaymentMethodMetadata,
+        paymentMethodMetadata: PaymentMethodMetadata?,
         customerState: CustomerState?,
         selection: PaymentSelection?,
         configuration: EmbeddedPaymentElement.Configuration?,
@@ -236,12 +236,12 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
     }
 
     override fun launchPaymentOptions(
-        paymentMethodMetadata: PaymentMethodMetadata,
+        paymentMethodMetadata: PaymentMethodMetadata?,
         customerState: CustomerState?,
         selection: PaymentSelection?,
         configuration: EmbeddedPaymentElement.Configuration?,
     ) {
-        if (configuration == null) {
+        if (configuration == null || paymentMethodMetadata == null) {
             errorReporter.report(
                 ErrorReporter.UnexpectedErrorEvent.EMBEDDED_SHEET_LAUNCHER_EMBEDDED_STATE_IS_NULL
             )

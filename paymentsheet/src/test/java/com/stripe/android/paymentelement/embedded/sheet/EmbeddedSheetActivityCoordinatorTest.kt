@@ -16,6 +16,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFact
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.createComposeCleanupRule
@@ -106,6 +107,51 @@ internal class EmbeddedSheetActivityCoordinatorTest {
     }
 
     @Test
+    fun `valid loading to failed transition replaces and registers failed presentation`() = runScenario {
+        val failedArgs = createArgs(
+            presentationState = EmbeddedActivityArgs.PresentationState.Failed,
+        ).copy(paymentMethodMetadata = null, configuration = null)
+        val failedIntent = createIntent(failedArgs)
+
+        coordinator.handleNewIntent(failedIntent)
+
+        assertThat(initialPresentation.onDestroyCalls.awaitItem()).isEqualTo(Unit)
+        val createCall = presentationFactory.createCalls.awaitItem()
+        assertThat(createCall.activity).isSameInstanceAs(activity)
+        assertThat(createCall.args).isEqualTo(failedArgs)
+        assertThat(createCall.activityResultCaller).isNotSameInstanceAs(activity)
+        assertThat(failedPresentation.registerCalls.awaitItem()).isEqualTo(Unit)
+        assertThat(activity.intent).isSameInstanceAs(failedIntent)
+
+        coordinator.onDestroy()
+        assertThat(failedPresentation.onDestroyCalls.awaitItem()).isEqualTo(Unit)
+    }
+
+    @Test
+    fun `loading without configuration uses default appearance`() = runScenario(
+        initialArgs = createArgs(
+            presentationState = EmbeddedActivityArgs.PresentationState.Loading,
+        ).copy(paymentMethodMetadata = null, configuration = null),
+    ) {
+        assertThat(coordinator.appearance).isEqualTo(PaymentSheet.Appearance())
+    }
+
+    @Test
+    fun `ready transition applies configured appearance`() = runScenario(
+        initialArgs = createArgs(
+            presentationState = EmbeddedActivityArgs.PresentationState.Loading,
+        ).copy(paymentMethodMetadata = null, configuration = null),
+    ) {
+        val readyArgs = createArgs(presentationState = EmbeddedActivityArgs.PresentationState.Ready)
+        coordinator.handleNewIntent(createIntent(readyArgs))
+
+        assertThat(initialPresentation.onDestroyCalls.awaitItem()).isEqualTo(Unit)
+        presentationFactory.createCalls.awaitItem()
+        assertThat(readyPresentation.registerCalls.awaitItem()).isEqualTo(Unit)
+        assertThat(coordinator.appearance).isSameInstanceAs(requireNotNull(readyArgs.configuration).appearance)
+    }
+
+    @Test
     fun `intent without args is ignored`() = runScenario {
         assertTransitionIgnored(Intent())
     }
@@ -156,9 +202,11 @@ internal class EmbeddedSheetActivityCoordinatorTest {
         val activity = Robolectric.buildActivity(EmbeddedSheetActivity::class.java).get()
         val initialPresentation = FakeEmbeddedSheetPresentation()
         val readyPresentation = FakeEmbeddedSheetPresentation()
+        val failedPresentation = FakeEmbeddedSheetPresentation()
         val presentationFactory = FakeEmbeddedSheetPresentationFactory(
             initialPresentation = initialPresentation,
             readyPresentation = readyPresentation,
+            failedPresentation = failedPresentation,
         )
         val coordinator = EmbeddedSheetActivityCoordinator(
             activity = activity,
@@ -173,6 +221,7 @@ internal class EmbeddedSheetActivityCoordinatorTest {
             coordinator = coordinator,
             initialPresentation = initialPresentation,
             readyPresentation = readyPresentation,
+            failedPresentation = failedPresentation,
             presentationFactory = presentationFactory,
             createCall = createCall,
         ).block()
@@ -180,6 +229,7 @@ internal class EmbeddedSheetActivityCoordinatorTest {
         presentationFactory.ensureAllEventsConsumed()
         initialPresentation.ensureAllEventsConsumed()
         readyPresentation.ensureAllEventsConsumed()
+        failedPresentation.ensureAllEventsConsumed()
     }
 
     private data class Scenario(
@@ -188,6 +238,7 @@ internal class EmbeddedSheetActivityCoordinatorTest {
         val coordinator: EmbeddedSheetActivityCoordinator,
         val initialPresentation: FakeEmbeddedSheetPresentation,
         val readyPresentation: FakeEmbeddedSheetPresentation,
+        val failedPresentation: FakeEmbeddedSheetPresentation,
         val presentationFactory: FakeEmbeddedSheetPresentationFactory,
         val createCall: FakeEmbeddedSheetPresentationFactory.CreateCall,
     ) {
@@ -202,12 +253,15 @@ internal class EmbeddedSheetActivityCoordinatorTest {
             initialPresentation.onDestroyCalls.expectNoEvents()
             readyPresentation.registerCalls.expectNoEvents()
             readyPresentation.onDestroyCalls.expectNoEvents()
+            failedPresentation.registerCalls.expectNoEvents()
+            failedPresentation.onDestroyCalls.expectNoEvents()
         }
     }
 
     private class FakeEmbeddedSheetPresentationFactory(
         private val initialPresentation: EmbeddedSheetPresentation,
         private val readyPresentation: EmbeddedSheetPresentation,
+        private val failedPresentation: EmbeddedSheetPresentation,
     ) : EmbeddedSheetPresentationFactory {
         val createCalls = Turbine<CreateCall>()
 
@@ -220,6 +274,7 @@ internal class EmbeddedSheetActivityCoordinatorTest {
             return when (args.presentationState) {
                 EmbeddedActivityArgs.PresentationState.Loading -> initialPresentation
                 EmbeddedActivityArgs.PresentationState.Ready -> readyPresentation
+                EmbeddedActivityArgs.PresentationState.Failed -> failedPresentation
             }
         }
 

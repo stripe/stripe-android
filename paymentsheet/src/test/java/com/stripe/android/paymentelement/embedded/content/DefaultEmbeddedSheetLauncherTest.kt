@@ -652,6 +652,36 @@ internal class DefaultEmbeddedSheetLauncherTest {
     }
 
     @Test
+    fun `launchPaymentOptions logs error and returns if metadata is null`() = testScenario {
+        sheetLauncher.launchPaymentOptions(
+            paymentMethodMetadata = null,
+            customerState = null,
+            selection = null,
+            configuration = EmbeddedConfigurationFactory.create(),
+        )
+
+        assertThat(errorReporter.awaitCall().errorEvent.eventName)
+            .isEqualTo("unexpected_error.embedded.embedded_sheet_launcher.embedded_state_is_null")
+        assertThat(sheetStateHolder.sheetIsOpen).isFalse()
+        errorReporter.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `launchPaymentOptions logs error and returns if state is unavailable`() = testScenario {
+        sheetLauncher.launchPaymentOptions(
+            paymentMethodMetadata = null,
+            customerState = null,
+            selection = null,
+            configuration = null,
+        )
+
+        assertThat(errorReporter.awaitCall().errorEvent.eventName)
+            .isEqualTo("unexpected_error.embedded.embedded_sheet_launcher.embedded_state_is_null")
+        assertThat(sheetStateHolder.sheetIsOpen).isFalse()
+        errorReporter.ensureAllEventsConsumed()
+    }
+
+    @Test
     fun `launchPaymentOptions is not launched again when the sheet is already open`() = testScenario {
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
         sheetStateHolder.sheetIsOpen = true
