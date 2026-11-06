@@ -2,7 +2,6 @@
 
 package com.stripe.android.checkout
 
-import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent
 import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent.InvocationSource
@@ -38,18 +37,12 @@ internal class CheckoutAnalyticsPerformer @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val stateHolder: CheckoutElementsControllerStateHolder,
     private val linkAccountHolder: LinkAccountHolder,
-    context: Context,
+    private val analyticsRequestFactory: PaymentAnalyticsRequestFactory,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val durationProvider: DurationProvider,
     private val apiConfigurationProvider: Provider<ApiConfiguration.State>,
     @IOContext private val workContext: CoroutineContext,
 ) : CheckoutConfirmationResultReporter {
-    private val analyticsRequestFactory = PaymentAnalyticsRequestFactory(
-        context = context,
-        defaultProductUsageTokens = emptySet(),
-        apiConfigurationProvider = apiConfigurationProvider,
-    )
-
     fun onPaymentElementConfirmationStarted(paymentSelection: PaymentSelection) {
         saveConfirmation(InvocationSource.Merchant, paymentSelection)
     }

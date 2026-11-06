@@ -9,6 +9,7 @@ import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
+import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.utils.FakeDurationProvider
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
@@ -23,14 +24,21 @@ internal object TestCheckoutAnalyticsPerformerFactory {
         linkAccountHolder: LinkAccountHolder = LinkAccountHolder(savedStateHandle),
         durationProvider: DurationProvider = FakeDurationProvider(),
         apiConfiguration: ApiConfiguration.State = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
-    ): CheckoutAnalyticsPerformer = CheckoutAnalyticsPerformer(
-        savedStateHandle = savedStateHandle,
-        stateHolder = stateHolder,
-        linkAccountHolder = linkAccountHolder,
-        context = ApplicationProvider.getApplicationContext<Context>(),
-        analyticsRequestExecutor = analyticsRequestExecutor,
-        durationProvider = durationProvider,
-        apiConfigurationProvider = Provider { apiConfiguration },
-        workContext = workContext,
-    )
+    ): CheckoutAnalyticsPerformer {
+        val apiConfigurationProvider = Provider { apiConfiguration }
+        return CheckoutAnalyticsPerformer(
+            savedStateHandle = savedStateHandle,
+            stateHolder = stateHolder,
+            linkAccountHolder = linkAccountHolder,
+            analyticsRequestFactory = PaymentAnalyticsRequestFactory(
+                context = ApplicationProvider.getApplicationContext<Context>(),
+                defaultProductUsageTokens = emptySet(),
+                apiConfigurationProvider = apiConfigurationProvider,
+            ),
+            analyticsRequestExecutor = analyticsRequestExecutor,
+            durationProvider = durationProvider,
+            apiConfigurationProvider = apiConfigurationProvider,
+            workContext = workContext,
+        )
+    }
 }
