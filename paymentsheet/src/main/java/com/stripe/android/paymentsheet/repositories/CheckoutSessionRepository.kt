@@ -272,7 +272,7 @@ internal class CheckoutSessionRepository @Inject constructor(
         analyticsRequestExecutor.executeAsync(
             paymentAnalyticsRequestFactory.createRequest(
                 event = event,
-                additionalParams = event.params + ("product_usage" to "checkout_elements"),
+                additionalParams = event.params,
             )
         )
     }

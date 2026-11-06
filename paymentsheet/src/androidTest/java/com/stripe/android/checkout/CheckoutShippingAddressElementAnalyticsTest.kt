@@ -14,6 +14,7 @@ import com.stripe.android.networktesting.RequestMatcher
 import com.stripe.android.networktesting.RequestMatchers.analyticsPayloadField
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.hasQueryParam
+import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.RequestMatchers.path
@@ -183,13 +184,16 @@ internal class CheckoutShippingAddressElementAnalyticsTest {
             analyticsPayloadField(EDIT_DISTANCE_FIELD, it.toString())
         } ?: not(hasQueryParam(EDIT_DISTANCE_FIELD))
 
-        networkRule.validateAnalyticsRequest(
-            eventName = "checkout_elements.update_shipping_address.succeeded",
-            productUsage = setOf("checkout_elements"),
+        networkRule.enqueue(
+            host("q.stripe.com"),
+            method("GET"),
+            analyticsPayloadField("event", "checkout_elements.update_shipping_address.succeeded"),
             analyticsPayloadField("invocation_source", "shipping_address_element"),
             analyticsPayloadField("did_request_tax_update", "false"),
             not(hasQueryParam("duration")),
-        )
+        ) { response ->
+            response.status = "HTTP/1.1 200 OK"
+        }
 
         listOf(
             "elements.shipping_address.save_started",
