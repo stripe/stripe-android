@@ -24,6 +24,7 @@ import javax.inject.Inject
 import javax.inject.Provider
 
 @OptIn(CheckoutSessionPreview::class)
+@Suppress("TooManyFunctions")
 internal class CheckoutSessionRepository @Inject constructor(
     private val stripeRepository: StripeRepository,
     private val elementsSessionClientParams: ElementsSessionClientParams,
