@@ -1,6 +1,7 @@
 package com.stripe.android.financialconnections.features.consent
 
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
+import com.stripe.android.financialconnections.ThemeMode
 import com.stripe.android.financialconnections.features.consent.ConsentPreviewParameterProvider.ConsentPreviewState
 import com.stripe.android.financialconnections.model.Bullet
 import com.stripe.android.financialconnections.model.ConnectedAccessNotice
@@ -47,7 +48,7 @@ internal class ConsentPreviewParameterProvider : PreviewParameterProvider<Consen
                     )
                 )
             ),
-            theme = Theme.DefaultLight,
+            theme = Theme.Default(ThemeMode.Automatic),
         )
     }
 
@@ -67,7 +68,7 @@ internal class ConsentPreviewParameterProvider : PreviewParameterProvider<Consen
                     )
                 )
             ),
-            theme = Theme.DefaultLight,
+            theme = Theme.Default(ThemeMode.Automatic),
         )
     }
 
@@ -86,7 +87,7 @@ internal class ConsentPreviewParameterProvider : PreviewParameterProvider<Consen
                     )
                 )
             ),
-            theme = Theme.DefaultLight,
+            theme = Theme.Default(ThemeMode.Automatic),
         )
     }
 
@@ -105,7 +106,7 @@ internal class ConsentPreviewParameterProvider : PreviewParameterProvider<Consen
                     )
                 )
             ),
-            theme = Theme.LinkLight,
+            theme = Theme.Link(ThemeMode.Automatic),
         )
     }
 
