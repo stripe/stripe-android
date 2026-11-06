@@ -116,6 +116,7 @@ dependencies {
     androidTestImplementation project(':payments-core-testing')
     androidTestImplementation project(':payment-element-test-pages')
 
+    androidTestImplementation libs.fuel
     androidTestImplementation libs.places
     androidTestImplementation libs.terminal.core
     androidTestImplementation libs.terminal.tapToPay
