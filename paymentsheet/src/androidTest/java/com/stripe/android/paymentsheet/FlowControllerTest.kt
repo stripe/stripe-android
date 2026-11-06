@@ -376,7 +376,7 @@ internal class FlowControllerTest(
 
         scenario.moveToState(Lifecycle.State.CREATED)
         scenario.onActivity {
-            apiConfigurationTestType.initializePaymentConfiguration(it)
+            apiConfigurationTestType.initializePaymentConfiguration(it, networkRule)
             @Suppress("Deprecation")
             flowController = PaymentSheet.FlowController.create(
                 activity = it,
@@ -465,7 +465,7 @@ internal class FlowControllerTest(
         fun initializeActivity() {
             scenario.moveToState(Lifecycle.State.CREATED)
             scenario.onActivity {
-                apiConfigurationTestType.initializePaymentConfiguration(it)
+                apiConfigurationTestType.initializePaymentConfiguration(it, networkRule)
 
                 @Suppress("Deprecation")
                 val unsynchronizedController = PaymentSheet.FlowController.create(
@@ -534,7 +534,7 @@ internal class FlowControllerTest(
 
         scenario.moveToState(Lifecycle.State.CREATED)
         scenario.onActivity {
-            apiConfigurationTestType.initializePaymentConfiguration(it)
+            apiConfigurationTestType.initializePaymentConfiguration(it, networkRule)
             @Suppress("Deprecation")
             flowController = PaymentSheet.FlowController.create(
                 activity = it,

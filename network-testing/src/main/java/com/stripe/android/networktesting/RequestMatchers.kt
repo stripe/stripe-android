@@ -39,12 +39,18 @@ internal class CompositeRequestMatcher(
 }
 
 object RequestMatchers {
-    /** Checks the complete version on selected API hosts; leaves other protocols unchanged. */
-    fun stripeVersions(expectedVersions: Map<String, String>): RequestMatcher {
-        val snapshot = expectedVersions.toMap()
-        return ToStringRequestMatcher("stripeVersions($snapshot)") { request ->
-            val expected = snapshot[request.headers["original-host"]]
-            expected == null || request.headers["Stripe-Version"] == expected
+    /** Requires session beta tokens on Stripe API requests, excluding card metadata. */
+    fun stripeBetas(betas: Set<String>): RequestMatcher {
+        val snapshot = betas.toSet()
+        return ToStringRequestMatcher("stripeBetas($snapshot)") { request ->
+            if (request.headers[ORIGINAL_HOST_HEADER] != API_HOST ||
+                path("/edge-internal/card-metadata").matches(request)
+            ) {
+                true
+            } else {
+                val tokens = request.headers["Stripe-Version"]?.split(';')?.drop(1).orEmpty()
+                tokens.containsAll(snapshot)
+            }
         }
     }
 

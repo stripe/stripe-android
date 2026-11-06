@@ -54,7 +54,7 @@ internal class PaymentSheetBillingConfigurationTest(
         scenario.moveToState(Lifecycle.State.CREATED)
         lateinit var paymentSheet: PaymentSheet
         scenario.onActivity {
-            apiConfigurationTestType.initializePaymentConfiguration(it)
+            apiConfigurationTestType.initializePaymentConfiguration(it, networkRule)
             paymentSheet = Builder { result ->
                 assertThat(result).isInstanceOf(PaymentSheetResult.Completed::class.java)
                 countDownLatch.countDown()
@@ -132,7 +132,7 @@ internal class PaymentSheetBillingConfigurationTest(
         scenario.moveToState(Lifecycle.State.CREATED)
         lateinit var paymentSheet: PaymentSheet
         scenario.onActivity {
-            apiConfigurationTestType.initializePaymentConfiguration(it)
+            apiConfigurationTestType.initializePaymentConfiguration(it, networkRule)
             paymentSheet = Builder { result ->
                 assertThat(result).isInstanceOf(PaymentSheetResult.Completed::class.java)
                 countDownLatch.countDown()

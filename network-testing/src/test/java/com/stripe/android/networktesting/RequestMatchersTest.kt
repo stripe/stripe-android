@@ -6,30 +6,77 @@ import org.junit.Test
 class RequestMatchersTest {
 
     @Test
-    fun `version matcher rejects missing tokens`() {
-        val matcher = RequestMatchers.stripeVersions(mapOf("api.stripe.com" to "2020-03-02;example=v1"))
-        val request = createRequest(
-            headers = mapOf("original-host" to "api.stripe.com", "Stripe-Version" to "2020-03-02"),
-        )
-        assertThat(matcher.matches(request)).isFalse()
-    }
-
-    @Test
-    fun `version matcher rejects extra tokens`() {
-        val matcher = RequestMatchers.stripeVersions(mapOf("api.stripe.com" to "2020-03-02;example=v1"))
+    fun `beta matcher rejects missing tokens`() {
+        val matcher = RequestMatchers.stripeBetas(setOf("example=v1"))
         val request = createRequest(
             headers = mapOf(
                 "original-host" to "api.stripe.com",
-                "Stripe-Version" to "2020-03-02;example=v1;leaked=v1",
             ),
         )
         assertThat(matcher.matches(request)).isFalse()
     }
 
     @Test
-    fun `version matcher leaves telemetry unchanged`() {
-        val matcher = RequestMatchers.stripeVersions(mapOf("api.stripe.com" to "2020-03-02;example=v1"))
-        val request = createRequest(headers = mapOf("original-host" to "q.stripe.com"))
+    fun `beta matcher rejects a different token value`() {
+        val matcher = RequestMatchers.stripeBetas(setOf("example=v1"))
+        val request = createRequest(
+            headers = mapOf(
+                "original-host" to "api.stripe.com",
+                "Stripe-Version" to "2020-03-02;example=v2",
+            ),
+        )
+        assertThat(matcher.matches(request)).isFalse()
+    }
+
+    @Test
+    fun `beta matcher rejects partial tokens`() {
+        val matcher = RequestMatchers.stripeBetas(setOf("example=v1"))
+        val request = createRequest(
+            headers = mapOf(
+                "original-host" to "api.stripe.com",
+                "Stripe-Version" to "2020-03-02;prefix_example=v1",
+            ),
+        )
+        assertThat(matcher.matches(request)).isFalse()
+    }
+
+    @Test
+    fun `beta matcher allows built-in tokens`() {
+        val matcher = RequestMatchers.stripeBetas(setOf("example=v1"))
+        val request = createRequest(
+            headers = mapOf(
+                "original-host" to "api.stripe.com",
+                "Stripe-Version" to "2020-03-02;built_in=v2;example=v1",
+            ),
+        )
+        assertThat(matcher.matches(request)).isTrue()
+    }
+
+    @Test
+    fun `beta matcher leaves telemetry unchanged`() {
+        val matcher = RequestMatchers.stripeBetas(setOf("example=v1"))
+        val request = createRequest(
+            headers = mapOf(
+                "original-host" to "q.stripe.com",
+            ),
+        )
+        assertThat(matcher.matches(request)).isTrue()
+    }
+
+    @Test
+    fun `beta matcher excludes card metadata`() {
+        val matcher = RequestMatchers.stripeBetas(setOf("example=v1"))
+        val request = createRequest(
+            path = "/edge-internal/card-metadata?bin_prefix=424242",
+            headers = mapOf("original-host" to "api.stripe.com"),
+        )
+        assertThat(matcher.matches(request)).isTrue()
+    }
+
+    @Test
+    fun `beta matcher allows unconfigured sessions`() {
+        val matcher = RequestMatchers.stripeBetas(emptySet())
+        val request = createRequest(headers = mapOf("original-host" to "api.stripe.com"))
         assertThat(matcher.matches(request)).isTrue()
     }
 

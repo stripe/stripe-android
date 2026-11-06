@@ -4,6 +4,7 @@ import android.content.Context
 import com.google.testing.junit.testparameterinjector.TestParameterValuesProvider
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.TestApiKeys
 import com.stripe.android.paymentsheet.PaymentSheet
 
@@ -13,7 +14,8 @@ internal sealed class ApiConfigurationTestType(
     val apiConfiguration: ApiConfiguration?,
     private val updatePaymentConfigurationPublishableKey: Boolean,
 ) {
-    fun initializePaymentConfiguration(context: Context) {
+    fun initializePaymentConfiguration(context: Context, networkRule: NetworkRule) {
+        networkRule.expectStripeBetas(apiConfiguration?.build()?.betas.orEmpty())
         PaymentConfiguration.clearInstance()
         context.getSharedPreferences(
             PaymentConfiguration::class.java.canonicalName,
@@ -56,7 +58,9 @@ internal sealed class ApiConfigurationTestType(
     data object ApiConfigurationOnly : ApiConfigurationTestType(
         paymentConfigurationPublishableKey = null,
         paymentConfigurationStripeAccount = null,
-        apiConfiguration = ApiConfiguration(TestApiKeys.PUBLISHABLE).stripeAccountId(TestApiKeys.ACCOUNT),
+        apiConfiguration = ApiConfiguration(TestApiKeys.PUBLISHABLE)
+            .stripeAccountId(TestApiKeys.ACCOUNT)
+            .betas(setOf("integration_beta=v1")),
         updatePaymentConfigurationPublishableKey = false,
     )
 
@@ -64,15 +68,6 @@ internal sealed class ApiConfigurationTestType(
         paymentConfigurationPublishableKey = IGNORED_PAYMENT_CONFIGURATION_PUBLISHABLE_KEY,
         paymentConfigurationStripeAccount = IGNORED_PAYMENT_CONFIGURATION_STRIPE_ACCOUNT,
         apiConfiguration = ApiConfiguration(TestApiKeys.PUBLISHABLE).stripeAccountId(TestApiKeys.ACCOUNT),
-        updatePaymentConfigurationPublishableKey = false,
-    )
-
-    data object ApiConfigurationWithBetas : ApiConfigurationTestType(
-        paymentConfigurationPublishableKey = null,
-        paymentConfigurationStripeAccount = null,
-        apiConfiguration = ApiConfiguration(TestApiKeys.PUBLISHABLE)
-            .stripeAccountId(TestApiKeys.ACCOUNT)
-            .betas(setOf("integration_beta=v1")),
         updatePaymentConfigurationPublishableKey = false,
     )
 

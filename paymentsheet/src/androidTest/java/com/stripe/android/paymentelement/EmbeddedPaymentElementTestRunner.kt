@@ -175,7 +175,7 @@ private fun runEmbeddedPaymentElementTestInternal(
     ActivityScenario.launch(MainActivity::class.java).use { scenario ->
         scenario.moveToState(Lifecycle.State.CREATED)
         scenario.onActivity {
-            apiConfigurationTestType.initializePaymentConfiguration(it)
+            apiConfigurationTestType.initializePaymentConfiguration(it, networkRule)
             DefaultLinkStore(it.applicationContext).clear()
         }
 
