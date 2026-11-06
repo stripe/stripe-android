@@ -128,7 +128,7 @@ internal class ThemeModeTest {
             val hostContext = LocalContext.current
             val incomingConfiguration = configuration(LocalConfiguration.current)
             CompositionLocalProvider(LocalConfiguration provides incomingConfiguration) {
-                val theme = if (linkTheme) Theme.LinkLight(themeMode()) else Theme.DefaultLight(themeMode())
+                val theme = if (linkTheme) Theme.Link(themeMode()) else Theme.Default(themeMode())
                 FinancialConnectionsTheme(theme) {
                     val resources = LocalResources.current
                     snapshot = ThemeSnapshot(
