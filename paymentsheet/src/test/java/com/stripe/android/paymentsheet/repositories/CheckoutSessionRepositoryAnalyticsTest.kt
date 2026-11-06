@@ -56,6 +56,7 @@ class CheckoutSessionRepositoryAnalyticsTest {
             analyticsPayloadField("defaults[billing_details][name]", "false"),
             not(hasQueryParam("payment_element")),
             not(hasQueryParam("checkout_config_id")),
+            not(hasQueryParam("ordered_lpms")),
             not(hasQueryParam("duration")),
         )
         expectEvent(
@@ -95,6 +96,7 @@ class CheckoutSessionRepositoryAnalyticsTest {
             analyticsPayloadField("error_type", "invalid_request_error"),
             analyticsPayloadField("error_code", "checkout_session_invalid"),
             analyticsPayloadField("request_id", "req_123"),
+            not(hasQueryParam("ordered_lpms")),
             hasQueryParam("duration"),
         )
         networkRule.checkoutInit { response ->
@@ -329,6 +331,7 @@ class CheckoutSessionRepositoryAnalyticsTest {
             "elements_session_config_id" to "cs_config_123",
             "adaptive_pricing_active" to false,
             "automatic_tax_enabled" to false,
+            "ordered_lpms" to "card,link,apple_pay,google_pay,cashapp",
         )
     }
 }
