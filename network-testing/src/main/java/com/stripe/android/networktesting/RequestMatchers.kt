@@ -43,8 +43,10 @@ object RequestMatchers {
         publishableKey: String = TestApiKeys.PUBLISHABLE,
         ephemeralKey: String = TestApiKeys.EPHEMERAL,
         accountId: String = TestApiKeys.ACCOUNT,
+        betas: Set<String> = setOf("integration_beta=v1"),
     ): RequestMatcher {
-        return ToStringRequestMatcher("stripeApiKey") { request ->
+        val expectedBetas = betas.toSet()
+        return ToStringRequestMatcher("stripeApiKey(betas=$expectedBetas)") { request ->
             when (request.headers[ORIGINAL_HOST_HEADER]) {
                 API_HOST -> {
                     val authorization = request.headers[AUTHORIZATION_HEADER]
@@ -54,7 +56,10 @@ object RequestMatchers {
                         authorization == "Bearer $publishableKey" ||
                             authorization == "Bearer ${TestApiKeys.LIVE_PUBLISHABLE}"
                     }
-                    matchesApiKey && request.headers[STRIPE_ACCOUNT_HEADER] == accountId
+                    val matchesCredentials = matchesApiKey && request.headers[STRIPE_ACCOUNT_HEADER] == accountId
+                    val matchesBetas = request.headers["Stripe-Version"]?.split(';')?.drop(1).orEmpty()
+                        .containsAll(expectedBetas)
+                    matchesCredentials && matchesBetas
                 }
                 ANALYTICS_HOST -> {
                     request.headers[AUTHORIZATION_HEADER] == null &&

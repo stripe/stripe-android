@@ -6,6 +6,7 @@ import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.TEST_TAG_ACCOUNT_DETAILS
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.TEST_TAG_BILLING_DETAILS
+import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
 import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
 import com.stripe.android.paymentsheet.utils.ConfirmationType
@@ -31,7 +32,9 @@ internal class DefaultPaymentMethodsFlowControllerConfirmationTest(
     private val apiConfigurationTestType: ApiConfigurationTestType,
 ) {
     @get:Rule
-    val testRules: TestRules = TestRules.create {
+    val testRules: TestRules = TestRules.create(
+        networkRule = NetworkRule(defaultMatcher = apiConfigurationTestType.defaultMatcher),
+    ) {
         around(IntentsRule())
     }
 
