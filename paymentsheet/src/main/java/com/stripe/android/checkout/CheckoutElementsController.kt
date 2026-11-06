@@ -13,6 +13,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent.Operation
 import com.stripe.android.checkout.analytics.LocalOperation
+import com.stripe.android.checkout.analytics.measureDuration
 import com.stripe.android.checkout.analytics.toAnalyticsMap
 import com.stripe.android.checkout.injection.CheckoutElementsPresenterSubcomponent
 import com.stripe.android.checkout.injection.DaggerCheckoutElementsControllerComponent
@@ -313,20 +314,25 @@ class CheckoutElementsController @Inject internal constructor(
         // timeout and cancellation scope.
         val callerContext = currentCoroutineContext().minusKey(Job)
         return withCheckoutState {
+            val analyticsParams = mutableMapOf<String, Any?>()
             checkoutSessionRepository.measure(
                 operation = Operation.RunServerUpdate,
                 checkoutSessionResponse = checkoutSessionResponse,
-                params = emptyMap(),
+                params = analyticsParams,
             ) {
                 runCatching {
-                    withContext(callerContext) {
-                        withTimeout(SERVER_UPDATE_TIMEOUT_MS) { serverUpdate() }
-                    }.getOrThrow()
-                    checkoutSessionRepository.init(
-                        clientSecret = checkoutSessionResponse.clientSecret,
-                        adaptivePricingAllowed = configuration.currencySelectorElementConfiguration != null,
-                        analyticsParams = configuration.toAnalyticsMap(),
-                    ).getOrThrow()
+                    analyticsParams.measureDuration("merchant_update_duration") {
+                        withContext(callerContext) {
+                            withTimeout(SERVER_UPDATE_TIMEOUT_MS) { serverUpdate() }
+                        }.getOrThrow()
+                    }
+                    analyticsParams.measureDuration("refresh_duration") {
+                        checkoutSessionRepository.init(
+                            clientSecret = checkoutSessionResponse.clientSecret,
+                            adaptivePricingAllowed = configuration.currencySelectorElementConfiguration != null,
+                            analyticsParams = configuration.toAnalyticsMap(),
+                        ).getOrThrow()
+                    }
                 }
             }
         }.toOperationResult()
