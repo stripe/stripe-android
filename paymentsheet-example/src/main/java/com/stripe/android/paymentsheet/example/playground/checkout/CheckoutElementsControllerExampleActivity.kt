@@ -170,7 +170,10 @@ internal class CheckoutElementsControllerExampleActivity : AppCompatActivity() {
                                 )
                             }
                         }
-                        CheckoutElementsControllerExampleViewModel.Status.Loading -> LoadingContent()
+                        CheckoutElementsControllerExampleViewModel.Status.Loading -> {
+                            LoadingContent()
+                            paymentElement.present()
+                        }
                         is CheckoutElementsControllerExampleViewModel.Status.Error -> ErrorContent(
                             message = currentStatus.message,
                             onRetry = viewModel::retry,

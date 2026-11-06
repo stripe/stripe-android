@@ -255,18 +255,21 @@ internal class CheckoutSheetLauncher @Inject constructor(
         if (!lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.CREATED)) return
         if (sheetStateHolder.sheetIsOpen) return
         val isUpdating = operationCoordinator.isUpdating.value
-        if (!isUpdating && (paymentMethodMetadata == null || configuration == null)) return
+
+        // if we get here and these conditions are true, then configuration has not completed.
+        val presentationState = if (isUpdating || selectionHolder.state == null) {
+            EmbeddedActivityArgs.PresentationState.Loading
+        } else {
+            EmbeddedActivityArgs.PresentationState.Ready
+        }
+
         sheetStateHolder.sheetIsOpen = true
         val initialArgs = createPaymentOptionsArgs(
             paymentMethodMetadata = paymentMethodMetadata,
             configuration = configuration,
             selection = selection,
             customerState = customerState,
-            presentationState = if (isUpdating) {
-                EmbeddedActivityArgs.PresentationState.Loading
-            } else {
-                EmbeddedActivityArgs.PresentationState.Ready
-            },
+            presentationState = presentationState,
         )
         launcherState.isAwaitingPaymentOptionsReady =
             initialArgs.presentationState == EmbeddedActivityArgs.PresentationState.Loading
@@ -294,6 +297,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
 
         lifecycleOwner.lifecycleScope.launch {
             operationCoordinator.isUpdating.first { isUpdating -> !isUpdating }
+            selectionHolder.stateFlow.first { state -> state != null }
             if (!sheetStateHolder.sheetIsOpen) {
                 launcherState.isAwaitingPaymentOptionsReady = false
                 return@launch

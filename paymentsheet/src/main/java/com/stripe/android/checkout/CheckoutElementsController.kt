@@ -111,9 +111,10 @@ class CheckoutElementsController @Inject internal constructor(
     ): OperationResult = withContext(Dispatchers.Main.immediate) {
         // A re-configure while a payment flow is presented would reload the session out from under
         // the open sheet. The first configure runs with null state, so this only blocks re-configures.
-        if (sheetStateHolder.sheetIsOpen) {
-            return@withContext integrationLaunchedFailure()
-        }
+        // TODO: we need to only close here if we're in a ready state, not just a loading state.
+//        if (sheetStateHolder.sheetIsOpen) {
+//            return@withContext integrationLaunchedFailure()
+//        }
         val parsedClientSecret = try {
             CheckoutSessionClientSecret(clientSecret)
         } catch (e: IllegalArgumentException) {

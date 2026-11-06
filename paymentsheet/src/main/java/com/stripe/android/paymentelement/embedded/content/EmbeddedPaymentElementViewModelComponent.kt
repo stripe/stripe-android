@@ -6,10 +6,14 @@ import android.content.res.Resources
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
+import com.stripe.android.checkout.CheckoutPaymentOptionDisplayDataFactory
+import com.stripe.android.checkout.DefaultCheckoutPaymentOptionDisplayDataFactory
 import com.stripe.android.common.di.ElementsSessionClientParamsModule
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.utils.RealUserFacingLogger
 import com.stripe.android.core.utils.UserFacingLogger
+import com.stripe.android.elements.ece.AvailableExpressButtonTypesFactory
+import com.stripe.android.elements.ece.DefaultAvailableExpressButtonTypesFactory
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.injection.PaymentsIntegrityModule
@@ -117,6 +121,16 @@ internal interface EmbeddedPaymentElementViewModelModule {
     fun bindsEmbeddedStateHelper(
         stateHelper: DefaultEmbeddedStateHelper
     ): EmbeddedStateHelper
+
+    @Binds
+    fun bindsCheckoutPaymentOptionDisplayDataFactory(
+        impl: DefaultCheckoutPaymentOptionDisplayDataFactory
+    ): CheckoutPaymentOptionDisplayDataFactory
+
+    @Binds
+    fun bindsAvailableExpressButtonTypesFactory(
+        impl: DefaultAvailableExpressButtonTypesFactory
+    ): AvailableExpressButtonTypesFactory
 
     @Binds
     fun bindsPaymentOptionDisplayDataHolder(
