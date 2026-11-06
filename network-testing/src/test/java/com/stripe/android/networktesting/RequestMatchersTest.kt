@@ -86,20 +86,6 @@ class RequestMatchersTest {
     }
 
     @Test
-    fun `stripeApiKey excludes card metadata`() {
-        val matcher = RequestMatchers.stripeApiKey(betas = setOf("example=v1"))
-        val request = createRequest(
-            path = "/edge-internal/card-metadata?bin_prefix=424242",
-            headers = mapOf(
-                "original-host" to "api.stripe.com",
-                "Authorization" to "Bearer ${TestApiKeys.PUBLISHABLE}",
-                "Stripe-Account" to TestApiKeys.ACCOUNT,
-            ),
-        )
-        assertThat(matcher.matches(request)).isTrue()
-    }
-
-    @Test
     fun `stripeApiKey allows unconfigured sessions`() {
         val matcher = RequestMatchers.stripeApiKey(betas = emptySet())
         val request = createRequest(

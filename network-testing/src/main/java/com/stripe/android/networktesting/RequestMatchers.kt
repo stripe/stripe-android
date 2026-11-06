@@ -57,8 +57,8 @@ object RequestMatchers {
                             authorization == "Bearer ${TestApiKeys.LIVE_PUBLISHABLE}"
                     }
                     val matchesCredentials = matchesApiKey && request.headers[STRIPE_ACCOUNT_HEADER] == accountId
-                    val matchesBetas = path("/edge-internal/card-metadata").matches(request) ||
-                        request.headers["Stripe-Version"]?.split(';')?.drop(1).orEmpty().containsAll(expectedBetas)
+                    val matchesBetas = request.headers["Stripe-Version"]?.split(';')?.drop(1).orEmpty()
+                        .containsAll(expectedBetas)
                     matchesCredentials && matchesBetas
                 }
                 ANALYTICS_HOST -> {
