@@ -151,6 +151,12 @@ internal class CheckoutPaymentElementAnalyticsTest {
         )
         validatePaymentElementAnalytics("mc_confirm_button_tapped")
         validatePaymentElementAnalytics("mc_dismiss")
+        // The session refresh reloads the Payment Element with the kept card selection.
+        validatePaymentElementAnalytics("mc_initial_displayed_payment_methods")
+        networkRule.validateAnalyticsRequest(
+            eventName = "stripe_android.card_metadata_pk_available",
+            productUsage = setOf("checkout_elements"),
+        )
         formPage.clickPrimaryButton()
 
         testRules.compose.waitUntilWithIdle {
@@ -827,6 +833,9 @@ internal class CheckoutPaymentElementAnalyticsTest {
 
     private fun billingTaxUpdateResponse(response: MockResponse) {
         response.testBodyFromFile("checkout-session-init.json") { json ->
+            // Match the init response so the session refresh keeps the new card selection.
+            json.put("customer_email", "checkout@example.com")
+            json.put("billing_address_collection", "required")
             json.remove("link_settings")
             json.getJSONObject("automatic_tax")
                 .put("enabled", true).put("status", "ready").put("address_source", "billing")
