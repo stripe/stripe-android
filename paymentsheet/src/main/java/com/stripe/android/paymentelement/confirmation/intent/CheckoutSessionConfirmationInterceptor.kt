@@ -105,9 +105,9 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
                 invocationSource = if (
                     (clientAttributionMetadata as ClientAttributionMetadata.CheckoutSession).isExpressCheckoutElement
                 ) {
-                    InvocationSource.ExpressCheckoutElement.code
+                    InvocationSource.ExpressCheckoutElement
                 } else {
-                    InvocationSource.PaymentElement.code
+                    InvocationSource.PaymentElement
                 },
                 address = billingAddress,
             ).getOrElse { error -> return Result.failure(error) }

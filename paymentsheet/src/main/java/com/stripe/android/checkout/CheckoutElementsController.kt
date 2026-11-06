@@ -146,7 +146,7 @@ class CheckoutElementsController @Inject internal constructor(
                     val updatedResponse = checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
                         checkoutSessionResponse = response,
                         addressSource = addressSource,
-                        invocationSource = InvocationSource.Merchant.code,
+                        invocationSource = InvocationSource.Merchant,
                         address = taxAddress,
                     ).getOrThrow()
                     // The updated totals change payment method metadata, so rebuild it before publishing.
@@ -213,7 +213,7 @@ class CheckoutElementsController @Inject internal constructor(
             checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
                 checkoutSessionResponse = checkoutSessionResponse,
                 addressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
-                invocationSource = InvocationSource.Merchant.code,
+                invocationSource = InvocationSource.Merchant,
                 address = built,
             )
         }.toOperationResult()
@@ -289,7 +289,7 @@ class CheckoutElementsController @Inject internal constructor(
             checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
                 checkoutSessionResponse = checkoutSessionResponse,
                 addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
-                invocationSource = InvocationSource.PaymentElement.code,
+                invocationSource = InvocationSource.PaymentElement,
                 address = address,
             ).onFailure {
                 stateHolder.state = stateHolder.state?.copy(
@@ -368,7 +368,7 @@ class CheckoutElementsController @Inject internal constructor(
             checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
                 checkoutSessionResponse = checkoutSessionResponse,
                 addressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
-                invocationSource = InvocationSource.Merchant.code,
+                invocationSource = InvocationSource.Merchant,
                 address = null,
             )
         }
@@ -492,7 +492,7 @@ class CheckoutElementsController @Inject internal constructor(
             checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
                 checkoutSessionResponse = checkoutSessionResponse,
                 addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
-                invocationSource = InvocationSource.Merchant.code,
+                invocationSource = InvocationSource.Merchant,
                 address = null,
             )
         }.toOperationResult()

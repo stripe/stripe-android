@@ -1,5 +1,6 @@
 package com.stripe.android.checkout
 
+import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent.InvocationSource
 import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent.Operation
 import com.stripe.android.checkout.analytics.LocalOperation
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -22,7 +23,7 @@ internal class CheckoutSessionTaxRegionUpdater @Inject constructor(
     suspend fun updateServerStateIfNeeded(
         checkoutSessionResponse: CheckoutSessionResponse,
         addressSource: CheckoutSessionResponse.TaxAddressSource,
-        invocationSource: String,
+        invocationSource: InvocationSource,
         address: CheckoutElementsController.Address.State?,
     ): Result<CheckoutSessionResponse> {
         val didRequestTaxUpdate = requiresUpdate(
@@ -30,7 +31,7 @@ internal class CheckoutSessionTaxRegionUpdater @Inject constructor(
             addressSource = addressSource,
         )
         val params = mapOf(
-            "invocation_source" to invocationSource,
+            "invocation_source" to invocationSource.code,
             "did_request_tax_update" to didRequestTaxUpdate,
         )
         return if (didRequestTaxUpdate) {

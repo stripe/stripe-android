@@ -68,7 +68,7 @@ internal class CheckoutSessionTaxRegionUpdaterTest {
         val result = updater.updateServerStateIfNeeded(
             checkoutSessionResponse = checkoutSessionResponse,
             addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
-            invocationSource = InvocationSource.Merchant.code,
+            invocationSource = InvocationSource.Merchant,
             address = ADDRESS,
         )
 
@@ -82,7 +82,7 @@ internal class CheckoutSessionTaxRegionUpdaterTest {
         val result = updater.updateServerStateIfNeeded(
             checkoutSessionResponse = checkoutSessionResponse,
             addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
-            invocationSource = InvocationSource.Merchant.code,
+            invocationSource = InvocationSource.Merchant,
             address = ADDRESS,
         )
 
@@ -94,7 +94,7 @@ internal class CheckoutSessionTaxRegionUpdaterTest {
         val result = updater.updateServerStateIfNeeded(
             checkoutSessionResponse = checkoutSessionResponse,
             addressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
-            invocationSource = InvocationSource.Merchant.code,
+            invocationSource = InvocationSource.Merchant,
             address = ADDRESS,
         )
 
@@ -111,7 +111,7 @@ internal class CheckoutSessionTaxRegionUpdaterTest {
         val result = updater.updateServerStateIfNeeded(
             checkoutSessionResponse = checkoutSessionResponse,
             addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
-            invocationSource = InvocationSource.Merchant.code,
+            invocationSource = InvocationSource.Merchant,
             address = ADDRESS,
         )
 

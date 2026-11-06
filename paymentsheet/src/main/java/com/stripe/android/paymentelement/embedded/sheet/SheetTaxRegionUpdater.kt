@@ -29,7 +29,7 @@ internal class SheetTaxRegionUpdater internal constructor(
             taxRegionUpdater.updateServerStateIfNeeded(
                 checkoutSessionResponse = response,
                 addressSource = addressSource,
-                invocationSource = InvocationSource.PaymentElement.code,
+                invocationSource = InvocationSource.PaymentElement,
                 address = address,
             )
         },

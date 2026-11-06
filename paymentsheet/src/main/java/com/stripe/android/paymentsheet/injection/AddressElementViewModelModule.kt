@@ -181,7 +181,7 @@ private class CheckoutShippingPrimaryButtonAction(
         return taxRegionUpdater.updateServerStateIfNeeded(
             checkoutSessionResponse = checkoutSessionResponse,
             addressSource = TaxAddressSource.SHIPPING,
-            invocationSource = InvocationSource.ShippingAddressElement.code,
+            invocationSource = InvocationSource.ShippingAddressElement,
             address = address,
         ).map { response ->
             AddressElementActivityContract.Result.CheckoutShippingSucceeded(

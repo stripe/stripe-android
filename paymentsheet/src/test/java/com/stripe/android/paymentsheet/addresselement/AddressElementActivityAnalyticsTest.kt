@@ -270,7 +270,7 @@ internal class AddressElementActivityAnalyticsTest {
             host("q.stripe.com"),
             method("GET"),
             analyticsPayloadField("event", "checkout_elements.update_shipping_address.$outcome"),
-            analyticsPayloadField("product_usage", "PaymentSheet.AddressController"),
+            analyticsPayloadField("product_usage", "checkout_elements"),
             analyticsPayloadField("checkout_session_id", checkoutSessionId),
             analyticsPayloadField("invocation_source", "shipping_address_element"),
             analyticsPayloadField("did_request_tax_update", "true"),

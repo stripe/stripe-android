@@ -96,7 +96,7 @@ internal class CheckoutGooglePayPaymentDataUpdateCallback @Inject constructor(
             response = taxRegionUpdater.updateServerStateIfNeeded(
                 checkoutSessionResponse = response,
                 addressSource = addressSource,
-                invocationSource = InvocationSource.ExpressCheckoutElement.code,
+                invocationSource = InvocationSource.ExpressCheckoutElement,
                 address = address,
             ).getOrElse { error ->
                 return addressUpdateErrorResponse(addressSource, error)
