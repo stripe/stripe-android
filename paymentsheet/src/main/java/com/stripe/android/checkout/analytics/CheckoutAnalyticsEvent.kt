@@ -26,6 +26,11 @@ internal class CheckoutAnalyticsEvent(
         }
     }
 
+    enum class InvocationSource(val code: String) {
+        Merchant("merchant"),
+        ExpressCheckoutElement("express_checkout_element"),
+    }
+
     enum class Operation(val code: String) {
         Confirm("confirm"),
         Init("init"),

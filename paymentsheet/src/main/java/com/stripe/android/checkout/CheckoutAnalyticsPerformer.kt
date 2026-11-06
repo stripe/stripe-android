@@ -5,8 +5,8 @@ package com.stripe.android.checkout
 import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent
+import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent.InvocationSource
 import com.stripe.android.checkout.analytics.CheckoutConfirmationContext
-import com.stripe.android.checkout.analytics.CheckoutConfirmationContext.InvocationSource
 import com.stripe.android.checkout.analytics.CheckoutConfirmationContext.LinkUi
 import com.stripe.android.checkout.analytics.ConfirmOperation
 import com.stripe.android.checkout.analytics.toAnalyticsMap
