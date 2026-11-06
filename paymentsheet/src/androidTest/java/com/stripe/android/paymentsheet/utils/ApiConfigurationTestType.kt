@@ -4,7 +4,6 @@ import android.content.Context
 import com.google.testing.junit.testparameterinjector.TestParameterValuesProvider
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.ApiConfiguration
-import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.TestApiKeys
 import com.stripe.android.paymentsheet.PaymentSheet
 
@@ -14,8 +13,9 @@ internal sealed class ApiConfigurationTestType(
     val apiConfiguration: ApiConfiguration?,
     private val updatePaymentConfigurationPublishableKey: Boolean,
 ) {
-    fun initializePaymentConfiguration(context: Context, networkRule: NetworkRule) {
-        networkRule.expectStripeBetas(apiConfiguration?.build()?.betas.orEmpty())
+    val betas: Set<String> = apiConfiguration?.build()?.betas.orEmpty()
+
+    fun initializePaymentConfiguration(context: Context) {
         PaymentConfiguration.clearInstance()
         context.getSharedPreferences(
             PaymentConfiguration::class.java.canonicalName,

@@ -39,8 +39,11 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(TestParameterInjector::class)
-internal class EmbeddedPaymentElementTest {
-    private val networkRule = NetworkRule()
+internal class EmbeddedPaymentElementTest(
+    @TestParameter(valuesProvider = EmbeddedPaymentElementApiConfigurationTestTypeProvider::class)
+    private val apiConfigurationTestType: ApiConfigurationTestType,
+) {
+    private val networkRule = NetworkRule(betas = apiConfigurationTestType.betas)
 
     @get:Rule
     val testRules: TestRules = TestRules.create(networkRule = networkRule) {
@@ -51,9 +54,6 @@ internal class EmbeddedPaymentElementTest {
     private val managePage = ManagePage(testRules.compose)
     private val editPage = EditPage(testRules.compose)
     private val formPage = EmbeddedFormPage(testRules.compose)
-
-    @TestParameter(valuesProvider = EmbeddedPaymentElementApiConfigurationTestTypeProvider::class)
-    lateinit var apiConfigurationTestType: ApiConfigurationTestType
 
     private val card1 = CardPaymentMethodDetails("pm_12345", "4242")
     private val card2 = CardPaymentMethodDetails("pm_67890", "5544")
@@ -372,6 +372,7 @@ internal class EmbeddedPaymentElementTest {
 
     @Test
     fun testSuccessfulCashAppPayment() = runEmbeddedPaymentElementTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         createIntentCallback = { _, _ ->
             CreateIntentResult.Success("pi_example_secret_12345")
@@ -415,6 +416,7 @@ internal class EmbeddedPaymentElementTest {
 
     @Test
     fun testSuccessfulUsBankAccountPayment() = runEmbeddedPaymentElementTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         createIntentCallback = { _, _ ->
             CreateIntentResult.Success("pi_example_secret_example")
@@ -468,6 +470,7 @@ internal class EmbeddedPaymentElementTest {
 
     @Test
     fun testSuccessfulCardPaymentWithLinkSignUp() = runEmbeddedPaymentElementTest(
+        apiConfigurationTestType = apiConfigurationTestType,
         networkRule = networkRule,
         createIntentCallback = { _, _ ->
             CreateIntentResult.Success("pi_example_secret_12345")
@@ -553,6 +556,7 @@ internal class EmbeddedPaymentElementTest {
     fun testCardMetadataQueryExecutedOncePerCardSessionForBin() {
         repeat(2) {
             runEmbeddedPaymentElementTest(
+                apiConfigurationTestType = apiConfigurationTestType,
                 networkRule = networkRule,
                 createIntentCallback = { _, shouldSavePaymentMethod ->
                     assertThat(shouldSavePaymentMethod).isFalse()

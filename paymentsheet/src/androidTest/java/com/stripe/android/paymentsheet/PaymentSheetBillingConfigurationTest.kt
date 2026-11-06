@@ -7,6 +7,7 @@ import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
 import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
+import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.not
@@ -38,7 +39,10 @@ internal class PaymentSheetBillingConfigurationTest(
     private val page: PaymentSheetPage = PaymentSheetPage(composeTestRule)
 
     @get:Rule
-    val testRules: TestRules = TestRules.create(composeTestRule = composeTestRule)
+    val testRules: TestRules = TestRules.create(
+        composeTestRule = composeTestRule,
+        networkRule = NetworkRule(betas = apiConfigurationTestType.betas),
+    )
 
     private val networkRule = testRules.networkRule
 
@@ -54,7 +58,7 @@ internal class PaymentSheetBillingConfigurationTest(
         scenario.moveToState(Lifecycle.State.CREATED)
         lateinit var paymentSheet: PaymentSheet
         scenario.onActivity {
-            apiConfigurationTestType.initializePaymentConfiguration(it, networkRule)
+            apiConfigurationTestType.initializePaymentConfiguration(it)
             paymentSheet = Builder { result ->
                 assertThat(result).isInstanceOf(PaymentSheetResult.Completed::class.java)
                 countDownLatch.countDown()
@@ -132,7 +136,7 @@ internal class PaymentSheetBillingConfigurationTest(
         scenario.moveToState(Lifecycle.State.CREATED)
         lateinit var paymentSheet: PaymentSheet
         scenario.onActivity {
-            apiConfigurationTestType.initializePaymentConfiguration(it, networkRule)
+            apiConfigurationTestType.initializePaymentConfiguration(it)
             paymentSheet = Builder { result ->
                 assertThat(result).isInstanceOf(PaymentSheetResult.Completed::class.java)
                 countDownLatch.countDown()

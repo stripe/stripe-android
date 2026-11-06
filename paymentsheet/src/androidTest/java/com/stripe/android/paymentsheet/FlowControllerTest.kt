@@ -68,7 +68,7 @@ internal class FlowControllerTest(
     @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
     private val apiConfigurationTestType: ApiConfigurationTestType,
 ) {
-    private val networkRule = NetworkRule()
+    private val networkRule = NetworkRule(betas = apiConfigurationTestType.betas)
 
     @get:Rule
     val testRules: TestRules = TestRules.create(networkRule = networkRule)
@@ -376,7 +376,7 @@ internal class FlowControllerTest(
 
         scenario.moveToState(Lifecycle.State.CREATED)
         scenario.onActivity {
-            apiConfigurationTestType.initializePaymentConfiguration(it, networkRule)
+            apiConfigurationTestType.initializePaymentConfiguration(it)
             @Suppress("Deprecation")
             flowController = PaymentSheet.FlowController.create(
                 activity = it,
@@ -465,7 +465,7 @@ internal class FlowControllerTest(
         fun initializeActivity() {
             scenario.moveToState(Lifecycle.State.CREATED)
             scenario.onActivity {
-                apiConfigurationTestType.initializePaymentConfiguration(it, networkRule)
+                apiConfigurationTestType.initializePaymentConfiguration(it)
 
                 @Suppress("Deprecation")
                 val unsynchronizedController = PaymentSheet.FlowController.create(
@@ -534,7 +534,7 @@ internal class FlowControllerTest(
 
         scenario.moveToState(Lifecycle.State.CREATED)
         scenario.onActivity {
-            apiConfigurationTestType.initializePaymentConfiguration(it, networkRule)
+            apiConfigurationTestType.initializePaymentConfiguration(it)
             @Suppress("Deprecation")
             flowController = PaymentSheet.FlowController.create(
                 activity = it,

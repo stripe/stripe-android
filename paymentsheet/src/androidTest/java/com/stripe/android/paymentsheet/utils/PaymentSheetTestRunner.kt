@@ -72,7 +72,7 @@ internal fun runPaymentSheetTest(
     ActivityScenario.launch(MainActivity::class.java).use { scenario ->
         scenario.moveToState(Lifecycle.State.CREATED)
         scenario.onActivity {
-            effectiveApiConfigurationTestType.initializePaymentConfiguration(it, networkRule)
+            effectiveApiConfigurationTestType.initializePaymentConfiguration(it)
             DefaultLinkStore(it.applicationContext).clear()
         }
 
@@ -163,7 +163,7 @@ internal fun runMultiplePaymentSheetInstancesTest(
     ActivityScenario.launch(MainActivity::class.java).use { scenario ->
         scenario.moveToState(Lifecycle.State.CREATED)
         scenario.onActivity {
-            apiConfigurationTestType.initializePaymentConfiguration(it, networkRule)
+            apiConfigurationTestType.initializePaymentConfiguration(it)
             DefaultLinkStore(it.applicationContext).clear()
         }
 

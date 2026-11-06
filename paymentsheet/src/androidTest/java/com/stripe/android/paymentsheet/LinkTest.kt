@@ -39,7 +39,10 @@ internal class LinkTest(
 ) {
     // The /v1/consumers/sessions/log_out request is launched async from a GlobalScope. We want to make sure it happens,
     // but it's okay if it takes a bit to happen.
-    private val networkRule = NetworkRule(validationTimeout = 5.seconds)
+    private val networkRule = NetworkRule(
+        validationTimeout = 5.seconds,
+        betas = apiConfigurationTestType.betas,
+    )
 
     @get:Rule
     val testRules: TestRules = TestRules.create(networkRule = networkRule)

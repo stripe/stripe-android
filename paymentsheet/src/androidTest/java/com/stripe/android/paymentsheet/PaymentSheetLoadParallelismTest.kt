@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet
 
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
 import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
 import com.stripe.android.model.PaymentMethod
@@ -41,7 +42,9 @@ internal class PaymentSheetLoadParallelismTest(
 ) {
 
     @get:Rule
-    val testRules: TestRules = TestRules.create()
+    val testRules: TestRules = TestRules.create(
+        networkRule = NetworkRule(betas = apiConfigurationTestType.betas),
+    )
 
     private val networkRule = testRules.networkRule
     private val page: PaymentSheetPage = PaymentSheetPage(testRules.compose)

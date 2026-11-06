@@ -6,8 +6,8 @@ import org.junit.Test
 class RequestMatchersTest {
 
     @Test
-    fun `stripeApiConfiguration rejects missing tokens`() {
-        val matcher = RequestMatchers.stripeApiConfiguration(betas = setOf("example=v1"))
+    fun `stripeApiKey rejects missing tokens`() {
+        val matcher = RequestMatchers.stripeApiKey(betas = setOf("example=v1"))
         val request = createRequest(
             headers = mapOf(
                 "original-host" to "api.stripe.com",
@@ -19,8 +19,8 @@ class RequestMatchersTest {
     }
 
     @Test
-    fun `stripeApiConfiguration rejects a different token value`() {
-        val matcher = RequestMatchers.stripeApiConfiguration(betas = setOf("example=v1"))
+    fun `stripeApiKey rejects a different token value`() {
+        val matcher = RequestMatchers.stripeApiKey(betas = setOf("example=v1"))
         val request = createRequest(
             headers = mapOf(
                 "original-host" to "api.stripe.com",
@@ -33,8 +33,8 @@ class RequestMatchersTest {
     }
 
     @Test
-    fun `stripeApiConfiguration rejects partial tokens`() {
-        val matcher = RequestMatchers.stripeApiConfiguration(betas = setOf("example=v1"))
+    fun `stripeApiKey rejects partial tokens`() {
+        val matcher = RequestMatchers.stripeApiKey(betas = setOf("example=v1"))
         val request = createRequest(
             headers = mapOf(
                 "original-host" to "api.stripe.com",
@@ -47,8 +47,8 @@ class RequestMatchersTest {
     }
 
     @Test
-    fun `stripeApiConfiguration allows built-in tokens`() {
-        val matcher = RequestMatchers.stripeApiConfiguration(betas = setOf("example=v1"))
+    fun `stripeApiKey allows built-in tokens`() {
+        val matcher = RequestMatchers.stripeApiKey(betas = setOf("example=v1"))
         val request = createRequest(
             headers = mapOf(
                 "original-host" to "api.stripe.com",
@@ -61,8 +61,8 @@ class RequestMatchersTest {
     }
 
     @Test
-    fun `stripeApiConfiguration matches analytics credentials when betas are configured`() {
-        val matcher = RequestMatchers.stripeApiConfiguration(betas = setOf("example=v1"))
+    fun `stripeApiKey matches analytics credentials when betas are configured`() {
+        val matcher = RequestMatchers.stripeApiKey(betas = setOf("example=v1"))
         val request = createRequest(
             path = "/?publishable_key=${TestApiKeys.PUBLISHABLE}",
             headers = mapOf(
@@ -73,8 +73,8 @@ class RequestMatchersTest {
     }
 
     @Test
-    fun `stripeApiConfiguration excludes card metadata`() {
-        val matcher = RequestMatchers.stripeApiConfiguration(betas = setOf("example=v1"))
+    fun `stripeApiKey excludes card metadata`() {
+        val matcher = RequestMatchers.stripeApiKey(betas = setOf("example=v1"))
         val request = createRequest(
             path = "/edge-internal/card-metadata?bin_prefix=424242",
             headers = mapOf(
@@ -87,8 +87,8 @@ class RequestMatchersTest {
     }
 
     @Test
-    fun `stripeApiConfiguration allows unconfigured sessions`() {
-        val matcher = RequestMatchers.stripeApiConfiguration()
+    fun `stripeApiKey allows unconfigured sessions`() {
+        val matcher = RequestMatchers.stripeApiKey()
         val request = createRequest(
             headers = mapOf(
                 "original-host" to "api.stripe.com",
@@ -100,8 +100,8 @@ class RequestMatchersTest {
     }
 
     @Test
-    fun `stripeApiConfiguration rejects invalid credentials despite matching betas`() {
-        val matcher = RequestMatchers.stripeApiConfiguration(betas = setOf("example=v1"))
+    fun `stripeApiKey rejects invalid credentials despite matching betas`() {
+        val matcher = RequestMatchers.stripeApiKey(betas = setOf("example=v1"))
         val request = createRequest(
             headers = mapOf(
                 "original-host" to "api.stripe.com",
@@ -114,34 +114,8 @@ class RequestMatchersTest {
     }
 
     @Test
-    fun `stripeApiConfiguration allows custom credentials when authorization is disabled`() {
-        val matcher = RequestMatchers.stripeApiConfiguration(
-            betas = setOf("example=v1"),
-            applyDefaultAuthorization = false,
-        )
-        val request = createRequest(
-            headers = mapOf(
-                "original-host" to "api.stripe.com",
-                "Authorization" to "Bearer pk_test_custom",
-                "Stripe-Version" to "2020-03-02;example=v1",
-            ),
-        )
-        assertThat(matcher.matches(request)).isTrue()
-    }
-
-    @Test
-    fun `stripeApiConfiguration still requires betas when authorization is disabled`() {
-        val matcher = RequestMatchers.stripeApiConfiguration(
-            betas = setOf("example=v1"),
-            applyDefaultAuthorization = false,
-        )
-        val request = createRequest(headers = mapOf("original-host" to "api.stripe.com"))
-        assertThat(matcher.matches(request)).isFalse()
-    }
-
-    @Test
-    fun `stripeApiConfiguration rejects invalid analytics credentials when betas are configured`() {
-        val matcher = RequestMatchers.stripeApiConfiguration(betas = setOf("example=v1"))
+    fun `stripeApiKey rejects invalid analytics credentials when betas are configured`() {
+        val matcher = RequestMatchers.stripeApiKey(betas = setOf("example=v1"))
         val request = createRequest(
             headers = mapOf("original-host" to "q.stripe.com"),
         )
@@ -149,7 +123,7 @@ class RequestMatchersTest {
     }
 
     @Test
-    fun `stripeApiConfiguration matches publishable key for API request`() {
+    fun `stripeApiKey matches publishable key for API request`() {
         val request = createRequest(
             path = "/v1/payment_intents/pi_123",
             headers = mapOf(
@@ -159,11 +133,11 @@ class RequestMatchersTest {
             ),
         )
 
-        assertThat(RequestMatchers.stripeApiConfiguration().matches(request)).isTrue()
+        assertThat(RequestMatchers.stripeApiKey().matches(request)).isTrue()
     }
 
     @Test
-    fun `stripeApiConfiguration matches live publishable key for API request`() {
+    fun `stripeApiKey matches live publishable key for API request`() {
         val request = createRequest(
             path = "/v1/payment_intents/pi_123",
             headers = mapOf(
@@ -173,21 +147,21 @@ class RequestMatchersTest {
             ),
         )
 
-        assertThat(RequestMatchers.stripeApiConfiguration().matches(request)).isTrue()
+        assertThat(RequestMatchers.stripeApiKey().matches(request)).isTrue()
     }
 
     @Test
-    fun `stripeApiConfiguration rejects missing authorization for API request`() {
+    fun `stripeApiKey rejects missing authorization for API request`() {
         val request = createRequest(
             path = "/v1/payment_intents/pi_123",
             headers = mapOf("original-host" to "api.stripe.com"),
         )
 
-        assertThat(RequestMatchers.stripeApiConfiguration().matches(request)).isFalse()
+        assertThat(RequestMatchers.stripeApiKey().matches(request)).isFalse()
     }
 
     @Test
-    fun `stripeApiConfiguration rejects incorrect authorization for API request`() {
+    fun `stripeApiKey rejects incorrect authorization for API request`() {
         val request = createRequest(
             path = "/v1/payment_intents/pi_123",
             headers = mapOf(
@@ -197,11 +171,11 @@ class RequestMatchersTest {
             ),
         )
 
-        assertThat(RequestMatchers.stripeApiConfiguration().matches(request)).isFalse()
+        assertThat(RequestMatchers.stripeApiKey().matches(request)).isFalse()
     }
 
     @Test
-    fun `stripeApiConfiguration matches ephemeral key for retrieving payment methods`() {
+    fun `stripeApiKey matches ephemeral key for retrieving payment methods`() {
         val request = createRequest(
             path = "/v1/payment_methods?type=card",
             headers = mapOf(
@@ -211,11 +185,11 @@ class RequestMatchersTest {
             ),
         )
 
-        assertThat(RequestMatchers.stripeApiConfiguration().matches(request)).isTrue()
+        assertThat(RequestMatchers.stripeApiKey().matches(request)).isTrue()
     }
 
     @Test
-    fun `stripeApiConfiguration matches publishable key for creating payment method`() {
+    fun `stripeApiKey matches publishable key for creating payment method`() {
         val request = createRequest(
             path = "/v1/payment_methods",
             method = "POST",
@@ -226,11 +200,11 @@ class RequestMatchersTest {
             ),
         )
 
-        assertThat(RequestMatchers.stripeApiConfiguration().matches(request)).isTrue()
+        assertThat(RequestMatchers.stripeApiKey().matches(request)).isTrue()
     }
 
     @Test
-    fun `stripeApiConfiguration matches ephemeral key for payment method mutation`() {
+    fun `stripeApiKey matches ephemeral key for payment method mutation`() {
         val request = createRequest(
             path = "/v1/payment_methods/pm_123/detach",
             method = "POST",
@@ -241,11 +215,11 @@ class RequestMatchersTest {
             ),
         )
 
-        assertThat(RequestMatchers.stripeApiConfiguration().matches(request)).isTrue()
+        assertThat(RequestMatchers.stripeApiKey().matches(request)).isTrue()
     }
 
     @Test
-    fun `stripeApiConfiguration matches ephemeral key for customer request`() {
+    fun `stripeApiKey matches ephemeral key for customer request`() {
         val request = createRequest(
             path = "/v1/customers/cus_123",
             headers = mapOf(
@@ -255,11 +229,11 @@ class RequestMatchersTest {
             ),
         )
 
-        assertThat(RequestMatchers.stripeApiConfiguration().matches(request)).isTrue()
+        assertThat(RequestMatchers.stripeApiKey().matches(request)).isTrue()
     }
 
     @Test
-    fun `stripeApiConfiguration matches ephemeral key for confirmation token using saved payment method`() {
+    fun `stripeApiKey matches ephemeral key for confirmation token using saved payment method`() {
         val request = createRequest(
             path = "/v1/confirmation_tokens",
             method = "POST",
@@ -271,11 +245,11 @@ class RequestMatchersTest {
             ),
         )
 
-        assertThat(RequestMatchers.stripeApiConfiguration().matches(request)).isTrue()
+        assertThat(RequestMatchers.stripeApiKey().matches(request)).isTrue()
     }
 
     @Test
-    fun `stripeApiConfiguration matches publishable key for confirmation token using new payment method`() {
+    fun `stripeApiKey matches publishable key for confirmation token using new payment method`() {
         val request = createRequest(
             path = "/v1/confirmation_tokens",
             method = "POST",
@@ -287,11 +261,11 @@ class RequestMatchersTest {
             ),
         )
 
-        assertThat(RequestMatchers.stripeApiConfiguration().matches(request)).isTrue()
+        assertThat(RequestMatchers.stripeApiKey().matches(request)).isTrue()
     }
 
     @Test
-    fun `stripeApiConfiguration rejects missing Stripe account for API request`() {
+    fun `stripeApiKey rejects missing Stripe account for API request`() {
         val request = createRequest(
             path = "/v1/payment_intents/pi_123",
             headers = mapOf(
@@ -300,11 +274,11 @@ class RequestMatchersTest {
             ),
         )
 
-        assertThat(RequestMatchers.stripeApiConfiguration().matches(request)).isFalse()
+        assertThat(RequestMatchers.stripeApiKey().matches(request)).isFalse()
     }
 
     @Test
-    fun `stripeApiConfiguration rejects incorrect Stripe account for API request`() {
+    fun `stripeApiKey rejects incorrect Stripe account for API request`() {
         val request = createRequest(
             path = "/v1/payment_intents/pi_123",
             headers = mapOf(
@@ -314,21 +288,21 @@ class RequestMatchersTest {
             ),
         )
 
-        assertThat(RequestMatchers.stripeApiConfiguration().matches(request)).isFalse()
+        assertThat(RequestMatchers.stripeApiKey().matches(request)).isFalse()
     }
 
     @Test
-    fun `stripeApiConfiguration matches analytics publishable key query parameter`() {
+    fun `stripeApiKey matches analytics publishable key query parameter`() {
         val request = createRequest(
             path = "/?event=mc_load&publishable_key=${TestApiKeys.PUBLISHABLE}",
             headers = mapOf("original-host" to "q.stripe.com"),
         )
 
-        assertThat(RequestMatchers.stripeApiConfiguration().matches(request)).isTrue()
+        assertThat(RequestMatchers.stripeApiKey().matches(request)).isTrue()
     }
 
     @Test
-    fun `stripeApiConfiguration rejects authorization header for analytics request`() {
+    fun `stripeApiKey rejects authorization header for analytics request`() {
         val request = createRequest(
             path = "/?publishable_key=${TestApiKeys.PUBLISHABLE}",
             headers = mapOf(
@@ -337,27 +311,27 @@ class RequestMatchersTest {
             ),
         )
 
-        assertThat(RequestMatchers.stripeApiConfiguration().matches(request)).isFalse()
+        assertThat(RequestMatchers.stripeApiKey().matches(request)).isFalse()
     }
 
     @Test
-    fun `stripeApiConfiguration rejects missing publishable key for analytics request`() {
+    fun `stripeApiKey rejects missing publishable key for analytics request`() {
         val request = createRequest(
             path = "/?event=mc_load",
             headers = mapOf("original-host" to "q.stripe.com"),
         )
 
-        assertThat(RequestMatchers.stripeApiConfiguration().matches(request)).isFalse()
+        assertThat(RequestMatchers.stripeApiKey().matches(request)).isFalse()
     }
 
     @Test
-    fun `stripeApiConfiguration ignores unrelated host`() {
+    fun `stripeApiKey ignores unrelated host`() {
         val request = createRequest(
             path = "/config",
             headers = mapOf("original-host" to "ppm.stripe.com"),
         )
 
-        assertThat(RequestMatchers.stripeApiConfiguration().matches(request)).isTrue()
+        assertThat(RequestMatchers.stripeApiKey().matches(request)).isTrue()
     }
 
     @Test
