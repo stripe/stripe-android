@@ -256,10 +256,12 @@ internal class CheckoutSheetLauncher @Inject constructor(
     ) {
         if (!lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.CREATED)) return
         if (sheetStateHolder.sheetIsOpen) return
-        val presentationState = when {
-            operationCoordinator.isUpdating.value -> EmbeddedActivityArgs.PresentationState.Loading
-            paymentMethodMetadata == null || configuration == null -> EmbeddedActivityArgs.PresentationState.Failed
-            else -> EmbeddedActivityArgs.PresentationState.Ready(
+        val isUpdating = operationCoordinator.isUpdating.value
+        val presentationState = if (isUpdating) {
+            EmbeddedActivityArgs.PresentationState.Loading(appearance = configuration?.appearance)
+        } else {
+            if (paymentMethodMetadata == null || configuration == null) return
+            EmbeddedActivityArgs.PresentationState.Ready(
                 paymentMethodMetadata = paymentMethodMetadata,
                 configuration = configuration,
             )
@@ -271,7 +273,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
             presentationState = presentationState,
         )
         launcherState.isAwaitingPaymentOptionsReady =
-            initialArgs.presentationState == EmbeddedActivityArgs.PresentationState.Loading
+            initialArgs.presentationState is EmbeddedActivityArgs.PresentationState.Loading
         activityLauncher.launch(initialArgs)
 
         resumePendingReadyLaunch()

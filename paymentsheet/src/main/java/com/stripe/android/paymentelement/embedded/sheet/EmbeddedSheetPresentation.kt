@@ -33,7 +33,7 @@ internal interface EmbeddedSheetPresentation {
             activityResultCaller: ActivityResultCaller,
         ): EmbeddedSheetPresentation {
             return when (val presentationState = args.presentationState) {
-                EmbeddedActivityArgs.PresentationState.Loading -> LoadingEmbeddedSheetPresentation.Factory.create(
+                is EmbeddedActivityArgs.PresentationState.Loading -> LoadingEmbeddedSheetPresentation.Factory.create(
                     activity = activity,
                     args = args,
                     activityResultCaller = activityResultCaller,

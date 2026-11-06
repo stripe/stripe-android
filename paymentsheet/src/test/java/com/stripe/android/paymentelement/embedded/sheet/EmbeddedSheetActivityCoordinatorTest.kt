@@ -130,16 +130,30 @@ internal class EmbeddedSheetActivityCoordinatorTest {
     @Test
     fun `loading without configuration uses default appearance`() = runScenario(
         initialArgs = createArgs(
-            presentationState = EmbeddedActivityArgs.PresentationState.Loading,
+            presentationState = EmbeddedActivityArgs.PresentationState.Loading(appearance = null),
         ),
     ) {
         assertThat(coordinator.appearance).isEqualTo(PaymentSheet.Appearance())
     }
 
     @Test
+    fun `loading uses supplied appearance`() {
+        val appearance = PaymentSheet.Appearance(
+            shapes = PaymentSheet.Shapes(cornerRadiusDp = 12f, borderStrokeWidthDp = 1f),
+        )
+        runScenario(
+            initialArgs = createArgs(
+                presentationState = EmbeddedActivityArgs.PresentationState.Loading(appearance = appearance),
+            ),
+        ) {
+            assertThat(coordinator.appearance).isSameInstanceAs(appearance)
+        }
+    }
+
+    @Test
     fun `ready transition applies configured appearance`() = runScenario(
         initialArgs = createArgs(
-            presentationState = EmbeddedActivityArgs.PresentationState.Loading,
+            presentationState = EmbeddedActivityArgs.PresentationState.Loading(appearance = null),
         ),
     ) {
         val readyState = createReadyState()
@@ -160,7 +174,9 @@ internal class EmbeddedSheetActivityCoordinatorTest {
     @Test
     fun `loading intent is ignored`() = runScenario {
         assertTransitionIgnored(
-            createIntent(createArgs(presentationState = EmbeddedActivityArgs.PresentationState.Loading))
+            createIntent(
+                createArgs(presentationState = EmbeddedActivityArgs.PresentationState.Loading(appearance = null))
+            )
         )
     }
 
@@ -196,7 +212,7 @@ internal class EmbeddedSheetActivityCoordinatorTest {
 
     private fun runScenario(
         initialArgs: EmbeddedActivityArgs = createArgs(
-            presentationState = EmbeddedActivityArgs.PresentationState.Loading,
+            presentationState = EmbeddedActivityArgs.PresentationState.Loading(appearance = null),
         ),
         block: suspend Scenario.() -> Unit,
     ) = runTest {
@@ -273,7 +289,7 @@ internal class EmbeddedSheetActivityCoordinatorTest {
         ): EmbeddedSheetPresentation {
             createCalls.add(CreateCall(activity, args, activityResultCaller))
             return when (args.presentationState) {
-                EmbeddedActivityArgs.PresentationState.Loading -> initialPresentation
+                is EmbeddedActivityArgs.PresentationState.Loading -> initialPresentation
                 is EmbeddedActivityArgs.PresentationState.Ready -> readyPresentation
                 EmbeddedActivityArgs.PresentationState.Failed -> failedPresentation
             }
