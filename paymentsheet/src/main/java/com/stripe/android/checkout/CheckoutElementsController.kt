@@ -1,6 +1,7 @@
 package com.stripe.android.checkout
 
 import android.app.Application
+import android.content.Context
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.os.Parcelable
@@ -26,6 +27,7 @@ import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.elements.PaymentElement
 import com.stripe.android.elements.ShippingAddressElement
 import com.stripe.android.elements.ece.ExpressButtonType
+import com.stripe.android.link.account.DefaultLinkStore
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
@@ -81,6 +83,20 @@ class CheckoutElementsController @Inject internal constructor(
     @PaymentElementCallbackIdentifier internal val paymentElementCallbackIdentifier: String,
     private val savedState: CheckoutElementsControllerSavedState,
 ) {
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    companion object {
+        /**
+         * Deletes persisted authentication state associated with a customer.
+         *
+         * Call this when the customer logs out of your app.
+         *
+         * @param context The application [Context].
+         */
+        fun resetCustomer(context: Context) {
+            DefaultLinkStore(context).clear()
+        }
+    }
+
     /**
      * The latest [Session] data, or `null` until [configure] has completed successfully.
      */
