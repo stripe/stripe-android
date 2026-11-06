@@ -57,6 +57,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.definitions.SwishDefiniti
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.TouchNGoDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.TrueMoneyDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.TwintDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.UpiDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.UsBankAccountDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.WeChatPayDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.WeroDefinition
@@ -122,6 +123,7 @@ internal object PaymentMethodRegistry {
         TouchNGoDefinition,
         TrueMoneyDefinition,
         TwintDefinition,
+        UpiDefinition,
         UsBankAccountDefinition,
         WeChatPayDefinition,
         WeroDefinition,

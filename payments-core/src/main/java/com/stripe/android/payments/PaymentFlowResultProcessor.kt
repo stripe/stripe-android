@@ -204,7 +204,11 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
         val shouldRefresh = stripeIntent.requiresAction() &&
             stripeIntent.paymentMethod?.type?.afterRedirectAction?.shouldRefreshOrRetrieve == true
 
-        return succeededMaybeRefresh || cancelledMaybeRefresh || actionNotProcessedMaybeRefresh || shouldRefresh
+        val upiProcessing = stripeIntent.status == StripeIntent.Status.Processing &&
+            stripeIntent.paymentMethod?.type == PaymentMethod.Type.Upi
+
+        return succeededMaybeRefresh || cancelledMaybeRefresh || actionNotProcessedMaybeRefresh ||
+            shouldRefresh || upiProcessing
     }
 
     private fun determineFlowOutcome(intent: StripeIntent, originalFlowOutcome: Int): Int {
@@ -318,9 +322,12 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
     private fun shouldRetry(stripeIntentResult: Result<StripeIntent>?): Boolean {
         val stripeIntent = stripeIntentResult?.getOrNull() ?: return true
         val requiresAction = stripeIntent.requiresAction()
-        val isCardPaymentProcessing = stripeIntent.status == StripeIntent.Status.Processing &&
-            stripeIntent.paymentMethod?.type == PaymentMethod.Type.Card
-        return requiresAction || isCardPaymentProcessing
+        val isPaymentProcessing = stripeIntent.status == StripeIntent.Status.Processing &&
+            (
+                stripeIntent.paymentMethod?.type == PaymentMethod.Type.Card ||
+                    stripeIntent.paymentMethod?.type == PaymentMethod.Type.Upi
+                )
+        return requiresAction || isPaymentProcessing
     }
 
     internal companion object {
