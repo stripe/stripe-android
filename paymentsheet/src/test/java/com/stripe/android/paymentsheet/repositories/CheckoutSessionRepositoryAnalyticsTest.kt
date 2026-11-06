@@ -260,7 +260,7 @@ class CheckoutSessionRepositoryAnalyticsTest {
     }
 
     @Test
-    fun `measure reports terminal params on succeeded and not on started`() = runScenario {
+    fun `measure snapshots params on started and succeeded`() = runScenario {
         expectEvent(
             "run_server_update.started",
             not(hasQueryParam("merchant_update_duration")),
@@ -270,18 +270,19 @@ class CheckoutSessionRepositoryAnalyticsTest {
             analyticsPayloadField("merchant_update_duration", "1.5"),
         )
 
+        val params = mutableMapOf<String, Any?>()
         repository.measure(
             operation = CheckoutAnalyticsEvent.Operation.RunServerUpdate,
             checkoutSessionResponse = checkoutSessionResponse,
-            params = emptyMap(),
-            terminalParams = { mapOf("merchant_update_duration" to 1.5f) },
+            params = params,
         ) {
+            params["merchant_update_duration"] = 1.5f
             Result.success(checkoutSessionResponse)
         }.getOrThrow()
     }
 
     @Test
-    fun `measure reports terminal params on failed`() = runScenario {
+    fun `measure snapshots params on started and failed`() = runScenario {
         expectEvent(
             "run_server_update.started",
             not(hasQueryParam("merchant_update_duration")),
@@ -291,12 +292,13 @@ class CheckoutSessionRepositoryAnalyticsTest {
             analyticsPayloadField("merchant_update_duration", "1.5"),
         )
 
+        val params = mutableMapOf<String, Any?>()
         val result = repository.measure(
             operation = CheckoutAnalyticsEvent.Operation.RunServerUpdate,
             checkoutSessionResponse = checkoutSessionResponse,
-            params = emptyMap(),
-            terminalParams = { mapOf("merchant_update_duration" to 1.5f) },
+            params = params,
         ) {
+            params["merchant_update_duration"] = 1.5f
             Result.failure(IllegalStateException("boom"))
         }
 

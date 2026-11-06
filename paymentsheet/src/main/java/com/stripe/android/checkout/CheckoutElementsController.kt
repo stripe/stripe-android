@@ -313,19 +313,12 @@ class CheckoutElementsController @Inject internal constructor(
         // Preserve the merchant's context while keeping the callback a child of the mutation's
         // timeout and cancellation scope.
         val callerContext = currentCoroutineContext().minusKey(Job)
-        var merchantUpdateDuration: Duration? = null
-        var refreshDuration: Duration? = null
         return withCheckoutState {
+            val analyticsParams = mutableMapOf<String, Any?>()
             checkoutSessionRepository.measure(
                 operation = Operation.RunServerUpdate,
                 checkoutSessionResponse = checkoutSessionResponse,
-                params = emptyMap(),
-                terminalParams = {
-                    buildMap {
-                        merchantUpdateDuration?.let { put("merchant_update_duration", it.inSeconds()) }
-                        refreshDuration?.let { put("refresh_duration", it.inSeconds()) }
-                    }
-                },
+                params = analyticsParams,
             ) {
                 runCatching {
                     val merchantUpdateStartedAt = TimeSource.Monotonic.markNow()
@@ -334,7 +327,8 @@ class CheckoutElementsController @Inject internal constructor(
                             withTimeout(SERVER_UPDATE_TIMEOUT_MS) { serverUpdate() }
                         }.getOrThrow()
                     } finally {
-                        merchantUpdateDuration = merchantUpdateStartedAt.elapsedNow()
+                        analyticsParams["merchant_update_duration"] =
+                            merchantUpdateStartedAt.elapsedNow().inSeconds()
                     }
                     val refreshStartedAt = TimeSource.Monotonic.markNow()
                     try {
@@ -344,7 +338,7 @@ class CheckoutElementsController @Inject internal constructor(
                             analyticsParams = configuration.toAnalyticsMap(),
                         ).getOrThrow()
                     } finally {
-                        refreshDuration = refreshStartedAt.elapsedNow()
+                        analyticsParams["refresh_duration"] = refreshStartedAt.elapsedNow().inSeconds()
                     }
                 }
             }

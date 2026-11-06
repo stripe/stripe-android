@@ -255,7 +255,6 @@ internal class CheckoutSessionRepository @Inject constructor(
         operation: Operation,
         checkoutSessionResponse: CheckoutSessionResponse?,
         params: Map<String, Any?>,
-        terminalParams: () -> Map<String, Any?> = { emptyMap() },
         block: suspend () -> Result<CheckoutSessionResponse>,
     ): Result<CheckoutSessionResponse> {
         val measuredOperation = MeasuredOperation(
@@ -264,11 +263,9 @@ internal class CheckoutSessionRepository @Inject constructor(
             report = ::fireEvent,
         )
         measuredOperation.started(checkoutSessionResponse)
-        val result = block()
-        val terminal = terminalParams()
-        return result
-            .onSuccess { measuredOperation.succeeded(it, terminal) }
-            .onFailure { measuredOperation.failed(checkoutSessionResponse, it, terminal) }
+        return block()
+            .onSuccess { measuredOperation.succeeded(it) }
+            .onFailure { measuredOperation.failed(checkoutSessionResponse, it) }
     }
 
     fun fireEvent(event: CheckoutAnalyticsEvent) {
