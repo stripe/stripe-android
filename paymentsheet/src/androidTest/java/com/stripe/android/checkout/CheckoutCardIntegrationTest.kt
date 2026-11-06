@@ -7,7 +7,6 @@ import com.stripe.android.elements.PaymentElement
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedContentPage
 import com.stripe.android.paymentelement.EmbeddedFormPage
-import com.stripe.android.paymentsheet.RequiresPlaygroundBackend
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
@@ -20,7 +19,6 @@ import org.junit.runner.RunWith
 
 @OptIn(CheckoutSessionPreview::class)
 @RunWith(AndroidJUnit4::class)
-@RequiresPlaygroundBackend
 internal class CheckoutCardIntegrationTest {
     @get:Rule
     val composeRule = createEmptyComposeRule()
