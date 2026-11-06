@@ -1350,7 +1350,9 @@ class PaymentSheet internal constructor(
                 userOverrideCountry?.let { userOverrideCountry(it) }
                 apiConfiguration?.let {
                     apiConfiguration(
-                        ApiConfiguration(it.publishableKey).stripeAccountId(it.stripeAccountId)
+                        ApiConfiguration(it.publishableKey)
+                            .stripeAccountId(it.stripeAccountId)
+                            .betas(it.betas)
                     )
                 }
             }

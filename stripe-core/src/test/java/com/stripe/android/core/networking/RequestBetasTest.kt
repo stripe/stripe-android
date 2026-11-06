@@ -10,6 +10,20 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class RequestBetasTest {
     @Test
+    fun `clearing idempotency preserves credentials and beta flags`() {
+        val state = ApiConfiguration.State("pk_test_123", "acct_merchant", setOf("example=v1"))
+        val original = state.toRequestOptions(idempotencyKey = "operation-key")
+
+        val options = original.copy(idempotencyKey = null)
+
+        assertThat(options.idempotencyKey).isNull()
+        assertThat(options.apiKey).isEqualTo(original.apiKey)
+        assertThat(options.stripeAccount).isEqualTo(original.stripeAccount)
+        assertThat(options.betas).containsExactly("example=v1")
+        assertThat(original.idempotencyKey).isEqualTo("operation-key")
+    }
+
+    @Test
     fun `request flags survive credential override without inheriting the merchant account`() {
         val state = ApiConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
             .stripeAccountId("acct_merchant")
