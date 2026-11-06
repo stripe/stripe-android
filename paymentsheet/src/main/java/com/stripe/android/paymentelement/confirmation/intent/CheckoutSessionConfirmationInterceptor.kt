@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.confirmation.intent
 
 import android.content.Context
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
+import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent.InvocationSource
 import com.stripe.android.checkout.toCheckoutAddress
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.exception.LocalStripeException
@@ -101,6 +102,13 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
             checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
                 checkoutSessionResponse = checkoutSessionResponse,
                 addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+                invocationSource = if (
+                    (clientAttributionMetadata as ClientAttributionMetadata.CheckoutSession).isExpressCheckoutElement
+                ) {
+                    InvocationSource.ExpressCheckoutElement.code
+                } else {
+                    InvocationSource.PaymentElement.code
+                },
                 address = billingAddress,
             ).getOrElse { error -> return Result.failure(error) }
         } else {

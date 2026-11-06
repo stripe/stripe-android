@@ -18,6 +18,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
+import com.stripe.android.lpmfoundations.paymentmethod.create
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
@@ -48,6 +49,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateCon
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionLauncherFactory
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.CheckoutStripeRepositoryFactory
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
@@ -178,7 +180,21 @@ internal suspend fun createIntentConfirmationInterceptor(
     ).create(
         integrationMetadata = integrationMetadata,
         customerMetadata = customerMetadata,
-        clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
+        clientAttributionMetadata = if (integrationMetadata is IntegrationMetadata.CheckoutSession) {
+            ClientAttributionMetadata.create(
+                elementsSessionConfigId = null,
+                initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+                    instancesKey = integrationMetadata.instancesKey,
+                    checkoutSessionResponse = integrationMetadata.checkoutSessionResponse,
+                    collectedEmail = integrationMetadata.collectedEmail,
+                    configuredElements = listOf("mobile-payment-element"),
+                ),
+                automaticPaymentMethodsEnabled = false,
+                isExpressCheckoutElement = false,
+            )
+        } else {
+            PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA
+        },
         isLiveMode = requestOptions.apiKeyIsLiveMode,
     )
 }

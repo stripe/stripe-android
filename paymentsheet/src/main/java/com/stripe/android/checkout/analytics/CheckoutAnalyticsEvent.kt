@@ -29,6 +29,8 @@ internal class CheckoutAnalyticsEvent(
     enum class InvocationSource(val code: String) {
         Merchant("merchant"),
         ExpressCheckoutElement("express_checkout_element"),
+        PaymentElement("payment_element"),
+        ShippingAddressElement("shipping_address_element"),
     }
 
     enum class Operation(val code: String) {
