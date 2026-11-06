@@ -29,7 +29,6 @@ class ApiConfiguration(
      * Sets beta API version tokens for this payment session, for example `example_beta=v1`.
      * Replaces any previously supplied tokens. The supplied set is copied.
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun betas(betas: Set<String>) = apply {
         this.betas = betas.toSet()
     }
