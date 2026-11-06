@@ -8,9 +8,17 @@ set -eo pipefail
 # input on the `avd-manager@2` Bitrise step: Gradle Managed Device tests
 # (e.g. pixel2api33DebugAndroidTest) boot the emulator straight from $ANDROID_HOME/emulator
 # without going through avd-manager, so they need this binary swapped in directly.
+#
+# Usage: pin_emulator_version.sh <emulator_build_number> <emulator_version>
+# emulator_version must match emulator_build_number.
 
-EMULATOR_BUILD_NUMBER=${EMULATOR_BUILD_NUMBER:-16428233}
-EMULATOR_VERSION=${EMULATOR_VERSION:-37.2.12} # must match the build number above
+EMULATOR_BUILD_NUMBER=$1
+EMULATOR_VERSION=$2
+
+if [ -z "$EMULATOR_BUILD_NUMBER" ] || [ -z "$EMULATOR_VERSION" ]; then
+  echo "Usage: $0 <emulator_build_number> <emulator_version>"
+  exit 1
+fi
 
 if [ -z "$ANDROID_HOME" ]; then
   echo "ANDROID_HOME is not set"
