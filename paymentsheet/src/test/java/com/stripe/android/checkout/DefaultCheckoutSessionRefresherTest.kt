@@ -2,8 +2,8 @@ package com.stripe.android.checkout
 
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.checkout.analytics.toAnalyticsMap
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -16,7 +16,10 @@ internal class DefaultCheckoutSessionRefresherTest {
 
     @Test
     fun `refresh with response commits it without fetching`() = runScenario {
-        val response = CheckoutSessionResponseFactory.create(id = "cs_confirmed")
+        val response = CheckoutSessionResponseFactory.create(
+            id = "cs_confirmed",
+            status = CheckoutSessionResponse.Status.COMPLETE,
+        )
 
         refresher.refresh(response)
 
@@ -38,8 +41,6 @@ internal class DefaultCheckoutSessionRefresherTest {
         assertThat(refreshActions.fetchCalls.awaitItem()).isEqualTo(
             FakeCheckoutSessionRefreshActions.FetchCall(
                 clientSecret = initialState.checkoutSessionResponse.clientSecret,
-                adaptivePricingAllowed = false,
-                analyticsParams = initialState.configuration.toAnalyticsMap(),
             )
         )
         assertThat(refreshActions.reloadCalls.awaitItem())
