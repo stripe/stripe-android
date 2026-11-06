@@ -318,10 +318,8 @@ class CheckoutElementsController @Inject internal constructor(
                     withContext(callerContext) {
                         withTimeout(SERVER_UPDATE_TIMEOUT_MS) { serverUpdate() }
                     }.getOrThrow()
-                    checkoutSessionRepository.init(
+                    checkoutSessionRepository.fetch(
                         clientSecret = checkoutSessionResponse.clientSecret,
-                        adaptivePricingAllowed = configuration.currencySelectorElementConfiguration != null,
-                        analyticsParams = configuration.toAnalyticsMap(),
                     ).getOrThrow()
                 }
             }

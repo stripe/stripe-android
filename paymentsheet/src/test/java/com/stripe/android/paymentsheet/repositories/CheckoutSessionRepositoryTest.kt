@@ -4,6 +4,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutAnalyticsTestFixtures
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
+import com.stripe.android.checkouttesting.checkoutFetch
 import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.checkouttesting.checkoutPoll
 import com.stripe.android.checkouttesting.checkoutUpdate
@@ -17,6 +18,7 @@ import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.hasBodyPart
+import com.stripe.android.networktesting.RequestMatchers.hasQueryParam
 import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.RequestMatchers.query
 import com.stripe.android.networktesting.testBodyFromFile
@@ -80,6 +82,27 @@ class CheckoutSessionRepositoryTest {
             clientSecret = CheckoutSessionClientSecret("cs_test_abc123_secret_test"),
             adaptivePricingAllowed = true,
             analyticsParams = emptyMap(),
+        )
+
+        assertThat(result.getOrThrow().clientSecret.value).isEqualTo("cs_test_abc123_secret_test")
+    }
+
+    @Test
+    fun `fetch sends CheckoutClient common params without initialization options`() = runTest {
+        val expectedSessionId = AnalyticsRequestFactory.sessionId.toString()
+        networkRule.checkoutFetch(
+            query("client_secret", "cs_test_abc123_secret_test"),
+            query("locale", clientParams.locale),
+            query("timezone", java.util.TimeZone.getDefault().id),
+            query("mobile_session_id", expectedSessionId),
+            query("mobile_app_id", clientParams.mobileAppId),
+            not(hasQueryParam("adaptive_pricing[allowed]")),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-init.json")
+        }
+
+        val result = repository.fetch(
+            clientSecret = CheckoutSessionClientSecret("cs_test_abc123_secret_test"),
         )
 
         assertThat(result.getOrThrow().clientSecret.value).isEqualTo("cs_test_abc123_secret_test")

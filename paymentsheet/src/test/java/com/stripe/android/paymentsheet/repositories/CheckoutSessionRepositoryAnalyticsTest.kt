@@ -4,9 +4,11 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutAnalyticsTestFixtures
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
+import com.stripe.android.checkouttesting.checkoutFetch
 import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.core.Logger
+import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
@@ -122,6 +124,33 @@ class CheckoutSessionRepositoryAnalyticsTest {
         )
 
         assertThat(result.isFailure).isTrue()
+    }
+
+    @Test
+    fun `fetch succeeds without reporting init analytics`() = runScenario {
+        networkRule.checkoutFetch { response ->
+            response.testBodyFromFile("checkout-session-init.json")
+        }
+
+        val result = repository.fetch(
+            clientSecret = CheckoutSessionClientSecret(CLIENT_SECRET),
+        )
+
+        assertThat(result.getOrThrow().clientSecret.value).isEqualTo(CLIENT_SECRET)
+    }
+
+    @Test
+    fun `fetch fails without reporting init analytics`() = runScenario {
+        networkRule.checkoutFetch { response ->
+            response.setResponseCode(400)
+            response.setBody("""{"error": {"type": "invalid_request_error", "message": "Invalid session"}}""")
+        }
+
+        val result = repository.fetch(
+            clientSecret = CheckoutSessionClientSecret(CLIENT_SECRET),
+        )
+
+        assertThat(result.exceptionOrNull()).isInstanceOf(APIException::class.java)
     }
 
     @Test

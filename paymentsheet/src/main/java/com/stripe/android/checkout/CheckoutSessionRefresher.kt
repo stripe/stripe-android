@@ -1,6 +1,5 @@
 package com.stripe.android.checkout
 
-import com.stripe.android.checkout.analytics.toAnalyticsMap
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.model.CheckoutSessionClientSecret
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
@@ -20,11 +19,7 @@ internal interface CheckoutSessionRefresher {
 @OptIn(CheckoutSessionPreview::class)
 internal class DefaultCheckoutSessionRefresher internal constructor(
     private val stateHolder: CheckoutElementsControllerStateHolder,
-    private val fetchResponse: suspend (
-        CheckoutSessionClientSecret,
-        Boolean,
-        Map<String, Any?>,
-    ) -> Result<CheckoutSessionResponse>,
+    private val fetchResponse: suspend (CheckoutSessionClientSecret) -> Result<CheckoutSessionResponse>,
     private val reloadState: suspend (CheckoutElementsControllerState) -> Unit,
 ) : CheckoutSessionRefresher {
 
@@ -35,23 +30,13 @@ internal class DefaultCheckoutSessionRefresher internal constructor(
         checkoutStateLoader: CheckoutStateLoader,
     ) : this(
         stateHolder = stateHolder,
-        fetchResponse = { clientSecret, adaptivePricingAllowed, analyticsParams ->
-            checkoutSessionRepository.init(
-                clientSecret = clientSecret,
-                adaptivePricingAllowed = adaptivePricingAllowed,
-                analyticsParams = analyticsParams,
-            )
-        },
+        fetchResponse = checkoutSessionRepository::fetch,
         reloadState = checkoutStateLoader::reload,
     )
 
     override suspend fun refresh() {
         val state = stateHolder.state ?: return
-        val response = fetchResponse(
-            state.checkoutSessionResponse.clientSecret,
-            state.configuration.currencySelectorElementConfiguration != null,
-            state.configuration.toAnalyticsMap(),
-        ).getOrThrow()
+        val response = fetchResponse(state.checkoutSessionResponse.clientSecret).getOrThrow()
 
         refresh(response)
     }
