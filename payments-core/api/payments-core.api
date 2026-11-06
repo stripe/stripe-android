@@ -3020,16 +3020,10 @@ public final class com/stripe/android/model/PaymentMethodOptionsParams$Card : co
 public final class com/stripe/android/model/PaymentMethodOptionsParams$Klarna : com/stripe/android/model/PaymentMethodOptionsParams {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public static final field PARAM_INTEROPERABILITY_TOKEN Ljava/lang/String;
-	public static final field PARAM_PARTNER_CONFIRMATION_TOKEN Ljava/lang/String;
-	public static final field PARAM_SETUP_FUTURE_USAGE Ljava/lang/String;
 	public fun <init> (Lcom/stripe/android/model/ConfirmPaymentIntentParams$SetupFutureUsage;)V
 	public synthetic fun <init> (Lcom/stripe/android/model/ConfirmPaymentIntentParams$SetupFutureUsage;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/ConfirmPaymentIntentParams$SetupFutureUsage;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/ConfirmPaymentIntentParams$SetupFutureUsage;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component3 ()Lcom/stripe/android/model/ConfirmPaymentIntentParams$SetupFutureUsage;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/ConfirmPaymentIntentParams$SetupFutureUsage;)Lcom/stripe/android/model/PaymentMethodOptionsParams$Klarna;
-	public static synthetic fun copy$default (Lcom/stripe/android/model/PaymentMethodOptionsParams$Klarna;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/ConfirmPaymentIntentParams$SetupFutureUsage;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentMethodOptionsParams$Klarna;
 	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getSetupFutureUsage ()Lcom/stripe/android/model/ConfirmPaymentIntentParams$SetupFutureUsage;

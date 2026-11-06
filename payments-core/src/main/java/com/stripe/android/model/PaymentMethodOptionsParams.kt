@@ -141,7 +141,8 @@ sealed class PaymentMethodOptionsParams(
     }
 
     @Parcelize
-    data class Klarna @KlarnaSdkPrivatePreview constructor(
+    @Poko
+    class Klarna @KlarnaSdkPrivatePreview constructor(
         private val interoperabilityToken: String?,
         private val partnerConfirmationToken: String?,
         var setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage? = null
@@ -153,6 +154,19 @@ sealed class PaymentMethodOptionsParams(
             setupFutureUsage = setupFutureUsage,
         )
 
+        @OptIn(KlarnaSdkPrivatePreview::class)
+        internal fun copy(
+            interoperabilityToken: String? = this.interoperabilityToken,
+            partnerConfirmationToken: String? = this.partnerConfirmationToken,
+            setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage? = this.setupFutureUsage
+        ): Klarna {
+            return Klarna(
+                interoperabilityToken = interoperabilityToken,
+                partnerConfirmationToken = partnerConfirmationToken,
+                setupFutureUsage = setupFutureUsage,
+            )
+        }
+
         override fun createTypeParams(): List<Pair<String, Any?>> {
             return listOf(
                 PARAM_INTEROPERABILITY_TOKEN to interoperabilityToken,
@@ -162,9 +176,9 @@ sealed class PaymentMethodOptionsParams(
         }
 
         internal companion object {
-            const val PARAM_INTEROPERABILITY_TOKEN = "interoperability_token"
-            const val PARAM_PARTNER_CONFIRMATION_TOKEN = "partner_confirmation_token"
-            const val PARAM_SETUP_FUTURE_USAGE = "setup_future_usage"
+            internal const val PARAM_INTEROPERABILITY_TOKEN = "interoperability_token"
+            internal const val PARAM_PARTNER_CONFIRMATION_TOKEN = "partner_confirmation_token"
+            internal const val PARAM_SETUP_FUTURE_USAGE = "setup_future_usage"
         }
     }
 
