@@ -6,7 +6,6 @@ import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
 import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
@@ -35,9 +34,7 @@ internal class PaymentSheetDeferredTest(
     private val apiConfigurationTestType: ApiConfigurationTestType,
 ) {
     @get:Rule
-    val testRules: TestRules = TestRules.create(
-        networkRule = NetworkRule(betas = apiConfigurationTestType.betas),
-    )
+    val testRules: TestRules = TestRules.create()
 
     private val composeTestRule = testRules.compose
     private val networkRule = testRules.networkRule

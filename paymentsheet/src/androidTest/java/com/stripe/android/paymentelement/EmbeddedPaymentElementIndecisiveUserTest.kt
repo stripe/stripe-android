@@ -30,11 +30,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(TestParameterInjector::class)
-internal class EmbeddedPaymentElementIndecisiveUserTest(
-    @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
-    private val apiConfigurationTestType: ApiConfigurationTestType,
-) {
-    private val networkRule = NetworkRule(betas = apiConfigurationTestType.betas)
+internal class EmbeddedPaymentElementIndecisiveUserTest {
+    private val networkRule = NetworkRule()
 
     @get:Rule
     val testRules: TestRules = TestRules.create(networkRule = networkRule)
@@ -43,6 +40,9 @@ internal class EmbeddedPaymentElementIndecisiveUserTest(
     private val managePage = ManagePage(testRules.compose)
     private val editPage = EditPage(testRules.compose)
     private val formPage = EmbeddedFormPage(testRules.compose)
+
+    @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
+    lateinit var apiConfigurationTestType: ApiConfigurationTestType
 
     private val card1 = CardPaymentMethodDetails("pm_12345", "4242")
     private val card2 = CardPaymentMethodDetails("pm_67890", "5544")

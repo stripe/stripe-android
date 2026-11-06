@@ -31,10 +31,7 @@ internal class CardNumberControllerNetworkTest(
 ) {
     // The card-metadata request happens async during card number input. We want to make sure it happens,
     // but it's okay if it takes a bit to happen.
-    private val networkRule = NetworkRule(
-        validationTimeout = 5.seconds,
-        betas = apiConfigurationTestType.betas,
-    )
+    private val networkRule = NetworkRule(validationTimeout = 5.seconds)
 
     @get:Rule
     val testRules: TestRules = TestRules.create(networkRule = networkRule)

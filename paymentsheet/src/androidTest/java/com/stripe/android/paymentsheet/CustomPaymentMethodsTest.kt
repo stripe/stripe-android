@@ -8,7 +8,6 @@ import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
 import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CustomPaymentMethodResult
@@ -31,9 +30,7 @@ internal class CustomPaymentMethodsTest(
     private val apiConfigurationTestType: ApiConfigurationTestType,
 ) {
     @get:Rule
-    val testRules: TestRules = TestRules.create(
-        networkRule = NetworkRule(betas = apiConfigurationTestType.betas),
-    )
+    val testRules: TestRules = TestRules.create()
 
     private val applicationContext = ApplicationProvider.getApplicationContext<Context>()
     private val composeTestRule = testRules.compose

@@ -44,7 +44,7 @@ internal class PaymentSheetTest(
     @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
     private val apiConfigurationTestType: ApiConfigurationTestType,
 ) {
-    private val networkRule = NetworkRule(betas = apiConfigurationTestType.betas)
+    private val networkRule = NetworkRule()
 
     @get:Rule
     val testRules: TestRules = TestRules.create(networkRule = networkRule) {

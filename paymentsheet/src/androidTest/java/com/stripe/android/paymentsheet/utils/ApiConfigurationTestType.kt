@@ -7,14 +7,14 @@ import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.networktesting.TestApiKeys
 import com.stripe.android.paymentsheet.PaymentSheet
 
+internal const val INTEGRATION_BETA = "integration_beta=v1"
+
 internal sealed class ApiConfigurationTestType(
     val paymentConfigurationPublishableKey: String?,
     val paymentConfigurationStripeAccount: String?,
     val apiConfiguration: ApiConfiguration?,
     private val updatePaymentConfigurationPublishableKey: Boolean,
 ) {
-    val betas: Set<String> = apiConfiguration?.build()?.betas.orEmpty()
-
     fun initializePaymentConfiguration(context: Context) {
         PaymentConfiguration.clearInstance()
         context.getSharedPreferences(
@@ -60,7 +60,7 @@ internal sealed class ApiConfigurationTestType(
         paymentConfigurationStripeAccount = null,
         apiConfiguration = ApiConfiguration(TestApiKeys.PUBLISHABLE)
             .stripeAccountId(TestApiKeys.ACCOUNT)
-            .betas(setOf("integration_beta=v1")),
+            .betas(setOf(INTEGRATION_BETA)),
         updatePaymentConfigurationPublishableKey = false,
     )
 

@@ -45,7 +45,6 @@ internal class FlowControllerAnalyticsTest(
     private val apiConfigurationTestType: ApiConfigurationTestType,
 ) {
     private val networkRule = NetworkRule(
-        betas = apiConfigurationTestType.betas,
         hostsToTrack = listOf(ApiRequest.API_HOST, AnalyticsRequest.HOST),
         validationTimeout = 5.seconds, // Analytics requests happen async.
     )

@@ -34,16 +34,10 @@ import kotlin.time.Duration.Companion.seconds
 
 @OptIn(TapToAddPreview::class)
 @RunWith(TestParameterInjector::class)
-internal class TapToAddTest(
-    @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
-    private val apiConfigurationTestType: ApiConfigurationTestType,
-) {
+internal class TapToAddTest {
     // The /v1/consumers/sessions/log_out request is launched async from a GlobalScope. We want to make sure
     // it happens, but it's okay if it takes a bit to happen.
-    private val networkRule = NetworkRule(
-        validationTimeout = 5.seconds,
-        betas = apiConfigurationTestType.betas,
-    )
+    private val networkRule = NetworkRule(validationTimeout = 5.seconds)
 
     val terminalWrapperTestRule = TerminalWrapperTestRule(enabled = true)
 
@@ -71,6 +65,8 @@ internal class TapToAddTest(
     fun successWithCompleteMode(
         @TestParameter(valuesProvider = TapToAddIntegrationType.Complete.Provider::class)
         integrationType: TapToAddIntegrationType.Complete,
+        @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
+        apiConfigurationTestType: ApiConfigurationTestType,
     ) = runTapToAddIntegrationTest(
         integrationType = integrationType,
         apiConfigurationTestType = apiConfigurationTestType,
@@ -109,6 +105,8 @@ internal class TapToAddTest(
     fun successWithContinueMode(
         @TestParameter(valuesProvider = TapToAddIntegrationType.Continue.Provider::class)
         integrationType: TapToAddIntegrationType.Continue,
+        @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
+        apiConfigurationTestType: ApiConfigurationTestType,
     ) = runTapToAddIntegrationTest(
         integrationType = integrationType,
         apiConfigurationTestType = apiConfigurationTestType,
@@ -148,6 +146,8 @@ internal class TapToAddTest(
     fun canceledDuringCardCollection(
         @TestParameter(valuesProvider = TapToAddIntegrationType.Provider::class)
         integrationType: TapToAddIntegrationType,
+        @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
+        apiConfigurationTestType: ApiConfigurationTestType,
     ) = runTapToAddIntegrationTest(
         integrationType = integrationType,
         apiConfigurationTestType = apiConfigurationTestType,
@@ -192,6 +192,8 @@ internal class TapToAddTest(
     fun successAfterCancelAfterCardCollectedWithCompleteMode(
         @TestParameter(valuesProvider = TapToAddIntegrationType.Complete.Provider::class)
         integrationType: TapToAddIntegrationType.Complete,
+        @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
+        apiConfigurationTestType: ApiConfigurationTestType,
     ) = runTapToAddIntegrationTest(
         integrationType = integrationType,
         apiConfigurationTestType = apiConfigurationTestType,
@@ -238,6 +240,8 @@ internal class TapToAddTest(
     fun successAfterCancelAfterCardCollectedWithLink(
         @TestParameter(valuesProvider = TapToAddIntegrationType.Provider::class)
         integrationType: TapToAddIntegrationType,
+        @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
+        apiConfigurationTestType: ApiConfigurationTestType,
     ) = runTapToAddIntegrationTest(
         integrationType = integrationType,
         apiConfigurationTestType = apiConfigurationTestType,

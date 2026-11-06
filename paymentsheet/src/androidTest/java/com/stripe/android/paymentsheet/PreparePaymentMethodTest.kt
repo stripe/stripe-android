@@ -7,7 +7,6 @@ import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
 import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.checkouttesting.createPaymentMethod
-import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.RequestMatchers.query
@@ -38,9 +37,7 @@ internal class PreparePaymentMethodTest(
     private val apiConfigurationTestType: ApiConfigurationTestType,
 ) {
     @get:Rule
-    val testRules: TestRules = TestRules.create(
-        networkRule = NetworkRule(betas = apiConfigurationTestType.betas),
-    )
+    val testRules: TestRules = TestRules.create()
 
     private val composeTestRule = testRules.compose
     private val networkRule = testRules.networkRule

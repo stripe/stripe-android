@@ -43,7 +43,7 @@ object RequestMatchers {
         publishableKey: String = TestApiKeys.PUBLISHABLE,
         ephemeralKey: String = TestApiKeys.EPHEMERAL,
         accountId: String = TestApiKeys.ACCOUNT,
-        betas: Set<String> = emptySet(),
+        betas: Set<String> = setOf("integration_beta=v1"),
     ): RequestMatcher {
         val expectedBetas = betas.toSet()
         return ToStringRequestMatcher("stripeApiKey(betas=$expectedBetas)") { request ->

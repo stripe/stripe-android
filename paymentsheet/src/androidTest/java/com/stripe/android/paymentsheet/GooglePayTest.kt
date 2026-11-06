@@ -21,7 +21,6 @@ import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.googlepaylauncher.GooglePayAvailabilityClient
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayRepository
-import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.ResponseReplacement
 import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
@@ -58,9 +57,7 @@ internal class GooglePayTest(
     lateinit var integrationType: ProductIntegrationType
 
     @get:Rule
-    val testRules: TestRules = TestRules.create(
-        networkRule = NetworkRule(betas = apiConfigurationTestType.betas),
-    )
+    val testRules: TestRules = TestRules.create()
 
     private val composeTestRule = testRules.compose
 
