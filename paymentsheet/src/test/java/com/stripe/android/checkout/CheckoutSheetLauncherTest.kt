@@ -87,8 +87,6 @@ internal class CheckoutSheetLauncherTest {
             ),
         )
         val expectedArgs = EmbeddedActivityArgs(
-            paymentMethodMetadata = paymentMethodMetadata,
-            configuration = EmbeddedConfigurationFactory.create(),
             productUsage = setOf("Checkout"),
             paymentElementCallbackIdentifier = CALLBACK_IDENTIFIER,
             statusBarColor = null,
@@ -100,7 +98,10 @@ internal class CheckoutSheetLauncherTest {
             launchMode = EmbeddedLaunchMode.Form(
                 selectedPaymentMethodCode = code,
             ),
-            presentationState = EmbeddedActivityArgs.PresentationState.Ready,
+            presentationState = EmbeddedActivityArgs.PresentationState.Ready(
+                paymentMethodMetadata = paymentMethodMetadata,
+                configuration = EmbeddedConfigurationFactory.create(),
+            ),
         )
 
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
@@ -389,8 +390,6 @@ internal class CheckoutSheetLauncherTest {
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
         val customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
         val expectedArgs = EmbeddedActivityArgs(
-            paymentMethodMetadata = paymentMethodMetadata,
-            configuration = EmbeddedConfigurationFactory.create(),
             productUsage = setOf("Checkout"),
             paymentElementCallbackIdentifier = CALLBACK_IDENTIFIER,
             statusBarColor = null,
@@ -400,7 +399,10 @@ internal class CheckoutSheetLauncherTest {
             linkAccountInfo = LinkAccountUpdate.Value(null),
             promotions = emptyList(),
             launchMode = EmbeddedLaunchMode.Manage,
-            presentationState = EmbeddedActivityArgs.PresentationState.Ready,
+            presentationState = EmbeddedActivityArgs.PresentationState.Ready(
+                paymentMethodMetadata = paymentMethodMetadata,
+                configuration = EmbeddedConfigurationFactory.create(),
+            ),
         )
 
         sheetLauncher.launchManage(
@@ -594,8 +596,6 @@ internal class CheckoutSheetLauncherTest {
         val customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
         val selection = PaymentSelection.GooglePay
         val expectedArgs = EmbeddedActivityArgs(
-            paymentMethodMetadata = paymentMethodMetadata,
-            configuration = EmbeddedConfigurationFactory.create(),
             productUsage = setOf("Checkout"),
             paymentElementCallbackIdentifier = CALLBACK_IDENTIFIER,
             statusBarColor = null,
@@ -605,7 +605,10 @@ internal class CheckoutSheetLauncherTest {
             linkAccountInfo = LinkAccountUpdate.Value(null),
             promotions = listOf(FakePaymentMethodMessagePromotionsHelper.klarnaPromotion),
             launchMode = EmbeddedLaunchMode.PaymentOptions,
-            presentationState = EmbeddedActivityArgs.PresentationState.Ready,
+            presentationState = EmbeddedActivityArgs.PresentationState.Ready(
+                paymentMethodMetadata = paymentMethodMetadata,
+                configuration = EmbeddedConfigurationFactory.create(),
+            ),
         )
 
         sheetLauncher.launchPaymentOptions(
@@ -657,9 +660,9 @@ internal class CheckoutSheetLauncherTest {
 
         val readyArgs = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityArgs
         assertThat(readyArgs.launchMode).isEqualTo(EmbeddedLaunchMode.PaymentOptions)
-        assertThat(readyArgs.presentationState).isEqualTo(EmbeddedActivityArgs.PresentationState.Ready)
-        assertThat(readyArgs.paymentMethodMetadata).isEqualTo(refreshedMetadata)
-        assertThat(readyArgs.configuration).isEqualTo(refreshedConfiguration)
+        val readyState = readyArgs.presentationState as EmbeddedActivityArgs.PresentationState.Ready
+        assertThat(readyState.paymentMethodMetadata).isEqualTo(refreshedMetadata)
+        assertThat(readyState.configuration).isEqualTo(refreshedConfiguration)
         assertThat(readyArgs.customerState).isEqualTo(refreshedCustomer)
         assertThat(readyArgs.selection).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
     }
@@ -699,7 +702,7 @@ internal class CheckoutSheetLauncherTest {
         runCurrent()
 
         val readyArgs = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityArgs
-        assertThat(readyArgs.presentationState).isEqualTo(EmbeddedActivityArgs.PresentationState.Ready)
+        assertThat(readyArgs.presentationState).isInstanceOf<EmbeddedActivityArgs.PresentationState.Ready>()
         assertThat(recreatedLauncherState.isAwaitingPaymentOptionsReady).isFalse()
     }
 
@@ -728,9 +731,9 @@ internal class CheckoutSheetLauncherTest {
         runCurrent()
 
         val readyArgs = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityArgs
-        assertThat(readyArgs.presentationState).isEqualTo(EmbeddedActivityArgs.PresentationState.Ready)
-        assertThat(readyArgs.paymentMethodMetadata).isEqualTo(retainedState.paymentMethodMetadata)
-        assertThat(readyArgs.configuration).isEqualTo(retainedState.configuration)
+        val readyState = readyArgs.presentationState as EmbeddedActivityArgs.PresentationState.Ready
+        assertThat(readyState.paymentMethodMetadata).isEqualTo(retainedState.paymentMethodMetadata)
+        assertThat(readyState.configuration).isEqualTo(retainedState.configuration)
     }
 
     @Test
@@ -762,8 +765,6 @@ internal class CheckoutSheetLauncherTest {
         val failedArgs = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityArgs
         assertThat(failedArgs.presentationState).isEqualTo(EmbeddedActivityArgs.PresentationState.Failed)
         assertThat(failedArgs.launchMode).isEqualTo(EmbeddedLaunchMode.PaymentOptions)
-        assertThat(failedArgs.paymentMethodMetadata).isNull()
-        assertThat(failedArgs.configuration).isNull()
         assertThat(launcherState.isAwaitingPaymentOptionsReady).isFalse()
 
         registerCall.callback.asCallbackFor<EmbeddedActivityResult>().onActivityResult(
@@ -853,8 +854,6 @@ internal class CheckoutSheetLauncherTest {
         )
         val loadingArgs = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityArgs
         assertThat(loadingArgs.presentationState).isEqualTo(EmbeddedActivityArgs.PresentationState.Loading)
-        assertThat(loadingArgs.paymentMethodMetadata).isNull()
-        assertThat(loadingArgs.configuration).isNull()
         assertThat(sheetStateHolder.sheetIsOpen).isTrue()
         assertThat(launcherState.isAwaitingPaymentOptionsReady).isTrue()
         errorReporter.ensureAllEventsConsumed()
@@ -863,9 +862,9 @@ internal class CheckoutSheetLauncherTest {
         runCurrent()
 
         val readyArgs = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityArgs
-        assertThat(readyArgs.presentationState).isEqualTo(EmbeddedActivityArgs.PresentationState.Ready)
-        assertThat(readyArgs.paymentMethodMetadata).isEqualTo(embeddedContentState.value?.paymentMethodMetadata)
-        assertThat(readyArgs.configuration).isEqualTo(embeddedContentState.value?.configuration)
+        val readyState = readyArgs.presentationState as EmbeddedActivityArgs.PresentationState.Ready
+        assertThat(readyState.paymentMethodMetadata).isEqualTo(embeddedContentState.value?.paymentMethodMetadata)
+        assertThat(readyState.configuration).isEqualTo(embeddedContentState.value?.configuration)
         assertThat(launcherState.isAwaitingPaymentOptionsReady).isFalse()
     }
 

@@ -442,7 +442,6 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
             ),
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
         ),
-        presentationState: EmbeddedActivityArgs.PresentationState = EmbeddedActivityArgs.PresentationState.Ready,
         block: (ActivityScenario<EmbeddedSheetActivity>) -> Unit,
     ) = launch(
         selection = selection,
@@ -453,7 +452,6 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
                 listOf(it.paymentMethod)
             }.orEmpty(),
         ),
-        presentationState = presentationState,
         block = block,
     )
 
@@ -475,7 +473,6 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
         previousNewSelections: Bundle,
         paymentMethodMetadata: PaymentMethodMetadata,
         customerState: CustomerState,
-        presentationState: EmbeddedActivityArgs.PresentationState = EmbeddedActivityArgs.PresentationState.Ready,
         block: (ActivityScenario<EmbeddedSheetActivity>) -> Unit,
     ) {
         ActivityScenario.launchActivityForResult<EmbeddedSheetActivity>(
@@ -486,7 +483,6 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
                     previousNewSelections = previousNewSelections,
                     paymentMethodMetadata = paymentMethodMetadata,
                     customerState = customerState,
-                    presentationState = presentationState,
                 ),
             )
         ).use { scenario ->
@@ -532,11 +528,8 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
         ),
         customerState: CustomerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,
-        presentationState: EmbeddedActivityArgs.PresentationState,
     ): EmbeddedActivityArgs {
         return EmbeddedActivityArgs(
-            paymentMethodMetadata = paymentMethodMetadata,
-            configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
             productUsage = setOf("EmbeddedPaymentElement"),
             statusBarColor = null,
             paymentElementCallbackIdentifier = "PaymentOptionsTestIdentifier",
@@ -549,7 +542,10 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
             ),
             promotions = emptyList(),
             launchMode = EmbeddedLaunchMode.PaymentOptions,
-            presentationState = presentationState,
+            presentationState = EmbeddedActivityArgs.PresentationState.Ready(
+                paymentMethodMetadata = paymentMethodMetadata,
+                configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
+            ),
         )
     }
 

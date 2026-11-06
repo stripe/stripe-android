@@ -32,15 +32,15 @@ internal interface EmbeddedSheetPresentation {
             args: EmbeddedActivityArgs,
             activityResultCaller: ActivityResultCaller,
         ): EmbeddedSheetPresentation {
-            return when (args.presentationState) {
+            return when (val presentationState = args.presentationState) {
                 EmbeddedActivityArgs.PresentationState.Loading -> LoadingEmbeddedSheetPresentation.Factory.create(
                     activity = activity,
                     args = args,
                     activityResultCaller = activityResultCaller,
                 )
                 EmbeddedActivityArgs.PresentationState.Failed -> FailedEmbeddedSheetPresentation(activity)
-                EmbeddedActivityArgs.PresentationState.Ready ->
-                    EmbeddedSheetViewModel.Factory { args }.createReadyPresentation(
+                is EmbeddedActivityArgs.PresentationState.Ready ->
+                    EmbeddedSheetViewModel.Factory(presentationState) { args }.createReadyPresentation(
                         activity = activity,
                         args = args,
                         activityResultCaller = activityResultCaller,

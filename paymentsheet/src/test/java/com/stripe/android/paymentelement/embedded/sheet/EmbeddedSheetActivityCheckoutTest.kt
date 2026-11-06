@@ -420,9 +420,6 @@ internal class EmbeddedSheetActivityCheckoutTest {
             EmbeddedSheetContract.createIntent(
                 context = applicationContext,
                 input = EmbeddedActivityArgs(
-                    paymentMethodMetadata = checkoutPaymentMethodMetadata(),
-                    configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.")
-                        .build(),
                     productUsage = setOf("EmbeddedPaymentElement"),
                     paymentElementCallbackIdentifier = "EmbeddedSheetActivityCheckoutTestCallbackIdentifier",
                     statusBarColor = null,
@@ -434,7 +431,11 @@ internal class EmbeddedSheetActivityCheckoutTest {
                     linkAccountInfo = LinkAccountUpdate.Value(null),
                     promotions = emptyList(),
                     launchMode = EmbeddedLaunchMode.Manage,
-                    presentationState = EmbeddedActivityArgs.PresentationState.Ready,
+                    presentationState = EmbeddedActivityArgs.PresentationState.Ready(
+                        paymentMethodMetadata = checkoutPaymentMethodMetadata(),
+                        configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.")
+                            .build(),
+                    ),
                 ),
             )
         ).use { scenario ->

@@ -229,8 +229,6 @@ internal class PaymentOptionsEmbeddedSheetMandateTest {
         block: (ActivityScenario<EmbeddedSheetActivity>) -> Unit,
     ) {
         val args = EmbeddedActivityArgs(
-            paymentMethodMetadata = paymentMethodMetadata,
-            configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
             productUsage = setOf("EmbeddedPaymentElement"),
             statusBarColor = null,
             paymentElementCallbackIdentifier = "PaymentOptionsMandateTestIdentifier",
@@ -245,7 +243,10 @@ internal class PaymentOptionsEmbeddedSheetMandateTest {
             ),
             promotions = emptyList(),
             launchMode = EmbeddedLaunchMode.PaymentOptions,
-            presentationState = EmbeddedActivityArgs.PresentationState.Ready,
+            presentationState = EmbeddedActivityArgs.PresentationState.Ready(
+                paymentMethodMetadata = paymentMethodMetadata,
+                configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
+            ),
         )
         ActivityScenario.launchActivityForResult<EmbeddedSheetActivity>(
             EmbeddedSheetContract.createIntent(context = applicationContext, input = args),
