@@ -9,10 +9,17 @@ jobs:
     permissions:
       issues: write
     steps:
+      - name: Generate triage app token
+        id: generate-triage-app-token
+        uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf # v2.2.1
+        with:
+          app-id: ${{ secrets.MOBILE_SDK_TRIAGE_APP_ID }}
+          private-key: ${{ secrets.MOBILE_SDK_TRIAGE_APP_PRIVATE_KEY }}
+          permission-contents: write
       - name: Close GitHub Issue
         uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ steps.generate-triage-app-token.outputs.token }}
           script: |
             const issueNumber = parseInt(context.payload.client_payload.issue_number, 10);
             const jiraKey    = context.payload.client_payload.jira_key;
