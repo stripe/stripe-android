@@ -373,6 +373,9 @@ workflows:
           inputs:
             - test_title: General and IME instrumentation tests
   run-paymentsheet-instrumentation-tests:
+    envs:
+      # Snapshot clones share a Wi-Fi MAC; keep each shard's network isolated.
+      - ANDROID_EMULATOR_FEATURES: "-WiFiPacketStream"
     before_run:
       - prepare_all
     after_run:
@@ -384,7 +387,7 @@ workflows:
             - content: ./scripts/retry.sh 3 ./scripts/pin_emulator_version.sh $EMULATOR_BUILD_NUMBER $EMULATOR_VERSION
       - script@1:
           title: Execute PaymentSheet instrumentation and Checkout E2E tests
-          timeout: 1500
+          timeout: 1200
           inputs:
             - content: ./scripts/retry_with_emulator_cleanup.sh 2 ./gradlew -Pandroid.experimental.androidTest.numManagedDeviceShards=6 -Pandroid.experimental.testOptions.managedDevices.maxConcurrentDevices=6 -Pandroid.testInstrumentationRunnerArguments.notAnnotation=com.stripe.android.paymentsheet.RequiresIme :paymentsheet:pixel2api33DebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
       - bundle::export_instrumentation_test_results:
