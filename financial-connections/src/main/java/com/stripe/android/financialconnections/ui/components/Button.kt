@@ -224,7 +224,7 @@ internal object FinancialConnectionsButton {
 }
 
 internal class ThemePreviewParameterProvider : CollectionPreviewParameterProvider<Theme>(
-    listOf(Theme.DefaultLight(ThemeMode.Automatic), Theme.LinkLight(ThemeMode.Automatic))
+    listOf(Theme.Default(ThemeMode.Automatic), Theme.Link(ThemeMode.Automatic))
 )
 
 @Preview(group = "Components", name = "Button - primary - idle")

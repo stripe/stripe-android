@@ -235,7 +235,7 @@ internal fun TopAppBarWithLinkLogoPreview() {
         FinancialConnectionsTopAppBar(
             state = TopAppBarState(
                 hideStripeLogo = false,
-                theme = Theme.LinkLight(ThemeMode.Automatic),
+                theme = Theme.Link(ThemeMode.Automatic),
                 linkBrand = LinkBrand.Link,
             ),
             onCloseClick = {},

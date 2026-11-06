@@ -39,28 +39,28 @@ internal sealed interface Theme {
     val mode: ThemeMode
 
     @Immutable
-    data class DefaultLight(override val mode: ThemeMode) : Theme
+    data class Default(override val mode: ThemeMode) : Theme
 
     @Immutable
-    data class LinkLight(override val mode: ThemeMode) : Theme
+    data class Link(override val mode: ThemeMode) : Theme
 
     val colors: FinancialConnectionsColors
         @Composable
         get() = when (this) {
-            is DefaultLight -> if (isSystemInDarkTheme()) DarkThemeColors else Colors
-            is LinkLight -> if (isSystemInDarkTheme()) InstantDebitsDarkModeColors else InstantDebitsColors
+            is Default -> if (isSystemInDarkTheme()) DarkThemeColors else Colors
+            is Link -> if (isSystemInDarkTheme()) InstantDebitsDarkModeColors else InstantDebitsColors
         }
 
     fun icon(linkBrand: LinkBrand): Int = when (this) {
-        is DefaultLight -> R.drawable.stripe_logo
-        is LinkLight -> when (linkBrand) {
+        is Default -> R.drawable.stripe_logo
+        is Link -> when (linkBrand) {
             LinkBrand.Onelink -> R.drawable.stripe_onelink_logo_monochrome
             LinkBrand.Link -> R.drawable.stripe_link_logo_monochrome
         }
     }
 
     companion object {
-        val default: Theme = DefaultLight(ThemeMode.Automatic)
+        val default: Theme = Default(ThemeMode.Automatic)
     }
 }
 

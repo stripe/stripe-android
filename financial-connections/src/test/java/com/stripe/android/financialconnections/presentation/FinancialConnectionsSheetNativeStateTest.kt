@@ -35,12 +35,7 @@ internal class FinancialConnectionsSheetNativeStateTest {
         val state = FinancialConnectionsSheetNativeState(
             args = FinancialConnectionsSheetNativeActivityArgs(
                 flowType = FinancialConnectionsSheetFlowType.ForData,
-                configuration = FinancialConnectionsSheetConfiguration(
-                    ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
-                    ApiKeyFixtures.DEFAULT_API_CONFIG,
-                    preCollectedConsent = null,
-                    themeMode = themeMode,
-                ),
+                configuration = configuration.copy(themeMode = themeMode),
                 initialSyncResponse = syncResponse.copy(
                     manifest = syncResponse.manifest.copy(theme = manifestTheme),
                 ),
@@ -51,9 +46,9 @@ internal class FinancialConnectionsSheetNativeStateTest {
 
         assertThat(state.theme.mode).isEqualTo(themeMode)
         val expectedType = if (manifestTheme == FinancialConnectionsSessionManifest.Theme.LINK_LIGHT) {
-            Theme.LinkLight::class.java
+            Theme.Link::class.java
         } else {
-            Theme.DefaultLight::class.java
+            Theme.Default::class.java
         }
         assertThat(state.theme).isInstanceOf(expectedType)
     }

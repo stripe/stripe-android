@@ -336,10 +336,10 @@ internal fun FinancialConnectionsSessionManifest.Theme?.toLocalTheme(themeMode: 
         null,
         FinancialConnectionsSessionManifest.Theme.LIGHT,
         FinancialConnectionsSessionManifest.Theme.DASHBOARD_LIGHT -> {
-            Theme.DefaultLight(themeMode)
+            Theme.Default(themeMode)
         }
         FinancialConnectionsSessionManifest.Theme.LINK_LIGHT -> {
-            Theme.LinkLight(themeMode)
+            Theme.Link(themeMode)
         }
     }
 }

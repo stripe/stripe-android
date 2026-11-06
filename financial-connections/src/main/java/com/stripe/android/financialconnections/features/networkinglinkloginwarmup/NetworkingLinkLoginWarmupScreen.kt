@@ -223,9 +223,9 @@ internal fun NetworkingLinkLoginWarmupScreenPreview(
 ) {
     FinancialConnectionsPreview(
         theme = if (state.isInstantDebits) {
-            Theme.LinkLight(ThemeMode.Automatic)
+            Theme.Link(ThemeMode.Automatic)
         } else {
-            Theme.DefaultLight(ThemeMode.Automatic)
+            Theme.Default(ThemeMode.Automatic)
         },
     ) {
         NetworkingLinkLoginWarmupContent(

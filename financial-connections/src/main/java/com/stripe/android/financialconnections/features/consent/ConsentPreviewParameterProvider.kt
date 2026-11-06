@@ -48,7 +48,7 @@ internal class ConsentPreviewParameterProvider : PreviewParameterProvider<Consen
                     )
                 )
             ),
-            theme = Theme.DefaultLight(ThemeMode.Automatic),
+            theme = Theme.Default(ThemeMode.Automatic),
         )
     }
 
@@ -68,7 +68,7 @@ internal class ConsentPreviewParameterProvider : PreviewParameterProvider<Consen
                     )
                 )
             ),
-            theme = Theme.DefaultLight(ThemeMode.Automatic),
+            theme = Theme.Default(ThemeMode.Automatic),
         )
     }
 
@@ -87,7 +87,7 @@ internal class ConsentPreviewParameterProvider : PreviewParameterProvider<Consen
                     )
                 )
             ),
-            theme = Theme.DefaultLight(ThemeMode.Automatic),
+            theme = Theme.Default(ThemeMode.Automatic),
         )
     }
 
@@ -106,7 +106,7 @@ internal class ConsentPreviewParameterProvider : PreviewParameterProvider<Consen
                     )
                 )
             ),
-            theme = Theme.LinkLight(ThemeMode.Automatic),
+            theme = Theme.Link(ThemeMode.Automatic),
         )
     }
 
