@@ -47,7 +47,7 @@ internal class LoadingEmbeddedSheetActivityTest {
 
     @Test
     fun `loading without state survives recreation and can be cancelled`() = launch(
-        presentationState = EmbeddedActivityArgs.PresentationState.Loading(appearance = null),
+        presentationState = EmbeddedActivityArgs.PresentationState.Loading,
     ) { scenario ->
         composeTestRule.onNodeWithTag(EMBEDDED_SHEET_LOADING_TEST_TAG).assertIsDisplayed()
         scenario.recreate()
@@ -64,7 +64,7 @@ internal class LoadingEmbeddedSheetActivityTest {
 
     @Test
     fun `failed intent closes loading sheet without state`() = launch(
-        presentationState = EmbeddedActivityArgs.PresentationState.Loading(appearance = null),
+        presentationState = EmbeddedActivityArgs.PresentationState.Loading,
     ) { scenario ->
         composeTestRule.onNodeWithTag(EMBEDDED_SHEET_LOADING_TEST_TAG).assertIsDisplayed()
         val failedIntent = EmbeddedSheetContract.createIntent(
@@ -91,7 +91,7 @@ internal class LoadingEmbeddedSheetActivityTest {
 
     @Test
     fun `loading renders and cancellation returns PaymentOptions`() = launch(
-        presentationState = EmbeddedActivityArgs.PresentationState.Loading(appearance = null),
+        presentationState = EmbeddedActivityArgs.PresentationState.Loading,
     ) { scenario ->
         composeTestRule.onNodeWithTag(EMBEDDED_SHEET_LOADING_TEST_TAG).assertIsDisplayed()
 
@@ -110,7 +110,7 @@ internal class LoadingEmbeddedSheetActivityTest {
 
     @Test
     fun `recreated loading activity remains loading`() = launch(
-        presentationState = EmbeddedActivityArgs.PresentationState.Loading(appearance = null),
+        presentationState = EmbeddedActivityArgs.PresentationState.Loading,
     ) { scenario ->
         composeTestRule.onNodeWithTag(EMBEDDED_SHEET_LOADING_TEST_TAG).assertIsDisplayed()
 
@@ -125,7 +125,7 @@ internal class LoadingEmbeddedSheetActivityTest {
 
     @Test
     fun `ready intent updates loading content without replacing composition and survives recreation`() = launch(
-        presentationState = EmbeddedActivityArgs.PresentationState.Loading(appearance = null),
+        presentationState = EmbeddedActivityArgs.PresentationState.Loading,
     ) { scenario ->
         val readyIntent = EmbeddedSheetContract.createIntent(
             applicationContext,

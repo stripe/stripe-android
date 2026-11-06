@@ -258,7 +258,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
         if (sheetStateHolder.sheetIsOpen) return
         val isUpdating = operationCoordinator.isUpdating.value
         val presentationState = if (isUpdating) {
-            EmbeddedActivityArgs.PresentationState.Loading(appearance = configuration?.appearance)
+            EmbeddedActivityArgs.PresentationState.Loading
         } else {
             if (paymentMethodMetadata == null || configuration == null) return
             EmbeddedActivityArgs.PresentationState.Ready(
@@ -273,7 +273,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
             presentationState = presentationState,
         )
         launcherState.isAwaitingPaymentOptionsReady =
-            initialArgs.presentationState is EmbeddedActivityArgs.PresentationState.Loading
+            initialArgs.presentationState == EmbeddedActivityArgs.PresentationState.Loading
         activityLauncher.launch(initialArgs)
 
         resumePendingReadyLaunch()
