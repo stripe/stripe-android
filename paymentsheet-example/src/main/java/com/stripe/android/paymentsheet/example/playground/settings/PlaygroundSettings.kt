@@ -593,6 +593,7 @@ internal class PlaygroundSettings private constructor(
             ),
             TermsDisplaySettingsDefinition,
             CustomStripeApiDefinition,
+            SdkVersionOverrideDefinition,
             CaptureMethodSettingsDefinition,
             FeatureFlagSettingsDefinition(FeatureFlags.disableNfcScanning),
             FeatureFlagSettingsDefinition(FeatureFlags.disableNfcScanningSecurity),

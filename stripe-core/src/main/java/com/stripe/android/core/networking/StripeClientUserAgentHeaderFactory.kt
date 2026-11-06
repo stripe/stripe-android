@@ -4,7 +4,6 @@ import android.os.Build
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.core.AppInfo
-import com.stripe.android.core.version.StripeSdkVersion
 import org.json.JSONObject
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -27,7 +26,7 @@ class StripeClientUserAgentHeaderFactory(
             mapOf(
                 "os.name" to "android",
                 "os.version" to Build.VERSION.SDK_INT.toString(),
-                "bindings.version" to StripeSdkVersion.VERSION_NAME,
+                "bindings.version" to RequestHeadersFactory.reportedSdkVersionName,
                 "lang" to "Java",
                 "publisher" to "Stripe",
                 "http.agent" to systemPropertySupplier(PROP_USER_AGENT)
