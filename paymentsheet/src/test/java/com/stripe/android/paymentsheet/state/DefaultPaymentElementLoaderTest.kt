@@ -23,6 +23,7 @@ import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.DurationProvider
+import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
@@ -30,6 +31,7 @@ import com.stripe.android.googlepaylauncher.injection.GooglePayRepositoryFactory
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.FakeIntegrityRequestManager
 import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.LinkController
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.gate.FakeLinkGate
 import com.stripe.android.link.gate.LinkGate
@@ -39,6 +41,7 @@ import com.stripe.android.link.ui.inline.LinkSignupMode.InsteadOfSaveForFutureUs
 import com.stripe.android.lpmfoundations.paymentmethod.AnalyticsMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.DisplayableCustomPaymentMethod
+import com.stripe.android.lpmfoundations.paymentmethod.FakePaymentMethodAvailabilityLogger
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
@@ -5188,6 +5191,183 @@ internal class DefaultPaymentElementLoaderTest {
         assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
     }
 
+    @Test
+    fun `logs filtering reasons once for PaymentSheet and FlowController loads`() = runScenario {
+        assertPaymentMethodFilteringLogs(
+            integrationConfiguration = PaymentElementLoader.Configuration.PaymentSheet(mockConfiguration()),
+            shouldLog = true,
+        )
+    }
+
+    @Test
+    fun `logs filtering reasons for embedded loads`() = runScenario {
+        assertPaymentMethodFilteringLogs(
+            integrationConfiguration = PaymentElementLoader.Configuration.Embedded(
+                isRowSelectionImmediateAction = false,
+                configuration = EmbeddedPaymentElement.Configuration.Builder("Merchant")
+                    .googlePay(ConfigFixtures.GOOGLE_PAY).build(),
+                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+            ),
+            shouldLog = true,
+        )
+    }
+
+    @Test
+    fun `logs filtering reasons for checkout payment element loads`() = runScenario {
+        val stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK.copy(
+            paymentMethodTypes = listOf("card", "sepa_debit"),
+        )
+        assertPaymentMethodFilteringLogs(
+            integrationConfiguration = PaymentElementLoader.Configuration.Embedded(
+                isRowSelectionImmediateAction = false,
+                configuration = EmbeddedPaymentElement.Configuration.Builder("Merchant")
+                    .googlePay(ConfigFixtures.GOOGLE_PAY).build(),
+                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+            ),
+            initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+                instancesKey = "DefaultPaymentElementLoaderTest",
+                checkoutSessionResponse = createCheckoutSessionResponse(
+                    canDetachPaymentMethod = true,
+                    stripeIntent = stripeIntent,
+                ),
+                collectedEmail = null,
+                configuredElements = listOf("mobile-payment-element"),
+            ),
+            shouldLog = true,
+        )
+    }
+
+    @Test
+    fun `logs unsupported checkout methods even when absent from the parsed intent`() = runScenario {
+        val logger = FakePaymentMethodAvailabilityLogger()
+        val response = createCheckoutSessionResponse(
+            canDetachPaymentMethod = true,
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK.copy(
+                paymentMethodTypes = listOf("card"),
+            ),
+        )
+        val state = createPaymentElementLoader(userFacingLogger = logger).load(
+            initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+                instancesKey = "DefaultPaymentElementLoaderTest",
+                checkoutSessionResponse = response.copy(
+                    elementsSession = requireNotNull(response.elementsSession).copy(
+                        orderedPaymentMethodTypesAndWallets = listOf("card", "unknown_method", "google_pay"),
+                    ),
+                ),
+                collectedEmail = null,
+                configuredElements = listOf("mobile-payment-element"),
+            ),
+            paymentSheetConfiguration = mockConfiguration(),
+            metadata = PaymentElementLoader.Metadata(initializedViaCompose = false),
+        ).getOrThrow()
+
+        assertThat(state.paymentMethodMetadata.supportedPaymentMethodTypes()).containsExactly("card")
+        assertThat(logger.messages.awaitItem()).isEqualTo(
+            "Payment Element could not offer unknown_method:\n" +
+                "  * This payment method is not currently supported by the Payment Element."
+        )
+        logger.messages.ensureAllEventsConsumed()
+        consumeLoadingEvents()
+        eventReporter.loadStartedTurbine.awaitItem()
+        eventReporter.loadSucceededTurbine.awaitItem()
+    }
+
+    @Test
+    fun `does not log filtering reasons for express checkout loads`() = runScenario {
+        assertPaymentMethodFilteringLogs(
+            integrationConfiguration = PaymentElementLoader.Configuration.ExpressCheckoutElement(
+                commonConfiguration = mockConfiguration().asCommonConfiguration(),
+            ),
+            shouldLog = false,
+        )
+    }
+
+    @Test
+    fun `does not log filtering reasons for standalone Link loads`() = runScenario {
+        assertPaymentMethodFilteringLogs(
+            integrationConfiguration = PaymentElementLoader.Configuration.StandaloneLink(
+                LinkController.Configuration(
+                    merchantDisplayName = "Merchant",
+                    publishableKey = DEFAULT_API_CONFIG.publishableKey,
+                ).build(),
+            ),
+            shouldLog = false,
+        )
+    }
+
+    @Test
+    fun `does not log filtering reasons for crypto onramp loads`() = runScenario {
+        assertPaymentMethodFilteringLogs(
+            integrationConfiguration = PaymentElementLoader.Configuration.CryptoOnramp(
+                LinkController.Configuration(
+                    merchantDisplayName = "Merchant",
+                    publishableKey = DEFAULT_API_CONFIG.publishableKey,
+                ).build(),
+            ),
+            shouldLog = false,
+        )
+    }
+
+    @Test
+    fun `logs filtering reasons before failing when no payment methods are available`() = runScenario {
+        val logger = FakePaymentMethodAvailabilityLogger()
+        val result = createPaymentElementLoader(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK.copy(
+                paymentMethodTypes = listOf("sepa_debit"),
+            ),
+            userFacingLogger = logger,
+        ).load(
+            initializationMode = DEFAULT_INITIALIZATION_MODE,
+            paymentSheetConfiguration = mockConfiguration(),
+            metadata = PaymentElementLoader.Metadata(initializedViaCompose = false),
+        )
+
+        assertThat(result.exceptionOrNull()).isInstanceOf(
+            PaymentSheetLoadingException.NoPaymentMethodTypesAvailable::class.java
+        )
+        assertThat(logger.messages.awaitItem()).isEqualTo(
+            "Payment Element could not offer sepa_debit:\n" +
+                "  * Configuration.allowsDelayedPaymentMethods must be set to true."
+        )
+        logger.messages.ensureAllEventsConsumed()
+        eventReporter.loadStartedTurbine.awaitItem()
+        eventReporter.loadFailedTurbine.awaitItem()
+    }
+
+    private suspend fun Scenario.assertPaymentMethodFilteringLogs(
+        integrationConfiguration: PaymentElementLoader.Configuration,
+        shouldLog: Boolean,
+        initializationMode: PaymentElementLoader.InitializationMode = DEFAULT_INITIALIZATION_MODE,
+    ) {
+        val logger = FakePaymentMethodAvailabilityLogger()
+        val state = createPaymentElementLoader(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK.copy(
+                paymentMethodTypes = listOf("card", "sepa_debit"),
+            ),
+            userFacingLogger = logger,
+        ).load(
+            initializationMode = initializationMode,
+            integrationConfiguration = integrationConfiguration,
+            metadata = PaymentElementLoader.Metadata(initializedViaCompose = false),
+        ).getOrThrow()
+
+        assertThat(state.paymentMethodMetadata.supportedPaymentMethodTypes()).containsExactly("card")
+        state.paymentMethodMetadata.sortedSupportedPaymentMethods()
+        if (integrationConfiguration.commonConfiguration.googlePay == null) {
+            assertThat(logger.messages.awaitItem()).isEqualTo("GooglePayConfiguration is not set.")
+        }
+        if (shouldLog) {
+            assertThat(logger.messages.awaitItem()).isEqualTo(
+                "Payment Element could not offer sepa_debit:\n" +
+                    "  * Configuration.allowsDelayedPaymentMethods must be set to true."
+            )
+        }
+        logger.messages.ensureAllEventsConsumed()
+        consumeLoadingEvents()
+        eventReporter.loadStartedTurbine.awaitItem()
+        eventReporter.loadSucceededTurbine.awaitItem()
+    }
+
     private fun runScenario(
         customerRepo: FakeCustomerRepository = FakeCustomerRepository(paymentMethods = PAYMENT_METHODS),
         block: suspend Scenario.() -> Unit
@@ -5258,7 +5438,7 @@ internal class DefaultPaymentElementLoaderTest {
             customPaymentMethods = customPaymentMethods,
             externalPaymentMethodData = externalPaymentMethodData,
         ),
-        userFacingLogger: FakeUserFacingLogger = FakeUserFacingLogger(),
+        userFacingLogger: UserFacingLogger = FakeUserFacingLogger(),
         integrityRequestManager: IntegrityRequestManager = FakeIntegrityRequestManager(),
         tapToAddConnectionStarter: TapToAddConnectionStarter =
             FakeTapToAddConnectionStarter.create(isSupported = false),
