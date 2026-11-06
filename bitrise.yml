@@ -23,7 +23,6 @@ pipelines:
       check-and-test: { }
       run-instrumentation-and-ime-tests: { }
       run-paymentsheet-instrumentation-tests: { }
-      run-checkout-integration-e2e: { }
       run-financial-connections-and-crypto-instrumentation-tests: { }
       run-connections-e2e-tests-on-push: { }
       run-cardscan-and-google-pay-tests: { }
@@ -396,30 +395,6 @@ workflows:
       bitrise.io:
         stack: ubuntu-resolute-26.04-bitrise-2026-android
         machine_type_id: g2.linux.x-large
-  run-checkout-integration-e2e:
-    before_run:
-      - prepare_all
-    after_run:
-      - conclude_all
-    steps:
-      - script@1:
-          title: Pin Android emulator version
-          inputs:
-            - content: ./scripts/retry.sh 3 ./scripts/pin_emulator_version.sh $EMULATOR_BUILD_NUMBER $EMULATOR_VERSION
-      - script@1:
-          title: Execute Checkout backend integration tests
-          timeout: 1200
-          inputs:
-            - content: ./scripts/retry_with_emulator_cleanup.sh 2 ./gradlew -PcheckoutIntegrationTests=true -Pandroid.testInstrumentationRunnerArguments.annotation=com.stripe.android.paymentsheet.RequiresPlaygroundBackend :paymentsheet:pixel2api33DebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
-      - bundle::export_instrumentation_test_results:
-          title: Export Checkout backend integration test results
-          is_always_run: true
-          inputs:
-            - test_title: Checkout backend integration tests
-    meta:
-      bitrise.io:
-        stack: ubuntu-resolute-26.04-bitrise-2026-android
-        machine_type_id: g2.linux.x-large
   run-paymentsheet-ime-instrumentation-tests:
     before_run:
       - prepare_all
@@ -542,10 +517,17 @@ workflows:
                 CLASSES=$(python3 scripts/get_shard_test_classes.py --shard-index 0 --num-shards 1)
 
                 ./scripts/retry_with_emulator_cleanup.sh 2 ./gradlew -PSTRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN=$STRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN -Pandroid.experimental.androidTest.numManagedDeviceShards=$PAYMENTSHEET_E2E_DEVICE_SHARD_COUNT -Pandroid.experimental.testOptions.managedDevices.maxConcurrentDevices=$PAYMENTSHEET_E2E_DEVICE_SHARD_COUNT "-Pandroid.testInstrumentationRunnerArguments.class=$CLASSES" :paymentsheet-example:pixel2api33chromeBaseDebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
-      - bundle::export_instrumentation_test_results:
-          title: Export PaymentSheet E2E test results
+      - script@1:
+          title: Execute Checkout backend integration tests
+          is_always_run: true
+          timeout: 1200
           inputs:
-            - test_title: PaymentSheet E2E tests
+            - content: ./scripts/retry_with_emulator_cleanup.sh 2 ./gradlew -PcheckoutIntegrationTests=true -Pandroid.testInstrumentationRunnerArguments.annotation=com.stripe.android.paymentsheet.RequiresPlaygroundBackend :paymentsheet:pixel2api33DebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
+      - bundle::export_instrumentation_test_results:
+          title: Export PaymentSheet and Checkout E2E test results
+          is_always_run: true
+          inputs:
+            - test_title: PaymentSheet and Checkout E2E tests
     meta:
       bitrise.io:
         stack: ubuntu-resolute-26.04-bitrise-2026-android
