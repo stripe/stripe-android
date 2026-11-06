@@ -1,6 +1,7 @@
 package com.stripe.attestation
 
 import android.app.Activity
+import app.cash.turbine.Turbine
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
 import com.google.android.play.core.integrity.StandardIntegrityException
@@ -9,6 +10,8 @@ import com.google.android.play.core.integrity.StandardIntegrityManager.StandardI
 import com.google.android.play.core.integrity.StandardIntegrityManager.StandardIntegrityTokenProvider
 import com.google.android.play.core.integrity.StandardIntegrityManager.StandardIntegrityTokenRequest
 import com.google.android.play.core.integrity.model.StandardIntegrityErrorCode
+import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.Logger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -69,7 +72,8 @@ class IntegrityStandardRequestManagerTest {
         val integrityStandardRequestManager = IntegrityStandardRequestManager(
             cloudProjectNumber = 123456789L,
             logError = { _, _ -> },
-            factory = countingFactory
+            factory = countingFactory,
+            logger = Logger.noop()
         )
 
         // Launch 10 concurrent prepare calls
@@ -116,6 +120,36 @@ class IntegrityStandardRequestManagerTest {
         assertEquals(error.errorType, AttestationError.ErrorType.PLAY_SERVICES_NOT_FOUND)
     }
 
+    @Test
+    fun `reset causes the next request to prepare a new provider`() = runTest {
+        val firstProvider = FakeStandardIntegrityTokenProvider(Tasks.forResult(FakeStandardIntegrityToken()))
+        val secondProvider = FakeStandardIntegrityTokenProvider(Tasks.forResult(FakeStandardIntegrityToken()))
+        val providers = ArrayDeque<StandardIntegrityTokenProvider>(listOf(firstProvider, secondProvider))
+        val prepareCalls = Turbine<Unit>()
+        val factory = StandardIntegrityManagerFactory {
+            StandardIntegrityManager {
+                prepareCalls.add(Unit)
+                Tasks.forResult(providers.removeFirst())
+            }
+        }
+        val integrityStandardRequestManager = IntegrityStandardRequestManager(
+            cloudProjectNumber = 123456789L,
+            logError = { _, _ -> },
+            factory = factory,
+            logger = Logger.noop()
+        )
+
+        val prepareResult = integrityStandardRequestManager.prepare()
+        integrityStandardRequestManager.reset()
+        val requestResult = integrityStandardRequestManager.requestToken("requestIdentifier")
+
+        assertThat(prepareResult.isSuccess).isTrue()
+        assertThat(requestResult.getOrNull()).isEqualTo("123456789")
+        prepareCalls.awaitItem()
+        prepareCalls.awaitItem()
+        prepareCalls.ensureAllEventsConsumed()
+    }
+
     @After
     fun cleanup() {
         Dispatchers.resetMain()
@@ -126,7 +160,8 @@ class IntegrityStandardRequestManagerTest {
     ) = IntegrityStandardRequestManager(
         cloudProjectNumber = 123456789L,
         logError = { _, _ -> },
-        factory = FakeStandardIntegrityManagerFactory(prepareTask)
+        factory = FakeStandardIntegrityManagerFactory(prepareTask),
+        logger = Logger.noop()
     )
 }
 
