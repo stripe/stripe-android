@@ -832,22 +832,18 @@ internal class CheckoutPaymentElementAnalyticsTest {
     }
 
     private fun billingTaxUpdateResponse(response: MockResponse) {
-        response.testBodyFromFile("checkout-session-init.json") { json ->
-            // Match the init response so the session refresh keeps the new card selection.
-            json.put("customer_email", "checkout@example.com")
-            json.put("billing_address_collection", "required")
-            json.remove("link_settings")
-            json.getJSONObject("automatic_tax")
-                .put("enabled", true).put("status", "ready").put("address_source", "billing")
-            json.getJSONArray("items").getJSONObject(0)
-                .getJSONObject("one_time_price").getJSONArray("items").getJSONObject(0)
-                .getJSONObject("amount_details")
-                .put("total", UPDATED_TOTAL)
-            json.getJSONObject("total_summary").put("due", UPDATED_TOTAL)
-        }
+        billingTaxResponse(response, taxStatus = "ready", total = UPDATED_TOTAL)
     }
 
     private fun billingTaxCheckoutInitResponse(response: MockResponse) {
+        billingTaxResponse(response, taxStatus = "requires_address", total = null)
+    }
+
+    private fun billingTaxResponse(
+        response: MockResponse,
+        taxStatus: String,
+        total: Int?,
+    ) {
         response.testBodyFromFile("checkout-session-init.json") { json ->
             json.put("customer_email", "checkout@example.com")
             json.remove("link_settings")
@@ -857,10 +853,16 @@ internal class CheckoutPaymentElementAnalyticsTest {
                 "automatic_tax",
                 JSONObject()
                     .put("enabled", true)
-                    .put("status", "ready")
+                    .put("status", taxStatus)
                     .put("address_source", "billing"),
             )
-            json.getJSONObject("automatic_tax").put("status", "requires_address")
+            if (total != null) {
+                json.getJSONArray("items").getJSONObject(0)
+                    .getJSONObject("one_time_price").getJSONArray("items").getJSONObject(0)
+                    .getJSONObject("amount_details")
+                    .put("total", total)
+                json.getJSONObject("total_summary").put("due", total)
+            }
         }
     }
 
