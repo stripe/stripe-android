@@ -14,8 +14,9 @@ internal class CheckoutAnalyticsEvent(
     error: Error?,
     operationParams: Map<String, Any?>,
 ) : AnalyticsEvent {
-    override val eventName = listOfNotNull("checkout_elements", operation.code, outcome?.code).joinToString(".")
+    override val eventName = listOfNotNull(PRODUCT, operation.code, outcome?.code).joinToString(".")
     val params: Map<String, Any?> = buildMap {
+        put("product_usage", PRODUCT)
         putAll(operationParams)
         putAll(analyticsMetadata.paramsMap)
         putAll(duration.mapOfDurationInSeconds())
@@ -68,5 +69,9 @@ internal class CheckoutAnalyticsEvent(
                 )
             }
         }
+    }
+
+    private companion object {
+        const val PRODUCT = "checkout_elements"
     }
 }
