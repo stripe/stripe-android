@@ -10,6 +10,7 @@ import androidx.test.espresso.intent.Intents.intending
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.GooglePayJsonFactory
+import com.stripe.android.googlepaylauncher.GooglePayPaymentDataError
 import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdate
 import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdateCallback
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
@@ -92,16 +93,21 @@ internal fun enqueueFailedGooglePayPayment(error: Throwable) {
     )
 }
 
-internal fun enqueueCanceledGooglePayPayment() {
+internal fun enqueueCanceledGooglePayPayment(
+    paymentDataUpdate: GooglePayPaymentDataUpdate? = null,
+    expectedPaymentDataUpdateError: GooglePayPaymentDataError? = null,
+) {
     enqueueGooglePayPaymentResult(
         GooglePayPaymentMethodLauncher.Result.Canceled,
-        paymentDataUpdate = null,
+        paymentDataUpdate = paymentDataUpdate,
+        expectedPaymentDataUpdateError = expectedPaymentDataUpdateError,
     )
 }
 
 private fun enqueueGooglePayPaymentResult(
     result: GooglePayPaymentMethodLauncher.Result,
     paymentDataUpdate: GooglePayPaymentDataUpdate?,
+    expectedPaymentDataUpdateError: GooglePayPaymentDataError? = null,
 ) {
     val activityResult = Instrumentation.ActivityResult(
         Activity.RESULT_OK,
@@ -115,7 +121,7 @@ private fun enqueueGooglePayPaymentResult(
             val response = runBlocking {
                 googlePayPaymentDataUpdateCallback(intent).onPaymentDataChanged(update)
             }
-            assertThat(response.error).isNull()
+            assertThat(response.error).isEqualTo(expectedPaymentDataUpdateError)
         }
         activityResult
     }

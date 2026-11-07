@@ -21,6 +21,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
+import com.stripe.android.lpmfoundations.paymentmethod.create
 import com.stripe.android.model.Address
 import com.stripe.android.model.AndroidVerificationObject
 import com.stripe.android.model.ClientAttributionMetadata
@@ -56,6 +57,7 @@ import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.repositories.CheckoutStripeRepositoryFactory
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentConfigurationTestRule
@@ -1177,11 +1179,16 @@ class CheckoutSessionConfirmationInterceptorTest {
                 checkoutSessionResponse = checkoutSessionResponse,
             ),
             customerMetadata = customerMetadata,
-            clientAttributionMetadata = ClientAttributionMetadata.Elements(
+            clientAttributionMetadata = ClientAttributionMetadata.create(
                 elementsSessionConfigId = "test_session_id",
-                paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
-                paymentMethodSelectionFlow = PaymentMethodSelectionFlow.MerchantSpecified,
-                stripeSdkVersion = StripeSdkVersion.VERSION_NAME,
+                initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+                    instancesKey = "test_key",
+                    checkoutSessionResponse = checkoutSessionResponse,
+                    collectedEmail = collectedEmail,
+                    configuredElements = listOf("mobile-payment-element"),
+                ),
+                automaticPaymentMethodsEnabled = false,
+                isExpressCheckoutElement = false,
             ),
             context = applicationContext,
             checkoutSessionRepository = checkoutSessionRepository,

@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.injection
 
 import android.content.Context
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
+import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent.InvocationSource
 import com.stripe.android.checkout.toCheckoutAddress
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
@@ -180,6 +181,7 @@ private class CheckoutShippingPrimaryButtonAction(
         return taxRegionUpdater.updateServerStateIfNeeded(
             checkoutSessionResponse = checkoutSessionResponse,
             addressSource = TaxAddressSource.SHIPPING,
+            invocationSource = InvocationSource.ShippingAddressElement,
             address = address,
         ).map { response ->
             AddressElementActivityContract.Result.CheckoutShippingSucceeded(
