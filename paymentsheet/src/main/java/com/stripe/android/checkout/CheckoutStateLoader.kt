@@ -65,6 +65,7 @@ internal class CheckoutStateLoader @Inject constructor(
     }
 
     fun clear() {
+        stateHolder.configurationState = null
         stateHolder.state = null
         customerStateHolder.setCustomerState(null)
     }

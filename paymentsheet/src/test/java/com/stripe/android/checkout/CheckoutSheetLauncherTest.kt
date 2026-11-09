@@ -9,6 +9,7 @@ import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.elements.PaymentElement
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.account.LinkAccountHolder
@@ -33,6 +34,7 @@ import com.stripe.android.paymentelement.embedded.sheet.EmbeddedSheetContract
 import com.stripe.android.paymentelement.embedded.stashNewSelection
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.createCustomerState
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -643,7 +645,7 @@ internal class CheckoutSheetLauncherTest {
         )
         val loadingArgs = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityArgs
         assertThat(loadingArgs.launchMode).isEqualTo(EmbeddedLaunchMode.PaymentOptions)
-        assertThat(loadingArgs.presentationState).isEqualTo(EmbeddedActivityArgs.PresentationState.Loading)
+        assertThat(loadingArgs.presentationState).isInstanceOf<EmbeddedActivityArgs.PresentationState.Loading>()
 
         val refreshedMetadata = PaymentMethodMetadataFactory.create()
         val refreshedConfiguration = EmbeddedConfigurationFactory.create(merchantDisplayName = "Refreshed merchant")
@@ -687,7 +689,7 @@ internal class CheckoutSheetLauncherTest {
             configuration = initialState.configuration,
         )
         val loadingArgs = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityArgs
-        assertThat(loadingArgs.presentationState).isEqualTo(EmbeddedActivityArgs.PresentationState.Loading)
+        assertThat(loadingArgs.presentationState).isInstanceOf<EmbeddedActivityArgs.PresentationState.Loading>()
         assertThat(launcherState.isAwaitingPaymentOptionsReady).isTrue()
 
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
@@ -725,7 +727,7 @@ internal class CheckoutSheetLauncherTest {
             configuration = retainedState.configuration,
         )
         val loadingArgs = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityArgs
-        assertThat(loadingArgs.presentationState).isEqualTo(EmbeddedActivityArgs.PresentationState.Loading)
+        assertThat(loadingArgs.presentationState).isInstanceOf<EmbeddedActivityArgs.PresentationState.Loading>()
 
         mutationGate.complete(Unit)
         runCurrent()
@@ -755,7 +757,7 @@ internal class CheckoutSheetLauncherTest {
             configuration = initialState.configuration,
         )
         val loadingArgs = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityArgs
-        assertThat(loadingArgs.presentationState).isEqualTo(EmbeddedActivityArgs.PresentationState.Loading)
+        assertThat(loadingArgs.presentationState).isInstanceOf<EmbeddedActivityArgs.PresentationState.Loading>()
 
         embeddedContentState.value = null
         mutationGate.complete(Unit)
@@ -829,6 +831,13 @@ internal class CheckoutSheetLauncherTest {
     @Test
     fun `launchPaymentOptions shows loading without initial state then shows configured options`() = testScenario {
         val configuredState = requireNotNull(selectionHolder.state)
+        selectionHolder.configurationState = CheckoutElementsController.Configuration()
+            .paymentElement(
+                PaymentElement.Configuration().appearance(
+                    PaymentElement.Configuration.Appearance()
+                        .themeMode(PaymentElement.Configuration.Appearance.ThemeMode.AlwaysDark)
+                )
+            ).build()
         embeddedContentState.value = null
         selectionHolder.state = null
         val configureGate = CompletableDeferred<Unit>()
@@ -853,7 +862,8 @@ internal class CheckoutSheetLauncherTest {
             configuration = null,
         )
         val loadingArgs = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityArgs
-        assertThat(loadingArgs.presentationState).isEqualTo(EmbeddedActivityArgs.PresentationState.Loading)
+        val loadingState = loadingArgs.presentationState as EmbeddedActivityArgs.PresentationState.Loading
+        assertThat(loadingState.appearance.themeMode).isEqualTo(PaymentSheet.ThemeMode.AlwaysDark)
         assertThat(sheetStateHolder.sheetIsOpen).isTrue()
         assertThat(launcherState.isAwaitingPaymentOptionsReady).isTrue()
         errorReporter.ensureAllEventsConsumed()
@@ -888,7 +898,7 @@ internal class CheckoutSheetLauncherTest {
             configuration = null,
         )
         val loadingArgs = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityArgs
-        assertThat(loadingArgs.presentationState).isEqualTo(EmbeddedActivityArgs.PresentationState.Loading)
+        assertThat(loadingArgs.presentationState).isInstanceOf<EmbeddedActivityArgs.PresentationState.Loading>()
         assertThat(launcherState.isAwaitingPaymentOptionsReady).isTrue()
 
         configureGate.complete(Unit)
@@ -904,6 +914,7 @@ internal class CheckoutSheetLauncherTest {
     fun `launchPaymentOptions does not launch before configure starts`() = testScenario {
         embeddedContentState.value = null
         selectionHolder.state = null
+        selectionHolder.configurationState = null
 
         sheetLauncher.launchPaymentOptions(
             paymentMethodMetadata = null,
@@ -916,6 +927,35 @@ internal class CheckoutSheetLauncherTest {
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
         assertThat(launcherState.isAwaitingPaymentOptionsReady).isFalse()
         assertThat(errorReporter.getLoggedErrors()).isEmpty()
+    }
+
+    @Test
+    fun `launchPaymentOptions does not show loading without configuration while updating`() = testScenario {
+        embeddedContentState.value = null
+        selectionHolder.state = null
+        selectionHolder.configurationState = null
+        val mutationGate = CompletableDeferred<Unit>()
+        coroutineScope.launch {
+            operationCoordinator.runMutation {
+                mutationGate.await()
+                Result.success(Unit)
+            }
+        }
+        runCurrent()
+        assertThat(operationCoordinator.isUpdating.value).isTrue()
+
+        sheetLauncher.launchPaymentOptions(
+            paymentMethodMetadata = null,
+            customerState = null,
+            selection = null,
+            configuration = null,
+        )
+
+        assertThat(sheetStateHolder.sheetIsOpen).isFalse()
+        assertThat(launcherState.isAwaitingPaymentOptionsReady).isFalse()
+        assertThat(errorReporter.getLoggedErrors()).isEmpty()
+        mutationGate.complete(Unit)
+        runCurrent()
     }
 
     @Test
@@ -1458,7 +1498,10 @@ internal class CheckoutSheetLauncherTest {
                 context = applicationContext,
                 linkAccountHolder = linkAccountHolder,
             ),
-        ).apply { state = CheckoutElementsControllerStateFactory.create() }
+        ).apply {
+            state = CheckoutElementsControllerStateFactory.create()
+            configurationState = requireNotNull(state).configuration
+        }
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
         val customerStateHolder = DefaultCustomerStateHolder(
             savedStateHandle = savedStateHandle,

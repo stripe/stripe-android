@@ -36,6 +36,17 @@ internal class CheckoutElementsControllerStateHolder @Inject constructor(
     val stateFlow: StateFlow<CheckoutElementsControllerState?> =
         savedStateHandle.getStateFlow(STATE_KEY, null)
 
+    private val configurationStateFlow: StateFlow<CheckoutElementsController.Configuration.State?> =
+        savedStateHandle.getStateFlow(CONFIGURATION_KEY, null)
+
+    @get:AnyThread
+    @set:MainThread
+    var configurationState: CheckoutElementsController.Configuration.State?
+        get() = configurationStateFlow.value
+        set(value) {
+            savedStateHandle[CONFIGURATION_KEY] = value
+        }
+
     /**
      * Snapshot reads are safe from any thread. Writes and read-modify-write operations require Main.
      */
@@ -114,5 +125,6 @@ internal class CheckoutElementsControllerStateHolder @Inject constructor(
 
     companion object {
         const val STATE_KEY = "CheckoutElementsController_InternalState"
+        private const val CONFIGURATION_KEY = "CheckoutElementsController_ConfigurationState"
     }
 }

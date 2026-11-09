@@ -111,6 +111,49 @@ internal class CheckoutElementsControllerTest {
     }
 
     @Test
+    fun `configure saves configuration before the session has loaded`() = runTest {
+        val setup = createControllerSetup(SavedStateHandle(), DEFAULT_INTEGRATION_NAME)
+        val configuration = CheckoutElementsController.Configuration().paymentElement(
+            PaymentElement.Configuration().appearance(
+                PaymentElement.Configuration.Appearance()
+                    .themeMode(PaymentElement.Configuration.Appearance.ThemeMode.AlwaysDark)
+            )
+        )
+        assertThat(setup.stateHolder.configurationState).isNull()
+
+        val initRequest = Turbine<Unit>()
+        val releaseInitResponse = CountDownLatch(1)
+        networkRule.checkoutInit { response ->
+            initRequest.add(Unit)
+            check(releaseInitResponse.await(10, TimeUnit.SECONDS)) {
+                "Timed out waiting to release the configure response"
+            }
+            successResponse(response)
+        }
+
+        val configure = async { setup.controller.configure(DEFAULT_CLIENT_SECRET, configuration) }
+        try {
+            testScheduler.advanceUntilIdle()
+            initRequest.awaitItem()
+
+            assertThat(configure.isCompleted).isFalse()
+            assertThat(setup.controller.isUpdating.value).isTrue()
+            assertThat(setup.stateHolder.state).isNull()
+            assertThat(setup.stateHolder.configurationState).isEqualTo(configuration.build())
+
+            val restored = CheckoutElementsControllerStateFactory.createStateHolder(
+                setup.savedStateHandle.simulateProcessDeath(),
+            )
+            assertThat(restored.configurationState).isEqualTo(configuration.build())
+        } finally {
+            releaseInitResponse.countDown()
+        }
+
+        assertThat(configure.await()).isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
+        initRequest.ensureAllEventsConsumed()
+    }
+
+    @Test
     fun `configure succeeds without a payment element`() = runConfigureScenario(
         configuration = CheckoutElementsController.Configuration(),
     ) {
