@@ -22,7 +22,7 @@ def update_pay_server_docs()
 
     puts 'Fetching latest pay-server...'
     begin
-        execute_or_fail("git -C #{mint_repo} fetch --depth=1 --no-tags origin green-pay-server")
+        execute_or_fail("git -C #{mint_repo} fetch --no-tags origin green-pay-server")
         execute_or_fail("git -C #{mint_repo} checkout #{mint_base_ref}")
 
         puts '> Updating android SDK version in pay-server for latest release.'
