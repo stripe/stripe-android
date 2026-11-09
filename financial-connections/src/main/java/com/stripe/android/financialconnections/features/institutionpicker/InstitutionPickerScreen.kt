@@ -190,11 +190,7 @@ private fun LoadedContent(
 
     LazyLayout(
         lazyListState = listState,
-        bodyPadding = if (isLink) {
-            PaddingValues(start = LinkBodyStartPadding, end = LinkBodyEndPadding)
-        } else {
-            PaddingValues(horizontal = 16.dp)
-        },
+        bodyPadding = if (isLink) LinkBodyPadding else DefaultBodyPadding,
     ) {
         item {
             SearchTitle(
@@ -538,8 +534,8 @@ private val ClearSearchGlyphSize = 20.dp
  * the 48.dp touch target centering a 24.dp icon), and the back arrow and close glyphs are inset a
  * further 4.dp and 5.dp within their 24.dp viewports.
  */
-private val LinkBodyStartPadding = 20.dp
-private val LinkBodyEndPadding = 21.dp
+private val LinkBodyPadding = PaddingValues(start = 20.dp, end = 21.dp)
+private val DefaultBodyPadding = PaddingValues(horizontal = 16.dp)
 
 @Composable
 private fun ManualEntryRow(

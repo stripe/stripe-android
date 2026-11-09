@@ -142,8 +142,12 @@ public final class com/stripe/android/financialconnections/exception/CustomManua
 public final class com/stripe/android/financialconnections/features/accountpicker/ComposableSingletons$AccountPickerScreenKt {
 	public static final field INSTANCE Lcom/stripe/android/financialconnections/features/accountpicker/ComposableSingletons$AccountPickerScreenKt;
 	public fun <init> ()V
-	public final fun getLambda$1423572609$financial_connections_release ()Lkotlin/jvm/functions/Function4;
-	public final fun getLambda$229709570$financial_connections_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$-224625929$financial_connections_release ()Lkotlin/jvm/functions/Function4;
+	public final fun getLambda$-262743146$financial_connections_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$-775732700$financial_connections_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-900307059$financial_connections_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$1370600110$financial_connections_release ()Lkotlin/jvm/functions/Function4;
+	public final fun getLambda$1998995220$financial_connections_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class com/stripe/android/financialconnections/features/accountupdate/ComposableSingletons$AccountUpdateRequiredModalKt {
@@ -181,6 +185,7 @@ public final class com/stripe/android/financialconnections/features/common/Compo
 	public fun <init> ()V
 	public final fun getLambda$-1205081696$financial_connections_release ()Lkotlin/jvm/functions/Function2;
 	public final fun getLambda$-1477221777$financial_connections_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$-1585239417$financial_connections_release ()Lkotlin/jvm/functions/Function2;
 	public final fun getLambda$-803806876$financial_connections_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda$-811119631$financial_connections_release ()Lkotlin/jvm/functions/Function2;
 	public final fun getLambda$-822699089$financial_connections_release ()Lkotlin/jvm/functions/Function3;
@@ -198,7 +203,7 @@ public final class com/stripe/android/financialconnections/features/common/Compo
 public final class com/stripe/android/financialconnections/features/common/ComposableSingletons$SharedPartnerAuthKt {
 	public static final field INSTANCE Lcom/stripe/android/financialconnections/features/common/ComposableSingletons$SharedPartnerAuthKt;
 	public fun <init> ()V
-	public final fun getLambda$-1709284826$financial_connections_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$1011445123$financial_connections_release ()Lkotlin/jvm/functions/Function3;
 }
 
 public final class com/stripe/android/financialconnections/features/consent/ui/ComposableSingletons$ConsentLogoHeaderKt {
@@ -212,26 +217,37 @@ public final class com/stripe/android/financialconnections/features/exit/Composa
 	public fun <init> ()V
 	public final fun getLambda$-1374968111$financial_connections_release ()Lkotlin/jvm/functions/Function2;
 	public final fun getLambda$-312397163$financial_connections_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda$-60472120$financial_connections_release ()Lkotlin/jvm/functions/Function3;
-	public final fun getLambda$2101475679$financial_connections_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$-69007167$financial_connections_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$1301355182$financial_connections_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$1522057629$financial_connections_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$749869273$financial_connections_release ()Lkotlin/jvm/functions/Function2;
+}
+
+public final class com/stripe/android/financialconnections/features/generic/ComposableSingletons$GenericScreenKt {
+	public static final field INSTANCE Lcom/stripe/android/financialconnections/features/generic/ComposableSingletons$GenericScreenKt;
+	public fun <init> ()V
+	public final fun getLambda$-262432688$financial_connections_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$1528728844$financial_connections_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class com/stripe/android/financialconnections/features/institutionpicker/ComposableSingletons$InstitutionPickerScreenKt {
 	public static final field INSTANCE Lcom/stripe/android/financialconnections/features/institutionpicker/ComposableSingletons$InstitutionPickerScreenKt;
 	public fun <init> ()V
-	public final fun getLambda$-156477903$financial_connections_release ()Lkotlin/jvm/functions/Function2;
 	public final fun getLambda$-1974987728$financial_connections_release ()Lkotlin/jvm/functions/Function3;
-	public final fun getLambda$1104674433$financial_connections_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-802121641$financial_connections_release ()Lkotlin/jvm/functions/Function2;
 	public final fun getLambda$1808967409$financial_connections_release ()Lkotlin/jvm/functions/Function3;
-	public final fun getLambda$973582777$financial_connections_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$2108182023$financial_connections_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class com/stripe/android/financialconnections/features/linkaccountpicker/ComposableSingletons$LinkAccountPickerScreenKt {
 	public static final field INSTANCE Lcom/stripe/android/financialconnections/features/linkaccountpicker/ComposableSingletons$LinkAccountPickerScreenKt;
 	public fun <init> ()V
-	public final fun getLambda$-775726903$financial_connections_release ()Lkotlin/jvm/functions/Function4;
-	public final fun getLambda$1590876224$financial_connections_release ()Lkotlin/jvm/functions/Function3;
-	public final fun getLambda$2110578920$financial_connections_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$-1222539263$financial_connections_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$-1572884928$financial_connections_release ()Lkotlin/jvm/functions/Function4;
+	public final fun getLambda$-1789959080$financial_connections_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$-617383126$financial_connections_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$636489303$financial_connections_release ()Lkotlin/jvm/functions/Function4;
+	public final fun getLambda$82426382$financial_connections_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class com/stripe/android/financialconnections/features/manualentry/ComposableSingletons$ManualEntryScreenKt {
@@ -240,9 +256,16 @@ public final class com/stripe/android/financialconnections/features/manualentry/
 	public final fun getLambda$-1128705666$financial_connections_release ()Lkotlin/jvm/functions/Function3;
 }
 
+public final class com/stripe/android/financialconnections/features/networkinglinkloginwarmup/ComposableSingletons$NetworkingLinkLoginWarmupScreenKt {
+	public static final field INSTANCE Lcom/stripe/android/financialconnections/features/networkinglinkloginwarmup/ComposableSingletons$NetworkingLinkLoginWarmupScreenKt;
+	public fun <init> ()V
+	public final fun getLambda$1102474640$financial_connections_release ()Lkotlin/jvm/functions/Function2;
+}
+
 public final class com/stripe/android/financialconnections/features/networkinglinkverification/ComposableSingletons$NetworkingLinkVerificationScreenKt {
 	public static final field INSTANCE Lcom/stripe/android/financialconnections/features/networkinglinkverification/ComposableSingletons$NetworkingLinkVerificationScreenKt;
 	public fun <init> ()V
+	public final fun getLambda$-1539132006$financial_connections_release ()Lkotlin/jvm/functions/Function2;
 	public final fun getLambda$1193599160$financial_connections_release ()Lkotlin/jvm/functions/Function3;
 }
 
@@ -250,7 +273,14 @@ public final class com/stripe/android/financialconnections/features/networkingsa
 	public static final field INSTANCE Lcom/stripe/android/financialconnections/features/networkingsavetolinkverification/ComposableSingletons$NetworkingSaveToLinkVerificationScreenKt;
 	public fun <init> ()V
 	public final fun getLambda$-1966495693$financial_connections_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$-2123347954$financial_connections_release ()Lkotlin/jvm/functions/Function2;
 	public final fun getLambda$1291129067$financial_connections_release ()Lkotlin/jvm/functions/Function3;
+}
+
+public final class com/stripe/android/financialconnections/features/notice/ComposableSingletons$NoticeSheetKt {
+	public static final field INSTANCE Lcom/stripe/android/financialconnections/features/notice/ComposableSingletons$NoticeSheetKt;
+	public fun <init> ()V
+	public final fun getLambda$1003453042$financial_connections_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class com/stripe/android/financialconnections/features/reset/ComposableSingletons$ResetScreenKt {
@@ -376,12 +406,6 @@ public final class com/stripe/android/financialconnections/navigation/bottomshee
 public final class com/stripe/android/financialconnections/ui/components/ComposableSingletons$ButtonKt {
 	public static final field INSTANCE Lcom/stripe/android/financialconnections/ui/components/ComposableSingletons$ButtonKt;
 	public fun <init> ()V
-	public final fun getLambda$-1034999190$financial_connections_release ()Lkotlin/jvm/functions/Function3;
-	public final fun getLambda$-1152635959$financial_connections_release ()Lkotlin/jvm/functions/Function3;
-	public final fun getLambda$-1270272728$financial_connections_release ()Lkotlin/jvm/functions/Function3;
-	public final fun getLambda$-1387909497$financial_connections_release ()Lkotlin/jvm/functions/Function3;
-	public final fun getLambda$-823903582$financial_connections_release ()Lkotlin/jvm/functions/Function3;
-	public final fun getLambda$-917362421$financial_connections_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda$1127479697$financial_connections_release ()Lkotlin/jvm/functions/Function2;
 }
 
@@ -396,6 +420,7 @@ public final class com/stripe/android/financialconnections/ui/components/Composa
 	public static final field INSTANCE Lcom/stripe/android/financialconnections/ui/components/ComposableSingletons$TextFieldKt;
 	public fun <init> ()V
 	public final fun getLambda$1015455786$financial_connections_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$1431235920$financial_connections_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class com/stripe/android/financialconnections/ui/components/ComposableSingletons$TopAppBarKt {
@@ -404,6 +429,7 @@ public final class com/stripe/android/financialconnections/ui/components/Composa
 	public final fun getLambda$-131451939$financial_connections_release ()Lkotlin/jvm/functions/Function2;
 	public final fun getLambda$-1318334173$financial_connections_release ()Lkotlin/jvm/functions/Function2;
 	public final fun getLambda$-1910988991$financial_connections_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-363690701$financial_connections_release ()Lkotlin/jvm/functions/Function2;
 	public final fun getLambda$1657803754$financial_connections_release ()Lkotlin/jvm/functions/Function2;
 	public final fun getLambda$293892879$financial_connections_release ()Lkotlin/jvm/functions/Function2;
 }
