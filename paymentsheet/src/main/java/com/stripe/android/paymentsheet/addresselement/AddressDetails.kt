@@ -1,10 +1,12 @@
 package com.stripe.android.paymentsheet.addresselement
 
 import android.os.Parcelable
+import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.model.Address
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.uicore.elements.FormFieldId
+import com.stripe.android.uicore.forms.FormFieldEntry
 import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
@@ -57,6 +59,42 @@ internal fun AddressDetails.toIdentifierMap(
     } else {
         emptyMap()
     }
+}
+
+/**
+ * Returns this address, or null when its country isn't in [allowedCountries]. An empty
+ * [allowedCountries] allows every country the Address Element supports.
+ */
+internal fun AddressDetails.takeIfCountryAllowed(allowedCountries: Set<String>): AddressDetails? {
+    val countries = allowedCountries.ifEmpty { CountryUtils.supportedBillingCountries }
+    val country = address?.country
+
+    return takeIf {
+        country == null || countries.contains(country)
+    }
+}
+
+/**
+ * Maps form values to [AddressDetails]. A non-null [hiddenName] stands in for the name field when
+ * it's hidden.
+ */
+internal fun Map<FormFieldId, FormFieldEntry>.toAddressDetails(
+    hiddenName: String?,
+    isCheckboxSelected: Boolean?,
+): AddressDetails {
+    return AddressDetails(
+        name = hiddenName ?: this[FormFieldId.Name]?.value,
+        address = PaymentSheet.Address(
+            city = this[FormFieldId.City]?.value,
+            country = this[FormFieldId.Country]?.value,
+            line1 = this[FormFieldId.Line1]?.value,
+            line2 = this[FormFieldId.Line2]?.value,
+            postalCode = this[FormFieldId.PostalCode]?.value,
+            state = this[FormFieldId.State]?.value,
+        ),
+        phoneNumber = this[FormFieldId.Phone]?.value,
+        isCheckboxSelected = isCheckboxSelected,
+    )
 }
 
 internal fun PaymentSheet.Address.toIdentifierMap(): Map<FormFieldId, String?> {
