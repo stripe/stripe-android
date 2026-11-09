@@ -10,8 +10,11 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.networktesting.AdvancedFraudSignalsTestRule
 import com.stripe.android.networktesting.NetworkRule
+import com.stripe.android.networktesting.RequestMatcher
 import com.stripe.android.networktesting.RequestMatchers.analyticsPayloadField
 import com.stripe.android.networktesting.RequestMatchers.hasQueryParam
+import com.stripe.android.networktesting.RequestMatchers.host
+import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
@@ -237,12 +240,43 @@ internal class AddressElementActivityAnalyticsTest {
         block: AddressElementActivityTestRunner.Scenario.(NetworkResponseGate) -> Unit,
     ) = runScenario {
         val taxUpdate = enqueueTaxUpdate(fails = fails)
+        expectCheckoutShippingAnalytics(
+            checkoutSessionResponse.id,
+            "started",
+            not(hasQueryParam("duration")),
+        )
+        expectCheckoutShippingAnalytics(
+            checkoutSessionResponse.id,
+            if (fails) "failed" else "succeeded",
+            hasQueryParam("duration"),
+            if (fails) analyticsPayloadField("error_type", "apiError") else not(hasQueryParam("error_type")),
+            not(hasQueryParam("error_code")),
+        )
         try {
             startTaxUpdateWithAnalytics(taxUpdate)
             assertDismissalBlocked()
             block(taxUpdate)
         } finally {
             taxUpdate.releaseResponse.countDown()
+        }
+    }
+
+    private fun expectCheckoutShippingAnalytics(
+        checkoutSessionId: String,
+        outcome: String,
+        vararg requestMatchers: RequestMatcher,
+    ) {
+        networkRule.enqueue(
+            host("q.stripe.com"),
+            method("GET"),
+            analyticsPayloadField("event", "checkout_elements.update_shipping_address.$outcome"),
+            analyticsPayloadField("product_usage", "PaymentSheet.AddressController"),
+            analyticsPayloadField("checkout_session_id", checkoutSessionId),
+            analyticsPayloadField("invocation_source", "shipping_address_element"),
+            analyticsPayloadField("did_request_tax_update", "true"),
+            *requestMatchers,
+        ) { response ->
+            response.status = "HTTP/1.1 200 OK"
         }
     }
 
