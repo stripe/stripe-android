@@ -270,7 +270,6 @@ internal class CheckoutConfirmationPerformerTest {
                 checkoutSessionResponse = response,
                 paymentMethodMetadata = requireNotNull(state.paymentMethodMetadata).copy(
                     integrationMetadata = IntegrationMetadata.CheckoutSession(
-                        id = response.id,
                         instancesKey = "test",
                         checkoutSessionResponse = response,
                         collectedEmail = null,

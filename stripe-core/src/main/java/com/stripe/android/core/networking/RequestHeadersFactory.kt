@@ -88,7 +88,7 @@ sealed class RequestHeadersFactory {
                 val apiRequestOptions = optionsProvider()
                 return mapOf(
                     HEADER_ACCEPT to "application/json",
-                    HEADER_STRIPE_VERSION to apiVersion,
+                    HEADER_STRIPE_VERSION to ApiVersion.withBetas(apiVersion, apiRequestOptions.betas),
                     HEADER_AUTHORIZATION to "Bearer ${apiRequestOptions.apiKey}"
                 ).plus(
                     stripeClientUserAgentHeaderFactory.create(appInfo)

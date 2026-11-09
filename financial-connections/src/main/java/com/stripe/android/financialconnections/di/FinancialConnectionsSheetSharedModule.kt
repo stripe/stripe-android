@@ -20,6 +20,7 @@ import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.core.networking.DefaultAnalyticsRequestV2Executor
 import com.stripe.android.core.networking.NetworkTypeDetector
 import com.stripe.android.core.networking.RealAnalyticsRequestV2Storage
+import com.stripe.android.core.networking.toRequestOptions
 import com.stripe.android.core.utils.ContextUtils.packageInfo
 import com.stripe.android.core.utils.IsWorkManagerAvailable
 import com.stripe.android.core.utils.RealIsWorkManagerAvailable
@@ -127,10 +128,7 @@ internal interface FinancialConnectionsSheetSharedModule {
             apiConfigurationProvider: Provider<ApiConfiguration.State>
         ): ApiRequest.Options {
             val apiConfiguration = apiConfigurationProvider.get()
-            return ApiRequest.Options(
-                apiKey = apiConfiguration.publishableKey,
-                stripeAccount = apiConfiguration.stripeAccountId
-            )
+            return apiConfiguration.toRequestOptions(idempotencyKey = null)
         }
 
         @Provides

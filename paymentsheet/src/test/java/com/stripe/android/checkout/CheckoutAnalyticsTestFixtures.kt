@@ -28,5 +28,6 @@ internal object CheckoutAnalyticsTestFixtures {
         "payment_status" to "unpaid",
         "adaptive_pricing_active" to false,
         "automatic_tax_enabled" to false,
+        "ordered_lpms" to "card,link",
     )
 }

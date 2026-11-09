@@ -234,7 +234,6 @@ internal class EmbeddedSheetActivityTest {
         return PaymentMethodMetadataFactory.create(
             integrationMetadata = IntegrationMetadata.CheckoutSession(
                 collectedEmail = null,
-                id = response.id,
                 instancesKey = "test_instances_key",
                 checkoutSessionResponse = response,
             ),
@@ -292,8 +291,6 @@ internal class EmbeddedSheetActivityTest {
             EmbeddedSheetContract.createIntent(
                 context = applicationContext,
                 input = EmbeddedActivityArgs(
-                    paymentMethodMetadata = paymentMethodMetadata,
-                    configuration = configuration,
                     productUsage = setOf("EmbeddedPaymentElement"),
                     statusBarColor = null,
                     paymentElementCallbackIdentifier = "EmbeddedFormTestIdentifier",
@@ -305,7 +302,10 @@ internal class EmbeddedSheetActivityTest {
                     launchMode = EmbeddedLaunchMode.Form(
                         selectedPaymentMethodCode = selectedPaymentMethodCode,
                     ),
-                    presentationState = EmbeddedActivityArgs.PresentationState.Ready,
+                    presentationState = EmbeddedActivityArgs.PresentationState.Ready(
+                        paymentMethodMetadata = paymentMethodMetadata,
+                        configuration = configuration,
+                    ),
                 ),
             )
         ).use { scenario ->

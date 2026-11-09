@@ -24,7 +24,6 @@ internal class CheckoutSessionTaxRegionUpdater @Inject constructor(
     ): Result<CheckoutSessionResponse> {
         return if (requiresUpdate(checkoutSessionResponse, addressSource)) {
             checkoutSessionRepository.updateTaxRegion(
-                sessionId = checkoutSessionResponse.id,
                 clientSecret = checkoutSessionResponse.clientSecret,
                 address = address,
             )

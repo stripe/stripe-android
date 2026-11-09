@@ -96,10 +96,12 @@ class StripePaymentLauncher @AssistedInject internal constructor(
 
     @SharedPaymentTokenSessionPreview
     override fun handleNextActionForHashedPaymentIntent(hashedValue: String) {
+        val apiConfiguration = apiConfigurationProvider.get()
         hostActivityLauncher.launch(
             PaymentLauncherContract.Args.HashedPaymentIntentNextActionArgs(
                 hashedValue = hashedValue,
-                stripeAccountId = apiConfigurationProvider.get().stripeAccountId,
+                stripeAccountId = apiConfiguration.stripeAccountId,
+                betas = apiConfiguration.betas,
                 enableLogging = enableLogging,
                 productUsage = productUsage,
                 includePaymentSheetNextHandlers = includePaymentSheetNextHandlers,

@@ -15,6 +15,7 @@ import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.analyticsPayloadField
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.hasQueryParam
+import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedContentPage
@@ -233,6 +234,81 @@ internal class CheckoutPaymentElementAnalyticsTest {
     }
 
     @Test
+    fun testSelectingSavedPaymentMethodWithoutAutomaticTaxReportsSucceeded() = runCheckoutPaymentElementScenario(
+        networkRule = networkRule,
+        renderPaymentElementContent = false,
+        setup = { controller ->
+            networkRule.validateCheckoutInitStartedAndSucceeded()
+            assertThat(
+                controller.configure(
+                    DEFAULT_CLIENT_SECRET,
+                    CheckoutElementsController.Configuration().paymentElement(PaymentElement.Configuration()),
+                )
+            ).isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
+        },
+    ) {
+        networkRule.validateAnalyticsRequest(
+            eventName = "checkout_elements.update_billing_address.succeeded",
+            productUsage = setOf("checkout_elements"),
+            analyticsPayloadField("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID),
+            analyticsPayloadField("invocation_source", "payment_element"),
+            analyticsPayloadField("did_request_tax_update", "false"),
+            not(hasQueryParam("duration")),
+            not(hasQueryParam("error_type")),
+            not(hasQueryParam("merchant_display_name")),
+        )
+
+        withContext(Dispatchers.Main) {
+            controller.selectSavedPaymentMethod(PaymentSelection.Saved(createPaymentMethodWithBillingAddress()))
+                .getOrThrow()
+        }
+        markTestSucceeded()
+    }
+
+    @Test
+    fun testSelectingSavedPaymentMethodWithBillingAutomaticTaxReportsTaxUpdate() = runCheckoutPaymentElementScenario(
+        networkRule = networkRule,
+        checkoutInitResponse = ::billingTaxCheckoutInitResponse,
+        renderPaymentElementContent = false,
+        setup = { controller ->
+            networkRule.validateCheckoutInitStartedAndSucceeded()
+            assertThat(
+                controller.configure(
+                    DEFAULT_CLIENT_SECRET,
+                    CheckoutElementsController.Configuration().paymentElement(PaymentElement.Configuration()),
+                )
+            ).isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
+        },
+    ) {
+        networkRule.validateCheckoutAnalyticsStarted(
+            "update_billing_address",
+            analyticsPayloadField("invocation_source", "payment_element"),
+            analyticsPayloadField("did_request_tax_update", "true"),
+        )
+        networkRule.checkoutUpdate(
+            bodyPart("tax_region[country]", "US"),
+            bodyPart("tax_region[line1]", "510 Townsend St"),
+            bodyPart("tax_region[line2]", "Floor 3"),
+            bodyPart("tax_region[city]", "San Francisco"),
+            bodyPart("tax_region[state]", "CA"),
+            bodyPart("tax_region[postal_code]", "94103"),
+        ) { response ->
+            billingTaxCheckoutInitResponse(response)
+        }
+        networkRule.validateCheckoutAnalyticsSucceeded(
+            "update_billing_address",
+            analyticsPayloadField("invocation_source", "payment_element"),
+            analyticsPayloadField("did_request_tax_update", "true"),
+        )
+
+        withContext(Dispatchers.Main) {
+            controller.selectSavedPaymentMethod(PaymentSelection.Saved(createPaymentMethodWithBillingAddress()))
+                .getOrThrow()
+        }
+        markTestSucceeded()
+    }
+
+    @Test
     fun testConfigureReportsInitStartedAndSucceededWithAttemptedConfiguration() =
         runCheckoutPaymentElementScenario(
             networkRule = networkRule,
@@ -253,6 +329,333 @@ internal class CheckoutPaymentElementAnalyticsTest {
         ) {
             markTestSucceeded()
         }
+
+    @Test
+    fun testUpdateEmailReportsSucceededWithoutDurationOrConfiguration() = runCheckoutPaymentElementScenario(
+        networkRule = networkRule,
+        renderPaymentElementContent = false,
+        setup = { controller ->
+            networkRule.validateCheckoutInitStartedAndSucceeded()
+            assertThat(
+                controller.configure(
+                    DEFAULT_CLIENT_SECRET,
+                    CheckoutElementsController.Configuration().paymentElement(PaymentElement.Configuration()),
+                )
+            ).isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
+        },
+    ) {
+        networkRule.validateAnalyticsRequest(
+            eventName = "checkout_elements.update_email.succeeded",
+            productUsage = setOf("checkout_elements"),
+            analyticsPayloadField("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID),
+            not(hasQueryParam("duration")),
+            not(hasQueryParam("error_type")),
+            not(hasQueryParam("merchant_display_name")),
+        )
+
+        assertThat(controller.updateEmail("email@example.com"))
+            .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
+        markTestSucceeded()
+    }
+
+    @Test
+    fun testClearPaymentOptionReportsInvokedAndBillingAddressEvents() = runCheckoutPaymentElementScenario(
+        networkRule = networkRule,
+        renderPaymentElementContent = false,
+        setup = { controller ->
+            networkRule.validateCheckoutInitStartedAndSucceeded()
+            assertThat(
+                controller.configure(
+                    DEFAULT_CLIENT_SECRET,
+                    CheckoutElementsController.Configuration().paymentElement(PaymentElement.Configuration()),
+                )
+            ).isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
+        },
+    ) {
+        networkRule.validateAnalyticsRequest(
+            eventName = "checkout_elements.clear_payment_option",
+            productUsage = setOf("checkout_elements"),
+            analyticsPayloadField("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID),
+            not(hasQueryParam("duration")),
+            not(hasQueryParam("error_type")),
+            not(hasQueryParam("merchant_display_name")),
+        )
+        networkRule.validateAnalyticsRequest(
+            eventName = "checkout_elements.update_billing_address.succeeded",
+            productUsage = setOf("checkout_elements"),
+            analyticsPayloadField("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID),
+            analyticsPayloadField("invocation_source", "merchant"),
+            analyticsPayloadField("did_request_tax_update", "false"),
+            not(hasQueryParam("duration")),
+            not(hasQueryParam("error_type")),
+            not(hasQueryParam("merchant_display_name")),
+        )
+
+        assertThat(controller.clearPaymentOption())
+            .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
+        markTestSucceeded()
+    }
+
+    @Test
+    fun testClearPaymentOptionWithBillingAutomaticTaxReportsTaxUpdate() = runCheckoutPaymentElementScenario(
+        networkRule = networkRule,
+        checkoutInitResponse = ::billingTaxCheckoutInitResponse,
+        renderPaymentElementContent = false,
+        setup = { controller ->
+            networkRule.validateCheckoutInitStartedAndSucceeded()
+            assertThat(
+                controller.configure(
+                    DEFAULT_CLIENT_SECRET,
+                    CheckoutElementsController.Configuration().paymentElement(PaymentElement.Configuration()),
+                )
+            ).isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
+        },
+    ) {
+        networkRule.validateAnalyticsRequest(
+            eventName = "checkout_elements.clear_payment_option",
+            productUsage = setOf("checkout_elements"),
+            analyticsPayloadField("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID),
+        )
+        networkRule.validateCheckoutAnalyticsStarted(
+            "update_billing_address",
+            analyticsPayloadField("invocation_source", "merchant"),
+            analyticsPayloadField("did_request_tax_update", "true"),
+        )
+        networkRule.checkoutUpdate(bodyPart("tax_region", "")) { response ->
+            billingTaxCheckoutInitResponse(response)
+        }
+        networkRule.validateCheckoutAnalyticsSucceeded(
+            "update_billing_address",
+            analyticsPayloadField("invocation_source", "merchant"),
+            analyticsPayloadField("did_request_tax_update", "true"),
+        )
+
+        assertThat(controller.clearPaymentOption())
+            .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
+        markTestSucceeded()
+    }
+
+    @Test
+    fun testRunServerUpdateReportsSucceeded() = runCheckoutPaymentElementScenario(
+        networkRule = networkRule,
+        renderPaymentElementContent = false,
+        setup = { controller ->
+            networkRule.validateCheckoutInitStartedAndSucceeded()
+            assertThat(
+                controller.configure(
+                    DEFAULT_CLIENT_SECRET,
+                    CheckoutElementsController.Configuration().paymentElement(PaymentElement.Configuration()),
+                )
+            ).isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
+        },
+    ) {
+        networkRule.validateCheckoutAnalyticsStarted(
+            "run_server_update",
+            not(hasQueryParam("merchant_update_duration")),
+            not(hasQueryParam("refresh_duration")),
+        )
+        networkRule.checkoutInitWithAnalytics(responseFactory = { response ->
+            response.testBodyFromFile("checkout-session-init.json") { json ->
+                json.remove("link_settings")
+            }
+        })
+        networkRule.validateCheckoutAnalyticsSucceeded(
+            "run_server_update",
+            hasQueryParam("merchant_update_duration"),
+            hasQueryParam("refresh_duration"),
+        )
+
+        assertThat(controller.runServerUpdate { Result.success(Unit) })
+            .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
+        markTestSucceeded()
+    }
+
+    @Test
+    fun testRunServerUpdateMerchantFailureReportsFailedWithoutRefresh() = runCheckoutPaymentElementScenario(
+        networkRule = networkRule,
+        renderPaymentElementContent = false,
+        setup = { controller ->
+            networkRule.validateCheckoutInitStartedAndSucceeded()
+            assertThat(
+                controller.configure(
+                    DEFAULT_CLIENT_SECRET,
+                    CheckoutElementsController.Configuration().paymentElement(PaymentElement.Configuration()),
+                )
+            ).isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
+        },
+    ) {
+        networkRule.validateCheckoutAnalyticsStarted(
+            "run_server_update",
+            not(hasQueryParam("merchant_update_duration")),
+            not(hasQueryParam("refresh_duration")),
+        )
+        networkRule.validateCheckoutAnalyticsFailed(
+            "run_server_update",
+            hasQueryParam("merchant_update_duration"),
+            not(hasQueryParam("refresh_duration")),
+            analyticsPayloadField("error_type", "java.lang.IllegalStateException"),
+        )
+
+        assertThat(controller.runServerUpdate { Result.failure(IllegalStateException("boom")) })
+            .isInstanceOf(CheckoutElementsController.OperationResult.Failed::class.java)
+        markTestSucceeded()
+    }
+
+    @Test
+    fun testUpdateShippingAddressWithoutAutomaticTaxReportsSucceeded() = runCheckoutPaymentElementScenario(
+        networkRule = networkRule,
+        renderPaymentElementContent = false,
+        setup = { controller ->
+            networkRule.validateCheckoutInitStartedAndSucceeded()
+            assertThat(
+                controller.configure(
+                    DEFAULT_CLIENT_SECRET,
+                    CheckoutElementsController.Configuration().paymentElement(PaymentElement.Configuration()),
+                )
+            ).isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
+        },
+    ) {
+        networkRule.validateAnalyticsRequest(
+            eventName = "checkout_elements.update_shipping_address.succeeded",
+            productUsage = setOf("checkout_elements"),
+            analyticsPayloadField("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID),
+            analyticsPayloadField("invocation_source", "merchant"),
+            analyticsPayloadField("did_request_tax_update", "false"),
+            not(hasQueryParam("duration")),
+            not(hasQueryParam("error_type")),
+            not(hasQueryParam("merchant_display_name")),
+        )
+
+        assertThat(controller.updateShippingAddress(name = "Jane Doe", address = shippingAddress()))
+            .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
+        markTestSucceeded()
+    }
+
+    @Test
+    fun testClearAlreadyNullShippingAddressReportsSucceeded() = runCheckoutPaymentElementScenario(
+        networkRule = networkRule,
+        checkoutInitResponse = ::shippingTaxCheckoutInitResponse,
+        renderPaymentElementContent = false,
+        setup = { controller ->
+            networkRule.validateCheckoutInitStartedAndSucceeded()
+            assertThat(
+                controller.configure(
+                    DEFAULT_CLIENT_SECRET,
+                    CheckoutElementsController.Configuration().paymentElement(PaymentElement.Configuration()),
+                )
+            ).isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
+        },
+    ) {
+        networkRule.validateAnalyticsRequest(
+            eventName = "checkout_elements.update_shipping_address.succeeded",
+            productUsage = setOf("checkout_elements"),
+            analyticsPayloadField("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID),
+            analyticsPayloadField("invocation_source", "merchant"),
+            analyticsPayloadField("did_request_tax_update", "false"),
+            not(hasQueryParam("duration")),
+            not(hasQueryParam("error_type")),
+            not(hasQueryParam("merchant_display_name")),
+        )
+
+        assertThat(controller.updateShippingAddress(name = null, address = null))
+            .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
+        markTestSucceeded()
+    }
+
+    @Test
+    fun testUpdateShippingAddressWithShippingAutomaticTaxReportsTaxUpdate() = runCheckoutPaymentElementScenario(
+        networkRule = networkRule,
+        checkoutInitResponse = ::shippingTaxCheckoutInitResponse,
+        renderPaymentElementContent = false,
+        setup = { controller ->
+            networkRule.validateCheckoutInitStartedAndSucceeded()
+            assertThat(
+                controller.configure(
+                    DEFAULT_CLIENT_SECRET,
+                    CheckoutElementsController.Configuration().paymentElement(PaymentElement.Configuration()),
+                )
+            ).isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
+        },
+    ) {
+        networkRule.validateCheckoutAnalyticsStarted(
+            "update_shipping_address",
+            analyticsPayloadField("invocation_source", "merchant"),
+            analyticsPayloadField("did_request_tax_update", "true"),
+        )
+        networkRule.checkoutUpdate(
+            bodyPart("tax_region[country]", "US"),
+            bodyPart("tax_region[line1]", "510 Townsend St"),
+            bodyPart("tax_region[city]", "San Francisco"),
+            bodyPart("tax_region[state]", "CA"),
+            bodyPart("tax_region[postal_code]", "94103"),
+        ) { response ->
+            shippingTaxCheckoutInitResponse(response)
+        }
+        networkRule.validateCheckoutAnalyticsSucceeded(
+            "update_shipping_address",
+            analyticsPayloadField("invocation_source", "merchant"),
+            analyticsPayloadField("did_request_tax_update", "true"),
+        )
+
+        assertThat(controller.updateShippingAddress(name = "Jane Doe", address = shippingAddress()))
+            .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
+        markTestSucceeded()
+    }
+
+    @Test
+    fun testClearShippingAddressWithShippingAutomaticTaxReportsTaxUpdate() = runCheckoutPaymentElementScenario(
+        networkRule = networkRule,
+        checkoutInitResponse = ::shippingTaxCheckoutInitResponse,
+        renderPaymentElementContent = false,
+        setup = { controller ->
+            networkRule.validateCheckoutInitStartedAndSucceeded()
+            assertThat(
+                controller.configure(
+                    DEFAULT_CLIENT_SECRET,
+                    CheckoutElementsController.Configuration().paymentElement(PaymentElement.Configuration()),
+                )
+            ).isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
+        },
+    ) {
+        networkRule.validateCheckoutAnalyticsStarted(
+            "update_shipping_address",
+            analyticsPayloadField("invocation_source", "merchant"),
+            analyticsPayloadField("did_request_tax_update", "true"),
+        )
+        networkRule.checkoutUpdate(
+            bodyPart("tax_region[country]", "US"),
+            bodyPart("tax_region[line1]", "510 Townsend St"),
+            bodyPart("tax_region[city]", "San Francisco"),
+            bodyPart("tax_region[state]", "CA"),
+            bodyPart("tax_region[postal_code]", "94103"),
+        ) { response ->
+            shippingTaxCheckoutInitResponse(response)
+        }
+        networkRule.validateCheckoutAnalyticsSucceeded(
+            "update_shipping_address",
+            analyticsPayloadField("invocation_source", "merchant"),
+            analyticsPayloadField("did_request_tax_update", "true"),
+        )
+        assertThat(controller.updateShippingAddress(name = "Jane Doe", address = shippingAddress()))
+            .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
+
+        networkRule.validateCheckoutAnalyticsStarted(
+            "update_shipping_address",
+            analyticsPayloadField("invocation_source", "merchant"),
+            analyticsPayloadField("did_request_tax_update", "true"),
+        )
+        networkRule.checkoutUpdate(bodyPart("tax_region", "")) { response ->
+            shippingTaxCheckoutInitResponse(response)
+        }
+        networkRule.validateCheckoutAnalyticsSucceeded(
+            "update_shipping_address",
+            analyticsPayloadField("invocation_source", "merchant"),
+            analyticsPayloadField("did_request_tax_update", "true"),
+        )
+        assertThat(controller.updateShippingAddress(name = null, address = null))
+            .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
+        markTestSucceeded()
+    }
 
     @Test
     fun testConfigureApiFailureReportsInitFailedAnalytics() = runCheckoutPaymentElementScenario(
@@ -294,6 +697,27 @@ internal class CheckoutPaymentElementAnalyticsTest {
             )
             json.getJSONObject("automatic_tax").put("status", "requires_address")
         }
+    }
+
+    private fun shippingTaxCheckoutInitResponse(response: MockResponse) {
+        createCheckoutInitResponseWithRequiredShippingAddress(response) { json ->
+            json.remove("link_settings")
+            json.put(
+                "automatic_tax",
+                JSONObject()
+                    .put("enabled", true)
+                    .put("status", "requires_address")
+                    .put("address_source", "shipping"),
+            )
+        }
+    }
+
+    private fun shippingAddress(): CheckoutElementsController.Address {
+        return CheckoutElementsController.Address(country = "US")
+            .line1("510 Townsend St")
+            .city("San Francisco")
+            .state("CA")
+            .postalCode("94103")
     }
 
     private fun checkoutInitApiFailureResponse(response: MockResponse) {

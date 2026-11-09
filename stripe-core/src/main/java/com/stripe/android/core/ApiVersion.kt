@@ -38,5 +38,13 @@ data class ApiVersion internal constructor(
         fun get(): ApiVersion {
             return INSTANCE
         }
+
+        /** Adds configured tokens without changing the producer's version or built-in tokens. */
+        fun withBetas(version: String, betas: Set<String>): String {
+            if (betas.isEmpty()) return version
+            val existing = version.split(';').toSet()
+            val additional = betas.filterNot { it in existing }.sorted()
+            return (listOf(version) + additional).joinToString(";")
+        }
     }
 }

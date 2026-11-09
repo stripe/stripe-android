@@ -2233,6 +2233,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                 loginState = LinkState.LoginState.LoggedOut,
                 signupMode = null,
             ),
+            isInstantDebitsOnboardingEnabled = true,
         ),
         initialProcessing: Boolean = false,
         initialSelection: PaymentSelection? = null,

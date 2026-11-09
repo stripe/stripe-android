@@ -77,6 +77,7 @@ class FinancialConnectionsSheet internal constructor(
                 stripeAccountId = stripeAccountId,
             ),
             preCollectedConsent = preCollectedConsent,
+            themeMode = ThemeMode.Automatic,
         )
     }
 

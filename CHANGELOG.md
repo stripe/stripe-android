@@ -6,6 +6,15 @@ NEXT_VERSION_BUMP: MINOR
 ### Crypto Onramp
 * [Added][15296](https://github.com/stripe/stripe-android/pull/15296) Added `googlePayCardBrandAcceptance` and `linkCardBrandAcceptance` to `OnrampConfiguration` to configure accepted card brands independently for Google Pay and Link. Link applies this setting only in passthrough mode.
 
+### Payments
+* [ADDED][15314](https://github.com/stripe/stripe-android/pull/15314) Klarna confirmation options for passing SDK-generated interoperability and partner confirmation tokens (private preview).
+
+### PaymentSheet
+* [ADDED][15326](https://github.com/stripe/stripe-android/pull/15326) Added `ApiConfiguration.betas` in public preview to configure beta API version headers for Payment Element.
+* [ADDED][15327](https://github.com/stripe/stripe-android/pull/15327) Added `PaymentSheet.Configuration.Builder.apiConfiguration` in public preview to configure API credentials for PaymentSheet and FlowController.
+* [FIXED][15315](https://github.com/stripe/stripe-android/pull/15315) Fixed an issue that caused the Bank payment method to be hidden unnecessarily.
+* [FIXED][15317](https://github.com/stripe/stripe-android/pull/15317) Fixed a memory leak where PaymentSheet could retain its Activity when closed before passive CAPTCHA warm-up finished.
+
 ## 23.25.2 - 2026-11-04
 
 ### PaymentSheet

@@ -83,7 +83,9 @@ internal class CheckoutLinkPaymentOptionsPresenterTest {
         presenter.present()
 
         verifyLinkWasNotPresented()
-        sheetLauncher.paymentOptionsCalls.expectNoEvents()
+        val call = sheetLauncher.paymentOptionsCalls.awaitItem()
+        assertThat(call.paymentMethodMetadata).isNull()
+        assertThat(call.configuration).isNull()
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
     }
 
@@ -500,7 +502,7 @@ internal class FakePaymentOptionsSheetLauncher : EmbeddedSheetLauncher {
     ) = error("Not expected")
 
     override fun launchPaymentOptions(
-        paymentMethodMetadata: PaymentMethodMetadata,
+        paymentMethodMetadata: PaymentMethodMetadata?,
         customerState: CustomerState?,
         selection: PaymentSelection?,
         configuration: EmbeddedPaymentElement.Configuration?,
@@ -509,7 +511,7 @@ internal class FakePaymentOptionsSheetLauncher : EmbeddedSheetLauncher {
     }
 
     data class PaymentOptionsCall(
-        val paymentMethodMetadata: PaymentMethodMetadata,
+        val paymentMethodMetadata: PaymentMethodMetadata?,
         val customerState: CustomerState?,
         val selection: PaymentSelection?,
         val configuration: EmbeddedPaymentElement.Configuration?,

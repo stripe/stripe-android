@@ -7,6 +7,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentsheet.ui.PrimaryButtonIcon
 import com.stripe.android.ui.core.elements.CvcController
 import com.stripe.android.ui.core.elements.CvcElement
 import com.stripe.android.uicore.elements.FormElement
@@ -24,7 +25,7 @@ internal class FakeTapToAddConfirmationInteractor(
     cardBrand: CardBrand = CardBrand.Visa,
     last4: String? = "4242",
     title: ResolvableString? = null,
-    locked: Boolean = true,
+    primaryButtonIcon: PrimaryButtonIcon = PrimaryButtonIcon.Lock,
     primaryButtonState: TapToAddConfirmationInteractor.State.PrimaryButton.State =
         TapToAddConfirmationInteractor.State.PrimaryButton.State.Idle,
     error: ResolvableString? = null,
@@ -36,7 +37,7 @@ internal class FakeTapToAddConfirmationInteractor(
             title = title,
             primaryButton = TapToAddConfirmationInteractor.State.PrimaryButton(
                 label = "Pay".resolvableString,
-                locked = locked,
+                icon = primaryButtonIcon,
                 state = primaryButtonState,
                 enabled = true,
             ),

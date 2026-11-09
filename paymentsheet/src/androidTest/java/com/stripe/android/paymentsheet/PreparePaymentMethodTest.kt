@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
 import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
 import com.stripe.android.model.PaymentMethod
@@ -37,7 +38,9 @@ internal class PreparePaymentMethodTest(
     private val apiConfigurationTestType: ApiConfigurationTestType,
 ) {
     @get:Rule
-    val testRules: TestRules = TestRules.create()
+    val testRules: TestRules = TestRules.create(
+        networkRule = NetworkRule(defaultMatcher = apiConfigurationTestType.defaultMatcher),
+    )
 
     private val composeTestRule = testRules.compose
     private val networkRule = testRules.networkRule

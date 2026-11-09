@@ -9,9 +9,11 @@ import com.stripe.android.LinkDisallowFundingSourceCreationPreview
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.common.analytics.experiment.DefaultPaymentMethodMessagePromotionsExperimentHandler
+import com.stripe.android.common.analytics.experiment.FakePreselectLinkExperiment
 import com.stripe.android.common.analytics.experiment.LogFcLiteExperiment
 import com.stripe.android.common.analytics.experiment.LogLinkHoldbackExperiment
 import com.stripe.android.common.analytics.experiment.PaymentMethodMessagePromotionsExperimentHandler
+import com.stripe.android.common.analytics.experiment.PreselectLinkExperiment
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.common.model.asCommonConfiguration
@@ -81,6 +83,7 @@ import com.stripe.android.paymentsheet.analytics.FakeLogFcLiteExperiment
 import com.stripe.android.paymentsheet.analytics.FakeLogLinkHoldbackExperiment
 import com.stripe.android.paymentsheet.analytics.FakePaymentMethodMessagePromotionsExperimentHandler
 import com.stripe.android.paymentsheet.injection.FakeApiConfigurationResolver
+import com.stripe.android.paymentsheet.model.CheckoutSessionClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.toSavedSelection
@@ -659,6 +662,92 @@ internal class DefaultPaymentElementLoaderTest {
             assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
             assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
         }
+
+    @Test
+    fun `final fallback uses the selection returned by the Link experiment`() = testPreselectLinkFallback(
+        selectionFromExperiment = PaymentSelection.Link(brand = LinkBrand.Onelink),
+        expectedSelection = PaymentSelection.Link(brand = LinkBrand.Onelink),
+    )
+
+    @Test
+    fun `final fallback remains empty when the Link experiment returns no selection`() = testPreselectLinkFallback(
+        selectionFromExperiment = null,
+        expectedSelection = null,
+    )
+
+    @Test
+    fun `unavailable last used payment method reaches the Link experiment`() = testPreselectLinkFallback(
+        savedSelection = SavedSelection.PaymentMethod("pm_no_longer_available"),
+        expectedSelection = PaymentSelection.Link(brand = LinkBrand.Link),
+    )
+
+    @Test
+    fun `last used customer payment method skips the Link experiment`() = testPreselectLinkFallback(
+        savedSelection = SavedSelection.PaymentMethod(PAYMENT_METHODS.last().id),
+        paymentMethods = PAYMENT_METHODS,
+        expectedSelection = PaymentSelection.Saved(PAYMENT_METHODS.last()),
+        expectsExperimentCall = false,
+    )
+
+    @Test
+    fun `customer payment method fallback skips the Link experiment`() = testPreselectLinkFallback(
+        paymentMethods = PAYMENT_METHODS,
+        expectedSelection = PaymentSelection.Saved(PAYMENT_METHODS.first()),
+        expectsExperimentCall = false,
+    )
+
+    @Test
+    fun `Google Pay fallback skips the Link experiment`() = testPreselectLinkFallback(
+        isGooglePayReady = true,
+        expectedSelection = PaymentSelection.GooglePay,
+        expectsExperimentCall = false,
+    )
+
+    @Test
+    fun `last used Link skips the Link experiment`() = testPreselectLinkFallback(
+        savedSelection = SavedSelection.Link,
+        expectedSelection = PaymentSelection.Link(brand = LinkBrand.Link),
+        expectsExperimentCall = false,
+    )
+
+    private fun testPreselectLinkFallback(
+        expectedSelection: PaymentSelection?,
+        selectionFromExperiment: PaymentSelection.Link? = PaymentSelection.Link(brand = LinkBrand.Link),
+        paymentMethods: List<PaymentMethod> = emptyList(),
+        savedSelection: SavedSelection? = null,
+        isGooglePayReady: Boolean = false,
+        expectsExperimentCall: Boolean = true,
+    ) = runScenario(customerRepo = FakeCustomerRepository(paymentMethods = paymentMethods)) {
+        prefsRepository.setSavedSelection(savedSelection)
+        val experiment = FakePreselectLinkExperiment(selection = selectionFromExperiment)
+        val loader = createPaymentElementLoader(
+            isGooglePayReady = isGooglePayReady,
+            linkSettings = createLinkSettings(passthroughModeEnabled = false),
+            preselectLinkExperiment = experiment,
+        )
+        val config = PaymentElementLoader.Configuration.PaymentSheet(
+            PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+        )
+        val state = loader.load(
+            initializationMode = DEFAULT_INITIALIZATION_MODE,
+            integrationConfiguration = config,
+            metadata = PaymentElementLoader.Metadata(initializedViaCompose = false),
+        ).getOrThrow()
+
+        assertThat(state.paymentSelection).isEqualTo(expectedSelection)
+        if (expectsExperimentCall) {
+            val call = experiment.getSelectionCalls.awaitItem()
+            assertThat(call.metadata).isSameInstanceAs(state.paymentMethodMetadata)
+            assertThat(call.customer).isEqualTo(state.customer)
+            assertThat(call.integrationConfiguration).isEqualTo(config)
+        } else {
+            experiment.getSelectionCalls.expectNoEvents()
+        }
+        experiment.validate()
+        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
+        assertThat(eventReporter.loadSucceededTurbine.awaitItem().paymentSelection).isEqualTo(expectedSelection)
+        consumeLoadingEvents()
+    }
 
     @Test
     fun `isTapToAddSupported should be false when tap to add is not supported`() =
@@ -1328,7 +1417,9 @@ internal class DefaultPaymentElementLoaderTest {
         ).put("ordered_payment_method_types_and_wallets", JSONArray(listOf("card")))
         json.getJSONObject("link_settings").put("link_mode", "LINK_CARD_BRAND")
             .remove("link_passthrough_mode_enabled")
-        val response = requireNotNull(CheckoutSessionResponseJsonParser("cs_secret").parse(json))
+        val response = requireNotNull(
+            CheckoutSessionResponseJsonParser(CheckoutSessionClientSecret("cs_test_abc123_secret_test")).parse(json)
+        )
         assertThat(response.elementsSession?.stripeIntent?.paymentMethodTypes).doesNotContain("link")
 
         val result = createPaymentElementLoader().load(
@@ -1922,7 +2013,6 @@ internal class DefaultPaymentElementLoaderTest {
             .isEqualTo(
                 IntegrationMetadata.CheckoutSession(
                     collectedEmail = null,
-                    id = checkoutSession.checkoutSessionResponse.id,
                     instancesKey = "DefaultPaymentElementLoaderTest",
                     checkoutSessionResponse = checkoutSession.checkoutSessionResponse,
                 )
@@ -3712,6 +3802,7 @@ internal class DefaultPaymentElementLoaderTest {
         assertThat((result.paymentSelection as? PaymentSelection.Saved)?.paymentMethod).isEqualTo(
             defaultPaymentMethod
         )
+        preselectLinkExperiment.getSelectionCalls.expectNoEvents()
     }
 
     @Test
@@ -5110,6 +5201,7 @@ internal class DefaultPaymentElementLoaderTest {
             eventReporter = eventReporter,
             prefsRepository = prefsRepository,
             customerRepository = customerRepo,
+            preselectLinkExperiment = FakePreselectLinkExperiment(),
         ).apply {
             runTest {
                 block()
@@ -5129,6 +5221,7 @@ internal class DefaultPaymentElementLoaderTest {
         val eventReporter: FakeLoadingEventReporter,
         val prefsRepository: FakePrefsRepository,
         val customerRepository: FakeCustomerRepository,
+        val preselectLinkExperiment: FakePreselectLinkExperiment,
     )
 
     private suspend fun Scenario.consumeLoadingEvents() {
@@ -5182,6 +5275,7 @@ internal class DefaultPaymentElementLoaderTest {
         durationProvider: FakeDurationProvider = FakeDurationProvider(),
         paymentMethodMessageExperimentHandler: PaymentMethodMessagePromotionsExperimentHandler =
             FakePaymentMethodMessagePromotionsExperimentHandler(),
+        preselectLinkExperiment: PreselectLinkExperiment = this.preselectLinkExperiment,
     ): DefaultPaymentElementLoader {
         val retrieveCustomerEmailImpl = DefaultRetrieveCustomerEmail(
             customerRepo,
@@ -5241,6 +5335,7 @@ internal class DefaultPaymentElementLoaderTest {
             tapToAddAvailabilityFactory = tapToAddAvailabilityFactory,
             durationProvider = durationProvider,
             paymentMethodMessagePromotionsExperimentHandler = paymentMethodMessageExperimentHandler,
+            preselectLinkExperiment = preselectLinkExperiment,
         )
     }
 

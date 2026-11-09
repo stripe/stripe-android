@@ -11,6 +11,7 @@ import com.stripe.android.financialconnections.ApiKeyFixtures.partnerAccount
 import com.stripe.android.financialconnections.ApiKeyFixtures.sessionManifest
 import com.stripe.android.financialconnections.ApiKeyFixtures.syncResponse
 import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
+import com.stripe.android.financialconnections.ThemeMode
 import com.stripe.android.financialconnections.exception.AccountLoadError
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.PartnerAccountsList
@@ -37,6 +38,7 @@ internal class PollAuthorizationSessionAccountsTest {
         ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
         ApiKeyFixtures.DEFAULT_API_CONFIG,
         preCollectedConsent = null,
+        themeMode = ThemeMode.Automatic,
     )
     private val pollAuthorizationSessionAccounts =
         PollAuthorizationSessionAccounts(repository, configuration)

@@ -51,7 +51,8 @@ class DefaultStripe3ds2ChallengeResultProcessorTest {
         analyticsRequestFactory,
         LinearRetryDelaySupplier(),
         Logger.noop(),
-        testDispatcher
+        testDispatcher,
+        apiConfiguration = ApiKeyFixtures.DEFAULT_API_CONFIG,
     )
 
     @get:Rule
