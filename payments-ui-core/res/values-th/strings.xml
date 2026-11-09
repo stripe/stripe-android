@@ -37,7 +37,7 @@
   <!-- Klarna pay later copy -->
   <string name="stripe_card_with_tap_or_enter_manually">แตะหรือป้อนเอง</string>
   <!-- Cash App mandate text -->
-  <string name="stripe_cash_app_pay_mandate">การดำเนินการต่อ หมายความว่าคุณอนุญาตให้ %1$s ฝากเงินเข้าบัญชี Cash App ของคุณสำหรับการชำระเงินรายการนี้ และการชำระเงินในอนาคตโดยสอดคล้องกับข้อกำหนดของ %2$s จนกว่าจะมีการเพิกถอนการอนุญาต คุณสามารถเปลี่ยนแปลงการตั้งค่านี้ได้ทุกเมื่อในการตั้งค่า Cash App</string>
+  <string name="stripe_cash_app_pay_mandate">เมื่อดำเนินการต่อ จะถือว่าคุณอนุญาตให้ %1$s หักเงินจากบัญชี Cash App ของคุณสำหรับการชำระเงินรายการนี้และการชำระเงินในอนาคตตามข้อกำหนดของ %2$s จนกว่าจะมีการเพิกถอนการอนุญาต คุณสามารถเปลี่ยนแปลงได้ทุกเมื่อในการตั้งค่า Cash App</string>
   <!-- Title for the contact information section -->
   <string name="stripe_contact_information">ข้อมูลติดต่อ</string>
   <!-- Text for continue button -->
@@ -66,7 +66,7 @@
   <!-- Klarna buy now or pay later copy -->
   <string name="stripe_klarna_buy_now_pay_later">ซื้อตอนนี้หรือจ่ายทีหลังด้วย Klarna</string>
   <!-- Klarna mandate text -->
-  <string name="stripe_klarna_mandate">การดำเนินการต่อที่ Klana หมายความว่าคุณอนุญาตให้ %1$s เรียกเก็บเงินจากบัญชี Klana ของคุณสำหรับการชำระเงินในอนาคตตามเงื่อนไขของผู้ค้ารายดังกล่าว คุณสามารถเปลี่ยนการอนุญาตนี้ได้ทุกเมื่อในแอป Klana หรือติดต่อที่ %2$s</string>
+  <string name="stripe_klarna_mandate">เมื่อดำเนินการต่อไปยัง Klarna จะถือว่าคุณอนุญาตให้ %1$s เรียกเก็บเงินจากบัญชี Klarna ของคุณสำหรับการชำระเงินในอนาคตตามข้อกำหนดของผู้ค้ารายดังกล่าวและข้อกำหนดของ Klarna คุณสามารถเปลี่ยนแปลงได้ทุกเมื่อในแอป Klarna ของคุณหรือโดยติดต่อ %2$s</string>
   <!-- Klarna pay later copy -->
   <string name="stripe_klarna_pay_later">จ่ายทีหลังด้วย Klarna</string>
   <!-- Caption for Phone field on address form -->
