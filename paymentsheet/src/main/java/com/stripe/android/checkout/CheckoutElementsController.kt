@@ -561,9 +561,9 @@ class CheckoutElementsController @Inject internal constructor(
          */
         val livemode: Boolean,
         /**
-         * The three-letter ISO currency code (e.g., "usd").
+         * The three-letter ISO currency code (e.g., "usd"), or `null` if the session has no currency.
          */
-        val currency: String,
+        val currency: String?,
         /**
          * Details about the currency presented to the customer, or `null` if the session is not using
          * adaptive pricing.
@@ -583,9 +583,9 @@ class CheckoutElementsController @Inject internal constructor(
         val orderSummaryItems: List<OrderSummaryItem>,
         /**
          * The factor used to convert amounts in the smallest currency unit to the major currency unit
-         * (e.g., `100` for USD and `1` for JPY).
+         * (e.g., `100` for USD and `1` for JPY), or `null` if the session has no currency.
          */
-        val minorUnitsAmountDivisor: Int,
+        val minorUnitsAmountDivisor: Int?,
         /**
          * The customer's currently selected payment option, or `null` if none has been selected yet.
          */
@@ -652,29 +652,30 @@ class CheckoutElementsController @Inject internal constructor(
             @Poko
             class Complete internal constructor(
                 /**
-                 * Whether the payment for this completed session has been collected.
+                 * The payment status of this completed session.
                  */
                 val paymentStatus: PaymentStatus,
             ) : Status()
 
             /**
-             * Whether the payment for a completed checkout session has been collected.
+             * The payment status of a completed checkout session.
              */
             @CheckoutSessionPreview
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             enum class PaymentStatus {
                 /**
-                 * The payment has been collected.
+                 * The payment funds are available in your account.
                  */
                 Paid,
 
                 /**
-                 * The payment has not been collected. It may still be processing or may have failed.
+                 * The payment funds are not yet available in your account.
                  */
                 Unpaid,
 
                 /**
-                 * No payment was required for this session, such as for a zero-amount order.
+                 * The payment is delayed to a future date, or the session is in setup mode and doesn't
+                 * require a payment at this time.
                  */
                 NoPaymentRequired,
             }
