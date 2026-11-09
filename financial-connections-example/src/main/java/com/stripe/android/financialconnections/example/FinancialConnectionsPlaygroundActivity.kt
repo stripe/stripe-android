@@ -54,6 +54,7 @@ import androidx.core.text.HtmlCompat
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.networking.MarkdownParser
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.financialconnections.ThemeMode
 import com.stripe.android.financialconnections.example.Experience.FinancialConnections
 import com.stripe.android.financialconnections.example.Experience.InstantDebits
 import com.stripe.android.financialconnections.example.Experience.LinkCardBrand
@@ -98,6 +99,7 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
         collectBankAccountForInstantDebitsLauncher = CollectBankAccountForInstantDebitsLauncher.createForPaymentSheet(
             // Pretending this is PaymentSheet for now…
             hostedSurface = HOSTED_SURFACE_PAYMENT_ELEMENT,
+            themeMode = ThemeMode.Automatic,
             activityResultRegistryOwner = this,
             callback = viewModel::onCollectBankAccountForInstantDebitsLauncherResult,
             financialConnectionsAvailability = FinancialConnectionsAvailability.Full
