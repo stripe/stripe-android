@@ -5,6 +5,7 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.toRequestOptions
 import dagger.Module
 import dagger.Provides
 import javax.inject.Provider
@@ -32,9 +33,6 @@ class ApiRequestOptionsModule {
         apiConfigurationProvider: Provider<ApiConfiguration.State>
     ): ApiRequest.Options {
         val apiConfiguration = apiConfigurationProvider.get()
-        return ApiRequest.Options(
-            apiKey = apiConfiguration.publishableKey,
-            stripeAccount = apiConfiguration.stripeAccountId,
-        )
+        return apiConfiguration.toRequestOptions(idempotencyKey = null)
     }
 }

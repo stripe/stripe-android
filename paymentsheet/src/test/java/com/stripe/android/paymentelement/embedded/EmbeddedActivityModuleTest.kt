@@ -93,7 +93,6 @@ internal class EmbeddedActivityModuleTest {
     @Test
     fun `checkout sheets do not provide promotions or report promotion displays`() = runPromotionsScenario(
         integrationMetadata = IntegrationMetadata.CheckoutSession(
-            id = "cs_123",
             instancesKey = "checkout",
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
             collectedEmail = null,

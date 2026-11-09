@@ -44,7 +44,7 @@ internal interface EmbeddedSheetLauncher {
     )
 
     fun launchPaymentOptions(
-        paymentMethodMetadata: PaymentMethodMetadata,
+        paymentMethodMetadata: PaymentMethodMetadata?,
         customerState: CustomerState?,
         selection: PaymentSelection?,
         configuration: EmbeddedPaymentElement.Configuration?,
@@ -186,8 +186,6 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
             .takeIf { it?.paymentMethodType == code }
             ?: selectionHolder.getPreviousNewSelection(code)
         val args = EmbeddedActivityArgs(
-            paymentMethodMetadata = paymentMethodMetadata,
-            configuration = configuration,
             productUsage = productUsage,
             paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
             statusBarColor = statusBarColor,
@@ -199,7 +197,10 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
             launchMode = EmbeddedLaunchMode.Form(
                 selectedPaymentMethodCode = code,
             ),
-            presentationState = EmbeddedActivityArgs.PresentationState.Ready,
+            presentationState = EmbeddedActivityArgs.PresentationState.Ready(
+                paymentMethodMetadata = paymentMethodMetadata,
+                configuration = configuration,
+            ),
         )
         activityLauncher.launch(args)
     }
@@ -219,8 +220,6 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
         if (sheetStateHolder.sheetIsOpen) return
         sheetStateHolder.sheetIsOpen = true
         val args = EmbeddedActivityArgs(
-            paymentMethodMetadata = paymentMethodMetadata,
-            configuration = configuration,
             productUsage = productUsage,
             paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
             statusBarColor = statusBarColor,
@@ -230,18 +229,21 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
             linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
             promotions = emptyList(),
             launchMode = EmbeddedLaunchMode.Manage,
-            presentationState = EmbeddedActivityArgs.PresentationState.Ready,
+            presentationState = EmbeddedActivityArgs.PresentationState.Ready(
+                paymentMethodMetadata = paymentMethodMetadata,
+                configuration = configuration,
+            ),
         )
         activityLauncher.launch(args)
     }
 
     override fun launchPaymentOptions(
-        paymentMethodMetadata: PaymentMethodMetadata,
+        paymentMethodMetadata: PaymentMethodMetadata?,
         customerState: CustomerState?,
         selection: PaymentSelection?,
         configuration: EmbeddedPaymentElement.Configuration?,
     ) {
-        if (configuration == null) {
+        if (configuration == null || paymentMethodMetadata == null) {
             errorReporter.report(
                 ErrorReporter.UnexpectedErrorEvent.EMBEDDED_SHEET_LAUNCHER_EMBEDDED_STATE_IS_NULL
             )
@@ -250,8 +252,6 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
         if (sheetStateHolder.sheetIsOpen) return
         sheetStateHolder.sheetIsOpen = true
         val args = EmbeddedActivityArgs(
-            paymentMethodMetadata = paymentMethodMetadata,
-            configuration = configuration,
             productUsage = productUsage,
             paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
             statusBarColor = statusBarColor,
@@ -261,7 +261,10 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
             linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
             promotions = emptyList(),
             launchMode = EmbeddedLaunchMode.PaymentOptions,
-            presentationState = EmbeddedActivityArgs.PresentationState.Ready,
+            presentationState = EmbeddedActivityArgs.PresentationState.Ready(
+                paymentMethodMetadata = paymentMethodMetadata,
+                configuration = configuration,
+            ),
         )
         activityLauncher.launch(args)
     }

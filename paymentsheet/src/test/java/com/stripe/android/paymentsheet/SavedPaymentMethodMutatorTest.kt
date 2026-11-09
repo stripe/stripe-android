@@ -20,6 +20,7 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
+import com.stripe.android.paymentsheet.model.CheckoutSessionClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.state.LinkState
@@ -252,8 +253,7 @@ class SavedPaymentMethodMutatorTest {
     @Test
     fun `removePaymentMethod with CheckoutSession metadata passes CheckoutSession to repository`() {
         val checkoutSessionMetadata = CustomerMetadata.CheckoutSession(
-            clientSecret = "cs_test_abc123_secret_test",
-            sessionId = "cs_test_123",
+            clientSecret = CheckoutSessionClientSecret("cs_test_123_secret_test"),
             customerId = "cus_123",
             removePaymentMethod = PaymentMethodRemovePermission.Full,
             saveConsent = PaymentMethodSaveConsentBehavior.Disabled(overrideAllowRedisplay = null),
@@ -275,7 +275,7 @@ class SavedPaymentMethodMutatorTest {
             val detachRequest = savedPaymentMethodRepository.detachRequests.awaitItem()
             assertThat(detachRequest.paymentMethodId).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_METHOD.id)
             assertThat(detachRequest.customerMetadata).isInstanceOf(CustomerMetadata.CheckoutSession::class.java)
-            assertThat((detachRequest.customerMetadata as CustomerMetadata.CheckoutSession).sessionId)
+            assertThat((detachRequest.customerMetadata as CustomerMetadata.CheckoutSession).clientSecret.sessionId)
                 .isEqualTo("cs_test_123")
 
             assertThat(postPaymentMethodRemovedTurbine.awaitItem()).isEqualTo(Unit)

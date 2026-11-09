@@ -77,6 +77,7 @@ class FinancialConnectionsSheetViewModelTest {
         ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
         ApiKeyFixtures.DEFAULT_API_CONFIG,
         preCollectedConsent = null,
+        themeMode = ThemeMode.Automatic,
     )
 
     private val syncResponse = syncResponse()

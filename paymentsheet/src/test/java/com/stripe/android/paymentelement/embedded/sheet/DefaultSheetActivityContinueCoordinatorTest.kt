@@ -308,7 +308,6 @@ internal class DefaultSheetActivityContinueCoordinatorTest {
         val CHECKOUT_SESSION_METADATA = PaymentMethodMetadataFactory.create(
             integrationMetadata = IntegrationMetadata.CheckoutSession(
                 collectedEmail = null,
-                id = "cs_test_123",
                 instancesKey = "test_instances_key",
                 checkoutSessionResponse = CheckoutSessionResponseFactory.create(
                     automaticTaxEnabled = true,

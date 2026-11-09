@@ -74,8 +74,6 @@ internal class DefaultEmbeddedSheetLauncherTest {
             ),
         )
         val expectedArgs = EmbeddedActivityArgs(
-            paymentMethodMetadata = paymentMethodMetadata,
-            configuration = EmbeddedConfigurationFactory.create(),
             productUsage = setOf("EmbeddedPaymentElement"),
             paymentElementCallbackIdentifier = "EmbeddedFormTestIdentifier",
             statusBarColor = null,
@@ -87,7 +85,10 @@ internal class DefaultEmbeddedSheetLauncherTest {
             launchMode = EmbeddedLaunchMode.Form(
                 selectedPaymentMethodCode = code,
             ),
-            presentationState = EmbeddedActivityArgs.PresentationState.Ready,
+            presentationState = EmbeddedActivityArgs.PresentationState.Ready(
+                paymentMethodMetadata = paymentMethodMetadata,
+                configuration = EmbeddedConfigurationFactory.create(),
+            ),
         )
 
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
@@ -410,8 +411,6 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
         val customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
         val expectedArgs = EmbeddedActivityArgs(
-            paymentMethodMetadata = paymentMethodMetadata,
-            configuration = EmbeddedConfigurationFactory.create(),
             productUsage = setOf("EmbeddedPaymentElement"),
             paymentElementCallbackIdentifier = "EmbeddedFormTestIdentifier",
             statusBarColor = null,
@@ -421,7 +420,10 @@ internal class DefaultEmbeddedSheetLauncherTest {
             linkAccountInfo = LinkAccountUpdate.Value(null),
             promotions = emptyList(),
             launchMode = EmbeddedLaunchMode.Manage,
-            presentationState = EmbeddedActivityArgs.PresentationState.Ready,
+            presentationState = EmbeddedActivityArgs.PresentationState.Ready(
+                paymentMethodMetadata = paymentMethodMetadata,
+                configuration = EmbeddedConfigurationFactory.create(),
+            ),
         )
 
         sheetLauncher.launchManage(
@@ -608,8 +610,6 @@ internal class DefaultEmbeddedSheetLauncherTest {
         )
         linkAccountHolder.set(linkAccountInfo)
         val expectedArgs = EmbeddedActivityArgs(
-            paymentMethodMetadata = paymentMethodMetadata,
-            configuration = EmbeddedConfigurationFactory.create(),
             productUsage = setOf("EmbeddedPaymentElement"),
             paymentElementCallbackIdentifier = "EmbeddedFormTestIdentifier",
             statusBarColor = null,
@@ -619,7 +619,10 @@ internal class DefaultEmbeddedSheetLauncherTest {
             linkAccountInfo = linkAccountInfo,
             promotions = emptyList(),
             launchMode = EmbeddedLaunchMode.PaymentOptions,
-            presentationState = EmbeddedActivityArgs.PresentationState.Ready,
+            presentationState = EmbeddedActivityArgs.PresentationState.Ready(
+                paymentMethodMetadata = paymentMethodMetadata,
+                configuration = EmbeddedConfigurationFactory.create(),
+            ),
         )
 
         sheetLauncher.launchPaymentOptions(
@@ -649,6 +652,36 @@ internal class DefaultEmbeddedSheetLauncherTest {
         assertThat(loggedErrors.first())
             .isEqualTo("unexpected_error.embedded.embedded_sheet_launcher.embedded_state_is_null")
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
+    }
+
+    @Test
+    fun `launchPaymentOptions logs error and returns if metadata is null`() = testScenario {
+        sheetLauncher.launchPaymentOptions(
+            paymentMethodMetadata = null,
+            customerState = null,
+            selection = null,
+            configuration = EmbeddedConfigurationFactory.create(),
+        )
+
+        assertThat(errorReporter.awaitCall().errorEvent.eventName)
+            .isEqualTo("unexpected_error.embedded.embedded_sheet_launcher.embedded_state_is_null")
+        assertThat(sheetStateHolder.sheetIsOpen).isFalse()
+        errorReporter.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `launchPaymentOptions logs error and returns if state is unavailable`() = testScenario {
+        sheetLauncher.launchPaymentOptions(
+            paymentMethodMetadata = null,
+            customerState = null,
+            selection = null,
+            configuration = null,
+        )
+
+        assertThat(errorReporter.awaitCall().errorEvent.eventName)
+            .isEqualTo("unexpected_error.embedded.embedded_sheet_launcher.embedded_state_is_null")
+        assertThat(sheetStateHolder.sheetIsOpen).isFalse()
+        errorReporter.ensureAllEventsConsumed()
     }
 
     @Test

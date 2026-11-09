@@ -123,6 +123,20 @@ internal class EmbeddedNavigatorScreenScreenshotTest {
     }
 
     @Test
+    fun displaysFormWithSecureIcon() {
+        snapshot(
+            screen = createFormScreen(
+                metadata = PaymentMethodMetadataFactory.create(
+                    stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(isLiveMode = true),
+                ),
+                primaryButtonIcon = PrimaryButtonIcon.Secure,
+            ),
+            previousScreen = createVerticalPaymentOptionsScreen(),
+            walletsState = createWalletsState(),
+        )
+    }
+
+    @Test
     fun displaysSavedPaymentMethodConfirm() {
         val screen = EmbeddedNavigator.Screen.SavedPaymentMethodConfirm(
             interactor = FakeSavedPaymentMethodConfirmInteractor(formEnabled = true),

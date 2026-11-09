@@ -27,6 +27,7 @@ import com.stripe.android.model.PaymentMethodSelectionFlow
 import com.stripe.android.paymentsheet.CardFundingFilteringPrivatePreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
+import com.stripe.android.paymentsheet.model.CheckoutSessionClientSecret
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.utils.FakeCustomerRepository
@@ -205,8 +206,7 @@ internal class DefaultCreateLinkStateTest {
         val createLinkState = createLinkStateFactory()
         val elementsSession = createElementsSession()
         val customerMetadata = CustomerMetadata.CheckoutSession(
-            clientSecret = "cs_test_abc123_secret_test",
-            sessionId = "cs_test_123",
+            clientSecret = CheckoutSessionClientSecret("cs_test_abc123_secret_test"),
             customerId = "cus_123",
             removePaymentMethod = PaymentMethodRemovePermission.None,
             saveConsent = PaymentMethodSaveConsentBehavior.Enabled,

@@ -11,6 +11,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixt
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
+import com.stripe.android.paymentsheet.model.CheckoutSessionClientSecret
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeDurationProvider
 import kotlinx.coroutines.test.runTest
@@ -180,8 +181,7 @@ internal class DefaultRetrieveCustomerEmailTest {
         )
 
         val CHECKOUT_SESSION_METADATA = CustomerMetadata.CheckoutSession(
-            clientSecret = "cs_test_abc123_secret_test",
-            sessionId = "cs_test_123",
+            clientSecret = CheckoutSessionClientSecret("cs_test_abc123_secret_test"),
             customerId = "cus_test_123",
             removePaymentMethod = PaymentMethodRemovePermission.None,
             saveConsent = PaymentMethodSaveConsentBehavior.Disabled(overrideAllowRedisplay = null),

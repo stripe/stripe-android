@@ -2,6 +2,7 @@ package com.stripe.android.model
 
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
+import com.stripe.android.KlarnaSdkPrivatePreview
 import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
@@ -140,6 +141,48 @@ sealed class PaymentMethodOptionsParams(
     }
 
     @Parcelize
+    @Poko
+    class Klarna @KlarnaSdkPrivatePreview constructor(
+        private val interoperabilityToken: String?,
+        private val partnerConfirmationToken: String?,
+        var setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage? = null
+    ) : PaymentMethodOptionsParams(PaymentMethod.Type.Klarna) {
+        @OptIn(KlarnaSdkPrivatePreview::class)
+        constructor(setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage? = null) : this(
+            interoperabilityToken = null,
+            partnerConfirmationToken = null,
+            setupFutureUsage = setupFutureUsage,
+        )
+
+        @OptIn(KlarnaSdkPrivatePreview::class)
+        internal fun copy(
+            interoperabilityToken: String? = this.interoperabilityToken,
+            partnerConfirmationToken: String? = this.partnerConfirmationToken,
+            setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage? = this.setupFutureUsage
+        ): Klarna {
+            return Klarna(
+                interoperabilityToken = interoperabilityToken,
+                partnerConfirmationToken = partnerConfirmationToken,
+                setupFutureUsage = setupFutureUsage,
+            )
+        }
+
+        override fun createTypeParams(): List<Pair<String, Any?>> {
+            return listOf(
+                PARAM_INTEROPERABILITY_TOKEN to interoperabilityToken,
+                PARAM_PARTNER_CONFIRMATION_TOKEN to partnerConfirmationToken,
+                PARAM_SETUP_FUTURE_USAGE to setupFutureUsage?.code
+            )
+        }
+
+        internal companion object {
+            internal const val PARAM_INTEROPERABILITY_TOKEN = "interoperability_token"
+            internal const val PARAM_PARTNER_CONFIRMATION_TOKEN = "partner_confirmation_token"
+            internal const val PARAM_SETUP_FUTURE_USAGE = "setup_future_usage"
+        }
+    }
+
+    @Parcelize
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class Konbini(
         private val confirmationNumber: String,
@@ -258,6 +301,7 @@ fun PaymentMethodOptionsParams.setupFutureUsage(): ConfirmPaymentIntentParams.Se
         is PaymentMethodOptionsParams.Card -> setupFutureUsage
         is PaymentMethodOptionsParams.SepaDebit -> setupFutureUsage
         is PaymentMethodOptionsParams.Konbini -> setupFutureUsage
+        is PaymentMethodOptionsParams.Klarna -> setupFutureUsage
         is PaymentMethodOptionsParams.Link -> setupFutureUsage
         is PaymentMethodOptionsParams.USBankAccount -> setupFutureUsage
         is PaymentMethodOptionsParams.WeChatPay -> setupFutureUsage
@@ -283,6 +327,7 @@ fun PaymentMethodOptionsParams?.updateSetupFutureUsageWithPmoSfu(
         is PaymentMethodOptionsParams.Card -> this.copy(setupFutureUsage = sfuValueToSet)
         is PaymentMethodOptionsParams.SepaDebit -> this.copy(setupFutureUsage = sfuValueToSet)
         is PaymentMethodOptionsParams.Konbini -> this.copy(setupFutureUsage = sfuValueToSet)
+        is PaymentMethodOptionsParams.Klarna -> this.copy(setupFutureUsage = sfuValueToSet)
         is PaymentMethodOptionsParams.Link -> this.copy(setupFutureUsage = sfuValueToSet)
         is PaymentMethodOptionsParams.USBankAccount -> this.copy(setupFutureUsage = sfuValueToSet)
         is PaymentMethodOptionsParams.WeChatPay -> this.copy(setupFutureUsage = sfuValueToSet)

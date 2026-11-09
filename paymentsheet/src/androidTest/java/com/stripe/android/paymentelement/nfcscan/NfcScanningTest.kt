@@ -20,8 +20,11 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(TestParameterInjector::class)
-internal class NfcScanningTest {
-    private val networkRule = NetworkRule()
+internal class NfcScanningTest(
+    @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
+    private val apiConfigurationTestType: ApiConfigurationTestType,
+) {
+    private val networkRule = NetworkRule(defaultMatcher = apiConfigurationTestType.defaultMatcher)
 
     @get:Rule
     val testRules: TestRules = TestRules.create(
@@ -40,8 +43,6 @@ internal class NfcScanningTest {
     fun success(
         @TestParameter(valuesProvider = NfcScanningIntegrationType.Provider::class)
         integrationType: NfcScanningIntegrationType,
-        @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
-        apiConfigurationTestType: ApiConfigurationTestType,
     ) = runNfcScanningIntegrationTest(
         integrationType = integrationType,
         apiConfigurationTestType = apiConfigurationTestType,
@@ -86,8 +87,6 @@ internal class NfcScanningTest {
     fun successWithNameRequired(
         @TestParameter(valuesProvider = NfcScanningIntegrationType.Provider::class)
         integrationType: NfcScanningIntegrationType,
-        @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
-        apiConfigurationTestType: ApiConfigurationTestType,
     ) = runNfcScanningIntegrationTest(
         integrationType = integrationType,
         apiConfigurationTestType = apiConfigurationTestType,

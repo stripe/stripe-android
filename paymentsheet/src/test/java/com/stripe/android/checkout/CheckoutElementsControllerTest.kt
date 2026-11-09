@@ -222,8 +222,10 @@ internal class CheckoutElementsControllerTest {
     fun `configure parses session id from client secret`() = runConfigureScenario(
         clientSecret = "cs_test_custom_secret_example",
         networkSetup = {
-            // The request must hit the path for the parsed session id, not the response's id.
-            networkRule.checkoutInit(sessionId = "cs_test_custom", responseFactory = ::successResponse)
+            networkRule.checkoutInit(
+                sessionId = "cs_test_custom",
+                responseFactory = successResponseFactory { json -> json.put("id", "cs_test_custom") },
+            )
         },
     ) {
         assertThat(result).isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
@@ -676,6 +678,18 @@ internal class CheckoutElementsControllerTest {
             assertThat(committedState?.embeddedConfiguration?.billingDetailsCollectionConfiguration?.address)
                 .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full)
         }
+
+    @Test
+    fun `configure with a malformed client secret fails without a request`() = runConfigureScenario(
+        clientSecret = "cs_test_malformed",
+        // No response is enqueued, so NetworkRule fails the test if a request is sent.
+        networkSetup = {},
+    ) {
+        val failure = result as CheckoutElementsController.OperationResult.Failed
+
+        assertThat(failure.error).isInstanceOf(IllegalArgumentException::class.java)
+        assertThat(controller.session.value).isNull()
+    }
 
     @Test
     fun `configure returns failure when network request fails`() = runConfigureScenario(
@@ -1669,7 +1683,7 @@ internal class CheckoutElementsControllerTest {
         }
 
     @Test
-    fun `concurrent mutations are serialized so the second uses the first result's session id`() =
+    fun `concurrent mutations are serialized`() =
         runMutationScenario {
             val firstRequest = Turbine<Unit>()
             val secondRequest = Turbine<Unit>()
@@ -1681,16 +1695,13 @@ internal class CheckoutElementsControllerTest {
                 check(releaseFirstResponse.await(10, TimeUnit.SECONDS)) {
                     "Timed out waiting to release the first mutation response"
                 }
-                successResponseFactory { json -> json.put("id", "cs_test_after_promo") }.invoke(response)
+                successResponseFactory().invoke(response)
             }
-            // The second mutation must target the session id produced by the first, proving the
-            // mutex serialized them (an unserialized call would hit the original id and fail).
             networkRule.checkoutUpdate(
                 bodyPart("adaptive_pricing[currency]", "eur"),
-                sessionId = "cs_test_after_promo",
             ) { response ->
                 secondRequest.add(Unit)
-                successResponseFactory { json -> json.put("id", "cs_test_after_promo") }.invoke(response)
+                successResponseFactory().invoke(response)
             }
 
             fromBackgroundThread {
@@ -1719,9 +1730,64 @@ internal class CheckoutElementsControllerTest {
                 }
             }
 
-            assertThat(controller.session.value?.id).isEqualTo("cs_test_after_promo")
+            assertThat(controller.session.value?.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
             firstRequest.ensureAllEventsConsumed()
             secondRequest.ensureAllEventsConsumed()
+        }
+
+    @Test
+    fun `queued mutation uses the preceding mutation's updated response`() =
+        runMutationScenario(
+            initModifier = { it.remove("customer_email") },
+        ) {
+            assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isNotEqualTo(4099L)
+            val firstRequest = Turbine<Unit>()
+            val releaseFirstResponse = CountDownLatch(1)
+            networkRule.checkoutUpdate(
+                bodyPart("promotion_code", "10OFF"),
+            ) { response ->
+                firstRequest.add(Unit)
+                check(releaseFirstResponse.await(10, TimeUnit.SECONDS)) {
+                    "Timed out waiting to release the first mutation response"
+                }
+                successResponseFactory(
+                    combine(
+                        withTotal(4099),
+                        { json ->
+                            json.remove("customer_email")
+                            json.getJSONObject("total_summary").put("due", 4099)
+                        },
+                    ),
+                ).invoke(response)
+            }
+
+            fromBackgroundThread {
+                coroutineScope {
+                    val first = async { controller.applyPromotionCode("10OFF") }
+                    try {
+                        firstRequest.awaitItem()
+                        val second = async(start = CoroutineStart.UNDISPATCHED) {
+                            controller.updateEmail("local@example.com")
+                        }
+                        withContext(Dispatchers.Main) { }
+                        assertThat(second.isCompleted).isFalse()
+
+                        releaseFirstResponse.countDown()
+
+                        assertThat(first.await())
+                            .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
+                        assertThat(second.await())
+                            .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
+                    } finally {
+                        releaseFirstResponse.countDown()
+                    }
+                }
+            }
+
+            assertThat(controller.session.value?.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
+            assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isEqualTo(4099L)
+            assertThat(controller.session.value?.email).isEqualTo("local@example.com")
+            firstRequest.ensureAllEventsConsumed()
         }
 
     @Test

@@ -287,6 +287,7 @@ class PaymentLauncherConfirmationActivityTest {
             productUsage = PRODUCT_USAGE,
             includePaymentSheetNextHandlers = false,
             statusBarColor = Color.RED,
+            betas = emptySet(),
         )
 
         mockViewModelActivityScenario().launchForResult(
@@ -318,6 +319,7 @@ class PaymentLauncherConfirmationActivityTest {
             productUsage = PRODUCT_USAGE,
             includePaymentSheetNextHandlers = false,
             statusBarColor = Color.RED,
+            betas = emptySet(),
         )
 
         mockViewModelActivityScenario().launchForResult(
