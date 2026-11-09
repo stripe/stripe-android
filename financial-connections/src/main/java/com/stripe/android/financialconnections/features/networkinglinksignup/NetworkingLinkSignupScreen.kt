@@ -30,6 +30,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.testTag
@@ -282,13 +283,10 @@ private fun PhoneNumberSection(
     focusRequester: FocusRequester,
 ) {
     var focused by remember { mutableStateOf(false) }
+    val focusedBackground = linkFocusedComponentBackground()
     Column {
         StripeThemeForConnections(
-            componentBackground = if (FinancialConnectionsTheme.theme.isLink && focused) {
-                colors.background
-            } else {
-                null
-            }
+            componentBackground = focusedBackground.takeIf { focused },
         ) {
             PhoneNumberCollectionSection(
                 modifier = Modifier.onFocusChanged { focused = it.hasFocus },
@@ -351,12 +349,9 @@ internal fun EmailSection(
     focusRequester: FocusRequester,
 ) {
     var focused by remember { mutableStateOf(false) }
+    val focusedBackground = linkFocusedComponentBackground()
     StripeThemeForConnections(
-        componentBackground = if (FinancialConnectionsTheme.theme.isLink && focused) {
-            colors.background
-        } else {
-            null
-        }
+        componentBackground = focusedBackground.takeIf { focused },
     ) {
         Box(
             modifier = Modifier
@@ -395,6 +390,18 @@ internal fun EmailSection(
             }
         }
     }
+}
+
+/**
+ * The Link DS 3.0 field background while focused, or null outside the Link theme. Read eagerly, not
+ * inside a focus-dependent branch: a composable read that only runs when focused changes the
+ * composition groups on each focus change and recreates the field, so it immediately loses focus.
+ */
+@Composable
+private fun linkFocusedComponentBackground(): Color? {
+    val isLink = FinancialConnectionsTheme.theme.isLink
+    val background = colors.background
+    return background.takeIf { isLink }
 }
 
 private suspend fun ScrollState.animateScrollToBottom(

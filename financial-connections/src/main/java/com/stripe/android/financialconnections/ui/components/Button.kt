@@ -51,7 +51,6 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.datasource.CollectionPreviewParameterProvider
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.stripe.android.financialconnections.ThemeMode
@@ -326,7 +325,7 @@ internal object FinancialConnectionsButton {
         }
 
         /**
-         * A pill-shaped, transparent secondary button with a hairline outline. Used for the "Cancel"
+         * A pill-shaped, transparent secondary button with a 1.dp outline. Used for the "Cancel"
          * action in the Link DS 3.0 warmup sheet's side-by-side footer.
          */
         data object SecondaryOutlined : Type() {
@@ -345,7 +344,8 @@ internal object FinancialConnectionsButton {
 
             @Composable
             override fun border(): BorderStroke = BorderStroke(
-                width = Dp.Hairline,
+                // A 1px hairline anti-aliases unevenly around the pill's curved ends.
+                width = 1.dp,
                 color = colors.border,
             )
 

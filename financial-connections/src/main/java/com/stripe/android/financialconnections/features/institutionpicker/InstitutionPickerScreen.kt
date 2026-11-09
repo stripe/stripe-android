@@ -184,13 +184,17 @@ private fun LoadedContent(
 
     // DS 3.0 groups the rows into a grey card that runs edge to edge within the body inset, so the
     // per-row 8.dp padding moves out to `bodyPadding` and the title/search bar drop their own inset.
-    // Both themes end up with everything 24.dp from the screen edge.
+    // In DS 3.0 the card edges line up with the visible back arrow and close glyphs in the top app bar.
     val isLink = FinancialConnectionsTheme.theme.isLink
     val contentInset = if (isLink) 0.dp else 8.dp
 
     LazyLayout(
         lazyListState = listState,
-        bodyPadding = PaddingValues(horizontal = if (isLink) 24.dp else 16.dp),
+        bodyPadding = if (isLink) {
+            PaddingValues(start = LinkBodyStartPadding, end = LinkBodyEndPadding)
+        } else {
+            PaddingValues(horizontal = 16.dp)
+        },
     ) {
         item {
             SearchTitle(
@@ -528,6 +532,14 @@ private fun ClearSearchButton(
 
 /** Size of the Link DS 3.0 clear-search glyph, balanced against the leading search icon. */
 private val ClearSearchGlyphSize = 20.dp
+
+/**
+ * Link DS 3.0 body insets. The top app bar icons sit 16.dp from the screen edge (4.dp bar padding plus
+ * the 48.dp touch target centering a 24.dp icon), and the back arrow and close glyphs are inset a
+ * further 4.dp and 5.dp within their 24.dp viewports.
+ */
+private val LinkBodyStartPadding = 20.dp
+private val LinkBodyEndPadding = 21.dp
 
 @Composable
 private fun ManualEntryRow(
