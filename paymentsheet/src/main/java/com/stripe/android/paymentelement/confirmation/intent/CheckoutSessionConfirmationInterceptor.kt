@@ -37,7 +37,7 @@ import dagger.assisted.AssistedInject
 internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructor(
     @Assisted private val integrationMetadata: IntegrationMetadata.CheckoutSession,
     @Assisted private val customerMetadata: CustomerMetadata?,
-    @Assisted private val clientAttributionMetadata: ClientAttributionMetadata,
+    @Assisted private val clientAttributionMetadata: ClientAttributionMetadata.CheckoutSession,
     context: Context,
     private val checkoutSessionRepository: CheckoutSessionRepository,
     private val checkoutSessionTaxRegionUpdater: CheckoutSessionTaxRegionUpdater,
@@ -102,9 +102,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
             checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
                 checkoutSessionResponse = checkoutSessionResponse,
                 addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
-                invocationSource = if (
-                    (clientAttributionMetadata as ClientAttributionMetadata.CheckoutSession).isExpressCheckoutElement
-                ) {
+                invocationSource = if (clientAttributionMetadata.isExpressCheckoutElement) {
                     InvocationSource.ExpressCheckoutElement
                 } else {
                     InvocationSource.PaymentElement
@@ -218,7 +216,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
         fun create(
             integrationMetadata: IntegrationMetadata.CheckoutSession,
             customerMetadata: CustomerMetadata?,
-            clientAttributionMetadata: ClientAttributionMetadata,
+            clientAttributionMetadata: ClientAttributionMetadata.CheckoutSession,
         ): CheckoutSessionConfirmationInterceptor
     }
 }
