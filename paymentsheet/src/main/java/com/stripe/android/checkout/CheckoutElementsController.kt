@@ -76,6 +76,7 @@ class CheckoutElementsController @Inject internal constructor(
     private val errorReporter: ErrorReporter,
     private val checkoutStateLoader: CheckoutStateLoader,
     private val stateHolder: CheckoutElementsControllerStateHolder,
+    private val configurationStateHolder: CheckoutElementsConfigurationStateHolder,
     private val sheetStateHolder: SheetStateHolder,
     private val operationCoordinator: CheckoutOperationCoordinator,
     private val checkoutElementsPresenterSubcomponentFactory: CheckoutElementsPresenterSubcomponent.Factory,
@@ -121,7 +122,7 @@ class CheckoutElementsController @Inject internal constructor(
             return@withContext kotlin.Result.failure(e)
         }
         val configurationState = configuration.build()
-        stateHolder.configurationState = configurationState
+        configurationStateHolder.state = configurationState
         operationCoordinator.runMutation {
             checkoutSessionRepository.init(
                 clientSecret = parsedClientSecret,
@@ -500,6 +501,7 @@ class CheckoutElementsController @Inject internal constructor(
     @MainThread
     fun destroy() {
         viewModelScope.cancel()
+        configurationStateHolder.state = null
         checkoutStateLoader.clear()
         savedState.clear()
     }

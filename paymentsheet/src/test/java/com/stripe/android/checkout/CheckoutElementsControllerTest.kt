@@ -119,7 +119,7 @@ internal class CheckoutElementsControllerTest {
                     .themeMode(PaymentElement.Configuration.Appearance.ThemeMode.AlwaysDark)
             )
         )
-        assertThat(setup.stateHolder.configurationState).isNull()
+        assertThat(setup.configurationStateHolder.state).isNull()
 
         val initRequest = Turbine<Unit>()
         val releaseInitResponse = CountDownLatch(1)
@@ -139,12 +139,7 @@ internal class CheckoutElementsControllerTest {
             assertThat(configure.isCompleted).isFalse()
             assertThat(setup.controller.isUpdating.value).isTrue()
             assertThat(setup.stateHolder.state).isNull()
-            assertThat(setup.stateHolder.configurationState).isEqualTo(configuration.build())
-
-            val restored = CheckoutElementsControllerStateFactory.createStateHolder(
-                setup.savedStateHandle.simulateProcessDeath(),
-            )
-            assertThat(restored.configurationState).isEqualTo(configuration.build())
+            assertThat(setup.configurationStateHolder.state).isEqualTo(configuration.build())
         } finally {
             releaseInitResponse.countDown()
         }
@@ -876,9 +871,11 @@ internal class CheckoutElementsControllerTest {
         assertThat(result).isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
         // Pre-condition: configure committed a non-null state so the clear is observable.
         assertThat(committedState).isNotNull()
+        assertThat(configurationStateHolder.state).isNotNull()
 
         controller.destroy()
 
+        assertThat(configurationStateHolder.state).isNull()
         assertThat(committedState).isNull()
         assertThat(controller.session.value).isNull()
         assertThat(savedStateHandle.keys()).doesNotContain(DEFAULT_INTEGRATION_NAME)
@@ -2299,6 +2296,7 @@ internal class CheckoutElementsControllerTest {
         return ControllerSetup(
             controller = controller,
             stateHolder = CheckoutElementsControllerStateFactory.createStateHolder(controllerSavedState.handle),
+            configurationStateHolder = CheckoutElementsConfigurationStateHolder(controllerSavedState.handle),
             sheetStateHolder = SheetStateHolder(controllerSavedState.handle),
             savedStateHandle = controllerSavedState.handle,
         )
@@ -2307,6 +2305,7 @@ internal class CheckoutElementsControllerTest {
     private class ControllerSetup(
         val controller: CheckoutElementsController,
         val stateHolder: CheckoutElementsControllerStateHolder,
+        val configurationStateHolder: CheckoutElementsConfigurationStateHolder,
         val sheetStateHolder: SheetStateHolder,
         val savedStateHandle: SavedStateHandle,
     )
@@ -2327,7 +2326,15 @@ internal class CheckoutElementsControllerTest {
         val savedStateHandle = SavedStateHandle()
         val setup = createControllerSetup(savedStateHandle, DEFAULT_INTEGRATION_NAME)
         val result = setup.controller.configure(clientSecret, configuration)
-        block(Scenario(setup.controller, result, savedStateHandle, setup.stateHolder))
+        block(
+            Scenario(
+                controller = setup.controller,
+                result = result,
+                savedStateHandle = savedStateHandle,
+                stateHolder = setup.stateHolder,
+                configurationStateHolder = setup.configurationStateHolder,
+            )
+        )
     }
 
     private class Scenario(
@@ -2335,6 +2342,7 @@ internal class CheckoutElementsControllerTest {
         val result: CheckoutElementsController.OperationResult,
         val savedStateHandle: SavedStateHandle,
         private val stateHolder: CheckoutElementsControllerStateHolder,
+        val configurationStateHolder: CheckoutElementsConfigurationStateHolder,
     ) {
         val committedState: CheckoutElementsControllerState?
             get() = stateHolder.state

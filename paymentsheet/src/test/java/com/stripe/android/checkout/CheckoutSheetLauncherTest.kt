@@ -831,7 +831,7 @@ internal class CheckoutSheetLauncherTest {
     @Test
     fun `launchPaymentOptions shows loading without initial state then shows configured options`() = testScenario {
         val configuredState = requireNotNull(selectionHolder.state)
-        selectionHolder.configurationState = CheckoutElementsController.Configuration()
+        configurationStateHolder.state = CheckoutElementsController.Configuration()
             .paymentElement(
                 PaymentElement.Configuration().appearance(
                     PaymentElement.Configuration.Appearance()
@@ -914,7 +914,7 @@ internal class CheckoutSheetLauncherTest {
     fun `launchPaymentOptions does not launch before configure starts`() = testScenario {
         embeddedContentState.value = null
         selectionHolder.state = null
-        selectionHolder.configurationState = null
+        configurationStateHolder.state = null
 
         sheetLauncher.launchPaymentOptions(
             paymentMethodMetadata = null,
@@ -933,7 +933,7 @@ internal class CheckoutSheetLauncherTest {
     fun `launchPaymentOptions does not show loading without configuration while updating`() = testScenario {
         embeddedContentState.value = null
         selectionHolder.state = null
-        selectionHolder.configurationState = null
+        configurationStateHolder.state = null
         val mutationGate = CompletableDeferred<Unit>()
         coroutineScope.launch {
             operationCoordinator.runMutation {
@@ -954,6 +954,38 @@ internal class CheckoutSheetLauncherTest {
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
         assertThat(launcherState.isAwaitingPaymentOptionsReady).isFalse()
         assertThat(errorReporter.getLoggedErrors()).isEmpty()
+        mutationGate.complete(Unit)
+        runCurrent()
+    }
+
+    @Test
+    fun `launchPaymentOptions launches ready while updating without payment element configuration`() = testScenario {
+        configurationStateHolder.state = CheckoutElementsController.Configuration().build()
+        val mutationGate = CompletableDeferred<Unit>()
+        coroutineScope.launch {
+            operationCoordinator.runMutation {
+                mutationGate.await()
+                Result.success(Unit)
+            }
+        }
+        runCurrent()
+        assertThat(operationCoordinator.isUpdating.value).isTrue()
+
+        val initialState = requireNotNull(embeddedContentState.value)
+        sheetLauncher.launchPaymentOptions(
+            paymentMethodMetadata = initialState.paymentMethodMetadata,
+            customerState = null,
+            selection = null,
+            configuration = initialState.configuration,
+        )
+
+        val readyArgs = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityArgs
+        val readyState = readyArgs.presentationState as EmbeddedActivityArgs.PresentationState.Ready
+        assertThat(readyState.paymentMethodMetadata).isSameInstanceAs(initialState.paymentMethodMetadata)
+        assertThat(readyState.configuration).isSameInstanceAs(initialState.configuration)
+        assertThat(sheetStateHolder.sheetIsOpen).isTrue()
+        assertThat(launcherState.isAwaitingPaymentOptionsReady).isFalse()
+
         mutationGate.complete(Unit)
         runCurrent()
     }
@@ -1498,9 +1530,9 @@ internal class CheckoutSheetLauncherTest {
                 context = applicationContext,
                 linkAccountHolder = linkAccountHolder,
             ),
-        ).apply {
-            state = CheckoutElementsControllerStateFactory.create()
-            configurationState = requireNotNull(state).configuration
+        ).apply { state = CheckoutElementsControllerStateFactory.create() }
+        val configurationStateHolder = CheckoutElementsConfigurationStateHolder(savedStateHandle).apply {
+            state = requireNotNull(selectionHolder.state).configuration
         }
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
         val customerStateHolder = DefaultCustomerStateHolder(
@@ -1542,6 +1574,7 @@ internal class CheckoutSheetLauncherTest {
                     activityResultCaller = activityResultCaller,
                     lifecycleOwner = owner,
                     selectionHolder = selectionHolder,
+                    configurationStateHolder = configurationStateHolder,
                     customerStateHolder = customerStateHolder,
                     linkAccountHolder = linkAccountHolder,
                     sheetStateHolder = sheetStateHolder,
@@ -1569,6 +1602,7 @@ internal class CheckoutSheetLauncherTest {
 
             Scenario(
                 selectionHolder = selectionHolder,
+                configurationStateHolder = configurationStateHolder,
                 lifecycleOwner = lifecycleOwner,
                 customerStateHolder = customerStateHolder,
                 linkAccountHolder = linkAccountHolder,
@@ -1597,6 +1631,7 @@ internal class CheckoutSheetLauncherTest {
 
     private class Scenario(
         val selectionHolder: CheckoutElementsControllerStateHolder,
+        val configurationStateHolder: CheckoutElementsConfigurationStateHolder,
         val lifecycleOwner: TestLifecycleOwner,
         val customerStateHolder: CustomerStateHolder,
         val linkAccountHolder: LinkAccountHolder,

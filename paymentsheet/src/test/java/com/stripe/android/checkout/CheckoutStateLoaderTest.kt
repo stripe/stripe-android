@@ -353,15 +353,13 @@ internal class CheckoutStateLoaderTest {
     }
 
     @Test
-    fun `clear removes configuration, controller and customer state`() = runScenario(
+    fun `clear removes controller and customer state`() = runScenario(
         customer = savedCustomer(),
     ) {
         loader.publish(loadInitial())
-        stateHolder.configurationState = requireNotNull(stateHolder.state).configuration
 
         loader.clear()
 
-        assertThat(stateHolder.configurationState).isNull()
         assertThat(stateHolder.state).isNull()
         assertThat(customerStateHolder.customer.value).isNull()
         assertThat(customerStateHolder.paymentMethods.value).isEmpty()
