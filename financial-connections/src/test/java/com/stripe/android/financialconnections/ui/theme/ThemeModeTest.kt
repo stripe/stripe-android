@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.ui.theme
 
+import android.content.Context
 import android.content.res.Configuration
 import android.content.res.Resources
 import android.util.TypedValue
@@ -43,7 +44,7 @@ internal class ThemeModeTest {
         @TestParameter linkTheme: Boolean,
     ) = runScenario(themeMode = { themeMode }, linkTheme = linkTheme) {
         assertTheme(isDark = themeMode == ThemeMode.AlwaysDark)
-        assertThat(snapshot().hostIsDark).isFalse()
+        assertThat(snapshot().hostContext.resources.configuration.isDark()).isFalse()
     }
 
     @Test
@@ -53,7 +54,7 @@ internal class ThemeModeTest {
         @TestParameter linkTheme: Boolean,
     ) = runScenario(themeMode = { themeMode }, linkTheme = linkTheme) {
         assertTheme(isDark = themeMode != ThemeMode.AlwaysLight)
-        assertThat(snapshot().hostIsDark).isTrue()
+        assertThat(snapshot().hostContext.resources.configuration.isDark()).isTrue()
     }
 
     @Test
@@ -67,7 +68,7 @@ internal class ThemeModeTest {
             composeRule.waitForIdle()
 
             assertTheme(isDark = false)
-            assertThat(snapshot().hostIsDark).isFalse()
+            assertThat(snapshot().hostContext.resources.configuration.isDark()).isFalse()
         }
     }
 
@@ -133,8 +134,8 @@ internal class ThemeModeTest {
                     val resources = LocalResources.current
                     snapshot = ThemeSnapshot(
                         isDark = isSystemInDarkTheme(),
-                        hostIsDark = hostContext.resources.configuration.isDark(),
-                        contextIsDark = LocalContext.current.resources.configuration.isDark(),
+                        hostContext = hostContext,
+                        context = LocalContext.current,
                         configuration = Configuration(LocalConfiguration.current),
                         resourceConfiguration = Configuration(resources.configuration),
                         incomingConfiguration = Configuration(incomingConfiguration),
@@ -152,7 +153,7 @@ internal class ThemeModeTest {
         fun assertTheme(isDark: Boolean) {
             val actual = snapshot()
             assertThat(actual.isDark).isEqualTo(isDark)
-            assertThat(actual.contextIsDark).isEqualTo(isDark)
+            assertThat(actual.context.resources.configuration.isDark()).isEqualTo(isDark)
             assertThat(actual.resourceConfiguration.isDark()).isEqualTo(isDark)
             assertThat(actual.background).isEqualTo(if (isDark) Neutral0Dark else Neutral0)
             if (isDark) {
@@ -165,8 +166,8 @@ internal class ThemeModeTest {
 
     private data class ThemeSnapshot(
         val isDark: Boolean,
-        val hostIsDark: Boolean,
-        val contextIsDark: Boolean,
+        val hostContext: Context,
+        val context: Context,
         val configuration: Configuration,
         val resourceConfiguration: Configuration,
         val incomingConfiguration: Configuration,
