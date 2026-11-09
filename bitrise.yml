@@ -367,6 +367,9 @@ workflows:
           inputs:
             - test_title: General instrumentation tests
   run-paymentsheet-instrumentation-tests:
+    envs:
+      # Snapshot clones share a Wi-Fi MAC; keep each shard's network isolated.
+      - ANDROID_EMULATOR_FEATURES: "-WiFiPacketStream"
     before_run:
       - prepare_all
     after_run:
