@@ -12,7 +12,7 @@ import org.robolectric.RobolectricTestRunner
 
 @OptIn(CheckoutSessionPreview::class)
 @RunWith(RobolectricTestRunner::class)
-internal class CheckoutElementsControllerResetCustomerTest {
+internal class CheckoutElementsControllerClearLocalCustomerDataTest {
     private val application = ApplicationProvider.getApplicationContext<Application>()
     private val linkStore = DefaultLinkStore(application)
 
@@ -22,11 +22,11 @@ internal class CheckoutElementsControllerResetCustomerTest {
     }
 
     @Test
-    fun `resetCustomer clears persisted Link state`() {
+    fun `clearLocalCustomerData clears persisted Link state`() {
         linkStore.markLinkAsUsed()
         assertThat(DefaultLinkStore(application).hasUsedLink()).isTrue()
 
-        CheckoutElementsController.resetCustomer(application)
+        CheckoutElementsController.clearLocalCustomerData(application)
 
         assertThat(DefaultLinkStore(application).hasUsedLink()).isFalse()
     }

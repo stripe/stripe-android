@@ -87,7 +87,7 @@ class CheckoutElementsController @Inject internal constructor(
          *
          * @param context The application [Context].
          */
-        fun resetCustomer(context: Context) {
+        fun clearLocalCustomerData(context: Context) {
             DefaultLinkStore(context).clear()
         }
     }
