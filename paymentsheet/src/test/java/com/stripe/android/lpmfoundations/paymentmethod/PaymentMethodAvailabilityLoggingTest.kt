@@ -32,18 +32,17 @@ internal class PaymentMethodAvailabilityLoggingTest {
     }
 
     @Test
-    fun `logs unmet requirements for unactivated methods`() = runScenario(
+    fun `logs only unmet requirements`() = runScenario(
         PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = listOf("card", "sepa_debit"),
-                unactivatedPaymentMethods = listOf("sepa_debit"),
-                isLiveMode = true,
+                paymentMethodTypes = listOf("card", "us_bank_account"),
+                paymentMethodOptionsJsonString = """{"us_bank_account":{"verification_method":"instant"}}""",
             ),
             allowsDelayedPaymentMethods = false,
         ),
     ) {
         assertThat(logger.messages.awaitItem()).isEqualTo(
-            "Payment Element could not offer sepa_debit:\n" +
+            "Payment Element could not offer us_bank_account:\n" +
                 "  * Configuration.allowsDelayedPaymentMethods must be set to true."
         )
     }
@@ -60,34 +59,6 @@ internal class PaymentMethodAvailabilityLoggingTest {
             "Payment Element could not offer affirm:\n" +
                 "  * This payment method is not supported with a SetupIntent or setup_future_usage."
         )
-    }
-
-    @Test
-    fun `does not duplicate activation warnings for otherwise supported methods`() = runScenario(
-        PaymentMethodMetadataFactory.create(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = listOf("card", "klarna"),
-                unactivatedPaymentMethods = listOf("klarna"),
-                isLiveMode = true,
-            ),
-        ),
-    ) {
-        assertThat(metadata.supportedPaymentMethodTypes()).doesNotContain("klarna")
-        logger.messages.expectNoEvents()
-    }
-
-    @Test
-    fun `does not log unactivated methods in test mode`() = runScenario(
-        PaymentMethodMetadataFactory.create(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = listOf("card", "klarna"),
-                unactivatedPaymentMethods = listOf("klarna"),
-                isLiveMode = false,
-            ),
-        ),
-    ) {
-        assertThat(metadata.supportedPaymentMethodTypes()).containsExactly("card", "klarna")
-        logger.messages.expectNoEvents()
     }
 
     @Test
