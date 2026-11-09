@@ -14,9 +14,6 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 internal data class EmbeddedActivityArgs(
-    // Metadata and configuration are only required for a ready presentation.
-    val paymentMethodMetadata: PaymentMethodMetadata?,
-    val configuration: EmbeddedPaymentElement.Configuration?,
     val productUsage: Set<String>,
     val paymentElementCallbackIdentifier: String,
     val statusBarColor: Int?,
@@ -28,10 +25,18 @@ internal data class EmbeddedActivityArgs(
     val launchMode: EmbeddedLaunchMode,
     val presentationState: PresentationState,
 ) : Parcelable {
-    internal enum class PresentationState {
-        Loading,
-        Ready,
-        Failed,
+    internal sealed interface PresentationState : Parcelable {
+        @Parcelize
+        data object Loading : PresentationState
+
+        @Parcelize
+        data class Ready(
+            val paymentMethodMetadata: PaymentMethodMetadata,
+            val configuration: EmbeddedPaymentElement.Configuration,
+        ) : PresentationState
+
+        @Parcelize
+        data object Failed : PresentationState
     }
 
     companion object {

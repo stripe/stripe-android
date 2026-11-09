@@ -37,7 +37,7 @@
   <!-- Klarna pay later copy -->
   <string name="stripe_card_with_tap_or_enter_manually">Dokunun veya manuel olarak girin</string>
   <!-- Cash App mandate text -->
-  <string name="stripe_cash_app_pay_mandate">Devam ederek %1$s şirketinin bu ödeme ve gelecekteki ödemeler için Cash Uygulaması hesabınızı %2$s şirketinin şartlarına uygun olarak borçlandırmasına izin vermiş olursunuz. Bu durum, izin iptal edilene kadar geçerli olur. İstediğiniz zaman Cash Uygulamasının Ayarlarından bu izni değiştirebilirsiniz.</string>
+  <string name="stripe_cash_app_pay_mandate">Devam ederek, bu yetkilendirme iptal edilene kadar, %2$s koşulları uyarınca bu ödeme ve gelecekteki ödemeler için Cash App hesabınızı borçlandırması konusunda %1$s tarafını yetkilendirirsiniz. Bunu istediğiniz zaman Cash App Ayarlarınızdan değiştirebilirsiniz.</string>
   <!-- Title for the contact information section -->
   <string name="stripe_contact_information">İletişim bilgileri</string>
   <!-- Text for continue button -->

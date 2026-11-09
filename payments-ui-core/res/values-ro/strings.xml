@@ -66,7 +66,7 @@
   <!-- Klarna buy now or pay later copy -->
   <string name="stripe_klarna_buy_now_pay_later">Cumpărați acum sau plătiți mai târziu folosind Klarna.</string>
   <!-- Klarna mandate text -->
-  <string name="stripe_klarna_mandate">Prin continuarea către Klarna, permiteți %1$s să vă taxeze contul Klarna pentru plățile viitoare în conformitate cu termenii acesteia și termenii Klarna. Puteți schimba acest lucru în orice moment din aplicația dvs. Klarna sau contactându-ne la %2$s.</string>
+  <string name="stripe_klarna_mandate">Prin continuarea către Klarna, permiteți %1$s să vă taxeze contul Klarna pentru plăți viitoare în conformitate cu termenii săi și termenii Klarna. Puteți modifica acest lucru în orice moment în aplicația dvs. Klarna sau contactând %2$s.</string>
   <!-- Klarna pay later copy -->
   <string name="stripe_klarna_pay_later">Plătiți mai târziu folosind Klarna.</string>
   <!-- Caption for Phone field on address form -->
@@ -86,7 +86,7 @@
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
   <string name="stripe_p24_bank">Banca Przelewy24</string>
   <!-- Label of a button that initiates payment when tapped -->
-  <string name="stripe_pay_button_amount">Adaugă %s</string>
+  <string name="stripe_pay_button_amount">Plătiți %s</string>
   <!-- Title for a bank account payment method -->
   <string name="stripe_payment_method_bank">Bancă</string>
   <!-- Label shown in the payment type picker describing a card payment -->

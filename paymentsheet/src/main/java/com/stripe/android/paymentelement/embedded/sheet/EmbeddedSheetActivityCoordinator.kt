@@ -27,7 +27,8 @@ internal class EmbeddedSheetActivityCoordinator(
     )
 
     val appearance: PaymentSheet.Appearance
-        get() = state.args.configuration?.appearance ?: PaymentSheet.Appearance()
+        get() = (state.args.presentationState as? EmbeddedActivityArgs.PresentationState.Ready)
+            ?.configuration?.appearance ?: PaymentSheet.Appearance()
 
     fun register() {
         state.presentation.register()

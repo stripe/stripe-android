@@ -4,8 +4,12 @@ import android.content.Context
 import com.google.testing.junit.testparameterinjector.TestParameterValuesProvider
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.networktesting.RequestMatcher
+import com.stripe.android.networktesting.RequestMatchers
 import com.stripe.android.networktesting.TestApiKeys
 import com.stripe.android.paymentsheet.PaymentSheet
+
+internal const val INTEGRATION_BETA = "integration_beta=v1"
 
 internal sealed class ApiConfigurationTestType(
     val paymentConfigurationPublishableKey: String?,
@@ -13,6 +17,9 @@ internal sealed class ApiConfigurationTestType(
     val apiConfiguration: ApiConfiguration?,
     private val updatePaymentConfigurationPublishableKey: Boolean,
 ) {
+    val defaultMatcher: RequestMatcher
+        get() = RequestMatchers.stripeApiKey(betas = apiConfiguration?.build()?.betas.orEmpty())
+
     fun initializePaymentConfiguration(context: Context) {
         PaymentConfiguration.clearInstance()
         context.getSharedPreferences(
@@ -56,7 +63,9 @@ internal sealed class ApiConfigurationTestType(
     data object ApiConfigurationOnly : ApiConfigurationTestType(
         paymentConfigurationPublishableKey = null,
         paymentConfigurationStripeAccount = null,
-        apiConfiguration = ApiConfiguration(TestApiKeys.PUBLISHABLE).stripeAccountId(TestApiKeys.ACCOUNT),
+        apiConfiguration = ApiConfiguration(TestApiKeys.PUBLISHABLE)
+            .stripeAccountId(TestApiKeys.ACCOUNT)
+            .betas(setOf(INTEGRATION_BETA)),
         updatePaymentConfigurationPublishableKey = false,
     )
 

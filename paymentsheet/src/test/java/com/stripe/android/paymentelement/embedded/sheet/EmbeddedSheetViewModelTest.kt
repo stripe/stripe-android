@@ -85,9 +85,11 @@ internal class EmbeddedSheetViewModelTest {
     }
 
     private class Scenario {
-        val args = EmbeddedActivityArgs(
+        private val readyState = EmbeddedActivityArgs.PresentationState.Ready(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
             configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
+        )
+        val args = EmbeddedActivityArgs(
             productUsage = setOf("PaymentSheet.FlowController"),
             paymentElementCallbackIdentifier = "EmbeddedSheetViewModelTest",
             statusBarColor = null,
@@ -104,7 +106,7 @@ internal class EmbeddedSheetViewModelTest {
             ),
             promotions = emptyList(),
             launchMode = EmbeddedLaunchMode.PaymentOptions,
-            presentationState = EmbeddedActivityArgs.PresentationState.Ready,
+            presentationState = readyState,
         )
         private var controller = createController(null)
         private var savedStateHandle = createViewModel()
@@ -115,8 +117,8 @@ internal class EmbeddedSheetViewModelTest {
             get() = LinkAccountHolder(savedStateHandle)
         val customerStateHolder: DefaultCustomerStateHolder
             get() = DefaultCustomerStateHolder(
-                customerMetadata = MutableStateFlow(requireNotNull(args.paymentMethodMetadata).customerMetadata),
-                paymentMethodMetadataFlow = MutableStateFlow(args.paymentMethodMetadata),
+                customerMetadata = MutableStateFlow(readyState.paymentMethodMetadata.customerMetadata),
+                paymentMethodMetadataFlow = MutableStateFlow(readyState.paymentMethodMetadata),
                 savedStateHandle = savedStateHandle,
                 selection = selectionHolder.selection,
             )
@@ -144,7 +146,7 @@ internal class EmbeddedSheetViewModelTest {
             val extras = MutableCreationExtras(activity.defaultViewModelCreationExtras).apply {
                 set(ViewModelProvider.NewInstanceFactory.VIEW_MODEL_KEY, "EmbeddedSheetViewModel")
             }
-            val viewModel = EmbeddedSheetViewModel.Factory { args }
+            val viewModel = EmbeddedSheetViewModel.Factory(readyState) { args }
                 .create(EmbeddedSheetViewModel::class.java, extras)
             activity.viewModelStore.put("EmbeddedSheetViewModel", viewModel)
             return extras.createSavedStateHandle()

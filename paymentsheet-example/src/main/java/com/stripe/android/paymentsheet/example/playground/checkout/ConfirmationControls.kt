@@ -26,6 +26,7 @@ internal fun ConfirmationControls(
     isCompleted: Boolean,
     isUpdating: Boolean,
     displayMandate: Boolean,
+    isShippingAddressElementConfigured: Boolean,
     onClearPaymentMethod: () -> Unit,
     onSelectPaymentMethod: () -> Unit,
     onSetShippingAddress: () -> Unit,
@@ -54,10 +55,12 @@ internal fun ConfirmationControls(
             modifier = Modifier.weight(1f),
         ) { Text("Select") }
     }
-    Button(
-        onClick = onSetShippingAddress,
-        modifier = Modifier.fillMaxWidth(),
-    ) { Text("Set shipping address") }
+    if (isShippingAddressElementConfigured) {
+        Button(
+            onClick = onSetShippingAddress,
+            modifier = Modifier.fillMaxWidth(),
+        ) { Text("Set shipping address") }
+    }
     Button(
         onClick = onConfirm,
         enabled = !isUpdating,

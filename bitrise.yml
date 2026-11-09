@@ -361,17 +361,11 @@ workflows:
           timeout: 1200
           inputs:
             - content: ./scripts/retry_with_emulator_cleanup.sh 2 ./gradlew -Pandroid.experimental.androidTest.numManagedDeviceShards=1 pixel2api33DebugAndroidTest -x :paymentsheet-example:pixel2api33BaseDebugAndroidTest -x :paymentsheet:pixel2api33DebugAndroidTest -x :example:pixel2api33DebugAndroidTest -x :financial-connections:pixel2api33DebugAndroidTest -x :financial-connections-example:pixel2api33DebugAndroidTest -x :camera-core:pixel2api33DebugAndroidTest -x :crypto-onramp-example:pixel2api33DebugAndroidTest -x :stripecardscan:pixel2api33DebugAndroidTest -x :stripecardscan-example:pixel2api33DebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
-      - script@1:
-          title: Execute PaymentSheet IME instrumentation tests
-          is_always_run: true
-          timeout: 1200
-          inputs:
-            - content: ./scripts/retry_with_emulator_cleanup.sh 2 ./gradlew -Pandroid.testInstrumentationRunnerArguments.annotation=com.stripe.android.paymentsheet.RequiresIme :paymentsheet:pixel2api33imeDebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
       - bundle::export_instrumentation_test_results:
-          title: Export general and IME instrumentation test results
+          title: Export general instrumentation test results
           is_always_run: true
           inputs:
-            - test_title: General and IME instrumentation tests
+            - test_title: General instrumentation tests
   run-paymentsheet-instrumentation-tests:
     before_run:
       - prepare_all
@@ -386,7 +380,7 @@ workflows:
           title: Execute instrumentation tests
           timeout: 1200
           inputs:
-            - content: ./scripts/retry_with_emulator_cleanup.sh 2 ./gradlew -Pandroid.experimental.androidTest.numManagedDeviceShards=6 -Pandroid.experimental.testOptions.managedDevices.maxConcurrentDevices=6 -Pandroid.testInstrumentationRunnerArguments.notAnnotation=com.stripe.android.paymentsheet.RequiresIme :paymentsheet:pixel2api33DebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
+            - content: ./scripts/retry_with_emulator_cleanup.sh 2 ./gradlew -Pandroid.experimental.androidTest.numManagedDeviceShards=6 -Pandroid.experimental.testOptions.managedDevices.maxConcurrentDevices=6 :paymentsheet:pixel2api33DebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
       - bundle::export_instrumentation_test_results:
           title: Export PaymentSheet instrumentation test results
           inputs:
@@ -395,25 +389,6 @@ workflows:
       bitrise.io:
         stack: ubuntu-resolute-26.04-bitrise-2026-android
         machine_type_id: g2.linux.x-large
-  run-paymentsheet-ime-instrumentation-tests:
-    before_run:
-      - prepare_all
-    after_run:
-      - conclude_all
-    steps:
-      - script@1:
-          title: Pin Android emulator version
-          inputs:
-            - content: ./scripts/retry.sh 3 ./scripts/pin_emulator_version.sh $EMULATOR_BUILD_NUMBER $EMULATOR_VERSION
-      - script@1:
-          title: Execute PaymentSheet IME instrumentation tests
-          timeout: 1200
-          inputs:
-            - content: ./scripts/retry_with_emulator_cleanup.sh 2 ./gradlew -Pandroid.testInstrumentationRunnerArguments.annotation=com.stripe.android.paymentsheet.RequiresIme :paymentsheet:pixel2api33imeDebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
-      - bundle::export_instrumentation_test_results:
-          title: Export PaymentSheet IME instrumentation test results
-          inputs:
-            - test_title: PaymentSheet IME instrumentation tests
   run-financial-connections-and-crypto-instrumentation-tests:
     before_run:
       - start_emulator

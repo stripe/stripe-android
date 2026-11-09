@@ -109,7 +109,6 @@ Important details:
 - Use the fully qualified test class and one method while reproducing.
 - Keep one device and one shard so iterations remain serial and attributable.
 - Use `pixel2api33chrome` for Chrome flows. For tests that do not need Chrome, select the module's appropriate managed device and confirm the exact task with `./gradlew :MODULE:tasks --all`.
-- Use the module's IME-enabled managed device, such as `pixel2api33ime`, for tests annotated with `RequiresIme`; do not substitute the Chrome image or a generic emulator.
 - Do not add an outer command retry or resurrect `scripts/retry_with_emulator_cleanup.sh`; outer retries obscure the first failure.
 
 ## Escalate Shampoo iterations
