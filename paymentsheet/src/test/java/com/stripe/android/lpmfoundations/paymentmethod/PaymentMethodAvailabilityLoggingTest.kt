@@ -94,7 +94,6 @@ internal class PaymentMethodAvailabilityLoggingTest {
         logUnavailablePaymentMethods(
             metadata = metadata,
             logger = logger,
-            paymentMethodTypes = metadata.stripeIntent.paymentMethodTypes,
         )
         Scenario(metadata, logger).block()
         logger.messages.ensureAllEventsConsumed()

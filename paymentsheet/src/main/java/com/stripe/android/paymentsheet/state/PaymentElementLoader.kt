@@ -479,8 +479,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
 
         logUnavailablePaymentMethodsIfNeeded(
             integrationConfiguration = integrationConfiguration,
-            initializationMode = initializationMode,
-            elementsSession = elementsSession,
             metadata = pmMetadata,
         )
 
@@ -902,8 +900,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
 
     private fun logUnavailablePaymentMethodsIfNeeded(
         integrationConfiguration: PaymentElementLoader.Configuration,
-        initializationMode: PaymentElementLoader.InitializationMode,
-        elementsSession: ElementsSession,
         metadata: PaymentMethodMetadata,
     ) {
         when (integrationConfiguration) {
@@ -912,12 +908,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             is PaymentElementLoader.Configuration.ExpressCheckoutElement -> logUnavailablePaymentMethods(
                 metadata = metadata,
                 logger = userFacingLogger,
-                paymentMethodTypes = metadata.stripeIntent.paymentMethodTypes +
-                    if (initializationMode is PaymentElementLoader.InitializationMode.CheckoutSession) {
-                        elementsSession.orderedPaymentMethodTypesAndWallets
-                    } else {
-                        emptyList()
-                    },
             )
             is PaymentElementLoader.Configuration.CryptoOnramp,
             is PaymentElementLoader.Configuration.StandaloneLink -> Unit

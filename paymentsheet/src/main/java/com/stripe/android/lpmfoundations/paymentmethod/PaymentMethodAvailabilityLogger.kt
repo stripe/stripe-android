@@ -5,11 +5,10 @@ import com.stripe.android.core.utils.UserFacingLogger
 internal fun logUnavailablePaymentMethods(
     metadata: PaymentMethodMetadata,
     logger: UserFacingLogger,
-    paymentMethodTypes: List<String>,
 ) {
     val supportedTypes = metadata.supportedPaymentMethodTypes()
     // Wallet availability is determined separately from the payment method registry.
-    paymentMethodTypes.distinct().filterNot { code ->
+    metadata.stripeIntent.paymentMethodTypes.distinct().filterNot { code ->
         code in supportedTypes || WalletType.entries.any { it.code == code }
     }.forEach { code ->
         val definition = PaymentMethodRegistry.definitionsByCode[code]

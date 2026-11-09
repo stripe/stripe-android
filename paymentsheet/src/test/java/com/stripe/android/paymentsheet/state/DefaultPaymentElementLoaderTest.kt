@@ -5234,12 +5234,12 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `logs unsupported checkout methods even when absent from the parsed intent`() = runScenario {
+    fun `logs unsupported checkout methods`() = runScenario {
         val logger = FakePaymentMethodAvailabilityLogger()
         val response = createCheckoutSessionResponse(
             canDetachPaymentMethod = true,
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK.copy(
-                paymentMethodTypes = listOf("card"),
+                paymentMethodTypes = listOf("card", "unknown_method", "google_pay"),
             ),
         )
         val state = createPaymentElementLoader(userFacingLogger = logger).load(
