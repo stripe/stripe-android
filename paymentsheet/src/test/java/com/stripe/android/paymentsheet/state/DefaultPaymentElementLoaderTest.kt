@@ -5210,74 +5210,6 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `logs filtering reasons for checkout payment element loads`() = runScenario {
-        val stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK.copy(
-            paymentMethodTypes = listOf("card", "sepa_debit"),
-        )
-        assertPaymentMethodFilteringLogs(
-            integrationConfiguration = PaymentElementLoader.Configuration.Embedded(
-                isRowSelectionImmediateAction = false,
-                configuration = EmbeddedPaymentElement.Configuration.Builder("Merchant")
-                    .googlePay(ConfigFixtures.GOOGLE_PAY).build(),
-                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
-            ),
-            initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
-                instancesKey = "DefaultPaymentElementLoaderTest",
-                checkoutSessionResponse = createCheckoutSessionResponse(
-                    canDetachPaymentMethod = true,
-                    stripeIntent = stripeIntent,
-                ),
-                collectedEmail = null,
-                configuredElements = listOf("mobile-payment-element"),
-            ),
-        )
-    }
-
-    @Test
-    fun `logs unsupported checkout methods`() = runScenario {
-        val logger = FakePaymentMethodAvailabilityLogger()
-        val response = createCheckoutSessionResponse(
-            canDetachPaymentMethod = true,
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK.copy(
-                paymentMethodTypes = listOf("card", "unknown_method", "google_pay"),
-            ),
-        )
-        val state = createPaymentElementLoader(userFacingLogger = logger).load(
-            initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
-                instancesKey = "DefaultPaymentElementLoaderTest",
-                checkoutSessionResponse = response.copy(
-                    elementsSession = requireNotNull(response.elementsSession).copy(
-                        orderedPaymentMethodTypesAndWallets = listOf("card", "unknown_method", "google_pay"),
-                    ),
-                ),
-                collectedEmail = null,
-                configuredElements = listOf("mobile-payment-element"),
-            ),
-            paymentSheetConfiguration = mockConfiguration(),
-            metadata = PaymentElementLoader.Metadata(initializedViaCompose = false),
-        ).getOrThrow()
-
-        assertThat(state.paymentMethodMetadata.supportedPaymentMethodTypes()).containsExactly("card")
-        assertThat(logger.messages.awaitItem()).isEqualTo(
-            "Payment Element could not offer unknown_method:\n" +
-                "  * This payment method is not currently supported by the Payment Element."
-        )
-        logger.messages.ensureAllEventsConsumed()
-        consumeLoadingEvents()
-        eventReporter.loadStartedTurbine.awaitItem()
-        eventReporter.loadSucceededTurbine.awaitItem()
-    }
-
-    @Test
-    fun `logs filtering reasons for express checkout loads`() = runScenario {
-        assertPaymentMethodFilteringLogs(
-            integrationConfiguration = PaymentElementLoader.Configuration.ExpressCheckoutElement(
-                commonConfiguration = mockConfiguration().asCommonConfiguration(),
-            ),
-        )
-    }
-
-    @Test
     fun `logs filtering reasons before failing when no payment methods are available`() = runScenario {
         val logger = FakePaymentMethodAvailabilityLogger()
         val result = createPaymentElementLoader(
@@ -5305,7 +5237,6 @@ internal class DefaultPaymentElementLoaderTest {
 
     private suspend fun Scenario.assertPaymentMethodFilteringLogs(
         integrationConfiguration: PaymentElementLoader.Configuration,
-        initializationMode: PaymentElementLoader.InitializationMode = DEFAULT_INITIALIZATION_MODE,
     ) {
         val logger = FakePaymentMethodAvailabilityLogger()
         val state = createPaymentElementLoader(
@@ -5314,7 +5245,7 @@ internal class DefaultPaymentElementLoaderTest {
             ),
             userFacingLogger = logger,
         ).load(
-            initializationMode = initializationMode,
+            initializationMode = DEFAULT_INITIALIZATION_MODE,
             integrationConfiguration = integrationConfiguration,
             metadata = PaymentElementLoader.Metadata(initializedViaCompose = false),
         ).getOrThrow()

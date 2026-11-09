@@ -904,11 +904,11 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     ) {
         when (integrationConfiguration) {
             is PaymentElementLoader.Configuration.PaymentSheet,
-            is PaymentElementLoader.Configuration.Embedded,
-            is PaymentElementLoader.Configuration.ExpressCheckoutElement -> logUnavailablePaymentMethods(
+            is PaymentElementLoader.Configuration.Embedded -> logUnavailablePaymentMethods(
                 metadata = metadata,
                 logger = userFacingLogger,
             )
+            is PaymentElementLoader.Configuration.ExpressCheckoutElement,
             is PaymentElementLoader.Configuration.CryptoOnramp,
             is PaymentElementLoader.Configuration.StandaloneLink -> Unit
         }
