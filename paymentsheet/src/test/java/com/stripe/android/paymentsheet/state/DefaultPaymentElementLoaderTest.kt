@@ -5296,12 +5296,14 @@ internal class DefaultPaymentElementLoaderTest {
                 commonConfiguration = mockConfiguration().asCommonConfiguration(),
             ),
             paymentMethodTypes = listOf("card", "unknown_method"),
+            expectedElementName = "Express Checkout Element",
         )
     }
 
     private suspend fun Scenario.assertLinkAvailabilityLogs(
         integrationConfiguration: PaymentElementLoader.Configuration,
         paymentMethodTypes: List<String> = listOf("card"),
+        expectedElementName: String = "Payment Element",
     ) {
         val logger = FakePaymentMethodAvailabilityLogger()
         val linkStateResult = LinkDisabledState(listOf(LinkDisabledReason.NotSupportedInElementsSession))
@@ -5325,7 +5327,7 @@ internal class DefaultPaymentElementLoaderTest {
             .containsExactlyElementsIn(paymentMethodTypes)
         assertThat(state.paymentMethodMetadata.linkStateResult).isEqualTo(linkStateResult)
         assertThat(logger.messages.awaitItem()).isEqualTo(
-            "Payment Element could not offer Link:\n" +
+            "$expectedElementName could not offer Link:\n" +
                 "  * Link is not supported by this Elements Session."
         )
         logger.messages.ensureAllEventsConsumed()

@@ -86,7 +86,7 @@ internal class LinkAvailabilityLoggerTest {
         isExpressCheckoutElement = true,
     ) {
         assertThat(logger.messages.awaitItem()).isEqualTo(
-            "Payment Element could not show the Link button:\n" +
+            "Express Checkout Element could not show the Link button:\n" +
                 "  * The Link button in Express Checkout Element does not support collecting a shipping address."
         )
     }

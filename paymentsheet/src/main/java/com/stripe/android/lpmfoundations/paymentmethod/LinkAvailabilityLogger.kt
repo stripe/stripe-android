@@ -2,7 +2,6 @@ package com.stripe.android.lpmfoundations.paymentmethod
 
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.model.LinkDisabledReason
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.state.LinkDisabledState
 import com.stripe.android.paymentsheet.state.LinkState
 
@@ -15,27 +14,22 @@ internal fun logUnavailableLink(
     val reasons = buildList {
         when (linkState) {
             is LinkDisabledState -> addAll(linkState.linkDisabledReasons.map { it.errorMessage })
-            is LinkState -> if (!metadata.shouldShowLinkButton) {
-                when (metadata.linkConfiguration.display) {
-                    PaymentSheet.LinkConfiguration.Display.Automatic -> Unit
-                    PaymentSheet.LinkConfiguration.Display.Never -> add(
-                        LinkDisabledReason.LinkConfiguration.errorMessage
-                    )
-                    PaymentSheet.LinkConfiguration.Display.WalletButtonHidden -> add(
-                        "LinkConfiguration.display is set to WalletButtonHidden and no existing Link user was found."
-                    )
-                }
-            }
+            is LinkState -> Unit
         }
         val checkoutSession = metadata.integrationMetadata as? IntegrationMetadata.CheckoutSession
-        if (isExpressCheckoutElement && checkoutSession?.checkoutSessionResponse?.requiresShippingAddress == true) {
-            add("The Link button in Express Checkout Element does not support collecting a shipping address.")
+        val buttonAvailability = metadata.linkButtonAvailability(
+            requiresShippingAddress =
+                isExpressCheckoutElement && checkoutSession?.checkoutSessionResponse?.requiresShippingAddress == true,
+        )
+        if (buttonAvailability is LinkButtonAvailability.Unavailable) {
+            addAll(buttonAvailability.reasons.map { it.errorMessage })
         }
     }
     if (reasons.isNotEmpty()) {
+        val elementName = if (isExpressCheckoutElement) "Express Checkout Element" else "Payment Element"
         val unavailableMessage = when (linkState) {
-            is LinkDisabledState -> "Payment Element could not offer Link:"
-            is LinkState -> "Payment Element could not show the Link button:"
+            is LinkDisabledState -> "$elementName could not offer Link:"
+            is LinkState -> "$elementName could not show the Link button:"
         }
         logger.logWarningWithoutPii("$unavailableMessage\n" + reasons.joinToString("\n") { "  * $it" })
     }
@@ -44,7 +38,7 @@ internal fun logUnavailableLink(
 private val LinkDisabledReason.errorMessage: String
     get() = when (this) {
         LinkDisabledReason.NotSupportedInElementsSession -> "Link is not supported by this Elements Session."
-        LinkDisabledReason.LinkConfiguration -> "LinkConfiguration.display is set to Never."
+        LinkDisabledReason.LinkConfiguration -> LinkButtonUnavailableReason.LinkConfiguration.errorMessage
         LinkDisabledReason.CardBrandFiltering ->
             "Card brand filtering requires native Link; the web Link flow does not support it."
         LinkDisabledReason.BillingDetailsCollection ->
