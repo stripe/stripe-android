@@ -51,7 +51,7 @@ class CollectBankAccountActivity : AppCompatActivity() {
             lifecycleScope.launchWhenStarted {
                 viewModel.viewEffect.collect { viewEffect ->
                     when (viewEffect) {
-                        is OpenConnectionsFlow -> viewEffect.launch()
+                        is OpenConnectionsFlow -> viewEffect.launch(themeMode = args.themeMode)
                         is FinishWithResult -> viewEffect.launch()
                     }
                 }
@@ -59,13 +59,13 @@ class CollectBankAccountActivity : AppCompatActivity() {
         }
     }
 
-    private fun OpenConnectionsFlow.launch() {
+    private fun OpenConnectionsFlow.launch(themeMode: ThemeMode) {
         financialConnectionsLauncher.present(
             FinancialConnectionsSheetConfiguration(
                 financialConnectionsSessionClientSecret = financialConnectionsSessionSecret,
                 apiConfiguration = apiConfiguration,
                 preCollectedConsent = preCollectedConsent,
-                themeMode = ThemeMode.Automatic,
+                themeMode = themeMode,
             ),
             elementsSessionContext = elementsSessionContext
         )

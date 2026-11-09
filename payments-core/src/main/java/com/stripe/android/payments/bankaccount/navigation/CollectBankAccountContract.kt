@@ -10,6 +10,7 @@ import androidx.annotation.VisibleForTesting
 import androidx.core.os.bundleOf
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.financialconnections.FinancialConnectionsPreCollectedConsent
+import com.stripe.android.financialconnections.ThemeMode
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountActivity
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
@@ -50,6 +51,7 @@ class CollectBankAccountContract :
         open val attachToIntent: Boolean,
         open val financialConnectionsAvailability: FinancialConnectionsAvailability?,
         open val hostedSurface: String?,
+        open val themeMode: ThemeMode,
         open val preCollectedConsent: FinancialConnectionsPreCollectedConsent?
     ) : Parcelable {
         fun toBundle() = bundleOf(EXTRA_ARGS to this)
@@ -70,10 +72,12 @@ class CollectBankAccountContract :
             override val attachToIntent: Boolean,
             override val financialConnectionsAvailability: FinancialConnectionsAvailability?,
             override val hostedSurface: String?,
+            override val themeMode: ThemeMode,
             override val preCollectedConsent: FinancialConnectionsPreCollectedConsent?
         ) : Args(
             apiConfiguration = apiConfiguration,
             hostedSurface = hostedSurface,
+            themeMode = themeMode,
             clientSecret = clientSecret,
             configuration = configuration,
             financialConnectionsAvailability = financialConnectionsAvailability,
@@ -90,10 +94,12 @@ class CollectBankAccountContract :
             override val attachToIntent: Boolean,
             override val financialConnectionsAvailability: FinancialConnectionsAvailability?,
             override val hostedSurface: String?,
+            override val themeMode: ThemeMode,
             override val preCollectedConsent: FinancialConnectionsPreCollectedConsent?
         ) : Args(
             apiConfiguration = apiConfiguration,
             hostedSurface = hostedSurface,
+            themeMode = themeMode,
             clientSecret = clientSecret,
             configuration = configuration,
             financialConnectionsAvailability = financialConnectionsAvailability,
@@ -108,6 +114,7 @@ class CollectBankAccountContract :
             override val configuration: CollectBankAccountConfiguration,
             override val financialConnectionsAvailability: FinancialConnectionsAvailability?,
             override val hostedSurface: String?,
+            override val themeMode: ThemeMode,
             val elementsSessionId: String,
             val customerId: String?,
             val onBehalfOf: String?,
@@ -116,6 +123,7 @@ class CollectBankAccountContract :
         ) : Args(
             apiConfiguration = apiConfiguration,
             hostedSurface = hostedSurface,
+            themeMode = themeMode,
             clientSecret = null,
             configuration = configuration,
             financialConnectionsAvailability = financialConnectionsAvailability,
@@ -129,6 +137,7 @@ class CollectBankAccountContract :
             override val apiConfiguration: ApiConfiguration.State,
             override val configuration: CollectBankAccountConfiguration,
             override val hostedSurface: String?,
+            override val themeMode: ThemeMode,
             override val financialConnectionsAvailability: FinancialConnectionsAvailability?,
             val elementsSessionId: String,
             val customerId: String?,
@@ -136,6 +145,7 @@ class CollectBankAccountContract :
         ) : Args(
             apiConfiguration = apiConfiguration,
             hostedSurface = hostedSurface,
+            themeMode = themeMode,
             clientSecret = null,
             configuration = configuration,
             financialConnectionsAvailability = financialConnectionsAvailability,

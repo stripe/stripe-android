@@ -7,6 +7,7 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnectionsPreCollectedConsent
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
+import com.stripe.android.financialconnections.ThemeMode
 import com.stripe.android.model.FinancialConnectionsSession
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
@@ -630,6 +631,7 @@ class CollectBankAccountViewModelTest {
             configuration = configuration,
             attachToIntent = attachToIntent,
             hostedSurface = hostedSurface,
+            themeMode = ThemeMode.Automatic,
             financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
             preCollectedConsent = preCollectedConsent
         )
@@ -647,6 +649,7 @@ class CollectBankAccountViewModelTest {
             ),
             attachToIntent = attachToIntent,
             hostedSurface = "payment_element",
+            themeMode = ThemeMode.Automatic,
             financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
             preCollectedConsent = null
         )
@@ -665,6 +668,7 @@ class CollectBankAccountViewModelTest {
             amount = 1000,
             currency = "usd",
             hostedSurface = "payment_element",
+            themeMode = ThemeMode.Automatic,
             financialConnectionsAvailability = FinancialConnectionsAvailability.Full
         )
     }
@@ -680,6 +684,7 @@ class CollectBankAccountViewModelTest {
             customerId = "customer_id",
             onBehalfOf = "on_behalf_of_id",
             hostedSurface = "payment_element",
+            themeMode = ThemeMode.Automatic,
             financialConnectionsAvailability = FinancialConnectionsAvailability.Full
         )
     }

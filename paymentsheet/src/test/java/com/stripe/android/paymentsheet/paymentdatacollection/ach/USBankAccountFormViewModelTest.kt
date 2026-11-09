@@ -1,13 +1,17 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.ach
 
+import android.os.Parcel
+import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.TurbineTestContext
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
+import com.google.testing.junit.testparameterinjector.TestParameter
 import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.financialconnections.ElementsSessionContext
+import com.stripe.android.financialconnections.ThemeMode
 import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
@@ -25,6 +29,7 @@ import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
+import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResponseInternal
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
@@ -56,10 +61,10 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import org.robolectric.RobolectricTestRunner
+import org.robolectric.RobolectricTestParameterInjector
 import kotlin.test.Test
 
-@RunWith(RobolectricTestRunner::class)
+@RunWith(RobolectricTestParameterInjector::class)
 class USBankAccountFormViewModelTest {
 
     private val defaultArgs = USBankAccountFormViewModel.Args(
@@ -86,6 +91,7 @@ class USBankAccountFormViewModelTest {
         savedPaymentMethod = null,
         shippingDetails = null,
         hostedSurface = CollectBankAccountLauncher.HOSTED_SURFACE_PAYMENT_ELEMENT,
+        themeMode = PaymentSheet.ThemeMode.Automatic,
         linkMode = null,
         setAsDefaultPaymentMethodEnabled = false,
         setAsDefaultMatchesSaveForFutureUse = false,
@@ -105,6 +111,52 @@ class USBankAccountFormViewModelTest {
 
     @get:Rule
     val viewModelStoreRule = ViewModelStoreTestRule()
+
+    @Test
+    fun `passes configured theme to bank account collection`(
+        @TestParameter themeMode: PaymentSheet.ThemeMode,
+        @TestParameter instantDebits: Boolean,
+        @TestParameter isPaymentFlow: Boolean,
+        @TestParameter deferredIntent: Boolean,
+    ) = runTest {
+        val registry = FakeBankAccountActivityResultRegistry()
+        val viewModel = createViewModel(
+            args = defaultArgs.copy(
+                themeMode = themeMode,
+                instantDebits = instantDebits,
+                isPaymentFlow = isPaymentFlow,
+                clientSecret = if (deferredIntent) null else defaultArgs.clientSecret,
+            ),
+        )
+        viewModel.register(object : ActivityResultRegistryOwner {
+            override val activityResultRegistry = registry
+        })
+
+        viewModel.handlePrimaryButtonClick()
+
+        val launchArgs = registry.launchCalls.awaitItem()
+        val expectedThemeMode = when (themeMode) {
+            PaymentSheet.ThemeMode.Automatic -> ThemeMode.Automatic
+            PaymentSheet.ThemeMode.AlwaysLight -> ThemeMode.AlwaysLight
+            PaymentSheet.ThemeMode.AlwaysDark -> ThemeMode.AlwaysDark
+        }
+        assertThat(launchArgs.themeMode).isEqualTo(expectedThemeMode)
+
+        val parcel = Parcel.obtain()
+        try {
+            parcel.writeParcelable(launchArgs, 0)
+            parcel.setDataPosition(0)
+            val restored = parcel.readParcelable<CollectBankAccountContract.Args>(
+                CollectBankAccountContract.Args::class.java.classLoader,
+            )
+            assertThat(restored?.themeMode).isEqualTo(expectedThemeMode)
+        } finally {
+            parcel.recycle()
+        }
+
+        viewModel.onDestroy()
+        registry.ensureAllEventsConsumed()
+    }
 
     @Test
     fun `when email and name is valid then required fields are filled`() =
