@@ -9,7 +9,6 @@ import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.orEmpty
 import com.stripe.android.core.utils.FeatureFlags.disableNfcScanning
-import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.link.model.LinkAccount
@@ -193,30 +192,6 @@ internal data class PaymentMethodMetadata(
         }
     }
 
-    fun logUnavailablePaymentMethods(logger: UserFacingLogger, paymentMethodTypes: List<String>) {
-        val supportedTypes = supportedPaymentMethodTypes()
-        // Wallet availability is determined separately from the payment method registry.
-        paymentMethodTypes.distinct().filterNot { code ->
-            code in supportedTypes || WalletType.entries.any { it.code == code }
-        }
-            .forEach { code ->
-                val definition = PaymentMethodRegistry.definitionsByCode[code]
-                val reasons = definition?.unmetRequirements(this)?.map { it.errorMessage }
-                    ?: listOf(AddPaymentMethodRequirement.Unsupported.errorMessage)
-                val activationReasons = if (isUnactivated(code)) {
-                    listOf(
-                        "This payment method is not activated for live mode. Activate it in the Stripe Dashboard."
-                    )
-                } else {
-                    emptyList()
-                }
-                logger.logWarningWithoutPii(
-                    "Payment Element could not offer $code:\n" +
-                        (reasons + activationReasons).joinToString("\n") { "  * $it" }
-                )
-            }
-    }
-
     fun supportedSavedPaymentMethodTypes(): List<PaymentMethod.Type> {
         val supportedTypes = supportedPaymentMethodDefinitions().filter { paymentMethodDefinition ->
             paymentMethodDefinition.supportedAsSavedPaymentMethod
@@ -325,12 +300,9 @@ internal data class PaymentMethodMetadata(
         val paymentMethodTypes = supportedPaymentMethodTypes + syntheticPaymentMethodTypes
 
         return paymentMethodTypes.filterNot {
-            isUnactivated(it.type.code)
+            stripeIntent.isLiveMode &&
+                stripeIntent.unactivatedPaymentMethods.contains(it.type.code)
         }
-    }
-
-    private fun isUnactivated(code: String): Boolean {
-        return stripeIntent.isLiveMode && code in stripeIntent.unactivatedPaymentMethods
     }
 
     fun amount(): Amount? {

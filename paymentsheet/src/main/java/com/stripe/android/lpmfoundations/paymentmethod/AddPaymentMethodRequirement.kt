@@ -8,11 +8,17 @@ import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConf
 internal enum class AddPaymentMethodRequirement {
     /** A special case that indicates the payment method is always unsupported by PaymentSheet. */
     Unsupported {
+        override val errorMessage: String =
+            "This payment method is not currently supported by the Payment Element."
+
         override fun isMetBy(metadata: PaymentMethodMetadata, code: String): Boolean = false
     },
 
     /** Indicates the payment method is unsupported by PaymentSheet when using SetupIntents or SFU. */
     UnsupportedForSetup {
+        override val errorMessage: String =
+            "This payment method is not supported with a SetupIntent or setup_future_usage."
+
         override fun isMetBy(metadata: PaymentMethodMetadata, code: String): Boolean {
             return !metadata.hasIntentToSetup(code)
         }
@@ -20,6 +26,9 @@ internal enum class AddPaymentMethodRequirement {
 
     /** Indicates the payment method is unsupported by PaymentSheet when using SetupIntents. */
     UnsupportedForSetupIntent {
+        override val errorMessage: String =
+            "This payment method is not supported with a SetupIntent."
+
         override fun isMetBy(metadata: PaymentMethodMetadata, code: String): Boolean {
             return metadata.stripeIntent !is SetupIntent
         }
@@ -27,6 +36,9 @@ internal enum class AddPaymentMethodRequirement {
 
     /** Requires that the developer declare support for asynchronous payment methods. */
     MerchantSupportsDelayedPaymentMethods {
+        override val errorMessage: String =
+            "Configuration.allowsDelayedPaymentMethods must be set to true."
+
         override fun isMetBy(metadata: PaymentMethodMetadata, code: String): Boolean {
             return metadata.allowsDelayedPaymentMethods
         }
@@ -34,6 +46,10 @@ internal enum class AddPaymentMethodRequirement {
 
     /** Requires that the FinancialConnections SDK has been linked. */
     FinancialConnectionsSdk {
+        override val errorMessage: String =
+            "The Financial Connections SDK must be included. " +
+                "See https://docs.stripe.com/payments/accept-a-payment?platform=android&payment-ui=mobile#android-ach"
+
         override fun isMetBy(metadata: PaymentMethodMetadata, code: String): Boolean {
             return metadata.financialConnectionsAvailability != null
         }
@@ -41,6 +57,9 @@ internal enum class AddPaymentMethodRequirement {
 
     /** Requires a valid us bank verification method. */
     ValidUsBankVerificationMethod {
+        override val errorMessage: String =
+            "US bank accounts require an automatic, instant, or instant_or_skip verification method."
+
         override fun isMetBy(metadata: PaymentMethodMetadata, code: String): Boolean {
             // Verification method is always 'automatic' for deferred intents
             val isDeferred = metadata.stripeIntent.clientSecret == null
@@ -59,6 +78,9 @@ internal enum class AddPaymentMethodRequirement {
 
     /** Requires that Instant Debits are possible for this transaction. */
     InstantDebits {
+        override val errorMessage: String =
+            "Instant debits require Link, bank onboarding, and email collection or an attached default email."
+
         override fun isMetBy(metadata: PaymentMethodMetadata, code: String): Boolean {
             return metadata.linkConfiguration.shouldDisplay &&
                 metadata.linkMode != LinkMode.LinkCardBrand &&
@@ -68,6 +90,10 @@ internal enum class AddPaymentMethodRequirement {
 
     /** Requires that LinkCardBrand is possible for this transaction. */
     LinkCardBrand {
+        override val errorMessage: String =
+            "Link card brand requires Link card brand mode, bank onboarding, and email collection or an " +
+                "attached default email."
+
         override fun isMetBy(metadata: PaymentMethodMetadata, code: String): Boolean {
             return metadata.linkConfiguration.shouldDisplay &&
                 metadata.linkMode == LinkMode.LinkCardBrand &&
@@ -77,24 +103,7 @@ internal enum class AddPaymentMethodRequirement {
 
     abstract fun isMetBy(metadata: PaymentMethodMetadata, code: String): Boolean
 
-    val errorMessage: String
-        get() = when (this) {
-            Unsupported -> "This payment method is not currently supported by the Payment Element."
-            UnsupportedForSetup ->
-                "This payment method is not supported with a SetupIntent or setup_future_usage."
-            UnsupportedForSetupIntent -> "This payment method is not supported with a SetupIntent."
-            MerchantSupportsDelayedPaymentMethods -> "Configuration.allowsDelayedPaymentMethods must be set to true."
-            FinancialConnectionsSdk ->
-                "The Financial Connections SDK must be included. " +
-                    "See https://docs.stripe.com/payments/accept-a-payment?platform=android&payment-ui=mobile#android-ach"
-            ValidUsBankVerificationMethod ->
-                "US bank accounts require an automatic, instant, or instant_or_skip verification method."
-            InstantDebits ->
-                "Instant debits require Link, bank onboarding, and email collection or an attached default email."
-            LinkCardBrand ->
-                "Link card brand requires Link card brand mode, bank onboarding, and email collection or an " +
-                    "attached default email."
-        }
+    abstract val errorMessage: String
 }
 
 private val PaymentMethodMetadata.supportsMobileInstantDebitsFlow: Boolean

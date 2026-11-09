@@ -29,6 +29,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.create
+import com.stripe.android.lpmfoundations.paymentmethod.logUnavailablePaymentMethods
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSession.ExperimentAssignment
@@ -476,21 +477,12 @@ internal class DefaultPaymentElementLoader @Inject constructor(
 
         warnUnactivatedIfNeeded(stripeIntent)
 
-        when (integrationConfiguration) {
-            is PaymentElementLoader.Configuration.PaymentSheet,
-            is PaymentElementLoader.Configuration.Embedded -> pmMetadata.logUnavailablePaymentMethods(
-                logger = userFacingLogger,
-                paymentMethodTypes = stripeIntent.paymentMethodTypes +
-                    if (initializationMode is PaymentElementLoader.InitializationMode.CheckoutSession) {
-                        elementsSession.orderedPaymentMethodTypesAndWallets
-                    } else {
-                        emptyList()
-                    },
-            )
-            is PaymentElementLoader.Configuration.CryptoOnramp,
-            is PaymentElementLoader.Configuration.StandaloneLink,
-            is PaymentElementLoader.Configuration.ExpressCheckoutElement -> Unit
-        }
+        logUnavailablePaymentMethodsIfNeeded(
+            integrationConfiguration = integrationConfiguration,
+            initializationMode = initializationMode,
+            elementsSession = elementsSession,
+            metadata = pmMetadata,
+        )
 
         if (!supportsIntent(pmMetadata)) {
             val requested = stripeIntent.paymentMethodTypes.joinToString(separator = ", ")
@@ -906,6 +898,30 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             "More information: https://support.stripe.com/questions/activate-a-new-payment-method"
 
         logger.warning(message)
+    }
+
+    private fun logUnavailablePaymentMethodsIfNeeded(
+        integrationConfiguration: PaymentElementLoader.Configuration,
+        initializationMode: PaymentElementLoader.InitializationMode,
+        elementsSession: ElementsSession,
+        metadata: PaymentMethodMetadata,
+    ) {
+        when (integrationConfiguration) {
+            is PaymentElementLoader.Configuration.PaymentSheet,
+            is PaymentElementLoader.Configuration.Embedded,
+            is PaymentElementLoader.Configuration.ExpressCheckoutElement -> logUnavailablePaymentMethods(
+                metadata = metadata,
+                logger = userFacingLogger,
+                paymentMethodTypes = metadata.stripeIntent.paymentMethodTypes +
+                    if (initializationMode is PaymentElementLoader.InitializationMode.CheckoutSession) {
+                        elementsSession.orderedPaymentMethodTypesAndWallets
+                    } else {
+                        emptyList()
+                    },
+            )
+            is PaymentElementLoader.Configuration.CryptoOnramp,
+            is PaymentElementLoader.Configuration.StandaloneLink -> Unit
+        }
     }
 
     private fun supportsIntent(

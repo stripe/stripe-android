@@ -32,10 +32,12 @@ internal class PaymentMethodAvailabilityLoggingTest {
     }
 
     @Test
-    fun `logs why a delayed method is excluded`() = runScenario(
+    fun `logs unmet requirements for unactivated methods`() = runScenario(
         PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("card", "sepa_debit"),
+                unactivatedPaymentMethods = listOf("sepa_debit"),
+                isLiveMode = true,
             ),
             allowsDelayedPaymentMethods = false,
         ),
@@ -61,7 +63,7 @@ internal class PaymentMethodAvailabilityLoggingTest {
     }
 
     @Test
-    fun `logs unactivated methods in live mode`() = runScenario(
+    fun `does not duplicate activation warnings for otherwise supported methods`() = runScenario(
         PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("card", "klarna"),
@@ -70,10 +72,8 @@ internal class PaymentMethodAvailabilityLoggingTest {
             ),
         ),
     ) {
-        assertThat(logger.messages.awaitItem()).isEqualTo(
-            "Payment Element could not offer klarna:\n" +
-                "  * This payment method is not activated for live mode. Activate it in the Stripe Dashboard."
-        )
+        assertThat(metadata.supportedPaymentMethodTypes()).doesNotContain("klarna")
+        logger.messages.expectNoEvents()
     }
 
     @Test
@@ -120,7 +120,11 @@ internal class PaymentMethodAvailabilityLoggingTest {
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val logger = FakePaymentMethodAvailabilityLogger()
-        metadata.logUnavailablePaymentMethods(logger, metadata.stripeIntent.paymentMethodTypes)
+        logUnavailablePaymentMethods(
+            metadata = metadata,
+            logger = logger,
+            paymentMethodTypes = metadata.stripeIntent.paymentMethodTypes,
+        )
         Scenario(metadata, logger).block()
         logger.messages.ensureAllEventsConsumed()
     }

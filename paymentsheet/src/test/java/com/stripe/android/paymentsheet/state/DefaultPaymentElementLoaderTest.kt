@@ -31,7 +31,6 @@ import com.stripe.android.googlepaylauncher.injection.GooglePayRepositoryFactory
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.FakeIntegrityRequestManager
 import com.stripe.android.link.LinkConfiguration
-import com.stripe.android.link.LinkController
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.gate.FakeLinkGate
 import com.stripe.android.link.gate.LinkGate
@@ -5195,7 +5194,6 @@ internal class DefaultPaymentElementLoaderTest {
     fun `logs filtering reasons once for PaymentSheet and FlowController loads`() = runScenario {
         assertPaymentMethodFilteringLogs(
             integrationConfiguration = PaymentElementLoader.Configuration.PaymentSheet(mockConfiguration()),
-            shouldLog = true,
         )
     }
 
@@ -5208,7 +5206,6 @@ internal class DefaultPaymentElementLoaderTest {
                     .googlePay(ConfigFixtures.GOOGLE_PAY).build(),
                 paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
             ),
-            shouldLog = true,
         )
     }
 
@@ -5233,7 +5230,6 @@ internal class DefaultPaymentElementLoaderTest {
                 collectedEmail = null,
                 configuredElements = listOf("mobile-payment-element"),
             ),
-            shouldLog = true,
         )
     }
 
@@ -5273,38 +5269,11 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `does not log filtering reasons for express checkout loads`() = runScenario {
+    fun `logs filtering reasons for express checkout loads`() = runScenario {
         assertPaymentMethodFilteringLogs(
             integrationConfiguration = PaymentElementLoader.Configuration.ExpressCheckoutElement(
                 commonConfiguration = mockConfiguration().asCommonConfiguration(),
             ),
-            shouldLog = false,
-        )
-    }
-
-    @Test
-    fun `does not log filtering reasons for standalone Link loads`() = runScenario {
-        assertPaymentMethodFilteringLogs(
-            integrationConfiguration = PaymentElementLoader.Configuration.StandaloneLink(
-                LinkController.Configuration(
-                    merchantDisplayName = "Merchant",
-                    publishableKey = DEFAULT_API_CONFIG.publishableKey,
-                ).build(),
-            ),
-            shouldLog = false,
-        )
-    }
-
-    @Test
-    fun `does not log filtering reasons for crypto onramp loads`() = runScenario {
-        assertPaymentMethodFilteringLogs(
-            integrationConfiguration = PaymentElementLoader.Configuration.CryptoOnramp(
-                LinkController.Configuration(
-                    merchantDisplayName = "Merchant",
-                    publishableKey = DEFAULT_API_CONFIG.publishableKey,
-                ).build(),
-            ),
-            shouldLog = false,
         )
     }
 
@@ -5336,7 +5305,6 @@ internal class DefaultPaymentElementLoaderTest {
 
     private suspend fun Scenario.assertPaymentMethodFilteringLogs(
         integrationConfiguration: PaymentElementLoader.Configuration,
-        shouldLog: Boolean,
         initializationMode: PaymentElementLoader.InitializationMode = DEFAULT_INITIALIZATION_MODE,
     ) {
         val logger = FakePaymentMethodAvailabilityLogger()
@@ -5353,15 +5321,10 @@ internal class DefaultPaymentElementLoaderTest {
 
         assertThat(state.paymentMethodMetadata.supportedPaymentMethodTypes()).containsExactly("card")
         state.paymentMethodMetadata.sortedSupportedPaymentMethods()
-        if (integrationConfiguration.commonConfiguration.googlePay == null) {
-            assertThat(logger.messages.awaitItem()).isEqualTo("GooglePayConfiguration is not set.")
-        }
-        if (shouldLog) {
-            assertThat(logger.messages.awaitItem()).isEqualTo(
-                "Payment Element could not offer sepa_debit:\n" +
-                    "  * Configuration.allowsDelayedPaymentMethods must be set to true."
-            )
-        }
+        assertThat(logger.messages.awaitItem()).isEqualTo(
+            "Payment Element could not offer sepa_debit:\n" +
+                "  * Configuration.allowsDelayedPaymentMethods must be set to true."
+        )
         logger.messages.ensureAllEventsConsumed()
         consumeLoadingEvents()
         eventReporter.loadStartedTurbine.awaitItem()
