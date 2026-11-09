@@ -66,7 +66,7 @@
   <!-- Klarna buy now or pay later copy -->
   <string name="stripe_klarna_buy_now_pay_later">Compra ara o paga més endavant amb Klarna.</string>
   <!-- Klarna mandate text -->
-  <string name="stripe_klarna_mandate">En continuar a Klarna, permeteu que %1$s cobri pagaments futurs al vostre compte de Klarna d\'acord amb les seves condicions. Podeu canviar aquesta opció en qualsevol moment a l\'aplicació Klarna o posant-vos en contacte amb %2$s.</string>
+  <string name="stripe_klarna_mandate">En continuar cap a Klarna, autoritzeu %1$s a carregar pagaments futurs al vostre compte de Klarna d\'acord amb els seus termes i amb els termes de Klarna. Podeu canviar-ho en qualsevol moment des de la vostra aplicació de Klarna o posant-vos en contacte amb %2$s.</string>
   <!-- Klarna pay later copy -->
   <string name="stripe_klarna_pay_later">Paga més endavant amb Klarna.</string>
   <!-- Caption for Phone field on address form -->
@@ -132,7 +132,7 @@
   <!-- Expiration date shown for a scanned card in the card pill -->
   <string name="stripe_scanned_card_pill_expiration_date">Caduca el %1$s</string>
   <!-- SEPA mandate text -->
-  <string name="stripe_sepa_mandate">Proporcionant la informació de pagament i confirmant aquest pagament, estàs autoritzant (A) %s i Stripe, el nostre proveïdor de serveis de pagament, a enviar ordres al teu banc per tal de carregar des del teu compte i (B) carregar el teu compte en conformitat amb aquestes ordres. Tens dret a un reembolsament per part del teu banc sota els termes i condicions que s\'hagin acordat amb aquest. El reembolsament s\'ha de sol·licitar en un termini de 8 setmanes des de la data en que es va carregar el compte. Els teus drets estan explicats en un extracte que pots demanar al teu banc. Estàs acceptant rebre notificacions per pròxims dèbits fins a dos dies abans de que es portin a terme.</string>
+  <string name="stripe_sepa_mandate">En proporcionar la vostra informació de pagament i confirmar aquest pagament, autoritzeu (A) %s i Stripe, el nostre proveïdor de serveis de pagament, a enviar instruccions al vostre banc per carregar el vostre compte i (B) al vostre banc a carregar el vostre compte d\'acord amb aquestes instruccions. Com a part dels vostres drets, teniu dret a un reembossament per part del vostre banc segons els termes i les condicions del vostre acord amb aquest. El reembossament s\'ha de sol·licitar en un termini de 8 setmanes a partir de la data en què es va carregar el vostre compte. Els vostres drets s\'expliquen en una declaració que podeu obtenir del vostre banc. Accepteu rebre notificacions de càrrecs futurs amb un màxim de 2 dies d\'antelació respecte al moment en què es produeixin.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_set_as_default_payment_method">Configura com a mètode de pagament per defecte</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->

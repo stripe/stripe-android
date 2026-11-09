@@ -37,7 +37,7 @@
   <!-- Klarna pay later copy -->
   <string name="stripe_card_with_tap_or_enter_manually">Napauta tai syötä manuaalisesti</string>
   <!-- Cash App mandate text -->
-  <string name="stripe_cash_app_pay_mandate">Jatkamalla valtuutat kauppiaan %1$s veloittamaan Cash App -tiliäsi tälle ja tuleville maksuille kauppiaan %2$s ehtojen mukaisesti, kunnes tämä todennus peruutetaan. Voit muuttaa tätä milloin tahansa Cash App -asetuksista.</string>
+  <string name="stripe_cash_app_pay_mandate">Jatkamalla valtuutat tahon %1$s veloittamaan Cash App -tiliäsi tästä maksusta ja tulevista maksuista tahon %2$s ehtojen mukaisesti, kunnes tämä valtuutus peruutetaan. Voit muuttaa tätä milloin tahansa Cash App -asetuksissasi.</string>
   <!-- Title for the contact information section -->
   <string name="stripe_contact_information">Yhteystiedot</string>
   <!-- Text for continue button -->
@@ -66,7 +66,7 @@
   <!-- Klarna buy now or pay later copy -->
   <string name="stripe_klarna_buy_now_pay_later">Osta nyt tai maksa myöhemmin Klarnalla.</string>
   <!-- Klarna mandate text -->
-  <string name="stripe_klarna_mandate">Jatkamalla Klarnaan valtuutat %1$s veloittamaan tulevia maksuja Klarna-tililtäsi heidän ehtojensa mukaisesti. Voit muuttaa tämän koska tahansa Klarna-sovelluksessa tai ottamalla yhteyttä kohteeseen %2$s.</string>
+  <string name="stripe_klarna_mandate">Jatkamalla Klarnaan sallit tahon %1$s veloittaa Klarna-tiliäsi tulevista maksuista heidän ehtojensa ja Klarnan ehtojen mukaisesti. Voit muuttaa tätä milloin tahansa Klarna-sovelluksessasi tai ottamalla yhteyttä tahoon %2$s.</string>
   <!-- Klarna pay later copy -->
   <string name="stripe_klarna_pay_later">Maksa myöhemmin Klarnalla.</string>
   <!-- Caption for Phone field on address form -->
@@ -132,7 +132,7 @@
   <!-- Expiration date shown for a scanned card in the card pill -->
   <string name="stripe_scanned_card_pill_expiration_date">Vanhenee %1$s</string>
   <!-- SEPA mandate text -->
-  <string name="stripe_sepa_mandate">Antamalla maksutiedot ja vahvistamalla tämän maksun, valtuutat (A) %s ja Stripen, maksupalvelun tarjoajamme, lähettämään ohjeita pankillesi tilisi veloittamiseksi ja (B) pankkisi veloittamaan tiliäsi annettujen ohjeiden mukaisesti. Oikeuksiesi mukaisesti olet oikeutettu maksun palautukseen pankiltasi heidän kanssaan tekemäsi sopimuksen mukaisesti. Maksun palautus on lunastettava kahdeksan viikon kuluessa tilisi veloituksesta. Oikeutesi kerrotaan lausunnossa, jonka voit hankkia pankiltasi. Hyväksyt vastaanottamaan ilmoituksia tulevista veloituksista kaksi päivää ennen niiden tapahtumista.</string>
+  <string name="stripe_sepa_mandate">Antamalla maksutietosi ja vahvistamalla tämän maksun valtuutat (A) tahon %s ja maksupalveluntarjoajamme Stripen lähettämään pankillesi ohjeet tilisi veloittamiseksi ja (B) pankkisi veloittamaan tiliäsi näiden ohjeiden mukaisesti. Osana oikeuksiasi olet oikeutettu pankkisi tekemään maksun palautukseen pankkisi kanssa tekemäsi sopimuksen ehtojen mukaisesti. Maksun palautusta on haettava kahdeksan viikon kuluessa siitä päivästä, jolloin tiliäsi veloitettiin. Oikeutesi on selitetty selvityksessä, jonka voit pyytää pankiltasi. Hyväksyt saavasi ilmoituksia tulevista veloituksista enintään kaksi päivää ennen niiden tapahtumista.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_set_as_default_payment_method">Aseta oletusarvoiseksi maksutavaksi</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
