@@ -386,14 +386,14 @@ workflows:
           inputs:
             - content: ./scripts/retry.sh 3 ./scripts/pin_emulator_version.sh $EMULATOR_BUILD_NUMBER $EMULATOR_VERSION
       - script@1:
-          title: Execute PaymentSheet instrumentation and Checkout E2E tests
+          title: Execute instrumentation tests
           timeout: 1200
           inputs:
             - content: ./scripts/retry_with_emulator_cleanup.sh 2 ./gradlew -Pandroid.experimental.androidTest.numManagedDeviceShards=6 -Pandroid.experimental.testOptions.managedDevices.maxConcurrentDevices=6 -Pandroid.testInstrumentationRunnerArguments.notAnnotation=com.stripe.android.paymentsheet.RequiresIme :paymentsheet:pixel2api33DebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
       - bundle::export_instrumentation_test_results:
-          title: Export PaymentSheet instrumentation and Checkout E2E test results
+          title: Export PaymentSheet instrumentation test results
           inputs:
-            - test_title: PaymentSheet instrumentation and Checkout E2E tests
+            - test_title: PaymentSheet instrumentation tests
     meta:
       bitrise.io:
         stack: ubuntu-resolute-26.04-bitrise-2026-android

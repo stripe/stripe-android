@@ -7,6 +7,7 @@ import com.stripe.android.elements.PaymentElement
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedContentPage
 import com.stripe.android.paymentelement.EmbeddedFormPage
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
@@ -67,14 +68,14 @@ internal class CheckoutCardIntegrationTest {
     )
 
     private fun runScenario(
-        setup: () -> Unit,
+        setup: suspend () -> Unit,
         check: (CheckoutElementsController.Result) -> Unit,
-    ) {
+    ) = runBlocking {
         val result = runCheckoutIntegrationTest(
             merchant = "US",
             sessionParams = cardOnlySessionParams(),
             configuration = configuration,
-            block = setup,
+            setup = setup,
         )
         check(result)
     }

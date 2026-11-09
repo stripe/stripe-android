@@ -15,26 +15,22 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.paymentsheet.MainActivity
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import kotlinx.serialization.json.JsonObject
 import kotlin.time.Duration.Companion.seconds
 
-internal fun runCheckoutIntegrationTest(
+internal suspend fun runCheckoutIntegrationTest(
     merchant: String,
     sessionParams: JsonObject,
     configuration: CheckoutElementsController.Configuration,
-    block: () -> Unit,
+    setup: suspend () -> Unit,
 ): CheckoutElementsController.Result {
     val backend = CheckoutPlaygroundBackend(
         baseUrl = "https://stp-mobile-playground-backend-v7.stripedemos.com/",
         merchant = merchant,
     )
-    val (publishableKey, clientSecret) = runBlocking {
-        withTimeout(OPERATION_TIMEOUT) {
-            backend.fetchPublishableKey().getOrThrow() to backend.createCheckoutSession(sessionParams).getOrThrow()
-        }
-    }
+    val publishableKey = backend.fetchPublishableKey().getOrThrow()
+    val clientSecret = backend.createCheckoutSession(sessionParams).getOrThrow()
     val checkoutResult = CompletableDeferred<CheckoutElementsController.Result>()
 
     return ActivityScenario.launch(MainActivity::class.java).use { scenario ->
@@ -49,11 +45,7 @@ internal fun runCheckoutIntegrationTest(
             ).resultCallback { checkoutResult.complete(it) }.build()
         }
         try {
-            val configureResult = runBlocking {
-                withTimeout(OPERATION_TIMEOUT) {
-                    controller.configure(clientSecret, configuration)
-                }
-            }
+            val configureResult = controller.configure(clientSecret, configuration)
             assertThat(configureResult).isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
 
             lateinit var presenter: CheckoutElementsPresenter
@@ -68,12 +60,10 @@ internal fun runCheckoutIntegrationTest(
             }
             scenario.moveToState(Lifecycle.State.RESUMED)
 
-            block()
+            setup()
 
             presenter.confirm()
-            runBlocking {
-                withTimeout(OPERATION_TIMEOUT) { checkoutResult.await() }
-            }
+            withTimeout(OPERATION_TIMEOUT) { checkoutResult.await() }
         } finally {
             scenario.onActivity { controller.destroy() }
         }
