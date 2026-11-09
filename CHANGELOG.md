@@ -1,7 +1,9 @@
 # CHANGELOG
 
-NEXT_VERSION_BUMP: MINOR
+NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
+
+## 23.26.0 - 2026-11-09
 
 ### Payments
 * [ADDED][15314](https://github.com/stripe/stripe-android/pull/15314) Klarna confirmation options for passing SDK-generated interoperability and partner confirmation tokens (private preview).
