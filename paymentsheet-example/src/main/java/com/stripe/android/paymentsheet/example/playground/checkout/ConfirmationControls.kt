@@ -3,7 +3,9 @@
 package com.stripe.android.paymentsheet.example.playground.checkout
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,9 +15,14 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import com.stripe.android.checkout.CheckoutElementsController.Session.PaymentOptionDisplayData
 
@@ -26,6 +33,7 @@ internal fun ConfirmationControls(
     isCompleted: Boolean,
     isUpdating: Boolean,
     displayMandate: Boolean,
+    isShippingAddressElementConfigured: Boolean,
     onClearPaymentMethod: () -> Unit,
     onSelectPaymentMethod: () -> Unit,
     onSetShippingAddress: () -> Unit,
@@ -54,15 +62,46 @@ internal fun ConfirmationControls(
             modifier = Modifier.weight(1f),
         ) { Text("Select") }
     }
-    Button(
+    ShippingAddressButton(
+        isConfigured = isShippingAddressElementConfigured,
         onClick = onSetShippingAddress,
-        modifier = Modifier.fillMaxWidth(),
-    ) { Text("Set shipping address") }
+    )
     Button(
         onClick = onConfirm,
         enabled = !isUpdating,
         modifier = Modifier.fillMaxWidth(),
     ) { Text("Confirm") }
+}
+
+@Composable
+private fun ShippingAddressButton(
+    isConfigured: Boolean,
+    onClick: () -> Unit,
+) {
+    var showConfigurationMessage by rememberSaveable(isConfigured) { mutableStateOf(false) }
+    Box {
+        Button(
+            onClick = onClick,
+            enabled = isConfigured,
+            modifier = Modifier.fillMaxWidth(),
+        ) { Text("Set shipping address") }
+        if (!isConfigured) {
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .pointerInput(Unit) {
+                        detectTapGestures { showConfigurationMessage = true }
+                    }
+            )
+        }
+    }
+    if (showConfigurationMessage) {
+        Text(
+            text = "Shipping Address Element isn't configured. Enable 'Set configuration' in " +
+                "Shipping Address Element settings, then create a new session.",
+            color = MaterialTheme.colors.error,
+        )
+    }
 }
 
 @Composable
