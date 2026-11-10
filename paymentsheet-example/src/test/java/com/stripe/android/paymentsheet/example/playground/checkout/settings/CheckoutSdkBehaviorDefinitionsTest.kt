@@ -7,7 +7,7 @@ import com.stripe.android.testing.FeatureFlagTestRule
 import org.junit.Rule
 import org.junit.Test
 
-class CheckoutFeatureFlagDefinitionsTest {
+class CheckoutSdkBehaviorDefinitionsTest {
     @get:Rule
     val webAuthFeatureFlagRule = FeatureFlagTestRule(
         featureFlag = FeatureFlags.forceLinkWebAuth,
@@ -20,7 +20,7 @@ class CheckoutFeatureFlagDefinitionsTest {
             .filter { it.type == FeatureFlag::class.java }
             .map { "feature_flags.${it.name}" }
 
-        val settingKeys = CheckoutFeatureFlagDefinitions.configuration.values()
+        val settingKeys = CheckoutSdkBehaviorDefinitions.configuration.values()
             .map { it.key }
             .filter { it.startsWith("feature_flags.") }
 
@@ -73,7 +73,7 @@ class CheckoutFeatureFlagDefinitionsTest {
     }
 
     private fun webAuthDefinition(): CheckoutPlaygroundSettingDefinition.Value<*> {
-        return CheckoutFeatureFlagDefinitions.configuration.values().single {
+        return CheckoutSdkBehaviorDefinitions.configuration.values().single {
             it.key == "feature_flags.forceLinkWebAuth"
         }
     }

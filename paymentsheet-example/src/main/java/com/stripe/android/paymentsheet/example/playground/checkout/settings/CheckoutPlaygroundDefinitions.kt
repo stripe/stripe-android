@@ -10,7 +10,7 @@ internal object CheckoutPlaygroundDefinitions {
             children = arrayOf(
                 session.configuration,
                 Controller.configuration,
-                CheckoutFeatureFlagDefinitions.configuration,
+                CheckoutSdkBehaviorDefinitions.configuration,
             ),
         )
     }
