@@ -69,11 +69,11 @@ android {
         }
     }
 
-    kotlinOptions {
-        freeCompilerArgs += [
-                "-opt-in=com.stripe.android.core.ApiConfigurationPreview",
-                "-Xconsistent-data-class-copy-visibility",
-        ]
+    kotlin {
+        compilerOptions {
+            freeCompilerArgs.add("-opt-in=com.stripe.android.core.ApiConfigurationPreview")
+            freeCompilerArgs.add("-Xconsistent-data-class-copy-visibility")
+        }
     }
 }
 

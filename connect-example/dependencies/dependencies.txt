@@ -1,14 +1,15 @@
-+--- androidx.databinding:viewbinding:8.13.2
-|    \--- androidx.annotation:annotation:1.0.0 -> 1.9.1
-|         \--- androidx.annotation:annotation-jvm:1.9.1
-|              \--- org.jetbrains.kotlin:kotlin-stdlib:1.9.24 -> 2.2.21
-|                   +--- org.jetbrains:annotations:13.0 -> 23.0.0
-|                   +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.0 (c)
-|                   \--- org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.0 (c)
-+--- org.jetbrains.kotlin:kotlin-stdlib:2.2.21 (*)
-+--- project :connect
++--- org.jetbrains.kotlin:kotlin-stdlib:2.2.21
+|    +--- org.jetbrains:annotations:13.0 -> 23.0.0
+|    +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.0 (c)
+|    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.0 (c)
++--- androidx.databinding:viewbinding:9.4.0
+|    +--- androidx.annotation:annotation:1.0.0 -> 1.9.1
+|    |    \--- androidx.annotation:annotation-jvm:1.9.1
+|    |         \--- org.jetbrains.kotlin:kotlin-stdlib:1.9.24 -> 2.2.21 (*)
+|    \--- org.jetbrains.kotlin:kotlin-stdlib:2.2.10 -> 2.2.21 (*)
++--- project ':connect'
 |    +--- org.jetbrains.kotlin:kotlin-stdlib:2.2.21 (*)
-|    +--- project :stripe-core
+|    +--- project ':stripe-core'
 |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:2.2.21 (*)
 |    |    +--- androidx.browser:browser:1.9.0
 |    |    |    +--- androidx.activity:activity:1.9.0 -> 1.12.4
@@ -214,7 +215,7 @@
 |    |    |    +--- androidx.interpolator:interpolator:1.0.0 (*)
 |    |    |    +--- com.google.guava:listenablefuture:1.0
 |    |    |    \--- org.jspecify:jspecify:1.0.0
-|    |    +--- com.google.dagger:dagger:2.58
+|    |    +--- com.google.dagger:dagger:2.59
 |    |    |    +--- jakarta.inject:jakarta.inject-api:2.0.1
 |    |    |    +--- javax.inject:javax.inject:1
 |    |    |    \--- org.jspecify:jspecify:1.0.0
@@ -272,12 +273,12 @@
 |    |    +--- androidx.lifecycle:lifecycle-viewmodel-savedstate:2.10.0 (*)
 |    |    \--- org.jetbrains.kotlin:kotlin-parcelize-runtime:2.2.21
 |    |         \--- org.jetbrains.kotlin:kotlin-stdlib:2.2.21 (*)
-|    +--- project :financial-connections
-|    |    +--- project :financial-connections-core
-|    |    |    +--- project :stripe-core (*)
-|    |    |    +--- project :payments-model
+|    +--- project ':financial-connections'
+|    |    +--- project ':financial-connections-core'
+|    |    |    +--- project ':stripe-core' (*)
+|    |    |    +--- project ':payments-model'
 |    |    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:2.2.21 (*)
-|    |    |    |    +--- project :stripe-core (*)
+|    |    |    |    +--- project ':stripe-core' (*)
 |    |    |    |    +--- androidx.appcompat:appcompat:1.7.1
 |    |    |    |    |    +--- androidx.activity:activity:1.8.0 -> 1.12.4 (*)
 |    |    |    |    |    +--- androidx.annotation:annotation:1.3.0 -> 1.9.1 (*)
@@ -421,10 +422,10 @@
 |    |    |    +--- org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0 (*)
 |    |    |    +--- org.jetbrains.kotlin:kotlin-parcelize-runtime:2.2.21 (*)
 |    |    |    \--- dev.drewhamilton.poko:poko-annotations:0.20.2 (*)
-|    |    +--- project :stripe-core (*)
-|    |    +--- project :stripe-ui-core
+|    |    +--- project ':stripe-core' (*)
+|    |    +--- project ':stripe-ui-core'
 |    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:2.2.21 (*)
-|    |    |    +--- project :stripe-core (*)
+|    |    |    +--- project ':stripe-core' (*)
 |    |    |    +--- androidx.activity:activity-ktx:1.12.4 (*)
 |    |    |    +--- androidx.annotation:annotation:1.9.1 (*)
 |    |    |    +--- androidx.core:core-ktx:1.17.0 (*)
@@ -827,13 +828,13 @@
 |    |    |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2 (*)
 |    |    |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2 (*)
 |    |    |    +--- org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0 (*)
-|    |    |    +--- com.google.dagger:dagger:2.58 (*)
+|    |    |    +--- com.google.dagger:dagger:2.59 (*)
 |    |    |    \--- org.jetbrains.kotlin:kotlin-parcelize-runtime:2.2.21 (*)
-|    |    +--- project :payments-model (*)
+|    |    +--- project ':payments-model' (*)
 |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:2.2.21 (*)
-|    |    +--- project :stripe-attestation
+|    |    +--- project ':stripe-attestation'
 |    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:2.2.21 (*)
-|    |    |    +--- project :stripe-core (*)
+|    |    |    +--- project ':stripe-core' (*)
 |    |    |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2 (*)
 |    |    |    \--- com.google.android.play:integrity:1.4.0
 |    |    |         +--- com.google.android.gms:play-services-basement:18.4.0
@@ -861,7 +862,7 @@
 |    |    |         +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0 -> 2.2.21 (*)
 |    |    |         \--- org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.0
 |    |    |              \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.0 -> 2.2.21 (*)
-|    |    +--- com.google.dagger:dagger:2.58 (*)
+|    |    +--- com.google.dagger:dagger:2.59 (*)
 |    |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2 (*)
 |    |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2 (*)
 |    |    +--- org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0 (*)
@@ -876,13 +877,13 @@
 |    +--- androidx.fragment:fragment-ktx:1.8.9 (*)
 |    +--- androidx.lifecycle:lifecycle-runtime-ktx:2.10.0 (*)
 |    +--- androidx.lifecycle:lifecycle-viewmodel-ktx:2.10.0 (*)
-|    +--- com.google.dagger:dagger:2.58 (*)
+|    +--- com.google.dagger:dagger:2.59 (*)
 |    +--- androidx.compose.ui:ui:1.10.6 (*)
 |    +--- androidx.compose.foundation:foundation:1.10.6 (*)
 |    +--- androidx.compose.material:material:1.10.6 (*)
 |    +--- org.jetbrains.kotlin:kotlin-parcelize-runtime:2.2.21 (*)
 |    \--- dev.drewhamilton.poko:poko-annotations:0.20.2 (*)
-+--- project :stripe-core (*)
++--- project ':stripe-core' (*)
 +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2 (*)
 +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2 (*)
 +--- org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0 (*)
@@ -914,11 +915,11 @@
 |    |    +--- androidx.compose.runtime:runtime:1.8.2 -> 1.10.6 (*)
 |    |    +--- androidx.compose.ui:ui:1.8.2 -> 1.10.6 (*)
 |    |    +--- androidx.hilt:hilt-lifecycle-viewmodel:1.3.0
-|    |    |    +--- com.google.dagger:hilt-android:2.54 -> 2.58
-|    |    |    |    +--- com.google.dagger:dagger:2.58 (*)
-|    |    |    |    +--- com.google.dagger:dagger-lint-aar:2.58
-|    |    |    |    +--- com.google.dagger:hilt-core:2.58
-|    |    |    |    |    +--- com.google.dagger:dagger:2.58 (*)
+|    |    |    +--- com.google.dagger:hilt-android:2.54 -> 2.59
+|    |    |    |    +--- com.google.dagger:dagger:2.59 (*)
+|    |    |    |    +--- com.google.dagger:dagger-lint-aar:2.59
+|    |    |    |    +--- com.google.dagger:hilt-core:2.59
+|    |    |    |    |    +--- com.google.dagger:dagger:2.59 (*)
 |    |    |    |    |    +--- com.google.code.findbugs:jsr305:3.0.2
 |    |    |    |    |    +--- jakarta.inject:jakarta.inject-api:2.0.1
 |    |    |    |    |    \--- javax.inject:javax.inject:1
@@ -936,7 +937,7 @@
 |    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib -> 2.2.21 (*)
 |    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib:2.0.21 -> 2.2.21 (c)
 |    |    +--- androidx.lifecycle:lifecycle-viewmodel-compose:2.9.1 -> 2.10.0 (*)
-|    |    +--- com.google.dagger:hilt-android:2.54 -> 2.58 (*)
+|    |    +--- com.google.dagger:hilt-android:2.54 -> 2.59 (*)
 |    |    +--- org.jetbrains.kotlin:kotlin-stdlib -> 2.2.21 (*)
 |    |    \--- org.jetbrains.kotlin:kotlin-stdlib:2.0.21 -> 2.2.21 (c)
 |    +--- androidx.lifecycle:lifecycle-viewmodel-compose:2.9.1 -> 2.10.0 (*)
@@ -951,7 +952,7 @@
 +--- androidx.compose.ui:ui-viewbinding:1.10.6
 |    +--- androidx.compose.ui:ui:1.10.6 (*)
 |    +--- androidx.compose.ui:ui-util:1.10.6 (*)
-|    +--- androidx.databinding:viewbinding:4.1.2 -> 8.13.2 (*)
+|    +--- androidx.databinding:viewbinding:4.1.2 -> 9.4.0 (*)
 |    +--- androidx.fragment:fragment-ktx:1.3.2 -> 1.8.9 (*)
 |    +--- org.jetbrains.kotlin:kotlin-stdlib:2.0.21 -> 2.2.21 (*)
 |    +--- androidx.compose.ui:ui:1.10.6 (c)
@@ -970,5 +971,5 @@
 |    +--- androidx.compose.ui:ui:1.7.0 -> 1.10.6 (*)
 |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4 -> 1.10.2 (*)
 |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.9.22 -> 2.2.21 (*)
-+--- com.google.dagger:hilt-android:2.58 (*)
++--- com.google.dagger:hilt-android:2.59 (*)
 \--- org.jetbrains.kotlin:kotlin-parcelize-runtime:2.2.21 (*)
