@@ -8,7 +8,6 @@ import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PaymentIntent
-import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.parsers.DeferredPaymentIntentJsonParser
 import com.stripe.android.model.parsers.DeferredSetupIntentJsonParser
@@ -246,11 +245,10 @@ internal class CheckoutSessionResponseJsonParser(
         val sessionId = json.requiredString("elements_session_id")
         val merchant = json.requiredObject("merchant_info")
         val orderedTypes = json.requiredArray("ordered_payment_method_types_and_wallets").strings()
-        val paymentTypes = orderedTypes.filter { PaymentMethod.Type.fromCode(it) != null }
         val linkSettings = json.optionalObject("link_settings")
         val fundingSources = linkSettings?.optJSONArray("link_funding_sources")
         val intentJson = JSONObject()
-            .put("payment_method_types", JSONArray(paymentTypes))
+            .put("payment_method_types", JSONArray(orderedTypes))
             .put("unactivated_payment_method_types", json.requiredArray("unactivated_payment_method_types"))
             .put("link_funding_sources", fundingSources)
             .put("country_code", json.optionalString("country_code"))

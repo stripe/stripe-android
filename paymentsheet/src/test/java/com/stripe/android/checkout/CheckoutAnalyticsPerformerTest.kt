@@ -4,7 +4,7 @@ package com.stripe.android.checkout
 
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.checkout.analytics.CheckoutConfirmationContext.InvocationSource
+import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent.InvocationSource
 import com.stripe.android.checkout.analytics.toAnalyticsMap
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.ApiConfigurationPreview
@@ -622,10 +622,9 @@ internal class CheckoutAnalyticsPerformerTest {
         configurationParams: Map<String, Any?> = confirmationConfigurationParams,
     ): Map<String, *> {
         when (invocationSource) {
-            InvocationSource.Merchant ->
-                performer.onPaymentElementConfirmationStarted(paymentSelection)
             InvocationSource.ExpressCheckoutElement ->
                 performer.onExpressCheckoutElementConfirmationStarted(paymentSelection)
+            else -> performer.onPaymentElementConfirmationStarted(paymentSelection)
         }
         return analyticsRequestExecutor.awaitConfirmationEvent(
             STARTED_EVENT,

@@ -34,7 +34,7 @@ Multi-module Android library for payment processing and financial services.
   Prefer one function with a default parameter when an overload would only forward the same arguments and supply an unambiguous value that preserves existing behavior. Do not add a forwarding overload solely to avoid a default. Check source and binary compatibility before removing an existing overload.
   Keep internal model fields and parameters that encode caller-specific policy explicit. A nullable or boolean type alone does not justify a default.
 
-**Instrumentation test device** — Use `pixel2api33DebugAndroidTest` by default for instrumentation tests in this working directory. Use `pixel2api33imeDebugAndroidTest` when a test specifically requires the IME-enabled managed device. Do not use `connectedAndroidTest`, other connected-device test tasks, or the user's running emulator unless the user explicitly requests it. If the managed-device task is unavailable or fails, report the issue rather than falling back to the user's emulator.
+**Instrumentation test device** — Use `pixel2api33DebugAndroidTest` by default for instrumentation tests in this working directory. Do not use `connectedAndroidTest`, other connected-device test tasks, or the user's running emulator unless the user explicitly requests it. If the managed-device task is unavailable or fails, report the issue rather than falling back to the user's emulator.
 
 **Testing** — MUST invoke the relevant skill (in `.agents/skills/`) before writing any test code:
 - `write-unit-tests` — unit test structure, fake implementations, runScenario pattern, Turbine testing, Truth assertions

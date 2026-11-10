@@ -2,8 +2,11 @@ package com.stripe.paymentelementtestpages
 
 import androidx.annotation.RestrictTo
 import androidx.compose.ui.test.SemanticsNodeInteraction
+import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.ComposeTestRule
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextReplacement
 
@@ -20,6 +23,20 @@ class BillingDetailsPage(
 
     fun updateLine1(value: String) {
         line1.performScrollTo().performTextReplacement(value)
+    }
+
+    fun fillOutUnitedStatesAddress(
+        line1: String,
+        city: String,
+        stateName: String,
+        zipCode: String,
+    ) {
+        country.assertTextContains("United States")
+        this.line1.performTextReplacement(line1)
+        this.city.performTextReplacement(city)
+        state.performScrollTo().performClick()
+        composeTestRule.onNodeWithText(stateName).performClick()
+        this.zipCode.performTextReplacement(zipCode)
     }
 
     private fun nodeWithLabel(label: String): SemanticsNodeInteraction {

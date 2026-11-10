@@ -6,6 +6,8 @@ NEXT_VERSION_BUMP: MINOR
 ### Crypto Onramp
 * [Added][15296](https://github.com/stripe/stripe-android/pull/15296) Added `googlePayCardBrandAcceptance` and `linkCardBrandAcceptance` to `OnrampConfiguration` to configure accepted card brands independently for Google Pay and Link.
 
+## 23.26.0 - 2026-11-09
+
 ### Payments
 * [ADDED][15314](https://github.com/stripe/stripe-android/pull/15314) Klarna confirmation options for passing SDK-generated interoperability and partner confirmation tokens (private preview).
 

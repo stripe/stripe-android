@@ -11,7 +11,6 @@ import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.isEnabled
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToNode
@@ -835,12 +834,12 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
     }
 
     private fun fillOutBillingDetails() {
-        billingDetailsPage.country.assertTextContains("United States")
-        billingDetailsPage.line1.performTextReplacement(BILLING_ADDRESS_LINE_ONE)
-        billingDetailsPage.city.performTextReplacement(BILLING_ADDRESS_CITY)
-        billingDetailsPage.state.performScrollTo().performClick()
-        testRules.compose.onNodeWithText("California").performClick()
-        billingDetailsPage.zipCode.performTextReplacement(BILLING_ADDRESS_ZIP)
+        billingDetailsPage.fillOutUnitedStatesAddress(
+            line1 = BILLING_ADDRESS_LINE_ONE,
+            city = BILLING_ADDRESS_CITY,
+            stateName = "California",
+            zipCode = BILLING_ADDRESS_ZIP,
+        )
     }
 
     private fun assertBillingDetailsArePopulated() {

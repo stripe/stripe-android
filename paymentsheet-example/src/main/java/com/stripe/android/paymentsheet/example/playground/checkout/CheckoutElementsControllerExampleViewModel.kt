@@ -61,6 +61,9 @@ internal class CheckoutElementsControllerExampleViewModel(
     val displayMandate: Boolean
         get() = !activeSnapshot[CheckoutPlaygroundDefinitions.Controller.payment.embeddedMandate]
 
+    val isShippingAddressElementConfigured: Boolean
+        get() = activeSnapshot[CheckoutPlaygroundDefinitions.Controller.shippingAddress.shouldSetConfiguration]
+
     init {
         if (_status.value is Status.Configured) {
             activeSnapshot.applyFeatureFlags()

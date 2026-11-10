@@ -40,6 +40,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
+import com.stripe.android.financialconnections.ThemeMode
 import com.stripe.android.financialconnections.features.common.FullScreenGenericLoading
 import com.stripe.android.financialconnections.features.common.ListItem
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
@@ -370,7 +371,11 @@ internal fun NetworkingLinkSignupScreenPreview(
     state: NetworkingLinkSignupState
 ) {
     FinancialConnectionsPreview(
-        theme = if (state.isInstantDebits) Theme.LinkLight else Theme.DefaultLight,
+        theme = if (state.isInstantDebits) {
+            Theme.Link(ThemeMode.Automatic)
+        } else {
+            Theme.Default(ThemeMode.Automatic)
+        },
     ) {
         NetworkingLinkSignupContent(
             state = state,

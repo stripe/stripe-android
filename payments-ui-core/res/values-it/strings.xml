@@ -78,7 +78,7 @@
   <!-- Label for name on card field -->
   <string name="stripe_name_on_card">Nome sulla carta</string>
   <!-- Label for the Naver Pay funding source selector -->
-  <string name="stripe_naver_pay_funding_label">Seleziona quanto vuoi pagare:</string>
+  <string name="stripe_naver_pay_funding_label">Seleziona come vuoi pagare:</string>
   <!-- Nigerian payment method notice. %s is the buyer terms URL. -->
   <string name="stripe_ng_payment_mor_notice"><![CDATA[Confermando il pagamento, accetti che la tua transazione venga gestita da Global Stack Services Limited in qualità di merchant of record e in conformità ai suoi <a href=\"%s\">termini di utilizzo</a>.]]></string>
   <!-- Nigerian payment method notice. %s is the buyer terms URL. -->

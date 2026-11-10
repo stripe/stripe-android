@@ -30,6 +30,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.ThemeMode
 import com.stripe.android.financialconnections.browser.BrowserManager
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetNativeActivityArgs
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
@@ -328,16 +329,17 @@ private class ActivityVisibilityObserver(
 }
 
 private val FinancialConnectionsSheetNativeActivityArgs.theme: Theme
-    get() = initialSyncResponse.manifest.theme?.toLocalTheme() ?: Theme.default
+    get() = initialSyncResponse.manifest.theme.toLocalTheme(configuration.themeMode)
 
-internal fun FinancialConnectionsSessionManifest.Theme.toLocalTheme(): Theme {
+internal fun FinancialConnectionsSessionManifest.Theme?.toLocalTheme(themeMode: ThemeMode): Theme {
     return when (this) {
+        null,
         FinancialConnectionsSessionManifest.Theme.LIGHT,
         FinancialConnectionsSessionManifest.Theme.DASHBOARD_LIGHT -> {
-            Theme.DefaultLight
+            Theme.Default(themeMode)
         }
         FinancialConnectionsSessionManifest.Theme.LINK_LIGHT -> {
-            Theme.LinkLight
+            Theme.Link(themeMode)
         }
     }
 }
