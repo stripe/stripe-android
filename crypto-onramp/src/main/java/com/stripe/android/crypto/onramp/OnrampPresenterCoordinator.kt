@@ -9,7 +9,6 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
-import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.utils.StatusBarCompat
@@ -55,6 +54,7 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContra
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.link.LinkAppearance
 import com.stripe.android.link.LinkController
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherFactory
@@ -102,17 +102,20 @@ internal class OnrampPresenterCoordinator @Inject constructor(
             ::handleGooglePayPaymentSelection
         )
 
-    private val googlePayPaymentMethodLauncher: GooglePayPaymentMethodLauncher? = googlePayConfig()?.let {
-        GooglePayPaymentMethodLauncher(
-            context = activity,
-            lifecycleOwner = activity,
-            activityResultLauncher = googlePayActivityResultLauncher,
-            config = it,
-            readyCallback = ::handleGooglePayIsReady,
-            cardBrandFilter = DefaultCardBrandFilter,
-            cardFundingFilter = DefaultCardFundingFilter
-        )
-    }
+    private val googlePayPaymentMethodLauncher: GooglePayPaymentMethodLauncher? =
+        interactor.state.value.configurationState?.let { configuration ->
+            configuration.googlePayConfig?.let { googlePayConfig ->
+                GooglePayPaymentMethodLauncher(
+                    context = activity,
+                    lifecycleOwner = activity,
+                    activityResultLauncher = googlePayActivityResultLauncher,
+                    config = googlePayConfig,
+                    readyCallback = ::handleGooglePayIsReady,
+                    cardBrandFilter = PaymentSheetCardBrandFilter(configuration.googlePayCardBrandAcceptance),
+                    cardFundingFilter = DefaultCardFundingFilter
+                )
+            }
+        }
 
     private var samsungPayLauncher: SamsungPayLauncher? = null
 
@@ -656,9 +659,6 @@ internal class OnrampPresenterCoordinator @Inject constructor(
 
         onrampCallbacksState.kycCallback?.onResult(kycResult)
     }
-
-    private fun googlePayConfig(): GooglePayPaymentMethodLauncher.Config? =
-        interactor.state.value.configurationState?.googlePayConfig
 
     private fun initializeSamsungPay() {
         val onrampConfiguration = interactor.state.value.configurationState ?: return

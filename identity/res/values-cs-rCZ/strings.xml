@@ -40,7 +40,7 @@
   <!-- Text for choosing a photo from gallery -->
   <string name="stripe_choose_file">Zvolte fotku</string>
   <!-- Close button text -->
-  <string name="stripe_close_button_text">zavřít</string>
+  <string name="stripe_close_button_text">Zavřít</string>
   <!-- Button to complete with test data -->
   <string name="stripe_complete_with_test_data">Dokončit se zkušebními daty</string>
   <!-- Description for complete button on test mode -->
@@ -169,7 +169,7 @@
   <!-- Instructional text when user needs remove anything blocking the document -->
   <string name="stripe_keep_fully_visible">Detaily nejsou viditelné</string>
   <!-- Continue button text -->
-  <string name="stripe_kontinue">pokračovat</string>
+  <string name="stripe_kontinue">Pokračovat</string>
   <!-- Label for the ID field to collect last 4 of social security number for US ID -->
   <string name="stripe_last_4_of_ssn">Poslední 4 pozice čísla sociálního pojištění</string>
   <!-- Label for last (family) name field -->

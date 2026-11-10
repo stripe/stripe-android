@@ -15,6 +15,8 @@ import com.stripe.android.core.networking.StripeRequest
 import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.core.networking.responseJson
 import com.stripe.android.core.networking.toMap
+import com.stripe.android.core.networking.toRequestOptions
+import com.stripe.android.core.networking.withRequestCredentials
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.crypto.onramp.model.ConfirmPartnerTermsRequest
 import com.stripe.android.crypto.onramp.model.CreatePaymentTokenRequest
@@ -146,11 +148,13 @@ internal class CryptoApiRepository @Inject constructor(
         return execute(
             request = apiRequestFactory.createPost(
                 url = fulfillKycRequirementsUrl,
-                options = ApiRequest.Options(
-                    apiKey = linkSessionKey,
-                    stripeAccount = apiConfigProvider.get().stripeAccountId,
-                    idempotencyKey = null,
-                ),
+                options = apiConfigProvider.get().let { apiConfiguration ->
+                    apiConfiguration.withRequestCredentials(
+                        apiKey = linkSessionKey,
+                        stripeAccount = apiConfiguration.stripeAccountId,
+                        idempotencyKey = null,
+                    )
+                },
                 params = request.toParamMap(),
             ),
             responseSerializer = Unit.serializer(),
@@ -164,11 +168,13 @@ internal class CryptoApiRepository @Inject constructor(
         return execute(
             request = OnrampFileUploadRequest(
                 file = file,
-                options = ApiRequest.Options(
-                    apiKey = linkSessionKey,
-                    stripeAccount = apiConfigProvider.get().stripeAccountId,
-                    idempotencyKey = null,
-                ),
+                options = apiConfigProvider.get().let { apiConfiguration ->
+                    apiConfiguration.withRequestCredentials(
+                        apiKey = linkSessionKey,
+                        stripeAccount = apiConfiguration.stripeAccountId,
+                        idempotencyKey = null,
+                    )
+                },
                 appInfo = appInfo,
             ),
             parseResponse = { body -> StripeFileJsonParser().parse(JSONObject(body)) },
@@ -462,10 +468,13 @@ internal class CryptoApiRepository @Inject constructor(
         paymentCredential: String,
         platformPublishableKey: String,
     ): Result<PaymentMethod> {
-        val options = ApiRequest.Options(
-            apiKey = platformPublishableKey,
-            stripeAccount = apiConfigProvider.get().stripeAccountId,
-        )
+        val options = apiConfigProvider.get().let { apiConfiguration ->
+            apiConfiguration.withRequestCredentials(
+                apiKey = platformPublishableKey,
+                stripeAccount = apiConfiguration.stripeAccountId,
+                idempotencyKey = null,
+            )
+        }
 
         return stripeRepository.createToken(
             tokenParams = SamsungPayTokenParams(paymentCredential),
@@ -525,19 +534,19 @@ internal class CryptoApiRepository @Inject constructor(
         return stripeRepository.retrievePaymentIntent(
             clientSecret = clientSecret,
             expandFields = listOf("payment_method"),
-            options = ApiRequest.Options(
-                apiKey = publishableKey,
-                stripeAccount = apiConfigProvider.get().stripeAccountId,
-            )
+            options = apiConfigProvider.get().let { apiConfiguration ->
+                apiConfiguration.withRequestCredentials(
+                    apiKey = publishableKey,
+                    stripeAccount = apiConfiguration.stripeAccountId,
+                    idempotencyKey = null,
+                )
+            }
         )
     }
 
     private fun buildRequestOptions(): ApiRequest.Options {
         val apiConfiguration = apiConfigProvider.get()
-        return ApiRequest.Options(
-            apiKey = apiConfiguration.publishableKey,
-            stripeAccount = apiConfiguration.stripeAccountId,
-        )
+        return apiConfiguration.toRequestOptions(idempotencyKey = null)
     }
 
     private fun credentialsParams(

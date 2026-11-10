@@ -138,6 +138,7 @@ internal class EmbeddedAddPaymentMethodInteractorFactoryTest {
                     loginState = LinkState.LoginState.LoggedOut,
                     signupMode = null,
                 ),
+                isInstantDebitsOnboardingEnabled = true,
                 paymentMethodIncentive = incentive,
             ),
         ) {

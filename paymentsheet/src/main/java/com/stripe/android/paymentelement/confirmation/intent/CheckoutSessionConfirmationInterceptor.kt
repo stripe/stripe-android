@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.confirmation.intent
 
 import android.content.Context
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
+import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent.InvocationSource
 import com.stripe.android.checkout.toCheckoutAddress
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.exception.LocalStripeException
@@ -36,7 +37,7 @@ import dagger.assisted.AssistedInject
 internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructor(
     @Assisted private val integrationMetadata: IntegrationMetadata.CheckoutSession,
     @Assisted private val customerMetadata: CustomerMetadata?,
-    @Assisted private val clientAttributionMetadata: ClientAttributionMetadata,
+    @Assisted private val clientAttributionMetadata: ClientAttributionMetadata.CheckoutSession,
     context: Context,
     private val checkoutSessionRepository: CheckoutSessionRepository,
     private val checkoutSessionTaxRegionUpdater: CheckoutSessionTaxRegionUpdater,
@@ -101,6 +102,11 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
             checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
                 checkoutSessionResponse = checkoutSessionResponse,
                 addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+                invocationSource = if (clientAttributionMetadata.isExpressCheckoutElement) {
+                    InvocationSource.ExpressCheckoutElement
+                } else {
+                    InvocationSource.PaymentElement
+                },
                 address = billingAddress,
             ).getOrElse { error -> return Result.failure(error) }
         } else {
@@ -153,7 +159,6 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
         params: ConfirmCheckoutSessionParams,
     ): ConfirmationDefinition.Action<Args> {
         return checkoutSessionRepository.confirm(
-            id = integrationMetadata.id,
             clientSecret = integrationMetadata.checkoutSessionResponse.clientSecret,
             params = params,
         ).fold(
@@ -211,7 +216,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
         fun create(
             integrationMetadata: IntegrationMetadata.CheckoutSession,
             customerMetadata: CustomerMetadata?,
-            clientAttributionMetadata: ClientAttributionMetadata,
+            clientAttributionMetadata: ClientAttributionMetadata.CheckoutSession,
         ): CheckoutSessionConfirmationInterceptor
     }
 }

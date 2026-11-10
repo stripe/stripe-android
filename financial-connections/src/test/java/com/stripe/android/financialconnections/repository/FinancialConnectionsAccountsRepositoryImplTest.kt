@@ -8,6 +8,7 @@ import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.ApiKeyFixtures.partnerAccount
 import com.stripe.android.financialconnections.ApiKeyFixtures.partnerAccountList
 import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
+import com.stripe.android.financialconnections.ThemeMode
 import com.stripe.android.financialconnections.domain.CachedPartnerAccount
 import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.network.FinancialConnectionsRequestExecutor
@@ -30,6 +31,7 @@ internal class FinancialConnectionsAccountsRepositoryImplTest {
         ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
         ApiKeyFixtures.DEFAULT_API_CONFIG,
         preCollectedConsent = null,
+        themeMode = ThemeMode.Automatic,
     )
     private val authSessionId = "AuthSessionId"
 

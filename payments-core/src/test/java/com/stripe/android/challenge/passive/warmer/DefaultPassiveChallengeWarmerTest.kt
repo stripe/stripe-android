@@ -6,10 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleRegistry
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.testing.TestLifecycleOwner
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.hcaptcha.FakeHCaptchaService
@@ -22,7 +19,6 @@ import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestCoroutineScheduler
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withContext
 import org.junit.Rule
@@ -43,7 +39,7 @@ internal class DefaultPassiveChallengeWarmerTest {
     }
 
     @Test
-    fun `uses a FragmentActivity lifecycle owner behind a wrapped caller`() = runScenario {
+    fun `uses a FragmentActivity lifecycle owner`() = runScenario {
         warmer.register(DummyActivityResultCaller.noOp(), activity)
 
         assertWarmUpUses(activity)
@@ -70,7 +66,7 @@ internal class DefaultPassiveChallengeWarmerTest {
 
     @Test
     fun `falls back to a FragmentActivity caller`() = runScenario {
-        warmer.register(activity, fakeLifecycleOwner())
+        warmer.register(activity, componentActivityOwner())
 
         assertWarmUpUses(activity)
     }
@@ -80,7 +76,7 @@ internal class DefaultPassiveChallengeWarmerTest {
         val fragment = Fragment()
         activity.supportFragmentManager.beginTransaction().add(fragment, "host").commitNow()
 
-        warmer.register(fragment, fakeLifecycleOwner())
+        warmer.register(fragment, componentActivityOwner())
 
         assertWarmUpUses(activity)
     }
@@ -115,11 +111,10 @@ internal class DefaultPassiveChallengeWarmerTest {
     }
 
     @Test
-    fun `does not register a destroyed owner`() = runScenario {
-        val owner = fakeLifecycleOwner()
-        owner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+    fun `does not register a finishing activity`() = runScenario {
+        activity.finish()
 
-        warmer.register(activity, owner)
+        warmer.register(activity, componentActivityOwner())
 
         assertNoWarmUp()
     }
@@ -128,21 +123,9 @@ internal class DefaultPassiveChallengeWarmerTest {
     fun `does not register a destroyed activity`() = runScenario {
         controller.pause().stop().destroy()
 
-        warmer.register(activity, fakeLifecycleOwner())
+        warmer.register(activity, componentActivityOwner())
 
         assertNoWarmUp()
-    }
-
-    @Test
-    fun `does not register an activity whose lifecycle is already destroyed`() = runScenario {
-        controller.pause().stop()
-        (activity.lifecycle as LifecycleRegistry).currentState = Lifecycle.State.DESTROYED
-        assertThat(activity.isDestroyed).isFalse()
-
-        warmer.register(activity, fakeLifecycleOwner())
-
-        assertNoWarmUp()
-        controller.destroy()
     }
 
     @Test
@@ -174,22 +157,8 @@ internal class DefaultPassiveChallengeWarmerTest {
     }
 
     @Test
-    fun `owner destruction cancels warm-up while activity is still alive`() = runScenario {
-        val owner = fakeLifecycleOwner()
-        warmer.register(activity, owner)
-        startWarmUp()
-        hCaptchaService.awaitWarmUpCall()
-
-        owner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-
-        cancelled.awaitItem()
-        assertThat(activity.isDestroyed).isFalse()
-        assertNoWarmUp()
-    }
-
-    @Test
-    fun `activity destruction cancels warm-up with a separate owner`() = runScenario {
-        warmer.register(activity, fakeLifecycleOwner())
+    fun `activity destruction cancels warm-up`() = runScenario {
+        warmer.register(activity, activity)
         startWarmUp()
         hCaptchaService.awaitWarmUpCall()
 
@@ -200,9 +169,8 @@ internal class DefaultPassiveChallengeWarmerTest {
     }
 
     @Test
-    fun `replacement cancels old warm-up and ignores old owner destruction`() = runScenario {
-        val oldOwner = fakeLifecycleOwner()
-        warmer.register(activity, oldOwner)
+    fun `replacement cancels old warm-up and registers the new host`() = runScenario {
+        warmer.register(activity, activity)
         startWarmUp()
         hCaptchaService.awaitWarmUpCall()
         val newActivity = createActivity(FragmentActivity::class.java).get()
@@ -210,7 +178,6 @@ internal class DefaultPassiveChallengeWarmerTest {
         warmer.register(newActivity, newActivity)
 
         cancelled.awaitItem()
-        oldOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
         controller.pause().stop().destroy()
         hCaptchaService.warmUpResult = {}
         assertWarmUpUses(newActivity)
@@ -227,6 +194,17 @@ internal class DefaultPassiveChallengeWarmerTest {
         warmer.unregister()
 
         cancelled.awaitItem()
+    }
+
+    @Test
+    fun `relaunches once the previous warm-up finishes`() = runScenario {
+        warmer.register(activity, activity)
+        warmer.start(passiveCaptchaParams)
+        hCaptchaService.awaitWarmUpCall()
+
+        warmer.start(passiveCaptchaParams)
+        testScheduler.runCurrent()
+        hCaptchaService.awaitWarmUpCall()
     }
 
     @Test
@@ -269,6 +247,8 @@ internal class DefaultPassiveChallengeWarmerTest {
         }
     }
 
+    private fun componentActivityOwner() = createActivity(ComponentActivity::class.java).get()
+
     private data class Scenario(
         val controller: ActivityController<FragmentActivity>,
         val warmer: DefaultPassiveChallengeWarmer,
@@ -310,8 +290,4 @@ internal class DefaultPassiveChallengeWarmerTest {
             warmer.start(passiveCaptchaParams)
         }
     }
-
-    private fun fakeLifecycleOwner() = TestLifecycleOwner(
-        coroutineDispatcher = UnconfinedTestDispatcher(),
-    )
 }

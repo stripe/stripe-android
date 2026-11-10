@@ -11,6 +11,7 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.ui.PrimaryButtonIcon
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
 import kotlinx.coroutines.delay
@@ -151,7 +152,7 @@ class TapToAddLayoutScreenshotTest {
     @Test
     fun confirmationLocked() {
         confirmationScreenshotTest(
-            locked = true,
+            primaryButtonIcon = PrimaryButtonIcon.Lock,
         )
     }
 
@@ -159,7 +160,7 @@ class TapToAddLayoutScreenshotTest {
     fun confirmationNoCardInfo() {
         confirmationScreenshotTest(
             last4 = null,
-            locked = true,
+            primaryButtonIcon = PrimaryButtonIcon.Lock,
             cardBrand = CardBrand.Unknown,
         )
     }
@@ -169,7 +170,7 @@ class TapToAddLayoutScreenshotTest {
         cvcInitialValue: String? = null,
         cardBrand: CardBrand = CardBrand.Visa,
         last4: String? = "4242",
-        locked: Boolean = false,
+        primaryButtonIcon: PrimaryButtonIcon = PrimaryButtonIcon.None,
         primaryButtonState: TapToAddConfirmationInteractor.State.PrimaryButton.State =
             TapToAddConfirmationInteractor.State.PrimaryButton.State.Idle,
         error: ResolvableString? = null,
@@ -183,7 +184,7 @@ class TapToAddLayoutScreenshotTest {
                             cvcInitialValue = cvcInitialValue,
                             cardBrand = cardBrand,
                             last4 = last4,
-                            locked = locked,
+                            primaryButtonIcon = primaryButtonIcon,
                             primaryButtonState = primaryButtonState,
                             error = error,
                         ),

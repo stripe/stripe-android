@@ -159,6 +159,7 @@ internal class EmbeddedContentScreenshotTest {
                 loginState = LinkState.LoginState.LoggedOut,
                 signupMode = null,
             ),
+            isInstantDebitsOnboardingEnabled = true,
         )
     }
 }

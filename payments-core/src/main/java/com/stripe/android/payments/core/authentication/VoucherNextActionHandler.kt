@@ -2,7 +2,6 @@ package com.stripe.android.payments.core.authentication
 
 import android.content.Context
 import com.stripe.android.core.ApiConfiguration
-import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.StripeIntent.NextActionData
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -24,15 +23,13 @@ internal class VoucherNextActionHandler @Inject constructor(
     override suspend fun performNextActionOnResumed(
         host: AuthActivityStarterHost,
         actionable: StripeIntent,
-        requestOptions: ApiRequest.Options
+        apiConfiguration: ApiConfiguration.State
     ) {
         val detailsData = actionable.nextActionData as NextActionData.DisplayVoucherDetails
         if (detailsData.hostedVoucherUrl == null) {
             ErrorReporter.createFallbackInstance(
                 context,
-                apiConfigurationProvider = {
-                    ApiConfiguration.State(requestOptions.apiKey, requestOptions.stripeAccount)
-                },
+                apiConfigurationProvider = { apiConfiguration },
             ).report(
                 ErrorReporter.UnexpectedErrorEvent.MISSING_HOSTED_VOUCHER_URL,
                 additionalNonPiiParams = mapOf("next_action_type" to (actionable.nextActionType?.code ?: ""))
@@ -40,13 +37,13 @@ internal class VoucherNextActionHandler @Inject constructor(
             noOpIntentAuthenticator.performNextAction(
                 host,
                 actionable,
-                requestOptions
+                apiConfiguration
             )
         } else {
             webIntentAuthenticator.performNextAction(
                 host,
                 actionable,
-                requestOptions
+                apiConfiguration
             )
         }
     }

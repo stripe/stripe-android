@@ -1,5 +1,8 @@
 package com.stripe.android.checkout
 
+import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent.InvocationSource
+import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent.Operation
+import com.stripe.android.checkout.analytics.LocalOperation
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
@@ -20,16 +23,41 @@ internal class CheckoutSessionTaxRegionUpdater @Inject constructor(
     suspend fun updateServerStateIfNeeded(
         checkoutSessionResponse: CheckoutSessionResponse,
         addressSource: CheckoutSessionResponse.TaxAddressSource,
+        invocationSource: InvocationSource,
         address: CheckoutElementsController.Address.State?,
     ): Result<CheckoutSessionResponse> {
-        return if (requiresUpdate(checkoutSessionResponse, addressSource)) {
-            checkoutSessionRepository.updateTaxRegion(
-                sessionId = checkoutSessionResponse.id,
-                clientSecret = checkoutSessionResponse.clientSecret,
-                address = address,
-            )
+        val didRequestTaxUpdate = requiresUpdate(
+            checkoutSessionResponse = checkoutSessionResponse,
+            addressSource = addressSource,
+        )
+        val params = mapOf(
+            "invocation_source" to invocationSource.code,
+            "did_request_tax_update" to didRequestTaxUpdate,
+        )
+        return if (didRequestTaxUpdate) {
+            checkoutSessionRepository.measure(
+                operation = addressSource.updateOperation(),
+                checkoutSessionResponse = checkoutSessionResponse,
+                params = params,
+            ) {
+                checkoutSessionRepository.updateTaxRegion(
+                    clientSecret = checkoutSessionResponse.clientSecret,
+                    address = address,
+                )
+            }
         } else {
-            Result.success(checkoutSessionResponse)
+            Result.success(checkoutSessionResponse).also {
+                LocalOperation(
+                    operation = addressSource.updateOperation(),
+                    params = params,
+                    report = checkoutSessionRepository::fireEvent,
+                ).succeeded(checkoutSessionResponse)
+            }
         }
+    }
+
+    private fun CheckoutSessionResponse.TaxAddressSource.updateOperation(): Operation = when (this) {
+        CheckoutSessionResponse.TaxAddressSource.SHIPPING -> Operation.UpdateShippingAddress
+        CheckoutSessionResponse.TaxAddressSource.BILLING -> Operation.UpdateBillingAddress
     }
 }

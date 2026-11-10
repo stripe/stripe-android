@@ -26,6 +26,10 @@
   <string name="stripe_confirm_close_form_body">As suas informações de pagamento não serão guardadas.</string>
   <!-- Used as the title for prompting the user if they want to close the sheet -->
   <string name="stripe_confirm_close_form_title">Pretende fechar este formulário?</string>
+  <!-- Fallback disclosure when paying in the merchant's currency instead of using Adaptive Pricing. -->
+  <string name="stripe_currency_selector_bank_fees_disclaimer">Podem aplicar-se a Taxa de câmbio e as comissões do seu banco.</string>
+  <string name="stripe_currency_selector_hide_details">Ocultar detalhes da taxa de câmbio</string>
+  <string name="stripe_currency_selector_show_details">Mostrar detalhes da taxa de câmbio</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header">Guardar as suas informações para finalização de compra de 1 clique com Link</string>
   <!-- Label for a checkbox that when checked allows the payment information
@@ -64,6 +68,12 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_email_suggestion_update">Sim, atualizar</string>
   <!-- Title for a button that indicates a user can log in or sign up. -->
   <string name="stripe_link_log_in_or_sign_up">Iniciar sessão ou criar conta</string>
+  <!-- Label of a button that signs the user out of their current Link account so they can log in to a different one. -->
+  <string name="stripe_link_log_in_to_another_account">Entrar noutra conta</string>
+  <!-- Message on a screen shown when none of the payment methods in the user's Link account can be used with this business. The placeholder is a Stripe brand name and should not be translated. -->
+  <string name="stripe_link_no_funding_sources_message">Nenhum dos métodos de pagamento na sua conta %s funciona com esta empresa.</string>
+  <!-- Title of a screen shown when none of the payment methods in the user's Link account can be used with this business. The placeholder is a Stripe brand name and should not be translated. -->
+  <string name="stripe_link_no_funding_sources_title">Não pode pagar com %s aqui</string>
   <!-- Text displayed on a confirmation button on the CRS CARF declaration screen -->
   <string name="stripe_link_onramp_carf_declaration_accept_button_text">Aceitar</string>
   <!-- Text displayed on a cancel button on the CRS CARF declaration screen -->

@@ -6,6 +6,123 @@ import org.junit.Test
 class RequestMatchersTest {
 
     @Test
+    fun `stripeApiKey requires the default integration beta`() {
+        val request = createRequest(
+            headers = mapOf(
+                "original-host" to "api.stripe.com",
+                "Authorization" to "Bearer ${TestApiKeys.PUBLISHABLE}",
+                "Stripe-Account" to TestApiKeys.ACCOUNT,
+                "Stripe-Version" to "2020-03-02",
+            ),
+        )
+        assertThat(RequestMatchers.stripeApiKey().matches(request)).isFalse()
+    }
+
+    @Test
+    fun `stripeApiKey rejects missing tokens`() {
+        val matcher = RequestMatchers.stripeApiKey(betas = setOf("example=v1"))
+        val request = createRequest(
+            headers = mapOf(
+                "original-host" to "api.stripe.com",
+                "Authorization" to "Bearer ${TestApiKeys.PUBLISHABLE}",
+                "Stripe-Account" to TestApiKeys.ACCOUNT,
+            ),
+        )
+        assertThat(matcher.matches(request)).isFalse()
+    }
+
+    @Test
+    fun `stripeApiKey rejects a different token value`() {
+        val matcher = RequestMatchers.stripeApiKey(betas = setOf("example=v1"))
+        val request = createRequest(
+            headers = mapOf(
+                "original-host" to "api.stripe.com",
+                "Authorization" to "Bearer ${TestApiKeys.PUBLISHABLE}",
+                "Stripe-Account" to TestApiKeys.ACCOUNT,
+                "Stripe-Version" to "2020-03-02;example=v2",
+            ),
+        )
+        assertThat(matcher.matches(request)).isFalse()
+    }
+
+    @Test
+    fun `stripeApiKey rejects partial tokens`() {
+        val matcher = RequestMatchers.stripeApiKey(betas = setOf("example=v1"))
+        val request = createRequest(
+            headers = mapOf(
+                "original-host" to "api.stripe.com",
+                "Authorization" to "Bearer ${TestApiKeys.PUBLISHABLE}",
+                "Stripe-Account" to TestApiKeys.ACCOUNT,
+                "Stripe-Version" to "2020-03-02;prefix_example=v1",
+            ),
+        )
+        assertThat(matcher.matches(request)).isFalse()
+    }
+
+    @Test
+    fun `stripeApiKey allows built-in tokens`() {
+        val matcher = RequestMatchers.stripeApiKey(betas = setOf("example=v1"))
+        val request = createRequest(
+            headers = mapOf(
+                "original-host" to "api.stripe.com",
+                "Authorization" to "Bearer ${TestApiKeys.PUBLISHABLE}",
+                "Stripe-Account" to TestApiKeys.ACCOUNT,
+                "Stripe-Version" to "2020-03-02;built_in=v2;example=v1",
+            ),
+        )
+        assertThat(matcher.matches(request)).isTrue()
+    }
+
+    @Test
+    fun `stripeApiKey matches analytics credentials when betas are configured`() {
+        val matcher = RequestMatchers.stripeApiKey(betas = setOf("example=v1"))
+        val request = createRequest(
+            path = "/?publishable_key=${TestApiKeys.PUBLISHABLE}",
+            headers = mapOf(
+                "original-host" to "q.stripe.com",
+            ),
+        )
+        assertThat(matcher.matches(request)).isTrue()
+    }
+
+    @Test
+    fun `stripeApiKey allows unconfigured sessions`() {
+        val matcher = RequestMatchers.stripeApiKey(betas = emptySet())
+        val request = createRequest(
+            headers = mapOf(
+                "original-host" to "api.stripe.com",
+                "Authorization" to "Bearer ${TestApiKeys.PUBLISHABLE}",
+                "Stripe-Account" to TestApiKeys.ACCOUNT,
+                "Stripe-Version" to "2020-03-02",
+            ),
+        )
+        assertThat(matcher.matches(request)).isTrue()
+    }
+
+    @Test
+    fun `stripeApiKey rejects invalid credentials despite matching betas`() {
+        val matcher = RequestMatchers.stripeApiKey(betas = setOf("example=v1"))
+        val request = createRequest(
+            headers = mapOf(
+                "original-host" to "api.stripe.com",
+                "Authorization" to "Bearer pk_test_incorrect",
+                "Stripe-Account" to TestApiKeys.ACCOUNT,
+                "Stripe-Version" to "2020-03-02;example=v1",
+            ),
+        )
+        assertThat(matcher.matches(request)).isFalse()
+    }
+
+    @Test
+    fun `stripeApiKey rejects invalid analytics credentials when betas are configured`() {
+        val matcher = RequestMatchers.stripeApiKey(betas = setOf("example=v1"))
+        val request = createRequest(
+            headers = mapOf("original-host" to "q.stripe.com"),
+        )
+        assertThat(matcher.matches(request)).isFalse()
+    }
+
+    @Test
     fun `stripeApiKey matches publishable key for API request`() {
         val request = createRequest(
             path = "/v1/payment_intents/pi_123",
@@ -379,7 +496,8 @@ class RequestMatchersTest {
                 .body(body)
                 .method(method)
                 .apply {
-                    headers.forEach { (name, value) -> header(name, value) }
+                    (mapOf("Stripe-Version" to "2020-03-02;integration_beta=v1") + headers)
+                        .forEach { (name, value) -> header(name, value) }
                 }
                 .build()
         )

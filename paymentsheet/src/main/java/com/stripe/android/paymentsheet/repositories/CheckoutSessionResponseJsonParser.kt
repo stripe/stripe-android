@@ -8,12 +8,12 @@ import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PaymentIntent
-import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.parsers.DeferredPaymentIntentJsonParser
 import com.stripe.android.model.parsers.DeferredSetupIntentJsonParser
 import com.stripe.android.model.parsers.ElementsSessionJsonParser
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
+import com.stripe.android.paymentsheet.model.CheckoutSessionClientSecret
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -21,12 +21,11 @@ import org.json.JSONObject
  * Parses CheckoutClient responses without depending on the legacy Elements Session wire format.
  */
 internal class CheckoutSessionResponseJsonParser(
-    private val clientSecret: String,
+    private val clientSecret: CheckoutSessionClientSecret,
 ) : ModelJsonParser<CheckoutSessionResponse> {
     @Suppress("CyclomaticComplexMethod", "LongMethod")
     override fun parse(json: JSONObject): CheckoutSessionResponse? = runCatching {
         require(json.requiredString("ui_mode") == "mobile_elements")
-        val id = json.requiredString("id")
         val configId = json.optionalString("checkout_session_config_id")
         val automaticPaymentMethodTypes = json.optionalBoolean("automatic_payment_method_types")
         val currency = json.requiredString("presentment_currency")
@@ -63,7 +62,6 @@ internal class CheckoutSessionResponseJsonParser(
         }
 
         CheckoutSessionResponse(
-            id = id,
             clientSecret = clientSecret,
             configId = configId,
             automaticPaymentMethodTypes = automaticPaymentMethodTypes,
@@ -247,11 +245,10 @@ internal class CheckoutSessionResponseJsonParser(
         val sessionId = json.requiredString("elements_session_id")
         val merchant = json.requiredObject("merchant_info")
         val orderedTypes = json.requiredArray("ordered_payment_method_types_and_wallets").strings()
-        val paymentTypes = orderedTypes.filter { PaymentMethod.Type.fromCode(it) != null }
         val linkSettings = json.optionalObject("link_settings")
         val fundingSources = linkSettings?.optJSONArray("link_funding_sources")
         val intentJson = JSONObject()
-            .put("payment_method_types", JSONArray(paymentTypes))
+            .put("payment_method_types", JSONArray(orderedTypes))
             .put("unactivated_payment_method_types", json.requiredArray("unactivated_payment_method_types"))
             .put("link_funding_sources", fundingSources)
             .put("country_code", json.optionalString("country_code"))

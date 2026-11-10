@@ -72,7 +72,7 @@ internal class OnrampE2ETestRule : TestRule {
         return RuleChain.emptyRuleChain()
             .around(composeRule)
             .around(attestationFeatureFlagTestRule)
-            .around(RetryRule(3))
+            .around(RetryRule(2))
             .around(fixtureRule)
             .around(activityRule)
             .apply(base, description)

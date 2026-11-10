@@ -145,6 +145,7 @@ class VerticalModeInitialScreenFactoryTest {
                 loginState = LinkState.LoginState.LoggedOut,
                 signupMode = null,
             ),
+            isInstantDebitsOnboardingEnabled = true,
         ),
         hasSavedPaymentMethods: Boolean = false,
         selection: PaymentSelection? = null,

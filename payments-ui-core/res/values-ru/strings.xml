@@ -37,7 +37,7 @@
   <!-- Klarna pay later copy -->
   <string name="stripe_card_with_tap_or_enter_manually">Коснитесь или введите вручную</string>
   <!-- Cash App mandate text -->
-  <string name="stripe_cash_app_pay_mandate">Продолжая, вы уполномочиваете компанию %1$s списывать с вашего счета Cash App суммы в соответствии с этим, а также будущими платежами согласно условиям компании %2$s, пока это разрешение не будет отозвано. Отозвать разрешение можно в любой момент в настройках приложения Cash App.</string>
+  <string name="stripe_cash_app_pay_mandate">Продолжая, вы авторизируете %1$s на списание средств с вашего счета Cash App для этого и будущих платежей в соответствии с условиями %2$s, пока данная авторизация не будет отозвана. Вы можете изменить это в любое время в настройках Cash App.</string>
   <!-- Title for the contact information section -->
   <string name="stripe_contact_information">Контактные данные</string>
   <!-- Text for continue button -->

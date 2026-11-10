@@ -26,6 +26,10 @@
   <string name="stripe_confirm_close_form_body">Jūsų mokėjimo informacija nebus įrašyta.</string>
   <!-- Used as the title for prompting the user if they want to close the sheet -->
   <string name="stripe_confirm_close_form_title">Ar norite uždaryti šią formą?</string>
+  <!-- Fallback disclosure when paying in the merchant's currency instead of using Adaptive Pricing. -->
+  <string name="stripe_currency_selector_bank_fees_disclaimer">Gali būti taikomas jūsų banko valiutų keitimo kursas ir mokesčiai.</string>
+  <string name="stripe_currency_selector_hide_details">Slėpti valiutų keitimo kurso informaciją</string>
+  <string name="stripe_currency_selector_show_details">Rodyti valiutų keitimo kurso informaciją</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header">Išsaugokite savo informaciją saugiam atsiskaitymui vienu spustelėjimu su \"Link\"</string>
   <!-- Label for a checkbox that when checked allows the payment information
@@ -64,6 +68,12 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_email_suggestion_update">Taip, atnaujinti</string>
   <!-- Title for a button that indicates a user can log in or sign up. -->
   <string name="stripe_link_log_in_or_sign_up">Prisijungti arba prisiregistruoti</string>
+  <!-- Label of a button that signs the user out of their current Link account so they can log in to a different one. -->
+  <string name="stripe_link_log_in_to_another_account">Prisijunkite prie kitos paskyros</string>
+  <!-- Message on a screen shown when none of the payment methods in the user's Link account can be used with this business. The placeholder is a Stripe brand name and should not be translated. -->
+  <string name="stripe_link_no_funding_sources_message">Nė vienas jūsų %s paskyros mokėjimo būdas neveikia su šia įmone.</string>
+  <!-- Title of a screen shown when none of the payment methods in the user's Link account can be used with this business. The placeholder is a Stripe brand name and should not be translated. -->
+  <string name="stripe_link_no_funding_sources_title">Čia negalite atsiskaityti naudodami %s</string>
   <!-- Text displayed on a confirmation button on the CRS CARF declaration screen -->
   <string name="stripe_link_onramp_carf_declaration_accept_button_text">Sutikti</string>
   <!-- Text displayed on a cancel button on the CRS CARF declaration screen -->

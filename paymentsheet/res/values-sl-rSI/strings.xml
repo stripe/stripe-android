@@ -17,7 +17,7 @@
   <!-- Instructions shown while waiting for a Bizum payment authorization -->
   <string name="stripe_bizum_confirm_payment">Potrdite plačilo Bizum v svoji mobilni bančni aplikaciji v %s, da dokončate nakup.</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
-  <string name="stripe_blik_confirm_payment">Potrdite plačilo v aplikaciji banke %s, da zaključite nakup.</string>
+  <string name="stripe_blik_confirm_payment">Potrdite plačilo v aplikaciji svoje banke v %s, da dokončate nakup.</string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
   <string name="stripe_cashapp_afterpay_subtitle">Kupite zdaj ali pa plačajte pozneje s storitvijo Cash App Afterpay</string>
   <!-- This shows the message on Buy Now Pay Later LPM, clearpay. -->
@@ -26,6 +26,10 @@
   <string name="stripe_confirm_close_form_body">Vaši podatki o plačilo ne bodo shranjeni.</string>
   <!-- Used as the title for prompting the user if they want to close the sheet -->
   <string name="stripe_confirm_close_form_title">Ali želite zapreti ta obrazec?</string>
+  <!-- Fallback disclosure when paying in the merchant's currency instead of using Adaptive Pricing. -->
+  <string name="stripe_currency_selector_bank_fees_disclaimer">Lahko veljajo menjalni tečaj in provizije vaše banke.</string>
+  <string name="stripe_currency_selector_hide_details">Skrij podrobnosti menjalnega tečaja</string>
+  <string name="stripe_currency_selector_show_details">Prikaži podrobnosti menjalnega tečaja</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header">Shranite svoje podatke za varno izvedbo plačila z enim klikom s storitvijo Link</string>
   <!-- Label for a checkbox that when checked allows the payment information
@@ -64,6 +68,12 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_email_suggestion_update">Da, posodobi</string>
   <!-- Title for a button that indicates a user can log in or sign up. -->
   <string name="stripe_link_log_in_or_sign_up">Vpis ali prijava</string>
+  <!-- Label of a button that signs the user out of their current Link account so they can log in to a different one. -->
+  <string name="stripe_link_log_in_to_another_account">Prijavite se v drug račun</string>
+  <!-- Message on a screen shown when none of the payment methods in the user's Link account can be used with this business. The placeholder is a Stripe brand name and should not be translated. -->
+  <string name="stripe_link_no_funding_sources_message">Nobeden od načinov plačila v vašem računu %s ne deluje s tem podjetjem.</string>
+  <!-- Title of a screen shown when none of the payment methods in the user's Link account can be used with this business. The placeholder is a Stripe brand name and should not be translated. -->
+  <string name="stripe_link_no_funding_sources_title">Tukaj ne morete plačati z %s</string>
   <!-- Text displayed on a confirmation button on the CRS CARF declaration screen -->
   <string name="stripe_link_onramp_carf_declaration_accept_button_text">Sprejmi</string>
   <!-- Text displayed on a cancel button on the CRS CARF declaration screen -->

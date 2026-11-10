@@ -40,7 +40,7 @@
   <!-- Text for choosing a photo from gallery -->
   <string name="stripe_choose_file">Trieu una foto</string>
   <!-- Close button text -->
-  <string name="stripe_close_button_text">tanca</string>
+  <string name="stripe_close_button_text">Tanca</string>
   <!-- Button to complete with test data -->
   <string name="stripe_complete_with_test_data">Completeu amb les dades de prova</string>
   <!-- Description for complete button on test mode -->
@@ -169,7 +169,7 @@
   <!-- Instructional text when user needs remove anything blocking the document -->
   <string name="stripe_keep_fully_visible">Els detalls no es veuen bé</string>
   <!-- Continue button text -->
-  <string name="stripe_kontinue">continua</string>
+  <string name="stripe_kontinue">Continua</string>
   <!-- Label for the ID field to collect last 4 of social security number for US ID -->
   <string name="stripe_last_4_of_ssn">Últims 4 números de la Seguretat Social</string>
   <!-- Label for last (family) name field -->

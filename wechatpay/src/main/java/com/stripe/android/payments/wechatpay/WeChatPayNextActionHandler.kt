@@ -5,7 +5,7 @@ import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
-import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.getRequestCode
 import com.stripe.android.payments.PaymentFlowResult
@@ -55,7 +55,7 @@ class WeChatPayNextActionHandler : PaymentNextActionHandler<StripeIntent>() {
     override suspend fun performNextActionOnResumed(
         host: AuthActivityStarterHost,
         actionable: StripeIntent,
-        requestOptions: ApiRequest.Options
+        apiConfiguration: ApiConfiguration.State
     ) {
         require(reflectionHelper.isWeChatPayAvailable()) {
             "WeChatPay dependency is not found, add " +

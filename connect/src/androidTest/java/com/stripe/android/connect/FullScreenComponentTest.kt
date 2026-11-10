@@ -52,7 +52,7 @@ class FullScreenComponentTest {
     @get:Rule
     val ruleChain: RuleChain = RuleChain
         .outerRule(activityRule)
-        .around(RetryRule(3))
+        .around(RetryRule(2))
 
     private val rootView
         get() = isAssignableFrom(StripeComponentDialogFragmentView::class.java)

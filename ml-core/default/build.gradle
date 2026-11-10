@@ -9,8 +9,9 @@ android {
 dependencies {
     api project(':ml-core:base')
     implementation libs.androidx.annotation
-    implementation libs.litert
-    api libs.litertSupport
+    api libs.litert
+    // The litert-support wrapper shares this artifact's namespace, which AGP 9 rejects.
+    api libs.litertSupportApi
 }
 
 ext {

@@ -182,8 +182,10 @@ internal interface EventReporter : CardScanEventsReporter {
     /**
      * The customer has been exposed to an experiment.
      */
+    // Load-time exposures can supply metadata before it is available from the integration's provider.
     fun onExperimentExposure(
-        experiment: LoggableExperiment
+        experiment: LoggableExperiment,
+        paymentMethodMetadata: PaymentMethodMetadata? = null,
     )
 
     /**

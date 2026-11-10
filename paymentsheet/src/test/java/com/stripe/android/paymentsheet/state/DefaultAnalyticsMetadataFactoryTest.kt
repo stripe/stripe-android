@@ -101,7 +101,10 @@ class DefaultAnalyticsMetadataFactoryTest {
 
     @Test
     fun `create returns Checkout Session analytics metadata`() {
-        val elementsSession = createElementsSession().copy(elementsSessionConfigId = "cfg_elements")
+        val elementsSession = createElementsSession().copy(
+            elementsSessionConfigId = "cfg_elements",
+            orderedPaymentMethodTypesAndWallets = listOf("link", "card", "google_pay"),
+        )
         val response = CheckoutSessionResponseFactory.create(
             configId = "cfg_checkout",
             elementsSession = elementsSession,
@@ -120,8 +123,36 @@ class DefaultAnalyticsMetadataFactoryTest {
                 "payment_status" to "unpaid",
                 "adaptive_pricing_active" to false,
                 "automatic_tax_enabled" to true,
+                "ordered_lpms" to "link,card,google_pay",
             )
         )
+    }
+
+    @Test
+    fun `create omits ordered lpms when Checkout Session response is absent`() {
+        val resultMap = DefaultAnalyticsMetadataFactory.create(response = null).paramsMap
+
+        assertThat(resultMap).doesNotContainKey("ordered_lpms")
+    }
+
+    @Test
+    fun `create omits ordered lpms when Elements Session is absent`() {
+        val response = CheckoutSessionResponseFactory.create(elementsSession = null)
+
+        val resultMap = DefaultAnalyticsMetadataFactory.create(response).paramsMap
+
+        assertThat(resultMap).doesNotContainKey("ordered_lpms")
+    }
+
+    @Test
+    fun `create omits ordered lpms when the ordered list is empty`() {
+        val response = CheckoutSessionResponseFactory.create(
+            elementsSession = createElementsSession().copy(orderedPaymentMethodTypesAndWallets = emptyList()),
+        )
+
+        val resultMap = DefaultAnalyticsMetadataFactory.create(response).paramsMap
+
+        assertThat(resultMap).doesNotContainKey("ordered_lpms")
     }
 
     @Test

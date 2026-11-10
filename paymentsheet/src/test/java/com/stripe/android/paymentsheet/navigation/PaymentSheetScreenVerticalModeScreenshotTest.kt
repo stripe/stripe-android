@@ -250,6 +250,7 @@ internal class PaymentSheetScreenVerticalModeScreenshotTest {
                 loginState = LinkState.LoginState.LoggedOut,
                 signupMode = null,
             ),
+            isInstantDebitsOnboardingEnabled = true,
         )
     }
 }

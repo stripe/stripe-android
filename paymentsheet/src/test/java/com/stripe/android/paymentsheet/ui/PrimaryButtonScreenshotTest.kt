@@ -3,9 +3,12 @@ package com.stripe.android.paymentsheet.ui
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.stripe.android.paymentsheet.R
@@ -75,6 +78,52 @@ class PrimaryButtonScreenshotTest {
                 label = "Pay $50.99",
                 icon = PrimaryButtonIcon.Lock,
                 enabled = false,
+            ) {}
+        }
+    }
+
+    @Test
+    fun testIdleSecure() {
+        paparazziRule.snapshot {
+            PrimaryButton(
+                label = "Pay $50.99",
+                icon = PrimaryButtonIcon.Secure,
+                enabled = true,
+            ) {}
+        }
+    }
+
+    @Test
+    fun testIdleSecureAndDisabled() {
+        paparazziRule.snapshot {
+            PrimaryButton(
+                label = "Pay $50.99",
+                icon = PrimaryButtonIcon.Secure,
+                enabled = false,
+            ) {}
+        }
+    }
+
+    @Test
+    fun testIdleSecureRtl() {
+        paparazziRule.snapshot {
+            CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+                PrimaryButton(
+                    label = "Pay $50.99",
+                    icon = PrimaryButtonIcon.Secure,
+                    enabled = true,
+                ) {}
+            }
+        }
+    }
+
+    @Test
+    fun testSecureWithCustomTheme() {
+        customThemePaparazziRule.snapshotWithCustomTheme {
+            PrimaryButton(
+                label = "Pay $50.99",
+                icon = PrimaryButtonIcon.Secure,
+                enabled = true,
             ) {}
         }
     }

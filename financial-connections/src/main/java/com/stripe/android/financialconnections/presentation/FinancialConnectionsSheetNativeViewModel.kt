@@ -576,7 +576,7 @@ internal data class FinancialConnectionsSheetNativeState(
         completed = false,
         initialPane = args.initialSyncResponse.manifest.nextPane,
         configuration = args.configuration,
-        theme = args.initialSyncResponse.manifest.theme?.toLocalTheme() ?: Theme.default,
+        theme = args.initialSyncResponse.manifest.theme.toLocalTheme(args.configuration.themeMode),
         linkBrand = args.initialSyncResponse.manifest.linkBrand,
         viewEffect = null,
         isLinkWithStripe = args.initialSyncResponse.manifest.isLinkWithStripe ?: false,

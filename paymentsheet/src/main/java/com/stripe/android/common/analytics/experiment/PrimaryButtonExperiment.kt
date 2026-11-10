@@ -23,7 +23,8 @@ internal class DefaultPrimaryButtonExperiment @Inject constructor(
         val icon = when (variant) {
             "control", "control_test" -> PrimaryButtonIcon.Lock
             "treatment_no_padlock" -> PrimaryButtonIcon.None
-            // Do not log exposures for variants whose behavior is not implemented yet.
+            "treatment_replace_padlock" -> PrimaryButtonIcon.Secure
+            // Do not log exposures for unrecognized variants.
             else -> return PrimaryButtonIcon.Lock
         }
 

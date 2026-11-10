@@ -169,6 +169,7 @@ internal class OnrampInteractor @Inject constructor(
                 .allowLogout(false)
                 .allowUserEmailEdits(false)
                 .appearance(configurationState.appearance)
+                .cardBrandAcceptance(configurationState.linkCardBrandAcceptance)
         )
 
         return if (linkResult.isSuccess) {

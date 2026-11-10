@@ -5,6 +5,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSession.ExperimentAssignment
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.utils.filterNotNullValues
 
 /**
@@ -113,6 +114,30 @@ internal sealed class LoggableExperiment(
         experiment = ExperimentAssignment.OCS_MOBILE_REMOVE_PRIMARY_BUTTON_PADLOCK,
         group = group,
         dimensions = CommonElementsDimensions.getDimensions(metadata, mode),
+    )
+
+    data class OcsMobilePreselectLink(
+        val experimentsData: ElementsSession.ExperimentsData,
+        override val group: String,
+        val metadata: PaymentMethodMetadata,
+        val mode: EventReporter.Mode,
+        val hasSavedPaymentMethod: Boolean,
+    ) : LoggableExperiment(
+        arbId = experimentsData.arbId,
+        experiment = ExperimentAssignment.OCS_MOBILE_PRESELECT_LINK,
+        group = group,
+        dimensions = CommonElementsDimensions.getDimensions(metadata, mode) + mapOf(
+            "link_enabled" to (metadata.linkState != null).toString(),
+            "link_login_state" to when (metadata.linkState?.loginState) {
+                LinkState.LoginState.LoggedIn -> "logged_in"
+                LinkState.LoginState.NeedsVerification -> "needs_verification"
+                LinkState.LoginState.NeedsWebVerification -> "needs_web_verification"
+                LinkState.LoginState.LoggedOut -> "logged_out"
+                null -> null
+            },
+            "google_pay_enabled" to metadata.isGooglePayReady.toString(),
+            "has_saved_payment_method" to hasSavedPaymentMethod.toString(),
+        ).filterNotNullValues(),
     )
 
     data class OcsMobileNfcScanningFeatureHoldback(

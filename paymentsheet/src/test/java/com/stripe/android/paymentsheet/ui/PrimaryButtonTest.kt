@@ -32,6 +32,34 @@ internal class PrimaryButtonTest {
     }
 
     @Test
+    fun `idle button displays the requested secure icon`() = runScenario(
+        processingState = PrimaryButtonProcessingState.Idle(null),
+        icon = PrimaryButtonIcon.Secure,
+    ) {
+        composeRule.onNodeWithTag(PRIMARY_BUTTON_SECURE_ICON_TEST_TAG, useUnmergedTree = true).assertIsDisplayed()
+        composeRule.onNodeWithTag(PRIMARY_BUTTON_LOCK_ICON_TEST_TAG, useUnmergedTree = true).assertDoesNotExist()
+    }
+
+    @Test
+    fun `processing button ignores the requested secure icon`() = assertSecureIconIgnored(
+        processingState = PrimaryButtonProcessingState.Processing,
+    )
+
+    @Test
+    fun `completed button ignores the requested secure icon`() = assertSecureIconIgnored(
+        processingState = PrimaryButtonProcessingState.Completed,
+    )
+
+    private fun assertSecureIconIgnored(processingState: PrimaryButtonProcessingState) = runScenario(
+        processingState = processingState,
+        icon = PrimaryButtonIcon.Secure,
+    ) {
+        composeRule.onNodeWithTag(PRIMARY_BUTTON_TEST_TAG).assertIsDisplayed()
+        composeRule.onNodeWithTag(PRIMARY_BUTTON_SECURE_ICON_TEST_TAG, useUnmergedTree = true).assertDoesNotExist()
+        composeRule.onNodeWithTag(PRIMARY_BUTTON_LOCK_ICON_TEST_TAG, useUnmergedTree = true).assertDoesNotExist()
+    }
+
+    @Test
     fun `processing button ignores the requested lock icon`() = assertLockIconIgnored(
         processingState = PrimaryButtonProcessingState.Processing,
     )
@@ -48,6 +76,7 @@ internal class PrimaryButtonTest {
 
     private fun runScenario(
         processingState: PrimaryButtonProcessingState,
+        icon: PrimaryButtonIcon = PrimaryButtonIcon.Lock,
         block: () -> Unit,
     ) {
         composeRule.setContent {
@@ -55,7 +84,7 @@ internal class PrimaryButtonTest {
             CompositionLocalProvider(LocalInspectionMode provides true) {
                 PrimaryButton(
                     label = "Pay",
-                    icon = PrimaryButtonIcon.Lock,
+                    icon = icon,
                     enabled = true,
                     processingState = processingState,
                 ) {}

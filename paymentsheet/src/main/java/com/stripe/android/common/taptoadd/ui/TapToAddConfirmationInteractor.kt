@@ -1,5 +1,6 @@
 package com.stripe.android.common.taptoadd.ui
 
+import com.stripe.android.common.analytics.experiment.PrimaryButtonExperiment
 import com.stripe.android.common.spms.CvcFormHelper
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.strings.ResolvableString
@@ -16,6 +17,7 @@ import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.ui.PrimaryButtonIcon
 import com.stripe.android.paymentsheet.utils.buyButtonLabel
 import com.stripe.android.paymentsheet.utils.reportPaymentResult
 import com.stripe.android.uicore.elements.FormElement
@@ -52,7 +54,7 @@ internal interface TapToAddConfirmationInteractor {
 
         data class PrimaryButton(
             val label: ResolvableString,
-            val locked: Boolean,
+            val icon: PrimaryButtonIcon,
             val state: State,
             val enabled: Boolean,
         ) {
@@ -92,6 +94,7 @@ internal class DefaultTapToAddConfirmationInteractor(
     private val confirmationHandler: ConfirmationHandler,
     private val cvcFormHelper: CvcFormHelper,
     private val eventReporter: EventReporter,
+    private val primaryButtonExperiment: PrimaryButtonExperiment,
     private val statusBarColor: Int?,
     private val onComplete: () -> Unit,
 ) : TapToAddConfirmationInteractor {
@@ -197,7 +200,7 @@ internal class DefaultTapToAddConfirmationInteractor(
                     primaryButtonLabel = null,
                     isForPaymentIntent = paymentMethodMetadata.stripeIntent is PaymentIntent
                 ),
-                locked = true,
+                icon = primaryButtonExperiment.getIcon(paymentMethodMetadata),
                 enabled = true,
                 state = TapToAddConfirmationInteractor.State.PrimaryButton.State.Idle,
             ),
@@ -283,6 +286,7 @@ internal class DefaultTapToAddConfirmationInteractor(
         private val cvcFormHelperFactory: CvcFormHelper.Factory,
         private val confirmationHandler: ConfirmationHandler,
         private val eventReporter: EventReporter,
+        private val primaryButtonExperiment: PrimaryButtonExperiment,
         @Named(STATUS_BAR_COLOR) private val statusBarColor: Int?,
         private val tapToAddNavigator: Provider<TapToAddNavigator>,
     ) : TapToAddConfirmationInteractor.Factory {
@@ -298,6 +302,7 @@ internal class DefaultTapToAddConfirmationInteractor(
                 linkInput = linkInput,
                 confirmationHandler = confirmationHandler,
                 eventReporter = eventReporter,
+                primaryButtonExperiment = primaryButtonExperiment,
                 coroutineContext = coroutineContext,
                 cvcFormHelper = cvcFormHelperFactory.create(paymentMethod),
                 statusBarColor = statusBarColor,

@@ -116,7 +116,7 @@ internal class PaymentOptionsEmbeddedSheetMandateTest {
     }
 
     @Test
-    fun `horizontal saved card shows Continue without a mandate`() = runScenario(
+    fun `horizontal saved card hides Continue and mandate`() = runScenario(
         paymentMethodMetadata = metadata(
             paymentMethodTypes = listOf("card", "us_bank_account"),
             layout = PaymentSheet.PaymentMethodLayout.Horizontal,
@@ -125,7 +125,7 @@ internal class PaymentOptionsEmbeddedSheetMandateTest {
         selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
     ) {
         composeTestRule.onNodeWithTag(SHEET_MANDATE_TEST_TAG).assertDoesNotExist()
-        composeTestRule.onNodeWithTag(PRIMARY_BUTTON_TEST_TAG).performScrollTo().assertIsDisplayed()
+        composeTestRule.onNodeWithTag(PRIMARY_BUTTON_TEST_TAG).assertDoesNotExist()
     }
 
     @Test
@@ -229,8 +229,6 @@ internal class PaymentOptionsEmbeddedSheetMandateTest {
         block: (ActivityScenario<EmbeddedSheetActivity>) -> Unit,
     ) {
         val args = EmbeddedActivityArgs(
-            paymentMethodMetadata = paymentMethodMetadata,
-            configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
             productUsage = setOf("EmbeddedPaymentElement"),
             statusBarColor = null,
             paymentElementCallbackIdentifier = "PaymentOptionsMandateTestIdentifier",
@@ -245,7 +243,10 @@ internal class PaymentOptionsEmbeddedSheetMandateTest {
             ),
             promotions = emptyList(),
             launchMode = EmbeddedLaunchMode.PaymentOptions,
-            presentationState = EmbeddedActivityArgs.PresentationState.Ready,
+            presentationState = EmbeddedActivityArgs.PresentationState.Ready(
+                paymentMethodMetadata = paymentMethodMetadata,
+                configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
+            ),
         )
         ActivityScenario.launchActivityForResult<EmbeddedSheetActivity>(
             EmbeddedSheetContract.createIntent(context = applicationContext, input = args),

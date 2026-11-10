@@ -21,11 +21,10 @@ internal class HCaptchaHeadlessWebView(
     internalConfig: HCaptchaInternalConfig,
     private val listener: HCaptchaStateListener
 ) : IHCaptchaVerifier {
-    private val webViewHelper: HCaptchaWebViewHelper
+    internal val webViewHelper: HCaptchaWebViewHelper
     private var webViewLoaded = false
     private var destroyed = false
     private var shouldExecuteOnLoad = false
-    private var shouldResetOnLoad = false
 
     init {
         val webView: WebView = HCaptchaWebView(activity)
@@ -79,10 +78,7 @@ internal class HCaptchaHeadlessWebView(
             return
         }
         webViewLoaded = true
-        if (shouldResetOnLoad) {
-            shouldResetOnLoad = false
-            reset()
-        } else if (shouldExecuteOnLoad) {
+        if (shouldExecuteOnLoad) {
             shouldExecuteOnLoad = false
             webViewHelper.resetAndExecute()
         }
@@ -99,18 +95,13 @@ internal class HCaptchaHeadlessWebView(
         if (destroyed) {
             return
         }
-        if (webViewLoaded) {
-            destroyWebView()
-        } else {
-            shouldResetOnLoad = true
-        }
+        destroyWebView()
     }
 
     private fun destroyWebView() {
         destroyed = true
         webViewLoaded = false
         shouldExecuteOnLoad = false
-        shouldResetOnLoad = false
         webViewHelper.destroy()
     }
 }

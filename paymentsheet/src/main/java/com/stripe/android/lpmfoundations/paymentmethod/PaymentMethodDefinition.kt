@@ -30,3 +30,11 @@ internal fun PaymentMethodDefinition.isSupported(metadata: PaymentMethodMetadata
         requirement.isMetBy(metadata, type.code)
     }
 }
+
+internal fun PaymentMethodDefinition.unmetRequirements(
+    metadata: PaymentMethodMetadata,
+): List<AddPaymentMethodRequirement> {
+    return requirementsToBeUsedAsNewPaymentMethod(metadata.hasIntentToSetup(type.code)).filterNot { requirement ->
+        requirement.isMetBy(metadata, type.code)
+    }
+}

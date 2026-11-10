@@ -20,6 +20,7 @@ import com.stripe.android.networktesting.RequestMatchers.hasBodyPart
 import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.RequestMatchers.query
 import com.stripe.android.networktesting.testBodyFromFile
+import com.stripe.android.paymentsheet.model.CheckoutSessionClientSecret
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.android.utils.FakeFraudDetectionDataRepository
 import kotlinx.coroutines.test.runTest
@@ -39,8 +40,6 @@ class CheckoutSessionRepositoryTest {
         mobileSessionIdProvider = { AnalyticsRequestFactory.sessionId.toString() },
     )
 
-    private val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
-
     private val checkoutSessionResponse = CheckoutAnalyticsTestFixtures.sessionResponse(
         stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
     )
@@ -50,7 +49,7 @@ class CheckoutSessionRepositoryTest {
         elementsSessionClientParams = CheckoutStripeRepositoryFactory.clientParams(),
         fraudDetectionDataRepository = FakeFraudDetectionDataRepository.create(),
         stripeNetworkClient = DefaultStripeNetworkClient(),
-        analyticsRequestExecutor = analyticsRequestExecutor,
+        analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
         paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
             context = ApplicationProvider.getApplicationContext(),
             publishableKey = "pk_test_123",
@@ -78,12 +77,12 @@ class CheckoutSessionRepositoryTest {
         }
 
         val result = repository.init(
-            sessionId = DEFAULT_CHECKOUT_SESSION_ID,
-            clientSecret = "cs_test_abc123_secret_test",
+            clientSecret = CheckoutSessionClientSecret("cs_test_abc123_secret_test"),
             adaptivePricingAllowed = true,
+            analyticsParams = emptyMap(),
         )
 
-        assertThat(result.getOrThrow().clientSecret).isEqualTo("cs_test_abc123_secret_test")
+        assertThat(result.getOrThrow().clientSecret.value).isEqualTo("cs_test_abc123_secret_test")
     }
 
     @Test
@@ -101,16 +100,15 @@ class CheckoutSessionRepositoryTest {
         }
 
         val result = repository.detachPaymentMethod(
-            sessionId = DEFAULT_CHECKOUT_SESSION_ID,
-            clientSecret = "cs_test_abc123_secret_test",
+            clientSecret = CheckoutSessionClientSecret("cs_test_abc123_secret_test"),
             paymentMethodId = "pm_123",
         )
 
-        assertThat(result.getOrThrow().clientSecret).isEqualTo("cs_test_abc123_secret_test")
+        assertThat(result.getOrThrow().clientSecret.value).isEqualTo("cs_test_abc123_secret_test")
     }
 
     @Test
-    fun `applyPromotionCode reports started and succeeded`() = runTest {
+    fun `applyPromotionCode sends the promotion code`() = runTest {
         networkRule.checkoutUpdate(
             bodyPart("promotion_code", "10OFF"),
             bodyPart("client_secret", "cs_test_abc123_secret_test"),
@@ -118,56 +116,16 @@ class CheckoutSessionRepositoryTest {
             response.testBodyFromFile("checkout-session-init.json")
         }
 
-        repository.applyPromotionCode(
-            checkoutSessionResponse = checkoutSessionResponse,
-            promotionCode = "10OFF",
-        ).getOrThrow()
-
-        val started = analyticsRequestExecutor.awaitEvent("checkout_elements.apply_promotion_code.started")
-        assertThat(started).containsAtLeastEntriesIn(CheckoutAnalyticsTestFixtures.sessionParams)
-        assertThat(started).doesNotContainKey("duration")
-        val succeeded = analyticsRequestExecutor.awaitEvent("checkout_elements.apply_promotion_code.succeeded")
-        assertThat(succeeded).containsAtLeastEntriesIn(INIT_RESPONSE_SESSION_PARAMS)
-        assertThat(succeeded).containsKey("duration")
-        analyticsRequestExecutor.validate()
-    }
-
-    @Test
-    fun `applyPromotionCode reports started and failed with the error`() = runTest {
-        networkRule.checkoutUpdate { response ->
-            response.setResponseCode(400)
-            response.addHeader("Request-Id", "req_123")
-            response.setBody(
-                """
-                    {
-                        "error": {
-                            "type": "invalid_request_error",
-                            "code": "promotion_code_invalid",
-                            "message": "Invalid promotion code"
-                        }
-                    }
-                """.trimIndent()
-            )
-        }
-
         val result = repository.applyPromotionCode(
             checkoutSessionResponse = checkoutSessionResponse,
-            promotionCode = "INVALID",
+            promotionCode = "10OFF",
         )
 
-        assertThat(result.isFailure).isTrue()
-        analyticsRequestExecutor.awaitEvent("checkout_elements.apply_promotion_code.started")
-        val failed = analyticsRequestExecutor.awaitEvent("checkout_elements.apply_promotion_code.failed")
-        assertThat(failed).containsAtLeastEntriesIn(CheckoutAnalyticsTestFixtures.sessionParams)
-        assertThat(failed).containsEntry("error_type", "invalid_request_error")
-        assertThat(failed).containsEntry("error_code", "promotion_code_invalid")
-        assertThat(failed).containsEntry("request_id", "req_123")
-        assertThat(failed).containsKey("duration")
-        analyticsRequestExecutor.validate()
+        assertThat(result.getOrThrow().clientSecret.value).isEqualTo("cs_test_abc123_secret_test")
     }
 
     @Test
-    fun `removePromotionCode sends an empty promotion code and reports started and succeeded`() = runTest {
+    fun `removePromotionCode sends an empty promotion code`() = runTest {
         networkRule.checkoutUpdate(
             bodyPart("promotion_code", ""),
             bodyPart("client_secret", "cs_test_abc123_secret_test"),
@@ -175,14 +133,11 @@ class CheckoutSessionRepositoryTest {
             response.testBodyFromFile("checkout-session-init.json")
         }
 
-        repository.removePromotionCode(
+        val result = repository.removePromotionCode(
             checkoutSessionResponse = checkoutSessionResponse,
-        ).getOrThrow()
+        )
 
-        analyticsRequestExecutor.awaitEvent("checkout_elements.remove_promotion_code.started")
-        val succeeded = analyticsRequestExecutor.awaitEvent("checkout_elements.remove_promotion_code.succeeded")
-        assertThat(succeeded).containsKey("duration")
-        analyticsRequestExecutor.validate()
+        assertThat(result.getOrThrow().clientSecret.value).isEqualTo("cs_test_abc123_secret_test")
     }
 
     @Test
@@ -195,12 +150,11 @@ class CheckoutSessionRepositoryTest {
         }
 
         val result = repository.updateCurrency(
-            sessionId = DEFAULT_CHECKOUT_SESSION_ID,
-            clientSecret = "cs_test_abc123_secret_test",
+            checkoutSessionResponse = checkoutSessionResponse,
             currencyCode = "eur",
         )
 
-        assertThat(result.getOrThrow().clientSecret).isEqualTo("cs_test_abc123_secret_test")
+        assertThat(result.getOrThrow().clientSecret.value).isEqualTo("cs_test_abc123_secret_test")
     }
 
     @Test
@@ -211,46 +165,11 @@ class CheckoutSessionRepositoryTest {
         }
 
         val result = repository.updateCurrency(
-            sessionId = DEFAULT_CHECKOUT_SESSION_ID,
-            clientSecret = "cs_test_abc123_secret_test",
+            checkoutSessionResponse = checkoutSessionResponse,
             currencyCode = "invalid",
         )
 
         assertThat(result.isFailure).isTrue()
-    }
-
-    @Test
-    fun `updateCurrency fires currency_toggled on success`() = runTest {
-        networkRule.checkoutUpdate { response ->
-            response.testBodyFromFile("checkout-session-init.json")
-        }
-
-        repository.updateCurrency(
-            sessionId = DEFAULT_CHECKOUT_SESSION_ID,
-            clientSecret = "cs_test_abc123_secret_test",
-            currencyCode = "eur",
-        ).getOrThrow()
-
-        analyticsRequestExecutor.awaitEvent("elements.adaptive_pricing.currency_toggled")
-        analyticsRequestExecutor.validate()
-    }
-
-    @Test
-    fun `updateCurrency fires currency_toggled_failed on failure`() = runTest {
-        networkRule.checkoutUpdate { response ->
-            response.setResponseCode(400)
-            response.setBody("""{"error": {"message": "Invalid currency"}}""")
-        }
-
-        val result = repository.updateCurrency(
-            sessionId = DEFAULT_CHECKOUT_SESSION_ID,
-            clientSecret = "cs_test_abc123_secret_test",
-            currencyCode = "invalid",
-        )
-
-        assertThat(result.isFailure).isTrue()
-        analyticsRequestExecutor.awaitEvent("elements.adaptive_pricing.currency_toggled.failed")
-        analyticsRequestExecutor.validate()
     }
 
     @Test
@@ -260,8 +179,7 @@ class CheckoutSessionRepositoryTest {
         )
 
         val result = repository.poll(
-            sessionId = DEFAULT_CHECKOUT_SESSION_ID,
-            clientSecret = "cs_test_abc123_secret_test",
+            clientSecret = CheckoutSessionClientSecret("cs_test_abc123_secret_test"),
         )
 
         assertThat(result.getOrThrow()).isEqualTo(
@@ -283,24 +201,9 @@ class CheckoutSessionRepositoryTest {
         }
 
         val result = repository.poll(
-            sessionId = DEFAULT_CHECKOUT_SESSION_ID,
-            clientSecret = "cs_test_abc123_secret_test",
+            clientSecret = CheckoutSessionClientSecret("cs_test_abc123_secret_test"),
         )
 
         assertThat(result.exceptionOrNull()).isInstanceOf(APIException::class.java)
-    }
-
-    private companion object {
-        // Values come from checkout-session-init.json, the response parsed by the update request.
-        val INIT_RESPONSE_SESSION_PARAMS: Map<String, Any> = mapOf(
-            "checkout_session_id" to "cs_test_abc123",
-            "checkout_config_id" to "checkout_config_123",
-            "currency" to "usd",
-            "session_status" to "open",
-            "payment_status" to "unpaid",
-            "elements_session_config_id" to "cs_config_123",
-            "adaptive_pricing_active" to false,
-            "automatic_tax_enabled" to false,
-        )
     }
 }

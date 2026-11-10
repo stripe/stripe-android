@@ -84,6 +84,9 @@ internal class DefaultSheetActivityStateHolderTest {
     fun `confirmation button uses experiment no icon`() = assertConfirmationButtonIcon(PrimaryButtonIcon.None)
 
     @Test
+    fun `confirmation button uses experiment secure icon`() = assertConfirmationButtonIcon(PrimaryButtonIcon.Secure)
+
+    @Test
     fun `experiment icon is preserved through selection and processing updates`() = testScenario(
         primaryButtonIcon = PrimaryButtonIcon.None,
     ) {

@@ -140,6 +140,9 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
             interactor = createSavedPaymentMethodsInteractor(),
             sheetActivityState = sheetActivityStateHolder.state,
             mandateText = selectionHolder.selection.mapAsStateFlow(::savedPaymentMethodsMandateText),
+            isContinueButtonVisible = selectionHolder.selection.mapAsStateFlow { selection ->
+                selection?.requiresConfirmation == true
+            },
             onContinueClick = ::onContinueClick,
             onPrimaryButtonDisabledClick = sheetActivityStateHolder::onPrimaryButtonDisabledClick,
         )
@@ -185,9 +188,17 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
                 )
             },
             onUpdatePaymentMethod = ::navigateToUpdateScreen,
-            updateSelection = { selection, _ -> selectionHolder.setSelection(selection) },
+            updateSelection = ::onSavedPaymentMethodsSelectionUpdated,
             linkBrand = paymentMethodMetadata.effectiveLinkBrand(linkAccount),
         )
+    }
+
+    private fun onSavedPaymentMethodsSelectionUpdated(selection: PaymentSelection?, isUserInput: Boolean) {
+        selectionHolder.setSelection(selection)
+        // Continue is hidden unless the selection requires confirmation, so other selections return immediately.
+        if (isUserInput && selection?.requiresConfirmation != true) {
+            onContinueClick()
+        }
     }
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)

@@ -8,6 +8,7 @@ import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
+import com.stripe.android.paymentsheet.model.CheckoutSessionClientSecret
 import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Test
@@ -16,6 +17,16 @@ import java.math.BigDecimal
 
 @RunWith(TestParameterInjector::class)
 class CheckoutSessionResponseJsonParserTest {
+    @Test
+    fun `derives session identity from the retained client secret`() {
+        val json = base().apply { remove("id") }
+
+        val result = requireNotNull(parse(json))
+
+        assertThat(result.id).isEqualTo(clientSecret.sessionId)
+        assertThat(result.clientSecret).isSameInstanceAs(clientSecret)
+    }
+
     @Test
     fun `parses nested amounts without legacy flat amounts`() {
         val json = base()
@@ -404,10 +415,16 @@ class CheckoutSessionResponseJsonParserTest {
     @Test
     fun `no payment required produces setup-style elements session`() {
         val json = base().put("payment_status", "no_payment_required")
+            .put(
+                "ordered_payment_method_types_and_wallets",
+                JSONArray(listOf("card", "google_pay", "unknown_method")),
+            )
 
         val result = parse(json)
 
         assertThat(result?.elementsSession?.stripeIntent).isInstanceOf(SetupIntent::class.java)
+        assertThat(result?.elementsSession?.stripeIntent?.paymentMethodTypes)
+            .containsExactly("card", "google_pay", "unknown_method").inOrder()
     }
 
     @Test
@@ -476,7 +493,6 @@ class CheckoutSessionResponseJsonParserTest {
     fun `rejects legacy and malformed response boundaries`() {
         val mutations: List<(JSONObject) -> Unit> = listOf(
             { it.remove("ui_mode") },
-            { it.remove("id") },
             { it.getJSONObject("merchant_info").remove("country") },
             { it.remove("ordered_payment_method_types_and_wallets") },
             { it.put("items", JSONArray()) },
@@ -566,10 +582,10 @@ class CheckoutSessionResponseJsonParserTest {
         val elements = requireNotNull(result.elementsSession)
         val intent = elements.stripeIntent as PaymentIntent
 
-        assertThat(result.clientSecret).isEqualTo("cs_test_abc123_secret_test")
         assertThat(elements.orderedPaymentMethodTypesAndWallets)
             .containsExactly("cashapp", "google_pay", "card", "link", "blik", "vipps").inOrder()
-        assertThat(intent.paymentMethodTypes).containsExactly("cashapp", "card", "link", "blik").inOrder()
+        assertThat(intent.paymentMethodTypes)
+            .containsExactly("cashapp", "google_pay", "card", "link", "blik", "vipps").inOrder()
         assertThat(intent.amount).isEqualTo(5099)
         assertThat(intent.getPaymentMethodOptions()["card"])
             .isEqualTo(mapOf("capture_method" to "manual", "setup_future_usage" to "off_session"))
@@ -712,5 +728,7 @@ class CheckoutSessionResponseJsonParserTest {
         JSONObject().put("display_name", "Sales tax").put("percentage", 8.0).put("rate_type", "percentage")
     )
 
-    private fun parse(json: JSONObject) = CheckoutSessionResponseJsonParser("cs_test_abc123_secret_test").parse(json)
+    private val clientSecret = CheckoutSessionClientSecret("cs_test_abc123_secret_test")
+
+    private fun parse(json: JSONObject) = CheckoutSessionResponseJsonParser(clientSecret).parse(json)
 }

@@ -4,17 +4,19 @@ import androidx.test.espresso.intent.rule.IntentsRule
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.checkouttesting.CheckoutInitResponseFactory
 import com.stripe.android.checkouttesting.checkoutConfirm
-import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.utils.FeatureFlags
+import com.stripe.android.googlepaylauncher.GooglePayPaymentDataError
 import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdate
 import com.stripe.android.networktesting.AdvancedFraudSignalsTestRule
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatcher
 import com.stripe.android.networktesting.RequestMatchers.analyticsPayloadField
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
+import com.stripe.android.networktesting.RequestMatchers.hasQueryParam
+import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.utils.GooglePayRepositoryTestRule
@@ -60,8 +62,7 @@ internal class ExpressCheckoutElementAnalyticsTest {
             }
 
             validateConfirmationStarted(selectedLpm = "google_pay")
-            validateConfirmationResult(
-                eventName = "checkout_elements.confirm.succeeded",
+            validateConfirmationSucceeded(
                 selectedLpm = "google_pay",
             )
 
@@ -76,7 +77,7 @@ internal class ExpressCheckoutElementAnalyticsTest {
         runExpressCheckoutElementAnalyticsTest {
             enqueueSuccessfulNativeLinkPayment()
 
-            networkRule.checkoutInit()
+            networkRule.checkoutInitWithAnalytics()
 
             validateAnalyticsRequest(eventName = "link.popup.show")
             validateAnalyticsRequest(eventName = "link.popup.success")
@@ -84,8 +85,7 @@ internal class ExpressCheckoutElementAnalyticsTest {
                 selectedLpm = "link",
                 analyticsPayloadField("link_context", "wallet"),
             )
-            validateConfirmationResult(
-                eventName = "checkout_elements.confirm.succeeded",
+            validateConfirmationSucceeded(
                 selectedLpm = "link",
                 analyticsPayloadField("link_context", "wallet"),
             )
@@ -105,10 +105,9 @@ internal class ExpressCheckoutElementAnalyticsTest {
 
             enqueueFailedGooglePayPayment(IllegalStateException("Google Pay failed"))
 
-            networkRule.checkoutInit()
+            networkRule.checkoutInitWithAnalytics()
             validateConfirmationStarted(selectedLpm = "google_pay")
-            validateConfirmationResult(
-                eventName = "checkout_elements.confirm.failed",
+            validateConfirmationFailed(
                 selectedLpm = "google_pay",
                 analyticsPayloadField("error_type", "googlePay_1"),
                 analyticsPayloadField("error_code", "1"),
@@ -128,10 +127,9 @@ internal class ExpressCheckoutElementAnalyticsTest {
         runExpressCheckoutElementAnalyticsTest {
             enqueueCanceledGooglePayPayment()
 
-            networkRule.checkoutInit()
+            networkRule.checkoutInitWithAnalytics()
             validateConfirmationStarted(selectedLpm = "google_pay")
-            validateConfirmationResult(
-                eventName = "checkout_elements.confirm.canceled",
+            validateConfirmationCanceled(
                 selectedLpm = "google_pay",
             )
 
@@ -149,7 +147,7 @@ internal class ExpressCheckoutElementAnalyticsTest {
         runExpressCheckoutElementAnalyticsTest {
             enqueueFailedNativeLinkPayment(IllegalStateException("Link failed"))
 
-            networkRule.checkoutInit()
+            networkRule.checkoutInitWithAnalytics()
             validateAnalyticsRequest(eventName = "link.popup.show")
             validateAnalyticsRequest(
                 eventName = "link.popup.error",
@@ -159,8 +157,7 @@ internal class ExpressCheckoutElementAnalyticsTest {
                 selectedLpm = "link",
                 analyticsPayloadField("link_context", "wallet"),
             )
-            validateConfirmationResult(
-                eventName = "checkout_elements.confirm.failed",
+            validateConfirmationFailed(
                 selectedLpm = "link",
                 analyticsPayloadField("link_context", "wallet"),
                 analyticsPayloadField("error_type", "java.lang.IllegalStateException"),
@@ -210,6 +207,8 @@ internal class ExpressCheckoutElementAnalyticsTest {
             ) { response ->
                 createCheckoutInitResponseWithRequiredShippingAddressForAutomaticTax(response)
             }
+            networkRule.validateCheckoutAnalyticsStarted("update_shipping_address", *addressUpdateMatchers())
+            networkRule.validateCheckoutAnalyticsSucceeded("update_shipping_address", *addressUpdateMatchers())
             validateAnalyticsRequest(eventName = "stripe_android.payment_intent_retrieval")
             networkRule.checkoutConfirm(
                 bodyPart("payment_method", paymentMethod.id),
@@ -225,8 +224,7 @@ internal class ExpressCheckoutElementAnalyticsTest {
                 response.testBodyFromFile("checkout-session-confirm.json")
             }
             validateConfirmationStarted(selectedLpm = "google_pay")
-            validateConfirmationResult(
-                eventName = "checkout_elements.confirm.succeeded",
+            validateConfirmationSucceeded(
                 selectedLpm = "google_pay",
             )
 
@@ -262,6 +260,8 @@ internal class ExpressCheckoutElementAnalyticsTest {
                 CheckoutInitResponseFactory
                     .createWithRequiredBillingAddressForAutomaticTax(response)
             }
+            networkRule.validateCheckoutAnalyticsStarted("update_billing_address", *addressUpdateMatchers())
+            networkRule.validateCheckoutAnalyticsSucceeded("update_billing_address", *addressUpdateMatchers())
             validateAnalyticsRequest(eventName = "stripe_android.payment_intent_retrieval")
             networkRule.checkoutConfirm(
                 bodyPart("payment_method", paymentMethod.id),
@@ -270,8 +270,7 @@ internal class ExpressCheckoutElementAnalyticsTest {
                 response.testBodyFromFile("checkout-session-confirm.json")
             }
             validateConfirmationStarted(selectedLpm = "google_pay")
-            validateConfirmationResult(
-                eventName = "checkout_elements.confirm.succeeded",
+            validateConfirmationSucceeded(
                 selectedLpm = "google_pay",
             )
 
@@ -299,12 +298,13 @@ internal class ExpressCheckoutElementAnalyticsTest {
                         .put("total", 5399)
                 }
             }
-            networkRule.checkoutInit(
+            networkRule.validateCheckoutAnalyticsStarted("update_billing_address", *addressUpdateMatchers())
+            networkRule.validateCheckoutAnalyticsSucceeded("update_billing_address", *addressUpdateMatchers())
+            networkRule.checkoutInitWithAnalytics(
                 responseFactory = CheckoutInitResponseFactory::createWithRequiredBillingAddressForAutomaticTax,
             )
             validateConfirmationStarted(selectedLpm = "google_pay")
-            validateConfirmationResult(
-                eventName = "checkout_elements.confirm.failed",
+            validateConfirmationFailed(
                 selectedLpm = "google_pay",
                 analyticsPayloadField("error_type", "checkoutSessionTotalChanged"),
                 analyticsPayloadField("error_code", "checkout_session_total_changed"),
@@ -316,11 +316,145 @@ internal class ExpressCheckoutElementAnalyticsTest {
         assertGooglePayCalledWithRequiredBillingAddress()
     }
 
+    @Test
+    fun testGooglePayPaymentMethodCallbackReportsBillingTaxUpdate() {
+        runExpressCheckoutElementAnalyticsTest(
+            linkEnabled = false,
+            initialCheckoutSessionResponseFactory =
+                CheckoutInitResponseFactory::createWithRequiredBillingAddressForAutomaticTax,
+        ) {
+            val paymentMethod = PaymentMethodFactory.card()
+            enqueueSuccessfulGooglePayPayment(
+                paymentMethod = paymentMethod,
+                paymentDataUpdate = GooglePayPaymentDataUpdate(
+                    callbackTrigger = GooglePayPaymentDataUpdate.CallbackTrigger.PaymentMethod,
+                    shippingAddress = null,
+                    billingAddress = googlePayAddress(),
+                ),
+            )
+            networkRule.checkoutUpdate(
+                bodyPart("tax_region[country]", "US"),
+                bodyPart("tax_region[city]", "San Francisco"),
+                bodyPart("tax_region[state]", "CA"),
+                bodyPart("tax_region[postal_code]", "94103"),
+            ) { response ->
+                CheckoutInitResponseFactory.createWithRequiredBillingAddressForAutomaticTax(response)
+            }
+            networkRule.validateCheckoutAnalyticsStarted("update_billing_address", *addressUpdateMatchers())
+            networkRule.validateCheckoutAnalyticsSucceeded("update_billing_address", *addressUpdateMatchers())
+            validateAnalyticsRequest(eventName = "stripe_android.payment_intent_retrieval")
+            networkRule.checkoutConfirm(
+                bodyPart("payment_method", paymentMethod.id),
+                bodyPart("expected_amount", "5099"),
+            ) { response ->
+                response.testBodyFromFile("checkout-session-confirm.json")
+            }
+            validateConfirmationStarted(selectedLpm = "google_pay")
+            validateConfirmationSucceeded(selectedLpm = "google_pay")
+
+            page.clickGooglePayButton()
+        }
+
+        assertGooglePayCalledWithRequiredBillingAddress()
+    }
+
+    @Test
+    fun testGooglePayShippingAddressCallbackReportsLocalSuccess() {
+        runExpressCheckoutElementAnalyticsTest {
+            val paymentMethod = PaymentMethodFactory.card()
+            enqueueSuccessfulGooglePayPayment(
+                paymentMethod = paymentMethod,
+                paymentDataUpdate = GooglePayPaymentDataUpdate(
+                    callbackTrigger = GooglePayPaymentDataUpdate.CallbackTrigger.ShippingAddress,
+                    shippingAddress = googlePayAddress(),
+                    billingAddress = null,
+                ),
+            )
+            networkRule.validateCheckoutSessionAnalyticsRequest(
+                "checkout_elements.update_shipping_address.succeeded",
+                analyticsPayloadField("invocation_source", "express_checkout_element"),
+                analyticsPayloadField("did_request_tax_update", "false"),
+                not(hasQueryParam("duration")),
+            )
+            validateAnalyticsRequest(eventName = "stripe_android.payment_intent_retrieval")
+            networkRule.checkoutConfirm(
+                bodyPart("payment_method", paymentMethod.id),
+                bodyPart("expected_amount", "5099"),
+            ) { response ->
+                response.testBodyFromFile("checkout-session-confirm.json")
+            }
+            validateConfirmationStarted(selectedLpm = "google_pay")
+            validateConfirmationSucceeded(selectedLpm = "google_pay")
+
+            page.clickGooglePayButton()
+        }
+
+        assertGooglePayCalled()
+    }
+
+    @Test
+    fun testGooglePayShippingAddressCallbackReportsTaxUpdateFailure() {
+        runExpressCheckoutElementAnalyticsTest(
+            initialCheckoutSessionResponseFactory =
+                ::createCheckoutInitResponseWithRequiredShippingAddressForAutomaticTax,
+        ) {
+            enqueueCanceledGooglePayPayment(
+                paymentDataUpdate = GooglePayPaymentDataUpdate(
+                    callbackTrigger = GooglePayPaymentDataUpdate.CallbackTrigger.ShippingAddress,
+                    shippingAddress = googlePayAddress(),
+                    billingAddress = null,
+                ),
+                expectedPaymentDataUpdateError = GooglePayPaymentDataError(
+                    reason = GooglePayPaymentDataError.Reason.ShippingAddressInvalid,
+                    message = "Something went wrong",
+                    intent = GooglePayPaymentDataError.Intent.ShippingAddress,
+                ),
+            )
+            networkRule.checkoutUpdate(
+                bodyPart("tax_region[country]", "US"),
+                bodyPart("tax_region[city]", "San Francisco"),
+                bodyPart("tax_region[state]", "CA"),
+                bodyPart("tax_region[postal_code]", "94103"),
+            ) { response ->
+                response.setResponseCode(400)
+                response.setBody(
+                    """{"error":{"type":"invalid_request_error","code":"invalid_tax_region","message":"Invalid address"}}"""
+                )
+            }
+            networkRule.validateCheckoutAnalyticsStarted("update_shipping_address", *addressUpdateMatchers())
+            networkRule.validateCheckoutAnalyticsFailed(
+                "update_shipping_address",
+                *addressUpdateMatchers(),
+                analyticsPayloadField("error_type", "invalid_request_error"),
+                analyticsPayloadField("error_code", "invalid_tax_region"),
+            )
+            networkRule.checkoutInitWithAnalytics(
+                responseFactory = ::createCheckoutInitResponseWithRequiredShippingAddressForAutomaticTax,
+            )
+            validateConfirmationStarted(selectedLpm = "google_pay")
+            validateConfirmationCanceled(selectedLpm = "google_pay")
+            enqueueLoadingRequests(linkEnabled = true)
+
+            page.clickGooglePayButton()
+        }
+
+        assertGooglePayCalled()
+    }
+
+    private fun googlePayAddress() = GooglePayPaymentDataUpdate.GooglePayAddress(
+        administrativeArea = "California",
+        countryCode = "US",
+        locality = "San Francisco",
+        postalCode = "94103",
+        iso3166AdministrativeArea = "US-CA",
+    )
+
     private fun runExpressCheckoutElementAnalyticsTest(
         linkEnabled: Boolean = true,
         initialCheckoutSessionResponseFactory: (MockResponse) -> Unit = CheckoutInitResponseFactory::create,
         block: suspend ExpressCheckoutElementScenario.() -> Unit,
     ) {
+        networkRule.validateCheckoutInitStartedAndSucceeded()
         enqueueLoadingRequests(linkEnabled = linkEnabled)
         networkRule.validateAnalyticsRequest(
             eventName = "elements.express_checkout_element.init",
@@ -352,25 +486,55 @@ internal class ExpressCheckoutElementAnalyticsTest {
         selectedLpm: String,
         vararg requestMatchers: RequestMatcher,
     ) {
-        networkRule.validateConfirmationStartedAnalyticsRequest(
-            "express_checkout_element",
-            selectedLpm,
+        networkRule.validateCheckoutAnalyticsStarted(
+            "confirm",
+            *confirmationMatchers(selectedLpm),
             *requestMatchers,
         )
     }
 
-    private fun validateConfirmationResult(
-        eventName: String,
+    private fun validateConfirmationSucceeded(
         selectedLpm: String,
         vararg requestMatchers: RequestMatcher,
     ) {
-        networkRule.validateConfirmationResultAnalyticsRequest(
-            eventName,
-            "express_checkout_element",
-            selectedLpm,
+        networkRule.validateCheckoutAnalyticsSucceeded(
+            "confirm",
+            *confirmationMatchers(selectedLpm),
             *requestMatchers,
         )
     }
+
+    private fun validateConfirmationFailed(
+        selectedLpm: String,
+        vararg requestMatchers: RequestMatcher,
+    ) {
+        networkRule.validateCheckoutAnalyticsFailed(
+            "confirm",
+            *confirmationMatchers(selectedLpm),
+            *requestMatchers,
+        )
+    }
+
+    private fun validateConfirmationCanceled(
+        selectedLpm: String,
+        vararg requestMatchers: RequestMatcher,
+    ) {
+        networkRule.validateCheckoutAnalyticsCanceled(
+            "confirm",
+            *confirmationMatchers(selectedLpm),
+            *requestMatchers,
+        )
+    }
+
+    private fun confirmationMatchers(selectedLpm: String) = arrayOf(
+        analyticsPayloadField("invocation_source", "express_checkout_element"),
+        analyticsPayloadField("selected_lpm", selectedLpm),
+    )
+
+    private fun addressUpdateMatchers() = arrayOf(
+        analyticsPayloadField("invocation_source", "express_checkout_element"),
+        analyticsPayloadField("did_request_tax_update", "true"),
+    )
 
     private fun validateLinkAccountLookupAnalyticsRequest() {
         validateAnalyticsRequest(eventName = "link.account_lookup.complete")
