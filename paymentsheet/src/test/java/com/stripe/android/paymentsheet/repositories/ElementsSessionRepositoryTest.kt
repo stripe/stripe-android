@@ -60,7 +60,7 @@ internal class ElementsSessionRepositoryTest {
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
         assertThat(requestCaptor.firstValue.headers["Stripe-Version"])
-            .isEqualTo("2020-03-02;elements_beta=v1")
+            .isEqualTo("2026-10-28.endive;elements_beta=v1")
         val requestOptions = (requestCaptor.firstValue as ApiRequest).options
         assertThat(requestOptions.apiKey).isEqualTo(DEFAULT_API_CONFIG.publishableKey)
         assertThat(requestOptions.stripeAccount).isEqualTo(DEFAULT_API_CONFIG.stripeAccountId)
