@@ -1,10 +1,5 @@
 package com.stripe.android.checkout
 
-import androidx.compose.ui.test.assertTextContains
-import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performScrollTo
-import androidx.compose.ui.test.performTextReplacement
 import androidx.test.espresso.Espresso
 import androidx.test.espresso.intent.rule.IntentsRule
 import com.google.common.truth.Truth.assertThat
@@ -116,7 +111,7 @@ internal class CheckoutPaymentElementAnalyticsTest {
         setup = ::configureBillingTaxPaymentElement,
     ) {
         listOf("mc_carousel_payment_method_tapped", "mc_form_shown", "mc_cardscan_api_check_failed").forEach {
-            validatePaymentElementAnalytics(it)
+            networkRule.validateCheckoutSessionAnalyticsRequest(it)
         }
         networkRule.validateAnalyticsRequest(
             eventName = "stripe_android.card_metadata_pk_available",
@@ -126,10 +121,15 @@ internal class CheckoutPaymentElementAnalyticsTest {
         formPage.waitUntilVisible()
 
         listOf("mc_form_interacted", "mc_card_number_completed", "mc_form_completed").forEach {
-            validatePaymentElementAnalytics(it)
+            networkRule.validateCheckoutSessionAnalyticsRequest(it)
         }
         formPage.fillOutCardDetails()
-        fillOutBillingDetails()
+        billingDetailsPage.fillOutUnitedStatesAddress(
+            line1 = "510 Townsend St",
+            city = "San Francisco",
+            stateName = "California",
+            zipCode = "94103",
+        )
 
         networkRule.checkoutUpdate(
             bodyPart("tax_region[country]", "US"),
@@ -149,10 +149,10 @@ internal class CheckoutPaymentElementAnalyticsTest {
             analyticsPayloadField("invocation_source", "payment_element"),
             analyticsPayloadField("did_request_tax_update", "true"),
         )
-        validatePaymentElementAnalytics("mc_confirm_button_tapped")
-        validatePaymentElementAnalytics("mc_dismiss")
+        networkRule.validateCheckoutSessionAnalyticsRequest("mc_confirm_button_tapped")
+        networkRule.validateCheckoutSessionAnalyticsRequest("mc_dismiss")
         // The session refresh reloads the Payment Element with the kept card selection.
-        validatePaymentElementAnalytics("mc_initial_displayed_payment_methods")
+        networkRule.validateCheckoutSessionAnalyticsRequest("mc_initial_displayed_payment_methods")
         networkRule.validateAnalyticsRequest(
             eventName = "stripe_android.card_metadata_pk_available",
             productUsage = setOf("checkout_elements"),
@@ -805,30 +805,13 @@ internal class CheckoutPaymentElementAnalyticsTest {
 
     private suspend fun configureBillingTaxPaymentElement(controller: CheckoutElementsController) {
         networkRule.validateCheckoutInitStartedAndSucceeded()
-        validatePaymentElementAnalytics("mc_initial_displayed_payment_methods")
+        networkRule.validateCheckoutSessionAnalyticsRequest("mc_initial_displayed_payment_methods")
         assertThat(
             controller.configure(
                 DEFAULT_CLIENT_SECRET,
                 CheckoutElementsController.Configuration().paymentElement(PaymentElement.Configuration()),
             )
         ).isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
-    }
-
-    private fun validatePaymentElementAnalytics(eventName: String) {
-        networkRule.validateAnalyticsRequest(
-            eventName = eventName,
-            productUsage = setOf("checkout_elements"),
-            analyticsPayloadField("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID),
-        )
-    }
-
-    private fun fillOutBillingDetails() {
-        billingDetailsPage.country.assertTextContains("United States")
-        billingDetailsPage.line1.performTextReplacement("510 Townsend St")
-        billingDetailsPage.city.performTextReplacement("San Francisco")
-        billingDetailsPage.state.performScrollTo().performClick()
-        testRules.compose.onNodeWithText("California").performClick()
-        billingDetailsPage.zipCode.performTextReplacement("94103")
     }
 
     private fun billingTaxUpdateResponse(response: MockResponse) {

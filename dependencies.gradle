@@ -196,7 +196,7 @@ ext.libs = [
         showkaseAnnotation                  : "com.airbnb.android:showkase-annotation:${versions.showkase}",
         showkaseProcessor                   : "com.airbnb.android:showkase-processor:${versions.showkase}",
         litert                              : "com.google.ai.edge.litert:litert:${versions.litert}",
-        litertSupport                       : "com.google.ai.edge.litert:litert-support:${versions.litert}",
+        litertSupportApi                    : "com.google.ai.edge.litert:litert-support-api:${versions.litert}",
         tensorflowLitePlayServices          : "com.google.android.gms:play-services-tflite-java:${versions.playServicesTfLite}",
         tensorflowLitePlayServicesSupport   : "com.google.android.gms:play-services-tflite-support:${versions.playServicesTfLite}",
         mlKitTextRecognition                : "com.google.android.gms:play-services-mlkit-text-recognition:${versions.playServicesMlKitTextRecognition}",

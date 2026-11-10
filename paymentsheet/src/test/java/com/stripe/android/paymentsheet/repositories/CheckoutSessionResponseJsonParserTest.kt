@@ -415,10 +415,16 @@ class CheckoutSessionResponseJsonParserTest {
     @Test
     fun `no payment required produces setup-style elements session`() {
         val json = base().put("payment_status", "no_payment_required")
+            .put(
+                "ordered_payment_method_types_and_wallets",
+                JSONArray(listOf("card", "google_pay", "unknown_method")),
+            )
 
         val result = parse(json)
 
         assertThat(result?.elementsSession?.stripeIntent).isInstanceOf(SetupIntent::class.java)
+        assertThat(result?.elementsSession?.stripeIntent?.paymentMethodTypes)
+            .containsExactly("card", "google_pay", "unknown_method").inOrder()
     }
 
     @Test
@@ -578,7 +584,8 @@ class CheckoutSessionResponseJsonParserTest {
 
         assertThat(elements.orderedPaymentMethodTypesAndWallets)
             .containsExactly("cashapp", "google_pay", "card", "link", "blik", "vipps").inOrder()
-        assertThat(intent.paymentMethodTypes).containsExactly("cashapp", "card", "link", "blik").inOrder()
+        assertThat(intent.paymentMethodTypes)
+            .containsExactly("cashapp", "google_pay", "card", "link", "blik", "vipps").inOrder()
         assertThat(intent.amount).isEqualTo(5099)
         assertThat(intent.getPaymentMethodOptions()["card"])
             .isEqualTo(mapOf("capture_method" to "manual", "setup_future_usage" to "off_session"))

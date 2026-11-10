@@ -148,7 +148,7 @@ internal suspend fun createIntentConfirmationInterceptor(
             override fun create(
                 integrationMetadata: IntegrationMetadata.CheckoutSession,
                 customerMetadata: CustomerMetadata?,
-                clientAttributionMetadata: ClientAttributionMetadata,
+                clientAttributionMetadata: ClientAttributionMetadata.CheckoutSession,
             ): CheckoutSessionConfirmationInterceptor {
                 val checkoutSessionRepository = CheckoutSessionRepository(
                     stripeRepository = CheckoutStripeRepositoryFactory.create(),

@@ -1189,7 +1189,7 @@ class CheckoutSessionConfirmationInterceptorTest {
                 ),
                 automaticPaymentMethodsEnabled = false,
                 isExpressCheckoutElement = false,
-            ),
+            ) as ClientAttributionMetadata.CheckoutSession,
             context = applicationContext,
             checkoutSessionRepository = checkoutSessionRepository,
             checkoutSessionTaxRegionUpdater = CheckoutSessionTaxRegionUpdater(checkoutSessionRepository),

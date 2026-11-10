@@ -3,7 +3,6 @@ package com.stripe.android.checkout
 import androidx.test.espresso.intent.rule.IntentsRule
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.checkouttesting.CheckoutInitResponseFactory
-import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutConfirm
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.core.networking.AnalyticsRequest
@@ -371,10 +370,8 @@ internal class ExpressCheckoutElementAnalyticsTest {
                     billingAddress = null,
                 ),
             )
-            networkRule.validateAnalyticsRequest(
-                eventName = "checkout_elements.update_shipping_address.succeeded",
-                productUsage = setOf("checkout_elements"),
-                analyticsPayloadField("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID),
+            networkRule.validateCheckoutSessionAnalyticsRequest(
+                "checkout_elements.update_shipping_address.succeeded",
                 analyticsPayloadField("invocation_source", "express_checkout_element"),
                 analyticsPayloadField("did_request_tax_update", "false"),
                 not(hasQueryParam("duration")),

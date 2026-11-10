@@ -41,7 +41,7 @@ sealed class RequestHeadersFactory {
 
     protected fun defaultXStripeUserAgentMap() = mutableMapOf<String, String?>(
         LANG to KOTLIN,
-        AnalyticsFields.BINDINGS_VERSION to StripeSdkVersion.VERSION_NAME,
+        AnalyticsFields.BINDINGS_VERSION to reportedSdkVersionName,
         AnalyticsFields.OS_VERSION to "${Build.VERSION.SDK_INT}",
         TYPE to "${Build.MANUFACTURER}_${Build.BRAND}_${Build.MODEL}",
         MODEL to Build.MODEL
@@ -205,9 +205,25 @@ sealed class RequestHeadersFactory {
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
+        /**
+         * Overrides the SDK version reported in the user agent headers, so test apps can exercise
+         * server behavior that depends on the SDK version. Null reports [StripeSdkVersion.VERSION_NAME].
+         */
+        @Volatile
+        var SDK_VERSION_NAME_OVERRIDE: String? = null
+
+        val reportedSdkVersionName: String
+            get() = SDK_VERSION_NAME_OVERRIDE ?: StripeSdkVersion.VERSION_NAME
+
         fun getUserAgent(
             sdkVersion: String = StripeSdkVersion.VERSION
-        ) = "Stripe/v1 $sdkVersion"
+        ): String {
+            val reportedSdkVersion = SDK_VERSION_NAME_OVERRIDE
+                ?.takeIf { sdkVersion == StripeSdkVersion.VERSION }
+                ?.let { "AndroidBindings/$it" }
+                ?: sdkVersion
+            return "Stripe/v1 $reportedSdkVersion"
+        }
 
         val CHARSET: String = Charsets.UTF_8.name()
 

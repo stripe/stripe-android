@@ -183,9 +183,8 @@ internal class CheckoutShippingAddressElementAnalyticsTest {
             analyticsPayloadField(EDIT_DISTANCE_FIELD, it.toString())
         } ?: not(hasQueryParam(EDIT_DISTANCE_FIELD))
 
-        networkRule.validateAnalyticsRequest(
-            eventName = "checkout_elements.update_shipping_address.succeeded",
-            productUsage = setOf("checkout_elements"),
+        networkRule.validateCheckoutSessionAnalyticsRequest(
+            "checkout_elements.update_shipping_address.succeeded",
             analyticsPayloadField("invocation_source", "shipping_address_element"),
             analyticsPayloadField("did_request_tax_update", "false"),
             not(hasQueryParam("duration")),

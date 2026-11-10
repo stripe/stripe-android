@@ -23,6 +23,7 @@ import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.DurationProvider
+import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
@@ -39,6 +40,7 @@ import com.stripe.android.link.ui.inline.LinkSignupMode.InsteadOfSaveForFutureUs
 import com.stripe.android.lpmfoundations.paymentmethod.AnalyticsMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.DisplayableCustomPaymentMethod
+import com.stripe.android.lpmfoundations.paymentmethod.FakePaymentMethodAvailabilityLogger
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
@@ -5188,6 +5190,78 @@ internal class DefaultPaymentElementLoaderTest {
         assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
     }
 
+    @Test
+    fun `logs filtering reasons once for PaymentSheet and FlowController loads`() = runScenario {
+        assertPaymentMethodFilteringLogs(
+            integrationConfiguration = PaymentElementLoader.Configuration.PaymentSheet(mockConfiguration()),
+        )
+    }
+
+    @Test
+    fun `logs filtering reasons for embedded loads`() = runScenario {
+        assertPaymentMethodFilteringLogs(
+            integrationConfiguration = PaymentElementLoader.Configuration.Embedded(
+                isRowSelectionImmediateAction = false,
+                configuration = EmbeddedPaymentElement.Configuration.Builder("Merchant")
+                    .googlePay(ConfigFixtures.GOOGLE_PAY).build(),
+                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+            ),
+        )
+    }
+
+    @Test
+    fun `logs filtering reasons before failing when no payment methods are available`() = runScenario {
+        val logger = FakePaymentMethodAvailabilityLogger()
+        val result = createPaymentElementLoader(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK.copy(
+                paymentMethodTypes = listOf("sepa_debit"),
+            ),
+            userFacingLogger = logger,
+        ).load(
+            initializationMode = DEFAULT_INITIALIZATION_MODE,
+            paymentSheetConfiguration = mockConfiguration(),
+            metadata = PaymentElementLoader.Metadata(initializedViaCompose = false),
+        )
+
+        assertThat(result.exceptionOrNull()).isInstanceOf(
+            PaymentSheetLoadingException.NoPaymentMethodTypesAvailable::class.java
+        )
+        assertThat(logger.messages.awaitItem()).isEqualTo(
+            "Payment Element could not offer sepa_debit:\n" +
+                "  * Configuration.allowsDelayedPaymentMethods must be set to true."
+        )
+        logger.messages.ensureAllEventsConsumed()
+        eventReporter.loadStartedTurbine.awaitItem()
+        eventReporter.loadFailedTurbine.awaitItem()
+    }
+
+    private suspend fun Scenario.assertPaymentMethodFilteringLogs(
+        integrationConfiguration: PaymentElementLoader.Configuration,
+    ) {
+        val logger = FakePaymentMethodAvailabilityLogger()
+        val state = createPaymentElementLoader(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK.copy(
+                paymentMethodTypes = listOf("card", "sepa_debit"),
+            ),
+            userFacingLogger = logger,
+        ).load(
+            initializationMode = DEFAULT_INITIALIZATION_MODE,
+            integrationConfiguration = integrationConfiguration,
+            metadata = PaymentElementLoader.Metadata(initializedViaCompose = false),
+        ).getOrThrow()
+
+        assertThat(state.paymentMethodMetadata.supportedPaymentMethodTypes()).containsExactly("card")
+        state.paymentMethodMetadata.sortedSupportedPaymentMethods()
+        assertThat(logger.messages.awaitItem()).isEqualTo(
+            "Payment Element could not offer sepa_debit:\n" +
+                "  * Configuration.allowsDelayedPaymentMethods must be set to true."
+        )
+        logger.messages.ensureAllEventsConsumed()
+        consumeLoadingEvents()
+        eventReporter.loadStartedTurbine.awaitItem()
+        eventReporter.loadSucceededTurbine.awaitItem()
+    }
+
     private fun runScenario(
         customerRepo: FakeCustomerRepository = FakeCustomerRepository(paymentMethods = PAYMENT_METHODS),
         block: suspend Scenario.() -> Unit
@@ -5258,7 +5332,7 @@ internal class DefaultPaymentElementLoaderTest {
             customPaymentMethods = customPaymentMethods,
             externalPaymentMethodData = externalPaymentMethodData,
         ),
-        userFacingLogger: FakeUserFacingLogger = FakeUserFacingLogger(),
+        userFacingLogger: UserFacingLogger = FakeUserFacingLogger(),
         integrityRequestManager: IntegrityRequestManager = FakeIntegrityRequestManager(),
         tapToAddConnectionStarter: TapToAddConnectionStarter =
             FakeTapToAddConnectionStarter.create(isSupported = false),

@@ -34,6 +34,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavBackStackEntry
 import com.stripe.android.financialconnections.R
+import com.stripe.android.financialconnections.ThemeMode
 import com.stripe.android.financialconnections.features.common.ShapedIcon
 import com.stripe.android.financialconnections.presentation.Async.Loading
 import com.stripe.android.financialconnections.presentation.paneViewModel
@@ -221,7 +222,11 @@ internal fun NetworkingLinkLoginWarmupScreenPreview(
     @PreviewParameter(NetworkingLinkLoginWarmupPreviewParameterProvider::class) state: NetworkingLinkLoginWarmupState
 ) {
     FinancialConnectionsPreview(
-        theme = if (state.isInstantDebits) Theme.LinkLight else Theme.DefaultLight,
+        theme = if (state.isInstantDebits) {
+            Theme.Link(ThemeMode.Automatic)
+        } else {
+            Theme.Default(ThemeMode.Automatic)
+        },
     ) {
         NetworkingLinkLoginWarmupContent(
             state = state,
