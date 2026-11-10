@@ -56,6 +56,7 @@ dependencies {
 
     kspDebug libs.showkaseProcessor
 
+    testImplementation(testFixtures(project(':stripe-ui-core')))
     testImplementation testLibs.androidx.archCore
     testImplementation testLibs.androidx.composeUi
     testImplementation testLibs.androidx.core
