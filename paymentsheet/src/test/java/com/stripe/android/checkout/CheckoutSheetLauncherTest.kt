@@ -1472,6 +1472,7 @@ internal class CheckoutSheetLauncherTest {
         val logger = FakeLogger()
         val confirmationHandler = FakeConfirmationHandler()
         val operationCoordinator = CheckoutOperationCoordinator(
+            displayMessageResolver = CheckoutDisplayMessageResolver(applicationContext),
             confirmationHandler = confirmationHandler,
             sheetStateHolder = sheetStateHolder,
             sessionRefresher = sessionRefresher,

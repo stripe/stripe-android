@@ -73,6 +73,7 @@ private val SERVER_UPDATE_TIMEOUT_MS = 20.seconds.inWholeMilliseconds
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Suppress("TooManyFunctions")
 class CheckoutElementsController @Inject internal constructor(
+    private val displayMessageResolver: CheckoutDisplayMessageResolver,
     @ViewModelScope private val viewModelScope: CoroutineScope,
     private val checkoutSessionRepository: CheckoutSessionRepository,
     private val checkoutSessionTaxRegionUpdater: CheckoutSessionTaxRegionUpdater,
@@ -434,7 +435,7 @@ class CheckoutElementsController @Inject internal constructor(
         onFailure = { error ->
             OperationResult.Failed(
                 error = error,
-                displayMessage = error.checkoutDisplayMessage(),
+                displayMessage = displayMessageResolver.resolve(error),
             )
         },
     )
@@ -1493,14 +1494,15 @@ class CheckoutElementsController @Inject internal constructor(
          * The operation failed with [error].
          *
          * @property error Diagnostic details for the operation failure.
-         * @property displayMessage A user-facing message, or `null` when no display message is available.
+         * @property displayMessage A localized user-facing message, with a generic fallback when no specific
+         * display message is available.
          */
         @Poko
         @CheckoutSessionPreview
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         class Failed internal constructor(
             val error: Throwable,
-            val displayMessage: String?,
+            val displayMessage: String,
         ) : OperationResult
     }
 
@@ -1529,14 +1531,15 @@ class CheckoutElementsController @Inject internal constructor(
          *
          * @property error The error that caused the payment flow to fail, or an [IllegalStateException]
          * explaining why confirmation could not start.
-         * @property displayMessage A user-facing message, or `null` when no display message is available.
+         * @property displayMessage A localized user-facing message, with a generic fallback when no specific
+         * display message is available.
          */
         @Poko
         @CheckoutSessionPreview
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         class Failed internal constructor(
             val error: Throwable,
-            val displayMessage: String?,
+            val displayMessage: String,
         ) : Result
     }
 
