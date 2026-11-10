@@ -448,7 +448,7 @@ public final class com/stripe/android/financialconnections/ui/theme/ComposableSi
 	public final fun getLambda$1017990275$financial_connections_release ()Lkotlin/jvm/functions/Function2;
 	public final fun getLambda$1030431689$financial_connections_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda$1947598019$financial_connections_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda$2070000352$financial_connections_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$465914647$financial_connections_release ()Lkotlin/jvm/functions/Function3;
 }
 
 public final class com/stripe/android/financialconnections/ui/theme/ComposableSingletons$TypeKt {

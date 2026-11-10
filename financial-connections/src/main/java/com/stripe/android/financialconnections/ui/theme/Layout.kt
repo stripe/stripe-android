@@ -32,6 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.features.common.LoadingPillContainer
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarState
@@ -67,6 +68,7 @@ internal fun Layout(
     footer: (@Composable () -> Unit)? = null,
     body: @Composable ColumnScope.() -> Unit,
 ) {
+    val bodyTopInset = bodyTopInset(inModal)
     LayoutScaffold(
         canScrollForward = scrollState.canScrollForward,
         canScrollBackward = scrollState.canScrollBackward,
@@ -84,7 +86,11 @@ internal fun Layout(
             verticalArrangement = verticalArrangement,
         ) {
             // Nested columns to achieve proper content padding
-            Column(modifier = Modifier.padding(bodyPadding)) {
+            Column(
+                modifier = Modifier
+                    .padding(bodyPadding)
+                    .padding(top = bodyTopInset)
+            ) {
                 body()
             }
 
@@ -119,6 +125,7 @@ internal fun LazyLayout(
     footer: (@Composable () -> Unit)? = null,
     body: LazyListScope.() -> Unit,
 ) {
+    val bodyTopInset = bodyTopInset(inModal)
     LayoutScaffold(
         canScrollForward = lazyListState.canScrollForward,
         canScrollBackward = lazyListState.canScrollBackward,
@@ -134,6 +141,10 @@ internal fun LazyLayout(
             verticalArrangement = verticalArrangement,
             contentPadding = bodyPadding,
             content = {
+                if (bodyTopInset > 0.dp) {
+                    item { Spacer(Modifier.height(bodyTopInset)) }
+                }
+
                 body()
 
                 if (footer == null) {
@@ -145,6 +156,18 @@ internal fun LazyLayout(
         )
     }
 }
+
+/**
+ * Extra space between the top app bar and the first body element. Link DS 3.0 gives full-screen panes
+ * more breathing room under the centered logo; modals start at their drag handle instead.
+ */
+@Composable
+private fun bodyTopInset(inModal: Boolean): Dp {
+    val isLink = FinancialConnectionsTheme.theme.isLink
+    return if (isLink && !inModal) LinkBodyTopInset else 0.dp
+}
+
+private val LinkBodyTopInset = 12.dp
 
 @Composable
 private fun LayoutScaffold(

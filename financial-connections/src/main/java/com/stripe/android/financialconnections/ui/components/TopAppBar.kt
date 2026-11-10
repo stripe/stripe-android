@@ -6,6 +6,7 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
 import androidx.compose.material.AppBarDefaults
@@ -90,40 +91,55 @@ private fun FinancialConnectionsTopAppBar(
 
     val keyboardController = rememberKeyboardController()
     val scope = rememberCoroutineScope()
+    // Link DS 3.0 centers the logo across the full bar width, independent of the back button.
+    val centerTitle = theme.isLink
 
-    TopAppBar(
-        title = {
+    Box(modifier = modifier) {
+        TopAppBar(
+            title = {
+                if (!centerTitle) {
+                    Title(
+                        hideStripeLogo = hideStripeLogo,
+                        theme = theme,
+                        linkBrand = linkBrand,
+                    )
+                }
+            },
+            elevation = 0.dp,
+            navigationIcon = if (canShowBackIcon && allowBackNavigation) {
+                {
+                    BackButton(
+                        scope = scope,
+                        keyboardController = keyboardController,
+                        localBackPressed = localBackPressed
+                    )
+                }
+            } else {
+                null
+            },
+            actions = {
+                CloseButton(
+                    scope = scope,
+                    keyboardController = keyboardController,
+                    onCloseClick = onCloseClick
+                )
+            },
+            backgroundColor = FinancialConnectionsTheme.colors.background,
+            contentColor = FinancialConnectionsTheme.colors.textAction,
+            modifier = Modifier.graphicsLayer {
+                shadowElevation = elevation.value.toPx()
+            }
+        )
+
+        if (centerTitle) {
             Title(
                 hideStripeLogo = hideStripeLogo,
                 theme = theme,
                 linkBrand = linkBrand,
+                modifier = Modifier.align(Alignment.Center),
             )
-        },
-        elevation = 0.dp,
-        navigationIcon = if (canShowBackIcon && allowBackNavigation) {
-            {
-                BackButton(
-                    scope = scope,
-                    keyboardController = keyboardController,
-                    localBackPressed = localBackPressed
-                )
-            }
-        } else {
-            null
-        },
-        actions = {
-            CloseButton(
-                scope = scope,
-                keyboardController = keyboardController,
-                onCloseClick = onCloseClick
-            )
-        },
-        backgroundColor = FinancialConnectionsTheme.colors.background,
-        contentColor = FinancialConnectionsTheme.colors.textAction,
-        modifier = modifier.graphicsLayer {
-            shadowElevation = elevation.value.toPx()
         }
-    )
+    }
 }
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -179,8 +195,10 @@ private fun Title(
     hideStripeLogo: Boolean,
     theme: Theme,
     linkBrand: LinkBrand,
+    modifier: Modifier = Modifier,
 ) {
     Row(
+        modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
