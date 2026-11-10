@@ -1,19 +1,31 @@
 package com.stripe.android.paymentsheet.example.playground.checkout.settings
 
+import com.stripe.android.core.networking.RequestHeadersFactory
 import com.stripe.android.core.utils.FeatureFlag
 import com.stripe.android.core.utils.FeatureFlags
 
-internal object CheckoutFeatureFlagDefinitions {
+internal object CheckoutSdkBehaviorDefinitions {
     val nativeLinkEnabled = featureFlag("nativeLinkEnabled", FeatureFlags.nativeLinkEnabled)
     val nativeLinkAttestationEnabled = featureFlag(
         "nativeLinkAttestationEnabled",
         FeatureFlags.nativeLinkAttestationEnabled,
     )
 
+    val sdkVersionOverride = value(
+        key = "sdkVersionOverride",
+        displayName = "SDK version override",
+        defaultValue = "",
+        encode = { it },
+        decode = { Result.success(it) },
+        applyFeatureFlags = { version ->
+            RequestHeadersFactory.SDK_VERSION_NAME_OVERRIDE = version.trim().takeIf { it.isNotEmpty() }
+        },
+    )
+
     val configuration: CheckoutPlaygroundSettingDefinition.Configuration = configuration(
         key = "feature_flags",
-        displayName = "Client side feature flags",
-        children = featureFlags().toTypedArray(),
+        displayName = "SDK behavior",
+        children = (listOf(sdkVersionOverride) + featureFlags()).toTypedArray(),
     )
 
     private fun featureFlags(): List<CheckoutPlaygroundSettingDefinition.Value<Boolean?>> {
