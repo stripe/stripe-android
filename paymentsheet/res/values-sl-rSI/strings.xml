@@ -17,7 +17,7 @@
   <!-- Instructions shown while waiting for a Bizum payment authorization -->
   <string name="stripe_bizum_confirm_payment">Potrdite plačilo Bizum v svoji mobilni bančni aplikaciji v %s, da dokončate nakup.</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
-  <string name="stripe_blik_confirm_payment">Potrdite plačilo v aplikaciji banke %s, da zaključite nakup.</string>
+  <string name="stripe_blik_confirm_payment">Potrdite plačilo v aplikaciji svoje banke v %s, da dokončate nakup.</string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
   <string name="stripe_cashapp_afterpay_subtitle">Kupite zdaj ali pa plačajte pozneje s storitvijo Cash App Afterpay</string>
   <!-- This shows the message on Buy Now Pay Later LPM, clearpay. -->

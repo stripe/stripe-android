@@ -171,7 +171,7 @@
   <!-- Continue button text -->
   <string name="stripe_kontinue">Fortsæt</string>
   <!-- Label for the ID field to collect last 4 of social security number for US ID -->
-  <string name="stripe_last_4_of_ssn">Sidste 4 cifre af personnummer</string>
+  <string name="stripe_last_4_of_ssn">De sidste fire cifre i Social Security number</string>
   <!-- Label for last (family) name field -->
   <string name="stripe_last_name">Sidste</string>
   <!-- Segmented control option for automatic identity document capture -->

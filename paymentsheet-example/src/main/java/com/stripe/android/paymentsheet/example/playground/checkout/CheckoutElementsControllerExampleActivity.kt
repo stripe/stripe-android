@@ -211,6 +211,7 @@ internal class CheckoutElementsControllerExampleActivity : AppCompatActivity() {
                                 isCompleted = isConfirmationCompleted,
                                 isUpdating = isUpdating,
                                 displayMandate = viewModel.displayMandate,
+                                isShippingAddressElementConfigured = viewModel.isShippingAddressElementConfigured,
                                 onClearPaymentMethod = viewModel::clearPaymentOption,
                                 onSelectPaymentMethod = paymentElement::present,
                                 onSetShippingAddress = shippingAddressElement::present,

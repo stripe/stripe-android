@@ -560,13 +560,14 @@ internal class CheckoutGooglePayPaymentDataUpdateCallbackTest {
                 mocked.updateServerStateIfNeeded(
                     checkoutSessionResponse = any(),
                     addressSource = any(),
+                    invocationSource = any(),
                     address = any()
                 )
             } doAnswer { invocation ->
                 val call = UpdateServerStateIfNeededCall(
                     checkoutSessionResponse = invocation.component1(),
                     addressSource = invocation.component2(),
-                    address = invocation.component3(),
+                    address = invocation.component4(),
                 )
                 updateServerStateIfNeededCalls.add(call)
 

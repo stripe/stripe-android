@@ -24,6 +24,8 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.utils.GooglePayRepositoryTestRule
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.validateAnalyticsRequest
+import com.stripe.android.testing.waitUntilWithIdle
+import com.stripe.paymentelementtestpages.BillingDetailsPage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.mockwebserver.MockResponse
@@ -48,6 +50,7 @@ internal class CheckoutPaymentElementAnalyticsTest {
 
     private val contentPage = EmbeddedContentPage(testRules.compose)
     private val formPage = EmbeddedFormPage(testRules.compose)
+    private val billingDetailsPage = BillingDetailsPage(testRules.compose)
 
     @Test
     fun testSheetAnalyticsUsesCheckoutElementsProductUsageAndCheckoutSessionId() = runCheckoutPaymentElementScenario(
@@ -102,6 +105,70 @@ internal class CheckoutPaymentElementAnalyticsTest {
     }
 
     @Test
+    fun testNewCardContinueReportsBillingTaxUpdate() = runCheckoutPaymentElementScenario(
+        networkRule = networkRule,
+        checkoutInitResponse = ::billingTaxCheckoutInitResponse,
+        setup = ::configureBillingTaxPaymentElement,
+    ) {
+        listOf("mc_carousel_payment_method_tapped", "mc_form_shown", "mc_cardscan_api_check_failed").forEach {
+            networkRule.validateCheckoutSessionAnalyticsRequest(it)
+        }
+        networkRule.validateAnalyticsRequest(
+            eventName = "stripe_android.card_metadata_pk_available",
+            productUsage = setOf("checkout_elements"),
+        )
+        contentPage.clickOnLpm("card")
+        formPage.waitUntilVisible()
+
+        listOf("mc_form_interacted", "mc_card_number_completed", "mc_form_completed").forEach {
+            networkRule.validateCheckoutSessionAnalyticsRequest(it)
+        }
+        formPage.fillOutCardDetails()
+        billingDetailsPage.fillOutUnitedStatesAddress(
+            line1 = "510 Townsend St",
+            city = "San Francisco",
+            stateName = "California",
+            zipCode = "94103",
+        )
+
+        networkRule.checkoutUpdate(
+            bodyPart("tax_region[country]", "US"),
+            bodyPart("tax_region[line1]", "510 Townsend St"),
+            bodyPart("tax_region[city]", "San Francisco"),
+            bodyPart("tax_region[state]", "CA"),
+            bodyPart("tax_region[postal_code]", "94103"),
+            responseFactory = ::billingTaxUpdateResponse,
+        )
+        networkRule.validateCheckoutAnalyticsStarted(
+            "update_billing_address",
+            analyticsPayloadField("invocation_source", "payment_element"),
+            analyticsPayloadField("did_request_tax_update", "true"),
+        )
+        networkRule.validateCheckoutAnalyticsSucceeded(
+            "update_billing_address",
+            analyticsPayloadField("invocation_source", "payment_element"),
+            analyticsPayloadField("did_request_tax_update", "true"),
+        )
+        networkRule.validateCheckoutSessionAnalyticsRequest("mc_confirm_button_tapped")
+        networkRule.validateCheckoutSessionAnalyticsRequest("mc_dismiss")
+        // The session refresh reloads the Payment Element with the kept card selection.
+        networkRule.validateCheckoutSessionAnalyticsRequest("mc_initial_displayed_payment_methods")
+        networkRule.validateAnalyticsRequest(
+            eventName = "stripe_android.card_metadata_pk_available",
+            productUsage = setOf("checkout_elements"),
+        )
+        formPage.clickPrimaryButton()
+
+        testRules.compose.waitUntilWithIdle {
+            controller.session.value?.totals?.total?.minorUnitsAmount == UPDATED_TOTAL.toLong()
+        }
+        assertThat(controller.session.value?.tax?.status).isEqualTo(CheckoutElementsController.Session.Tax.Status.Ready)
+        assertThat(controller.session.value?.paymentOption?.billingDetails?.address?.line1).isEqualTo("510 Townsend St")
+        contentPage.assertHasSelectedLpm("card")
+        markTestSucceeded()
+    }
+
+    @Test
     fun testGooglePayTotalChangeFailureSendsAnalyticsErrorCode() {
         runCheckoutPaymentElementScenario(
             networkRule = networkRule,
@@ -145,6 +212,16 @@ internal class CheckoutPaymentElementAnalyticsTest {
                         .put("total", UPDATED_TOTAL)
                 }
             }
+            networkRule.validateCheckoutAnalyticsStarted(
+                "update_billing_address",
+                analyticsPayloadField("invocation_source", "payment_element"),
+                analyticsPayloadField("did_request_tax_update", "true"),
+            )
+            networkRule.validateCheckoutAnalyticsSucceeded(
+                "update_billing_address",
+                analyticsPayloadField("invocation_source", "payment_element"),
+                analyticsPayloadField("did_request_tax_update", "true"),
+            )
             networkRule.checkoutInitWithAnalytics(responseFactory = ::billingTaxCheckoutInitResponse)
             networkRule.validateCheckoutAnalyticsStarted(
                 "confirm",
@@ -658,6 +735,50 @@ internal class CheckoutPaymentElementAnalyticsTest {
     }
 
     @Test
+    fun testConfigureDefaultBillingAddressReportsTaxUpdate() = runCheckoutPaymentElementScenario(
+        networkRule = networkRule,
+        checkoutInitResponse = ::billingTaxCheckoutInitResponse,
+        renderPaymentElementContent = false,
+        setup = { controller ->
+            networkRule.validateCheckoutInitStartedAndSucceeded()
+            networkRule.checkoutUpdate(
+                bodyPart("tax_region[country]", "US"),
+                bodyPart("tax_region[line1]", "510 Townsend St"),
+                bodyPart("tax_region[city]", "San Francisco"),
+                bodyPart("tax_region[state]", "CA"),
+                bodyPart("tax_region[postal_code]", "94103"),
+                responseFactory = ::billingTaxCheckoutInitResponse,
+            )
+            networkRule.validateCheckoutAnalyticsStarted(
+                "update_billing_address",
+                analyticsPayloadField("invocation_source", "merchant"),
+                analyticsPayloadField("did_request_tax_update", "true"),
+            )
+            networkRule.validateCheckoutAnalyticsSucceeded(
+                "update_billing_address",
+                analyticsPayloadField("invocation_source", "merchant"),
+                analyticsPayloadField("did_request_tax_update", "true"),
+            )
+            assertThat(
+                controller.configure(
+                    DEFAULT_CLIENT_SECRET,
+                    CheckoutElementsController.Configuration()
+                        .paymentElement(PaymentElement.Configuration())
+                        .defaults(
+                            CheckoutElementsController.Configuration.Defaults().billingDetails(
+                                CheckoutElementsController.Configuration.Defaults.ContactDetails()
+                                    .address(shippingAddress())
+                            )
+                        ),
+                )
+            ).isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
+        },
+    ) {
+        assertThat(controller.session.value?.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
+        markTestSucceeded()
+    }
+
+    @Test
     fun testConfigureApiFailureReportsInitFailedAnalytics() = runCheckoutPaymentElementScenario(
         networkRule = networkRule,
         checkoutInitResponse = ::checkoutInitApiFailureResponse,
@@ -680,6 +801,33 @@ internal class CheckoutPaymentElementAnalyticsTest {
         },
     ) {
         markTestSucceeded()
+    }
+
+    private suspend fun configureBillingTaxPaymentElement(controller: CheckoutElementsController) {
+        networkRule.validateCheckoutInitStartedAndSucceeded()
+        networkRule.validateCheckoutSessionAnalyticsRequest("mc_initial_displayed_payment_methods")
+        assertThat(
+            controller.configure(
+                DEFAULT_CLIENT_SECRET,
+                CheckoutElementsController.Configuration().paymentElement(PaymentElement.Configuration()),
+            )
+        ).isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
+    }
+
+    private fun billingTaxUpdateResponse(response: MockResponse) {
+        response.testBodyFromFile("checkout-session-init.json") { json ->
+            // Match the init response so the session refresh keeps the new card selection.
+            json.put("customer_email", "checkout@example.com")
+            json.put("billing_address_collection", "required")
+            json.remove("link_settings")
+            json.getJSONObject("automatic_tax")
+                .put("enabled", true).put("status", "ready").put("address_source", "billing")
+            json.getJSONArray("items").getJSONObject(0)
+                .getJSONObject("one_time_price").getJSONArray("items").getJSONObject(0)
+                .getJSONObject("amount_details")
+                .put("total", UPDATED_TOTAL)
+            json.getJSONObject("total_summary").put("due", UPDATED_TOTAL)
+        }
     }
 
     private fun billingTaxCheckoutInitResponse(response: MockResponse) {
