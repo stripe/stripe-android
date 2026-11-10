@@ -302,7 +302,8 @@ internal class CheckoutElementsControllerStateHolderTest {
             }
             stateHolder.setPreviousNewSelections(bundle)
 
-            assertThat(stateHolder.loadedState?.previousNewSelections).isNotSameInstanceAs(originalPreviousNewSelections)
+            assertThat(stateHolder.loadedState?.previousNewSelections)
+                .isNotSameInstanceAs(originalPreviousNewSelections)
             assertThat(stateHolder.getPreviousNewSelection("card"))
                 .isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
             assertThat(stateHolder.getPreviousNewSelection("cashapp"))
@@ -342,7 +343,9 @@ internal class CheckoutElementsControllerStateHolderTest {
         )
         val stateHolder = CheckoutElementsControllerStateHolder(
             savedStateHandle = SavedStateHandle(
-                mapOf(CheckoutElementsControllerStateHolder.STATE_KEY to CheckoutElementsControllerState.Loaded(restored))
+                mapOf(
+                    CheckoutElementsControllerStateHolder.STATE_KEY to CheckoutElementsControllerState.Loaded(restored)
+                )
             ),
             errorReporter = FakeErrorReporter(),
             paymentOptionFactory = { _, _, _ -> null },

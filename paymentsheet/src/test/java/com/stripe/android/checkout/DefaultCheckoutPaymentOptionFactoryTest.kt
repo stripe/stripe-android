@@ -317,7 +317,9 @@ internal class DefaultCheckoutPaymentOptionFactoryTest {
     fun `reading an old payment option does not acknowledge saved SEPA after reconfiguration`() = runScenario {
         val stateHolder = createStateHolder(SAVED_SEPA)
         val oldOption = requireNotNull(stateHolder.session.value?.paymentOption)
-        stateHolder.loadedState = requireNotNull(stateHolder.loadedState).copy(mandateState = CheckoutMandateState.initial())
+        stateHolder.loadedState = requireNotNull(stateHolder.loadedState).copy(
+            mandateState = CheckoutMandateState.initial(),
+        )
         assertThat(oldOption.mandateText).isNotNull()
 
         assertThat(requireNotNull(stateHolder.loadedState).mandateState.hasAcknowledgedSepaMandate(SAVED_SEPA))
@@ -327,7 +329,9 @@ internal class DefaultCheckoutPaymentOptionFactoryTest {
     @Test
     fun `reading the current payment option acknowledges saved SEPA after reconfiguration`() = runScenario {
         val stateHolder = createStateHolder(SAVED_SEPA)
-        stateHolder.loadedState = requireNotNull(stateHolder.loadedState).copy(mandateState = CheckoutMandateState.initial())
+        stateHolder.loadedState = requireNotNull(stateHolder.loadedState).copy(
+            mandateState = CheckoutMandateState.initial(),
+        )
         assertThat(stateHolder.session.value?.paymentOption?.mandateText).isNotNull()
 
         assertThat(requireNotNull(stateHolder.loadedState).mandateState.hasAcknowledgedSepaMandate(SAVED_SEPA))
@@ -338,7 +342,9 @@ internal class DefaultCheckoutPaymentOptionFactoryTest {
     fun `reading an old payment option does not clear current mandate acknowledgement`() = runScenario {
         val stateHolder = createStateHolder(SAVED_SEPA)
         val oldOption = requireNotNull(stateHolder.session.value?.paymentOption)
-        stateHolder.loadedState = requireNotNull(stateHolder.loadedState).copy(mandateState = CheckoutMandateState.initial())
+        stateHolder.loadedState = requireNotNull(stateHolder.loadedState).copy(
+            mandateState = CheckoutMandateState.initial(),
+        )
         assertThat(stateHolder.session.value?.paymentOption?.mandateText).isNotNull()
         assertThat(oldOption.mandateText).isNotNull()
 

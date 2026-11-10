@@ -401,7 +401,8 @@ class CheckoutElementsController @Inject internal constructor(
      * currently presented.
      */
     private suspend fun withCheckoutState(
-        additionalStateMutations: CheckoutElementsControllerLoadedState.() -> CheckoutElementsControllerLoadedState = { this },
+        additionalStateMutations: CheckoutElementsControllerLoadedState.() ->
+            CheckoutElementsControllerLoadedState = { this },
         block: suspend CheckoutElementsControllerLoadedState.() -> kotlin.Result<CheckoutSessionResponse>,
     ): kotlin.Result<Unit> = withContext(Dispatchers.Main.immediate) {
         stateHolder.loadedState

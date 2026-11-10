@@ -1046,7 +1046,9 @@ internal class CheckoutSheetLauncherTest {
 
         cancelPaymentOptions(createCustomerState(paymentMethods = listOf(paymentMethod)))
 
-        assertThat(requireNotNull(selectionHolder.loadedState).mandateState.hasAcknowledgedSepaMandate(selection)).isFalse()
+        assertThat(
+            requireNotNull(selectionHolder.loadedState).mandateState.hasAcknowledgedSepaMandate(selection)
+        ).isFalse()
     }
 
     @Test
@@ -1061,7 +1063,9 @@ internal class CheckoutSheetLauncherTest {
 
         val selection = selectionHolder.selection.value as PaymentSelection.Saved
         assertThat(selection.paymentMethod).isEqualTo(updatedPaymentMethod)
-        assertThat(requireNotNull(selectionHolder.loadedState).mandateState.hasAcknowledgedSepaMandate(selection)).isFalse()
+        assertThat(
+            requireNotNull(selectionHolder.loadedState).mandateState.hasAcknowledgedSepaMandate(selection)
+        ).isFalse()
     }
 
     @Test
