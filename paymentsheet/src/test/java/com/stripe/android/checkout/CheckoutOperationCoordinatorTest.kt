@@ -998,7 +998,7 @@ internal class CheckoutOperationCoordinatorTest {
         val sessionRefresher = FakeCheckoutSessionRefresher()
         val confirmationFinalizer = FakeCheckoutConfirmationFinalizer()
         val coordinator = CheckoutOperationCoordinator(
-            context = applicationContext,
+            displayMessageResolver = CheckoutDisplayMessageResolver(applicationContext),
             confirmationHandler = confirmationHandler,
             sheetStateHolder = sheetStateHolder,
             sessionRefresher = sessionRefresher,

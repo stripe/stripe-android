@@ -400,7 +400,7 @@ internal class CheckoutConfirmationPerformerTest {
             workContext = UnconfinedTestDispatcher(testScheduler),
         )
         val operationCoordinator = CheckoutOperationCoordinator(
-            context = ApplicationProvider.getApplicationContext(),
+            displayMessageResolver = CheckoutDisplayMessageResolver(ApplicationProvider.getApplicationContext()),
             confirmationHandler = confirmationHandler,
             sheetStateHolder = SheetStateHolder(savedStateHandle).apply { this.sheetIsOpen = sheetIsOpen },
             sessionRefresher = sessionRefresher,
