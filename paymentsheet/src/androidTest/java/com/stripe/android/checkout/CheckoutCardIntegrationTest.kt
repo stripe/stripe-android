@@ -2,6 +2,10 @@ package com.stripe.android.checkout
 
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.uiautomator.By
+import androidx.test.uiautomator.UiDevice
+import androidx.test.uiautomator.Until
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.elements.PaymentElement
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -17,6 +21,7 @@ import kotlinx.serialization.json.put
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import kotlin.time.Duration.Companion.seconds
 
 @OptIn(CheckoutSessionPreview::class)
 @RunWith(AndroidJUnit4::class)
@@ -48,6 +53,7 @@ internal class CheckoutCardIntegrationTest {
             formPage.fillOutCardDetails(newCardNumber = "4242424242424242")
             formPage.clickPrimaryButton()
         },
+        afterConfirm = {},
         check = { result ->
             assertThat(result).isInstanceOf(CheckoutElementsController.Result.Completed::class.java)
         },
@@ -60,6 +66,7 @@ internal class CheckoutCardIntegrationTest {
             formPage.fillOutCardDetails(newCardNumber = "4000000000000002")
             formPage.clickPrimaryButton()
         },
+        afterConfirm = {},
         check = { result ->
             assertThat(result).isInstanceOf(CheckoutElementsController.Result.Failed::class.java)
             assertThat((result as CheckoutElementsController.Result.Failed).displayMessage)
@@ -67,8 +74,29 @@ internal class CheckoutCardIntegrationTest {
         },
     )
 
+    @Test
+    fun testCardWith3ds2ChallengeCompletes() = runScenario(
+        setup = {
+            contentPage.clickOnLpm("card")
+            formPage.fillOutCardDetails(newCardNumber = "4000000000003220")
+            formPage.clickPrimaryButton()
+        },
+        afterConfirm = {
+            val device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
+            val completeButton = device.wait(
+                Until.findObject(By.text("COMPLETE")),
+                CHALLENGE_TIMEOUT.inWholeMilliseconds,
+            )
+            checkNotNull(completeButton) { "3DS2 challenge COMPLETE button not found" }.click()
+        },
+        check = { result ->
+            assertThat(result).isInstanceOf(CheckoutElementsController.Result.Completed::class.java)
+        },
+    )
+
     private fun runScenario(
         setup: suspend () -> Unit,
+        afterConfirm: suspend () -> Unit,
         check: (CheckoutElementsController.Result) -> Unit,
     ) = runBlocking {
         val result = runCheckoutIntegrationTest(
@@ -76,6 +104,7 @@ internal class CheckoutCardIntegrationTest {
             sessionParams = cardOnlySessionParams(),
             configuration = configuration,
             setup = setup,
+            afterConfirm = afterConfirm,
         )
         check(result)
     }
@@ -109,5 +138,9 @@ internal class CheckoutCardIntegrationTest {
                 },
             )
         }
+    }
+
+    private companion object {
+        val CHALLENGE_TIMEOUT = 30.seconds
     }
 }
