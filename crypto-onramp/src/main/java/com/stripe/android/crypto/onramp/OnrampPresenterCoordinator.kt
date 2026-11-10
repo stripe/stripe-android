@@ -346,7 +346,6 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         presentPartnerTermsIfNeeded(
             declarationType = PartnerDeclarationType.TransactionTerms,
             resultLauncher = termsAndConditionsResultLauncher,
-            getCallback = { onrampCallbacksState.termsAndConditionsCallback },
             headingResId = PaymentSheetR.string.stripe_link_onramp_terms_and_conditions_screen_title,
         )
     }
@@ -355,7 +354,6 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         presentPartnerTermsIfNeeded(
             declarationType = PartnerDeclarationType.TermsOfService,
             resultLauncher = termsOfServiceResultLauncher,
-            getCallback = { onrampCallbacksState.termsOfServiceCallback },
             headingResId = PaymentSheetR.string.stripe_link_onramp_terms_of_service_screen_title,
         )
     }
@@ -363,12 +361,11 @@ internal class OnrampPresenterCoordinator @Inject constructor(
     private fun presentPartnerTermsIfNeeded(
         declarationType: PartnerDeclarationType,
         resultLauncher: ActivityResultLauncher<HTMLConfirmationActivityArgs>,
-        getCallback: () -> OnrampPartnerTermsCallback?,
         @StringRes headingResId: Int,
     ) {
         coroutineScope.launch {
             val result = interactor.startPartnerTerms(declarationType)
-            val callback = getCallback()
+            val callback = partnerTermsCallback(declarationType)
             when (result) {
                 is OnrampStartPartnerTermsResult.PresentationRequired -> {
                     if (lifecycleOwner.lifecycle.currentState == Lifecycle.State.DESTROYED) {
@@ -635,14 +632,17 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                             declarationId = content.declarationId,
                             declarationType = content.declarationType,
                         )
-                        val callback = when (content.declarationType) {
-                            PartnerDeclarationType.TransactionTerms -> onrampCallbacksState.termsAndConditionsCallback
-                            PartnerDeclarationType.TermsOfService -> onrampCallbacksState.termsOfServiceCallback
-                        }
-                        callback?.onResult(termsResult)
+                        partnerTermsCallback(content.declarationType)?.onResult(termsResult)
                     }
                 }
             }
+        }
+    }
+
+    private fun partnerTermsCallback(declarationType: PartnerDeclarationType): OnrampPartnerTermsCallback? {
+        return when (declarationType) {
+            PartnerDeclarationType.TransactionTerms -> onrampCallbacksState.termsAndConditionsCallback
+            PartnerDeclarationType.TermsOfService -> onrampCallbacksState.termsOfServiceCallback
         }
     }
 
