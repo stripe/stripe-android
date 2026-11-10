@@ -81,7 +81,7 @@ internal class CheckoutGooglePayPaymentDataUpdateCallback @Inject constructor(
 
     private suspend fun updateAddresses(
         countryCode: String?,
-        currentState: CheckoutElementsControllerState,
+        currentState: CheckoutElementsControllerLoadedState,
         paymentDataUpdate: GooglePayPaymentDataUpdate,
         addressSources: List<CheckoutSessionResponse.TaxAddressSource>,
     ): GooglePayPaymentDataUpdateResponse {

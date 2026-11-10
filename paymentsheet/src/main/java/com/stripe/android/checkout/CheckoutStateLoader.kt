@@ -48,7 +48,7 @@ internal class CheckoutStateLoader @Inject constructor(
         )
     }
 
-    suspend fun reload(state: CheckoutElementsControllerState) {
+    suspend fun reload(state: CheckoutElementsControllerLoadedState) {
         publish(
             load(
                 configuration = state.configuration,
@@ -112,7 +112,7 @@ internal class CheckoutStateLoader @Inject constructor(
             embeddedConfig = paymentElementConfigs?.embeddedConfig,
         )
 
-        val state = CheckoutElementsControllerState(
+        val state = CheckoutElementsControllerLoadedState(
             configuration = configuration,
             checkoutSessionResponse = response,
             flagImages = flagImages,
@@ -249,7 +249,7 @@ internal class CheckoutStateLoader @Inject constructor(
     }
 
     data class LoadedState(
-        val state: CheckoutElementsControllerState,
+        val state: CheckoutElementsControllerLoadedState,
         val customer: CustomerState?,
     )
 
@@ -291,7 +291,7 @@ internal class CheckoutStateLoader @Inject constructor(
                 mandateState = CheckoutMandateState.initial(),
             )
 
-            fun from(state: CheckoutElementsControllerState) = CarryForward(
+            fun from(state: CheckoutElementsControllerLoadedState) = CarryForward(
                 isInitialLoad = false,
                 cachedFlagImages = state.flagImages,
                 previousSelection = state.paymentSelection,

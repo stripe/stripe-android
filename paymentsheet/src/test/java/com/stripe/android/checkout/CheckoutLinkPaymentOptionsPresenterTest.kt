@@ -307,7 +307,7 @@ internal class CheckoutLinkPaymentOptionsPresenterTest {
                 signupMode = null,
             )
         )
-        val existingState = savedStateHandle.get<CheckoutElementsControllerState>(
+        val existingState = savedStateHandle.get<CheckoutElementsControllerLoadedState>(
             CheckoutElementsControllerStateHolder.STATE_KEY
         )
         val state = existingState ?: CheckoutElementsControllerStateFactory.create(

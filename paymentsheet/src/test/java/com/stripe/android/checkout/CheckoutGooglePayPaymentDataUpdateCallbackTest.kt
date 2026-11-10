@@ -473,7 +473,7 @@ internal class CheckoutGooglePayPaymentDataUpdateCallbackTest {
     }
 
     private fun runScenario(
-        state: CheckoutElementsControllerState? = CheckoutElementsControllerStateFactory.create(),
+        state: CheckoutElementsControllerLoadedState? = CheckoutElementsControllerStateFactory.create(),
         addressBuilderResult: CheckoutGooglePayPaymentDataUpdateAddressBuilder.Result =
             CheckoutGooglePayPaymentDataUpdateAddressBuilder.Result.Available(ADDRESS),
         addressBuilderResultProvider: (
@@ -537,7 +537,7 @@ internal class CheckoutGooglePayPaymentDataUpdateCallbackTest {
         val taxRegionUpdater: FakeCheckoutSessionTaxRegionUpdater,
         val errorReporter: FakeErrorReporter,
         val providedMapperResponse: GooglePayPaymentDataUpdateResponse,
-        val providedState: CheckoutElementsControllerState?,
+        val providedState: CheckoutElementsControllerLoadedState?,
         val providedUpdateResult: Result<CheckoutSessionResponse>,
     ) {
         // Match Google Pay's work scope: state reads must be safe on a real background thread.

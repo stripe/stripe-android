@@ -6,7 +6,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.checkout.CheckoutCommonConfigurationFactory
 import com.stripe.android.checkout.CheckoutElementsController
-import com.stripe.android.checkout.CheckoutElementsControllerState
+import com.stripe.android.checkout.CheckoutElementsControllerLoadedState
 import com.stripe.android.checkout.CheckoutElementsControllerStateFactory
 import com.stripe.android.checkout.CheckoutElementsControllerStateHolder
 import com.stripe.android.checkout.CheckoutOperationCoordinator
@@ -216,7 +216,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
     private fun createState(
         allowedShippingCountries: List<String>? = null,
         requiresBillingAddress: Boolean = false,
-    ): CheckoutElementsControllerState {
+    ): CheckoutElementsControllerLoadedState {
         return CheckoutElementsControllerStateFactory.create(
             configuration = CheckoutElementsController.Configuration()
                 .expressCheckoutElement(ExpressCheckoutElement.Configuration())
@@ -244,7 +244,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
 
     @Suppress("LongMethod")
     private fun runScenario(
-        state: CheckoutElementsControllerState?,
+        state: CheckoutElementsControllerLoadedState?,
         expressButton: ExpressButton,
         block: suspend Scenario.() -> Unit,
     ) = runTest {

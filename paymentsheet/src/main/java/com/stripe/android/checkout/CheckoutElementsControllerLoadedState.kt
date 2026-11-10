@@ -16,7 +16,7 @@ import kotlinx.parcelize.Parcelize
 
 @OptIn(CheckoutSessionPreview::class)
 @Parcelize
-internal data class CheckoutElementsControllerState(
+internal data class CheckoutElementsControllerLoadedState(
     val configuration: CheckoutElementsController.Configuration.State,
     val checkoutSessionResponse: CheckoutSessionResponse,
     val flagImages: Map<String, Bitmap>?,
@@ -59,9 +59,9 @@ internal data class CheckoutElementsControllerState(
  * [SavedPaymentMethodSelectionState.Idle] when the selection changes.
  */
 @OptIn(CheckoutSessionPreview::class)
-internal fun CheckoutElementsControllerState.commitSelection(
+internal fun CheckoutElementsControllerLoadedState.commitSelection(
     selection: PaymentSelection?,
-): CheckoutElementsControllerState {
+): CheckoutElementsControllerLoadedState {
     val updatedPreviousNewSelections = Bundle(previousNewSelections).apply {
         stashNewSelection(selection)
     }

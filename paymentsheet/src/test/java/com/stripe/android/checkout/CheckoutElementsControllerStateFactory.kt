@@ -39,8 +39,8 @@ internal object CheckoutElementsControllerStateFactory {
         previousNewSelections: Bundle = Bundle(),
         linkEagerPresentationSuppressed: Boolean = false,
         mandateState: CheckoutMandateState = CheckoutMandateState.initial(),
-    ): CheckoutElementsControllerState {
-        return CheckoutElementsControllerState(
+    ): CheckoutElementsControllerLoadedState {
+        return CheckoutElementsControllerLoadedState(
             configuration = configuration,
             checkoutSessionResponse = checkoutSessionResponse,
             flagImages = flagImages,

@@ -72,7 +72,7 @@ internal class DefaultCheckoutSessionRefresherTest {
     private data class Scenario(
         val refresher: DefaultCheckoutSessionRefresher,
         val stateHolder: CheckoutElementsControllerStateHolder,
-        val initialState: CheckoutElementsControllerState,
+        val initialState: CheckoutElementsControllerLoadedState,
         val refreshActions: FakeCheckoutSessionRefreshActions,
     )
 }

@@ -346,7 +346,7 @@ internal class CheckoutElementsControllerStateHolderTest {
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         expressCheckoutElementPaymentMethodMetadata: PaymentMethodMetadata? = PaymentMethodMetadataFactory.create(),
         requiresShippingAddress: Boolean = false,
-    ) = CheckoutElementsControllerState(
+    ) = CheckoutElementsControllerLoadedState(
         configuration = CheckoutElementsController.Configuration().build(),
         checkoutSessionResponse = CheckoutSessionResponseFactory.create(
             requiresShippingAddress = requiresShippingAddress,

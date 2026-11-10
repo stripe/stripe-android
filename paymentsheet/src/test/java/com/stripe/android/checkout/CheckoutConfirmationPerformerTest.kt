@@ -346,14 +346,14 @@ internal class CheckoutConfirmationPerformerTest {
 
     private fun googlePayState(
         paymentSelection: PaymentSelection?,
-    ): CheckoutElementsControllerState {
+    ): CheckoutElementsControllerLoadedState {
         return CheckoutElementsControllerStateFactory.create(
             paymentSelection = paymentSelection,
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(merchantCountry = "US"),
         )
     }
 
-    private fun linkState(): CheckoutElementsControllerState {
+    private fun linkState(): CheckoutElementsControllerLoadedState {
         return CheckoutElementsControllerStateFactory.create(
             paymentSelection = PaymentSelection.Link(brand = LinkBrand.Link),
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
@@ -368,7 +368,7 @@ internal class CheckoutConfirmationPerformerTest {
 
     private fun savedSepaState(
         embeddedViewDisplaysMandateText: Boolean,
-    ): CheckoutElementsControllerState {
+    ): CheckoutElementsControllerLoadedState {
         return CheckoutElementsControllerStateFactory.create(
             embeddedConfiguration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.")
                 .embeddedViewDisplaysMandateText(embeddedViewDisplaysMandateText)
@@ -379,7 +379,7 @@ internal class CheckoutConfirmationPerformerTest {
 
     @Suppress("LongMethod")
     private fun runScenario(
-        state: CheckoutElementsControllerState?,
+        state: CheckoutElementsControllerLoadedState?,
         statusBarColor: Int? = null,
         sheetIsOpen: Boolean = false,
         block: suspend Scenario.() -> Unit,

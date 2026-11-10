@@ -3,7 +3,7 @@ package com.stripe.android.checkout.injection
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.checkout.CheckoutElementsControllerState
+import com.stripe.android.checkout.CheckoutElementsControllerLoadedState
 import com.stripe.android.checkout.CheckoutElementsControllerStateFactory
 import com.stripe.android.checkout.CheckoutElementsControllerStateHolder
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -135,7 +135,7 @@ internal class PaymentElementModuleTest {
     }
 
     private fun runScenario(
-        state: CheckoutElementsControllerState? = CheckoutElementsControllerStateFactory.create(),
+        state: CheckoutElementsControllerLoadedState? = CheckoutElementsControllerStateFactory.create(),
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val errorReporter = FakeErrorReporter()

@@ -626,7 +626,7 @@ internal class CheckoutStateLoaderTest {
         previousNewSelections: Bundle = Bundle(),
         checkoutSessionResponse: CheckoutSessionResponse = CheckoutSessionResponseFactory.create(),
         linkEagerPresentationSuppressed: Boolean = false,
-    ) = CheckoutElementsControllerState(
+    ) = CheckoutElementsControllerLoadedState(
         configuration = defaultConfiguration(),
         checkoutSessionResponse = checkoutSessionResponse,
         flagImages = null,

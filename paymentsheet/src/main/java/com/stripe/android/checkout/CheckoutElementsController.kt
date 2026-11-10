@@ -393,7 +393,7 @@ class CheckoutElementsController @Inject internal constructor(
     /**
      * Runs a mutation against the checkout session, serializing it behind the operation coordinator
      * so mutations run in sequence. [block] produces the updated [CheckoutSessionResponse]; the
-     * result is folded into a new [CheckoutElementsControllerState] (with any [additionalStateMutations]
+     * result is folded into a new [CheckoutElementsControllerLoadedState] (with any [additionalStateMutations]
      * applied) and handed to [checkoutStateLoader] to reload the payment element and atomically
      * commit the new state.
      *
@@ -401,8 +401,8 @@ class CheckoutElementsController @Inject internal constructor(
      * currently presented.
      */
     private suspend fun withCheckoutState(
-        additionalStateMutations: CheckoutElementsControllerState.() -> CheckoutElementsControllerState = { this },
-        block: suspend CheckoutElementsControllerState.() -> kotlin.Result<CheckoutSessionResponse>,
+        additionalStateMutations: CheckoutElementsControllerLoadedState.() -> CheckoutElementsControllerLoadedState = { this },
+        block: suspend CheckoutElementsControllerLoadedState.() -> kotlin.Result<CheckoutSessionResponse>,
     ): kotlin.Result<Unit> = withContext(Dispatchers.Main.immediate) {
         stateHolder.state
             ?: return@withContext kotlin.Result.failure(

@@ -19,7 +19,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Owns [CheckoutElementsController]'s [CheckoutElementsControllerState] — the single source of truth for the
+ * Owns [CheckoutElementsController]'s [CheckoutElementsControllerLoadedState] — the single source of truth for the
  * controller — persisting it in [SavedStateHandle] so it survives process death. All observable
  * projections (e.g. [session]) are derived from the one [stateFlow]. Kept separate from the
  * controller so [CheckoutStateLoader] can commit loaded state directly rather than reaching back
@@ -33,7 +33,7 @@ internal class CheckoutElementsControllerStateHolder @Inject constructor(
     private val paymentOptionFactory: CheckoutPaymentOptionDisplayDataFactory,
     private val availableExpressButtonTypesFactory: AvailableExpressButtonTypesFactory,
 ) : EmbeddedSelectionHolder {
-    val stateFlow: StateFlow<CheckoutElementsControllerState?> =
+    val stateFlow: StateFlow<CheckoutElementsControllerLoadedState?> =
         savedStateHandle.getStateFlow(STATE_KEY, null)
 
     /**
@@ -41,7 +41,7 @@ internal class CheckoutElementsControllerStateHolder @Inject constructor(
      */
     @get:AnyThread
     @set:MainThread
-    var state: CheckoutElementsControllerState?
+    var state: CheckoutElementsControllerLoadedState?
         get() = stateFlow.value
         set(value) {
             savedStateHandle[STATE_KEY] = value
@@ -98,11 +98,11 @@ internal class CheckoutElementsControllerStateHolder @Inject constructor(
     }
 
     /**
-     * The selection lives on [CheckoutElementsControllerState], so the mutators can only act once
+     * The selection lives on [CheckoutElementsControllerLoadedState], so the mutators can only act once
      * [CheckoutStateLoader] has committed a state. A call before then is a programming error (a
      * mis-ordered selection write); report it and no-op rather than silently dropping the value.
      */
-    private fun requireState(operation: String): CheckoutElementsControllerState? {
+    private fun requireState(operation: String): CheckoutElementsControllerLoadedState? {
         return state ?: run {
             errorReporter.report(
                 errorEvent = ErrorReporter.UnexpectedErrorEvent.CHECKOUT_SELECTION_SET_BEFORE_LOAD,

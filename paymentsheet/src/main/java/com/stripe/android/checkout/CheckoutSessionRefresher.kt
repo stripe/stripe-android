@@ -25,7 +25,7 @@ internal class DefaultCheckoutSessionRefresher internal constructor(
         Boolean,
         Map<String, Any?>,
     ) -> Result<CheckoutSessionResponse>,
-    private val reloadState: suspend (CheckoutElementsControllerState) -> Unit,
+    private val reloadState: suspend (CheckoutElementsControllerLoadedState) -> Unit,
 ) : CheckoutSessionRefresher {
 
     @Inject

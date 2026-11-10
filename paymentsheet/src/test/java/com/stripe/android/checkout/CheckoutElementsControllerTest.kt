@@ -2172,7 +2172,7 @@ internal class CheckoutElementsControllerTest {
     }
 
     @Suppress("RestrictedApi")
-    private fun parentHandleWithState(state: CheckoutElementsControllerState): SavedStateHandle {
+    private fun parentHandleWithState(state: CheckoutElementsControllerLoadedState): SavedStateHandle {
         val childHandle = SavedStateHandle(
             mapOf(CheckoutElementsControllerStateHolder.STATE_KEY to state)
         )
@@ -2240,7 +2240,7 @@ internal class CheckoutElementsControllerTest {
         )
         // SavedStateHandle requires main-thread access, but StateFlow alone does not enforce it.
         // Creating LiveData for the same keys makes Android reject off-main state publication.
-        controllerSavedState.handle.getLiveData<CheckoutElementsControllerState>(
+        controllerSavedState.handle.getLiveData<CheckoutElementsControllerLoadedState>(
             CheckoutElementsControllerStateHolder.STATE_KEY
         )
         controllerSavedState.handle.getLiveData<CustomerState>(CustomerStateHolder.SAVED_CUSTOMER)
@@ -2293,7 +2293,7 @@ internal class CheckoutElementsControllerTest {
         val savedStateHandle: SavedStateHandle,
         private val stateHolder: CheckoutElementsControllerStateHolder,
     ) {
-        val committedState: CheckoutElementsControllerState?
+        val committedState: CheckoutElementsControllerLoadedState?
             get() = stateHolder.state
 
         val committedSavedPaymentMethodId: String?
@@ -2360,7 +2360,7 @@ internal class CheckoutElementsControllerTest {
 
         // Reads the state the controller committed via its state holder, which shares this
         // SavedStateHandle in the production graph.
-        fun committedState(): CheckoutElementsControllerState = requireNotNull(stateHolder.state)
+        fun committedState(): CheckoutElementsControllerLoadedState = requireNotNull(stateHolder.state)
 
         fun loadedSavedPaymentMethodSelection(): PaymentSelection.Saved {
             val customerState: CustomerState = requireNotNull(

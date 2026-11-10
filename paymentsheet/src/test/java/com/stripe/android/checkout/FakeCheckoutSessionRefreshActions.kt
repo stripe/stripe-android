@@ -6,7 +6,7 @@ import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 
 internal class FakeCheckoutSessionRefreshActions {
     val fetchCalls = Turbine<FetchCall>()
-    val reloadCalls = Turbine<CheckoutElementsControllerState>()
+    val reloadCalls = Turbine<CheckoutElementsControllerLoadedState>()
     private val fetchResponses = Turbine<() -> Result<CheckoutSessionResponse>>()
 
     fun enqueueFetchResponse(response: () -> Result<CheckoutSessionResponse>) {
@@ -22,7 +22,7 @@ internal class FakeCheckoutSessionRefreshActions {
         return fetchResponses.awaitItem().invoke()
     }
 
-    suspend fun reload(state: CheckoutElementsControllerState) {
+    suspend fun reload(state: CheckoutElementsControllerLoadedState) {
         reloadCalls.add(state)
     }
 

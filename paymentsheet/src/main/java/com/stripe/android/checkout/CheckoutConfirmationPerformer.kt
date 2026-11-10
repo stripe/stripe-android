@@ -74,7 +74,7 @@ internal class CheckoutConfirmationPerformer @Inject constructor(
 
     @OptIn(CheckoutSessionPreview::class)
     private fun confirmationArgs(
-        state: CheckoutElementsControllerState,
+        state: CheckoutElementsControllerLoadedState,
         paymentMethodMetadata: PaymentMethodMetadata,
         paymentSelection: PaymentSelection,
         configuration: CommonConfiguration,

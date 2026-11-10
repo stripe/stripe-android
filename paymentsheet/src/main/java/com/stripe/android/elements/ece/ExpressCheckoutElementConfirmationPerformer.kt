@@ -3,7 +3,7 @@ package com.stripe.android.elements.ece
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.checkout.CheckoutAnalyticsPerformer
 import com.stripe.android.checkout.CheckoutCommonConfigurationFactory
-import com.stripe.android.checkout.CheckoutElementsControllerState
+import com.stripe.android.checkout.CheckoutElementsControllerLoadedState
 import com.stripe.android.checkout.CheckoutElementsControllerStateHolder
 import com.stripe.android.checkout.CheckoutOperationCoordinator
 import com.stripe.android.core.injection.ViewModelScope
@@ -73,7 +73,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformer @Inject constr
 
     @OptIn(CheckoutSessionPreview::class)
     private fun getConfirmationArgs(
-        state: CheckoutElementsControllerState,
+        state: CheckoutElementsControllerLoadedState,
         expressButton: ExpressButton,
     ): ConfirmationHandler.Args? {
         val configuration = commonConfigurationFactory.createForExpressCheckoutElement(
