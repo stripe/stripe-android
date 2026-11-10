@@ -68,7 +68,7 @@ internal class CheckoutCardIntegrationTest {
     )
 
     private fun runScenario(
-        setup: suspend () -> Unit,
+        setup: suspend (CheckoutElementsController) -> Unit,
         check: (CheckoutElementsController.Result) -> Unit,
     ) = runBlocking {
         val result = runCheckoutIntegrationTest(

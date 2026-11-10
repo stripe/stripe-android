@@ -39,6 +39,29 @@ internal class CheckoutPlaygroundBackend(
         )
     }
 
+    suspend fun createCustomer(requestParams: JsonObject): kotlin.Result<String> {
+        val body = buildJsonObject {
+            put("merchant", merchant)
+            put("request_params", requestParams)
+        }
+        return execute(
+            request = Fuel.post("$baseUrl/create_customer").jsonBody(body.toString()),
+            responseKey = "id",
+        )
+    }
+
+    suspend fun attachPaymentMethod(paymentMethodId: String, customerId: String): kotlin.Result<Unit> {
+        val body = buildJsonObject {
+            put("merchant", merchant)
+            put("payment_method_id", paymentMethodId)
+            put("request_params", buildJsonObject { put("customer", customerId) })
+        }
+        return execute(
+            request = Fuel.post("$baseUrl/attach_payment_method").jsonBody(body.toString()),
+            responseKey = "id",
+        ).map { }
+    }
+
     private suspend fun execute(request: Request, responseKey: String): kotlin.Result<String> =
         withContext(Dispatchers.IO) {
             val deserializer = object : Deserializable<String> {
