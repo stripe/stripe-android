@@ -17,6 +17,8 @@ android {
 }
 
 dependencies {
+    api(testFixtures(project(':stripe-ui-core')))
+
     implementation project(":payments-core")
 
     implementation libs.androidx.activity
