@@ -140,7 +140,7 @@ internal class CheckoutConfirmationPerformerTest {
         performer.confirm()
         assertRejection("Cannot confirm checkout before it is configured.")
 
-        stateHolder.state = googlePayState(paymentSelection = PaymentSelection.GooglePay)
+        stateHolder.loadedState = googlePayState(paymentSelection = PaymentSelection.GooglePay)
         confirmAndAwaitStart()
     }
 
@@ -151,7 +151,7 @@ internal class CheckoutConfirmationPerformerTest {
         performer.confirm()
         assertRejection("Cannot confirm checkout without a selected payment option.")
 
-        stateHolder.state = googlePayState(paymentSelection = PaymentSelection.GooglePay)
+        stateHolder.loadedState = googlePayState(paymentSelection = PaymentSelection.GooglePay)
         confirmAndAwaitStart()
     }
 
@@ -162,7 +162,7 @@ internal class CheckoutConfirmationPerformerTest {
         performer.confirm()
         assertRejection("Cannot confirm checkout without providing a PaymentElement configuration.")
 
-        stateHolder.state = googlePayState(paymentSelection = PaymentSelection.GooglePay)
+        stateHolder.loadedState = googlePayState(paymentSelection = PaymentSelection.GooglePay)
 
         assertThat(confirmAndAwaitStart().confirmationOption).isInstanceOf<GooglePayConfirmationOption>()
     }
@@ -177,7 +177,7 @@ internal class CheckoutConfirmationPerformerTest {
         performer.confirm()
         assertRejection("Cannot confirm checkout because the selected payment option cannot be confirmed.")
 
-        stateHolder.state = googlePayState(paymentSelection = PaymentSelection.GooglePay)
+        stateHolder.loadedState = googlePayState(paymentSelection = PaymentSelection.GooglePay)
         confirmAndAwaitStart()
     }
 
@@ -189,7 +189,7 @@ internal class CheckoutConfirmationPerformerTest {
         assertRejection("Cannot confirm checkout without providing a PaymentElement configuration.")
 
         val state = googlePayState(paymentSelection = PaymentSelection.GooglePay)
-        stateHolder.state = state
+        stateHolder.loadedState = state
 
         val args = confirmAndAwaitStart()
         assertThat(args.confirmationOption).isInstanceOf<GooglePayConfirmationOption>()
@@ -228,7 +228,7 @@ internal class CheckoutConfirmationPerformerTest {
         assertRejection("Cannot confirm checkout while checkout mutations are in progress.")
         assertThat(operationCoordinator.isUpdating.value).isTrue()
 
-        stateHolder.state = googlePayState(paymentSelection = PaymentSelection.GooglePay)
+        stateHolder.loadedState = googlePayState(paymentSelection = PaymentSelection.GooglePay)
         releaseMutation.complete(Unit)
         mutation.await()
         testScheduler.runCurrent()
@@ -241,7 +241,7 @@ internal class CheckoutConfirmationPerformerTest {
         state = googlePayState(paymentSelection = PaymentSelection.GooglePay),
     ) {
         confirmAndAwaitStart()
-        stateHolder.state = linkState()
+        stateHolder.loadedState = linkState()
 
         performer.confirm()
         assertRejection("Cannot confirm checkout while another confirmation is in progress.")
@@ -256,7 +256,7 @@ internal class CheckoutConfirmationPerformerTest {
             mapOf(
                 "selected_lpm" to "google_pay",
                 "invocation_source" to "merchant",
-                "checkout_session_id" to requireNotNull(stateHolder.state).checkoutSessionResponse.id,
+                "checkout_session_id" to requireNotNull(stateHolder.loadedState).checkoutSessionResponse.id,
             )
         )
     }
@@ -283,7 +283,7 @@ internal class CheckoutConfirmationPerformerTest {
         assertThat(args.confirmationOption).isInstanceOf<GooglePayConfirmationOption>()
         assertThat((args.confirmationOption as GooglePayConfirmationOption).config.billingEmailOverride).isNull()
         assertThat(args.paymentMethodMetadata)
-            .isEqualTo(stateHolder.state?.paymentMethodMetadata)
+            .isEqualTo(stateHolder.loadedState?.paymentMethodMetadata)
         assertThat(args.statusBarColor).isEqualTo(STATUS_BAR_COLOR)
     }
 
@@ -318,7 +318,7 @@ internal class CheckoutConfirmationPerformerTest {
     fun `content access acknowledges saved SEPA when embedded mandate text is disabled`() = runScenario(
         state = savedSepaState(embeddedViewDisplaysMandateText = false),
     ) {
-        requireNotNull(stateHolder.state).mandateState.recordContentAccess()
+        requireNotNull(stateHolder.loadedState).mandateState.recordContentAccess()
 
         val option = confirmAndAwaitStart().confirmationOption as PaymentMethodConfirmationOption.Saved
         assertThat(option.hasAcknowledgedSepaMandate).isTrue()
@@ -339,7 +339,7 @@ internal class CheckoutConfirmationPerformerTest {
             mapOf(
                 "selected_lpm" to "google_pay",
                 "invocation_source" to "merchant",
-                "checkout_session_id" to requireNotNull(stateHolder.state).checkoutSessionResponse.id,
+                "checkout_session_id" to requireNotNull(stateHolder.loadedState).checkoutSessionResponse.id,
             )
         )
     }
@@ -387,7 +387,7 @@ internal class CheckoutConfirmationPerformerTest {
         val confirmationHandler = FakeConfirmationHandler()
         val savedStateHandle = SavedStateHandle()
         val stateHolder = CheckoutElementsControllerStateFactory.createStateHolder(savedStateHandle)
-        stateHolder.state = state
+        stateHolder.loadedState = state
         val sessionRefresher = FakeCheckoutSessionRefresher()
         val results = Turbine<CheckoutElementsController.Result>()
         val resultThreads = Turbine<Thread>()

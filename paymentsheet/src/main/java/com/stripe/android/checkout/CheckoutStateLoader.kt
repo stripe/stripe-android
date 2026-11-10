@@ -60,12 +60,12 @@ internal class CheckoutStateLoader @Inject constructor(
     }
 
     fun publish(loadedState: LoadedState) {
-        stateHolder.state = loadedState.state
+        stateHolder.loadedState = loadedState.state
         customerStateHolder.setCustomerState(loadedState.customer)
     }
 
     fun clear() {
-        stateHolder.state = null
+        stateHolder.loadedState = null
         customerStateHolder.setCustomerState(null)
     }
 

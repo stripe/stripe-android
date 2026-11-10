@@ -51,7 +51,7 @@ internal class DefaultExpressCheckoutElementInteractor @Inject constructor(
 
     override val state: StateFlow<ExpressCheckoutElementInteractor.State> = combineAsStateFlow(
         linkAccountHolder.linkAccountInfo,
-        stateHolder.stateFlow,
+        stateHolder.loadedStateFlow,
         stateHolder.session,
         isUpdating,
     ) { linkAccountInfo, state, session, isUpdating ->

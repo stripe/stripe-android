@@ -78,7 +78,7 @@ internal class CheckoutLinkPaymentOptionsPresenterTest {
 
     @Test
     fun `missing metadata delegates to default presenter without launching Link`() = runScenario {
-        stateHolder.state = requireNotNull(stateHolder.state).copy(paymentMethodMetadata = null)
+        stateHolder.loadedState = requireNotNull(stateHolder.loadedState).copy(paymentMethodMetadata = null)
 
         presenter.present()
 
@@ -118,7 +118,7 @@ internal class CheckoutLinkPaymentOptionsPresenterTest {
             result = LinkActivityResult.Completed(LinkAccountUpdate.None, selectedPayment = updatedPayment)
         )
 
-        assertThat(stateHolder.state?.paymentSelection)
+        assertThat(stateHolder.loadedState?.paymentSelection)
             .isEqualTo(linkSelection.copy(selectedPayment = updatedPayment))
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
     }
@@ -126,8 +126,8 @@ internal class CheckoutLinkPaymentOptionsPresenterTest {
     @Test
     fun `completion after metadata is removed closes without changing checkout state`() = runScenario {
         val launch = presentLink()
-        val stateWithoutMetadata = requireNotNull(stateHolder.state).copy(paymentMethodMetadata = null)
-        stateHolder.state = stateWithoutMetadata
+        val stateWithoutMetadata = requireNotNull(stateHolder.loadedState).copy(paymentMethodMetadata = null)
+        stateHolder.loadedState = stateWithoutMetadata
         assertThat(sheetStateHolder.sheetIsOpen).isTrue()
 
         dispatchResult(
@@ -139,7 +139,7 @@ internal class CheckoutLinkPaymentOptionsPresenterTest {
         )
 
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
-        assertThat(stateHolder.state).isEqualTo(stateWithoutMetadata)
+        assertThat(stateHolder.loadedState).isEqualTo(stateWithoutMetadata)
         assertThat(linkAccountHolder.linkAccountInfo.value).isEqualTo(linkAccountInfo)
         sheetLauncher.paymentOptionsCalls.expectNoEvents()
     }
@@ -158,7 +158,7 @@ internal class CheckoutLinkPaymentOptionsPresenterTest {
             )
         )
 
-        assertThat(stateHolder.state?.paymentSelection).isEqualTo(PaymentSelection.Saved(fallback))
+        assertThat(stateHolder.loadedState?.paymentSelection).isEqualTo(PaymentSelection.Saved(fallback))
         val paymentOptionsCall = sheetLauncher.paymentOptionsCalls.awaitItem()
         assertThat(paymentOptionsCall.paymentMethodMetadata).isEqualTo(paymentMethodMetadata)
         assertThat(paymentOptionsCall.selection).isEqualTo(PaymentSelection.Saved(fallback))
@@ -229,7 +229,7 @@ internal class CheckoutLinkPaymentOptionsPresenterTest {
 
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
         assertThat(linkAccountHolder.linkAccountInfo.value.account).isNull()
-        assertThat(stateHolder.state?.paymentMethodMetadata?.linkState?.loginState)
+        assertThat(stateHolder.loadedState?.paymentMethodMetadata?.linkState?.loginState)
             .isEqualTo(com.stripe.android.paymentsheet.state.LinkState.LoginState.LoggedOut)
     }
 
@@ -253,7 +253,7 @@ internal class CheckoutLinkPaymentOptionsPresenterTest {
                 )
             )
 
-            assertThat(stateHolder.state?.linkEagerPresentationSuppressed).isTrue()
+            assertThat(stateHolder.loadedState?.linkEagerPresentationSuppressed).isTrue()
         }
 
         runScenario(savedStateHandle = savedStateHandle) {
@@ -283,7 +283,7 @@ internal class CheckoutLinkPaymentOptionsPresenterTest {
 
     @Test
     fun `eligible Link presentation after destruction leaves state unchanged`() = runScenario {
-        val state = stateHolder.state
+        val state = stateHolder.loadedState
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
 
         presenter.present()
@@ -291,7 +291,7 @@ internal class CheckoutLinkPaymentOptionsPresenterTest {
         verifyLinkWasNotPresented()
         sheetLauncher.paymentOptionsCalls.expectNoEvents()
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
-        assertThat(stateHolder.state).isEqualTo(state)
+        assertThat(stateHolder.loadedState).isEqualTo(state)
     }
 
     @Suppress("LongMethod")
@@ -307,15 +307,15 @@ internal class CheckoutLinkPaymentOptionsPresenterTest {
                 signupMode = null,
             )
         )
-        val existingState = savedStateHandle.get<CheckoutElementsControllerLoadedState>(
+        val existingState = savedStateHandle.get<CheckoutElementsControllerState.Loaded>(
             CheckoutElementsControllerStateHolder.STATE_KEY
-        )
+        )?.state
         val state = existingState ?: CheckoutElementsControllerStateFactory.create(
             paymentSelection = selection,
             paymentMethodMetadata = paymentMethodMetadata,
         )
         val stateHolder = CheckoutElementsControllerStateFactory.createStateHolder(savedStateHandle).apply {
-            this.state = state
+            this.loadedState = state
         }
         val customerStateHolder = DefaultCustomerStateHolder(
             savedStateHandle = SavedStateHandle(),

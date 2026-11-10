@@ -315,7 +315,7 @@ internal interface CheckoutElementsControllerModule {
         fun providePaymentMethodMetadata(
             stateHolder: CheckoutElementsControllerStateHolder,
         ): PaymentMethodMetadata? {
-            return stateHolder.state?.paymentMethodMetadata
+            return stateHolder.loadedState?.paymentMethodMetadata
         }
 
         @OptIn(ExperimentalAnalyticEventCallbackApi::class)
@@ -357,7 +357,7 @@ internal interface CheckoutElementsControllerModule {
         fun providePaymentMethodMetadataFlow(
             stateHolder: CheckoutElementsControllerStateHolder,
         ): StateFlow<PaymentMethodMetadata?> {
-            return stateHolder.stateFlow.mapAsStateFlow { it?.paymentMethodMetadata }
+            return stateHolder.loadedStateFlow.mapAsStateFlow { it?.paymentMethodMetadata }
         }
 
         @Provides
@@ -380,7 +380,7 @@ internal interface CheckoutElementsControllerModule {
         fun provideSavedPaymentMethodSelectionState(
             stateHolder: CheckoutElementsControllerStateHolder,
         ): StateFlow<SavedPaymentMethodSelectionState> {
-            return stateHolder.stateFlow.mapAsStateFlow {
+            return stateHolder.loadedStateFlow.mapAsStateFlow {
                 it?.savedPaymentMethodSelectionState ?: SavedPaymentMethodSelectionState.Idle
             }
         }

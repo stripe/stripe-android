@@ -25,7 +25,7 @@ internal class CheckoutGooglePayPaymentDataUpdateCallback @Inject constructor(
     override suspend fun onPaymentDataChanged(
         paymentDataUpdate: GooglePayPaymentDataUpdate,
     ): GooglePayPaymentDataUpdateResponse {
-        val currentState = stateHolder.state ?: run {
+        val currentState = stateHolder.loadedState ?: run {
             return notConfiguredResponse()
         }
 

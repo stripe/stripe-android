@@ -95,7 +95,7 @@ internal class DefaultExpressCheckoutElementEventReporterTest {
                 ),
             ),
         )
-        stateHolder.state = CheckoutElementsControllerStateFactory.create(
+        stateHolder.loadedState = CheckoutElementsControllerStateFactory.create(
             configuration = CheckoutElementsController.Configuration()
                 .expressCheckoutElement(expressCheckoutElementConfiguration)
                 .build(),

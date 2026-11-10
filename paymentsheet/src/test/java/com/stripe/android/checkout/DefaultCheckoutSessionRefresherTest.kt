@@ -29,7 +29,7 @@ internal class DefaultCheckoutSessionRefresherTest {
         val response = CheckoutSessionResponseFactory.create(id = "cs_fetched")
         val stateAtCommit = initialState.copy(temporarySelection = "card")
         refreshActions.enqueueFetchResponse {
-            stateHolder.state = stateAtCommit
+            stateHolder.loadedState = stateAtCommit
             Result.success(response)
         }
 
@@ -51,7 +51,7 @@ internal class DefaultCheckoutSessionRefresherTest {
     ) = runTest {
         val stateHolder = CheckoutElementsControllerStateFactory.createStateHolder(SavedStateHandle())
         val initialState = CheckoutElementsControllerStateFactory.create()
-        stateHolder.state = initialState
+        stateHolder.loadedState = initialState
         val refreshActions = FakeCheckoutSessionRefreshActions()
         val refresher = DefaultCheckoutSessionRefresher(
             stateHolder = stateHolder,

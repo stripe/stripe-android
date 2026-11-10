@@ -60,7 +60,7 @@ internal class CheckoutAnalyticsPerformer @Inject constructor(
         savedStateHandle.remove<CheckoutConfirmationContext>(CONFIRMATION_CONTEXT_KEY)
 
         val operation = ConfirmOperation(confirmationContext, durationProvider, ::reportEvent)
-        val sessionResponse = response ?: stateHolder.state?.checkoutSessionResponse
+        val sessionResponse = response ?: stateHolder.loadedState?.checkoutSessionResponse
 
         when (result) {
             is ConfirmationHandler.Result.Succeeded -> operation.succeeded(sessionResponse)
@@ -73,7 +73,7 @@ internal class CheckoutAnalyticsPerformer @Inject constructor(
     }
 
     private fun reportEvent(event: CheckoutAnalyticsEvent) {
-        val state = stateHolder.state
+        val state = stateHolder.loadedState
         val publishableKey = state?.paymentMethodMetadata?.apiConfiguration?.publishableKey
             ?: apiConfigurationProvider.get().publishableKey
         val configurationParams = state?.configuration?.toAnalyticsMap().orEmpty()
@@ -92,7 +92,7 @@ internal class CheckoutAnalyticsPerformer @Inject constructor(
         invocationSource: InvocationSource,
         paymentSelection: PaymentSelection,
     ) {
-        val state = stateHolder.state
+        val state = stateHolder.loadedState
         val metadata = when (invocationSource) {
             InvocationSource.ExpressCheckoutElement -> state?.expressCheckoutElementPaymentMethodMetadata
             else -> state?.paymentMethodMetadata

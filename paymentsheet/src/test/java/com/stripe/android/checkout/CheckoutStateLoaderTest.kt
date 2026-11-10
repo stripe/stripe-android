@@ -93,7 +93,7 @@ internal class CheckoutStateLoaderTest {
 
         loader.reload(previousState)
 
-        val state = requireNotNull(stateHolder.state)
+        val state = requireNotNull(stateHolder.loadedState)
         assertThat(state.paymentMethodMetadata).isNull()
         assertThat(state.expressCheckoutElementPaymentMethodMetadata).isNull()
         assertThat(state.embeddedConfiguration).isNull()
@@ -122,7 +122,7 @@ internal class CheckoutStateLoaderTest {
 
         loader.reload(firstState)
 
-        assertThat(stateHolder.state?.mandateState?.hasAcknowledgedSepaMandate(selection)).isTrue()
+        assertThat(stateHolder.loadedState?.mandateState?.hasAcknowledgedSepaMandate(selection)).isTrue()
     }
 
     @Test
@@ -133,7 +133,7 @@ internal class CheckoutStateLoaderTest {
         loader.reload(firstState)
         firstState.mandateState.recordMandateTextAccess(selection.paymentMethod)
 
-        assertThat(stateHolder.state?.mandateState?.hasAcknowledgedSepaMandate(selection)).isTrue()
+        assertThat(stateHolder.loadedState?.mandateState?.hasAcknowledgedSepaMandate(selection)).isTrue()
     }
 
     @Test
@@ -173,7 +173,7 @@ internal class CheckoutStateLoaderTest {
 
         loader.reload(initial)
 
-        val state = requireNotNull(stateHolder.state)
+        val state = requireNotNull(stateHolder.loadedState)
         assertThat(state.expressCheckoutElementPaymentMethodMetadata).isNotNull()
         assertThat(state.paymentMethodMetadata).isNull()
         assertThat(state.embeddedConfiguration).isNull()
@@ -347,7 +347,7 @@ internal class CheckoutStateLoaderTest {
         // new set through to the shared holder rather than leaving the stale one from the initial
         // load in place.
         paymentElementLoader.updatePaymentMethods(emptyList())
-        loader.reload(requireNotNull(stateHolder.state))
+        loader.reload(requireNotNull(stateHolder.loadedState))
 
         assertThat(customerStateHolder.paymentMethods.value).isEmpty()
     }
@@ -360,7 +360,7 @@ internal class CheckoutStateLoaderTest {
 
         loader.clear()
 
-        assertThat(stateHolder.state).isNull()
+        assertThat(stateHolder.loadedState).isNull()
         assertThat(customerStateHolder.customer.value).isNull()
         assertThat(customerStateHolder.paymentMethods.value).isEmpty()
     }
@@ -376,7 +376,7 @@ internal class CheckoutStateLoaderTest {
 
         // The committed state adopts whatever the chooser returned, not the loader's recomputed
         // selection.
-        assertThat(stateHolder.state?.paymentSelection)
+        assertThat(stateHolder.loadedState?.paymentSelection)
             .isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
         val call = chooser.lastCall
         assertThat(call?.previousSelection).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
@@ -413,7 +413,7 @@ internal class CheckoutStateLoaderTest {
         // selection rather than adopting the loader's recomputed one.
         loader.reload(afterPick)
 
-        assertThat(stateHolder.state?.paymentSelection).isEqualTo(PaymentSelection.GooglePay)
+        assertThat(stateHolder.loadedState?.paymentSelection).isEqualTo(PaymentSelection.GooglePay)
     }
 
     @Test
@@ -429,7 +429,7 @@ internal class CheckoutStateLoaderTest {
             )
         )
 
-        assertThat(stateHolder.state?.savedPaymentMethodSelectionState)
+        assertThat(stateHolder.loadedState?.savedPaymentMethodSelectionState)
             .isEqualTo(SavedPaymentMethodSelectionState.Idle)
     }
 
@@ -439,7 +439,7 @@ internal class CheckoutStateLoaderTest {
     ) {
         loadInitial()
 
-        assertThat(stateHolder.state).isNull()
+        assertThat(stateHolder.loadedState).isNull()
         assertThat(stateHolder.session.value).isNull()
         assertThat(customerStateHolder.customer.value).isNull()
     }
@@ -450,7 +450,7 @@ internal class CheckoutStateLoaderTest {
 
         assertThat(stateHolder.session.value?.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
         // No adaptive pricing in the response, so no flag images are resolved.
-        assertThat(stateHolder.state?.flagImages).isNull()
+        assertThat(stateHolder.loadedState?.flagImages).isNull()
     }
 
     @Test
@@ -461,7 +461,7 @@ internal class CheckoutStateLoaderTest {
             loadInitial()
         }
 
-        assertThat(stateHolder.state).isNull()
+        assertThat(stateHolder.loadedState).isNull()
     }
 
     @Test
@@ -492,7 +492,7 @@ internal class CheckoutStateLoaderTest {
 
         loader.reload(seeded)
 
-        assertThat(stateHolder.state?.temporarySelection).isEqualTo("card")
+        assertThat(stateHolder.loadedState?.temporarySelection).isEqualTo("card")
         assertThat(stateHolder.getPreviousNewSelection("cashapp"))
             .isEqualTo(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
     }
@@ -501,14 +501,14 @@ internal class CheckoutStateLoaderTest {
     fun `reload preserves eager Link suppression`() = runScenario {
         loader.reload(committedState(linkEagerPresentationSuppressed = true))
 
-        assertThat(stateHolder.state?.linkEagerPresentationSuppressed).isTrue()
+        assertThat(stateHolder.loadedState?.linkEagerPresentationSuppressed).isTrue()
     }
 
     @Test
     fun `loadInitial resets the temporary selection and previous new selections`() = runScenario {
         // A prior state carries a temporary selection and a stashed new payment method; a fresh
         // configuration load must start from a clean slate rather than carrying them forward.
-        stateHolder.state = committedState(
+        stateHolder.loadedState = committedState(
             temporarySelection = "card",
             previousNewSelections = Bundle().apply {
                 putParcelable("cashapp", PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
@@ -523,7 +523,7 @@ internal class CheckoutStateLoaderTest {
 
     @Test
     fun `loadInitial resets eager Link suppression for a newly configured session`() = runScenario {
-        stateHolder.state = committedState(linkEagerPresentationSuppressed = true)
+        stateHolder.loadedState = committedState(linkEagerPresentationSuppressed = true)
 
         val state = loadInitial().state
 
@@ -550,8 +550,8 @@ internal class CheckoutStateLoaderTest {
         assertThat(initial.paymentSelection).isNotNull()
         loader.publish(CheckoutStateLoader.LoadedState(initial.copy(paymentSelection = null), savedCustomer()))
         repeat(3) {
-            loader.reload(requireNotNull(stateHolder.state))
-            assertThat(stateHolder.state?.paymentSelection).isNull()
+            loader.reload(requireNotNull(stateHolder.loadedState))
+            assertThat(stateHolder.loadedState?.paymentSelection).isNull()
             assertThat(customerStateHolder.paymentMethods.value).isEqualTo(savedCustomer().paymentMethods)
         }
         assertThat(loadInitial().state.paymentSelection).isNotNull()
@@ -568,7 +568,7 @@ internal class CheckoutStateLoaderTest {
             paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
         )
         loader.reload(selected)
-        assertThat(stateHolder.state?.paymentSelection).isEqualTo(selected.paymentSelection)
+        assertThat(stateHolder.loadedState?.paymentSelection).isEqualTo(selected.paymentSelection)
     }
 
     @Test
@@ -583,7 +583,7 @@ internal class CheckoutStateLoaderTest {
         )
         paymentElementLoader.updatePaymentMethods(emptyList())
         loader.reload(selected)
-        assertThat(stateHolder.state?.paymentSelection).isEqualTo(PaymentSelection.GooglePay)
+        assertThat(stateHolder.loadedState?.paymentSelection).isEqualTo(PaymentSelection.GooglePay)
     }
 
     private fun realSelectionChooser(savedStateHandle: SavedStateHandle): EmbeddedSelectionChooser =
@@ -690,10 +690,10 @@ internal class CheckoutStateLoaderTest {
         val customerStateHolder = DefaultCustomerStateHolder(
             savedStateHandle = savedStateHandle,
             selection = stateHolder.selection,
-            paymentMethodMetadataFlow = stateHolder.stateFlow.mapAsStateFlow {
+            paymentMethodMetadataFlow = stateHolder.loadedStateFlow.mapAsStateFlow {
                 it?.paymentMethodMetadata
             },
-            customerMetadata = stateHolder.stateFlow.mapAsStateFlow {
+            customerMetadata = stateHolder.loadedStateFlow.mapAsStateFlow {
                 it?.paymentMethodMetadata?.customerMetadata
             },
         )

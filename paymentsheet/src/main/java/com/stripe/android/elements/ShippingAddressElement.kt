@@ -124,7 +124,7 @@ class ShippingAddressElement internal constructor(
     @AnyThread
     fun present() {
         coroutineScope.launch(Dispatchers.Main.immediate) {
-            val state = stateHolder.state
+            val state = stateHolder.loadedState
             val configuration = state?.configuration?.shippingAddressElementConfiguration
             if (state == null || configuration == null) {
                 errorReporter.report(

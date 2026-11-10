@@ -212,7 +212,7 @@ class CheckoutElementsController @Inject internal constructor(
         if (address == null) {
             return clearShippingAddress().toOperationResult()
         }
-        stateHolder.state?.checkoutSessionResponse
+        stateHolder.loadedState?.checkoutSessionResponse
             ?.validateShippingCountry(address.build().country)
             ?.onFailure { return kotlin.Result.failure<Unit>(it).toOperationResult() }
         val built = address.build()
@@ -281,7 +281,7 @@ class CheckoutElementsController @Inject internal constructor(
         return withCheckoutState(
             additionalStateMutations = { commitSelection(selection) },
         ) {
-            stateHolder.state = copy(
+            stateHolder.loadedState = copy(
                 savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Pending(
                     selection.paymentMethod.id,
                 ),
@@ -308,7 +308,7 @@ class CheckoutElementsController @Inject internal constructor(
                 invocationSource = InvocationSource.PaymentElement,
                 address = address,
             ).onFailure {
-                stateHolder.state = stateHolder.state?.copy(
+                stateHolder.loadedState = stateHolder.loadedState?.copy(
                     savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Failed(
                         error = it.stripeErrorMessage(),
                     ),
@@ -404,7 +404,7 @@ class CheckoutElementsController @Inject internal constructor(
         additionalStateMutations: CheckoutElementsControllerLoadedState.() -> CheckoutElementsControllerLoadedState = { this },
         block: suspend CheckoutElementsControllerLoadedState.() -> kotlin.Result<CheckoutSessionResponse>,
     ): kotlin.Result<Unit> = withContext(Dispatchers.Main.immediate) {
-        stateHolder.state
+        stateHolder.loadedState
             ?: return@withContext kotlin.Result.failure(
                 IllegalStateException("Cannot mutate checkout session before it is configured.")
             )
@@ -417,7 +417,7 @@ class CheckoutElementsController @Inject internal constructor(
             runCatching {
                 // Re-read the latest committed state inside the lock so serialized mutations
                 // build on each other's results rather than a stale snapshot.
-                val state = requireNotNull(stateHolder.state)
+                val state = requireNotNull(stateHolder.loadedState)
                 val response = state.block().getOrThrow()
                 val newState = state
                     .copy(checkoutSessionResponse = response)

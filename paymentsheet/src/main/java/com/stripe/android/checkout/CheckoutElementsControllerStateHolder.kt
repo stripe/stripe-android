@@ -19,7 +19,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Owns [CheckoutElementsController]'s [CheckoutElementsControllerLoadedState] — the single source of truth for the
+ * Owns [CheckoutElementsController]'s [CheckoutElementsControllerState] — the single source of truth for the
  * controller — persisting it in [SavedStateHandle] so it survives process death. All observable
  * projections (e.g. [session]) are derived from the one [stateFlow]. Kept separate from the
  * controller so [CheckoutStateLoader] can commit loaded state directly rather than reaching back
@@ -33,25 +33,36 @@ internal class CheckoutElementsControllerStateHolder @Inject constructor(
     private val paymentOptionFactory: CheckoutPaymentOptionDisplayDataFactory,
     private val availableExpressButtonTypesFactory: AvailableExpressButtonTypesFactory,
 ) : EmbeddedSelectionHolder {
-    val stateFlow: StateFlow<CheckoutElementsControllerLoadedState?> =
+    val stateFlow: StateFlow<CheckoutElementsControllerState?> =
         savedStateHandle.getStateFlow(STATE_KEY, null)
+
+    val loadedStateFlow: StateFlow<CheckoutElementsControllerLoadedState?> =
+        stateFlow.mapAsStateFlow { (it as? CheckoutElementsControllerState.Loaded)?.state }
 
     /**
      * Snapshot reads are safe from any thread. Writes and read-modify-write operations require Main.
      */
     @get:AnyThread
     @set:MainThread
-    var state: CheckoutElementsControllerLoadedState?
+    var state: CheckoutElementsControllerState?
         get() = stateFlow.value
         set(value) {
             savedStateHandle[STATE_KEY] = value
         }
 
+    @get:AnyThread
+    @set:MainThread
+    var loadedState: CheckoutElementsControllerLoadedState?
+        get() = loadedStateFlow.value
+        set(value) {
+            state = value?.let(CheckoutElementsControllerState::Loaded)
+        }
+
     init {
         // A restored Pending has no mutation left to finish it, so reset it to avoid loading forever.
-        state?.let { restoredState ->
+        loadedState?.let { restoredState ->
             if (restoredState.savedPaymentMethodSelectionState is SavedPaymentMethodSelectionState.Pending) {
-                state = restoredState.copy(
+                loadedState = restoredState.copy(
                     savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Idle,
                 )
             }
@@ -59,7 +70,7 @@ internal class CheckoutElementsControllerStateHolder @Inject constructor(
     }
 
     val session: StateFlow<Session?> =
-        stateFlow.mapAsStateFlow {
+        loadedStateFlow.mapAsStateFlow {
             it?.asCheckoutSession(
                 paymentOptionFactory,
                 availableExpressButtonTypesFactory,
@@ -67,22 +78,22 @@ internal class CheckoutElementsControllerStateHolder @Inject constructor(
         }
 
     override val selection: StateFlow<PaymentSelection?> =
-        stateFlow.mapAsStateFlow { it?.paymentSelection }
+        loadedStateFlow.mapAsStateFlow { it?.paymentSelection }
 
     override val temporarySelection: StateFlow<String?> =
-        stateFlow.mapAsStateFlow { it?.temporarySelection }
+        loadedStateFlow.mapAsStateFlow { it?.temporarySelection }
 
     override val previousNewSelections: Bundle
-        get() = state?.previousNewSelections ?: Bundle()
+        get() = loadedState?.previousNewSelections ?: Bundle()
 
     override fun setSelection(updatedSelection: PaymentSelection?) {
         val current = requireState(operation = "setSelection") ?: return
-        state = current.commitSelection(updatedSelection)
+        loadedState = current.commitSelection(updatedSelection)
     }
 
     override fun setTemporarySelection(code: PaymentMethodCode?) {
         val current = requireState(operation = "setTemporarySelection") ?: return
-        state = current.copy(temporarySelection = code)
+        loadedState = current.copy(temporarySelection = code)
     }
 
     override fun setPreviousNewSelections(bundle: Bundle) {
@@ -90,7 +101,7 @@ internal class CheckoutElementsControllerStateHolder @Inject constructor(
         val previousNewSelections = Bundle(current.previousNewSelections).apply {
             putAll(bundle)
         }
-        state = current.copy(previousNewSelections = previousNewSelections)
+        loadedState = current.copy(previousNewSelections = previousNewSelections)
     }
 
     override fun getPreviousNewSelection(code: PaymentMethodCode): PaymentSelection.New? {
@@ -103,7 +114,7 @@ internal class CheckoutElementsControllerStateHolder @Inject constructor(
      * mis-ordered selection write); report it and no-op rather than silently dropping the value.
      */
     private fun requireState(operation: String): CheckoutElementsControllerLoadedState? {
-        return state ?: run {
+        return loadedState ?: run {
             errorReporter.report(
                 errorEvent = ErrorReporter.UnexpectedErrorEvent.CHECKOUT_SELECTION_SET_BEFORE_LOAD,
                 additionalNonPiiParams = mapOf("operation" to operation),

@@ -103,7 +103,7 @@ internal class ShippingAddressElementTest {
         assertThat(launch.thread).isSameInstanceAs(mainThread)
         assertThat(launch.input.apiConfiguration).isEqualTo(DEFAULT_API_CONFIG)
         assertThat(launch.input.checkoutSessionResponse)
-            .isSameInstanceAs(requireNotNull(stateHolder.state).checkoutSessionResponse)
+            .isSameInstanceAs(requireNotNull(stateHolder.loadedState).checkoutSessionResponse)
 
         val config = requireNotNull(launch.input.config)
         assertThat(config.appearance).isEqualTo(PaymentSheet.Appearance())
@@ -123,7 +123,7 @@ internal class ShippingAddressElementTest {
 
     @Test
     fun `present passes checkout session allowed shipping countries`() = runScenario {
-        stateHolder.state = CheckoutElementsControllerStateFactory.create(
+        stateHolder.loadedState = CheckoutElementsControllerStateFactory.create(
             configuration = configuredCheckoutConfiguration,
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(
                 allowedShippingCountries = listOf("US", "CA"),
@@ -140,7 +140,7 @@ internal class ShippingAddressElementTest {
 
     @Test
     fun `present prefills the form with the checkout session shipping address`() = runScenario {
-        stateHolder.state = CheckoutElementsControllerStateFactory.create(
+        stateHolder.loadedState = CheckoutElementsControllerStateFactory.create(
             configuration = configuredCheckoutConfiguration,
             collectedDetails = CheckoutCollectedDetails(
                 email = null,
@@ -411,7 +411,7 @@ internal class ShippingAddressElementTest {
             savedStateHandle = savedStateHandle,
         )
         if (configured) {
-            stateHolder.state = CheckoutElementsControllerStateFactory.create(
+            stateHolder.loadedState = CheckoutElementsControllerStateFactory.create(
                 configuration = configuration,
             )
         }

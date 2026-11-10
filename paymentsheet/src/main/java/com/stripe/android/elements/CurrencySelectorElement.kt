@@ -34,7 +34,7 @@ class CurrencySelectorElement @Inject internal constructor(
             key = viewModelKey,
             factory = viewModelFactory,
         )
-        val state by stateHolder.stateFlow.collectAsState()
+        val state by stateHolder.loadedStateFlow.collectAsState()
         val appearanceState = state?.configuration?.currencySelectorElementConfiguration?.appearance ?: return
         val isUpdating by checkoutElementsController.isUpdating.collectAsState()
         val session by checkoutElementsController.session.collectAsState()

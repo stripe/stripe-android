@@ -50,7 +50,7 @@ internal class CheckoutLinkPaymentOptionsPresenter @Inject constructor(
     override fun present() {
         if (lifecycleOwner.lifecycle.currentState == Lifecycle.State.DESTROYED) return
         if (sheetStateHolder.sheetIsOpen) return
-        val state = stateHolder.state
+        val state = stateHolder.loadedState
         if (state == null || state.paymentMethodMetadata == null) {
             defaultPresenter.present()
             return
@@ -69,7 +69,7 @@ internal class CheckoutLinkPaymentOptionsPresenter @Inject constructor(
     }
 
     private fun onLinkResult(result: LinkActivityResult) {
-        val state = stateHolder.state
+        val state = stateHolder.loadedState
         if (state == null || state.paymentMethodMetadata == null) {
             sheetStateHolder.sheetIsOpen = false
             return
@@ -88,7 +88,7 @@ internal class CheckoutLinkPaymentOptionsPresenter @Inject constructor(
             LinkPaymentMethodSelectionOutcome.Dismiss -> sheetStateHolder.sheetIsOpen = false
             LinkPaymentMethodSelectionOutcome.ShowPaymentOptions -> presentDefault()
             LinkPaymentMethodSelectionOutcome.SuppressFutureEagerPresentation -> {
-                stateHolder.state = stateHolder.state?.copy(linkEagerPresentationSuppressed = true)
+                stateHolder.loadedState = stateHolder.loadedState?.copy(linkEagerPresentationSuppressed = true)
             }
             is LinkPaymentMethodSelectionOutcome.UpdateSelection -> {
                 stateHolder.setSelection(outcome.selection)
@@ -104,7 +104,7 @@ internal class CheckoutLinkPaymentOptionsPresenter @Inject constructor(
 
     private fun updateLinkMetadata(outcome: LinkPaymentMethodSelectionOutcome.UpdatedLinkMetadata) {
         linkAccountHolder.set(outcome.linkAccountInfo)
-        stateHolder.state = stateHolder.state?.copy(
+        stateHolder.loadedState = stateHolder.loadedState?.copy(
             paymentMethodMetadata = outcome.paymentMethodMetadata,
         )
     }

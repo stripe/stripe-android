@@ -34,7 +34,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformer @Inject constr
 ) : ExpressCheckoutElementConfirmationPerformer {
     override fun confirm(expressButton: ExpressButton) {
         val confirmationArgs = operationCoordinator.tryBeginConfirmation {
-            val state = stateHolder.state ?: run {
+            val state = stateHolder.loadedState ?: run {
                 errorReporter.report(
                     ErrorReporter.UnexpectedErrorEvent.EXPRESS_CHECKOUT_ELEMENT_NULL_STATE_ON_CONFIRM
                 )

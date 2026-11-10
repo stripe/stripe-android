@@ -23,7 +23,7 @@ internal class CheckoutElementsPresenterInitializer @Inject constructor(
         confirmationHandler.register(activityResultCaller, lifecycleOwner)
 
         sheetStateHolder.sheetLauncher = sheetLauncher
-        stateHolder.state?.embeddedConfiguration?.appearance?.parseAppearance()
+        stateHolder.loadedState?.embeddedConfiguration?.appearance?.parseAppearance()
 
         lifecycleOwner.lifecycle.addObserver(
             object : DefaultLifecycleObserver {

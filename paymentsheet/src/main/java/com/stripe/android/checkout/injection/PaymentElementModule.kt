@@ -64,7 +64,7 @@ internal interface PaymentElementModule {
         fun provideEmbeddedContentState(
             stateHolder: CheckoutElementsControllerStateHolder,
         ): StateFlow<EmbeddedContentHelperStateHolder.State?> {
-            return stateHolder.stateFlow.mapAsStateFlow { state ->
+            return stateHolder.loadedStateFlow.mapAsStateFlow { state ->
                 val embeddedConfiguration = state?.embeddedConfiguration
                 val paymentMethodMetadata = state?.paymentMethodMetadata
                 if (state == null || embeddedConfiguration == null || paymentMethodMetadata == null) {

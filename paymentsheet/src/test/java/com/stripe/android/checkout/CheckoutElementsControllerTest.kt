@@ -771,7 +771,7 @@ internal class CheckoutElementsControllerTest {
     fun `session is null before configure`() = runTest {
         val setup = createControllerSetup(SavedStateHandle(), DEFAULT_INTEGRATION_NAME)
         assertThat(setup.controller.session.value).isNull()
-        assertThat(setup.stateHolder.state).isNull()
+        assertThat(setup.stateHolder.loadedState).isNull()
     }
 
     @Test
@@ -822,7 +822,7 @@ internal class CheckoutElementsControllerTest {
             savedStateHandle.simulateProcessDeath(),
             DEFAULT_INTEGRATION_NAME,
         )
-        val state = recreated.stateHolder.state
+        val state = recreated.stateHolder.loadedState
         assertThat(state).isNotNull()
         assertThat(state!!.embeddedConfiguration?.merchantDisplayName)
             .isEqualTo(expectedMerchantDisplayName)
@@ -948,7 +948,7 @@ internal class CheckoutElementsControllerTest {
             assertThat(controller.session.value?.paymentOption).isNull()
             cancelAndIgnoreRemainingEvents()
         }
-        assertThat(setup.stateHolder.state?.paymentSelection).isNull()
+        assertThat(setup.stateHolder.loadedState?.paymentSelection).isNull()
         assertThat(setup.savedStateHandle.get<CustomerState>(CustomerStateHolder.SAVED_CUSTOMER)?.paymentMethods)
             .isEqualTo(customer.paymentMethods)
         networkRule.enqueueSuccessfulInit(inventory)
@@ -2174,7 +2174,7 @@ internal class CheckoutElementsControllerTest {
     @Suppress("RestrictedApi")
     private fun parentHandleWithState(state: CheckoutElementsControllerLoadedState): SavedStateHandle {
         val childHandle = SavedStateHandle(
-            mapOf(CheckoutElementsControllerStateHolder.STATE_KEY to state)
+            mapOf(CheckoutElementsControllerStateHolder.STATE_KEY to CheckoutElementsControllerState.Loaded(state))
         )
         return SavedStateHandle(
             mapOf(DEFAULT_INTEGRATION_NAME to childHandle.savedStateProvider().saveState())
@@ -2294,10 +2294,10 @@ internal class CheckoutElementsControllerTest {
         private val stateHolder: CheckoutElementsControllerStateHolder,
     ) {
         val committedState: CheckoutElementsControllerLoadedState?
-            get() = stateHolder.state
+            get() = stateHolder.loadedState
 
         val committedSavedPaymentMethodId: String?
-            get() = (stateHolder.state?.paymentSelection as? PaymentSelection.Saved)?.paymentMethod?.id
+            get() = (stateHolder.loadedState?.paymentSelection as? PaymentSelection.Saved)?.paymentMethod?.id
     }
 
     // Configures a controller from a fresh init, seeds the requested scenario state, then hands it
@@ -2360,7 +2360,7 @@ internal class CheckoutElementsControllerTest {
 
         // Reads the state the controller committed via its state holder, which shares this
         // SavedStateHandle in the production graph.
-        fun committedState(): CheckoutElementsControllerLoadedState = requireNotNull(stateHolder.state)
+        fun committedState(): CheckoutElementsControllerLoadedState = requireNotNull(stateHolder.loadedState)
 
         fun loadedSavedPaymentMethodSelection(): PaymentSelection.Saved {
             val customerState: CustomerState = requireNotNull(

@@ -47,7 +47,7 @@ internal class PaymentElementModuleTest {
         ),
     ) {
         val content = requireNotNull(embeddedContentState.value)
-        val state = requireNotNull(stateHolder.state)
+        val state = requireNotNull(stateHolder.loadedState)
         assertThat(content.paymentMethodMetadata).isSameInstanceAs(state.paymentMethodMetadata)
         assertThat(content.configuration).isSameInstanceAs(state.embeddedConfiguration)
         assertThat(content.embeddedViewDisplaysMandateText).isTrue()
@@ -72,7 +72,7 @@ internal class PaymentElementModuleTest {
             assertThat(awaitItem()).isNull()
 
             val state = CheckoutElementsControllerStateFactory.create()
-            stateHolder.state = state
+            stateHolder.loadedState = state
 
             val content = requireNotNull(awaitItem())
             assertThat(content.paymentMethodMetadata).isSameInstanceAs(state.paymentMethodMetadata)
@@ -86,7 +86,7 @@ internal class PaymentElementModuleTest {
         embeddedContentState.test {
             assertThat(awaitItem()).isNotNull()
 
-            stateHolder.state = requireNotNull(stateHolder.state).copy(embeddedConfiguration = null)
+            stateHolder.loadedState = requireNotNull(stateHolder.loadedState).copy(embeddedConfiguration = null)
 
             assertThat(awaitItem()).isNull()
             ensureAllEventsConsumed()
@@ -98,7 +98,7 @@ internal class PaymentElementModuleTest {
         embeddedContentState.test {
             assertThat(awaitItem()).isNotNull()
 
-            stateHolder.state = null
+            stateHolder.loadedState = null
 
             assertThat(awaitItem()).isNull()
             ensureAllEventsConsumed()
@@ -113,7 +113,7 @@ internal class PaymentElementModuleTest {
             assertThat(awaitItem()).isNull()
 
             val state = CheckoutElementsControllerStateFactory.create()
-            stateHolder.state = state
+            stateHolder.loadedState = state
 
             val content = requireNotNull(awaitItem())
             assertThat(content.paymentMethodMetadata).isSameInstanceAs(state.paymentMethodMetadata)
@@ -127,7 +127,7 @@ internal class PaymentElementModuleTest {
         embeddedContentState.test {
             assertThat(awaitItem()).isNotNull()
 
-            stateHolder.state = requireNotNull(stateHolder.state).copy(paymentMethodMetadata = null)
+            stateHolder.loadedState = requireNotNull(stateHolder.loadedState).copy(paymentMethodMetadata = null)
 
             assertThat(awaitItem()).isNull()
             ensureAllEventsConsumed()
@@ -142,7 +142,7 @@ internal class PaymentElementModuleTest {
         val stateHolder = CheckoutElementsControllerStateFactory.createStateHolder(
             savedStateHandle = SavedStateHandle(),
             errorReporter = errorReporter,
-        ).apply { this.state = state }
+        ).apply { this.loadedState = state }
 
         Scenario(
             stateHolder = stateHolder,

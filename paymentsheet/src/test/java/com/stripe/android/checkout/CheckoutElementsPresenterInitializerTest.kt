@@ -77,7 +77,12 @@ internal class CheckoutElementsPresenterInitializerTest {
                 sheetLauncher = FakeEmbeddedSheetLauncher(),
                 sheetStateHolder = SheetStateHolder(SavedStateHandle()),
                 stateHolder = CheckoutElementsControllerStateFactory.createStateHolder(
-                    SavedStateHandle(mapOf(CheckoutElementsControllerStateHolder.STATE_KEY to restoredState))
+                    SavedStateHandle(
+                        mapOf(
+                            CheckoutElementsControllerStateHolder.STATE_KEY to
+                                CheckoutElementsControllerState.Loaded(restoredState)
+                        )
+                    )
                 ),
             )
 

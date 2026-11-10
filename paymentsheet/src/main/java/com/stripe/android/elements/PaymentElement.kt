@@ -46,7 +46,7 @@ class PaymentElement @Inject internal constructor(
      */
     @Composable
     fun Content() {
-        val state by stateHolder.stateFlow.collectAsState()
+        val state by stateHolder.loadedStateFlow.collectAsState()
         val mandateState = state?.mandateState
         SideEffect {
             mandateState?.recordContentAccess()

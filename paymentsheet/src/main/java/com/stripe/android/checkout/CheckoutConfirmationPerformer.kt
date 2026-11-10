@@ -28,7 +28,7 @@ internal class CheckoutConfirmationPerformer @Inject constructor(
     fun confirm() {
         lateinit var paymentSelection: PaymentSelection
         val arguments = operationCoordinator.tryBeginConfirmation {
-            val state = stateHolder.state ?: return@tryBeginConfirmation Result.failure(
+            val state = stateHolder.loadedState ?: return@tryBeginConfirmation Result.failure(
                 IllegalStateException("Cannot confirm checkout before it is configured.")
             )
             paymentSelection = state.paymentSelection ?: return@tryBeginConfirmation Result.failure(

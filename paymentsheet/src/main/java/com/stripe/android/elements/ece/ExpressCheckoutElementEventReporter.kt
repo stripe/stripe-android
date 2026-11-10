@@ -31,7 +31,7 @@ internal class DefaultExpressCheckoutElementEventReporter @Inject constructor(
     }
 
     private fun defaultParams(): Map<String, Any> {
-        val state = stateHolder.state ?: return emptyMap()
+        val state = stateHolder.loadedState ?: return emptyMap()
         val expressCheckoutElementConfiguration = state.configuration.expressCheckoutElementConfiguration
             ?: return emptyMap()
         val paymentMethodMetadata = state.expressCheckoutElementPaymentMethodMetadata ?: return emptyMap()

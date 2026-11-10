@@ -828,14 +828,14 @@ internal class CheckoutSheetLauncherTest {
 
     @Test
     fun `launchPaymentOptions shows loading without initial state then shows configured options`() = testScenario {
-        val configuredState = requireNotNull(selectionHolder.state)
+        val configuredState = requireNotNull(selectionHolder.loadedState)
         embeddedContentState.value = null
-        selectionHolder.state = null
+        selectionHolder.loadedState = null
         val configureGate = CompletableDeferred<Unit>()
         coroutineScope.launch {
             operationCoordinator.runMutation {
                 configureGate.await()
-                selectionHolder.state = configuredState
+                selectionHolder.loadedState = configuredState
                 embeddedContentState.value = EmbeddedContentHelperStateHolder.State(
                     paymentMethodMetadata = requireNotNull(configuredState.paymentMethodMetadata),
                     embeddedViewDisplaysMandateText = true,
@@ -871,7 +871,7 @@ internal class CheckoutSheetLauncherTest {
     @Test
     fun `launchPaymentOptions shows loading then dismisses when initial configure fails`() = testScenario {
         embeddedContentState.value = null
-        selectionHolder.state = null
+        selectionHolder.loadedState = null
         val configureGate = CompletableDeferred<Unit>()
         coroutineScope.launch {
             operationCoordinator.runMutation<Unit> {
@@ -903,7 +903,7 @@ internal class CheckoutSheetLauncherTest {
     @Test
     fun `launchPaymentOptions does not launch before configure starts`() = testScenario {
         embeddedContentState.value = null
-        selectionHolder.state = null
+        selectionHolder.loadedState = null
 
         sheetLauncher.launchPaymentOptions(
             paymentMethodMetadata = null,
@@ -1020,7 +1020,7 @@ internal class CheckoutSheetLauncherTest {
     fun `continuing payment options acknowledges the saved SEPA mandate`() = testScenario {
         val selection = PaymentSelection.Saved(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD)
         selectionHolder.setSelection(selection)
-        val mandateState = requireNotNull(selectionHolder.state).mandateState
+        val mandateState = requireNotNull(selectionHolder.loadedState).mandateState
         assertThat(mandateState.hasAcknowledgedSepaMandate(selection)).isFalse()
         val result = EmbeddedActivityResult.Complete(
             previousNewSelections = Bundle(),
@@ -1046,7 +1046,7 @@ internal class CheckoutSheetLauncherTest {
 
         cancelPaymentOptions(createCustomerState(paymentMethods = listOf(paymentMethod)))
 
-        assertThat(requireNotNull(selectionHolder.state).mandateState.hasAcknowledgedSepaMandate(selection)).isFalse()
+        assertThat(requireNotNull(selectionHolder.loadedState).mandateState.hasAcknowledgedSepaMandate(selection)).isFalse()
     }
 
     @Test
@@ -1061,7 +1061,7 @@ internal class CheckoutSheetLauncherTest {
 
         val selection = selectionHolder.selection.value as PaymentSelection.Saved
         assertThat(selection.paymentMethod).isEqualTo(updatedPaymentMethod)
-        assertThat(requireNotNull(selectionHolder.state).mandateState.hasAcknowledgedSepaMandate(selection)).isFalse()
+        assertThat(requireNotNull(selectionHolder.loadedState).mandateState.hasAcknowledgedSepaMandate(selection)).isFalse()
     }
 
     @Test
@@ -1334,7 +1334,7 @@ internal class CheckoutSheetLauncherTest {
         initialLifecycleState = Lifecycle.State.INITIALIZED,
     ) {
         selectionHolder.setTemporarySelection("existing")
-        val state = selectionHolder.state
+        val state = selectionHolder.loadedState
 
         sheetLauncher.launchForm(
             code = "card",
@@ -1347,7 +1347,7 @@ internal class CheckoutSheetLauncherTest {
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
         assertThat(launcherState.isAwaitingPaymentOptionsReady).isFalse()
         assertThat(selectionHolder.temporarySelection.value).isEqualTo("existing")
-        assertThat(selectionHolder.state).isEqualTo(state)
+        assertThat(selectionHolder.loadedState).isEqualTo(state)
         assertThat(immediateActionWasInvoked()).isFalse()
         assertThat(errorReporter.getLoggedErrors()).isEmpty()
     }
@@ -1365,7 +1365,7 @@ internal class CheckoutSheetLauncherTest {
     @Test
     fun `launchForm after destruction leaves state unchanged`() = testScenario {
         selectionHolder.setTemporarySelection("existing")
-        val state = selectionHolder.state
+        val state = selectionHolder.loadedState
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
         dummyActivityResultCallerScenario.awaitNextUnregisteredLauncher()
 
@@ -1380,14 +1380,14 @@ internal class CheckoutSheetLauncherTest {
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
         assertThat(launcherState.isAwaitingPaymentOptionsReady).isFalse()
         assertThat(selectionHolder.temporarySelection.value).isEqualTo("existing")
-        assertThat(selectionHolder.state).isEqualTo(state)
+        assertThat(selectionHolder.loadedState).isEqualTo(state)
         assertThat(immediateActionWasInvoked()).isFalse()
     }
 
     @Test
     fun `launchManage after destruction leaves state unchanged`() = testScenario {
         selectionHolder.setTemporarySelection("existing")
-        val state = selectionHolder.state
+        val state = selectionHolder.loadedState
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
         dummyActivityResultCallerScenario.awaitNextUnregisteredLauncher()
 
@@ -1401,14 +1401,14 @@ internal class CheckoutSheetLauncherTest {
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
         assertThat(launcherState.isAwaitingPaymentOptionsReady).isFalse()
         assertThat(selectionHolder.temporarySelection.value).isEqualTo("existing")
-        assertThat(selectionHolder.state).isEqualTo(state)
+        assertThat(selectionHolder.loadedState).isEqualTo(state)
         assertThat(immediateActionWasInvoked()).isFalse()
     }
 
     @Test
     fun `launchPaymentOptions after destruction leaves state unchanged`() = testScenario {
         selectionHolder.setTemporarySelection("existing")
-        val state = selectionHolder.state
+        val state = selectionHolder.loadedState
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
         dummyActivityResultCallerScenario.awaitNextUnregisteredLauncher()
 
@@ -1422,7 +1422,7 @@ internal class CheckoutSheetLauncherTest {
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
         assertThat(launcherState.isAwaitingPaymentOptionsReady).isFalse()
         assertThat(selectionHolder.temporarySelection.value).isEqualTo("existing")
-        assertThat(selectionHolder.state).isEqualTo(state)
+        assertThat(selectionHolder.loadedState).isEqualTo(state)
         assertThat(immediateActionWasInvoked()).isFalse()
     }
 
@@ -1458,7 +1458,7 @@ internal class CheckoutSheetLauncherTest {
                 context = applicationContext,
                 linkAccountHolder = linkAccountHolder,
             ),
-        ).apply { state = CheckoutElementsControllerStateFactory.create() }
+        ).apply { loadedState = CheckoutElementsControllerStateFactory.create() }
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
         val customerStateHolder = DefaultCustomerStateHolder(
             savedStateHandle = savedStateHandle,

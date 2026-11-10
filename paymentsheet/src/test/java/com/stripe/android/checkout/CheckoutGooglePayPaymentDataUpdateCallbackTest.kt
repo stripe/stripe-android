@@ -504,7 +504,7 @@ internal class CheckoutGooglePayPaymentDataUpdateCallbackTest {
             stateHolder = CheckoutElementsControllerStateFactory.createStateHolder(
                 savedStateHandle = SavedStateHandle(),
             ).apply {
-                this.state = state
+                this.loadedState = state
             },
             addressBuilder = addressBuilder,
             mapper = mapper,

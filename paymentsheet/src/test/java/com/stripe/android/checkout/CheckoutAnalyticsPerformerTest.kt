@@ -94,7 +94,7 @@ internal class CheckoutAnalyticsPerformerTest {
             )
             .build()
         val configurationParams = configuration.toAnalyticsMap()
-        stateHolder.state = requireNotNull(stateHolder.state).copy(configuration = configuration)
+        stateHolder.loadedState = requireNotNull(stateHolder.loadedState).copy(configuration = configuration)
 
         startReporting()
         val startedRequest = startConfirmation(
@@ -221,7 +221,7 @@ internal class CheckoutAnalyticsPerformerTest {
 
     @Test
     fun `express checkout confirmation context survives performer recreation`() = runScenario {
-        stateHolder.state = stateHolder.state!!.copy(
+        stateHolder.loadedState = stateHolder.loadedState!!.copy(
             expressCheckoutElementPaymentMethodMetadata = linkMetadata(LinkState.LoginState.NeedsVerification),
         )
         val expectedParams = confirmParams(
@@ -465,7 +465,7 @@ internal class CheckoutAnalyticsPerformerTest {
 
     @Test
     fun `express checkout uses its Link session when Payment Element Link is disabled`() = runScenario {
-        stateHolder.state = stateHolder.state!!.copy(
+        stateHolder.loadedState = stateHolder.loadedState!!.copy(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 apiConfiguration = ApiConfiguration(DEFAULT_METADATA_PUBLISHABLE_KEY).build(),
                 linkConfiguration = PaymentSheet.LinkConfiguration(
@@ -502,7 +502,7 @@ internal class CheckoutAnalyticsPerformerTest {
     fun `saved payment method confirmation reports the saved selection`() = runScenario {
         val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         val expectedParams = confirmParams(selectedLpm = "card", isSavedPaymentMethod = true)
-        stateHolder.state = stateHolder.state!!.copy(paymentSelection = selection)
+        stateHolder.loadedState = stateHolder.loadedState!!.copy(paymentSelection = selection)
         startReporting()
         startConfirmation(InvocationSource.Merchant, selection, expectedParams)
 
@@ -536,7 +536,7 @@ internal class CheckoutAnalyticsPerformerTest {
     @Test
     fun `confirmation response provides completed session fields`() = runScenario {
         val elementsSession = ElementsSession.createFromFallback(
-            stripeIntent = requireNotNull(stateHolder.state?.paymentMethodMetadata).stripeIntent,
+            stripeIntent = requireNotNull(stateHolder.loadedState?.paymentMethodMetadata).stripeIntent,
             sessionsError = null,
         ).copy(elementsSessionConfigId = "cfg_elements_initial")
         val initialResponse = CheckoutSessionResponseFactory.create(
@@ -544,7 +544,7 @@ internal class CheckoutAnalyticsPerformerTest {
             elementsSession = elementsSession,
             automaticTaxEnabled = true,
         )
-        stateHolder.state = stateHolder.state!!.copy(checkoutSessionResponse = initialResponse)
+        stateHolder.loadedState = stateHolder.loadedState!!.copy(checkoutSessionResponse = initialResponse)
         startReporting()
         startConfirmation(
             InvocationSource.Merchant,
@@ -660,7 +660,7 @@ internal class CheckoutAnalyticsPerformerTest {
     ) = runTest {
         val savedStateHandle = SavedStateHandle()
         val stateHolder = CheckoutElementsControllerStateFactory.createStateHolder(savedStateHandle).apply {
-            state = CheckoutElementsControllerStateFactory.create(
+            loadedState = CheckoutElementsControllerStateFactory.create(
                 paymentSelection = PaymentSelection.GooglePay,
                 paymentMethodMetadata = paymentMethodMetadata,
                 checkoutSessionResponse = CheckoutAnalyticsTestFixtures.sessionResponse(

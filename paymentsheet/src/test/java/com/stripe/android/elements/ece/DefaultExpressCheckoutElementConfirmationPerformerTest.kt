@@ -104,7 +104,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
             val option = args.confirmationOption as GooglePayConfirmationOption
             assertThat(option.config.shippingAddressParameters).isNull()
             assertThat(args.paymentMethodMetadata)
-                .isEqualTo(stateHolder.state?.expressCheckoutElementPaymentMethodMetadata)
+                .isEqualTo(stateHolder.loadedState?.expressCheckoutElementPaymentMethodMetadata)
         }
     }
 
@@ -209,7 +209,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
                 LinkLaunchMode.Full(showSecondaryButton = false)
             )
             assertThat(args.paymentMethodMetadata)
-                .isEqualTo(stateHolder.state?.expressCheckoutElementPaymentMethodMetadata)
+                .isEqualTo(stateHolder.loadedState?.expressCheckoutElementPaymentMethodMetadata)
         }
     }
 
@@ -252,7 +252,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
         val errorReporter = FakeErrorReporter()
         val savedStateHandle = SavedStateHandle()
         val stateHolder = CheckoutElementsControllerStateFactory.createStateHolder(savedStateHandle)
-        stateHolder.state = state
+        stateHolder.loadedState = state
         val sessionRefresher = FakeCheckoutSessionRefresher()
         val results = Turbine<CheckoutElementsController.Result>()
         val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()

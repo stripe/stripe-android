@@ -133,7 +133,7 @@ internal class PaymentElementTest {
         assertThat(newMandateState.hasAcknowledgedSepaMandate(SAVED_SEPA)).isFalse()
 
         composeRule.runOnIdle {
-            stateHolder.state = requireNotNull(stateHolder.state).copy(mandateState = newMandateState)
+            stateHolder.loadedState = requireNotNull(stateHolder.loadedState).copy(mandateState = newMandateState)
         }
         composeRule.waitForIdle()
 
@@ -170,7 +170,7 @@ internal class PaymentElementTest {
         val contentHelper = FakeEmbeddedContentHelper(MutableStateFlow(embeddedContent))
         val mandateState = CheckoutMandateState.initial()
         val stateHolder = CheckoutElementsControllerStateFactory.createStateHolder(SavedStateHandle()).apply {
-            state = CheckoutElementsControllerStateFactory.create(mandateState = mandateState)
+            loadedState = CheckoutElementsControllerStateFactory.create(mandateState = mandateState)
         }
         Scenario(
             paymentElement = PaymentElement(contentHelper, stateHolder, backgroundScope),

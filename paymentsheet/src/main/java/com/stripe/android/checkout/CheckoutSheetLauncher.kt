@@ -143,7 +143,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
         when (result) {
             is EmbeddedActivityResult.Complete -> {
                 (result.selection as? PaymentSelection.Saved)?.let { selection ->
-                    selectionHolder.state?.mandateState?.acknowledgeSepaMandate(selection.paymentMethod)
+                    selectionHolder.loadedState?.mandateState?.acknowledgeSepaMandate(selection.paymentMethod)
                 }
                 applyCompleteResult(result)
                 refreshCheckoutSession(result.checkoutSessionResponse)

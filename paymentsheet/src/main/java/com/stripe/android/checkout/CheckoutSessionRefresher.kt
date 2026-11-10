@@ -46,7 +46,7 @@ internal class DefaultCheckoutSessionRefresher internal constructor(
     )
 
     override suspend fun refresh() {
-        val state = stateHolder.state ?: return
+        val state = stateHolder.loadedState ?: return
         val response = fetchResponse(
             state.checkoutSessionResponse.clientSecret,
             state.configuration.currencySelectorElementConfiguration != null,
@@ -57,7 +57,7 @@ internal class DefaultCheckoutSessionRefresher internal constructor(
     }
 
     override suspend fun refresh(response: CheckoutSessionResponse) {
-        val state = stateHolder.state ?: return
+        val state = stateHolder.loadedState ?: return
         reloadState(state.copy(checkoutSessionResponse = response))
     }
 }
