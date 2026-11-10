@@ -34,41 +34,46 @@ internal suspend fun runCheckoutIntegrationTest(
     val clientSecret = backend.createCheckoutSession(sessionParams).getOrThrow()
     val checkoutResult = CompletableDeferred<CheckoutElementsController.Result>()
 
-    return ActivityScenario.launch(MainActivity::class.java).use { scenario ->
-        scenario.moveToState(Lifecycle.State.CREATED)
-        PaymentConfiguration.init(ApplicationProvider.getApplicationContext(), publishableKey)
+    return try {
+        ActivityScenario.launch(MainActivity::class.java).use { scenario ->
+            scenario.moveToState(Lifecycle.State.CREATED)
+            PaymentConfiguration.init(ApplicationProvider.getApplicationContext(), publishableKey)
 
-        lateinit var controller: CheckoutElementsController
-        scenario.onActivity {
-            controller = CheckoutElementsController.Builder(
-                application = ApplicationProvider.getApplicationContext(),
-                savedStateHandle = SavedStateHandle(),
-            ).resultCallback { checkoutResult.complete(it) }.build()
-        }
-        try {
-            val configureResult = controller.configure(clientSecret, configuration)
-            assertThat(configureResult).isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
+            lateinit var controller: CheckoutElementsController
+            scenario.onActivity {
+                controller = CheckoutElementsController.Builder(
+                    application = ApplicationProvider.getApplicationContext(),
+                    savedStateHandle = SavedStateHandle(),
+                ).resultCallback { checkoutResult.complete(it) }.build()
+            }
+            try {
+                val configureResult = controller.configure(clientSecret, configuration)
+                assertThat(configureResult)
+                    .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
 
-            lateinit var presenter: CheckoutElementsPresenter
-            scenario.onActivity { activity ->
-                presenter = controller.createPresenter(activity)
-                val paymentElement = presenter.paymentElement()
-                activity.setContent {
-                    Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                        paymentElement.Content()
+                lateinit var presenter: CheckoutElementsPresenter
+                scenario.onActivity { activity ->
+                    presenter = controller.createPresenter(activity)
+                    val paymentElement = presenter.paymentElement()
+                    activity.setContent {
+                        Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                            paymentElement.Content()
+                        }
                     }
                 }
+                scenario.moveToState(Lifecycle.State.RESUMED)
+
+                setup()
+
+                presenter.confirm()
+                handleNextAction()
+                withTimeout(OPERATION_TIMEOUT) { checkoutResult.await() }
+            } finally {
+                scenario.onActivity { controller.destroy() }
             }
-            scenario.moveToState(Lifecycle.State.RESUMED)
-
-            setup()
-
-            presenter.confirm()
-            handleNextAction()
-            withTimeout(OPERATION_TIMEOUT) { checkoutResult.await() }
-        } finally {
-            scenario.onActivity { controller.destroy() }
         }
+    } finally {
+        clearWebViewWindowCoverageTracker()
     }
 }
 
