@@ -1008,7 +1008,7 @@ internal class SignUpViewModelTest {
 private open class SignUpLinkEventsReporter : FakeLinkEventsReporter() {
     override fun onSignupFlowPresented() = Unit
 
-    override fun onSignupStarted(isInline: Boolean) = Unit
+    override fun onSignupStarted(isInline: Boolean, checkoutSessionId: String?) = Unit
 
     override fun onSignupCompleted(isInline: Boolean) = Unit
 }

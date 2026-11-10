@@ -467,15 +467,15 @@ internal class FakeCheckoutLinkAnalyticsHelper : LinkAnalyticsHelper {
     val launchedCalls = Turbine<Unit>()
     val resultCalls = Turbine<LinkActivityResult>()
 
-    override fun onLinkLaunched() {
+    override fun onLinkLaunched(checkoutSessionId: String?) {
         launchedCalls.add(Unit)
     }
 
-    override fun onLinkResult(linkActivityResult: LinkActivityResult) {
+    override fun onLinkResult(linkActivityResult: LinkActivityResult, checkoutSessionId: String?) {
         resultCalls.add(linkActivityResult)
     }
 
-    override fun onLinkPopupSkipped() = error("Not expected")
+    override fun onLinkPopupSkipped(checkoutSessionId: String?) = error("Not expected")
 
     fun ensureAllEventsConsumed() {
         launchedCalls.ensureAllEventsConsumed()

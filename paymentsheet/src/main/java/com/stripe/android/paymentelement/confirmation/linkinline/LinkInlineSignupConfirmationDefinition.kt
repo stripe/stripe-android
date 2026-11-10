@@ -109,7 +109,7 @@ internal class LinkInlineSignupConfirmationDefinition(
             )
             AccountStatus.VerificationStarted,
             is AccountStatus.NeedsVerification -> {
-                linkAnalyticsHelper.onLinkPopupSkipped()
+                linkAnalyticsHelper.onLinkPopupSkipped(configuration.checkoutSessionId)
 
                 linkInlineSignupConfirmationOption.toOption()
             }
@@ -136,13 +136,13 @@ internal class LinkInlineSignupConfirmationDefinition(
         ephemeralKeySecret: String?,
         userInput: UserInput,
     ): PaymentMethodConfirmationOption {
+        val configuration = linkInlineSignupConfirmationOption.linkConfiguration
+
         if (userInput is UserInput.SignIn) {
-            linkAnalyticsHelper.onLinkPopupSkipped()
+            linkAnalyticsHelper.onLinkPopupSkipped(configuration.checkoutSessionId)
 
             return linkInlineSignupConfirmationOption.toOption()
         }
-
-        val configuration = linkInlineSignupConfirmationOption.linkConfiguration
 
         return when (linkInlineSignupConfirmationOption) {
             is LinkInlineSignupConfirmationOption.New -> {

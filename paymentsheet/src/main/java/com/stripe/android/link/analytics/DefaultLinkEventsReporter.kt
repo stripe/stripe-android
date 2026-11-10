@@ -3,25 +3,28 @@ package com.stripe.android.link.analytics
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.exception.safeAnalyticsMessage
-import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
 
-internal class DefaultLinkEventsReporter @Inject constructor(
+/**
+ * @param checkoutSessionId attached to every event. Events that can fire from the singleton reporter, which is shared
+ * across Link configurations, also take it per call; a non-null per-call value takes precedence.
+ */
+internal class DefaultLinkEventsReporter(
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
     private val errorReporter: ErrorReporter,
-    @IOContext private val workContext: CoroutineContext,
+    private val workContext: CoroutineContext,
     private val logger: Logger,
     private val durationProvider: DurationProvider,
+    private val checkoutSessionId: String?,
 ) : LinkEventsReporter {
     override fun onInvalidSessionState(state: LinkEventsReporter.SessionState) {
         val params = mapOf(FIELD_SESSION_STATE to state.analyticsValue)
@@ -30,17 +33,17 @@ internal class DefaultLinkEventsReporter @Inject constructor(
         fireEvent(LinkEvent.SignUpFailureInvalidSessionState, params)
     }
 
-    override fun onInlineSignupCheckboxChecked() {
-        fireEvent(LinkEvent.SignUpCheckboxChecked)
+    override fun onInlineSignupCheckboxChecked(checkoutSessionId: String?) {
+        fireEvent(LinkEvent.SignUpCheckboxChecked, checkoutSessionId = checkoutSessionId)
     }
 
     override fun onSignupFlowPresented() {
         fireEvent(LinkEvent.SignUpFlowPresented)
     }
 
-    override fun onSignupStarted(isInline: Boolean) {
+    override fun onSignupStarted(isInline: Boolean, checkoutSessionId: String?) {
         durationProvider.start(DurationProvider.Key.LinkSignup)
-        fireEvent(LinkEvent.SignUpStart)
+        fireEvent(LinkEvent.SignUpStart, checkoutSessionId = checkoutSessionId)
     }
 
     override fun onSignupCompleted(isInline: Boolean) {
@@ -107,37 +110,38 @@ internal class DefaultLinkEventsReporter @Inject constructor(
         fireEvent(LinkEvent.TwoFACancel)
     }
 
-    override fun on2FAResendCode(verificationType: String) {
+    override fun on2FAResendCode(verificationType: String, checkoutSessionId: String?) {
         fireEvent(
             LinkEvent.TwoFAResendCode(verificationType),
-            mapOf("verification_type" to verificationType)
+            mapOf("verification_type" to verificationType),
+            checkoutSessionId,
         )
     }
 
-    override fun onPopupShow() {
-        fireEvent(LinkEvent.PopupShow)
+    override fun onPopupShow(checkoutSessionId: String?) {
+        fireEvent(LinkEvent.PopupShow, checkoutSessionId = checkoutSessionId)
     }
 
-    override fun onPopupSuccess() {
-        fireEvent(LinkEvent.PopupSuccess)
+    override fun onPopupSuccess(checkoutSessionId: String?) {
+        fireEvent(LinkEvent.PopupSuccess, checkoutSessionId = checkoutSessionId)
     }
 
-    override fun onPopupCancel() {
-        fireEvent(LinkEvent.PopupCancel)
+    override fun onPopupCancel(checkoutSessionId: String?) {
+        fireEvent(LinkEvent.PopupCancel, checkoutSessionId = checkoutSessionId)
     }
 
-    override fun onPopupError(error: Throwable) {
+    override fun onPopupError(error: Throwable, checkoutSessionId: String?) {
         val params = mapOf(FIELD_ERROR_MESSAGE to error.safeAnalyticsMessage)
 
-        fireEvent(LinkEvent.PopupError, params)
+        fireEvent(LinkEvent.PopupError, params, checkoutSessionId)
     }
 
-    override fun onPopupLogout() {
-        fireEvent(LinkEvent.PopupLogout)
+    override fun onPopupLogout(checkoutSessionId: String?) {
+        fireEvent(LinkEvent.PopupLogout, checkoutSessionId = checkoutSessionId)
     }
 
-    override fun onPopupSkipped() {
-        fireEvent(LinkEvent.PopupSkipped)
+    override fun onPopupSkipped(checkoutSessionId: String?) {
+        fireEvent(LinkEvent.PopupSkipped, checkoutSessionId = checkoutSessionId)
     }
 
     private fun durationInSecondsFromStart(duration: Duration?): Map<String, Float>? {
@@ -148,14 +152,17 @@ internal class DefaultLinkEventsReporter @Inject constructor(
 
     private fun fireEvent(
         event: LinkEvent,
-        additionalParams: Map<String, Any>? = null
+        additionalParams: Map<String, Any>? = null,
+        checkoutSessionId: String? = null,
     ) {
-        logger.debug("Link event: ${event.eventName} $additionalParams")
+        val params = (additionalParams ?: emptyMap()) +
+            (checkoutSessionId ?: this.checkoutSessionId)?.let { mapOf(FIELD_CHECKOUT_SESSION_ID to it) }.orEmpty()
+        logger.debug("Link event: ${event.eventName} $params")
         CoroutineScope(workContext).launch {
             analyticsRequestExecutor.executeAsync(
                 paymentAnalyticsRequestFactory.createRequest(
                     event,
-                    additionalParams ?: emptyMap()
+                    params
                 )
             )
         }
@@ -175,5 +182,6 @@ internal class DefaultLinkEventsReporter @Inject constructor(
         private const val VALUE_VERIFIED = "verified"
 
         private const val FIELD_ERROR_MESSAGE = "error_message"
+        private const val FIELD_CHECKOUT_SESSION_ID = "checkout_session_id"
     }
 }

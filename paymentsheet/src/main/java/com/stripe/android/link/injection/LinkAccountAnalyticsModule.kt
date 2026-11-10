@@ -40,6 +40,7 @@ internal object LinkAccountAnalyticsModule {
     @Provides
     @LinkAccountAnalytics
     fun provideLinkEventsReporter(
+        configuration: LinkConfiguration,
         analyticsRequestExecutor: AnalyticsRequestExecutor,
         @LinkAccountAnalytics paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
         errorReporter: ErrorReporter,
@@ -54,6 +55,7 @@ internal object LinkAccountAnalyticsModule {
             workContext = workContext,
             logger = logger,
             durationProvider = durationProvider,
+            checkoutSessionId = configuration.checkoutSessionId,
         )
     }
 }

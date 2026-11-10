@@ -26,6 +26,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentB
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilter
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
+import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerSession
@@ -127,6 +128,14 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
         )
 
     @Test
+    fun `'action' should report popup skipped with checkout session ID on 'NeedsVerification' account status`() =
+        testSkippedLinkSignupOnAccountStatus(
+            accountStatus = AccountStatus.NeedsVerification(),
+            clientAttributionMetadata = PaymentMethodMetadataFixtures.CHECKOUT_SESSION_CLIENT_ATTRIBUTION_METADATA,
+            expectedCheckoutSessionId = "cs_test_123",
+        )
+
+    @Test
     fun `'action' should return 'Launch' with new option with null SFU if no reuse request`() =
         testSuccessfulSignupWithNewCard(
             saveOption = LinkInlineSignupConfirmationOption.PaymentMethodSaveOption.NoRequest,
@@ -181,10 +190,28 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
         )
 
     @Test
-    fun `'action' should skip & return 'Launch' if input is sign in`() = test(
+    fun `'action' should skip & return 'Launch' if input is sign in`() =
+        testSkippedLinkSignupOnSignIn(
+            clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
+            expectedCheckoutSessionId = null,
+        )
+
+    @Test
+    fun `'action' should report popup skipped with checkout session ID if input is sign in`() =
+        testSkippedLinkSignupOnSignIn(
+            clientAttributionMetadata = PaymentMethodMetadataFixtures.CHECKOUT_SESSION_CLIENT_ATTRIBUTION_METADATA,
+            expectedCheckoutSessionId = "cs_test_123",
+        )
+
+    private fun testSkippedLinkSignupOnSignIn(
+        clientAttributionMetadata: ClientAttributionMetadata,
+        expectedCheckoutSessionId: String?,
+    ) = test(
         initialAccountStatus = AccountStatus.Verified(consentPresentation = null),
     ) {
-        val confirmationOption = createLinkInlineSignupConfirmationOption()
+        val confirmationOption = createLinkInlineSignupConfirmationOption(
+            clientAttributionMetadata = clientAttributionMetadata,
+        )
 
         val action = definition.action(
             confirmationOption = confirmationOption.copy(
@@ -203,7 +230,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
 
         validateSkippedLaunchAction(confirmationOption, launchAction)
 
-        assertThat(analyticsScenario.onLinkPopupSkippedCalls.awaitItem()).isNotNull()
+        assertThat(analyticsScenario.onLinkPopupSkippedCalls.awaitItem()).isEqualTo(expectedCheckoutSessionId)
     }
 
     @Test
@@ -465,9 +492,14 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
     }
 
     private fun testSkippedLinkSignupOnAccountStatus(
-        accountStatus: AccountStatus
+        accountStatus: AccountStatus,
+        clientAttributionMetadata: ClientAttributionMetadata =
+            PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
+        expectedCheckoutSessionId: String? = null,
     ) = test {
-        val confirmationOption = createLinkInlineSignupConfirmationOption()
+        val confirmationOption = createLinkInlineSignupConfirmationOption(
+            clientAttributionMetadata = clientAttributionMetadata,
+        )
 
         actionTest(
             attachNewCardToAccountResult = Result.failure(IllegalStateException("Should not be used!")),
@@ -477,7 +509,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
         ) { launchAction ->
             validateSkippedLaunchAction(confirmationOption, launchAction)
 
-            assertThat(analyticsScenario.onLinkPopupSkippedCalls.awaitItem()).isNotNull()
+            assertThat(analyticsScenario.onLinkPopupSkippedCalls.awaitItem()).isEqualTo(expectedCheckoutSessionId)
         }
     }
 
@@ -773,6 +805,8 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
             consentAction = SignUpConsentAction.Checkbox,
         ),
         passthroughMode: Boolean = false,
+        clientAttributionMetadata: ClientAttributionMetadata =
+            PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
     ): LinkInlineSignupConfirmationOption.New {
         return LinkInlineSignupConfirmationOption.New(
             createParams = createParams,
@@ -816,7 +850,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
                 saveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
                 forceSetupFutureUseBehaviorAndNewMandate = false,
                 linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD"),
-                clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
+                clientAttributionMetadata = clientAttributionMetadata,
                 cardFundingFilter = PaymentSheetCardFundingFilter(PaymentSheet.CardFundingType.entries),
                 linkBrand = LinkBrand.Link,
                 apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
@@ -884,15 +918,15 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
     }
 
     private class RecordingLinkAnalyticsHelper private constructor() : FakeLinkAnalyticsHelper() {
-        private val onLinkPopupSkippedCalls = Turbine<Unit>()
+        private val onLinkPopupSkippedCalls = Turbine<String?>()
 
-        override fun onLinkPopupSkipped() {
-            onLinkPopupSkippedCalls.add(Unit)
+        override fun onLinkPopupSkipped(checkoutSessionId: String?) {
+            onLinkPopupSkippedCalls.add(checkoutSessionId)
         }
 
         class Scenario(
             val helper: LinkAnalyticsHelper,
-            val onLinkPopupSkippedCalls: ReceiveTurbine<Unit>,
+            val onLinkPopupSkippedCalls: ReceiveTurbine<String?>,
         )
 
         companion object {

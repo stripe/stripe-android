@@ -203,7 +203,10 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
     }
 
     override fun resendCode() {
-        linkEventsReporter.on2FAResendCode(verificationType = "SMS")
+        linkEventsReporter.on2FAResendCode(
+            verificationType = "SMS",
+            checkoutSessionId = (state.value.verificationState as? Render2FA)?.linkConfiguration?.checkoutSessionId,
+        )
         otpElement.controller.reset()
         update2FAState { viewState ->
             viewState.copy(

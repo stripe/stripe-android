@@ -6,20 +6,20 @@ import javax.inject.Inject
 internal class DefaultLinkAnalyticsHelper @Inject internal constructor(
     private val linkEventsReporter: LinkEventsReporter,
 ) : LinkAnalyticsHelper {
-    override fun onLinkLaunched() {
-        linkEventsReporter.onPopupShow()
+    override fun onLinkLaunched(checkoutSessionId: String?) {
+        linkEventsReporter.onPopupShow(checkoutSessionId)
     }
 
-    override fun onLinkResult(linkActivityResult: LinkActivityResult) {
+    override fun onLinkResult(linkActivityResult: LinkActivityResult, checkoutSessionId: String?) {
         when (linkActivityResult) {
             is LinkActivityResult.Canceled -> {
                 when (linkActivityResult.reason) {
                     LinkActivityResult.Canceled.Reason.BackPressed -> {
-                        linkEventsReporter.onPopupCancel()
+                        linkEventsReporter.onPopupCancel(checkoutSessionId)
                     }
 
                     LinkActivityResult.Canceled.Reason.LoggedOut -> {
-                        linkEventsReporter.onPopupLogout()
+                        linkEventsReporter.onPopupLogout(checkoutSessionId)
                     }
                     LinkActivityResult.Canceled.Reason.PayAnotherWay -> Unit
                 }
@@ -27,16 +27,16 @@ internal class DefaultLinkAnalyticsHelper @Inject internal constructor(
 
             is LinkActivityResult.PaymentMethodObtained,
             is LinkActivityResult.Completed -> {
-                linkEventsReporter.onPopupSuccess()
+                linkEventsReporter.onPopupSuccess(checkoutSessionId)
             }
 
             is LinkActivityResult.Failed -> {
-                linkEventsReporter.onPopupError(linkActivityResult.error)
+                linkEventsReporter.onPopupError(linkActivityResult.error, checkoutSessionId)
             }
         }
     }
 
-    override fun onLinkPopupSkipped() {
-        linkEventsReporter.onPopupSkipped()
+    override fun onLinkPopupSkipped(checkoutSessionId: String?) {
+        linkEventsReporter.onPopupSkipped(checkoutSessionId)
     }
 }

@@ -282,11 +282,11 @@ class LinkFormElementTest {
     }
 
     private object FakeLinkInlineSignupEventsReporter : FakeLinkEventsReporter() {
-        override fun onSignupStarted(isInline: Boolean) {
+        override fun onSignupStarted(isInline: Boolean, checkoutSessionId: String?) {
             Log.d("LINK_FORM_ELEMENT_TEST", "onSignupStarted")
         }
 
-        override fun onInlineSignupCheckboxChecked() {
+        override fun onInlineSignupCheckboxChecked(checkoutSessionId: String?) {
             Log.d("LINK_FORM_ELEMENT_TEST", "onInlineSignupCheckboxChecked")
         }
     }

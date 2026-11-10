@@ -52,7 +52,67 @@ class DefaultLinkEventsReporterTest {
             assertThat(loggedParams.get("analytics_value")).isEqualTo("apiError")
         }
 
+    @Test
+    fun onAccountLookupComplete_withCheckoutSession_includesCheckoutSessionId() =
+        runScenario(
+            checkoutSessionId = CHECKOUT_SESSION_ID,
+        ) { linkEventsReporter, fakeAnalyticsRequestExecutor, testScheduler ->
+            linkEventsReporter.onAccountLookupComplete()
+
+            testScheduler.advanceUntilIdle()
+
+            val loggedParams = fakeAnalyticsRequestExecutor.awaitEvent("link.account_lookup.complete")
+            assertThat(loggedParams["checkout_session_id"]).isEqualTo(CHECKOUT_SESSION_ID)
+        }
+
+    @Test
+    fun onAccountLookupComplete_withoutCheckoutSession_omitsCheckoutSessionId() =
+        runScenario(checkoutSessionId = null) { linkEventsReporter, fakeAnalyticsRequestExecutor, testScheduler ->
+            linkEventsReporter.onAccountLookupComplete()
+
+            testScheduler.advanceUntilIdle()
+
+            val loggedParams = fakeAnalyticsRequestExecutor.awaitEvent("link.account_lookup.complete")
+            assertThat(loggedParams).doesNotContainKey("checkout_session_id")
+        }
+
+    @Test
+    fun onPopupShow_withCheckoutSession_includesCheckoutSessionId() =
+        runScenario(checkoutSessionId = null) { linkEventsReporter, fakeAnalyticsRequestExecutor, testScheduler ->
+            linkEventsReporter.onPopupShow(checkoutSessionId = CHECKOUT_SESSION_ID)
+
+            testScheduler.advanceUntilIdle()
+
+            val loggedParams = fakeAnalyticsRequestExecutor.awaitEvent("link.popup.show")
+            assertThat(loggedParams["checkout_session_id"]).isEqualTo(CHECKOUT_SESSION_ID)
+        }
+
+    @Test
+    fun on2FAResendCode_withoutCheckoutSessionId_fallsBackToReporterCheckoutSessionId() =
+        runScenario(
+            checkoutSessionId = CHECKOUT_SESSION_ID,
+        ) { linkEventsReporter, fakeAnalyticsRequestExecutor, testScheduler ->
+            linkEventsReporter.on2FAResendCode(verificationType = "EMAIL", checkoutSessionId = null)
+
+            testScheduler.advanceUntilIdle()
+
+            val loggedParams = fakeAnalyticsRequestExecutor.awaitEvent("link.2fa.resend_code")
+            assertThat(loggedParams["checkout_session_id"]).isEqualTo(CHECKOUT_SESSION_ID)
+        }
+
+    @Test
+    fun onInlineSignupCheckboxChecked_withCheckoutSession_includesCheckoutSessionId() =
+        runScenario(checkoutSessionId = null) { linkEventsReporter, fakeAnalyticsRequestExecutor, testScheduler ->
+            linkEventsReporter.onInlineSignupCheckboxChecked(checkoutSessionId = CHECKOUT_SESSION_ID)
+
+            testScheduler.advanceUntilIdle()
+
+            val loggedParams = fakeAnalyticsRequestExecutor.awaitEvent("link.signup.checkbox_checked")
+            assertThat(loggedParams["checkout_session_id"]).isEqualTo(CHECKOUT_SESSION_ID)
+        }
+
     private fun runScenario(
+        checkoutSessionId: String? = null,
         testBlock: suspend (LinkEventsReporter, FakeAnalyticsRequestExecutor, TestCoroutineScheduler) -> Unit
     ) {
         val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
@@ -66,7 +126,8 @@ class DefaultLinkEventsReporterTest {
             errorReporter = FakeErrorReporter(),
             workContext = testScope.coroutineContext,
             logger = Logger.noop(),
-            durationProvider = FakeDurationProvider()
+            durationProvider = FakeDurationProvider(),
+            checkoutSessionId = checkoutSessionId,
         )
 
         testScope.runTest {
@@ -74,6 +135,10 @@ class DefaultLinkEventsReporterTest {
         }
 
         analyticsRequestExecutor.validate()
+    }
+
+    private companion object {
+        const val CHECKOUT_SESSION_ID = "cs_test_123"
     }
 
     class FakeDurationProvider : DurationProvider {

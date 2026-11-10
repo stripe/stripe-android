@@ -26,6 +26,9 @@ internal class LinkPaymentLauncher @Inject internal constructor(
     private var linkActivityResultLauncher:
         ActivityResultLauncher<LinkActivityContract.Args>? = null
 
+    // Kept from the presented configuration so result events match the launch event.
+    private var presentedCheckoutSessionId: String? = null
+
     fun register(
         key: String = "LinkPaymentLauncher",
         activityResultRegistry: ActivityResultRegistry,
@@ -54,7 +57,7 @@ internal class LinkPaymentLauncher @Inject internal constructor(
         linkActivityResult: LinkActivityResult,
         nextStep: (LinkActivityResult) -> Unit
     ) {
-        analyticsHelper.onLinkResult(linkActivityResult)
+        analyticsHelper.onLinkResult(linkActivityResult, presentedCheckoutSessionId)
         when (linkActivityResult) {
             is PaymentMethodObtained, is LinkActivityResult.Completed -> {
                 linkStore.markLinkAsUsed()
@@ -90,8 +93,9 @@ internal class LinkPaymentLauncher @Inject internal constructor(
             launchMode = launchMode,
             statusBarColor = statusBarColor,
         )
+        presentedCheckoutSessionId = configuration.checkoutSessionId
         linkActivityResultLauncher?.launch(args)
-        analyticsHelper.onLinkLaunched()
+        analyticsHelper.onLinkLaunched(presentedCheckoutSessionId)
     }
 }
 

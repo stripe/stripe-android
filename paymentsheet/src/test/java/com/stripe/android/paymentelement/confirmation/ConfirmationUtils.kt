@@ -274,11 +274,11 @@ internal class ConfirmationTestScenario(
 internal class FakeLinkEventsReporterForConfirmation(
     reporter: FakeLinkEventsReporter
 ) : LinkEventsReporter by reporter {
-    override fun onPopupShow() {
+    override fun onPopupShow(checkoutSessionId: String?) {
         // No-op
     }
 
-    override fun onPopupSuccess() {
+    override fun onPopupSuccess(checkoutSessionId: String?) {
         // No-op
     }
 }

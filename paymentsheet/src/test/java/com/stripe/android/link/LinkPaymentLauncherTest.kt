@@ -9,6 +9,7 @@ import com.stripe.android.link.analytics.FakeLinkAnalyticsHelper
 import com.stripe.android.link.analytics.LinkAnalyticsHelper
 import com.stripe.android.link.injection.LinkAnalyticsComponent
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.confirmation.asCallbackFor
 import com.stripe.android.testing.CoroutineTestRule
@@ -256,6 +257,34 @@ internal class LinkPaymentLauncherTest {
         )
     }
 
+    @Test
+    fun `present and result analytics carry the configuration's checkout session ID`() = runTest {
+        val linkActivityResult = LinkActivityResult.Completed(
+            linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
+            selectedPayment = null,
+        )
+        val linkAnalyticsHelper = TrackingLinkAnalyticsHelper()
+        val linkPaymentLauncher = createLinkPaymentLauncher(linkAnalyticsHelper = linkAnalyticsHelper)
+
+        linkPaymentLauncher.register(activityResultRegistry = FakeActivityResultRegistry(linkActivityResult)) {}
+
+        linkPaymentLauncher.present(
+            configuration = TestFactory.LINK_CONFIGURATION.copy(
+                clientAttributionMetadata = PaymentMethodMetadataFixtures.CHECKOUT_SESSION_CLIENT_ATTRIBUTION_METADATA,
+            ),
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+            linkAccountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
+            linkExpressMode = LinkExpressMode.ENABLED,
+            launchMode = LinkLaunchMode.Full(showSecondaryButton = true),
+            statusBarColor = null,
+        )
+
+        assertThat(linkAnalyticsHelper.launches).containsExactly("cs_test_123")
+        assertThat(linkAnalyticsHelper.results).containsExactly(
+            TrackingLinkAnalyticsHelper.ResultCall(linkActivityResult, checkoutSessionId = "cs_test_123")
+        )
+    }
+
     private fun testActivityResultCallbackWithActivityResultRegistry(
         linkActivityResult: LinkActivityResult,
         expectedMarkAsUsedCalls: Int,
@@ -338,7 +367,10 @@ internal class LinkPaymentLauncherTest {
     ) {
         assertThat(callbackResult).isEqualTo(linkActivityResult)
         assertThat(markAsUsedCalls.cancelAndConsumeRemainingEvents().size).isEqualTo(expectedMarkAsUsedCalls)
-        assertThat(linkAnalyticsHelper.results).containsExactly(linkActivityResult)
+        assertThat(linkAnalyticsHelper.launches).containsExactly(null)
+        assertThat(linkAnalyticsHelper.results).containsExactly(
+            TrackingLinkAnalyticsHelper.ResultCall(linkActivityResult, checkoutSessionId = null)
+        )
     }
 
     private fun setupActivityResultRegistryMock(
@@ -384,14 +416,19 @@ internal class LinkPaymentLauncherTest {
 }
 
 private class TrackingLinkAnalyticsHelper : FakeLinkAnalyticsHelper() {
-    val results = arrayListOf<LinkActivityResult>()
-    var launchCount = 0
+    val launches = arrayListOf<String?>()
+    val results = arrayListOf<ResultCall>()
 
-    override fun onLinkLaunched() {
-        launchCount++
+    override fun onLinkLaunched(checkoutSessionId: String?) {
+        launches.add(checkoutSessionId)
     }
 
-    override fun onLinkResult(linkActivityResult: LinkActivityResult) {
-        results.add(linkActivityResult)
+    override fun onLinkResult(linkActivityResult: LinkActivityResult, checkoutSessionId: String?) {
+        results.add(ResultCall(linkActivityResult, checkoutSessionId))
     }
+
+    data class ResultCall(
+        val linkActivityResult: LinkActivityResult,
+        val checkoutSessionId: String?,
+    )
 }

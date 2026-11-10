@@ -164,7 +164,7 @@ internal class InlineSignupViewModel(
         // First time user checks the box, start listening to inputs
         if (_viewState.value.isExpanded && !hasExpanded) {
             hasExpanded = true
-            linkEventsReporter.onInlineSignupCheckboxChecked()
+            linkEventsReporter.onInlineSignupCheckboxChecked(config.checkoutSessionId)
         }
     }
 
@@ -294,7 +294,7 @@ internal class InlineSignupViewModel(
                             apiFailed = false
                         )
                     }
-                    linkEventsReporter.onSignupStarted(true)
+                    linkEventsReporter.onSignupStarted(isInline = true, checkoutSessionId = config.checkoutSessionId)
                 }
             },
             onFailure = {
