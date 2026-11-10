@@ -64,27 +64,27 @@ internal open class FakeLinkEventsReporter : LinkEventsReporter {
 
     override fun on2FAResendCode(verificationType: String, checkoutSessionId: String?) = Unit
 
-    override fun onPopupShow(checkoutSessionId: String?) {
+    override fun onPopupShow() {
         throw NotImplementedError()
     }
 
-    override fun onPopupSuccess(checkoutSessionId: String?) {
+    override fun onPopupSuccess() {
         throw NotImplementedError()
     }
 
-    override fun onPopupCancel(checkoutSessionId: String?) {
+    override fun onPopupCancel() {
         throw NotImplementedError()
     }
 
-    override fun onPopupError(error: Throwable, checkoutSessionId: String?) {
+    override fun onPopupError(error: Throwable) {
         throw NotImplementedError()
     }
 
-    override fun onPopupLogout(checkoutSessionId: String?) {
+    override fun onPopupLogout() {
         throw NotImplementedError()
     }
 
-    override fun onPopupSkipped(checkoutSessionId: String?) {
+    override fun onPopupSkipped() {
         throw NotImplementedError()
     }
 }

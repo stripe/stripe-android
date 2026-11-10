@@ -20,12 +20,12 @@ internal interface LinkEventsReporter {
     fun on2FACancel()
     fun on2FAResendCode(verificationType: String, checkoutSessionId: String?)
 
-    fun onPopupShow(checkoutSessionId: String?)
-    fun onPopupSuccess(checkoutSessionId: String?)
-    fun onPopupCancel(checkoutSessionId: String?)
-    fun onPopupError(error: Throwable, checkoutSessionId: String?)
-    fun onPopupLogout(checkoutSessionId: String?)
-    fun onPopupSkipped(checkoutSessionId: String?)
+    fun onPopupShow()
+    fun onPopupSuccess()
+    fun onPopupCancel()
+    fun onPopupError(error: Throwable)
+    fun onPopupLogout()
+    fun onPopupSkipped()
 
     enum class SessionState {
         RequiresSignUp, RequiresVerification, Verified

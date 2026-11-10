@@ -4,12 +4,13 @@ import com.stripe.android.checkout.CheckoutElementsControllerStateHolder
 import com.stripe.android.checkout.CheckoutLinkPaymentOptionsPresenter
 import com.stripe.android.checkout.CheckoutSheetLauncher
 import com.stripe.android.link.LinkActivityContract
+import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.LinkPaymentMethodSelectionLauncher
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkStore
+import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.gate.LinkGate
-import com.stripe.android.link.injection.LinkAnalyticsComponent
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedContentHelper
@@ -82,13 +83,15 @@ internal interface PaymentElementModule {
         @Named(CHECKOUT_LINK_PAYMENT_METHOD_SELECTION_LAUNCHER)
         @CheckoutElementsPresenterScope
         fun provideCheckoutLinkPaymentLauncher(
-            linkAnalyticsComponentFactory: LinkAnalyticsComponent.Factory,
+            linkConfigurationCoordinator: LinkConfigurationCoordinator,
+            linkEventsReporter: LinkEventsReporter,
             linkActivityContract: LinkActivityContract,
             @PaymentElementCallbackIdentifier identifier: String,
             linkStore: LinkStore,
         ): LinkPaymentLauncher {
             return LinkPaymentLauncher(
-                linkAnalyticsComponentFactory = linkAnalyticsComponentFactory,
+                linkConfigurationCoordinator = linkConfigurationCoordinator,
+                linkEventsReporter = linkEventsReporter,
                 paymentElementCallbackIdentifier = identifier,
                 linkActivityContract = linkActivityContract,
                 linkStore = linkStore,

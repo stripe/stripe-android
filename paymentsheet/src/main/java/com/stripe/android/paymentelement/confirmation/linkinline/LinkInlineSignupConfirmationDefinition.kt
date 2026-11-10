@@ -22,7 +22,6 @@ import kotlinx.parcelize.Parcelize
 
 internal class LinkInlineSignupConfirmationDefinition(
     private val linkConfigurationCoordinator: LinkConfigurationCoordinator,
-    private val linkAnalyticsHelper: LinkAnalyticsHelper,
     private val linkStore: LinkStore,
 ) : ConfirmationDefinition<
     LinkInlineSignupConfirmationOption,
@@ -100,16 +99,18 @@ internal class LinkInlineSignupConfirmationDefinition(
 
         val configuration = linkInlineSignupConfirmationOption.linkConfiguration
         val userInput = linkInlineSignupConfirmationOption.sanitizedUserInput
+        val linkAnalyticsHelper = linkConfigurationCoordinator.getComponent(configuration).linkAnalyticsHelper
 
         return when (linkConfigurationCoordinator.getAccountStatusFlow(configuration).first()) {
             is AccountStatus.Verified -> createOptionAfterAttachingToLink(
                 linkInlineSignupConfirmationOption = linkInlineSignupConfirmationOption,
                 ephemeralKeySecret = ephemeralKeySecret,
                 userInput = userInput,
+                linkAnalyticsHelper = linkAnalyticsHelper,
             )
             AccountStatus.VerificationStarted,
             is AccountStatus.NeedsVerification -> {
-                linkAnalyticsHelper.onLinkPopupSkipped(configuration.checkoutSessionId)
+                linkAnalyticsHelper.onLinkPopupSkipped()
 
                 linkInlineSignupConfirmationOption.toOption()
             }
@@ -135,11 +136,12 @@ internal class LinkInlineSignupConfirmationDefinition(
         linkInlineSignupConfirmationOption: LinkInlineSignupConfirmationOption,
         ephemeralKeySecret: String?,
         userInput: UserInput,
+        linkAnalyticsHelper: LinkAnalyticsHelper,
     ): PaymentMethodConfirmationOption {
         val configuration = linkInlineSignupConfirmationOption.linkConfiguration
 
         if (userInput is UserInput.SignIn) {
-            linkAnalyticsHelper.onLinkPopupSkipped(configuration.checkoutSessionId)
+            linkAnalyticsHelper.onLinkPopupSkipped()
 
             return linkInlineSignupConfirmationOption.toOption()
         }

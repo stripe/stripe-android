@@ -118,30 +118,30 @@ internal class DefaultLinkEventsReporter(
         )
     }
 
-    override fun onPopupShow(checkoutSessionId: String?) {
-        fireEvent(LinkEvent.PopupShow, checkoutSessionId = checkoutSessionId)
+    override fun onPopupShow() {
+        fireEvent(LinkEvent.PopupShow)
     }
 
-    override fun onPopupSuccess(checkoutSessionId: String?) {
-        fireEvent(LinkEvent.PopupSuccess, checkoutSessionId = checkoutSessionId)
+    override fun onPopupSuccess() {
+        fireEvent(LinkEvent.PopupSuccess)
     }
 
-    override fun onPopupCancel(checkoutSessionId: String?) {
-        fireEvent(LinkEvent.PopupCancel, checkoutSessionId = checkoutSessionId)
+    override fun onPopupCancel() {
+        fireEvent(LinkEvent.PopupCancel)
     }
 
-    override fun onPopupError(error: Throwable, checkoutSessionId: String?) {
+    override fun onPopupError(error: Throwable) {
         val params = mapOf(FIELD_ERROR_MESSAGE to error.safeAnalyticsMessage)
 
-        fireEvent(LinkEvent.PopupError, params, checkoutSessionId)
+        fireEvent(LinkEvent.PopupError, params)
     }
 
-    override fun onPopupLogout(checkoutSessionId: String?) {
-        fireEvent(LinkEvent.PopupLogout, checkoutSessionId = checkoutSessionId)
+    override fun onPopupLogout() {
+        fireEvent(LinkEvent.PopupLogout)
     }
 
-    override fun onPopupSkipped(checkoutSessionId: String?) {
-        fireEvent(LinkEvent.PopupSkipped, checkoutSessionId = checkoutSessionId)
+    override fun onPopupSkipped() {
+        fireEvent(LinkEvent.PopupSkipped)
     }
 
     private fun durationInSecondsFromStart(duration: Duration?): Map<String, Float>? {

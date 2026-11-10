@@ -27,9 +27,9 @@ import com.stripe.android.link.NativeLinkActivityContract
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.WebLinkActivityContract
 import com.stripe.android.link.account.LinkAccountHolder
+import com.stripe.android.link.analytics.FakeLinkEventsReporter
 import com.stripe.android.link.analytics.LinkAnalyticsHelper
 import com.stripe.android.link.gate.FakeLinkGate
-import com.stripe.android.link.injection.LinkAnalyticsComponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -47,6 +47,8 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.uicore.utils.stateFlowOf
+import com.stripe.android.utils.FakeLinkComponent
+import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakeLinkStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
@@ -338,11 +340,10 @@ internal class CheckoutLinkPaymentOptionsPresenterTest {
         val linkAnalyticsHelper = FakeCheckoutLinkAnalyticsHelper()
         val linkStore = FakeLinkStore()
         val linkPaymentLauncher = LinkPaymentLauncher(
-            linkAnalyticsComponentFactory = object : LinkAnalyticsComponent.Factory {
-                override fun create() = object : LinkAnalyticsComponent {
-                    override val linkAnalyticsHelper = linkAnalyticsHelper
-                }
-            },
+            linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(
+                component = FakeLinkComponent(linkAnalyticsHelper = linkAnalyticsHelper),
+            ),
+            linkEventsReporter = FakeLinkEventsReporter(),
             paymentElementCallbackIdentifier = CALLBACK_IDENTIFIER,
             linkActivityContract = LinkActivityContract(
                 nativeLinkActivityContract = NativeLinkActivityContract(
@@ -467,15 +468,15 @@ internal class FakeCheckoutLinkAnalyticsHelper : LinkAnalyticsHelper {
     val launchedCalls = Turbine<Unit>()
     val resultCalls = Turbine<LinkActivityResult>()
 
-    override fun onLinkLaunched(checkoutSessionId: String?) {
+    override fun onLinkLaunched() {
         launchedCalls.add(Unit)
     }
 
-    override fun onLinkResult(linkActivityResult: LinkActivityResult, checkoutSessionId: String?) {
+    override fun onLinkResult(linkActivityResult: LinkActivityResult) {
         resultCalls.add(linkActivityResult)
     }
 
-    override fun onLinkPopupSkipped(checkoutSessionId: String?) = error("Not expected")
+    override fun onLinkPopupSkipped() = error("Not expected")
 
     fun ensureAllEventsConsumed() {
         launchedCalls.ensureAllEventsConsumed()

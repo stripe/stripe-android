@@ -11,7 +11,6 @@ import com.stripe.android.googlepaylauncher.injection.InternalGooglePayPaymentMe
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.account.LinkAccountHolder
-import com.stripe.android.link.analytics.FakeLinkAnalyticsHelper
 import com.stripe.android.link.analytics.FakeLinkEventsReporter
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
@@ -251,7 +250,6 @@ internal fun createTestConfirmationHandlerFactory(
                 LinkInlineSignupConfirmationDefinition(
                     linkConfigurationCoordinator = linkConfigurationCoordinator,
                     linkStore = RecordingLinkStore.noOp(),
-                    linkAnalyticsHelper = FakeLinkAnalyticsHelper(),
                 ),
                 CvcRecollectionConfirmationDefinition(
                     factory = cvcRecollectionLauncherFactory,
@@ -274,11 +272,11 @@ internal class ConfirmationTestScenario(
 internal class FakeLinkEventsReporterForConfirmation(
     reporter: FakeLinkEventsReporter
 ) : LinkEventsReporter by reporter {
-    override fun onPopupShow(checkoutSessionId: String?) {
+    override fun onPopupShow() {
         // No-op
     }
 
-    override fun onPopupSuccess(checkoutSessionId: String?) {
+    override fun onPopupSuccess() {
         // No-op
     }
 }

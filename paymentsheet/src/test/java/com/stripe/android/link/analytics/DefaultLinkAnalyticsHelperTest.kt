@@ -11,10 +11,10 @@ import org.junit.Test
 internal class DefaultLinkAnalyticsHelperTest {
     @Test
     fun `test onLinkLaunched calls onPopupShow`() = runScenario {
-        analyticsHelper.onLinkLaunched(CHECKOUT_SESSION_ID)
+        analyticsHelper.onLinkLaunched()
 
         assertThat(eventsReporter.popupCalls.awaitItem())
-            .isEqualTo(PopupCall(PopupEvent.Show, CHECKOUT_SESSION_ID))
+            .isEqualTo(PopupEvent.Show)
     }
 
     @Test
@@ -29,11 +29,10 @@ internal class DefaultLinkAnalyticsHelperTest {
                     type = null
                 )
             ),
-            checkoutSessionId = CHECKOUT_SESSION_ID,
         )
 
         assertThat(eventsReporter.popupCalls.awaitItem())
-            .isEqualTo(PopupCall(PopupEvent.Success, CHECKOUT_SESSION_ID))
+            .isEqualTo(PopupEvent.Success)
     }
 
     @Test
@@ -42,11 +41,10 @@ internal class DefaultLinkAnalyticsHelperTest {
             linkActivityResult = LinkActivityResult.Completed(
                 linkAccountUpdate = LinkAccountUpdate.None
             ),
-            checkoutSessionId = CHECKOUT_SESSION_ID,
         )
 
         assertThat(eventsReporter.popupCalls.awaitItem())
-            .isEqualTo(PopupCall(PopupEvent.Success, CHECKOUT_SESSION_ID))
+            .isEqualTo(PopupEvent.Success)
     }
 
     @Test
@@ -58,11 +56,10 @@ internal class DefaultLinkAnalyticsHelperTest {
                 error = error,
                 linkAccountUpdate = LinkAccountUpdate.None
             ),
-            checkoutSessionId = CHECKOUT_SESSION_ID,
         )
 
         assertThat(eventsReporter.popupCalls.awaitItem())
-            .isEqualTo(PopupCall(PopupEvent.Error(error), CHECKOUT_SESSION_ID))
+            .isEqualTo(PopupEvent.Error(error))
     }
 
     @Test
@@ -72,11 +69,10 @@ internal class DefaultLinkAnalyticsHelperTest {
                 reason = LinkActivityResult.Canceled.Reason.BackPressed,
                 linkAccountUpdate = LinkAccountUpdate.None
             ),
-            checkoutSessionId = CHECKOUT_SESSION_ID,
         )
 
         assertThat(eventsReporter.popupCalls.awaitItem())
-            .isEqualTo(PopupCall(PopupEvent.Cancel, CHECKOUT_SESSION_ID))
+            .isEqualTo(PopupEvent.Cancel)
     }
 
     @Test
@@ -86,19 +82,18 @@ internal class DefaultLinkAnalyticsHelperTest {
                 reason = LinkActivityResult.Canceled.Reason.LoggedOut,
                 linkAccountUpdate = LinkAccountUpdate.None
             ),
-            checkoutSessionId = CHECKOUT_SESSION_ID,
         )
 
         assertThat(eventsReporter.popupCalls.awaitItem())
-            .isEqualTo(PopupCall(PopupEvent.Logout, CHECKOUT_SESSION_ID))
+            .isEqualTo(PopupEvent.Logout)
     }
 
     @Test
     fun `test onLinkPopupSkipped calls onPopupSkipped`() = runScenario {
-        analyticsHelper.onLinkPopupSkipped(CHECKOUT_SESSION_ID)
+        analyticsHelper.onLinkPopupSkipped()
 
         assertThat(eventsReporter.popupCalls.awaitItem())
-            .isEqualTo(PopupCall(PopupEvent.Skipped, CHECKOUT_SESSION_ID))
+            .isEqualTo(PopupEvent.Skipped)
     }
 
     private fun runScenario(
@@ -128,40 +123,31 @@ internal class DefaultLinkAnalyticsHelperTest {
         data object Skipped : PopupEvent
     }
 
-    private data class PopupCall(
-        val event: PopupEvent,
-        val checkoutSessionId: String?,
-    )
-
     private class PopupRecordingLinkEventsReporter : FakeLinkEventsReporter() {
-        val popupCalls = Turbine<PopupCall>()
+        val popupCalls = Turbine<PopupEvent>()
 
-        override fun onPopupShow(checkoutSessionId: String?) {
-            popupCalls.add(PopupCall(PopupEvent.Show, checkoutSessionId))
+        override fun onPopupShow() {
+            popupCalls.add(PopupEvent.Show)
         }
 
-        override fun onPopupSuccess(checkoutSessionId: String?) {
-            popupCalls.add(PopupCall(PopupEvent.Success, checkoutSessionId))
+        override fun onPopupSuccess() {
+            popupCalls.add(PopupEvent.Success)
         }
 
-        override fun onPopupCancel(checkoutSessionId: String?) {
-            popupCalls.add(PopupCall(PopupEvent.Cancel, checkoutSessionId))
+        override fun onPopupCancel() {
+            popupCalls.add(PopupEvent.Cancel)
         }
 
-        override fun onPopupError(error: Throwable, checkoutSessionId: String?) {
-            popupCalls.add(PopupCall(PopupEvent.Error(error), checkoutSessionId))
+        override fun onPopupError(error: Throwable) {
+            popupCalls.add(PopupEvent.Error(error))
         }
 
-        override fun onPopupLogout(checkoutSessionId: String?) {
-            popupCalls.add(PopupCall(PopupEvent.Logout, checkoutSessionId))
+        override fun onPopupLogout() {
+            popupCalls.add(PopupEvent.Logout)
         }
 
-        override fun onPopupSkipped(checkoutSessionId: String?) {
-            popupCalls.add(PopupCall(PopupEvent.Skipped, checkoutSessionId))
+        override fun onPopupSkipped() {
+            popupCalls.add(PopupEvent.Skipped)
         }
-    }
-
-    private companion object {
-        const val CHECKOUT_SESSION_ID = "cs_test_123"
     }
 }

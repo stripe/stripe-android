@@ -1,9 +1,11 @@
 package com.stripe.android.paymentelement.confirmation.linkinline
 
+import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.core.Logger
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkConfiguration
@@ -11,10 +13,10 @@ import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.LinkStore
-import com.stripe.android.link.analytics.FakeLinkAnalyticsHelper
-import com.stripe.android.link.analytics.LinkAnalyticsHelper
+import com.stripe.android.link.analytics.DefaultLinkAnalyticsHelper
 import com.stripe.android.link.attestation.LinkAttestationCheck
 import com.stripe.android.link.gate.LinkGate
+import com.stripe.android.link.injection.LinkAccountAnalyticsModule
 import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
@@ -39,6 +41,7 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.wallets.Wallet
+import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationOption
@@ -52,17 +55,25 @@ import com.stripe.android.paymentelement.confirmation.fakeLifecycleOwner
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.testing.DummyActivityResultCaller
+import com.stripe.android.testing.FakeAnalyticsRequestExecutor
+import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
+import com.stripe.android.utils.FakeDurationProvider
+import com.stripe.android.utils.FakeLinkComponent
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.RecordingLinkStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
+import org.robolectric.RobolectricTestRunner
 
+@RunWith(RobolectricTestRunner::class)
 internal class LinkInlineSignupConfirmationDefinitionTest {
     @Test
     fun `'key' should be 'LinkInlineSignup'`() {
@@ -134,6 +145,25 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
             clientAttributionMetadata = PaymentMethodMetadataFixtures.CHECKOUT_SESSION_CLIENT_ATTRIBUTION_METADATA,
             expectedCheckoutSessionId = "cs_test_123",
         )
+
+    @Test
+    fun `'action' reports popup skipped for its current configuration after checkout reuse`() = test(
+        initialAccountStatus = AccountStatus.NeedsVerification(),
+    ) {
+        val checkoutOption = createLinkInlineSignupConfirmationOption(
+            clientAttributionMetadata = PaymentMethodMetadataFixtures.CHECKOUT_SESSION_CLIENT_ATTRIBUTION_METADATA,
+        )
+        definition.action(checkoutOption, CONFIRMATION_PARAMETERS)
+        assertThat(coordinatorScenario.getAccountStatusFlowCalls.awaitItem().configuration)
+            .isEqualTo(checkoutOption.linkConfiguration)
+        assertPopupSkipped(expectedCheckoutSessionId = "cs_test_123")
+
+        val option = createLinkInlineSignupConfirmationOption()
+        definition.action(option, CONFIRMATION_PARAMETERS)
+        assertThat(coordinatorScenario.getAccountStatusFlowCalls.awaitItem().configuration)
+            .isEqualTo(option.linkConfiguration)
+        assertPopupSkipped(expectedCheckoutSessionId = null)
+    }
 
     @Test
     fun `'action' should return 'Launch' with new option with null SFU if no reuse request`() =
@@ -230,7 +260,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
 
         validateSkippedLaunchAction(confirmationOption, launchAction)
 
-        assertThat(analyticsScenario.onLinkPopupSkippedCalls.awaitItem()).isEqualTo(expectedCheckoutSessionId)
+        assertPopupSkipped(expectedCheckoutSessionId)
     }
 
     @Test
@@ -509,7 +539,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
         ) { launchAction ->
             validateSkippedLaunchAction(confirmationOption, launchAction)
 
-            assertThat(analyticsScenario.onLinkPopupSkippedCalls.awaitItem()).isEqualTo(expectedCheckoutSessionId)
+            assertPopupSkipped(expectedCheckoutSessionId)
         }
     }
 
@@ -724,6 +754,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
         assertThat(launchAction.receivesResultInProcess).isTrue()
     }
 
+    @Suppress("LongMethod")
     private fun test(
         attachNewCardToAccountResult: Result<LinkPaymentDetails> = Result.success(
             LinkPaymentDetails.New(
@@ -744,51 +775,73 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
         hasUsedLink: Boolean = false,
         test: suspend Scenario.() -> Unit
     ) = runTest {
+        val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
+        val errorReporter = FakeErrorReporter()
+        val durationProvider = FakeDurationProvider()
+        val requestFactory = PaymentAnalyticsRequestFactory(
+            context = ApplicationProvider.getApplicationContext(),
+            publishableKey = "pk_test",
+        )
+        val workContext = coroutineContext
+
         RecordingLinkConfigurationCoordinator.test(
             attachNewCardToAccountResult = attachNewCardToAccountResult,
             attachExistingCardToAccountResult = attachExistingCardToAccountResult,
             signInResult = signInResult,
             initialAccountStatus = initialAccountStatus,
             accountStatusOnSignIn = accountStatusOnSignIn,
+            componentFactory = { configuration ->
+                val reporter = LinkAccountAnalyticsModule.provideLinkEventsReporter(
+                    configuration = configuration,
+                    analyticsRequestExecutor = analyticsRequestExecutor,
+                    paymentAnalyticsRequestFactory = requestFactory,
+                    errorReporter = errorReporter,
+                    workContext = workContext,
+                    logger = Logger.noop(),
+                    durationProvider = durationProvider,
+                )
+                FakeLinkComponent(
+                    configuration = configuration,
+                    linkAnalyticsHelper = DefaultLinkAnalyticsHelper(reporter),
+                )
+            },
         ) {
             val coordinatorScenario = this
 
-            RecordingLinkAnalyticsHelper.test {
-                val analyticsScenario = this
+            RecordingOnLinkInlineResult.test {
+                val onResultScenario = this
 
-                RecordingOnLinkInlineResult.test {
-                    val onResultScenario = this
+                RecordingLinkStore.test(hasUsedLink) {
+                    val linkStoreScenario = this
 
-                    RecordingLinkStore.test(hasUsedLink) {
-                        val linkStoreScenario = this
-
-                        test(
-                            Scenario(
-                                definition = createLinkInlineSignupConfirmationDefinition(
-                                    linkConfigurationCoordinator = coordinatorScenario.coordinator,
-                                    linkAnalyticsHelper = analyticsScenario.helper,
-                                    linkStore = linkStoreScenario.linkStore,
-                                ),
-                                coordinatorScenario = coordinatorScenario,
-                                storeScenario = linkStoreScenario,
-                                analyticsScenario = analyticsScenario,
-                                onResultScenario = onResultScenario,
-                            )
+                    test(
+                        Scenario(
+                            definition = createLinkInlineSignupConfirmationDefinition(
+                                linkConfigurationCoordinator = coordinatorScenario.coordinator,
+                                linkStore = linkStoreScenario.linkStore,
+                            ),
+                            coordinatorScenario = coordinatorScenario,
+                            storeScenario = linkStoreScenario,
+                            analyticsRequestExecutor = analyticsRequestExecutor,
+                            testScheduler = testScheduler,
+                            onResultScenario = onResultScenario,
                         )
-                    }
+                    )
                 }
             }
         }
+
+        analyticsRequestExecutor.validate()
+        errorReporter.ensureAllEventsConsumed()
+        durationProvider.validate()
     }
 
     private fun createLinkInlineSignupConfirmationDefinition(
         linkConfigurationCoordinator: LinkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
-        linkAnalyticsHelper: LinkAnalyticsHelper = FakeLinkAnalyticsHelper(),
         linkStore: LinkStore = RecordingLinkStore.noOp(),
     ): LinkInlineSignupConfirmationDefinition {
         return LinkInlineSignupConfirmationDefinition(
             linkConfigurationCoordinator = linkConfigurationCoordinator,
-            linkAnalyticsHelper = linkAnalyticsHelper,
             linkStore = linkStore,
         )
     }
@@ -883,9 +936,20 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
         val definition: LinkInlineSignupConfirmationDefinition,
         val coordinatorScenario: RecordingLinkConfigurationCoordinator.Scenario,
         val storeScenario: RecordingLinkStore.Scenario,
-        val analyticsScenario: RecordingLinkAnalyticsHelper.Scenario,
+        val analyticsRequestExecutor: FakeAnalyticsRequestExecutor,
+        val testScheduler: TestCoroutineScheduler,
         val onResultScenario: RecordingOnLinkInlineResult.Scenario,
-    )
+    ) {
+        suspend fun assertPopupSkipped(expectedCheckoutSessionId: String?) {
+            testScheduler.runCurrent()
+            val params = analyticsRequestExecutor.awaitEvent("link.popup.skipped")
+            if (expectedCheckoutSessionId == null) {
+                assertThat(params).doesNotContainKey("checkout_session_id")
+            } else {
+                assertThat(params["checkout_session_id"]).isEqualTo(expectedCheckoutSessionId)
+            }
+        }
+    }
 
     private class RecordingOnLinkInlineResult private constructor() {
         data class OnResultCall(
@@ -917,42 +981,13 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
         }
     }
 
-    private class RecordingLinkAnalyticsHelper private constructor() : FakeLinkAnalyticsHelper() {
-        private val onLinkPopupSkippedCalls = Turbine<String?>()
-
-        override fun onLinkPopupSkipped(checkoutSessionId: String?) {
-            onLinkPopupSkippedCalls.add(checkoutSessionId)
-        }
-
-        class Scenario(
-            val helper: LinkAnalyticsHelper,
-            val onLinkPopupSkippedCalls: ReceiveTurbine<String?>,
-        )
-
-        companion object {
-            suspend fun test(
-                test: suspend Scenario.() -> Unit
-            ) {
-                val helper = RecordingLinkAnalyticsHelper()
-
-                test(
-                    Scenario(
-                        helper = helper,
-                        onLinkPopupSkippedCalls = helper.onLinkPopupSkippedCalls,
-                    )
-                )
-
-                helper.onLinkPopupSkippedCalls.ensureAllEventsConsumed()
-            }
-        }
-    }
-
     private class RecordingLinkConfigurationCoordinator private constructor(
         private val attachNewCardToAccountResult: Result<LinkPaymentDetails>,
         private val attachExistingCardToAccountResult: Result<LinkPaymentDetails.Saved>,
         private val signInResult: Result<Boolean>,
         initialAccountStatus: AccountStatus,
         private val accountStatusOnSignIn: AccountStatus,
+        private val componentFactory: (LinkConfiguration) -> LinkComponent,
     ) : LinkConfigurationCoordinator {
         private val getAccountStatusFlowCalls = Turbine<GetAccountStatusFlowCall>()
         private val signInCalls = Turbine<SignInCall>()
@@ -970,7 +1005,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
             }
 
         override fun getComponent(configuration: LinkConfiguration): LinkComponent {
-            throw NotImplementedError()
+            return componentFactory(configuration)
         }
 
         override fun getAccountStatusFlow(configuration: LinkConfiguration): Flow<AccountStatus> {
@@ -1062,6 +1097,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
                 signInResult: Result<Boolean>,
                 initialAccountStatus: AccountStatus,
                 accountStatusOnSignIn: AccountStatus,
+                componentFactory: (LinkConfiguration) -> LinkComponent,
                 test: suspend Scenario.() -> Unit,
             ) {
                 val coordinator = RecordingLinkConfigurationCoordinator(
@@ -1070,6 +1106,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
                     signInResult = signInResult,
                     initialAccountStatus = initialAccountStatus,
                     accountStatusOnSignIn = accountStatusOnSignIn,
+                    componentFactory = componentFactory,
                 )
 
                 test(

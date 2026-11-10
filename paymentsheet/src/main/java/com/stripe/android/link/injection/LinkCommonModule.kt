@@ -28,7 +28,6 @@ internal interface LinkCommonModule {
     fun bindLinkRepository(linkApiRepository: LinkApiRepository): LinkRepository
 
     companion object {
-        // Shared across Link configurations, so popup events take the checkout session ID per call.
         @Provides
         @Singleton
         fun provideLinkEventsReporter(

@@ -21,7 +21,6 @@ import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.gate.DefaultLinkGate
 import com.stripe.android.link.gate.LinkGate
-import com.stripe.android.link.injection.LinkAnalyticsComponent
 import com.stripe.android.link.injection.LinkCommonModule
 import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.link.injection.PaymentsIntegrityModule
@@ -77,7 +76,6 @@ import javax.inject.Singleton
 @SuppressWarnings("TooManyFunctions")
 @Module(
     subcomponents = [
-        LinkAnalyticsComponent::class,
         LinkComponent::class,
     ],
     includes = [

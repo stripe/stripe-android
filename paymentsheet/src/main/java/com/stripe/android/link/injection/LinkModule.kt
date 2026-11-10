@@ -5,6 +5,8 @@ import com.stripe.android.link.account.DefaultLinkAccountManager
 import com.stripe.android.link.account.DefaultLinkAuth
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.account.LinkAuth
+import com.stripe.android.link.analytics.DefaultLinkAnalyticsHelper
+import com.stripe.android.link.analytics.LinkAnalyticsHelper
 import com.stripe.android.link.attestation.DefaultLinkAttestationCheck
 import com.stripe.android.link.attestation.LinkAttestationCheck
 import com.stripe.android.link.gate.DefaultLinkGate
@@ -15,6 +17,10 @@ import dagger.Provides
 
 @Module
 internal interface LinkModule {
+    @Binds
+    @LinkScope
+    fun bindLinkAnalyticsHelper(linkAnalyticsHelper: DefaultLinkAnalyticsHelper): LinkAnalyticsHelper
+
     @Binds
     @LinkScope
     fun bindLinkAccountManager(linkAccountManager: DefaultLinkAccountManager): LinkAccountManager
