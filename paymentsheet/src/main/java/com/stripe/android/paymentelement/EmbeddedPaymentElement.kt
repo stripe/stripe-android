@@ -611,7 +611,9 @@ class EmbeddedPaymentElement @Inject internal constructor(
                 primaryButtonLabel?.let { primaryButtonLabel(it) }
                 apiConfiguration?.let {
                     apiConfiguration(
-                        ApiConfiguration(it.publishableKey).stripeAccountId(it.stripeAccountId)
+                        ApiConfiguration(it.publishableKey)
+                            .stripeAccountId(it.stripeAccountId)
+                            .betas(it.betas)
                     )
                 }
             }

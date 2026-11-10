@@ -8,14 +8,15 @@ import kotlin.time.Duration
 
 internal class CheckoutAnalyticsEvent(
     val operation: Operation,
-    outcome: Outcome,
+    outcome: Outcome?,
     analyticsMetadata: AnalyticsMetadata,
     duration: Duration?,
     error: Error?,
     operationParams: Map<String, Any?>,
 ) : AnalyticsEvent {
-    override val eventName = "checkout_elements.${operation.code}.${outcome.code}"
+    override val eventName = listOfNotNull(PRODUCT, operation.code, outcome?.code).joinToString(".")
     val params: Map<String, Any?> = buildMap {
+        put("product_usage", PRODUCT)
         putAll(operationParams)
         putAll(analyticsMetadata.paramsMap)
         putAll(duration.mapOfDurationInSeconds())
@@ -26,8 +27,24 @@ internal class CheckoutAnalyticsEvent(
         }
     }
 
+    enum class InvocationSource(val code: String) {
+        Merchant("merchant"),
+        ExpressCheckoutElement("express_checkout_element"),
+        PaymentElement("payment_element"),
+        ShippingAddressElement("shipping_address_element"),
+    }
+
     enum class Operation(val code: String) {
         Confirm("confirm"),
+        Init("init"),
+        ApplyPromotionCode("apply_promotion_code"),
+        RemovePromotionCode("remove_promotion_code"),
+        UpdateCurrency("update_currency"),
+        UpdateEmail("update_email"),
+        ClearPaymentOption("clear_payment_option"),
+        RunServerUpdate("run_server_update"),
+        UpdateShippingAddress("update_shipping_address"),
+        UpdateBillingAddress("update_billing_address"),
     }
 
     enum class Outcome(val code: String) {
@@ -52,5 +69,9 @@ internal class CheckoutAnalyticsEvent(
                 )
             }
         }
+    }
+
+    private companion object {
+        const val PRODUCT = "checkout_elements"
     }
 }

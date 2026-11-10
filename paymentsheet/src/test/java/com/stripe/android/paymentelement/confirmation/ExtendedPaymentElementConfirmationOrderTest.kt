@@ -8,7 +8,6 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.attestation.AttestationActivityContract
 import com.stripe.android.challenge.passive.PassiveChallengeActivityContract
-import com.stripe.android.challenge.passive.warmer.activity.PassiveChallengeWarmerContract
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkActivityContract
@@ -25,10 +24,9 @@ import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class ExtendedPaymentElementConfirmationOrderTest {
-    private val application = ApplicationProvider.getApplicationContext<Application>()
-
     @Test
     fun `on register, should register contracts in expected order`() = runTest {
+        val application = ApplicationProvider.getApplicationContext<Application>()
         DummyActivityResultCaller.test {
             val viewModel = DaggerExtendedPaymentElementConfirmationTestComponent.factory()
                 .create(
@@ -46,9 +44,6 @@ class ExtendedPaymentElementConfirmationOrderTest {
             assertThat(awaitNextRegisteredLauncher()).isInstanceOf<ActivityResultLauncher<*>>()
 
             assertThat(awaitRegisterCall().contract).isInstanceOf<BacsMandateConfirmationContract>()
-            assertThat(awaitNextRegisteredLauncher()).isInstanceOf<ActivityResultLauncher<*>>()
-
-            assertThat(awaitRegisterCall().contract).isInstanceOf<PassiveChallengeWarmerContract>()
             assertThat(awaitNextRegisteredLauncher()).isInstanceOf<ActivityResultLauncher<*>>()
 
             assertThat(awaitRegisterCall().contract).isInstanceOf<PassiveChallengeActivityContract>()

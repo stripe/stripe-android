@@ -1,9 +1,9 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.link.TestFactory
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement.InstantDebits
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement.LinkCardBrand
+import com.stripe.android.model.LinkDisabledReason
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
@@ -15,7 +15,7 @@ import com.stripe.android.payments.financialconnections.FinancialConnectionsAvai
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
-import com.stripe.android.paymentsheet.state.LinkState
+import com.stripe.android.paymentsheet.state.LinkDisabledState
 import com.stripe.android.testing.PaymentIntentFactory
 import org.junit.Test
 
@@ -147,11 +147,7 @@ internal class AddPaymentMethodRequirementTest {
     fun testInstantDebitsReturnsTrue() {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = createValidInstantDebitsPaymentIntent(),
-            linkState = LinkState(
-                configuration = TestFactory.LINK_CONFIGURATION_WITH_INSTANT_DEBITS_ONBOARDING,
-                loginState = LinkState.LoginState.LoggedOut,
-                signupMode = null,
-            )
+            isInstantDebitsOnboardingEnabled = true,
         )
 
         assertThat(InstantDebits.isMetBy(metadata, "")).isTrue()
@@ -161,16 +157,47 @@ internal class AddPaymentMethodRequirementTest {
     fun testInstantDebitsReturnsFalseIfOnboardingDisabledForInstantDebits() {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = createValidInstantDebitsPaymentIntent(),
-            linkState = LinkState(
-                configuration = TestFactory.LINK_CONFIGURATION.copy(
-                    linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD"),
-                ),
-                loginState = LinkState.LoginState.LoggedOut,
-                signupMode = null,
-            )
+            isInstantDebitsOnboardingEnabled = false,
         )
 
         assertThat(InstantDebits.isMetBy(metadata, "")).isFalse()
+    }
+
+    @Test
+    fun testInstantDebitsReturnsTrueIfLinkDisabledForCardBrandFiltering() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = createValidInstantDebitsPaymentIntent(),
+            linkState = LinkDisabledState(listOf(LinkDisabledReason.CardBrandFiltering)),
+            isInstantDebitsOnboardingEnabled = true,
+        )
+
+        assertThat(InstantDebits.isMetBy(metadata, "")).isTrue()
+    }
+
+    @Test
+    fun testInstantDebitsReturnsTrueIfLinkDisabledForBillingDetailsCollection() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = createValidInstantDebitsPaymentIntent(),
+            linkState = LinkDisabledState(listOf(LinkDisabledReason.BillingDetailsCollection)),
+            billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
+                name = CollectionMode.Always,
+                email = CollectionMode.Always,
+            ),
+            isInstantDebitsOnboardingEnabled = true,
+        )
+
+        assertThat(InstantDebits.isMetBy(metadata, "")).isTrue()
+    }
+
+    @Test
+    fun testInstantDebitsReturnsTrueIfLinkStateUnavailable() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = createValidInstantDebitsPaymentIntent(),
+            linkState = null,
+            isInstantDebitsOnboardingEnabled = true,
+        )
+
+        assertThat(InstantDebits.isMetBy(metadata, "")).isTrue()
     }
 
     @Test
@@ -178,11 +205,7 @@ internal class AddPaymentMethodRequirementTest {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = createValidInstantDebitsPaymentIntent(),
             linkMode = LinkMode.LinkCardBrand,
-            linkState = LinkState(
-                configuration = TestFactory.LINK_CONFIGURATION_WITH_INSTANT_DEBITS_ONBOARDING,
-                loginState = LinkState.LoginState.LoggedOut,
-                signupMode = null,
-            ),
+            isInstantDebitsOnboardingEnabled = true,
         )
 
         assertThat(InstantDebits.isMetBy(metadata, "")).isFalse()
@@ -195,11 +218,7 @@ internal class AddPaymentMethodRequirementTest {
             linkConfiguration = PaymentSheet.LinkConfiguration(
                 display = PaymentSheet.LinkConfiguration.Display.Automatic,
             ),
-            linkState = LinkState(
-                configuration = TestFactory.LINK_CONFIGURATION_WITH_INSTANT_DEBITS_ONBOARDING,
-                loginState = LinkState.LoginState.LoggedOut,
-                signupMode = null,
-            ),
+            isInstantDebitsOnboardingEnabled = true,
         )
 
         assertThat(InstantDebits.isMetBy(metadata, "")).isTrue()
@@ -212,11 +231,7 @@ internal class AddPaymentMethodRequirementTest {
             linkConfiguration = PaymentSheet.LinkConfiguration(
                 display = PaymentSheet.LinkConfiguration.Display.Never,
             ),
-            linkState = LinkState(
-                configuration = TestFactory.LINK_CONFIGURATION_WITH_INSTANT_DEBITS_ONBOARDING,
-                loginState = LinkState.LoginState.LoggedOut,
-                signupMode = null,
-            ),
+            isInstantDebitsOnboardingEnabled = true,
         )
 
         assertThat(InstantDebits.isMetBy(metadata, "")).isFalse()
@@ -227,14 +242,33 @@ internal class AddPaymentMethodRequirementTest {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = createValidInstantDebitsPaymentIntent(),
             linkMode = LinkMode.LinkCardBrand,
-            linkState = LinkState(
-                configuration = TestFactory.LINK_CONFIGURATION_WITH_INSTANT_DEBITS_ONBOARDING,
-                loginState = LinkState.LoginState.LoggedOut,
-                signupMode = null,
-            ),
+            isInstantDebitsOnboardingEnabled = true,
         )
 
         assertThat(LinkCardBrand.isMetBy(metadata, "")).isTrue()
+    }
+
+    @Test
+    fun testLinkCardBrandReturnsTrueIfLinkDisabledForCardBrandFiltering() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = createValidInstantDebitsPaymentIntent(),
+            linkMode = LinkMode.LinkCardBrand,
+            linkState = LinkDisabledState(listOf(LinkDisabledReason.CardBrandFiltering)),
+            isInstantDebitsOnboardingEnabled = true,
+        )
+
+        assertThat(LinkCardBrand.isMetBy(metadata, "")).isTrue()
+    }
+
+    @Test
+    fun testLinkCardBrandReturnsFalseIfOnboardingDisabledForInstantDebits() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = createValidInstantDebitsPaymentIntent(),
+            linkMode = LinkMode.LinkCardBrand,
+            isInstantDebitsOnboardingEnabled = false,
+        )
+
+        assertThat(LinkCardBrand.isMetBy(metadata, "")).isFalse()
     }
 
     @Test
@@ -242,11 +276,7 @@ internal class AddPaymentMethodRequirementTest {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = createValidInstantDebitsPaymentIntent(),
             linkMode = LinkMode.LinkCardBrand,
-            linkState = LinkState(
-                configuration = TestFactory.LINK_CONFIGURATION_WITH_INSTANT_DEBITS_ONBOARDING,
-                loginState = LinkState.LoginState.LoggedOut,
-                signupMode = null,
-            ),
+            isInstantDebitsOnboardingEnabled = true,
             billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
                 email = CollectionMode.Never,
                 attachDefaultsToPaymentMethod = true,
@@ -262,11 +292,7 @@ internal class AddPaymentMethodRequirementTest {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = createValidInstantDebitsPaymentIntent(),
             linkMode = LinkMode.LinkCardBrand,
-            linkState = LinkState(
-                configuration = TestFactory.LINK_CONFIGURATION_WITH_INSTANT_DEBITS_ONBOARDING,
-                loginState = LinkState.LoginState.LoggedOut,
-                signupMode = null,
-            ),
+            isInstantDebitsOnboardingEnabled = true,
             billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
                 email = CollectionMode.Never,
                 attachDefaultsToPaymentMethod = false,
@@ -284,11 +310,7 @@ internal class AddPaymentMethodRequirementTest {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = createValidInstantDebitsPaymentIntent(),
             linkMode = LinkMode.LinkCardBrand,
-            linkState = LinkState(
-                configuration = TestFactory.LINK_CONFIGURATION_WITH_INSTANT_DEBITS_ONBOARDING,
-                loginState = LinkState.LoginState.LoggedOut,
-                signupMode = null,
-            ),
+            isInstantDebitsOnboardingEnabled = true,
             billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(
                 email = CollectionMode.Never,
                 attachDefaultsToPaymentMethod = true,
@@ -309,11 +331,7 @@ internal class AddPaymentMethodRequirementTest {
             linkConfiguration = PaymentSheet.LinkConfiguration(
                 display = PaymentSheet.LinkConfiguration.Display.Automatic,
             ),
-            linkState = LinkState(
-                configuration = TestFactory.LINK_CONFIGURATION_WITH_INSTANT_DEBITS_ONBOARDING,
-                loginState = LinkState.LoginState.LoggedOut,
-                signupMode = null,
-            )
+            isInstantDebitsOnboardingEnabled = true,
         )
 
         assertThat(LinkCardBrand.isMetBy(metadata, "")).isTrue()
@@ -324,11 +342,7 @@ internal class AddPaymentMethodRequirementTest {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = createValidInstantDebitsPaymentIntent(),
             linkMode = LinkMode.LinkCardBrand,
-            linkState = LinkState(
-                configuration = TestFactory.LINK_CONFIGURATION_WITH_INSTANT_DEBITS_ONBOARDING,
-                loginState = LinkState.LoginState.LoggedOut,
-                signupMode = null,
-            ),
+            isInstantDebitsOnboardingEnabled = true,
             linkConfiguration = PaymentSheet.LinkConfiguration(
                 display = PaymentSheet.LinkConfiguration.Display.Never,
             ),

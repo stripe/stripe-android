@@ -155,6 +155,7 @@ internal class CheckoutShippingAddressElementAnalyticsTest {
             checkoutInitResponse = ::createCheckoutInitResponse,
             renderPaymentElementContent = false,
             setup = { configuredController ->
+                networkRule.validateCheckoutInitStartedAndSucceeded()
                 assertThat(configuredController.configure(DEFAULT_CLIENT_SECRET, configuration))
                     .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
             },
@@ -181,6 +182,13 @@ internal class CheckoutShippingAddressElementAnalyticsTest {
         val distanceMatcher = editDistance?.let {
             analyticsPayloadField(EDIT_DISTANCE_FIELD, it.toString())
         } ?: not(hasQueryParam(EDIT_DISTANCE_FIELD))
+
+        networkRule.validateCheckoutSessionAnalyticsRequest(
+            "checkout_elements.update_shipping_address.succeeded",
+            analyticsPayloadField("invocation_source", "shipping_address_element"),
+            analyticsPayloadField("did_request_tax_update", "false"),
+            not(hasQueryParam("duration")),
+        )
 
         listOf(
             "elements.shipping_address.save_started",

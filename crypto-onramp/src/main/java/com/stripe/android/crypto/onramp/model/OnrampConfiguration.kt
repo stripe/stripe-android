@@ -6,6 +6,7 @@ import com.stripe.android.crypto.onramp.exception.SDKVersion
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.link.LinkAppearance
 import com.stripe.android.model.CardBrand
+import com.stripe.android.paymentsheet.PaymentSheet
 
 /**
  * Configuration options required to initialize the Onramp flow.
@@ -24,6 +25,8 @@ class OnrampConfiguration {
     private var publishableKey: String? = null
     private var appearance: LinkAppearance? = null
     private var cryptoCustomerId: String? = null
+    private var googlePayCardBrandAcceptance: PaymentSheet.CardBrandAcceptance = PaymentSheet.CardBrandAcceptance.all()
+    private var linkCardBrandAcceptance: PaymentSheet.CardBrandAcceptance = PaymentSheet.CardBrandAcceptance.all()
     private var countryHint: String? = null
     private var googlePayConfig: GooglePayPaymentMethodLauncher.Config? = null
     private var samsungPayConfig: SamsungPayConfig? = null
@@ -65,6 +68,23 @@ class OnrampConfiguration {
      */
     fun countryHint(countryHint: String?) = apply {
         this.countryHint = countryHint
+    }
+
+    /**
+     * Sets the card brands accepted when collecting cards through Link.
+     * Configure Google Pay brands separately using [googlePayCardBrandAcceptance].
+     * All supported brands are accepted by default. This filtering is client-side only.
+     */
+    fun linkCardBrandAcceptance(linkCardBrandAcceptance: PaymentSheet.CardBrandAcceptance) = apply {
+        this.linkCardBrandAcceptance = linkCardBrandAcceptance
+    }
+
+    /**
+     * Sets the card brands accepted when collecting cards through Google Pay.
+     * All supported brands are accepted by default. This filtering is client-side only.
+     */
+    fun googlePayCardBrandAcceptance(googlePayCardBrandAcceptance: PaymentSheet.CardBrandAcceptance) = apply {
+        this.googlePayCardBrandAcceptance = googlePayCardBrandAcceptance
     }
 
     /**
@@ -130,6 +150,8 @@ class OnrampConfiguration {
 
     internal class State(
         val countryHint: String?,
+        val googlePayCardBrandAcceptance: PaymentSheet.CardBrandAcceptance,
+        val linkCardBrandAcceptance: PaymentSheet.CardBrandAcceptance,
         val merchantDisplayName: String,
         val publishableKey: String,
         val appearance: LinkAppearance,
@@ -142,6 +164,8 @@ class OnrampConfiguration {
     internal fun build(): State {
         return State(
             countryHint = countryHint,
+            googlePayCardBrandAcceptance = googlePayCardBrandAcceptance,
+            linkCardBrandAcceptance = linkCardBrandAcceptance,
             merchantDisplayName = requireNotNull(merchantDisplayName) {
                 "merchantDisplayName must not be null"
             },

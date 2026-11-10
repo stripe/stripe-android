@@ -58,6 +58,11 @@ internal class InputAddressViewModel @Inject constructor(
 
     private val initialInputsAreTheSame = initialBillingAddress == initialShippingAddress
 
+    // The customer can't edit a hidden name, so the address keeps the prefilled one.
+    private val hiddenName = args.config?.address?.name.takeIf {
+        args.config?.nameField == AddressLauncher.NameField.Never
+    }
+
     private val _shippingSameAsBillingState = MutableStateFlow(
         if (canUseShippingSameAsBilling()) {
             ShippingSameAsBillingState.Show(
@@ -224,17 +229,9 @@ internal class InputAddressViewModel @Inject constructor(
     private fun getCurrentAddress(): AddressDetails {
         val formValues = addressFormController.getCurrentFormValues()
 
-        return AddressDetails(
-            name = formValues[FormFieldId.Name]?.value,
-            address = PaymentSheet.Address(
-                city = formValues[FormFieldId.City]?.value,
-                country = formValues[FormFieldId.Country]?.value,
-                line1 = formValues[FormFieldId.Line1]?.value,
-                line2 = formValues[FormFieldId.Line2]?.value,
-                postalCode = formValues[FormFieldId.PostalCode]?.value,
-                state = formValues[FormFieldId.State]?.value
-            ),
-            phoneNumber = formValues[FormFieldId.Phone]?.value
+        return formValues.toAddressDetails(
+            hiddenName = hiddenName,
+            isCheckboxSelected = null,
         )
     }
 
@@ -249,18 +246,9 @@ internal class InputAddressViewModel @Inject constructor(
             return
         }
         if (!resultStateHolder.tryStartSaving()) return
-        val addressDetails = AddressDetails(
-            name = completedFormValues[FormFieldId.Name]?.value,
-            address = PaymentSheet.Address(
-                city = completedFormValues[FormFieldId.City]?.value,
-                country = completedFormValues[FormFieldId.Country]?.value,
-                line1 = completedFormValues[FormFieldId.Line1]?.value,
-                line2 = completedFormValues[FormFieldId.Line2]?.value,
-                postalCode = completedFormValues[FormFieldId.PostalCode]?.value,
-                state = completedFormValues[FormFieldId.State]?.value
-            ),
-            phoneNumber = completedFormValues[FormFieldId.Phone]?.value,
-            isCheckboxSelected = checkboxChecked
+        val addressDetails = completedFormValues.toAddressDetails(
+            hiddenName = hiddenName,
+            isCheckboxSelected = checkboxChecked,
         )
         val selectedAddress = autocompleteSelectedAddressDetails()
         eventReporter.onSaveStarted(
@@ -371,13 +359,7 @@ internal class InputAddressViewModel @Inject constructor(
     }
 
     private fun AddressDetails.takeIfUsable(): AddressDetails? {
-        val allowedCountries = args.config?.allowedCountries?.takeIf {
-            it.isNotEmpty()
-        } ?: CountryUtils.supportedBillingCountries
-
-        return takeIf {
-            address?.country == null || allowedCountries.contains(address.country)
-        }
+        return takeIfCountryAllowed(allowedCountries = args.config?.allowedCountries.orEmpty())
     }
 
     override fun onSearchActivated() {

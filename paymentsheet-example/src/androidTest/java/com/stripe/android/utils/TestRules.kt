@@ -31,7 +31,7 @@ class TestRules private constructor(
 
         fun create(
             disableAnimations: Boolean = true,
-            retryCount: Int = 3,
+            retryCount: Int = 2,
             block: RuleChain.() -> RuleChain = { this }
         ): TestRules {
             val composeTestRule = createEmptyComposeRule()

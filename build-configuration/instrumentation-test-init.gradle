@@ -1,6 +1,15 @@
+import groovy.json.JsonSlurper
+
 apply from: new File(gradle.startParameter.currentDir, "build-configuration/quarantined-tests-json.gradle")
 
 def load = gradle.ext.quarantinedTestsLoad
+def retryStatePath = System.getenv('STRIPE_INSTRUMENTATION_RETRY_STATE')
+def completedTests = retryStatePath
+    ? new JsonSlurper().parseText(new File(retryStatePath).getText('UTF-8')).completed
+    : [:]
+def commandLineExclusions = gradle.startParameter.projectProperties[
+    'android.testInstrumentationRunnerArguments.notClass'
+]
 
 allprojects { project ->
     def configureAndroidTestOrchestratorResolution = {
@@ -59,23 +68,37 @@ allprojects { project ->
     project.plugins.withId('com.android.library', configureAndroidTestOrchestratorResolution)
     project.plugins.withId('com.android.application', configureAndroidTestOrchestratorResolution)
 
-    if (load.status != 'OK') {
-        return
-    }
-
-    def excludedInstrumentationTestClasses = load.cases
+    def quarantinedTests = load.cases
         .collect { testCase -> "${testCase.className}#${testCase.testCaseName}" }
-        .join(",")
-
-    if (excludedInstrumentationTestClasses.isEmpty()) {
-        return
-    }
+    def passedTests = completedTests[project.projectDir.absolutePath]?.keySet() ?: []
+    def requestedTestTasks = gradle.startParameter.taskNames.findAll { name ->
+        def separator = name.lastIndexOf(':')
+        name.endsWith('AndroidTest') &&
+            (separator <= 0 || name.substring(0, separator) == project.path)
+    }.collect { name -> name.substring(name.lastIndexOf(':') + 1) }.unique()
 
     def configureAndroidTestExclusions = {
-        project.android.defaultConfig.testInstrumentationRunnerArguments.put(
-            'notClass',
-            excludedInstrumentationTestClasses
-        )
+        project.androidComponents.finalizeDsl { android ->
+            def arguments = android.defaultConfig.testInstrumentationRunnerArguments
+            def exclusions = (arguments.get('notClass') ?: '').tokenize(',') + quarantinedTests
+            if (requestedTestTasks.size() > 1 && !passedTests.isEmpty()) {
+                // A pass on one device/variant must not suppress an unrun case
+                // on another. Current CI commands run one test task per project.
+                println "Cannot exclude passed tests for ${project.path}: multiple instrumentation tasks requested"
+            } else if (commandLineExclusions && !passedTests.isEmpty()) {
+                // AGP gives command-line runner arguments precedence over the
+                // DSL. Preserve the caller's filter instead of silently losing it.
+                println "Cannot exclude passed tests for ${project.path}: command-line notClass overrides the DSL"
+            } else {
+                exclusions += passedTests
+                if (!passedTests.isEmpty()) {
+                    println "Excluding ${passedTests.size()} previously passed test(s) for ${project.path}"
+                }
+            }
+            if (!exclusions.isEmpty()) {
+                arguments.put('notClass', exclusions.unique().join(','))
+            }
+        }
     }
 
     project.plugins.withId("com.android.application", configureAndroidTestExclusions)

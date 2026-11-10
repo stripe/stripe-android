@@ -5,6 +5,7 @@ import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.common.analytics.experiment.FakePrimaryButtonExperiment
 import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
@@ -281,6 +282,7 @@ internal class DefaultVerticalModeFormInteractorTest {
                     loginState = LinkState.LoginState.LoggedOut,
                     signupMode = null,
                 ),
+                isInstantDebitsOnboardingEnabled = true,
                 paymentMethodIncentive = incentive,
             ),
             paymentMethodCode = PaymentMethod.Type.Link.code,
@@ -362,6 +364,7 @@ internal class DefaultVerticalModeFormInteractorTest {
             coroutineScope = TestScope(UnconfinedTestDispatcher()),
             onClickDelegate = OnClickDelegateOverrideImpl(),
             eventReporter = FakeEventReporter(),
+            primaryButtonExperiment = FakePrimaryButtonExperiment(),
             confirmationHandler = FakeConfirmationHandler(),
             tapToAddHelper = FakeTapToAddHelper.noOp(),
             customerStateHolder = FakeCustomerStateHolder(),

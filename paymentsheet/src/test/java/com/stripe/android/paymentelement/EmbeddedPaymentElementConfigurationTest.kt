@@ -20,6 +20,15 @@ import org.junit.Test
 class EmbeddedPaymentElementConfigurationTest {
 
     @Test
+    fun `beta flags survive builder reconstruction`() {
+        val original = EmbeddedPaymentElement.Configuration.Builder("Merchant")
+            .apiConfiguration(ApiConfiguration("pk_test_123").betas(setOf("example=v1")))
+            .build()
+
+        assertThat(original.newBuilder().build().apiConfiguration?.betas).containsExactly("example=v1")
+    }
+
+    @Test
     fun `api configuration is included in common configuration`() {
         val configuration = EmbeddedPaymentElement.Configuration.Builder("Test Merchant")
             .apiConfiguration(

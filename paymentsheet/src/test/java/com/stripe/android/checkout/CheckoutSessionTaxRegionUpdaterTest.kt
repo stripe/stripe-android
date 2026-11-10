@@ -3,6 +3,7 @@ package com.stripe.android.checkout
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutElementsController.Address
+import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent.InvocationSource
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.core.networking.ApiRequest
@@ -67,6 +68,7 @@ internal class CheckoutSessionTaxRegionUpdaterTest {
         val result = updater.updateServerStateIfNeeded(
             checkoutSessionResponse = checkoutSessionResponse,
             addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+            invocationSource = InvocationSource.Merchant,
             address = ADDRESS,
         )
 
@@ -80,6 +82,7 @@ internal class CheckoutSessionTaxRegionUpdaterTest {
         val result = updater.updateServerStateIfNeeded(
             checkoutSessionResponse = checkoutSessionResponse,
             addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+            invocationSource = InvocationSource.Merchant,
             address = ADDRESS,
         )
 
@@ -91,6 +94,7 @@ internal class CheckoutSessionTaxRegionUpdaterTest {
         val result = updater.updateServerStateIfNeeded(
             checkoutSessionResponse = checkoutSessionResponse,
             addressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
+            invocationSource = InvocationSource.Merchant,
             address = ADDRESS,
         )
 
@@ -107,6 +111,7 @@ internal class CheckoutSessionTaxRegionUpdaterTest {
         val result = updater.updateServerStateIfNeeded(
             checkoutSessionResponse = checkoutSessionResponse,
             addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+            invocationSource = InvocationSource.Merchant,
             address = ADDRESS,
         )
 

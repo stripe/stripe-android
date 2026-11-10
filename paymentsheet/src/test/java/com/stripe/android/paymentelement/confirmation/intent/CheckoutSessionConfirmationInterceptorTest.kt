@@ -21,6 +21,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
+import com.stripe.android.lpmfoundations.paymentmethod.create
 import com.stripe.android.model.Address
 import com.stripe.android.model.AndroidVerificationObject
 import com.stripe.android.model.ClientAttributionMetadata
@@ -56,6 +57,7 @@ import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.repositories.CheckoutStripeRepositoryFactory
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentConfigurationTestRule
@@ -1107,10 +1109,10 @@ class CheckoutSessionConfirmationInterceptorTest {
         token: String?,
     ): PaymentMethodConfirmationOption {
         val errorReporter = FakeErrorReporter()
-        val warmer = FakePassiveChallengeWarmer()
+        val passiveChallengeWarmer = FakePassiveChallengeWarmer()
         val definition = PassiveChallengeConfirmationDefinition(
             errorReporter = errorReporter,
-            passiveChallengeWarmer = warmer,
+            passiveChallengeWarmer = passiveChallengeWarmer,
             productUsage = emptySet(),
             isEligibleForConfirmationChallenge = FakeIsEligibleForConfirmationChallenge(),
         )
@@ -1128,7 +1130,7 @@ class CheckoutSessionConfirmationInterceptorTest {
                 ?: PassiveChallengeActivityResult.Failed(IllegalStateException("Challenge failed")),
         ) as ConfirmationDefinition.Result.NextStep
         errorReporter.ensureAllEventsConsumed()
-        warmer.ensureAllEventsConsumed()
+        passiveChallengeWarmer.ensureAllEventsConsumed()
         return result.confirmationOption as PaymentMethodConfirmationOption
     }
 
@@ -1173,17 +1175,21 @@ class CheckoutSessionConfirmationInterceptorTest {
         val interceptor = CheckoutSessionConfirmationInterceptor(
             integrationMetadata = IntegrationMetadata.CheckoutSession(
                 collectedEmail = collectedEmail,
-                id = checkoutSessionResponse.id,
                 instancesKey = "test_key",
                 checkoutSessionResponse = checkoutSessionResponse,
             ),
             customerMetadata = customerMetadata,
-            clientAttributionMetadata = ClientAttributionMetadata.Elements(
+            clientAttributionMetadata = ClientAttributionMetadata.create(
                 elementsSessionConfigId = "test_session_id",
-                paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
-                paymentMethodSelectionFlow = PaymentMethodSelectionFlow.MerchantSpecified,
-                stripeSdkVersion = StripeSdkVersion.VERSION_NAME,
-            ),
+                initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+                    instancesKey = "test_key",
+                    checkoutSessionResponse = checkoutSessionResponse,
+                    collectedEmail = collectedEmail,
+                    configuredElements = listOf("mobile-payment-element"),
+                ),
+                automaticPaymentMethodsEnabled = false,
+                isExpressCheckoutElement = false,
+            ) as ClientAttributionMetadata.CheckoutSession,
             context = applicationContext,
             checkoutSessionRepository = checkoutSessionRepository,
             checkoutSessionTaxRegionUpdater = CheckoutSessionTaxRegionUpdater(checkoutSessionRepository),

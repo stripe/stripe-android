@@ -89,6 +89,24 @@ class RequestHeadersFactoriesTest {
     }
 
     @Test
+    fun headers_withSdkVersionOverride_reportOverriddenVersion() {
+        RequestHeadersFactory.SDK_VERSION_NAME_OVERRIDE = "22.0.0"
+        try {
+            val headers = createBasePaymentApiHeaders()
+
+            assertThat(headers[HEADER_USER_AGENT]).isEqualTo("Stripe/v1 AndroidBindings/22.0.0")
+            assertThat(
+                JSONObject(requireNotNull(headers[HEADER_X_STRIPE_USER_AGENT]))[AnalyticsFields.BINDINGS_VERSION]
+            ).isEqualTo("22.0.0")
+            assertThat(
+                JSONObject(requireNotNull(headers[HEADER_STRIPE_CLIENT_USER_AGENT])).getString("bindings.version")
+            ).isEqualTo("22.0.0")
+        } finally {
+            RequestHeadersFactory.SDK_VERSION_NAME_OVERRIDE = null
+        }
+    }
+
+    @Test
     fun headers_withInternalAppInfo() {
         val headers = createBasePaymentApiHeaders(appInfo = AppInfoFixtures.DEFAULT)
         assertThat(headers[HEADER_USER_AGENT])

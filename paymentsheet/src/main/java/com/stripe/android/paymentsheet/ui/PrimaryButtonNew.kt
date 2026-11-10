@@ -61,6 +61,8 @@ import com.stripe.android.uicore.StripeTheme
 import kotlinx.coroutines.delay
 
 const val PRIMARY_BUTTON_TEST_TAG = "PRIMARY_BUTTON_TEST_TAG"
+internal const val PRIMARY_BUTTON_LOCK_ICON_TEST_TAG = "PRIMARY_BUTTON_LOCK_ICON_TEST_TAG"
+internal const val PRIMARY_BUTTON_SECURE_ICON_TEST_TAG = "PRIMARY_BUTTON_SECURE_ICON_TEST_TAG"
 private const val FADE_ANIMATION_DURATION = 100
 private const val FADE_OUT_ANIMATION_DELAY = 90
 
@@ -261,16 +263,28 @@ private fun BoxScope.StaticIncompleteProcessing(
             color = onBackground,
             modifier = Modifier.align(Alignment.CenterEnd),
         )
-    } else if (icon == PrimaryButtonIcon.Lock) {
-        Icon(
-            painter = painterResource(
-                id = R.drawable.stripe_ic_paymentsheet_googlepay_primary_button_lock
-            ),
-            tint = onBackground,
-            contentDescription = null,
-            modifier = Modifier
-                .align(Alignment.CenterEnd)
-        )
+    } else {
+        val drawableRes = when (icon) {
+            PrimaryButtonIcon.Lock -> R.drawable.stripe_ic_paymentsheet_googlepay_primary_button_lock
+            PrimaryButtonIcon.Secure -> R.drawable.stripe_ic_paymentsheet_primary_button_secure
+            PrimaryButtonIcon.None -> null
+        }
+        drawableRes?.let {
+            Icon(
+                painter = painterResource(id = it),
+                tint = onBackground,
+                contentDescription = null,
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .testTag(
+                        if (icon == PrimaryButtonIcon.Lock) {
+                            PRIMARY_BUTTON_LOCK_ICON_TEST_TAG
+                        } else {
+                            PRIMARY_BUTTON_SECURE_ICON_TEST_TAG
+                        }
+                    )
+            )
+        }
     }
 }
 

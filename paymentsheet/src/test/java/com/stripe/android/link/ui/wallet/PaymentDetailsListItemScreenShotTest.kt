@@ -1,17 +1,26 @@
 package com.stripe.android.link.ui.wallet
 
+import android.graphics.Bitmap
+import android.graphics.Color
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.ConsumerPaymentDetails.Display
+import com.stripe.android.model.ConsumerPaymentDetails.Display.Icon
 import com.stripe.android.model.CvcCheck
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
+import com.stripe.android.uicore.image.LocalStripeImageLoader
+import com.stripe.android.utils.FakeStripeImageLoader
 import org.junit.Rule
 import org.junit.Test
 
@@ -48,7 +57,8 @@ internal class PaymentDetailsListItemScreenShotTest {
                         administrativeArea = null,
                         countryCode = CountryCode.US,
                         postalCode = "12312"
-                    )
+                    ),
+                    display = null,
                 ),
                 enabled = true,
                 isSelected = false,
@@ -81,7 +91,8 @@ internal class PaymentDetailsListItemScreenShotTest {
                         administrativeArea = null,
                         countryCode = CountryCode.US,
                         postalCode = "12312"
-                    )
+                    ),
+                    display = null,
                 ),
                 enabled = true,
                 isSelected = true,
@@ -114,7 +125,8 @@ internal class PaymentDetailsListItemScreenShotTest {
                         administrativeArea = null,
                         countryCode = CountryCode.US,
                         postalCode = "12312"
-                    )
+                    ),
+                    display = null,
                 ),
                 enabled = true,
                 isSelected = false,
@@ -147,7 +159,8 @@ internal class PaymentDetailsListItemScreenShotTest {
                         administrativeArea = null,
                         countryCode = CountryCode.US,
                         postalCode = "12312"
-                    )
+                    ),
+                    display = null,
                 ),
                 enabled = false,
                 isSelected = true,
@@ -180,7 +193,8 @@ internal class PaymentDetailsListItemScreenShotTest {
                         administrativeArea = null,
                         countryCode = CountryCode.US,
                         postalCode = "12312"
-                    )
+                    ),
+                    display = null,
                 ),
                 enabled = true,
                 isSelected = true,
@@ -203,6 +217,7 @@ internal class PaymentDetailsListItemScreenShotTest {
                     nickname = null,
                     billingAddress = null,
                     billingEmailAddress = null,
+                    display = null,
                 ),
                 enabled = true,
                 isSelected = false,
@@ -225,6 +240,7 @@ internal class PaymentDetailsListItemScreenShotTest {
                     nickname = null,
                     billingAddress = null,
                     billingEmailAddress = null,
+                    display = null,
                 ),
                 enabled = true,
                 isSelected = false,
@@ -305,6 +321,57 @@ internal class PaymentDetailsListItemScreenShotTest {
         )
     }
 
+    @Test
+    fun testRemoteIcons() {
+        val cardArtUrl = "https://b.stripecdn.com/card-art.png"
+        val bankIconUrl = "https://b.stripecdn.com/bank-icon.png"
+        val cardBrandIconUrl = "https://b.stripecdn.com/card-brand-icon.png"
+
+        // Given a card and bank account with loadable icons, a card whose icon can't be loaded, and a card whose
+        // loadable icon is a card brand icon
+        val paymentDetails = listOf(
+            remoteIconCard(
+                id = "1",
+                isDefault = true,
+                brand = CardBrand.Visa,
+                last4 = "4242",
+                label = "Visa Credit",
+                icon = Icon(defaultUrl = cardArtUrl, type = Icon.Type.CardArt),
+            ),
+            remoteIconBankAccount(icon = Icon(defaultUrl = bankIconUrl, type = Icon.Type.Institution)),
+            remoteIconCard(
+                id = "3",
+                isDefault = false,
+                brand = CardBrand.AmericanExpress,
+                last4 = "0005",
+                label = "American Express Credit",
+                icon = Icon(defaultUrl = "https://b.stripecdn.com/unloadable-icon.png", type = Icon.Type.CardArt),
+            ),
+            remoteIconCard(
+                id = "4",
+                isDefault = false,
+                brand = CardBrand.MasterCard,
+                last4 = "4444",
+                label = "Mastercard Credit",
+                icon = Icon(defaultUrl = cardBrandIconUrl, type = Icon.Type.CardBrand),
+            ),
+        )
+
+        // ...and an image loader with card art, bank account and card brand icons
+        val images = {
+            mapOf(
+                cardArtUrl to solidBitmap(color = Color.RED, width = 48, height = 32),
+                bankIconUrl to solidBitmap(color = Color.BLUE, width = 96, height = 96),
+                cardBrandIconUrl to solidBitmap(color = Color.GREEN, width = 48, height = 32),
+            )
+        }
+
+        // When each payment method is displayed
+        // Then the card art fills the rectangular icon area, the bank account icon fills the square icon area,
+        // and the card without a loadable icon and the card with a card brand icon show their local brand icons
+        snapshotWithImageLoader(paymentDetails = paymentDetails, images = images)
+    }
+
     private fun snapshot(state: State) {
         paparazziRule.snapshot {
             DefaultLinkTheme {
@@ -320,6 +387,75 @@ internal class PaymentDetailsListItemScreenShotTest {
                 )
             }
         }
+    }
+
+    /**
+     * Snapshots [paymentDetails] after their icons load from [images], which is invoked during rendering because
+     * bitmaps can only be created once Paparazzi is rendering.
+     */
+    private fun snapshotWithImageLoader(
+        paymentDetails: List<ConsumerPaymentDetails.PaymentDetails>,
+        images: () -> Map<String, Bitmap>,
+    ) {
+        paparazziRule.snapshotAfterOffset {
+            val imageLoader = remember { FakeStripeImageLoader(images = images()) }
+
+            DefaultLinkTheme {
+                CompositionLocalProvider(LocalStripeImageLoader provides imageLoader) {
+                    Column {
+                        paymentDetails.forEach { details ->
+                            PaymentDetailsListItem(
+                                paymentDetails = details,
+                                isClickable = true,
+                                isMenuButtonClickable = true,
+                                isAvailable = true,
+                                isSelected = false,
+                                isUpdating = false,
+                                onClick = {},
+                                onMenuButtonClick = {}
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun remoteIconCard(
+        id: String,
+        isDefault: Boolean,
+        brand: CardBrand,
+        last4: String,
+        label: String,
+        icon: Icon,
+    ) = ConsumerPaymentDetails.Card(
+        id = id,
+        expiryYear = 2030,
+        expiryMonth = 10,
+        isDefault = isDefault,
+        brand = brand,
+        last4 = last4,
+        cvcCheck = CvcCheck.Pass,
+        networks = emptyList(),
+        funding = ConsumerPaymentDetails.Card.Funding.Credit,
+        nickname = null,
+        display = Display(label = label, sublabel = "•••• $last4", icon = icon),
+    )
+
+    private fun remoteIconBankAccount(icon: Icon) = ConsumerPaymentDetails.BankAccount(
+        id = "2",
+        last4 = "6789",
+        isDefault = false,
+        nickname = null,
+        bankAccountName = "Checking",
+        bankIconCode = null,
+        billingAddress = null,
+        billingEmailAddress = null,
+        display = Display(label = "Checking", sublabel = "••6789", icon = icon),
+    )
+
+    private fun solidBitmap(color: Int, width: Int, height: Int): Bitmap {
+        return Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888).apply { eraseColor(color) }
     }
 
     internal data class State(

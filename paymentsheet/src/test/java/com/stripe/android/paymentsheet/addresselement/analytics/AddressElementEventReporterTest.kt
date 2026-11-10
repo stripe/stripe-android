@@ -128,8 +128,7 @@ internal class AddressElementEventReporterTest {
     fun `Checkout onShown reports the current country and session`() = runScenario {
         checkoutShippingReporter.onShown(country = "CA")
 
-        val params = analyticsRequestExecutor.getExecutedRequests().single().params
-        assertThat(params).containsEntry("event", "elements.shipping_address.shown")
+        val params = analyticsRequestExecutor.awaitEvent("elements.shipping_address.shown")
         assertThat(params).containsEntry("checkout_session_id", "cs_test_123")
         assertThat(params["address_data_blob"]).isEqualTo(
             mapOf("address_country_code" to "CA")
@@ -143,8 +142,7 @@ internal class AddressElementEventReporterTest {
             autocompleteAddressDetails = createAddressDetails(line1 = "511 Townsend St"),
         )
 
-        val params = analyticsRequestExecutor.getExecutedRequests().single().params
-        assertThat(params).containsEntry("event", "elements.shipping_address.save_started")
+        val params = analyticsRequestExecutor.awaitEvent("elements.shipping_address.save_started")
         assertThat(params).containsEntry("checkout_session_id", "cs_test_123")
         assertThat(params["address_data_blob"]).isEqualTo(
             mapOf(
@@ -162,8 +160,7 @@ internal class AddressElementEventReporterTest {
             autocompleteAddressDetails = null,
         )
 
-        val params = analyticsRequestExecutor.getExecutedRequests().single().params
-        assertThat(params).containsEntry("event", "elements.shipping_address.save_completed")
+        val params = analyticsRequestExecutor.awaitEvent("elements.shipping_address.save_completed")
         assertThat(params).containsEntry("checkout_session_id", "cs_test_123")
         assertThat(params["address_data_blob"]).isEqualTo(
             mapOf(
@@ -180,8 +177,7 @@ internal class AddressElementEventReporterTest {
             autocompleteAddressDetails = null,
         )
 
-        val params = analyticsRequestExecutor.getExecutedRequests().single().params
-        assertThat(params).containsEntry("event", "elements.shipping_address.canceled")
+        val params = analyticsRequestExecutor.awaitEvent("elements.shipping_address.canceled")
         assertThat(params).containsEntry("checkout_session_id", "cs_test_123")
         assertThat(params["address_data_blob"]).isEqualTo(
             mapOf(
@@ -199,8 +195,7 @@ internal class AddressElementEventReporterTest {
             error = IllegalStateException("sensitive details"),
         )
 
-        val params = analyticsRequestExecutor.getExecutedRequests().single().params
-        assertThat(params).containsEntry("event", "elements.shipping_address.save_failed")
+        val params = analyticsRequestExecutor.awaitEvent("elements.shipping_address.save_failed")
         assertThat(params).containsEntry("checkout_session_id", "cs_test_123")
         assertThat(params["address_data_blob"]).isEqualTo(
             mapOf(
@@ -247,6 +242,7 @@ internal class AddressElementEventReporterTest {
         ).block()
 
         addressLauncherEventReporter.validate()
+        analyticsRequestExecutor.validate()
     }
 
     private data class Scenario(

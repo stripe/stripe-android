@@ -9,6 +9,7 @@ import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.analytics.experiment.LogFcLiteExperiment
 import com.stripe.android.common.analytics.experiment.LogLinkHoldbackExperiment
 import com.stripe.android.common.analytics.experiment.PaymentMethodMessagePromotionsExperimentHandler
+import com.stripe.android.common.analytics.experiment.PreselectLinkExperiment
 import com.stripe.android.common.coroutines.runCatching
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
@@ -28,6 +29,8 @@ import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.create
+import com.stripe.android.lpmfoundations.paymentmethod.logUnavailableLink
+import com.stripe.android.lpmfoundations.paymentmethod.logUnavailablePaymentMethods
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSession.ExperimentAssignment
@@ -237,7 +240,6 @@ internal interface PaymentElementLoader {
 
             override fun integrationMetadata(paymentElementCallbacks: PaymentElementCallbacks?): IntegrationMetadata {
                 return IntegrationMetadata.CheckoutSession(
-                    id = checkoutSessionResponse.id,
                     instancesKey = instancesKey,
                     checkoutSessionResponse = checkoutSessionResponse,
                     collectedEmail = collectedEmail,
@@ -294,6 +296,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     private val tapToAddAvailabilityFactory: TapToAddAvailabilityFactory,
     private val durationProvider: DurationProvider,
     private val paymentMethodMessagePromotionsExperimentHandler: PaymentMethodMessagePromotionsExperimentHandler,
+    private val preselectLinkExperiment: PreselectLinkExperiment,
 ) : PaymentElementLoader {
 
     fun interface AnalyticsMetadataFactory {
@@ -465,7 +468,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                     metadata = paymentMethodMetadata,
                     customer = customer,
                     isGooglePayReady = isGooglePayReady,
-                    isUsingWalletButtons = configuration.walletButtons?.willDisplayExternally ?: false
+                    integrationConfiguration = integrationConfiguration,
                 )
             }
         }
@@ -474,6 +477,11 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         val pmMetadata = paymentMethodMetadata.await()
 
         warnUnactivatedIfNeeded(stripeIntent)
+
+        logUnavailablePaymentMethodsIfNeeded(
+            integrationConfiguration = integrationConfiguration,
+            metadata = pmMetadata,
+        )
 
         if (!supportsIntent(pmMetadata)) {
             val requested = stripeIntent.paymentMethodTypes.joinToString(separator = ", ")
@@ -775,8 +783,10 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         metadata: PaymentMethodMetadata,
         customer: CustomerState?,
         isGooglePayReady: Boolean,
-        isUsingWalletButtons: Boolean,
+        integrationConfiguration: PaymentElementLoader.Configuration,
     ): PaymentSelection? {
+        val isUsingWalletButtons = integrationConfiguration.commonConfiguration.walletButtons?.willDisplayExternally
+            ?: false
         val isDefaultPaymentMethodEnabled = metadata.customerMetadata?.isPaymentMethodSetAsDefaultEnabled ?: false
         val primaryPaymentSelection = if (isDefaultPaymentMethodEnabled) {
             customer?.paymentMethods?.firstOrNull {
@@ -814,6 +824,11 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             ?: PaymentSelection.GooglePay.takeIf {
                 !isUsingWalletButtons && isGooglePayReady
             }
+            ?: preselectLinkExperiment.getSelection(
+                metadata = metadata,
+                customer = customer,
+                integrationConfiguration = integrationConfiguration,
+            )
     }
 
     private suspend fun retrieveSavedSelection(
@@ -882,6 +897,26 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             "More information: https://support.stripe.com/questions/activate-a-new-payment-method"
 
         logger.warning(message)
+    }
+
+    private fun logUnavailablePaymentMethodsIfNeeded(
+        integrationConfiguration: PaymentElementLoader.Configuration,
+        metadata: PaymentMethodMetadata,
+    ) {
+        when (integrationConfiguration) {
+            is PaymentElementLoader.Configuration.PaymentSheet,
+            is PaymentElementLoader.Configuration.Embedded -> {
+                logUnavailablePaymentMethods(metadata = metadata, logger = userFacingLogger)
+                logUnavailableLink(metadata = metadata, logger = userFacingLogger, isExpressCheckoutElement = false)
+            }
+            is PaymentElementLoader.Configuration.ExpressCheckoutElement -> logUnavailableLink(
+                metadata = metadata,
+                logger = userFacingLogger,
+                isExpressCheckoutElement = true,
+            )
+            is PaymentElementLoader.Configuration.CryptoOnramp,
+            is PaymentElementLoader.Configuration.StandaloneLink -> Unit
+        }
     }
 
     private fun supportsIntent(

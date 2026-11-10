@@ -115,6 +115,7 @@ class AddressLauncher internal constructor(
         internal val autocompleteCountries: Set<String> = AUTOCOMPLETE_DEFAULT_COUNTRIES,
         internal val billingAddress: PaymentSheet.BillingDetails?,
         internal val useStripeHostedAutocomplete: Boolean = true,
+        internal val nameField: NameField = NameField.Auto,
     ) : Parcelable {
         @JvmOverloads
         constructor(
@@ -236,6 +237,7 @@ class AddressLauncher internal constructor(
             private var googlePlacesApiKey: String? = null
             private var autocompleteCountries: Set<String> = AUTOCOMPLETE_DEFAULT_COUNTRIES
             private var billingAddress: PaymentSheet.BillingDetails? = null
+            private var nameField: NameField = NameField.Auto
 
             fun appearance(appearance: PaymentSheet.Appearance) =
                 apply { this.appearance = appearance }
@@ -266,6 +268,10 @@ class AddressLauncher internal constructor(
             fun billingAddress(billingAddress: PaymentSheet.BillingDetails?) =
                 apply { this.billingAddress = billingAddress }
 
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun nameField(nameField: NameField) =
+                apply { this.nameField = nameField }
+
             fun build() = Configuration(
                 appearance = appearance,
                 address = address,
@@ -276,8 +282,27 @@ class AddressLauncher internal constructor(
                 googlePlacesApiKey = googlePlacesApiKey,
                 autocompleteCountries = autocompleteCountries,
                 billingAddress = billingAddress,
+                nameField = nameField,
             )
         }
+    }
+
+    /**
+     * Whether the Address Element collects a name.
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @Parcelize
+    enum class NameField : Parcelable {
+        /**
+         * The name field is displayed and the customer is required to fill it in.
+         */
+        Auto,
+
+        /**
+         * The name field is not displayed. The result's name is the one in
+         * [Configuration.address], if any.
+         */
+        Never,
     }
 
     /**

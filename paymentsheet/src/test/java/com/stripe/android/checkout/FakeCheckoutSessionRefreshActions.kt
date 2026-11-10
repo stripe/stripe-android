@@ -1,6 +1,7 @@
 package com.stripe.android.checkout
 
 import app.cash.turbine.Turbine
+import com.stripe.android.paymentsheet.model.CheckoutSessionClientSecret
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 
 internal class FakeCheckoutSessionRefreshActions {
@@ -13,10 +14,11 @@ internal class FakeCheckoutSessionRefreshActions {
     }
 
     suspend fun fetch(
-        clientSecret: String,
+        clientSecret: CheckoutSessionClientSecret,
         adaptivePricingAllowed: Boolean,
+        analyticsParams: Map<String, Any?>,
     ): Result<CheckoutSessionResponse> {
-        fetchCalls.add(FetchCall(clientSecret, adaptivePricingAllowed))
+        fetchCalls.add(FetchCall(clientSecret, adaptivePricingAllowed, analyticsParams))
         return fetchResponses.awaitItem().invoke()
     }
 
@@ -31,7 +33,8 @@ internal class FakeCheckoutSessionRefreshActions {
     }
 
     data class FetchCall(
-        val clientSecret: String,
+        val clientSecret: CheckoutSessionClientSecret,
         val adaptivePricingAllowed: Boolean,
+        val analyticsParams: Map<String, Any?>,
     )
 }

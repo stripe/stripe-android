@@ -125,6 +125,7 @@ class PaymentLauncherContract :
             override val productUsage: Set<String>,
             override val includePaymentSheetNextHandlers: Boolean,
             val hashedValue: String,
+            val betas: Set<String>,
             @ColorInt override var statusBarColor: Int?,
         ) : Args(
             enableLogging = enableLogging,
@@ -168,6 +169,7 @@ class PaymentLauncherContract :
                 ApiConfiguration.State(
                     publishableKey = decodedValue.getOrNull()?.first ?: UNKNOWN_KEY,
                     stripeAccountId = stripeAccountId,
+                    betas = betas,
                 )
             }
 

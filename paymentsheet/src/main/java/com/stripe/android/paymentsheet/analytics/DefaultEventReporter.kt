@@ -398,12 +398,14 @@ internal class DefaultEventReporter @Inject internal constructor(
     }
 
     override fun onExperimentExposure(
-        experiment: LoggableExperiment
+        experiment: LoggableExperiment,
+        paymentMethodMetadata: PaymentMethodMetadata?,
     ) {
         fireV2Event(
             PaymentSheetEvent.ExperimentExposure(
                 experiment = experiment,
-            )
+            ),
+            paymentMethodMetadata = paymentMethodMetadata ?: paymentMethodMetadataProvider.get(),
         )
     }
 
@@ -624,11 +626,11 @@ internal class DefaultEventReporter @Inject internal constructor(
         }
     }
 
-    private fun fireV2Event(event: PaymentSheetEvent) {
+    private fun fireV2Event(event: PaymentSheetEvent, paymentMethodMetadata: PaymentMethodMetadata?) {
         val executor = analyticsRequestV2Executor
         val request = analyticsRequestV2Factory.createRequest(
             eventName = event.eventName,
-            additionalParams = paymentMethodMetadataProvider.get().defaultAnalyticsParams() + event.params,
+            additionalParams = paymentMethodMetadata.defaultAnalyticsParams() + event.params,
         )
 
         CoroutineScope(workContext).launch {

@@ -22,6 +22,12 @@ dependencies {
 }
 
 android {
+    kotlin {
+        compilerOptions {
+            optIn.add("com.stripe.android.core.ApiConfigurationPreview")
+        }
+    }
+
     testOptions {
         unitTests {
             includeAndroidResources = true

@@ -39,6 +39,47 @@ import kotlin.test.Test
 @RunWith(RobolectricTestRunner::class)
 internal class DefaultHCaptchaServiceTest {
     @Test
+    fun `module shares warmed token without sharing caller dependencies`() = runTest {
+        val storage = FakeHCaptchaCacheStorage()
+        val serviceFactory = { provider: HCaptchaProvider, reporter: CaptchaEventsReporter, starter: WebViewStarter ->
+            HCaptchaModule.provideHCaptchaService(provider, reporter, starter, storage)
+        }
+        val siteKey = "site-key"
+        TestContext.test(serviceFactory = serviceFactory) {
+            val warmUp = this
+            hCaptchaProvider.hCaptchaHandler = SetupSuccessfulHCaptcha("warmed-token")
+
+            TestContext.test(serviceFactory = serviceFactory) {
+                assertThat(service).isNotSameInstanceAs(warmUp.service)
+
+                warmUp.service.warmUp(warmUp.activity, siteKey, null)
+                warmUp.webViewStarter.awaitCall()
+                warmUp.hCaptchaProvider.awaitCall()
+                assertThat(warmUp.captchaEventsReporter.awaitCall())
+                    .isEqualTo(FakeCaptchaEventsReporter.Call.Init(siteKey))
+                assertThat(warmUp.captchaEventsReporter.awaitCall())
+                    .isEqualTo(FakeCaptchaEventsReporter.Call.Execute(siteKey))
+                assertThat(warmUp.captchaEventsReporter.awaitCall())
+                    .isEqualTo(FakeCaptchaEventsReporter.Call.Success(siteKey))
+
+                val result = service.performPassiveHCaptcha(activity, siteKey, null, null)
+
+                assertThat(result).isEqualTo(HCaptchaService.Result.Success("warmed-token"))
+                assertThat(storage.value).isEqualTo(CachedResult.Idle)
+                assertThat(captchaEventsReporter.awaitCall())
+                    .isEqualTo(FakeCaptchaEventsReporter.Call.AttachStart)
+                assertThat(captchaEventsReporter.awaitCall())
+                    .isEqualTo(FakeCaptchaEventsReporter.Call.AttachEnd(isReady = true, siteKey))
+                captchaEventsReporter.ensureAllEventsConsumed()
+                hCaptchaProvider.ensureAllEventsConsumed()
+            }
+
+            captchaEventsReporter.ensureAllEventsConsumed()
+            hCaptchaProvider.ensureAllEventsConsumed()
+        }
+    }
+
+    @Test
     fun `performPassiveHCaptcha waits for WebView startup before setup`() = runTest {
         TestContext.test(webViewStarter = FakeWebViewStarter(completeImmediately = false)) {
             hCaptchaProvider.hCaptchaHandler = SetupSuccessfulHCaptcha()
@@ -694,7 +735,7 @@ internal class DefaultHCaptchaServiceTest {
     private data class TestContext private constructor(
         val activity: FragmentActivity,
         val hCaptchaProvider: FakeHCaptchaProvider,
-        val service: DefaultHCaptchaService,
+        val service: HCaptchaService,
         val captchaEventsReporter: FakeCaptchaEventsReporter,
         val webViewStarter: FakeWebViewStarter
     ) {
@@ -705,17 +746,21 @@ internal class DefaultHCaptchaServiceTest {
                 hCaptchaProvider: FakeHCaptchaProvider = FakeHCaptchaProvider(),
                 captchaEventsReporter: FakeCaptchaEventsReporter = FakeCaptchaEventsReporter(),
                 webViewStarter: FakeWebViewStarter = FakeWebViewStarter(),
-                service: DefaultHCaptchaService = DefaultHCaptchaService(
-                    hCaptchaProvider,
-                    captchaEventsReporter,
-                    webViewStarter
-                ),
+                serviceFactory: (HCaptchaProvider, CaptchaEventsReporter, WebViewStarter) -> HCaptchaService =
+                    { provider, reporter, starter ->
+                        DefaultHCaptchaService(
+                            hCaptchaProvider = provider,
+                            captchaEventsReporter = reporter,
+                            webViewStarter = starter,
+                            storage = FakeHCaptchaCacheStorage()
+                        )
+                    },
                 block: suspend TestContext.() -> Unit
             ) {
                 TestContext(
                     activity = activity,
                     hCaptchaProvider = hCaptchaProvider,
-                    service = service,
+                    service = serviceFactory(hCaptchaProvider, captchaEventsReporter, webViewStarter),
                     captchaEventsReporter = captchaEventsReporter,
                     webViewStarter = webViewStarter
                 ).apply { block(this) }

@@ -105,7 +105,6 @@ class GooglePayIsEmailRequiredProviderTest {
         val checkoutSessionResponse = CheckoutSessionResponseFactory.create()
         return IntegrationMetadata.CheckoutSession(
             collectedEmail = null,
-            id = checkoutSessionResponse.id,
             instancesKey = "checkout_instances_123",
             checkoutSessionResponse = checkoutSessionResponse,
         )

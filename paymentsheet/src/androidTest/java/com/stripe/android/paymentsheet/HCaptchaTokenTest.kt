@@ -33,7 +33,10 @@ internal class HCaptchaTokenTest(
 ) {
     // The /v1/consumers/sessions/log_out request is launched async from a GlobalScope. We want to make sure it happens,
     // but it's okay if it takes a bit to happen.
-    private val networkRule = NetworkRule(validationTimeout = 5.seconds)
+    private val networkRule = NetworkRule(
+        validationTimeout = 5.seconds,
+        defaultMatcher = apiConfigurationTestType.defaultMatcher,
+    )
     private val testRules: TestRules = TestRules.create(
         networkRule = networkRule,
         retryRule = RetryRule(5),

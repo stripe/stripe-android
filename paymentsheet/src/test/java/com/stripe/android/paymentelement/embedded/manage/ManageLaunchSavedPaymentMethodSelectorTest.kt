@@ -56,7 +56,7 @@ internal class ManageLaunchSavedPaymentMethodSelectorTest {
                 assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Pending(selection.paymentMethod.id))
                 assertThat(selectionHolder.selection.value).isEqualTo(INITIAL_SELECTION)
 
-                val response = CheckoutSessionResponseFactory.create(id = "refreshed_response")
+                val response = CheckoutSessionResponseFactory.create(id = "cs_refreshed_response")
                 update.complete(Result.success(response))
 
                 assertThat(awaitItem()).isEqualTo(SavedPaymentMethodSelectionState.Idle)
@@ -273,7 +273,6 @@ internal class ManageLaunchSavedPaymentMethodSelectorTest {
         val CHECKOUT_SESSION_METADATA = PaymentMethodMetadataFactory.create(
             integrationMetadata = IntegrationMetadata.CheckoutSession(
                 collectedEmail = null,
-                id = "cs_test_123",
                 instancesKey = "test_instances_key",
                 checkoutSessionResponse = CheckoutSessionResponseFactory.create(
                     automaticTaxEnabled = true,

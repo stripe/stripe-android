@@ -4,9 +4,8 @@ package com.stripe.android.checkout
 
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.checkout.analytics.CheckoutConfirmationContext.InvocationSource
+import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent.InvocationSource
 import com.stripe.android.checkout.analytics.toAnalyticsMap
-import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.ApiConfigurationPreview
 import com.stripe.android.core.StripeError
@@ -35,13 +34,13 @@ import com.stripe.android.paymentelement.confirmation.MutableConfirmationMetadat
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationTypeKey
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.analytics.FakeAnalyticsRequestExecutor
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.LinkDisabledState
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
+import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.android.utils.FakeDurationProvider
 import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -623,10 +622,9 @@ internal class CheckoutAnalyticsPerformerTest {
         configurationParams: Map<String, Any?> = confirmationConfigurationParams,
     ): Map<String, *> {
         when (invocationSource) {
-            InvocationSource.Merchant ->
-                performer.onPaymentElementConfirmationStarted(paymentSelection)
             InvocationSource.ExpressCheckoutElement ->
                 performer.onExpressCheckoutElementConfirmationStarted(paymentSelection)
+            else -> performer.onPaymentElementConfirmationStarted(paymentSelection)
         }
         return analyticsRequestExecutor.awaitConfirmationEvent(
             STARTED_EVENT,
@@ -648,7 +646,8 @@ internal class CheckoutAnalyticsPerformerTest {
         val request = awaitEvent(event)
         assertThat(request).containsEntry("product_usage", "checkout_elements")
         assertThat(request).containsEntry("publishable_key", DEFAULT_METADATA_PUBLISHABLE_KEY)
-        val expected = sessionParams + configurationParams + params + listOfNotNull(duration?.let { "duration" to it })
+        val expected = CheckoutAnalyticsTestFixtures.sessionParams + configurationParams + params +
+            listOfNotNull(duration?.let { "duration" to it })
         assertThat(request.filterKeys { it in confirmationSpecKeys }).containsExactlyEntriesIn(expected)
         return request
     }
@@ -664,12 +663,8 @@ internal class CheckoutAnalyticsPerformerTest {
             state = CheckoutElementsControllerStateFactory.create(
                 paymentSelection = PaymentSelection.GooglePay,
                 paymentMethodMetadata = paymentMethodMetadata,
-                checkoutSessionResponse = CheckoutSessionResponseFactory.create(
-                    configId = "cfg_checkout",
-                    elementsSession = ElementsSession.createFromFallback(
-                        stripeIntent = paymentMethodMetadata.stripeIntent,
-                        sessionsError = null,
-                    ).copy(elementsSessionConfigId = "cfg_elements"),
+                checkoutSessionResponse = CheckoutAnalyticsTestFixtures.sessionResponse(
+                    stripeIntent = paymentMethodMetadata.stripeIntent,
                 ),
             )
         }
@@ -740,22 +735,11 @@ internal class CheckoutAnalyticsPerformerTest {
         val CONFIRMATION_DURATION = 2.seconds
         const val CONFIRMATION_DURATION_SECONDS = 2f
 
-        val sessionParams: Map<String, Any> = mapOf(
-            "checkout_session_id" to DEFAULT_CHECKOUT_SESSION_ID,
-            "checkout_config_id" to "cfg_checkout",
-            "elements_session_config_id" to "cfg_elements",
-            "currency" to "usd",
-            "session_status" to "open",
-            "payment_status" to "unpaid",
-            "adaptive_pricing_active" to false,
-            "automatic_tax_enabled" to false,
-        )
-
         val confirmationConfigurationParams: Map<String, Any?> =
             CheckoutElementsControllerStateFactory.create().configuration.toAnalyticsMap()
 
         val confirmationSpecKeys: Set<String> =
-            sessionParams.keys + confirmationConfigurationParams.keys + setOf(
+            CheckoutAnalyticsTestFixtures.sessionParams.keys + confirmationConfigurationParams.keys + setOf(
                 "selected_lpm",
                 "is_saved_payment_method",
                 "link_context",

@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
+import com.stripe.android.financialconnections.ThemeMode
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetFlowType
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.networking.FakeFinancialConnectionsManifestRepository
@@ -24,13 +25,14 @@ internal class CurrentLinkBrandTest {
             financialConnectionsSessionClientSecret = ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
             apiConfiguration = ApiKeyFixtures.DEFAULT_API_CONFIG,
             preCollectedConsent = null,
+            themeMode = ThemeMode.Automatic,
         ),
         reducedBranding = false,
         testMode = false,
         viewEffect = null,
         completed = false,
         initialPane = FinancialConnectionsSessionManifest.Pane.CONSENT,
-        theme = Theme.LinkLight,
+        theme = Theme.Link(ThemeMode.Automatic),
         linkBrand = LinkBrand.Link,
         isLinkWithStripe = true,
         manualEntryUsesMicrodeposits = false,

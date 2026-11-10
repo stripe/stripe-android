@@ -264,9 +264,6 @@ internal class EmbeddedSheetActivityTest {
             EmbeddedSheetContract.createIntent(
                 context = applicationContext,
                 input = EmbeddedActivityArgs(
-                    paymentMethodMetadata = paymentMethodMetadata,
-                    configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.")
-                        .build(),
                     productUsage = setOf("EmbeddedPaymentElement"),
                     paymentElementCallbackIdentifier = "EmbeddedSheetActivityTestCallbackIdentifier",
                     statusBarColor = null,
@@ -278,7 +275,11 @@ internal class EmbeddedSheetActivityTest {
                     linkAccountInfo = LinkAccountUpdate.Value(null),
                     promotions = emptyList(),
                     launchMode = EmbeddedLaunchMode.Manage,
-                    presentationState = EmbeddedActivityArgs.PresentationState.Ready,
+                    presentationState = EmbeddedActivityArgs.PresentationState.Ready(
+                        paymentMethodMetadata = paymentMethodMetadata,
+                        configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.")
+                            .build(),
+                    ),
                 ),
             )
         ).use { scenario ->

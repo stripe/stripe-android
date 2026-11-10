@@ -26,6 +26,10 @@
   <string name="stripe_confirm_close_form_body">Vaše platební údaje nebudou uloženy.</string>
   <!-- Used as the title for prompting the user if they want to close the sheet -->
   <string name="stripe_confirm_close_form_title">Chcete tento formulář zavřít?</string>
+  <!-- Fallback disclosure when paying in the merchant's currency instead of using Adaptive Pricing. -->
+  <string name="stripe_currency_selector_bank_fees_disclaimer">Mohou být uplatněny směnné kurzy a poplatky vaší banky.</string>
+  <string name="stripe_currency_selector_hide_details">Skrýt podrobnosti o směnném kurzu</string>
+  <string name="stripe_currency_selector_show_details">Zobrazit podrobnosti o směnném kurzu</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header">Uložte své údaje pro pro bezpečné odbavení 1 kliknutím u Link</string>
   <!-- Label for a checkbox that when checked allows the payment information
@@ -64,6 +68,12 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_email_suggestion_update">Ano, aktualizovat</string>
   <!-- Title for a button that indicates a user can log in or sign up. -->
   <string name="stripe_link_log_in_or_sign_up">Registrovat nebo přihlásit</string>
+  <!-- Label of a button that signs the user out of their current Link account so they can log in to a different one. -->
+  <string name="stripe_link_log_in_to_another_account">Přihlaste se k jinému účtu</string>
+  <!-- Message on a screen shown when none of the payment methods in the user's Link account can be used with this business. The placeholder is a Stripe brand name and should not be translated. -->
+  <string name="stripe_link_no_funding_sources_message">Žádný ze způsobů platby na vašem účtu %s u této firmy nefunguje.</string>
+  <!-- Title of a screen shown when none of the payment methods in the user's Link account can be used with this business. The placeholder is a Stripe brand name and should not be translated. -->
+  <string name="stripe_link_no_funding_sources_title">Pomocí %s zde nemůžete platit</string>
   <!-- Text displayed on a confirmation button on the CRS CARF declaration screen -->
   <string name="stripe_link_onramp_carf_declaration_accept_button_text">Přijmout</string>
   <!-- Text displayed on a cancel button on the CRS CARF declaration screen -->
@@ -414,7 +424,7 @@ to be saved and used in future checkout sessions. -->
   <!-- Mandate text displayed when paying via Link instant debit. -->
   <string name="stripe_wallet_bank_account_terms"><![CDATA[Pokračováním souhlasíte s autorizací plateb v souladu s těmito <terms>podmínkami</terms>.]]></string>
   <!-- Text providing link to terms for bank payments when seller information is provided -->
-  <string name="stripe_wallet_bank_account_terms_merchant_and_seller"><![CDATA[Odesláním objednávky do %1$s a %2$s souhlasíte s uložením svých údajů u %3$s pro budoucí nákupy a souhlasíte s autorizací plateb podle podmínek <terms></terms>.]]></string>
+  <string name="stripe_wallet_bank_account_terms_merchant_and_seller"><![CDATA[Odesláním objednávky do %1$s a %2$s souhlasíte s uložením svých údajů u %3$s pro budoucí nákupy a souhlasíte s autorizací plateb podle podmínek <terms>těchto podmínek</terms>.]]></string>
   <!-- Text providing link to terms for bank payments -->
   <string name="stripe_wallet_bank_account_terms_seller"><![CDATA[Odesláním objednávky společnosti %s souhlasíte s autorizací plateb podle <terms>těchto podmínek</terms>.]]></string>
   <!-- Label for a section displaying payment details. -->

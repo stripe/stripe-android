@@ -5,6 +5,7 @@ import androidx.lifecycle.Lifecycle
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
 import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
@@ -38,7 +39,10 @@ internal class PaymentSheetBillingConfigurationTest(
     private val page: PaymentSheetPage = PaymentSheetPage(composeTestRule)
 
     @get:Rule
-    val testRules: TestRules = TestRules.create(composeTestRule = composeTestRule)
+    val testRules: TestRules = TestRules.create(
+        composeTestRule = composeTestRule,
+        networkRule = NetworkRule(defaultMatcher = apiConfigurationTestType.defaultMatcher),
+    )
 
     private val networkRule = testRules.networkRule
 

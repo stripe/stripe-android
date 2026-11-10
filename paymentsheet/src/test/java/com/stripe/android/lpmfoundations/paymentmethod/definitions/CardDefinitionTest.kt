@@ -830,7 +830,6 @@ class CardDefinitionTest {
         val integrationMetadata = checkoutSessionResponse?.let { response ->
             IntegrationMetadata.CheckoutSession(
                 collectedEmail = null,
-                id = response.id,
                 instancesKey = "CardDefinitionTest",
                 checkoutSessionResponse = response,
             )

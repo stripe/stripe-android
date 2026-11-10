@@ -11,6 +11,7 @@ import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.ApiKeyFixtures.financialConnectionsSessionNoAccounts
 import com.stripe.android.financialconnections.CoroutineTestRule
 import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
+import com.stripe.android.financialconnections.ThemeMode
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Metadata
@@ -80,6 +81,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
         financialConnectionsSessionClientSecret = ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
         apiConfiguration = ApiKeyFixtures.DEFAULT_API_CONFIG,
         preCollectedConsent = null,
+        themeMode = ThemeMode.Automatic,
     )
     private val encodedPaymentMethod = "{\"id\": \"pm_123\"}"
 
@@ -313,7 +315,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
             viewEffect = null,
             completed = false,
             initialPane = FinancialConnectionsSessionManifest.Pane.CONSENT,
-            theme = Theme.LinkLight,
+            theme = Theme.Link(ThemeMode.Automatic),
             linkBrand = LinkBrand.Link,
             isLinkWithStripe = true,
             manualEntryUsesMicrodeposits = false,
@@ -372,7 +374,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
             viewEffect = null,
             completed = false,
             initialPane = FinancialConnectionsSessionManifest.Pane.CONSENT,
-            theme = Theme.LinkLight,
+            theme = Theme.Link(ThemeMode.Automatic),
             linkBrand = LinkBrand.Link,
             isLinkWithStripe = true,
             manualEntryUsesMicrodeposits = false,
@@ -428,7 +430,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
             viewEffect = null,
             completed = false,
             initialPane = FinancialConnectionsSessionManifest.Pane.CONSENT,
-            theme = Theme.LinkLight,
+            theme = Theme.Link(ThemeMode.Automatic),
             linkBrand = LinkBrand.Link,
             isLinkWithStripe = true,
             manualEntryUsesMicrodeposits = false,
@@ -476,7 +478,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
             viewEffect = null,
             completed = false,
             initialPane = FinancialConnectionsSessionManifest.Pane.CONSENT,
-            theme = Theme.DefaultLight,
+            theme = Theme.Default(ThemeMode.Automatic),
             linkBrand = LinkBrand.Link,
             isLinkWithStripe = false,
             manualEntryUsesMicrodeposits = false,
@@ -586,7 +588,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
         viewEffect = null,
         completed = false,
         initialPane = FinancialConnectionsSessionManifest.Pane.CONSENT,
-        theme = Theme.LinkLight,
+        theme = Theme.Link(ThemeMode.Automatic),
         linkBrand = linkBrand,
         isLinkWithStripe = true,
         manualEntryUsesMicrodeposits = false,

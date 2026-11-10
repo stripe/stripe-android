@@ -11,7 +11,6 @@ import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.isEnabled
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToNode
@@ -233,7 +232,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
             assertSavedPaymentMethodSpinnerCount(1)
             contentPage.assertHasSelectedLpm("cashapp")
             assertThat(controller.session.value?.totals?.total?.minorUnitsAmount)
-                .isEqualTo(INITIAL_TOTAL.toDouble())
+                .isEqualTo(INITIAL_TOTAL.toLong())
             immediateActionCalls.expectNoEvents()
 
             releaseTaxUpdateResponse.countDown()
@@ -324,7 +323,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
             assertSavedPaymentMethodSpinnerCount(0)
             contentPage.assertHasSelectedLpm("cashapp")
             assertThat(controller.session.value?.totals?.total?.minorUnitsAmount)
-                .isEqualTo(INITIAL_TOTAL.toDouble())
+                .isEqualTo(INITIAL_TOTAL.toLong())
             immediateActionCalls.expectNoEvents()
             contentPage.assertHasSavedPaymentMethodSelectionError(
                 applicationContext.getString(R.string.stripe_something_went_wrong)
@@ -470,7 +469,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
 
         immediateActionCalls.awaitItem()
         val session = checkNotNull(controller.session.value)
-        assertThat(session.totals.total.minorUnitsAmount).isEqualTo(INITIAL_TOTAL.toDouble())
+        assertThat(session.totals.total.minorUnitsAmount).isEqualTo(INITIAL_TOTAL.toLong())
         assertThat(session.paymentOption?.paymentMethodType).isEqualTo("cashapp")
         assertThat(session.paymentOption?.billingDetails?.address?.line1)
             .isEqualTo(BILLING_ADDRESS_LINE_ONE)
@@ -478,7 +477,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
     }
 
     private fun assertSavedPaymentMethodSession(session: CheckoutElementsController.Session) {
-        assertThat(session.totals.total.minorUnitsAmount).isEqualTo(UPDATED_TOTAL.toDouble())
+        assertThat(session.totals.total.minorUnitsAmount).isEqualTo(UPDATED_TOTAL.toLong())
         assertThat(session.paymentOption?.paymentMethodType).isEqualTo("card")
         assertThat(session.paymentOption?.billingDetails?.address?.line1)
             .isEqualTo(SAVED_BILLING_ADDRESS_LINE_ONE)
@@ -499,7 +498,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
         formPage.assertErrorIsShown(applicationContext.getString(R.string.stripe_something_went_wrong))
         formPage.waitUntilVisible()
         formPage.assertPrimaryButtonIsEnabled()
-        assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isEqualTo(INITIAL_TOTAL.toDouble())
+        assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isEqualTo(INITIAL_TOTAL.toLong())
 
         enqueueTaxUpdate(automaticTaxResponse(UPDATED_TOTAL, TAX_STATUS_COMPLETE))
         formPage.clickPrimaryButton()
@@ -835,12 +834,12 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
     }
 
     private fun fillOutBillingDetails() {
-        billingDetailsPage.country.assertTextContains("United States")
-        billingDetailsPage.line1.performTextReplacement(BILLING_ADDRESS_LINE_ONE)
-        billingDetailsPage.city.performTextReplacement(BILLING_ADDRESS_CITY)
-        billingDetailsPage.state.performScrollTo().performClick()
-        testRules.compose.onNodeWithText("California").performClick()
-        billingDetailsPage.zipCode.performTextReplacement(BILLING_ADDRESS_ZIP)
+        billingDetailsPage.fillOutUnitedStatesAddress(
+            line1 = BILLING_ADDRESS_LINE_ONE,
+            city = BILLING_ADDRESS_CITY,
+            stateName = "California",
+            zipCode = BILLING_ADDRESS_ZIP,
+        )
     }
 
     private fun assertBillingDetailsArePopulated() {
@@ -853,7 +852,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
 
     private fun waitForSessionTotal(controller: CheckoutElementsController, total: Long) {
         testRules.compose.waitUntilWithIdle {
-            controller.session.value?.totals?.total?.minorUnitsAmount == total.toDouble()
+            controller.session.value?.totals?.total?.minorUnitsAmount == total.toLong()
         }
     }
 

@@ -69,9 +69,6 @@ internal data class LinkConfiguration(
     val enableMfaAuthFlow: Boolean
         get() = flags["link_mobile_enable_mfa_auth_flow"] == true
 
-    val supportsInstantDebitsOnboarding: Boolean
-        get() = linkSupportedPaymentMethodsOnboardingEnabled.contains("INSTANT_DEBITS")
-
     @Parcelize
     data class CustomerInfo(
         val name: String?,

@@ -40,7 +40,7 @@
   <!-- Text for choosing a photo from gallery -->
   <string name="stripe_choose_file">Выберите фотографию</string>
   <!-- Close button text -->
-  <string name="stripe_close_button_text">закрыть</string>
+  <string name="stripe_close_button_text">Закрыть</string>
   <!-- Button to complete with test data -->
   <string name="stripe_complete_with_test_data">Завершить с использованием проверочных данных</string>
   <!-- Description for complete button on test mode -->
@@ -169,7 +169,7 @@
   <!-- Instructional text when user needs remove anything blocking the document -->
   <string name="stripe_keep_fully_visible">Детали не видны</string>
   <!-- Continue button text -->
-  <string name="stripe_kontinue">продолжить</string>
+  <string name="stripe_kontinue">Продолжить</string>
   <!-- Label for the ID field to collect last 4 of social security number for US ID -->
   <string name="stripe_last_4_of_ssn">Последние 4 цифры номера социального страхования</string>
   <!-- Label for last (family) name field -->

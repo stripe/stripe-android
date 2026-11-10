@@ -40,8 +40,12 @@ import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalAnalyticEventCallbackApi::class)
 @RunWith(TestParameterInjector::class)
-internal class EmbeddedPaymentElementAnalyticsTest {
+internal class EmbeddedPaymentElementAnalyticsTest(
+    @TestParameter(valuesProvider = EmbeddedPaymentElementApiConfigurationTestTypeProvider::class)
+    private val apiConfigurationTestType: ApiConfigurationTestType,
+) {
     private val networkRule = NetworkRule(
+        defaultMatcher = apiConfigurationTestType.defaultMatcher,
         hostsToTrack = listOf(ApiRequest.API_HOST, AnalyticsRequest.HOST),
         validationTimeout = 5.seconds, // Analytics requests happen async.
     )
@@ -58,9 +62,6 @@ internal class EmbeddedPaymentElementAnalyticsTest {
     private val formPage = EmbeddedFormPage(testRules.compose)
     private val managePage = ManagePage(testRules.compose)
     private val editPage = EditPage(testRules.compose)
-
-    @TestParameter(valuesProvider = EmbeddedPaymentElementApiConfigurationTestTypeProvider::class)
-    lateinit var apiConfigurationTestType: ApiConfigurationTestType
 
     private val card1 = CardPaymentMethodDetails("pm_12345", "4242")
     private val card2 = CardPaymentMethodDetails("pm_67890", "5544")

@@ -14,6 +14,10 @@ ext {
 }
 
 android {
+    testFixtures {
+        enable = true
+    }
+
     buildFeatures {
         compose true
         buildConfig = true
@@ -51,6 +55,10 @@ dependencies {
 
     debugImplementation libs.compose.uiTestManifest
     debugImplementation libs.compose.uiTooling
+
+    testFixturesApi testLibs.junit
+    // The module's Compose compiler also applies to test fixtures.
+    testFixturesImplementation libs.compose.runtime
 
     testImplementation project(':screenshot-testing')
     testImplementation testLibs.androidx.archCore

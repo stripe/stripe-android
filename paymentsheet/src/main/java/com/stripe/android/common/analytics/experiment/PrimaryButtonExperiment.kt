@@ -4,14 +4,18 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.ElementsSession.ExperimentAssignment
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.ui.PrimaryButtonIcon
+import javax.inject.Inject
 
-internal object PrimaryButtonExperiment {
+internal interface PrimaryButtonExperiment {
     // Only call when displaying a confirmation button that would otherwise show a padlock.
-    fun getIcon(
-        metadata: PaymentMethodMetadata,
-        eventReporter: EventReporter,
-        mode: EventReporter.Mode,
-    ): PrimaryButtonIcon {
+    fun getIcon(metadata: PaymentMethodMetadata): PrimaryButtonIcon
+}
+
+internal class DefaultPrimaryButtonExperiment @Inject constructor(
+    private val eventReporter: EventReporter,
+    private val mode: EventReporter.Mode,
+) : PrimaryButtonExperiment {
+    override fun getIcon(metadata: PaymentMethodMetadata): PrimaryButtonIcon {
         val experimentsData = metadata.experimentsData ?: return PrimaryButtonIcon.Lock
         val variant = experimentsData.experimentAssignments[
             ExperimentAssignment.OCS_MOBILE_REMOVE_PRIMARY_BUTTON_PADLOCK
@@ -19,7 +23,8 @@ internal object PrimaryButtonExperiment {
         val icon = when (variant) {
             "control", "control_test" -> PrimaryButtonIcon.Lock
             "treatment_no_padlock" -> PrimaryButtonIcon.None
-            // Do not log exposures for variants whose behavior is not implemented yet.
+            "treatment_replace_padlock" -> PrimaryButtonIcon.Secure
+            // Do not log exposures for unrecognized variants.
             else -> return PrimaryButtonIcon.Lock
         }
 

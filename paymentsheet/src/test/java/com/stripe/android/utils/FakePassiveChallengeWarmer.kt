@@ -1,45 +1,32 @@
 package com.stripe.android.utils
 
 import androidx.activity.result.ActivityResultCaller
+import androidx.lifecycle.LifecycleOwner
 import app.cash.turbine.Turbine
 import com.stripe.android.challenge.passive.warmer.PassiveChallengeWarmer
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.model.PassiveCaptchaParams
 
-class FakePassiveChallengeWarmer : PassiveChallengeWarmer {
+internal class FakePassiveChallengeWarmer : PassiveChallengeWarmer {
     data class RegisterCall(
         val activityResultCaller: ActivityResultCaller,
+        val lifecycleOwner: LifecycleOwner,
     )
 
-    data class StartCall(
-        val passiveCaptchaParams: PassiveCaptchaParams,
-        val apiConfiguration: ApiConfiguration.State,
-        val productUsage: Set<String>
-    )
+    val registerCalls = Turbine<RegisterCall>()
+    val startCalls = Turbine<PassiveCaptchaParams>()
+    val unregisterCalls = Turbine<Unit>()
 
-    private val registerCalls = Turbine<RegisterCall>()
-    private val startCalls = Turbine<StartCall>()
-    private val unregisterCalls = Turbine<Unit>()
-
-    override fun register(activityResultCaller: ActivityResultCaller) {
-        registerCalls.add(RegisterCall(activityResultCaller))
+    override fun register(activityResultCaller: ActivityResultCaller, lifecycleOwner: LifecycleOwner) {
+        registerCalls.add(RegisterCall(activityResultCaller, lifecycleOwner))
     }
 
-    override fun start(
-        passiveCaptchaParams: PassiveCaptchaParams,
-        apiConfiguration: ApiConfiguration.State,
-        productUsage: Set<String>
-    ) {
-        startCalls.add(StartCall(passiveCaptchaParams, apiConfiguration, productUsage))
+    override fun start(passiveCaptchaParams: PassiveCaptchaParams) {
+        startCalls.add(passiveCaptchaParams)
     }
 
     override fun unregister() {
         unregisterCalls.add(Unit)
     }
-
-    suspend fun awaitRegisterCall(): RegisterCall = registerCalls.awaitItem()
-    suspend fun awaitStartCall(): StartCall = startCalls.awaitItem()
-    suspend fun awaitUnregisterCall(): Unit = unregisterCalls.awaitItem()
 
     fun ensureAllEventsConsumed() {
         registerCalls.ensureAllEventsConsumed()

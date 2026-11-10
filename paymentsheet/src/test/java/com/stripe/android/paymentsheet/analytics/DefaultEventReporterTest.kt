@@ -9,6 +9,7 @@ import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.common.analytics.experiment.LoggableExperiment
 import com.stripe.android.core.exception.LocalStripeException
 import com.stripe.android.core.networking.AnalyticsEvent
+import com.stripe.android.core.networking.toMap
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.link.ui.LinkButtonState
@@ -19,6 +20,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFact
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSession.ExperimentAssignment
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentIntentFixtures
@@ -34,6 +36,7 @@ import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormViewModel
 import com.stripe.android.paymentsheet.state.WalletsState
+import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -83,6 +86,35 @@ class DefaultEventReporterTest {
 
         val request = analyticsRequestV2Executor.enqueueCalls.awaitItem()
         assertThat(request.eventName).isEqualTo("elements.experiment_exposure")
+    }
+
+    @Test
+    fun `load time exposure uses supplied metadata before provider is populated`() = runScenario {
+        val metadata = paymentMethodMetadataWithTestAnalyticsMetadata
+        val experiment = LoggableExperiment.OcsMobilePreselectLink(
+            experimentsData = ElementsSession.ExperimentsData(
+                arbId = "arb_123",
+                experimentAssignments = mapOf(ExperimentAssignment.OCS_MOBILE_PRESELECT_LINK to "control_test"),
+            ),
+            group = "control_test",
+            metadata = metadata,
+            mode = EventReporter.Mode.Custom,
+            hasSavedPaymentMethod = false,
+        )
+
+        eventReporter.onExperimentExposure(experiment, paymentMethodMetadata = metadata)
+
+        val request = analyticsRequestV2Executor.enqueueCalls.awaitItem()
+        assertThat(request.eventName).isEqualTo("elements.experiment_exposure")
+        assertThat(request.params.toMap()).containsAtLeast(
+            "experiment_retrieved", "ocs_mobile_preselect_link",
+            "arb_id", "arb_123",
+            "assignment_group", "control_test",
+            "example_from_test", "true",
+            "payment_method_orientation", "horizontal",
+            "dimensions-in_app_elements_integration_type", "flowcontroller",
+            "dimensions-has_saved_payment_method", "false",
+        )
     }
 
     @Test

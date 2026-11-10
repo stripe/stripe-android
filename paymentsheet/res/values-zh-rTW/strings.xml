@@ -26,6 +26,10 @@
   <string name="stripe_confirm_close_form_body">不會儲存您的付款資訊。</string>
   <!-- Used as the title for prompting the user if they want to close the sheet -->
   <string name="stripe_confirm_close_form_title">您確定要儲存此表單嗎？</string>
+  <!-- Fallback disclosure when paying in the merchant's currency instead of using Adaptive Pricing. -->
+  <string name="stripe_currency_selector_bank_fees_disclaimer">可能適用您銀行的匯率與手續費。</string>
+  <string name="stripe_currency_selector_hide_details">隱藏匯率詳細資料</string>
+  <string name="stripe_currency_selector_show_details">顯示匯率詳細資料</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header">儲存您的資訊，用 Link 安全地一鍵結帳</string>
   <!-- Label for a checkbox that when checked allows the payment information
@@ -57,6 +61,12 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_card_type_unknown">%1$s 金融卡</string>
   <!-- Title for a button that indicates a user can log in or sign up. -->
   <string name="stripe_link_log_in_or_sign_up">登入或註冊</string>
+  <!-- Label of a button that signs the user out of their current Link account so they can log in to a different one. -->
+  <string name="stripe_link_log_in_to_another_account">登入另一個帳戶</string>
+  <!-- Message on a screen shown when none of the payment methods in the user's Link account can be used with this business. The placeholder is a Stripe brand name and should not be translated. -->
+  <string name="stripe_link_no_funding_sources_message">您的 %s 帳戶中沒有任何支付方式適用於此商家。</string>
+  <!-- Title of a screen shown when none of the payment methods in the user's Link account can be used with this business. The placeholder is a Stripe brand name and should not be translated. -->
+  <string name="stripe_link_no_funding_sources_title">您無法在此使用 %s 支付</string>
   <!-- Title of the screen responsible for accepting Crypto Onramp terms and conditions -->
   <string name="stripe_link_onramp_terms_and_conditions_screen_title">條款與細則</string>
   <!-- Title of the screen responsible for accepting Crypto Onramp terms of service -->
