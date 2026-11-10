@@ -4,6 +4,7 @@ import android.os.Build
 import android.view.View
 import android.webkit.WebView
 import androidx.test.platform.app.InstrumentationRegistry
+import java.lang.reflect.Field
 import java.lang.reflect.Modifier
 
 /**
@@ -13,24 +14,24 @@ import java.lang.reflect.Modifier
  */
 internal fun clearWebViewWindowCoverageTracker() {
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) return
-    val awContents = try {
+    val awContents =
         Class.forName("org.chromium.android_webview.AwContents", false, WebView.getWebViewClassLoader())
-    } catch (_: ClassNotFoundException) {
-        return
-    }
-    val tracker = awContents.declaredFields.map { it.type }.firstOrNull { it.isWindowCoverageTracker() } ?: return
-    val windowsField = tracker.declaredFields.singleOrNull {
-        Modifier.isStatic(it.modifiers) && Map::class.java.isAssignableFrom(it.type)
-    } ?: return
+    val windowsField = awContents.declaredFields.firstNotNullOfOrNull { it.type.windowCoverageTrackerMapField() }
+        ?: return
     windowsField.isAccessible = true
-    val windows = windowsField.get(null) as? MutableMap<*, *> ?: return
+    val windows = windowsField.get(null) as MutableMap<*, *>
     InstrumentationRegistry.getInstrumentation().runOnMainSync { windows.clear() }
 }
 
-private fun Class<*>.isWindowCoverageTracker(): Boolean {
-    val instanceFieldTypes = declaredFields.filterNot { Modifier.isStatic(it.modifiers) }.map { it.type }
-    return instanceFieldTypes.size == TRACKER_INSTANCE_FIELD_TYPES.size &&
-        instanceFieldTypes.containsAll(TRACKER_INSTANCE_FIELD_TYPES)
+private fun Class<*>.windowCoverageTrackerMapField(): Field? {
+    val (staticFields, instanceFields) = declaredFields.partition { Modifier.isStatic(it.modifiers) }
+    val instanceFieldTypes = instanceFields.map { it.type }
+    if (instanceFieldTypes.size != TRACKER_INSTANCE_FIELD_TYPES.size ||
+        !instanceFieldTypes.containsAll(TRACKER_INSTANCE_FIELD_TYPES)
+    ) {
+        return null
+    }
+    return staticFields.singleOrNull { Map::class.java.isAssignableFrom(it.type) }
 }
 
 private val TRACKER_INSTANCE_FIELD_TYPES = listOf(
