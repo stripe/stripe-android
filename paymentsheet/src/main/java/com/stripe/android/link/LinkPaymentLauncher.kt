@@ -94,8 +94,7 @@ internal class LinkPaymentLauncher @Inject internal constructor(
             launchMode = launchMode,
             statusBarColor = statusBarColor,
         )
-        val analyticsHelper = linkConfigurationCoordinator.getComponent(configuration).linkAnalyticsHelper
-        this.analyticsHelper = analyticsHelper
+        analyticsHelper = linkConfigurationCoordinator.getComponent(configuration).linkAnalyticsHelper
         linkActivityResultLauncher?.launch(args)
         analyticsHelper.onLinkLaunched()
     }

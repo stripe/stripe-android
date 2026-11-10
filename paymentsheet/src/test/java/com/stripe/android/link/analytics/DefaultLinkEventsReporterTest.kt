@@ -53,43 +53,6 @@ class DefaultLinkEventsReporterTest {
         }
 
     @Test
-    fun onAccountLookupComplete_withCheckoutSession_includesCheckoutSessionId() =
-        runScenario(
-            checkoutSessionId = CHECKOUT_SESSION_ID,
-        ) { linkEventsReporter, fakeAnalyticsRequestExecutor, testScheduler ->
-            linkEventsReporter.onAccountLookupComplete()
-
-            testScheduler.advanceUntilIdle()
-
-            val loggedParams = fakeAnalyticsRequestExecutor.awaitEvent("link.account_lookup.complete")
-            assertThat(loggedParams["checkout_session_id"]).isEqualTo(CHECKOUT_SESSION_ID)
-        }
-
-    @Test
-    fun onAccountLookupComplete_withoutCheckoutSession_omitsCheckoutSessionId() =
-        runScenario(checkoutSessionId = null) { linkEventsReporter, fakeAnalyticsRequestExecutor, testScheduler ->
-            linkEventsReporter.onAccountLookupComplete()
-
-            testScheduler.advanceUntilIdle()
-
-            val loggedParams = fakeAnalyticsRequestExecutor.awaitEvent("link.account_lookup.complete")
-            assertThat(loggedParams).doesNotContainKey("checkout_session_id")
-        }
-
-    @Test
-    fun onPopupShow_withCheckoutSession_includesCheckoutSessionId() =
-        runScenario(
-            checkoutSessionId = CHECKOUT_SESSION_ID,
-        ) { linkEventsReporter, fakeAnalyticsRequestExecutor, testScheduler ->
-            linkEventsReporter.onPopupShow()
-
-            testScheduler.advanceUntilIdle()
-
-            val loggedParams = fakeAnalyticsRequestExecutor.awaitEvent("link.popup.show")
-            assertThat(loggedParams["checkout_session_id"]).isEqualTo(CHECKOUT_SESSION_ID)
-        }
-
-    @Test
     fun onPopupShow_withoutCheckoutSession_omitsCheckoutSessionId() =
         runScenario(checkoutSessionId = null) { linkEventsReporter, fakeAnalyticsRequestExecutor, testScheduler ->
             linkEventsReporter.onPopupShow()

@@ -13,9 +13,6 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
 
-/**
- * @param checkoutSessionId attached to every event this reporter fires.
- */
 internal class DefaultLinkEventsReporter(
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,

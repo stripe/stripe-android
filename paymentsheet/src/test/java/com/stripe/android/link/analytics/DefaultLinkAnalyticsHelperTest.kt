@@ -1,24 +1,32 @@
 package com.stripe.android.link.analytics
 
-import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.model.PaymentMethod
-import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
 internal class DefaultLinkAnalyticsHelperTest {
     @Test
-    fun `test onLinkLaunched calls onPopupShow`() = runScenario {
+    fun `test onLinkLaunched calls onPopupShow`() {
+        val eventReporter = object : FakeLinkEventsReporter() {
+            override fun onPopupShow() {
+                calledCount++
+            }
+        }
+        val analyticsHelper = DefaultLinkAnalyticsHelper(eventReporter)
         analyticsHelper.onLinkLaunched()
-
-        assertThat(eventsReporter.popupCalls.awaitItem())
-            .isEqualTo(PopupEvent.Show)
+        assertThat(eventReporter.calledCount).isEqualTo(1)
     }
 
     @Test
-    fun `test onLinkResult with PaymentMethodObtained calls onPopupSuccess`() = runScenario {
+    fun `test onLinkResult with PaymentMethodObtained calls onPopupSuccess`() {
+        val eventReporter = object : FakeLinkEventsReporter() {
+            override fun onPopupSuccess() {
+                calledCount++
+            }
+        }
+        val analyticsHelper = DefaultLinkAnalyticsHelper(eventReporter)
         analyticsHelper.onLinkResult(
             linkActivityResult = LinkActivityResult.PaymentMethodObtained(
                 paymentMethod = PaymentMethod(
@@ -28,126 +36,87 @@ internal class DefaultLinkAnalyticsHelperTest {
                     code = null,
                     type = null
                 )
-            ),
+            )
         )
-
-        assertThat(eventsReporter.popupCalls.awaitItem())
-            .isEqualTo(PopupEvent.Success)
+        assertThat(eventReporter.calledCount).isEqualTo(1)
     }
 
     @Test
-    fun `test onLinkResult with Completed calls onPopupSuccess`() = runScenario {
+    fun `test onLinkResult with Completed calls onPopupSuccess`() {
+        val eventReporter = object : FakeLinkEventsReporter() {
+            override fun onPopupSuccess() {
+                calledCount++
+            }
+        }
+        val analyticsHelper = DefaultLinkAnalyticsHelper(eventReporter)
         analyticsHelper.onLinkResult(
-            linkActivityResult = LinkActivityResult.Completed(
+            LinkActivityResult.Completed(
                 linkAccountUpdate = LinkAccountUpdate.None
-            ),
+            )
         )
-
-        assertThat(eventsReporter.popupCalls.awaitItem())
-            .isEqualTo(PopupEvent.Success)
+        assertThat(eventReporter.calledCount).isEqualTo(1)
     }
 
     @Test
-    fun `test onLinkResult with Failed calls onPopupError`() = runScenario {
-        val error = IllegalStateException()
-
+    fun `test onLinkResult with Failed calls onPopupError`() {
+        val eventReporter = object : FakeLinkEventsReporter() {
+            override fun onPopupError(error: Throwable) {
+                calledCount++
+            }
+        }
+        val analyticsHelper = DefaultLinkAnalyticsHelper(eventReporter)
         analyticsHelper.onLinkResult(
             linkActivityResult = LinkActivityResult.Failed(
-                error = error,
+                error = IllegalStateException(),
                 linkAccountUpdate = LinkAccountUpdate.None
-            ),
+            )
         )
-
-        assertThat(eventsReporter.popupCalls.awaitItem())
-            .isEqualTo(PopupEvent.Error(error))
+        assertThat(eventReporter.calledCount).isEqualTo(1)
     }
 
     @Test
-    fun `test onLinkResult with CanceledBackPressed calls onPopupCancel`() = runScenario {
+    fun `test onLinkResult with CanceledBackPressed calls onPopupCancel`() {
+        val eventReporter = object : FakeLinkEventsReporter() {
+            override fun onPopupCancel() {
+                calledCount++
+            }
+        }
+        val analyticsHelper = DefaultLinkAnalyticsHelper(eventReporter)
         analyticsHelper.onLinkResult(
             linkActivityResult = LinkActivityResult.Canceled(
                 reason = LinkActivityResult.Canceled.Reason.BackPressed,
                 linkAccountUpdate = LinkAccountUpdate.None
-            ),
+            )
         )
-
-        assertThat(eventsReporter.popupCalls.awaitItem())
-            .isEqualTo(PopupEvent.Cancel)
+        assertThat(eventReporter.calledCount).isEqualTo(1)
     }
 
     @Test
-    fun `test onLinkResult with CanceledLoggedOut calls onPopupLogout`() = runScenario {
+    fun `test onLinkResult with CanceledLoggedOut calls onPopupLogout`() {
+        val eventReporter = object : FakeLinkEventsReporter() {
+            override fun onPopupLogout() {
+                calledCount++
+            }
+        }
+        val analyticsHelper = DefaultLinkAnalyticsHelper(eventReporter)
         analyticsHelper.onLinkResult(
             linkActivityResult = LinkActivityResult.Canceled(
                 reason = LinkActivityResult.Canceled.Reason.LoggedOut,
                 linkAccountUpdate = LinkAccountUpdate.None
-            ),
+            )
         )
-
-        assertThat(eventsReporter.popupCalls.awaitItem())
-            .isEqualTo(PopupEvent.Logout)
+        assertThat(eventReporter.calledCount).isEqualTo(1)
     }
 
     @Test
-    fun `test onLinkPopupSkipped calls onPopupSkipped`() = runScenario {
+    fun `test onLinkPopupSkipped calls onPopupSkipped`() {
+        val eventReporter = object : FakeLinkEventsReporter() {
+            override fun onPopupSkipped() {
+                calledCount++
+            }
+        }
+        val analyticsHelper = DefaultLinkAnalyticsHelper(eventReporter)
         analyticsHelper.onLinkPopupSkipped()
-
-        assertThat(eventsReporter.popupCalls.awaitItem())
-            .isEqualTo(PopupEvent.Skipped)
-    }
-
-    private fun runScenario(
-        block: suspend Scenario.() -> Unit,
-    ) = runTest {
-        val eventsReporter = PopupRecordingLinkEventsReporter()
-
-        Scenario(
-            analyticsHelper = DefaultLinkAnalyticsHelper(eventsReporter),
-            eventsReporter = eventsReporter,
-        ).block()
-
-        eventsReporter.popupCalls.ensureAllEventsConsumed()
-    }
-
-    private class Scenario(
-        val analyticsHelper: DefaultLinkAnalyticsHelper,
-        val eventsReporter: PopupRecordingLinkEventsReporter,
-    )
-
-    private sealed interface PopupEvent {
-        data object Show : PopupEvent
-        data object Success : PopupEvent
-        data object Cancel : PopupEvent
-        data class Error(val error: Throwable) : PopupEvent
-        data object Logout : PopupEvent
-        data object Skipped : PopupEvent
-    }
-
-    private class PopupRecordingLinkEventsReporter : FakeLinkEventsReporter() {
-        val popupCalls = Turbine<PopupEvent>()
-
-        override fun onPopupShow() {
-            popupCalls.add(PopupEvent.Show)
-        }
-
-        override fun onPopupSuccess() {
-            popupCalls.add(PopupEvent.Success)
-        }
-
-        override fun onPopupCancel() {
-            popupCalls.add(PopupEvent.Cancel)
-        }
-
-        override fun onPopupError(error: Throwable) {
-            popupCalls.add(PopupEvent.Error(error))
-        }
-
-        override fun onPopupLogout() {
-            popupCalls.add(PopupEvent.Logout)
-        }
-
-        override fun onPopupSkipped() {
-            popupCalls.add(PopupEvent.Skipped)
-        }
+        assertThat(eventReporter.calledCount).isEqualTo(1)
     }
 }

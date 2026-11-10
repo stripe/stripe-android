@@ -138,13 +138,13 @@ internal class LinkInlineSignupConfirmationDefinition(
         userInput: UserInput,
         linkAnalyticsHelper: LinkAnalyticsHelper,
     ): PaymentMethodConfirmationOption {
-        val configuration = linkInlineSignupConfirmationOption.linkConfiguration
-
         if (userInput is UserInput.SignIn) {
             linkAnalyticsHelper.onLinkPopupSkipped()
 
             return linkInlineSignupConfirmationOption.toOption()
         }
+
+        val configuration = linkInlineSignupConfirmationOption.linkConfiguration
 
         return when (linkInlineSignupConfirmationOption) {
             is LinkInlineSignupConfirmationOption.New -> {

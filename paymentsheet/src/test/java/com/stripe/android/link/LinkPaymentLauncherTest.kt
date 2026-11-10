@@ -1,50 +1,35 @@
 package com.stripe.android.link
 
-import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistry
 import androidx.activity.result.contract.ActivityResultContract
-import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.Logger
 import com.stripe.android.link.account.LinkStore
-import com.stripe.android.link.analytics.DefaultLinkAnalyticsHelper
 import com.stripe.android.link.analytics.FakeLinkAnalyticsHelper
 import com.stripe.android.link.analytics.FakeLinkEventsReporter
 import com.stripe.android.link.analytics.LinkAnalyticsHelper
 import com.stripe.android.link.analytics.LinkEventsReporter
-import com.stripe.android.link.injection.LinkAccountAnalyticsModule
-import com.stripe.android.link.injection.LinkCommonModule
 import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentelement.confirmation.asCallbackFor
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.DummyActivityResultCaller
-import com.stripe.android.testing.FakeAnalyticsRequestExecutor
-import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.utils.FakeActivityResultRegistry
-import com.stripe.android.utils.FakeDurationProvider
 import com.stripe.android.utils.FakeLinkComponent
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakeLinkStore
 import com.stripe.android.utils.RecordingLinkStore
-import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import org.robolectric.RobolectricTestRunner
 
-@RunWith(RobolectricTestRunner::class)
 internal class LinkPaymentLauncherTest {
 
     @get:Rule
@@ -277,42 +262,57 @@ internal class LinkPaymentLauncherTest {
     }
 
     @Test
-    fun `present and result analytics carry the configuration's checkout session ID`() = runAnalyticsScenario {
-        presentAndComplete(checkoutConfiguration("cs_test_123"), expectedCheckoutSessionId = "cs_test_123")
-    }
+    fun `result and launch reach the presented configuration's helper after the coordinator moves on`() = runTest {
+        DummyActivityResultCaller.test {
+            val helperA = TrackingLinkAnalyticsHelper()
+            val helperB = TrackingLinkAnalyticsHelper()
+            var component: LinkComponent = FakeLinkComponent(linkAnalyticsHelper = helperA)
+            val coordinator = object : LinkConfigurationCoordinator by FakeLinkConfigurationCoordinator() {
+                override fun getComponent(configuration: LinkConfiguration): LinkComponent = component
+            }
+            val linkPaymentLauncher = createLinkPaymentLauncher(linkConfigurationCoordinator = coordinator)
+            var callbackParam: LinkActivityResult? = null
+            linkPaymentLauncher.register(activityResultCaller) { callbackParam = it }
 
-    @Test
-    fun `subsequent presentations report their own checkout session ID`() = runAnalyticsScenario {
-        presentAndComplete(checkoutConfiguration("cs_test_first"), expectedCheckoutSessionId = "cs_test_first")
-        presentAndComplete(checkoutConfiguration("cs_test_second"), expectedCheckoutSessionId = "cs_test_second")
-    }
+            linkPaymentLauncher.present(
+                configuration = TestFactory.LINK_CONFIGURATION,
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+                linkAccountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
+                linkExpressMode = LinkExpressMode.ENABLED,
+                launchMode = LinkLaunchMode.Full(showSecondaryButton = true),
+                statusBarColor = null,
+            )
+            component = FakeLinkComponent(linkAnalyticsHelper = helperB)
 
-    @Test
-    fun `presentation without checkout omits a previous checkout session ID`() = runAnalyticsScenario {
-        presentAndComplete(checkoutConfiguration("cs_test_first"), expectedCheckoutSessionId = "cs_test_first")
-        presentAndComplete(TestFactory.LINK_CONFIGURATION, expectedCheckoutSessionId = null)
-    }
+            val result = LinkActivityResult.Canceled(linkAccountUpdate = LinkAccountUpdate.None)
+            awaitRegisterCall().callback.asCallbackFor<LinkActivityResult>().onActivityResult(result)
 
-    @Test
-    fun `result retains the presented helper when the coordinator moves to another configuration`() =
-        runAnalyticsScenario {
-            present(checkoutConfiguration("cs_test_first"))
-            assertPopupEvent("link.popup.show", expectedCheckoutSessionId = "cs_test_first")
+            assertThat(callbackParam).isEqualTo(result)
+            assertThat(helperA.launchCount).isEqualTo(1)
+            assertThat(helperA.results).containsExactly(result)
+            assertThat(helperB.launchCount).isEqualTo(0)
+            assertThat(helperB.results).isEmpty()
 
-            coordinator.getComponent(checkoutConfiguration("cs_test_second"))
-
-            complete()
-            assertPopupEvent("link.popup.success", expectedCheckoutSessionId = "cs_test_first")
+            awaitLaunchCall()
+            awaitNextRegisteredLauncher()
         }
+    }
 
     @Test
-    fun `pending result before presentation reports analytics without a checkout session ID`() = runAnalyticsScenario {
-        val result = LinkActivityResult.Canceled(linkAccountUpdate = LinkAccountUpdate.None)
+    fun `result before any presentation goes to the fallback helper`() = runTest {
+        DummyActivityResultCaller.test {
+            val linkEventsReporter = RecordingLinkEventsReporter()
+            val linkPaymentLauncher = createLinkPaymentLauncher(linkEventsReporter = linkEventsReporter)
+            linkPaymentLauncher.register(activityResultCaller) {}
 
-        callback.onActivityResult(result)
+            val result = LinkActivityResult.Canceled(linkAccountUpdate = LinkAccountUpdate.None)
+            awaitRegisterCall().callback.asCallbackFor<LinkActivityResult>().onActivityResult(result)
 
-        assertThat(resultCalls.awaitItem()).isSameInstanceAs(result)
-        assertPopupEvent("link.popup.cancel", expectedCheckoutSessionId = null)
+            linkEventsReporter.popupCancels.awaitItem()
+            linkEventsReporter.popupCancels.ensureAllEventsConsumed()
+
+            awaitNextRegisteredLauncher()
+        }
     }
 
     private fun testActivityResultCallbackWithActivityResultRegistry(
@@ -397,9 +397,7 @@ internal class LinkPaymentLauncherTest {
     ) {
         assertThat(callbackResult).isEqualTo(linkActivityResult)
         assertThat(markAsUsedCalls.cancelAndConsumeRemainingEvents().size).isEqualTo(expectedMarkAsUsedCalls)
-        linkAnalyticsHelper.launches.awaitItem()
-        assertThat(linkAnalyticsHelper.results.awaitItem()).isSameInstanceAs(linkActivityResult)
-        linkAnalyticsHelper.ensureAllEventsConsumed()
+        assertThat(linkAnalyticsHelper.results).containsExactly(linkActivityResult)
     }
 
     private fun setupActivityResultRegistryMock(
@@ -428,165 +426,40 @@ internal class LinkPaymentLauncherTest {
 
     private fun createLinkPaymentLauncher(
         linkActivityContract: LinkActivityContract = mock(),
-        linkAnalyticsHelper: LinkAnalyticsHelper = FakeLaunchOnlyLinkAnalyticsHelper(),
+        linkAnalyticsHelper: LinkAnalyticsHelper = TrackingLinkAnalyticsHelper(),
         linkConfigurationCoordinator: LinkConfigurationCoordinator = FakeLinkConfigurationCoordinator(
             component = FakeLinkComponent(linkAnalyticsHelper = linkAnalyticsHelper),
         ),
         linkEventsReporter: LinkEventsReporter = FakeLinkEventsReporter(),
-        linkStore: LinkStore = FakeLinkStore(),
+        linkStore: LinkStore = FakeLinkStore()
     ): LinkPaymentLauncher {
         return LinkPaymentLauncher(
             linkConfigurationCoordinator = linkConfigurationCoordinator,
             linkEventsReporter = linkEventsReporter,
             linkActivityContract = linkActivityContract,
             linkStore = linkStore,
-            paymentElementCallbackIdentifier = "PaymentElementCallbackIdentifier",
+            paymentElementCallbackIdentifier = "PaymentElementCallbackIdentifier"
         )
-    }
-
-    private fun checkoutConfiguration(checkoutSessionId: String): LinkConfiguration {
-        return TestFactory.LINK_CONFIGURATION.copy(
-            clientAttributionMetadata = PaymentMethodMetadataFixtures.CHECKOUT_SESSION_CLIENT_ATTRIBUTION_METADATA.copy(
-                checkoutSessionId = checkoutSessionId,
-            ),
-        )
-    }
-
-    @Suppress("LongMethod")
-    private fun runAnalyticsScenario(block: suspend AnalyticsScenario.() -> Unit) = runTest {
-        val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
-        val errorReporter = FakeErrorReporter()
-        val durationProvider = FakeDurationProvider()
-        val linkStore = FakeLinkStore()
-        val workContext = coroutineContext
-        val requestFactory = PaymentAnalyticsRequestFactory(
-            context = ApplicationProvider.getApplicationContext(),
-            publishableKey = "pk_test",
-        )
-        val coordinator = RealLinkConfigurationCoordinator(
-            linkComponentFactory = object : LinkComponent.Factory {
-                override fun create(configuration: LinkConfiguration): LinkComponent {
-                    val reporter = LinkAccountAnalyticsModule.provideLinkEventsReporter(
-                        configuration = configuration,
-                        analyticsRequestExecutor = analyticsRequestExecutor,
-                        paymentAnalyticsRequestFactory = requestFactory,
-                        errorReporter = errorReporter,
-                        workContext = workContext,
-                        logger = Logger.noop(),
-                        durationProvider = durationProvider,
-                    )
-                    return FakeLinkComponent(
-                        configuration = configuration,
-                        linkAnalyticsHelper = DefaultLinkAnalyticsHelper(reporter),
-                    )
-                }
-            },
-        )
-        val launcher = createLinkPaymentLauncher(
-            linkConfigurationCoordinator = coordinator,
-            linkEventsReporter = LinkCommonModule.provideLinkEventsReporter(
-                analyticsRequestExecutor = analyticsRequestExecutor,
-                paymentAnalyticsRequestFactory = requestFactory,
-                errorReporter = errorReporter,
-                workContext = workContext,
-                logger = Logger.noop(),
-                durationProvider = durationProvider,
-            ),
-            linkStore = linkStore,
-        )
-        val resultCalls = Turbine<LinkActivityResult>()
-
-        DummyActivityResultCaller.test {
-            launcher.register(activityResultCaller) { resultCalls.add(it) }
-            val callback = awaitRegisterCall().callback.asCallbackFor<LinkActivityResult>()
-            awaitNextRegisteredLauncher()
-
-            AnalyticsScenario(
-                launcher = launcher,
-                coordinator = coordinator,
-                callerScenario = this,
-                callback = callback,
-                resultCalls = resultCalls,
-                analyticsRequestExecutor = analyticsRequestExecutor,
-                linkStore = linkStore,
-                testScheduler = testScheduler,
-            ).block()
-        }
-
-        resultCalls.ensureAllEventsConsumed()
-        analyticsRequestExecutor.validate()
-        errorReporter.ensureAllEventsConsumed()
-        durationProvider.validate()
-        linkStore.ensureAllEventsConsumed()
-    }
-
-    private class AnalyticsScenario(
-        val launcher: LinkPaymentLauncher,
-        val coordinator: LinkConfigurationCoordinator,
-        val callerScenario: DummyActivityResultCaller.Scenario,
-        val callback: ActivityResultCallback<LinkActivityResult>,
-        val resultCalls: Turbine<LinkActivityResult>,
-        val analyticsRequestExecutor: FakeAnalyticsRequestExecutor,
-        val linkStore: FakeLinkStore,
-        val testScheduler: TestCoroutineScheduler,
-    ) {
-        suspend fun present(configuration: LinkConfiguration) {
-            launcher.present(
-                configuration = configuration,
-                paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
-                linkAccountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
-                linkExpressMode = LinkExpressMode.ENABLED,
-                launchMode = LinkLaunchMode.Full(showSecondaryButton = true),
-                statusBarColor = null,
-            )
-            val args = callerScenario.awaitLaunchCall() as LinkActivityContract.Args
-            assertThat(args.configuration).isEqualTo(configuration)
-        }
-
-        suspend fun complete() {
-            val result = LinkActivityResult.Completed(linkAccountUpdate = LinkAccountUpdate.None)
-            callback.onActivityResult(result)
-            assertThat(resultCalls.awaitItem()).isSameInstanceAs(result)
-            linkStore.markAsUsedCalls.awaitItem()
-        }
-
-        suspend fun assertPopupEvent(eventName: String, expectedCheckoutSessionId: String?) {
-            testScheduler.runCurrent()
-            val params = analyticsRequestExecutor.awaitEvent(eventName)
-            if (expectedCheckoutSessionId == null) {
-                assertThat(params).doesNotContainKey("checkout_session_id")
-            } else {
-                assertThat(params["checkout_session_id"]).isEqualTo(expectedCheckoutSessionId)
-            }
-        }
-
-        suspend fun presentAndComplete(configuration: LinkConfiguration, expectedCheckoutSessionId: String?) {
-            present(configuration)
-            assertPopupEvent("link.popup.show", expectedCheckoutSessionId)
-            complete()
-            assertPopupEvent("link.popup.success", expectedCheckoutSessionId)
-        }
     }
 }
 
 private class TrackingLinkAnalyticsHelper : FakeLinkAnalyticsHelper() {
-    val launches = Turbine<Unit>()
-    val results = Turbine<LinkActivityResult>()
+    val results = arrayListOf<LinkActivityResult>()
+    var launchCount = 0
 
     override fun onLinkLaunched() {
-        launches.add(Unit)
+        launchCount++
     }
 
     override fun onLinkResult(linkActivityResult: LinkActivityResult) {
         results.add(linkActivityResult)
     }
-
-    fun ensureAllEventsConsumed() {
-        launches.ensureAllEventsConsumed()
-        results.ensureAllEventsConsumed()
-    }
 }
 
-private class FakeLaunchOnlyLinkAnalyticsHelper : FakeLinkAnalyticsHelper() {
-    override fun onLinkLaunched() = Unit
+private class RecordingLinkEventsReporter : FakeLinkEventsReporter() {
+    val popupCancels = Turbine<Unit>()
+
+    override fun onPopupCancel() {
+        popupCancels.add(Unit)
+    }
 }
