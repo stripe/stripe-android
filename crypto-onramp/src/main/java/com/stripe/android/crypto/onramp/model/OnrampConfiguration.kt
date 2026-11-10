@@ -73,7 +73,6 @@ class OnrampConfiguration {
     /**
      * Sets the card brands accepted when collecting cards through Link.
      * Configure Google Pay brands separately using [googlePayCardBrandAcceptance].
-     * Link applies this setting only in passthrough mode.
      * All supported brands are accepted by default. This filtering is client-side only.
      */
     fun linkCardBrandAcceptance(linkCardBrandAcceptance: PaymentSheet.CardBrandAcceptance) = apply {
