@@ -53,7 +53,6 @@ internal class CheckoutCardIntegrationTest {
             formPage.fillOutCardDetails(newCardNumber = "4242424242424242")
             formPage.clickPrimaryButton()
         },
-        afterConfirm = {},
         check = { result ->
             assertThat(result).isInstanceOf(CheckoutElementsController.Result.Completed::class.java)
         },
@@ -66,7 +65,6 @@ internal class CheckoutCardIntegrationTest {
             formPage.fillOutCardDetails(newCardNumber = "4000000000000002")
             formPage.clickPrimaryButton()
         },
-        afterConfirm = {},
         check = { result ->
             assertThat(result).isInstanceOf(CheckoutElementsController.Result.Failed::class.java)
             assertThat((result as CheckoutElementsController.Result.Failed).displayMessage)
@@ -81,7 +79,7 @@ internal class CheckoutCardIntegrationTest {
             formPage.fillOutCardDetails(newCardNumber = "4000000000003220")
             formPage.clickPrimaryButton()
         },
-        afterConfirm = {
+        handleNextAction = {
             val device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
             val completeButton = device.wait(
                 Until.findObject(By.text("COMPLETE")),
@@ -96,7 +94,7 @@ internal class CheckoutCardIntegrationTest {
 
     private fun runScenario(
         setup: suspend () -> Unit,
-        afterConfirm: suspend () -> Unit,
+        handleNextAction: suspend () -> Unit = {},
         check: (CheckoutElementsController.Result) -> Unit,
     ) = runBlocking {
         val result = runCheckoutIntegrationTest(
@@ -104,7 +102,7 @@ internal class CheckoutCardIntegrationTest {
             sessionParams = cardOnlySessionParams(),
             configuration = configuration,
             setup = setup,
-            afterConfirm = afterConfirm,
+            handleNextAction = handleNextAction,
         )
         check(result)
     }
