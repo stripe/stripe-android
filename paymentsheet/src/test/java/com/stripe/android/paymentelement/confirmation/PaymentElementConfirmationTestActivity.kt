@@ -30,6 +30,7 @@ import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.account.DefaultLinkStore
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkStore
+import com.stripe.android.link.analytics.DefaultLinkAnalyticsHelper
 import com.stripe.android.link.analytics.FakeLinkEventsReporter
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.gate.DefaultLinkGate
@@ -51,6 +52,7 @@ import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.FakeLogger
 import com.stripe.android.utils.FakeDurationProvider
+import com.stripe.android.utils.FakeLinkComponent
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import dagger.Binds
 import dagger.BindsInstance
@@ -213,8 +215,13 @@ internal interface PaymentElementConfirmationTestModule {
 
         @Provides
         @Singleton
-        fun providesFakeLinkConfigurationCoordinator(): LinkConfigurationCoordinator =
-            FakeLinkConfigurationCoordinator()
+        fun providesFakeLinkConfigurationCoordinator(
+            linkEventsReporter: LinkEventsReporter,
+        ): LinkConfigurationCoordinator = FakeLinkConfigurationCoordinator(
+            component = FakeLinkComponent(
+                linkAnalyticsHelper = DefaultLinkAnalyticsHelper(linkEventsReporter),
+            ),
+        )
 
         @Provides
         @Singleton
