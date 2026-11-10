@@ -10,8 +10,6 @@ import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.signup.SignUpState
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
-import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.EmailSource
 import com.stripe.android.model.PaymentIntent
@@ -188,18 +186,7 @@ class InlineSignupViewModelTest {
             val viewModel = createViewModel()
             viewModel.toggleExpanded()
 
-            verify(linkEventsReporter).onInlineSignupCheckboxChecked(checkoutSessionId = null)
-        }
-
-    @Test
-    fun `When user checks box in Checkout then analytics event includes checkout session ID`() =
-        runTest(UnconfinedTestDispatcher()) {
-            val viewModel = createViewModel(
-                clientAttributionMetadata = PaymentMethodMetadataFixtures.CHECKOUT_SESSION_CLIENT_ATTRIBUTION_METADATA,
-            )
-            viewModel.toggleExpanded()
-
-            verify(linkEventsReporter).onInlineSignupCheckboxChecked(checkoutSessionId = "cs_test_123")
+            verify(linkEventsReporter).onInlineSignupCheckboxChecked()
         }
 
     @Test
@@ -215,23 +202,7 @@ class InlineSignupViewModelTest {
             advanceTimeBy(LOOKUP_DEBOUNCE_MS + 100)
 
             assertThat(viewModel.viewState.value.signUpState).isEqualTo(SignUpState.InputtingRemainingFields)
-            verify(linkEventsReporter).onSignupStarted(isInline = true, checkoutSessionId = null)
-        }
-
-    @Test
-    fun `When signup starts in Checkout then analytics event includes checkout session ID`() =
-        runTest(UnconfinedTestDispatcher()) {
-            val viewModel = createViewModel(
-                clientAttributionMetadata = PaymentMethodMetadataFixtures.CHECKOUT_SESSION_CLIENT_ATTRIBUTION_METADATA,
-            )
-            viewModel.toggleExpanded()
-            viewModel.emailController.onRawValueChange("valid@email.com")
-
-            linkAccountManager.lookupResult = Result.success(null)
-
-            advanceTimeBy(LOOKUP_DEBOUNCE_MS + 100)
-
-            verify(linkEventsReporter).onSignupStarted(isInline = true, checkoutSessionId = "cs_test_123")
+            verify(linkEventsReporter).onSignupStarted(true)
         }
 
     @Test
@@ -566,7 +537,6 @@ class InlineSignupViewModelTest {
         signupMode: LinkSignupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
         initialUserInput: UserInput? = null,
         linkSignUpOptInFeatureEnabled: Boolean = false,
-        clientAttributionMetadata: ClientAttributionMetadata = TestFactory.LINK_CONFIGURATION.clientAttributionMetadata,
     ) = InlineSignupViewModel(
         config = TestFactory.LINK_CONFIGURATION.copy(
             stripeIntent = stripeIntent(countryCode),
@@ -578,7 +548,6 @@ class InlineSignupViewModelTest {
                 billingCountryCode = null
             ),
             linkSignUpOptInFeatureEnabled = linkSignUpOptInFeatureEnabled,
-            clientAttributionMetadata = clientAttributionMetadata,
         ),
         signupMode = signupMode,
         linkAccountManager = linkAccountManager,

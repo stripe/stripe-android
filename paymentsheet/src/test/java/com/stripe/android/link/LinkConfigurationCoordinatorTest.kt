@@ -5,7 +5,9 @@ import com.stripe.android.isInstanceOf
 import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.FakeLinkAnalyticsHelper
+import com.stripe.android.link.analytics.FakeLinkEventsReporter
 import com.stripe.android.link.analytics.LinkAnalyticsHelper
+import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.attestation.FakeLinkAttestationCheck
 import com.stripe.android.link.attestation.LinkAttestationCheck
 import com.stripe.android.link.gate.FakeLinkGate
@@ -111,6 +113,7 @@ class LinkConfigurationCoordinatorTest {
 
     private class FakeLinkComponent private constructor(
         override val linkAnalyticsHelper: LinkAnalyticsHelper = FakeLinkAnalyticsHelper(),
+        override val linkEventsReporter: LinkEventsReporter = FakeLinkEventsReporter(),
         override val linkAccountManager: LinkAccountManager,
         override val configuration: LinkConfiguration,
         override val linkGate: LinkGate,

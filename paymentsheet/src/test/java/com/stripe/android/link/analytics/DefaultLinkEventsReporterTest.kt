@@ -101,27 +101,17 @@ class DefaultLinkEventsReporterTest {
         }
 
     @Test
-    fun on2FAResendCode_withoutCheckoutSessionId_fallsBackToReporterCheckoutSessionId() =
+    fun on2FAResendCode_withCheckoutSession_includesCheckoutSessionIdAndEventParams() =
         runScenario(
             checkoutSessionId = CHECKOUT_SESSION_ID,
         ) { linkEventsReporter, fakeAnalyticsRequestExecutor, testScheduler ->
-            linkEventsReporter.on2FAResendCode(verificationType = "EMAIL", checkoutSessionId = null)
+            linkEventsReporter.on2FAResendCode(verificationType = "EMAIL")
 
             testScheduler.advanceUntilIdle()
 
             val loggedParams = fakeAnalyticsRequestExecutor.awaitEvent("link.2fa.resend_code")
             assertThat(loggedParams["checkout_session_id"]).isEqualTo(CHECKOUT_SESSION_ID)
-        }
-
-    @Test
-    fun onInlineSignupCheckboxChecked_withCheckoutSession_includesCheckoutSessionId() =
-        runScenario(checkoutSessionId = null) { linkEventsReporter, fakeAnalyticsRequestExecutor, testScheduler ->
-            linkEventsReporter.onInlineSignupCheckboxChecked(checkoutSessionId = CHECKOUT_SESSION_ID)
-
-            testScheduler.advanceUntilIdle()
-
-            val loggedParams = fakeAnalyticsRequestExecutor.awaitEvent("link.signup.checkbox_checked")
-            assertThat(loggedParams["checkout_session_id"]).isEqualTo(CHECKOUT_SESSION_ID)
+            assertThat(loggedParams["verification_type"]).isEqualTo("EMAIL")
         }
 
     private fun runScenario(

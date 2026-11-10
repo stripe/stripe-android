@@ -6,7 +6,7 @@ internal open class FakeLinkEventsReporter : LinkEventsReporter {
         throw NotImplementedError()
     }
 
-    override fun onInlineSignupCheckboxChecked(checkoutSessionId: String?) {
+    override fun onInlineSignupCheckboxChecked() {
         throw NotImplementedError()
     }
 
@@ -14,7 +14,7 @@ internal open class FakeLinkEventsReporter : LinkEventsReporter {
         throw NotImplementedError()
     }
 
-    override fun onSignupStarted(isInline: Boolean, checkoutSessionId: String?) {
+    override fun onSignupStarted(isInline: Boolean) {
         throw NotImplementedError()
     }
 
@@ -62,7 +62,7 @@ internal open class FakeLinkEventsReporter : LinkEventsReporter {
         throw NotImplementedError()
     }
 
-    override fun on2FAResendCode(verificationType: String, checkoutSessionId: String?) = Unit
+    override fun on2FAResendCode(verificationType: String) = Unit
 
     override fun onPopupShow() {
         throw NotImplementedError()

@@ -3,9 +3,9 @@ package com.stripe.android.link.analytics
 internal interface LinkEventsReporter {
     fun onInvalidSessionState(state: SessionState)
 
-    fun onInlineSignupCheckboxChecked(checkoutSessionId: String?)
+    fun onInlineSignupCheckboxChecked()
     fun onSignupFlowPresented()
-    fun onSignupStarted(isInline: Boolean, checkoutSessionId: String?)
+    fun onSignupStarted(isInline: Boolean = false)
     fun onSignupCompleted(isInline: Boolean = false)
     fun onSignupFailure(isInline: Boolean = false, error: Throwable)
     fun onEmailSuggestionAccepted()
@@ -18,7 +18,7 @@ internal interface LinkEventsReporter {
     fun on2FAComplete(verificationType: String)
     fun on2FAFailure(verificationType: String)
     fun on2FACancel()
-    fun on2FAResendCode(verificationType: String, checkoutSessionId: String?)
+    fun on2FAResendCode(verificationType: String)
 
     fun onPopupShow()
     fun onPopupSuccess()

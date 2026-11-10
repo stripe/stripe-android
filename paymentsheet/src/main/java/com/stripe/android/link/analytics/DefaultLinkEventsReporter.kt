@@ -14,8 +14,7 @@ import kotlin.time.Duration
 import kotlin.time.DurationUnit
 
 /**
- * @param checkoutSessionId attached to every event. Events that can fire from the singleton reporter, which is shared
- * across Link configurations, also take it per call; a non-null per-call value takes precedence.
+ * @param checkoutSessionId attached to every event this reporter fires.
  */
 internal class DefaultLinkEventsReporter(
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
@@ -33,17 +32,17 @@ internal class DefaultLinkEventsReporter(
         fireEvent(LinkEvent.SignUpFailureInvalidSessionState, params)
     }
 
-    override fun onInlineSignupCheckboxChecked(checkoutSessionId: String?) {
-        fireEvent(LinkEvent.SignUpCheckboxChecked, checkoutSessionId = checkoutSessionId)
+    override fun onInlineSignupCheckboxChecked() {
+        fireEvent(LinkEvent.SignUpCheckboxChecked)
     }
 
     override fun onSignupFlowPresented() {
         fireEvent(LinkEvent.SignUpFlowPresented)
     }
 
-    override fun onSignupStarted(isInline: Boolean, checkoutSessionId: String?) {
+    override fun onSignupStarted(isInline: Boolean) {
         durationProvider.start(DurationProvider.Key.LinkSignup)
-        fireEvent(LinkEvent.SignUpStart, checkoutSessionId = checkoutSessionId)
+        fireEvent(LinkEvent.SignUpStart)
     }
 
     override fun onSignupCompleted(isInline: Boolean) {
@@ -110,11 +109,10 @@ internal class DefaultLinkEventsReporter(
         fireEvent(LinkEvent.TwoFACancel)
     }
 
-    override fun on2FAResendCode(verificationType: String, checkoutSessionId: String?) {
+    override fun on2FAResendCode(verificationType: String) {
         fireEvent(
             LinkEvent.TwoFAResendCode(verificationType),
-            mapOf("verification_type" to verificationType),
-            checkoutSessionId,
+            mapOf("verification_type" to verificationType)
         )
     }
 
@@ -152,11 +150,10 @@ internal class DefaultLinkEventsReporter(
 
     private fun fireEvent(
         event: LinkEvent,
-        additionalParams: Map<String, Any>? = null,
-        checkoutSessionId: String? = null,
+        additionalParams: Map<String, Any>? = null
     ) {
         val params = (additionalParams ?: emptyMap()) +
-            (checkoutSessionId ?: this.checkoutSessionId)?.let { mapOf(FIELD_CHECKOUT_SESSION_ID to it) }.orEmpty()
+            checkoutSessionId?.let { mapOf(FIELD_CHECKOUT_SESSION_ID to it) }.orEmpty()
         logger.debug("Link event: ${event.eventName} $params")
         CoroutineScope(workContext).launch {
             analyticsRequestExecutor.executeAsync(

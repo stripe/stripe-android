@@ -7,13 +7,16 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.LinkAccountUpdate
+import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentLauncher
+import com.stripe.android.link.RealLinkConfigurationCoordinator
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.analytics.FakeLinkEventsReporter
-import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.gate.FakeLinkGate
+import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.verification.VerificationViewState
@@ -455,10 +458,24 @@ class DefaultLinkInlineInteractorTest {
     }
 
     @Test
-    fun `resendCode reports checkout session ID from the 2FA configuration`() = runTest(testDispatcher) {
+    fun `resendCode reports through the reporter for the 2FA configuration`() = runTest(testDispatcher) {
         linkAccountManager.startVerificationResult = Result.success(createLinkAccount())
         val linkEventsReporter = ResendLinkEventsReporter()
-        val interactor = createInteractor(linkEventsReporter = linkEventsReporter)
+        val componentConfigurations = Turbine<LinkConfiguration>()
+        val interactor = createInteractor(
+            linkConfigurationCoordinator = RealLinkConfigurationCoordinator(
+                linkComponentFactory = object : LinkComponent.Factory {
+                    override fun create(configuration: LinkConfiguration): LinkComponent {
+                        componentConfigurations.add(configuration)
+                        return FakeLinkComponent(
+                            configuration = configuration,
+                            linkAccountManager = linkAccountManager,
+                            linkEventsReporter = linkEventsReporter,
+                        )
+                    }
+                },
+            ),
+        )
         val checkoutLinkConfiguration = TestFactory.LINK_CONFIGURATION.copy(
             clientAttributionMetadata = PaymentMethodMetadataFixtures.CHECKOUT_SESSION_CLIENT_ATTRIBUTION_METADATA,
         )
@@ -486,8 +503,10 @@ class DefaultLinkInlineInteractorTest {
 
         interactor.resendCode()
 
-        assertThat(linkEventsReporter.resendCalls.awaitItem()).isEqualTo("SMS" to "cs_test_123")
+        assertThat(componentConfigurations.awaitItem()).isEqualTo(checkoutLinkConfiguration)
+        assertThat(linkEventsReporter.resendCalls.awaitItem()).isEqualTo("SMS")
         linkAccountManager.awaitStartVerificationCall()
+        componentConfigurations.ensureAllEventsConsumed()
         linkEventsReporter.resendCalls.ensureAllEventsConsumed()
     }
 
@@ -673,21 +692,20 @@ class DefaultLinkInlineInteractorTest {
     }
 
     private fun createInteractor(
-        linkEventsReporter: LinkEventsReporter = FakeLinkEventsReporter(),
+        linkConfigurationCoordinator: LinkConfigurationCoordinator = this.linkConfigurationCoordinator,
     ) = DefaultLinkInlineInteractor(
         coroutineScope = TestScope(testDispatcher),
         linkConfigurationCoordinator = linkConfigurationCoordinator,
         linkLauncher = linkLauncher,
         savedStateHandle = savedStateHandle,
         logger = FakeLogger(),
-        linkEventsReporter = linkEventsReporter
     )
 
     private class ResendLinkEventsReporter : FakeLinkEventsReporter() {
-        val resendCalls = Turbine<Pair<String, String?>>()
+        val resendCalls = Turbine<String>()
 
-        override fun on2FAResendCode(verificationType: String, checkoutSessionId: String?) {
-            resendCalls.add(verificationType to checkoutSessionId)
+        override fun on2FAResendCode(verificationType: String) {
+            resendCalls.add(verificationType)
         }
     }
 

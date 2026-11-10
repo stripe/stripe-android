@@ -114,9 +114,7 @@ internal class LinkAuthFlow(
 
     fun resend() {
         if (!canResend()) return
-        challenge?.type?.let {
-            linkEventsReporter.on2FAResendCode(verificationType = it.value, checkoutSessionId = null)
-        }
+        challenge?.type?.let { linkEventsReporter.on2FAResendCode(verificationType = it.value) }
         sendCode(isResend = true)
     }
 

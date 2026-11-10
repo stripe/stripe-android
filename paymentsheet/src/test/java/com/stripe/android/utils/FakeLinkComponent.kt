@@ -4,7 +4,9 @@ import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.FakeLinkAnalyticsHelper
+import com.stripe.android.link.analytics.FakeLinkEventsReporter
 import com.stripe.android.link.analytics.LinkAnalyticsHelper
+import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.attestation.FakeLinkAttestationCheck
 import com.stripe.android.link.attestation.LinkAttestationCheck
 import com.stripe.android.link.gate.FakeLinkGate
@@ -20,6 +22,7 @@ import org.mockito.kotlin.mock
 internal class FakeLinkComponent(
     override var configuration: LinkConfiguration = createLinkConfiguration(),
     override val linkAnalyticsHelper: LinkAnalyticsHelper = FakeLinkAnalyticsHelper(),
+    override val linkEventsReporter: LinkEventsReporter = FakeLinkEventsReporter(),
     override val linkAccountManager: LinkAccountManager = FakeLinkAccountManager(),
     override val linkGate: LinkGate = FakeLinkGate(),
     override val linkAttestationCheck: LinkAttestationCheck = FakeLinkAttestationCheck(),

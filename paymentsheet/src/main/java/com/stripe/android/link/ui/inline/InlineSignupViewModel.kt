@@ -9,6 +9,7 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.LinkEventsReporter
+import com.stripe.android.link.injection.LinkAccountAnalytics
 import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.link.ui.inline.LinkSignupField.Email
 import com.stripe.android.link.ui.inline.LinkSignupField.Name
@@ -53,7 +54,7 @@ internal class InlineSignupViewModel(
         @Assisted previousLinkSignupCheckboxSelection: Boolean?,
         config: LinkConfiguration,
         linkAccountManager: LinkAccountManager,
-        linkEventsReporter: LinkEventsReporter,
+        @LinkAccountAnalytics linkEventsReporter: LinkEventsReporter,
         logger: Logger,
     ) : this(
         initialUserInput = initialUserInput,
@@ -164,7 +165,7 @@ internal class InlineSignupViewModel(
         // First time user checks the box, start listening to inputs
         if (_viewState.value.isExpanded && !hasExpanded) {
             hasExpanded = true
-            linkEventsReporter.onInlineSignupCheckboxChecked(config.checkoutSessionId)
+            linkEventsReporter.onInlineSignupCheckboxChecked()
         }
     }
 
@@ -294,7 +295,7 @@ internal class InlineSignupViewModel(
                             apiFailed = false
                         )
                     }
-                    linkEventsReporter.onSignupStarted(isInline = true, checkoutSessionId = config.checkoutSessionId)
+                    linkEventsReporter.onSignupStarted(true)
                 }
             },
             onFailure = {

@@ -615,7 +615,7 @@ internal class LinkAuthFlowTest {
             cancelCalls.add(Unit)
         }
 
-        override fun on2FAResendCode(verificationType: String, checkoutSessionId: String?) {
+        override fun on2FAResendCode(verificationType: String) {
             resendCalls.add(verificationType)
         }
 
