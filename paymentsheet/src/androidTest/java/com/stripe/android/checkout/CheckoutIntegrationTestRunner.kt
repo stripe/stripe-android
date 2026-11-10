@@ -24,7 +24,7 @@ internal suspend fun runCheckoutIntegrationTest(
     sessionParams: JsonObject,
     configuration: CheckoutElementsController.Configuration,
     setup: suspend () -> Unit,
-    afterConfirm: suspend () -> Unit,
+    handleNextAction: suspend () -> Unit,
 ): CheckoutElementsController.Result {
     val backend = CheckoutPlaygroundBackend(
         baseUrl = "https://stp-mobile-playground-backend-v7.stripedemos.com/",
@@ -64,7 +64,7 @@ internal suspend fun runCheckoutIntegrationTest(
             setup()
 
             presenter.confirm()
-            afterConfirm()
+            handleNextAction()
             withTimeout(OPERATION_TIMEOUT) { checkoutResult.await() }
         } finally {
             scenario.onActivity { controller.destroy() }
