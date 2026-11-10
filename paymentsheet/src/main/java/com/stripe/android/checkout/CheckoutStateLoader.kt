@@ -49,25 +49,35 @@ internal class CheckoutStateLoader @Inject constructor(
     }
 
     suspend fun reload(state: CheckoutElementsControllerLoadedState) {
-        publish(
-            load(
-                configuration = state.configuration,
-                response = state.checkoutSessionResponse,
-                collectedDetails = state.collectedDetails,
-                carryForward = CarryForward.from(state),
-            )
-        )
+        publish(loadFrom(state))
+    }
+
+    suspend fun reloadLoading(state: CheckoutElementsControllerLoadedState, loadingGeneration: Long) {
+        publishLoading(loadFrom(state), loadingGeneration)
     }
 
     fun publish(loadedState: LoadedState) {
+        if (stateHolder.state is CheckoutElementsControllerState.Loading) return
         stateHolder.loadedState = loadedState.state
         customerStateHolder.setCustomerState(loadedState.customer)
     }
 
+    fun publishLoading(loadedState: LoadedState, loadingGeneration: Long) {
+        if (!stateHolder.completeLoading(loadingGeneration, loadedState.state)) return
+        customerStateHolder.setCustomerState(loadedState.customer)
+    }
+
     fun clear() {
-        stateHolder.loadedState = null
+        stateHolder.state = null
         customerStateHolder.setCustomerState(null)
     }
+
+    private suspend fun loadFrom(state: CheckoutElementsControllerLoadedState): LoadedState = load(
+        configuration = state.configuration,
+        response = state.checkoutSessionResponse,
+        collectedDetails = state.collectedDetails,
+        carryForward = CarryForward.from(state),
+    )
 
     private suspend fun load(
         configuration: CheckoutElementsController.Configuration.State,

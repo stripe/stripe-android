@@ -111,6 +111,36 @@ internal class CheckoutElementsControllerTest {
     }
 
     @Test
+    fun `configure publishes loading configuration before the response arrives`() = runTest {
+        val setup = createControllerSetup(SavedStateHandle(), DEFAULT_INTEGRATION_NAME)
+        val configuration = configurationWithPaymentElement()
+        val initStarted = Turbine<Unit>()
+        val releaseResponse = CountDownLatch(1)
+        networkRule.checkoutInit { response ->
+            initStarted.add(Unit)
+            check(releaseResponse.await(10, TimeUnit.SECONDS))
+            successResponse(response)
+        }
+
+        val configure = async { setup.controller.configure(DEFAULT_CLIENT_SECRET, configuration) }
+        try {
+            testScheduler.advanceUntilIdle()
+            initStarted.awaitItem()
+
+            val loading = setup.stateHolder.state as CheckoutElementsControllerState.Loading
+            assertThat(loading.state.configuration).isEqualTo(configuration.build())
+            assertThat(setup.stateHolder.loadedState).isNull()
+            assertThat(setup.controller.session.value).isNull()
+        } finally {
+            releaseResponse.countDown()
+        }
+
+        assertThat(configure.await()).isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
+        assertThat(setup.stateHolder.state).isInstanceOf(CheckoutElementsControllerState.Loaded::class.java)
+        initStarted.ensureAllEventsConsumed()
+    }
+
+    @Test
     fun `configure succeeds without a payment element`() = runConfigureScenario(
         configuration = CheckoutElementsController.Configuration(),
     ) {
@@ -593,11 +623,11 @@ internal class CheckoutElementsControllerTest {
         }
 
     @Test
-    fun `reconfigure preserves the published session and state when default shipping tax update fails`() =
+    fun `reconfigure clears the published session and state when default shipping tax update fails`() =
         runConfigureScenario {
             assertThat(result).isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
-            val beforeSession = requireNotNull(controller.session.value)
-            val beforeState = requireNotNull(committedState)
+            assertThat(controller.session.value).isNotNull()
+            assertThat(committedState).isNotNull()
             networkRule.enqueueSuccessfulInit(automaticTaxFor("shipping"))
             networkRule.defaultShippingAddressTaxUpdate { response ->
                 response.setResponseCode(400)
@@ -610,8 +640,8 @@ internal class CheckoutElementsControllerTest {
             )
 
             assertThat(reconfigureResult).isInstanceOf(CheckoutElementsController.OperationResult.Failed::class.java)
-            assertThat(controller.session.value).isEqualTo(beforeSession)
-            assertThat(committedState).isEqualTo(beforeState)
+            assertThat(controller.session.value).isNull()
+            assertThat(committedState).isNull()
         }
 
     @Test

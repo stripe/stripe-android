@@ -33,6 +33,8 @@ internal class CheckoutElementsControllerStateHolder @Inject constructor(
     private val paymentOptionFactory: CheckoutPaymentOptionDisplayDataFactory,
     private val availableExpressButtonTypesFactory: AvailableExpressButtonTypesFactory,
 ) : EmbeddedSelectionHolder {
+    private var loadingGeneration = 0L
+
     val stateFlow: StateFlow<CheckoutElementsControllerState?> =
         savedStateHandle.getStateFlow(STATE_KEY, null)
 
@@ -55,10 +57,14 @@ internal class CheckoutElementsControllerStateHolder @Inject constructor(
     var loadedState: CheckoutElementsControllerLoadedState?
         get() = loadedStateFlow.value
         set(value) {
+            if (state is CheckoutElementsControllerState.Loading) return
             state = value?.let(CheckoutElementsControllerState::Loaded)
         }
 
     init {
+        if (state is CheckoutElementsControllerState.Loading) {
+            state = null
+        }
         // A restored Pending has no mutation left to finish it, so reset it to avoid loading forever.
         loadedState?.let { restoredState ->
             if (restoredState.savedPaymentMethodSelectionState is SavedPaymentMethodSelectionState.Pending) {
@@ -66,6 +72,27 @@ internal class CheckoutElementsControllerStateHolder @Inject constructor(
                     savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Idle,
                 )
             }
+        }
+    }
+
+    @MainThread
+    fun beginLoading(configuration: CheckoutElementsController.Configuration.State): Long {
+        loadingGeneration += 1
+        state = CheckoutElementsControllerState.Loading(CheckoutElementsControllerLoadingState(configuration))
+        return loadingGeneration
+    }
+
+    @MainThread
+    fun completeLoading(generation: Long, loaded: CheckoutElementsControllerLoadedState): Boolean {
+        if (generation != loadingGeneration || state !is CheckoutElementsControllerState.Loading) return false
+        state = CheckoutElementsControllerState.Loaded(loaded)
+        return true
+    }
+
+    @MainThread
+    fun clearLoading(generation: Long) {
+        if (generation == loadingGeneration && state is CheckoutElementsControllerState.Loading) {
+            state = null
         }
     }
 

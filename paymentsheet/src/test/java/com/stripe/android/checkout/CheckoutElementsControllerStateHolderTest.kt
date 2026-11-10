@@ -48,6 +48,35 @@ internal class CheckoutElementsControllerStateHolderTest {
     }
 
     @Test
+    fun `loading state hides loaded projections and rejects an older load`() = testScenario {
+        val previous = committedState()
+        stateHolder.loadedState = previous
+        val configuration = CheckoutElementsController.Configuration().build()
+
+        val firstGeneration = stateHolder.beginLoading(configuration)
+        val secondGeneration = stateHolder.beginLoading(configuration)
+
+        assertThat(stateHolder.state).isInstanceOf(CheckoutElementsControllerState.Loading::class.java)
+        assertThat(stateHolder.loadedState).isNull()
+        assertThat(stateHolder.session.value).isNull()
+        assertThat(stateHolder.completeLoading(firstGeneration, previous)).isFalse()
+        assertThat(stateHolder.completeLoading(secondGeneration, previous)).isTrue()
+        assertThat(stateHolder.loadedState).isSameInstanceAs(previous)
+    }
+
+    @Test
+    fun `restored loading state is cleared`() = runTest {
+        val handle = SavedStateHandle()
+        val holder = CheckoutElementsControllerStateFactory.createStateHolder(handle)
+        holder.beginLoading(CheckoutElementsController.Configuration().build())
+
+        val restored = CheckoutElementsControllerStateFactory.createStateHolder(handle.simulateProcessDeath())
+
+        assertThat(restored.state).isNull()
+        assertThat(restored.loadedState).isNull()
+    }
+
+    @Test
     fun `background state reads reflect committed and cleared state`() = testScenario {
         suspend fun readState() = withContext(Dispatchers.IO) {
             assertThat(Thread.currentThread()).isNotSameInstanceAs(Looper.getMainLooper().thread)

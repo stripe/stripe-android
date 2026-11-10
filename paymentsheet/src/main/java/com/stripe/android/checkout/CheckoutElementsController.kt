@@ -135,42 +135,51 @@ class CheckoutElementsController @Inject internal constructor(
         val parsedClientSecret = try {
             CheckoutSessionClientSecret(clientSecret)
         } catch (e: IllegalArgumentException) {
+            checkoutStateLoader.clear()
             return@withContext kotlin.Result.failure(e)
         }
-        operationCoordinator.runMutation {
-            val configurationState = configuration.build()
-
-            checkoutSessionRepository.init(
-                clientSecret = parsedClientSecret,
-                adaptivePricingAllowed = configurationState.currencySelectorElementConfiguration != null,
-                analyticsParams = configurationState.toAnalyticsMap(),
-            ).mapCatching { response ->
-                val initialLoad = checkoutStateLoader.loadInitial(
-                    configuration = configurationState,
-                    checkoutSessionResponse = response,
-                )
-                val addressSource = response.taxAddressSource
-                val taxAddress = when (addressSource) {
-                    CheckoutSessionResponse.TaxAddressSource.SHIPPING ->
-                        initialLoad.state.collectedDetails.shippingAddress
-                    CheckoutSessionResponse.TaxAddressSource.BILLING ->
-                        initialLoad.state.paymentSelection?.billingDetails?.address?.toCheckoutAddress()
-                            ?: configurationState.defaults.billingDetails?.address
-                    null -> null
-                }
-                if (taxAddress != null && addressSource != null && response.automaticTaxEnabled) {
-                    val updatedResponse = checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
+        val configurationState = configuration.build()
+        checkoutStateLoader.clear()
+        val loadingGeneration = stateHolder.beginLoading(configurationState)
+        try {
+            operationCoordinator.runMutation {
+                checkoutSessionRepository.init(
+                    clientSecret = parsedClientSecret,
+                    adaptivePricingAllowed = configurationState.currencySelectorElementConfiguration != null,
+                    analyticsParams = configurationState.toAnalyticsMap(),
+                ).mapCatching { response ->
+                    val initialLoad = checkoutStateLoader.loadInitial(
+                        configuration = configurationState,
                         checkoutSessionResponse = response,
-                        addressSource = addressSource,
-                        invocationSource = InvocationSource.Merchant,
-                        address = taxAddress,
-                    ).getOrThrow()
-                    // The updated totals change payment method metadata, so rebuild it before publishing.
-                    checkoutStateLoader.reload(initialLoad.state.copy(checkoutSessionResponse = updatedResponse))
-                } else {
-                    checkoutStateLoader.publish(initialLoad)
+                    )
+                    val addressSource = response.taxAddressSource
+                    val taxAddress = when (addressSource) {
+                        CheckoutSessionResponse.TaxAddressSource.SHIPPING ->
+                            initialLoad.state.collectedDetails.shippingAddress
+                        CheckoutSessionResponse.TaxAddressSource.BILLING ->
+                            initialLoad.state.paymentSelection?.billingDetails?.address?.toCheckoutAddress()
+                                ?: configurationState.defaults.billingDetails?.address
+                        null -> null
+                    }
+                    if (taxAddress != null && addressSource != null && response.automaticTaxEnabled) {
+                        val updatedResponse = checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
+                            checkoutSessionResponse = response,
+                            addressSource = addressSource,
+                            invocationSource = InvocationSource.Merchant,
+                            address = taxAddress,
+                        ).getOrThrow()
+                        // The updated totals change payment method metadata, so rebuild it before publishing.
+                        checkoutStateLoader.reloadLoading(
+                            initialLoad.state.copy(checkoutSessionResponse = updatedResponse),
+                            loadingGeneration = loadingGeneration,
+                        )
+                    } else {
+                        checkoutStateLoader.publishLoading(initialLoad, loadingGeneration)
+                    }
                 }
             }
+        } finally {
+            stateHolder.clearLoading(loadingGeneration)
         }
     }.toOperationResult()
 
