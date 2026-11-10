@@ -10,9 +10,11 @@ import org.junit.Test
 import java.io.IOException
 
 internal class CheckoutDisplayMessageTest {
+    private val genericErrorMessage = "Generic display message"
+
     @Test
     fun `uses local display message`() {
-        val result = LocalStripeException("Local display message", null).checkoutDisplayMessage()
+        val result = LocalStripeException("Local display message", null).checkoutDisplayMessage(genericErrorMessage)
 
         assertThat(result).isEqualTo("Local display message")
     }
@@ -21,7 +23,7 @@ internal class CheckoutDisplayMessageTest {
     fun `uses server message for non-card errors`() {
         val result = APIException(
             stripeError = StripeError(type = "api_error", message = "Server display message"),
-        ).checkoutDisplayMessage()
+        ).checkoutDisplayMessage(genericErrorMessage)
 
         assertThat(result).isEqualTo("Server display message")
     }
@@ -30,35 +32,35 @@ internal class CheckoutDisplayMessageTest {
     fun `uses server message when error type is missing`() {
         val result = APIException(
             stripeError = StripeError(message = "Untyped server display message"),
-        ).checkoutDisplayMessage()
+        ).checkoutDisplayMessage(genericErrorMessage)
 
         assertThat(result).isEqualTo("Untyped server display message")
     }
 
     @Test
-    fun `returns null when server response is malformed`() {
+    fun `returns generic message when server response is malformed`() {
         val result = APIException(
             stripeError = StripeError(message = StripeErrorJsonParser.MALFORMED_RESPONSE_MESSAGE),
             message = StripeErrorJsonParser.MALFORMED_RESPONSE_MESSAGE,
-        ).checkoutDisplayMessage()
+        ).checkoutDisplayMessage(genericErrorMessage)
 
-        assertThat(result).isNull()
+        assertThat(result).isEqualTo(genericErrorMessage)
     }
 
     @Test
-    fun `returns null when typed server error has no display message`() {
+    fun `returns generic message when typed server error has no display message`() {
         val result = APIException(
             stripeError = StripeError(type = "api_error"),
             message = "Request failed with status code 400 and non-JSON error body.",
-        ).checkoutDisplayMessage()
+        ).checkoutDisplayMessage(genericErrorMessage)
 
-        assertThat(result).isNull()
+        assertThat(result).isEqualTo(genericErrorMessage)
     }
 
     @Test
-    fun `returns null for network errors`() {
+    fun `returns generic message for network errors`() {
         val error = APIConnectionException.create(IOException("connection diagnostic"))
 
-        assertThat(error.checkoutDisplayMessage()).isNull()
+        assertThat(error.checkoutDisplayMessage(genericErrorMessage)).isEqualTo(genericErrorMessage)
     }
 }

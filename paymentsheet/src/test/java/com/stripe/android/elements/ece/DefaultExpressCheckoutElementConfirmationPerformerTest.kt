@@ -1,6 +1,7 @@
 package com.stripe.android.elements.ece
 
 import androidx.lifecycle.SavedStateHandle
+import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.GooglePayJsonFactory
@@ -263,6 +264,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
             workContext = UnconfinedTestDispatcher(testScheduler),
         )
         val operationCoordinator = CheckoutOperationCoordinator(
+            context = ApplicationProvider.getApplicationContext(),
             confirmationHandler = confirmationHandler,
             sheetStateHolder = SheetStateHolder(savedStateHandle),
             sessionRefresher = sessionRefresher,

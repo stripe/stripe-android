@@ -2,6 +2,7 @@ package com.stripe.android.checkout
 
 import android.os.Looper
 import androidx.lifecycle.SavedStateHandle
+import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
@@ -399,6 +400,7 @@ internal class CheckoutConfirmationPerformerTest {
             workContext = UnconfinedTestDispatcher(testScheduler),
         )
         val operationCoordinator = CheckoutOperationCoordinator(
+            context = ApplicationProvider.getApplicationContext(),
             confirmationHandler = confirmationHandler,
             sheetStateHolder = SheetStateHolder(savedStateHandle).apply { this.sheetIsOpen = sheetIsOpen },
             sessionRefresher = sessionRefresher,

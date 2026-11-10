@@ -34,6 +34,7 @@ import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.CheckoutSessionClientSecret
 import com.stripe.android.paymentsheet.model.PaymentOptionResource
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -73,6 +74,7 @@ private val SERVER_UPDATE_TIMEOUT_MS = 20.seconds.inWholeMilliseconds
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Suppress("TooManyFunctions")
 class CheckoutElementsController @Inject internal constructor(
+    context: Context,
     @ViewModelScope private val viewModelScope: CoroutineScope,
     private val checkoutSessionRepository: CheckoutSessionRepository,
     private val checkoutSessionTaxRegionUpdater: CheckoutSessionTaxRegionUpdater,
@@ -85,6 +87,8 @@ class CheckoutElementsController @Inject internal constructor(
     @PaymentElementCallbackIdentifier internal val paymentElementCallbackIdentifier: String,
     private val savedState: CheckoutElementsControllerSavedState,
 ) {
+    private val genericErrorMessage = context.getString(R.string.stripe_something_went_wrong)
+
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
         /**
@@ -434,7 +438,7 @@ class CheckoutElementsController @Inject internal constructor(
         onFailure = { error ->
             OperationResult.Failed(
                 error = error,
-                displayMessage = error.checkoutDisplayMessage(),
+                displayMessage = error.checkoutDisplayMessage(genericErrorMessage),
             )
         },
     )
@@ -1493,14 +1497,15 @@ class CheckoutElementsController @Inject internal constructor(
          * The operation failed with [error].
          *
          * @property error Diagnostic details for the operation failure.
-         * @property displayMessage A user-facing message, or `null` when no display message is available.
+         * @property displayMessage A localized user-facing message, with a generic fallback when no specific
+         * display message is available.
          */
         @Poko
         @CheckoutSessionPreview
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         class Failed internal constructor(
             val error: Throwable,
-            val displayMessage: String?,
+            val displayMessage: String,
         ) : OperationResult
     }
 
@@ -1529,14 +1534,15 @@ class CheckoutElementsController @Inject internal constructor(
          *
          * @property error The error that caused the payment flow to fail, or an [IllegalStateException]
          * explaining why confirmation could not start.
-         * @property displayMessage A user-facing message, or `null` when no display message is available.
+         * @property displayMessage A localized user-facing message, with a generic fallback when no specific
+         * display message is available.
          */
         @Poko
         @CheckoutSessionPreview
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         class Failed internal constructor(
             val error: Throwable,
-            val displayMessage: String?,
+            val displayMessage: String,
         ) : Result
     }
 
