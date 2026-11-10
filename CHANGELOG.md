@@ -5,6 +5,7 @@ NEXT_VERSION_BUMP: MINOR
 
 ### Crypto Onramp
 * [Added][15296](https://github.com/stripe/stripe-android/pull/15296) Added `googlePayCardBrandAcceptance` and `linkCardBrandAcceptance` to `OnrampConfiguration` to configure accepted card brands independently for Google Pay and Link.
+* [FIXED][15268](https://github.com/stripe/stripe-android/pull/15268) Fixed stale customer and checkout state persisting or being restored by in-flight operations after logging out.
 
 ## 23.26.0 - 2026-11-09
 
