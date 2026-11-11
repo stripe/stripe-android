@@ -210,6 +210,7 @@ internal class CheckoutPaymentElementAnalyticsTest {
                         .getJSONObject("one_time_price").getJSONArray("items").getJSONObject(0)
                         .getJSONObject("amount_details")
                         .put("total", UPDATED_TOTAL)
+                    json.getJSONObject("total_summary").put("total", UPDATED_TOTAL)
                 }
             }
             networkRule.validateCheckoutAnalyticsStarted(
@@ -826,7 +827,7 @@ internal class CheckoutPaymentElementAnalyticsTest {
                 .getJSONObject("one_time_price").getJSONArray("items").getJSONObject(0)
                 .getJSONObject("amount_details")
                 .put("total", UPDATED_TOTAL)
-            json.getJSONObject("total_summary").put("due", UPDATED_TOTAL)
+            json.getJSONObject("total_summary").put("total", UPDATED_TOTAL)
         }
     }
 

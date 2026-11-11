@@ -1076,14 +1076,7 @@ internal class CheckoutElementsControllerTest {
             .isNotEqualTo(4099L)
         networkRule.checkoutUpdate(
             bodyPart("promotion_code", "10OFF"),
-            responseFactory = successResponseFactory(
-                combine(
-                    withTotal(4099),
-                    { json ->
-                        json.getJSONObject("total_summary").put("due", 4099)
-                    },
-                ),
-            ),
+            responseFactory = successResponseFactory(withTotal(4099)),
         )
 
         val result = fromBackgroundThread { controller.applyPromotionCode("10OFF") }
@@ -1513,6 +1506,7 @@ internal class CheckoutElementsControllerTest {
             val previousResponse = committedState().checkoutSessionResponse
             val response = previousResponse.copy(
                 checkoutItems = listOf(CheckoutSessionResponseFactory.checkoutItem(total = 6000L)),
+                totalSummary = previousResponse.totalSummary.copy(subtotal = 6000L, total = 6000L),
             )
             val address = fullAddress.build()
 
@@ -1762,7 +1756,6 @@ internal class CheckoutElementsControllerTest {
                         withTotal(4099),
                         { json ->
                             json.remove("customer_email")
-                            json.getJSONObject("total_summary").put("due", 4099)
                         },
                     ),
                 ).invoke(response)
@@ -2235,6 +2228,7 @@ internal class CheckoutElementsControllerTest {
 
     private fun withTotal(amount: Int): (JSONObject) -> Unit = { json ->
         checkoutItemJson(json).getJSONObject("amount_details").put("total", amount).put("subtotal", amount)
+        json.getJSONObject("total_summary").put("total", amount).put("subtotal", amount)
     }
 
     private fun createControllerSetup(

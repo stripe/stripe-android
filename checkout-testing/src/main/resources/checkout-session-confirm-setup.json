@@ -70,6 +70,8 @@
     }
   ],
   "total_summary": {
+    "tax_exclusive": 0,
+    "tax_inclusive": 0,
     "total_tax_amounts": [],
     "subtotal": 0,
     "total": 0,

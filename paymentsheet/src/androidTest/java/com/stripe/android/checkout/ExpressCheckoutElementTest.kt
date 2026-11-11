@@ -422,7 +422,8 @@ internal class ExpressCheckoutElementTest {
                     json.getJSONArray("items").getJSONObject(0)
                         .getJSONObject("one_time_price").getJSONArray("items").getJSONObject(0)
                         .getJSONObject("amount_details")
-                        .put("total", 5399)
+                        .put("total", 5399).put("tax_exclusive", 300)
+                    json.getJSONObject("total_summary").put("total", 5399).put("tax_exclusive", 300)
                 }
             }
             networkRule.checkoutInit(
