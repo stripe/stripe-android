@@ -1515,10 +1515,14 @@ class CheckoutElementsController @Inject internal constructor(
     sealed interface Result {
         /**
          * The customer completed the payment flow.
+         *
+         * @property paymentStatus The payment status after Checkout completed.
          */
         @CheckoutSessionPreview
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        class Completed internal constructor() : Result
+        class Completed internal constructor(
+            val paymentStatus: Session.Status.PaymentStatus,
+        ) : Result
 
         /**
          * The customer canceled the payment flow.

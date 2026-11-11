@@ -111,7 +111,7 @@ internal class CheckoutOperationCoordinator @Inject constructor(
                 completeConfirmation { wasRestored ->
                     val (result, response) = finalizeConfirmation(state.result)
                     resultReporter.reportConfirmationResult(result, response)
-                    result.asCheckoutResult(wasRestored, displayMessageResolver)
+                    result.asCheckoutResult(response, wasRestored, displayMessageResolver)
                 }
             }
         }
@@ -128,7 +128,19 @@ internal class CheckoutOperationCoordinator @Inject constructor(
         val response = succeeded?.metadata?.get(CheckoutSessionResponseKey)
         if (response == null) {
             refreshSession { sessionRefresher.refresh() }
-            return result to null
+            val resolvedResult = if (succeeded == null) {
+                result
+            } else {
+                val error = IllegalStateException(
+                    "Checkout confirmation succeeded without returning the confirmed session."
+                )
+                ConfirmationHandler.Result.Failed(
+                    cause = error,
+                    message = error.stripeErrorMessage(),
+                    type = ConfirmationHandler.Result.Failed.ErrorType.Internal,
+                )
+            }
+            return resolvedResult to null
         }
 
         // A next action returns a newer Intent than the one retrieved after /confirm.
@@ -204,11 +216,14 @@ internal class CheckoutOperationCoordinator @Inject constructor(
 }
 
 private fun ConfirmationHandler.Result.asCheckoutResult(
+    response: CheckoutSessionResponse?,
     confirmationWasRestored: Boolean,
     displayMessageResolver: CheckoutDisplayMessageResolver,
 ): CheckoutElementsController.Result? {
     return when (this) {
-        is ConfirmationHandler.Result.Succeeded -> CheckoutElementsController.Result.Completed()
+        is ConfirmationHandler.Result.Succeeded -> CheckoutElementsController.Result.Completed(
+            paymentStatus = checkNotNull(response).paymentStatus.asPaymentStatus(),
+        )
         is ConfirmationHandler.Result.Canceled -> when (action) {
             ConfirmationHandler.Result.Canceled.Action.InformCancellation ->
                 CheckoutElementsController.Result.Canceled()
