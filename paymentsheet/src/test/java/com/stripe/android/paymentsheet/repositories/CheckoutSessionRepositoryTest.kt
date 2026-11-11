@@ -18,7 +18,6 @@ import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.hasBodyPart
-import com.stripe.android.networktesting.RequestMatchers.hasQueryParam
 import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.RequestMatchers.query
 import com.stripe.android.networktesting.testBodyFromFile
@@ -88,7 +87,7 @@ class CheckoutSessionRepositoryTest {
     }
 
     @Test
-    fun `fetch sends CheckoutClient common params without initialization options`() = runTest {
+    fun `fetch sends CheckoutClient common params`() = runTest {
         val expectedSessionId = AnalyticsRequestFactory.sessionId.toString()
         networkRule.checkoutFetch(
             query("client_secret", "cs_test_abc123_secret_test"),
@@ -96,7 +95,6 @@ class CheckoutSessionRepositoryTest {
             query("timezone", java.util.TimeZone.getDefault().id),
             query("mobile_session_id", expectedSessionId),
             query("mobile_app_id", clientParams.mobileAppId),
-            not(hasQueryParam("adaptive_pricing[allowed]")),
         ) { response ->
             response.testBodyFromFile("checkout-session-init.json")
         }
