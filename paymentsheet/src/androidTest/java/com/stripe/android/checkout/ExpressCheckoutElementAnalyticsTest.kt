@@ -54,7 +54,6 @@ internal class ExpressCheckoutElementAnalyticsTest {
 
             enqueueSuccessfulGooglePayPayment(paymentMethod = paymentMethod)
 
-            validateAnalyticsRequest(eventName = "stripe_android.payment_intent_retrieval")
             networkRule.checkoutConfirm(
                 bodyPart("payment_method", paymentMethod.id),
                 bodyPart("expected_amount", "5099"),
@@ -210,7 +209,6 @@ internal class ExpressCheckoutElementAnalyticsTest {
             }
             networkRule.validateCheckoutAnalyticsStarted("update_shipping_address", *addressUpdateMatchers())
             networkRule.validateCheckoutAnalyticsSucceeded("update_shipping_address", *addressUpdateMatchers())
-            validateAnalyticsRequest(eventName = "stripe_android.payment_intent_retrieval")
             networkRule.checkoutConfirm(
                 bodyPart("payment_method", paymentMethod.id),
                 bodyPart("expected_amount", "5099"),
@@ -263,7 +261,6 @@ internal class ExpressCheckoutElementAnalyticsTest {
             }
             networkRule.validateCheckoutAnalyticsStarted("update_billing_address", *addressUpdateMatchers())
             networkRule.validateCheckoutAnalyticsSucceeded("update_billing_address", *addressUpdateMatchers())
-            validateAnalyticsRequest(eventName = "stripe_android.payment_intent_retrieval")
             networkRule.checkoutConfirm(
                 bodyPart("payment_method", paymentMethod.id),
                 bodyPart("expected_amount", "5099"),
@@ -344,7 +341,6 @@ internal class ExpressCheckoutElementAnalyticsTest {
             }
             networkRule.validateCheckoutAnalyticsStarted("update_billing_address", *addressUpdateMatchers())
             networkRule.validateCheckoutAnalyticsSucceeded("update_billing_address", *addressUpdateMatchers())
-            validateAnalyticsRequest(eventName = "stripe_android.payment_intent_retrieval")
             networkRule.checkoutConfirm(
                 bodyPart("payment_method", paymentMethod.id),
                 bodyPart("expected_amount", "5099"),
@@ -378,7 +374,6 @@ internal class ExpressCheckoutElementAnalyticsTest {
                 analyticsPayloadField("did_request_tax_update", "false"),
                 not(hasQueryParam("duration")),
             )
-            validateAnalyticsRequest(eventName = "stripe_android.payment_intent_retrieval")
             networkRule.checkoutConfirm(
                 bodyPart("payment_method", paymentMethod.id),
                 bodyPart("expected_amount", "5099"),

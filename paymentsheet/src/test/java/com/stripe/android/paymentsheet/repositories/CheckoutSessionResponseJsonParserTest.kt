@@ -15,6 +15,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import java.math.BigDecimal
 
+@Suppress("LargeClass")
 @RunWith(TestParameterInjector::class)
 class CheckoutSessionResponseJsonParserTest {
     @Test
@@ -55,9 +56,44 @@ class CheckoutSessionResponseJsonParserTest {
     }
 
     @Test
-    fun `rejects an intent reference without its client secret`() {
+    fun `parses the payment response intent with its expanded payment method`() {
+        val result = requireNotNull(parse(response("checkout-session-confirm.json")))
+
+        val paymentIntent = requireNotNull(result.paymentResponse?.paymentIntent)
+        assertThat(paymentIntent.id).isEqualTo("pi_checkout123")
+        assertThat(paymentIntent.clientSecret).isEqualTo("pi_checkout123_secret_example")
+        assertThat(paymentIntent.paymentMethod?.id).isEqualTo("pm_cs_example")
+        assertThat(result.paymentResponse?.setupIntent).isNull()
+    }
+
+    @Test
+    fun `parses the payment response setup intent with its expanded payment method`() {
+        val result = requireNotNull(parse(response("checkout-session-confirm-setup.json")))
+
+        val setupIntent = requireNotNull(result.paymentResponse?.setupIntent)
+        assertThat(setupIntent.id).isEqualTo("seti_checkout123")
+        assertThat(setupIntent.paymentMethod?.id).isEqualTo("pm_cs_example")
+        assertThat(result.paymentResponse?.paymentIntent).isNull()
+    }
+
+    @Test
+    fun `rejects a payment response with an invalid payment intent`() {
         val json = response("checkout-session-confirm.json")
-        json.getJSONObject("payment_response").getJSONObject("payment_intent").remove("client_secret")
+        json.getJSONObject("payment_response").put(
+            "payment_intent",
+            JSONObject().put("id", "pi_checkout123").put("client_secret", "pi_checkout123_secret_example"),
+        )
+
+        assertThat(parse(json)).isNull()
+    }
+
+    @Test
+    fun `rejects a payment response with an invalid setup intent`() {
+        val json = response("checkout-session-confirm-setup.json")
+        json.getJSONObject("payment_response").put(
+            "setup_intent",
+            JSONObject().put("id", "seti_checkout123").put("client_secret", "seti_checkout123_secret_example"),
+        )
 
         assertThat(parse(json)).isNull()
     }
