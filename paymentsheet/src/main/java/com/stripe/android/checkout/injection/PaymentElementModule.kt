@@ -1,8 +1,10 @@
 package com.stripe.android.checkout.injection
 
+import com.stripe.android.checkout.CheckoutElementsController
 import com.stripe.android.checkout.CheckoutElementsControllerStateHolder
 import com.stripe.android.checkout.CheckoutLinkPaymentOptionsPresenter
 import com.stripe.android.checkout.CheckoutSheetLauncher
+import com.stripe.android.checkout.CommitSheetResult
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.LinkPaymentMethodSelectionLauncher
@@ -60,6 +62,13 @@ internal interface PaymentElementModule {
 
     @OptIn(CheckoutSessionPreview::class)
     companion object {
+        @Provides
+        fun provideCommitSheetResult(
+            checkoutElementsController: CheckoutElementsController,
+        ): CommitSheetResult {
+            return CommitSheetResult(checkoutElementsController::commitSheetResult)
+        }
+
         @Provides
         fun provideEmbeddedContentState(
             stateHolder: CheckoutElementsControllerStateHolder,

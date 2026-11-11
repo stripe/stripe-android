@@ -1536,6 +1536,34 @@ internal class CheckoutElementsControllerTest {
         }
 
     @Test
+    fun `commitSheetResult commits caller-provided response and selection in one session update`() =
+        runMutationScenario(paymentSelection = PaymentSelection.GooglePay) {
+            val response = committedState().checkoutSessionResponse.copy(
+                checkoutItems = listOf(CheckoutSessionResponseFactory.checkoutItem(total = 6000L)),
+            )
+            val selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION
+
+            controller.session.test {
+                val initial = requireNotNull(awaitItem())
+                assertThat(initial.paymentOption?.paymentMethodType).isEqualTo("google_pay")
+                assertThat(initial.totals.total.minorUnitsAmount).isNotEqualTo(6000L)
+
+                controller.commitSheetResult(
+                    selection = selection,
+                    updatedCheckoutSessionResponse = response,
+                ).getOrThrow()
+
+                val committed = requireNotNull(awaitItem())
+                assertThat(committed.paymentOption?.paymentMethodType).isEqualTo("card")
+                assertThat(committed.totals.total.minorUnitsAmount).isEqualTo(6000L)
+                expectNoEvents()
+            }
+            val state = committedState()
+            assertThat(state.checkoutSessionResponse).isSameInstanceAs(response)
+            assertThat(state.paymentSelection).isEqualTo(selection)
+        }
+
+    @Test
     fun `runServerUpdate refreshes the session after serverUpdate completes`() = runMutationScenario {
         assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isNotEqualTo(8000L)
         networkRule.checkoutInit(

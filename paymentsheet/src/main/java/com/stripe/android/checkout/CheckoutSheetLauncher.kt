@@ -35,12 +35,20 @@ import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.state.CustomerState
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
+
+internal fun interface CommitSheetResult {
+    suspend operator fun invoke(
+        selection: PaymentSelection?,
+        checkoutSessionResponse: CheckoutSessionResponse,
+    ): Result<Unit>
+}
 
 @Singleton
 internal class CheckoutSheetLauncherState @Inject constructor(
@@ -68,7 +76,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
     private val linkAccountHolder: LinkAccountHolder,
     private val sheetStateHolder: SheetStateHolder,
     private val errorReporter: ErrorReporter,
-    private val sessionRefresher: CheckoutSessionRefresher,
+    private val commitSheetResult: CommitSheetResult,
     private val operationCoordinator: CheckoutOperationCoordinator,
     private val launcherState: CheckoutSheetLauncherState,
     private val embeddedContentState: StateFlow<EmbeddedContentHelperStateHolder.State?>,
@@ -98,10 +106,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
             launcherState.isAwaitingPaymentOptionsReady = false
             sheetStateHolder.sheetIsOpen = false
             when (result.launchMode) {
-                is EmbeddedLaunchMode.Form -> {
-                    selectionHolder.setTemporarySelection(null)
-                    handleFormResult(result)
-                }
+                is EmbeddedLaunchMode.Form -> handleFormResult(result)
                 is EmbeddedLaunchMode.Manage -> handleManageResult(result)
                 is EmbeddedLaunchMode.PaymentOptions -> handlePaymentOptionsResult(result)
             }
@@ -113,26 +118,27 @@ internal class CheckoutSheetLauncher @Inject constructor(
 
     private fun handleFormResult(result: EmbeddedActivityResult) {
         when (result) {
-            is EmbeddedActivityResult.Complete -> {
-                applyCompleteResult(result)
+            // Keep the tapped row highlighted until the selection is applied.
+            is EmbeddedActivityResult.Complete -> applyCompleteResult(result) {
+                selectionHolder.setTemporarySelection(null)
                 if (!result.hasBeenConfirmed) {
                     result.selection?.let { rowSelectionImmediateActionHandler.invoke() }
                 }
-                refreshCheckoutSession(result.checkoutSessionResponse)
             }
-            is EmbeddedActivityResult.Cancelled -> applyCustomerState(result.customerState)
-            is EmbeddedActivityResult.Error -> Unit
+            is EmbeddedActivityResult.Cancelled -> {
+                selectionHolder.setTemporarySelection(null)
+                applyCustomerState(result.customerState)
+            }
+            is EmbeddedActivityResult.Error -> selectionHolder.setTemporarySelection(null)
         }
     }
 
     private fun handleManageResult(result: EmbeddedActivityResult) {
         when (result) {
-            is EmbeddedActivityResult.Complete -> {
-                applyCompleteResult(result)
+            is EmbeddedActivityResult.Complete -> applyCompleteResult(result) {
                 if (result.shouldInvokeSelectionCallback && result.selection is PaymentSelection.Saved) {
                     rowSelectionImmediateActionHandler.invoke()
                 }
-                refreshCheckoutSession(result.checkoutSessionResponse)
             }
             is EmbeddedActivityResult.Cancelled -> Unit
             is EmbeddedActivityResult.Error -> Unit
@@ -145,8 +151,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
                 (result.selection as? PaymentSelection.Saved)?.let { selection ->
                     selectionHolder.state?.mandateState?.acknowledgeSepaMandate(selection.paymentMethod)
                 }
-                applyCompleteResult(result)
-                refreshCheckoutSession(result.checkoutSessionResponse)
+                applyCompleteResult(result, onSelectionApplied = {})
             }
             is EmbeddedActivityResult.Cancelled -> {
                 applyCustomerState(result.customerState)
@@ -156,20 +161,26 @@ internal class CheckoutSheetLauncher @Inject constructor(
         }
     }
 
-    private fun applyCompleteResult(result: EmbeddedActivityResult.Complete) {
+    private fun applyCompleteResult(
+        result: EmbeddedActivityResult.Complete,
+        onSelectionApplied: () -> Unit,
+    ) {
         applyCustomerState(result.customerState)
         selectionHolder.setPreviousNewSelections(result.previousNewSelections)
-        selectionHolder.setSelection(result.selection)
-    }
-
-    private fun refreshCheckoutSession(response: CheckoutSessionResponse?) {
-        response ?: return
-        coroutineScope.launch {
-            operationCoordinator.runMutation {
-                runCatching { sessionRefresher.refresh(response) }
-            }.onFailure {
+        val response = result.checkoutSessionResponse
+        if (response == null) {
+            selectionHolder.setSelection(result.selection)
+            onSelectionApplied()
+            return
+        }
+        // Undispatched so the commit blocks confirmation before this result callback returns.
+        coroutineScope.launch(start = CoroutineStart.UNDISPATCHED) {
+            commitSheetResult(result.selection, response).onFailure {
                 logger.error("Failed to refresh the checkout session after the sheet closed.", it)
+                // The sheet already updated the server, so keep the customer's choice.
+                selectionHolder.setSelection(result.selection)
             }
+            onSelectionApplied()
         }
     }
 

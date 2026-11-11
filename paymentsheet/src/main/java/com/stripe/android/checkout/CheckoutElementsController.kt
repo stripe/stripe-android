@@ -253,6 +253,15 @@ class CheckoutElementsController @Inject internal constructor(
         kotlin.Result.success(updatedCheckoutSessionResponse)
     }
 
+    internal suspend fun commitSheetResult(
+        selection: PaymentSelection?,
+        updatedCheckoutSessionResponse: CheckoutSessionResponse,
+    ): kotlin.Result<Unit> = withCheckoutState(
+        additionalStateMutations = { commitSelection(selection) },
+    ) {
+        kotlin.Result.success(updatedCheckoutSessionResponse)
+    }
+
     /**
      * Updates the customer's email address.
      *
