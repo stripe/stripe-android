@@ -129,6 +129,7 @@ internal class CollectBankAccountViewModel @Inject constructor(
                         preCollectedConsent = args.preCollectedConsent.takeIf {
                             args.hostedSurface == null && args.configuration !is InstantDebits
                         },
+                        themeMode = args.themeMode,
                     )
                 )
             }
