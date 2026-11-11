@@ -1,11 +1,10 @@
 package com.stripe.android.paymentelement.embedded.sheet
 
 import androidx.lifecycle.SavedStateHandle
-import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
-import com.stripe.android.checkout.analytics.CheckoutAnalyticsReporter
+import com.stripe.android.checkout.analytics.FakeCheckoutAnalyticsReporter
 import com.stripe.android.checkout.analytics.LocalOperation
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutUpdate
@@ -19,7 +18,6 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -36,7 +34,6 @@ import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFacto
 import com.stripe.android.paymentsheet.repositories.CheckoutStripeRepositoryFactory
 import com.stripe.android.paymentsheet.verticalmode.FakeManageScreenInteractor
 import com.stripe.android.paymentsheet.verticalmode.FakePaymentMethodVerticalLayoutInteractor
-import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.android.utils.FakeFraudDetectionDataRepository
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.test.TestScope
@@ -257,13 +254,7 @@ internal class DefaultSheetActivityContinueCoordinatorTest {
     }
 
     private fun checkoutSessionTaxRegionUpdater(): CheckoutSessionTaxRegionUpdater {
-        val analyticsReporter = CheckoutAnalyticsReporter(
-            analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
-            paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
-                context = ApplicationProvider.getApplicationContext(),
-                publishableKey = "pk_test_123",
-            ),
-        )
+        val analyticsReporter = FakeCheckoutAnalyticsReporter()
         val checkoutSessionRepository = CheckoutSessionRepository(
             stripeRepository = CheckoutStripeRepositoryFactory.create(),
             elementsSessionClientParams = CheckoutStripeRepositoryFactory.clientParams(),
