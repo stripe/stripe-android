@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
+import com.stripe.android.checkout.analytics.CheckoutAnalyticsReporter
 import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
@@ -150,16 +151,19 @@ internal suspend fun createIntentConfirmationInterceptor(
                 customerMetadata: CustomerMetadata?,
                 clientAttributionMetadata: ClientAttributionMetadata.CheckoutSession,
             ): CheckoutSessionConfirmationInterceptor {
-                val checkoutSessionRepository = CheckoutSessionRepository(
-                    stripeRepository = CheckoutStripeRepositoryFactory.create(),
-                    elementsSessionClientParams = CheckoutStripeRepositoryFactory.clientParams(),
-                    fraudDetectionDataRepository = FakeFraudDetectionDataRepository.create(),
-                    stripeNetworkClient = DefaultStripeNetworkClient(),
+                val analyticsReporter = CheckoutAnalyticsReporter(
                     analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
                     paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
                         context = ApplicationProvider.getApplicationContext(),
                         publishableKey = "pk",
                     ),
+                )
+                val checkoutSessionRepository = CheckoutSessionRepository(
+                    stripeRepository = CheckoutStripeRepositoryFactory.create(),
+                    elementsSessionClientParams = CheckoutStripeRepositoryFactory.clientParams(),
+                    fraudDetectionDataRepository = FakeFraudDetectionDataRepository.create(),
+                    stripeNetworkClient = DefaultStripeNetworkClient(),
+                    analyticsReporter = analyticsReporter,
                     apiRequestOptionsProvider = {
                         ApiRequest.Options(
                             apiKey = DEFAULT_API_CONFIG.publishableKey,
@@ -173,7 +177,10 @@ internal suspend fun createIntentConfirmationInterceptor(
                     clientAttributionMetadata = clientAttributionMetadata,
                     context = ApplicationProvider.getApplicationContext(),
                     checkoutSessionRepository = checkoutSessionRepository,
-                    checkoutSessionTaxRegionUpdater = CheckoutSessionTaxRegionUpdater(checkoutSessionRepository),
+                    checkoutSessionTaxRegionUpdater = CheckoutSessionTaxRegionUpdater(
+                        checkoutSessionRepository,
+                        analyticsReporter,
+                    ),
                 )
             }
         },

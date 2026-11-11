@@ -1,13 +1,12 @@
 package com.stripe.android.checkout.analytics
 
 import android.content.Context
-import com.stripe.android.PaymentConfiguration
-import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.checkout.injection.DaggerCheckoutAnalyticsReporterComponent
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
-import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
+import javax.inject.Inject
 
-internal class CheckoutAnalyticsReporter(
+internal class CheckoutAnalyticsReporter @Inject constructor(
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
 ) {
@@ -22,20 +21,9 @@ internal class CheckoutAnalyticsReporter(
 
     companion object {
         fun createFallbackInstance(context: Context): CheckoutAnalyticsReporter {
-            return CheckoutAnalyticsReporter(
-                analyticsRequestExecutor = DefaultAnalyticsRequestExecutor(),
-                paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
-                    context = context,
-                    defaultProductUsageTokens = emptySet(),
-                    apiConfigurationProvider = {
-                        val paymentConfiguration = PaymentConfiguration.getInstance(context)
-                        ApiConfiguration.State(
-                            publishableKey = paymentConfiguration.publishableKey,
-                            stripeAccountId = paymentConfiguration.stripeAccountId,
-                        )
-                    },
-                ),
-            )
+            return DaggerCheckoutAnalyticsReporterComponent.factory()
+                .create(context.applicationContext)
+                .analyticsReporter
         }
     }
 }

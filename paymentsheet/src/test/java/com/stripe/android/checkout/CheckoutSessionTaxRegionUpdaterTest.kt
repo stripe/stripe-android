@@ -4,6 +4,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutElementsController.Address
 import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent.InvocationSource
+import com.stripe.android.checkout.analytics.CheckoutAnalyticsReporter
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.core.networking.ApiRequest
@@ -122,16 +123,19 @@ internal class CheckoutSessionTaxRegionUpdaterTest {
         automaticTaxEnabled: Boolean = true,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
-        val checkoutSessionRepository = CheckoutSessionRepository(
-            stripeRepository = CheckoutStripeRepositoryFactory.create(),
-            elementsSessionClientParams = CheckoutStripeRepositoryFactory.clientParams(),
-            fraudDetectionDataRepository = FakeFraudDetectionDataRepository.create(),
-            stripeNetworkClient = DefaultStripeNetworkClient(),
+        val analyticsReporter = CheckoutAnalyticsReporter(
             analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
             paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
                 context = ApplicationProvider.getApplicationContext(),
                 publishableKey = "pk_test_123",
             ),
+        )
+        val checkoutSessionRepository = CheckoutSessionRepository(
+            stripeRepository = CheckoutStripeRepositoryFactory.create(),
+            elementsSessionClientParams = CheckoutStripeRepositoryFactory.clientParams(),
+            fraudDetectionDataRepository = FakeFraudDetectionDataRepository.create(),
+            stripeNetworkClient = DefaultStripeNetworkClient(),
+            analyticsReporter = analyticsReporter,
             apiRequestOptionsProvider = {
                 ApiRequest.Options(
                     apiKey = DEFAULT_API_CONFIG.publishableKey,
@@ -140,7 +144,7 @@ internal class CheckoutSessionTaxRegionUpdaterTest {
             },
         )
 
-        val updater = CheckoutSessionTaxRegionUpdater(checkoutSessionRepository)
+        val updater = CheckoutSessionTaxRegionUpdater(checkoutSessionRepository, analyticsReporter)
 
         val scenario = Scenario(
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(

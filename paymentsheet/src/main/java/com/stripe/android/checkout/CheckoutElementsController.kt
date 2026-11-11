@@ -77,6 +77,7 @@ class CheckoutElementsController @Inject internal constructor(
     private val displayMessageResolver: CheckoutDisplayMessageResolver,
     @ViewModelScope private val viewModelScope: CoroutineScope,
     private val checkoutSessionRepository: CheckoutSessionRepository,
+    private val analyticsReporter: CheckoutAnalyticsReporter,
     private val checkoutSessionTaxRegionUpdater: CheckoutSessionTaxRegionUpdater,
     private val errorReporter: ErrorReporter,
     private val checkoutStateLoader: CheckoutStateLoader,
@@ -277,7 +278,7 @@ class CheckoutElementsController @Inject internal constructor(
                 LocalOperation(
                     operation = Operation.UpdateEmail,
                     params = emptyMap(),
-                    report = checkoutSessionRepository::fireEvent,
+                    report = analyticsReporter::fireEvent,
                 ).succeeded(checkoutSessionResponse)
             }
         }.toOperationResult()
@@ -385,7 +386,7 @@ class CheckoutElementsController @Inject internal constructor(
                         "invocation_source" to InvocationSource.Merchant.code,
                         "did_request_tax_update" to false,
                     ),
-                    report = checkoutSessionRepository::fireEvent,
+                    report = analyticsReporter::fireEvent,
                 ).succeeded(checkoutSessionResponse)
             }
         } else {
@@ -511,7 +512,7 @@ class CheckoutElementsController @Inject internal constructor(
             LocalOperation(
                 operation = Operation.ClearPaymentOption,
                 params = emptyMap(),
-                report = checkoutSessionRepository::fireEvent,
+                report = analyticsReporter::fireEvent,
             ).invoked(checkoutSessionResponse)
             checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
                 checkoutSessionResponse = checkoutSessionResponse,

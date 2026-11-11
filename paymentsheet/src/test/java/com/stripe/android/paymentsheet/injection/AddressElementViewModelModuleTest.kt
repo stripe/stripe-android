@@ -4,6 +4,7 @@ import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
+import com.stripe.android.checkout.analytics.CheckoutAnalyticsReporter
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.networking.AnalyticsRequestFactory
@@ -397,17 +398,20 @@ class AddressElementViewModelModuleTest {
     )
 
     private fun createTaxRegionUpdater(): CheckoutSessionTaxRegionUpdater {
+        val analyticsReporter = CheckoutAnalyticsReporter(
+            analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
+            paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
+                context = ApplicationProvider.getApplicationContext(),
+                publishableKey = "pk_test_123",
+            ),
+        )
         return CheckoutSessionTaxRegionUpdater(
             CheckoutSessionRepository(
                 stripeRepository = CheckoutStripeRepositoryFactory.create(),
                 elementsSessionClientParams = CheckoutStripeRepositoryFactory.clientParams(),
                 fraudDetectionDataRepository = FakeFraudDetectionDataRepository.create(),
                 stripeNetworkClient = DefaultStripeNetworkClient(),
-                analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
-                paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
-                    context = ApplicationProvider.getApplicationContext(),
-                    publishableKey = "pk_test_123",
-                ),
+                analyticsReporter = analyticsReporter,
                 apiRequestOptionsProvider = Provider {
                     ApiRequest.Options(
                         apiKey = "pk_test_123",
@@ -415,6 +419,7 @@ class AddressElementViewModelModuleTest {
                     )
                 },
             ),
+            analyticsReporter = analyticsReporter,
         )
     }
 

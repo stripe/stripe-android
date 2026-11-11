@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.repositories
 
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkout.analytics.CheckoutAnalyticsReporter
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
@@ -348,10 +349,12 @@ class DefaultSavedPaymentMethodRepositoryTest {
             elementsSessionClientParams = clientParams,
             fraudDetectionDataRepository = FakeFraudDetectionDataRepository.create(),
             stripeNetworkClient = DefaultStripeNetworkClient(),
-            analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
-            paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
-                context = ApplicationProvider.getApplicationContext(),
-                publishableKey = "pk_test_123",
+            analyticsReporter = CheckoutAnalyticsReporter(
+                analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
+                paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
+                    context = ApplicationProvider.getApplicationContext(),
+                    publishableKey = "pk_test_123",
+                ),
             ),
             apiRequestOptionsProvider = {
                 ApiRequest.Options(

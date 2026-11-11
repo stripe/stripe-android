@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.embedded.sheet
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
+import com.stripe.android.checkout.analytics.CheckoutAnalyticsReporter
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.core.networking.ApiRequest
@@ -191,16 +192,19 @@ internal class SheetTaxRegionUpdaterTest {
     }
 
     private fun checkoutSessionTaxRegionUpdater(): CheckoutSessionTaxRegionUpdater {
-        val checkoutSessionRepository = CheckoutSessionRepository(
-            stripeRepository = CheckoutStripeRepositoryFactory.create(),
-            elementsSessionClientParams = CheckoutStripeRepositoryFactory.clientParams(),
-            fraudDetectionDataRepository = FakeFraudDetectionDataRepository.create(),
-            stripeNetworkClient = DefaultStripeNetworkClient(),
+        val analyticsReporter = CheckoutAnalyticsReporter(
             analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
             paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
                 context = ApplicationProvider.getApplicationContext(),
                 publishableKey = "pk_test_123",
             ),
+        )
+        val checkoutSessionRepository = CheckoutSessionRepository(
+            stripeRepository = CheckoutStripeRepositoryFactory.create(),
+            elementsSessionClientParams = CheckoutStripeRepositoryFactory.clientParams(),
+            fraudDetectionDataRepository = FakeFraudDetectionDataRepository.create(),
+            stripeNetworkClient = DefaultStripeNetworkClient(),
+            analyticsReporter = analyticsReporter,
             apiRequestOptionsProvider = {
                 ApiRequest.Options(
                     apiKey = DEFAULT_API_CONFIG.publishableKey,
@@ -209,7 +213,7 @@ internal class SheetTaxRegionUpdaterTest {
             },
         )
 
-        return CheckoutSessionTaxRegionUpdater(checkoutSessionRepository)
+        return CheckoutSessionTaxRegionUpdater(checkoutSessionRepository, analyticsReporter)
     }
 
     private fun checkoutSessionResponse(

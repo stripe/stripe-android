@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.repositories
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutAnalyticsTestFixtures
+import com.stripe.android.checkout.analytics.CheckoutAnalyticsReporter
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.checkouttesting.checkoutPoll
@@ -49,10 +50,12 @@ class CheckoutSessionRepositoryTest {
         elementsSessionClientParams = CheckoutStripeRepositoryFactory.clientParams(),
         fraudDetectionDataRepository = FakeFraudDetectionDataRepository.create(),
         stripeNetworkClient = DefaultStripeNetworkClient(),
-        analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
-        paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
-            context = ApplicationProvider.getApplicationContext(),
-            publishableKey = "pk_test_123",
+        analyticsReporter = CheckoutAnalyticsReporter(
+            analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
+            paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
+                context = ApplicationProvider.getApplicationContext(),
+                publishableKey = "pk_test_123",
+            ),
         ),
         apiRequestOptionsProvider = {
             ApiRequest.Options(

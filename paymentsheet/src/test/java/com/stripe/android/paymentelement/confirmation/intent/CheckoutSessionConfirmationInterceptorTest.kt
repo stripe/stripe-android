@@ -7,6 +7,7 @@ import com.google.testing.junit.testparameterinjector.TestParameter
 import com.stripe.android.challenge.passive.PassiveChallengeActivityContract
 import com.stripe.android.challenge.passive.PassiveChallengeActivityResult
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
+import com.stripe.android.checkout.analytics.CheckoutAnalyticsReporter
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutConfirm
 import com.stripe.android.checkouttesting.checkoutUpdate
@@ -1154,16 +1155,19 @@ class CheckoutSessionConfirmationInterceptorTest {
         checkoutSessionResponse: CheckoutSessionResponse = CheckoutSessionResponseFactory.create(),
         block: suspend Scenario.() -> Unit,
     ) {
-        val checkoutSessionRepository = CheckoutSessionRepository(
-            stripeRepository = CheckoutStripeRepositoryFactory.create(),
-            elementsSessionClientParams = CheckoutStripeRepositoryFactory.clientParams(),
-            fraudDetectionDataRepository = FakeFraudDetectionDataRepository.create(),
-            stripeNetworkClient = DefaultStripeNetworkClient(),
+        val analyticsReporter = CheckoutAnalyticsReporter(
             analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
             paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
                 context = ApplicationProvider.getApplicationContext(),
                 publishableKey = "pk_test_123",
             ),
+        )
+        val checkoutSessionRepository = CheckoutSessionRepository(
+            stripeRepository = CheckoutStripeRepositoryFactory.create(),
+            elementsSessionClientParams = CheckoutStripeRepositoryFactory.clientParams(),
+            fraudDetectionDataRepository = FakeFraudDetectionDataRepository.create(),
+            stripeNetworkClient = DefaultStripeNetworkClient(),
+            analyticsReporter = analyticsReporter,
             apiRequestOptionsProvider = {
                 ApiRequest.Options(
                     apiKey = DEFAULT_API_CONFIG.publishableKey,
@@ -1192,7 +1196,10 @@ class CheckoutSessionConfirmationInterceptorTest {
             ) as ClientAttributionMetadata.CheckoutSession,
             context = applicationContext,
             checkoutSessionRepository = checkoutSessionRepository,
-            checkoutSessionTaxRegionUpdater = CheckoutSessionTaxRegionUpdater(checkoutSessionRepository),
+            checkoutSessionTaxRegionUpdater = CheckoutSessionTaxRegionUpdater(
+                checkoutSessionRepository,
+                analyticsReporter,
+            ),
         )
 
         runTest {

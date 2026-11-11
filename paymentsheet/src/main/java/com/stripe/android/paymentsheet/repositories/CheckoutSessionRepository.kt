@@ -2,21 +2,18 @@ package com.stripe.android.paymentsheet.repositories
 
 import com.stripe.android.Stripe
 import com.stripe.android.checkout.CheckoutElementsController.Address
-import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent
 import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent.Operation
 import com.stripe.android.checkout.analytics.CheckoutAnalyticsReporter
 import com.stripe.android.checkout.analytics.MeasuredOperation
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
-import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.executeRequestWithResultParser
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.networking.ConfirmationParamsUtils
-import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.model.CheckoutSessionClientSecret
@@ -30,15 +27,9 @@ internal class CheckoutSessionRepository @Inject constructor(
     private val elementsSessionClientParams: ElementsSessionClientParams,
     private val stripeNetworkClient: StripeNetworkClient,
     private val fraudDetectionDataRepository: FraudDetectionDataRepository,
-    analyticsRequestExecutor: AnalyticsRequestExecutor,
-    paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
+    private val analyticsReporter: CheckoutAnalyticsReporter,
     private val apiRequestOptionsProvider: Provider<ApiRequest.Options>,
 ) {
-    private val analyticsReporter = CheckoutAnalyticsReporter(
-        analyticsRequestExecutor = analyticsRequestExecutor,
-        paymentAnalyticsRequestFactory = paymentAnalyticsRequestFactory,
-    )
-
     private val apiRequestFactory = ApiRequest.Factory(
         appInfo = Stripe.appInfo,
         apiVersion = Stripe.API_VERSION,
@@ -265,16 +256,12 @@ internal class CheckoutSessionRepository @Inject constructor(
         val measuredOperation = MeasuredOperation(
             operation = operation,
             params = params,
-            report = ::fireEvent,
+            report = analyticsReporter::fireEvent,
         )
         measuredOperation.started(checkoutSessionResponse)
         return block()
             .onSuccess { measuredOperation.succeeded(it) }
             .onFailure { measuredOperation.failed(checkoutSessionResponse, it) }
-    }
-
-    fun fireEvent(event: CheckoutAnalyticsEvent) {
-        analyticsReporter.fireEvent(event)
     }
 
     private companion object {
