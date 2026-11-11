@@ -50,7 +50,7 @@ internal class CheckoutCardIntegrationTest {
         )
 
     @Test
-    fun testSuccessfulCardPayment() = runScenario(
+    fun testSuccessfulCardPayment() = runPlainScenario(
         setup = {
             contentPage.clickOnLpm("card")
             formPage.fillOutCardDetails(newCardNumber = "4242424242424242")
@@ -62,7 +62,7 @@ internal class CheckoutCardIntegrationTest {
     )
 
     @Test
-    fun testDeclinedCardReportsFailure() = runScenario(
+    fun testDeclinedCardReportsFailure() = runPlainScenario(
         setup = {
             contentPage.clickOnLpm("card")
             formPage.fillOutCardDetails(newCardNumber = "4000000000000002")
@@ -79,15 +79,14 @@ internal class CheckoutCardIntegrationTest {
     fun testSavedCardIsReusedWithBillingTaxInAnotherSession() = runBlocking {
         lateinit var customerId: String
 
-        val saveResult = runCheckoutIntegrationTest(
-            merchant = TAX_MERCHANT,
-            sessionParams = { backend ->
+        val saveResult = runTaxScenario(
+            paymentMethodSave = true,
+            customerIdFactory = { backend ->
                 customerId = backend.createCustomer(
                     buildJsonObject { put("email", CUSTOMER_EMAIL) },
                 ).getOrThrow()
-                automaticTaxSessionParams(customerId, paymentMethodSave = true)
+                customerId
             },
-            configuration = configuration,
             setup = { controller ->
                 contentPage.clickOnLpm("card")
                 fillOutCardAndBillingDetails("4242424242424242", CALIFORNIA_ADDRESS, "California")
@@ -108,10 +107,9 @@ internal class CheckoutCardIntegrationTest {
         )
         assertThat(saveResult).isInstanceOf(CheckoutElementsController.Result.Completed::class.java)
 
-        val reuseResult = runCheckoutIntegrationTest(
-            merchant = TAX_MERCHANT,
-            sessionParams = { automaticTaxSessionParams(customerId, paymentMethodSave = false) },
-            configuration = configuration,
+        val reuseResult = runTaxScenario(
+            paymentMethodSave = false,
+            customerIdFactory = { customerId },
             setup = { controller ->
                 contentPage.assertHasSelectedSavedCard("4242")
                 val session = awaitBillingTaxSession(
@@ -127,15 +125,13 @@ internal class CheckoutCardIntegrationTest {
 
     @Test
     fun testChangingNewCardBillingAddressUpdatesTaxAndCompletesPayment() = runBlocking {
-        val result = runCheckoutIntegrationTest(
-            merchant = TAX_MERCHANT,
-            sessionParams = { backend ->
-                val customerId = backend.createCustomer(
+        val result = runTaxScenario(
+            paymentMethodSave = false,
+            customerIdFactory = { backend ->
+                backend.createCustomer(
                     buildJsonObject { put("email", CUSTOMER_EMAIL) },
                 ).getOrThrow()
-                automaticTaxSessionParams(customerId, paymentMethodSave = false)
             },
-            configuration = configuration,
             setup = { controller ->
                 contentPage.clickOnLpm("card")
                 fillOutCardAndBillingDetails("4242424242424242", CALIFORNIA_ADDRESS, "California")
@@ -169,7 +165,7 @@ internal class CheckoutCardIntegrationTest {
         assertThat(result).isInstanceOf(CheckoutElementsController.Result.Completed::class.java)
     }
 
-    private fun runScenario(
+    private fun runPlainScenario(
         setup: suspend (CheckoutElementsController) -> Unit,
         check: (CheckoutElementsController.Result) -> Unit,
     ) = runBlocking {
@@ -180,6 +176,21 @@ internal class CheckoutCardIntegrationTest {
             setup = setup,
         )
         check(result)
+    }
+
+    private suspend fun runTaxScenario(
+        paymentMethodSave: Boolean,
+        customerIdFactory: suspend (CheckoutPlaygroundBackend) -> String,
+        setup: suspend (CheckoutElementsController) -> Unit,
+    ): CheckoutElementsController.Result {
+        return runCheckoutIntegrationTest(
+            merchant = TAX_MERCHANT,
+            sessionParams = { backend ->
+                automaticTaxSessionParams(customerIdFactory(backend), paymentMethodSave)
+            },
+            configuration = configuration,
+            setup = setup,
+        )
     }
 
     private fun cardOnlySessionParams(): JsonObject {
