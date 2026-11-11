@@ -1,7 +1,6 @@
 package com.stripe.android.checkout
 
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
-import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.Stripe
@@ -39,7 +38,19 @@ internal class CheckoutCardIntegrationTest {
     private val formPage = EmbeddedFormPage(composeRule)
     private val managePage = ManagePage(composeRule)
 
-    private val configuration = checkoutConfiguration(PaymentElement.Configuration.PaymentMethodLayout.Automatic)
+    private val configuration = CheckoutElementsController.Configuration()
+        .merchantDisplayName("Checkout E2E")
+        .paymentElement(
+            PaymentElement.Configuration()
+                .googlePayConfiguration(
+                    PaymentElement.Configuration.GooglePayConfiguration()
+                        .display(PaymentElement.Configuration.GooglePayConfiguration.Display.Never)
+                )
+                .linkConfiguration(
+                    PaymentElement.Configuration.LinkConfiguration()
+                        .display(PaymentElement.Configuration.LinkConfiguration.Display.Never)
+                )
+        )
 
     @Test
     fun testSuccessfulCardPayment() = runScenario(
@@ -69,24 +80,20 @@ internal class CheckoutCardIntegrationTest {
 
     @Test
     fun testSwitchingSavedCardsUpdatesBillingTaxAndCompletesPayment() = runBlocking {
-        val backend = CheckoutPlaygroundBackend(
-            baseUrl = "https://stp-mobile-playground-backend-v7.stripedemos.com/",
-            merchant = TAX_MERCHANT,
-        )
-        val stripe = Stripe(
-            context = ApplicationProvider.getApplicationContext(),
-            publishableKey = backend.fetchPublishableKey().getOrThrow(),
-        )
-        val customerId = backend.createCustomer(
-            buildJsonObject { put("email", CUSTOMER_EMAIL) },
-        ).getOrThrow()
-        val californiaCardId = createSavedCard(stripe, backend, customerId, CALIFORNIA_ADDRESS, "4242424242424242")
-        val oregonCardId = createSavedCard(stripe, backend, customerId, OREGON_ADDRESS, "5555555555554444")
+        lateinit var californiaCardId: String
+        lateinit var oregonCardId: String
 
         val result = runCheckoutIntegrationTest(
             merchant = TAX_MERCHANT,
-            sessionParams = automaticTaxSessionParams(customerId),
-            configuration = checkoutConfiguration(PaymentElement.Configuration.PaymentMethodLayout.Vertical),
+            sessionParams = { backend, stripe ->
+                val customerId = backend.createCustomer(
+                    buildJsonObject { put("email", CUSTOMER_EMAIL) },
+                ).getOrThrow()
+                californiaCardId = createSavedCard(stripe, backend, customerId, CALIFORNIA_ADDRESS, "4242424242424242")
+                oregonCardId = createSavedCard(stripe, backend, customerId, OREGON_ADDRESS, "5555555555554444")
+                automaticTaxSessionParams(customerId)
+            },
+            configuration = configuration,
             setup = { controller ->
                 val californiaSession = selectSavedCard(controller, californiaCardId, CALIFORNIA_ADDRESS)
                 val californiaTotals = californiaSession.totals
@@ -112,7 +119,7 @@ internal class CheckoutCardIntegrationTest {
     ) = runBlocking {
         val result = runCheckoutIntegrationTest(
             merchant = "US",
-            sessionParams = cardOnlySessionParams(),
+            sessionParams = { _, _ -> cardOnlySessionParams() },
             configuration = configuration,
             setup = setup,
         )
@@ -148,25 +155,6 @@ internal class CheckoutCardIntegrationTest {
                 },
             )
         }
-    }
-
-    private fun checkoutConfiguration(
-        paymentMethodLayout: PaymentElement.Configuration.PaymentMethodLayout,
-    ): CheckoutElementsController.Configuration {
-        return CheckoutElementsController.Configuration()
-            .merchantDisplayName("Checkout E2E")
-            .paymentElement(
-                PaymentElement.Configuration()
-                    .paymentMethodLayout(paymentMethodLayout)
-                    .googlePayConfiguration(
-                        PaymentElement.Configuration.GooglePayConfiguration()
-                            .display(PaymentElement.Configuration.GooglePayConfiguration.Display.Never)
-                    )
-                    .linkConfiguration(
-                        PaymentElement.Configuration.LinkConfiguration()
-                            .display(PaymentElement.Configuration.LinkConfiguration.Display.Never)
-                    )
-            )
     }
 
     private suspend fun createSavedCard(

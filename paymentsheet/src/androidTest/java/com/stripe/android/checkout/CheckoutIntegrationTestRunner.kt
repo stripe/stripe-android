@@ -13,6 +13,7 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.Stripe
 import com.stripe.android.paymentsheet.MainActivity
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.withTimeout
@@ -21,7 +22,7 @@ import kotlin.time.Duration.Companion.seconds
 
 internal suspend fun runCheckoutIntegrationTest(
     merchant: String,
-    sessionParams: JsonObject,
+    sessionParams: suspend (CheckoutPlaygroundBackend, Stripe) -> JsonObject,
     configuration: CheckoutElementsController.Configuration,
     setup: suspend (CheckoutElementsController) -> Unit,
 ): CheckoutElementsController.Result {
@@ -30,7 +31,11 @@ internal suspend fun runCheckoutIntegrationTest(
         merchant = merchant,
     )
     val publishableKey = backend.fetchPublishableKey().getOrThrow()
-    val clientSecret = backend.createCheckoutSession(sessionParams).getOrThrow()
+    val stripe = Stripe(
+        context = ApplicationProvider.getApplicationContext(),
+        publishableKey = publishableKey,
+    )
+    val clientSecret = backend.createCheckoutSession(sessionParams(backend, stripe)).getOrThrow()
     val checkoutResult = CompletableDeferred<CheckoutElementsController.Result>()
 
     return ActivityScenario.launch(MainActivity::class.java).use { scenario ->
