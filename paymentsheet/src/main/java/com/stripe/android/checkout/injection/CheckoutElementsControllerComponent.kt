@@ -365,7 +365,9 @@ internal interface CheckoutElementsControllerModule {
         fun provideIsUpdating(
             operationCoordinator: CheckoutOperationCoordinator,
         ): StateFlow<Boolean> {
-            return operationCoordinator.isUpdating
+            return operationCoordinator.status.mapAsStateFlow {
+                it != CheckoutOperationCoordinator.Status.Idle
+            }
         }
 
         @Provides
@@ -373,7 +375,9 @@ internal interface CheckoutElementsControllerModule {
         fun provideHostProcessing(
             operationCoordinator: CheckoutOperationCoordinator,
         ): StateFlow<Boolean> {
-            return operationCoordinator.isUpdating
+            return operationCoordinator.status.mapAsStateFlow {
+                it != CheckoutOperationCoordinator.Status.Idle
+            }
         }
 
         @Provides

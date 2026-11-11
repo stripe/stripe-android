@@ -256,8 +256,8 @@ internal class CheckoutSheetLauncher @Inject constructor(
     ) {
         if (!lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.CREATED)) return
         if (sheetStateHolder.sheetIsOpen) return
-        val isUpdating = operationCoordinator.isUpdating.value
-        val presentationState = if (isUpdating) {
+        val status = operationCoordinator.status.value
+        val presentationState = if (status == CheckoutOperationCoordinator.Status.Updating) {
             EmbeddedActivityArgs.PresentationState.Loading
         } else {
             if (paymentMethodMetadata == null || configuration == null) return
@@ -297,7 +297,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
         if (!launcherState.isAwaitingPaymentOptionsReady) return
 
         lifecycleOwner.lifecycleScope.launch {
-            operationCoordinator.isUpdating.first { isUpdating -> !isUpdating }
+            operationCoordinator.status.first { it == CheckoutOperationCoordinator.Status.Idle }
             if (!sheetStateHolder.sheetIsOpen) {
                 launcherState.isAwaitingPaymentOptionsReady = false
                 return@launch
