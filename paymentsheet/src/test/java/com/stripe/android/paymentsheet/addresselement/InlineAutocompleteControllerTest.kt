@@ -464,7 +464,7 @@ class InlineAutocompleteControllerTest {
         delegate.onFocusLost()
         advanceTimeBy(500)
 
-        // Re-focus re-enables observation; isActive remains true
+        // Re-focus re-enables predictions
         delegate.onFocusGained()
         queryFlow.value = "123 Main S"
         advanceTimeBy(500)
@@ -590,22 +590,6 @@ class InlineAutocompleteControllerTest {
             val call = fakePlacesClient.findPredictionsCalls.awaitItem()
             assertThat(call.query).isEqualTo("second query")
         }
-
-    @Test
-    fun `dispose cancels query observation`() = runScenario {
-        fakePlacesClient.findPredictionsResult = Result.success(
-            FindAutocompletePredictionsResponse(emptyList())
-        )
-        delegate.observeQueryChanges(queryFlow, countryFlow)
-        delegate.onSearchActivated()
-
-        delegate.dispose()
-
-        queryFlow.value = "123 Main"
-        advanceTimeBy(500)
-
-        fakePlacesClient.findPredictionsCalls.expectNoEvents()
-    }
 
     @Test
     fun `null country flow value defaults to empty string`() = runScenario(

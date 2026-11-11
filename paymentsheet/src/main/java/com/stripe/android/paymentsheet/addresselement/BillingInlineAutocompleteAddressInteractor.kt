@@ -10,6 +10,7 @@ internal class BillingInlineAutocompleteAddressInteractor(
     placesClient: PlacesClientProxy,
     override val autocompleteConfig: AutocompleteAddressInteractor.Config,
     coroutineScope: CoroutineScope,
+    private val onFocusGained: (BillingInlineAutocompleteAddressInteractor) -> Unit,
 ) : AutocompleteAddressInteractor {
     private var eventListener: ((AutocompleteAddressInteractor.Event) -> Unit)? = null
 
@@ -47,6 +48,7 @@ internal class BillingInlineAutocompleteAddressInteractor(
 
     override fun onFocusGained() {
         inlineController.onFocusGained()
+        onFocusGained.invoke(this)
     }
 
     override fun onEnterManuallyFromInline() {
@@ -58,9 +60,5 @@ internal class BillingInlineAutocompleteAddressInteractor(
 
     override fun onSearchActivated() {
         inlineController.onSearchActivated()
-    }
-
-    fun dispose() {
-        inlineController.dispose()
     }
 }

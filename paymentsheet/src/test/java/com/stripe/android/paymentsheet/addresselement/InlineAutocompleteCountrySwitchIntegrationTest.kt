@@ -46,6 +46,7 @@ class InlineAutocompleteCountrySwitchIntegrationTest {
                 placesClient = fakePlaces,
                 autocompleteConfig = config,
                 coroutineScope = backgroundScope,
+                onFocusGained = {},
             )
             val countryController = DropdownFieldController(
                 config = CountryConfig(
