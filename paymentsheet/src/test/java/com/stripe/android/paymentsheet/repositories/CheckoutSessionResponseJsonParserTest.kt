@@ -339,11 +339,25 @@ class CheckoutSessionResponseJsonParserTest {
 
         val result = parse(json)!!
 
-        assertThat(result.totalSummary.subtotal).isEqualTo(9007199254740993L)
-        assertThat(result.totalSummary.total).isEqualTo(9007199254741073L)
-        assertThat(result.totalSummary.taxExclusive).isEqualTo(80L)
-        assertThat(result.totalSummary.taxInclusive).isEqualTo(40L)
-        assertThat(result.totalSummary.totalTaxAmounts).hasSize(1)
+        assertThat(result.totalSummary).isEqualTo(
+            CheckoutSessionResponse.TotalSummary(
+                subtotal = 9007199254740993L,
+                total = 9007199254741073L,
+                taxExclusive = 80L,
+                taxInclusive = 40L,
+                totalTaxAmounts = listOf(
+                    CheckoutSessionResponse.TaxAmount(
+                        amount = 80L,
+                        inclusive = false,
+                        taxRate = CheckoutSessionResponse.TaxRate(
+                            displayName = "Sales tax",
+                            percentage = 8.0,
+                            rateType = CheckoutSessionResponse.TaxRateType.PERCENTAGE,
+                        ),
+                    )
+                ),
+            )
+        )
     }
 
     @Test

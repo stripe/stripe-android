@@ -1076,14 +1076,7 @@ internal class CheckoutElementsControllerTest {
             .isNotEqualTo(4099L)
         networkRule.checkoutUpdate(
             bodyPart("promotion_code", "10OFF"),
-            responseFactory = successResponseFactory(
-                combine(
-                    withTotal(4099),
-                    { json ->
-                        json.getJSONObject("total_summary").put("due", 4099)
-                    },
-                ),
-            ),
+            responseFactory = successResponseFactory(withTotal(4099)),
         )
 
         val result = fromBackgroundThread { controller.applyPromotionCode("10OFF") }
@@ -1763,7 +1756,6 @@ internal class CheckoutElementsControllerTest {
                         withTotal(4099),
                         { json ->
                             json.remove("customer_email")
-                            json.getJSONObject("total_summary").put("due", 4099)
                         },
                     ),
                 ).invoke(response)

@@ -86,15 +86,15 @@ class CheckoutSessionMappersTest {
         ).session()
         val item = (session.orderSummaryItems.single() as Session.OrderSummaryItem.OneTimePrice).items.single()
 
-        assertThat(session.totals.subtotal.minorUnitsAmount).isEqualTo(1500L)
-        assertThat(session.totals.subtotal.amount).isEqualTo("$15.00")
-        assertThat(session.totals.total.minorUnitsAmount).isEqualTo(1625L)
-        assertThat(session.totals.total.amount).isEqualTo("$16.25")
-        assertThat(session.totals.taxExclusive.minorUnitsAmount).isEqualTo(125L)
-        assertThat(session.totals.taxExclusive.amount).isEqualTo("$1.25")
-        assertThat(session.totals.taxInclusive.minorUnitsAmount).isEqualTo(40L)
-        assertThat(session.totals.taxInclusive.amount).isEqualTo("$0.40")
-        assertThat(session.totals.discount.minorUnitsAmount).isEqualTo(0L)
+        assertThat(session.totals).isEqualTo(
+            Session.Totals(
+                subtotal = Session.Amount("$15.00", 1500L),
+                taxExclusive = Session.Amount("$1.25", 125L),
+                taxInclusive = Session.Amount("$0.40", 40L),
+                discount = Session.Amount("$0.00", 0L),
+                total = Session.Amount("$16.25", 1625L),
+            )
+        )
         assertThat(item.amountDetails.subtotal.minorUnitsAmount).isEqualTo(1000L)
         assertThat(item.amountDetails.total.minorUnitsAmount).isEqualTo(1080L)
         assertThat(item.amountDetails.taxExclusive.minorUnitsAmount).isEqualTo(80L)

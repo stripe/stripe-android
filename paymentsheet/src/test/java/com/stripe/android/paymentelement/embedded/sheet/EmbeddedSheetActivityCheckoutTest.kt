@@ -387,7 +387,6 @@ internal class EmbeddedSheetActivityCheckoutTest {
             json.getJSONObject("total_summary")
                 .put("total", BASE_AMOUNT + taxAmount)
                 .put("tax_exclusive", taxAmount)
-                .put("due", BASE_AMOUNT + taxAmount)
         }
     }
 
