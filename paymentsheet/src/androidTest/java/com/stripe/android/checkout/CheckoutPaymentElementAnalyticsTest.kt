@@ -442,13 +442,15 @@ internal class CheckoutPaymentElementAnalyticsTest {
     }
 
     @Test
-    fun testClearLocalCustomerDataReportsInvokedEvent() {
+    fun testClearLocalCustomerDataReportsInvokedEventWithoutPublishableKey() {
         val context = ApplicationProvider.getApplicationContext<Context>()
         PaymentConfiguration.init(context, TestApiKeys.PUBLISHABLE, TestApiKeys.ACCOUNT)
 
         networkRule.validateAnalyticsRequest(
             eventName = "checkout_elements.clear_local_customer_data",
             productUsage = setOf("checkout_elements"),
+            analyticsPayloadField("publishable_key", ApiRequest.Options.UNDEFINED_PUBLISHABLE_KEY),
+            applyDefaultAuthorization = false,
         )
         CheckoutElementsController.clearLocalCustomerData(context)
     }

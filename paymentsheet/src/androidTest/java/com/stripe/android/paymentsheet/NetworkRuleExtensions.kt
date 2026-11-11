@@ -10,6 +10,7 @@ internal fun NetworkRule.validateAnalyticsRequest(
     eventName: String,
     productUsage: Set<String>,
     vararg requestMatchers: RequestMatcher,
+    applyDefaultAuthorization: Boolean = true,
 ) {
     enqueue(
         host("q.stripe.com"),
@@ -17,6 +18,7 @@ internal fun NetworkRule.validateAnalyticsRequest(
         analyticsPayloadField("event", eventName),
         analyticsPayloadField("product_usage", productUsage.joinToString(",")),
         *requestMatchers,
+        applyDefaultAuthorization = applyDefaultAuthorization,
     ) { response ->
         response.status = "HTTP/1.1 200 OK"
     }

@@ -2,11 +2,12 @@ package com.stripe.android.checkout.injection
 
 import android.content.Context
 import com.stripe.android.checkout.analytics.LocalOperation
+import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
-import com.stripe.android.payments.core.injection.ApiConfigurationFromPaymentConfigurationModule
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import dagger.Binds
 import dagger.BindsInstance
@@ -19,7 +20,6 @@ import javax.inject.Named
     modules = [
         CheckoutAnalyticsReporterModule::class,
         CoroutineContextModule::class,
-        ApiConfigurationFromPaymentConfigurationModule::class,
     ]
 )
 internal interface CheckoutAnalyticsReporterComponent {
@@ -46,6 +46,15 @@ internal interface CheckoutAnalyticsReporterModule {
 
         @Provides
         @Named(PRODUCT_USAGE)
-        fun provideProductUsage(): Set<String> = emptySet()
+        fun provideProductUsage(): Set<String> = setOf("checkout_elements")
+
+        // Static Checkout APIs have no session, and merchants aren't expected to initialize PaymentConfiguration.
+        @Provides
+        fun provideApiConfiguration(): ApiConfiguration.State {
+            return ApiConfiguration.State(
+                publishableKey = ApiRequest.Options.UNDEFINED_PUBLISHABLE_KEY,
+                stripeAccountId = null,
+            )
+        }
     }
 }
