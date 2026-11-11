@@ -24,6 +24,7 @@ import javax.inject.Inject
 import javax.inject.Provider
 
 @OptIn(CheckoutSessionPreview::class)
+@Suppress("TooManyFunctions")
 internal class CheckoutSessionRepository @Inject constructor(
     private val stripeRepository: StripeRepository,
     private val elementsSessionClientParams: ElementsSessionClientParams,
@@ -76,6 +77,24 @@ internal class CheckoutSessionRepository @Inject constructor(
                 "adaptive_pricing[allowed]" to adaptivePricingAllowed,
                 "timezone" to TimeZone.getDefault().id,
             ),
+        )
+    }
+
+    suspend fun fetch(
+        clientSecret: CheckoutSessionClientSecret,
+    ): Result<CheckoutSessionResponse> {
+        return executeRequestWithResultParser(
+            stripeErrorJsonParser = stripeErrorJsonParser,
+            stripeNetworkClient = stripeNetworkClient,
+            request = apiRequestFactory.createGet(
+                url = fetchUrl(clientSecret.sessionId),
+                options = apiRequestOptionsProvider.get(),
+                params = elementsSessionClientParams.toCheckoutSessionMap() + mapOf(
+                    "client_secret" to clientSecret.value,
+                    "timezone" to TimeZone.getDefault().id,
+                ),
+            ),
+            responseJsonParser = CheckoutSessionResponseJsonParser(clientSecret),
         )
     }
 
@@ -283,6 +302,9 @@ internal class CheckoutSessionRepository @Inject constructor(
 
         private fun initUrl(sessionId: String): String =
             "${ApiRequest.API_HOST}/v1/checkout_client/$sessionId/init"
+
+        private fun fetchUrl(sessionId: String): String =
+            "${ApiRequest.API_HOST}/v1/checkout_client/$sessionId/retrieve"
 
         private fun confirmUrl(checkoutSessionId: String): String =
             "${ApiRequest.API_HOST}/v1/checkout_client/$checkoutSessionId/confirm"

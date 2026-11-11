@@ -5,7 +5,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.checkouttesting.CheckoutInitResponseFactory
 import com.stripe.android.checkouttesting.checkoutConfirm
-import com.stripe.android.checkouttesting.checkoutInit
+import com.stripe.android.checkouttesting.checkoutFetch
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.core.exception.LocalStripeException
 import com.stripe.android.core.utils.FeatureFlags
@@ -116,7 +116,7 @@ internal class ExpressCheckoutElementTest {
             repeat(2) {
                 networkRule.enqueueLinkAccountLookup()
             }
-            networkRule.checkoutInit()
+            networkRule.checkoutFetch()
 
             page.clickLinkButton()
         }
@@ -167,7 +167,7 @@ internal class ExpressCheckoutElementTest {
             repeat(2) {
                 networkRule.enqueueLinkAccountLookup()
             }
-            networkRule.checkoutInit()
+            networkRule.checkoutFetch()
 
             page.clickGooglePayButton()
         }
@@ -195,7 +195,7 @@ internal class ExpressCheckoutElementTest {
             repeat(2) {
                 networkRule.enqueueLinkAccountLookup()
             }
-            networkRule.checkoutInit()
+            networkRule.checkoutFetch()
 
             page.clickLinkButton()
         }
@@ -426,7 +426,7 @@ internal class ExpressCheckoutElementTest {
                     json.getJSONObject("total_summary").put("total", 5399).put("tax_exclusive", 300)
                 }
             }
-            networkRule.checkoutInit(
+            networkRule.checkoutFetch(
                 responseFactory = CheckoutInitResponseFactory::createWithRequiredBillingAddressForAutomaticTax,
             )
 

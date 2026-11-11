@@ -348,10 +348,8 @@ class CheckoutElementsController @Inject internal constructor(
                         }.getOrThrow()
                     }
                     analyticsParams.measureDuration("refresh_duration") {
-                        checkoutSessionRepository.init(
+                        checkoutSessionRepository.fetch(
                             clientSecret = checkoutSessionResponse.clientSecret,
-                            adaptivePricingAllowed = configuration.currencySelectorElementConfiguration != null,
-                            analyticsParams = configuration.toAnalyticsMap(),
                         ).getOrThrow()
                     }
                 }

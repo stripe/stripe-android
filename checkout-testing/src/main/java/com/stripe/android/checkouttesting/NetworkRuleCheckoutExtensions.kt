@@ -41,6 +41,20 @@ fun NetworkRule.checkoutInit(
     )
 }
 
+fun NetworkRule.checkoutFetch(
+    vararg requestMatchers: RequestMatcher,
+    sessionId: String = DEFAULT_CHECKOUT_SESSION_ID,
+    responseFactory: (MockResponse) -> Unit = CheckoutInitResponseFactory::create,
+) {
+    enqueue(
+        host("api.stripe.com"),
+        method("GET"),
+        path("/v1/checkout_client/$sessionId/retrieve"),
+        *requestMatchers,
+        responseFactory = responseFactory,
+    )
+}
+
 fun NetworkRule.checkoutUpdate(
     vararg requestMatchers: RequestMatcher,
     sessionId: String = DEFAULT_CHECKOUT_SESSION_ID,
