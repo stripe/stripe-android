@@ -4,6 +4,7 @@ import com.stripe.android.Stripe
 import com.stripe.android.checkout.CheckoutElementsController.Address
 import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent
 import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent.Operation
+import com.stripe.android.checkout.analytics.CheckoutAnalyticsReporter
 import com.stripe.android.checkout.analytics.MeasuredOperation
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
@@ -29,10 +30,14 @@ internal class CheckoutSessionRepository @Inject constructor(
     private val elementsSessionClientParams: ElementsSessionClientParams,
     private val stripeNetworkClient: StripeNetworkClient,
     private val fraudDetectionDataRepository: FraudDetectionDataRepository,
-    private val analyticsRequestExecutor: AnalyticsRequestExecutor,
-    private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
+    analyticsRequestExecutor: AnalyticsRequestExecutor,
+    paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
     private val apiRequestOptionsProvider: Provider<ApiRequest.Options>,
 ) {
+    private val analyticsReporter = CheckoutAnalyticsReporter(
+        analyticsRequestExecutor = analyticsRequestExecutor,
+        paymentAnalyticsRequestFactory = paymentAnalyticsRequestFactory,
+    )
 
     private val apiRequestFactory = ApiRequest.Factory(
         appInfo = Stripe.appInfo,
@@ -269,12 +274,7 @@ internal class CheckoutSessionRepository @Inject constructor(
     }
 
     fun fireEvent(event: CheckoutAnalyticsEvent) {
-        analyticsRequestExecutor.executeAsync(
-            paymentAnalyticsRequestFactory.createRequest(
-                event = event,
-                additionalParams = event.params,
-            )
-        )
+        analyticsReporter.fireEvent(event)
     }
 
     private companion object {

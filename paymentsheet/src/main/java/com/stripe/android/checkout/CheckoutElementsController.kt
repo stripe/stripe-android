@@ -12,9 +12,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.AnnotatedString
 import androidx.lifecycle.SavedStateHandle
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent.InvocationSource
 import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent.Operation
+import com.stripe.android.checkout.analytics.CheckoutAnalyticsReporter
 import com.stripe.android.checkout.analytics.LocalOperation
 import com.stripe.android.checkout.analytics.measureDuration
 import com.stripe.android.checkout.analytics.toAnalyticsMap
@@ -22,9 +22,7 @@ import com.stripe.android.checkout.injection.CheckoutElementsPresenterSubcompone
 import com.stripe.android.checkout.injection.DaggerCheckoutElementsControllerComponent
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.common.ui.PaymentElementActivityResultCaller
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.injection.ViewModelScope
-import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.core.reactnative.ReactNativeSdkInternal
 import com.stripe.android.core.utils.StatusBarCompat
 import com.stripe.android.elements.CurrencySelectorElement
@@ -33,7 +31,6 @@ import com.stripe.android.elements.PaymentElement
 import com.stripe.android.elements.ShippingAddressElement
 import com.stripe.android.elements.ece.ExpressButtonType
 import com.stripe.android.link.account.DefaultLinkStore
-import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
@@ -101,29 +98,11 @@ class CheckoutElementsController @Inject internal constructor(
          */
         fun clearLocalCustomerData(context: Context) {
             DefaultLinkStore(context).clear()
-            val analyticsRequestFactory = PaymentAnalyticsRequestFactory(
-                context = context,
-                defaultProductUsageTokens = emptySet(),
-                apiConfigurationProvider = {
-                    val paymentConfiguration = PaymentConfiguration.getInstance(context)
-                    ApiConfiguration.State(
-                        publishableKey = paymentConfiguration.publishableKey,
-                        stripeAccountId = paymentConfiguration.stripeAccountId,
-                    )
-                },
-            )
-            val analyticsRequestExecutor = DefaultAnalyticsRequestExecutor()
+            val analyticsReporter = CheckoutAnalyticsReporter.createFallbackInstance(context)
             LocalOperation(
                 operation = Operation.ClearLocalCustomerData,
                 params = emptyMap(),
-                report = { event ->
-                    analyticsRequestExecutor.executeAsync(
-                        analyticsRequestFactory.createRequest(
-                            event = event,
-                            additionalParams = event.params,
-                        )
-                    )
-                },
+                report = analyticsReporter::fireEvent,
             ).invoked(response = null)
         }
     }
