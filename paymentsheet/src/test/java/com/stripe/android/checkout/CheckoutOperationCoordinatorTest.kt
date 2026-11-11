@@ -97,6 +97,97 @@ internal class CheckoutOperationCoordinatorTest {
     }
 
     @Test
+    fun `queued configure takes precedence over an active mutation`() = runScenario {
+        val configuration = CheckoutElementsController.Configuration().build()
+        val releaseMutation = CompletableDeferred<Unit>()
+        val configureStarted = CompletableDeferred<Unit>()
+        val releaseConfigure = CompletableDeferred<Unit>()
+
+        coordinator.status.test {
+            assertThat(awaitItem()).isEqualTo(CheckoutOperationCoordinator.Status.Idle)
+            val mutation = backgroundScope.async {
+                coordinator.runMutation {
+                    releaseMutation.await()
+                    Result.success(Unit)
+                }
+            }
+            assertThat(awaitItem()).isEqualTo(CheckoutOperationCoordinator.Status.Updating)
+
+            val configure = backgroundScope.async {
+                coordinator.runConfigure(configuration) {
+                    configureStarted.complete(Unit)
+                    releaseConfigure.await()
+                    Result.success(Unit)
+                }
+            }
+            assertThat(awaitItem()).isEqualTo(CheckoutOperationCoordinator.Status.Configuring(configuration))
+            assertThat(configureStarted.isCompleted).isFalse()
+
+            releaseMutation.complete(Unit)
+            assertThat(mutation.await().isSuccess).isTrue()
+            configureStarted.await()
+            expectNoEvents()
+
+            releaseConfigure.complete(Unit)
+            assertThat(configure.await().isSuccess).isTrue()
+            assertThat(awaitItem()).isEqualTo(CheckoutOperationCoordinator.Status.Idle)
+        }
+    }
+
+    @Test
+    fun `cancelling queued configure restores Updating while a mutation remains`() = runScenario {
+        val configuration = CheckoutElementsController.Configuration().build()
+        val releaseMutation = CompletableDeferred<Unit>()
+
+        coordinator.status.test {
+            assertThat(awaitItem()).isEqualTo(CheckoutOperationCoordinator.Status.Idle)
+            val mutation = backgroundScope.async {
+                coordinator.runMutation {
+                    releaseMutation.await()
+                    Result.success(Unit)
+                }
+            }
+            assertThat(awaitItem()).isEqualTo(CheckoutOperationCoordinator.Status.Updating)
+
+            val configure = backgroundScope.async {
+                coordinator.runConfigure<Unit>(configuration) {
+                    error("Queued configure must not run before the mutation completes")
+                }
+            }
+            assertThat(awaitItem()).isEqualTo(CheckoutOperationCoordinator.Status.Configuring(configuration))
+
+            configure.cancelAndJoin()
+            assertThat(awaitItem()).isEqualTo(CheckoutOperationCoordinator.Status.Updating)
+
+            releaseMutation.complete(Unit)
+            assertThat(mutation.await().isSuccess).isTrue()
+            assertThat(awaitItem()).isEqualTo(CheckoutOperationCoordinator.Status.Idle)
+        }
+    }
+
+    @Test
+    fun `pending configure takes precedence over an in-flight confirmation`() = runScenario(
+        initialConfirmationState = ConfirmationHandler.State.Confirming(
+            CONFIRMATION_PARAMETERS.confirmationOption
+        ),
+    ) {
+        val configuration = CheckoutElementsController.Configuration().build()
+
+        coordinator.status.test {
+            assertThat(awaitItem()).isEqualTo(CheckoutOperationCoordinator.Status.Updating)
+            val configure = backgroundScope.async {
+                coordinator.runConfigure<Unit>(configuration) {
+                    error("Queued configure must not run before the confirmation completes")
+                }
+            }
+            assertThat(awaitItem()).isEqualTo(CheckoutOperationCoordinator.Status.Configuring(configuration))
+
+            configure.cancelAndJoin()
+            assertThat(awaitItem()).isEqualTo(CheckoutOperationCoordinator.Status.Updating)
+        }
+    }
+
+    @Test
     fun `failed configure returns the failure and resets status`() = runScenario {
         val configuration = CheckoutElementsController.Configuration().build()
         val releaseConfigure = CompletableDeferred<Unit>()

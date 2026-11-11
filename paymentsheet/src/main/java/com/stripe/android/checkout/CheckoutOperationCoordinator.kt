@@ -214,10 +214,11 @@ internal class CheckoutOperationCoordinator @Inject constructor(
 
     private fun updateStatus() = viewModelScope.launch(Dispatchers.Main) {
         synchronized(admissionLock) {
-            _status.value = if (confirmationInFlight) {
-                Status.Updating
-            } else {
-                pendingMutations.firstOrNull()?.status ?: Status.Idle
+            val configuring = pendingMutations.firstNotNullOfOrNull { it.status as? Status.Configuring }
+            _status.value = when {
+                configuring != null -> configuring
+                confirmationInFlight || pendingMutations.isNotEmpty() -> Status.Updating
+                else -> Status.Idle
             }
         }
     }
