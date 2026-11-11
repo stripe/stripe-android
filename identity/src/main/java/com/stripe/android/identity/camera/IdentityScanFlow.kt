@@ -189,15 +189,18 @@ internal class IdentityScanFlow(
         loop?.unsubscribe()
         loop = null
 
-        analyzerPool?.closeAllAnalyzers()
+        val pool = analyzerPool
         analyzerPool = null
-
-        loopJob?.apply {
-            if (isActive) {
-                cancel()
-            }
-        }
+        val job = loopJob
         loopJob = null
+        if (job == null) {
+            pool?.closeAllAnalyzers()
+        } else {
+            job.cancel()
+            // Cancellation does not stop an analyze() call that is in progress. Closing an
+            // interpreter while it runs is unsafe, so close the analyzers after the workers end.
+            job.invokeOnCompletion { pool?.closeAllAnalyzers() }
+        }
     }
 
     private companion object {
