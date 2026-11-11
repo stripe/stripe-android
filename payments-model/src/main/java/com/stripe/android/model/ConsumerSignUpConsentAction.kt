@@ -18,4 +18,7 @@ enum class ConsumerSignUpConsentAction(val value: String) {
 
     // Financial Connections
     EnteredPhoneNumberClickedSaveToLink("entered_phone_number_clicked_save_to_link"),
+
+    // Stripe Identity (Networked Identity)
+    EnteredPhoneNumberEmailClickedSaveWithLinkIdentity("entered_phone_number_email_clicked_save_with_link_identity"),
 }

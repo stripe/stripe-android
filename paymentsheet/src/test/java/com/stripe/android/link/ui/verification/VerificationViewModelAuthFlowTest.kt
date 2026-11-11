@@ -161,7 +161,7 @@ internal class VerificationViewModelAuthFlowTest {
 
     @Test
     fun `authentication mode dismisses with completed once verified`() = runScenario(
-        linkLaunchMode = LinkLaunchMode.Authentication(),
+        linkLaunchMode = LinkLaunchMode.Authentication(content = null),
     ) {
         accountManager.awaitStartVerificationCall()
         backHandlers.awaitItem()

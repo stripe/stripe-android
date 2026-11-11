@@ -24,6 +24,7 @@ import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.inline.SignUpConsentAction
+import com.stripe.android.link.ui.inline.toSignUpConsentAction
 import com.stripe.android.link.withDismissalDisabled
 import com.stripe.android.model.EmailSource
 import com.stripe.android.paymentsheet.R
@@ -71,7 +72,9 @@ internal class SignUpViewModel @Inject constructor(
         initialValue = customerInfo?.name
     )
 
-    private val _state = MutableStateFlow(SignUpScreenState.create(configuration, customerInfo))
+    private val authenticationContent = (linkLaunchMode as? LinkLaunchMode.Authentication)?.content
+
+    private val _state = MutableStateFlow(SignUpScreenState.create(configuration, customerInfo, authenticationContent))
     val state: StateFlow<SignUpScreenState> = _state.asStateFlow()
 
     private var emailHasChanged = false
@@ -197,7 +200,8 @@ internal class SignUpViewModel @Inject constructor(
                 country = phoneNumberController.getCountryCode(),
                 countryInferringMethod = "PHONE_NUMBER",
                 name = nameController.fieldValue.value,
-                consentAction = SignUpConsentAction.Implied
+                consentAction = authenticationContent?.consentAction?.toSignUpConsentAction()
+                    ?: SignUpConsentAction.Implied
             )
         }
 
