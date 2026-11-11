@@ -256,15 +256,23 @@ internal class CheckoutSheetLauncher @Inject constructor(
     ) {
         if (!lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.CREATED)) return
         if (sheetStateHolder.sheetIsOpen) return
-        val status = operationCoordinator.status.value
-        val presentationState = if (status == CheckoutOperationCoordinator.Status.Updating) {
-            EmbeddedActivityArgs.PresentationState.Loading
-        } else {
-            if (paymentMethodMetadata == null || configuration == null) return
-            EmbeddedActivityArgs.PresentationState.Ready(
-                paymentMethodMetadata = paymentMethodMetadata,
-                configuration = configuration,
-            )
+        val presentationState = when (val status = operationCoordinator.status.value) {
+            CheckoutOperationCoordinator.Status.Idle -> {
+                if (paymentMethodMetadata == null || configuration == null) return
+                EmbeddedActivityArgs.PresentationState.Ready(
+                    paymentMethodMetadata = paymentMethodMetadata,
+                    configuration = configuration,
+                )
+            }
+            CheckoutOperationCoordinator.Status.Updating -> {
+                if (configuration == null) return
+                EmbeddedActivityArgs.PresentationState.Loading(configuration.appearance)
+            }
+            is CheckoutOperationCoordinator.Status.Configuring -> {
+                val appearance = status.configuration.paymentElementConfiguration?.appearance?.asPaymentSheet()
+                    ?: return
+                EmbeddedActivityArgs.PresentationState.Loading(appearance)
+            }
         }
         sheetStateHolder.sheetIsOpen = true
         val initialArgs = createPaymentOptionsArgs(
@@ -273,7 +281,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
             presentationState = presentationState,
         )
         launcherState.isAwaitingPaymentOptionsReady =
-            initialArgs.presentationState == EmbeddedActivityArgs.PresentationState.Loading
+            initialArgs.presentationState is EmbeddedActivityArgs.PresentationState.Loading
         activityLauncher.launch(initialArgs)
 
         resumePendingReadyLaunch()
