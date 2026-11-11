@@ -27,6 +27,10 @@ internal data class LpmScenario(
         settings[AutomaticPaymentMethodsSettingsDefinition] = false
         settings[SupportedPaymentMethodsSettingsDefinition] = code
         settings[DelayedPaymentMethodsSettingsDefinition] = true
+        // Many payment methods don't support manual capture
+        settings[CaptureMethodSettingsDefinition] = false
+        // Otherwise Link is added as a payment method type
+        settings[LinkSettingsDefinition] = LinkDisplaySetting.Never
         // Offer only this payment method: no saved payment methods, EPMs, CPMs, or payment method configuration
         settings[CustomerSettingsDefinition] = CustomerType.GUEST
         settings[ExternalPaymentMethodSettingsDefinition] = ExternalPaymentMethodType.Off
