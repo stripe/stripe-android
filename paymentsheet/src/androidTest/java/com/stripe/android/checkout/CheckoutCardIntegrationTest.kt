@@ -12,7 +12,7 @@ import com.stripe.paymentelementtestpages.BillingDetailsPage
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
@@ -76,73 +76,67 @@ internal class CheckoutCardIntegrationTest {
     )
 
     @Test
-    fun testSavedCardIsReusedWithBillingTaxInAnotherSession() = runTaxScenario(
-        reuseSetup = { controller ->
+    fun testSavedCardIsReusedWithBillingTaxInAnotherSession() = runTaxScenario {
+        runSession(paymentMethodSave = true) { controller ->
+            assertAwaitingBillingAddress(controller.session.value)
+
+            contentPage.clickOnLpm("card")
+            billingDetailsPage.enterAddressManually(checkNotNull(CALIFORNIA_ADDRESS.line1))
+            fillOutCardAndBillingDetails("4242424242424242", CALIFORNIA_ADDRESS, "California")
+            paymentSheetPage.assertSaveForFutureCheckboxNotChecked()
+            paymentSheetPage.checkSaveForFuture()
+            paymentSheetPage.assertSaveForFutureUseCheckboxChecked()
+            formPage.clickPrimaryButtonWithoutWaitingForDismissal()
+
+            val session = awaitSession(controller, "California tax") {
+                it.tax?.status == CheckoutElementsController.Session.Tax.Status.Ready
+            }
+            formPage.waitUntilMissing()
+            contentPage.assertHasSelectedLpm("card")
+            assertBillingAddress(session, CALIFORNIA_ADDRESS)
+            assertTaxed(session)
+        }
+
+        runSession(paymentMethodSave = false) { controller ->
             contentPage.assertHasSelectedSavedCard("4242")
-            val session = awaitBillingTaxSession(
-                controller = controller,
-                address = CALIFORNIA_ADDRESS,
-                expectPositiveTax = true,
-            )
-            assertCaliforniaTax(session)
-        },
-    ) { controller ->
-        val initialSession = controller.session.value
-        assertThat(initialSession?.tax?.status)
-            .isEqualTo(CheckoutElementsController.Session.Tax.Status.RequiresBillingAddress)
-        assertThat(initialSession?.paymentOption?.billingDetails?.address).isNull()
-
-        contentPage.clickOnLpm("card")
-        fillOutCardAndBillingDetails("4242424242424242", CALIFORNIA_ADDRESS, "California")
-        paymentSheetPage.assertSaveForFutureCheckboxNotChecked()
-        paymentSheetPage.checkSaveForFuture()
-        paymentSheetPage.assertSaveForFutureUseCheckboxChecked()
-        formPage.clickPrimaryButtonWithoutWaitingForDismissal()
-
-        val session = awaitBillingTaxSession(
-            controller = controller,
-            address = CALIFORNIA_ADDRESS,
-            expectPositiveTax = true,
-        )
-        formPage.waitUntilMissing()
-        contentPage.assertHasSelectedLpm("card")
-        assertCaliforniaTax(session)
+            // configure publishes the session only after its billing tax update, so no wait is needed.
+            val session = checkNotNull(controller.session.value)
+            assertBillingAddress(session, CALIFORNIA_ADDRESS)
+            assertTaxed(session)
+        }
     }
 
     @Test
-    fun testChangingNewCardBillingAddressUpdatesTaxAndCompletesPayment() = runTaxScenario { controller ->
-        val initialSession = controller.session.value
-        assertThat(initialSession?.tax?.status)
-            .isEqualTo(CheckoutElementsController.Session.Tax.Status.RequiresBillingAddress)
-        assertThat(initialSession?.paymentOption?.billingDetails?.address).isNull()
+    fun testChangingNewCardBillingAddressUpdatesTaxAndCompletesPayment() = runTaxScenario {
+        runSession(paymentMethodSave = false) { controller ->
+            assertAwaitingBillingAddress(controller.session.value)
 
-        contentPage.clickOnLpm("card")
-        fillOutCardAndBillingDetails("4242424242424242", CALIFORNIA_ADDRESS, "California")
-        formPage.clickPrimaryButtonWithoutWaitingForDismissal()
+            contentPage.clickOnLpm("card")
+            billingDetailsPage.enterAddressManually(checkNotNull(CALIFORNIA_ADDRESS.line1))
+            fillOutCardAndBillingDetails("4242424242424242", CALIFORNIA_ADDRESS, "California")
+            formPage.clickPrimaryButtonWithoutWaitingForDismissal()
 
-        val californiaSession = awaitBillingTaxSession(
-            controller = controller,
-            address = CALIFORNIA_ADDRESS,
-            expectPositiveTax = true,
-        )
-        formPage.waitUntilMissing()
-        contentPage.assertHasSelectedLpm("card")
-        assertCaliforniaTax(californiaSession)
+            val californiaSession = awaitSession(controller, "California tax") {
+                it.tax?.status == CheckoutElementsController.Session.Tax.Status.Ready
+            }
+            formPage.waitUntilMissing()
+            contentPage.assertHasSelectedLpm("card")
+            assertBillingAddress(californiaSession, CALIFORNIA_ADDRESS)
+            assertTaxed(californiaSession)
 
-        contentPage.clickOnLpm("card")
-        fillOutCardAndBillingDetails("5555555555554444", OREGON_ADDRESS, "Oregon")
-        formPage.clickPrimaryButtonWithoutWaitingForDismissal()
+            contentPage.clickOnLpm("card")
+            fillOutCardAndBillingDetails("5555555555554444", OREGON_ADDRESS, "Oregon")
+            formPage.clickPrimaryButtonWithoutWaitingForDismissal()
 
-        val oregonSession = awaitBillingTaxSession(
-            controller = controller,
-            address = OREGON_ADDRESS,
-            expectPositiveTax = false,
-        )
-        formPage.waitUntilMissing()
-        contentPage.assertHasSelectedLpm("card")
-        assertThat(oregonSession.totals.subtotal.minorUnitsAmount).isEqualTo(SUBTOTAL)
-        assertThat(oregonSession.totals.taxExclusive.minorUnitsAmount).isEqualTo(0L)
-        assertThat(oregonSession.totals.total.minorUnitsAmount).isEqualTo(SUBTOTAL)
+            val californiaTax = californiaSession.totals.taxExclusive.minorUnitsAmount
+            val oregonSession = awaitSession(controller, "Oregon tax") {
+                it.totals.taxExclusive.minorUnitsAmount != californiaTax
+            }
+            formPage.waitUntilMissing()
+            contentPage.assertHasSelectedLpm("card")
+            assertBillingAddress(oregonSession, OREGON_ADDRESS)
+            assertUntaxed(oregonSession)
+        }
     }
 
     private fun runPlainScenario(
@@ -158,10 +152,7 @@ internal class CheckoutCardIntegrationTest {
         check(result)
     }
 
-    private fun runTaxScenario(
-        reuseSetup: (suspend (CheckoutElementsController) -> Unit)? = null,
-        setup: suspend (CheckoutElementsController) -> Unit,
-    ) = runBlocking {
+    private fun runTaxScenario(block: suspend TaxScenario.() -> Unit) = runBlocking {
         val backend = CheckoutPlaygroundBackend(
             baseUrl = CHECKOUT_PLAYGROUND_BACKEND_URL,
             merchant = TAX_MERCHANT,
@@ -169,24 +160,21 @@ internal class CheckoutCardIntegrationTest {
         val customerId = backend.createCustomer(
             buildJsonObject { put("email", CUSTOMER_EMAIL) },
         ).getOrThrow()
+        TaxScenario(customerId).block()
+    }
 
+    private inner class TaxScenario(private val customerId: String) {
         suspend fun runSession(
             paymentMethodSave: Boolean,
-            sessionSetup: suspend (CheckoutElementsController) -> Unit,
+            setup: suspend (CheckoutElementsController) -> Unit,
         ) {
-            val sessionParams = automaticTaxSessionParams(customerId, paymentMethodSave)
             val result = runCheckoutIntegrationTest(
                 merchant = TAX_MERCHANT,
-                sessionParams = sessionParams,
+                sessionParams = automaticTaxSessionParams(customerId, paymentMethodSave),
                 configuration = configuration,
-                setup = sessionSetup,
+                setup = setup,
             )
             assertThat(result).isInstanceOf(CheckoutElementsController.Result.Completed::class.java)
-        }
-
-        runSession(paymentMethodSave = reuseSetup != null, sessionSetup = setup)
-        if (reuseSetup != null) {
-            runSession(paymentMethodSave = false, sessionSetup = reuseSetup)
         }
     }
 
@@ -226,45 +214,60 @@ internal class CheckoutCardIntegrationTest {
         address: CheckoutElementsController.Address.State,
         stateName: String,
     ) {
+        // Line1 is already in the inline-autocomplete "Address" field, from manual entry or the reopened selection.
         formPage.fillOutCardDetails(newCardNumber = cardNumber)
-        billingDetailsPage.fillOutUnitedStatesAddress(
-            line1 = checkNotNull(address.line1),
+        billingDetailsPage.fillOutUnitedStatesCityStateAndZip(
             city = checkNotNull(address.city),
             stateName = stateName,
             zipCode = checkNotNull(address.postalCode),
         )
     }
 
-    private suspend fun awaitBillingTaxSession(
+    // The sheet result commits the new selection before the refreshed response, so wait on response-derived fields.
+    private suspend fun awaitSession(
         controller: CheckoutElementsController,
-        address: CheckoutElementsController.Address.State,
-        expectPositiveTax: Boolean,
+        description: String,
+        predicate: (CheckoutElementsController.Session) -> Boolean,
     ): CheckoutElementsController.Session {
-        val session = withTimeout(30.seconds) {
-            controller.session.filterNotNull().first { session ->
-                val tax = session.totals.taxExclusive.minorUnitsAmount
-                session.paymentOption?.billingDetails?.address?.state == address.state &&
-                    session.tax?.status == CheckoutElementsController.Session.Tax.Status.Ready &&
-                    (if (expectPositiveTax) tax > 0L else tax == 0L)
-            }
-        }
-        assertThat(session.tax?.status).isEqualTo(CheckoutElementsController.Session.Tax.Status.Ready)
+        return withTimeoutOrNull(30.seconds) {
+            controller.session.filterNotNull().first(predicate)
+        } ?: error("Timed out waiting for $description. Last session: ${controller.session.value}")
+    }
+
+    private fun assertAwaitingBillingAddress(session: CheckoutElementsController.Session?) {
+        assertThat(session?.tax?.status)
+            .isEqualTo(CheckoutElementsController.Session.Tax.Status.RequiresBillingAddress)
+        assertThat(session?.paymentOption?.billingDetails?.address).isNull()
+    }
+
+    private fun assertBillingAddress(
+        session: CheckoutElementsController.Session,
+        address: CheckoutElementsController.Address.State,
+    ) {
         val selectedAddress = session.paymentOption?.billingDetails?.address
         assertThat(selectedAddress?.line1).isEqualTo(address.line1)
         assertThat(selectedAddress?.city).isEqualTo(address.city)
         assertThat(selectedAddress?.state).isEqualTo(address.state)
         assertThat(selectedAddress?.postalCode).isEqualTo(address.postalCode)
         assertThat(selectedAddress?.country).isEqualTo(address.country)
-        return session
     }
 
-    private fun assertCaliforniaTax(session: CheckoutElementsController.Session) {
+    private fun assertTaxed(session: CheckoutElementsController.Session) {
         val totals = session.totals
+        assertThat(session.tax?.status).isEqualTo(CheckoutElementsController.Session.Tax.Status.Ready)
         assertThat(totals.subtotal.minorUnitsAmount).isEqualTo(SUBTOTAL)
         assertThat(totals.taxExclusive.minorUnitsAmount).isGreaterThan(0L)
         assertThat(totals.total.minorUnitsAmount).isEqualTo(
             totals.subtotal.minorUnitsAmount + totals.taxExclusive.minorUnitsAmount,
         )
+    }
+
+    private fun assertUntaxed(session: CheckoutElementsController.Session) {
+        val totals = session.totals
+        assertThat(session.tax?.status).isEqualTo(CheckoutElementsController.Session.Tax.Status.Ready)
+        assertThat(totals.subtotal.minorUnitsAmount).isEqualTo(SUBTOTAL)
+        assertThat(totals.taxExclusive.minorUnitsAmount).isEqualTo(0L)
+        assertThat(totals.total.minorUnitsAmount).isEqualTo(SUBTOTAL)
     }
 
     private fun automaticTaxSessionParams(customerId: String, paymentMethodSave: Boolean): JsonObject {
