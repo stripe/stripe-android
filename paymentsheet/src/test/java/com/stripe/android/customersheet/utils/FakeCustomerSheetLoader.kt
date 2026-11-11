@@ -63,6 +63,7 @@ internal class FakeCustomerSheetLoader(
                         isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSyncDefaultEnabled,
                         passiveCaptchaParams = passiveCaptchaParams,
                         integrationMetadata = integrationMetadata,
+                        appearance = configuration.appearance,
                     ),
                     supportedPaymentMethods = supportedPaymentMethods,
                     customerPaymentMethods = customerPaymentMethods,

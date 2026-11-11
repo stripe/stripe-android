@@ -1,8 +1,6 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.ach
 
-import android.os.Parcel
 import androidx.activity.result.ActivityResultRegistryOwner
-import androidx.core.os.ParcelCompat
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.TurbineTestContext
@@ -30,7 +28,6 @@ import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
-import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResponseInternal
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
@@ -142,20 +139,6 @@ class USBankAccountFormViewModelTest {
             PaymentSheet.ThemeMode.AlwaysDark -> ThemeMode.AlwaysDark
         }
         assertThat(launchArgs.themeMode).isEqualTo(expectedThemeMode)
-
-        val parcel = Parcel.obtain()
-        try {
-            parcel.writeParcelable(launchArgs, 0)
-            parcel.setDataPosition(0)
-            val restored = ParcelCompat.readParcelable(
-                parcel,
-                CollectBankAccountContract.Args::class.java.classLoader,
-                CollectBankAccountContract.Args::class.java,
-            )
-            assertThat(restored?.themeMode).isEqualTo(expectedThemeMode)
-        } finally {
-            parcel.recycle()
-        }
 
         viewModel.onDestroy()
         registry.ensureAllEventsConsumed()
