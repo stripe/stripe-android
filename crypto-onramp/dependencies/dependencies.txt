@@ -1207,6 +1207,7 @@
 |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:2.2.21 (*)
 |    |    +--- androidx.annotation:annotation:1.9.1 (*)
 |    |    \--- com.google.ai.edge.litert:litert:1.4.1 (*)
+|    +--- project :paymentsheet (*)
 |    +--- com.google.accompanist:accompanist-themeadapter-material:0.36.0
 |    |    +--- com.google.accompanist:accompanist-themeadapter-core:0.36.0
 |    |    |    +--- androidx.core:core-ktx:1.8.0 -> 1.17.0 (*)

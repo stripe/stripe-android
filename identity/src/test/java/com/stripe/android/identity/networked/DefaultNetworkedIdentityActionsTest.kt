@@ -12,10 +12,15 @@ import com.stripe.android.core.networking.StripeConnection
 import com.stripe.android.core.networking.StripeRequest
 import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.core.version.StripeSdkVersion
+import com.stripe.android.identity.SUCCESS_VERIFICATION_PAGE_NOT_REQUIRE_LIVE_CAPTURE
 import com.stripe.android.identity.networking.IDENTITY_STRIPE_API_VERSION_WITH_BETA_HEADER
 import com.stripe.android.identity.networking.VERIFICATION_PAGE_DATA_JSON_STRING
+import com.stripe.android.identity.networking.models.NetworkedIdentityRoute
 import com.stripe.android.identity.networking.models.Requirement
+import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageData
+import com.stripe.android.identity.networking.models.VerificationPageData.Companion.submittedAndClosed
+import com.stripe.android.identity.networking.models.VerificationPageNetworkedIdentity
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -125,16 +130,48 @@ internal class DefaultNetworkedIdentityActionsTest {
         request(Action.Skip)
     }
 
+    @Test
+    fun `a save read back after submit is submitted and closed`() = runScenario(
+        retrieveVerificationPage = {
+            SUCCESS_VERIFICATION_PAGE_NOT_REQUIRE_LIVE_CAPTURE.copy(
+                status = VerificationPage.Status.PROCESSING,
+                submitted = true,
+                networkedIdentity = VerificationPageNetworkedIdentity(
+                    state = VerificationPageNetworkedIdentity.State(
+                        consented = true,
+                        skipped = false,
+                        direction = "merchant_to_consumer",
+                    ),
+                ),
+            )
+        },
+    ) {
+        val committed = actions.verificationIfCommitted(NetworkedIdentityRoute.ResumeSave).getOrThrow()
+
+        assertThat(committed?.submittedAndClosed()).isTrue()
+    }
+
+    @Test
+    fun `a failed read-back is reported`() = runScenario(
+        retrieveVerificationPage = { throw IOException("Lost.") },
+    ) {
+        val committed = actions.verificationIfCommitted(NetworkedIdentityRoute.ResumeSave)
+
+        assertThat(committed.exceptionOrNull()).isInstanceOf(IOException::class.java)
+    }
+
     private fun runScenario(
         response: Result<StripeResponse<String>> = Result.success(
             StripeResponse(code = 200, body = VERIFICATION_PAGE_DATA_JSON_STRING)
         ),
+        retrieveVerificationPage: suspend () -> VerificationPage = { error("The session isn't read back here.") },
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val connections = FakeActionConnectionFactory(response)
         val actions = DefaultNetworkedIdentityActions(
             verificationSessionId = SESSION_ID,
             ephemeralKey = EPHEMERAL_KEY,
+            retrieveVerificationPage = retrieveVerificationPage,
             stripeNetworkClient = DefaultStripeNetworkClient(
                 workContext = StandardTestDispatcher(testScheduler),
                 connectionFactory = connections,
@@ -165,7 +202,7 @@ internal class DefaultNetworkedIdentityActionsTest {
     }
 
     internal enum class Action(val path: String, val parameter: String?) {
-        Attach("attach_document", "identity_document_association_token"),
+        Attach("reuse_document", "identity_document_association_token"),
         PrepareSave("prepare_document_save", "identity_document_save_association_token"),
         Skip("skip", null);
 
