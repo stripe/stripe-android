@@ -3,16 +3,12 @@ package com.stripe.android.checkout
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.Stripe
-import com.stripe.android.createPaymentMethod
 import com.stripe.android.elements.PaymentElement
-import com.stripe.android.model.Address
-import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedContentPage
 import com.stripe.android.paymentelement.EmbeddedFormPage
-import com.stripe.paymentelementtestpages.ManagePage
+import com.stripe.android.paymentsheet.PaymentSheetPage
+import com.stripe.paymentelementtestpages.BillingDetailsPage
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -36,7 +32,8 @@ internal class CheckoutCardIntegrationTest {
 
     private val contentPage = EmbeddedContentPage(composeRule)
     private val formPage = EmbeddedFormPage(composeRule)
-    private val managePage = ManagePage(composeRule)
+    private val billingDetailsPage = BillingDetailsPage(composeRule)
+    private val paymentSheetPage = PaymentSheetPage(composeRule)
 
     private val configuration = CheckoutElementsController.Configuration()
         .merchantDisplayName("Checkout E2E")
@@ -79,37 +76,96 @@ internal class CheckoutCardIntegrationTest {
     )
 
     @Test
-    fun testSwitchingSavedCardsUpdatesBillingTaxAndCompletesPayment() = runBlocking {
-        lateinit var californiaCardId: String
-        lateinit var oregonCardId: String
+    fun testSavedCardIsReusedWithBillingTaxInAnotherSession() = runBlocking {
+        lateinit var customerId: String
 
-        val result = runCheckoutIntegrationTest(
+        val saveResult = runCheckoutIntegrationTest(
             merchant = TAX_MERCHANT,
-            sessionParams = { backend, stripe ->
-                val customerId = backend.createCustomer(
+            sessionParams = { backend ->
+                customerId = backend.createCustomer(
                     buildJsonObject { put("email", CUSTOMER_EMAIL) },
                 ).getOrThrow()
-                californiaCardId = createSavedCard(stripe, backend, customerId, CALIFORNIA_ADDRESS, "4242424242424242")
-                oregonCardId = createSavedCard(stripe, backend, customerId, OREGON_ADDRESS, "5555555555554444")
-                automaticTaxSessionParams(customerId)
+                automaticTaxSessionParams(customerId, paymentMethodSave = true)
             },
             configuration = configuration,
             setup = { controller ->
-                val californiaSession = selectSavedCard(controller, californiaCardId, CALIFORNIA_ADDRESS)
-                val californiaTotals = californiaSession.totals
-                assertThat(californiaTotals.subtotal.minorUnitsAmount).isEqualTo(SUBTOTAL)
-                assertThat(californiaTotals.taxExclusive.minorUnitsAmount).isGreaterThan(0L)
-                assertThat(californiaTotals.total.minorUnitsAmount).isEqualTo(
-                    californiaTotals.subtotal.minorUnitsAmount + californiaTotals.taxExclusive.minorUnitsAmount,
-                )
+                contentPage.clickOnLpm("card")
+                fillOutCardAndBillingDetails("4242424242424242", CALIFORNIA_ADDRESS, "California")
+                paymentSheetPage.assertSaveForFutureCheckboxNotChecked()
+                paymentSheetPage.checkSaveForFuture()
+                paymentSheetPage.assertSaveForFutureUseCheckboxChecked()
+                formPage.clickPrimaryButtonWithoutWaitingForDismissal()
 
-                val oregonSession = selectSavedCard(controller, oregonCardId, OREGON_ADDRESS)
+                val session = awaitBillingTaxSession(
+                    controller = controller,
+                    address = CALIFORNIA_ADDRESS,
+                    expectPositiveTax = true,
+                )
+                formPage.waitUntilMissing()
+                contentPage.assertHasSelectedLpm("card")
+                assertCaliforniaTax(session)
+            },
+        )
+        assertThat(saveResult).isInstanceOf(CheckoutElementsController.Result.Completed::class.java)
+
+        val reuseResult = runCheckoutIntegrationTest(
+            merchant = TAX_MERCHANT,
+            sessionParams = { automaticTaxSessionParams(customerId, paymentMethodSave = false) },
+            configuration = configuration,
+            setup = { controller ->
+                contentPage.assertHasSelectedSavedCard("4242")
+                val session = awaitBillingTaxSession(
+                    controller = controller,
+                    address = CALIFORNIA_ADDRESS,
+                    expectPositiveTax = true,
+                )
+                assertCaliforniaTax(session)
+            },
+        )
+        assertThat(reuseResult).isInstanceOf(CheckoutElementsController.Result.Completed::class.java)
+    }
+
+    @Test
+    fun testChangingNewCardBillingAddressUpdatesTaxAndCompletesPayment() = runBlocking {
+        val result = runCheckoutIntegrationTest(
+            merchant = TAX_MERCHANT,
+            sessionParams = { backend ->
+                val customerId = backend.createCustomer(
+                    buildJsonObject { put("email", CUSTOMER_EMAIL) },
+                ).getOrThrow()
+                automaticTaxSessionParams(customerId, paymentMethodSave = false)
+            },
+            configuration = configuration,
+            setup = { controller ->
+                contentPage.clickOnLpm("card")
+                fillOutCardAndBillingDetails("4242424242424242", CALIFORNIA_ADDRESS, "California")
+                formPage.clickPrimaryButtonWithoutWaitingForDismissal()
+
+                val californiaSession = awaitBillingTaxSession(
+                    controller = controller,
+                    address = CALIFORNIA_ADDRESS,
+                    expectPositiveTax = true,
+                )
+                formPage.waitUntilMissing()
+                contentPage.assertHasSelectedLpm("card")
+                assertCaliforniaTax(californiaSession)
+
+                contentPage.clickOnLpm("card")
+                fillOutCardAndBillingDetails("5555555555554444", OREGON_ADDRESS, "Oregon")
+                formPage.clickPrimaryButtonWithoutWaitingForDismissal()
+
+                val oregonSession = awaitBillingTaxSession(
+                    controller = controller,
+                    address = OREGON_ADDRESS,
+                    expectPositiveTax = false,
+                )
+                formPage.waitUntilMissing()
+                contentPage.assertHasSelectedLpm("card")
                 assertThat(oregonSession.totals.subtotal.minorUnitsAmount).isEqualTo(SUBTOTAL)
                 assertThat(oregonSession.totals.taxExclusive.minorUnitsAmount).isEqualTo(0L)
                 assertThat(oregonSession.totals.total.minorUnitsAmount).isEqualTo(SUBTOTAL)
             },
         )
-
         assertThat(result).isInstanceOf(CheckoutElementsController.Result.Completed::class.java)
     }
 
@@ -119,7 +175,7 @@ internal class CheckoutCardIntegrationTest {
     ) = runBlocking {
         val result = runCheckoutIntegrationTest(
             merchant = "US",
-            sessionParams = { _, _ -> cardOnlySessionParams() },
+            sessionParams = { cardOnlySessionParams() },
             configuration = configuration,
             setup = setup,
         )
@@ -157,53 +213,36 @@ internal class CheckoutCardIntegrationTest {
         }
     }
 
-    private suspend fun createSavedCard(
-        stripe: Stripe,
-        backend: CheckoutPlaygroundBackend,
-        customerId: String,
-        address: Address,
+    private fun fillOutCardAndBillingDetails(
         cardNumber: String,
-    ): String {
-        val paymentMethod = stripe.createPaymentMethod(
-            PaymentMethodCreateParams.create(
-                card = PaymentMethodCreateParams.Card.Builder()
-                    .setNumber(cardNumber)
-                    .setExpiryMonth(12)
-                    .setExpiryYear(2034)
-                    .setCvc("123")
-                    .build(),
-                billingDetails = PaymentMethod.BillingDetails(
-                    address = address,
-                    email = CUSTOMER_EMAIL,
-                    name = "Jenny Rosen",
-                ),
-                metadata = null,
-                allowRedisplay = PaymentMethod.AllowRedisplay.ALWAYS,
-            ),
+        address: CheckoutElementsController.Address.State,
+        stateName: String,
+    ) {
+        formPage.fillOutCardDetails(newCardNumber = cardNumber)
+        billingDetailsPage.fillOutUnitedStatesAddress(
+            line1 = checkNotNull(address.line1),
+            city = checkNotNull(address.city),
+            stateName = stateName,
+            zipCode = checkNotNull(address.postalCode),
         )
-        backend.attachPaymentMethod(paymentMethod.id, customerId).getOrThrow()
-        return paymentMethod.id
     }
 
-    private suspend fun selectSavedCard(
+    private suspend fun awaitBillingTaxSession(
         controller: CheckoutElementsController,
-        paymentMethodId: String,
-        address: Address,
+        address: CheckoutElementsController.Address.State,
+        expectPositiveTax: Boolean,
     ): CheckoutElementsController.Session {
-        contentPage.clickViewMore()
-        managePage.waitUntilVisible()
-        managePage.selectPaymentMethod(paymentMethodId)
-
         val session = withTimeout(30.seconds) {
             combine(controller.session, controller.isUpdating) { session, isUpdating ->
-                session.takeIf {
-                    !isUpdating && session?.paymentOption?.billingDetails?.address?.state == address.state
+                session?.takeIf {
+                    val tax = it.totals.taxExclusive.minorUnitsAmount
+                    !isUpdating &&
+                        it.paymentOption?.billingDetails?.address?.state == address.state &&
+                        it.tax?.status == CheckoutElementsController.Session.Tax.Status.Ready &&
+                        (if (expectPositiveTax) tax > 0L else tax == 0L)
                 }
             }.first { it != null }
         }
-        managePage.waitUntilNotVisible()
-        contentPage.assertHasSelectedSavedPaymentMethod(paymentMethodId)
-
         val selectedSession = checkNotNull(session)
         assertThat(selectedSession.tax?.status).isEqualTo(CheckoutElementsController.Session.Tax.Status.Ready)
         val selectedAddress = selectedSession.paymentOption?.billingDetails?.address
@@ -215,7 +254,16 @@ internal class CheckoutCardIntegrationTest {
         return selectedSession
     }
 
-    private fun automaticTaxSessionParams(customerId: String): JsonObject {
+    private fun assertCaliforniaTax(session: CheckoutElementsController.Session) {
+        val totals = session.totals
+        assertThat(totals.subtotal.minorUnitsAmount).isEqualTo(SUBTOTAL)
+        assertThat(totals.taxExclusive.minorUnitsAmount).isGreaterThan(0L)
+        assertThat(totals.total.minorUnitsAmount).isEqualTo(
+            totals.subtotal.minorUnitsAmount + totals.taxExclusive.minorUnitsAmount,
+        )
+    }
+
+    private fun automaticTaxSessionParams(customerId: String, paymentMethodSave: Boolean): JsonObject {
         val lineItem = buildJsonObject {
             put("quantity", 1)
             put(
@@ -245,7 +293,7 @@ internal class CheckoutCardIntegrationTest {
             put(
                 "saved_payment_method_options",
                 buildJsonObject {
-                    put("payment_method_save", "disabled")
+                    put("payment_method_save", if (paymentMethodSave) "enabled" else "disabled")
                     put("payment_method_remove", "disabled")
                 },
             )
@@ -268,15 +316,17 @@ internal class CheckoutCardIntegrationTest {
         const val CUSTOMER_EMAIL = "checkout-e2e@example.com"
         const val SUBTOTAL = 1000L
 
-        val CALIFORNIA_ADDRESS = Address(
+        val CALIFORNIA_ADDRESS = CheckoutElementsController.Address.State(
             line1 = "123 Main St",
+            line2 = null,
             city = "San Francisco",
             state = "CA",
             postalCode = "94105",
             country = "US",
         )
-        val OREGON_ADDRESS = Address(
+        val OREGON_ADDRESS = CheckoutElementsController.Address.State(
             line1 = "123 Main St",
+            line2 = null,
             city = "Portland",
             state = "OR",
             postalCode = "97201",
