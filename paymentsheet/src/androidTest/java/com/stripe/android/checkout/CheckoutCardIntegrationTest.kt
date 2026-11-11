@@ -143,8 +143,12 @@ internal class CheckoutCardIntegrationTest {
         setup: suspend (CheckoutElementsController) -> Unit,
         check: (CheckoutElementsController.Result) -> Unit,
     ) = runBlocking {
-        val result = runCheckoutIntegrationTest(
+        val backend = CheckoutPlaygroundBackend(
+            baseUrl = CHECKOUT_PLAYGROUND_BACKEND_URL,
             merchant = "US",
+        )
+        val result = runCheckoutIntegrationTest(
+            backend = backend,
             sessionParams = cardOnlySessionParams(),
             configuration = configuration,
             setup = setup,
@@ -160,16 +164,19 @@ internal class CheckoutCardIntegrationTest {
         val customerId = backend.createCustomer(
             buildJsonObject { put("email", CUSTOMER_EMAIL) },
         ).getOrThrow()
-        TaxScenario(customerId).block()
+        TaxScenario(backend, customerId).block()
     }
 
-    private inner class TaxScenario(private val customerId: String) {
+    private inner class TaxScenario(
+        private val backend: CheckoutPlaygroundBackend,
+        private val customerId: String,
+    ) {
         suspend fun runSession(
             paymentMethodSave: Boolean,
             setup: suspend (CheckoutElementsController) -> Unit,
         ) {
             val result = runCheckoutIntegrationTest(
-                merchant = TAX_MERCHANT,
+                backend = backend,
                 sessionParams = automaticTaxSessionParams(customerId, paymentMethodSave),
                 configuration = configuration,
                 setup = setup,
