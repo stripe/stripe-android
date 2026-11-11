@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.paymentdatacollection.ach
 
 import android.os.Parcel
 import androidx.activity.result.ActivityResultRegistryOwner
+import androidx.core.os.ParcelCompat
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.TurbineTestContext
@@ -146,8 +147,10 @@ class USBankAccountFormViewModelTest {
         try {
             parcel.writeParcelable(launchArgs, 0)
             parcel.setDataPosition(0)
-            val restored = parcel.readParcelable<CollectBankAccountContract.Args>(
+            val restored = ParcelCompat.readParcelable(
+                parcel,
                 CollectBankAccountContract.Args::class.java.classLoader,
+                CollectBankAccountContract.Args::class.java,
             )
             assertThat(restored?.themeMode).isEqualTo(expectedThemeMode)
         } finally {
