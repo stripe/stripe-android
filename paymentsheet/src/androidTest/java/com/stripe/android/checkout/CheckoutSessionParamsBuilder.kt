@@ -12,22 +12,43 @@ private const val CURRENCY = "usd"
 private const val CUSTOMER_EMAIL = "checkout-e2e@example.com"
 
 /** Builds a card-only Checkout Session request with a single line item for [CheckoutPlaygroundBackend]. */
-internal fun checkoutSessionParams(
-    unitAmount: Long = 1000L,
-    customerId: String? = null,
-    automaticTax: Boolean = false,
-    paymentMethodSave: Boolean? = null,
-): JsonObject = buildJsonObject {
-    put("ui_mode", "mobile_elements")
-    put("currency", CURRENCY)
-    put("allowed_payment_method_types", JsonArray(listOf(JsonPrimitive("card"))))
-    putCart(unitAmount, automaticTax)
-    putCustomer(customerId, automaticTax)
-    if (automaticTax) {
-        put("automatic_tax", buildJsonObject { put("enabled", true) })
-        put("billing_address_collection", "required")
+internal class CheckoutSessionParamsBuilder(
+    private val unitAmount: Long,
+) {
+    private var customerId: String? = null
+    private var automaticTax: Boolean = false
+    private var paymentMethodSave: Boolean? = null
+
+    fun customerId(
+        customerId: String,
+    ): CheckoutSessionParamsBuilder = apply {
+        this.customerId = customerId
     }
-    if (paymentMethodSave != null) putSavedPaymentMethodOptions(paymentMethodSave)
+
+    fun automaticTax(
+        automaticTax: Boolean,
+    ): CheckoutSessionParamsBuilder = apply {
+        this.automaticTax = automaticTax
+    }
+
+    fun paymentMethodSave(
+        paymentMethodSave: Boolean,
+    ): CheckoutSessionParamsBuilder = apply {
+        this.paymentMethodSave = paymentMethodSave
+    }
+
+    fun build(): JsonObject = buildJsonObject {
+        put("ui_mode", "mobile_elements")
+        put("currency", CURRENCY)
+        put("allowed_payment_method_types", JsonArray(listOf(JsonPrimitive("card"))))
+        putCart(unitAmount, automaticTax)
+        putCustomer(customerId, automaticTax)
+        if (automaticTax) {
+            put("automatic_tax", buildJsonObject { put("enabled", true) })
+            put("billing_address_collection", "required")
+        }
+        paymentMethodSave?.let { putSavedPaymentMethodOptions(it) }
+    }
 }
 
 private fun JsonObjectBuilder.putCart(unitAmount: Long, automaticTax: Boolean) {

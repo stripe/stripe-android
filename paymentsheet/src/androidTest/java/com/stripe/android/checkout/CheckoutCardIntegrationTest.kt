@@ -145,7 +145,7 @@ internal class CheckoutCardIntegrationTest {
         )
         val result = runCheckoutIntegrationTest(
             backend = backend,
-            sessionParams = checkoutSessionParams(),
+            sessionParams = CheckoutSessionParamsBuilder(unitAmount = SUBTOTAL).build(),
             configuration = configuration,
             setup = setup,
         )
@@ -173,12 +173,11 @@ internal class CheckoutCardIntegrationTest {
         ) {
             val result = runCheckoutIntegrationTest(
                 backend = backend,
-                sessionParams = checkoutSessionParams(
-                    unitAmount = SUBTOTAL,
-                    customerId = customerId,
-                    automaticTax = true,
-                    paymentMethodSave = paymentMethodSave,
-                ),
+                sessionParams = CheckoutSessionParamsBuilder(unitAmount = SUBTOTAL)
+                    .customerId(customerId)
+                    .automaticTax(true)
+                    .paymentMethodSave(paymentMethodSave)
+                    .build(),
                 configuration = configuration,
                 setup = setup,
             )
