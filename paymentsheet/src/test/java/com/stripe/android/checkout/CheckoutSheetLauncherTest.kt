@@ -1089,7 +1089,7 @@ internal class CheckoutSheetLauncherTest {
         assertThat(logger.errorLogs).containsExactly(
             "Failed to refresh the checkout session after the sheet closed." to expectedError
         )
-        assertThat(operationCoordinator.isUpdating.value).isFalse()
+        assertThat(operationCoordinator.status.value).isEqualTo(CheckoutOperationCoordinator.Status.Idle)
     }
 
     @Test
