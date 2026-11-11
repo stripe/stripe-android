@@ -5,6 +5,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutElementsController.Address
 import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent.InvocationSource
 import com.stripe.android.checkout.analytics.CheckoutAnalyticsReporter
+import com.stripe.android.checkout.analytics.LocalOperation
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.core.networking.ApiRequest
@@ -144,7 +145,12 @@ internal class CheckoutSessionTaxRegionUpdaterTest {
             },
         )
 
-        val updater = CheckoutSessionTaxRegionUpdater(checkoutSessionRepository, analyticsReporter)
+        val updater = CheckoutSessionTaxRegionUpdater(
+            checkoutSessionRepository,
+            localOperationFactory = LocalOperation.Factory { operation, params ->
+                LocalOperation(operation, params, analyticsReporter)
+            },
+        )
 
         val scenario = Scenario(
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(

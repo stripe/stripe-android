@@ -14,7 +14,6 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent.InvocationSource
 import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent.Operation
-import com.stripe.android.checkout.analytics.CheckoutAnalyticsReporter
 import com.stripe.android.checkout.analytics.LocalOperation
 import com.stripe.android.checkout.analytics.measureDuration
 import com.stripe.android.checkout.analytics.toAnalyticsMap
@@ -77,7 +76,7 @@ class CheckoutElementsController @Inject internal constructor(
     private val displayMessageResolver: CheckoutDisplayMessageResolver,
     @ViewModelScope private val viewModelScope: CoroutineScope,
     private val checkoutSessionRepository: CheckoutSessionRepository,
-    private val analyticsReporter: CheckoutAnalyticsReporter,
+    private val localOperationFactory: LocalOperation.Factory,
     private val checkoutSessionTaxRegionUpdater: CheckoutSessionTaxRegionUpdater,
     private val errorReporter: ErrorReporter,
     private val checkoutStateLoader: CheckoutStateLoader,
@@ -99,11 +98,10 @@ class CheckoutElementsController @Inject internal constructor(
          */
         fun clearLocalCustomerData(context: Context) {
             DefaultLinkStore(context).clear()
-            val analyticsReporter = CheckoutAnalyticsReporter.createFallbackInstance(context)
-            LocalOperation(
+            val localOperationFactory = LocalOperation.createFallbackFactory(context)
+            localOperationFactory.create(
                 operation = Operation.ClearLocalCustomerData,
                 params = emptyMap(),
-                report = analyticsReporter::fireEvent,
             ).invoked(response = null)
         }
     }
@@ -275,10 +273,9 @@ class CheckoutElementsController @Inject internal constructor(
             },
         ) {
             kotlin.Result.success(checkoutSessionResponse).also {
-                LocalOperation(
+                localOperationFactory.create(
                     operation = Operation.UpdateEmail,
                     params = emptyMap(),
-                    report = analyticsReporter::fireEvent,
                 ).succeeded(checkoutSessionResponse)
             }
         }.toOperationResult()
@@ -380,13 +377,12 @@ class CheckoutElementsController @Inject internal constructor(
         val previousAddress = collectedDetails.shippingAddress
         if (previousAddress == null) {
             kotlin.Result.success(checkoutSessionResponse).also {
-                LocalOperation(
+                localOperationFactory.create(
                     operation = Operation.UpdateShippingAddress,
                     params = mapOf(
                         "invocation_source" to InvocationSource.Merchant.code,
                         "did_request_tax_update" to false,
                     ),
-                    report = analyticsReporter::fireEvent,
                 ).succeeded(checkoutSessionResponse)
             }
         } else {
@@ -509,10 +505,9 @@ class CheckoutElementsController @Inject internal constructor(
                 )
             },
         ) {
-            LocalOperation(
+            localOperationFactory.create(
                 operation = Operation.ClearPaymentOption,
                 params = emptyMap(),
-                report = analyticsReporter::fireEvent,
             ).invoked(checkoutSessionResponse)
             checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
                 checkoutSessionResponse = checkoutSessionResponse,

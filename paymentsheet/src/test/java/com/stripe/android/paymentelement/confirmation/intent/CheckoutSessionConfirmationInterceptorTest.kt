@@ -8,6 +8,7 @@ import com.stripe.android.challenge.passive.PassiveChallengeActivityContract
 import com.stripe.android.challenge.passive.PassiveChallengeActivityResult
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
 import com.stripe.android.checkout.analytics.CheckoutAnalyticsReporter
+import com.stripe.android.checkout.analytics.LocalOperation
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutConfirm
 import com.stripe.android.checkouttesting.checkoutUpdate
@@ -1198,7 +1199,9 @@ class CheckoutSessionConfirmationInterceptorTest {
             checkoutSessionRepository = checkoutSessionRepository,
             checkoutSessionTaxRegionUpdater = CheckoutSessionTaxRegionUpdater(
                 checkoutSessionRepository,
-                analyticsReporter,
+                localOperationFactory = LocalOperation.Factory { operation, params ->
+                    LocalOperation(operation, params, analyticsReporter)
+                },
             ),
         )
 

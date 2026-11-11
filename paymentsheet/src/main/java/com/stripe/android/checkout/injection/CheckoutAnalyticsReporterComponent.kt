@@ -1,7 +1,7 @@
 package com.stripe.android.checkout.injection
 
 import android.content.Context
-import com.stripe.android.checkout.analytics.CheckoutAnalyticsReporter
+import com.stripe.android.checkout.analytics.LocalOperation
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
@@ -23,7 +23,7 @@ import javax.inject.Named
     ]
 )
 internal interface CheckoutAnalyticsReporterComponent {
-    val analyticsReporter: CheckoutAnalyticsReporter
+    val localOperationFactory: LocalOperation.Factory
 
     @Component.Factory
     interface Factory {

@@ -2,7 +2,6 @@ package com.stripe.android.checkout
 
 import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent.InvocationSource
 import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent.Operation
-import com.stripe.android.checkout.analytics.CheckoutAnalyticsReporter
 import com.stripe.android.checkout.analytics.LocalOperation
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
@@ -12,7 +11,7 @@ import javax.inject.Inject
 @OptIn(CheckoutSessionPreview::class)
 internal class CheckoutSessionTaxRegionUpdater @Inject constructor(
     private val checkoutSessionRepository: CheckoutSessionRepository,
-    private val analyticsReporter: CheckoutAnalyticsReporter,
+    private val localOperationFactory: LocalOperation.Factory,
 ) {
     fun requiresUpdate(
         checkoutSessionResponse: CheckoutSessionResponse,
@@ -49,10 +48,9 @@ internal class CheckoutSessionTaxRegionUpdater @Inject constructor(
             }
         } else {
             Result.success(checkoutSessionResponse).also {
-                LocalOperation(
+                localOperationFactory.create(
                     operation = addressSource.updateOperation(),
                     params = params,
-                    report = analyticsReporter::fireEvent,
                 ).succeeded(checkoutSessionResponse)
             }
         }
