@@ -103,7 +103,7 @@ internal class CheckoutSessionRepository @Inject constructor(
         fraudDetectionDataRepository.refresh()
 
         val requestParams = ConfirmationParamsUtils.prepareConfirmationParams(
-            params.toParamMap() + CONFIRM_EXPAND_PARAMS,
+            params.toParamMap(),
             params.paymentMethodData,
             sourceParams = null,
             fraudDetectionData = fraudDetectionDataRepository.getCached(),
@@ -285,14 +285,6 @@ internal class CheckoutSessionRepository @Inject constructor(
     private companion object {
         private const val UNSUPPORTED_UPDATE_ERROR =
             "Checkout session update requires at least card expiry or billing details."
-
-        // Next-action handling requires the returned Intent's PaymentMethod to be expanded.
-        private val CONFIRM_EXPAND_PARAMS = mapOf(
-            "expand" to listOf(
-                "payment_response.payment_intent.payment_method",
-                "payment_response.setup_intent.payment_method",
-            ),
-        )
 
         private fun initUrl(sessionId: String): String =
             "${ApiRequest.API_HOST}/v1/checkout_client/$sessionId/init"
