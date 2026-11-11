@@ -72,6 +72,7 @@ import org.junit.Test
 import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestParameterInjector
+import java.net.URLDecoder
 
 @Suppress("LargeClass")
 @OptIn(CheckoutSessionPreview::class)
@@ -418,16 +419,37 @@ class CheckoutSessionConfirmationInterceptorTest {
     }
 
     @Test
-    fun `intercept with requires_action payment intent returns Launch action`() = runScenario {
+    fun `intercept uses the intent returned by confirm with its expanded payment method`() = runScenario {
         networkRule.checkoutConfirm(
-                intentResponseFactory = { response ->
-                    response.testBodyFromFile("checkout-payment-intent.json") { json ->
-                        json.put("status", "requires_action")
-                    }
-                },
-            ) { response ->
-                response.testBodyFromFile("checkout-session-confirm.json")
+            RequestMatcher { request ->
+                val expandValues = request.bodyText.split("&")
+                    .map { URLDecoder.decode(it, Charsets.UTF_8.name()) }
+                    .filter { it.startsWith("expand[]=") }
+                    .map { it.substringAfter("=") }
+                expandValues == listOf(
+                    "payment_response.payment_intent.payment_method",
+                    "payment_response.setup_intent.payment_method",
+                )
+            },
+        ) { response ->
+            response.testBodyFromFile("checkout-session-confirm.json")
+        }
+
+        val result = interceptNewPm() as ConfirmationDefinition.Action.Complete
+
+        val intent = result.intent as PaymentIntent
+        assertThat(intent.id).isEqualTo("pi_checkout123")
+        assertThat(intent.paymentMethod?.id).isEqualTo("pm_cs_example")
+    }
+
+    @Test
+    fun `intercept with requires_action payment intent returns Launch action`() = runScenario {
+        networkRule.checkoutConfirm { response ->
+            response.testBodyFromFile("checkout-session-confirm.json") { json ->
+                json.getJSONObject("payment_response").getJSONObject("payment_intent")
+                    .put("status", "requires_action")
             }
+        }
 
         val result = interceptNewPm()
 
@@ -576,9 +598,9 @@ class CheckoutSessionConfirmationInterceptorTest {
                 // Synthetic boundary case: recorded confirmations return only one intent type.
                 json.getJSONObject("payment_response").put(
                     "setup_intent",
-                    JSONObject()
-                        .put("id", "seti_123")
-                        .put("client_secret", "seti_123_secret_example"),
+                    JSONObject(
+                        requireNotNull(javaClass.classLoader?.getResource("checkout-setup-intent.json")).readText()
+                    ),
                 )
             }
         }
@@ -593,15 +615,12 @@ class CheckoutSessionConfirmationInterceptorTest {
 
     @Test
     fun `intercept with requires_action setup intent returns Launch action`() = runScenario {
-        networkRule.checkoutConfirm(
-                intentResponseFactory = { response ->
-                    response.testBodyFromFile("checkout-setup-intent.json") { json ->
-                        json.put("status", "requires_action")
-                    }
-                },
-            ) { response ->
-                response.testBodyFromFile("checkout-session-confirm-setup.json")
+        networkRule.checkoutConfirm { response ->
+            response.testBodyFromFile("checkout-session-confirm-setup.json") { json ->
+                json.getJSONObject("payment_response").getJSONObject("setup_intent")
+                    .put("status", "requires_action")
             }
+        }
 
         val result = interceptNewPm()
 
@@ -639,14 +658,11 @@ class CheckoutSessionConfirmationInterceptorTest {
     @Test
     fun `intercept with saved payment method and requires_action payment intent returns Launch action`() =
         runScenario {
-            networkRule.checkoutConfirm(
-                intentResponseFactory = { response ->
-                    response.testBodyFromFile("checkout-payment-intent.json") { json ->
-                        json.put("status", "requires_action")
-                    }
-                },
-            ) { response ->
-                response.testBodyFromFile("checkout-session-confirm.json")
+            networkRule.checkoutConfirm { response ->
+                response.testBodyFromFile("checkout-session-confirm.json") { json ->
+                    json.getJSONObject("payment_response").getJSONObject("payment_intent")
+                        .put("status", "requires_action")
+                }
             }
 
             val result = interceptSavedPm()
@@ -1071,23 +1087,6 @@ class CheckoutSessionConfirmationInterceptorTest {
     }
 
     @Test
-    fun `intercept propagates intent retrieval failure`() = runScenario {
-        networkRule.checkoutConfirm(
-            intentResponseFactory = { response ->
-                response.setResponseCode(400)
-                response.setBody("""{"error":{"message":"Intent retrieval failed"}}""")
-            },
-        ) { response ->
-            response.testBodyFromFile("checkout-session-confirm.json")
-        }
-
-        val result = interceptNewPm() as ConfirmationDefinition.Action.Fail
-
-        assertThat(result.cause.message).isEqualTo("Intent retrieval failed")
-        assertThat(result.errorType).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Transaction())
-    }
-
-    @Test
     fun `intercept propagates CheckoutClient payment error`() = runScenario {
         networkRule.checkoutConfirm { response ->
             response.testBodyFromFile("checkout-session-confirm.json") { json ->
@@ -1156,7 +1155,6 @@ class CheckoutSessionConfirmationInterceptorTest {
     ) {
         val analyticsReporter = FakeCheckoutAnalyticsReporter()
         val checkoutSessionRepository = CheckoutSessionRepository(
-            stripeRepository = CheckoutStripeRepositoryFactory.create(),
             elementsSessionClientParams = CheckoutStripeRepositoryFactory.clientParams(),
             fraudDetectionDataRepository = FakeFraudDetectionDataRepository.create(),
             stripeNetworkClient = DefaultStripeNetworkClient(),

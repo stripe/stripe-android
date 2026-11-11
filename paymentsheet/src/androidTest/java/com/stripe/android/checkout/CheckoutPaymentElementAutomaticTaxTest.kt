@@ -902,7 +902,10 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
                 .put("total", total)
                 .put("tax_exclusive", total - INITIAL_TOTAL)
             json.remove("link_settings")
-            json.getJSONObject("total_summary").put("due", total)
+            json.getJSONObject("total_summary")
+                .put("subtotal", INITIAL_TOTAL)
+                .put("total", total)
+                .put("tax_exclusive", total - INITIAL_TOTAL)
             if (hasSavedPaymentMethod) {
                 json.getJSONObject("saved_payment_method_options").put("payment_method_remove", "enabled")
                 json.put(

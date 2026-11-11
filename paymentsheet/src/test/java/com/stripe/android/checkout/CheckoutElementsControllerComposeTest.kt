@@ -74,6 +74,7 @@ internal class CheckoutElementsControllerComposeTest {
                     .getJSONObject("one_time_price").getJSONArray("items").getJSONObject(0)
                     .getJSONObject("amount_details")
                     .put("total", 4099).put("subtotal", 4099)
+                json.getJSONObject("total_summary").put("total", 4099).put("subtotal", 4099)
             }
         }
 

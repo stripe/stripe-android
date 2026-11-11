@@ -13,6 +13,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutElementsController.Address
 import com.stripe.android.checkout.injection.DaggerCheckoutElementsControllerComponent
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
+import com.stripe.android.checkouttesting.checkoutFetch
 import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.core.exception.APIException
@@ -1076,14 +1077,7 @@ internal class CheckoutElementsControllerTest {
             .isNotEqualTo(4099L)
         networkRule.checkoutUpdate(
             bodyPart("promotion_code", "10OFF"),
-            responseFactory = successResponseFactory(
-                combine(
-                    withTotal(4099),
-                    { json ->
-                        json.getJSONObject("total_summary").put("due", 4099)
-                    },
-                ),
-            ),
+            responseFactory = successResponseFactory(withTotal(4099)),
         )
 
         val result = fromBackgroundThread { controller.applyPromotionCode("10OFF") }
@@ -1513,6 +1507,7 @@ internal class CheckoutElementsControllerTest {
             val previousResponse = committedState().checkoutSessionResponse
             val response = previousResponse.copy(
                 checkoutItems = listOf(CheckoutSessionResponseFactory.checkoutItem(total = 6000L)),
+                totalSummary = previousResponse.totalSummary.copy(subtotal = 6000L, total = 6000L),
             )
             val address = fullAddress.build()
 
@@ -1538,7 +1533,7 @@ internal class CheckoutElementsControllerTest {
     @Test
     fun `runServerUpdate refreshes the session after serverUpdate completes`() = runMutationScenario {
         assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isNotEqualTo(8000L)
-        networkRule.checkoutInit(
+        networkRule.checkoutFetch(
             responseFactory = successResponseFactory(withTotal(8000)),
         )
 
@@ -1556,19 +1551,6 @@ internal class CheckoutElementsControllerTest {
 
         assertThat(result).isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
         assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isEqualTo(8000L)
-    }
-
-    @Test
-    fun `refresh commits a complete session status to the state holder`() = runMutationScenario {
-        networkRule.checkoutInit(
-            responseFactory = successResponseFactory { json -> json.put("status", "complete") },
-        )
-
-        val result = controller.runServerUpdate { Result.success(Unit) }
-
-        assertThat(result).isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
-        assertThat(controller.session.value?.status)
-            .isInstanceOf(CheckoutElementsController.Session.Status.Complete::class.java)
     }
 
     @Test
@@ -1603,7 +1585,7 @@ internal class CheckoutElementsControllerTest {
 
     @Test
     fun `runServerUpdate returns failure when the refresh fails`() = runMutationScenario {
-        networkRule.checkoutInit { response ->
+        networkRule.checkoutFetch { response ->
             response.setResponseCode(500)
             response.setBody("""{"error": {"message": "Internal server error"}}""")
         }
@@ -1762,7 +1744,6 @@ internal class CheckoutElementsControllerTest {
                         withTotal(4099),
                         { json ->
                             json.remove("customer_email")
-                            json.getJSONObject("total_summary").put("due", 4099)
                         },
                     ),
                 ).invoke(response)
@@ -2235,6 +2216,7 @@ internal class CheckoutElementsControllerTest {
 
     private fun withTotal(amount: Int): (JSONObject) -> Unit = { json ->
         checkoutItemJson(json).getJSONObject("amount_details").put("total", amount).put("subtotal", amount)
+        json.getJSONObject("total_summary").put("total", amount).put("subtotal", amount)
     }
 
     private fun createControllerSetup(

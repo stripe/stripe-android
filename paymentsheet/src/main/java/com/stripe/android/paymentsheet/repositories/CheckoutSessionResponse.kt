@@ -28,7 +28,7 @@ internal data class CheckoutSessionResponse(
     val customer: Customer?,
     val savedPaymentMethodsOfferSave: SavedPaymentMethodsOfferSave?,
     val checkoutItems: List<CheckoutItem>,
-    val totalSummary: TotalSummary?,
+    val totalSummary: TotalSummary,
     val adaptivePricingInfo: AdaptivePricingInfo?,
     val taxMeta: TaxMeta?,
     val automaticTaxEnabled: Boolean,
@@ -44,13 +44,10 @@ internal data class CheckoutSessionResponse(
         get() = clientSecret.sessionId
 
     @Parcelize
-    data class IntentReference(val id: String, val clientSecret: String) : StripeModel
-
-    @Parcelize
     data class PaymentResponse(
         val status: String,
-        val paymentIntent: IntentReference?,
-        val setupIntent: IntentReference?,
+        val paymentIntent: PaymentIntent?,
+        val setupIntent: SetupIntent?,
         val error: StripeError?,
     ) : StripeModel
 
@@ -134,7 +131,13 @@ internal data class CheckoutSessionResponse(
     ) : StripeModel
 
     @Parcelize
-    data class TotalSummary(val totalTaxAmounts: List<TaxAmount>) : StripeModel
+    data class TotalSummary(
+        val subtotal: Long,
+        val total: Long,
+        val taxExclusive: Long,
+        val taxInclusive: Long,
+        val totalTaxAmounts: List<TaxAmount>,
+    ) : StripeModel
 
     @Parcelize
     data class TaxAmount(val amount: Long, val inclusive: Boolean, val taxRate: TaxRate) : StripeModel

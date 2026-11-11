@@ -43,6 +43,7 @@ import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.validateShippingCountry
 import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.paymentsheet.verticalmode.CurrencySelectorOptions
+import com.stripe.android.uicore.utils.mapAsStateFlow
 import dev.drewhamilton.poko.Poko
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -115,7 +116,9 @@ class CheckoutElementsController @Inject internal constructor(
     /**
      * Whether a mutation or confirmation is currently in progress or queued.
      */
-    val isUpdating: StateFlow<Boolean> = operationCoordinator.isUpdating
+    val isUpdating: StateFlow<Boolean> = operationCoordinator.status.mapAsStateFlow {
+        it != CheckoutOperationCoordinator.Status.Idle
+    }
 
     init {
         viewModelScope.launch {
@@ -353,10 +356,8 @@ class CheckoutElementsController @Inject internal constructor(
                         }.getOrThrow()
                     }
                     analyticsParams.measureDuration("refresh_duration") {
-                        checkoutSessionRepository.init(
+                        checkoutSessionRepository.fetch(
                             clientSecret = checkoutSessionResponse.clientSecret,
-                            adaptivePricingAllowed = configuration.currencySelectorElementConfiguration != null,
-                            analyticsParams = configuration.toAnalyticsMap(),
                         ).getOrThrow()
                     }
                 }

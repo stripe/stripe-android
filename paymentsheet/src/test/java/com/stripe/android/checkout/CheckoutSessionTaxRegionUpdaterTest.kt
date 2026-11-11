@@ -123,7 +123,6 @@ internal class CheckoutSessionTaxRegionUpdaterTest {
     ) = runTest {
         val analyticsReporter = FakeCheckoutAnalyticsReporter()
         val checkoutSessionRepository = CheckoutSessionRepository(
-            stripeRepository = CheckoutStripeRepositoryFactory.create(),
             elementsSessionClientParams = CheckoutStripeRepositoryFactory.clientParams(),
             fraudDetectionDataRepository = FakeFraudDetectionDataRepository.create(),
             stripeNetworkClient = DefaultStripeNetworkClient(),

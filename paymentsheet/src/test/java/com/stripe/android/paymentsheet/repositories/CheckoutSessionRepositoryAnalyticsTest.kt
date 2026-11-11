@@ -308,7 +308,6 @@ class CheckoutSessionRepositoryAnalyticsTest {
 
     private fun runScenario(block: suspend Scenario.() -> Unit) = runTest {
         val repository = CheckoutSessionRepository(
-            stripeRepository = CheckoutStripeRepositoryFactory.create(),
             elementsSessionClientParams = CheckoutStripeRepositoryFactory.clientParams(),
             fraudDetectionDataRepository = FakeFraudDetectionDataRepository.create(),
             stripeNetworkClient = DefaultStripeNetworkClient(),
