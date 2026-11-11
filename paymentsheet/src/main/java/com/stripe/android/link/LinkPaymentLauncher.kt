@@ -5,7 +5,9 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistry
 import com.stripe.android.link.LinkActivityResult.PaymentMethodObtained
 import com.stripe.android.link.account.LinkStore
-import com.stripe.android.link.injection.LinkAnalyticsComponent
+import com.stripe.android.link.analytics.DefaultLinkAnalyticsHelper
+import com.stripe.android.link.analytics.LinkAnalyticsHelper
+import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import javax.inject.Inject
@@ -16,12 +18,14 @@ import javax.inject.Singleton
  */
 @Singleton
 internal class LinkPaymentLauncher @Inject internal constructor(
-    linkAnalyticsComponentFactory: LinkAnalyticsComponent.Factory,
+    private val linkConfigurationCoordinator: LinkConfigurationCoordinator,
+    linkEventsReporter: LinkEventsReporter,
     @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
     private val linkActivityContract: LinkActivityContract,
     private val linkStore: LinkStore
 ) : LinkPaymentPresenter {
-    private val analyticsHelper = linkAnalyticsComponentFactory.create().linkAnalyticsHelper
+    // A restored result can arrive during registration before a configuration is presented.
+    private var analyticsHelper: LinkAnalyticsHelper = DefaultLinkAnalyticsHelper(linkEventsReporter)
 
     private var linkActivityResultLauncher:
         ActivityResultLauncher<LinkActivityContract.Args>? = null
@@ -90,6 +94,7 @@ internal class LinkPaymentLauncher @Inject internal constructor(
             launchMode = launchMode,
             statusBarColor = statusBarColor,
         )
+        analyticsHelper = linkConfigurationCoordinator.getComponent(configuration).linkAnalyticsHelper
         linkActivityResultLauncher?.launch(args)
         analyticsHelper.onLinkLaunched()
     }

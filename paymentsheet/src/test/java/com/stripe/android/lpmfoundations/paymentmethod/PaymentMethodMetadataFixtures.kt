@@ -33,6 +33,16 @@ internal object PaymentMethodMetadataFixtures {
         stripeSdkVersion = StripeSdkVersion.VERSION_NAME,
     )
 
+    internal val CHECKOUT_SESSION_CLIENT_ATTRIBUTION_METADATA = ClientAttributionMetadata.CheckoutSession(
+        elementsSessionConfigId = "e961790f-43ed-4fcc-a534-74eeca28d042",
+        paymentMethodSelectionFlow = PaymentMethodSelectionFlow.Automatic,
+        checkoutSessionId = "cs_test_123",
+        checkoutConfigId = null,
+        configuredElements = listOf("mobile-payment-element"),
+        isExpressCheckoutElement = false,
+        stripeSdkVersion = StripeSdkVersion.VERSION_NAME,
+    )
+
     internal val CUSTOMER_SESSIONS_CUSTOMER_METADATA = CustomerMetadata.CustomerSession(
         id = "cus_123",
         ephemeralKeySecret = "ek_123",

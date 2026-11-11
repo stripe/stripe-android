@@ -1,17 +1,22 @@
 package com.stripe.android.link.verification
 
 import androidx.lifecycle.SavedStateHandle
+import app.cash.turbine.Turbine
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.LinkAccountUpdate
+import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentLauncher
+import com.stripe.android.link.RealLinkConfigurationCoordinator
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.analytics.FakeLinkEventsReporter
 import com.stripe.android.link.gate.FakeLinkGate
+import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.verification.VerificationViewState
@@ -19,6 +24,7 @@ import com.stripe.android.link.verification.VerificationState.Loading
 import com.stripe.android.link.verification.VerificationState.Render2FA
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PassiveCaptchaParams
@@ -452,6 +458,59 @@ class DefaultLinkInlineInteractorTest {
     }
 
     @Test
+    fun `resendCode reports through the reporter for the 2FA configuration`() = runTest(testDispatcher) {
+        linkAccountManager.startVerificationResult = Result.success(createLinkAccount())
+        val linkEventsReporter = ResendLinkEventsReporter()
+        val componentConfigurations = Turbine<LinkConfiguration>()
+        val interactor = createInteractor(
+            linkConfigurationCoordinator = RealLinkConfigurationCoordinator(
+                linkComponentFactory = object : LinkComponent.Factory {
+                    override fun create(configuration: LinkConfiguration): LinkComponent {
+                        componentConfigurations.add(configuration)
+                        return FakeLinkComponent(
+                            configuration = configuration,
+                            linkAccountManager = linkAccountManager,
+                            linkEventsReporter = linkEventsReporter,
+                        )
+                    }
+                },
+            ),
+        )
+        val checkoutLinkConfiguration = TestFactory.LINK_CONFIGURATION.copy(
+            clientAttributionMetadata = PaymentMethodMetadataFixtures.CHECKOUT_SESSION_CLIENT_ATTRIBUTION_METADATA,
+        )
+
+        savedStateHandle[LINK_EMBEDDED_STATE_KEY] = LinkInlineState(
+            verificationState = Render2FA(
+                linkConfiguration = checkoutLinkConfiguration,
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+                viewState = VerificationViewState(
+                    authFlow = null,
+                    isProcessing = false,
+                    errorMessage = null,
+                    email = "test@example.com",
+                    redactedPhoneNumber = "****1234",
+                    requestFocus = false,
+                    isDialog = true,
+                    allowLogout = false,
+                    isSendingNewCode = false,
+                    defaultPayment = null,
+                    didSendNewCode = false,
+                    linkBrand = LinkBrand.Link,
+                ),
+            ),
+        )
+
+        interactor.resendCode()
+
+        assertThat(componentConfigurations.awaitItem()).isEqualTo(checkoutLinkConfiguration)
+        assertThat(linkEventsReporter.resendCalls.awaitItem()).isEqualTo("SMS")
+        linkAccountManager.awaitStartVerificationCall()
+        componentConfigurations.ensureAllEventsConsumed()
+        linkEventsReporter.resendCalls.ensureAllEventsConsumed()
+    }
+
+    @Test
     fun `resendCode should handle verification failure`() = runTest(testDispatcher) {
         // Setup
         val mockAccount = createLinkAccount(AccountStatus.NeedsVerification())
@@ -632,14 +691,23 @@ class DefaultLinkInlineInteractorTest {
         assertThat(otpController.fieldValue.value).isEmpty()
     }
 
-    private fun createInteractor() = DefaultLinkInlineInteractor(
+    private fun createInteractor(
+        linkConfigurationCoordinator: LinkConfigurationCoordinator = this.linkConfigurationCoordinator,
+    ) = DefaultLinkInlineInteractor(
         coroutineScope = TestScope(testDispatcher),
         linkConfigurationCoordinator = linkConfigurationCoordinator,
         linkLauncher = linkLauncher,
         savedStateHandle = savedStateHandle,
         logger = FakeLogger(),
-        linkEventsReporter = FakeLinkEventsReporter()
     )
+
+    private class ResendLinkEventsReporter : FakeLinkEventsReporter() {
+        val resendCalls = Turbine<String>()
+
+        override fun on2FAResendCode(verificationType: String) {
+            resendCalls.add(verificationType)
+        }
+    }
 
     private fun createPaymentMethodMetadata(
         linkState: LinkState? = LinkState(

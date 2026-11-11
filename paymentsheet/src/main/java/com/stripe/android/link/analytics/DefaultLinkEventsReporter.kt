@@ -3,25 +3,24 @@ package com.stripe.android.link.analytics
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.exception.safeAnalyticsMessage
-import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
 
-internal class DefaultLinkEventsReporter @Inject constructor(
+internal class DefaultLinkEventsReporter(
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
     private val errorReporter: ErrorReporter,
-    @IOContext private val workContext: CoroutineContext,
+    private val workContext: CoroutineContext,
     private val logger: Logger,
     private val durationProvider: DurationProvider,
+    private val checkoutSessionId: String?,
 ) : LinkEventsReporter {
     override fun onInvalidSessionState(state: LinkEventsReporter.SessionState) {
         val params = mapOf(FIELD_SESSION_STATE to state.analyticsValue)
@@ -150,12 +149,14 @@ internal class DefaultLinkEventsReporter @Inject constructor(
         event: LinkEvent,
         additionalParams: Map<String, Any>? = null
     ) {
-        logger.debug("Link event: ${event.eventName} $additionalParams")
+        val params = (additionalParams ?: emptyMap()) +
+            checkoutSessionId?.let { mapOf(FIELD_CHECKOUT_SESSION_ID to it) }.orEmpty()
+        logger.debug("Link event: ${event.eventName} $params")
         CoroutineScope(workContext).launch {
             analyticsRequestExecutor.executeAsync(
                 paymentAnalyticsRequestFactory.createRequest(
                     event,
-                    additionalParams ?: emptyMap()
+                    params
                 )
             )
         }
@@ -175,5 +176,6 @@ internal class DefaultLinkEventsReporter @Inject constructor(
         private const val VALUE_VERIFIED = "verified"
 
         private const val FIELD_ERROR_MESSAGE = "error_message"
+        private const val FIELD_CHECKOUT_SESSION_ID = "checkout_session_id"
     }
 }

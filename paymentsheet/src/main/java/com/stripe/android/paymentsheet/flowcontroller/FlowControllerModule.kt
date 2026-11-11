@@ -6,12 +6,13 @@ import android.content.res.Resources
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.link.LinkActivityContract
+import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.LinkPaymentMethodSelectionLauncher
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkStore
+import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.gate.LinkGate
-import com.stripe.android.link.injection.LinkAnalyticsComponent
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
@@ -55,12 +56,14 @@ internal object FlowControllerModule {
     @Singleton
     @Named(FLOW_CONTROLLER_LINK_LAUNCHER)
     fun provideFlowControllerLinkLauncher(
-        linkAnalyticsComponentFactory: LinkAnalyticsComponent.Factory,
+        linkConfigurationCoordinator: LinkConfigurationCoordinator,
+        linkEventsReporter: LinkEventsReporter,
         linkActivityContract: LinkActivityContract,
         @PaymentElementCallbackIdentifier identifier: String,
         linkStore: LinkStore,
     ) = LinkPaymentLauncher(
-        linkAnalyticsComponentFactory,
+        linkConfigurationCoordinator,
+        linkEventsReporter,
         identifier,
         linkActivityContract,
         linkStore,
@@ -70,12 +73,14 @@ internal object FlowControllerModule {
     @Singleton
     @Named(WALLETS_BUTTON_LINK_LAUNCHER)
     fun provideWalletsButtonLinkLauncher(
-        linkAnalyticsComponentFactory: LinkAnalyticsComponent.Factory,
+        linkConfigurationCoordinator: LinkConfigurationCoordinator,
+        linkEventsReporter: LinkEventsReporter,
         linkActivityContract: LinkActivityContract,
         @PaymentElementCallbackIdentifier identifier: String,
         linkStore: LinkStore,
     ) = LinkPaymentLauncher(
-        linkAnalyticsComponentFactory,
+        linkConfigurationCoordinator,
+        linkEventsReporter,
         identifier,
         linkActivityContract,
         linkStore,

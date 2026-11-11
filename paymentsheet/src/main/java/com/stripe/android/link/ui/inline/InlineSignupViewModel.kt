@@ -9,6 +9,7 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.LinkEventsReporter
+import com.stripe.android.link.injection.LinkAccountAnalytics
 import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.link.ui.inline.LinkSignupField.Email
 import com.stripe.android.link.ui.inline.LinkSignupField.Name
@@ -53,7 +54,7 @@ internal class InlineSignupViewModel(
         @Assisted previousLinkSignupCheckboxSelection: Boolean?,
         config: LinkConfiguration,
         linkAccountManager: LinkAccountManager,
-        linkEventsReporter: LinkEventsReporter,
+        @LinkAccountAnalytics linkEventsReporter: LinkEventsReporter,
         logger: Logger,
     ) : this(
         initialUserInput = initialUserInput,

@@ -52,7 +52,33 @@ class DefaultLinkEventsReporterTest {
             assertThat(loggedParams.get("analytics_value")).isEqualTo("apiError")
         }
 
+    @Test
+    fun onPopupShow_withoutCheckoutSession_omitsCheckoutSessionId() =
+        runScenario(checkoutSessionId = null) { linkEventsReporter, fakeAnalyticsRequestExecutor, testScheduler ->
+            linkEventsReporter.onPopupShow()
+
+            testScheduler.advanceUntilIdle()
+
+            val loggedParams = fakeAnalyticsRequestExecutor.awaitEvent("link.popup.show")
+            assertThat(loggedParams).doesNotContainKey("checkout_session_id")
+        }
+
+    @Test
+    fun on2FAResendCode_withCheckoutSession_includesCheckoutSessionIdAndEventParams() =
+        runScenario(
+            checkoutSessionId = CHECKOUT_SESSION_ID,
+        ) { linkEventsReporter, fakeAnalyticsRequestExecutor, testScheduler ->
+            linkEventsReporter.on2FAResendCode(verificationType = "EMAIL")
+
+            testScheduler.advanceUntilIdle()
+
+            val loggedParams = fakeAnalyticsRequestExecutor.awaitEvent("link.2fa.resend_code")
+            assertThat(loggedParams["checkout_session_id"]).isEqualTo(CHECKOUT_SESSION_ID)
+            assertThat(loggedParams["verification_type"]).isEqualTo("EMAIL")
+        }
+
     private fun runScenario(
+        checkoutSessionId: String? = null,
         testBlock: suspend (LinkEventsReporter, FakeAnalyticsRequestExecutor, TestCoroutineScheduler) -> Unit
     ) {
         val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
@@ -66,7 +92,8 @@ class DefaultLinkEventsReporterTest {
             errorReporter = FakeErrorReporter(),
             workContext = testScope.coroutineContext,
             logger = Logger.noop(),
-            durationProvider = FakeDurationProvider()
+            durationProvider = FakeDurationProvider(),
+            checkoutSessionId = checkoutSessionId,
         )
 
         testScope.runTest {
@@ -74,6 +101,10 @@ class DefaultLinkEventsReporterTest {
         }
 
         analyticsRequestExecutor.validate()
+    }
+
+    private companion object {
+        const val CHECKOUT_SESSION_ID = "cs_test_123"
     }
 
     class FakeDurationProvider : DurationProvider {

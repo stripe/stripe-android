@@ -1,10 +1,11 @@
 package com.stripe.android.link.analytics
 
 import com.stripe.android.link.LinkActivityResult
+import com.stripe.android.link.injection.LinkAccountAnalytics
 import javax.inject.Inject
 
 internal class DefaultLinkAnalyticsHelper @Inject internal constructor(
-    private val linkEventsReporter: LinkEventsReporter,
+    @LinkAccountAnalytics private val linkEventsReporter: LinkEventsReporter,
 ) : LinkAnalyticsHelper {
     override fun onLinkLaunched() {
         linkEventsReporter.onPopupShow()

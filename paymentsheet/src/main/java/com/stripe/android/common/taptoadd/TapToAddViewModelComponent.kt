@@ -40,7 +40,6 @@ import com.stripe.android.link.RealLinkConfigurationCoordinator
 import com.stripe.android.link.account.DefaultLinkStore
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkStore
-import com.stripe.android.link.injection.LinkAnalyticsComponent
 import com.stripe.android.link.injection.LinkCommonModule
 import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -275,7 +274,6 @@ internal interface TapToAddViewModelModule {
 
 @Module(
     subcomponents = [
-        LinkAnalyticsComponent::class,
         LinkComponent::class,
     ],
     includes = [

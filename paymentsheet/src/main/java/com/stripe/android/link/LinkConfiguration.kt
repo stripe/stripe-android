@@ -69,6 +69,9 @@ internal data class LinkConfiguration(
     val enableMfaAuthFlow: Boolean
         get() = flags["link_mobile_enable_mfa_auth_flow"] == true
 
+    val checkoutSessionId: String?
+        get() = (clientAttributionMetadata as? ClientAttributionMetadata.CheckoutSession)?.checkoutSessionId
+
     @Parcelize
     data class CustomerInfo(
         val name: String?,

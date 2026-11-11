@@ -3,12 +3,16 @@ package com.stripe.android.link.injection
 import com.stripe.android.Stripe
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
+import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.link.analytics.DefaultLinkEventsReporter
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.repositories.LinkApiRepository
 import com.stripe.android.link.repositories.LinkRepository
+import com.stripe.android.networking.PaymentAnalyticsRequestFactory
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.repository.ConsumersApiService
 import com.stripe.android.repository.ConsumersApiServiceImpl
 import dagger.Binds
@@ -23,11 +27,26 @@ internal interface LinkCommonModule {
     @Singleton
     fun bindLinkRepository(linkApiRepository: LinkApiRepository): LinkRepository
 
-    @Binds
-    @Singleton
-    fun bindLinkEventsReporter(linkEventsReporter: DefaultLinkEventsReporter): LinkEventsReporter
-
     companion object {
+        @Provides
+        @Singleton
+        fun provideLinkEventsReporter(
+            analyticsRequestExecutor: AnalyticsRequestExecutor,
+            paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
+            errorReporter: ErrorReporter,
+            @IOContext workContext: CoroutineContext,
+            logger: Logger,
+            durationProvider: DurationProvider,
+        ): LinkEventsReporter = DefaultLinkEventsReporter(
+            analyticsRequestExecutor = analyticsRequestExecutor,
+            paymentAnalyticsRequestFactory = paymentAnalyticsRequestFactory,
+            errorReporter = errorReporter,
+            workContext = workContext,
+            logger = logger,
+            durationProvider = durationProvider,
+            checkoutSessionId = null,
+        )
+
         @Provides
         @Singleton
         fun provideConsumersApiService(

@@ -38,7 +38,6 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
     @Named(WALLETS_BUTTON_LINK_LAUNCHER) private val linkLauncher: LinkPaymentLauncher,
     private val logger: Logger,
     private val savedStateHandle: SavedStateHandle,
-    private val linkEventsReporter: LinkEventsReporter
 ) : LinkInlineInteractor {
 
     override val otpElement = OTPElementFactory.create()
@@ -196,6 +195,10 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
         return linkConfigurationCoordinator.getComponent(linkConfiguration).linkAccountManager
     }
 
+    private fun Render2FA.linkEventsReporter(): LinkEventsReporter {
+        return linkConfigurationCoordinator.getComponent(linkConfiguration).linkEventsReporter
+    }
+
     fun onLinkResult() {
         // Regardless of the Link result, the user completed verification,
         // so we can reset the verification state to RenderButton.
@@ -203,7 +206,7 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
     }
 
     override fun resendCode() {
-        linkEventsReporter.on2FAResendCode(verificationType = "SMS")
+        (state.value.verificationState as? Render2FA)?.linkEventsReporter()?.on2FAResendCode(verificationType = "SMS")
         otpElement.controller.reset()
         update2FAState { viewState ->
             viewState.copy(

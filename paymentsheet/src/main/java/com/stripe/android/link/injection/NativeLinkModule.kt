@@ -11,6 +11,7 @@ import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.core.utils.DefaultDurationProvider
@@ -19,6 +20,7 @@ import com.stripe.android.core.utils.RealUserFacingLogger
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.link.LinkAccountUpdate
+import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkDismissalCoordinator
 import com.stripe.android.link.RealLinkDismissalCoordinator
 import com.stripe.android.link.account.DefaultLinkAccountManager
@@ -89,10 +91,6 @@ internal interface NativeLinkModule {
 
     @Binds
     @NativeLinkScope
-    fun bindLinkEventsReporter(linkEventsReporter: DefaultLinkEventsReporter): LinkEventsReporter
-
-    @Binds
-    @NativeLinkScope
     fun bindLinkAccountManager(linkAccountManager: DefaultLinkAccountManager): LinkAccountManager
 
     @Binds
@@ -160,6 +158,26 @@ internal interface NativeLinkModule {
         ): LinkAccountHolder = LinkAccountHolder(savedStateHandle).apply {
             set(linkAccountInfo)
         }
+
+        @Provides
+        @NativeLinkScope
+        fun provideLinkEventsReporter(
+            configuration: LinkConfiguration,
+            analyticsRequestExecutor: AnalyticsRequestExecutor,
+            paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
+            errorReporter: ErrorReporter,
+            @IOContext workContext: CoroutineContext,
+            logger: Logger,
+            durationProvider: DurationProvider,
+        ): LinkEventsReporter = DefaultLinkEventsReporter(
+            analyticsRequestExecutor = analyticsRequestExecutor,
+            paymentAnalyticsRequestFactory = paymentAnalyticsRequestFactory,
+            errorReporter = errorReporter,
+            workContext = workContext,
+            logger = logger,
+            durationProvider = durationProvider,
+            checkoutSessionId = configuration.checkoutSessionId,
+        )
 
         @Provides
         @NativeLinkScope

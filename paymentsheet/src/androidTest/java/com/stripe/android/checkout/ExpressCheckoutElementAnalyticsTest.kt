@@ -3,6 +3,7 @@ package com.stripe.android.checkout
 import androidx.test.espresso.intent.rule.IntentsRule
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.checkouttesting.CheckoutInitResponseFactory
+import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutConfirm
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.core.networking.AnalyticsRequest
@@ -79,8 +80,8 @@ internal class ExpressCheckoutElementAnalyticsTest {
 
             networkRule.checkoutInitWithAnalytics()
 
-            validateAnalyticsRequest(eventName = "link.popup.show")
-            validateAnalyticsRequest(eventName = "link.popup.success")
+            validateLinkAnalyticsRequest(eventName = "link.popup.show")
+            validateLinkAnalyticsRequest(eventName = "link.popup.success")
             validateConfirmationStarted(
                 selectedLpm = "link",
                 analyticsPayloadField("link_context", "wallet"),
@@ -148,8 +149,8 @@ internal class ExpressCheckoutElementAnalyticsTest {
             enqueueFailedNativeLinkPayment(IllegalStateException("Link failed"))
 
             networkRule.checkoutInitWithAnalytics()
-            validateAnalyticsRequest(eventName = "link.popup.show")
-            validateAnalyticsRequest(
+            validateLinkAnalyticsRequest(eventName = "link.popup.show")
+            validateLinkAnalyticsRequest(
                 eventName = "link.popup.error",
                 analyticsPayloadField("error_message", "unknown"),
             )
@@ -537,7 +538,18 @@ internal class ExpressCheckoutElementAnalyticsTest {
     )
 
     private fun validateLinkAccountLookupAnalyticsRequest() {
-        validateAnalyticsRequest(eventName = "link.account_lookup.complete")
+        validateLinkAnalyticsRequest(eventName = "link.account_lookup.complete")
+    }
+
+    private fun validateLinkAnalyticsRequest(
+        eventName: String,
+        vararg requestMatchers: RequestMatcher,
+    ) {
+        validateAnalyticsRequest(
+            eventName,
+            analyticsPayloadField("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID),
+            *requestMatchers,
+        )
     }
 
     private fun validateAnalyticsRequest(

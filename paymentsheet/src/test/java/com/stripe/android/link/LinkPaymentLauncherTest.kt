@@ -3,17 +3,22 @@ package com.stripe.android.link
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistry
 import androidx.activity.result.contract.ActivityResultContract
+import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.analytics.FakeLinkAnalyticsHelper
+import com.stripe.android.link.analytics.FakeLinkEventsReporter
 import com.stripe.android.link.analytics.LinkAnalyticsHelper
-import com.stripe.android.link.injection.LinkAnalyticsComponent
+import com.stripe.android.link.analytics.LinkEventsReporter
+import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.confirmation.asCallbackFor
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.utils.FakeActivityResultRegistry
+import com.stripe.android.utils.FakeLinkComponent
+import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakeLinkStore
 import com.stripe.android.utils.RecordingLinkStore
 import kotlinx.coroutines.test.runTest
@@ -256,6 +261,60 @@ internal class LinkPaymentLauncherTest {
         )
     }
 
+    @Test
+    fun `result and launch reach the presented configuration's helper after the coordinator moves on`() = runTest {
+        DummyActivityResultCaller.test {
+            val helperA = TrackingLinkAnalyticsHelper()
+            val helperB = TrackingLinkAnalyticsHelper()
+            var component: LinkComponent = FakeLinkComponent(linkAnalyticsHelper = helperA)
+            val coordinator = object : LinkConfigurationCoordinator by FakeLinkConfigurationCoordinator() {
+                override fun getComponent(configuration: LinkConfiguration): LinkComponent = component
+            }
+            val linkPaymentLauncher = createLinkPaymentLauncher(linkConfigurationCoordinator = coordinator)
+            var callbackParam: LinkActivityResult? = null
+            linkPaymentLauncher.register(activityResultCaller) { callbackParam = it }
+
+            linkPaymentLauncher.present(
+                configuration = TestFactory.LINK_CONFIGURATION,
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+                linkAccountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
+                linkExpressMode = LinkExpressMode.ENABLED,
+                launchMode = LinkLaunchMode.Full(showSecondaryButton = true),
+                statusBarColor = null,
+            )
+            component = FakeLinkComponent(linkAnalyticsHelper = helperB)
+
+            val result = LinkActivityResult.Canceled(linkAccountUpdate = LinkAccountUpdate.None)
+            awaitRegisterCall().callback.asCallbackFor<LinkActivityResult>().onActivityResult(result)
+
+            assertThat(callbackParam).isEqualTo(result)
+            assertThat(helperA.launchCount).isEqualTo(1)
+            assertThat(helperA.results).containsExactly(result)
+            assertThat(helperB.launchCount).isEqualTo(0)
+            assertThat(helperB.results).isEmpty()
+
+            awaitLaunchCall()
+            awaitNextRegisteredLauncher()
+        }
+    }
+
+    @Test
+    fun `result before any presentation goes to the fallback helper`() = runTest {
+        DummyActivityResultCaller.test {
+            val linkEventsReporter = RecordingLinkEventsReporter()
+            val linkPaymentLauncher = createLinkPaymentLauncher(linkEventsReporter = linkEventsReporter)
+            linkPaymentLauncher.register(activityResultCaller) {}
+
+            val result = LinkActivityResult.Canceled(linkAccountUpdate = LinkAccountUpdate.None)
+            awaitRegisterCall().callback.asCallbackFor<LinkActivityResult>().onActivityResult(result)
+
+            linkEventsReporter.popupCancels.awaitItem()
+            linkEventsReporter.popupCancels.ensureAllEventsConsumed()
+
+            awaitNextRegisteredLauncher()
+        }
+    }
+
     private fun testActivityResultCallbackWithActivityResultRegistry(
         linkActivityResult: LinkActivityResult,
         expectedMarkAsUsedCalls: Int,
@@ -368,14 +427,15 @@ internal class LinkPaymentLauncherTest {
     private fun createLinkPaymentLauncher(
         linkActivityContract: LinkActivityContract = mock(),
         linkAnalyticsHelper: LinkAnalyticsHelper = TrackingLinkAnalyticsHelper(),
+        linkConfigurationCoordinator: LinkConfigurationCoordinator = FakeLinkConfigurationCoordinator(
+            component = FakeLinkComponent(linkAnalyticsHelper = linkAnalyticsHelper),
+        ),
+        linkEventsReporter: LinkEventsReporter = FakeLinkEventsReporter(),
         linkStore: LinkStore = FakeLinkStore()
     ): LinkPaymentLauncher {
         return LinkPaymentLauncher(
-            linkAnalyticsComponentFactory = object : LinkAnalyticsComponent.Factory {
-                override fun create() = object : LinkAnalyticsComponent {
-                    override val linkAnalyticsHelper = linkAnalyticsHelper
-                }
-            },
+            linkConfigurationCoordinator = linkConfigurationCoordinator,
+            linkEventsReporter = linkEventsReporter,
             linkActivityContract = linkActivityContract,
             linkStore = linkStore,
             paymentElementCallbackIdentifier = "PaymentElementCallbackIdentifier"
@@ -393,5 +453,13 @@ private class TrackingLinkAnalyticsHelper : FakeLinkAnalyticsHelper() {
 
     override fun onLinkResult(linkActivityResult: LinkActivityResult) {
         results.add(linkActivityResult)
+    }
+}
+
+private class RecordingLinkEventsReporter : FakeLinkEventsReporter() {
+    val popupCancels = Turbine<Unit>()
+
+    override fun onPopupCancel() {
+        popupCancels.add(Unit)
     }
 }
