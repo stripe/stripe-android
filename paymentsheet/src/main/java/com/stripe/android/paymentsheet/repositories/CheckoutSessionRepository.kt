@@ -16,7 +16,6 @@ import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.networking.ConfirmationParamsUtils
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
-import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.model.CheckoutSessionClientSecret
 import java.util.TimeZone
@@ -26,7 +25,6 @@ import javax.inject.Provider
 @OptIn(CheckoutSessionPreview::class)
 @Suppress("TooManyFunctions")
 internal class CheckoutSessionRepository @Inject constructor(
-    private val stripeRepository: StripeRepository,
     private val elementsSessionClientParams: ElementsSessionClientParams,
     private val stripeNetworkClient: StripeNetworkClient,
     private val fraudDetectionDataRepository: FraudDetectionDataRepository,
@@ -105,7 +103,7 @@ internal class CheckoutSessionRepository @Inject constructor(
         fraudDetectionDataRepository.refresh()
 
         val requestParams = ConfirmationParamsUtils.prepareConfirmationParams(
-            params.toParamMap(),
+            params.toParamMap() + CONFIRM_EXPAND_PARAMS,
             params.paymentMethodData,
             sourceParams = null,
             fraudDetectionData = fraudDetectionDataRepository.getCached(),
@@ -125,27 +123,15 @@ internal class CheckoutSessionRepository @Inject constructor(
                     message = response.paymentResponse.error?.message ?: "Checkout requires a payment method.",
                 )
             }
-            val paymentReference = response.paymentResponse?.paymentIntent
-            val setupReference = response.paymentResponse?.setupIntent
-            val intent = when {
-                paymentReference != null -> stripeRepository.retrievePaymentIntent(
-                    clientSecret = paymentReference.clientSecret,
-                    options = apiRequestOptionsProvider.get(),
-                    expandFields = listOf("payment_method"),
-                ).getOrThrow()
-                setupReference != null -> stripeRepository.retrieveSetupIntent(
-                    clientSecret = setupReference.clientSecret,
-                    options = apiRequestOptionsProvider.get(),
-                    expandFields = listOf("payment_method"),
-                ).getOrThrow()
-                else -> error(
+            val intent = response.paymentResponse?.paymentIntent
+                ?: response.paymentResponse?.setupIntent
+                ?: error(
                     if (response.paymentResponse?.status == "requires_action") {
                         "CheckoutClient requires an action without a supported Intent."
                     } else {
                         "No PaymentIntent or SetupIntent in checkout session confirm response"
                     }
                 )
-            }
             response.withIntent(intent)
         }
     }
@@ -299,6 +285,14 @@ internal class CheckoutSessionRepository @Inject constructor(
     private companion object {
         private const val UNSUPPORTED_UPDATE_ERROR =
             "Checkout session update requires at least card expiry or billing details."
+
+        // Next-action handling requires the returned Intent's PaymentMethod to be expanded.
+        private val CONFIRM_EXPAND_PARAMS = mapOf(
+            "expand" to listOf(
+                "payment_response.payment_intent.payment_method",
+                "payment_response.setup_intent.payment_method",
+            ),
+        )
 
         private fun initUrl(sessionId: String): String =
             "${ApiRequest.API_HOST}/v1/checkout_client/$sessionId/init"

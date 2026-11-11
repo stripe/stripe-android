@@ -44,13 +44,10 @@ internal data class CheckoutSessionResponse(
         get() = clientSecret.sessionId
 
     @Parcelize
-    data class IntentReference(val id: String, val clientSecret: String) : StripeModel
-
-    @Parcelize
     data class PaymentResponse(
         val status: String,
-        val paymentIntent: IntentReference?,
-        val setupIntent: IntentReference?,
+        val paymentIntent: PaymentIntent?,
+        val setupIntent: SetupIntent?,
         val error: StripeError?,
     ) : StripeModel
 

@@ -399,7 +399,6 @@ class AddressElementViewModelModuleTest {
     private fun createTaxRegionUpdater(): CheckoutSessionTaxRegionUpdater {
         return CheckoutSessionTaxRegionUpdater(
             CheckoutSessionRepository(
-                stripeRepository = CheckoutStripeRepositoryFactory.create(),
                 elementsSessionClientParams = CheckoutStripeRepositoryFactory.clientParams(),
                 fraudDetectionDataRepository = FakeFraudDetectionDataRepository.create(),
                 stripeNetworkClient = DefaultStripeNetworkClient(),

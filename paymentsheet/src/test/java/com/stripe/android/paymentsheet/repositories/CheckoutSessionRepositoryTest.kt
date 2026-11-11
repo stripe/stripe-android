@@ -46,7 +46,6 @@ class CheckoutSessionRepositoryTest {
     )
 
     private val repository = CheckoutSessionRepository(
-        stripeRepository = CheckoutStripeRepositoryFactory.create(),
         elementsSessionClientParams = CheckoutStripeRepositoryFactory.clientParams(),
         fraudDetectionDataRepository = FakeFraudDetectionDataRepository.create(),
         stripeNetworkClient = DefaultStripeNetworkClient(),
