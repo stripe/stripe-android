@@ -9,6 +9,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextReplacement
+import com.stripe.android.testing.waitUntilWithIdle
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class BillingDetailsPage(
@@ -25,6 +26,30 @@ class BillingDetailsPage(
         line1.performScrollTo().performTextReplacement(value)
     }
 
+    fun enterAddressManually(line1: String) {
+        composeTestRule.waitUntilWithIdle(conditionDescription = "inline address field to be shown") {
+            composeTestRule.onAllNodes(hasText("Address"))
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                .isNotEmpty()
+        }
+        composeTestRule.onNode(hasText("Address")).performScrollTo().performTextReplacement(line1)
+        composeTestRule.waitForIdle()
+        composeTestRule.waitUntil(
+            conditionDescription = "'Enter address manually' to be shown",
+            timeoutMillis = 15_000,
+        ) {
+            composeTestRule.onAllNodes(hasText("Enter address manually"))
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                .isNotEmpty()
+        }
+        composeTestRule.onNodeWithText("Enter address manually").performClick()
+        composeTestRule.waitUntilWithIdle(conditionDescription = "expanded billing address form") {
+            composeTestRule.onAllNodes(hasText("ZIP Code"))
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                .isNotEmpty()
+        }
+    }
+
     fun fillOutUnitedStatesAddress(
         line1: String,
         city: String,
@@ -33,9 +58,17 @@ class BillingDetailsPage(
     ) {
         country.assertTextContains("United States")
         this.line1.performTextReplacement(line1)
+        fillOutUnitedStatesCityStateAndZip(city, stateName, zipCode)
+    }
+
+    fun fillOutUnitedStatesCityStateAndZip(
+        city: String,
+        stateName: String,
+        zipCode: String,
+    ) {
         this.city.performTextReplacement(city)
         state.performScrollTo().performClick()
-        composeTestRule.onNodeWithText(stateName).performClick()
+        composeTestRule.onNodeWithText(stateName).performScrollTo().performClick()
         this.zipCode.performTextReplacement(zipCode)
     }
 

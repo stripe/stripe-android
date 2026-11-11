@@ -20,15 +20,11 @@ import kotlinx.serialization.json.JsonObject
 import kotlin.time.Duration.Companion.seconds
 
 internal suspend fun runCheckoutIntegrationTest(
-    merchant: String,
+    backend: CheckoutPlaygroundBackend,
     sessionParams: JsonObject,
     configuration: CheckoutElementsController.Configuration,
-    setup: suspend () -> Unit,
+    setup: suspend (CheckoutElementsController) -> Unit,
 ): CheckoutElementsController.Result {
-    val backend = CheckoutPlaygroundBackend(
-        baseUrl = "https://stp-mobile-playground-backend-v7.stripedemos.com/",
-        merchant = merchant,
-    )
     val publishableKey = backend.fetchPublishableKey().getOrThrow()
     val clientSecret = backend.createCheckoutSession(sessionParams).getOrThrow()
     val checkoutResult = CompletableDeferred<CheckoutElementsController.Result>()
@@ -60,7 +56,7 @@ internal suspend fun runCheckoutIntegrationTest(
             }
             scenario.moveToState(Lifecycle.State.RESUMED)
 
-            setup()
+            setup(controller)
 
             presenter.confirm()
             withTimeout(OPERATION_TIMEOUT) { checkoutResult.await() }

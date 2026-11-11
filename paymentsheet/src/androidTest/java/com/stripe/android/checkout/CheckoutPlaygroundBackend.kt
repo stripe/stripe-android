@@ -14,6 +14,8 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import org.json.JSONObject
 
+internal const val CHECKOUT_PLAYGROUND_BACKEND_URL = "https://stp-mobile-playground-backend-v7.stripedemos.com/"
+
 internal class CheckoutPlaygroundBackend(
     baseUrl: String,
     private val merchant: String,
@@ -36,6 +38,17 @@ internal class CheckoutPlaygroundBackend(
         return execute(
             request = Fuel.post("$baseUrl/create_checkout_session").jsonBody(body.toString()),
             responseKey = "client_secret",
+        )
+    }
+
+    suspend fun createCustomer(requestParams: JsonObject): kotlin.Result<String> {
+        val body = buildJsonObject {
+            put("merchant", merchant)
+            put("request_params", requestParams)
+        }
+        return execute(
+            request = Fuel.post("$baseUrl/create_customer").jsonBody(body.toString()),
+            responseKey = "id",
         )
     }
 
