@@ -9,7 +9,7 @@ import com.stripe.android.paymentelement.EmbeddedContentPage
 import com.stripe.android.paymentelement.EmbeddedFormPage
 import com.stripe.android.paymentsheet.PaymentSheetPage
 import com.stripe.paymentelementtestpages.BillingDetailsPage
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
@@ -87,6 +87,11 @@ internal class CheckoutCardIntegrationTest {
             assertCaliforniaTax(session)
         },
     ) { controller ->
+        val initialSession = controller.session.value
+        assertThat(initialSession?.tax?.status)
+            .isEqualTo(CheckoutElementsController.Session.Tax.Status.RequiresBillingAddress)
+        assertThat(initialSession?.paymentOption?.billingDetails?.address).isNull()
+
         contentPage.clickOnLpm("card")
         fillOutCardAndBillingDetails("4242424242424242", CALIFORNIA_ADDRESS, "California")
         paymentSheetPage.assertSaveForFutureCheckboxNotChecked()
@@ -106,6 +111,11 @@ internal class CheckoutCardIntegrationTest {
 
     @Test
     fun testChangingNewCardBillingAddressUpdatesTaxAndCompletesPayment() = runTaxScenario { controller ->
+        val initialSession = controller.session.value
+        assertThat(initialSession?.tax?.status)
+            .isEqualTo(CheckoutElementsController.Session.Tax.Status.RequiresBillingAddress)
+        assertThat(initialSession?.paymentOption?.billingDetails?.address).isNull()
+
         contentPage.clickOnLpm("card")
         fillOutCardAndBillingDetails("4242424242424242", CALIFORNIA_ADDRESS, "California")
         formPage.clickPrimaryButtonWithoutWaitingForDismissal()
@@ -231,25 +241,21 @@ internal class CheckoutCardIntegrationTest {
         expectPositiveTax: Boolean,
     ): CheckoutElementsController.Session {
         val session = withTimeout(30.seconds) {
-            combine(controller.session, controller.isUpdating) { session, isUpdating ->
-                session?.takeIf {
-                    val tax = it.totals.taxExclusive.minorUnitsAmount
-                    !isUpdating &&
-                        it.paymentOption?.billingDetails?.address?.state == address.state &&
-                        it.tax?.status == CheckoutElementsController.Session.Tax.Status.Ready &&
-                        (if (expectPositiveTax) tax > 0L else tax == 0L)
-                }
-            }.first { it != null }
+            controller.session.filterNotNull().first { session ->
+                val tax = session.totals.taxExclusive.minorUnitsAmount
+                session.paymentOption?.billingDetails?.address?.state == address.state &&
+                    session.tax?.status == CheckoutElementsController.Session.Tax.Status.Ready &&
+                    (if (expectPositiveTax) tax > 0L else tax == 0L)
+            }
         }
-        val selectedSession = checkNotNull(session)
-        assertThat(selectedSession.tax?.status).isEqualTo(CheckoutElementsController.Session.Tax.Status.Ready)
-        val selectedAddress = selectedSession.paymentOption?.billingDetails?.address
+        assertThat(session.tax?.status).isEqualTo(CheckoutElementsController.Session.Tax.Status.Ready)
+        val selectedAddress = session.paymentOption?.billingDetails?.address
         assertThat(selectedAddress?.line1).isEqualTo(address.line1)
         assertThat(selectedAddress?.city).isEqualTo(address.city)
         assertThat(selectedAddress?.state).isEqualTo(address.state)
         assertThat(selectedAddress?.postalCode).isEqualTo(address.postalCode)
         assertThat(selectedAddress?.country).isEqualTo(address.country)
-        return selectedSession
+        return session
     }
 
     private fun assertCaliforniaTax(session: CheckoutElementsController.Session) {
