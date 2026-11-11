@@ -27,7 +27,7 @@ internal object GooglePayDisplayItemsFactory {
 
         items += response.checkoutItems.flatMap { it.oneTimePrice.items }.map { it.asDisplayItem(context) }
         items += response.subtotalDisplayItem(context)
-        items += response.totalSummary?.totalTaxAmounts.orEmpty().map { it.asDisplayItem(context) }
+        items += response.totalSummary.totalTaxAmounts.map { it.asDisplayItem(context) }
         items += response.totalLineItem(context)
 
         return items

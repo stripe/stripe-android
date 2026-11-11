@@ -1513,6 +1513,7 @@ internal class CheckoutElementsControllerTest {
             val previousResponse = committedState().checkoutSessionResponse
             val response = previousResponse.copy(
                 checkoutItems = listOf(CheckoutSessionResponseFactory.checkoutItem(total = 6000L)),
+                totalSummary = previousResponse.totalSummary.copy(subtotal = 6000L, total = 6000L),
             )
             val address = fullAddress.build()
 
@@ -2235,6 +2236,7 @@ internal class CheckoutElementsControllerTest {
 
     private fun withTotal(amount: Int): (JSONObject) -> Unit = { json ->
         checkoutItemJson(json).getJSONObject("amount_details").put("total", amount).put("subtotal", amount)
+        json.getJSONObject("total_summary").put("total", amount).put("subtotal", amount)
     }
 
     private fun createControllerSetup(

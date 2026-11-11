@@ -296,6 +296,7 @@ internal class ExpressCheckoutElementAnalyticsTest {
                         .getJSONObject("one_time_price").getJSONArray("items").getJSONObject(0)
                         .getJSONObject("amount_details")
                         .put("total", 5399)
+                    json.getJSONObject("total_summary").put("total", 5399)
                 }
             }
             networkRule.validateCheckoutAnalyticsStarted("update_billing_address", *addressUpdateMatchers())

@@ -167,6 +167,10 @@ internal class CheckoutSessionResponseJsonParser(
     }
 
     private fun parseTotalSummary(totalSummary: JSONObject) = CheckoutSessionResponse.TotalSummary(
+        subtotal = totalSummary.requiredLong("subtotal"),
+        total = totalSummary.requiredLong("total"),
+        taxExclusive = totalSummary.requiredLong("tax_exclusive"),
+        taxInclusive = totalSummary.requiredLong("tax_inclusive"),
         totalTaxAmounts = totalSummary.requiredArray("total_tax_amounts").objects().map(::parseTaxAmount),
     )
 

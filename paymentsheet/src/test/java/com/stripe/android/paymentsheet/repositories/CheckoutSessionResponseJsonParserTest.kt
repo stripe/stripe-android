@@ -323,6 +323,10 @@ class CheckoutSessionResponseJsonParserTest {
     fun `parses aggregate discounts and taxes from recurring total summary`() {
         val json = base()
         json.getJSONObject("total_summary")
+            .put("subtotal", 9007199254740993L)
+            .put("total", 9007199254741073L)
+            .put("tax_exclusive", 80)
+            .put("tax_inclusive", 40)
             .put("total_tax_amounts", JSONArray().put(taxAmount()))
             .put(
                 "total_discount_amounts",
@@ -335,7 +339,11 @@ class CheckoutSessionResponseJsonParserTest {
 
         val result = parse(json)!!
 
-        assertThat(result.totalSummary?.totalTaxAmounts).hasSize(1)
+        assertThat(result.totalSummary.subtotal).isEqualTo(9007199254740993L)
+        assertThat(result.totalSummary.total).isEqualTo(9007199254741073L)
+        assertThat(result.totalSummary.taxExclusive).isEqualTo(80L)
+        assertThat(result.totalSummary.taxInclusive).isEqualTo(40L)
+        assertThat(result.totalSummary.totalTaxAmounts).hasSize(1)
     }
 
     @Test
@@ -348,7 +356,7 @@ class CheckoutSessionResponseJsonParserTest {
 
         val result = requireNotNull(parse(json))
 
-        assertThat(result.totalSummary?.totalTaxAmounts).isEmpty()
+        assertThat(result.totalSummary.totalTaxAmounts).isEmpty()
     }
 
     @Test
@@ -356,6 +364,18 @@ class CheckoutSessionResponseJsonParserTest {
         val json = base()
         assertThat(parse(json)).isNotNull()
         json.remove("total_summary")
+
+        assertThat(parse(json)).isNull()
+    }
+
+    @Test
+    fun `rejects missing required total summary fields`(
+        @TestParameter(value = ["subtotal", "total", "tax_exclusive", "tax_inclusive", "total_tax_amounts"])
+        field: String,
+    ) {
+        val json = base()
+        assertThat(parse(json)).isNotNull()
+        json.getJSONObject("total_summary").remove(field)
 
         assertThat(parse(json)).isNull()
     }

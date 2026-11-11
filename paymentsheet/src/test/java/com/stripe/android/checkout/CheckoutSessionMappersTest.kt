@@ -62,6 +62,46 @@ class CheckoutSessionMappersTest {
     }
 
     @Test
+    fun `session totals use the server summary instead of item amounts`() {
+        val taxRate = CheckoutSessionResponse.TaxRate(
+            displayName = "Sales tax",
+            percentage = 8.0,
+            rateType = CheckoutSessionResponse.TaxRateType.PERCENTAGE,
+        )
+        val session = CheckoutSessionResponseFactory.create(
+            checkoutItems = listOf(
+                CheckoutSessionResponseFactory.checkoutItem(subtotal = 1000, total = 1080)
+                    .withTaxes(inclusive = 20, exclusive = 80)
+            ),
+            totalSummary = CheckoutSessionResponse.TotalSummary(
+                subtotal = 1500,
+                total = 1625,
+                taxExclusive = 125,
+                taxInclusive = 40,
+                totalTaxAmounts = listOf(
+                    CheckoutSessionResponse.TaxAmount(amount = 125, inclusive = false, taxRate = taxRate),
+                    CheckoutSessionResponse.TaxAmount(amount = 40, inclusive = true, taxRate = taxRate),
+                ),
+            ),
+        ).session()
+        val item = (session.orderSummaryItems.single() as Session.OrderSummaryItem.OneTimePrice).items.single()
+
+        assertThat(session.totals.subtotal.minorUnitsAmount).isEqualTo(1500L)
+        assertThat(session.totals.subtotal.amount).isEqualTo("$15.00")
+        assertThat(session.totals.total.minorUnitsAmount).isEqualTo(1625L)
+        assertThat(session.totals.total.amount).isEqualTo("$16.25")
+        assertThat(session.totals.taxExclusive.minorUnitsAmount).isEqualTo(125L)
+        assertThat(session.totals.taxExclusive.amount).isEqualTo("$1.25")
+        assertThat(session.totals.taxInclusive.minorUnitsAmount).isEqualTo(40L)
+        assertThat(session.totals.taxInclusive.amount).isEqualTo("$0.40")
+        assertThat(session.totals.discount.minorUnitsAmount).isEqualTo(0L)
+        assertThat(item.amountDetails.subtotal.minorUnitsAmount).isEqualTo(1000L)
+        assertThat(item.amountDetails.total.minorUnitsAmount).isEqualTo(1080L)
+        assertThat(item.amountDetails.taxExclusive.minorUnitsAmount).isEqualTo(80L)
+        assertThat(item.amountDetails.taxInclusive.minorUnitsAmount).isEqualTo(20L)
+    }
+
+    @Test
     fun `maps nested item using stable inner key and server computed amounts`() {
         val item = CheckoutSessionResponseFactory.create(
             checkoutItems = listOf(CheckoutSessionResponseFactory.checkoutItem(total = 2500, subtotal = 2400))
@@ -146,7 +186,13 @@ class CheckoutSessionMappersTest {
         )
         val session = CheckoutSessionResponseFactory.create(
             checkoutItems = listOf(taxedItem),
-            totalSummary = CheckoutSessionResponse.TotalSummary(listOf(tax)),
+            totalSummary = CheckoutSessionResponse.TotalSummary(
+                subtotal = 1000,
+                total = 1000 + tax.amount,
+                taxExclusive = tax.amount,
+                taxInclusive = 0,
+                totalTaxAmounts = listOf(tax),
+            ),
         ).session()
         val item = (session.orderSummaryItems.single() as Session.OrderSummaryItem.OneTimePrice)
             .items.single()
