@@ -57,8 +57,15 @@ private fun NetworkRule.validateCheckoutAnalytics(
     outcome: String,
     vararg requestMatchers: RequestMatcher,
 ) {
+    validateCheckoutSessionAnalyticsRequest("checkout_elements.$operation.$outcome", *requestMatchers)
+}
+
+internal fun NetworkRule.validateCheckoutSessionAnalyticsRequest(
+    eventName: String,
+    vararg requestMatchers: RequestMatcher,
+) {
     validateAnalyticsRequest(
-        eventName = "checkout_elements.$operation.$outcome",
+        eventName = eventName,
         productUsage = setOf("checkout_elements"),
         analyticsPayloadField("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID),
         *requestMatchers,

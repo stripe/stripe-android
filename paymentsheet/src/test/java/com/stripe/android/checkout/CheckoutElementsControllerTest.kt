@@ -74,6 +74,7 @@ import org.junit.Test
 import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.ContinuationInterceptor
@@ -689,6 +690,8 @@ internal class CheckoutElementsControllerTest {
         val failure = result as CheckoutElementsController.OperationResult.Failed
 
         assertThat(failure.error).isInstanceOf(IllegalArgumentException::class.java)
+        assertThat(failure.displayMessage)
+            .isEqualTo(applicationContext.getString(R.string.stripe_something_went_wrong))
         assertThat(controller.session.value).isNull()
     }
 
@@ -709,7 +712,8 @@ internal class CheckoutElementsControllerTest {
     }
 
     @Test
-    fun `configure returns null display message when server error has no message`() = runConfigureScenario(
+    @Config(qualifiers = "fr")
+    fun `configure returns localized generic display message when server error has no message`() = runConfigureScenario(
         networkSetup = {
             networkRule.checkoutInit { response ->
                 response.setResponseCode(500)
@@ -719,11 +723,11 @@ internal class CheckoutElementsControllerTest {
     ) {
         val failure = result as CheckoutElementsController.OperationResult.Failed
 
-        assertThat(failure.displayMessage).isNull()
+        assertThat(failure.displayMessage).isEqualTo("Un problème est survenu")
     }
 
     @Test
-    fun `configure returns null display message when server error is malformed`() = runConfigureScenario(
+    fun `configure returns generic display message when server error is malformed`() = runConfigureScenario(
         networkSetup = {
             networkRule.checkoutInit { response ->
                 response.setResponseCode(500)
@@ -735,7 +739,8 @@ internal class CheckoutElementsControllerTest {
 
         assertThat((failure.error as APIException).stripeError?.message)
             .isEqualTo(StripeErrorJsonParser.MALFORMED_RESPONSE_MESSAGE)
-        assertThat(failure.displayMessage).isNull()
+        assertThat(failure.displayMessage)
+            .isEqualTo(applicationContext.getString(R.string.stripe_something_went_wrong))
     }
 
     @Test
@@ -1565,7 +1570,8 @@ internal class CheckoutElementsControllerTest {
         val failure = result as CheckoutElementsController.OperationResult.Failed
         assertThat(failure.error).isInstanceOf(IllegalStateException::class.java)
         assertThat(failure.error).hasMessageThat().isEqualTo("Server error")
-        assertThat(failure.displayMessage).isNull()
+        assertThat(failure.displayMessage)
+            .isEqualTo(applicationContext.getString(R.string.stripe_something_went_wrong))
         assertThat(controller.session.value).isEqualTo(before)
     }
 
@@ -1579,7 +1585,8 @@ internal class CheckoutElementsControllerTest {
         assertThat(result).isInstanceOf(CheckoutElementsController.OperationResult.Failed::class.java)
         val failure = result as CheckoutElementsController.OperationResult.Failed
         assertThat(failure.error).isSameInstanceAs(expected)
-        assertThat(failure.displayMessage).isNull()
+        assertThat(failure.displayMessage)
+            .isEqualTo(applicationContext.getString(R.string.stripe_something_went_wrong))
     }
 
     @Test

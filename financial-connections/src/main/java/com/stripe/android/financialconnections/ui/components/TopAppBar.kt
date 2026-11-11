@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import com.stripe.android.financialconnections.ThemeMode
 import com.stripe.android.financialconnections.navigation.bottomsheet.BottomSheetNavigator
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarState
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
@@ -234,7 +235,7 @@ internal fun TopAppBarWithLinkLogoPreview() {
         FinancialConnectionsTopAppBar(
             state = TopAppBarState(
                 hideStripeLogo = false,
-                theme = Theme.LinkLight,
+                theme = Theme.Link(ThemeMode.Automatic),
                 linkBrand = LinkBrand.Link,
             ),
             onCloseClick = {},

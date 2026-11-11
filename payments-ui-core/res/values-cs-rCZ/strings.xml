@@ -66,7 +66,7 @@
   <!-- Klarna buy now or pay later copy -->
   <string name="stripe_klarna_buy_now_pay_later">Kupte nyní nebo zaplaťte později pomocí Klarna</string>
   <!-- Klarna mandate text -->
-  <string name="stripe_klarna_mandate">Pokračováním ve službě Klarna povolujete společnosti %1$s, aby v souladu s jejími podmínkami a podmínkami účtovala na váš účet Klarna budoucí platby. Toto můžete kdykoli změnit v aplikaci Klarna nebo tak, že se obrátíte na %2$s.</string>
+  <string name="stripe_klarna_mandate">Pokračováním na Klarna umožňujete %1$s strhnout budoucí platby z vašeho účtu Klarna v souladu s jejich podmínkami a podmínkami společnosti Klarna. Toto nastavení můžete kdykoli změnit ve své aplikaci Klarna nebo kontaktováním %2$s.</string>
   <!-- Klarna pay later copy -->
   <string name="stripe_klarna_pay_later">Zaplaťte později pomocí Klarna.</string>
   <!-- Caption for Phone field on address form -->
@@ -132,7 +132,7 @@
   <!-- Expiration date shown for a scanned card in the card pill -->
   <string name="stripe_scanned_card_pill_expiration_date">Vyprší %1$s</string>
   <!-- SEPA mandate text -->
-  <string name="stripe_sepa_mandate">Tím, že zadáte informace o platbě a potvrdíte tuto platbu, udělujete společnosti (A) %s a Stripe, našemu poskytovateli platebních služeb, oprávnění zaslat do vaší banky pokyny k zatížení vašeho účtu a (B) vaší bance zatížit váš účet na základě těchto pokynů. V rámci svých práv máte nárok na refundaci od banky na základě smluvních podmínek vaší smlouvy s bankou. Refundaci je nutné nárokovat během 8 týdnů od data, kdy byl váš účet zatížen. Vaše práva jsou vysvětlena v prohlášení, které můžete získat od banky.</string>
+  <string name="stripe_sepa_mandate">Poskytnutím svých platebních údajů a potvrzením této platby opravňujete (A) %s a Stripe, našeho poskytovatele platebních služeb, k zasílání pokynů vaší bance k inkasu z vašeho účtu a (B) vaši banku k inkasu z vašeho účtu v souladu s těmito pokyny. V rámci svých práv máte nárok na proplacení od své banky podle podmínek vaší smlouvy s bankou. O proplacení je nutné požádat do 8 týdnů od data, kdy byl váš účet zatížen. Vaše práva jsou vysvětlena v prohlášení, které můžete získat u své banky. Souhlasíte s přijímáním oznámení o budoucích inkasech až 2 dny před jejich provedením.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_set_as_default_payment_method">Nastavit jako výchozí způsob platby</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->

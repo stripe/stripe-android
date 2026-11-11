@@ -23,6 +23,7 @@ import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.DurationProvider
+import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
@@ -39,6 +40,7 @@ import com.stripe.android.link.ui.inline.LinkSignupMode.InsteadOfSaveForFutureUs
 import com.stripe.android.lpmfoundations.paymentmethod.AnalyticsMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.DisplayableCustomPaymentMethod
+import com.stripe.android.lpmfoundations.paymentmethod.FakePaymentMethodAvailabilityLogger
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
@@ -5188,6 +5190,153 @@ internal class DefaultPaymentElementLoaderTest {
         assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
     }
 
+    @Test
+    fun `logs filtering reasons once for PaymentSheet and FlowController loads`() = runScenario {
+        assertPaymentMethodFilteringLogs(
+            integrationConfiguration = PaymentElementLoader.Configuration.PaymentSheet(mockConfiguration()),
+        )
+    }
+
+    @Test
+    fun `logs filtering reasons for embedded loads`() = runScenario {
+        assertPaymentMethodFilteringLogs(
+            integrationConfiguration = PaymentElementLoader.Configuration.Embedded(
+                isRowSelectionImmediateAction = false,
+                configuration = EmbeddedPaymentElement.Configuration.Builder("Merchant")
+                    .googlePay(ConfigFixtures.GOOGLE_PAY).build(),
+                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+            ),
+        )
+    }
+
+    @Test
+    fun `logs filtering reasons before failing when no payment methods are available`() = runScenario {
+        val logger = FakePaymentMethodAvailabilityLogger()
+        val createLinkState = FakeCreateLinkState()
+        val result = createPaymentElementLoader(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK.copy(
+                paymentMethodTypes = listOf("sepa_debit"),
+            ),
+            userFacingLogger = logger,
+            createLinkState = createLinkState,
+        ).load(
+            initializationMode = DEFAULT_INITIALIZATION_MODE,
+            paymentSheetConfiguration = mockConfiguration(),
+            metadata = PaymentElementLoader.Metadata(initializedViaCompose = false),
+        )
+
+        assertThat(result.exceptionOrNull()).isInstanceOf(
+            PaymentSheetLoadingException.NoPaymentMethodTypesAvailable::class.java
+        )
+        assertThat(logger.messages.awaitItem()).isEqualTo(
+            "Payment Element could not offer sepa_debit:\n" +
+                "  * Configuration.allowsDelayedPaymentMethods must be set to true."
+        )
+        logger.messages.ensureAllEventsConsumed()
+        createLinkState.calls.awaitItem()
+        createLinkState.ensureAllEventsConsumed()
+        eventReporter.loadStartedTurbine.awaitItem()
+        eventReporter.loadFailedTurbine.awaitItem()
+    }
+
+    private suspend fun Scenario.assertPaymentMethodFilteringLogs(
+        integrationConfiguration: PaymentElementLoader.Configuration,
+    ) {
+        val logger = FakePaymentMethodAvailabilityLogger()
+        val createLinkState = FakeCreateLinkState()
+        val state = createPaymentElementLoader(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK.copy(
+                paymentMethodTypes = listOf("card", "sepa_debit"),
+            ),
+            userFacingLogger = logger,
+            createLinkState = createLinkState,
+        ).load(
+            initializationMode = DEFAULT_INITIALIZATION_MODE,
+            integrationConfiguration = integrationConfiguration,
+            metadata = PaymentElementLoader.Metadata(initializedViaCompose = false),
+        ).getOrThrow()
+
+        assertThat(state.paymentMethodMetadata.supportedPaymentMethodTypes()).containsExactly("card")
+        state.paymentMethodMetadata.sortedSupportedPaymentMethods()
+        assertThat(logger.messages.awaitItem()).isEqualTo(
+            "Payment Element could not offer sepa_debit:\n" +
+                "  * Configuration.allowsDelayedPaymentMethods must be set to true."
+        )
+        logger.messages.ensureAllEventsConsumed()
+        createLinkState.calls.awaitItem()
+        createLinkState.ensureAllEventsConsumed()
+        consumeLoadingEvents()
+        eventReporter.loadStartedTurbine.awaitItem()
+        eventReporter.loadSucceededTurbine.awaitItem()
+    }
+
+    @Test
+    fun `logs Link availability for PaymentSheet and FlowController loads`() = runScenario {
+        assertLinkAvailabilityLogs(
+            integrationConfiguration = PaymentElementLoader.Configuration.PaymentSheet(mockConfiguration()),
+        )
+    }
+
+    @Test
+    fun `logs Link availability for embedded loads`() = runScenario {
+        assertLinkAvailabilityLogs(
+            integrationConfiguration = PaymentElementLoader.Configuration.Embedded(
+                isRowSelectionImmediateAction = false,
+                configuration = EmbeddedPaymentElement.Configuration.Builder("Merchant")
+                    .googlePay(ConfigFixtures.GOOGLE_PAY).build(),
+                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+            ),
+        )
+    }
+
+    @Test
+    fun `logs Link availability for Express Checkout without logging generic payment methods`() = runScenario {
+        assertLinkAvailabilityLogs(
+            integrationConfiguration = PaymentElementLoader.Configuration.ExpressCheckoutElement(
+                commonConfiguration = mockConfiguration().asCommonConfiguration(),
+            ),
+            paymentMethodTypes = listOf("card", "unknown_method"),
+            expectedElementName = "Express Checkout Element",
+        )
+    }
+
+    private suspend fun Scenario.assertLinkAvailabilityLogs(
+        integrationConfiguration: PaymentElementLoader.Configuration,
+        paymentMethodTypes: List<String> = listOf("card"),
+        expectedElementName: String = "Payment Element",
+    ) {
+        val logger = FakePaymentMethodAvailabilityLogger()
+        val linkStateResult = LinkDisabledState(listOf(LinkDisabledReason.NotSupportedInElementsSession))
+        val createLinkState = FakeCreateLinkState(linkStateResult)
+        val state = createPaymentElementLoader(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK.copy(
+                paymentMethodTypes = paymentMethodTypes,
+            ),
+            userFacingLogger = logger,
+            createLinkState = createLinkState,
+        ).load(
+            initializationMode = DEFAULT_INITIALIZATION_MODE,
+            integrationConfiguration = integrationConfiguration,
+            metadata = PaymentElementLoader.Metadata(initializedViaCompose = false),
+        ).getOrThrow()
+
+        val createCall = createLinkState.calls.awaitItem()
+        assertThat(createCall.configuration).isEqualTo(integrationConfiguration.commonConfiguration)
+        assertThat(createCall.initializationMode).isEqualTo(DEFAULT_INITIALIZATION_MODE)
+        assertThat(createCall.elementsSession.stripeIntent.paymentMethodTypes)
+            .containsExactlyElementsIn(paymentMethodTypes)
+        assertThat(state.paymentMethodMetadata.linkStateResult).isEqualTo(linkStateResult)
+        assertThat(logger.messages.awaitItem()).isEqualTo(
+            "$expectedElementName could not offer Link:\n" +
+                "  * Link is not supported by this Elements Session."
+        )
+        logger.messages.ensureAllEventsConsumed()
+        createLinkState.ensureAllEventsConsumed()
+        consumeLoadingEvents()
+        eventReporter.loadStartedTurbine.awaitItem()
+        eventReporter.loadSucceededTurbine.awaitItem()
+    }
+
     private fun runScenario(
         customerRepo: FakeCustomerRepository = FakeCustomerRepository(paymentMethods = PAYMENT_METHODS),
         block: suspend Scenario.() -> Unit
@@ -5258,7 +5407,7 @@ internal class DefaultPaymentElementLoaderTest {
             customPaymentMethods = customPaymentMethods,
             externalPaymentMethodData = externalPaymentMethodData,
         ),
-        userFacingLogger: FakeUserFacingLogger = FakeUserFacingLogger(),
+        userFacingLogger: UserFacingLogger = FakeUserFacingLogger(),
         integrityRequestManager: IntegrityRequestManager = FakeIntegrityRequestManager(),
         tapToAddConnectionStarter: TapToAddConnectionStarter =
             FakeTapToAddConnectionStarter.create(isSupported = false),
@@ -5276,12 +5425,13 @@ internal class DefaultPaymentElementLoaderTest {
         paymentMethodMessageExperimentHandler: PaymentMethodMessagePromotionsExperimentHandler =
             FakePaymentMethodMessagePromotionsExperimentHandler(),
         preselectLinkExperiment: PreselectLinkExperiment = this.preselectLinkExperiment,
+        createLinkState: CreateLinkState? = null,
     ): DefaultPaymentElementLoader {
         val retrieveCustomerEmailImpl = DefaultRetrieveCustomerEmail(
             customerRepo,
             durationProvider,
         )
-        val createLinkState = DefaultCreateLinkState(
+        val defaultCreateLinkState = DefaultCreateLinkState(
             accountStatusProvider = { linkAccountState },
             retrieveCustomerEmail = retrieveCustomerEmailImpl,
             linkStore = linkStore,
@@ -5305,7 +5455,7 @@ internal class DefaultPaymentElementLoaderTest {
             eventReporter = eventReporter,
             errorReporter = errorReporter,
             workContext = testDispatcher,
-            createLinkState = createLinkState,
+            createLinkState = createLinkState ?: defaultCreateLinkState,
             logLinkHoldbackExperiment = logLinkHoldbackExperiment,
             logFcLiteExperiment = logFcLiteExperiment,
             externalPaymentMethodsRepository = ExternalPaymentMethodsRepository(errorReporter = FakeErrorReporter()),

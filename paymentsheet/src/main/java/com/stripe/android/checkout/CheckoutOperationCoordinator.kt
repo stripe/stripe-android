@@ -4,10 +4,7 @@ package com.stripe.android.checkout
 
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
-import com.stripe.android.core.exception.LocalStripeException
-import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.ViewModelScope
-import com.stripe.android.core.model.parsers.StripeErrorJsonParser
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.intent.CheckoutSessionResponseKey
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
@@ -26,6 +23,7 @@ import javax.inject.Singleton
 
 @Singleton
 internal class CheckoutOperationCoordinator @Inject constructor(
+    private val displayMessageResolver: CheckoutDisplayMessageResolver,
     private val confirmationHandler: ConfirmationHandler,
     private val sheetStateHolder: SheetStateHolder,
     private val sessionRefresher: CheckoutSessionRefresher,
@@ -93,7 +91,7 @@ internal class CheckoutOperationCoordinator @Inject constructor(
             resultCallback.onResult(
                 CheckoutElementsController.Result.Failed(
                     error = error,
-                    displayMessage = error.checkoutDisplayMessage(),
+                    displayMessage = displayMessageResolver.resolve(error),
                 )
             )
         }
@@ -106,7 +104,7 @@ internal class CheckoutOperationCoordinator @Inject constructor(
                 completeConfirmation { wasRestored ->
                     val (result, response) = finalizeConfirmation(state.result)
                     resultReporter.reportConfirmationResult(result, response)
-                    result.asCheckoutResult(wasRestored)
+                    result.asCheckoutResult(wasRestored, displayMessageResolver)
                 }
             }
         }
@@ -149,7 +147,7 @@ internal class CheckoutOperationCoordinator @Inject constructor(
             refreshSession { sessionRefresher.refresh() }
             CheckoutElementsController.Result.Failed(
                 error = error,
-                displayMessage = error.checkoutDisplayMessage(),
+                displayMessage = displayMessageResolver.resolve(error),
             )
         }
     }
@@ -200,6 +198,7 @@ internal class CheckoutOperationCoordinator @Inject constructor(
 
 private fun ConfirmationHandler.Result.asCheckoutResult(
     confirmationWasRestored: Boolean,
+    displayMessageResolver: CheckoutDisplayMessageResolver,
 ): CheckoutElementsController.Result? {
     return when (this) {
         is ConfirmationHandler.Result.Succeeded -> CheckoutElementsController.Result.Completed()
@@ -212,15 +211,7 @@ private fun ConfirmationHandler.Result.asCheckoutResult(
         }
         is ConfirmationHandler.Result.Failed -> CheckoutElementsController.Result.Failed(
             error = cause,
-            displayMessage = cause.checkoutDisplayMessage(),
+            displayMessage = displayMessageResolver.resolve(cause),
         )
     }
-}
-
-internal fun Throwable.checkoutDisplayMessage(): String? {
-    (this as? LocalStripeException)?.displayMessage?.let { return it }
-
-    // Malformed responses contain a parser diagnostic, so omit that message.
-    return (this as? StripeException)?.stripeError?.message
-        ?.takeIf { it != StripeErrorJsonParser.MALFORMED_RESPONSE_MESSAGE }
 }

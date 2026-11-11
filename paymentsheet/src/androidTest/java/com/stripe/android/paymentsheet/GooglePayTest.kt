@@ -29,6 +29,7 @@ import com.stripe.android.paymentsheet.ui.GOOGLE_PAY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_FORM_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_METHOD_CARD_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG
+import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
 import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
 import com.stripe.android.paymentsheet.utils.ProductIntegrationTestRunnerContext
@@ -57,7 +58,9 @@ internal class GooglePayTest(
     lateinit var integrationType: ProductIntegrationType
 
     @get:Rule
-    val testRules: TestRules = TestRules.create()
+    val testRules: TestRules = TestRules.create(
+        networkRule = NetworkRule(defaultMatcher = apiConfigurationTestType.defaultMatcher),
+    )
 
     private val composeTestRule = testRules.compose
 

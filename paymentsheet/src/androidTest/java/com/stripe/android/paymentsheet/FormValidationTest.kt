@@ -17,6 +17,7 @@ import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountActivity
 import com.stripe.android.paymentsheet.ui.PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SHEET_PRIMARY_BUTTON_DISABLED_OVERLAY_TEST_TAG
+import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
 import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
 import com.stripe.android.paymentsheet.utils.ProductIntegrationType
@@ -35,7 +36,9 @@ internal class FormValidationTest(
     private val apiConfigurationTestType: ApiConfigurationTestType,
 ) {
     @get:Rule
-    val testRules: TestRules = TestRules.create {
+    val testRules: TestRules = TestRules.create(
+        networkRule = NetworkRule(defaultMatcher = apiConfigurationTestType.defaultMatcher),
+    ) {
         around(IntentsRule())
     }
 

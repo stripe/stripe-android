@@ -228,14 +228,13 @@ internal class PaymentMethodMetadataTest {
     }
 
     @Test
-    fun `filterSupportedPaymentMethods removes unsupported paymentMethodTypes`() {
+    fun `filterSupportedPaymentMethods removes unsupported payment methods and wallets`() {
         val stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-            paymentMethodTypes = listOf("card", "pay_now"),
+            paymentMethodTypes = listOf("card", "pay_now", "google_pay"),
         )
         val metadata = PaymentMethodMetadataFactory.create(stripeIntent)
         val supportedPaymentMethods = metadata.supportedPaymentMethodTypes()
-        assertThat(supportedPaymentMethods).hasSize(1)
-        assertThat(supportedPaymentMethods.first()).isEqualTo("card")
+        assertThat(supportedPaymentMethods).containsExactly("card")
     }
 
     @Test

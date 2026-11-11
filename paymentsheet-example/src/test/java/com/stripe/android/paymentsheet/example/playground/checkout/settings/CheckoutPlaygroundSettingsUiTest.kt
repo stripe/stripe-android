@@ -45,13 +45,13 @@ class CheckoutPlaygroundSettingsUiTest {
 
     @Test
     fun `feature flags are accessible from the top level`() = runScenario {
-        page.group(CheckoutFeatureFlagDefinitions.configuration).assertIsDisplayed().performClick()
+        page.group(CheckoutSdkBehaviorDefinitions.configuration).assertIsDisplayed().performClick()
 
-        val nativeLink = CheckoutFeatureFlagDefinitions.configuration.values().single {
+        val nativeLink = CheckoutSdkBehaviorDefinitions.configuration.values().single {
             it.key == "feature_flags.nativeLinkEnabled"
         }
         page.value(nativeLink).performScrollTo().assertIsDisplayed()
-        val webAuth = CheckoutFeatureFlagDefinitions.configuration.values().single {
+        val webAuth = CheckoutSdkBehaviorDefinitions.configuration.values().single {
             it.key == "feature_flags.forceLinkWebAuth"
         }
         page.value(webAuth).performScrollTo().assertIsDisplayed()
