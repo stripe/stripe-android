@@ -21,16 +21,16 @@ import kotlin.time.Duration.Companion.seconds
 
 internal suspend fun runCheckoutIntegrationTest(
     merchant: String,
-    sessionParams: suspend (CheckoutPlaygroundBackend) -> JsonObject,
+    sessionParams: JsonObject,
     configuration: CheckoutElementsController.Configuration,
     setup: suspend (CheckoutElementsController) -> Unit,
 ): CheckoutElementsController.Result {
     val backend = CheckoutPlaygroundBackend(
-        baseUrl = "https://stp-mobile-playground-backend-v7.stripedemos.com/",
+        baseUrl = CHECKOUT_PLAYGROUND_BACKEND_URL,
         merchant = merchant,
     )
     val publishableKey = backend.fetchPublishableKey().getOrThrow()
-    val clientSecret = backend.createCheckoutSession(sessionParams(backend)).getOrThrow()
+    val clientSecret = backend.createCheckoutSession(sessionParams).getOrThrow()
     val checkoutResult = CompletableDeferred<CheckoutElementsController.Result>()
 
     return ActivityScenario.launch(MainActivity::class.java).use { scenario ->

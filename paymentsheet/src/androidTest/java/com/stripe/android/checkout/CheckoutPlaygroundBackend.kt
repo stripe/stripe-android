@@ -14,6 +14,8 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import org.json.JSONObject
 
+internal const val CHECKOUT_PLAYGROUND_BACKEND_URL = "https://stp-mobile-playground-backend-v7.stripedemos.com/"
+
 internal class CheckoutPlaygroundBackend(
     baseUrl: String,
     private val merchant: String,
