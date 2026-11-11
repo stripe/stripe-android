@@ -47,6 +47,7 @@ import com.stripe.android.identity.navigation.SelfieWarmupDestination.SELFIE_WAR
 import com.stripe.android.identity.networking.IdentityModelFetcher
 import com.stripe.android.identity.networking.IdentityRepository
 import com.stripe.android.identity.networking.Resource
+import com.stripe.android.identity.networking.SelfieUploadState
 import com.stripe.android.identity.networking.SingleSideDocumentUploadState
 import com.stripe.android.identity.networking.Status
 import com.stripe.android.identity.networking.UploadedResult
@@ -160,8 +161,10 @@ internal class IdentityViewModelTest {
     private val mockOnReadyToSubmit = mock<() -> Unit>()
     private val mockTfLiteInitializer = mock<InterpreterInitializer>()
 
+    private val viewModel = createViewModel(mockSavedStateHandle)
+
     @OptIn(ExperimentalCoroutinesApi::class)
-    private val viewModel = IdentityViewModel(
+    private fun createViewModel(savedStateHandle: SavedStateHandle) = IdentityViewModel(
         ApplicationProvider.getApplicationContext(),
         IdentityVerificationSheetContract.Args(
             verificationSessionId = VERIFICATION_SESSION_ID,
@@ -181,7 +184,7 @@ internal class IdentityViewModelTest {
         mockScreenTracker,
         mock(),
         mockTfLiteInitializer,
-        mockSavedStateHandle,
+        savedStateHandle,
         mock(),
         UnconfinedTestDispatcher(),
         mock()
@@ -207,6 +210,27 @@ internal class IdentityViewModelTest {
         assertThat(viewModel.documentBackUploadedState.value).isEqualTo(
             SingleSideDocumentUploadState()
         )
+    }
+
+    @Test
+    fun `restoring after process death clears in-flight selfie upload and request states`() {
+        // Given state saved while a selfie upload and both requests were in flight
+        val savedStateHandle = SavedStateHandle(
+            mapOf(
+                "selfie_upload_state" to SelfieUploadState(firstHighResResult = Resource.loading()),
+                "verification_page_data" to Resource.loading<Int>(),
+                "verification_page_submit" to Resource.loading<Int>()
+            )
+        )
+
+        // When the view model is recreated from it
+        val restoredViewModel = createViewModel(savedStateHandle)
+
+        // Then nothing is reported as in flight
+        assertThat(restoredViewModel.selfieUploadState.value).isEqualTo(SelfieUploadState())
+        assertThat(restoredViewModel.verificationPageData.value.status).isEqualTo(Status.IDLE)
+        assertThat(restoredViewModel.verificationPageSubmit.value.status).isEqualTo(Status.IDLE)
+        assertThat(restoredViewModel.isSubmitting()).isFalse()
     }
 
     @Test
@@ -590,7 +614,30 @@ internal class IdentityViewModelTest {
             any()
         )
         assertThat(viewModel.errorCause.value).isEqualTo(throwable)
+        assertThat(viewModel.verificationPageData.value.status).isEqualTo(Status.ERROR)
+        assertThat(viewModel.isSubmitting()).isFalse()
         verify(mockScreenTracker).screenTransitionStart(eq(SCREEN_NAME_CONSENT), any())
+        verify(mockController).navigate(
+            argWhere {
+                it.startsWith(ErrorDestination.ERROR)
+            },
+            any<NavOptionsBuilder.() -> Unit>()
+        )
+    }
+
+    @Test
+    fun `submitAndNavigate - postFailure - navigate to error and stop submitting`() = runBlocking {
+        // Given the submit request fails
+        val throwable = RuntimeException()
+        whenever(mockIdentityRepository.postVerificationPageSubmit(any(), any())).thenThrow(throwable)
+
+        // When the verification is submitted
+        viewModel.submitAndNavigate(mockController, ConsentDestination.ROUTE.route)
+
+        // Then the error screen shows and the submit is no longer in flight
+        assertThat(viewModel.errorCause.value).isEqualTo(throwable)
+        assertThat(viewModel.verificationPageSubmit.value.status).isEqualTo(Status.ERROR)
+        assertThat(viewModel.isSubmitting()).isFalse()
         verify(mockController).navigate(
             argWhere {
                 it.startsWith(ErrorDestination.ERROR)
