@@ -37,7 +37,6 @@ interface IntegrityRequestManager {
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class IntegrityStandardRequestManager(
     private val cloudProjectNumber: Long,
-    private val logError: (String, Throwable) -> Unit,
     private val factory: StandardIntegrityManagerFactory,
     private val logger: Logger,
     private val mutex: Mutex = Mutex()
@@ -51,7 +50,7 @@ class IntegrityStandardRequestManager(
     }
         .map {}
         .recoverCatching {
-            logError("Integrity - Failed to prepare integrity token", it)
+            logger.error("Integrity - Failed to prepare integrity token", it)
             throw AttestationError.fromException(it)
         }
 
@@ -77,7 +76,7 @@ class IntegrityStandardRequestManager(
         finishedTask.toResult().getOrThrow()
     }.map { it.token() }
         .recoverCatching {
-            logError("Integrity - Failed to request integrity token", it)
+            logger.error("Integrity - Failed to request integrity token", it)
             throw AttestationError.fromException(it)
         }
 

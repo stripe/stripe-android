@@ -49,9 +49,6 @@ private object LinkIntegrityRequestManagerHolder {
         return instance ?: synchronized(this) {
             instance ?: IntegrityStandardRequestManager(
                 cloudProjectNumber = 577365562050, // stripe-payments-sdk-prod
-                logError = { message, error ->
-                    Logger.getInstance(BuildConfig.DEBUG).error(message, error)
-                },
                 factory = RealStandardIntegrityManagerFactory(application),
                 logger = Logger.getInstance(BuildConfig.DEBUG)
             ).also { instance = it }

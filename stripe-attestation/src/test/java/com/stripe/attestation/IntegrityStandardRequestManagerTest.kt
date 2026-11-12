@@ -71,7 +71,6 @@ class IntegrityStandardRequestManagerTest {
 
         val integrityStandardRequestManager = IntegrityStandardRequestManager(
             cloudProjectNumber = 123456789L,
-            logError = { _, _ -> },
             factory = countingFactory,
             logger = Logger.noop()
         )
@@ -134,7 +133,6 @@ class IntegrityStandardRequestManagerTest {
         }
         val integrityStandardRequestManager = IntegrityStandardRequestManager(
             cloudProjectNumber = 123456789L,
-            logError = { _, _ -> },
             factory = factory,
             logger = Logger.noop()
         )
@@ -159,7 +157,6 @@ class IntegrityStandardRequestManagerTest {
         prepareTask: Task<StandardIntegrityTokenProvider>
     ) = IntegrityStandardRequestManager(
         cloudProjectNumber = 123456789L,
-        logError = { _, _ -> },
         factory = FakeStandardIntegrityManagerFactory(prepareTask),
         logger = Logger.noop()
     )
