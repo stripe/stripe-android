@@ -89,9 +89,8 @@ internal object PaymentOptionLabelsFactory {
         context: Context,
         card: PaymentMethod.Card,
     ): PaymentOption.Labels {
-        val brand = (card.displayBrand?.let { CardBrand.fromCode(it) } ?: card.brand).takeIf {
-            it != CardBrand.Unknown
-        }
+        val brand = (CardBrand.fromCode(card.displayBrand).takeIf { it != CardBrand.Unknown } ?: card.brand)
+            .takeIf { it != CardBrand.Unknown }
         val last4 = createCardLabel(card.last4)?.resolve(context).orEmpty()
 
         return if (brand != null) {

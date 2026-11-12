@@ -168,6 +168,28 @@ class PaymentOptionLabelsFactoryTest {
     }
 
     @Test
+    fun `create with saved card with unrecognized display brand falls back to brand`() {
+        val amexWithUnrecognizedDisplayBrand = PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(
+            card = PaymentMethodFixtures.CARD.copy(
+                brand = CardBrand.AmericanExpress,
+                displayBrand = "american_express",
+                last4 = "8431",
+            )
+        )
+
+        val labels = PaymentOptionLabelsFactory.create(
+            context = context,
+            selection = PaymentSelection.Saved(
+                paymentMethod = amexWithUnrecognizedDisplayBrand
+            ),
+            linkBrand = null,
+        )
+
+        assertThat(labels.label).isEqualTo("American Express")
+        assertThat(labels.sublabel).isEqualTo("\u2066···· 8431\u2069")
+    }
+
+    @Test
     fun `create with saved US Bank Account without bank name returns correct labels`() {
         val bankAccountWithoutName = PaymentMethodFixtures.US_BANK_ACCOUNT.copy(
             usBankAccount = PaymentMethodFixtures.US_BANK_ACCOUNT.usBankAccount?.copy(

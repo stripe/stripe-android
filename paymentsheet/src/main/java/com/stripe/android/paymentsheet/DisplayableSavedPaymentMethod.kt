@@ -79,8 +79,8 @@ internal data class DisplayableSavedPaymentMethod private constructor(
     fun brandDisplayName(): String? {
         return when (savedPaymentMethod) {
             is SavedPaymentMethod.Card -> {
-                val brand = savedPaymentMethod.card.displayBrand?.let { CardBrand.fromCode(it) }
-                    ?: savedPaymentMethod.card.brand
+                val brand = CardBrand.fromCode(savedPaymentMethod.card.displayBrand)
+                    .takeIf { it != CardBrand.Unknown } ?: savedPaymentMethod.card.brand
                 return brand.displayName
             }
             is SavedPaymentMethod.Link -> {
