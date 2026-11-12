@@ -52,7 +52,7 @@ internal class CheckoutOperationCoordinator @Inject constructor(
         data class Configuring(val configuration: CheckoutElementsController.Configuration.State) : Status
     }
 
-    private class Mutation(val status: Status)
+    private data class Mutation(val status: Status)
 
     suspend fun <T> runMutation(
         block: suspend () -> Result<T>,
@@ -79,7 +79,7 @@ internal class CheckoutOperationCoordinator @Inject constructor(
             }
         } finally {
             synchronized(admissionLock) {
-                pendingMutations -= mutation
+                pendingMutations.removeAll { it === mutation }
                 updateStatus()
             }
         }
