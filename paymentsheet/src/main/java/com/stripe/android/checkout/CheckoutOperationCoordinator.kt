@@ -79,7 +79,8 @@ internal class CheckoutOperationCoordinator @Inject constructor(
             }
         } finally {
             synchronized(admissionLock) {
-                pendingMutations.removeAll { it === mutation }
+                val mutationIndex = pendingMutations.indexOfFirst { it === mutation }
+                pendingMutations.removeAt(mutationIndex)
                 updateStatus()
             }
         }
