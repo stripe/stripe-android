@@ -1005,6 +1005,7 @@ internal class CheckoutOperationCoordinatorTest {
     fun `failed confirmation refreshes and reports without a confirm response`() {
         val reporter = FakeCheckoutConfirmationResultReporter()
         runScenario(resultReporter = reporter) {
+            sessionRefresher.fetchedResponse = response
             coordinator.tryBeginConfirmation { Result.success(CONFIRMATION_PARAMETERS) }
 
             enqueueRefreshAction {}
@@ -1019,6 +1020,27 @@ internal class CheckoutOperationCoordinatorTest {
             assertThat(reporter.calls.awaitItem())
                 .isEqualTo(FakeCheckoutConfirmationResultReporter.Call(failed, response = null))
             assertThat(resultTurbine.awaitItem()).isInstanceOf<CheckoutElementsController.Result.Failed>()
+        }
+        reporter.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `successful confirmation without metadata returns fetched payment status`() {
+        val reporter = FakeCheckoutConfirmationResultReporter()
+        runScenario(resultReporter = reporter) {
+            val fetched = response.copy(paymentStatus = CheckoutSessionResponse.PaymentStatus.PAID)
+            sessionRefresher.fetchedResponse = fetched
+            coordinator.tryBeginConfirmation { Result.success(CONFIRMATION_PARAMETERS) }
+
+            enqueueRefreshAction {}
+            val succeeded = ConfirmationHandler.Result.Succeeded(PaymentIntentFixtures.PI_SUCCEEDED)
+            confirmationState.value = ConfirmationHandler.State.Complete(succeeded)
+
+            assertThat(refreshCalls.awaitItem()).isEqualTo(FakeCheckoutSessionRefresher.Call.Fetch)
+            val result = resultTurbine.awaitItem() as CheckoutElementsController.Result.Completed
+            assertThat(result.paymentStatus).isEqualTo(CheckoutElementsController.Session.Status.PaymentStatus.Paid)
+            assertThat(reporter.calls.awaitItem())
+                .isEqualTo(FakeCheckoutConfirmationResultReporter.Call(succeeded, fetched))
         }
         reporter.ensureAllEventsConsumed()
     }
@@ -1299,7 +1321,7 @@ internal class CheckoutOperationCoordinatorTest {
         val confirmationState: MutableStateFlow<ConfirmationHandler.State>,
         val resultTurbine: Turbine<CheckoutElementsController.Result>,
         val refreshCalls: Turbine<FakeCheckoutSessionRefresher.Call>,
-        private val sessionRefresher: FakeCheckoutSessionRefresher,
+        val sessionRefresher: FakeCheckoutSessionRefresher,
         val confirmationFinalizer: FakeCheckoutConfirmationFinalizer,
         val observerJob: Job,
         private val testScope: TestScope,
