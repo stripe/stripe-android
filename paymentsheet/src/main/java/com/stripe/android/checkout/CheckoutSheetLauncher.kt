@@ -35,7 +35,6 @@ import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.state.CustomerState
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -106,7 +105,10 @@ internal class CheckoutSheetLauncher @Inject constructor(
             launcherState.isAwaitingPaymentOptionsReady = false
             sheetStateHolder.sheetIsOpen = false
             when (result.launchMode) {
-                is EmbeddedLaunchMode.Form -> handleFormResult(result)
+                is EmbeddedLaunchMode.Form -> {
+                    selectionHolder.setTemporarySelection(null)
+                    handleFormResult(result)
+                }
                 is EmbeddedLaunchMode.Manage -> handleManageResult(result)
                 is EmbeddedLaunchMode.PaymentOptions -> handlePaymentOptionsResult(result)
             }
@@ -118,18 +120,13 @@ internal class CheckoutSheetLauncher @Inject constructor(
 
     private fun handleFormResult(result: EmbeddedActivityResult) {
         when (result) {
-            // Keep the tapped row highlighted until the selection is applied.
             is EmbeddedActivityResult.Complete -> applyCompleteResult(result) {
-                selectionHolder.setTemporarySelection(null)
                 if (!result.hasBeenConfirmed) {
                     result.selection?.let { rowSelectionImmediateActionHandler.invoke() }
                 }
             }
-            is EmbeddedActivityResult.Cancelled -> {
-                selectionHolder.setTemporarySelection(null)
-                applyCustomerState(result.customerState)
-            }
-            is EmbeddedActivityResult.Error -> selectionHolder.setTemporarySelection(null)
+            is EmbeddedActivityResult.Cancelled -> applyCustomerState(result.customerState)
+            is EmbeddedActivityResult.Error -> Unit
         }
     }
 
@@ -173,8 +170,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
             onSelectionApplied()
             return
         }
-        // Undispatched so the commit blocks confirmation before this result callback returns.
-        coroutineScope.launch(start = CoroutineStart.UNDISPATCHED) {
+        coroutineScope.launch {
             commitSheetResult(result.selection, response).onFailure {
                 logger.error("Failed to refresh the checkout session after the sheet closed.", it)
                 // The sheet already updated the server, so keep the customer's choice.

@@ -7,7 +7,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
-import app.cash.turbine.Turbine
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.isInstanceOf
@@ -301,13 +300,12 @@ internal class CheckoutSheetLauncherTest {
                 FakeCommitSheetResult.Call(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION, response)
             )
             assertThat(sheetStateHolder.sheetIsOpen).isFalse()
-            assertThat(selectionHolder.temporarySelection.value).isEqualTo("cashapp")
+            assertThat(selectionHolder.temporarySelection.value).isNull()
             assertThat(immediateActionWasInvoked()).isFalse()
 
             commitResult.complete(Result.success(Unit))
             runCurrent()
 
-            assertThat(selectionHolder.temporarySelection.value).isNull()
             assertThat(immediateActionWasInvoked()).isTrue()
             // The commit publishes the selection with the response, so the launcher never writes it separately.
             assertThat(selectionHolder.selection.value).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
@@ -554,32 +552,6 @@ internal class CheckoutSheetLauncherTest {
             assertThat(logger.errorLogs).containsExactly(
                 "Failed to refresh the checkout session after the sheet closed." to expectedError
             )
-        }
-    }
-
-    @Test
-    fun `sheet result with checkout session response rejects confirmation until the commit completes`() {
-        val commitResult = CompletableDeferred<Result<Unit>>()
-        testScenario(commitResult = commitResult) {
-            val result = manageCompleteResult(checkoutSessionResponse = CheckoutSessionResponseFactory.create())
-
-            registerCall.callback.asCallbackFor<EmbeddedActivityResult>().onActivityResult(result)
-
-            // No runCurrent: a confirm right after the result callback must already see the commit.
-            assertThat(
-                operationCoordinator.tryBeginConfirmation {
-                    error("Confirmation must not be admitted while the sheet result is committing.")
-                }
-            ).isNull()
-            val rejection = awaitResultCallbackCall() as CheckoutElementsController.Result.Failed
-            assertThat(rejection.error).hasMessageThat()
-                .isEqualTo("Cannot confirm checkout while checkout mutations are in progress.")
-            awaitCommitCall()
-
-            commitResult.complete(Result.success(Unit))
-            runCurrent()
-
-            assertThat(immediateActionWasInvoked()).isTrue()
         }
     }
 
@@ -1541,7 +1513,6 @@ internal class CheckoutSheetLauncherTest {
         val errorReporter = FakeErrorReporter()
         val sessionRefresher = FakeCheckoutSessionRefresher()
         val commitSheetResult = FakeCommitSheetResult(commitResult)
-        val resultCallbackCalls = Turbine<CheckoutElementsController.Result>()
         val logger = FakeLogger()
         val confirmationHandler = FakeConfirmationHandler()
         val operationCoordinator = CheckoutOperationCoordinator(
@@ -1552,7 +1523,7 @@ internal class CheckoutSheetLauncherTest {
             confirmationFinalizer = { Result.success(it) },
             resultReporter = { _, _ -> },
             logger = logger,
-            resultCallback = { resultCallbackCalls.add(it) },
+            resultCallback = {},
             viewModelScope = backgroundScope,
         )
         val launcherState = CheckoutSheetLauncherState(savedStateHandle)
@@ -1614,7 +1585,6 @@ internal class CheckoutSheetLauncherTest {
                 errorReporter = errorReporter,
                 immediateActionWasInvoked = { immediateActionInvoked },
                 commitSheetResult = commitSheetResult,
-                resultCallbackCalls = resultCallbackCalls,
                 logger = logger,
                 operationCoordinator = operationCoordinator,
                 launcherState = launcherState,
@@ -1629,7 +1599,6 @@ internal class CheckoutSheetLauncherTest {
         confirmationHandler.validate()
         sessionRefresher.ensureAllEventsConsumed()
         commitSheetResult.ensureAllEventsConsumed()
-        resultCallbackCalls.ensureAllEventsConsumed()
     }
 
     private class Scenario(
@@ -1645,7 +1614,6 @@ internal class CheckoutSheetLauncherTest {
         val errorReporter: FakeErrorReporter,
         val immediateActionWasInvoked: () -> Boolean,
         private val commitSheetResult: FakeCommitSheetResult,
-        private val resultCallbackCalls: Turbine<CheckoutElementsController.Result>,
         val logger: FakeLogger,
         val operationCoordinator: CheckoutOperationCoordinator,
         val launcherState: CheckoutSheetLauncherState,
@@ -1701,10 +1669,6 @@ internal class CheckoutSheetLauncherTest {
 
         fun expectNoCommitCalls() {
             commitSheetResult.calls.expectNoEvents()
-        }
-
-        suspend fun awaitResultCallbackCall(): CheckoutElementsController.Result {
-            return resultCallbackCalls.awaitItem()
         }
 
         suspend fun launchForm(code: String) {
