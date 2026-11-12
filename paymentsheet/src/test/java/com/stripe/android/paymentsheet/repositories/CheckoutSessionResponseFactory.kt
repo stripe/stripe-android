@@ -23,7 +23,7 @@ internal object CheckoutSessionResponseFactory {
         customer: CheckoutSessionResponse.Customer? = null,
         savedPaymentMethodsOfferSave: CheckoutSessionResponse.SavedPaymentMethodsOfferSave? = null,
         checkoutItems: List<CheckoutSessionResponse.CheckoutItem> = listOf(checkoutItem(amount, currency)),
-        totalSummary: CheckoutSessionResponse.TotalSummary? = null,
+        totalSummary: CheckoutSessionResponse.TotalSummary = createTotalSummary(checkoutItems),
         adaptivePricingInfo: CheckoutSessionResponse.AdaptivePricingInfo? = null,
         taxMeta: CheckoutSessionResponse.TaxMeta? = CheckoutSessionResponse.TaxMeta(
             CheckoutSessionResponse.TaxComputationType.OFF,
@@ -66,6 +66,19 @@ internal object CheckoutSessionResponseFactory {
         merchantCountry = merchantCountry,
         businessName = businessName,
     )
+
+    private fun createTotalSummary(
+        checkoutItems: List<CheckoutSessionResponse.CheckoutItem>,
+    ): CheckoutSessionResponse.TotalSummary {
+        val items = checkoutItems.flatMap { it.oneTimePrice.items }
+        return CheckoutSessionResponse.TotalSummary(
+            subtotal = items.sumOf { it.subtotal },
+            total = items.sumOf { it.total },
+            taxExclusive = items.sumOf { it.taxExclusive },
+            taxInclusive = items.sumOf { it.taxInclusive },
+            totalTaxAmounts = items.flatMap { it.taxAmounts },
+        )
+    }
 
     fun checkoutItem(
         total: Long = 1000L,

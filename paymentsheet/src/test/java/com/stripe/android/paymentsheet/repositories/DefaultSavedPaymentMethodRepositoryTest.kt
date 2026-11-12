@@ -344,7 +344,6 @@ class DefaultSavedPaymentMethodRepositoryTest {
             onRetrievePaymentMethod = { _ -> retrievePaymentMethodResult },
         )
         val checkoutSessionRepository = CheckoutSessionRepository(
-            stripeRepository = CheckoutStripeRepositoryFactory.create(),
             elementsSessionClientParams = clientParams,
             fraudDetectionDataRepository = FakeFraudDetectionDataRepository.create(),
             stripeNetworkClient = DefaultStripeNetworkClient(),

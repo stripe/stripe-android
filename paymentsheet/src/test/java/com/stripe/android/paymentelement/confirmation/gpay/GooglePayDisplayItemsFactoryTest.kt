@@ -42,7 +42,6 @@ class GooglePayDisplayItemsFactoryTest {
             checkoutItems = listOf(
                 CheckoutSessionResponseFactory.checkoutItem(subtotal = 2000, total = 1950)
             ),
-            totalSummary = null,
         )
 
         val items = GooglePayDisplayItemsFactory.create(response, context)
@@ -75,6 +74,10 @@ class GooglePayDisplayItemsFactoryTest {
                 CheckoutSessionResponseFactory.checkoutItem(subtotal = 2000, total = 1950)
             ),
             totalSummary = CheckoutSessionResponse.TotalSummary(
+                subtotal = 2000,
+                total = 1950,
+                taxExclusive = 150,
+                taxInclusive = 0,
                 totalTaxAmounts = listOf(tax),
             ),
         )
@@ -94,8 +97,8 @@ class GooglePayDisplayItemsFactoryTest {
     }
 
     @Test
-    fun `absent aggregate tax produces no tax row`() {
-        val response = CheckoutSessionResponseFactory.create(totalSummary = null)
+    fun `empty aggregate tax produces no tax row`() {
+        val response = CheckoutSessionResponseFactory.create()
 
         val items = GooglePayDisplayItemsFactory.create(response, context)
 

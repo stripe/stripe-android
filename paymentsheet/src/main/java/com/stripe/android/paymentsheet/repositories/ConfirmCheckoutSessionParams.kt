@@ -49,6 +49,14 @@ internal data class ConfirmCheckoutSessionParams(
             if (shipping != null) {
                 put("shipping", shipping.toParamMap())
             }
+            // Next-action handling requires the returned Intent's PaymentMethod to be expanded.
+            put(
+                "expand",
+                listOf(
+                    "payment_response.payment_intent.payment_method",
+                    "payment_response.setup_intent.payment_method",
+                ),
+            )
         }
     }
 

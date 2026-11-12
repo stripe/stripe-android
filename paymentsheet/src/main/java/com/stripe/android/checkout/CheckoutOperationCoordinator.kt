@@ -41,15 +41,22 @@ internal class CheckoutOperationCoordinator @Inject constructor(
     private var confirmationCompletionClaimed = false
     private val mutex = Mutex(locked = confirmationInFlight)
 
-    private val _isUpdating = MutableStateFlow(confirmationInFlight)
-    val isUpdating: StateFlow<Boolean> = _isUpdating.asStateFlow()
+    private val _status = MutableStateFlow<Status>(
+        if (confirmationInFlight) Status.Updating else Status.Idle
+    )
+    val status: StateFlow<Status> = _status.asStateFlow()
+
+    sealed interface Status {
+        data object Idle : Status
+        data object Updating : Status
+    }
 
     suspend fun <T> runMutation(
         block: suspend () -> Result<T>,
     ): Result<T> {
         synchronized(admissionLock) {
             pendingMutations += 1
-            updateIsUpdating()
+            updateStatus()
         }
 
         return try {
@@ -59,7 +66,7 @@ internal class CheckoutOperationCoordinator @Inject constructor(
         } finally {
             synchronized(admissionLock) {
                 pendingMutations -= 1
-                updateIsUpdating()
+                updateStatus()
             }
         }
     }
@@ -83,7 +90,7 @@ internal class CheckoutOperationCoordinator @Inject constructor(
                 }
                 confirmationInFlight = true
                 confirmationWasRestored = false
-                updateIsUpdating()
+                updateStatus()
             }
         }
         // Integrator callbacks may re-enter checkout, so deliver rejections outside the admission lock.
@@ -172,7 +179,7 @@ internal class CheckoutOperationCoordinator @Inject constructor(
                 confirmationWasRestored = false
                 confirmationCompletionClaimed = false
                 mutex.unlock()
-                updateIsUpdating()
+                updateStatus()
             }
         }
     }
@@ -191,8 +198,8 @@ internal class CheckoutOperationCoordinator @Inject constructor(
         }
     }
 
-    private fun updateIsUpdating() = viewModelScope.launch(Dispatchers.Main) {
-        _isUpdating.value = confirmationInFlight || pendingMutations > 0
+    private fun updateStatus() = viewModelScope.launch(Dispatchers.Main) {
+        _status.value = if (confirmationInFlight || pendingMutations > 0) Status.Updating else Status.Idle
     }
 }
 
