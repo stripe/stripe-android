@@ -85,6 +85,4 @@ private object NoAutocompleteAddressInteractor : AutocompleteAddressInteractor {
     )
 
     override fun register(onEvent: (AutocompleteAddressInteractor.Event) -> Unit) = Unit
-
-    override fun onAutocomplete(country: String) = Unit
 }

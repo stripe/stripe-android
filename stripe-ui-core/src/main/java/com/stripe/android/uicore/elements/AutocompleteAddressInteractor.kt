@@ -16,8 +16,6 @@ interface AutocompleteAddressInteractor {
 
     fun register(onEvent: (Event) -> Unit)
 
-    fun onAutocomplete(country: String)
-
     fun observeQueryChanges(query: StateFlow<String>, country: StateFlow<String?>) = Unit
 
     fun onPredictionSelected(predictionId: String) = Unit

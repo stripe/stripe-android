@@ -17,12 +17,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.NavHostController
-import androidx.navigation.NavType
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressElementResultStateHolder.State
@@ -68,9 +62,6 @@ internal class AddressElementActivity : ComponentActivity() {
         starterArgs.config?.appearance?.parseAppearance()
 
         setContent {
-            val navController = rememberNavController()
-            viewModel.navigator.navigationController = navController
-
             val bottomSheetState = rememberStripeBottomSheetState(
                 confirmValueChange = ::confirmValueChange,
             )
@@ -87,20 +78,15 @@ internal class AddressElementActivity : ComponentActivity() {
             BackHandler {
                 if (viewModel.resultStateHolder.state.value != State.Idle) return@BackHandler
 
-                if (navController.previousBackStackEntry == null || !viewModel.navigator.onBack()) {
-                    dismiss()
-                }
+                dismiss()
             }
 
-            AddressElementUi(bottomSheetState, navController)
+            AddressElementUi(bottomSheetState)
         }
     }
 
     @Composable
-    private fun AddressElementUi(
-        bottomSheetState: StripeBottomSheetState,
-        navController: NavHostController,
-    ) {
+    private fun AddressElementUi(bottomSheetState: StripeBottomSheetState) {
         val resultState by viewModel.resultStateHolder.state.collectAsState()
 
         PaymentElementTheme(appearance = starterArgs?.config?.appearance ?: PaymentSheet.Appearance()) {
@@ -109,36 +95,10 @@ internal class AddressElementActivity : ComponentActivity() {
                 onDismissed = ::dismiss,
             ) {
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    NavHost(
-                        navController = navController,
-                        startDestination = AddressElementScreen.InputAddress.route,
-                    ) {
-                        composable(AddressElementScreen.InputAddress.route) {
-                            InputAddressScreen(
-                                viewModel = inputAddressViewModel,
-                                onCloseClick = ::dismiss,
-                            )
-                        }
-                        composable(
-                            AddressElementScreen.Autocomplete.route,
-                            arguments = listOf(
-                                navArgument(AddressElementScreen.Autocomplete.countryArg) {
-                                    type = NavType.StringType
-                                }
-                            )
-                        ) { backStackEntry ->
-                            val country = backStackEntry
-                                .arguments
-                                ?.getString(
-                                    AddressElementScreen.Autocomplete.countryArg
-                                )
-                            AutocompleteScreen(
-                                viewModel.autoCompleteViewModelSubcomponentFactoryProvider,
-                                viewModel.navigator,
-                                country
-                            )
-                        }
-                    }
+                    InputAddressScreen(
+                        viewModel = inputAddressViewModel,
+                        onCloseClick = ::dismiss,
+                    )
                 }
             }
 

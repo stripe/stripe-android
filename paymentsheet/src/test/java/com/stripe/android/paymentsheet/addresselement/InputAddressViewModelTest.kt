@@ -32,14 +32,10 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.kotlin.any
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class InputAddressViewModelTest {
-    private val navigator = mock<AddressElementNavigator>()
     private val resultStateHolder = AddressElementResultStateHolder()
     private val testDispatcher = UnconfinedTestDispatcher()
 
@@ -63,7 +59,6 @@ class InputAddressViewModelTest {
     ): InputAddressViewModel {
         return InputAddressViewModel(
             argsFactory(config),
-            navigator,
             resultStateHolder,
             eventReporter,
             placesClient = placesClient,
@@ -117,78 +112,6 @@ class InputAddressViewModelTest {
     }
 
     @Test
-    fun `no autocomplete address passed has an empty address to start`() {
-        val flow = MutableStateFlow<AddressDetails?>(null)
-
-        runScenario(
-            withPlacesClient = false,
-            beforeViewModelCreation = {
-                whenever(navigator.getResultFlow<AddressDetails?>(any())).thenReturn(flow)
-            },
-        ) {
-            assertThat(viewModel.collectedAddress.value).isEqualTo(AddressDetails())
-        }
-    }
-
-    @Test
-    fun `autocomplete address passed is collected to start`() {
-        val expectedAddress = PaymentSheet.Address(country = "US")
-        val flow = MutableStateFlow<AddressElementNavigator.AutocompleteEvent?>(
-            AddressElementNavigator.AutocompleteEvent.OnBack(expectedAddress)
-        )
-
-        runScenario(
-            withPlacesClient = false,
-            beforeViewModelCreation = {
-                whenever(
-                    navigator.getResultFlow<AddressElementNavigator.AutocompleteEvent?>(
-                        AddressElementNavigator.AutocompleteEvent.KEY
-                    )
-                ).thenReturn(flow)
-            },
-        ) {
-            assertThat(viewModel.collectedAddress.value).isEqualTo(
-                AddressDetails(
-                    address = expectedAddress
-                )
-            )
-        }
-    }
-
-    @Test
-    fun `takes only fields in new address`() {
-        val usAddress = PaymentSheet.Address(country = "US")
-        val flow = MutableStateFlow<AddressElementNavigator.AutocompleteEvent?>(
-            AddressElementNavigator.AutocompleteEvent.OnBack(usAddress)
-        )
-
-        runScenario(
-            withPlacesClient = false,
-            beforeViewModelCreation = {
-                whenever(
-                    navigator.getResultFlow<AddressElementNavigator.AutocompleteEvent?>(
-                        AddressElementNavigator.AutocompleteEvent.KEY
-                    )
-                ).thenReturn(flow)
-            },
-        ) {
-            assertThat(viewModel.collectedAddress.value).isEqualTo(
-                AddressDetails(
-                    address = usAddress,
-                )
-            )
-
-            val expectedAddress = PaymentSheet.Address(country = "CAN", line1 = "foobar")
-            flow.tryEmit(AddressElementNavigator.AutocompleteEvent.OnBack(expectedAddress))
-            assertThat(viewModel.collectedAddress.value).isEqualTo(
-                AddressDetails(
-                    address = expectedAddress,
-                )
-            )
-        }
-    }
-
-    @Test
     fun `default address from merchant is parsed`() {
         val expectedAddress = AddressDetails(name = "skyler", address = PaymentSheet.Address(country = "US"))
 
@@ -196,7 +119,9 @@ class InputAddressViewModelTest {
             address = expectedAddress,
             withPlacesClient = false,
         ) {
-            assertThat(viewModel.collectedAddress.value).isEqualTo(expectedAddress)
+            val formValues = viewModel.addressFormController.getCurrentFormValues()
+            assertThat(formValues[FormFieldId.Name]?.value).isEqualTo("skyler")
+            assertThat(formValues[FormFieldId.Country]?.value).isEqualTo("US")
         }
     }
 
@@ -702,47 +627,6 @@ class InputAddressViewModelTest {
             testDispatcher.scheduler.advanceUntilIdle()
             assertThat(viewModel.hasChanges()).isFalse()
         }
-
-    @Test
-    fun `autocomplete edit makes form dirty`() {
-        val autocompleteEvents = MutableStateFlow<AddressElementNavigator.AutocompleteEvent?>(null)
-
-        runScenario(
-            config = AddressLauncher.Configuration.Builder()
-                .allowedCountries(setOf("US"))
-                .build(),
-            beforeViewModelCreation = {
-                whenever(
-                    navigator.getResultFlow<AddressElementNavigator.AutocompleteEvent?>(
-                        AddressElementNavigator.AutocompleteEvent.KEY
-                    )
-                ).thenReturn(autocompleteEvents)
-            },
-        ) {
-            autocompleteEvents.value = AddressElementNavigator.AutocompleteEvent.OnBack(
-                PaymentSheet.Address(
-                    city = "San Francisco",
-                    country = "US",
-                    line1 = "123 Apple Street",
-                    postalCode = "94107",
-                    state = "CA",
-                )
-            )
-            testDispatcher.scheduler.advanceUntilIdle()
-
-            assertThat(
-                viewModel.addressFormController.uncompletedFormValues.value[FormFieldId.Line1]?.value
-            ).isEqualTo("123 Apple Street")
-            assertThat(viewModel.hasChanges()).isTrue()
-
-            autocompleteEvents.value = AddressElementNavigator.AutocompleteEvent.OnBack(
-                PaymentSheet.Address(country = "US")
-            )
-            testDispatcher.scheduler.advanceUntilIdle()
-
-            assertThat(viewModel.hasChanges()).isFalse()
-        }
-    }
 
     @Test
     fun `additional checkbox edit makes form dirty and reverting clears it`() = runScenario(

@@ -45,8 +45,6 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.networking.RequestSurface
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
-import com.stripe.android.paymentsheet.addresselement.AutocompleteActivityLauncher
-import com.stripe.android.paymentsheet.addresselement.TestAutocompleteLauncher
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
@@ -109,32 +107,27 @@ internal class LinkActivityViewModelTest {
     }
 
     @Test
-    fun `test that activity registerForActivityResult registers confirmation handler & autocomplete launcher`() =
+    fun `test that activity registerForActivityResult registers confirmation handler`() =
         runTest(dispatcher) {
-            TestAutocompleteLauncher.test {
-                val confirmationHandler = FakeConfirmationHandler()
-                val vm = createViewModel(
-                    autocompleteLauncher = launcher,
-                    confirmationHandler = confirmationHandler
-                )
+            val confirmationHandler = FakeConfirmationHandler()
+            val vm = createViewModel(
+                confirmationHandler = confirmationHandler
+            )
 
-                val activityResultCaller = DummyActivityResultCaller.noOp()
+            val activityResultCaller = DummyActivityResultCaller.noOp()
 
-                vm.registerForActivityResult(
-                    activityResultCaller = activityResultCaller,
-                    lifecycleOwner = object : LifecycleOwner {
-                        override val lifecycle: Lifecycle = mock()
-                    }
-                )
+            vm.registerForActivityResult(
+                activityResultCaller = activityResultCaller,
+                lifecycleOwner = object : LifecycleOwner {
+                    override val lifecycle: Lifecycle = mock()
+                }
+            )
 
-                vm.unregisterActivity()
+            vm.unregisterActivity()
 
-                val autocompleteRegisterCall = registerCalls.awaitItem()
-                val confirmationHandlerRegisterCall = confirmationHandler.registerTurbine.awaitItem()
+            val confirmationHandlerRegisterCall = confirmationHandler.registerTurbine.awaitItem()
 
-                assertThat(autocompleteRegisterCall.activityResultCaller).isEqualTo(activityResultCaller)
-                assertThat(confirmationHandlerRegisterCall.activityResultCaller).isEqualTo(activityResultCaller)
-            }
+            assertThat(confirmationHandlerRegisterCall.activityResultCaller).isEqualTo(activityResultCaller)
         }
 
     @Test
@@ -1264,7 +1257,6 @@ internal class LinkActivityViewModelTest {
         linkLaunchMode: LinkLaunchMode = LinkLaunchMode.Full(showSecondaryButton = true),
         linkConfirmationHandler: LinkConfirmationHandler = FakeLinkConfirmationHandler(),
         launchWeb: (LinkConfiguration, PaymentMethodMetadata) -> Unit = { _, _ -> },
-        autocompleteLauncher: AutocompleteActivityLauncher = TestAutocompleteLauncher.noOp(),
         linkConfiguration: LinkConfiguration = TestFactory.LINK_CONFIGURATION,
         addPaymentMethodOptionsFactory: AddPaymentMethodOptions.Factory = mock(),
     ): LinkActivityViewModel {
@@ -1282,7 +1274,6 @@ internal class LinkActivityViewModelTest {
             savedStateHandle = savedStateHandle,
             linkLaunchMode = linkLaunchMode,
             linkConfirmationHandlerFactory = { linkConfirmationHandler },
-            autocompleteLauncher = autocompleteLauncher,
             addPaymentMethodOptionsFactory = addPaymentMethodOptionsFactory,
         ).apply {
             this.launchWebFlow = launchWeb

@@ -28,13 +28,11 @@ import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.testing.createComposeCleanupRule
-import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.paymentelementtestpages.AddressElementPage
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
-import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
@@ -204,16 +202,16 @@ internal class AddressElementActivityTest {
 
     @Test
     @Config(qualifiers = "notnight")
-    fun `always dark appearance is applied to autocomplete text on a light system`() {
-        val expectedPrimary = Color(0xFF654321)
+    fun `always dark appearance is applied to input address text on a light system`() {
+        val expectedOnSurface = Color(0xFF654321)
         val appearance = PaymentSheet.Appearance(
-            colorsDark = PaymentSheet.Colors.configureDefaultDark(primary = expectedPrimary),
+            colorsDark = PaymentSheet.Colors.Builder.dark()
+                .onSurface(expectedOnSurface)
+                .build(),
             themeMode = PaymentSheet.ThemeMode.AlwaysDark,
         )
-        val previousPlacesClientOverride = PlacesClientProxy.override
 
         try {
-            PlacesClientProxy.override = mock()
             runScenario(
                 args = AddressElementActivityContract.Args.Standalone(
                     apiConfiguration = DEFAULT_API_CONFIG,
@@ -223,23 +221,18 @@ internal class AddressElementActivityTest {
                 ),
             ) {
                 composeTestRule.waitForIdle()
-                activityScenario.onActivity { activity ->
-                    ViewModelProvider(activity)[AddressElementViewModel::class.java]
-                        .navigator
-                        .navigateTo(AddressElementScreen.Autocomplete(country = "US"))
-                }
-                composeTestRule.waitForIdle()
 
                 val textLayoutResults = mutableListOf<TextLayoutResult>()
                 composeTestRule.onNodeWithText(
-                    applicationContext.getString(R.string.stripe_paymentsheet_enter_address_manually)
+                    applicationContext.getString(R.string.stripe_paymentsheet_address_element_shipping_address)
                 ).performSemanticsAction(SemanticsActions.GetTextLayoutResult) { action ->
                     action(textLayoutResults)
                 }
-                assertThat(textLayoutResults.single().layoutInput.style.color).isEqualTo(expectedPrimary)
+                // Material's content alpha dims the onSurface color, so compare only its RGB.
+                assertThat(textLayoutResults.single().layoutInput.style.color.copy(alpha = 1f))
+                    .isEqualTo(expectedOnSurface)
             }
         } finally {
-            PlacesClientProxy.override = previousPlacesClientOverride
             PaymentSheet.Appearance().parseAppearance()
         }
     }
@@ -331,18 +324,11 @@ internal class AddressElementActivityTest {
     }
 
     @Test
-    fun `unchanged input can be canceled with root back without popping input`() = runScenario {
+    fun `unchanged input can be canceled with back`() = runScenario {
         addressPage.assertReadyToSave()
 
         activityScenario.onActivity { activity ->
-            val viewModel = ViewModelProvider(activity)[AddressElementViewModel::class.java]
-            val navController = requireNotNull(viewModel.navigator.navigationController)
-            val inputEntry = navController.getBackStackEntry(AddressElementScreen.InputAddress.route)
-
             activity.onBackPressedDispatcher.onBackPressed()
-
-            assertThat(navController.getBackStackEntry(AddressElementScreen.InputAddress.route))
-                .isSameInstanceAs(inputEntry)
         }
 
         assertThat(awaitResult()).isEqualTo(AddressElementActivityContract.Result.Canceled)

@@ -35,7 +35,6 @@ internal interface AddressElementPrimaryButtonAction {
 @Suppress("TooManyFunctions")
 internal class InputAddressViewModel @Inject constructor(
     val args: AddressElementActivityContract.Args,
-    val navigator: AddressElementNavigator,
     val resultStateHolder: AddressElementResultStateHolder,
     private val eventReporter: AddressElementEventReporter,
     @Named(AddressElementViewModelModule.INLINE_PLACES_CLIENT)
@@ -82,10 +81,7 @@ internal class InputAddressViewModel @Inject constructor(
 
     val shippingSameAsBillingState = _shippingSameAsBillingState.asStateFlow()
 
-    private val _collectedAddress = MutableStateFlow(
-        value = unparsedInitialShippingAddress ?: unparsedInitialBillingAddress
-    )
-    val collectedAddress: StateFlow<AddressDetails?> = _collectedAddress
+    private val initialAddress = unparsedInitialShippingAddress ?: unparsedInitialBillingAddress
 
     private val isInlineAutocompleteEnabled = true
 
@@ -125,7 +121,7 @@ internal class InputAddressViewModel @Inject constructor(
         )
 
     val addressFormController = AddressFormController(
-        initialValues = _collectedAddress.value?.toIdentifierMap() ?: emptyMap(),
+        initialValues = initialAddress?.toIdentifierMap() ?: emptyMap(),
         interactor = this,
         config = args.config,
     )
@@ -161,35 +157,6 @@ internal class InputAddressViewModel @Inject constructor(
                 autocompleteAddressDetails = autocompleteSelectedAddressDetails(),
             )
             resultStateHolder.onCancelCompleted()
-        }
-
-        viewModelScope.launch {
-            navigator.getResultFlow<AddressElementNavigator.AutocompleteEvent?>(
-                AddressElementNavigator.AutocompleteEvent.KEY
-            )?.collect { event ->
-                val oldAddress = _collectedAddress.value
-                val newAddress = event?.address
-                val autocompleteAddress = AddressDetails(
-                    name = oldAddress?.name,
-                    address = newAddress ?: oldAddress?.address,
-                    phoneNumber = oldAddress?.phoneNumber,
-                    isCheckboxSelected = oldAddress?.isCheckboxSelected
-                )
-
-                val values = autocompleteAddress.toIdentifierMap()
-
-                when (event) {
-                    is AddressElementNavigator.AutocompleteEvent.OnEnterManually -> {
-                        eventListener?.invoke(AutocompleteAddressInteractor.Event.OnExpandForm(values))
-                    }
-                    is AddressElementNavigator.AutocompleteEvent.OnBack -> {
-                        eventListener?.invoke(AutocompleteAddressInteractor.Event.OnValues(values))
-                    }
-                    null -> Unit
-                }
-
-                _collectedAddress.emit(autocompleteAddress)
-            }
         }
 
         viewModelScope.launch {
@@ -384,18 +351,6 @@ internal class InputAddressViewModel @Inject constructor(
 
     override fun onPredictionSelected(predictionId: String) {
         inlineAutocompleteController?.onPredictionSelected(predictionId)
-    }
-
-    override fun onAutocomplete(country: String) {
-        if (autocompleteConfig.isInlineAutocompleteEnabled) return
-        viewModelScope.launch {
-            _collectedAddress.emit(getCurrentAddress())
-            navigator.navigateTo(
-                AddressElementScreen.Autocomplete(
-                    country = country
-                )
-            )
-        }
     }
 
     sealed interface ShippingSameAsBillingState {
