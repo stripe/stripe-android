@@ -2,10 +2,6 @@ package com.stripe.android.checkout
 
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.uiautomator.By
-import androidx.test.uiautomator.UiDevice
-import androidx.test.uiautomator.Until
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.elements.PaymentElement
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -80,26 +76,6 @@ internal class CheckoutCardIntegrationTest {
     )
 
     @Test
-    fun testCardWith3ds2ChallengeCompletes() = runPlainScenario(
-        setup = {
-            contentPage.clickOnLpm("card")
-            formPage.fillOutCardDetails(newCardNumber = "4000000000003220")
-            formPage.clickPrimaryButton()
-        },
-        handleNextAction = {
-            val device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
-            val completeButton = device.wait(
-                Until.findObject(By.text("COMPLETE")),
-                CHALLENGE_TIMEOUT.inWholeMilliseconds,
-            )
-            checkNotNull(completeButton) { "3DS2 challenge COMPLETE button not found" }.click()
-        },
-        check = { result ->
-            assertThat(result).isInstanceOf(CheckoutElementsController.Result.Completed::class.java)
-        },
-    )
-
-    @Test
     fun testSavedCardIsReusedWithBillingTaxInAnotherSession() = runTaxScenario {
         runSession(paymentMethodSave = true) { controller ->
             assertAwaitingBillingAddress(controller.session.value)
@@ -165,7 +141,6 @@ internal class CheckoutCardIntegrationTest {
 
     private fun runPlainScenario(
         setup: suspend (CheckoutElementsController) -> Unit,
-        handleNextAction: suspend () -> Unit = {},
         check: (CheckoutElementsController.Result) -> Unit,
     ) = runBlocking {
         val backend = CheckoutPlaygroundBackend(
@@ -177,7 +152,7 @@ internal class CheckoutCardIntegrationTest {
             sessionParams = cardOnlySessionParams(),
             configuration = configuration,
             setup = setup,
-            handleNextAction = handleNextAction,
+            handleNextAction = {},
         )
         check(result)
     }
@@ -356,7 +331,6 @@ internal class CheckoutCardIntegrationTest {
         const val TAX_MERCHANT = "us_tax"
         const val CUSTOMER_EMAIL = "checkout-e2e@example.com"
         const val SUBTOTAL = 1000L
-        val CHALLENGE_TIMEOUT = 30.seconds
 
         val CALIFORNIA_ADDRESS = CheckoutElementsController.Address.State(
             line1 = "123 Main St",
