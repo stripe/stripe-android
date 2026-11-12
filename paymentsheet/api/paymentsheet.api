@@ -2200,6 +2200,12 @@ public abstract interface class com/stripe/android/paymentsheet/addresselement/A
 	public abstract fun onAddressLauncherResult (Lcom/stripe/android/paymentsheet/addresselement/AddressLauncherResult;)V
 }
 
+public final class com/stripe/android/paymentsheet/featuredinstitutions/ComposableSingletons$FeaturedInstitutionIconsKt {
+	public static final field INSTANCE Lcom/stripe/android/paymentsheet/featuredinstitutions/ComposableSingletons$FeaturedInstitutionIconsKt;
+	public fun <init> ()V
+	public final fun getLambda$493007546$paymentsheet_release ()Lkotlin/jvm/functions/Function4;
+}
+
 public final class com/stripe/android/paymentsheet/model/PaymentOption {
 	public static final field $stable I
 	public fun <init> (ILjava/lang/String;)V
@@ -2311,10 +2317,10 @@ public final class com/stripe/android/paymentsheet/verticalmode/ComposableSingle
 	public static final field INSTANCE Lcom/stripe/android/paymentsheet/verticalmode/ComposableSingletons$PaymentMethodRowButtonKt;
 	public fun <init> ()V
 	public final fun getLambda$-1179981339$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
-	public final fun getLambda$-126937227$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
-	public final fun getLambda$-2146415700$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$-1970087443$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda$-228724754$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda$1616606426$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$521290230$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
 }
 
 public final class com/stripe/android/paymentsheet/verticalmode/ComposableSingletons$SavedPaymentMethodConfirmUIKt {
