@@ -66,7 +66,7 @@ ext.versions = [
         playServicesWallet          : '20.0.0',
         playIntegrity               : '1.4.0',
         retrofit                    : '2.12.0',
-        robolectric                 : '4.16.1',
+        robolectric                 : '4.17',
         sentryGradlePlugin          : '6.1.0',
         showkase                    : '1.0.0-beta18',
         litert                      : '1.4.1',
