@@ -46,6 +46,9 @@ internal object CheckoutSessionDefinitions {
         defaultValue = "email@example.com",
         validate = optionalEmail,
     )
+    val customerUpdateAddress = customerUpdate("address")
+    val customerUpdateName = customerUpdate("name")
+    val customerUpdateShipping = customerUpdate("shipping")
     val currency = choice(
         key = "session.currency",
         displayName = "Currency",
@@ -157,6 +160,9 @@ internal object CheckoutSessionDefinitions {
             paymentMethodSave,
             paymentMethodRemove,
             customerEmail,
+            customerUpdateAddress,
+            customerUpdateName,
+            customerUpdateShipping,
             currency,
             merchant,
             customSecretKey,
@@ -170,6 +176,21 @@ internal object CheckoutSessionDefinitions {
             invoiceCreation,
         ),
     )
+
+    private fun customerUpdate(field: String) = choice(
+        key = "session.customer_update.$field",
+        displayName = "Customer update $field",
+        defaultValue = CheckoutCustomerUpdate.Default,
+        options = CheckoutCustomerUpdate.entries.map { it.name to it },
+        serialize = CheckoutCustomerUpdate::serializedValue,
+        isApplicable = { settings -> settings[customer] != CheckoutCustomer.Guest },
+    )
+}
+
+internal enum class CheckoutCustomerUpdate(val serializedValue: String) {
+    Default("default"),
+    Auto("auto"),
+    Never("never"),
 }
 
 internal enum class CheckoutCustomer(

@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.example.playground.checkout
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.example.playground.checkout.settings.AdaptivePricingCountry
+import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutCustomerUpdate
 import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutPlaygroundDefinitions.session
 import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutPlaygroundSettings
 import com.stripe.android.paymentsheet.example.playground.settings.Currency
@@ -113,6 +114,79 @@ class CheckoutSessionParamsFactoryTest {
         assertThat(params["customer_update"]!!.jsonObject).isEqualTo(
             JsonObject(mapOf("address" to JsonPrimitive("auto"), "shipping" to JsonPrimitive("auto")))
         )
+    }
+
+    @Test
+    fun `default customer updates are omitted without automatic tax`() = runScenario {
+        settings.update(session.billingAddressCollection, true)
+        settings.update(session.shippingAddressCollection, true)
+
+        val params = createParams(customerId = "cus_123")
+
+        assertThat(params).doesNotContainKey("customer_update")
+    }
+
+    @Test
+    fun `explicit auto customer updates are sent without automatic tax or address collection`() = runScenario {
+        settings.update(session.customerUpdateAddress, CheckoutCustomerUpdate.Auto)
+        settings.update(session.customerUpdateName, CheckoutCustomerUpdate.Auto)
+        settings.update(session.customerUpdateShipping, CheckoutCustomerUpdate.Auto)
+
+        val params = createParams(customerId = "cus_123")
+
+        assertThat(params.getValue("customer_update").jsonObject).isEqualTo(
+            JsonObject(
+                mapOf(
+                    "address" to JsonPrimitive("auto"),
+                    "name" to JsonPrimitive("auto"),
+                    "shipping" to JsonPrimitive("auto"),
+                )
+            )
+        )
+    }
+
+    @Test
+    fun `never customer updates override automatic tax address updates`() = runScenario {
+        settings.update(session.automaticTax, true)
+        settings.update(session.billingAddressCollection, true)
+        settings.update(session.shippingAddressCollection, true)
+        settings.update(session.customerUpdateAddress, CheckoutCustomerUpdate.Never)
+        settings.update(session.customerUpdateName, CheckoutCustomerUpdate.Never)
+        settings.update(session.customerUpdateShipping, CheckoutCustomerUpdate.Never)
+
+        val params = createParams(customerId = "cus_123")
+
+        assertThat(params.getValue("customer_update").jsonObject).isEqualTo(
+            JsonObject(
+                mapOf(
+                    "address" to JsonPrimitive("never"),
+                    "name" to JsonPrimitive("never"),
+                    "shipping" to JsonPrimitive("never"),
+                )
+            )
+        )
+    }
+
+    @Test
+    fun `address update can be overridden independently`() = runScenario {
+        settings.update(session.customerUpdateAddress, CheckoutCustomerUpdate.Auto)
+
+        val params = createParams(customerId = "cus_123")
+
+        assertThat(params.getValue("customer_update").jsonObject).isEqualTo(
+            JsonObject(mapOf("address" to JsonPrimitive("auto")))
+        )
+    }
+
+    @Test
+    fun `customer updates are omitted without a customer ID`() = runScenario {
+        settings.update(session.customerUpdateAddress, CheckoutCustomerUpdate.Auto)
+        settings.update(session.customerUpdateName, CheckoutCustomerUpdate.Auto)
+        settings.update(session.customerUpdateShipping, CheckoutCustomerUpdate.Auto)
+
+        val params = createParams()
+
+        assertThat(params).doesNotContainKey("customer_update")
     }
 
     @Test

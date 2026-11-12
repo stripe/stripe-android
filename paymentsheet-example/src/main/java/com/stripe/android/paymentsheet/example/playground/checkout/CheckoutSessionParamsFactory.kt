@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.example.playground.checkout
 
 import android.os.Build
 import com.stripe.android.core.version.StripeSdkVersion
+import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutCustomerUpdate
 import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutPlaygroundDefinitions
 import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutPlaygroundSettings
 import kotlinx.serialization.json.JsonArray
@@ -48,9 +49,7 @@ internal object CheckoutSessionParamsFactory {
                 customerId,
                 email,
                 paymentMethodSave,
-                automaticTax,
-                billingAddressCollection,
-                shippingAddressCollection,
+                settings,
             )
             putSavedPaymentMethodOptions(customerId, paymentMethodSave, paymentMethodRemove)
         }
@@ -131,9 +130,7 @@ internal object CheckoutSessionParamsFactory {
         customerId: String?,
         email: String?,
         paymentMethodSave: Boolean,
-        automaticTax: Boolean,
-        billingAddressCollection: Boolean,
-        shippingAddressCollection: Boolean,
+        settings: CheckoutPlaygroundSettings.Snapshot,
     ) {
         if (customerId == null) {
             email?.let { put("customer_email", it) }
@@ -142,13 +139,34 @@ internal object CheckoutSessionParamsFactory {
         }
 
         put("customer", customerId)
-        if (automaticTax) {
-            val customerUpdate = buildJsonObject {
-                if (billingAddressCollection) put("address", "auto")
-                if (shippingAddressCollection) put("shipping", "auto")
-            }
-            if (customerUpdate.isNotEmpty()) put("customer_update", customerUpdate)
+        val session = CheckoutPlaygroundDefinitions.session
+        val automaticTax = settings[session.automaticTax]
+        val customerUpdate = buildJsonObject {
+            putCustomerUpdate(
+                "address",
+                settings[session.customerUpdateAddress],
+                defaultAuto = automaticTax && settings[session.billingAddressCollection],
+            )
+            putCustomerUpdate("name", settings[session.customerUpdateName], defaultAuto = false)
+            putCustomerUpdate(
+                "shipping",
+                settings[session.customerUpdateShipping],
+                defaultAuto = automaticTax && settings[session.shippingAddressCollection],
+            )
         }
+        if (customerUpdate.isNotEmpty()) put("customer_update", customerUpdate)
+    }
+
+    private fun JsonObjectBuilder.putCustomerUpdate(
+        field: String,
+        update: CheckoutCustomerUpdate,
+        defaultAuto: Boolean,
+    ) {
+        val value = when (update) {
+            CheckoutCustomerUpdate.Default -> "auto".takeIf { defaultAuto }
+            else -> update.serializedValue
+        }
+        value?.let { put(field, it) }
     }
 
     private fun JsonObjectBuilder.putSavedPaymentMethodOptions(

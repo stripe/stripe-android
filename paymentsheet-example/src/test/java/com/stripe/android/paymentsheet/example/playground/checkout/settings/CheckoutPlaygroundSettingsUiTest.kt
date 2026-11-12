@@ -204,6 +204,46 @@ class CheckoutPlaygroundSettingsUiTest {
     }
 
     @Test
+    fun `customer update options can be changed in server side config`() = runScenario(
+        initialConfiguration = CheckoutPlaygroundDefinitions.session.configuration,
+        configureSettings = {
+            update(CheckoutPlaygroundDefinitions.session.customer, CheckoutCustomer.New)
+        },
+    ) {
+        val session = CheckoutPlaygroundDefinitions.session
+        page.value(session.customerUpdateAddress).performScrollTo().assertIsDisplayed()
+        page.option(session.customerUpdateAddress, "Never").performClick()
+        page.value(session.customerUpdateName).performScrollTo().assertIsDisplayed()
+        page.option(session.customerUpdateName, "Auto").performClick()
+        page.value(session.customerUpdateShipping).performScrollTo().assertIsDisplayed()
+        page.option(session.customerUpdateShipping, "Auto").performClick()
+
+        assertThat(settings[session.customerUpdateAddress]).isEqualTo(CheckoutCustomerUpdate.Never)
+        assertThat(settings[session.customerUpdateName]).isEqualTo(CheckoutCustomerUpdate.Auto)
+        assertThat(settings[session.customerUpdateShipping]).isEqualTo(CheckoutCustomerUpdate.Auto)
+    }
+
+    @Test
+    fun `customer update settings are hidden for guests`() = runScenario(
+        initialConfiguration = CheckoutPlaygroundDefinitions.session.configuration,
+        configureSettings = {
+            update(CheckoutPlaygroundDefinitions.session.customer, CheckoutCustomer.Returning)
+        },
+    ) {
+        val session = CheckoutPlaygroundDefinitions.session
+        page.value(session.customerUpdateAddress).performScrollTo().assertIsDisplayed()
+        page.value(session.customerUpdateName).performScrollTo().assertIsDisplayed()
+        page.value(session.customerUpdateShipping).performScrollTo().assertIsDisplayed()
+
+        settings.update(session.customer, CheckoutCustomer.Guest)
+        composeRule.waitForIdle()
+
+        page.value(session.customerUpdateAddress).assertDoesNotExist()
+        page.value(session.customerUpdateName).assertDoesNotExist()
+        page.value(session.customerUpdateShipping).assertDoesNotExist()
+    }
+
+    @Test
     fun `returning customer displays stored customer ID`() = runScenario(
         initialConfiguration = CheckoutPlaygroundDefinitions.session.configuration,
         configureSettings = { saveReturningCustomer("cus_123") },
@@ -358,6 +398,9 @@ class CheckoutPlaygroundSettingsUiTest {
 
         fun value(definition: CheckoutPlaygroundSettingDefinition.Value<*>) =
             rule.onNodeWithTag(checkoutSettingValueTestTag(definition))
+
+        fun option(definition: CheckoutPlaygroundSettingDefinition.Value<*>, text: String) =
+            rule.onNode(hasText(text).and(hasAnyAncestor(hasTestTag(checkoutSettingValueTestTag(definition)))))
 
         fun breadcrumb(definition: CheckoutPlaygroundSettingDefinition.Value<*>) =
             rule.onNodeWithTag(checkoutSettingBreadcrumbTestTag(definition))
