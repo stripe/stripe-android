@@ -212,6 +212,7 @@ class CheckoutSessionConfirmationInterceptorTest {
         @TestParameter saved: Boolean,
         @TestParameter(value = ["Card", "Link", "SepaDebit"]) type: PaymentMethod.Type,
         @TestParameter setup: Boolean,
+        @TestParameter isExpressCheckoutElement: Boolean,
     ) {
         val paymentMethod = when (type) {
             PaymentMethod.Type.Card -> PaymentMethodFixtures.CARD_PAYMENT_METHOD
@@ -242,9 +243,10 @@ class CheckoutSessionConfirmationInterceptorTest {
             type = type,
             paymentMethod = paymentMethod,
             createParams = createParams,
+            isExpressCheckoutElement = isExpressCheckoutElement,
         )
 
-        runScenario {
+        runScenario(isExpressCheckoutElement = isExpressCheckoutElement) {
             networkRule.checkoutConfirm(
                 *paymentMethodMatchers.toTypedArray(),
                 bodyPart("expected_payment_method_type", type.code),
@@ -1151,6 +1153,7 @@ class CheckoutSessionConfirmationInterceptorTest {
         customerMetadata: CustomerMetadata? = null,
         collectedEmail: String? = null,
         checkoutSessionResponse: CheckoutSessionResponse = CheckoutSessionResponseFactory.create(),
+        isExpressCheckoutElement: Boolean = false,
         block: suspend Scenario.() -> Unit,
     ) {
         val analyticsReporter = FakeCheckoutAnalyticsReporter()
@@ -1183,7 +1186,7 @@ class CheckoutSessionConfirmationInterceptorTest {
                     configuredElements = listOf("mobile-payment-element"),
                 ),
                 automaticPaymentMethodsEnabled = false,
-                isExpressCheckoutElement = false,
+                isExpressCheckoutElement = isExpressCheckoutElement,
             ) as ClientAttributionMetadata.CheckoutSession,
             context = applicationContext,
             checkoutSessionRepository = checkoutSessionRepository,
@@ -1209,9 +1212,11 @@ class CheckoutSessionConfirmationInterceptorTest {
         type: PaymentMethod.Type,
         paymentMethod: PaymentMethod,
         createParams: PaymentMethodCreateParams,
+        isExpressCheckoutElement: Boolean,
     ): List<RequestMatcher> = if (saved) {
         listOf(bodyPart("payment_method", paymentMethod.id))
     } else {
+        val paymentUserAgentToken = if (isExpressCheckoutElement) "ExpressCheckoutElement" else "PaymentElement"
         listOf(
             when (type) {
                 PaymentMethod.Type.Card -> bodyPart("payment_method_data[card][number]", "4242424242424242")
@@ -1224,7 +1229,7 @@ class CheckoutSessionConfirmationInterceptorTest {
             },
             bodyPart(
                 "payment_method_data[payment_user_agent]",
-                setOf("stripe-android/${StripeSdkVersion.VERSION_NAME}", "checkout_elements")
+                setOf("stripe-android/${StripeSdkVersion.VERSION_NAME}", paymentUserAgentToken)
                     .plus(createParams.attribution)
                     .joinToString(";"),
             ),
