@@ -245,18 +245,27 @@ internal class FieldPopulator(
     }
 
     fun populateAddress() {
-        selectors
-            .composeTestRule
-            .onNodeWithText(selectors.getResourceString(values.addressEntryMode.lineOneLabelResourceId))
-            .performScrollTo()
-            .performClick()
-            .performTextInput(values.line1)
+        typeIntoAddressLineOne(values.addressEntryMode.lineOneLabelResourceId, values.line1)
 
         if (values.addressEntryMode.requiresManualEntry) {
             selectors.enterAddressManually()
         }
 
         populateAddressDetails()
+    }
+
+    fun populateAddressFromSuggestion(query: String, suggestion: String) {
+        typeIntoAddressLineOne(UiCoreR.string.stripe_address_label_address, query)
+        selectors.selectAddressSuggestion(suggestion)
+    }
+
+    private fun typeIntoAddressLineOne(labelResourceId: Int, text: String) {
+        selectors
+            .composeTestRule
+            .onNodeWithText(selectors.getResourceString(labelResourceId))
+            .performScrollTo()
+            .performClick()
+            .performTextInput(text)
     }
 
     private fun populateAddressDetails() {
