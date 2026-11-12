@@ -43,7 +43,9 @@ internal class InlineAutocompleteController(
 
     private var activationState: ActivationState = ActivationState.ActiveByQuery
     private var lastObservedCountry: String? = null
-    private var predictionsPaused = false
+
+    // Paused until focus or Search so a prefilled query is not fetched without user action.
+    private var predictionsPaused = true
     private var queryFlow: StateFlow<String>? = null
     private var countryFlow: StateFlow<String?>? = null
     private var observeJob: Job? = null
@@ -68,7 +70,6 @@ internal class InlineAutocompleteController(
         queryFlow = query
         countryFlow = country
         lastObservedCountry = country.value ?: ""
-        predictionsPaused = false
         observeJob = coroutineScope.launch {
             combine(query, country) { q, c -> q to (c ?: "") }
                 .debounce(AutocompleteViewModel.SEARCH_DEBOUNCE_MS)
