@@ -49,6 +49,8 @@ android {
     }
 
     testOptions {
+        animationsDisabled = true
+
         managedDevices {
             localDevices {
                 register("pixel2api33") {
