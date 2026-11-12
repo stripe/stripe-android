@@ -17,13 +17,21 @@ internal data class ConfirmCheckoutSessionParams(
     val paymentMethodData: PaymentMethodCreateParams?,
     private val passiveCaptchaToken: String?,
     private val expectedPaymentMethodType: String?,
-    val clientAttributionMetadata: ClientAttributionMetadata.CheckoutSession,
+    private val clientAttributionMetadata: ClientAttributionMetadata.CheckoutSession,
     private val returnUrl: String,
     private val expectedAmount: Long,
     private val savePaymentMethod: Boolean?,
     private val shipping: Shipping?,
     private val collectedInformation: CollectedInformation?,
 ) {
+    fun productUsageTokens(): Set<String> = setOf(
+        if (clientAttributionMetadata.isExpressCheckoutElement) {
+            "ExpressCheckoutElement"
+        } else {
+            "PaymentElement"
+        }
+    )
+
     fun toParamMap(): Map<String, Any> {
         return buildMap {
             if (paymentMethodId != null) {

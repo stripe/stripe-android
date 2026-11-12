@@ -107,13 +107,7 @@ internal class CheckoutSessionRepository @Inject constructor(
             params.paymentMethodData,
             sourceParams = null,
             fraudDetectionData = fraudDetectionDataRepository.getCached(),
-            productUsageTokens = setOf(
-                if (params.clientAttributionMetadata.isExpressCheckoutElement) {
-                    "ExpressCheckoutElement"
-                } else {
-                    "PaymentElement"
-                }
-            ),
+            productUsageTokens = params.productUsageTokens(),
         )
         return executePost(
             clientSecret = clientSecret,
