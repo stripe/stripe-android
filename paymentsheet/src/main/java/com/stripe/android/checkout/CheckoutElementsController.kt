@@ -77,6 +77,7 @@ class CheckoutElementsController @Inject internal constructor(
     private val displayMessageResolver: CheckoutDisplayMessageResolver,
     @ViewModelScope private val viewModelScope: CoroutineScope,
     private val checkoutSessionRepository: CheckoutSessionRepository,
+    private val localOperationFactory: LocalOperation.Factory,
     private val checkoutSessionTaxRegionUpdater: CheckoutSessionTaxRegionUpdater,
     private val errorReporter: ErrorReporter,
     private val checkoutStateLoader: CheckoutStateLoader,
@@ -98,6 +99,11 @@ class CheckoutElementsController @Inject internal constructor(
          */
         fun clearLocalCustomerData(context: Context) {
             DefaultLinkStore(context).clear()
+            val localOperationFactory = LocalOperation.createFallbackFactory(context)
+            localOperationFactory.create(
+                operation = Operation.ClearLocalCustomerData,
+                params = emptyMap(),
+            ).invoked(response = null)
         }
     }
 
@@ -270,10 +276,9 @@ class CheckoutElementsController @Inject internal constructor(
             },
         ) {
             kotlin.Result.success(checkoutSessionResponse).also {
-                LocalOperation(
+                localOperationFactory.create(
                     operation = Operation.UpdateEmail,
                     params = emptyMap(),
-                    report = checkoutSessionRepository::fireEvent,
                 ).succeeded(checkoutSessionResponse)
             }
         }.toOperationResult()
@@ -373,13 +378,12 @@ class CheckoutElementsController @Inject internal constructor(
         val previousAddress = collectedDetails.shippingAddress
         if (previousAddress == null) {
             kotlin.Result.success(checkoutSessionResponse).also {
-                LocalOperation(
+                localOperationFactory.create(
                     operation = Operation.UpdateShippingAddress,
                     params = mapOf(
                         "invocation_source" to InvocationSource.Merchant.code,
                         "did_request_tax_update" to false,
                     ),
-                    report = checkoutSessionRepository::fireEvent,
                 ).succeeded(checkoutSessionResponse)
             }
         } else {
@@ -502,10 +506,9 @@ class CheckoutElementsController @Inject internal constructor(
                 )
             },
         ) {
-            LocalOperation(
+            localOperationFactory.create(
                 operation = Operation.ClearPaymentOption,
                 params = emptyMap(),
-                report = checkoutSessionRepository::fireEvent,
             ).invoked(checkoutSessionResponse)
             checkoutSessionTaxRegionUpdater.updateServerStateIfNeeded(
                 checkoutSessionResponse = checkoutSessionResponse,

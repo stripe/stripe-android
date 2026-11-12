@@ -1,8 +1,8 @@
 package com.stripe.android.paymentsheet.repositories
 
-import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutAnalyticsTestFixtures
+import com.stripe.android.checkout.analytics.FakeCheckoutAnalyticsReporter
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutFetch
 import com.stripe.android.checkouttesting.checkoutInit
@@ -14,7 +14,6 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.model.PaymentIntentFixtures
-import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.hasBodyPart
@@ -22,7 +21,6 @@ import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.RequestMatchers.query
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.model.CheckoutSessionClientSecret
-import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.android.utils.FakeFraudDetectionDataRepository
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -49,11 +47,7 @@ class CheckoutSessionRepositoryTest {
         elementsSessionClientParams = CheckoutStripeRepositoryFactory.clientParams(),
         fraudDetectionDataRepository = FakeFraudDetectionDataRepository.create(),
         stripeNetworkClient = DefaultStripeNetworkClient(),
-        analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
-        paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
-            context = ApplicationProvider.getApplicationContext(),
-            publishableKey = "pk_test_123",
-        ),
+        analyticsReporter = FakeCheckoutAnalyticsReporter(),
         apiRequestOptionsProvider = {
             ApiRequest.Options(
                 apiKey = DEFAULT_API_CONFIG.publishableKey,

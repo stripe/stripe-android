@@ -263,6 +263,7 @@ class PaymentElementAutocompleteAddressInteractorTest {
 
         val first = factory.create()
         first.observeQueryChanges(queryFlow, countryFlow)
+        first.onFocusGained()
 
         // Creating a new interactor disposes the previous one, so its observation is cancelled.
         factory.create()

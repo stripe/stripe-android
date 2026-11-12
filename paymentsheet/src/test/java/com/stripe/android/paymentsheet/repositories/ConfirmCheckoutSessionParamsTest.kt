@@ -4,7 +4,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.model.Address
 import com.stripe.android.model.ClientAttributionMetadata
-import com.stripe.android.model.PaymentIntentCreationFlow
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodSelectionFlow
@@ -173,10 +172,13 @@ class ConfirmCheckoutSessionParamsTest {
     }
 
     private companion object {
-        val CLIENT_ATTRIBUTION_METADATA = ClientAttributionMetadata.Elements(
+        val CLIENT_ATTRIBUTION_METADATA = ClientAttributionMetadata.CheckoutSession(
             elementsSessionConfigId = "test_session_id",
-            paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
             paymentMethodSelectionFlow = PaymentMethodSelectionFlow.MerchantSpecified,
+            checkoutSessionId = "cs_test_abc123",
+            checkoutConfigId = null,
+            configuredElements = listOf("mobile-payment-element"),
+            isExpressCheckoutElement = false,
             stripeSdkVersion = StripeSdkVersion.VERSION_NAME,
         )
 
