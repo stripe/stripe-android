@@ -794,7 +794,7 @@ internal class CheckoutOperationCoordinatorTest {
     }
 
     @Test
-    fun `successful confirmation without response refreshes and reports an internal failure`() {
+    fun `successful confirmation without response maps to failure for callback and reporting`() {
         val reporter = FakeCheckoutConfirmationResultReporter()
         runScenario(resultReporter = reporter) {
             coordinator.tryBeginConfirmation { Result.success(CONFIRMATION_PARAMETERS) }
