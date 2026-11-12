@@ -122,9 +122,19 @@ internal class EmbeddedSheetActivityCoordinatorTest {
         assertThat(createCall.activityResultCaller).isNotSameInstanceAs(activity)
         assertThat(failedPresentation.registerCalls.awaitItem()).isEqualTo(Unit)
         assertThat(activity.intent).isSameInstanceAs(failedIntent)
+        assertThat(coordinator.appearance).isNull()
 
         coordinator.onDestroy()
         assertThat(failedPresentation.onDestroyCalls.awaitItem()).isEqualTo(Unit)
+    }
+
+    @Test
+    fun `failed presentation has no appearance`() = runScenario(
+        initialArgs = createArgs(
+            presentationState = EmbeddedActivityArgs.PresentationState.Failed,
+        ),
+    ) {
+        assertThat(coordinator.appearance).isNull()
     }
 
     @Test

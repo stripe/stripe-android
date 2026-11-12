@@ -36,7 +36,8 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
         this.coordinator = coordinator
         coordinator.register()
         setContent {
-            PaymentElementTheme(appearance = coordinator.appearance) {
+            val appearance = coordinator.appearance ?: return@setContent
+            PaymentElementTheme(appearance = appearance) {
                 val bottomSheetState = rememberStripeBottomSheetState(
                     confirmValueChange = { coordinator.canDismiss() },
                 )
