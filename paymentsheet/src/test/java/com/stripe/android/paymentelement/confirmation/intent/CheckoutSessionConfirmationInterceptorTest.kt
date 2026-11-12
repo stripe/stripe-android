@@ -208,46 +208,11 @@ class CheckoutSessionConfirmationInterceptorTest {
     }
 
     @Test
-    fun `new payment method PUA identifies the confirming Checkout element`(
-        @TestParameter isExpressCheckoutElement: Boolean,
-    ) = runScenario(isExpressCheckoutElement = isExpressCheckoutElement) {
-        val createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD.copy(
-            card = PaymentMethodCreateParamsFixtures.CARD_WITH_ATTRIBUTION,
-        )
-        val paymentMethodMatchers = createPaymentMethodMatchers(
-            saved = false,
-            type = PaymentMethod.Type.Card,
-            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
-            createParams = createParams,
-            paymentUserAgentToken = if (isExpressCheckoutElement) "ExpressCheckoutElement" else "PaymentElement",
-        )
-
-        networkRule.checkoutConfirm(
-            *paymentMethodMatchers.toTypedArray(),
-            bodyPart("client_attribution_metadata[merchant_integration_source]", "mobile-checkout"),
-            bodyPart(
-                "client_attribution_metadata[merchant_integration_subtype]",
-                if (isExpressCheckoutElement) "mobile-express-checkout-element" else "mobile-payment-element",
-            ),
-            *commonRequestMatchers(),
-        ) { response ->
-            response.testBodyFromFile("checkout-session-confirm.json")
-        }
-
-        val result = interceptor.intercept(
-            intent = PaymentIntentFactory.create(),
-            confirmationOption = NEW_PM_OPTION.copy(createParams = createParams),
-            shippingValues = null,
-        )
-
-        assertThat(result).isInstanceOf<ConfirmationDefinition.Action.Complete<IntentConfirmationDefinition.Args>>()
-    }
-
-    @Test
     fun `confirmation sends actual payment method type`(
         @TestParameter saved: Boolean,
         @TestParameter(value = ["Card", "Link", "SepaDebit"]) type: PaymentMethod.Type,
         @TestParameter setup: Boolean,
+        @TestParameter isExpressCheckoutElement: Boolean,
     ) {
         val paymentMethod = when (type) {
             PaymentMethod.Type.Card -> PaymentMethodFixtures.CARD_PAYMENT_METHOD
@@ -278,9 +243,10 @@ class CheckoutSessionConfirmationInterceptorTest {
             type = type,
             paymentMethod = paymentMethod,
             createParams = createParams,
+            isExpressCheckoutElement = isExpressCheckoutElement,
         )
 
-        runScenario {
+        runScenario(isExpressCheckoutElement = isExpressCheckoutElement) {
             networkRule.checkoutConfirm(
                 *paymentMethodMatchers.toTypedArray(),
                 bodyPart("expected_payment_method_type", type.code),
@@ -1244,10 +1210,11 @@ class CheckoutSessionConfirmationInterceptorTest {
         type: PaymentMethod.Type,
         paymentMethod: PaymentMethod,
         createParams: PaymentMethodCreateParams,
-        paymentUserAgentToken: String = "PaymentElement",
+        isExpressCheckoutElement: Boolean,
     ): List<RequestMatcher> = if (saved) {
         listOf(bodyPart("payment_method", paymentMethod.id))
     } else {
+        val paymentUserAgentToken = if (isExpressCheckoutElement) "ExpressCheckoutElement" else "PaymentElement"
         listOf(
             when (type) {
                 PaymentMethod.Type.Card -> bodyPart("payment_method_data[card][number]", "4242424242424242")
