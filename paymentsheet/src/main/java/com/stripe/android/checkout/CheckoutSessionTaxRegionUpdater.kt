@@ -11,6 +11,7 @@ import javax.inject.Inject
 @OptIn(CheckoutSessionPreview::class)
 internal class CheckoutSessionTaxRegionUpdater @Inject constructor(
     private val checkoutSessionRepository: CheckoutSessionRepository,
+    private val localOperationFactory: LocalOperation.Factory,
 ) {
     fun requiresUpdate(
         checkoutSessionResponse: CheckoutSessionResponse,
@@ -47,10 +48,9 @@ internal class CheckoutSessionTaxRegionUpdater @Inject constructor(
             }
         } else {
             Result.success(checkoutSessionResponse).also {
-                LocalOperation(
+                localOperationFactory.create(
                     operation = addressSource.updateOperation(),
                     params = params,
-                    report = checkoutSessionRepository::fireEvent,
                 ).succeeded(checkoutSessionResponse)
             }
         }

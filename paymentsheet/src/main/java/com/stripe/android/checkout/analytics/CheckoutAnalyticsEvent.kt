@@ -42,6 +42,7 @@ internal class CheckoutAnalyticsEvent(
         UpdateCurrency("update_currency"),
         UpdateEmail("update_email"),
         ClearPaymentOption("clear_payment_option"),
+        ClearLocalCustomerData("clear_local_customer_data"),
         RunServerUpdate("run_server_update"),
         UpdateShippingAddress("update_shipping_address"),
         UpdateBillingAddress("update_billing_address"),

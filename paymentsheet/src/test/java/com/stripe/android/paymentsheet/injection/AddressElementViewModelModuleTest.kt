@@ -4,6 +4,8 @@ import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
+import com.stripe.android.checkout.analytics.FakeCheckoutAnalyticsReporter
+import com.stripe.android.checkout.analytics.LocalOperation
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.networking.AnalyticsRequestFactory
@@ -11,7 +13,6 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.model.Address
-import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.testBodyFromFile
@@ -397,16 +398,13 @@ class AddressElementViewModelModuleTest {
     )
 
     private fun createTaxRegionUpdater(): CheckoutSessionTaxRegionUpdater {
+        val analyticsReporter = FakeCheckoutAnalyticsReporter()
         return CheckoutSessionTaxRegionUpdater(
             CheckoutSessionRepository(
                 elementsSessionClientParams = CheckoutStripeRepositoryFactory.clientParams(),
                 fraudDetectionDataRepository = FakeFraudDetectionDataRepository.create(),
                 stripeNetworkClient = DefaultStripeNetworkClient(),
-                analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
-                paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
-                    context = ApplicationProvider.getApplicationContext(),
-                    publishableKey = "pk_test_123",
-                ),
+                analyticsReporter = analyticsReporter,
                 apiRequestOptionsProvider = Provider {
                     ApiRequest.Options(
                         apiKey = "pk_test_123",
@@ -414,6 +412,9 @@ class AddressElementViewModelModuleTest {
                     )
                 },
             ),
+            localOperationFactory = LocalOperation.Factory { operation, params ->
+                LocalOperation(operation, params, analyticsReporter)
+            },
         )
     }
 
