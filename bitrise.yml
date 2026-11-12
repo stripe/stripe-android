@@ -25,7 +25,7 @@ pipelines:
       run-paymentsheet-instrumentation-tests: { }
       run-financial-connections-and-crypto-instrumentation-tests: { }
       run-connections-e2e-tests-on-push: { }
-      run-cardscan-and-google-pay-tests: { }
+      run-cardscan-google-pay-and-web-auth-tests: { }
       run-paymentsheet-e2e: { }
       check-dependencies-and-publish-pom: { }
   pipeline-connect-e2e-debug-tests:
@@ -420,7 +420,7 @@ workflows:
       bitrise.io:
         stack: ubuntu-resolute-26.04-bitrise-2026-android
         machine_type_id: g2.linux.x-large
-  run-cardscan-and-google-pay-tests:
+  run-cardscan-google-pay-and-web-auth-tests:
     before_run:
       - start_cardscan_emulator
       - prepare_all
@@ -440,10 +440,18 @@ workflows:
           timeout: 1200
           inputs:
             - content: ./scripts/retry_with_emulator_cleanup.sh 2 ./gradlew :camera-core:connectedAndroidTest :stripecardscan:connectedAndroidTest :stripecardscan-example:connectedAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
-      - bundle::export_instrumentation_test_results:
-          title: Export CardScan instrumentation test results
+      # Reuses CardScan's Google APIs emulator, which ships a browser, unlike the aosp-atd managed device.
+      - script@1:
+          title: Execute PaymentSheet web authentication tests
+          is_always_run: true
+          timeout: 1200
           inputs:
-            - test_title: CardScan instrumentation tests
+            - content: ./scripts/retry_with_emulator_cleanup.sh 2 ./gradlew "-Pandroid.testInstrumentationRunnerArguments.package=com.stripe.android.checkout.webauth" :paymentsheet:connectedDebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
+      # One export for both steps: each export republishes every module's results under its title.
+      - bundle::export_instrumentation_test_results:
+          title: Export CardScan and web authentication test results
+          inputs:
+            - test_title: CardScan and web authentication instrumentation tests
       # Firebase Test Lab runs remotely, so it can share this job without
       # competing with CardScan's local emulator.
       - android-build-for-ui-testing@0:
@@ -495,12 +503,6 @@ workflows:
                 CLASSES=$(python3 scripts/get_shard_test_classes.py --shard-index 0 --num-shards 1)
 
                 ./scripts/retry_with_emulator_cleanup.sh 2 ./gradlew -PSTRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN=$STRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN -Pandroid.experimental.androidTest.numManagedDeviceShards=$PAYMENTSHEET_E2E_DEVICE_SHARD_COUNT -Pandroid.experimental.testOptions.managedDevices.maxConcurrentDevices=$PAYMENTSHEET_E2E_DEVICE_SHARD_COUNT "-Pandroid.testInstrumentationRunnerArguments.class=$CLASSES" :paymentsheet-example:pixel2api33chromeBaseDebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
-      - script@1:
-          title: Execute PaymentSheet web authentication tests
-          is_always_run: true
-          timeout: 1200
-          inputs:
-            - content: ./scripts/retry_with_emulator_cleanup.sh 2 ./gradlew "-Pandroid.testInstrumentationRunnerArguments.package=com.stripe.android.checkout.webauth" :paymentsheet:pixel2api33chromeDebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
       - bundle::export_instrumentation_test_results:
           title: Export PaymentSheet E2E test results
           inputs:

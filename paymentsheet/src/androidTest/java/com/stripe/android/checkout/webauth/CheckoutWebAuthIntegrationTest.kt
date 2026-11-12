@@ -22,7 +22,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import kotlin.time.Duration.Companion.seconds
 
-// CI selects this package to run on pixel2api33chrome, away from the aosp-atd suite whose WebView 101 leaks Activities.
+// CI runs this package on a Google APIs emulator, apart from the aosp-atd suite whose WebView 101 leaks Activities.
 @OptIn(CheckoutSessionPreview::class)
 @RunWith(AndroidJUnit4::class)
 internal class CheckoutWebAuthIntegrationTest {
