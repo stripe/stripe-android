@@ -7,6 +7,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
+import app.cash.turbine.Turbine
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.elements.PaymentElement
@@ -36,6 +37,7 @@ import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.createCustomerState
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
@@ -183,7 +185,7 @@ internal class CheckoutSheetLauncherTest {
     }
 
     @Test
-    fun `launchForm logs error and returns if configuration is null`() = testScenario {
+    fun `launchForm reports failure and logs error if configuration is null`() = testScenario {
         sheetLauncher.launchForm(
             code = "test_code",
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
@@ -197,6 +199,7 @@ internal class CheckoutSheetLauncherTest {
             .isEqualTo("unexpected_error.embedded.embedded_sheet_launcher.embedded_state_is_null")
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
         assertThat(selectionHolder.temporarySelection.value).isNull()
+        assertMissingConfigurationFailure()
     }
 
     @Test
@@ -420,7 +423,7 @@ internal class CheckoutSheetLauncherTest {
     }
 
     @Test
-    fun `launchManage logs error and returns if configuration is null`() = testScenario {
+    fun `launchManage reports failure and logs error if configuration is null`() = testScenario {
         sheetLauncher.launchManage(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
             customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,
@@ -431,6 +434,7 @@ internal class CheckoutSheetLauncherTest {
         assertThat(loggedErrors.size).isEqualTo(1)
         assertThat(loggedErrors.first())
             .isEqualTo("unexpected_error.embedded.embedded_sheet_launcher.embedded_state_is_null")
+        assertMissingConfigurationFailure()
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
     }
 
@@ -912,7 +916,7 @@ internal class CheckoutSheetLauncherTest {
     }
 
     @Test
-    fun `launchPaymentOptions does not launch while configuring without a payment element`() = testScenario {
+    fun `launchPaymentOptions reports failure while configuring without a payment element`() = testScenario {
         val configuration = CheckoutElementsController.Configuration().build()
         embeddedContentState.value = null
         selectionHolder.state = null
@@ -932,6 +936,7 @@ internal class CheckoutSheetLauncherTest {
             configuration = null,
         )
 
+        assertMissingConfigurationFailure()
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
         assertThat(launcherState.isAwaitingPaymentOptionsReady).isFalse()
         assertThat(errorReporter.getLoggedErrors()).isEmpty()
@@ -940,7 +945,7 @@ internal class CheckoutSheetLauncherTest {
     }
 
     @Test
-    fun `launchPaymentOptions does not launch before configure starts`() = testScenario {
+    fun `launchPaymentOptions reports failure before configure starts`() = testScenario {
         embeddedContentState.value = null
         selectionHolder.state = null
 
@@ -952,6 +957,7 @@ internal class CheckoutSheetLauncherTest {
         )
         runCurrent()
 
+        assertMissingConfigurationFailure()
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
         assertThat(launcherState.isAwaitingPaymentOptionsReady).isFalse()
         assertThat(errorReporter.getLoggedErrors()).isEmpty()
@@ -975,7 +981,7 @@ internal class CheckoutSheetLauncherTest {
     }
 
     @Test
-    fun `launchPaymentOptions does not launch when configuration is unavailable while idle`() = testScenario {
+    fun `launchPaymentOptions reports failure when configuration is unavailable while idle`() = testScenario {
         embeddedContentState.value = null
 
         sheetLauncher.launchPaymentOptions(
@@ -986,9 +992,66 @@ internal class CheckoutSheetLauncherTest {
         )
         runCurrent()
 
+        assertMissingConfigurationFailure()
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
         assertThat(launcherState.isAwaitingPaymentOptionsReady).isFalse()
         assertThat(errorReporter.getLoggedErrors()).isEmpty()
+    }
+
+    @Test
+    fun `launchPaymentOptions reports failure when configuration is unavailable while updating`() = testScenario {
+        val mutationGate = CompletableDeferred<Unit>()
+        coroutineScope.launch {
+            operationCoordinator.runMutation {
+                mutationGate.await()
+                Result.success(Unit)
+            }
+        }
+        runCurrent()
+
+        sheetLauncher.launchPaymentOptions(
+            paymentMethodMetadata = null,
+            customerState = null,
+            selection = null,
+            configuration = null,
+        )
+
+        assertMissingConfigurationFailure()
+        assertThat(sheetStateHolder.sheetIsOpen).isFalse()
+        assertThat(launcherState.isAwaitingPaymentOptionsReady).isFalse()
+        assertThat(operationCoordinator.status.value).isEqualTo(CheckoutOperationCoordinator.Status.Updating)
+        mutationGate.complete(Unit)
+        runCurrent()
+    }
+
+    @Test
+    fun `missing configuration does not report failure when the sheet is already open`() = testScenario {
+        sheetStateHolder.sheetIsOpen = true
+
+        sheetLauncher.launchPaymentOptions(
+            paymentMethodMetadata = null,
+            customerState = null,
+            selection = null,
+            configuration = null,
+        )
+
+        resultCallbacks.expectNoEvents()
+        assertThat(sheetStateHolder.sheetIsOpen).isTrue()
+    }
+
+    @Test
+    fun `missing configuration does not report failure before lifecycle creation`() = testScenario(
+        initialLifecycleState = Lifecycle.State.INITIALIZED,
+    ) {
+        sheetLauncher.launchPaymentOptions(
+            paymentMethodMetadata = null,
+            customerState = null,
+            selection = null,
+            configuration = null,
+        )
+
+        resultCallbacks.expectNoEvents()
+        assertThat(sheetStateHolder.sheetIsOpen).isFalse()
     }
 
     @Test
@@ -1510,6 +1573,7 @@ internal class CheckoutSheetLauncherTest {
         val sessionRefresher = FakeCheckoutSessionRefresher()
         val logger = FakeLogger()
         val confirmationHandler = FakeConfirmationHandler()
+        val resultCallbacks = Turbine<CheckoutElementsController.Result>()
         val operationCoordinator = CheckoutOperationCoordinator(
             displayMessageResolver = CheckoutDisplayMessageResolver(applicationContext),
             confirmationHandler = confirmationHandler,
@@ -1543,6 +1607,8 @@ internal class CheckoutSheetLauncherTest {
                     linkAccountHolder = linkAccountHolder,
                     sheetStateHolder = sheetStateHolder,
                     errorReporter = errorReporter,
+                    resultCallback = resultCallbacks::add,
+                    displayMessageResolver = CheckoutDisplayMessageResolver(applicationContext),
                     sessionRefresher = sessionRefresher,
                     operationCoordinator = operationCoordinator,
                     launcherState = state,
@@ -1575,6 +1641,7 @@ internal class CheckoutSheetLauncherTest {
                 sheetLauncher = sheetLauncher,
                 sheetStateHolder = sheetStateHolder,
                 errorReporter = errorReporter,
+                resultCallbacks = resultCallbacks,
                 immediateActionWasInvoked = { immediateActionInvoked },
                 sessionRefresher = sessionRefresher,
                 logger = logger,
@@ -1590,6 +1657,7 @@ internal class CheckoutSheetLauncherTest {
 
         confirmationHandler.validate()
         sessionRefresher.ensureAllEventsConsumed()
+        resultCallbacks.ensureAllEventsConsumed()
     }
 
     private class Scenario(
@@ -1603,6 +1671,7 @@ internal class CheckoutSheetLauncherTest {
         val sheetLauncher: EmbeddedSheetLauncher,
         val sheetStateHolder: SheetStateHolder,
         val errorReporter: FakeErrorReporter,
+        val resultCallbacks: Turbine<CheckoutElementsController.Result>,
         val immediateActionWasInvoked: () -> Boolean,
         val sessionRefresher: FakeCheckoutSessionRefresher,
         val logger: FakeLogger,
@@ -1617,6 +1686,21 @@ internal class CheckoutSheetLauncherTest {
         ) -> CheckoutSheetLauncher,
         private val runCurrent: () -> Unit,
     ) {
+        suspend fun assertMissingConfigurationFailure() {
+            val result = resultCallbacks.awaitItem()
+            assertThat(result).isInstanceOf<CheckoutElementsController.Result.Failed>()
+            val failed = result as CheckoutElementsController.Result.Failed
+            assertThat(failed.error).isInstanceOf<IllegalStateException>()
+            assertThat(failed.error.message).isEqualTo(
+                "Cannot present the Payment Element without a Payment Element configuration. " +
+                    "Include paymentElement in the checkout configuration before presenting it."
+            )
+            assertThat(failed.displayMessage).isEqualTo(
+                ApplicationProvider.getApplicationContext<Application>()
+                    .getString(R.string.stripe_something_went_wrong)
+            )
+        }
+
         fun runCurrent() {
             runCurrent.invoke()
         }

@@ -68,6 +68,8 @@ internal class CheckoutSheetLauncher @Inject constructor(
     private val linkAccountHolder: LinkAccountHolder,
     private val sheetStateHolder: SheetStateHolder,
     private val errorReporter: ErrorReporter,
+    private val resultCallback: CheckoutElementsController.ResultCallback,
+    private val displayMessageResolver: CheckoutDisplayMessageResolver,
     private val sessionRefresher: CheckoutSessionRefresher,
     private val operationCoordinator: CheckoutOperationCoordinator,
     private val launcherState: CheckoutSheetLauncherState,
@@ -258,19 +260,20 @@ internal class CheckoutSheetLauncher @Inject constructor(
         if (sheetStateHolder.sheetIsOpen) return
         val presentationState = when (val status = operationCoordinator.status.value) {
             CheckoutOperationCoordinator.Status.Idle -> {
-                if (paymentMethodMetadata == null || configuration == null) return
+                if (configuration == null) return reportMissingConfiguration()
+                if (paymentMethodMetadata == null) return
                 EmbeddedActivityArgs.PresentationState.Ready(
                     paymentMethodMetadata = paymentMethodMetadata,
                     configuration = configuration,
                 )
             }
             CheckoutOperationCoordinator.Status.Updating -> {
-                if (configuration == null) return
+                if (configuration == null) return reportMissingConfiguration()
                 EmbeddedActivityArgs.PresentationState.Loading(configuration.appearance)
             }
             is CheckoutOperationCoordinator.Status.Configuring -> {
                 val appearance = status.configuration.paymentElementConfiguration?.appearance?.asPaymentSheet()
-                    ?: return
+                    ?: return reportMissingConfiguration()
                 EmbeddedActivityArgs.PresentationState.Loading(appearance)
             }
         }
@@ -295,10 +298,24 @@ internal class CheckoutSheetLauncher @Inject constructor(
             errorReporter.report(
                 ErrorReporter.UnexpectedErrorEvent.EMBEDDED_SHEET_LAUNCHER_EMBEDDED_STATE_IS_NULL
             )
+            reportMissingConfiguration()
             return null
         }
         if (sheetStateHolder.sheetIsOpen) return null
         return configuration
+    }
+
+    private fun reportMissingConfiguration() {
+        val error = IllegalStateException(
+            "Cannot present the Payment Element without a Payment Element configuration. " +
+                "Include paymentElement in the checkout configuration before presenting it."
+        )
+        resultCallback.onResult(
+            CheckoutElementsController.Result.Failed(
+                error = error,
+                displayMessage = displayMessageResolver.resolve(error),
+            )
+        )
     }
 
     private fun resumePendingReadyLaunch() {
