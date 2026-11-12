@@ -181,7 +181,6 @@ internal object MobileSession {
     )
 
     /** The X-Stripe-Mobile-Config header value on elements/sessions. */
-    @ConsistentCopyVisibility
     @Serializable
     data class Config private constructor(
         /** The generated schema hash, for debugging purposes. */
