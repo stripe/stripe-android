@@ -17,7 +17,7 @@ internal data class ConfirmCheckoutSessionParams(
     val paymentMethodData: PaymentMethodCreateParams?,
     private val passiveCaptchaToken: String?,
     private val expectedPaymentMethodType: String?,
-    private val clientAttributionMetadata: ClientAttributionMetadata,
+    val clientAttributionMetadata: ClientAttributionMetadata.CheckoutSession,
     private val returnUrl: String,
     private val expectedAmount: Long,
     private val savePaymentMethod: Boolean?,
