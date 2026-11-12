@@ -9,8 +9,8 @@ import androidx.test.uiautomator.UiSelector
 import androidx.test.uiautomator.Until
 import java.security.InvalidParameterException
 
-/** Drives a Stripe test authorization page in Chrome, including Chrome's first-run onboarding. */
-class ChromeAuthorizationPage(
+/** Drives a Stripe test authorization page in a browser, including Chrome's first-run onboarding. */
+class BrowserAuthorizationPage(
     private val device: UiDevice,
     private val composeTestRule: ComposeTestRule,
 ) {

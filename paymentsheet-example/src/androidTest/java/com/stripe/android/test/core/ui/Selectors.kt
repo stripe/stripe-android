@@ -32,8 +32,8 @@ import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.DEFAULT_UI_TIMEOUT
 import com.stripe.android.test.core.HOOKS_PAGE_LOAD_TIMEOUT
 import com.stripe.android.test.core.TestParameters
-import com.stripe.android.testing.ChromeAuthorizationPage
-import com.stripe.android.testing.ChromeAuthorizationPage.Companion.BROWSER_LAUNCH_TIMEOUT_MS
+import com.stripe.android.testing.BrowserAuthorizationPage
+import com.stripe.android.testing.BrowserAuthorizationPage.Companion.BROWSER_LAUNCH_TIMEOUT_MS
 import com.stripe.android.ui.core.elements.MANDATE_TEST_TAG
 import com.stripe.android.ui.core.elements.SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG
 import com.stripe.android.uicore.elements.DROPDOWN_MENU_CLICKABLE_TEST_TAG
@@ -54,7 +54,7 @@ internal class Selectors(
     val composeTestRule: ComposeTestRule,
     private val testParameters: TestParameters
 ) {
-    private val chromeAuthorizationPage = ChromeAuthorizationPage(device, composeTestRule)
+    private val browserAuthorizationPage = BrowserAuthorizationPage(device, composeTestRule)
 
     val continueButton = BuyButton(composeTestRule)
     val complete = ComposeButton(composeTestRule, hasTestTag(CHECKOUT_TEST_TAG))
@@ -164,7 +164,7 @@ internal class Selectors(
             "test ${if (isSetup) "setup" else "payment"} page"
         }
 
-        chromeAuthorizationPage.awaitPageText(readinessText, HOOKS_PAGE_LOAD_TIMEOUT * 1000)
+        browserAuthorizationPage.awaitPageText(readinessText, HOOKS_PAGE_LOAD_TIMEOUT * 1000)
     }
 
     /** Waits for the browser chooser or browser, then handles Chrome's first-run onboarding. */
@@ -175,7 +175,7 @@ internal class Selectors(
             conditionDescription = "browser chooser or ${browser.name} to launch",
             timeoutMillis = BROWSER_LAUNCH_TIMEOUT_MS,
         ) {
-            chromeAuthorizationPage.currentTopActivity()?.let { activity ->
+            browserAuthorizationPage.currentTopActivity()?.let { activity ->
                 val isRequestedBrowser = activity.contains(browser.packageName)
                 if (isRequestedBrowser) {
                     launchedActivity = activity
@@ -190,7 +190,7 @@ internal class Selectors(
                 conditionDescription = "${browser.name} to launch",
                 timeoutMillis = BROWSER_LAUNCH_TIMEOUT_MS,
             ) {
-                chromeAuthorizationPage.currentTopActivity()?.let { activity ->
+                browserAuthorizationPage.currentTopActivity()?.let { activity ->
                     if (activity.contains(browser.packageName)) {
                         launchedActivity = activity
                     }
@@ -200,7 +200,7 @@ internal class Selectors(
         }
 
         if (browser == BrowserUI.Chrome) {
-            chromeAuthorizationPage.dismissFirstRunIfShown()
+            browserAuthorizationPage.dismissFirstRunIfShown()
         }
     }
 
@@ -229,7 +229,7 @@ internal class Selectors(
                 device = device
             ) {
                 override fun click() {
-                    chromeAuthorizationPage.clickAction(
+                    browserAuthorizationPage.clickAction(
                         testParameters.authorizationAction.text(testParameters.isSetupMode)
                     )
                 }
