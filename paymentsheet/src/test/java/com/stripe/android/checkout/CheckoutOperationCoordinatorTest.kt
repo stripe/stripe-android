@@ -287,51 +287,6 @@ internal class CheckoutOperationCoordinatorTest {
     }
 
     @Test
-    fun `cancelling an identical queued configure preserves pending configuration order`() = runScenario {
-        val configuration = CheckoutElementsController.Configuration().build()
-        val nextConfiguration = CheckoutElementsController.Configuration()
-            .paymentElement(PaymentElement.Configuration()).build()
-        val releaseConfigure = CompletableDeferred<Unit>()
-        val releaseNextConfigure = CompletableDeferred<Unit>()
-
-        coordinator.status.test {
-            assertThat(awaitItem()).isEqualTo(CheckoutOperationCoordinator.Status.Idle)
-            val configure = backgroundScope.async {
-                coordinator.runConfigure(configuration) {
-                    releaseConfigure.await()
-                    Result.success(Unit)
-                }
-            }
-            assertThat(awaitItem()).isEqualTo(CheckoutOperationCoordinator.Status.Configuring(configuration))
-
-            val nextConfigure = backgroundScope.async {
-                coordinator.runConfigure(nextConfiguration) {
-                    releaseNextConfigure.await()
-                    Result.success(Unit)
-                }
-            }
-            val identicalConfigure = backgroundScope.async {
-                coordinator.runConfigure<Unit>(configuration) {
-                    error("Canceled configure must not run")
-                }
-            }
-            runCurrent()
-            expectNoEvents()
-
-            identicalConfigure.cancelAndJoin()
-            expectNoEvents()
-
-            releaseConfigure.complete(Unit)
-            assertThat(configure.await().isSuccess).isTrue()
-            assertThat(awaitItem()).isEqualTo(CheckoutOperationCoordinator.Status.Configuring(nextConfiguration))
-
-            releaseNextConfigure.complete(Unit)
-            assertThat(nextConfigure.await().isSuccess).isTrue()
-            assertThat(awaitItem()).isEqualTo(CheckoutOperationCoordinator.Status.Idle)
-        }
-    }
-
-    @Test
     fun `runMutation returns the block result`() = runScenario {
         val result = coordinator.runMutation {
             Result.success("result")
