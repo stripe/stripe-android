@@ -41,8 +41,8 @@ dependencies {
     testImplementation testLibs.kotlin.coroutines
     testImplementation testLibs.mockito.kotlin
     testImplementation testLibs.robolectric
-    testImplementation testLibs.truth
     testImplementation testLibs.testParameterInjector
+    testImplementation testLibs.truth
     testImplementation testLibs.turbine
 
     androidTestImplementation testLibs.androidx.junit
