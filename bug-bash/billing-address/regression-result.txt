@@ -1,0 +1,15 @@
+test_saved_card_country_change_collects_us_tax_address (__main__.BillingTaxEditTest.test_saved_card_country_change_collects_us_tax_address) ... FAIL
+
+======================================================================
+FAIL: test_saved_card_country_change_collects_us_tax_address (__main__.BillingTaxEditTest.test_saved_card_country_change_collects_us_tax_address)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "~/stripe/stripe-android-2/bug-bash/billing-address/repro_tax_billing_edit.py", line 203, in test_saved_card_country_change_collects_us_tax_address
+    self.assertFalse(missing, "Saved-card editor omitted required US tax fields: " + ", ".join(sorted(missing)))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: {'Address', 'State', 'City'} is not false : Saved-card editor omitted required US tax fields: Address, City, State
+
+----------------------------------------------------------------------
+Ran 1 test in 87.316s
+
+FAILED (failures=1)

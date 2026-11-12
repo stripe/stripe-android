@@ -1,6 +1,6 @@
 # Checkout Sessions sequential bug bash — 2026-11-11
 
-Sharing snapshot prepared on 2026-11-12: [report index](README.md). The two new reports and seven-topic evidence are included; earlier local billing/shipping work and the unrelated `AGENTS.md` edit are excluded. Historical references below to local/uncommitted files describe the investigation before publication.
+Sharing snapshot prepared on 2026-11-12: [report index](README.md). The two new reports and seven-topic evidence are included. A follow-up publication adds the earlier billing-address report and its evidence; the earlier shipping work and unrelated `AGENTS.md` edit remain excluded. Historical references below to local/uncommitted files describe the investigation before publication.
 
 Seven topic agents ran in sequence using the Checkout Elements `bug-bash` skill. The initial run confirmed [SEPA PMO `none` offers an ineffective save checkbox](../../ISSUE_confirm_sepa_none_offers_ineffective_save_checkbox.md) using backend and SDK tests while the physical Pixel was locked. The user then unlocked the device and authorized the native follow-up below, which reproduced that finding on-device and also confirmed [saved Amex accessibility labels say Unknown](../../ISSUE_lpms_saved_amex_accessibility_unknown_brand.md).
 
@@ -76,7 +76,7 @@ A completed pass is not a claim that untested or unavailable functionality passe
 - Order summary: no new confirmed bugs. Three live paid cases (detailed USD cart, inclusive-tax CA/OR updates, ISK), independently retrieved succeeded PaymentIntents and 14 JVM tests passed, including six new response/controller replays. Product details, quantities, decimal prices, free item, inclusive tax and currency divisor covered. Native UI, live merchant cart mutation and completed-session persistence remain gaps. Temporary source restored; environment released.
 - Confirm: one new bug, the [ineffective SEPA save checkbox](../../ISSUE_confirm_sepa_none_offers_ineffective_save_checkbox.md). Nineteen live confirmations covered global `payment_settings[setup_future_usage]`, PMO overrides, save choices, attachment and fresh-session redisplay (11 card payments succeeded/paid; eight SEPA payments processing with Checkout complete/unpaid). Nineteen scoped JVM checks passed. The regression asserting that explicit SEPA PMO `none` must not offer an ineffective save checkbox failed as expected, including an independent SEPA-only reproduction. A mixed card/SEPA configuration establishes the supported merchant use case. Temporary source restored; environment released.
 
-The pre-existing local `ISSUE_billing_address_saved_card_edit_omits_tax_fields.md` was preserved and not counted as a new finding; it is outside this sharing snapshot. Earlier shipping/billing device evidence is labeled inherited; those flows were not rerun on the locked device in this sequence.
+The pre-existing [saved-card billing-tax editor report](../../ISSUE_billing_address_saved_card_edit_omits_tax_fields.md) was preserved and not counted as a new finding; it is now included in the sharing snapshot at the user's request. Earlier shipping/billing device evidence is labeled inherited; those flows were not rerun on the locked device in this sequence.
 
 ## Initial pass limitations and handoff
 

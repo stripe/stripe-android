@@ -1,0 +1,62 @@
+{
+  "automatic_tax": {
+    "address_source": "billing",
+    "enabled": true,
+    "status": "requires_address"
+  },
+  "customer": {
+    "id": "cus_VbstCnERwlK6WZ",
+    "payment_methods": [
+      {
+        "id": "pm_1Uaf8BK8p6Sx2i8aEezO0sFB",
+        "object": "payment_method",
+        "allow_redisplay": "always",
+        "billing_details": {
+          "address": {
+            "city": null,
+            "country": "US",
+            "line1": null,
+            "line2": null,
+            "postal_code": "94103",
+            "state": null
+          },
+          "email": null,
+          "name": null,
+          "phone": null,
+          "tax_id": null
+        },
+        "card": {
+          "brand": "visa",
+          "checks": {
+            "address_line1_check": null,
+            "address_postal_code_check": null,
+            "cvc_check": null
+          },
+          "country": "US",
+          "display_brand": "visa",
+          "exp_month": 11,
+          "exp_year": 2027,
+          "funding": "credit",
+          "generated_from": null,
+          "last4": "4242",
+          "networks": {
+            "available": [
+              "visa"
+            ],
+            "preferred": null
+          },
+          "regulated_status": "unregulated",
+          "three_d_secure_usage": {
+            "supported": true
+          },
+          "wallet": null
+        },
+        "created": 1794417379,
+        "customer": "cus_VbstCnERwlK6WZ",
+        "customer_account": null,
+        "livemode": false,
+        "type": "card"
+      }
+    ]
+  }
+}
