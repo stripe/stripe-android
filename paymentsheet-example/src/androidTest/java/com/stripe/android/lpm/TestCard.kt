@@ -104,6 +104,30 @@ internal class TestCard : BasePlaygroundTest() {
         )
     }
 
+    @Test
+    fun testCardWithAutocompleteBillingAddressInCustomFlow() {
+        testDriver.confirmCustomAndBuy(
+            testParameters.copy(
+                saveForFutureUseCheckboxVisible = false,
+            ).copyPlaygroundSettings { settings ->
+                settings[CustomerSettingsDefinition] = CustomerType.GUEST
+                settings[MerchantSettingsDefinition] = Merchant.US
+                settings[CurrencySettingsDefinition] = Currency.USD
+                settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.Off
+                settings[CollectAddressSettingsDefinition] =
+                    PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
+            },
+            values = FieldPopulator.Values(),
+            populateCustomLpmFields = {
+                populateCardDetails()
+                populateAddressFromSuggestion(
+                    query = "354 Oyster Point",
+                    suggestion = "354 Oyster Point Boulevard",
+                )
+            },
+        )
+    }
+
     /*
      * TODO(samer-stripe): Once we update `PaymentResult` to return a `StripeIntent`, update the test
      *  to check against the payment method IDs rather than the last 4 digits.

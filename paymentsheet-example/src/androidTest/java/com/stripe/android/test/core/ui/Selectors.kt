@@ -4,15 +4,18 @@ import android.content.pm.PackageManager
 import android.os.SystemClock.sleep
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsNodeInteraction
+import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isToggleable
 import androidx.compose.ui.test.junit4.ComposeTestRule
+import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
@@ -370,6 +373,18 @@ internal class Selectors(
         composeTestRule.onNodeWithTextAfterWaiting(
             getResourceString(UiCoreR.string.stripe_address_enter_manually)
         ).performClick()
+        composeTestRule.onNodeWithTextAfterWaiting(
+            getResourceString(CoreR.string.stripe_address_label_city)
+        )
+    }
+
+    @OptIn(ExperimentalTestApi::class)
+    fun selectAddressSuggestion(suggestion: String) {
+        val matcher = hasText(suggestion, substring = true).and(hasClickAction())
+        composeTestRule.waitUntilAtLeastOneExists(matcher, DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
+        composeTestRule.onAllNodes(matcher).onFirst()
+            .performScrollTo()
+            .performClick()
         composeTestRule.onNodeWithTextAfterWaiting(
             getResourceString(CoreR.string.stripe_address_label_city)
         )
