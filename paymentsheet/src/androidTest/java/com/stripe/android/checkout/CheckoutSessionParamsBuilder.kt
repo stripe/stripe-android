@@ -11,13 +11,14 @@ import kotlinx.serialization.json.put
 private const val CURRENCY = "usd"
 private const val CUSTOMER_EMAIL = "checkout-e2e@example.com"
 
-/** Builds a card-only Checkout Session request with a single line item for [CheckoutPlaygroundBackend]. */
+/** Builds a Checkout Session request with a single line item for [CheckoutPlaygroundBackend]. Card-only by default. */
 internal class CheckoutSessionParamsBuilder(
     private val unitAmount: Long,
 ) {
     private var customerId: String? = null
     private var automaticTax: Boolean = false
     private var paymentMethodSave: Boolean? = null
+    private var allowedPaymentMethodTypes: List<String> = listOf("card")
 
     fun customerId(
         customerId: String,
@@ -37,10 +38,16 @@ internal class CheckoutSessionParamsBuilder(
         this.paymentMethodSave = paymentMethodSave
     }
 
+    fun allowedPaymentMethodTypes(
+        allowedPaymentMethodTypes: List<String>,
+    ): CheckoutSessionParamsBuilder = apply {
+        this.allowedPaymentMethodTypes = allowedPaymentMethodTypes
+    }
+
     fun build(): JsonObject = buildJsonObject {
         put("ui_mode", "mobile_elements")
         put("currency", CURRENCY)
-        put("allowed_payment_method_types", JsonArray(listOf(JsonPrimitive("card"))))
+        put("allowed_payment_method_types", JsonArray(allowedPaymentMethodTypes.map { JsonPrimitive(it) }))
         putCart(unitAmount, automaticTax)
         putCustomer(customerId, automaticTax)
         if (automaticTax) {
