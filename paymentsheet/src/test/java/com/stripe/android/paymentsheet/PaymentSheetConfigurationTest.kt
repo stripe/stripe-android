@@ -39,11 +39,12 @@ class PaymentSheetConfigurationTest {
             .savePaymentMethodOptInBehavior(behavior)
             .build()
 
+        val commonConfiguration = configuration.asCommonConfiguration()
         assertThat(configuration.savePaymentMethodOptInBehavior).isEqualTo(behavior)
         assertThat(configuration.newBuilder().build().savePaymentMethodOptInBehavior).isEqualTo(behavior)
-        assertThat(configuration.asCommonConfiguration().savePaymentMethodOptInBehavior).isEqualTo(behavior)
+        assertThat(commonConfiguration.savePaymentMethodOptInBehavior).isEqualTo(behavior)
         verifyParcelRoundtrip(configuration)
-        verifyParcelRoundtrip(configuration.asCommonConfiguration())
+        verifyParcelRoundtrip(commonConfiguration)
     }
 
     @OptIn(

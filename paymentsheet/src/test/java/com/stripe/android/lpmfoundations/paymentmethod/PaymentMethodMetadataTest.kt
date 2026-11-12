@@ -88,7 +88,6 @@ internal class PaymentMethodMetadataTest {
             metadata.writeToParcel(parcel, 0)
             parcel.setDataPosition(0)
             val restored = parcelableCreator<PaymentMethodMetadata>().createFromParcel(parcel)
-            assertThat(restored.savePaymentMethodOptInBehavior).isEqualTo(behavior)
             assertThat(restored).isEqualTo(metadata)
         } finally {
             parcel.recycle()

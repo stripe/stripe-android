@@ -22,8 +22,8 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
+import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
@@ -784,20 +784,9 @@ class USBankAccountFormViewModelTest {
         @TestParameter behavior: PaymentSheet.SavePaymentMethodOptInBehavior,
         @TestParameter savedChoice: Boolean,
     ) = runTest {
-        val selection = PaymentSelection.New.USBankAccount(
-            label = "Test",
-            iconResource = 0,
-            paymentMethodCreateParams = PaymentMethodCreateParams.createUSBankAccount(),
+        val selection = PaymentMethodFixtures.US_BANK_PAYMENT_SELECTION.copy(
             customerRequestedSave = customerRequestedSave(showCheckbox = true, saveForFutureUse = savedChoice),
-            input = PaymentSelection.New.USBankAccount.Input(
-                name = "",
-                email = null,
-                phone = null,
-                address = null,
-                saveForFutureUse = savedChoice,
-            ),
-            instantDebits = null,
-            screenState = BankFormScreenStateFactory.createWithSession("test_session"),
+            input = PaymentMethodFixtures.US_BANK_PAYMENT_SELECTION.input.copy(saveForFutureUse = savedChoice),
         )
         val viewModel = createViewModel(
             args = defaultArgs.copy(

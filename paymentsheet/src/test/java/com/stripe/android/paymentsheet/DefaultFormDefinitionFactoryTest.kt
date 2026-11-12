@@ -29,8 +29,11 @@ import org.robolectric.RobolectricTestRunner
 internal class DefaultFormDefinitionFactoryTest {
     @Test
     fun `switching methods preserves deselection instead of reapplying opt out default`() = runScenario(
-        metadata = defaultMetadata().copy(
-            customerMetadata = PaymentMethodMetadataFactory.create(hasCustomerConfiguration = true).customerMetadata,
+        metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("cashapp", "card"),
+            ),
+            hasCustomerConfiguration = true,
             savePaymentMethodOptInBehavior = PaymentSheet.SavePaymentMethodOptInBehavior.RequiresOptOut,
         ),
     ) {
