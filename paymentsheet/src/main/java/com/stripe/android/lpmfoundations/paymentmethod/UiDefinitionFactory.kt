@@ -20,6 +20,7 @@ import com.stripe.android.model.setupFutureUsage
 import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.paymentsheet.LinkInlineHandler
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheet.SavePaymentMethodOptInBehavior
 import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
@@ -153,11 +154,7 @@ internal sealed interface UiDefinitionFactory {
                 private fun getSaveForFutureUseInitialValue(metadata: PaymentMethodMetadata): Boolean {
                     return paymentMethodOptionsParams?.setupFutureUsage()?.let {
                         it != ConfirmPaymentIntentParams.SetupFutureUsage.Blank
-                    } ?: when (metadata.savePaymentMethodOptInBehavior) {
-                        PaymentSheet.SavePaymentMethodOptInBehavior.Automatic,
-                        PaymentSheet.SavePaymentMethodOptInBehavior.RequiresOptIn -> false
-                        PaymentSheet.SavePaymentMethodOptInBehavior.RequiresOptOut -> true
-                    }
+                    } ?: (metadata.savePaymentMethodOptInBehavior == SavePaymentMethodOptInBehavior.RequiresOptOut)
                 }
             }
         }

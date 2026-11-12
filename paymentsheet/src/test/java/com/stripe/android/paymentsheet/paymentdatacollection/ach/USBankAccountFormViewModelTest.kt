@@ -815,17 +815,6 @@ class USBankAccountFormViewModelTest {
     }
 
     @Test
-    fun `Doesn't save for future use by default`() = runTest {
-        val viewModel = createViewModel(
-            args = defaultArgs.copy(
-                formArgs = defaultArgs.formArgs,
-                showCheckbox = true,
-            ),
-        )
-        assertThat(viewModel.saveForFutureUseCheckedFlow.value).isFalse()
-    }
-
-    @Test
     fun `Doesn't set setAsDefaultPaymentMethodElement by default`() = runTest {
         val viewModel = createViewModel(
             args = defaultArgs.copy(

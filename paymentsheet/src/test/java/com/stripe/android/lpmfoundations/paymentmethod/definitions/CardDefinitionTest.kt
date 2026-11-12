@@ -64,6 +64,7 @@ import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -130,13 +131,17 @@ class CardDefinitionTest {
         viewModelStoreRule.track(form)
         val initiallySelected = behavior == PaymentSheet.SavePaymentMethodOptInBehavior.RequiresOptOut
 
-        form.completeFormValues.test {
-            val initialSelection = requireNotNull(awaitItem()).transformToPaymentSelection(
-                paymentMethod = CardDefinition.uiDefinitionFactory(metadata).createSupportedPaymentMethod(metadata),
-                paymentMethodMetadata = metadata,
-            ) as PaymentSelection.New.Card
-            val initialOptions = initialSelection.paymentMethodOptionsParams as PaymentMethodOptionsParams.Card
-            assertThat(initialOptions.setupFutureUsage).isEqualTo(
+        val paymentMethod = CardDefinition.uiDefinitionFactory(metadata).createSupportedPaymentMethod(metadata)
+        form.completeFormValues.map { values ->
+            values?.let {
+                val selection = it.transformToPaymentSelection(
+                    paymentMethod = paymentMethod,
+                    paymentMethodMetadata = metadata,
+                ) as PaymentSelection.New.Card
+                (selection.paymentMethodOptionsParams as PaymentMethodOptionsParams.Card).setupFutureUsage
+            }
+        }.test {
+            assertThat(awaitItem()).isEqualTo(
                 if (initiallySelected) {
                     ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
                 } else {
@@ -146,12 +151,7 @@ class CardDefinitionTest {
 
             save.controller.onValueChange(!initiallySelected)
             testScheduler.runCurrent()
-            val toggledSelection = requireNotNull(expectMostRecentItem()).transformToPaymentSelection(
-                paymentMethod = CardDefinition.uiDefinitionFactory(metadata).createSupportedPaymentMethod(metadata),
-                paymentMethodMetadata = metadata,
-            ) as PaymentSelection.New.Card
-            val toggledOptions = toggledSelection.paymentMethodOptionsParams as PaymentMethodOptionsParams.Card
-            assertThat(toggledOptions.setupFutureUsage).isEqualTo(
+            assertThat(expectMostRecentItem()).isEqualTo(
                 if (initiallySelected) {
                     ConfirmPaymentIntentParams.SetupFutureUsage.Blank
                 } else {
@@ -179,18 +179,11 @@ class CardDefinitionTest {
     @Test
     fun `opt out does not make an ineligible save control visible`(
         @TestParameter hasCustomer: Boolean,
-        @TestParameter isSetup: Boolean,
-        @TestParameter hasSetupFutureUsage: Boolean,
+        @TestParameter intent: SaveConsentIntent,
         @TestParameter consent: Consent,
     ) {
         val metadata = PaymentMethodMetadataFactory.create(
-            stripeIntent = if (isSetup) {
-                SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD
-            } else {
-                PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                    setupFutureUsage = if (hasSetupFutureUsage) StripeIntent.Usage.OffSession else null,
-                )
-            },
+            stripeIntent = intent.stripeIntent,
             hasCustomerConfiguration = hasCustomer,
             saveConsent = consent.behavior,
             savePaymentMethodOptInBehavior = PaymentSheet.SavePaymentMethodOptInBehavior.RequiresOptOut,
@@ -199,9 +192,17 @@ class CardDefinitionTest {
         val elements = CardDefinition.formElements(metadata)
 
         val eligible = hasCustomer && (
-            consent == Consent.Enabled || (consent == Consent.Legacy && !isSetup && !hasSetupFutureUsage)
+            consent == Consent.Enabled || (consent == Consent.Legacy && intent == SaveConsentIntent.Payment)
             )
         assertThat(elements.any { it is SaveForFutureUseElement }).isEqualTo(eligible)
+    }
+
+    enum class SaveConsentIntent(val stripeIntent: StripeIntent) {
+        Payment(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(setupFutureUsage = null)),
+        PaymentWithFutureUsage(
+            PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(setupFutureUsage = StripeIntent.Usage.OffSession)
+        ),
+        Setup(SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD)
     }
 
     enum class Consent(internal val behavior: PaymentMethodSaveConsentBehavior) {
