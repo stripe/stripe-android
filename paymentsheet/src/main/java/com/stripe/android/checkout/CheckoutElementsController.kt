@@ -147,9 +147,8 @@ class CheckoutElementsController @Inject internal constructor(
         } catch (e: IllegalArgumentException) {
             return@withContext kotlin.Result.failure(e)
         }
-        operationCoordinator.runMutation {
-            val configurationState = configuration.build()
-
+        val configurationState = configuration.build()
+        operationCoordinator.runConfigure(configurationState) {
             checkoutSessionRepository.init(
                 clientSecret = parsedClientSecret,
                 adaptivePricingAllowed = configurationState.currencySelectorElementConfiguration != null,
