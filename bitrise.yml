@@ -383,7 +383,7 @@ workflows:
           title: Execute instrumentation tests
           timeout: 1200
           inputs:
-            - content: ./scripts/retry_with_emulator_cleanup.sh 2 ./gradlew -Pandroid.experimental.androidTest.numManagedDeviceShards=6 -Pandroid.experimental.testOptions.managedDevices.maxConcurrentDevices=6 :paymentsheet:pixel2api33DebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
+            - content: ./scripts/retry_with_emulator_cleanup.sh 2 ./gradlew -Pandroid.experimental.androidTest.numManagedDeviceShards=6 -Pandroid.experimental.testOptions.managedDevices.maxConcurrentDevices=6 :paymentsheet:pixel2api33chromeDebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
       - bundle::export_instrumentation_test_results:
           title: Export PaymentSheet instrumentation test results
           inputs:
