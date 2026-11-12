@@ -46,6 +46,7 @@ import com.stripe.android.paymentsheet.PaymentSheet.IntentConfiguration
 import com.stripe.android.paymentsheet.PaymentSheet.PaymentMethodLayout
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.LoadingEventReporter
+import com.stripe.android.paymentsheet.featuredinstitutions.FeaturedInstitutionsHelper
 import com.stripe.android.paymentsheet.injection.ApiConfigurationResolver
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -293,6 +294,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     private val elementsSessionLoader: ElementsSessionLoader,
     private val createCustomerMetadata: CreateCustomerMetadata,
     private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper,
+    private val featuredInstitutionsHelper: FeaturedInstitutionsHelper,
     private val tapToAddAvailabilityFactory: TapToAddAvailabilityFactory,
     private val durationProvider: DurationProvider,
     private val paymentMethodMessagePromotionsExperimentHandler: PaymentMethodMessagePromotionsExperimentHandler,
@@ -475,6 +477,9 @@ internal class DefaultPaymentElementLoader @Inject constructor(
 
         val stripeIntent = elementsSession.stripeIntent
         val pmMetadata = paymentMethodMetadata.await()
+
+        // Never awaited: the Bank row renders without featured institution icons until they're ready.
+        featuredInstitutionsHelper.fetchAsync(elementsSession, pmMetadata, apiConfiguration)
 
         warnUnactivatedIfNeeded(stripeIntent)
 

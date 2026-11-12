@@ -77,6 +77,7 @@ import com.stripe.android.paymentsheet.addresselement.analytics.FakeAddressLaunc
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.cvcrecollection.FakeCvcRecollectionHandler
 import com.stripe.android.paymentsheet.cvcrecollection.RecordingCvcRecollectionLauncherFactory
+import com.stripe.android.paymentsheet.featuredinstitutions.FakeFeaturedInstitutionsHelper
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
@@ -1340,6 +1341,7 @@ internal class PaymentSheetActivityTest {
                 primaryButtonExperiment = FakePrimaryButtonExperiment(),
                 customerStateHolderFactory = DefaultCustomerStateHolder.Factory,
                 paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
+                featuredInstitutionsHelper = FakeFeaturedInstitutionsHelper(),
                 placesClient = null,
                 linkAccountHolder = LinkAccountHolder(savedStateHandle),
                 stripeAutocompleteRepository = FakeStripeAutocompleteRepository(),

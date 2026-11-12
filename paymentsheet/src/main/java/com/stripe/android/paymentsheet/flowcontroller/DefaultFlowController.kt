@@ -60,6 +60,7 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
 import com.stripe.android.paymentsheet.analytics.persistBillingAnalytics
 import com.stripe.android.paymentsheet.analytics.reportBillingAddressCompleted
+import com.stripe.android.paymentsheet.featuredinstitutions.FeaturedInstitutionsHelper
 import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -106,7 +107,8 @@ internal class DefaultFlowController @Inject internal constructor(
     private val errorReporter: ErrorReporter,
     @InitializedViaCompose private val initializedViaCompose: Boolean,
     @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
-    private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper
+    private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper,
+    private val featuredInstitutionsHelper: FeaturedInstitutionsHelper,
 ) : PaymentSheet.FlowController {
     private val paymentOptionActivityLauncher: ActivityResultLauncher<PaymentOptionContract.Args>
 
@@ -310,7 +312,8 @@ internal class DefaultFlowController @Inject internal constructor(
             linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
             walletButtonsRendered = viewModel.walletButtonsRendered,
             paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
-            promotions = paymentMethodMessagePromotionsHelper.getPromotions()
+            promotions = paymentMethodMessagePromotionsHelper.getPromotions(),
+            featuredInstitutions = featuredInstitutionsHelper.featuredInstitutions?.publishedInstitutions,
         )
 
         val options = ActivityOptionsCompat.makeCustomAnimation(

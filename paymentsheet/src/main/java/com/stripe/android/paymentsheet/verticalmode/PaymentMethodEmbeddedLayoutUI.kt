@@ -334,7 +334,11 @@ internal fun EmbeddedNewPaymentMethodRowButtonsLayoutUi(
 
         if (isSelected && selection is PaymentMethodVerticalLayoutInteractor.Selection.New && selection.canBeChanged) {
             val displayablePaymentMethod = item.copy(
-                subtitle = selection.changeDetails?.resolvableString ?: item.subtitle
+                subtitle = selection.changeDetails?.resolvableString ?: item.subtitle,
+                // Featured institution icons give way to the "Change" button, which the disclosure style never shows.
+                featuredInstitutions = item.featuredInstitutions.takeIf {
+                    appearance.style is RowStyle.FlatWithDisclosure
+                },
             )
             NewPaymentMethodRowButton(
                 isEnabled = isEnabled,

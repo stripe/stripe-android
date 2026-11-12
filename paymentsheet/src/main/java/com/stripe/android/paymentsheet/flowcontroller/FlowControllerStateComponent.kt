@@ -21,6 +21,7 @@ import com.stripe.android.payments.core.injection.ApiRequestOptionsModule
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.LinkHandler
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.featuredinstitutions.FeaturedInstitutionsHelperModule
 import com.stripe.android.paymentsheet.injection.ApiConfigurationModule
 import com.stripe.android.paymentsheet.injection.LinkHoldbackExposureModule
 import com.stripe.android.paymentsheet.injection.PaymentMethodMessagePromotionsExperimentHandlerModule
@@ -54,6 +55,7 @@ import javax.inject.Singleton
         ElementsSessionClientParamsModule::class,
         LinkHoldbackExposureModule::class,
         PaymentMethodMessagePromotionsHelperModule::class,
+        FeaturedInstitutionsHelperModule::class,
         PaymentMethodMessagePromotionsExperimentHandlerModule::class,
     ]
 )

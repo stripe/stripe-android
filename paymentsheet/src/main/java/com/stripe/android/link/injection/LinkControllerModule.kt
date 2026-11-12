@@ -15,6 +15,7 @@ import com.stripe.android.paymentelement.confirmation.injection.ExtendedPaymentE
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.featuredinstitutions.NoOpFeaturedInstitutionsHelperModule
 import com.stripe.android.paymentsheet.injection.LinkHoldbackExposureModule
 import com.stripe.android.paymentsheet.injection.PaymentSheetCommonModule
 import com.stripe.android.paymentsheet.repositories.NoOpPaymentMethodMessagingPromotionHelperModule
@@ -43,6 +44,7 @@ import javax.inject.Singleton
         LinkHoldbackExposureModule::class,
         PaymentsIntegrityModule::class,
         NoOpPaymentMethodMessagingPromotionHelperModule::class,
+        NoOpFeaturedInstitutionsHelperModule::class,
     ],
     subcomponents = [
         LinkControllerPresenterComponent::class,

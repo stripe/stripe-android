@@ -29,6 +29,7 @@ import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.featuredinstitutions.FeaturedInstitutions
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
@@ -374,6 +375,40 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                 val paymentMethods = awaitItem().displayablePaymentMethods
                 val instantDebits = paymentMethods.first { it.code == "link" }
                 assertThat(instantDebits.promoBadge).isNull()
+            }
+        }
+    }
+
+    @Test
+    fun `Passes featured institutions to the bank row only`() {
+        val featuredInstitutions = FeaturedInstitutions.preloaded(icons = emptyList())
+
+        runScenario(featuredInstitutions = featuredInstitutions) {
+            interactor.state.test {
+                val paymentMethods = awaitItem().displayablePaymentMethods
+                assertThat(paymentMethods.first { it.code == "link" }.featuredInstitutions)
+                    .isSameInstanceAs(featuredInstitutions)
+                assertThat(paymentMethods.filter { it.code != "link" }.map { it.featuredInstitutions })
+                    .containsNoneIn(listOf(featuredInstitutions))
+            }
+        }
+    }
+
+    @Test
+    fun `Incentive promo badge replaces featured institutions on the bank row`() {
+        val incentive = PaymentMethodIncentive(
+            identifier = "link_instant_debits",
+            displayText = "$5",
+        )
+
+        runScenario(
+            incentive = incentive,
+            featuredInstitutions = FeaturedInstitutions.preloaded(icons = emptyList()),
+        ) {
+            interactor.state.test {
+                val instantDebits = awaitItem().displayablePaymentMethods.first { it.code == "link" }
+                assertThat(instantDebits.promoBadge).isEqualTo("$5")
+                assertThat(instantDebits.featuredInstitutions).isNull()
             }
         }
     }
@@ -2254,6 +2289,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         displaysMandatesInFormScreen: Boolean = false,
         updateMandateText: ((mandateText: ResolvableString?, showAbove: Boolean) -> Unit)? = null,
         promotionsHelper: PaymentMethodMessagePromotionsHelper? = null,
+        featuredInstitutions: FeaturedInstitutions? = null,
         testBlock: suspend TestParams.() -> Unit
     ) {
         val processing: MutableStateFlow<Boolean> = MutableStateFlow(initialProcessing)
@@ -2337,7 +2373,8 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             },
             updateMandateText = updateMandateText,
             linkAccount = linkAccount,
-            paymentMethodMessagePromotionsHelper = promotionsHelper
+            paymentMethodMessagePromotionsHelper = promotionsHelper,
+            featuredInstitutions = featuredInstitutions,
         )
         closeInteractorRule.track(interactor)
 
