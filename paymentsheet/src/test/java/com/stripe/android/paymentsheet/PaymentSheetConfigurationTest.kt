@@ -19,7 +19,6 @@ class PaymentSheetConfigurationTest {
         ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi::class,
         WalletButtonsPreview::class,
         CardFundingFilteringPrivatePreview::class,
-        AddressAutocompletePreview::class,
     )
     @Test
     fun `beta flags survive builder reconstruction`() {
@@ -28,6 +27,17 @@ class PaymentSheetConfigurationTest {
             .build()
 
         assertThat(original.newBuilder().build().apiConfiguration?.betas).containsExactly("example=v1")
+    }
+
+    @OptIn(AddressAutocompletePreview::class)
+    @Suppress("DEPRECATION")
+    @Test
+    fun `deprecated googlePlacesApiKey builder method is accepted and ignored`() {
+        val withKey = PaymentSheet.Configuration.Builder("Merchant")
+            .googlePlacesApiKey("test_api_key")
+            .build()
+
+        assertThat(withKey).isEqualTo(PaymentSheet.Configuration.Builder("Merchant").build())
     }
 
     @Test
@@ -66,7 +76,6 @@ class PaymentSheetConfigurationTest {
             walletButtons = PaymentSheet.WalletButtonsConfiguration(
                 willDisplayExternally = true,
             ),
-            googlePlacesApiKey = "test_api_key",
             termsDisplay = mapOf(PaymentMethod.Type.Card to PaymentSheet.TermsDisplay.NEVER),
             opensCardScannerAutomatically = true,
             userOverrideCountry = "GB",
@@ -116,6 +125,6 @@ class PaymentSheetConfigurationTest {
         // When a new property is added, this count will change, signaling that:
         // 1. newBuilder() needs to propagate the new property
         // 2. The round-trip test above needs a non-default value for it
-        assertThat(propertyCount).isEqualTo(25)
+        assertThat(propertyCount).isEqualTo(24)
     }
 }

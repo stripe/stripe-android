@@ -22,13 +22,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.AddressLauncher
 import com.stripe.android.paymentsheet.addresselement.rememberAddressLauncher
 import com.stripe.android.paymentsheet.example.R
-import com.stripe.android.paymentsheet.example.Settings
 
 class AddressElementExampleActivity : AppCompatActivity() {
 
@@ -67,12 +65,9 @@ private fun AddressElementExampleScreen(viewModel: AddressElementExampleViewMode
                 state.address?.let { address ->
                     Address(address)
                 }
-                val context = LocalContext.current
                 Button(
                     onClick = {
                         val config = AddressLauncher.Configuration.Builder()
-                            // Provide your Google Places API key to enable autocomplete
-                            .googlePlacesApiKey(Settings(context).googlePlacesApiKey)
                             .build()
                         addressLauncher.present(
                             publishableKey = state.publishableKey,

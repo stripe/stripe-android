@@ -311,7 +311,6 @@ internal class DefaultCreateLinkState @Inject constructor(
         billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
         defaultBillingDetails = configuration.defaultBillingDetails,
         allowDefaultOptIn = elementsSession.allowLinkDefaultOptIn,
-        googlePlacesApiKey = configuration.googlePlacesApiKey,
         collectMissingBillingDetailsForExistingPaymentMethods =
             configuration.link.collectMissingBillingDetailsForExistingPaymentMethods,
         allowUserEmailEdits = configuration.link.allowUserEmailEdits,

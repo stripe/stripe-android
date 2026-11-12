@@ -157,7 +157,6 @@ class ShippingAddressElement internal constructor(
                         address = address,
                         allowedCountries = state.checkoutSessionResponse.allowedShippingCountries?.toSet()
                             ?: emptySet(),
-                        useStripeHostedAutocomplete = true,
                     ),
                 )
             )

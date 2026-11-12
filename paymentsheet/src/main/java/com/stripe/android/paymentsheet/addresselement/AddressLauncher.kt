@@ -111,10 +111,8 @@ class AddressLauncher internal constructor(
         internal val buttonTitle: String? = null,
         internal val additionalFields: AdditionalFieldsConfiguration? = null,
         internal val title: String? = null,
-        internal val googlePlacesApiKey: String? = null,
         internal val autocompleteCountries: Set<String> = AUTOCOMPLETE_DEFAULT_COUNTRIES,
         internal val billingAddress: PaymentSheet.BillingDetails?,
-        internal val useStripeHostedAutocomplete: Boolean = true,
         internal val nameField: NameField = NameField.Auto,
     ) : Parcelable {
         @JvmOverloads
@@ -158,14 +156,13 @@ class AddressLauncher internal constructor(
             buttonTitle = buttonTitle,
             additionalFields = additionalFields,
             title = title,
-            googlePlacesApiKey = null,
             autocompleteCountries = autocompleteCountries,
             billingAddress = null,
         )
 
         /**
          * @param googlePlacesApiKey Google Places API key. This is no longer required for address
-         * autocomplete.
+         * autocomplete, and the value is ignored.
          */
         @Deprecated(
             message = "Google Places API key is no longer required. " +
@@ -182,7 +179,7 @@ class AddressLauncher internal constructor(
             buttonTitle: String? = null,
             additionalFields: AdditionalFieldsConfiguration? = null,
             title: String? = null,
-            googlePlacesApiKey: String? = null,
+            @Suppress("UNUSED_PARAMETER") googlePlacesApiKey: String? = null,
             autocompleteCountries: Set<String> = AUTOCOMPLETE_DEFAULT_COUNTRIES,
         ) : this(
             appearance = appearance,
@@ -191,7 +188,6 @@ class AddressLauncher internal constructor(
             buttonTitle = buttonTitle,
             additionalFields = additionalFields,
             title = title,
-            googlePlacesApiKey = googlePlacesApiKey,
             autocompleteCountries = autocompleteCountries,
             billingAddress = null,
         )
@@ -211,7 +207,7 @@ class AddressLauncher internal constructor(
             buttonTitle: String?,
             additionalFields: AdditionalFieldsConfiguration?,
             title: String?,
-            googlePlacesApiKey: String?,
+            @Suppress("UNUSED_PARAMETER") googlePlacesApiKey: String?,
         ) : this(
             appearance = appearance,
             address = address,
@@ -219,7 +215,6 @@ class AddressLauncher internal constructor(
             buttonTitle = buttonTitle,
             additionalFields = additionalFields,
             title = title,
-            googlePlacesApiKey = googlePlacesApiKey,
             autocompleteCountries = AUTOCOMPLETE_DEFAULT_COUNTRIES,
             billingAddress = null,
         )
@@ -234,7 +229,6 @@ class AddressLauncher internal constructor(
             private var buttonTitle: String? = null
             private var additionalFields: AdditionalFieldsConfiguration? = null
             private var title: String? = null
-            private var googlePlacesApiKey: String? = null
             private var autocompleteCountries: Set<String> = AUTOCOMPLETE_DEFAULT_COUNTRIES
             private var billingAddress: PaymentSheet.BillingDetails? = null
             private var nameField: NameField = NameField.Auto
@@ -257,9 +251,13 @@ class AddressLauncher internal constructor(
             fun title(title: String?) =
                 apply { this.title = title }
 
+            /**
+             * Google Places API key. This is no longer required for address autocomplete, and the value is
+             * ignored.
+             */
             @Deprecated("Google Places API key is no longer required. This method will be removed in a future release.")
-            fun googlePlacesApiKey(googlePlacesApiKey: String?) =
-                apply { this.googlePlacesApiKey = googlePlacesApiKey }
+            @Suppress("UNUSED_PARAMETER")
+            fun googlePlacesApiKey(googlePlacesApiKey: String?): Builder = this
 
             fun autocompleteCountries(autocompleteCountries: Set<String>) =
                 apply { this.autocompleteCountries = autocompleteCountries }
@@ -279,7 +277,6 @@ class AddressLauncher internal constructor(
                 buttonTitle = buttonTitle,
                 additionalFields = additionalFields,
                 title = title,
-                googlePlacesApiKey = googlePlacesApiKey,
                 autocompleteCountries = autocompleteCountries,
                 billingAddress = billingAddress,
                 nameField = nameField,

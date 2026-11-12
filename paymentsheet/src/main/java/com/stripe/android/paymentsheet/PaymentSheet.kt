@@ -946,7 +946,6 @@ class PaymentSheet internal constructor(
             ConfigurationDefaults.customPaymentMethods,
         internal val link: LinkConfiguration = ConfigurationDefaults.link,
         internal val walletButtons: WalletButtonsConfiguration = ConfigurationDefaults.walletButtons,
-        internal val googlePlacesApiKey: String? = ConfigurationDefaults.googlePlacesApiKey,
         internal val termsDisplay: Map<PaymentMethod.Type, TermsDisplay> = emptyMap(),
         internal val opensCardScannerAutomatically: Boolean = ConfigurationDefaults.opensCardScannerAutomatically,
         internal val userOverrideCountry: String? = ConfigurationDefaults.userOverrideCountry,
@@ -1087,7 +1086,6 @@ class PaymentSheet internal constructor(
             private var allowedCardFundingTypes: List<CardFundingType> = ConfigurationDefaults.allowedCardFundingTypes
             private var link: PaymentSheet.LinkConfiguration = ConfigurationDefaults.link
             private var walletButtons: WalletButtonsConfiguration = ConfigurationDefaults.walletButtons
-            private var googlePlacesApiKey: String? = ConfigurationDefaults.googlePlacesApiKey
             private var termsDisplay: Map<PaymentMethod.Type, TermsDisplay> = emptyMap()
             private var opensCardScannerAutomatically: Boolean =
                 ConfigurationDefaults.opensCardScannerAutomatically
@@ -1240,13 +1238,13 @@ class PaymentSheet internal constructor(
             }
 
             /**
-             * Google Places API key. This is no longer required for address autocomplete.
+             * Google Places API key. This is no longer required for address autocomplete, and the value is
+             * ignored.
              */
             @AddressAutocompletePreview
             @Deprecated("Google Places API key is no longer required. This method will be removed in a future release.")
-            fun googlePlacesApiKey(googlePlacesApiKey: String) = apply {
-                this.googlePlacesApiKey = googlePlacesApiKey
-            }
+            @Suppress("UNUSED_PARAMETER")
+            fun googlePlacesApiKey(googlePlacesApiKey: String): Builder = this
 
             /**
              * A map for specifying when legal agreements are displayed for each payment method type.
@@ -1302,7 +1300,6 @@ class PaymentSheet internal constructor(
                 customPaymentMethods = customPaymentMethods,
                 link = link,
                 walletButtons = walletButtons,
-                googlePlacesApiKey = googlePlacesApiKey,
                 termsDisplay = termsDisplay,
                 opensCardScannerAutomatically = opensCardScannerAutomatically,
                 userOverrideCountry = userOverrideCountry,
@@ -1321,7 +1318,6 @@ class PaymentSheet internal constructor(
             ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi::class,
             WalletButtonsPreview::class,
             CardFundingFilteringPrivatePreview::class,
-            AddressAutocompletePreview::class,
         )
         internal fun newBuilder(): Builder = Builder(merchantDisplayName)
             .customer(customer)
@@ -1346,8 +1342,6 @@ class PaymentSheet internal constructor(
             .opensCardScannerAutomatically(opensCardScannerAutomatically)
             .apply {
                 primaryButtonLabel?.let { primaryButtonLabel(it) }
-                @Suppress("DEPRECATION")
-                googlePlacesApiKey?.let { googlePlacesApiKey(it) }
                 userOverrideCountry?.let { userOverrideCountry(it) }
                 apiConfiguration?.let {
                     apiConfiguration(

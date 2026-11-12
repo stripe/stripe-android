@@ -5,6 +5,7 @@ NEXT_VERSION_BUMP: MINOR
 
 ### PaymentSheet
 * [FIXED][15363](https://github.com/stripe/stripe-android/pull/15363) Fixed an issue where inline address autocomplete could request suggestions for a prefilled address before the customer focused the address field.
+* [CHANGED][15384](https://github.com/stripe/stripe-android/pull/15384) PaymentSheet and AddressElement no longer depend on the Google Places SDK. Address autocomplete uses Stripe's hosted endpoints, and the deprecated `googlePlacesApiKey` options are ignored. The SDK no longer initializes the Places SDK on your behalf. If you added `com.google.android.libraries.places:places` only for Stripe address autocomplete, you can remove it.
 
 ### AddressElement
 * [FIXED][15363](https://github.com/stripe/stripe-android/pull/15363) Fixed an issue where inline address autocomplete could request suggestions for a prefilled address before the customer focused the address field.

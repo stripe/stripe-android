@@ -154,9 +154,8 @@ class AutocompleteAddressControllerTest {
     }
 
     @Test
-    fun `Element uses manual fields when Stripe-hosted autocomplete is disabled with Google key`() = noAutocompleteTest(
+    fun `Element uses manual fields when Stripe-hosted autocomplete is disabled`() = noAutocompleteTest(
         autocompleteConfig = AutocompleteAddressInteractor.Config(
-            googlePlacesApiKey = "123",
             autocompleteCountries = setOf("US"),
             isInlineAutocompleteEnabled = true,
             shouldUseStripeHostedAutocomplete = false,
@@ -164,10 +163,9 @@ class AutocompleteAddressControllerTest {
     )
 
     @Test
-    fun `Element uses inline autocomplete when stripe-hosted is enabled without Google key`() =
+    fun `Element uses inline autocomplete when stripe-hosted is enabled`() =
         elementsTest(
             autocompleteConfig = AutocompleteAddressInteractor.Config(
-                googlePlacesApiKey = null,
                 autocompleteCountries = setOf("US"),
                 isInlineAutocompleteEnabled = true,
                 shouldUseStripeHostedAutocomplete = true,
@@ -183,7 +181,6 @@ class AutocompleteAddressControllerTest {
         runTest(UnconfinedTestDispatcher()) {
             TestAutocompleteAddressInteractor.test(
                 autocompleteConfig = AutocompleteAddressInteractor.Config(
-                    googlePlacesApiKey = null,
                     autocompleteCountries = setOf("US"),
                     isInlineAutocompleteEnabled = true,
                     shouldUseStripeHostedAutocomplete = true,
@@ -231,7 +228,6 @@ class AutocompleteAddressControllerTest {
         runTest(UnconfinedTestDispatcher()) {
             TestAutocompleteAddressInteractor.test(
                 autocompleteConfig = AutocompleteAddressInteractor.Config(
-                    googlePlacesApiKey = null,
                     autocompleteCountries = setOf("US"),
                     isInlineAutocompleteEnabled = true,
                     shouldUseStripeHostedAutocomplete = true,
@@ -278,7 +274,6 @@ class AutocompleteAddressControllerTest {
     fun `Element uses manual fields when autocomplete country is not supported`() = noAutocompleteTest(
         values = mapOf(FormFieldId.Country to "US"),
         autocompleteConfig = AutocompleteAddressInteractor.Config(
-            googlePlacesApiKey = null,
             autocompleteCountries = setOf("CA"),
             isInlineAutocompleteEnabled = true,
             shouldUseStripeHostedAutocomplete = true,
@@ -290,7 +285,6 @@ class AutocompleteAddressControllerTest {
     fun `Should expand form if expand form event is provided`() = runTest(UnconfinedTestDispatcher()) {
         TestAutocompleteAddressInteractor.test(
             autocompleteConfig = AutocompleteAddressInteractor.Config(
-                googlePlacesApiKey = null,
                 autocompleteCountries = setOf("US"),
                 isInlineAutocompleteEnabled = true,
                 shouldUseStripeHostedAutocomplete = true,
@@ -354,7 +348,6 @@ class AutocompleteAddressControllerTest {
     fun `Should updates values on autocomplete values event with values`() = runTest(UnconfinedTestDispatcher()) {
         TestAutocompleteAddressInteractor.test(
             autocompleteConfig = AutocompleteAddressInteractor.Config(
-                googlePlacesApiKey = null,
                 autocompleteCountries = setOf("US"),
                 isInlineAutocompleteEnabled = true,
                 shouldUseStripeHostedAutocomplete = true,
@@ -409,7 +402,6 @@ class AutocompleteAddressControllerTest {
     fun `Should updates values on expand event if it has values`() = runTest(UnconfinedTestDispatcher()) {
         TestAutocompleteAddressInteractor.test(
             autocompleteConfig = AutocompleteAddressInteractor.Config(
-                googlePlacesApiKey = null,
                 autocompleteCountries = setOf("US"),
                 isInlineAutocompleteEnabled = true,
                 shouldUseStripeHostedAutocomplete = true,
@@ -574,7 +566,6 @@ class AutocompleteAddressControllerTest {
     fun `On autocomplete event should update country`() = runTest(UnconfinedTestDispatcher()) {
         TestAutocompleteAddressInteractor.test(
             autocompleteConfig = AutocompleteAddressInteractor.Config(
-                googlePlacesApiKey = null,
                 autocompleteCountries = setOf("US"),
                 isInlineAutocompleteEnabled = true,
                 shouldUseStripeHostedAutocomplete = true,
@@ -626,7 +617,6 @@ class AutocompleteAddressControllerTest {
             FormFieldId.Line1 to "123 Apple Street"
         ),
         autocompleteConfig = AutocompleteAddressInteractor.Config(
-            googlePlacesApiKey = null,
             autocompleteCountries = setOf("US"),
             isInlineAutocompleteEnabled = true,
             shouldUseStripeHostedAutocomplete = true,
@@ -650,7 +640,6 @@ class AutocompleteAddressControllerTest {
     fun `Should register on creation`() = runTest {
         TestAutocompleteAddressInteractor.test(
             autocompleteConfig = AutocompleteAddressInteractor.Config(
-                googlePlacesApiKey = null,
                 autocompleteCountries = emptySet()
             )
         ) {
@@ -668,7 +657,6 @@ class AutocompleteAddressControllerTest {
             phoneNumberConfig = AddressFieldConfiguration.REQUIRED,
             interactor = TestAutocompleteAddressInteractor.noOp(
                 autocompleteConfig = AutocompleteAddressInteractor.Config(
-                    googlePlacesApiKey = null,
                     autocompleteCountries = emptySet(),
                 )
             ),
@@ -802,7 +790,6 @@ class AutocompleteAddressControllerTest {
         shippingValuesMap: Map<FormFieldId, String?> = emptyMap(),
         autocompleteConfig: AutocompleteAddressInteractor.Config = AutocompleteAddressInteractor.Config(
             autocompleteCountries = setOf("AT", "BE", "DE", "ES", "IT", "NL"),
-            googlePlacesApiKey = null,
         ),
         eventToEmit: AutocompleteAddressInteractor.Event? = null,
         hideCountry: Boolean = false,
@@ -868,7 +855,6 @@ class AutocompleteAddressControllerTest {
         shippingValuesMap: Map<FormFieldId, String?> = emptyMap(),
         autocompleteConfig: AutocompleteAddressInteractor.Config = AutocompleteAddressInteractor.Config(
             autocompleteCountries = setOf("AT", "BE", "DE", "ES", "IT", "NL"),
-            googlePlacesApiKey = null,
         ),
         hideCountry: Boolean = false,
         interactor: AutocompleteAddressInteractor =
@@ -996,7 +982,6 @@ class AutocompleteAddressControllerTest {
 
     private companion object {
         val DEFAULT_HOSTED_AUTOCOMPLETE_CONFIG = AutocompleteAddressInteractor.Config(
-            googlePlacesApiKey = null,
             autocompleteCountries = setOf("US"),
             isInlineAutocompleteEnabled = true,
             shouldUseStripeHostedAutocomplete = true,
