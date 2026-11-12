@@ -1,0 +1,26 @@
+{
+  "id": "pm_1Uagi0Lu5o3P18Zpkui3G1ej",
+  "object": "payment_method",
+  "allow_redisplay": "unspecified",
+  "bancontact": {},
+  "billing_details": {
+    "address": {
+      "city": null,
+      "country": null,
+      "line1": null,
+      "line2": null,
+      "postal_code": null,
+      "state": null
+    },
+    "email": "lpm-bash@example.com",
+    "name": "LPM Test",
+    "phone": null,
+    "tax_id": null
+  },
+  "created": 1794423444,
+  "customer": null,
+  "customer_account": null,
+  "livemode": false,
+  "shared_payment_granted_token": null,
+  "type": "bancontact"
+}

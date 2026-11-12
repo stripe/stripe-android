@@ -1,0 +1,33 @@
+{
+  "ui_mode": "mobile_elements",
+  "currency": "usd",
+  "allowed_payment_method_types": [
+    "card"
+  ],
+  "automatic_tax": {
+    "enabled": false
+  },
+  "adaptive_pricing": {
+    "enabled": false
+  },
+  "items": [
+    {
+      "type": "one_time_price",
+      "one_time_price": {
+        "items": [
+          {
+            "price_data": {
+              "currency": "usd",
+              "unit_amount": 12000,
+              "product_data": {
+                "name": "Email Collection Test"
+              }
+            },
+            "quantity": 1
+          }
+        ]
+      }
+    }
+  ],
+  "customer": "cus_VbuOF81XQpGJ5V"
+}

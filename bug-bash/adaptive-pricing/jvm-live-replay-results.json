@@ -1,0 +1,14 @@
+{
+  "name": "com.stripe.android.checkout.AdaptivePricingLiveResponseBashTest",
+  "tests": "4",
+  "failures": "0",
+  "errors": "0",
+  "skipped": "0",
+  "time": "0.184",
+  "test_names": [
+    "captured disabled adaptive pricing has no selector or presentment details",
+    "captured France round trip retains EUR totals and USD integration currency",
+    "captured USD payment after Japanese toggles keeps USD total",
+    "captured Japan round trip formats JPY without decimal division"
+  ]
+}

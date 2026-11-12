@@ -1,0 +1,34 @@
+{
+  "ui_mode": "mobile_elements",
+  "currency": "usd",
+  "allowed_payment_method_types": [
+    "card"
+  ],
+  "automatic_tax": {
+    "enabled": false
+  },
+  "adaptive_pricing": {
+    "enabled": false
+  },
+  "customer_email": "order-summary-bash@example.com",
+  "items": [
+    {
+      "type": "one_time_price",
+      "one_time_price": {
+        "items": [
+          {
+            "price_data": {
+              "currency": "usd",
+              "unit_amount": 1000,
+              "product_data": {
+                "name": "Product"
+              }
+            },
+            "quantity": 1
+          }
+        ],
+        "description": "Group description"
+      }
+    }
+  ]
+}

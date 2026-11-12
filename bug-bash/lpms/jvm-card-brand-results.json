@@ -1,0 +1,54 @@
+[
+  {
+    "module": "paymentsheet",
+    "name": "com.stripe.android.paymentsheet.PaymentSheetCardBrandFilterTest",
+    "tests": "12",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "0.046",
+    "cases": [
+      "testIsAccepted_disallowedBrands",
+      "isAccepted(paymentMethod) defaults to Unknown when both brand and displayBrand are null",
+      "testIsAccepted_allowsBrandWithNullCategory_whenDisallowed",
+      "isAccepted(paymentMethod) handles unknown brand gracefully",
+      "isAccepted(paymentMethod) rejects card with disallowed brand",
+      "isAccepted(paymentMethod) accepts card with allowed brand",
+      "isAccepted(paymentMethod) uses displayBrand when available",
+      "testIsAccepted_unknownBrandCategory",
+      "testIsAccepted_allowedBrands",
+      "isAccepted(paymentMethod) falls back to brand when displayBrand is null",
+      "isAccepted(paymentMethod) returns true for non-card payment methods",
+      "testIsAccepted_allBrandsAccepted"
+    ]
+  },
+  {
+    "module": "payments-ui-core",
+    "name": "com.stripe.android.ui.core.elements.CardNumberConfigTest",
+    "tests": "5",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "0.039",
+    "cases": [
+      "determineState returns valid for allowed brand without CBC",
+      "determineState allows disallowed brand with CBC when number length is less than or equal to 8",
+      "determineState returns valid for allowed brand with CBC",
+      "determineState returns error for disallowed brand with CBC when number length is greater than 8",
+      "determineState returns error for disallowed brand without CBC"
+    ]
+  },
+  {
+    "module": "payments-ui-core",
+    "name": "com.stripe.android.ui.core.elements.CardNumberControllerTest",
+    "tests": "2",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "3.691",
+    "cases": [
+      "trailingIcon should filter out disallowed brands",
+      "on disallowed card brand entered, should report event"
+    ]
+  }
+]

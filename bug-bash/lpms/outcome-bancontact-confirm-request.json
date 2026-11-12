@@ -1,0 +1,6 @@
+{
+  "payment_method": "pm_1Uagi0Lu5o3P18Zpkui3G1ej",
+  "expected_payment_method_type": "bancontact",
+  "expected_amount": 12000,
+  "return_url": "stripesdk://payment_return_url/com.stripe.android.paymentsheet.example"
+}

@@ -1,0 +1,166 @@
+[
+  {
+    "case": "pmo-off-disabled",
+    "method": "card",
+    "merchant_sfu": null,
+    "merchant_pmo_sfu": "off_session",
+    "save_enabled": false,
+    "save_choice": null,
+    "effective_initial_sfu": "off_session",
+    "initial_save_options": {
+      "payment_method_remove": "disabled",
+      "payment_method_save": "disabled"
+    },
+    "initial_offer_save": null,
+    "sent_allow_redisplay": "limited",
+    "checkout_status": "complete",
+    "payment_status": "paid",
+    "intent_status": "succeeded",
+    "intent_sfu": null,
+    "intent_method_options": {
+      "card": {
+        "setup_future_usage": "off_session"
+      }
+    },
+    "payment_method_id": "pm_1UagyyLu5o3P18ZpGKudSUQu",
+    "payment_method_customer": "cus_Vbuof48be2jZUz",
+    "payment_method_redisplay": "limited",
+    "customer_id": "cus_Vbuof48be2jZUz",
+    "returning_default": [],
+    "returning_all": [
+      {
+        "id": "pm_1UagyyLu5o3P18ZpGKudSUQu",
+        "type": "card",
+        "allow_redisplay": "limited"
+      }
+    ]
+  },
+  {
+    "case": "pmo-on-disabled",
+    "method": "card",
+    "merchant_sfu": null,
+    "merchant_pmo_sfu": "on_session",
+    "save_enabled": false,
+    "save_choice": null,
+    "effective_initial_sfu": "on_session",
+    "initial_save_options": {
+      "payment_method_remove": "disabled",
+      "payment_method_save": "disabled"
+    },
+    "initial_offer_save": null,
+    "sent_allow_redisplay": "limited",
+    "checkout_status": "complete",
+    "payment_status": "paid",
+    "intent_status": "succeeded",
+    "intent_sfu": null,
+    "intent_method_options": {
+      "card": {
+        "setup_future_usage": "on_session"
+      }
+    },
+    "payment_method_id": "pm_1Uagz3Lu5o3P18ZpEEd8dPr7",
+    "payment_method_customer": "cus_VbuosJMzvGmPIX",
+    "payment_method_redisplay": "limited",
+    "customer_id": "cus_VbuosJMzvGmPIX",
+    "returning_default": [],
+    "returning_all": [
+      {
+        "id": "pm_1Uagz3Lu5o3P18ZpEEd8dPr7",
+        "type": "card",
+        "allow_redisplay": "limited"
+      }
+    ]
+  },
+  {
+    "case": "pmo-none-disabled",
+    "error": {
+      "error": "Invalid payment_method_options[card][setup_future_usage]: must be one of on_session or off_session",
+      "request_id": "req_ZBR1SrZuBqNpwK"
+    }
+  },
+  {
+    "case": "pmo-off-unchecked",
+    "method": "card",
+    "merchant_sfu": null,
+    "merchant_pmo_sfu": "off_session",
+    "save_enabled": true,
+    "save_choice": false,
+    "effective_initial_sfu": "off_session",
+    "initial_save_options": {
+      "payment_method_remove": "disabled",
+      "payment_method_save": "enabled"
+    },
+    "initial_offer_save": null,
+    "sent_allow_redisplay": "limited",
+    "checkout_status": "complete",
+    "payment_status": "paid",
+    "intent_status": "succeeded",
+    "intent_sfu": null,
+    "intent_method_options": {
+      "card": {
+        "setup_future_usage": "off_session"
+      }
+    },
+    "payment_method_id": "pm_1Uagz8Lu5o3P18ZpsvVxrID1",
+    "payment_method_customer": "cus_Vbuotjmyg9hGnp",
+    "payment_method_redisplay": "limited",
+    "customer_id": "cus_Vbuotjmyg9hGnp",
+    "returning_default": [],
+    "returning_all": [
+      {
+        "id": "pm_1Uagz8Lu5o3P18ZpsvVxrID1",
+        "type": "card",
+        "allow_redisplay": "limited"
+      }
+    ]
+  },
+  {
+    "case": "pmo-on-checked",
+    "method": "card",
+    "merchant_sfu": null,
+    "merchant_pmo_sfu": "on_session",
+    "save_enabled": true,
+    "save_choice": true,
+    "effective_initial_sfu": "on_session",
+    "initial_save_options": {
+      "payment_method_remove": "disabled",
+      "payment_method_save": "enabled"
+    },
+    "initial_offer_save": null,
+    "sent_allow_redisplay": "always",
+    "checkout_status": "complete",
+    "payment_status": "paid",
+    "intent_status": "succeeded",
+    "intent_sfu": "off_session",
+    "intent_method_options": {
+      "card": {
+        "setup_future_usage": "on_session"
+      }
+    },
+    "payment_method_id": "pm_1UagzDLu5o3P18Zpdv8i1d4s",
+    "payment_method_customer": "cus_VbuooS06ubIa8S",
+    "payment_method_redisplay": "always",
+    "customer_id": "cus_VbuooS06ubIa8S",
+    "returning_default": [
+      {
+        "id": "pm_1UagzDLu5o3P18Zpdv8i1d4s",
+        "type": "card",
+        "allow_redisplay": "always"
+      }
+    ],
+    "returning_all": [
+      {
+        "id": "pm_1UagzDLu5o3P18Zpdv8i1d4s",
+        "type": "card",
+        "allow_redisplay": "always"
+      }
+    ]
+  },
+  {
+    "case": "pmo-none-checked",
+    "error": {
+      "error": "Invalid payment_method_options[card][setup_future_usage]: must be one of on_session or off_session",
+      "request_id": "req_sFu7AtWyiGPcmf"
+    }
+  }
+]

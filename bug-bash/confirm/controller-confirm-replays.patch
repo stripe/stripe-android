@@ -1,0 +1,241 @@
+diff --git a/paymentsheet/src/test/java/com/stripe/android/checkout/CheckoutElementsControllerTest.kt b/paymentsheet/src/test/java/com/stripe/android/checkout/CheckoutElementsControllerTest.kt
+index c9505aea03..0e44355985 100644
+--- a/paymentsheet/src/test/java/com/stripe/android/checkout/CheckoutElementsControllerTest.kt
++++ b/paymentsheet/src/test/java/com/stripe/android/checkout/CheckoutElementsControllerTest.kt
+@@ -14,6 +14,7 @@ import com.stripe.android.checkout.CheckoutElementsController.Address
+ import com.stripe.android.checkout.injection.DaggerCheckoutElementsControllerComponent
+ import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
+ import com.stripe.android.checkouttesting.checkoutFetch
++import com.stripe.android.checkouttesting.checkoutConfirm
+ import com.stripe.android.checkouttesting.checkoutInit
+ import com.stripe.android.checkouttesting.checkoutUpdate
+ import com.stripe.android.core.exception.APIException
+@@ -35,6 +36,7 @@ import com.stripe.android.networktesting.testBodyFromFile
+ import com.stripe.android.paymentelement.CheckoutSessionPreview
+ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
+ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
++import com.stripe.android.paymentelement.confirmation.toConfirmationOption
+ import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
+ import com.stripe.android.paymentsheet.CustomerStateHolder
+ import com.stripe.android.paymentsheet.DefaultPrefsRepository
+@@ -107,6 +109,220 @@ internal class CheckoutElementsControllerTest {
+         PaymentElementCallbackReferences.clear()
+     }
+ 
++    @Test
++    fun `confirm sfu bash absent unchecked`() = runConfirmSfuBashCase(
++        "sfu-absent-unchecked", "card", false, null,
++    )
++
++    @Test
++    fun `confirm sfu bash absent checked`() = runConfirmSfuBashCase(
++        "sfu-absent-checked", "card", true, null,
++    )
++
++    @Test
++    fun `confirm sfu bash merchant on session disabled`() = runConfirmSfuBashCase(
++        "global-on-disabled", "card", null, "on_session",
++    )
++
++    @Test
++    fun `confirm sfu bash merchant off session unchecked`() = runConfirmSfuBashCase(
++        "global-off-unchecked", "card", false, "off_session",
++    )
++
++    @Test
++    fun `confirm sfu bash merchant on session checked`() = runConfirmSfuBashCase(
++        "global-on-checked", "card", true, "on_session",
++    )
++
++    @Test
++    fun `confirm sfu bash pmo overrides global`() = runConfirmSfuBashCase(
++        "global-on-pmo-off", "card", null, "off_session",
++    )
++
++    @Test
++    fun `confirm sfu bash pmo on session with checked save`() = runConfirmSfuBashCase(
++        "pmo-on-checked", "card", true, "on_session",
++    )
++
++    @Test
++    fun `confirm sfu bash sepa pmo off session`() = runConfirmSfuBashCase(
++        "sepa-pmo-off", "sepa_debit", null, "off_session",
++    )
++
++    @Test
++    fun `confirm sfu bash sepa none overrides global`() = runConfirmSfuBashCase(
++        "sepa-global-off-pmo-none", "sepa_debit", null, "none",
++    )
++
++    @Test
++    fun `confirm sfu bash sepa none with checked save`() = runConfirmSfuBashCase(
++        "sepa-global-off-pmo-none-checked", "sepa_debit", true, "none",
++    )
++
++    @Test
++    fun `confirm sfu bash minimal sepa save control`() = runConfirmSfuBashCase(
++        "sepa-save-control", "sepa_debit", true, null,
++    )
++
++    @Test
++    fun `confirm sfu bash minimal sepa none with checked save`() = runConfirmSfuBashCase(
++        "sepa-none-checked", "sepa_debit", true, "none",
++    )
++
++    @Test
++    fun `confirm sfu bash mixed card and sepa none with checked save`() = runConfirmSfuBashCase(
++        "mixed-sepa-none-checked", "sepa_debit", true, "none",
++    )
++
++    @Test
++    fun `confirm sfu regression explicit none does not offer an ineffective save checkbox`() = runTest {
++        networkRule.checkoutInit { it.setBody(confirmSfuBashJson("mixed-sepa-none-checked-init").toString()) }
++        val setup = createControllerSetup(SavedStateHandle(), DEFAULT_INTEGRATION_NAME)
++        val configuration = CheckoutElementsController.Configuration().paymentElement(
++            PaymentElement.Configuration().linkConfiguration(
++                PaymentElement.Configuration.LinkConfiguration().display(
++                    PaymentElement.Configuration.LinkConfiguration.Display.Never
++                )
++            )
++        )
++        assertThat(setup.controller.configure(DEFAULT_CLIENT_SECRET, configuration))
++            .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
++        val metadata = requireNotNull(setup.stateHolder.state?.paymentMethodMetadata)
++        assertThat(metadata.supportedPaymentMethodTypes()).containsExactly("card", "sepa_debit")
++        assertThat(metadata.hasIntentToSetup("sepa_debit")).isFalse()
++        val cardElements = requireNotNull(metadata.formElementsForCode(
++            "card", com.stripe.android.lpmfoundations.paymentmethod.TestUiDefinitionFactoryArgumentsFactory.create(),
++        ))
++        assertThat(cardElements.filterIsInstance<com.stripe.android.ui.core.elements.SaveForFutureUseElement>())
++            .hasSize(1)
++        val elements = requireNotNull(metadata.formElementsForCode(
++            "sepa_debit", com.stripe.android.lpmfoundations.paymentmethod.TestUiDefinitionFactoryArgumentsFactory.create(),
++        ))
++        assertThat(elements.filterIsInstance<com.stripe.android.ui.core.elements.SaveForFutureUseElement>())
++            .isEmpty()
++    }
++
++    private fun confirmSfuBashJson(name: String): JSONObject {
++        val directory = generateSequence(java.io.File(".").absoluteFile) { it.parentFile }
++            .map { java.io.File(it, "bug-bash/confirm") }.first { it.isDirectory }
++        return JSONObject(java.io.File(directory, "$name.json").readText()).apply {
++            remove("experiments_data")
++            optJSONObject("payment_response")?.optJSONObject("payment_intent")?.let {
++                it.put("id", "pi_confirmbash").put("client_secret", "pi_confirmbash_secret_test")
++            }
++            if (name.endsWith("payment-intent")) {
++                put("id", "pi_confirmbash").put("client_secret", "pi_confirmbash_secret_test")
++            }
++        }
++    }
++
++    private fun runConfirmSfuBashCase(
++        name: String,
++        method: String,
++        choice: Boolean?,
++        expectedEffectiveSfu: String?,
++    ) = runTest {
++        networkRule.checkoutInit { it.setBody(confirmSfuBashJson("$name-init").toString()) }
++        val setup = createControllerSetup(SavedStateHandle(), DEFAULT_INTEGRATION_NAME)
++        val configuration = CheckoutElementsController.Configuration().paymentElement(
++            PaymentElement.Configuration().linkConfiguration(
++                PaymentElement.Configuration.LinkConfiguration().display(
++                    PaymentElement.Configuration.LinkConfiguration.Display.Never
++                )
++            )
++        )
++        assertThat(setup.controller.configure(DEFAULT_CLIENT_SECRET, configuration))
++            .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
++        val state = requireNotNull(setup.stateHolder.state)
++        val metadata = requireNotNull(state.paymentMethodMetadata)
++        val intent = metadata.stripeIntent as PaymentIntent
++        assertThat((intent.getPaymentMethodOptions()[method] as? Map<*, *>)?.get("setup_future_usage"))
++            .isEqualTo(expectedEffectiveSfu)
++        val hasSetup = expectedEffectiveSfu == "on_session" || expectedEffectiveSfu == "off_session"
++        assertThat(metadata.hasIntentToSetup(method)).isEqualTo(hasSetup)
++        val formElements = requireNotNull(metadata.formElementsForCode(
++            method, com.stripe.android.lpmfoundations.paymentmethod.TestUiDefinitionFactoryArgumentsFactory.create(),
++        ))
++        val saveElement = formElements.filterIsInstance<com.stripe.android.ui.core.elements.SaveForFutureUseElement>()
++            .singleOrNull()
++        assertThat(saveElement != null).isEqualTo(choice != null)
++        choice?.let { checked ->
++            requireNotNull(saveElement).controller.onValueChange(checked)
++            saveElement.controller.saveForFutureUse.test { assertThat(awaitItem()).isEqualTo(checked) }
++        }
++        val requestedSave = when (choice) {
++            true -> PaymentSelection.CustomerRequestedSave.RequestReuse
++            false -> PaymentSelection.CustomerRequestedSave.RequestNoReuse
++            null -> PaymentSelection.CustomerRequestedSave.NoRequest
++        }
++        val redisplay = metadata.allowRedisplay(requestedSave, method)
++        assertThat(redisplay.value).isEqualTo(if (choice == true) "always" else if (hasSetup) "limited" else "unspecified")
++        val billingDetails = com.stripe.android.model.PaymentMethod.BillingDetails(
++            name = "Confirm SFU Test", email = "confirm-sfu@example.com",
++        )
++        val createParams = if (method == "card") {
++            com.stripe.android.model.PaymentMethodCreateParams.create(
++                card = com.stripe.android.model.PaymentMethodCreateParams.Card.create("tok_visa"),
++                billingDetails = billingDetails, allowRedisplay = redisplay,
++            )
++        } else {
++            com.stripe.android.model.PaymentMethodCreateParams.create(
++                sepaDebit = com.stripe.android.model.PaymentMethodCreateParams.SepaDebit("DE89370400440532013000"),
++                billingDetails = billingDetails, allowRedisplay = redisplay,
++            )
++        }
++        val selection = PaymentSelection.New.GenericPaymentMethod(
++            label = resolvableString("Confirm SFU"), iconResource = 0, iconResourceNight = null,
++            lightThemeIconUrl = null, darkThemeIconUrl = null,
++            paymentMethodCreateParams = createParams, customerRequestedSave = requestedSave,
++        )
++        val commonConfiguration = requireNotNull(CheckoutCommonConfigurationFactory("Confirm SFU").createForPaymentElement(
++            state.configuration, state.checkoutSessionResponse, state.collectedDetails,
++        ))
++        val option = selection.toConfirmationOption(commonConfiguration, null, metadata.cardFundingFilter)
++            as com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption.New
++        assertThat(option.shouldSave).isEqualTo(choice == true)
++
++        val repository = com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository(
++            stripeRepository = com.stripe.android.paymentsheet.repositories.CheckoutStripeRepositoryFactory.create(),
++            elementsSessionClientParams = com.stripe.android.paymentsheet.repositories.CheckoutStripeRepositoryFactory.clientParams(),
++            stripeNetworkClient = com.stripe.android.core.networking.DefaultStripeNetworkClient(),
++            fraudDetectionDataRepository = com.stripe.android.utils.FakeFraudDetectionDataRepository.create(),
++            analyticsRequestExecutor = com.stripe.android.testing.FakeAnalyticsRequestExecutor(),
++            paymentAnalyticsRequestFactory = com.stripe.android.networking.PaymentAnalyticsRequestFactory(applicationContext, "pk_test_123"),
++            apiRequestOptionsProvider = { com.stripe.android.core.networking.ApiRequest.Options(
++                metadata.apiConfiguration.publishableKey, metadata.apiConfiguration.stripeAccountId,
++            ) },
++        )
++        val interceptor = com.stripe.android.paymentelement.confirmation.intent.CheckoutSessionConfirmationInterceptor(
++            integrationMetadata = metadata.integrationMetadata as IntegrationMetadata.CheckoutSession,
++            customerMetadata = metadata.customerMetadata,
++            clientAttributionMetadata = metadata.clientAttributionMetadata as com.stripe.android.model.ClientAttributionMetadata.CheckoutSession,
++            context = applicationContext, checkoutSessionRepository = repository,
++            checkoutSessionTaxRegionUpdater = CheckoutSessionTaxRegionUpdater(repository),
++        )
++        networkRule.checkoutConfirm(
++            bodyPart("expected_payment_method_type", method),
++            bodyPart("payment_method_data[allow_redisplay]", redisplay.value),
++            if (choice == null) not(hasBodyPart("collected_information[save_payment_method]"))
++            else bodyPart("collected_information[save_payment_method]", choice.toString()),
++            not(hasBodyPart("setup_future_usage")),
++            not(hasBodyPart("payment_method_options[$method][setup_future_usage]")),
++            intentResponseFactory = { it.setBody(confirmSfuBashJson("$name-payment-intent").toString()) },
++        ) { it.setBody(confirmSfuBashJson("$name-confirm").toString()) }
++        val result = interceptor.intercept(intent, option, null)
++        if (result is com.stripe.android.paymentelement.confirmation.ConfirmationDefinition.Action.Fail) {
++            throw AssertionError("Captured confirmation failed", result.cause)
++        }
++        result as com.stripe.android.paymentelement.confirmation.ConfirmationDefinition.Action.Complete
++        val actual = result.intent as PaymentIntent
++        val captured = confirmSfuBashJson("$name-payment-intent")
++        assertThat(actual.setupFutureUsage?.code).isEqualTo(captured.optString("setup_future_usage").takeUnless { it == "null" || it.isEmpty() })
++        assertThat(actual.status?.code).isEqualTo(if (method == "card") "succeeded" else "processing")
++        assertThat(actual.isSetupFutureUsageSet(method)).isEqualTo(hasSetup || choice == true && expectedEffectiveSfu != "none")
++        assertThat(actual.paymentMethod?.allowRedisplay?.value).isEqualTo(captured.getJSONObject("payment_method").getString("allow_redisplay"))
++    }
++
+     @Test
+     fun `configure returns success`() = runConfigureScenario {
+         assertThat(result).isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)

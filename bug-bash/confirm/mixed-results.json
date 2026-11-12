@@ -1,0 +1,32 @@
+[
+  {
+    "case": "mixed-sepa-none-checked",
+    "method": "sepa_debit",
+    "merchant_sfu": null,
+    "merchant_pmo_sfu": "none",
+    "save_enabled": true,
+    "save_choice": true,
+    "effective_initial_sfu": "none",
+    "initial_save_options": {
+      "payment_method_remove": "disabled",
+      "payment_method_save": "enabled"
+    },
+    "initial_offer_save": null,
+    "sent_allow_redisplay": "always",
+    "checkout_status": "complete",
+    "payment_status": "unpaid",
+    "intent_status": "processing",
+    "intent_sfu": "off_session",
+    "intent_method_options": {
+      "sepa_debit": {
+        "setup_future_usage": "none"
+      }
+    },
+    "payment_method_id": "pm_1Uah65Lu5o3P18ZpSQR5bC9I",
+    "payment_method_customer": null,
+    "payment_method_redisplay": "always",
+    "customer_id": "cus_VbuvUPkajSOzuO",
+    "returning_default": [],
+    "returning_all": []
+  }
+]

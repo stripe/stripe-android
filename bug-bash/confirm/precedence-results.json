@@ -1,0 +1,62 @@
+[
+  {
+    "case": "sepa-global-off-pmo-none",
+    "method": "sepa_debit",
+    "merchant_sfu": "off_session",
+    "merchant_pmo_sfu": "none",
+    "save_enabled": false,
+    "save_choice": null,
+    "effective_initial_sfu": "none",
+    "initial_save_options": {
+      "payment_method_remove": "disabled",
+      "payment_method_save": "disabled"
+    },
+    "initial_offer_save": null,
+    "sent_allow_redisplay": "unspecified",
+    "checkout_status": "complete",
+    "payment_status": "unpaid",
+    "intent_status": "processing",
+    "intent_sfu": "off_session",
+    "intent_method_options": {
+      "sepa_debit": {
+        "setup_future_usage": "none"
+      }
+    },
+    "payment_method_id": "pm_1Uah0hLu5o3P18ZpfIiylVlr",
+    "payment_method_customer": null,
+    "payment_method_redisplay": "limited",
+    "customer_id": "cus_VbuqZUYbLKx7iu",
+    "returning_default": [],
+    "returning_all": []
+  },
+  {
+    "case": "sepa-global-off-pmo-none-checked",
+    "method": "sepa_debit",
+    "merchant_sfu": "off_session",
+    "merchant_pmo_sfu": "none",
+    "save_enabled": true,
+    "save_choice": true,
+    "effective_initial_sfu": "none",
+    "initial_save_options": {
+      "payment_method_remove": "disabled",
+      "payment_method_save": "enabled"
+    },
+    "initial_offer_save": null,
+    "sent_allow_redisplay": "always",
+    "checkout_status": "complete",
+    "payment_status": "unpaid",
+    "intent_status": "processing",
+    "intent_sfu": "off_session",
+    "intent_method_options": {
+      "sepa_debit": {
+        "setup_future_usage": "none"
+      }
+    },
+    "payment_method_id": "pm_1Uah0mLu5o3P18ZpybTastEV",
+    "payment_method_customer": null,
+    "payment_method_redisplay": "always",
+    "customer_id": "cus_Vbuqdwv0R5npHo",
+    "returning_default": [],
+    "returning_all": []
+  }
+]

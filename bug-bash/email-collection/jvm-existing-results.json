@@ -1,0 +1,60 @@
+{
+  "gradle_exit": 0,
+  "gradle_elapsed": "19s",
+  "suites": [
+    {
+      "name": "com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseJsonParserTest",
+      "tests": "2",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "0.016"
+    },
+    {
+      "name": "com.stripe.android.checkout.CheckoutSessionMappersTest",
+      "tests": "2",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "0.003"
+    },
+    {
+      "name": "com.stripe.android.paymentelement.confirmation.intent.CheckoutSessionConfirmationInterceptorTest",
+      "tests": "12",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "1.352"
+    },
+    {
+      "name": "com.stripe.android.checkout.CheckoutElementsControllerTest",
+      "tests": "5",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "2.813"
+    },
+    {
+      "name": "com.stripe.android.checkout.CheckoutCommonConfigurationFactoryTest",
+      "tests": "2",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "0.08"
+    },
+    {
+      "name": "com.stripe.android.paymentsheet.repositories.ConfirmCheckoutSessionParamsTest",
+      "tests": "17",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0",
+      "time": "0.009"
+    }
+  ],
+  "totals": {
+    "tests": 40,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  }
+}

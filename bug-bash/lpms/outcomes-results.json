@@ -1,0 +1,260 @@
+[
+  {
+    "case": "outcome-card",
+    "confirm": {
+      "status": "complete",
+      "payment_status": "paid",
+      "ordered_types": [
+        "card",
+        "apple_pay",
+        "google_pay"
+      ],
+      "automatic_payment_method_types": null,
+      "setup_future_usage_for_payment_method_type": {},
+      "total": 12000,
+      "customer_id": "cus_VbuW5b3E4XZRax",
+      "saved_methods": []
+    },
+    "intent_status": "succeeded",
+    "intent_sfu": null,
+    "next_action_type": null,
+    "polls": [
+      {
+        "id": "cs_test_a0mZz3Sc8ddejWpFEflXG7kTQ0RABRtvbk8tw8bbDWTmwlGfLcMa4dgr7z",
+        "confirmation_status": "succeeded",
+        "livemode": false,
+        "payment_status": "paid",
+        "state": "complete",
+        "status": "complete",
+        "ui_mode": "mobile_elements"
+      },
+      {
+        "id": "cs_test_a0mZz3Sc8ddejWpFEflXG7kTQ0RABRtvbk8tw8bbDWTmwlGfLcMa4dgr7z",
+        "confirmation_status": "succeeded",
+        "livemode": false,
+        "payment_status": "paid",
+        "state": "complete",
+        "status": "complete",
+        "ui_mode": "mobile_elements"
+      },
+      {
+        "id": "cs_test_a0mZz3Sc8ddejWpFEflXG7kTQ0RABRtvbk8tw8bbDWTmwlGfLcMa4dgr7z",
+        "confirmation_status": "succeeded",
+        "livemode": false,
+        "payment_status": "paid",
+        "state": "complete",
+        "status": "complete",
+        "ui_mode": "mobile_elements"
+      }
+    ]
+  },
+  {
+    "case": "outcome-sepa_debit-no-save",
+    "confirm": {
+      "status": "complete",
+      "payment_status": "unpaid",
+      "ordered_types": [
+        "sepa_debit"
+      ],
+      "automatic_payment_method_types": null,
+      "setup_future_usage_for_payment_method_type": {},
+      "total": 12000,
+      "customer_id": "cus_VbuWaup2bVhUsP",
+      "saved_methods": []
+    },
+    "intent_status": "processing",
+    "intent_sfu": null,
+    "next_action_type": null,
+    "polls": [
+      {
+        "id": "cs_test_a0dQbdr4i4JPLCDrscRUEvazREIvhxEZOO296boIuO3mya9UkPbw79NTpq",
+        "confirmation_status": "succeeded",
+        "livemode": false,
+        "payment_status": "unpaid",
+        "state": "complete",
+        "status": "complete",
+        "ui_mode": "mobile_elements"
+      },
+      {
+        "id": "cs_test_a0dQbdr4i4JPLCDrscRUEvazREIvhxEZOO296boIuO3mya9UkPbw79NTpq",
+        "confirmation_status": "succeeded",
+        "livemode": false,
+        "payment_status": "unpaid",
+        "state": "complete",
+        "status": "complete",
+        "ui_mode": "mobile_elements"
+      },
+      {
+        "id": "cs_test_a0dQbdr4i4JPLCDrscRUEvazREIvhxEZOO296boIuO3mya9UkPbw79NTpq",
+        "confirmation_status": "succeeded",
+        "livemode": false,
+        "payment_status": "unpaid",
+        "state": "complete",
+        "status": "complete",
+        "ui_mode": "mobile_elements"
+      }
+    ],
+    "returning": {
+      "status": "open",
+      "payment_status": "unpaid",
+      "ordered_types": [
+        "card",
+        "apple_pay",
+        "google_pay",
+        "sepa_debit"
+      ],
+      "automatic_payment_method_types": null,
+      "setup_future_usage_for_payment_method_type": {},
+      "total": 12000,
+      "customer_id": "cus_VbuWaup2bVhUsP",
+      "saved_methods": []
+    },
+    "new_method_id": "pm_1UaghqLu5o3P18Zp5VC8QN2P"
+  },
+  {
+    "case": "outcome-sepa_debit-save",
+    "confirm": {
+      "status": "complete",
+      "payment_status": "unpaid",
+      "ordered_types": [
+        "sepa_debit"
+      ],
+      "automatic_payment_method_types": null,
+      "setup_future_usage_for_payment_method_type": {},
+      "total": 12000,
+      "customer_id": "cus_VbuWZn0uV7kWKD",
+      "saved_methods": [
+        {
+          "id": "pm_1UaghvLu5o3P18ZpFnWbaQsg",
+          "type": "sepa_debit",
+          "allow_redisplay": "always",
+          "card": null,
+          "sepa_debit": {
+            "bank_code": "37040044",
+            "branch_code": "",
+            "country": "DE",
+            "fingerprint": "vifs0Ho7vwRn1Miu",
+            "generated_from": {
+              "charge": null,
+              "setup_attempt": null
+            },
+            "last4": "3000"
+          }
+        }
+      ]
+    },
+    "intent_status": "processing",
+    "intent_sfu": "off_session",
+    "next_action_type": null,
+    "polls": [
+      {
+        "id": "cs_test_a0blNOQv0U7uOILPHZy8VebjNhJsFnR7R40QQqX7WrPOaQFETPfY9Cnyrn",
+        "confirmation_status": "succeeded",
+        "livemode": false,
+        "payment_status": "unpaid",
+        "state": "complete",
+        "status": "complete",
+        "ui_mode": "mobile_elements"
+      },
+      {
+        "id": "cs_test_a0blNOQv0U7uOILPHZy8VebjNhJsFnR7R40QQqX7WrPOaQFETPfY9Cnyrn",
+        "confirmation_status": "succeeded",
+        "livemode": false,
+        "payment_status": "unpaid",
+        "state": "complete",
+        "status": "complete",
+        "ui_mode": "mobile_elements"
+      },
+      {
+        "id": "cs_test_a0blNOQv0U7uOILPHZy8VebjNhJsFnR7R40QQqX7WrPOaQFETPfY9Cnyrn",
+        "confirmation_status": "succeeded",
+        "livemode": false,
+        "payment_status": "unpaid",
+        "state": "complete",
+        "status": "complete",
+        "ui_mode": "mobile_elements"
+      }
+    ],
+    "returning": {
+      "status": "open",
+      "payment_status": "unpaid",
+      "ordered_types": [
+        "card",
+        "apple_pay",
+        "google_pay",
+        "sepa_debit"
+      ],
+      "automatic_payment_method_types": null,
+      "setup_future_usage_for_payment_method_type": {},
+      "total": 12000,
+      "customer_id": "cus_VbuWZn0uV7kWKD",
+      "saved_methods": [
+        {
+          "id": "pm_1UaghvLu5o3P18ZpFnWbaQsg",
+          "type": "sepa_debit",
+          "allow_redisplay": "always",
+          "card": null,
+          "sepa_debit": {
+            "bank_code": "37040044",
+            "branch_code": "",
+            "country": "DE",
+            "fingerprint": "vifs0Ho7vwRn1Miu",
+            "generated_from": {
+              "charge": null,
+              "setup_attempt": null
+            },
+            "last4": "3000"
+          }
+        }
+      ]
+    },
+    "new_method_id": "pm_1UaghvLu5o3P18ZpFnWbaQsg"
+  },
+  {
+    "case": "outcome-bancontact",
+    "confirm": {
+      "status": "open",
+      "payment_status": "unpaid",
+      "ordered_types": [
+        "bancontact"
+      ],
+      "automatic_payment_method_types": null,
+      "setup_future_usage_for_payment_method_type": {},
+      "total": 12000,
+      "customer_id": "cus_VbuX66UCwYPcoR",
+      "saved_methods": []
+    },
+    "intent_status": "requires_action",
+    "intent_sfu": null,
+    "next_action_type": "redirect_to_url",
+    "polls": [
+      {
+        "id": "cs_test_a0oU2X2tjB1A1JLNGDNFtqPl8escnkVcGDoxnTtxiW7vNYrR7kJIJEwrc3",
+        "confirmation_status": "pending",
+        "livemode": false,
+        "payment_status": "unpaid",
+        "state": "ready",
+        "status": "open",
+        "ui_mode": "mobile_elements"
+      },
+      {
+        "id": "cs_test_a0oU2X2tjB1A1JLNGDNFtqPl8escnkVcGDoxnTtxiW7vNYrR7kJIJEwrc3",
+        "confirmation_status": "pending",
+        "livemode": false,
+        "payment_status": "unpaid",
+        "state": "ready",
+        "status": "open",
+        "ui_mode": "mobile_elements"
+      },
+      {
+        "id": "cs_test_a0oU2X2tjB1A1JLNGDNFtqPl8escnkVcGDoxnTtxiW7vNYrR7kJIJEwrc3",
+        "confirmation_status": "pending",
+        "livemode": false,
+        "payment_status": "unpaid",
+        "state": "ready",
+        "status": "open",
+        "ui_mode": "mobile_elements"
+      }
+    ]
+  }
+]

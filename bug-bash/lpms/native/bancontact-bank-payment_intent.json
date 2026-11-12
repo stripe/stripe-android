@@ -1,0 +1,40 @@
+{
+  "id": "pi_3UaizaLu5o3P18Zp0KMf9Qil",
+  "object": "payment_intent",
+  "allowed_payment_method_types": [
+    "bancontact"
+  ],
+  "amount": 12000,
+  "amount_details": {
+    "tip": {}
+  },
+  "automatic_payment_methods": null,
+  "canceled_at": null,
+  "cancellation_reason": null,
+  "capture_method": "automatic_async",
+  "confirmation_method": "automatic",
+  "created": 1794432222,
+  "currency": "eur",
+  "description": null,
+  "excluded_payment_method_types": null,
+  "last_payment_error": null,
+  "livemode": false,
+  "next_action": {
+    "redirect_to_url": {
+      "return_url": "stripesdk://payment_return_url/com.stripe.android.paymentsheet.example",
+      "url": "https://pm-redirects.stripe.com/authorize/acct_1HvTI7Lu5o3P18Zp/pa_nonce_VbwtfmQGLJ861gkaIAQ52DcyYfzhYln"
+    },
+    "type": "redirect_to_url"
+  },
+  "payment_method": "pm_1UaizaLu5o3P18ZpaeknAhYM",
+  "payment_method_configuration_details": null,
+  "payment_method_types": [
+    "bancontact"
+  ],
+  "processing": null,
+  "receipt_email": null,
+  "setup_future_usage": null,
+  "shipping": null,
+  "source": null,
+  "status": "requires_action"
+}

@@ -1,0 +1,4 @@
+{
+  "error": "Invalid payment_method_options[card][setup_future_usage]: must be one of on_session or off_session",
+  "request_id": "req_KrzYHDqSNwbQsV"
+}

@@ -1,0 +1,18 @@
+{
+  "fresh_preferences_restored_exactly": true,
+  "checkout_preferences_absent": true,
+  "reverse_mappings": [],
+  "owned_relay_port_closed": true,
+  "owned_private_state_removed": true,
+  "owned_device_scratch_removed": true,
+  "recorder_used": false,
+  "menu_observed": "CheckoutElementsController Example",
+  "keyguard_showing": false,
+  "screen_state": "SCREEN_STATE_ON",
+  "stay_on_while_plugged_in": 7,
+  "installed_revision": "cf7dd4b99965a4e754abdadacf4f337e764f6e6a",
+  "installed_flags": {
+    "DIRECTLY_TO_PLAYGROUND": false,
+    "STRIPE_PAYMENTSHEET_EXAMPLE_USES_CLEARTEXT_TRAFFIC": true
+  }
+}

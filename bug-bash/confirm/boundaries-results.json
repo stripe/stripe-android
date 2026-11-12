@@ -1,0 +1,23 @@
+[
+  {
+    "case": "boundary-global-none",
+    "error": {
+      "error": "Invalid payment_intent_data[setup_future_usage]: must be one of on_session or off_session",
+      "request_id": "req_08caGUdm8AFoRs"
+    }
+  },
+  {
+    "case": "boundary-top-level-sfu",
+    "error": {
+      "error": "Received unknown parameter: setup_future_usage",
+      "request_id": "req_75WNHDiZ11PVvL"
+    }
+  },
+  {
+    "case": "boundary-sepa-on",
+    "accepted": true,
+    "effective_sfu": {
+      "sepa_debit": "on_session"
+    }
+  }
+]

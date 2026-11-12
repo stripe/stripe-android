@@ -1,0 +1,74 @@
+{
+  "id": "pi_3Uah3MLu5o3P18Zp0mWrFF9b",
+  "object": "payment_intent",
+  "allowed_payment_method_types": [
+    "sepa_debit"
+  ],
+  "amount": 12000,
+  "amount_details": {
+    "tip": {}
+  },
+  "automatic_payment_methods": null,
+  "canceled_at": null,
+  "cancellation_reason": null,
+  "capture_method": "automatic_async",
+  "client_secret": "[REDACTED]",
+  "confirmation_method": "automatic",
+  "created": 1794424768,
+  "currency": "eur",
+  "description": null,
+  "excluded_payment_method_types": null,
+  "last_payment_error": null,
+  "livemode": false,
+  "next_action": null,
+  "payment_method": {
+    "id": "pm_1Uah3MLu5o3P18ZpnHU8j8MW",
+    "object": "payment_method",
+    "allow_redisplay": "always",
+    "billing_details": {
+      "address": {
+        "city": null,
+        "country": null,
+        "line1": null,
+        "line2": null,
+        "postal_code": null,
+        "state": null
+      },
+      "email": "confirm-sfu@example.com",
+      "name": "Confirm SFU Test",
+      "phone": null,
+      "tax_id": null
+    },
+    "created": 1794424768,
+    "customer": null,
+    "customer_account": null,
+    "livemode": false,
+    "sepa_debit": {
+      "bank_code": "37040044",
+      "branch_code": "",
+      "country": "DE",
+      "fingerprint": "vifs0Ho7vwRn1Miu",
+      "generated_from": {
+        "charge": null,
+        "setup_attempt": null
+      },
+      "last4": "3000"
+    },
+    "type": "sepa_debit"
+  },
+  "payment_method_configuration_details": null,
+  "payment_method_options": {
+    "sepa_debit": {
+      "setup_future_usage": "none"
+    }
+  },
+  "payment_method_types": [
+    "sepa_debit"
+  ],
+  "processing": null,
+  "receipt_email": null,
+  "setup_future_usage": "off_session",
+  "shipping": null,
+  "source": null,
+  "status": "processing"
+}

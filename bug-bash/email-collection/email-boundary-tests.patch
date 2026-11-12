@@ -1,0 +1,133 @@
+diff --git a/paymentsheet/src/test/java/com/stripe/android/checkout/CheckoutElementsControllerTest.kt b/paymentsheet/src/test/java/com/stripe/android/checkout/CheckoutElementsControllerTest.kt
+index c9505aea03..b61d7e01f3 100644
+--- a/paymentsheet/src/test/java/com/stripe/android/checkout/CheckoutElementsControllerTest.kt
++++ b/paymentsheet/src/test/java/com/stripe/android/checkout/CheckoutElementsControllerTest.kt
+@@ -107,6 +107,83 @@ internal class CheckoutElementsControllerTest {
+         PaymentElementCallbackReferences.clear()
+     }
+ 
++    @Test
++    fun `email bash captured guest can replace and clear configured prefill`() = runConfigureScenario(
++        initModifier = emailBashResponse("guest-validation-init"),
++        configuration = emailBashConfiguration().defaults(
++            CheckoutElementsController.Configuration.Defaults().email("prefill@example.com")
++        ),
++    ) {
++        assertThat(result).isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
++        controller.session.test {
++            assertThat(awaitItem()?.email).isEqualTo("prefill@example.com")
++            assertThat(controller.updateEmail("email-collection+replaced@example.com"))
++                .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
++            assertThat(awaitItem()?.email).isEqualTo("email-collection+replaced@example.com")
++            assertThat(controller.updateEmail(null))
++                .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
++            assertThat(awaitItem()?.email).isNull()
++            assertThat(committedState?.embeddedConfiguration?.defaultBillingDetails?.email).isNull()
++            val metadata = committedState?.paymentMethodMetadata?.integrationMetadata as IntegrationMetadata.CheckoutSession
++            assertThat(metadata.collectedEmail).isNull()
++        }
++    }
++
++    @Test
++    fun `email bash public API preserves invalid input until confirmation then supports correction`() =
++        runConfigureScenario(
++            initModifier = emailBashResponse("guest-validation-init"),
++            configuration = emailBashConfiguration(),
++        ) {
++            assertThat(result).isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
++            assertThat(controller.session.value?.email).isNull()
++            assertThat(controller.updateEmail("not-an-email"))
++                .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
++            assertThat(controller.session.value?.email).isEqualTo("not-an-email")
++            val invalidMetadata = committedState?.paymentMethodMetadata?.integrationMetadata as IntegrationMetadata.CheckoutSession
++            assertThat(invalidMetadata.collectedEmail).isEqualTo("not-an-email")
++            assertThat(controller.updateEmail("email-collection+recovered@example.com"))
++                .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
++            assertThat(controller.session.value?.email).isEqualTo("email-collection+recovered@example.com")
++            val correctedMetadata = committedState?.paymentMethodMetadata?.integrationMetadata as IntegrationMetadata.CheckoutSession
++            assertThat(correctedMetadata.collectedEmail).isEqualTo("email-collection+recovered@example.com")
++        }
++
++    @Test
++    fun `email bash captured returning customer retains fixed email after replace and clear`() =
++        runConfigureScenario(
++            initModifier = emailBashResponse("customer-collect-returning-init"),
++            configuration = emailBashConfiguration(),
++        ) {
++            assertThat(result).isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
++            assertThat(controller.session.value?.email).isEqualTo("email-collection+customer@example.com")
++            assertThat(controller.updateEmail("another@example.com"))
++                .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
++            assertThat(controller.session.value?.email).isEqualTo("email-collection+customer@example.com")
++            assertThat(controller.updateEmail(null))
++                .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
++            assertThat(controller.session.value?.email).isEqualTo("email-collection+customer@example.com")
++            assertThat(committedState?.embeddedConfiguration?.defaultBillingDetails?.email)
++                .isEqualTo("email-collection+customer@example.com")
++        }
++
++    private fun emailBashResponse(name: String): (JSONObject) -> Unit = { destination ->
++        val directory = generateSequence(java.io.File(".").absoluteFile) { it.parentFile }
++            .map { java.io.File(it, "bug-bash/email-collection") }.first { it.isDirectory }
++        val captured = JSONObject(java.io.File(directory, "$name.json").readText())
++        destination.keys().asSequence().toList().forEach { destination.remove(it) }
++        captured.keys().forEach { destination.put(it, captured.get(it)) }
++        destination.remove("experiments_data")
++    }
++
++    private fun emailBashConfiguration() = CheckoutElementsController.Configuration().paymentElement(
++        PaymentElement.Configuration().linkConfiguration(
++            PaymentElement.Configuration.LinkConfiguration().display(
++                PaymentElement.Configuration.LinkConfiguration.Display.Never
++            )
++        )
++    )
++
+     @Test
+     fun `configure returns success`() = runConfigureScenario {
+         assertThat(result).isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
+diff --git a/paymentsheet/src/test/java/com/stripe/android/paymentelement/confirmation/intent/CheckoutSessionConfirmationInterceptorTest.kt b/paymentsheet/src/test/java/com/stripe/android/paymentelement/confirmation/intent/CheckoutSessionConfirmationInterceptorTest.kt
+index 9ae69c6ec7..349b49b49d 100644
+--- a/paymentsheet/src/test/java/com/stripe/android/paymentelement/confirmation/intent/CheckoutSessionConfirmationInterceptorTest.kt
++++ b/paymentsheet/src/test/java/com/stripe/android/paymentelement/confirmation/intent/CheckoutSessionConfirmationInterceptorTest.kt
+@@ -86,6 +86,40 @@ class CheckoutSessionConfirmationInterceptorTest {
+         .outerRule(networkRule)
+         .around(PaymentConfigurationTestRule(applicationContext))
+ 
++    @Test
++    fun `email bash captured invalid email error reaches confirmation caller`() = runScenario(
++        collectedEmail = "not-an-email",
++    ) {
++        networkRule.checkoutConfirm(bodyPart("collected_information[email]", "not-an-email")) { response ->
++            response.setResponseCode(400)
++            response.setBody(emailBashError("guest-validation-invalid-error"))
++        }
++        val result = interceptNewPm()
++        assertThat(result).isInstanceOf<ConfirmationDefinition.Action.Fail<IntentConfirmationDefinition.Args>>()
++        val failure = result as ConfirmationDefinition.Action.Fail
++        assertThat(failure.cause.message).contains("Invalid email address: not-an-email")
++        assertThat(failure.errorType).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Transaction())
++    }
++
++    @Test
++    fun `email bash captured missing email error reaches confirmation caller`() = runScenario {
++        networkRule.checkoutConfirm(not(hasBodyPart("collected_information[email]"))) { response ->
++            response.setResponseCode(400)
++            response.setBody(emailBashError("guest-validation-missing-error"))
++        }
++        val result = interceptNewPm()
++        assertThat(result).isInstanceOf<ConfirmationDefinition.Action.Fail<IntentConfirmationDefinition.Args>>()
++        val failure = result as ConfirmationDefinition.Action.Fail
++        assertThat(failure.cause.message).contains("An error has occurred confirming the Checkout Session.")
++        assertThat(failure.errorType).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Transaction())
++    }
++
++    private fun emailBashError(name: String): String {
++        val directory = generateSequence(java.io.File(".").absoluteFile) { it.parentFile }
++            .map { java.io.File(it, "bug-bash/email-collection") }.first { it.isDirectory }
++        return java.io.File(directory, "$name.json").readText()
++    }
++
+     @Test
+     fun `open confirmation completes with the unmodified confirm response for polling`() = runScenario {
+         networkRule.checkoutConfirm { response ->

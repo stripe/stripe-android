@@ -1,0 +1,4 @@
+{
+  "error": "You can not pass `payment_intent_data` in `modeless` mode.",
+  "request_id": "req_2cOOmcSp7D8Ti4"
+}

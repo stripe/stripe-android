@@ -1,0 +1,31 @@
+{
+  "customer": "cus_Vbw0WrpSDj0lPj",
+  "payment_method": "pm_1Uai8RLu5o3P18Zp5hdKOOlz",
+  "card": {
+    "brand": "visa",
+    "checks": {
+      "address_line1_check": null,
+      "address_postal_code_check": null,
+      "cvc_check": null
+    },
+    "country": "US",
+    "display_brand": "visa",
+    "exp_month": 11,
+    "exp_year": 2027,
+    "funding": "credit",
+    "generated_from": null,
+    "last4": "4242",
+    "networks": {
+      "available": [
+        "visa"
+      ],
+      "preferred": null
+    },
+    "regulated_status": "unregulated",
+    "three_d_secure_usage": {
+      "supported": true
+    },
+    "wallet": null
+  },
+  "country": "FR"
+}

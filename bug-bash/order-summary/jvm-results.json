@@ -1,0 +1,54 @@
+{
+  "gradle_exit_code": 0,
+  "gradle_elapsed": "33s",
+  "tests": 14,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "classes": [
+    {
+      "class": "com.stripe.android.checkout.OrderSummaryLiveResponseBashTest",
+      "tests": "4",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "time": "0.054",
+      "test_names": [
+        "French locale preserves actual decimal price and minor units",
+        "inclusive tax preserves total while included tax updates and survives confirmation",
+        "ISK uses Stripe divisor through line totals and confirmation",
+        "details preserve quantities labels images decimal precision and confirmed line totals"
+      ]
+    },
+    {
+      "class": "com.stripe.android.checkout.CheckoutElementsControllerTest",
+      "tests": "8",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "time": "3.023",
+      "test_names": [
+        "runServerUpdate returns failure when serverUpdate fails",
+        "runServerUpdate returns failure when a payment flow is presented",
+        "runServerUpdate returns failure when serverUpdate throws",
+        "order summary bash detailed cart survives public server refresh",
+        "runServerUpdate returns failure when the refresh fails",
+        "runServerUpdate refreshes the session after serverUpdate completes",
+        "order summary bash inclusive tax updates stable items and public totals",
+        "runServerUpdate returns failure when serverUpdate exceeds the timeout"
+      ]
+    },
+    {
+      "class": "com.stripe.android.checkout.DefaultCheckoutSessionRefresherTest",
+      "tests": "2",
+      "skipped": "0",
+      "failures": "0",
+      "errors": "0",
+      "time": "0.05",
+      "test_names": [
+        "refresh without response fetches and commits latest session",
+        "refresh with response commits it without fetching"
+      ]
+    }
+  ]
+}

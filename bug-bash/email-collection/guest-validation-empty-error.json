@@ -1,0 +1,9 @@
+{
+  "error": {
+    "code": "email_invalid",
+    "doc_url": "https://stripe.com/docs/error-codes/email-invalid",
+    "message": "Invalid email address: ",
+    "param": "collected_information[email]",
+    "type": "invalid_request_error"
+  }
+}

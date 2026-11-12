@@ -1,0 +1,65 @@
+{
+  "id": "pi_3Uagi0Lu5o3P18Zp1xNBRCJQ",
+  "object": "payment_intent",
+  "allowed_payment_method_types": [
+    "bancontact"
+  ],
+  "amount": 12000,
+  "amount_details": {
+    "tip": {}
+  },
+  "automatic_payment_methods": null,
+  "canceled_at": null,
+  "cancellation_reason": null,
+  "capture_method": "automatic_async",
+  "client_secret": "[REDACTED]",
+  "confirmation_method": "automatic",
+  "created": 1794423444,
+  "currency": "eur",
+  "description": null,
+  "excluded_payment_method_types": null,
+  "last_payment_error": null,
+  "livemode": false,
+  "next_action": {
+    "redirect_to_url": {
+      "return_url": "stripesdk://payment_return_url/com.stripe.android.paymentsheet.example",
+      "url": "https://example.com/redacted-redirect"
+    },
+    "type": "redirect_to_url"
+  },
+  "payment_method": {
+    "id": "pm_1Uagi0Lu5o3P18Zpkui3G1ej",
+    "object": "payment_method",
+    "allow_redisplay": "limited",
+    "bancontact": {},
+    "billing_details": {
+      "address": {
+        "city": null,
+        "country": null,
+        "line1": null,
+        "line2": null,
+        "postal_code": null,
+        "state": null
+      },
+      "email": "lpm-bash@example.com",
+      "name": "LPM Test",
+      "phone": null,
+      "tax_id": null
+    },
+    "created": 1794423444,
+    "customer": null,
+    "customer_account": null,
+    "livemode": false,
+    "type": "bancontact"
+  },
+  "payment_method_configuration_details": null,
+  "payment_method_types": [
+    "bancontact"
+  ],
+  "processing": null,
+  "receipt_email": null,
+  "setup_future_usage": null,
+  "shipping": null,
+  "source": null,
+  "status": "requires_action"
+}

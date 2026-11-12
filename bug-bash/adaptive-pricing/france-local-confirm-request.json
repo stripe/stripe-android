@@ -1,0 +1,6 @@
+{
+  "payment_method": "pm_1UagLnLu5o3P18ZpS3A7ghKz",
+  "expected_payment_method_type": "card",
+  "expected_amount": 11251,
+  "return_url": "stripesdk://payment_return_url/com.stripe.android.paymentsheet.example"
+}

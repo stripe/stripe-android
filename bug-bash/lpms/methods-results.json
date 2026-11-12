@@ -1,0 +1,145 @@
+[
+  {
+    "case": "methods-card-only",
+    "requested": [
+      "card"
+    ],
+    "response": {
+      "status": "open",
+      "payment_status": "unpaid",
+      "ordered_types": [
+        "card",
+        "apple_pay",
+        "google_pay"
+      ],
+      "total": 12000,
+      "customer_id": null,
+      "saved_methods": [],
+      "automatic_payment_method_types": null
+    }
+  },
+  {
+    "case": "methods-sepa-only",
+    "requested": [
+      "sepa_debit"
+    ],
+    "response": {
+      "status": "open",
+      "payment_status": "unpaid",
+      "ordered_types": [
+        "sepa_debit"
+      ],
+      "total": 12000,
+      "customer_id": null,
+      "saved_methods": [],
+      "automatic_payment_method_types": null
+    },
+    "disallowed_card_error": {
+      "error": {
+        "code": "checkout_confirm_error",
+        "extra_fields": {
+          "payment_method_type": "card",
+          "confirm_error_reason": "payment_method_types_mismatch"
+        },
+        "message": "An error has occurred confirming the Checkout Session.",
+        "param": "payment_method",
+        "type": "invalid_request_error"
+      }
+    }
+  },
+  {
+    "case": "methods-bancontact-only",
+    "requested": [
+      "bancontact"
+    ],
+    "response": {
+      "status": "open",
+      "payment_status": "unpaid",
+      "ordered_types": [
+        "bancontact"
+      ],
+      "total": 12000,
+      "customer_id": null,
+      "saved_methods": [],
+      "automatic_payment_method_types": null
+    }
+  },
+  {
+    "case": "methods-mixed",
+    "requested": [
+      "card",
+      "sepa_debit",
+      "bancontact"
+    ],
+    "response": {
+      "status": "open",
+      "payment_status": "unpaid",
+      "ordered_types": [
+        "card",
+        "apple_pay",
+        "google_pay",
+        "sepa_debit",
+        "bancontact"
+      ],
+      "total": 12000,
+      "customer_id": null,
+      "saved_methods": [],
+      "automatic_payment_method_types": null
+    }
+  },
+  {
+    "case": "methods-automatic",
+    "requested": null,
+    "response": {
+      "status": "open",
+      "payment_status": "unpaid",
+      "ordered_types": [
+        "card",
+        "apple_pay",
+        "google_pay",
+        "link",
+        "sepa_debit",
+        "ideal",
+        "bancontact",
+        "p24",
+        "eps",
+        "multibanco"
+      ],
+      "total": 12000,
+      "customer_id": null,
+      "saved_methods": [],
+      "automatic_payment_method_types": null
+    }
+  },
+  {
+    "case": "methods-sepa-usd",
+    "error": {
+      "error": "All types provided in `allowed_payment_method_types` are invalid. Please ensure the provided types are activated in your dashboard (https://dashboard.stripe.com/account/payments/settings) and your account is enabled for any preview features that you are trying to use. For example, `sepa_debit` is invalid because: Invalid currency options `usd`. The payment method `sepa_debit` only supports the following currencies: `eur`.",
+      "request_id": "req_6Ju6l0UW4IA5fN"
+    }
+  },
+  {
+    "case": "methods-empty",
+    "requested": [],
+    "response": {
+      "status": "open",
+      "payment_status": "unpaid",
+      "ordered_types": [
+        "card",
+        "apple_pay",
+        "google_pay",
+        "link",
+        "sepa_debit",
+        "ideal",
+        "bancontact",
+        "p24",
+        "eps",
+        "multibanco"
+      ],
+      "total": 12000,
+      "customer_id": null,
+      "saved_methods": [],
+      "automatic_payment_method_types": null
+    }
+  }
+]

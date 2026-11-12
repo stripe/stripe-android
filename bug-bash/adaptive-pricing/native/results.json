@@ -1,0 +1,109 @@
+{
+  "native_results": [
+    {
+      "case": "france-initial",
+      "session_id": "cs_test_a03401eQJBoWMrZHJRNgpHlkTQmSjaSdWA5gKNzueagHzVHRgHj5mUsTy5",
+      "currency": "eur",
+      "total": 11252,
+      "line_totals": [
+        6564,
+        4688
+      ],
+      "saved_payment_method": "pm_1Uai8RLu5o3P18Zp5hdKOOlz",
+      "ui_and_backend_match": true
+    },
+    {
+      "case": "france-usd",
+      "session_id": "cs_test_a03401eQJBoWMrZHJRNgpHlkTQmSjaSdWA5gKNzueagHzVHRgHj5mUsTy5",
+      "currency": "usd",
+      "total": 12000,
+      "line_totals": [
+        7000,
+        5000
+      ],
+      "saved_payment_method": "pm_1Uai8RLu5o3P18Zp5hdKOOlz",
+      "ui_and_backend_match": true
+    },
+    {
+      "case": "france-usd-after-selector",
+      "session_id": "cs_test_a03401eQJBoWMrZHJRNgpHlkTQmSjaSdWA5gKNzueagHzVHRgHj5mUsTy5",
+      "currency": "usd",
+      "total": 12000,
+      "line_totals": [
+        7000,
+        5000
+      ],
+      "saved_payment_method": "pm_1Uai8RLu5o3P18Zp5hdKOOlz",
+      "ui_and_backend_match": true
+    },
+    {
+      "case": "france-eur-before-confirm",
+      "session_id": "cs_test_a03401eQJBoWMrZHJRNgpHlkTQmSjaSdWA5gKNzueagHzVHRgHj5mUsTy5",
+      "currency": "eur",
+      "total": 11252,
+      "line_totals": [
+        6564,
+        4688
+      ],
+      "saved_payment_method": "pm_1Uai8RLu5o3P18Zp5hdKOOlz",
+      "ui_and_backend_match": true
+    },
+    {
+      "case": "japan-initial",
+      "session_id": "cs_test_a000x3R291MpRhpABhb2sd2w7AOsXys3rAbRDdpcgyy9sBL5fR913qZpn5",
+      "currency": "jpy",
+      "total": 19953,
+      "line_totals": [
+        11639,
+        8314
+      ],
+      "saved_payment_method": "pm_1UaiCkLu5o3P18ZpSg3DkPN6",
+      "ui_and_backend_match": true
+    },
+    {
+      "case": "japan-usd",
+      "session_id": "cs_test_a000x3R291MpRhpABhb2sd2w7AOsXys3rAbRDdpcgyy9sBL5fR913qZpn5",
+      "currency": "usd",
+      "total": 12000,
+      "line_totals": [
+        7000,
+        5000
+      ],
+      "saved_payment_method": "pm_1UaiCkLu5o3P18ZpSg3DkPN6",
+      "ui_and_backend_match": true
+    },
+    {
+      "case": "japan-jpy-before-confirm",
+      "session_id": "cs_test_a000x3R291MpRhpABhb2sd2w7AOsXys3rAbRDdpcgyy9sBL5fR913qZpn5",
+      "currency": "jpy",
+      "total": 19953,
+      "line_totals": [
+        11639,
+        8314
+      ],
+      "saved_payment_method": "pm_1UaiCkLu5o3P18ZpSg3DkPN6",
+      "ui_and_backend_match": true
+    }
+  ],
+  "native_confirmations": [
+    {
+      "country": "france",
+      "status": "complete",
+      "confirmation_status": "succeeded",
+      "payment_status": "paid"
+    },
+    {
+      "country": "japan",
+      "status": "complete",
+      "confirmation_status": "succeeded",
+      "payment_status": "paid"
+    }
+  ],
+  "currency_retention": "France USD survived native Select sheet open/Close; native EUR/JPY persisted through confirmation",
+  "secret_scan": "passed",
+  "limits": [
+    "No native USD confirmation",
+    "No native Intent response body or charge/webhook inspection",
+    "No process restoration, accessibility, wallets, 3DS, tax, shipping, discount or recovery tests in this follow-up"
+  ]
+}

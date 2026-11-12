@@ -1,0 +1,170 @@
+{
+  "source": "cf7dd4b99965a4e754abdadacf4f337e764f6e6a",
+  "device": "Pixel 6a API 36",
+  "cases": {
+    "mixed": {
+      "session_id": "cs_test_a02By9u2zFyPY0duO1FfYtoecjne2k7ynn8QWKp3dqnSbui5hZGS9HvzUy",
+      "saved_methods": [
+        {
+          "id": "pm_1UairlLu5o3P18Zp1ELRKLYi",
+          "type": "sepa_debit",
+          "brand": null,
+          "allow_redisplay": "always"
+        },
+        {
+          "id": "pm_1UairkLu5o3P18ZpgOfgtemI",
+          "type": "card",
+          "brand": "amex",
+          "allow_redisplay": "unspecified"
+        },
+        {
+          "id": "pm_1UairjLu5o3P18ZpRijUnM6J",
+          "type": "card",
+          "brand": "mastercard",
+          "allow_redisplay": "limited"
+        },
+        {
+          "id": "pm_1UairiLu5o3P18ZpdQ5Pt5C3",
+          "type": "card",
+          "brand": "visa",
+          "allow_redisplay": "always"
+        }
+      ]
+    },
+    "default": {
+      "session_id": "cs_test_a0wUuhmAHpnAyDqGEZgStvoSTyGGPdfsChqFHiOAC8Y8Q7pHJZAtKTk1Ab",
+      "saved_methods": [
+        {
+          "id": "pm_1UairlLu5o3P18Zp1ELRKLYi",
+          "type": "sepa_debit",
+          "brand": null,
+          "allow_redisplay": "always"
+        },
+        {
+          "id": "pm_1UairiLu5o3P18ZpdQ5Pt5C3",
+          "type": "card",
+          "brand": "visa",
+          "allow_redisplay": "always"
+        }
+      ]
+    },
+    "visa-only": {
+      "session_id": "cs_test_a0wJLjmYU8H9NuVsH1MeGeENQhzNFh5OSBQHSpsgVISKR06ZxApEvNJ6KK",
+      "saved_methods": [
+        {
+          "id": "pm_1UairlLu5o3P18Zp1ELRKLYi",
+          "type": "sepa_debit",
+          "brand": null,
+          "allow_redisplay": "always"
+        },
+        {
+          "id": "pm_1UairkLu5o3P18ZpgOfgtemI",
+          "type": "card",
+          "brand": "amex",
+          "allow_redisplay": "unspecified"
+        },
+        {
+          "id": "pm_1UairjLu5o3P18ZpRijUnM6J",
+          "type": "card",
+          "brand": "mastercard",
+          "allow_redisplay": "limited"
+        },
+        {
+          "id": "pm_1UairiLu5o3P18ZpdQ5Pt5C3",
+          "type": "card",
+          "brand": "visa",
+          "allow_redisplay": "always"
+        }
+      ]
+    },
+    "no-visa": {
+      "session_id": "cs_test_a09kMQyuqw1KSgufY94Z3Mz0gHgMGQ9j6KoZqV3HyTCWDmRmrYmZrSxRTV",
+      "saved_methods": [
+        {
+          "id": "pm_1UairlLu5o3P18Zp1ELRKLYi",
+          "type": "sepa_debit",
+          "brand": null,
+          "allow_redisplay": "always"
+        },
+        {
+          "id": "pm_1UairkLu5o3P18ZpgOfgtemI",
+          "type": "card",
+          "brand": "amex",
+          "allow_redisplay": "unspecified"
+        },
+        {
+          "id": "pm_1UairjLu5o3P18ZpRijUnM6J",
+          "type": "card",
+          "brand": "mastercard",
+          "allow_redisplay": "limited"
+        },
+        {
+          "id": "pm_1UairiLu5o3P18ZpdQ5Pt5C3",
+          "type": "card",
+          "brand": "visa",
+          "allow_redisplay": "always"
+        }
+      ]
+    },
+    "sepa-only": {
+      "session_id": "cs_test_a0k1vffY123TtaMXebQHlPY78gqYPCbKFG2cxqxnNon1tyInam2pidXbmw",
+      "saved_methods": [
+        {
+          "id": "pm_1UairlLu5o3P18Zp1ELRKLYi",
+          "type": "sepa_debit",
+          "brand": null,
+          "allow_redisplay": "always"
+        }
+      ]
+    },
+    "bancontact": {
+      "session_id": "cs_test_a09m86k5eBw76xvQ2N3FYfEiN3CJFUhFXDskvaSUtqyfVZYFGPJEbNwoHN",
+      "saved_methods": []
+    }
+  },
+  "payments": {
+    "saved_sepa": {
+      "id": "cs_test_a0k1vffY123TtaMXebQHlPY78gqYPCbKFG2cxqxnNon1tyInam2pidXbmw",
+      "confirmation_status": "succeeded",
+      "livemode": false,
+      "payment_status": "paid",
+      "state": "complete",
+      "status": "complete",
+      "ui_mode": "mobile_elements"
+    },
+    "bancontact_pending": {
+      "id": "cs_test_a09m86k5eBw76xvQ2N3FYfEiN3CJFUhFXDskvaSUtqyfVZYFGPJEbNwoHN",
+      "confirmation_status": "pending",
+      "livemode": false,
+      "payment_status": "unpaid",
+      "state": "ready",
+      "status": "open",
+      "ui_mode": "mobile_elements"
+    },
+    "bancontact_complete": {
+      "id": "cs_test_a09m86k5eBw76xvQ2N3FYfEiN3CJFUhFXDskvaSUtqyfVZYFGPJEbNwoHN",
+      "confirmation_status": "succeeded",
+      "livemode": false,
+      "payment_status": "paid",
+      "state": "complete",
+      "status": "complete",
+      "ui_mode": "mobile_elements"
+    },
+    "bancontact_intent": {
+      "id": "pi_3UaizaLu5o3P18Zp0KMf9Qil",
+      "status": "succeeded",
+      "amount": 12000,
+      "currency": "eur",
+      "livemode": false
+    }
+  },
+  "new_report": "ISSUE_lpms_saved_amex_accessibility_unknown_brand.md",
+  "inherited_saving": "../confirm/native/results.json",
+  "limits": [
+    "Native Intent fields independently captured for Bancontact only",
+    "No redirect failure/cancel/process recreation",
+    "No independent SEPA settlement/webhook validation",
+    "No TalkBack speech or accessibility-setting changes",
+    "No broad native LPM/country/currency or SFU matrix"
+  ]
+}

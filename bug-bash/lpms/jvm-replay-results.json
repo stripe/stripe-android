@@ -1,0 +1,32 @@
+[
+  {
+    "name": "com.stripe.android.checkout.LpmBashResponseTest",
+    "tests": "3",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "0.036",
+    "cases": [
+      "lpm bash redirect pending keeps summary and open status",
+      "lpm bash paid card control keeps summary and paid status",
+      "lpm bash processing sepa keeps summary and complete unpaid status"
+    ]
+  },
+  {
+    "name": "com.stripe.android.checkout.CheckoutElementsControllerTest",
+    "tests": "7",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "3.071",
+    "cases": [
+      "lpm bash visa exclusion preserves other brands and sepa",
+      "lpm bash sepa only preserves only server eligible saved methods",
+      "lpm bash visa acceptance filters saved cards and preserves sepa",
+      "lpm bash mixed allowed types reach payment metadata",
+      "lpm bash automatic supported types exclude disabled wallets",
+      "lpm bash saved sepa selection retains accessible order summary",
+      "lpm bash local inventory preserves server redisplay decisions"
+    ]
+  }
+]

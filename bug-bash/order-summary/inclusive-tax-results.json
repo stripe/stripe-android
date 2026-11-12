@@ -1,0 +1,81 @@
+{
+  "case": "inclusive-tax",
+  "status": "complete",
+  "currency": "usd",
+  "totals": {
+    "due": 4500,
+    "subtotal": 4500,
+    "tax_exclusive": 0,
+    "tax_inclusive": 357,
+    "total": 4500,
+    "total_tax_amounts": [
+      {
+        "amount": 357,
+        "display_name": "Sales Tax",
+        "inclusive": true,
+        "percentage": 8.625
+      }
+    ]
+  },
+  "groups": [
+    "checkout_item_VbufhLRq"
+  ],
+  "items": [
+    {
+      "key": "inner_item_Vbuflyov",
+      "name": "Tax included item",
+      "quantity": 2,
+      "unit_amount": 1000,
+      "unit_amount_decimal": "1000.0",
+      "unit_label": null,
+      "images": [],
+      "product_description": null,
+      "adjustable_quantity": null,
+      "amount_details": {
+        "discount": 0,
+        "discount_amounts": [],
+        "subtotal": 2000,
+        "tax_amounts": [
+          {
+            "amount": 159,
+            "inclusive": true,
+            "display_name": "Sales Tax",
+            "percentage": 8.625
+          }
+        ],
+        "tax_exclusive": 0,
+        "tax_inclusive": 159,
+        "total": 2000
+      }
+    },
+    {
+      "key": "inner_item_Vbufzmil",
+      "name": "Second inclusive item",
+      "quantity": 1,
+      "unit_amount": 2500,
+      "unit_amount_decimal": "2500.0",
+      "unit_label": null,
+      "images": [],
+      "product_description": null,
+      "adjustable_quantity": null,
+      "amount_details": {
+        "discount": 0,
+        "discount_amounts": [],
+        "subtotal": 2500,
+        "tax_amounts": [
+          {
+            "amount": 198,
+            "inclusive": true,
+            "display_name": "Sales Tax",
+            "percentage": 8.625
+          }
+        ],
+        "tax_exclusive": 0,
+        "tax_inclusive": 198,
+        "total": 2500
+      }
+    }
+  ],
+  "payment_intent_status": "succeeded",
+  "payment_intent_amount": 4500
+}

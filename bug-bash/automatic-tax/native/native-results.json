@@ -1,0 +1,26 @@
+{
+  "new_sdk_issues": 0,
+  "shipping": {
+    "initial_total": 13035,
+    "initial_tax": 1035,
+    "saved_oregon_total": 12000,
+    "saved_oregon_tax": 0,
+    "native_payment": "complete",
+    "poll": "complete/succeeded/paid"
+  },
+  "billing": {
+    "incomplete_zip": "941",
+    "incomplete_status": "requires_address",
+    "corrected_zip": "94103",
+    "corrected_total": 13035,
+    "corrected_tax": 1035,
+    "native_payment": "complete",
+    "poll": "complete/succeeded/paid"
+  },
+  "currency": "usd",
+  "final_payment_intent_amount_independently_retrieved": false,
+  "github_search": {
+    "command": "GH_HOST=github.com gh issue list --repo stripe/stripe-android --state all --search \"checkout tax\" --limit 100 --json number,title,url,state",
+    "results": []
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "customer": "cus_VbwTvI6eUoLW5w",
+  "payment_method": "pm_1Uaia6Lu5o3P18ZpV6VJUWDK",
+  "billing_details": {
+    "address": {
+      "city": null,
+      "country": "US",
+      "line1": null,
+      "line2": null,
+      "postal_code": "94103",
+      "state": null
+    },
+    "email": "conflicting-card@example.com",
+    "name": "Email Native Test",
+    "phone": null,
+    "tax_id": null
+  }
+}

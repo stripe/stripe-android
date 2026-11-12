@@ -1,0 +1,36 @@
+{
+  "ui_mode": "mobile_elements",
+  "currency": "eur",
+  "automatic_tax": {
+    "enabled": false
+  },
+  "adaptive_pricing": {
+    "enabled": false
+  },
+  "items": [
+    {
+      "type": "one_time_price",
+      "one_time_price": {
+        "items": [
+          {
+            "price_data": {
+              "currency": "eur",
+              "unit_amount": 12000,
+              "product_data": {
+                "name": "LPM Test"
+              }
+            },
+            "quantity": 1
+          }
+        ]
+      }
+    }
+  ],
+  "customer": "cus_VbuWaup2bVhUsP",
+  "saved_payment_method_options": {
+    "payment_method_save": "enabled"
+  },
+  "allowed_payment_method_types": [
+    "sepa_debit"
+  ]
+}

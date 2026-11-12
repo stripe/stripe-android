@@ -1,0 +1,58 @@
+{
+  "id": "pi_3UaizaLu5o3P18Zp0KMf9Qil",
+  "object": "payment_intent",
+  "allowed_payment_method_types": [
+    "bancontact"
+  ],
+  "amount": 12000,
+  "amount_details": {
+    "tip": {}
+  },
+  "automatic_payment_methods": null,
+  "canceled_at": null,
+  "cancellation_reason": null,
+  "capture_method": "automatic_async",
+  "confirmation_method": "automatic",
+  "created": 1794432222,
+  "currency": "eur",
+  "description": null,
+  "excluded_payment_method_types": null,
+  "last_payment_error": null,
+  "livemode": false,
+  "next_action": null,
+  "payment_method": {
+    "id": "pm_1UaizaLu5o3P18ZpaeknAhYM",
+    "object": "payment_method",
+    "allow_redisplay": "limited",
+    "bancontact": {},
+    "billing_details": {
+      "address": {
+        "city": null,
+        "country": null,
+        "line1": null,
+        "line2": null,
+        "postal_code": null,
+        "state": null
+      },
+      "email": null,
+      "name": "Native LPM Tester",
+      "phone": null,
+      "tax_id": null
+    },
+    "created": 1794432222,
+    "customer": null,
+    "customer_account": null,
+    "livemode": false,
+    "type": "bancontact"
+  },
+  "payment_method_configuration_details": null,
+  "payment_method_types": [
+    "bancontact"
+  ],
+  "processing": null,
+  "receipt_email": null,
+  "setup_future_usage": null,
+  "shipping": null,
+  "source": null,
+  "status": "succeeded"
+}

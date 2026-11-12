@@ -1,0 +1,32 @@
+{
+  "native_confirmations": 2,
+  "native_rejections": 2,
+  "fixed": {
+    "initial_email": "native-fixed@example.com",
+    "configured_default": "native-prefill@example.com",
+    "conflicting_card_billing_email": "conflicting-card@example.com",
+    "replacement_input": "native-attempt@example.com",
+    "clear_attempt": true,
+    "native_complete": true,
+    "fresh_session_email": "native-fixed@example.com",
+    "same_customer_verified": true
+  },
+  "collected": {
+    "customer_and_card_initial_email": null,
+    "configured_prefill": "native-prefill@example.com",
+    "cleared_native_confirmation": "failed; open/unpaid",
+    "malformed_input": "not-an-email",
+    "malformed_native_confirmation": "Invalid email address: not-an-email; open/unpaid",
+    "recovered_input": "Native.Email+Recovered@example.com",
+    "native_complete": true,
+    "fresh_session_email": "Native.Email+Recovered@example.com",
+    "same_customer_verified": true
+  },
+  "transport": "Logging-only backend relay; all create requests and responses unchanged; SDK confirmation direct to Stripe",
+  "new_confirmed_bugs": 0,
+  "limitations": [
+    "No raw native confirm request/response capture",
+    "No native PaymentIntent amount/receipt-delivery verification",
+    "No new-card email form, wallet, or LPM native coverage in this follow-up"
+  ]
+}

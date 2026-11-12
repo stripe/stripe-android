@@ -1,0 +1,10 @@
+{
+  "error": {
+    "code": "checkout_confirm_error",
+    "extra_fields": {
+      "confirm_error_reason": "checkout_email_missing"
+    },
+    "message": "An error has occurred confirming the Checkout Session.",
+    "type": "invalid_request_error"
+  }
+}

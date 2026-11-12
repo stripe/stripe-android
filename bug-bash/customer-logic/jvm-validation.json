@@ -1,0 +1,66 @@
+{
+  "gradle_exit_code": 0,
+  "elapsed": "4m 30s",
+  "classes": [
+    {
+      "class": "com.stripe.android.paymentsheet.state.CreateCustomerMetadataTest",
+      "tests": 16,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 3.713
+    },
+    {
+      "class": "com.stripe.android.checkout.CheckoutElementsControllerClearLocalCustomerDataTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 11.066
+    },
+    {
+      "class": "com.stripe.android.checkout.CheckoutStateLoaderTest",
+      "tests": 34,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 15.986
+    },
+    {
+      "class": "com.stripe.android.paymentsheet.state.CreateCustomerStateTest",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.189
+    },
+    {
+      "class": "com.stripe.android.paymentsheet.example.playground.checkout.CheckoutSessionFactoryTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 1.452
+    },
+    {
+      "class": "com.stripe.android.paymentsheet.example.playground.checkout.CheckoutSessionParamsFactoryTest",
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.092
+    },
+    {
+      "class": "com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutPlaygroundSettingsTest",
+      "tests": 38,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.487
+    }
+  ],
+  "total_tests": 113,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0
+}

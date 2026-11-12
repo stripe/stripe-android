@@ -1,0 +1,20 @@
+{
+  "gradle_exit": 1,
+  "elapsed_seconds": 19,
+  "tests": 2,
+  "failures": 1,
+  "errors": 0,
+  "skipped": 0,
+  "cases": [
+    {
+      "name": "confirm sfu bash mixed card and sepa none with checked save",
+      "passed": true,
+      "failure": null
+    },
+    {
+      "name": "confirm sfu regression explicit none does not offer an ineffective save checkbox",
+      "passed": false,
+      "failure": "com.google.common.truth.AssertionErrorWithFacts: expected to be empty\nbut was: [SaveForFutureUseElement(initialValue=false, merchantName=Mobile Example Account)]"
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "payment_method": "pm_1UagTUK8p6Sx2i8a6CCE1CnS",
+  "expected_payment_method_type": "card",
+  "expected_amount": 12000,
+  "collected_information[email]": "automatic-tax-bash@example.com",
+  "return_url": "stripesdk://payment_return_url/com.stripe.android.paymentsheet.example"
+}

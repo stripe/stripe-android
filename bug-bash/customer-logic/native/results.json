@@ -1,0 +1,89 @@
+{
+  "source_revision": "cf7dd4b99965a4e754abdadacf4f337e764f6e6a",
+  "native_cases": [
+    {
+      "case": "guest",
+      "result": "No customer, empty card form, no save checkbox, no selection"
+    },
+    {
+      "case": "new",
+      "result": "Native New creates explicit empty customer; successful configure persists exact Returning ID"
+    },
+    {
+      "case": "new-confirm",
+      "result": "Native Visa 4242, 12/30, 123, US 94103, save checked; Payment complete!; poll complete/succeeded/paid"
+    },
+    {
+      "case": "returning-new",
+      "result": "Fresh session uses persisted customer and displays/selects saved Visa 4242",
+      "inventory": {
+        "customer_id": "cus_Vbvp5KkMtSbfLD",
+        "email": "native-customer@example.com",
+        "methods": [
+          {
+            "id": "pm_1Uai0hLu5o3P18ZpZFr1b9Oc",
+            "brand": "visa",
+            "last4": "4242",
+            "allow_redisplay": "always"
+          }
+        ]
+      }
+    },
+    {
+      "case": "switch-beta",
+      "result": "Same controller displays/selects only Beta Mastercard 4444, with Beta email",
+      "inventory": {
+        "customer_id": "cus_VbvkxepwZPD6mZ",
+        "email": "customer-beta@example.com",
+        "methods": [
+          {
+            "id": "pm_1UahsmLu5o3P18ZpNdY0FGw6",
+            "brand": "mastercard",
+            "last4": "4444",
+            "allow_redisplay": "always"
+          }
+        ]
+      }
+    },
+    {
+      "case": "switch-back",
+      "result": "Same controller restores only first customer Visa 4242 and first email",
+      "inventory": {
+        "customer_id": "cus_Vbvp5KkMtSbfLD",
+        "email": "native-customer@example.com",
+        "methods": [
+          {
+            "id": "pm_1Uai0hLu5o3P18ZpZFr1b9Oc",
+            "brand": "visa",
+            "last4": "4242",
+            "allow_redisplay": "always"
+          }
+        ]
+      }
+    },
+    {
+      "case": "switch-guest",
+      "result": "Same controller clears customer inventory and selection; form blank with no save checkbox"
+    }
+  ],
+  "restart_between_native_cases": false,
+  "sdk_or_test_source_edits": false,
+  "new_confirmed_bugs": [],
+  "screenshots_viewed": [
+    "beta-selected.png",
+    "guest-after-customers-cleared.png",
+    "guest-after-customers-form.png",
+    "guest-card-form.png",
+    "new-completed.png",
+    "new-now-returning-settings.png",
+    "new-save-checked.png",
+    "returning-back-selected.png",
+    "returning-new-selected.png"
+  ],
+  "recordings_created": false,
+  "scope_limits": [
+    "No native Intent body or fulfillment/webhook inspection",
+    "No customer_update address/email persistence assertions",
+    "No Link logout, wallet, authentication, process-restoration, accessibility or multiple-card preference-retention coverage"
+  ]
+}

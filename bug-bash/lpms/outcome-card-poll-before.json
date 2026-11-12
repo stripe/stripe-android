@@ -1,0 +1,9 @@
+{
+  "id": "cs_test_a0mZz3Sc8ddejWpFEflXG7kTQ0RABRtvbk8tw8bbDWTmwlGfLcMa4dgr7z",
+  "confirmation_status": "not_started",
+  "livemode": false,
+  "payment_status": "unpaid",
+  "state": "ready",
+  "status": "open",
+  "ui_mode": "mobile_elements"
+}

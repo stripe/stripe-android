@@ -1,0 +1,84 @@
+{
+  "id": "pi_3UagyLLu5o3P18Zp0kWwEoOC",
+  "object": "payment_intent",
+  "allowed_payment_method_types": [
+    "card"
+  ],
+  "amount": 12000,
+  "amount_details": {
+    "tip": {}
+  },
+  "automatic_payment_methods": null,
+  "canceled_at": null,
+  "cancellation_reason": null,
+  "capture_method": "automatic_async",
+  "client_secret": "[REDACTED]",
+  "confirmation_method": "automatic",
+  "created": 1794424457,
+  "currency": "eur",
+  "description": null,
+  "excluded_payment_method_types": null,
+  "last_payment_error": null,
+  "livemode": false,
+  "next_action": null,
+  "payment_method": {
+    "id": "pm_1UagyLLu5o3P18ZpOI1bzaEO",
+    "object": "payment_method",
+    "allow_redisplay": "always",
+    "billing_details": {
+      "address": {
+        "city": null,
+        "country": null,
+        "line1": null,
+        "line2": null,
+        "postal_code": null,
+        "state": null
+      },
+      "email": "confirm-sfu@example.com",
+      "name": "Confirm SFU Test",
+      "phone": null,
+      "tax_id": null
+    },
+    "card": {
+      "brand": "visa",
+      "checks": {
+        "address_line1_check": null,
+        "address_postal_code_check": null,
+        "cvc_check": null
+      },
+      "country": "US",
+      "display_brand": "visa",
+      "exp_month": 11,
+      "exp_year": 2027,
+      "funding": "credit",
+      "generated_from": null,
+      "last4": "4242",
+      "networks": {
+        "available": [
+          "visa"
+        ],
+        "preferred": null
+      },
+      "regulated_status": "unregulated",
+      "three_d_secure_usage": {
+        "supported": true
+      },
+      "wallet": null
+    },
+    "created": 1794424457,
+    "customer": "cus_Vbun8UprAIAnEr",
+    "customer_account": null,
+    "livemode": false,
+    "type": "card"
+  },
+  "payment_method_configuration_details": null,
+  "payment_method_types": [
+    "card"
+  ],
+  "processing": null,
+  "receipt_email": null,
+  "setup_future_usage": "off_session",
+  "shipping": null,
+  "source": null,
+  "status": "succeeded"
+}

@@ -1,0 +1,18 @@
+{
+  "customer": "cus_VbwXIjTvR6lFL5",
+  "payment_method": "pm_1UaiemLu5o3P18ZpfoP1Txqm",
+  "billing_details": {
+    "address": {
+      "city": null,
+      "country": "US",
+      "line1": null,
+      "line2": null,
+      "postal_code": "94103",
+      "state": null
+    },
+    "email": null,
+    "name": "Email Native Test",
+    "phone": null,
+    "tax_id": null
+  }
+}

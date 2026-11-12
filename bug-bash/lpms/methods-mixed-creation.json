@@ -1,0 +1,35 @@
+{
+  "ui_mode": "mobile_elements",
+  "currency": "eur",
+  "customer_email": "lpm-bash@example.com",
+  "automatic_tax": {
+    "enabled": false
+  },
+  "adaptive_pricing": {
+    "enabled": false
+  },
+  "items": [
+    {
+      "type": "one_time_price",
+      "one_time_price": {
+        "items": [
+          {
+            "price_data": {
+              "currency": "eur",
+              "unit_amount": 12000,
+              "product_data": {
+                "name": "LPM Test"
+              }
+            },
+            "quantity": 1
+          }
+        ]
+      }
+    }
+  ],
+  "allowed_payment_method_types": [
+    "card",
+    "sepa_debit",
+    "bancontact"
+  ]
+}

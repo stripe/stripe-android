@@ -1,0 +1,96 @@
+diff --git a/paymentsheet/src/test/java/com/stripe/android/checkout/CheckoutElementsControllerTest.kt b/paymentsheet/src/test/java/com/stripe/android/checkout/CheckoutElementsControllerTest.kt
+index c9505aea03..51c398c106 100644
+--- a/paymentsheet/src/test/java/com/stripe/android/checkout/CheckoutElementsControllerTest.kt
++++ b/paymentsheet/src/test/java/com/stripe/android/checkout/CheckoutElementsControllerTest.kt
+@@ -107,6 +107,91 @@ internal class CheckoutElementsControllerTest {
+         PaymentElementCallbackReferences.clear()
+     }
+ 
++    @Test
++    fun `order summary bash detailed cart survives public server refresh`() = runOrderSummaryBashScenario("details-init") {
++        controller.session.test {
++            val before = requireNotNull(awaitItem())
++            val group = before.orderSummaryItems.single() as CheckoutElementsController.Session.OrderSummaryItem.OneTimePrice
++            assertThat(group.items.map { it.quantity }).containsExactly(3, 100, 1).inOrder()
++            assertThat(group.items[1].unitAmountDecimal?.minorUnitsAmount)
++                .isEqualTo(java.math.BigDecimal("12.345678901234"))
++            assertThat(group.items[0].images).containsExactly("https://stripe.com/img/v3/home/twitter.png")
++            assertThat(before.totals.total.minorUnitsAmount).isEqualTo(5132L)
++            networkRule.checkoutFetch { response -> response.setBody(orderSummaryBashJson("details-retrieve").toString()) }
++            assertThat(controller.runServerUpdate { Result.success(Unit) })
++                .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
++            assertThat(controller.session.value?.orderSummaryItems).isEqualTo(before.orderSummaryItems)
++            assertThat(controller.session.value?.totals).isEqualTo(before.totals)
++            expectNoEvents()
++        }
++    }
++
++    @Test
++    fun `order summary bash inclusive tax updates stable items and public totals`() = runOrderSummaryBashScenario(
++        "inclusive-tax-init",
++    ) {
++        controller.session.test {
++            val before = requireNotNull(awaitItem())
++            assertThat(before.tax?.status).isEqualTo(CheckoutElementsController.Session.Tax.Status.RequiresShippingAddress)
++            val sf = Address("US").line1("510 Townsend St").city("San Francisco").state("CA").postalCode("94103")
++            val oregon = Address("US").line1("1120 SW 5th Ave").city("Portland").state("OR").postalCode("97204")
++            networkRule.checkoutUpdate(bodyPart("tax_region[postal_code]", "94103")) { response ->
++                response.setBody(orderSummaryBashJson("inclusive-tax-sf").toString())
++            }
++            assertThat(controller.updateShippingAddress("Order Summary Recipient", sf))
++                .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
++            val california = requireNotNull(awaitItem())
++            assertThat(california.totals.total.minorUnitsAmount).isEqualTo(4500L)
++            assertThat(california.totals.taxInclusive.minorUnitsAmount).isEqualTo(357L)
++            assertThat(california.orderSummaryItems.map { it.id }).isEqualTo(before.orderSummaryItems.map { it.id })
++            networkRule.checkoutUpdate(bodyPart("tax_region[postal_code]", "97204")) { response ->
++                response.setBody(orderSummaryBashJson("inclusive-tax-or").toString())
++            }
++            assertThat(controller.updateShippingAddress("Order Summary Recipient", oregon))
++                .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
++            val untaxed = requireNotNull(awaitItem())
++            assertThat(untaxed.totals.total).isEqualTo(california.totals.total)
++            assertThat(untaxed.totals.taxInclusive.minorUnitsAmount).isEqualTo(0L)
++            networkRule.checkoutUpdate(bodyPart("tax_region[postal_code]", "94103")) { response ->
++                response.setBody(orderSummaryBashJson("inclusive-tax-sf-restored").toString())
++            }
++            assertThat(controller.updateShippingAddress("Order Summary Recipient", sf))
++                .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
++            val restored = requireNotNull(awaitItem())
++            assertThat(restored.orderSummaryItems).isEqualTo(california.orderSummaryItems)
++            assertThat(restored.totals).isEqualTo(california.totals)
++            networkRule.checkoutFetch { response ->
++                response.setBody(orderSummaryBashJson("inclusive-tax-sf-restored-retrieve").toString())
++            }
++            assertThat(controller.runServerUpdate { Result.success(Unit) })
++                .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
++            assertThat(controller.session.value?.orderSummaryItems).isEqualTo(restored.orderSummaryItems)
++            assertThat(controller.session.value?.totals).isEqualTo(restored.totals)
++            expectNoEvents()
++        }
++    }
++
++    private fun orderSummaryBashJson(name: String): JSONObject {
++        val directory = generateSequence(java.io.File(".").absoluteFile) { it.parentFile }
++            .map { java.io.File(it, "bug-bash/order-summary") }.first { it.isDirectory }
++        return JSONObject(java.io.File(directory, "$name.json").readText()).apply { remove("experiments_data") }
++    }
++
++    private fun runOrderSummaryBashScenario(name: String, block: suspend ControllerSetup.() -> Unit) = runTest {
++        networkRule.checkoutInit { response -> response.setBody(orderSummaryBashJson(name).toString()) }
++        val setup = createControllerSetup(SavedStateHandle(), DEFAULT_INTEGRATION_NAME)
++        val configuration = CheckoutElementsController.Configuration().paymentElement(
++            PaymentElement.Configuration().linkConfiguration(
++                PaymentElement.Configuration.LinkConfiguration().display(
++                    PaymentElement.Configuration.LinkConfiguration.Display.Never
++                )
++            )
++        )
++        assertThat(setup.controller.configure(DEFAULT_CLIENT_SECRET, configuration))
++            .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
++        setup.block()
++    }
++
+     @Test
+     fun `configure returns success`() = runConfigureScenario {
+         assertThat(result).isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)

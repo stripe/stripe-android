@@ -1,0 +1,17 @@
+{
+  "owned_relay_pid": 80451,
+  "owned_port": 61774,
+  "signal": "SIGTERM",
+  "fresh_preference_backup": {
+    "names": [
+      "CheckoutElementsControllerPlaygroundSettings.xml",
+      "com.stripe.android.PaymentConfiguration.xml",
+      "DefaultPrefsRepository.xml"
+    ],
+    "present": [
+      "com.stripe.android.PaymentConfiguration.xml",
+      "DefaultPrefsRepository.xml"
+    ]
+  },
+  "preference_restore_verified_byte_for_byte": true
+}

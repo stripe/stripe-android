@@ -1,0 +1,41 @@
+[
+  {
+    "case": "france-disabled",
+    "init_currency": "usd",
+    "init_total": 12000,
+    "confirmed": false
+  },
+  {
+    "case": "france-local",
+    "init_currency": "eur",
+    "init_total": 11251,
+    "confirm_currency": "eur",
+    "confirm_total": 11251,
+    "payment_intent_currency": "usd",
+    "payment_intent_amount": 12000,
+    "presentment_details": null,
+    "confirmed": true
+  },
+  {
+    "case": "japan-local",
+    "init_currency": "jpy",
+    "init_total": 19951,
+    "confirm_currency": "jpy",
+    "confirm_total": 19951,
+    "payment_intent_currency": "usd",
+    "payment_intent_amount": 12000,
+    "presentment_details": null,
+    "confirmed": true
+  },
+  {
+    "case": "japan-usd",
+    "init_currency": "jpy",
+    "init_total": 19951,
+    "confirm_currency": "usd",
+    "confirm_total": 12000,
+    "payment_intent_currency": "usd",
+    "payment_intent_amount": 12000,
+    "presentment_details": null,
+    "confirmed": true
+  }
+]

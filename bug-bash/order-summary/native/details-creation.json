@@ -1,0 +1,76 @@
+{
+  "merchant": "US",
+  "request_params": {
+    "ui_mode": "mobile_elements",
+    "metadata": {
+      "sdk": "stripe-android",
+      "sdk_version": "23.26.0",
+      "integration": "checkout-playground",
+      "android_version": "16",
+      "android_api_level": "36"
+    },
+    "currency": "usd",
+    "items": [
+      {
+        "type": "one_time_price",
+        "one_time_price": {
+          "items": [
+            {
+              "price_data": {
+                "currency": "usd",
+                "unit_amount": 1299,
+                "product_data": {
+                  "name": "Caf\u00e9 shirt \u2014 blue & white 100%",
+                  "description": "Soft cotton\nBlue edition",
+                  "images": [
+                    "https://stripe.com/img/v3/home/twitter.png"
+                  ],
+                  "unit_label": "shirt"
+                }
+              },
+              "quantity": 3,
+              "adjustable_quantity": {
+                "enabled": true,
+                "minimum": 0,
+                "maximum": 12
+              }
+            },
+            {
+              "price_data": {
+                "currency": "usd",
+                "unit_amount_decimal": "12.345678901234",
+                "product_data": {
+                  "name": "Ribbon",
+                  "unit_label": "meter"
+                }
+              },
+              "quantity": 100
+            },
+            {
+              "price_data": {
+                "currency": "usd",
+                "unit_amount": 0,
+                "product_data": {
+                  "name": "Complimentary gift"
+                }
+              },
+              "quantity": 1
+            }
+          ]
+        }
+      }
+    ],
+    "allowed_payment_method_types": [
+      "card"
+    ],
+    "customer": "cus_VbxAvtQqUR3XpO",
+    "saved_payment_method_options": {
+      "payment_method_save": "disabled",
+      "payment_method_remove": "disabled"
+    },
+    "adaptive_pricing": {
+      "enabled": false
+    }
+  },
+  "stripe_version": "2026-08-26.preview"
+}

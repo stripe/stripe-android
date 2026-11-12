@@ -1,0 +1,201 @@
+diff --git a/paymentsheet/src/test/java/com/stripe/android/checkout/CheckoutElementsControllerTest.kt b/paymentsheet/src/test/java/com/stripe/android/checkout/CheckoutElementsControllerTest.kt
+index c9505aea03..acb7539511 100644
+--- a/paymentsheet/src/test/java/com/stripe/android/checkout/CheckoutElementsControllerTest.kt
++++ b/paymentsheet/src/test/java/com/stripe/android/checkout/CheckoutElementsControllerTest.kt
+@@ -107,6 +107,109 @@ internal class CheckoutElementsControllerTest {
+         PaymentElementCallbackReferences.clear()
+     }
+ 
++    @Test
++    fun `lpm bash mixed allowed types reach payment metadata`() = runLpmBashScenario("methods-mixed-init") {
++        assertThat(stateHolder.state?.paymentMethodMetadata?.supportedPaymentMethodTypes())
++            .containsExactly("card", "sepa_debit", "bancontact")
++        assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isEqualTo(12000L)
++    }
++
++    @Test
++    fun `lpm bash automatic supported types exclude disabled wallets`() = runLpmBashScenario("methods-automatic-init") {
++        assertThat(stateHolder.state?.paymentMethodMetadata?.supportedPaymentMethodTypes())
++            .containsExactly("card", "sepa_debit", "ideal", "bancontact", "p24", "eps", "multibanco")
++    }
++
++    @Test
++    fun `lpm bash sepa only preserves only server eligible saved methods`() = runLpmBashScenario("redisplay-sepa-only-init") {
++        assertThat(stateHolder.state?.paymentMethodMetadata?.supportedPaymentMethodTypes()).containsExactly("sepa_debit")
++        val inventory = requireNotNull(savedStateHandle.get<CustomerState>(CustomerStateHolder.SAVED_CUSTOMER))
++        assertThat(inventory.paymentMethods.map { it.type?.code }).containsExactly("sepa_debit")
++    }
++
++    @Test
++    fun `lpm bash local inventory preserves server redisplay decisions`() = runLpmBashScenario("redisplay-all-init") {
++        val raw = requireNotNull(stateHolder.state?.checkoutSessionResponse?.customer).paymentMethods
++        val inventory = requireNotNull(savedStateHandle.get<CustomerState>(CustomerStateHolder.SAVED_CUSTOMER))
++        assertThat(raw).hasSize(4)
++        assertThat(inventory.paymentMethods.map { it.id }).containsExactlyElementsIn(raw.map { it.id })
++        assertThat(inventory.paymentMethods.map { it.allowRedisplay }).containsAtLeast(
++            com.stripe.android.model.PaymentMethod.AllowRedisplay.ALWAYS,
++            com.stripe.android.model.PaymentMethod.AllowRedisplay.LIMITED,
++            com.stripe.android.model.PaymentMethod.AllowRedisplay.UNSPECIFIED,
++        )
++    }
++
++    @Test
++    fun `lpm bash visa acceptance filters saved cards and preserves sepa`() = runLpmBashScenario(
++        "redisplay-all-init",
++        PaymentElement.Configuration.CardBrandAcceptance.allowed(
++            listOf(PaymentElement.Configuration.CardBrandAcceptance.BrandCategory.Visa)
++        ),
++    ) {
++        val inventory = requireNotNull(savedStateHandle.get<CustomerState>(CustomerStateHolder.SAVED_CUSTOMER))
++        assertThat(stateHolder.state?.checkoutSessionResponse?.customer?.paymentMethods).hasSize(4)
++        assertThat(inventory.paymentMethods.map { it.card?.brand?.code ?: it.type?.code })
++            .containsExactly("visa", "sepa_debit")
++    }
++
++    @Test
++    fun `lpm bash visa exclusion preserves other brands and sepa`() = runLpmBashScenario(
++        "redisplay-all-init",
++        PaymentElement.Configuration.CardBrandAcceptance.disallowed(
++            listOf(PaymentElement.Configuration.CardBrandAcceptance.BrandCategory.Visa)
++        ),
++    ) {
++        val inventory = requireNotNull(savedStateHandle.get<CustomerState>(CustomerStateHolder.SAVED_CUSTOMER))
++        assertThat(inventory.paymentMethods.map { it.card?.brand?.code ?: it.type?.code })
++            .containsExactly("mastercard", "amex", "sepa_debit")
++    }
++
++    @Test
++    fun `lpm bash saved sepa selection retains accessible order summary`() = runLpmBashScenario(
++        "outcome-sepa_debit-save-returning-init",
++    ) {
++        assertThat(controller.clearPaymentOption()).isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
++        val method = requireNotNull(savedStateHandle.get<CustomerState>(CustomerStateHolder.SAVED_CUSTOMER))
++            .paymentMethods.single()
++        controller.session.test {
++            val before = requireNotNull(awaitItem())
++            assertThat(before.paymentOption).isNull()
++            assertThat(before.orderSummaryItems).hasSize(1)
++            assertThat(before.totals.total.minorUnitsAmount).isEqualTo(12000L)
++            controller.selectSavedPaymentMethod(PaymentSelection.Saved(method)).getOrThrow()
++            val selected = requireNotNull(awaitItem())
++            assertThat(selected.paymentOption?.paymentMethodType).isEqualTo("sepa_debit")
++            assertThat(selected.orderSummaryItems).isEqualTo(before.orderSummaryItems)
++            assertThat(selected.totals).isEqualTo(before.totals)
++        }
++    }
++
++    private fun runLpmBashScenario(
++        name: String,
++        acceptance: PaymentElement.Configuration.CardBrandAcceptance = PaymentElement.Configuration.CardBrandAcceptance.all(),
++        block: suspend ControllerSetup.() -> Unit,
++    ) = runTest {
++        networkRule.checkoutInit { response ->
++            val directory = generateSequence(java.io.File(".").absoluteFile) { it.parentFile }
++                .map { java.io.File(it, "bug-bash/lpms") }.first { it.isDirectory }
++            val json = JSONObject(java.io.File(directory, "$name.json").readText())
++            json.remove("experiments_data")
++            response.setBody(json.toString())
++        }
++        val setup = createControllerSetup(SavedStateHandle(), DEFAULT_INTEGRATION_NAME)
++        val configuration = CheckoutElementsController.Configuration().paymentElement(
++            PaymentElement.Configuration().cardBrandAcceptance(acceptance).linkConfiguration(
++                PaymentElement.Configuration.LinkConfiguration().display(
++                    PaymentElement.Configuration.LinkConfiguration.Display.Never
++                )
++            )
++        )
++        assertThat(setup.controller.configure(DEFAULT_CLIENT_SECRET, configuration))
++            .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
++        setup.block()
++    }
++
+     @Test
+     fun `configure returns success`() = runConfigureScenario {
+         assertThat(result).isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
+diff --git a/paymentsheet/src/test/java/com/stripe/android/checkout/LpmBashResponseTest.kt b/paymentsheet/src/test/java/com/stripe/android/checkout/LpmBashResponseTest.kt
+new file mode 100644
+index 0000000000..c184028b3f
+--- /dev/null
++++ b/paymentsheet/src/test/java/com/stripe/android/checkout/LpmBashResponseTest.kt
+@@ -0,0 +1,81 @@
++@file:OptIn(com.stripe.android.paymentelement.CheckoutSessionPreview::class)
++
++package com.stripe.android.checkout
++
++import com.google.common.truth.Truth.assertThat
++import com.stripe.android.paymentsheet.model.CheckoutSessionClientSecret
++import com.stripe.android.paymentsheet.repositories.CheckoutClientPollResponseJsonParser
++import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseJsonParser
++import org.json.JSONArray
++import org.json.JSONObject
++import org.junit.Test
++import java.io.File
++import java.util.Locale
++
++class LpmBashResponseTest {
++    @Test
++    fun `lpm bash processing sepa keeps summary and complete unpaid status`() {
++        val response = response("outcome-sepa_debit-save-confirm")
++        val session = response.session()
++        assertThat(session.status).isEqualTo(
++            CheckoutElementsController.Session.Status.Complete(CheckoutElementsController.Session.Status.PaymentStatus.Unpaid)
++        )
++        assertSummary(session)
++        val poll = requireNotNull(CheckoutClientPollResponseJsonParser.parse(
++            JSONArray(file("outcome-sepa_debit-save-polls")).getJSONObject(0)
++        ))
++        assertThat(response.withPollResponse(poll).session()).isEqualTo(session)
++    }
++
++    @Test
++    fun `lpm bash redirect pending keeps summary and open status`() {
++        val response = response("outcome-bancontact-confirm")
++        val session = response.session()
++        assertThat(session.status).isInstanceOf(CheckoutElementsController.Session.Status.Open::class.java)
++        assertSummary(session)
++        val poll = requireNotNull(CheckoutClientPollResponseJsonParser.parse(
++            JSONArray(file("outcome-bancontact-polls")).getJSONObject(0)
++        ))
++        assertThat(response.withPollResponse(poll).session()).isEqualTo(session)
++    }
++
++    @Test
++    fun `lpm bash paid card control keeps summary and paid status`() {
++        val session = response("outcome-card-confirm").session()
++        assertThat(session.status).isEqualTo(
++            CheckoutElementsController.Session.Status.Complete(CheckoutElementsController.Session.Status.PaymentStatus.Paid)
++        )
++        assertSummary(session)
++    }
++
++    private fun assertSummary(session: CheckoutElementsController.Session) {
++        assertThat(session.totals.total.minorUnitsAmount).isEqualTo(12000L)
++        assertThat(session.totals.total.amount).isEqualTo("€120.00")
++        val group = session.orderSummaryItems.single() as CheckoutElementsController.Session.OrderSummaryItem.OneTimePrice
++        val item = group.items.single()
++        assertThat(item.displayName).isEqualTo("LPM Test")
++        assertThat(item.quantity).isEqualTo(1)
++        assertThat(item.amountDetails.total.minorUnitsAmount).isEqualTo(12000L)
++    }
++
++    private fun response(name: String) = requireNotNull(
++        CheckoutSessionResponseJsonParser(CheckoutSessionClientSecret("cs_test_lpm_secret_example"))
++            .parse(JSONObject(file(name)))
++    )
++
++    private fun file(name: String): String {
++        val directory = generateSequence(File(".").absoluteFile) { it.parentFile }
++            .map { File(it, "bug-bash/lpms") }.first { it.isDirectory }
++        return File(directory, "$name.json").readText()
++    }
++
++    private fun com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse.session() = asCheckoutSession(
++        collectedEmail = null,
++        collectedShippingName = null,
++        collectedShippingAddress = null,
++        flagImages = null,
++        paymentOption = null,
++        availableExpressButtonTypes = emptyList(),
++        locale = Locale.US,
++    )
++}

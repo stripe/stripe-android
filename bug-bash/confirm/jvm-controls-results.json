@@ -1,0 +1,43 @@
+{
+  "gradle_exit": 0,
+  "elapsed_seconds": 30,
+  "tests": 18,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "suites": [
+    {
+      "name": "com.stripe.android.paymentelement.confirmation.intent.CheckoutSessionConfirmationInterceptorTest",
+      "tests": [
+        "intercept with new payment method passes shouldSave true when save is enabled and checkbox checked",
+        "intercept with new payment method omits savePaymentMethod when save is disabled",
+        "intercept with new payment method omits savePaymentMethod for guest",
+        "intercept with saved payment method passes null for savePaymentMethod",
+        "intercept with new payment method passes shouldSave false when save is enabled and checkbox unchecked"
+      ]
+    },
+    {
+      "name": "com.stripe.android.checkout.CheckoutConfirmationPerformerTest",
+      "tests": [
+        "presenter confirm from a background thread resolves the performer on Main and starts confirmation"
+      ]
+    },
+    {
+      "name": "com.stripe.android.checkout.CheckoutElementsControllerTest",
+      "tests": [
+        "confirm sfu bash absent unchecked",
+        "confirm sfu bash absent checked",
+        "confirm sfu bash pmo overrides global",
+        "confirm sfu bash sepa none overrides global",
+        "confirm sfu bash sepa pmo off session",
+        "confirm sfu bash minimal sepa save control",
+        "confirm sfu bash merchant off session unchecked",
+        "confirm sfu bash merchant on session disabled",
+        "confirm sfu bash merchant on session checked",
+        "confirm sfu bash pmo on session with checked save",
+        "confirm sfu bash minimal sepa none with checked save",
+        "confirm sfu bash sepa none with checked save"
+      ]
+    }
+  ]
+}

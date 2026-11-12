@@ -1,0 +1,21 @@
+{
+  "checked_at_utc": "2026-11-11T21:12:59.674911+00:00",
+  "device": "REDACTED_DEVICE_SERIAL",
+  "screen_keyguard": [
+    "showing=false",
+    "inputRestricted=false",
+    "secure=true",
+    "screenState=SCREEN_STATE_ON"
+  ],
+  "main_menu_verified": true,
+  "stay_on_while_plugged_in": "7",
+  "reverse_mappings": "",
+  "preferences_restored": true,
+  "owned_relay_stopped_and_awaited": true,
+  "owned_private_state_deleted": true,
+  "owned_device_scratch_removed": true,
+  "source": "cf7dd4b99965a4e754abdadacf4f337e764f6e6a",
+  "DIRECTLY_TO_PLAYGROUND": false,
+  "STRIPE_PAYMENTSHEET_EXAMPLE_USES_CLEARTEXT_TRAFFIC": true,
+  "device_build_backend_released": true
+}

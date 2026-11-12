@@ -1,0 +1,86 @@
+{
+  "case": "details",
+  "status": "complete",
+  "currency": "usd",
+  "totals": {
+    "due": 5132,
+    "subtotal": 5132,
+    "tax_exclusive": 0,
+    "tax_inclusive": 0,
+    "total": 5132,
+    "total_tax_amounts": []
+  },
+  "groups": [
+    "checkout_item_VbuePgTr"
+  ],
+  "items": [
+    {
+      "key": "inner_item_VbueMDmk",
+      "name": "Caf\u00e9 shirt \u2014 blue & white 100%",
+      "quantity": 3,
+      "unit_amount": 1299,
+      "unit_amount_decimal": "1299.0",
+      "unit_label": "shirt",
+      "images": [
+        "https://stripe.com/img/v3/home/twitter.png"
+      ],
+      "product_description": "Soft cotton\nBlue edition",
+      "adjustable_quantity": {
+        "enabled": true,
+        "maximum": 12,
+        "minimum": 0
+      },
+      "amount_details": {
+        "discount": 0,
+        "discount_amounts": [],
+        "subtotal": 3897,
+        "tax_amounts": [],
+        "tax_exclusive": 0,
+        "tax_inclusive": 0,
+        "total": 3897
+      }
+    },
+    {
+      "key": "inner_item_Vbuel8jg",
+      "name": "Ribbon",
+      "quantity": 100,
+      "unit_amount": null,
+      "unit_amount_decimal": "12.345678901234",
+      "unit_label": "meter",
+      "images": [],
+      "product_description": null,
+      "adjustable_quantity": null,
+      "amount_details": {
+        "discount": 0,
+        "discount_amounts": [],
+        "subtotal": 1235,
+        "tax_amounts": [],
+        "tax_exclusive": 0,
+        "tax_inclusive": 0,
+        "total": 1235
+      }
+    },
+    {
+      "key": "inner_item_Vbue2nE0",
+      "name": "Complimentary gift",
+      "quantity": 1,
+      "unit_amount": 0,
+      "unit_amount_decimal": "0.0",
+      "unit_label": null,
+      "images": [],
+      "product_description": null,
+      "adjustable_quantity": null,
+      "amount_details": {
+        "discount": 0,
+        "discount_amounts": [],
+        "subtotal": 0,
+        "tax_amounts": [],
+        "tax_exclusive": 0,
+        "tax_inclusive": 0,
+        "total": 0
+      }
+    }
+  ],
+  "payment_intent_status": "succeeded",
+  "payment_intent_amount": 5132
+}

@@ -1,0 +1,43 @@
+{
+  "ui_mode": "mobile_elements",
+  "currency": "kwd",
+  "allowed_payment_method_types": [
+    "card"
+  ],
+  "automatic_tax": {
+    "enabled": false
+  },
+  "adaptive_pricing": {
+    "enabled": false
+  },
+  "customer_email": "order-summary-bash@example.com",
+  "items": [
+    {
+      "type": "one_time_price",
+      "one_time_price": {
+        "items": [
+          {
+            "price_data": {
+              "currency": "kwd",
+              "unit_amount": 12345,
+              "product_data": {
+                "name": "Three decimal currency"
+              }
+            },
+            "quantity": 2
+          },
+          {
+            "price_data": {
+              "currency": "kwd",
+              "unit_amount_decimal": "12.345678901234",
+              "product_data": {
+                "name": "Fractional fils"
+              }
+            },
+            "quantity": 100
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "error": {
+    "code": "checkout_not_active_session",
+    "message": "This Checkout Session is no longer active.",
+    "type": "invalid_request_error"
+  }
+}

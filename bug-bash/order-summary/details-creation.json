@@ -1,0 +1,64 @@
+{
+  "ui_mode": "mobile_elements",
+  "currency": "usd",
+  "allowed_payment_method_types": [
+    "card"
+  ],
+  "automatic_tax": {
+    "enabled": false
+  },
+  "adaptive_pricing": {
+    "enabled": false
+  },
+  "customer_email": "order-summary-bash@example.com",
+  "items": [
+    {
+      "type": "one_time_price",
+      "one_time_price": {
+        "items": [
+          {
+            "price_data": {
+              "currency": "usd",
+              "unit_amount": 1299,
+              "product_data": {
+                "name": "Caf\u00e9 shirt \u2014 blue & white 100%",
+                "description": "Soft cotton\nBlue edition",
+                "images": [
+                  "https://stripe.com/img/v3/home/twitter.png"
+                ],
+                "unit_label": "shirt"
+              }
+            },
+            "quantity": 3,
+            "adjustable_quantity": {
+              "enabled": true,
+              "minimum": 0,
+              "maximum": 12
+            }
+          },
+          {
+            "price_data": {
+              "currency": "usd",
+              "unit_amount_decimal": "12.345678901234",
+              "product_data": {
+                "name": "Ribbon",
+                "unit_label": "meter"
+              }
+            },
+            "quantity": 100
+          },
+          {
+            "price_data": {
+              "currency": "usd",
+              "unit_amount": 0,
+              "product_data": {
+                "name": "Complimentary gift"
+              }
+            },
+            "quantity": 1
+          }
+        ]
+      }
+    }
+  ]
+}

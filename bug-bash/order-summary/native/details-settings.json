@@ -1,0 +1,19 @@
+{
+  "session.backend_url": "http://127.0.0.1:53560",
+  "session.customer": "returning",
+  "session.customer_id": "cus_VbxAvtQqUR3XpO",
+  "session.customer_email": "",
+  "session.merchant": "US",
+  "session.currency": "usd",
+  "session.automatic_tax": "false",
+  "session.automatic_payment_methods": "false",
+  "session.payment_method_types": "card",
+  "session.payment_method_save": "false",
+  "session.payment_method_remove": "false",
+  "session.billing_address_collection": "false",
+  "session.shipping_address_collection": "false",
+  "controller.shipping_address.should_set_configuration": "false",
+  "controller.payment_element.should_set_configuration": "true",
+  "payment.link.display": "Never",
+  "payment.google_pay.display": "Never"
+}

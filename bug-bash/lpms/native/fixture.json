@@ -1,0 +1,190 @@
+{
+  "customer": "cus_VbwlAhYKGO7wYa",
+  "methods": [
+    {
+      "id": "pm_1UairiLu5o3P18ZpdQ5Pt5C3",
+      "object": "payment_method",
+      "allow_redisplay": "always",
+      "billing_details": {
+        "address": {
+          "city": "San Francisco",
+          "country": "US",
+          "line1": "510 Townsend St",
+          "line2": null,
+          "postal_code": "94103",
+          "state": "CA"
+        },
+        "email": "native-lpms@example.com",
+        "name": "Native LPM Tester",
+        "phone": null,
+        "tax_id": null
+      },
+      "card": {
+        "brand": "visa",
+        "checks": {
+          "address_line1_check": null,
+          "address_postal_code_check": null,
+          "cvc_check": null
+        },
+        "country": "US",
+        "display_brand": "visa",
+        "exp_month": 11,
+        "exp_year": 2027,
+        "funding": "credit",
+        "generated_from": null,
+        "last4": "4242",
+        "networks": {
+          "available": [
+            "visa"
+          ],
+          "preferred": null
+        },
+        "regulated_status": "unregulated",
+        "three_d_secure_usage": {
+          "supported": true
+        },
+        "wallet": null
+      },
+      "created": 1794431734,
+      "customer": null,
+      "customer_account": null,
+      "livemode": false,
+      "type": "card"
+    },
+    {
+      "id": "pm_1UairjLu5o3P18ZpRijUnM6J",
+      "object": "payment_method",
+      "allow_redisplay": "limited",
+      "billing_details": {
+        "address": {
+          "city": "San Francisco",
+          "country": "US",
+          "line1": "510 Townsend St",
+          "line2": null,
+          "postal_code": "94103",
+          "state": "CA"
+        },
+        "email": "native-lpms@example.com",
+        "name": "Native LPM Tester",
+        "phone": null,
+        "tax_id": null
+      },
+      "card": {
+        "brand": "mastercard",
+        "checks": {
+          "address_line1_check": null,
+          "address_postal_code_check": null,
+          "cvc_check": null
+        },
+        "country": "US",
+        "display_brand": "mastercard",
+        "exp_month": 11,
+        "exp_year": 2027,
+        "funding": "credit",
+        "generated_from": null,
+        "last4": "4444",
+        "networks": {
+          "available": [
+            "mastercard"
+          ],
+          "preferred": null
+        },
+        "regulated_status": "unregulated",
+        "three_d_secure_usage": {
+          "supported": true
+        },
+        "wallet": null
+      },
+      "created": 1794431735,
+      "customer": null,
+      "customer_account": null,
+      "livemode": false,
+      "type": "card"
+    },
+    {
+      "id": "pm_1UairkLu5o3P18ZpgOfgtemI",
+      "object": "payment_method",
+      "allow_redisplay": "unspecified",
+      "billing_details": {
+        "address": {
+          "city": "San Francisco",
+          "country": "US",
+          "line1": "510 Townsend St",
+          "line2": null,
+          "postal_code": "94103",
+          "state": "CA"
+        },
+        "email": "native-lpms@example.com",
+        "name": "Native LPM Tester",
+        "phone": null,
+        "tax_id": null
+      },
+      "card": {
+        "brand": "amex",
+        "checks": {
+          "address_line1_check": null,
+          "address_postal_code_check": null,
+          "cvc_check": null
+        },
+        "country": "US",
+        "display_brand": "american_express",
+        "exp_month": 11,
+        "exp_year": 2027,
+        "funding": "credit",
+        "generated_from": null,
+        "last4": "8431",
+        "networks": {
+          "available": [
+            "amex"
+          ],
+          "preferred": null
+        },
+        "regulated_status": "unregulated",
+        "three_d_secure_usage": {
+          "supported": true
+        },
+        "wallet": null
+      },
+      "created": 1794431736,
+      "customer": null,
+      "customer_account": null,
+      "livemode": false,
+      "type": "card"
+    },
+    {
+      "id": "pm_1UairlLu5o3P18Zp1ELRKLYi",
+      "object": "payment_method",
+      "allow_redisplay": "always",
+      "billing_details": {
+        "address": {
+          "city": "San Francisco",
+          "country": "US",
+          "line1": "510 Townsend St",
+          "line2": null,
+          "postal_code": "94103",
+          "state": "CA"
+        },
+        "email": "native-lpms@example.com",
+        "name": "Native LPM Tester",
+        "phone": null,
+        "tax_id": null
+      },
+      "created": 1794431737,
+      "customer": null,
+      "customer_account": null,
+      "livemode": false,
+      "sepa_debit": {
+        "bank_code": "37040044",
+        "branch_code": "",
+        "country": "DE",
+        "fingerprint": "vifs0Ho7vwRn1Miu",
+        "generated_from": {
+          "charge": null,
+          "setup_attempt": null
+        },
+        "last4": "3000"
+      },
+      "type": "sepa_debit"
+    }
+  ]
+}

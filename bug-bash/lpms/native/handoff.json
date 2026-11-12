@@ -1,0 +1,32 @@
+{
+  "released_at": "2026-11-11T21:38:07.293573Z",
+  "device": "Pixel 6a REDACTED_DEVICE_SERIAL API 36",
+  "final_main_menu_confirmed": false,
+  "main_activity_launched_during_restore": true,
+  "keyguard_showing": true,
+  "keyguard_secure": true,
+  "screen_state": "SCREEN_STATE_OFF",
+  "wakefulness": "Dozing",
+  "lock_reason": "OFF_BECAUSE_OF_TIMEOUT",
+  "device_policy_changed": false,
+  "stay_awake_unchanged": "7",
+  "preferences_restored_byte_for_byte": [
+    "com.stripe.android.PaymentConfiguration.xml",
+    "DefaultPrefsRepository.xml"
+  ],
+  "checkout_preferences_absent": true,
+  "relay_stopped_and_awaited": true,
+  "relay_port_closed": true,
+  "reverse_mappings_empty": true,
+  "private_state_removed": true,
+  "owned_scratch_and_logs_removed": true,
+  "recorder_used": false,
+  "owned_browser_custom_tab_closed_on_redirect": true,
+  "installed_source": "cf7dd4b99965a4e754abdadacf4f337e764f6e6a",
+  "installed_flags": {
+    "DIRECTLY_TO_PLAYGROUND": false,
+    "STRIPE_PAYMENTSHEET_EXAMPLE_USES_CLEARTEXT_TRAFFIC": true
+  },
+  "temporary_test_source_removed": true,
+  "next_topic_requirement": "User unlock required before native Order Summary"
+}

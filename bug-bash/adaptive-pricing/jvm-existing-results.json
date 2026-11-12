@@ -1,0 +1,50 @@
+[
+  {
+    "name": "com.stripe.android.checkout.CheckoutElementsControllerTest",
+    "tests": "5",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "18.133"
+  },
+  {
+    "name": "com.stripe.android.checkout.CheckoutSessionMappersTest",
+    "tests": "13",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "0.062"
+  },
+  {
+    "name": "com.stripe.android.checkout.CurrencySelectorViewModelTest",
+    "tests": "9",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "0.433"
+  },
+  {
+    "name": "com.stripe.android.elements.CurrencySelectorElementContentUITest",
+    "tests": "7",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "7.452"
+  },
+  {
+    "name": "com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseJsonParserTest",
+    "tests": "69",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "0.445"
+  },
+  {
+    "name": "com.stripe.android.paymentsheet.verticalmode.CurrencySelectorOptionsFactoryTest",
+    "tests": "16",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "0.683"
+  }
+]

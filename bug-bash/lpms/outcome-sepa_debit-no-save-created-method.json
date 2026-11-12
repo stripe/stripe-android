@@ -1,0 +1,36 @@
+{
+  "id": "pm_1UaghqLu5o3P18Zp5VC8QN2P",
+  "object": "payment_method",
+  "allow_redisplay": "unspecified",
+  "billing_details": {
+    "address": {
+      "city": null,
+      "country": null,
+      "line1": null,
+      "line2": null,
+      "postal_code": null,
+      "state": null
+    },
+    "email": "lpm-bash@example.com",
+    "name": "LPM Test",
+    "phone": null,
+    "tax_id": null
+  },
+  "created": 1794423434,
+  "customer": null,
+  "customer_account": null,
+  "livemode": false,
+  "sepa_debit": {
+    "bank_code": "37040044",
+    "branch_code": "",
+    "country": "DE",
+    "fingerprint": "vifs0Ho7vwRn1Miu",
+    "generated_from": {
+      "charge": null,
+      "setup_attempt": null
+    },
+    "last4": "3000"
+  },
+  "shared_payment_granted_token": null,
+  "type": "sepa_debit"
+}

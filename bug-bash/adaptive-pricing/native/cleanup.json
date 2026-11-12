@@ -1,0 +1,23 @@
+{
+  "preferences": {
+    "CheckoutElementsControllerPlaygroundSettings.xml": "absent as at fresh backup",
+    "com.stripe.android.PaymentConfiguration.xml": "restored byte-for-byte",
+    "DefaultPrefsRepository.xml": "restored byte-for-byte"
+  },
+  "reverse_mappings": [],
+  "relay": "stopped, port closed",
+  "private_state": "removed",
+  "device_scratch": "removed",
+  "sdk_source_changes": false,
+  "gradle_builds": 0,
+  "installed_source": "cf7dd4b99965a4e754abdadacf4f337e764f6e6a",
+  "DIRECTLY_TO_PLAYGROUND": false,
+  "STRIPE_PAYMENTSHEET_EXAMPLE_USES_CLEARTEXT_TRAFFIC": true,
+  "final_menu": "CheckoutElementsController Example observed",
+  "keyguard": [
+    "showing=false",
+    "screenState=SCREEN_STATE_ON"
+  ],
+  "stay_awake": 7,
+  "device_policy": "unchanged"
+}

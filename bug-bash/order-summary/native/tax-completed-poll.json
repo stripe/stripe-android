@@ -1,0 +1,9 @@
+{
+  "id": "cs_test_a0Z0KynjkCl6Yo9drPZQMKDZc8FNKBNI96JGOMTmL4DUyYFYcEfBf5HSeH",
+  "confirmation_status": "succeeded",
+  "livemode": false,
+  "payment_status": "paid",
+  "state": "complete",
+  "status": "complete",
+  "ui_mode": "mobile_elements"
+}

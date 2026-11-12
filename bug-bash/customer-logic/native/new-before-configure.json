@@ -1,0 +1,6 @@
+{
+  "session.customer": "new",
+  "session.customer_id": "",
+  "session.customer_email": "native-customer@example.com",
+  "returning_customer_id": null
+}

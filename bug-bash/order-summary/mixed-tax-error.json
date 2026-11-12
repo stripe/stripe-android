@@ -1,0 +1,4 @@
+{
+  "error": "All elements in the `checkout_items` array must have the same `tax_behavior`.",
+  "request_id": "req_tpG8jrBGT7APAz"
+}

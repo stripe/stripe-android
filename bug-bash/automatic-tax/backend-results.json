@@ -1,0 +1,147 @@
+[
+  {
+    "case": "billing-auto",
+    "steps": [
+      {
+        "tax_source": "billing",
+        "tax_status": "requires_address",
+        "tax": 0,
+        "total": 12000
+      },
+      {
+        "tax_source": "billing",
+        "tax_status": "ready",
+        "tax": 1035,
+        "total": 13035
+      },
+      {
+        "tax_source": "billing",
+        "tax_status": "ready",
+        "tax": 0,
+        "total": 12000
+      },
+      {
+        "tax_source": "billing",
+        "tax_status": "ready",
+        "tax": 0,
+        "total": 12000
+      },
+      {
+        "tax_source": "billing",
+        "tax_status": "ready",
+        "tax": 0,
+        "total": 12000
+      },
+      {
+        "tax_source": "billing",
+        "tax_status": "requires_address",
+        "tax": 0,
+        "total": 12000
+      },
+      {
+        "tax_source": "billing",
+        "tax_status": "ready",
+        "tax": 1035,
+        "total": 13035
+      }
+    ],
+    "tax_source": "billing",
+    "tax_status": "ready",
+    "tax": 1035,
+    "total": 13035,
+    "confirmed": true,
+    "payment_intent_amount": 13035
+  },
+  {
+    "case": "billing-required",
+    "steps": [
+      {
+        "tax_source": "billing",
+        "tax_status": "requires_address",
+        "tax": 0,
+        "total": 12000
+      },
+      {
+        "tax_source": "billing",
+        "tax_status": "ready",
+        "tax": 1035,
+        "total": 13035
+      },
+      {
+        "tax_source": "billing",
+        "tax_status": "requires_address",
+        "tax": 0,
+        "total": 12000
+      },
+      {
+        "tax_source": "billing",
+        "tax_status": "ready",
+        "tax": 0,
+        "total": 12000
+      }
+    ],
+    "tax_source": "billing",
+    "tax_status": "ready",
+    "tax": 0,
+    "total": 12000,
+    "confirmed": true,
+    "payment_intent_amount": 12000
+  },
+  {
+    "case": "shipping",
+    "steps": [
+      {
+        "tax_source": "shipping",
+        "tax_status": "requires_address",
+        "tax": 0,
+        "total": 12000
+      },
+      {
+        "tax_source": "shipping",
+        "tax_status": "ready",
+        "tax": 1035,
+        "total": 13035
+      },
+      {
+        "tax_source": "shipping",
+        "tax_status": "ready",
+        "tax": 0,
+        "total": 12000
+      },
+      {
+        "tax_source": "shipping",
+        "tax_status": "requires_address",
+        "tax": 0,
+        "total": 12000
+      },
+      {
+        "tax_source": "shipping",
+        "tax_status": "ready",
+        "tax": 0,
+        "total": 12000
+      }
+    ],
+    "tax_source": "shipping",
+    "tax_status": "ready",
+    "tax": 0,
+    "total": 12000,
+    "confirmed": true,
+    "payment_intent_amount": 12000
+  },
+  {
+    "case": "customer-source",
+    "tax_source": "customer",
+    "tax_status": "ready",
+    "tax": 1035,
+    "total": 13035,
+    "confirmed": false
+  },
+  {
+    "case": "customer-billing-source",
+    "tax_source": "billing",
+    "tax_status": "ready",
+    "tax": 0,
+    "total": 12000,
+    "confirmed": false
+  }
+]

@@ -1,0 +1,42 @@
+[
+  {
+    "name": "com.stripe.android.checkout.CheckoutElementsControllerTest",
+    "tests": "31",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "4.74"
+  },
+  {
+    "name": "com.stripe.android.checkout.CheckoutSessionTaxRegionUpdaterTest",
+    "tests": "6",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "0.115"
+  },
+  {
+    "name": "com.stripe.android.checkout.ShippingAddressElementStateHolderTest",
+    "tests": "1",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "0.013"
+  },
+  {
+    "name": "com.stripe.android.paymentelement.confirmation.intent.CheckoutSessionConfirmationInterceptorTest",
+    "tests": "27",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "2.38"
+  },
+  {
+    "name": "com.stripe.android.paymentsheet.state.DefaultPaymentMethodFilterTest",
+    "tests": "13",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "0.076"
+  }
+]

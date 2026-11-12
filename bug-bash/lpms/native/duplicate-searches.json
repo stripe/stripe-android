@@ -1,0 +1,29 @@
+{
+  "repo": "stripe/stripe-android",
+  "state": "all",
+  "command_prefix": "GH_HOST=github.com gh issue list --repo stripe/stripe-android --state all --search",
+  "queries": {
+    "\"american_express\" \"Unknown\"": [
+      {
+        "number": 1604,
+        "title": "Stripe Custom Card Android  with 4 digits CVV "
+      }
+    ],
+    "amex accessibility": [],
+    "\"Unknown\" \"displayBrand\"": [
+      {
+        "number": 7590,
+        "title": "[BUG] 3DS not working when activity gets re-created"
+      }
+    ],
+    "\"american_express\" \"description\"": [],
+    "\"Amex\" \"TalkBack\"": [],
+    "\"saved card\" \"Unknown\"": [
+      {
+        "number": 1017,
+        "title": "Payment Intents API throw exception with savePaymentMethod: true"
+      }
+    ]
+  },
+  "conclusion": "No matching issue; returned titles describe different surfaces/root causes. Existing billing and SEPA-save root reports checked."
+}

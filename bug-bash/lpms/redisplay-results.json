@@ -1,0 +1,507 @@
+[
+  {
+    "case": "redisplay-default",
+    "filters": null,
+    "response": {
+      "status": "open",
+      "payment_status": "unpaid",
+      "ordered_types": [
+        "card",
+        "apple_pay",
+        "google_pay",
+        "sepa_debit"
+      ],
+      "automatic_payment_method_types": null,
+      "setup_future_usage_for_payment_method_type": {},
+      "total": 12000,
+      "customer_id": "cus_VbuWFjzr2gPqHU",
+      "saved_methods": [
+        {
+          "id": "pm_1UaghOLu5o3P18ZpRgNZDgv2",
+          "type": "sepa_debit",
+          "allow_redisplay": "always",
+          "card": null,
+          "sepa_debit": {
+            "bank_code": "37040044",
+            "branch_code": "",
+            "country": "DE",
+            "fingerprint": "vifs0Ho7vwRn1Miu",
+            "generated_from": {
+              "charge": null,
+              "setup_attempt": null
+            },
+            "last4": "3000"
+          }
+        },
+        {
+          "id": "pm_1UaghMLu5o3P18Zp9dxF5ZJp",
+          "type": "card",
+          "allow_redisplay": "always",
+          "card": {
+            "brand": "visa",
+            "checks": {
+              "address_line1_check": null,
+              "address_postal_code_check": null,
+              "cvc_check": null
+            },
+            "country": "US",
+            "display_brand": "visa",
+            "exp_month": 11,
+            "exp_year": 2027,
+            "funding": "credit",
+            "generated_from": null,
+            "last4": "4242",
+            "networks": {
+              "available": [
+                "visa"
+              ],
+              "preferred": null
+            },
+            "regulated_status": "unregulated",
+            "three_d_secure_usage": {
+              "supported": true
+            },
+            "wallet": null
+          },
+          "sepa_debit": null
+        }
+      ]
+    }
+  },
+  {
+    "case": "redisplay-all",
+    "filters": [
+      "always",
+      "limited",
+      "unspecified"
+    ],
+    "response": {
+      "status": "open",
+      "payment_status": "unpaid",
+      "ordered_types": [
+        "card",
+        "apple_pay",
+        "google_pay",
+        "sepa_debit"
+      ],
+      "automatic_payment_method_types": null,
+      "setup_future_usage_for_payment_method_type": {},
+      "total": 12000,
+      "customer_id": "cus_VbuWFjzr2gPqHU",
+      "saved_methods": [
+        {
+          "id": "pm_1UaghQLu5o3P18Zpa9Om1REr",
+          "type": "sepa_debit",
+          "allow_redisplay": "unspecified",
+          "card": null,
+          "sepa_debit": {
+            "bank_code": "37040044",
+            "branch_code": "",
+            "country": "DE",
+            "fingerprint": "vifs0Ho7vwRn1Miu",
+            "generated_from": {
+              "charge": null,
+              "setup_attempt": null
+            },
+            "last4": "3000"
+          }
+        },
+        {
+          "id": "pm_1UaghNLu5o3P18ZpWWEWCb2Z",
+          "type": "card",
+          "allow_redisplay": "unspecified",
+          "card": {
+            "brand": "amex",
+            "checks": {
+              "address_line1_check": null,
+              "address_postal_code_check": null,
+              "cvc_check": null
+            },
+            "country": "US",
+            "display_brand": "american_express",
+            "exp_month": 11,
+            "exp_year": 2027,
+            "funding": "credit",
+            "generated_from": null,
+            "last4": "8431",
+            "networks": {
+              "available": [
+                "amex"
+              ],
+              "preferred": null
+            },
+            "regulated_status": "unregulated",
+            "three_d_secure_usage": {
+              "supported": true
+            },
+            "wallet": null
+          },
+          "sepa_debit": null
+        },
+        {
+          "id": "pm_1UaghNLu5o3P18ZpTgkAJjzc",
+          "type": "card",
+          "allow_redisplay": "limited",
+          "card": {
+            "brand": "mastercard",
+            "checks": {
+              "address_line1_check": null,
+              "address_postal_code_check": null,
+              "cvc_check": null
+            },
+            "country": "US",
+            "display_brand": "mastercard",
+            "exp_month": 11,
+            "exp_year": 2027,
+            "funding": "credit",
+            "generated_from": null,
+            "last4": "4444",
+            "networks": {
+              "available": [
+                "mastercard"
+              ],
+              "preferred": null
+            },
+            "regulated_status": "unregulated",
+            "three_d_secure_usage": {
+              "supported": true
+            },
+            "wallet": null
+          },
+          "sepa_debit": null
+        },
+        {
+          "id": "pm_1UaghMLu5o3P18Zp9dxF5ZJp",
+          "type": "card",
+          "allow_redisplay": "always",
+          "card": {
+            "brand": "visa",
+            "checks": {
+              "address_line1_check": null,
+              "address_postal_code_check": null,
+              "cvc_check": null
+            },
+            "country": "US",
+            "display_brand": "visa",
+            "exp_month": 11,
+            "exp_year": 2027,
+            "funding": "credit",
+            "generated_from": null,
+            "last4": "4242",
+            "networks": {
+              "available": [
+                "visa"
+              ],
+              "preferred": null
+            },
+            "regulated_status": "unregulated",
+            "three_d_secure_usage": {
+              "supported": true
+            },
+            "wallet": null
+          },
+          "sepa_debit": null
+        }
+      ]
+    }
+  },
+  {
+    "case": "redisplay-limited",
+    "filters": [
+      "limited"
+    ],
+    "response": {
+      "status": "open",
+      "payment_status": "unpaid",
+      "ordered_types": [
+        "card",
+        "apple_pay",
+        "google_pay",
+        "sepa_debit"
+      ],
+      "automatic_payment_method_types": null,
+      "setup_future_usage_for_payment_method_type": {},
+      "total": 12000,
+      "customer_id": "cus_VbuWFjzr2gPqHU",
+      "saved_methods": [
+        {
+          "id": "pm_1UaghPLu5o3P18Zp6oIoIuJw",
+          "type": "sepa_debit",
+          "allow_redisplay": "limited",
+          "card": null,
+          "sepa_debit": {
+            "bank_code": "37040044",
+            "branch_code": "",
+            "country": "DE",
+            "fingerprint": "vifs0Ho7vwRn1Miu",
+            "generated_from": {
+              "charge": null,
+              "setup_attempt": null
+            },
+            "last4": "3000"
+          }
+        },
+        {
+          "id": "pm_1UaghNLu5o3P18ZpTgkAJjzc",
+          "type": "card",
+          "allow_redisplay": "limited",
+          "card": {
+            "brand": "mastercard",
+            "checks": {
+              "address_line1_check": null,
+              "address_postal_code_check": null,
+              "cvc_check": null
+            },
+            "country": "US",
+            "display_brand": "mastercard",
+            "exp_month": 11,
+            "exp_year": 2027,
+            "funding": "credit",
+            "generated_from": null,
+            "last4": "4444",
+            "networks": {
+              "available": [
+                "mastercard"
+              ],
+              "preferred": null
+            },
+            "regulated_status": "unregulated",
+            "three_d_secure_usage": {
+              "supported": true
+            },
+            "wallet": null
+          },
+          "sepa_debit": null
+        }
+      ]
+    }
+  },
+  {
+    "case": "redisplay-unspecified",
+    "filters": [
+      "unspecified"
+    ],
+    "response": {
+      "status": "open",
+      "payment_status": "unpaid",
+      "ordered_types": [
+        "card",
+        "apple_pay",
+        "google_pay",
+        "sepa_debit"
+      ],
+      "automatic_payment_method_types": null,
+      "setup_future_usage_for_payment_method_type": {},
+      "total": 12000,
+      "customer_id": "cus_VbuWFjzr2gPqHU",
+      "saved_methods": [
+        {
+          "id": "pm_1UaghQLu5o3P18Zpa9Om1REr",
+          "type": "sepa_debit",
+          "allow_redisplay": "unspecified",
+          "card": null,
+          "sepa_debit": {
+            "bank_code": "37040044",
+            "branch_code": "",
+            "country": "DE",
+            "fingerprint": "vifs0Ho7vwRn1Miu",
+            "generated_from": {
+              "charge": null,
+              "setup_attempt": null
+            },
+            "last4": "3000"
+          }
+        },
+        {
+          "id": "pm_1UaghNLu5o3P18ZpWWEWCb2Z",
+          "type": "card",
+          "allow_redisplay": "unspecified",
+          "card": {
+            "brand": "amex",
+            "checks": {
+              "address_line1_check": null,
+              "address_postal_code_check": null,
+              "cvc_check": null
+            },
+            "country": "US",
+            "display_brand": "american_express",
+            "exp_month": 11,
+            "exp_year": 2027,
+            "funding": "credit",
+            "generated_from": null,
+            "last4": "8431",
+            "networks": {
+              "available": [
+                "amex"
+              ],
+              "preferred": null
+            },
+            "regulated_status": "unregulated",
+            "three_d_secure_usage": {
+              "supported": true
+            },
+            "wallet": null
+          },
+          "sepa_debit": null
+        }
+      ]
+    }
+  },
+  {
+    "case": "redisplay-sepa-only",
+    "filters": [
+      "always",
+      "limited",
+      "unspecified"
+    ],
+    "response": {
+      "status": "open",
+      "payment_status": "unpaid",
+      "ordered_types": [
+        "sepa_debit"
+      ],
+      "automatic_payment_method_types": null,
+      "setup_future_usage_for_payment_method_type": {},
+      "total": 12000,
+      "customer_id": "cus_VbuWFjzr2gPqHU",
+      "saved_methods": [
+        {
+          "id": "pm_1UaghQLu5o3P18Zpa9Om1REr",
+          "type": "sepa_debit",
+          "allow_redisplay": "unspecified",
+          "card": null,
+          "sepa_debit": {
+            "bank_code": "37040044",
+            "branch_code": "",
+            "country": "DE",
+            "fingerprint": "vifs0Ho7vwRn1Miu",
+            "generated_from": {
+              "charge": null,
+              "setup_attempt": null
+            },
+            "last4": "3000"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "case": "redisplay-card-only",
+    "filters": [
+      "always",
+      "limited",
+      "unspecified"
+    ],
+    "response": {
+      "status": "open",
+      "payment_status": "unpaid",
+      "ordered_types": [
+        "card",
+        "apple_pay",
+        "google_pay"
+      ],
+      "automatic_payment_method_types": null,
+      "setup_future_usage_for_payment_method_type": {},
+      "total": 12000,
+      "customer_id": "cus_VbuWFjzr2gPqHU",
+      "saved_methods": [
+        {
+          "id": "pm_1UaghNLu5o3P18ZpWWEWCb2Z",
+          "type": "card",
+          "allow_redisplay": "unspecified",
+          "card": {
+            "brand": "amex",
+            "checks": {
+              "address_line1_check": null,
+              "address_postal_code_check": null,
+              "cvc_check": null
+            },
+            "country": "US",
+            "display_brand": "american_express",
+            "exp_month": 11,
+            "exp_year": 2027,
+            "funding": "credit",
+            "generated_from": null,
+            "last4": "8431",
+            "networks": {
+              "available": [
+                "amex"
+              ],
+              "preferred": null
+            },
+            "regulated_status": "unregulated",
+            "three_d_secure_usage": {
+              "supported": true
+            },
+            "wallet": null
+          },
+          "sepa_debit": null
+        },
+        {
+          "id": "pm_1UaghNLu5o3P18ZpTgkAJjzc",
+          "type": "card",
+          "allow_redisplay": "limited",
+          "card": {
+            "brand": "mastercard",
+            "checks": {
+              "address_line1_check": null,
+              "address_postal_code_check": null,
+              "cvc_check": null
+            },
+            "country": "US",
+            "display_brand": "mastercard",
+            "exp_month": 11,
+            "exp_year": 2027,
+            "funding": "credit",
+            "generated_from": null,
+            "last4": "4444",
+            "networks": {
+              "available": [
+                "mastercard"
+              ],
+              "preferred": null
+            },
+            "regulated_status": "unregulated",
+            "three_d_secure_usage": {
+              "supported": true
+            },
+            "wallet": null
+          },
+          "sepa_debit": null
+        },
+        {
+          "id": "pm_1UaghMLu5o3P18Zp9dxF5ZJp",
+          "type": "card",
+          "allow_redisplay": "always",
+          "card": {
+            "brand": "visa",
+            "checks": {
+              "address_line1_check": null,
+              "address_postal_code_check": null,
+              "cvc_check": null
+            },
+            "country": "US",
+            "display_brand": "visa",
+            "exp_month": 11,
+            "exp_year": 2027,
+            "funding": "credit",
+            "generated_from": null,
+            "last4": "4242",
+            "networks": {
+              "available": [
+                "visa"
+              ],
+              "preferred": null
+            },
+            "regulated_status": "unregulated",
+            "three_d_secure_usage": {
+              "supported": true
+            },
+            "wallet": null
+          },
+          "sepa_debit": null
+        }
+      ]
+    }
+  }
+]

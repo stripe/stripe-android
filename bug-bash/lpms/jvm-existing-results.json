@@ -1,0 +1,34 @@
+[
+  {
+    "name": "com.stripe.android.paymentelement.confirmation.intent.CheckoutSessionConfirmationInterceptorTest",
+    "tests": "83",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "4.413"
+  },
+  {
+    "name": "com.stripe.android.checkout.CheckoutConfirmationPerformerTest",
+    "tests": "22",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "3.487"
+  },
+  {
+    "name": "com.stripe.android.paymentsheet.repositories.CheckoutClientPollResponseJsonParserTest",
+    "tests": "5",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "0.05"
+  },
+  {
+    "name": "com.stripe.android.checkout.DefaultCheckoutConfirmationFinalizerTest",
+    "tests": "7",
+    "failures": "0",
+    "errors": "0",
+    "skipped": "0",
+    "time": "0.069"
+  }
+]

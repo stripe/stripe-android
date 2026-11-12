@@ -1,0 +1,113 @@
+[
+  {
+    "case": "sfu-absent-disabled",
+    "method": "card",
+    "merchant_sfu": null,
+    "merchant_pmo_sfu": null,
+    "save_enabled": false,
+    "save_choice": null,
+    "effective_initial_sfu": null,
+    "initial_save_options": {
+      "payment_method_remove": "disabled",
+      "payment_method_save": "disabled"
+    },
+    "initial_offer_save": null,
+    "sent_allow_redisplay": "unspecified",
+    "checkout_status": "complete",
+    "payment_status": "paid",
+    "intent_status": "succeeded",
+    "intent_sfu": null,
+    "intent_method_options": null,
+    "payment_method_id": "pm_1UagyCLu5o3P18Zp1T1M4UJ7",
+    "payment_method_customer": null,
+    "payment_method_redisplay": "limited",
+    "customer_id": "cus_VbunzkzRR5PV8F",
+    "returning_default": [],
+    "returning_all": []
+  },
+  {
+    "case": "sfu-absent-unchecked",
+    "method": "card",
+    "merchant_sfu": null,
+    "merchant_pmo_sfu": null,
+    "save_enabled": true,
+    "save_choice": false,
+    "effective_initial_sfu": null,
+    "initial_save_options": {
+      "payment_method_remove": "disabled",
+      "payment_method_save": "enabled"
+    },
+    "initial_offer_save": null,
+    "sent_allow_redisplay": "unspecified",
+    "checkout_status": "complete",
+    "payment_status": "paid",
+    "intent_status": "succeeded",
+    "intent_sfu": null,
+    "intent_method_options": null,
+    "payment_method_id": "pm_1UagyGLu5o3P18ZpaGytT23E",
+    "payment_method_customer": null,
+    "payment_method_redisplay": "limited",
+    "customer_id": "cus_VbunqGy5ma2Isd",
+    "returning_default": [],
+    "returning_all": []
+  },
+  {
+    "case": "sfu-absent-checked",
+    "method": "card",
+    "merchant_sfu": null,
+    "merchant_pmo_sfu": null,
+    "save_enabled": true,
+    "save_choice": true,
+    "effective_initial_sfu": null,
+    "initial_save_options": {
+      "payment_method_remove": "disabled",
+      "payment_method_save": "enabled"
+    },
+    "initial_offer_save": null,
+    "sent_allow_redisplay": "always",
+    "checkout_status": "complete",
+    "payment_status": "paid",
+    "intent_status": "succeeded",
+    "intent_sfu": "off_session",
+    "intent_method_options": null,
+    "payment_method_id": "pm_1UagyLLu5o3P18ZpOI1bzaEO",
+    "payment_method_customer": "cus_Vbun8UprAIAnEr",
+    "payment_method_redisplay": "always",
+    "customer_id": "cus_Vbun8UprAIAnEr",
+    "returning_default": [
+      {
+        "id": "pm_1UagyLLu5o3P18ZpOI1bzaEO",
+        "type": "card",
+        "allow_redisplay": "always"
+      }
+    ],
+    "returning_all": [
+      {
+        "id": "pm_1UagyLLu5o3P18ZpOI1bzaEO",
+        "type": "card",
+        "allow_redisplay": "always"
+      }
+    ]
+  },
+  {
+    "case": "sfu-on-disabled",
+    "error": {
+      "error": "You can not pass `payment_intent_data` in `modeless` mode.",
+      "request_id": "req_ejf5E7wDtXC2hx"
+    }
+  },
+  {
+    "case": "sfu-off-unchecked",
+    "error": {
+      "error": "You can not pass `payment_intent_data` in `modeless` mode.",
+      "request_id": "req_5OkwUY6DwQdBRS"
+    }
+  },
+  {
+    "case": "sfu-on-checked",
+    "error": {
+      "error": "You can not pass `payment_intent_data` in `modeless` mode.",
+      "request_id": "req_2cOOmcSp7D8Ti4"
+    }
+  }
+]

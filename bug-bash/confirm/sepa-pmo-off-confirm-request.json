@@ -1,0 +1,10 @@
+{
+  "payment_method_data[type]": "sepa_debit",
+  "payment_method_data[allow_redisplay]": "limited",
+  "payment_method_data[billing_details][name]": "Confirm SFU Test",
+  "payment_method_data[billing_details][email]": "confirm-sfu@example.com",
+  "expected_payment_method_type": "sepa_debit",
+  "expected_amount": 12000,
+  "return_url": "stripesdk://payment_return_url/com.stripe.android.paymentsheet.example",
+  "payment_method_data[sepa_debit][iban]": "DE89370400440532013000"
+}

@@ -1,0 +1,7 @@
+{
+  "payment_method": "pm_1UaghqLu5o3P18Zp5VC8QN2P",
+  "expected_payment_method_type": "sepa_debit",
+  "expected_amount": 12000,
+  "return_url": "stripesdk://payment_return_url/com.stripe.android.paymentsheet.example",
+  "collected_information[save_payment_method]": "false"
+}

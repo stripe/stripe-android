@@ -1,0 +1,12 @@
+{
+  "payment_method": "pm_1UagqCK8p6Sx2i8akpW4Knui",
+  "expected_payment_method_type": "card",
+  "expected_amount": 4500,
+  "return_url": "stripesdk://payment_return_url/com.stripe.android.paymentsheet.example",
+  "shipping[name]": "Order Summary Recipient",
+  "shipping[address][country]": "US",
+  "shipping[address][line1]": "510 Townsend St",
+  "shipping[address][city]": "San Francisco",
+  "shipping[address][state]": "CA",
+  "shipping[address][postal_code]": "94103"
+}

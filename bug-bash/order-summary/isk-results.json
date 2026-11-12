@@ -1,0 +1,60 @@
+{
+  "case": "isk",
+  "status": "complete",
+  "currency": "isk",
+  "totals": {
+    "due": 29600,
+    "subtotal": 29600,
+    "tax_exclusive": 0,
+    "tax_inclusive": 0,
+    "total": 29600,
+    "total_tax_amounts": []
+  },
+  "groups": [
+    "checkout_item_Vbug0aBH"
+  ],
+  "items": [
+    {
+      "key": "inner_item_VbugWChG",
+      "name": "Icelandic item",
+      "quantity": 2,
+      "unit_amount": 12300,
+      "unit_amount_decimal": "12300.0",
+      "unit_label": null,
+      "images": [],
+      "product_description": null,
+      "adjustable_quantity": null,
+      "amount_details": {
+        "discount": 0,
+        "discount_amounts": [],
+        "subtotal": 24600,
+        "tax_amounts": [],
+        "tax_exclusive": 0,
+        "tax_inclusive": 0,
+        "total": 24600
+      }
+    },
+    {
+      "key": "inner_item_VbugFwbB",
+      "name": "Icelandic second item",
+      "quantity": 1,
+      "unit_amount": 5000,
+      "unit_amount_decimal": "5000.0",
+      "unit_label": null,
+      "images": [],
+      "product_description": null,
+      "adjustable_quantity": null,
+      "amount_details": {
+        "discount": 0,
+        "discount_amounts": [],
+        "subtotal": 5000,
+        "tax_amounts": [],
+        "tax_exclusive": 0,
+        "tax_inclusive": 0,
+        "total": 5000
+      }
+    }
+  ],
+  "payment_intent_status": "succeeded",
+  "payment_intent_amount": 29600
+}

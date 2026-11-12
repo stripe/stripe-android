@@ -1,0 +1,10 @@
+{
+  "payment_method_data[type]": "card",
+  "payment_method_data[allow_redisplay]": "unspecified",
+  "payment_method_data[billing_details][name]": "Confirm SFU Test",
+  "payment_method_data[billing_details][email]": "confirm-sfu@example.com",
+  "expected_payment_method_type": "card",
+  "expected_amount": 12000,
+  "return_url": "stripesdk://payment_return_url/com.stripe.android.paymentsheet.example",
+  "payment_method_data[card][token]": "[REDACTED]"
+}

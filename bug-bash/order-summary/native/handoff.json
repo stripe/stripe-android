@@ -1,0 +1,27 @@
+{
+  "released_at": "2026-11-11T21:51:24.995474+00:00",
+  "device": "Pixel 6a REDACTED_DEVICE_SERIAL API 36",
+  "final_main_menu_confirmed": true,
+  "keyguard_showing": false,
+  "screen_on": true,
+  "preferences_restored_byte_for_byte": [
+    "com.stripe.android.PaymentConfiguration.xml",
+    "DefaultPrefsRepository.xml"
+  ],
+  "checkout_preferences_absent": true,
+  "relay_stopped_and_awaited": true,
+  "relay_port_closed": true,
+  "reverse_mappings_empty": true,
+  "owned_scratch_removed": true,
+  "private_state_removed": true,
+  "recorder_used": false,
+  "production_or_test_source_modified": false,
+  "device_policy_changed": false,
+  "stay_awake_unchanged": "7",
+  "installed_source": "cf7dd4b99965a4e754abdadacf4f337e764f6e6a",
+  "installed_flags": {
+    "DIRECTLY_TO_PLAYGROUND": false,
+    "STRIPE_PAYMENTSHEET_EXAMPLE_USES_CLEARTEXT_TRAFFIC": true
+  },
+  "next": "Root final audit; native topic work complete"
+}

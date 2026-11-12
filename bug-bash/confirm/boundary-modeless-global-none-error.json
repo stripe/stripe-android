@@ -1,0 +1,4 @@
+{
+  "error": "Invalid payment_settings[setup_future_usage]: must be one of on_session or off_session",
+  "request_id": "req_itvmQIfi8wa4RE"
+}

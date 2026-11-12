@@ -1,0 +1,37 @@
+{
+  "ui_mode": "mobile_elements",
+  "currency": "eur",
+  "customer": "cus_VbuoPAlSyVoBUG",
+  "allowed_payment_method_types": [
+    "card"
+  ],
+  "automatic_tax": {
+    "enabled": false
+  },
+  "adaptive_pricing": {
+    "enabled": false
+  },
+  "items": [
+    {
+      "type": "one_time_price",
+      "one_time_price": {
+        "items": [
+          {
+            "price_data": {
+              "currency": "eur",
+              "unit_amount": 12000,
+              "product_data": {
+                "name": "Confirm SFU Test"
+              }
+            },
+            "quantity": 1
+          }
+        ]
+      }
+    }
+  ],
+  "mode": "payment",
+  "payment_intent_data": {
+    "setup_future_usage": "off_session"
+  }
+}

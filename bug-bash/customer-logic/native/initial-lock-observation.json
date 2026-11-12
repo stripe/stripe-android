@@ -1,0 +1,52 @@
+{
+  "source_revision": "cf7dd4b99965a4e754abdadacf4f337e764f6e6a",
+  "device": {
+    "model": "Pixel 6a",
+    "api": 36,
+    "serial": "REDACTED_DEVICE_SERIAL"
+  },
+  "native_cases_executed": [],
+  "blocking_observation": {
+    "showing": true,
+    "secure": true,
+    "screen_state": "SCREEN_STATE_OFF",
+    "normal_wake_and_dismiss_result": "Enter PIN"
+  },
+  "power_read_only": {
+    "is_powered": true,
+    "plug_type": 1,
+    "stay_on": false,
+    "stay_on_while_plugged_in": 7,
+    "device_admin_max_screen_off_timeout_ms": 300000,
+    "device_admin_timeout_enforced": true,
+    "screen_off_timeout_setting_ms": 1800000
+  },
+  "fixture": {
+    "customer_id": "cus_VbvkxepwZPD6mZ",
+    "email": "customer-beta@example.com",
+    "card": "mastercard",
+    "last4": "4444",
+    "mode": "test",
+    "native_use": false
+  },
+  "backed_up_preferences": {
+    "names": [
+      "CheckoutElementsControllerPlaygroundSettings.xml",
+      "com.stripe.android.PaymentConfiguration.xml",
+      "DefaultPrefsRepository.xml"
+    ],
+    "present": [
+      "com.stripe.android.PaymentConfiguration.xml",
+      "DefaultPrefsRepository.xml"
+    ]
+  },
+  "cleanup": {
+    "preferences_restored_exactly": true,
+    "relay_stopped": true,
+    "recordings_created": false,
+    "screenshots_created": false,
+    "private_state_removed": true
+  },
+  "scope": "Initial locked preparation only; native coverage completed after owner unlocked during first cleanup.",
+  "superseded_for_native_results_by": "results.json"
+}

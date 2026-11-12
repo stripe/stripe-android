@@ -1,0 +1,64 @@
+{
+  "gradle_exit": 1,
+  "elapsed": "28s",
+  "expected_failure": "captured Amex exposes its supported brand name",
+  "passed": 8,
+  "failed": 1,
+  "suites": [
+    {
+      "class": "LpmNativeCardDescriptionBashTest",
+      "tests": 2,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "captured Visa exposes its supported brand name",
+          "failure": null
+        },
+        {
+          "name": "captured Amex exposes its supported brand name",
+          "failure": "com.google.common.truth.Platform$ComparisonFailureWithFacts: expected: American Express ending in 8431\nbut was : Unknown ending in 8431"
+        }
+      ]
+    },
+    {
+      "class": "DisplayableSavedPaymentMethodTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "create_forSepaDebit_createsSepaDebit",
+          "failure": null
+        },
+        {
+          "name": "create_forUSBankAccount_createsUSBankAccount",
+          "failure": null
+        },
+        {
+          "name": "create_forCard_createsCard",
+          "failure": null
+        },
+        {
+          "name": "create_unexpectedType_createsUnexpected",
+          "failure": null
+        },
+        {
+          "name": "create_missingPaymentMethodInfo_createsUnexpected",
+          "failure": null
+        },
+        {
+          "name": "getDescription_usesDisplayedCardBrand",
+          "failure": null
+        },
+        {
+          "name": "getDescription_usesBrandIfDisplayBrandIsUnknown",
+          "failure": null
+        }
+      ]
+    }
+  ],
+  "first_attempt": "7 existing controls passed; both new minimized JSON cases lacked the required PaymentMethod id. Added synthetic IDs and reran; no behavior fields changed."
+}

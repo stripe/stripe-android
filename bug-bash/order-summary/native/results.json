@@ -1,0 +1,40 @@
+{
+  "device": "Pixel 6a REDACTED_DEVICE_SERIAL API 36",
+  "source": "cf7dd4b99965a4e754abdadacf4f337e764f6e6a",
+  "unchanged_sdk": true,
+  "native_payments_completed": 2,
+  "details": {
+    "line_totals": [
+      3897,
+      1235,
+      0
+    ],
+    "quantities": [
+      3,
+      100,
+      1
+    ],
+    "total": 5132,
+    "clear_reselect_preserved_summary": true,
+    "completion_preserved_summary": true,
+    "poll": "complete/succeeded/paid"
+  },
+  "inclusive_tax": {
+    "line_totals": [
+      2000,
+      2500
+    ],
+    "total": 4500,
+    "ca_included_tax": 357,
+    "or_included_tax": 0,
+    "exclusive_tax": 0,
+    "or_label_observation": "Backend display_name empty; sample renders (included) $0.00",
+    "poll": "complete/succeeded/paid"
+  },
+  "all_nine_flow_screenshots_opened_and_inspected": true,
+  "retained_json_xml_parse_and_redaction_checks": true,
+  "raw_active_totals_and_native_completion_verified": true,
+  "native_final_payment_intent_independently_retrieved": false,
+  "new_confirmed_sdk_bugs": 0,
+  "new_gradle_or_jvm_tests": 0
+}

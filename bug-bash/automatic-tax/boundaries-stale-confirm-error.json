@@ -1,0 +1,8 @@
+{
+  "error": {
+    "code": "checkout_expected_amount_does_not_match_amount_due",
+    "message": "The expected amount ($130.35 usd) does not match the amount due today ($120.00 usd) at Checkout confirmation.",
+    "param": "expected_amount",
+    "type": "invalid_request_error"
+  }
+}

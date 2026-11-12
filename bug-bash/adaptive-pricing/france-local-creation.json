@@ -1,0 +1,39 @@
+{
+  "ui_mode": "mobile_elements",
+  "currency": "usd",
+  "allowed_payment_method_types": [
+    "card"
+  ],
+  "customer_email": "test+location_FR@example.com",
+  "items": [
+    {
+      "type": "one_time_price",
+      "one_time_price": {
+        "items": [
+          {
+            "price_data": {
+              "currency": "usd",
+              "unit_amount": 3500,
+              "tax_behavior": "exclusive",
+              "product_data": {
+                "name": "Classic T-Shirt"
+              }
+            },
+            "quantity": 2
+          },
+          {
+            "price_data": {
+              "currency": "usd",
+              "unit_amount": 5000,
+              "tax_behavior": "exclusive",
+              "product_data": {
+                "name": "Zip-Up Hoodie"
+              }
+            },
+            "quantity": 1
+          }
+        ]
+      }
+    }
+  ]
+}

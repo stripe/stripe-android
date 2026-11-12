@@ -1,0 +1,241 @@
+[
+  {
+    "case": "guest_no_customer",
+    "creation_parameters": {
+      "customer_email": "guest-customer-bash@example.com"
+    },
+    "response": {
+      "id": "cs_test_a0vWpz1VkUB5xU0NAnrEROep9m9ySYi8zhO4OzqtGc4gdalRjPPdYyBGfu",
+      "status": "open",
+      "customer": null,
+      "customer_email": "guest-customer-bash@example.com",
+      "customer_creation": null,
+      "saved_payment_method_options": {
+        "payment_method_remove": "disabled",
+        "payment_method_save": "disabled"
+      },
+      "payment_status": "unpaid"
+    }
+  },
+  {
+    "case": "guest_create_always",
+    "creation_parameters": {
+      "customer_email": "guest-save-bash@example.com",
+      "customer_creation": "always",
+      "saved_payment_method_options": {
+        "payment_method_save": "enabled",
+        "payment_method_remove": "enabled"
+      }
+    },
+    "response": {
+      "id": "cs_test_a0qvhWrVZrm3nrFbwh4eMQ32ONPcsdEIb5DXDlMQ4CKhmT1T3FHffZjGbI",
+      "status": "open",
+      "customer": null,
+      "customer_email": "guest-save-bash@example.com",
+      "customer_creation": null,
+      "saved_payment_method_options": {
+        "payment_method_remove": "enabled",
+        "payment_method_save": "enabled"
+      },
+      "payment_status": "unpaid"
+    }
+  },
+  {
+    "case": "new_explicit_customer",
+    "creation_parameters": {
+      "customer": "cus_Vbu0x0pLtfiQbL",
+      "saved_payment_method_options": {
+        "payment_method_save": "enabled",
+        "payment_method_remove": "enabled"
+      }
+    },
+    "response": {
+      "id": "cs_test_a0mcdbQanG9WjACoX7rPD5yEVRiFRwL6EqCR6YiPixBXYvfMoTl4vrZN25",
+      "status": "open",
+      "customer": {
+        "id": "cus_Vbu0x0pLtfiQbL",
+        "payment_methods": []
+      },
+      "customer_email": "new-customer-bash@example.com",
+      "customer_creation": null,
+      "saved_payment_method_options": {
+        "payment_method_remove": "enabled",
+        "payment_method_save": "enabled"
+      },
+      "payment_status": "unpaid"
+    }
+  },
+  {
+    "case": "returning_alpha",
+    "creation_parameters": {
+      "customer": "cus_Vbu19ekeuF9NB7",
+      "saved_payment_method_options": {
+        "payment_method_save": "disabled",
+        "payment_method_remove": "enabled"
+      }
+    },
+    "response": {
+      "id": "cs_test_a01NkIeaYmK9EfEQeWHnlom22MYnOwRsKXWI8eC3NF0WasL48MBQ2Mftrd",
+      "status": "open",
+      "customer": {
+        "id": "cus_Vbu19ekeuF9NB7",
+        "payment_methods": [
+          {
+            "id": "pm_1UagCyLu5o3P18ZppHEF6eg7",
+            "object": "payment_method",
+            "allow_redisplay": "always",
+            "billing_details": {
+              "address": {
+                "city": null,
+                "country": "US",
+                "line1": null,
+                "line2": null,
+                "postal_code": "94103",
+                "state": null
+              },
+              "email": null,
+              "name": "Customer alpha",
+              "phone": null,
+              "tax_id": null
+            },
+            "card": {
+              "brand": "visa",
+              "checks": {
+                "address_line1_check": null,
+                "address_postal_code_check": null,
+                "cvc_check": null
+              },
+              "country": "US",
+              "display_brand": "visa",
+              "exp_month": 11,
+              "exp_year": 2027,
+              "funding": "credit",
+              "generated_from": null,
+              "last4": "4242",
+              "networks": {
+                "available": [
+                  "visa"
+                ],
+                "preferred": null
+              },
+              "regulated_status": "unregulated",
+              "three_d_secure_usage": {
+                "supported": true
+              },
+              "wallet": null
+            },
+            "created": 1794421520,
+            "customer": "cus_Vbu19ekeuF9NB7",
+            "customer_account": null,
+            "livemode": false,
+            "type": "card"
+          }
+        ]
+      },
+      "customer_email": "customer-alpha@example.com",
+      "customer_creation": null,
+      "saved_payment_method_options": {
+        "payment_method_remove": "enabled",
+        "payment_method_save": "disabled"
+      },
+      "payment_status": "unpaid"
+    }
+  },
+  {
+    "case": "returning_beta",
+    "creation_parameters": {
+      "customer": "cus_Vbu1Tp4qWEHpdO",
+      "saved_payment_method_options": {
+        "payment_method_save": "disabled",
+        "payment_method_remove": "enabled"
+      }
+    },
+    "response": {
+      "id": "cs_test_a0n6DIFVU3QAPHMHA7tayi27FQQHENl80YtoK6xsYAzrutEdOMl4W0F2Ib",
+      "status": "open",
+      "customer": {
+        "id": "cus_Vbu1Tp4qWEHpdO",
+        "payment_methods": [
+          {
+            "id": "pm_1UagD0Lu5o3P18Zpry0McI5B",
+            "object": "payment_method",
+            "allow_redisplay": "always",
+            "billing_details": {
+              "address": {
+                "city": null,
+                "country": "US",
+                "line1": null,
+                "line2": null,
+                "postal_code": "94103",
+                "state": null
+              },
+              "email": null,
+              "name": "Customer beta",
+              "phone": null,
+              "tax_id": null
+            },
+            "card": {
+              "brand": "mastercard",
+              "checks": {
+                "address_line1_check": null,
+                "address_postal_code_check": null,
+                "cvc_check": null
+              },
+              "country": "US",
+              "display_brand": "mastercard",
+              "exp_month": 11,
+              "exp_year": 2027,
+              "funding": "credit",
+              "generated_from": null,
+              "last4": "4444",
+              "networks": {
+                "available": [
+                  "mastercard"
+                ],
+                "preferred": null
+              },
+              "regulated_status": "unregulated",
+              "three_d_secure_usage": {
+                "supported": true
+              },
+              "wallet": null
+            },
+            "created": 1794421522,
+            "customer": "cus_Vbu1Tp4qWEHpdO",
+            "customer_account": null,
+            "livemode": false,
+            "type": "card"
+          }
+        ]
+      },
+      "customer_email": "customer-beta@example.com",
+      "customer_creation": null,
+      "saved_payment_method_options": {
+        "payment_method_remove": "enabled",
+        "payment_method_save": "disabled"
+      },
+      "payment_status": "unpaid"
+    }
+  },
+  {
+    "case": "customer_without_email",
+    "creation_parameters": {
+      "customer": "cus_Vbu192lbptfc2A"
+    },
+    "response": {
+      "id": "cs_test_a0bixvcu6GNN7MiUUjPoeAtUVc5Isp01L5IweWoEAnrd6ltyjpfXIpC0Su",
+      "status": "open",
+      "customer": {
+        "id": "cus_Vbu192lbptfc2A",
+        "payment_methods": []
+      },
+      "customer_email": null,
+      "customer_creation": null,
+      "saved_payment_method_options": {
+        "payment_method_remove": "disabled",
+        "payment_method_save": "disabled"
+      },
+      "payment_status": "unpaid"
+    }
+  }
+]
