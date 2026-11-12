@@ -1,4 +1,4 @@
-package com.stripe.android.checkout
+package com.stripe.android.checkout.webauth
 
 import android.app.Activity
 import android.app.Instrumentation
@@ -13,6 +13,11 @@ import androidx.test.espresso.intent.matcher.UriMatchers.hasScheme
 import androidx.test.espresso.intent.rule.IntentsRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkout.CHECKOUT_PLAYGROUND_BACKEND_URL
+import com.stripe.android.checkout.CheckoutElementsController
+import com.stripe.android.checkout.CheckoutPlaygroundBackend
+import com.stripe.android.checkout.CheckoutSessionParamsBuilder
+import com.stripe.android.checkout.runCheckoutIntegrationTest
 import com.stripe.android.elements.PaymentElement
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedContentPage
@@ -67,6 +72,7 @@ internal class CheckoutRedirectIntegrationTest {
                 contentPage.clickOnLpm("affirm")
                 contentPage.assertHasSelectedLpm("affirm")
             },
+            handleNextAction = {},
         )
 
         assertThat(result).isInstanceOf(CheckoutElementsController.Result.Canceled::class.java)
