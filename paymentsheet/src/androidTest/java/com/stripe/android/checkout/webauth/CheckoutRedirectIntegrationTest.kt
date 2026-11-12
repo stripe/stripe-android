@@ -54,8 +54,7 @@ internal class CheckoutRedirectIntegrationTest {
 
     @Test
     fun testRedirectReturnWithoutAuthorizationReportsCanceled() = runBlocking {
-        // The device has no browser, so stub the tab StripeBrowserLauncherActivity opens. Returning without
-        // authorizing is the same as closing it.
+        // Stub the tab StripeBrowserLauncherActivity opens. Returning without authorizing is the same as closing it.
         intending(BROWSER_INTENT).respondWith(Instrumentation.ActivityResult(Activity.RESULT_OK, Intent()))
 
         val backend = CheckoutPlaygroundBackend(
