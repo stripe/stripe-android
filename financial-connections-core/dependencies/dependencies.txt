@@ -1,4 +1,4 @@
-+--- project :stripe-core
++--- project ':stripe-core'
 |    +--- org.jetbrains.kotlin:kotlin-stdlib:2.2.21
 |    |    \--- org.jetbrains:annotations:13.0 -> 23.0.0
 |    +--- androidx.browser:browser:1.9.0
@@ -192,7 +192,7 @@
 |    |    +--- androidx.interpolator:interpolator:1.0.0 (*)
 |    |    +--- com.google.guava:listenablefuture:1.0
 |    |    \--- org.jspecify:jspecify:1.0.0
-|    +--- com.google.dagger:dagger:2.58
+|    +--- com.google.dagger:dagger:2.59
 |    |    +--- jakarta.inject:jakarta.inject-api:2.0.1
 |    |    +--- javax.inject:javax.inject:1
 |    |    \--- org.jspecify:jspecify:1.0.0
@@ -244,9 +244,9 @@
 |    +--- androidx.lifecycle:lifecycle-viewmodel-savedstate:2.10.0 (*)
 |    \--- org.jetbrains.kotlin:kotlin-parcelize-runtime:2.2.21
 |         \--- org.jetbrains.kotlin:kotlin-stdlib:2.2.21 (*)
-+--- project :payments-model
++--- project ':payments-model'
 |    +--- org.jetbrains.kotlin:kotlin-stdlib:2.2.21 (*)
-|    +--- project :stripe-core (*)
+|    +--- project ':stripe-core' (*)
 |    +--- androidx.appcompat:appcompat:1.7.1
 |    |    +--- androidx.activity:activity:1.8.0 -> 1.12.4 (*)
 |    |    +--- androidx.annotation:annotation:1.3.0 -> 1.9.1 (*)

@@ -1,7 +1,10 @@
 # CHANGELOG
 
-NEXT_VERSION_BUMP: MINOR
+NEXT_VERSION_BUMP: MAJOR
 ## XX.XX.XX - 20XX-XX-XX
+
+### All SDKs
+* [CHANGED] Bumped Dagger from 2.58 to 2.59.
 
 ### Crypto Onramp
 * [Added][15296](https://github.com/stripe/stripe-android/pull/15296) Added `googlePayCardBrandAcceptance` and `linkCardBrandAcceptance` to `OnrampConfiguration` to configure accepted card brands independently for Google Pay and Link.
