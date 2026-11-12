@@ -125,13 +125,13 @@ class InputAddressViewModelTest {
     }
 
     @Test
-    fun `default configuration enables stripe-hosted autocomplete with hosted countries`() =
+    fun `default configuration enables stripe-hosted autocomplete with default countries`() =
         runScenario(
             config = AddressLauncher.Configuration(),
         ) {
             assertThat(viewModel.autocompleteConfig.shouldUseStripeHostedAutocomplete).isTrue()
             assertThat(viewModel.autocompleteConfig.autocompleteCountries)
-                .isEqualTo(AUTOCOMPLETE_STRIPE_HOSTED_DEFAULT_COUNTRIES)
+                .isEqualTo(AUTOCOMPLETE_DEFAULT_COUNTRIES)
         }
 
     @Test
