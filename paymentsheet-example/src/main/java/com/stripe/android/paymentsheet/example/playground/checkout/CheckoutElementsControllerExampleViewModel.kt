@@ -144,7 +144,8 @@ internal class CheckoutElementsControllerExampleViewModel(
                             _status.value = Status.Configured
                         }
                         is CheckoutElementsController.OperationResult.Failed -> {
-                            showError("Failed to configure", configurationResult.error)
+                            Log.e(TAG, "Failed to configure", configurationResult.error)
+                            _status.value = Status.Error(configurationResult.displayMessage)
                         }
                     }
                 },
@@ -160,7 +161,7 @@ internal class CheckoutElementsControllerExampleViewModel(
         viewModelScope.launch {
             _operationMessage.value = when (val result = operation()) {
                 is CheckoutElementsController.OperationResult.Succeeded -> successMessage
-                is CheckoutElementsController.OperationResult.Failed -> result.displayMessage ?: "Operation failed"
+                is CheckoutElementsController.OperationResult.Failed -> result.displayMessage
             }
         }
     }
@@ -174,7 +175,7 @@ internal class CheckoutElementsControllerExampleViewModel(
             }
             is CheckoutElementsController.Result.Canceled -> "Confirmation canceled"
             is CheckoutElementsController.Result.Failed -> {
-                result.displayMessage?.let { "Confirmation failed: $it" } ?: "Confirmation failed"
+                "Confirmation failed: ${result.displayMessage}"
             }
         }
     }

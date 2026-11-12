@@ -4,6 +4,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutAnalyticsTestFixtures
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
+import com.stripe.android.checkouttesting.checkoutFetch
 import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.checkouttesting.checkoutPoll
 import com.stripe.android.checkouttesting.checkoutUpdate
@@ -45,7 +46,6 @@ class CheckoutSessionRepositoryTest {
     )
 
     private val repository = CheckoutSessionRepository(
-        stripeRepository = CheckoutStripeRepositoryFactory.create(),
         elementsSessionClientParams = CheckoutStripeRepositoryFactory.clientParams(),
         fraudDetectionDataRepository = FakeFraudDetectionDataRepository.create(),
         stripeNetworkClient = DefaultStripeNetworkClient(),
@@ -80,6 +80,26 @@ class CheckoutSessionRepositoryTest {
             clientSecret = CheckoutSessionClientSecret("cs_test_abc123_secret_test"),
             adaptivePricingAllowed = true,
             analyticsParams = emptyMap(),
+        )
+
+        assertThat(result.getOrThrow().clientSecret.value).isEqualTo("cs_test_abc123_secret_test")
+    }
+
+    @Test
+    fun `fetch sends CheckoutClient common params`() = runTest {
+        val expectedSessionId = AnalyticsRequestFactory.sessionId.toString()
+        networkRule.checkoutFetch(
+            query("client_secret", "cs_test_abc123_secret_test"),
+            query("locale", clientParams.locale),
+            query("timezone", java.util.TimeZone.getDefault().id),
+            query("mobile_session_id", expectedSessionId),
+            query("mobile_app_id", clientParams.mobileAppId),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-init.json")
+        }
+
+        val result = repository.fetch(
+            clientSecret = CheckoutSessionClientSecret("cs_test_abc123_secret_test"),
         )
 
         assertThat(result.getOrThrow().clientSecret.value).isEqualTo("cs_test_abc123_secret_test")

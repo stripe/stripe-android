@@ -88,6 +88,8 @@
     }
   ],
   "total_summary": {
+    "tax_exclusive": 0,
+    "tax_inclusive": 0,
     "total_tax_amounts": [],
     "subtotal": 4594,
     "total": 4594,

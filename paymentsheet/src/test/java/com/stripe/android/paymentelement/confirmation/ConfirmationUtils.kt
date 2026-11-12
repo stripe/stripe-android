@@ -151,7 +151,6 @@ internal suspend fun createIntentConfirmationInterceptor(
                 clientAttributionMetadata: ClientAttributionMetadata.CheckoutSession,
             ): CheckoutSessionConfirmationInterceptor {
                 val checkoutSessionRepository = CheckoutSessionRepository(
-                    stripeRepository = CheckoutStripeRepositoryFactory.create(),
                     elementsSessionClientParams = CheckoutStripeRepositoryFactory.clientParams(),
                     fraudDetectionDataRepository = FakeFraudDetectionDataRepository.create(),
                     stripeNetworkClient = DefaultStripeNetworkClient(),

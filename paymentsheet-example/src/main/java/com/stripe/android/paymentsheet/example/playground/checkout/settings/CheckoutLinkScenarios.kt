@@ -27,7 +27,7 @@ internal object CheckoutLinkScenarios {
         val payment = CheckoutPlaygroundDefinitions.Controller.payment
         set(payment.shouldSetConfiguration, true)
         set(payment.link.display, PaymentElement.Configuration.LinkConfiguration.Display.Automatic)
-        set(CheckoutFeatureFlagDefinitions.nativeLinkEnabled, native)
-        set(CheckoutFeatureFlagDefinitions.nativeLinkAttestationEnabled, attestation)
+        set(CheckoutSdkBehaviorDefinitions.nativeLinkEnabled, native)
+        set(CheckoutSdkBehaviorDefinitions.nativeLinkAttestationEnabled, attestation)
     }
 }

@@ -134,16 +134,7 @@ internal data class PaymentMethodMetadata(
      * the button is still shown if the load-time lookup found an existing Link user.
      */
     val shouldShowLinkButton: Boolean
-        get() {
-            val linkState = linkState ?: return false
-
-            return when (linkConfiguration.display) {
-                PaymentSheet.LinkConfiguration.Display.Automatic -> true
-                PaymentSheet.LinkConfiguration.Display.Never -> false
-                PaymentSheet.LinkConfiguration.Display.WalletButtonHidden ->
-                    linkState.loginState != LinkState.LoginState.LoggedOut
-            }
-        }
+        get() = linkButtonAvailability(requiresShippingAddress = false) is LinkButtonAvailability.Available
 
     /**
      * Returns the consumer's LinkBrand if logged in, otherwise falls back to the metadata's brand.
