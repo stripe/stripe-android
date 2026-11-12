@@ -2,6 +2,7 @@ package com.stripe.android.checkout
 
 import android.os.Looper
 import androidx.lifecycle.SavedStateHandle
+import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
@@ -65,7 +66,7 @@ internal class CheckoutConfirmationPerformerTest {
     fun `confirm fails when state is not loaded`() = runScenario(state = null) {
         performer.confirm()
         assertRejection("Cannot confirm checkout before it is configured.")
-        assertThat(operationCoordinator.isUpdating.value).isFalse()
+        assertThat(operationCoordinator.status.value).isEqualTo(CheckoutOperationCoordinator.Status.Idle)
     }
 
     @Test
@@ -74,7 +75,7 @@ internal class CheckoutConfirmationPerformerTest {
     ) {
         performer.confirm()
         assertRejection("Cannot confirm checkout without a selected payment option.")
-        assertThat(operationCoordinator.isUpdating.value).isFalse()
+        assertThat(operationCoordinator.status.value).isEqualTo(CheckoutOperationCoordinator.Status.Idle)
     }
 
     @Test
@@ -87,7 +88,7 @@ internal class CheckoutConfirmationPerformerTest {
         performer.confirm()
 
         assertRejection("Cannot confirm checkout without providing a PaymentElement configuration.")
-        assertThat(operationCoordinator.isUpdating.value).isFalse()
+        assertThat(operationCoordinator.status.value).isEqualTo(CheckoutOperationCoordinator.Status.Idle)
     }
 
     @Test
@@ -100,7 +101,7 @@ internal class CheckoutConfirmationPerformerTest {
         performer.confirm()
 
         assertRejection("Cannot confirm checkout without providing a PaymentElement configuration.")
-        assertThat(operationCoordinator.isUpdating.value).isFalse()
+        assertThat(operationCoordinator.status.value).isEqualTo(CheckoutOperationCoordinator.Status.Idle)
     }
 
     @Test
@@ -112,7 +113,7 @@ internal class CheckoutConfirmationPerformerTest {
     ) {
         performer.confirm()
         assertRejection("Cannot confirm checkout because the selected payment option cannot be confirmed.")
-        assertThat(operationCoordinator.isUpdating.value).isFalse()
+        assertThat(operationCoordinator.status.value).isEqualTo(CheckoutOperationCoordinator.Status.Idle)
     }
 
     @Test
@@ -226,13 +227,13 @@ internal class CheckoutConfirmationPerformerTest {
 
         performer.confirm()
         assertRejection("Cannot confirm checkout while checkout mutations are in progress.")
-        assertThat(operationCoordinator.isUpdating.value).isTrue()
+        assertThat(operationCoordinator.status.value).isEqualTo(CheckoutOperationCoordinator.Status.Updating)
 
         stateHolder.state = googlePayState(paymentSelection = PaymentSelection.GooglePay)
         releaseMutation.complete(Unit)
         mutation.await()
         testScheduler.runCurrent()
-        assertThat(operationCoordinator.isUpdating.value).isFalse()
+        assertThat(operationCoordinator.status.value).isEqualTo(CheckoutOperationCoordinator.Status.Idle)
         confirmAndAwaitStart()
     }
 
@@ -245,7 +246,7 @@ internal class CheckoutConfirmationPerformerTest {
 
         performer.confirm()
         assertRejection("Cannot confirm checkout while another confirmation is in progress.")
-        assertThat(operationCoordinator.isUpdating.value).isTrue()
+        assertThat(operationCoordinator.status.value).isEqualTo(CheckoutOperationCoordinator.Status.Updating)
 
         analyticsPerformer.reportConfirmationResult(
             result = ConfirmationHandler.Result.Succeeded(PaymentIntentFixtures.PI_SUCCEEDED),
@@ -399,6 +400,7 @@ internal class CheckoutConfirmationPerformerTest {
             workContext = UnconfinedTestDispatcher(testScheduler),
         )
         val operationCoordinator = CheckoutOperationCoordinator(
+            displayMessageResolver = CheckoutDisplayMessageResolver(ApplicationProvider.getApplicationContext()),
             confirmationHandler = confirmationHandler,
             sheetStateHolder = SheetStateHolder(savedStateHandle).apply { this.sheetIsOpen = sheetIsOpen },
             sessionRefresher = sessionRefresher,

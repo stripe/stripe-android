@@ -2,21 +2,18 @@ package com.stripe.android.paymentsheet.repositories
 
 import com.stripe.android.Stripe
 import com.stripe.android.checkout.CheckoutElementsController.Address
-import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent
 import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent.Operation
+import com.stripe.android.checkout.analytics.CheckoutAnalyticsReporter
 import com.stripe.android.checkout.analytics.MeasuredOperation
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
-import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.executeRequestWithResultParser
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.networking.ConfirmationParamsUtils
-import com.stripe.android.networking.PaymentAnalyticsRequestFactory
-import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.model.CheckoutSessionClientSecret
 import java.util.TimeZone
@@ -24,16 +21,14 @@ import javax.inject.Inject
 import javax.inject.Provider
 
 @OptIn(CheckoutSessionPreview::class)
+@Suppress("TooManyFunctions")
 internal class CheckoutSessionRepository @Inject constructor(
-    private val stripeRepository: StripeRepository,
     private val elementsSessionClientParams: ElementsSessionClientParams,
     private val stripeNetworkClient: StripeNetworkClient,
     private val fraudDetectionDataRepository: FraudDetectionDataRepository,
-    private val analyticsRequestExecutor: AnalyticsRequestExecutor,
-    private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
+    private val analyticsReporter: CheckoutAnalyticsReporter,
     private val apiRequestOptionsProvider: Provider<ApiRequest.Options>,
 ) {
-
     private val apiRequestFactory = ApiRequest.Factory(
         appInfo = Stripe.appInfo,
         apiVersion = Stripe.API_VERSION,
@@ -79,6 +74,24 @@ internal class CheckoutSessionRepository @Inject constructor(
         )
     }
 
+    suspend fun fetch(
+        clientSecret: CheckoutSessionClientSecret,
+    ): Result<CheckoutSessionResponse> {
+        return executeRequestWithResultParser(
+            stripeErrorJsonParser = stripeErrorJsonParser,
+            stripeNetworkClient = stripeNetworkClient,
+            request = apiRequestFactory.createGet(
+                url = fetchUrl(clientSecret.sessionId),
+                options = apiRequestOptionsProvider.get(),
+                params = elementsSessionClientParams.toCheckoutSessionMap() + mapOf(
+                    "client_secret" to clientSecret.value,
+                    "timezone" to TimeZone.getDefault().id,
+                ),
+            ),
+            responseJsonParser = CheckoutSessionResponseJsonParser(clientSecret),
+        )
+    }
+
     suspend fun confirm(
         clientSecret: CheckoutSessionClientSecret,
         params: ConfirmCheckoutSessionParams,
@@ -106,27 +119,15 @@ internal class CheckoutSessionRepository @Inject constructor(
                     message = response.paymentResponse.error?.message ?: "Checkout requires a payment method.",
                 )
             }
-            val paymentReference = response.paymentResponse?.paymentIntent
-            val setupReference = response.paymentResponse?.setupIntent
-            val intent = when {
-                paymentReference != null -> stripeRepository.retrievePaymentIntent(
-                    clientSecret = paymentReference.clientSecret,
-                    options = apiRequestOptionsProvider.get(),
-                    expandFields = listOf("payment_method"),
-                ).getOrThrow()
-                setupReference != null -> stripeRepository.retrieveSetupIntent(
-                    clientSecret = setupReference.clientSecret,
-                    options = apiRequestOptionsProvider.get(),
-                    expandFields = listOf("payment_method"),
-                ).getOrThrow()
-                else -> error(
+            val intent = response.paymentResponse?.paymentIntent
+                ?: response.paymentResponse?.setupIntent
+                ?: error(
                     if (response.paymentResponse?.status == "requires_action") {
                         "CheckoutClient requires an action without a supported Intent."
                     } else {
                         "No PaymentIntent or SetupIntent in checkout session confirm response"
                     }
                 )
-            }
             response.withIntent(intent)
         }
     }
@@ -260,21 +261,12 @@ internal class CheckoutSessionRepository @Inject constructor(
         val measuredOperation = MeasuredOperation(
             operation = operation,
             params = params,
-            report = ::fireEvent,
+            report = analyticsReporter::fireEvent,
         )
         measuredOperation.started(checkoutSessionResponse)
         return block()
             .onSuccess { measuredOperation.succeeded(it) }
             .onFailure { measuredOperation.failed(checkoutSessionResponse, it) }
-    }
-
-    fun fireEvent(event: CheckoutAnalyticsEvent) {
-        analyticsRequestExecutor.executeAsync(
-            paymentAnalyticsRequestFactory.createRequest(
-                event = event,
-                additionalParams = event.params,
-            )
-        )
     }
 
     private companion object {
@@ -283,6 +275,9 @@ internal class CheckoutSessionRepository @Inject constructor(
 
         private fun initUrl(sessionId: String): String =
             "${ApiRequest.API_HOST}/v1/checkout_client/$sessionId/init"
+
+        private fun fetchUrl(sessionId: String): String =
+            "${ApiRequest.API_HOST}/v1/checkout_client/$sessionId/retrieve"
 
         private fun confirmUrl(checkoutSessionId: String): String =
             "${ApiRequest.API_HOST}/v1/checkout_client/$checkoutSessionId/confirm"

@@ -4,6 +4,7 @@ import androidx.test.espresso.intent.rule.IntentsRule
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.checkouttesting.CheckoutInitResponseFactory
 import com.stripe.android.checkouttesting.checkoutConfirm
+import com.stripe.android.checkouttesting.checkoutFetch
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.ApiRequest
@@ -53,7 +54,6 @@ internal class ExpressCheckoutElementAnalyticsTest {
 
             enqueueSuccessfulGooglePayPayment(paymentMethod = paymentMethod)
 
-            validateAnalyticsRequest(eventName = "stripe_android.payment_intent_retrieval")
             networkRule.checkoutConfirm(
                 bodyPart("payment_method", paymentMethod.id),
                 bodyPart("expected_amount", "5099"),
@@ -77,7 +77,7 @@ internal class ExpressCheckoutElementAnalyticsTest {
         runExpressCheckoutElementAnalyticsTest {
             enqueueSuccessfulNativeLinkPayment()
 
-            networkRule.checkoutInitWithAnalytics()
+            networkRule.checkoutFetch()
 
             validateAnalyticsRequest(eventName = "link.popup.show")
             validateAnalyticsRequest(eventName = "link.popup.success")
@@ -105,7 +105,7 @@ internal class ExpressCheckoutElementAnalyticsTest {
 
             enqueueFailedGooglePayPayment(IllegalStateException("Google Pay failed"))
 
-            networkRule.checkoutInitWithAnalytics()
+            networkRule.checkoutFetch()
             validateConfirmationStarted(selectedLpm = "google_pay")
             validateConfirmationFailed(
                 selectedLpm = "google_pay",
@@ -127,7 +127,7 @@ internal class ExpressCheckoutElementAnalyticsTest {
         runExpressCheckoutElementAnalyticsTest {
             enqueueCanceledGooglePayPayment()
 
-            networkRule.checkoutInitWithAnalytics()
+            networkRule.checkoutFetch()
             validateConfirmationStarted(selectedLpm = "google_pay")
             validateConfirmationCanceled(
                 selectedLpm = "google_pay",
@@ -147,7 +147,7 @@ internal class ExpressCheckoutElementAnalyticsTest {
         runExpressCheckoutElementAnalyticsTest {
             enqueueFailedNativeLinkPayment(IllegalStateException("Link failed"))
 
-            networkRule.checkoutInitWithAnalytics()
+            networkRule.checkoutFetch()
             validateAnalyticsRequest(eventName = "link.popup.show")
             validateAnalyticsRequest(
                 eventName = "link.popup.error",
@@ -209,7 +209,6 @@ internal class ExpressCheckoutElementAnalyticsTest {
             }
             networkRule.validateCheckoutAnalyticsStarted("update_shipping_address", *addressUpdateMatchers())
             networkRule.validateCheckoutAnalyticsSucceeded("update_shipping_address", *addressUpdateMatchers())
-            validateAnalyticsRequest(eventName = "stripe_android.payment_intent_retrieval")
             networkRule.checkoutConfirm(
                 bodyPart("payment_method", paymentMethod.id),
                 bodyPart("expected_amount", "5099"),
@@ -262,7 +261,6 @@ internal class ExpressCheckoutElementAnalyticsTest {
             }
             networkRule.validateCheckoutAnalyticsStarted("update_billing_address", *addressUpdateMatchers())
             networkRule.validateCheckoutAnalyticsSucceeded("update_billing_address", *addressUpdateMatchers())
-            validateAnalyticsRequest(eventName = "stripe_android.payment_intent_retrieval")
             networkRule.checkoutConfirm(
                 bodyPart("payment_method", paymentMethod.id),
                 bodyPart("expected_amount", "5099"),
@@ -295,12 +293,13 @@ internal class ExpressCheckoutElementAnalyticsTest {
                     json.getJSONArray("items").getJSONObject(0)
                         .getJSONObject("one_time_price").getJSONArray("items").getJSONObject(0)
                         .getJSONObject("amount_details")
-                        .put("total", 5399)
+                        .put("total", 5399).put("tax_exclusive", 300)
+                    json.getJSONObject("total_summary").put("total", 5399).put("tax_exclusive", 300)
                 }
             }
             networkRule.validateCheckoutAnalyticsStarted("update_billing_address", *addressUpdateMatchers())
             networkRule.validateCheckoutAnalyticsSucceeded("update_billing_address", *addressUpdateMatchers())
-            networkRule.checkoutInitWithAnalytics(
+            networkRule.checkoutFetch(
                 responseFactory = CheckoutInitResponseFactory::createWithRequiredBillingAddressForAutomaticTax,
             )
             validateConfirmationStarted(selectedLpm = "google_pay")
@@ -342,7 +341,6 @@ internal class ExpressCheckoutElementAnalyticsTest {
             }
             networkRule.validateCheckoutAnalyticsStarted("update_billing_address", *addressUpdateMatchers())
             networkRule.validateCheckoutAnalyticsSucceeded("update_billing_address", *addressUpdateMatchers())
-            validateAnalyticsRequest(eventName = "stripe_android.payment_intent_retrieval")
             networkRule.checkoutConfirm(
                 bodyPart("payment_method", paymentMethod.id),
                 bodyPart("expected_amount", "5099"),
@@ -376,7 +374,6 @@ internal class ExpressCheckoutElementAnalyticsTest {
                 analyticsPayloadField("did_request_tax_update", "false"),
                 not(hasQueryParam("duration")),
             )
-            validateAnalyticsRequest(eventName = "stripe_android.payment_intent_retrieval")
             networkRule.checkoutConfirm(
                 bodyPart("payment_method", paymentMethod.id),
                 bodyPart("expected_amount", "5099"),
@@ -428,7 +425,7 @@ internal class ExpressCheckoutElementAnalyticsTest {
                 analyticsPayloadField("error_type", "invalid_request_error"),
                 analyticsPayloadField("error_code", "invalid_tax_region"),
             )
-            networkRule.checkoutInitWithAnalytics(
+            networkRule.checkoutFetch(
                 responseFactory = ::createCheckoutInitResponseWithRequiredShippingAddressForAutomaticTax,
             )
             validateConfirmationStarted(selectedLpm = "google_pay")

@@ -15,6 +15,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import java.math.BigDecimal
 
+@Suppress("LargeClass")
 @RunWith(TestParameterInjector::class)
 class CheckoutSessionResponseJsonParserTest {
     @Test
@@ -55,9 +56,44 @@ class CheckoutSessionResponseJsonParserTest {
     }
 
     @Test
-    fun `rejects an intent reference without its client secret`() {
+    fun `parses the payment response intent with its expanded payment method`() {
+        val result = requireNotNull(parse(response("checkout-session-confirm.json")))
+
+        val paymentIntent = requireNotNull(result.paymentResponse?.paymentIntent)
+        assertThat(paymentIntent.id).isEqualTo("pi_checkout123")
+        assertThat(paymentIntent.clientSecret).isEqualTo("pi_checkout123_secret_example")
+        assertThat(paymentIntent.paymentMethod?.id).isEqualTo("pm_cs_example")
+        assertThat(result.paymentResponse?.setupIntent).isNull()
+    }
+
+    @Test
+    fun `parses the payment response setup intent with its expanded payment method`() {
+        val result = requireNotNull(parse(response("checkout-session-confirm-setup.json")))
+
+        val setupIntent = requireNotNull(result.paymentResponse?.setupIntent)
+        assertThat(setupIntent.id).isEqualTo("seti_checkout123")
+        assertThat(setupIntent.paymentMethod?.id).isEqualTo("pm_cs_example")
+        assertThat(result.paymentResponse?.paymentIntent).isNull()
+    }
+
+    @Test
+    fun `rejects a payment response with an invalid payment intent`() {
         val json = response("checkout-session-confirm.json")
-        json.getJSONObject("payment_response").getJSONObject("payment_intent").remove("client_secret")
+        json.getJSONObject("payment_response").put(
+            "payment_intent",
+            JSONObject().put("id", "pi_checkout123").put("client_secret", "pi_checkout123_secret_example"),
+        )
+
+        assertThat(parse(json)).isNull()
+    }
+
+    @Test
+    fun `rejects a payment response with an invalid setup intent`() {
+        val json = response("checkout-session-confirm-setup.json")
+        json.getJSONObject("payment_response").put(
+            "setup_intent",
+            JSONObject().put("id", "seti_checkout123").put("client_secret", "seti_checkout123_secret_example"),
+        )
 
         assertThat(parse(json)).isNull()
     }
@@ -323,6 +359,10 @@ class CheckoutSessionResponseJsonParserTest {
     fun `parses aggregate discounts and taxes from recurring total summary`() {
         val json = base()
         json.getJSONObject("total_summary")
+            .put("subtotal", 9007199254740993L)
+            .put("total", 9007199254741073L)
+            .put("tax_exclusive", 80)
+            .put("tax_inclusive", 40)
             .put("total_tax_amounts", JSONArray().put(taxAmount()))
             .put(
                 "total_discount_amounts",
@@ -335,7 +375,25 @@ class CheckoutSessionResponseJsonParserTest {
 
         val result = parse(json)!!
 
-        assertThat(result.totalSummary?.totalTaxAmounts).hasSize(1)
+        assertThat(result.totalSummary).isEqualTo(
+            CheckoutSessionResponse.TotalSummary(
+                subtotal = 9007199254740993L,
+                total = 9007199254741073L,
+                taxExclusive = 80L,
+                taxInclusive = 40L,
+                totalTaxAmounts = listOf(
+                    CheckoutSessionResponse.TaxAmount(
+                        amount = 80L,
+                        inclusive = false,
+                        taxRate = CheckoutSessionResponse.TaxRate(
+                            displayName = "Sales tax",
+                            percentage = 8.0,
+                            rateType = CheckoutSessionResponse.TaxRateType.PERCENTAGE,
+                        ),
+                    )
+                ),
+            )
+        )
     }
 
     @Test
@@ -348,7 +406,7 @@ class CheckoutSessionResponseJsonParserTest {
 
         val result = requireNotNull(parse(json))
 
-        assertThat(result.totalSummary?.totalTaxAmounts).isEmpty()
+        assertThat(result.totalSummary.totalTaxAmounts).isEmpty()
     }
 
     @Test
@@ -356,6 +414,18 @@ class CheckoutSessionResponseJsonParserTest {
         val json = base()
         assertThat(parse(json)).isNotNull()
         json.remove("total_summary")
+
+        assertThat(parse(json)).isNull()
+    }
+
+    @Test
+    fun `rejects missing required total summary fields`(
+        @TestParameter(value = ["subtotal", "total", "tax_exclusive", "tax_inclusive", "total_tax_amounts"])
+        field: String,
+    ) {
+        val json = base()
+        assertThat(parse(json)).isNotNull()
+        json.getJSONObject("total_summary").remove(field)
 
         assertThat(parse(json)).isNull()
     }
@@ -694,41 +764,41 @@ class CheckoutSessionResponseJsonParserTest {
         assertThat(elements.cardBrandChoice?.eligible).isTrue()
         assertThat(elements.cardBrandChoice?.preferredNetworks).containsExactly("cartes_bancaires")
     }
-
-    private fun base(): JSONObject = response(baseFixture = "checkout-session-init.json")
-
-    private fun parseResponse(
-        baseFixture: String,
-        overridesFixture: String? = null,
-    ): CheckoutSessionResponse {
-        return requireNotNull(parse(response(baseFixture, overridesFixture)))
-    }
-
-    private fun response(
-        baseFixture: String,
-        overridesFixture: String? = null,
-    ): JSONObject {
-        val response = jsonFixture(baseFixture)
-        overridesFixture?.let(::jsonFixture)?.let { overrides ->
-            overrides.keys().forEach { key -> response.put(key, overrides.get(key)) }
-        }
-        return response
-    }
-
-    private fun jsonFixture(name: String): JSONObject {
-        val resource = requireNotNull(javaClass.classLoader?.getResource(name))
-        return JSONObject(resource.readText())
-    }
-
-    private fun item(json: JSONObject): JSONObject = json.getJSONArray("items")
-        .getJSONObject(0).getJSONObject("one_time_price").getJSONArray("items").getJSONObject(0)
-
-    private fun taxAmount() = JSONObject().put("amount", 80).put("inclusive", false).put(
-        "tax_rate",
-        JSONObject().put("display_name", "Sales tax").put("percentage", 8.0).put("rate_type", "percentage")
-    )
-
-    private val clientSecret = CheckoutSessionClientSecret("cs_test_abc123_secret_test")
-
-    private fun parse(json: JSONObject) = CheckoutSessionResponseJsonParser(clientSecret).parse(json)
 }
+
+private fun base(): JSONObject = response(baseFixture = "checkout-session-init.json")
+
+private fun parseResponse(
+    baseFixture: String,
+    overridesFixture: String? = null,
+): CheckoutSessionResponse {
+    return requireNotNull(parse(response(baseFixture, overridesFixture)))
+}
+
+private fun response(
+    baseFixture: String,
+    overridesFixture: String? = null,
+): JSONObject {
+    val response = jsonFixture(baseFixture)
+    overridesFixture?.let(::jsonFixture)?.let { overrides ->
+        overrides.keys().forEach { key -> response.put(key, overrides.get(key)) }
+    }
+    return response
+}
+
+private fun jsonFixture(name: String): JSONObject {
+    val resource = requireNotNull(CheckoutSessionResponseJsonParserTest::class.java.classLoader?.getResource(name))
+    return JSONObject(resource.readText())
+}
+
+private fun item(json: JSONObject): JSONObject = json.getJSONArray("items")
+    .getJSONObject(0).getJSONObject("one_time_price").getJSONArray("items").getJSONObject(0)
+
+private fun taxAmount() = JSONObject().put("amount", 80).put("inclusive", false).put(
+    "tax_rate",
+    JSONObject().put("display_name", "Sales tax").put("percentage", 8.0).put("rate_type", "percentage")
+)
+
+private val clientSecret = CheckoutSessionClientSecret("cs_test_abc123_secret_test")
+
+private fun parse(json: JSONObject) = CheckoutSessionResponseJsonParser(clientSecret).parse(json)

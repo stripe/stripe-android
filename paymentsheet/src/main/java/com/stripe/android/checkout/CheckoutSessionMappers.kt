@@ -48,7 +48,7 @@ internal fun CheckoutSessionResponse.asCheckoutSession(
             Session.ShippingAddress(collectedShippingName, it.asShippingAddress())
         },
         tax = taxMeta.asTax(taxAddressSource),
-        taxAmounts = totalSummary?.totalTaxAmounts?.map {
+        taxAmounts = totalSummary.totalTaxAmounts.map {
             it.asTaxAmount(presentmentCurrency, locale)
         },
         totals = totals(presentmentCurrency, locale),
@@ -143,13 +143,12 @@ private fun CheckoutSessionResponse.TaxAmount.asTaxAmount(
 }
 
 private fun CheckoutSessionResponse.totals(currency: String, locale: Locale): Session.Totals {
-    val items = checkoutItems.flatMap { it.oneTimePrice.items }
     return Session.Totals(
-        subtotal = amount(items.sumOf { it.subtotal }, currency, locale),
-        taxExclusive = amount(items.sumOf { it.taxExclusive }, currency, locale),
-        taxInclusive = amount(items.sumOf { it.taxInclusive }, currency, locale),
+        subtotal = amount(totalSummary.subtotal, currency, locale),
+        taxExclusive = amount(totalSummary.taxExclusive, currency, locale),
+        taxInclusive = amount(totalSummary.taxInclusive, currency, locale),
         discount = amount(0L, currency, locale),
-        total = amount(items.sumOf { it.total }, currency, locale),
+        total = amount(totalSummary.total, currency, locale),
     )
 }
 

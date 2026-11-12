@@ -1,8 +1,9 @@
 package com.stripe.android.paymentelement.embedded.sheet
 
-import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
+import com.stripe.android.checkout.analytics.FakeCheckoutAnalyticsReporter
+import com.stripe.android.checkout.analytics.LocalOperation
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.core.networking.ApiRequest
@@ -11,7 +12,6 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixt
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.testBodyFromFile
@@ -21,7 +21,6 @@ import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.repositories.CheckoutStripeRepositoryFactory
-import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.android.utils.FakeFraudDetectionDataRepository
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -191,16 +190,12 @@ internal class SheetTaxRegionUpdaterTest {
     }
 
     private fun checkoutSessionTaxRegionUpdater(): CheckoutSessionTaxRegionUpdater {
+        val analyticsReporter = FakeCheckoutAnalyticsReporter()
         val checkoutSessionRepository = CheckoutSessionRepository(
-            stripeRepository = CheckoutStripeRepositoryFactory.create(),
             elementsSessionClientParams = CheckoutStripeRepositoryFactory.clientParams(),
             fraudDetectionDataRepository = FakeFraudDetectionDataRepository.create(),
             stripeNetworkClient = DefaultStripeNetworkClient(),
-            analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
-            paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
-                context = ApplicationProvider.getApplicationContext(),
-                publishableKey = "pk_test_123",
-            ),
+            analyticsReporter = analyticsReporter,
             apiRequestOptionsProvider = {
                 ApiRequest.Options(
                     apiKey = DEFAULT_API_CONFIG.publishableKey,
@@ -209,7 +204,12 @@ internal class SheetTaxRegionUpdaterTest {
             },
         )
 
-        return CheckoutSessionTaxRegionUpdater(checkoutSessionRepository)
+        return CheckoutSessionTaxRegionUpdater(
+            checkoutSessionRepository,
+            localOperationFactory = LocalOperation.Factory { operation, params ->
+                LocalOperation(operation, params, analyticsReporter)
+            },
+        )
     }
 
     private fun checkoutSessionResponse(

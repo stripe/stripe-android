@@ -12,7 +12,9 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.parsers.DeferredPaymentIntentJsonParser
 import com.stripe.android.model.parsers.DeferredSetupIntentJsonParser
 import com.stripe.android.model.parsers.ElementsSessionJsonParser
+import com.stripe.android.model.parsers.PaymentIntentJsonParser
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
+import com.stripe.android.model.parsers.SetupIntentJsonParser
 import com.stripe.android.paymentsheet.model.CheckoutSessionClientSecret
 import org.json.JSONArray
 import org.json.JSONObject
@@ -53,8 +55,12 @@ internal class CheckoutSessionResponseJsonParser(
         val paymentResponse = json.optionalObject("payment_response")?.let { response ->
             CheckoutSessionResponse.PaymentResponse(
                 status = response.requiredString("status"),
-                paymentIntent = response.optionalObject("payment_intent")?.let(::parseIntentReference),
-                setupIntent = response.optionalObject("setup_intent")?.let(::parseIntentReference),
+                paymentIntent = response.optionalObject("payment_intent")?.let {
+                    PaymentIntentJsonParser().parse(it) ?: error("Invalid payment intent")
+                },
+                setupIntent = response.optionalObject("setup_intent")?.let {
+                    SetupIntentJsonParser().parse(it) ?: error("Invalid setup intent")
+                },
                 error = response.optionalObject("last_payment_error")?.let {
                     StripeErrorJsonParser().parse(JSONObject().put("error", it))
                 },
@@ -167,6 +173,10 @@ internal class CheckoutSessionResponseJsonParser(
     }
 
     private fun parseTotalSummary(totalSummary: JSONObject) = CheckoutSessionResponse.TotalSummary(
+        subtotal = totalSummary.requiredLong("subtotal"),
+        total = totalSummary.requiredLong("total"),
+        taxExclusive = totalSummary.requiredLong("tax_exclusive"),
+        taxInclusive = totalSummary.requiredLong("tax_inclusive"),
         totalTaxAmounts = totalSummary.requiredArray("total_tax_amounts").objects().map(::parseTaxAmount),
     )
 
@@ -229,11 +239,6 @@ internal class CheckoutSessionResponseJsonParser(
             canDetachPaymentMethod = canRemove,
         )
     }
-
-    private fun parseIntentReference(json: JSONObject) = CheckoutSessionResponse.IntentReference(
-        id = json.requiredString("id"),
-        clientSecret = json.requiredString("client_secret"),
-    )
 
     @Suppress("LongMethod")
     private fun parseElementsSession(

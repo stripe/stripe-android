@@ -1,9 +1,13 @@
 package com.stripe.android.checkout
 
+import android.content.Context
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
 import androidx.test.espresso.intent.rule.IntentsRule
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
+import com.stripe.android.checkouttesting.checkoutFetch
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.core.exception.LocalStripeException
 import com.stripe.android.core.networking.AnalyticsRequest
@@ -16,6 +20,7 @@ import com.stripe.android.networktesting.RequestMatchers.analyticsPayloadField
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.hasQueryParam
 import com.stripe.android.networktesting.RequestMatchers.not
+import com.stripe.android.networktesting.TestApiKeys
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedContentPage
@@ -210,6 +215,7 @@ internal class CheckoutPaymentElementAnalyticsTest {
                         .getJSONObject("one_time_price").getJSONArray("items").getJSONObject(0)
                         .getJSONObject("amount_details")
                         .put("total", UPDATED_TOTAL)
+                    json.getJSONObject("total_summary").put("total", UPDATED_TOTAL)
                 }
             }
             networkRule.validateCheckoutAnalyticsStarted(
@@ -222,7 +228,7 @@ internal class CheckoutPaymentElementAnalyticsTest {
                 analyticsPayloadField("invocation_source", "payment_element"),
                 analyticsPayloadField("did_request_tax_update", "true"),
             )
-            networkRule.checkoutInitWithAnalytics(responseFactory = ::billingTaxCheckoutInitResponse)
+            networkRule.checkoutFetch(responseFactory = ::billingTaxCheckoutInitResponse)
             networkRule.validateCheckoutAnalyticsStarted(
                 "confirm",
                 analyticsPayloadField("invocation_source", "merchant"),
@@ -436,6 +442,20 @@ internal class CheckoutPaymentElementAnalyticsTest {
     }
 
     @Test
+    fun testClearLocalCustomerDataReportsInvokedEventWithoutPublishableKey() {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        PaymentConfiguration.init(context, TestApiKeys.PUBLISHABLE, TestApiKeys.ACCOUNT)
+
+        networkRule.validateAnalyticsRequest(
+            eventName = "checkout_elements.clear_local_customer_data",
+            productUsage = setOf("checkout_elements"),
+            analyticsPayloadField("publishable_key", ApiRequest.Options.UNDEFINED_PUBLISHABLE_KEY),
+            applyDefaultAuthorization = false,
+        )
+        CheckoutElementsController.clearLocalCustomerData(context)
+    }
+
+    @Test
     fun testClearPaymentOptionReportsInvokedAndBillingAddressEvents() = runCheckoutPaymentElementScenario(
         networkRule = networkRule,
         renderPaymentElementContent = false,
@@ -531,7 +551,7 @@ internal class CheckoutPaymentElementAnalyticsTest {
             not(hasQueryParam("merchant_update_duration")),
             not(hasQueryParam("refresh_duration")),
         )
-        networkRule.checkoutInitWithAnalytics(responseFactory = { response ->
+        networkRule.checkoutFetch(responseFactory = { response ->
             response.testBodyFromFile("checkout-session-init.json") { json ->
                 json.remove("link_settings")
             }
@@ -826,7 +846,7 @@ internal class CheckoutPaymentElementAnalyticsTest {
                 .getJSONObject("one_time_price").getJSONArray("items").getJSONObject(0)
                 .getJSONObject("amount_details")
                 .put("total", UPDATED_TOTAL)
-            json.getJSONObject("total_summary").put("due", UPDATED_TOTAL)
+            json.getJSONObject("total_summary").put("total", UPDATED_TOTAL)
         }
     }
 

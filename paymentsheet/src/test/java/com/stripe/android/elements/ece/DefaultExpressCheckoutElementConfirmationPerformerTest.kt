@@ -1,10 +1,12 @@
 package com.stripe.android.elements.ece
 
 import androidx.lifecycle.SavedStateHandle
+import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.checkout.CheckoutCommonConfigurationFactory
+import com.stripe.android.checkout.CheckoutDisplayMessageResolver
 import com.stripe.android.checkout.CheckoutElementsController
 import com.stripe.android.checkout.CheckoutElementsControllerState
 import com.stripe.android.checkout.CheckoutElementsControllerStateFactory
@@ -263,6 +265,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
             workContext = UnconfinedTestDispatcher(testScheduler),
         )
         val operationCoordinator = CheckoutOperationCoordinator(
+            displayMessageResolver = CheckoutDisplayMessageResolver(ApplicationProvider.getApplicationContext()),
             confirmationHandler = confirmationHandler,
             sheetStateHolder = SheetStateHolder(savedStateHandle),
             sessionRefresher = sessionRefresher,

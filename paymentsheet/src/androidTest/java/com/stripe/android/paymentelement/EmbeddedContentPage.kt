@@ -12,6 +12,7 @@ import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isEnabled
 import androidx.compose.ui.test.isNotEnabled
 import androidx.compose.ui.test.isSelected
@@ -123,6 +124,25 @@ internal class EmbeddedContentPage(
                 useUnmergedTree = true,
             ).assertExists()
         }
+    }
+
+    fun assertHasSelectedSavedCard(last4: String) {
+        val savedRowMatcher = SemanticsMatcher("saved payment-method row") { node ->
+            val tag = node.config.getOrElse(SemanticsProperties.TestTag) { "" }
+            tag.startsWith("${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_")
+        }
+        val selectedRowMatcher = savedRowMatcher
+            .and(hasAnyAncestor(hasTestTag(TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT)))
+            .and(isSelected())
+            .and(hasText(last4, substring = true))
+        composeTestRule.waitUntilWithIdle(
+            conditionDescription = "saved card ending in $last4 to be selected",
+        ) {
+            composeTestRule.onAllNodes(selectedRowMatcher)
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                .isNotEmpty()
+        }
+        composeTestRule.onNode(selectedRowMatcher).assertExists()
     }
 
     fun assertHasSavedPaymentMethodSelectionError(error: String) {

@@ -4,6 +4,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutAnalyticsTestFixtures
 import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent
+import com.stripe.android.checkout.analytics.CheckoutAnalyticsReporter
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.checkouttesting.checkoutUpdate
@@ -307,19 +308,20 @@ class CheckoutSessionRepositoryAnalyticsTest {
 
     private fun runScenario(block: suspend Scenario.() -> Unit) = runTest {
         val repository = CheckoutSessionRepository(
-            stripeRepository = CheckoutStripeRepositoryFactory.create(),
             elementsSessionClientParams = CheckoutStripeRepositoryFactory.clientParams(),
             fraudDetectionDataRepository = FakeFraudDetectionDataRepository.create(),
             stripeNetworkClient = DefaultStripeNetworkClient(),
-            analyticsRequestExecutor = DefaultAnalyticsRequestExecutor(
-                stripeNetworkClient = DefaultStripeNetworkClient(workContext = coroutineContext + Dispatchers.IO),
-                workContext = coroutineContext + Dispatchers.IO,
-                logger = Logger.noop(),
-            ),
-            paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
-                context = ApplicationProvider.getApplicationContext(),
-                publishableKey = DEFAULT_API_CONFIG.publishableKey,
-                defaultProductUsageTokens = setOf("checkout_elements"),
+            analyticsReporter = CheckoutAnalyticsReporter(
+                analyticsRequestExecutor = DefaultAnalyticsRequestExecutor(
+                    stripeNetworkClient = DefaultStripeNetworkClient(workContext = coroutineContext + Dispatchers.IO),
+                    workContext = coroutineContext + Dispatchers.IO,
+                    logger = Logger.noop(),
+                ),
+                paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
+                    context = ApplicationProvider.getApplicationContext(),
+                    publishableKey = DEFAULT_API_CONFIG.publishableKey,
+                    defaultProductUsageTokens = setOf("checkout_elements"),
+                ),
             ),
             apiRequestOptionsProvider = {
                 ApiRequest.Options(
