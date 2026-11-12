@@ -1,4 +1,4 @@
-package com.stripe.android.utils
+package com.stripe.android.testing
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
@@ -15,7 +15,7 @@ private const val FOCUS_POLL_INTERVAL_MS = 100L
  * wait with this. Obtaining [UiDevice] first is required so UiAutomator enables interactive-window
  * retrieval, otherwise [android.app.UiAutomation.getWindows] can return empty.
  */
-internal fun awaitWindowFocus(timeoutMs: Long = FOCUS_WAIT_TIMEOUT_MS): Boolean {
+fun awaitWindowFocus(timeoutMs: Long = FOCUS_WAIT_TIMEOUT_MS): Boolean {
     val instrumentation = InstrumentationRegistry.getInstrumentation()
     UiDevice.getInstance(instrumentation)
     val uiAutomation = instrumentation.uiAutomation
