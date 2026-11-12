@@ -17,6 +17,8 @@ import kotlinx.serialization.json.Json
 // Map SDK configuration fields explicitly; do not encode SDK objects.
 @OptIn(ExperimentalSerializationApi::class)
 internal object MobileSession {
+    private const val ASCII_LIMIT = 0x80
+
     private val json = Json {
         encodeDefaults = true
         explicitNulls = false
@@ -34,7 +36,7 @@ internal object MobileSession {
         // Non-ASCII can only appear inside JSON strings, so escaping each UTF-16 char (both halves
         // of a surrogate pair for characters above U+FFFF) keeps the JSON valid.
         for (char in json.encodeToString(config)) {
-            if (char.code < 0x80) append(char) else append("\\u%04x".format(char.code))
+            if (char.code < ASCII_LIMIT) append(char) else append("\\u%04x".format(char.code))
         }
     }
 
@@ -43,16 +45,26 @@ internal object MobileSession {
 
     @Serializable
     enum class CollectionMode {
-        @SerialName("automatic") AUTOMATIC,
-        @SerialName("never") NEVER,
-        @SerialName("always") ALWAYS,
+        @SerialName("automatic")
+        AUTOMATIC,
+
+        @SerialName("never")
+        NEVER,
+
+        @SerialName("always")
+        ALWAYS,
     }
 
     @Serializable
     enum class AddressCollectionMode {
-        @SerialName("automatic") AUTOMATIC,
-        @SerialName("never") NEVER,
-        @SerialName("full") FULL,
+        @SerialName("automatic")
+        AUTOMATIC,
+
+        @SerialName("never")
+        NEVER,
+
+        @SerialName("full")
+        FULL,
     }
 
     /** Open: unknown values decode to [UNPARSABLE], which callers must handle. */
@@ -77,9 +89,14 @@ internal object MobileSession {
 
     @Serializable
     enum class CardBrandFilter {
-        @SerialName("all") ALL,
-        @SerialName("allowed") ALLOWED,
-        @SerialName("disallowed") DISALLOWED,
+        @SerialName("all")
+        ALL,
+
+        @SerialName("allowed")
+        ALLOWED,
+
+        @SerialName("disallowed")
+        DISALLOWED,
     }
 
     /** Open: unknown values decode to [UNPARSABLE], which callers must handle. */
@@ -164,7 +181,10 @@ internal object MobileSession {
         val link: LinkConfig,
         @SerialName("card_brand_acceptance")
         val cardBrandAcceptance: CardBrandAcceptance,
-        /** Payment method types as the merchant configured them, including external and custom (`cpmt_`) ones. Empty when the merchant didn't set an order. */
+        /**
+         * Payment method types as the merchant configured them, including external and custom (`cpmt_`) ones.
+         * Empty when the merchant didn't set an order.
+         */
         @SerialName("payment_method_order")
         val paymentMethodOrder: List<String>
     )
@@ -175,7 +195,11 @@ internal object MobileSession {
         /** Whether the (optional) full Financial Connections SDK is linked. */
         @SerialName("has_financial_connections_sdk")
         val hasFinancialConnectionsSdk: Boolean,
-        /** Whether this device can run native Link: on iOS, in testmode or when App Attest is supported; always true on Android. The server combines it with the merchant's Link attestation setting to decide native Link. */
+        /**
+         * Whether this device can run native Link: on iOS, in testmode or when App Attest is supported;
+         * always true on Android. The server combines it with the merchant's Link attestation setting
+         * to decide native Link.
+         */
         @SerialName("device_supports_native_link")
         val deviceSupportsNativeLink: Boolean
     )
@@ -208,10 +232,18 @@ internal object MobileSession {
     /** Which payment methods PaymentSheet offers. */
     @Serializable
     data class PaymentMethodAvailability(
-        /** Shown exactly as given, in this order: payment method types (`card`), synthetic types (`instant_debits`, `link_card_brand`), external payment methods (`external_*`), and custom payment method IDs (`cpmt_*`). Does not yet support PMs not supported by the SDK, but will do so before public release. */
+        /**
+         * Shown exactly as given, in this order: payment method types (`card`), synthetic types
+         * (`instant_debits`, `link_card_brand`), external payment methods (`external_*`), and custom
+         * payment method IDs (`cpmt_*`). Does not yet support PMs not supported by the SDK, but will
+         * do so before public release.
+         */
         @SerialName("payment_method_types")
         val paymentMethodTypes: List<String>,
-        /** Whether to offer Link. With the `wallet_button_hidden` display mode, the SDK shows the Link button only to customers with a Link account. */
+        /**
+         * Whether to offer Link. With the `wallet_button_hidden` display mode, the SDK shows the Link
+         * button only to customers with a Link account.
+         */
         @SerialName("link_enabled")
         val linkEnabled: Boolean
     )
@@ -219,12 +251,17 @@ internal object MobileSession {
     /** The mobile_session sidecar on elements/sessions. */
     @Serializable
     data class Session(
-        /** When absent, the current client uses its local logic. A future client SDK version will require that this is populated. */
+        /**
+         * When absent, the current client uses its local logic. A future client SDK version will
+         * require that this is populated.
+         */
         @SerialName("payment_method_availability")
         val paymentMethodAvailability: PaymentMethodAvailability?,
-        /** Messages for the merchant's developer, such as why a payment method wasn't offered. The SDK logs each one verbatim after loading. Present in test mode whenever `payment_method_availability` is. */
+        /**
+         * Messages for the merchant's developer, such as why a payment method wasn't offered. The SDK
+         * logs each one verbatim after loading. Present in test mode whenever `payment_method_availability` is.
+         */
         @SerialName("log_messages")
         val logMessages: List<String>?
     )
-
 }
