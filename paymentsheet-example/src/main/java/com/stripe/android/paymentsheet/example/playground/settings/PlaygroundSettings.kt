@@ -556,6 +556,14 @@ internal class PlaygroundSettings private constructor(
             CardBrandAcceptanceSettingsDefinition,
             CardFundingAcceptanceSettingsDefinition,
             FeatureFlagSettingsDefinition(
+                FeatureFlags.serverPaymentMethodAvailabilityEnabled,
+                listOf(
+                    PlaygroundConfigurationData.IntegrationType.PaymentSheet,
+                    PlaygroundConfigurationData.IntegrationType.FlowController,
+                    PlaygroundConfigurationData.IntegrationType.Embedded,
+                ),
+            ),
+            FeatureFlagSettingsDefinition(
                 FeatureFlags.enableKlarnaFormRemoval,
                 listOf(
                     PlaygroundConfigurationData.IntegrationType.PaymentSheet,
