@@ -161,8 +161,9 @@ internal class CheckoutSheetLauncher @Inject constructor(
     ) {
         applyCustomerState(result.customerState)
         selectionHolder.setPreviousNewSelections(result.previousNewSelections)
-        // Apply the selection after any refresh commits so the selection and immediate action see the
-        // sheet's response. Undispatched so results without a response still apply synchronously.
+        selectionHolder.setSelection(result.selection)
+        // Undispatched so the refresh blocks confirmation in the same turn as the selection write, and the
+        // immediate action runs only after the sheet's response is committed.
         coroutineScope.launch(start = CoroutineStart.UNDISPATCHED) {
             result.checkoutSessionResponse?.let { response ->
                 operationCoordinator.runMutation {
@@ -172,7 +173,6 @@ internal class CheckoutSheetLauncher @Inject constructor(
                     logger.error("Failed to refresh the checkout session after the sheet closed.", it)
                 }
             }
-            selectionHolder.setSelection(result.selection)
             if (invokeImmediateAction) rowSelectionImmediateActionHandler.invoke()
         }
     }

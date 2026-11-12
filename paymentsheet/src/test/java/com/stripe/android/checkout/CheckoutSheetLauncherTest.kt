@@ -491,7 +491,6 @@ internal class CheckoutSheetLauncherTest {
     fun `manageSheetLauncher refreshes checkout after dismissal without invoking selection callback`() = testScenario {
         sheetStateHolder.sheetIsOpen = true
         val response = CheckoutSessionResponseFactory.create(id = "cs_saved_card_tax_response")
-        sessionRefresher.enqueueRefreshAction {}
         val result = manageCompleteResult(
             checkoutSessionResponse = response,
             shouldInvokeSelectionCallback = false,
@@ -508,7 +507,6 @@ internal class CheckoutSheetLauncherTest {
 
     @Test
     fun `manageSheetLauncher invokes immediate action after checkout session refresh completes`() = testScenario {
-        selectionHolder.setSelection(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
         val releaseRefresh = CompletableDeferred<Unit>()
         val response = CheckoutSessionResponseFactory.create()
         sessionRefresher.enqueueRefreshAction { releaseRefresh.await() }
@@ -517,20 +515,18 @@ internal class CheckoutSheetLauncherTest {
         registerCall.callback.asCallbackFor<EmbeddedActivityResult>().onActivityResult(result)
         runCurrent()
 
+        assertThat(selectionHolder.selection.value).isEqualTo(result.selection)
         assertThat(awaitRefreshCall()).isEqualTo(FakeCheckoutSessionRefresher.Call.Commit(response))
-        assertThat(selectionHolder.selection.value).isEqualTo(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
         assertThat(immediateActionWasInvoked()).isFalse()
 
         releaseRefresh.complete(Unit)
         runCurrent()
 
-        assertThat(selectionHolder.selection.value).isEqualTo(result.selection)
         assertThat(immediateActionWasInvoked()).isTrue()
     }
 
     @Test
-    fun `manageSheetLauncher does not apply selection when checkout session refresh is cancelled`() = testScenario {
-        selectionHolder.setSelection(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
+    fun `manageSheetLauncher skips immediate action when checkout session refresh is cancelled`() = testScenario {
         val response = CheckoutSessionResponseFactory.create()
         sessionRefresher.enqueueRefreshAction { throw CancellationException("Refresh canceled") }
 
@@ -539,7 +535,6 @@ internal class CheckoutSheetLauncherTest {
         runCurrent()
 
         assertThat(awaitRefreshCall()).isEqualTo(FakeCheckoutSessionRefresher.Call.Commit(response))
-        assertThat(selectionHolder.selection.value).isEqualTo(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
         assertThat(immediateActionWasInvoked()).isFalse()
         assertThat(logger.errorLogs).isEmpty()
     }
