@@ -5,12 +5,16 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.SectionElement
@@ -23,6 +27,33 @@ import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 internal class DefaultFormDefinitionFactoryTest {
+    @Test
+    fun `switching methods preserves deselection instead of reapplying opt out default`() = runScenario(
+        metadata = defaultMetadata().copy(
+            customerMetadata = PaymentMethodMetadataFactory.create(hasCustomerConfiguration = true).customerMetadata,
+            savePaymentMethodOptInBehavior = PaymentSheet.SavePaymentMethodOptInBehavior.RequiresOptOut,
+        ),
+    ) {
+        val initialSave = factory.formElementsForCode("card").filterIsInstance<SaveForFutureUseElement>().single()
+        assertThat(selectionProvider.calls.awaitItem()).isEqualTo("card")
+        assertThat(initialSave.controller.saveForFutureUse.value).isTrue()
+        initialSave.controller.onValueChange(false)
+        selectionProvider.selection = NewPaymentOptionSelection.New(
+            PaymentMethodFixtures.CARD_PAYMENT_SELECTION.copy(
+                paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(
+                    setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.Blank,
+                ),
+                customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse,
+            )
+        )
+
+        factory.formElementsForCode("cashapp")
+        assertThat(selectionProvider.calls.awaitItem()).isEqualTo("cashapp")
+        val restoredSave = factory.formElementsForCode("card").filterIsInstance<SaveForFutureUseElement>().single()
+        assertThat(selectionProvider.calls.awaitItem()).isEqualTo("card")
+        assertThat(restoredSave.controller.saveForFutureUse.value).isFalse()
+    }
+
     @Test
     fun `classification constructs elements once per code`() = runScenario {
         repeat(3) {

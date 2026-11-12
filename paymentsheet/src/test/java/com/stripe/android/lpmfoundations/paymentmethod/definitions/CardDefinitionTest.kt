@@ -1,7 +1,9 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import androidx.lifecycle.SavedStateHandle
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.google.testing.junit.testparameterinjector.TestParameter
 import com.stripe.android.common.nfcscan.IsNfcScanningAvailable
 import com.stripe.android.common.nfcscan.NfcScanningAction
 import com.stripe.android.common.nfcscan.NfcScanningAvailability
@@ -18,6 +20,7 @@ import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.lpmfoundations.paymentmethod.link.LinkFormElement
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntentFixtures
@@ -25,14 +28,21 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntentFixtures
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInteractor
+import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
+import com.stripe.android.paymentsheet.forms.FormViewModel
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.LinkState
+import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
+import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CleanupTestRule
+import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.ui.core.elements.AutomaticallyLaunchedCardScanFormDataHelper
 import com.stripe.android.ui.core.elements.BillingAddressElement
 import com.stripe.android.ui.core.elements.CardDetailsAction
@@ -54,21 +64,151 @@ import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
+import org.robolectric.RobolectricTestParameterInjector
 import com.stripe.android.lpmfoundations.paymentmethod.formElements as createFormElements
 import com.stripe.android.ui.core.R as PaymentsUiCoreR
 
-@RunWith(RobolectricTestRunner::class)
+@RunWith(RobolectricTestParameterInjector::class)
 class CardDefinitionTest {
     private val coroutineScopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
 
     @get:Rule
     val cleanupRule = coroutineScopeCleanupRule
 
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
+
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule()
+
     private val coroutineScope = coroutineScopeCleanupRule.track(CoroutineScope(Dispatchers.Unconfined))
+
+    @Test
+    fun `save control uses configured initial state and remains changeable`(
+        @TestParameter behavior: PaymentSheet.SavePaymentMethodOptInBehavior,
+        @TestParameter matchesSave: Boolean,
+    ) = runTest {
+        val elements = getFormElementsWithSaveForFutureUseAndSetAsDefaultPaymentMethod(
+            isPaymentMethodSetAsDefaultEnabled = true,
+            savePaymentMethodOptInBehavior = behavior,
+            setAsDefaultMatchesSaveForFutureUse = matchesSave,
+        )
+        val save = elements.filterIsInstance<SaveForFutureUseElement>().single()
+        val setDefault = elements.filterIsInstance<SetAsDefaultPaymentMethodElement>().single()
+        val initiallySelected = behavior == PaymentSheet.SavePaymentMethodOptInBehavior.RequiresOptOut
+
+        save.controller.saveForFutureUse.test {
+            assertThat(awaitItem()).isEqualTo(initiallySelected)
+            assertThat(setDefault.shouldShowElementFlow.value).isEqualTo(initiallySelected && !matchesSave)
+            assertThat(setDefault.controller.shouldPaymentMethodBeSetAsDefault.value)
+                .isEqualTo(initiallySelected && matchesSave)
+            save.controller.onValueChange(!initiallySelected)
+            assertThat(awaitItem()).isEqualTo(!initiallySelected)
+            assertThat(setDefault.shouldShowElementFlow.value).isEqualTo(!initiallySelected && !matchesSave)
+            assertThat(setDefault.controller.shouldPaymentMethodBeSetAsDefault.value)
+                .isEqualTo(!initiallySelected && matchesSave)
+        }
+    }
+
+    @Test
+    fun `save confirmation options follow the control rather than configured preference`(
+        @TestParameter behavior: PaymentSheet.SavePaymentMethodOptInBehavior,
+    ) = runTest {
+        val metadata = PaymentMethodMetadataFactory.create(
+            hasCustomerConfiguration = true,
+            savePaymentMethodOptInBehavior = behavior,
+        )
+        val save = CardDefinition.formElements(metadata).filterIsInstance<SaveForFutureUseElement>().single()
+        val form = FormViewModel(
+            formElements = listOf(save),
+            formArguments = FormArgumentsFactory.create("card", metadata),
+        )
+        viewModelStoreRule.track(form)
+        val initiallySelected = behavior == PaymentSheet.SavePaymentMethodOptInBehavior.RequiresOptOut
+
+        form.completeFormValues.test {
+            val initialSelection = requireNotNull(awaitItem()).transformToPaymentSelection(
+                paymentMethod = CardDefinition.uiDefinitionFactory(metadata).createSupportedPaymentMethod(metadata),
+                paymentMethodMetadata = metadata,
+            ) as PaymentSelection.New.Card
+            val initialOptions = initialSelection.paymentMethodOptionsParams as PaymentMethodOptionsParams.Card
+            assertThat(initialOptions.setupFutureUsage).isEqualTo(
+                if (initiallySelected) {
+                    ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+                } else {
+                    ConfirmPaymentIntentParams.SetupFutureUsage.Blank
+                }
+            )
+
+            save.controller.onValueChange(!initiallySelected)
+            testScheduler.runCurrent()
+            val toggledSelection = requireNotNull(expectMostRecentItem()).transformToPaymentSelection(
+                paymentMethod = CardDefinition.uiDefinitionFactory(metadata).createSupportedPaymentMethod(metadata),
+                paymentMethodMetadata = metadata,
+            ) as PaymentSelection.New.Card
+            val toggledOptions = toggledSelection.paymentMethodOptionsParams as PaymentMethodOptionsParams.Card
+            assertThat(toggledOptions.setupFutureUsage).isEqualTo(
+                if (initiallySelected) {
+                    ConfirmPaymentIntentParams.SetupFutureUsage.Blank
+                } else {
+                    ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+                }
+            )
+        }
+    }
+
+    @Test
+    fun `explicit save options override configured initial state`(
+        @TestParameter behavior: PaymentSheet.SavePaymentMethodOptInBehavior,
+        @TestParameter usage: ConfirmPaymentIntentParams.SetupFutureUsage,
+    ) {
+        val elements = getFormElementsWithSaveForFutureUseAndSetAsDefaultPaymentMethod(
+            isPaymentMethodSetAsDefaultEnabled = false,
+            savePaymentMethodOptInBehavior = behavior,
+            paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(setupFutureUsage = usage),
+        )
+
+        assertThat(elements.filterIsInstance<SaveForFutureUseElement>().single().controller.saveForFutureUse.value)
+            .isEqualTo(usage != ConfirmPaymentIntentParams.SetupFutureUsage.Blank)
+    }
+
+    @Test
+    fun `opt out does not make an ineligible save control visible`(
+        @TestParameter hasCustomer: Boolean,
+        @TestParameter isSetup: Boolean,
+        @TestParameter hasSetupFutureUsage: Boolean,
+        @TestParameter consent: Consent,
+    ) {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = if (isSetup) {
+                SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD
+            } else {
+                PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    setupFutureUsage = if (hasSetupFutureUsage) StripeIntent.Usage.OffSession else null,
+                )
+            },
+            hasCustomerConfiguration = hasCustomer,
+            saveConsent = consent.behavior,
+            savePaymentMethodOptInBehavior = PaymentSheet.SavePaymentMethodOptInBehavior.RequiresOptOut,
+        )
+
+        val elements = CardDefinition.formElements(metadata)
+
+        val eligible = hasCustomer && (
+            consent == Consent.Enabled || (consent == Consent.Legacy && !isSetup && !hasSetupFutureUsage)
+            )
+        assertThat(elements.any { it is SaveForFutureUseElement }).isEqualTo(eligible)
+    }
+
+    enum class Consent(internal val behavior: PaymentMethodSaveConsentBehavior) {
+        Legacy(PaymentMethodSaveConsentBehavior.Legacy),
+        Enabled(PaymentMethodSaveConsentBehavior.Enabled),
+        Disabled(PaymentMethodSaveConsentBehavior.Disabled(overrideAllowRedisplay = null))
+    }
 
     @Test
     fun `createFormElements returns minimal set of fields`() {
@@ -938,6 +1078,8 @@ class CardDefinitionTest {
 
     private fun getFormElementsWithSaveForFutureUseAndSetAsDefaultPaymentMethod(
         isPaymentMethodSetAsDefaultEnabled: Boolean,
+        savePaymentMethodOptInBehavior: PaymentSheet.SavePaymentMethodOptInBehavior =
+            PaymentSheet.SavePaymentMethodOptInBehavior.Automatic,
         setAsDefaultMatchesSaveForFutureUse: Boolean = false,
         paymentMethodExtraParams: PaymentMethodExtraParams? = null,
         paymentMethodOptionsParams: PaymentMethodOptionsParams? = null,
@@ -948,6 +1090,7 @@ class CardDefinitionTest {
                     address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
                 ),
                 hasCustomerConfiguration = true,
+                savePaymentMethodOptInBehavior = savePaymentMethodOptInBehavior,
                 isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
             ),
             setAsDefaultMatchesSaveForFutureUse = setAsDefaultMatchesSaveForFutureUse,

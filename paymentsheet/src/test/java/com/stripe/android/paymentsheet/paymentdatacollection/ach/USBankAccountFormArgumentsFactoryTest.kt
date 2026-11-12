@@ -21,6 +21,7 @@ internal class USBankAccountFormArgumentsFactoryTest {
         )
         val metadata = PaymentMethodMetadataFactory.create(
             paymentMethodIncentive = incentive,
+            savePaymentMethodOptInBehavior = PaymentSheet.SavePaymentMethodOptInBehavior.RequiresOptOut,
             onBehalfOf = "acct_123",
             sellerBusinessName = "Rocket Rides",
             forceSetupFutureUseBehaviorAndNewMandate = true,
@@ -53,6 +54,8 @@ internal class USBankAccountFormArgumentsFactoryTest {
         assertThat(arguments.hostedSurface).isEqualTo("test_surface")
         assertThat(arguments.instantDebits).isTrue()
         assertThat(arguments.showCheckbox).isFalse()
+        assertThat(arguments.savePaymentMethodOptInBehavior)
+            .isEqualTo(PaymentSheet.SavePaymentMethodOptInBehavior.RequiresOptOut)
         assertThat(arguments.isCompleteFlow).isTrue()
         assertThat(arguments.primaryButtonIcon.value).isEqualTo(PrimaryButtonIcon.None)
         assertThat(arguments.isPaymentFlow).isTrue()

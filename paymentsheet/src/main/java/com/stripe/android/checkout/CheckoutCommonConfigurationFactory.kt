@@ -90,6 +90,7 @@ internal class CheckoutCommonConfigurationFactory @Inject constructor(
     ): CommonConfiguration = CommonConfiguration(
         merchantDisplayName = configuration.resolveMerchantDisplayName(checkoutSessionResponse, appName),
         customer = ConfigurationDefaults.customer,
+        savePaymentMethodOptInBehavior = ConfigurationDefaults.savePaymentMethodOptInBehavior,
         googlePay = googlePayConfiguration,
         link = linkConfiguration,
         defaultBillingDetails = configuration.toBillingDetails(

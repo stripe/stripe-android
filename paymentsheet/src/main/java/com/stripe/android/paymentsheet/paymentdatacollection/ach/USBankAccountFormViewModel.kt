@@ -219,7 +219,10 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     }
 
     private val saveForFutureUseInitialValue: Boolean =
-        args.savedPaymentMethod?.input?.saveForFutureUse ?: false
+        args.savedPaymentMethod?.input?.saveForFutureUse ?: (
+            args.showCheckbox && !args.instantDebits &&
+                args.savePaymentMethodOptInBehavior == PaymentSheet.SavePaymentMethodOptInBehavior.RequiresOptOut
+            )
 
     val saveForFutureUseElement: SaveForFutureUseElement = SaveForFutureUseElement(
         initialValue = saveForFutureUseInitialValue,
@@ -856,6 +859,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         val linkMode: LinkMode?,
         val formArgs: FormArguments,
         val showCheckbox: Boolean,
+        val savePaymentMethodOptInBehavior: PaymentSheet.SavePaymentMethodOptInBehavior,
         val isCompleteFlow: Boolean,
         val isPaymentFlow: Boolean,
         val stripeIntentId: String?,

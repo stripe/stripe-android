@@ -6,6 +6,7 @@ import app.cash.turbine.TurbineTestContext
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
+import com.google.testing.junit.testparameterinjector.TestParameter
 import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.financialconnections.ElementsSessionContext
 import com.stripe.android.financialconnections.model.BankAccount
@@ -21,6 +22,7 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
@@ -56,10 +58,10 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import org.robolectric.RobolectricTestRunner
+import org.robolectric.RobolectricTestParameterInjector
 import kotlin.test.Test
 
-@RunWith(RobolectricTestRunner::class)
+@RunWith(RobolectricTestParameterInjector::class)
 class USBankAccountFormViewModelTest {
 
     private val defaultArgs = USBankAccountFormViewModel.Args(
@@ -78,6 +80,7 @@ class USBankAccountFormViewModelTest {
             paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
         ),
         showCheckbox = false,
+        savePaymentMethodOptInBehavior = PaymentSheet.SavePaymentMethodOptInBehavior.Automatic,
         isCompleteFlow = true,
         isPaymentFlow = true,
         stripeIntentId = "id_12345",
@@ -727,6 +730,88 @@ class USBankAccountFormViewModelTest {
 
         viewModel.addressElement.countryElement.controller.onRawValueChange("CA")
         assertThat(viewModel.phoneController.countryDropdownController.rawFieldValue.value).isEqualTo("CA")
+    }
+
+    @Test
+    fun `fresh save control honors preference only when eligible`(
+        @TestParameter behavior: PaymentSheet.SavePaymentMethodOptInBehavior,
+        @TestParameter showCheckbox: Boolean,
+        @TestParameter instantDebits: Boolean,
+    ) = runTest {
+        val viewModel = createViewModel(
+            args = defaultArgs.copy(
+                showCheckbox = showCheckbox,
+                instantDebits = instantDebits,
+                savePaymentMethodOptInBehavior = behavior,
+            ),
+        )
+
+        viewModel.saveForFutureUseCheckedFlow.test {
+            assertThat(awaitItem()).isEqualTo(
+                showCheckbox && !instantDebits && behavior == PaymentSheet.SavePaymentMethodOptInBehavior.RequiresOptOut
+            )
+        }
+    }
+
+    @Test
+    fun `opt out confirmation options follow subsequent deselection`() = runTest {
+        val viewModel = createViewModel(
+            args = defaultArgs.copy(
+                showCheckbox = true,
+                savePaymentMethodOptInBehavior = PaymentSheet.SavePaymentMethodOptInBehavior.RequiresOptOut,
+            ),
+        )
+
+        viewModel.linkedAccount.test {
+            assertThat(awaitItem()).isNull()
+            viewModel.handleCollectBankAccountResult(mockVerifiedBankAccount())
+            val initial = requireNotNull(awaitItem())
+            assertThat(initial.customerRequestedSave).isEqualTo(CustomerRequestedSave.RequestReuse)
+            val initialOptions = initial.paymentMethodOptionsParams as PaymentMethodOptionsParams.USBankAccount
+            assertThat(initialOptions.setupFutureUsage)
+                .isEqualTo(ConfirmPaymentIntentParams.SetupFutureUsage.OffSession)
+
+            viewModel.saveForFutureUseElement.controller.onValueChange(false)
+            val toggled = requireNotNull(awaitItem())
+            assertThat(toggled.customerRequestedSave).isEqualTo(CustomerRequestedSave.RequestNoReuse)
+            val toggledOptions = toggled.paymentMethodOptionsParams as PaymentMethodOptionsParams.USBankAccount
+            assertThat(toggledOptions.setupFutureUsage).isEqualTo(ConfirmPaymentIntentParams.SetupFutureUsage.Blank)
+        }
+    }
+
+    @Test
+    fun `restored save choice overrides preference`(
+        @TestParameter behavior: PaymentSheet.SavePaymentMethodOptInBehavior,
+        @TestParameter savedChoice: Boolean,
+    ) = runTest {
+        val selection = PaymentSelection.New.USBankAccount(
+            label = "Test",
+            iconResource = 0,
+            paymentMethodCreateParams = PaymentMethodCreateParams.createUSBankAccount(),
+            customerRequestedSave = customerRequestedSave(showCheckbox = true, saveForFutureUse = savedChoice),
+            input = PaymentSelection.New.USBankAccount.Input(
+                name = "",
+                email = null,
+                phone = null,
+                address = null,
+                saveForFutureUse = savedChoice,
+            ),
+            instantDebits = null,
+            screenState = BankFormScreenStateFactory.createWithSession("test_session"),
+        )
+        val viewModel = createViewModel(
+            args = defaultArgs.copy(
+                showCheckbox = true,
+                savePaymentMethodOptInBehavior = behavior,
+                savedPaymentMethod = selection,
+            ),
+        )
+
+        viewModel.saveForFutureUseCheckedFlow.test {
+            assertThat(awaitItem()).isEqualTo(savedChoice)
+            viewModel.saveForFutureUseElement.controller.onValueChange(!savedChoice)
+            assertThat(awaitItem()).isEqualTo(!savedChoice)
+        }
     }
 
     @Test

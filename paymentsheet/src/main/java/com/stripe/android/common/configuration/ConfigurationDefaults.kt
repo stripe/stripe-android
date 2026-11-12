@@ -31,6 +31,8 @@ internal object ConfigurationDefaults {
     val googlePlacesApiKey: String? = null
     const val opensCardScannerAutomatically: Boolean = false
     val userOverrideCountry: String? = null
+    val savePaymentMethodOptInBehavior: PaymentSheet.SavePaymentMethodOptInBehavior =
+        PaymentSheet.SavePaymentMethodOptInBehavior.Automatic
 
     const val embeddedViewDisplaysMandateText: Boolean = true
 }

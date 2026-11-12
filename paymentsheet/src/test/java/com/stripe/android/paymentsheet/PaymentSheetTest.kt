@@ -27,6 +27,25 @@ internal class PaymentSheetTest {
     val callbackRule = PaymentElementCallbackTestRule()
 
     @Test
+    fun `launch preserves configured save behavior`(
+        @TestParameter behavior: PaymentSheet.SavePaymentMethodOptInBehavior,
+        @TestParameter isSetup: Boolean,
+    ) = runScenario(Construction.ActivityBuilder, savedState = null) {
+        val configuration = PaymentSheet.Configuration.Builder("Test")
+            .savePaymentMethodOptInBehavior(behavior)
+            .build()
+
+        if (isSetup) {
+            paymentSheet.presentWithSetupIntent("test_secret", configuration)
+        } else {
+            paymentSheet.presentWithPaymentIntent("test_secret", configuration)
+        }
+
+        val args = requireNotNull(PaymentSheetContract.Args.fromIntent(shadowOf(activity).nextStartedActivity))
+        assertThat(args.config.savePaymentMethodOptInBehavior).isEqualTo(behavior)
+    }
+
+    @Test
     fun `launch uses the owner's stored identifier`(
         @TestParameter construction: Construction,
     ) = runScenario(construction, savedState = null) {

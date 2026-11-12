@@ -130,7 +130,7 @@ internal sealed interface UiDefinitionFactory {
                             paymentMethodExtraParams = paymentMethodExtraParams,
                         ),
                         shippingValues = metadata.shippingDetails?.toIdentifierMap(metadata.defaultBillingDetails),
-                        saveForFutureUseInitialValue = getSaveForFutureUseInitialValue(),
+                        saveForFutureUseInitialValue = getSaveForFutureUseInitialValue(metadata),
                         billingDetailsCollectionConfiguration = metadata.billingDetailsCollectionConfiguration,
                         requiresBillingAddressForAutomaticTax = metadata.requiresBillingAddressForAutomaticTax,
                         requiresMandate = requiresMandate,
@@ -150,10 +150,14 @@ internal sealed interface UiDefinitionFactory {
                     )
                 }
 
-                private fun getSaveForFutureUseInitialValue(): Boolean {
+                private fun getSaveForFutureUseInitialValue(metadata: PaymentMethodMetadata): Boolean {
                     return paymentMethodOptionsParams?.setupFutureUsage()?.let {
                         it != ConfirmPaymentIntentParams.SetupFutureUsage.Blank
-                    } ?: false
+                    } ?: when (metadata.savePaymentMethodOptInBehavior) {
+                        PaymentSheet.SavePaymentMethodOptInBehavior.Automatic,
+                        PaymentSheet.SavePaymentMethodOptInBehavior.RequiresOptIn -> false
+                        PaymentSheet.SavePaymentMethodOptInBehavior.RequiresOptOut -> true
+                    }
                 }
             }
         }

@@ -1,8 +1,12 @@
 package com.stripe.android.paymentsheet
 
+import android.os.Parcel
+import android.os.Parcelable
 import androidx.compose.ui.graphics.Color
 import com.google.common.truth.Truth.assertThat
+import com.google.testing.junit.testparameterinjector.TestParameter
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
+import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
@@ -11,9 +15,36 @@ import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import kotlinx.parcelize.parcelableCreator
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestParameterInjector
 
+@RunWith(RobolectricTestParameterInjector::class)
 class PaymentSheetConfigurationTest {
+
+    @Test
+    fun `save behavior defaults to Automatic for existing constructors and builder`() {
+        assertThat(PaymentSheet.Configuration("Test").savePaymentMethodOptInBehavior)
+            .isEqualTo(PaymentSheet.SavePaymentMethodOptInBehavior.Automatic)
+        assertThat(PaymentSheet.Configuration.Builder("Test").build().savePaymentMethodOptInBehavior)
+            .isEqualTo(PaymentSheet.SavePaymentMethodOptInBehavior.Automatic)
+    }
+
+    @Test
+    fun `save behavior survives builder reconstruction common configuration and parceling`(
+        @TestParameter behavior: PaymentSheet.SavePaymentMethodOptInBehavior,
+    ) {
+        val configuration = PaymentSheet.Configuration.Builder("Test")
+            .savePaymentMethodOptInBehavior(behavior)
+            .build()
+
+        assertThat(configuration.savePaymentMethodOptInBehavior).isEqualTo(behavior)
+        assertThat(configuration.newBuilder().build().savePaymentMethodOptInBehavior).isEqualTo(behavior)
+        assertThat(configuration.asCommonConfiguration().savePaymentMethodOptInBehavior).isEqualTo(behavior)
+        verifyParcelRoundtrip(configuration)
+        verifyParcelRoundtrip(configuration.asCommonConfiguration())
+    }
 
     @OptIn(
         ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi::class,
@@ -70,6 +101,7 @@ class PaymentSheetConfigurationTest {
             termsDisplay = mapOf(PaymentMethod.Type.Card to PaymentSheet.TermsDisplay.NEVER),
             opensCardScannerAutomatically = true,
             userOverrideCountry = "GB",
+            savePaymentMethodOptInBehavior = PaymentSheet.SavePaymentMethodOptInBehavior.RequiresOptOut,
         )
 
         val roundTripped = original.newBuilder().build()
@@ -106,6 +138,17 @@ class PaymentSheetConfigurationTest {
             .isNotEqualTo(darkAppearance)
     }
 
+    private inline fun <reified T : Parcelable> verifyParcelRoundtrip(value: T) {
+        val parcel = Parcel.obtain()
+        try {
+            value.writeToParcel(parcel, 0)
+            parcel.setDataPosition(0)
+            assertThat(parcelableCreator<T>().createFromParcel(parcel)).isEqualTo(value)
+        } finally {
+            parcel.recycle()
+        }
+    }
+
     @Test
     fun `Configuration property count matches expected - update newBuilder when this fails`() {
         val propertyCount = PaymentSheet.Configuration::class.java.declaredFields
@@ -116,6 +159,6 @@ class PaymentSheetConfigurationTest {
         // When a new property is added, this count will change, signaling that:
         // 1. newBuilder() needs to propagate the new property
         // 2. The round-trip test above needs a non-default value for it
-        assertThat(propertyCount).isEqualTo(25)
+        assertThat(propertyCount).isEqualTo(26)
     }
 }

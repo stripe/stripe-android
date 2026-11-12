@@ -50,6 +50,7 @@ internal object USBankAccountFormArgumentsFactory {
 
         return USBankAccountFormArguments(
             showCheckbox = isSaveForFutureUseValueChangeable && instantDebits.not(),
+            savePaymentMethodOptInBehavior = paymentMethodMetadata.savePaymentMethodOptInBehavior,
             hostedSurface = hostedSurface,
             instantDebits = instantDebits,
             linkMode = paymentMethodMetadata.linkMode,

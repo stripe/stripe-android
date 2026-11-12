@@ -88,6 +88,7 @@ internal fun USBankAccountForm(
                 formArgs = formArgs,
                 hostedSurface = usBankAccountFormArgs.hostedSurface,
                 showCheckbox = usBankAccountFormArgs.showCheckbox,
+                savePaymentMethodOptInBehavior = usBankAccountFormArgs.savePaymentMethodOptInBehavior,
                 isCompleteFlow = usBankAccountFormArgs.isCompleteFlow,
                 isPaymentFlow = usBankAccountFormArgs.isPaymentFlow,
                 stripeIntentId = usBankAccountFormArgs.stripeIntentId,
