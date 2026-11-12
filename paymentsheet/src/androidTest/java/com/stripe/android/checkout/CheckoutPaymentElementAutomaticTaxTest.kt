@@ -419,7 +419,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
                 hasSavedPaymentMethod = true,
             ),
             rowSelectionBehavior = PaymentElement.RowSelectionBehavior.immediateAction {
-                scenario.immediateActionCalls.add(Unit)
+                scenario.immediateActionCalls.add(scenario.controller.session.value)
             },
             configureNetworkSetup = {
                 enqueueSavedPaymentMethodTaxUpdate(
@@ -467,8 +467,9 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
         fillOutBillingDetails()
         formPage.clickPrimaryButton()
 
-        immediateActionCalls.awaitItem()
-        val session = checkNotNull(controller.session.value)
+        // The session seen by the immediate action must already carry the Cash App tax response.
+        val session = checkNotNull(immediateActionCalls.awaitItem())
+        assertThat(session.tax?.status).isEqualTo(CheckoutElementsController.Session.Tax.Status.Ready)
         assertThat(session.totals.total.minorUnitsAmount).isEqualTo(INITIAL_TOTAL.toLong())
         assertThat(session.paymentOption?.paymentMethodType).isEqualTo("cashapp")
         assertThat(session.paymentOption?.billingDetails?.address?.line1)
@@ -706,7 +707,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
     ) {
         val controller: CheckoutElementsController
             get() = checkoutScenario.controller
-        val immediateActionCalls = Turbine<Unit>()
+        val immediateActionCalls = Turbine<CheckoutElementsController.Session?>()
         val taxUpdateRequests = Turbine<Unit>()
         val releaseTaxUpdateResponse = CountDownLatch(if (holdTaxUpdateResponse) 1 else 0)
 
