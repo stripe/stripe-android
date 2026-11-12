@@ -9,6 +9,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextReplacement
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.paymentsheet.PaymentSheet.SavePaymentMethodOptInBehavior
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.createComposeCleanupRule
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -27,6 +28,30 @@ internal class SettingsUiTest {
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule(UnconfinedTestDispatcher())
+
+    @Test
+    fun `save payment method opt in behavior can be selected and restored`() = runScenario(
+        searchQuery = "Save payment method opt-in behavior",
+    ) {
+        assertThat(playgroundSettings[SavePaymentMethodOptInBehaviorSettingsDefinition].value)
+            .isEqualTo(SavePaymentMethodOptInBehavior.Automatic)
+        composeRule.onNodeWithText("Automatic").assertIsDisplayed()
+        composeRule.onNodeWithText("Opt-in").assertIsDisplayed()
+        composeRule.onNodeWithText("Opt-out").performClick()
+
+        assertThat(playgroundSettings[SavePaymentMethodOptInBehaviorSettingsDefinition].value)
+            .isEqualTo(SavePaymentMethodOptInBehavior.RequiresOptOut)
+        val restored = PlaygroundSettings.createFromJsonString(playgroundSettings.snapshot().asJsonString())
+        assertThat(restored[SavePaymentMethodOptInBehaviorSettingsDefinition].value)
+            .isEqualTo(SavePaymentMethodOptInBehavior.RequiresOptOut)
+
+        composeRule.onNodeWithText("Opt-in").performClick()
+        assertThat(playgroundSettings[SavePaymentMethodOptInBehaviorSettingsDefinition].value)
+            .isEqualTo(SavePaymentMethodOptInBehavior.RequiresOptIn)
+        composeRule.onNodeWithText("Automatic").performClick()
+        assertThat(playgroundSettings[SavePaymentMethodOptInBehaviorSettingsDefinition].value)
+            .isEqualTo(SavePaymentMethodOptInBehavior.Automatic)
+    }
 
     @Test
     fun `custom billing email can be entered`() = runScenario(
