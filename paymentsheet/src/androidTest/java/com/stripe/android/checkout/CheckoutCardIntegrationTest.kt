@@ -13,10 +13,6 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
-import kotlinx.serialization.json.JsonArray
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import org.junit.Rule
@@ -149,7 +145,7 @@ internal class CheckoutCardIntegrationTest {
         )
         val result = runCheckoutIntegrationTest(
             backend = backend,
-            sessionParams = cardOnlySessionParams(),
+            sessionParams = CheckoutSessionParamsBuilder(unitAmount = SUBTOTAL).build(),
             configuration = configuration,
             setup = setup,
             handleNextAction = {},
@@ -178,43 +174,16 @@ internal class CheckoutCardIntegrationTest {
         ) {
             val result = runCheckoutIntegrationTest(
                 backend = backend,
-                sessionParams = automaticTaxSessionParams(customerId, paymentMethodSave),
+                sessionParams = CheckoutSessionParamsBuilder(unitAmount = SUBTOTAL)
+                    .customerId(customerId)
+                    .automaticTax(true)
+                    .paymentMethodSave(paymentMethodSave)
+                    .build(),
                 configuration = configuration,
                 setup = setup,
                 handleNextAction = {},
             )
             assertThat(result).isInstanceOf(CheckoutElementsController.Result.Completed::class.java)
-        }
-    }
-
-    private fun cardOnlySessionParams(): JsonObject {
-        val lineItem = buildJsonObject {
-            put("quantity", 1)
-            put(
-                "price_data",
-                buildJsonObject {
-                    put("currency", "usd")
-                    put("unit_amount", 1000)
-                    put("product_data", buildJsonObject { put("name", "Checkout E2E") })
-                },
-            )
-        }
-        return buildJsonObject {
-            put("ui_mode", "mobile_elements")
-            put("currency", "usd")
-            put("customer_email", "checkout-e2e@example.com")
-            put("allowed_payment_method_types", JsonArray(listOf(JsonPrimitive("card"))))
-            put(
-                "items",
-                buildJsonArray {
-                    add(
-                        buildJsonObject {
-                            put("type", "one_time_price")
-                            put("one_time_price", buildJsonObject { put("items", JsonArray(listOf(lineItem))) })
-                        },
-                    )
-                },
-            )
         }
     }
 
@@ -277,54 +246,6 @@ internal class CheckoutCardIntegrationTest {
         assertThat(totals.subtotal.minorUnitsAmount).isEqualTo(SUBTOTAL)
         assertThat(totals.taxExclusive.minorUnitsAmount).isEqualTo(0L)
         assertThat(totals.total.minorUnitsAmount).isEqualTo(SUBTOTAL)
-    }
-
-    private fun automaticTaxSessionParams(customerId: String, paymentMethodSave: Boolean): JsonObject {
-        val lineItem = buildJsonObject {
-            put("quantity", 1)
-            put(
-                "price_data",
-                buildJsonObject {
-                    put("currency", "usd")
-                    put("unit_amount", SUBTOTAL)
-                    put("tax_behavior", "exclusive")
-                    put(
-                        "product_data",
-                        buildJsonObject {
-                            put("name", "Checkout E2E")
-                            put("tax_code", "txcd_99999999")
-                        },
-                    )
-                },
-            )
-        }
-        return buildJsonObject {
-            put("ui_mode", "mobile_elements")
-            put("currency", "usd")
-            put("customer", customerId)
-            put("automatic_tax", buildJsonObject { put("enabled", true) })
-            put("billing_address_collection", "required")
-            put("customer_update", buildJsonObject { put("address", "auto") })
-            put("allowed_payment_method_types", JsonArray(listOf(JsonPrimitive("card"))))
-            put(
-                "saved_payment_method_options",
-                buildJsonObject {
-                    put("payment_method_save", if (paymentMethodSave) "enabled" else "disabled")
-                    put("payment_method_remove", "disabled")
-                },
-            )
-            put(
-                "items",
-                buildJsonArray {
-                    add(
-                        buildJsonObject {
-                            put("type", "one_time_price")
-                            put("one_time_price", buildJsonObject { put("items", JsonArray(listOf(lineItem))) })
-                        },
-                    )
-                },
-            )
-        }
     }
 
     private companion object {
