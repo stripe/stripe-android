@@ -24,9 +24,8 @@ internal fun getPMOSFUFromStringMap(
         }
     }.toMap()
 
-    return PaymentSheet.IntentConfiguration.Mode.Payment.PaymentMethodOptions(
-        setupFutureUsageValues = setupFutureUsageValues
-    )
+    return PaymentSheet.IntentConfiguration.Mode.Payment.PaymentMethodOptions()
+        .setupFutureUsageValues(setupFutureUsageValues)
 }
 
 internal fun stringValueToMap(value: String): Map<String, String>? {

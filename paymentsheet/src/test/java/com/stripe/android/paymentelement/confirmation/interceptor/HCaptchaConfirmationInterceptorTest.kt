@@ -64,10 +64,9 @@ class HCaptchaConfirmationInterceptorTest {
         val interceptor = createIntentConfirmationInterceptor(
             integrationMetadata = IntegrationMetadata.DeferredIntent.WithPaymentMethod(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Setup(
-                        currency = "usd",
-                    ),
-                ),
+                    mode = PaymentSheet.IntentConfiguration.Mode.Setup()
+                        .currency("usd"),
+                ).build(),
             ),
             stripeRepository = object : AbsFakeStripeRepository() {
                 override suspend fun retrieveStripeIntent(
@@ -112,7 +111,7 @@ class HCaptchaConfirmationInterceptorTest {
                         amount = 1099L,
                         currency = "usd",
                     ),
-                ),
+                ).build(),
             ),
             stripeRepository = object : AbsFakeStripeRepository() {
                 override suspend fun retrieveStripeIntent(

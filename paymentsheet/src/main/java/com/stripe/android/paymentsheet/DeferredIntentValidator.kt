@@ -17,7 +17,7 @@ internal object DeferredIntentValidator {
      */
     fun validate(
         stripeIntent: StripeIntent,
-        intentConfiguration: PaymentSheet.IntentConfiguration,
+        intentConfiguration: PaymentSheet.IntentConfiguration.State,
         allowsManualConfirmation: Boolean,
         paymentMethod: PaymentMethod
     ): StripeIntent {

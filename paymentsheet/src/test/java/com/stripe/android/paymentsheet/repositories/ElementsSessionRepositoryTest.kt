@@ -209,7 +209,7 @@ internal class ElementsSessionRepositoryTest {
                         amount = 1234,
                         currency = "cad",
                     )
-                )
+                ).build()
             ),
             customer = null,
             externalPaymentMethods = emptyList(),
@@ -287,8 +287,9 @@ internal class ElementsSessionRepositoryTest {
                         amount = 1234,
                         currency = "cad",
                     ),
-                    paymentMethodTypes = expectedPaymentMethodTypes
                 )
+                    .paymentMethodTypes(expectedPaymentMethodTypes)
+                    .build()
             ),
             customer = null,
             externalPaymentMethods = emptyList(),
@@ -470,14 +471,16 @@ internal class ElementsSessionRepositoryTest {
         repository.get(
             initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
-                    sharedPaymentTokenSessionWithMode =
-                    PaymentSheet.IntentConfiguration.Mode.Payment(amount = 1234, currency = "cad"),
-                    sellerDetails = PaymentSheet.IntentConfiguration.SellerDetails(
-                        businessName = "My business, Inc.",
-                        networkId = "network_123",
-                        externalId = "external_123",
-                    ),
-                ),
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(amount = 1234, currency = "cad"),
+                )
+                    .sharedPaymentTokenSession(
+                        PaymentSheet.IntentConfiguration.SellerDetails(
+                            businessName = "My business, Inc.",
+                            networkId = "network_123",
+                            externalId = "external_123",
+                        )
+                    )
+                    .build(),
             ),
             customer = null,
             externalPaymentMethods = emptyList(),
@@ -551,14 +554,15 @@ internal class ElementsSessionRepositoryTest {
             StripeResponse(200, ElementsSessionFixtures.DEFERRED_INTENT_JSON.toString(), emptyMap())
         )
 
-        val paymentMethodOptions = PaymentSheet.IntentConfiguration.Mode.Payment.PaymentMethodOptions(
-            setupFutureUsageValues = mapOf(
-                PaymentMethod.Type.Card to PaymentSheet.IntentConfiguration.SetupFutureUse.OnSession,
-                PaymentMethod.Type.Affirm to PaymentSheet.IntentConfiguration.SetupFutureUse.None,
-                PaymentMethod.Type.AmazonPay
-                    to PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession,
+        val paymentMethodOptions = PaymentSheet.IntentConfiguration.Mode.Payment.PaymentMethodOptions()
+            .setupFutureUsageValues(
+                mapOf(
+                    PaymentMethod.Type.Card to PaymentSheet.IntentConfiguration.SetupFutureUse.OnSession,
+                    PaymentMethod.Type.Affirm to PaymentSheet.IntentConfiguration.SetupFutureUse.None,
+                    PaymentMethod.Type.AmazonPay
+                        to PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession,
+                )
             )
-        )
 
         createRepository().get(
             initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
@@ -566,10 +570,10 @@ internal class ElementsSessionRepositoryTest {
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 1000,
                         currency = "usd",
-                        setupFutureUse = null,
-                        paymentMethodOptions = paymentMethodOptions
-                    ),
-                )
+                    )
+                        .setupFutureUse(null)
+                        .paymentMethodOptions(paymentMethodOptions),
+                ).build()
             ),
             customer = null,
             customPaymentMethods = listOf(),
@@ -598,14 +602,15 @@ internal class ElementsSessionRepositoryTest {
             StripeResponse(200, ElementsSessionFixtures.DEFERRED_INTENT_JSON.toString(), emptyMap())
         )
 
-        val paymentMethodOptions = PaymentSheet.IntentConfiguration.Mode.Payment.PaymentMethodOptions(
-            setupFutureUsageValues = mapOf(
-                PaymentMethod.Type.Card to PaymentSheet.IntentConfiguration.SetupFutureUse.OnSession,
-                PaymentMethod.Type.Affirm to PaymentSheet.IntentConfiguration.SetupFutureUse.None,
-                PaymentMethod.Type.AmazonPay
-                    to PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession,
+        val paymentMethodOptions = PaymentSheet.IntentConfiguration.Mode.Payment.PaymentMethodOptions()
+            .setupFutureUsageValues(
+                mapOf(
+                    PaymentMethod.Type.Card to PaymentSheet.IntentConfiguration.SetupFutureUse.OnSession,
+                    PaymentMethod.Type.Affirm to PaymentSheet.IntentConfiguration.SetupFutureUse.None,
+                    PaymentMethod.Type.AmazonPay
+                        to PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession,
+                )
             )
-        )
 
         createRepository().get(
             initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
@@ -613,11 +618,12 @@ internal class ElementsSessionRepositoryTest {
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 1000,
                         currency = "usd",
-                        setupFutureUse = null,
-                        paymentMethodOptions = paymentMethodOptions,
-                    ),
-                    requireCvcRecollection = true,
-                ),
+                    )
+                        .setupFutureUse(null)
+                        .paymentMethodOptions(paymentMethodOptions),
+                )
+                    .requireCvcRecollection(true)
+                    .build(),
             ),
             customer = null,
             customPaymentMethods = listOf(),
@@ -651,10 +657,11 @@ internal class ElementsSessionRepositoryTest {
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 1000,
                         currency = "usd",
-                        setupFutureUse = null,
-                    ),
-                    requireCvcRecollection = true,
-                ),
+                    )
+                        .setupFutureUse(null),
+                )
+                    .requireCvcRecollection(true)
+                    .build(),
             ),
             customer = null,
             customPaymentMethods = listOf(),
@@ -792,8 +799,9 @@ internal class ElementsSessionRepositoryTest {
                         amount = 2000,
                         currency = "usd",
                     ),
-                    paymentMethodTypes = listOf("card", "link"),
                 )
+                    .paymentMethodTypes(listOf("card", "link"))
+                    .build()
             ),
             customer = null,
             externalPaymentMethods = emptyList(),
@@ -925,7 +933,7 @@ internal class ElementsSessionRepositoryTest {
                         amount = 1000,
                         currency = "usd",
                     ),
-                )
+                ).build()
             ),
             customer = null,
             externalPaymentMethods = emptyList(),
@@ -1033,8 +1041,9 @@ internal class ElementsSessionRepositoryTest {
                         amount = 2000,
                         currency = "usd",
                     ),
-                    paymentMethodTypes = listOf("card"),
                 )
+                    .paymentMethodTypes(listOf("card"))
+                    .build()
             ),
             customer = null,
             externalPaymentMethods = emptyList(),

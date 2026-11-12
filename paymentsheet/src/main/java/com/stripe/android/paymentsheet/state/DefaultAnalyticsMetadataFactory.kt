@@ -277,8 +277,8 @@ private val PaymentElementLoader.InitializationMode.defaultAnalyticsValue: Strin
         is PaymentElementLoader.InitializationMode.CheckoutSession -> "checkout_session"
         is PaymentElementLoader.InitializationMode.DeferredIntent -> {
             when (this.intentConfiguration.mode) {
-                is PaymentSheet.IntentConfiguration.Mode.Payment -> "deferred_payment_intent"
-                is PaymentSheet.IntentConfiguration.Mode.Setup -> "deferred_setup_intent"
+                is PaymentSheet.IntentConfiguration.Mode.Payment.State -> "deferred_payment_intent"
+                is PaymentSheet.IntentConfiguration.Mode.Setup.State -> "deferred_setup_intent"
             }
         }
         is PaymentElementLoader.InitializationMode.PaymentIntent -> "payment_intent"

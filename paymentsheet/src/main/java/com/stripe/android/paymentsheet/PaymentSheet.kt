@@ -603,7 +603,7 @@ class PaymentSheet internal constructor(
         configuration: Configuration? = null,
     ) {
         paymentSheetLauncher.present(
-            mode = InitializationMode.DeferredIntent(intentConfiguration),
+            mode = InitializationMode.DeferredIntent(intentConfiguration.build()),
             configuration = configuration,
         )
     }
@@ -616,40 +616,98 @@ class PaymentSheet internal constructor(
      * values or the payment/setup will fail.
      *
      * @param mode Whether [PaymentSheet] should present a payment or setup flow.
-     * @param paymentMethodTypes The payment methods types to display. If empty, we dynamically
-     * determine the payment method types using your [Stripe Dashboard settings](https://dashboard.stripe.com/settings/payment_methods).
-     * @param paymentMethodConfigurationId The configuration ID (if any) for the selected payment method configuration.
-     * See https://stripe.com/docs/payments/multiple-payment-method-configs for more information.
-     * @param onBehalfOf The account (if any) for which the funds of the intent are intended. See
-     * [our docs](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-on_behalf_of) for more info.
      */
-    @Poko
-    @Parcelize
-    class IntentConfiguration internal constructor(
-        val mode: Mode,
-        val paymentMethodTypes: List<String> = emptyList(),
-        val paymentMethodConfigurationId: String? = null,
-        val onBehalfOf: String? = null,
-        internal val requireCvcRecollection: Boolean = false,
-        internal val intentBehavior: IntentBehavior = IntentBehavior.Default,
-    ) : Parcelable {
-        @JvmOverloads
+    @OptIn(SharedPaymentTokenSessionPreview::class)
+    class IntentConfiguration(
+        private val mode: Mode,
+    ) {
+        private var paymentMethodTypes: List<String> = emptyList()
+        private var paymentMethodConfigurationId: String? = null
+        private var onBehalfOf: String? = null
+        private var requireCvcRecollection: Boolean = false
+        private var isSharedPaymentTokenSession: Boolean = false
+        private var sellerDetails: SellerDetails? = null
+
+        @Deprecated(
+            message = DEPRECATED_CONSTRUCTOR_MESSAGE,
+            replaceWith = ReplaceWith(
+                "IntentConfiguration(mode).paymentMethodTypes(paymentMethodTypes)" +
+                    ".paymentMethodConfigurationId(paymentMethodConfigurationId)" +
+                    ".onBehalfOf(onBehalfOf)" +
+                    ".requireCvcRecollection(requireCvcRecollection)"
+            ),
+        )
         constructor(
             mode: Mode,
             paymentMethodTypes: List<String> = emptyList(),
             paymentMethodConfigurationId: String? = null,
             onBehalfOf: String? = null,
             requireCvcRecollection: Boolean = false,
-        ) : this(
-            mode = mode,
-            paymentMethodTypes = paymentMethodTypes,
-            paymentMethodConfigurationId = paymentMethodConfigurationId,
-            onBehalfOf = onBehalfOf,
-            requireCvcRecollection = requireCvcRecollection,
-            intentBehavior = IntentBehavior.Default,
+        ) : this(mode) {
+            this.paymentMethodTypes = paymentMethodTypes
+            this.paymentMethodConfigurationId = paymentMethodConfigurationId
+            this.onBehalfOf = onBehalfOf
+            this.requireCvcRecollection = requireCvcRecollection
+        }
+
+        @Deprecated(
+            message = DEPRECATED_CONSTRUCTOR_MESSAGE,
+            replaceWith = ReplaceWith("IntentConfiguration(mode).paymentMethodTypes(paymentMethodTypes)"),
         )
+        constructor(
+            mode: Mode,
+            paymentMethodTypes: List<String>,
+        ) : this(mode) {
+            this.paymentMethodTypes = paymentMethodTypes
+        }
+
+        @Deprecated(
+            message = DEPRECATED_CONSTRUCTOR_MESSAGE,
+            replaceWith = ReplaceWith(
+                "IntentConfiguration(mode).paymentMethodTypes(paymentMethodTypes)" +
+                    ".paymentMethodConfigurationId(paymentMethodConfigurationId)"
+            ),
+        )
+        constructor(
+            mode: Mode,
+            paymentMethodTypes: List<String>,
+            paymentMethodConfigurationId: String?,
+        ) : this(mode) {
+            this.paymentMethodTypes = paymentMethodTypes
+            this.paymentMethodConfigurationId = paymentMethodConfigurationId
+        }
+
+        @Deprecated(
+            message = DEPRECATED_CONSTRUCTOR_MESSAGE,
+            replaceWith = ReplaceWith(
+                "IntentConfiguration(mode).paymentMethodTypes(paymentMethodTypes)" +
+                    ".paymentMethodConfigurationId(paymentMethodConfigurationId)" +
+                    ".onBehalfOf(onBehalfOf)"
+            ),
+        )
+        constructor(
+            mode: Mode,
+            paymentMethodTypes: List<String>,
+            paymentMethodConfigurationId: String?,
+            onBehalfOf: String?,
+        ) : this(mode) {
+            this.paymentMethodTypes = paymentMethodTypes
+            this.paymentMethodConfigurationId = paymentMethodConfigurationId
+            this.onBehalfOf = onBehalfOf
+        }
 
         @SharedPaymentTokenSessionPreview
+        @Deprecated(
+            message = DEPRECATED_CONSTRUCTOR_MESSAGE,
+            replaceWith = ReplaceWith(
+                "IntentConfiguration(sharedPaymentTokenSessionWithMode)" +
+                    ".sharedPaymentTokenSession(sellerDetails)" +
+                    ".paymentMethodTypes(paymentMethodTypes)" +
+                    ".paymentMethodConfigurationId(paymentMethodConfigurationId)" +
+                    ".onBehalfOf(onBehalfOf)" +
+                    ".requireCvcRecollection(requireCvcRecollection)"
+            ),
+        )
         @JvmOverloads
         constructor(
             sharedPaymentTokenSessionWithMode: Mode,
@@ -658,22 +716,90 @@ class PaymentSheet internal constructor(
             paymentMethodConfigurationId: String? = null,
             onBehalfOf: String? = null,
             requireCvcRecollection: Boolean = false,
-        ) : this(
-            mode = sharedPaymentTokenSessionWithMode,
+        ) : this(sharedPaymentTokenSessionWithMode) {
+            this.isSharedPaymentTokenSession = true
+            this.sellerDetails = sellerDetails
+            this.paymentMethodTypes = paymentMethodTypes
+            this.paymentMethodConfigurationId = paymentMethodConfigurationId
+            this.onBehalfOf = onBehalfOf
+            this.requireCvcRecollection = requireCvcRecollection
+        }
+
+        /**
+         * The payment methods types to display. If empty, we dynamically determine the payment
+         * method types using your [Stripe Dashboard settings](https://dashboard.stripe.com/settings/payment_methods).
+         */
+        fun paymentMethodTypes(paymentMethodTypes: List<String>): IntentConfiguration = apply {
+            this.paymentMethodTypes = paymentMethodTypes
+        }
+
+        /**
+         * The configuration ID (if any) for the selected payment method configuration.
+         * See https://stripe.com/docs/payments/multiple-payment-method-configs for more information.
+         */
+        fun paymentMethodConfigurationId(paymentMethodConfigurationId: String?): IntentConfiguration = apply {
+            this.paymentMethodConfigurationId = paymentMethodConfigurationId
+        }
+
+        /**
+         * The account (if any) for which the funds of the intent are intended. See
+         * [our docs](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-on_behalf_of) for more info.
+         */
+        fun onBehalfOf(onBehalfOf: String?): IntentConfiguration = apply {
+            this.onBehalfOf = onBehalfOf
+        }
+
+        /**
+         * Whether the customer must re-enter the CVC of a saved card before paying. Defaults to `false`.
+         */
+        fun requireCvcRecollection(requireCvcRecollection: Boolean): IntentConfiguration = apply {
+            this.requireCvcRecollection = requireCvcRecollection
+        }
+
+        /**
+         * Configures [PaymentSheet] to create a shared payment token instead of confirming an intent.
+         *
+         * @param sellerDetails Details about the seller the shared payment token is created for.
+         */
+        @SharedPaymentTokenSessionPreview
+        fun sharedPaymentTokenSession(sellerDetails: SellerDetails?): IntentConfiguration = apply {
+            this.isSharedPaymentTokenSession = true
+            this.sellerDetails = sellerDetails
+        }
+
+        @Parcelize
+        internal data class State(
+            val mode: Mode.State,
+            val paymentMethodTypes: List<String>,
+            val paymentMethodConfigurationId: String?,
+            val onBehalfOf: String?,
+            val requireCvcRecollection: Boolean,
+            val intentBehavior: IntentBehavior,
+        ) : Parcelable
+
+        internal fun build(): State = State(
+            mode = mode.build(),
             paymentMethodTypes = paymentMethodTypes,
             paymentMethodConfigurationId = paymentMethodConfigurationId,
             onBehalfOf = onBehalfOf,
             requireCvcRecollection = requireCvcRecollection,
-            intentBehavior = IntentBehavior.SharedPaymentToken(sellerDetails),
+            intentBehavior = if (isSharedPaymentTokenSession) {
+                IntentBehavior.SharedPaymentToken(sellerDetails?.build())
+            } else {
+                IntentBehavior.Default
+            },
         )
 
         /**
          * Contains information about the desired payment or setup flow.
          */
-        sealed class Mode : Parcelable {
+        sealed class Mode {
+            internal abstract fun build(): State
 
-            internal abstract val setupFutureUse: SetupFutureUse?
-            internal abstract val captureMethod: CaptureMethod?
+            internal sealed class State : Parcelable {
+                abstract val setupFutureUse: SetupFutureUse?
+                abstract val captureMethod: CaptureMethod?
+            }
 
             /**
              * Use this if your integration creates a [PaymentIntent].
@@ -683,61 +809,189 @@ class PaymentSheet internal constructor(
              * button, and influences available payment methods. See [our docs](https://stripe.com/docs/api/payment_intents/create#create_payment_intent-amount) for more info.
              * @param currency Three-letter ISO currency code. Filters out payment methods based on
              * supported currency. See [our docs](https://stripe.com/docs/api/payment_intents/create#create_payment_intent-currency) for more info.
-             * @param setupFutureUse Indicates that you intend to make future payments. See
-             * [our docs](https://stripe.com/docs/api/payment_intents/create#create_payment_intent-setup_future_usage) for more info.
-             * @param captureMethod Controls when the funds will be captured from the customer's
-             * account. See [our docs](https://stripe.com/docs/api/payment_intents/create#create_payment_intent-capture_method) for more info.
-             * @param paymentMethodOptions Additional payment method options params. See [our docs](https://docs.stripe.com/api/payment_intents/create#create_payment_intent-payment_method_options) for more info.
              */
-            @Poko
-            @Parcelize
             @OptIn(PaymentMethodOptionsSetupFutureUsagePreview::class)
-            class Payment @JvmOverloads constructor(
-                val amount: Long,
-                val currency: String,
-                override val setupFutureUse: SetupFutureUse? = null,
-                override val captureMethod: CaptureMethod = CaptureMethod.Automatic,
-                internal val paymentMethodOptions: PaymentMethodOptions?
+            class Payment(
+                private val amount: Long,
+                private val currency: String,
             ) : Mode() {
+                private var setupFutureUse: SetupFutureUse? = null
+                private var captureMethod: CaptureMethod = CaptureMethod.Automatic
+                private var paymentMethodOptions: PaymentMethodOptions? = null
 
+                @Deprecated(
+                    message = DEPRECATED_CONSTRUCTOR_MESSAGE,
+                    replaceWith = ReplaceWith(
+                        "Payment(amount, currency).setupFutureUse(setupFutureUse).captureMethod(captureMethod)"
+                    ),
+                )
                 constructor(
                     amount: Long,
                     currency: String,
                     setupFutureUse: SetupFutureUse? = null,
                     captureMethod: CaptureMethod = CaptureMethod.Automatic,
-                ) : this(
+                ) : this(amount, currency) {
+                    this.setupFutureUse = setupFutureUse
+                    this.captureMethod = captureMethod
+                }
+
+                @Deprecated(
+                    message = DEPRECATED_CONSTRUCTOR_MESSAGE,
+                    replaceWith = ReplaceWith(
+                        "Payment(amount, currency).setupFutureUse(setupFutureUse).captureMethod(captureMethod)" +
+                            ".paymentMethodOptions(paymentMethodOptions)"
+                    ),
+                )
+                @JvmOverloads
+                constructor(
+                    amount: Long,
+                    currency: String,
+                    setupFutureUse: SetupFutureUse? = null,
+                    captureMethod: CaptureMethod = CaptureMethod.Automatic,
+                    paymentMethodOptions: PaymentMethodOptions?,
+                ) : this(amount, currency) {
+                    this.setupFutureUse = setupFutureUse
+                    this.captureMethod = captureMethod
+                    this.paymentMethodOptions = paymentMethodOptions
+                }
+
+                /**
+                 * Indicates that you intend to make future payments. See
+                 * [our docs](https://stripe.com/docs/api/payment_intents/create#create_payment_intent-setup_future_usage) for more info.
+                 */
+                fun setupFutureUse(setupFutureUse: SetupFutureUse?): Payment = apply {
+                    this.setupFutureUse = setupFutureUse
+                }
+
+                /**
+                 * Controls when the funds will be captured from the customer's account. Defaults to
+                 * [CaptureMethod.Automatic]. See [our docs](https://stripe.com/docs/api/payment_intents/create#create_payment_intent-capture_method) for more info.
+                 */
+                fun captureMethod(captureMethod: CaptureMethod): Payment = apply {
+                    this.captureMethod = captureMethod
+                }
+
+                /**
+                 * Additional payment method options params. See
+                 * [our docs](https://docs.stripe.com/api/payment_intents/create#create_payment_intent-payment_method_options)
+                 * for more info.
+                 */
+                @PaymentMethodOptionsSetupFutureUsagePreview
+                fun paymentMethodOptions(paymentMethodOptions: PaymentMethodOptions?): Payment = apply {
+                    this.paymentMethodOptions = paymentMethodOptions
+                }
+
+                @Parcelize
+                internal data class State(
+                    val amount: Long,
+                    val currency: String,
+                    override val setupFutureUse: SetupFutureUse?,
+                    override val captureMethod: CaptureMethod,
+                    val paymentMethodOptions: PaymentMethodOptions.State?,
+                ) : Mode.State()
+
+                internal override fun build(): State = State(
                     amount = amount,
                     currency = currency,
                     setupFutureUse = setupFutureUse,
                     captureMethod = captureMethod,
-                    paymentMethodOptions = null
+                    paymentMethodOptions = paymentMethodOptions?.build(),
                 )
 
-                @Parcelize
-                @Poko
                 @PaymentMethodOptionsSetupFutureUsagePreview
-                class PaymentMethodOptions(
-                    internal val setupFutureUsageValues: Map<PaymentMethod.Type, SetupFutureUse>
-                ) : Parcelable
+                class PaymentMethodOptions() {
+                    private var setupFutureUsageValues: Map<PaymentMethod.Type, SetupFutureUse> = emptyMap()
+
+                    @Deprecated(
+                        message = DEPRECATED_CONSTRUCTOR_MESSAGE,
+                        replaceWith = ReplaceWith(
+                            "PaymentMethodOptions().setupFutureUsageValues(setupFutureUsageValues)"
+                        ),
+                    )
+                    constructor(
+                        setupFutureUsageValues: Map<PaymentMethod.Type, SetupFutureUse>,
+                    ) : this() {
+                        this.setupFutureUsageValues = setupFutureUsageValues
+                    }
+
+                    /**
+                     * Sets the [SetupFutureUse] value to use for each payment method type.
+                     */
+                    fun setupFutureUsageValues(
+                        setupFutureUsageValues: Map<PaymentMethod.Type, SetupFutureUse>
+                    ): PaymentMethodOptions = apply {
+                        this.setupFutureUsageValues = setupFutureUsageValues
+                    }
+
+                    @Parcelize
+                    internal data class State(
+                        val setupFutureUsageValues: Map<PaymentMethod.Type, SetupFutureUse>,
+                    ) : Parcelable
+
+                    internal fun build(): State = State(
+                        setupFutureUsageValues = setupFutureUsageValues,
+                    )
+                }
             }
 
             /**
              * Use this if your integration creates a [SetupIntent].
-             *
-             * @param currency Three-letter ISO currency code. Filters out payment methods based on
-             * supported currency. See [our docs](https://stripe.com/docs/api/payment_intents/create#create_payment_intent-currency) for more info.
-             * @param setupFutureUse Indicates that you intend to make future payments. See
-             * [our docs](https://stripe.com/docs/api/payment_intents/create#create_payment_intent-setup_future_usage) for more info.
              */
-            @Poko
-            @Parcelize
-            class Setup @JvmOverloads constructor(
-                val currency: String? = null,
-                override val setupFutureUse: SetupFutureUse = SetupFutureUse.OffSession,
-            ) : Mode() {
+            class Setup() : Mode() {
+                private var currency: String? = null
+                private var setupFutureUse: SetupFutureUse = SetupFutureUse.OffSession
 
-                override val captureMethod: CaptureMethod?
-                    get() = null
+                @Deprecated(
+                    message = DEPRECATED_CONSTRUCTOR_MESSAGE,
+                    replaceWith = ReplaceWith("Setup().currency(currency).setupFutureUse(setupFutureUse)"),
+                )
+                constructor(
+                    currency: String? = null,
+                    setupFutureUse: SetupFutureUse = SetupFutureUse.OffSession,
+                ) : this() {
+                    this.currency = currency
+                    this.setupFutureUse = setupFutureUse
+                }
+
+                @Deprecated(
+                    message = DEPRECATED_CONSTRUCTOR_MESSAGE,
+                    replaceWith = ReplaceWith("Setup().currency(currency)"),
+                )
+                constructor(
+                    currency: String?,
+                ) : this() {
+                    this.currency = currency
+                }
+
+                /**
+                 * Three-letter ISO currency code. Filters out payment methods based on supported
+                 * currency. See [our docs](https://stripe.com/docs/api/payment_intents/create#create_payment_intent-currency) for more info.
+                 */
+                fun currency(currency: String?): Setup = apply {
+                    this.currency = currency
+                }
+
+                /**
+                 * Indicates how you intend to use the payment method in the future. Defaults to
+                 * [SetupFutureUse.OffSession]. See [our docs](https://stripe.com/docs/api/payment_intents/create#create_payment_intent-setup_future_usage) for more info.
+                 */
+                fun setupFutureUse(setupFutureUse: SetupFutureUse): Setup = apply {
+                    this.setupFutureUse = setupFutureUse
+                }
+
+                @Parcelize
+                internal data class State(
+                    val currency: String?,
+                    override val setupFutureUse: SetupFutureUse,
+                ) : Mode.State() {
+                    override val captureMethod: CaptureMethod?
+                        get() = null
+                }
+
+                internal override fun build(): State = State(
+                    currency = currency,
+                    setupFutureUse = setupFutureUse,
+                )
             }
         }
 
@@ -794,13 +1048,24 @@ class PaymentSheet internal constructor(
         }
 
         @SharedPaymentTokenSessionPreview
-        @Parcelize
-        @Poko
         class SellerDetails(
-            val businessName: String,
-            val networkId: String,
-            val externalId: String,
-        ) : Parcelable
+            private val businessName: String,
+            private val networkId: String,
+            private val externalId: String,
+        ) {
+            @Parcelize
+            internal data class State(
+                val businessName: String,
+                val networkId: String,
+                val externalId: String,
+            ) : Parcelable
+
+            internal fun build(): State = State(
+                businessName = businessName,
+                networkId = networkId,
+                externalId = externalId,
+            )
+        }
 
         @OptIn(SharedPaymentTokenSessionPreview::class)
         internal sealed interface IntentBehavior : Parcelable {
@@ -809,7 +1074,7 @@ class PaymentSheet internal constructor(
 
             @Parcelize
             data class SharedPaymentToken(
-                val sellerDetails: SellerDetails?,
+                val sellerDetails: SellerDetails.State?,
             ) : IntentBehavior
         }
 
@@ -829,6 +1094,9 @@ class PaymentSheet internal constructor(
             @DelicatePaymentSheetApi
             const val COMPLETE_WITHOUT_CONFIRMING_INTENT =
                 IntentConfirmationInterceptor.COMPLETE_WITHOUT_CONFIRMING_INTENT
+
+            private const val DEPRECATED_CONSTRUCTOR_MESSAGE =
+                "Use the required-argument constructor and the builder methods instead."
         }
     }
 

@@ -42,10 +42,9 @@ internal enum class CheckoutMode(override val value: String) : ValueEnum {
         override fun intentConfigurationMode(
             playgroundState: PlaygroundState.Payment
         ): PaymentSheet.IntentConfiguration.Mode {
-            return PaymentSheet.IntentConfiguration.Mode.Setup(
-                currency = playgroundState.currencyCode.value,
-                setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession,
-            )
+            return PaymentSheet.IntentConfiguration.Mode.Setup()
+                .currency(playgroundState.currencyCode.value)
+                .setupFutureUse(PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession)
         }
     },
     PAYMENT("payment") {
@@ -55,8 +54,8 @@ internal enum class CheckoutMode(override val value: String) : ValueEnum {
             return PaymentSheet.IntentConfiguration.Mode.Payment(
                 amount = requireNotNull(playgroundState.amount),
                 currency = playgroundState.currencyCode.value,
-                paymentMethodOptions = playgroundState.paymentMethodOptionsSetupFutureUsage
             )
+                .paymentMethodOptions(playgroundState.paymentMethodOptionsSetupFutureUsage)
         }
     },
     PAYMENT_WITH_SETUP("payment_with_setup") {
@@ -66,9 +65,9 @@ internal enum class CheckoutMode(override val value: String) : ValueEnum {
             return PaymentSheet.IntentConfiguration.Mode.Payment(
                 amount = requireNotNull(playgroundState.amount),
                 currency = playgroundState.currencyCode.value,
-                setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession,
-                paymentMethodOptions = playgroundState.paymentMethodOptionsSetupFutureUsage
             )
+                .setupFutureUse(PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession)
+                .paymentMethodOptions(playgroundState.paymentMethodOptionsSetupFutureUsage)
         }
     };
 

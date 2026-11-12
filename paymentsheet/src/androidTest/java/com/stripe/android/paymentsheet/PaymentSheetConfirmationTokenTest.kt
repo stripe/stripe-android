@@ -163,17 +163,19 @@ internal class PaymentSheetConfirmationTokenTest(
                         PaymentSheet.IntentConfiguration.Mode.Payment(
                             amount = 5099,
                             currency = "usd",
-                            setupFutureUse = if (paymentMethodType == PaymentMethodType.CashAppWithSetupFutureUsage) {
-                                PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession
-                            } else {
-                                null
-                            }
                         )
+                            .setupFutureUse(
+                                if (paymentMethodType == PaymentMethodType.CashAppWithSetupFutureUsage) {
+                                    PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession
+                                } else {
+                                    null
+                                }
+                            )
                     } else {
                         PaymentSheet.IntentConfiguration.Mode.Setup()
                     },
-                    requireCvcRecollection = paymentMethodType == PaymentMethodType.SavedCardWithCvcRecollection
-                ),
+                )
+                    .requireCvcRecollection(paymentMethodType == PaymentMethodType.SavedCardWithCvcRecollection),
                 configuration = testContext.apiConfigurationTestType.applyTo(
                     PaymentSheet.Configuration.Builder("Example, Inc.")
                         .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)

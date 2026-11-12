@@ -62,8 +62,8 @@ internal class EmbeddedPaymentElementTest(
         mode = PaymentSheet.IntentConfiguration.Mode.Payment(
             amount = 5000,
             currency = "USD",
-            setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession
         )
+            .setupFutureUse(PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession)
     )
 
     @After
@@ -363,8 +363,8 @@ internal class EmbeddedPaymentElementTest(
                     amount = 5000,
                     currency = "USD",
                 ),
-                onBehalfOf = oboMerchantID,
             )
+                .onBehalfOf(oboMerchantID)
         )
 
         testContext.markTestSucceeded()

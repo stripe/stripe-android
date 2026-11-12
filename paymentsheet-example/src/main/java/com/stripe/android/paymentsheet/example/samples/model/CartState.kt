@@ -91,9 +91,10 @@ internal fun CartState.toIntentConfiguration(): PaymentSheet.IntentConfiguration
         mode = PaymentSheet.IntentConfiguration.Mode.Payment(
             amount = total ?: 0L,
             currency = "usd",
-            setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession.takeIf {
+        ).setupFutureUse(
+            PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession.takeIf {
                 isSubscription
-            },
+            }
         )
     )
 }

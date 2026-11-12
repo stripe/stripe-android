@@ -75,16 +75,18 @@ internal class PreparePaymentMethodTest(
             context.presentPaymentSheet {
                 presentWithIntentConfiguration(
                     intentConfiguration = PaymentSheet.IntentConfiguration(
-                        sharedPaymentTokenSessionWithMode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                             amount = 5000L,
                             currency = "USD",
                         ),
-                        sellerDetails = PaymentSheet.IntentConfiguration.SellerDetails(
-                            businessName = "My business, Inc.",
-                            networkId = "network_123",
-                            externalId = "external_123",
-                        )
-                    ),
+                    )
+                        .sharedPaymentTokenSession(
+                            PaymentSheet.IntentConfiguration.SellerDetails(
+                                businessName = "My business, Inc.",
+                                networkId = "network_123",
+                                externalId = "external_123",
+                            )
+                        ),
                     configuration = apiConfigurationTestType.applyTo(
                         PaymentSheet.Configuration.Builder(merchantDisplayName = "Example, Inc.")
                             .shippingDetails(SHIPPING_ADDRESS)
@@ -138,16 +140,18 @@ internal class PreparePaymentMethodTest(
             context.configureFlowController {
                 configureWithIntentConfiguration(
                     intentConfiguration = PaymentSheet.IntentConfiguration(
-                        sharedPaymentTokenSessionWithMode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                             amount = 5000L,
                             currency = "USD",
                         ),
-                        sellerDetails = PaymentSheet.IntentConfiguration.SellerDetails(
-                            businessName = "My business, Inc.",
-                            networkId = "network_456",
-                            externalId = "external_456",
-                        )
-                    ),
+                    )
+                        .sharedPaymentTokenSession(
+                            PaymentSheet.IntentConfiguration.SellerDetails(
+                                businessName = "My business, Inc.",
+                                networkId = "network_456",
+                                externalId = "external_456",
+                            )
+                        ),
                     configuration = apiConfigurationTestType.applyTo(
                         PaymentSheet.Configuration.Builder(merchantDisplayName = "Example, Inc.")
                             .shippingDetails(SHIPPING_ADDRESS)
@@ -212,16 +216,18 @@ internal class PreparePaymentMethodTest(
 
             context.configure(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
-                    sharedPaymentTokenSessionWithMode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 5000L,
                         currency = "USD",
                     ),
-                    sellerDetails = PaymentSheet.IntentConfiguration.SellerDetails(
-                        businessName = "My business, Inc.",
-                        networkId = "network_789",
-                        externalId = "external_789",
-                    )
-                ),
+                )
+                    .sharedPaymentTokenSession(
+                        PaymentSheet.IntentConfiguration.SellerDetails(
+                            businessName = "My business, Inc.",
+                            networkId = "network_789",
+                            externalId = "external_789",
+                        )
+                    ),
             ) {
                 shippingDetails(SHIPPING_ADDRESS)
                     .formSheetAction(EmbeddedPaymentElement.FormSheetAction.Confirm)

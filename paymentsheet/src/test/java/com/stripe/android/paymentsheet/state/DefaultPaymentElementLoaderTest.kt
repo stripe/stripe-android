@@ -1963,7 +1963,7 @@ internal class DefaultPaymentElementLoaderTest {
                         amount = -1099,
                         currency = "USD"
                     ),
-                ),
+                ).build(),
             ).validate()
         }
     }
@@ -1977,7 +1977,7 @@ internal class DefaultPaymentElementLoaderTest {
                         amount = 0,
                         currency = "USD"
                     ),
-                ),
+                ).build(),
             ).validate()
         }
     }
@@ -2049,7 +2049,7 @@ internal class DefaultPaymentElementLoaderTest {
             ),
         )
         val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-            intentConfiguration = intentConfiguration
+            intentConfiguration = intentConfiguration.build()
         )
         assertThat(
             initializationMode.integrationMetadata(
@@ -2058,7 +2058,7 @@ internal class DefaultPaymentElementLoaderTest {
                         error("Should not be called.")
                     }.build()
             )
-        ).isEqualTo(IntegrationMetadata.DeferredIntent.WithSharedPaymentToken(intentConfiguration))
+        ).isEqualTo(IntegrationMetadata.DeferredIntent.WithSharedPaymentToken(intentConfiguration.build()))
     }
 
     @Test
@@ -2070,7 +2070,7 @@ internal class DefaultPaymentElementLoaderTest {
             ),
         )
         val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-            intentConfiguration = intentConfiguration
+            intentConfiguration = intentConfiguration.build()
         )
         assertThat(
             initializationMode.integrationMetadata(
@@ -2079,7 +2079,7 @@ internal class DefaultPaymentElementLoaderTest {
                         error("Should not be called.")
                     }.build()
             )
-        ).isEqualTo(IntegrationMetadata.DeferredIntent.WithConfirmationToken(intentConfiguration))
+        ).isEqualTo(IntegrationMetadata.DeferredIntent.WithConfirmationToken(intentConfiguration.build()))
     }
 
     @Test
@@ -2091,7 +2091,7 @@ internal class DefaultPaymentElementLoaderTest {
             ),
         )
         val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-            intentConfiguration = intentConfiguration
+            intentConfiguration = intentConfiguration.build()
         )
         assertThat(
             initializationMode.integrationMetadata(
@@ -2100,7 +2100,7 @@ internal class DefaultPaymentElementLoaderTest {
                         error("Should not be called.")
                     }.build()
             )
-        ).isEqualTo(IntegrationMetadata.DeferredIntent.WithPaymentMethod(intentConfiguration))
+        ).isEqualTo(IntegrationMetadata.DeferredIntent.WithPaymentMethod(intentConfiguration.build()))
     }
 
     @Test
@@ -2111,7 +2111,7 @@ internal class DefaultPaymentElementLoaderTest {
                     amount = 1234,
                     currency = "cad",
                 ),
-            ),
+            ).build(),
         )
 
         assertFailsWith<IllegalStateException>("No callback for deferred intent.") {
@@ -2199,7 +2199,7 @@ internal class DefaultPaymentElementLoaderTest {
                     amount = 1234,
                     currency = "cad",
                 ),
-            ),
+            ).build(),
         )
 
         loader.load(
@@ -2226,7 +2226,7 @@ internal class DefaultPaymentElementLoaderTest {
                     amount = 1234,
                     currency = "cad",
                 ),
-            ),
+            ).build(),
         )
 
         val result = loader.load(
@@ -2274,7 +2274,7 @@ internal class DefaultPaymentElementLoaderTest {
                         amount = 1234,
                         currency = "cad",
                     ),
-                ),
+                ).build(),
             ),
             paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
             metadata = PaymentElementLoader.Metadata(
@@ -2306,7 +2306,7 @@ internal class DefaultPaymentElementLoaderTest {
                         amount = 1234,
                         currency = "cad",
                     ),
-                ),
+                ).build(),
             ),
             paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
             metadata = PaymentElementLoader.Metadata(
@@ -4901,7 +4901,7 @@ internal class DefaultPaymentElementLoaderTest {
                     amount = 5000,
                     currency = "USD"
                 ),
-            ),
+            ).build(),
         )
 
         loader.load(

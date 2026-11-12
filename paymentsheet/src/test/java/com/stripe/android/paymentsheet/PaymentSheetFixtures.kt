@@ -242,7 +242,7 @@ internal object PaymentSheetFixtures {
                         amount = 10L,
                         currency = "USD"
                     )
-                )
+                ).build()
             ),
             config = CONFIG_CUSTOMER,
             paymentElementCallbackIdentifier = PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER,

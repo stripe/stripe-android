@@ -50,8 +50,8 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest(
         mode = PaymentSheet.IntentConfiguration.Mode.Payment(
             amount = 5000,
             currency = "USD",
-            setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession
         )
+            .setupFutureUse(PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession)
     )
 
     @Test

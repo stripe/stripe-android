@@ -23,7 +23,7 @@ import dagger.assisted.AssistedInject
 
 @OptIn(SharedPaymentTokenSessionPreview::class)
 internal class SharedPaymentTokenConfirmationInterceptor @AssistedInject constructor(
-    @Assisted private val intentConfiguration: PaymentSheet.IntentConfiguration,
+    @Assisted private val intentConfiguration: PaymentSheet.IntentConfiguration.State,
     @Assisted private val handler: PreparePaymentMethodHandler,
     private val stripeRepository: StripeRepository,
     private val requestOptions: ApiRequest.Options,
@@ -115,7 +115,7 @@ internal class SharedPaymentTokenConfirmationInterceptor @AssistedInject constru
     interface Factory {
         @OptIn(SharedPaymentTokenSessionPreview::class)
         fun create(
-            intentConfiguration: PaymentSheet.IntentConfiguration,
+            intentConfiguration: PaymentSheet.IntentConfiguration.State,
             handler: PreparePaymentMethodHandler
         ): SharedPaymentTokenConfirmationInterceptor
     }

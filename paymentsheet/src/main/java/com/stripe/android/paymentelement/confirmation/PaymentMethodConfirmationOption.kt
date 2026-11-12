@@ -14,7 +14,7 @@ internal sealed interface PaymentMethodConfirmationOption : ConfirmationHandler.
     val optionsParams: PaymentMethodOptionsParams?
 
     fun updatedForDeferredIntent(
-        intentConfiguration: PaymentSheet.IntentConfiguration,
+        intentConfiguration: PaymentSheet.IntentConfiguration.State,
     ): PaymentMethodConfirmationOption
 
     fun shouldSaveAsDefault(): Boolean = false
@@ -30,7 +30,7 @@ internal sealed interface PaymentMethodConfirmationOption : ConfirmationHandler.
         val hasAcknowledgedSepaMandate: Boolean = false,
     ) : PaymentMethodConfirmationOption {
         override fun updatedForDeferredIntent(
-            intentConfiguration: PaymentSheet.IntentConfiguration,
+            intentConfiguration: PaymentSheet.IntentConfiguration.State,
         ): Saved {
             val updatedOptionsParams = optionsParams.updatedWithPmoSfu(
                 code = paymentMethod.type?.code,
@@ -52,7 +52,7 @@ internal sealed interface PaymentMethodConfirmationOption : ConfirmationHandler.
     ) : PaymentMethodConfirmationOption {
 
         override fun updatedForDeferredIntent(
-            intentConfiguration: PaymentSheet.IntentConfiguration,
+            intentConfiguration: PaymentSheet.IntentConfiguration.State,
         ): New {
             val updatedCreateParams = createParams.updatedWithProductUsage(intentConfiguration)
             val updatedOptionsParams = optionsParams.updatedWithPmoSfu(

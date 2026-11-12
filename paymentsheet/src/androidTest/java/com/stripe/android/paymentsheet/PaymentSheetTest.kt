@@ -579,8 +579,8 @@ internal class PaymentSheetTest(
                         amount = 5000,
                         currency = "USD"
                     ),
-                    requireCvcRecollection = true,
-                ),
+                )
+                    .requireCvcRecollection(true),
                 configuration = apiConfigurationTestType.applyTo(
                     defaultConfiguration.newBuilder()
                         .customer(
@@ -938,8 +938,8 @@ internal class PaymentSheetTest(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 5000,
                         currency = "USD",
-                        setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession
                     )
+                        .setupFutureUse(PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession)
                 ),
                 configuration = apiConfigurationTestType.applyTo(configurationWithTermsDisplayNever),
             )
@@ -997,8 +997,8 @@ internal class PaymentSheetTest(
                         amount = 5000,
                         currency = "USD"
                     ),
-                    onBehalfOf = oboMerchantID
-                ),
+                )
+                    .onBehalfOf(oboMerchantID),
                 configuration = apiConfigurationTestType.applyTo(defaultConfiguration),
             )
         }

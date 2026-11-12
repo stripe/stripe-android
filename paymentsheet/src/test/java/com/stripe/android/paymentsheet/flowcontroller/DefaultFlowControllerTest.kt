@@ -1736,7 +1736,7 @@ internal class DefaultFlowControllerTest {
             )
         )
         assertThat(arguments.paymentMethodMetadata.integrationMetadata)
-            .isEqualTo(IntegrationMetadata.DeferredIntent.WithPaymentMethod(intentConfiguration))
+            .isEqualTo(IntegrationMetadata.DeferredIntent.WithPaymentMethod(intentConfiguration.build()))
     }
 
     @Test

@@ -266,7 +266,7 @@ class FlowControllerConfigurationHandlerTest {
                             amount = amount,
                             currency = "cad",
                         )
-                    )
+                    ).build()
                 ),
                 configuration = PaymentSheet.Configuration("Some name"),
                 initializedViaCompose = false,
@@ -373,7 +373,7 @@ class FlowControllerConfigurationHandlerTest {
                         amount = 1234,
                         currency = "cad",
                     ),
-                ),
+                ).build(),
             ),
             configuration = PaymentSheet.Configuration("Some name"),
             initializedViaCompose = false,
@@ -409,7 +409,7 @@ class FlowControllerConfigurationHandlerTest {
                         amount = 1234,
                         currency = "cad",
                     ),
-                ),
+                ).build(),
             ),
             configuration = PaymentSheet.Configuration("Some name"),
             initializedViaCompose = false,
