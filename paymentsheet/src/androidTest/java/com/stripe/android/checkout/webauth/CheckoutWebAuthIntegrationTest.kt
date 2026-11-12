@@ -3,9 +3,7 @@ package com.stripe.android.checkout.webauth
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
-import androidx.test.uiautomator.Until
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CHECKOUT_PLAYGROUND_BACKEND_URL
 import com.stripe.android.checkout.CheckoutElementsController
@@ -20,7 +18,6 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import kotlin.time.Duration.Companion.seconds
 
 // CI runs this package on a Google APIs emulator, apart from the aosp-atd suite whose WebView 101 leaks Activities.
 @OptIn(CheckoutSessionPreview::class)
@@ -31,6 +28,9 @@ internal class CheckoutWebAuthIntegrationTest {
 
     private val contentPage = EmbeddedContentPage(composeRule)
     private val formPage = EmbeddedFormPage(composeRule)
+    private val challengePage = ThreeDS2ChallengePage(
+        UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
+    )
 
     private val configuration = CheckoutElementsController.Configuration()
         .merchantDisplayName("Checkout E2E")
@@ -61,18 +61,9 @@ internal class CheckoutWebAuthIntegrationTest {
                 formPage.clickPrimaryButton()
             },
             handleNextAction = {
-                val device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
-                val completeButton = device.wait(
-                    Until.findObject(By.text("COMPLETE")),
-                    CHALLENGE_TIMEOUT.inWholeMilliseconds,
-                )
-                checkNotNull(completeButton) { "3DS2 challenge COMPLETE button not found" }.click()
+                challengePage.complete()
             },
         )
         assertThat(result).isInstanceOf(CheckoutElementsController.Result.Completed::class.java)
-    }
-
-    private companion object {
-        val CHALLENGE_TIMEOUT = 30.seconds
     }
 }
