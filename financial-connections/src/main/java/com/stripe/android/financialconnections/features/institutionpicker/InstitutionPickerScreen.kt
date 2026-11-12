@@ -687,7 +687,7 @@ private fun LinkInstitutionChevron() {
     if (FinancialConnectionsTheme.theme.isLink) {
         Spacer(modifier = Modifier.size(8.dp))
         Icon(
-            painter = painterResource(id = R.drawable.stripe_ic_chevron_right),
+            painter = painterResource(id = R.drawable.stripe_fc_ic_chevron_right),
             contentDescription = null,
             tint = colors.textSubdued,
             modifier = Modifier.size(ChevronSize),

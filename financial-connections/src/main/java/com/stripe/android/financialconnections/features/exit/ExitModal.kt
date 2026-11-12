@@ -26,6 +26,7 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsThem
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 import com.stripe.android.financialconnections.ui.theme.Layout
 import com.stripe.android.financialconnections.ui.theme.Theme
+import com.stripe.android.financialconnections.ui.theme.isLink
 import com.stripe.android.uicore.utils.collectAsState
 
 @Composable
@@ -63,11 +64,14 @@ private fun ExitModalContent(
             bottom = 24.dp,
         ),
     ) {
-        ShapedIcon(
-            painter = painterResource(id = R.drawable.stripe_ic_panel_arrow_right),
-            contentDescription = stringResource(R.string.stripe_exit_modal_title)
-        )
-        Spacer(modifier = Modifier.size(16.dp))
+        // Link DS 3.0 drops the header icon on this sheet, matching iOS.
+        if (!FinancialConnectionsTheme.theme.isLink) {
+            ShapedIcon(
+                painter = painterResource(id = R.drawable.stripe_ic_panel_arrow_right),
+                contentDescription = stringResource(R.string.stripe_exit_modal_title)
+            )
+            Spacer(modifier = Modifier.size(16.dp))
+        }
         Text(
             text = stringResource(R.string.stripe_exit_modal_title),
             style = typography.headingLarge,

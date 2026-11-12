@@ -233,7 +233,7 @@ private fun LinkThemeLinks(
                 }
                 Spacer(modifier = Modifier.size(12.dp))
                 Icon(
-                    painter = painterResource(R.drawable.stripe_ic_chevron_right),
+                    painter = painterResource(R.drawable.stripe_fc_ic_chevron_right),
                     contentDescription = null,
                     tint = colors.textSubdued,
                     modifier = Modifier.size(14.dp),
