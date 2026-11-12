@@ -3,12 +3,14 @@ package com.stripe.android.payments.bankaccount
 import androidx.activity.result.ActivityResultLauncher
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.financialconnections.FinancialConnectionsPreCollectedConsent
+import com.stripe.android.financialconnections.ThemeMode
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 
 internal class CollectBankAccountForACHLauncher(
     private val hostActivityLauncher: ActivityResultLauncher<CollectBankAccountContract.Args>,
     private val hostedSurface: String?,
+    private val themeMode: ThemeMode,
     private val financialConnectionsAvailability: FinancialConnectionsAvailability?
 ) : CollectBankAccountLauncher {
 
@@ -47,6 +49,7 @@ internal class CollectBankAccountForACHLauncher(
                 clientSecret = clientSecret,
                 configuration = configuration,
                 hostedSurface = hostedSurface,
+                themeMode = themeMode,
                 attachToIntent = attachToIntent,
                 financialConnectionsAvailability = financialConnectionsAvailability,
                 preCollectedConsent = preCollectedConsent.takeIf { hostedSurface == null }
@@ -83,6 +86,7 @@ internal class CollectBankAccountForACHLauncher(
                 clientSecret = clientSecret,
                 configuration = configuration,
                 hostedSurface = hostedSurface,
+                themeMode = themeMode,
                 attachToIntent = attachToIntent,
                 financialConnectionsAvailability = financialConnectionsAvailability,
                 preCollectedConsent = preCollectedConsent.takeIf { hostedSurface == null }
@@ -112,6 +116,7 @@ internal class CollectBankAccountForACHLauncher(
                 onBehalfOf = onBehalfOf,
                 amount = amount,
                 hostedSurface = hostedSurface,
+                themeMode = themeMode,
                 financialConnectionsAvailability = financialConnectionsAvailability,
                 currency = currency,
             )
@@ -136,6 +141,7 @@ internal class CollectBankAccountForACHLauncher(
                 configuration = configuration,
                 customerId = customerId,
                 hostedSurface = hostedSurface,
+                themeMode = themeMode,
                 financialConnectionsAvailability = financialConnectionsAvailability,
                 onBehalfOf = onBehalfOf,
             )

@@ -3,10 +3,12 @@ package com.stripe.android.payments.bankaccount.ui
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.google.testing.junit.testparameterinjector.TestParameter
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnectionsPreCollectedConsent
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
+import com.stripe.android.financialconnections.ThemeMode
 import com.stripe.android.model.FinancialConnectionsSession
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
@@ -38,10 +40,10 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.stub
 import org.mockito.kotlin.verify
-import org.robolectric.RobolectricTestRunner
+import org.robolectric.RobolectricTestParameterInjector
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession as PaymentsFinancialConnectionsSession
 
-@RunWith(RobolectricTestRunner::class)
+@RunWith(RobolectricTestParameterInjector::class)
 class CollectBankAccountViewModelTest {
 
     @get:Rule
@@ -68,14 +70,16 @@ class CollectBankAccountViewModelTest {
     }
 
     @Test
-    fun `init - when createFinancialConnectionsSession succeeds for PI, opens connection flow`() = runTest {
+    fun `init - when createFinancialConnectionsSession succeeds for PI, opens connection flow`(
+        @TestParameter themeMode: ThemeMode,
+    ) = runTest {
         val viewEffect = MutableSharedFlow<CollectBankAccountViewEffect>()
         viewEffect.test {
             // Given
             givenCreateAccountSessionForPaymentIntentReturns(Result.success(financialConnectionsSession))
 
             // When
-            buildViewModel(viewEffect, paymentIntentConfiguration())
+            buildViewModel(viewEffect, paymentIntentConfiguration().copy(themeMode = themeMode))
 
             // Then
             val effect = awaitItem() as OpenConnectionsFlow
@@ -86,20 +90,23 @@ class CollectBankAccountViewModelTest {
                     financialConnectionsSessionSecret = financialConnectionsSession.clientSecret!!,
                     elementsSessionContext = null,
                     preCollectedConsent = null,
+                    themeMode = themeMode,
                 )
             )
         }
     }
 
     @Test
-    fun `init - when createFinancialConnectionsSession succeeds for SI, opens connection flow`() = runTest {
+    fun `init - when createFinancialConnectionsSession succeeds for SI, opens connection flow`(
+        @TestParameter themeMode: ThemeMode,
+    ) = runTest {
         val viewEffect = MutableSharedFlow<CollectBankAccountViewEffect>()
         viewEffect.test {
             // Given
             givenCreateAccountSessionForSetupIntentReturns(Result.success(financialConnectionsSession))
 
             // When
-            buildViewModel(viewEffect, setupIntentConfiguration())
+            buildViewModel(viewEffect, setupIntentConfiguration().copy(themeMode = themeMode))
 
             // Then
             assertThat(awaitItem()).isEqualTo(
@@ -108,13 +115,16 @@ class CollectBankAccountViewModelTest {
                     financialConnectionsSessionSecret = financialConnectionsSession.clientSecret!!,
                     elementsSessionContext = null,
                     preCollectedConsent = null,
+                    themeMode = themeMode,
                 )
             )
         }
     }
 
     @Test
-    fun `init - when create session succeeds for deferred payment, opens connection flow`() = runTest {
+    fun `init - when create session succeeds for deferred payment, opens connection flow`(
+        @TestParameter themeMode: ThemeMode,
+    ) = runTest {
         val viewEffect = MutableSharedFlow<CollectBankAccountViewEffect>()
         viewEffect.test {
             // Given
@@ -123,7 +133,7 @@ class CollectBankAccountViewModelTest {
             )
 
             // When
-            buildViewModel(viewEffect, deferredPaymentIntentConfiguration())
+            buildViewModel(viewEffect, deferredPaymentIntentConfiguration().copy(themeMode = themeMode))
 
             // Then
             assertThat(awaitItem()).isEqualTo(
@@ -132,13 +142,16 @@ class CollectBankAccountViewModelTest {
                     financialConnectionsSessionSecret = financialConnectionsSession.clientSecret!!,
                     elementsSessionContext = null,
                     preCollectedConsent = null,
+                    themeMode = themeMode,
                 )
             )
         }
     }
 
     @Test
-    fun `init - when createFinancialConnectionsSession succeeds for deferred setup, opens connection flow`() = runTest {
+    fun `init - when createFinancialConnectionsSession succeeds for deferred setup, opens connection flow`(
+        @TestParameter themeMode: ThemeMode,
+    ) = runTest {
         val viewEffect = MutableSharedFlow<CollectBankAccountViewEffect>()
         viewEffect.test {
             // Given
@@ -147,7 +160,7 @@ class CollectBankAccountViewModelTest {
             )
 
             // When
-            buildViewModel(viewEffect, deferredSetupIntentConfiguration())
+            buildViewModel(viewEffect, deferredSetupIntentConfiguration().copy(themeMode = themeMode))
 
             // Then
             assertThat(awaitItem()).isEqualTo(
@@ -156,6 +169,7 @@ class CollectBankAccountViewModelTest {
                     financialConnectionsSessionSecret = financialConnectionsSession.clientSecret!!,
                     elementsSessionContext = null,
                     preCollectedConsent = null,
+                    themeMode = themeMode,
                 )
             )
         }
@@ -191,6 +205,7 @@ class CollectBankAccountViewModelTest {
                     financialConnectionsSessionSecret = financialConnectionsSession.clientSecret!!,
                     elementsSessionContext = null,
                     preCollectedConsent = preCollectedConsent,
+                    themeMode = ThemeMode.Automatic,
                 )
             )
         }
@@ -217,6 +232,7 @@ class CollectBankAccountViewModelTest {
                     financialConnectionsSessionSecret = financialConnectionsSession.clientSecret!!,
                     elementsSessionContext = null,
                     preCollectedConsent = null,
+                    themeMode = ThemeMode.Automatic,
                 )
             )
         }
@@ -255,6 +271,7 @@ class CollectBankAccountViewModelTest {
                     financialConnectionsSessionSecret = financialConnectionsSession.clientSecret!!,
                     elementsSessionContext = null,
                     preCollectedConsent = null,
+                    themeMode = ThemeMode.Automatic,
                 )
             )
         }
@@ -630,6 +647,7 @@ class CollectBankAccountViewModelTest {
             configuration = configuration,
             attachToIntent = attachToIntent,
             hostedSurface = hostedSurface,
+            themeMode = ThemeMode.Automatic,
             financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
             preCollectedConsent = preCollectedConsent
         )
@@ -647,6 +665,7 @@ class CollectBankAccountViewModelTest {
             ),
             attachToIntent = attachToIntent,
             hostedSurface = "payment_element",
+            themeMode = ThemeMode.Automatic,
             financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
             preCollectedConsent = null
         )
@@ -665,6 +684,7 @@ class CollectBankAccountViewModelTest {
             amount = 1000,
             currency = "usd",
             hostedSurface = "payment_element",
+            themeMode = ThemeMode.Automatic,
             financialConnectionsAvailability = FinancialConnectionsAvailability.Full
         )
     }
@@ -680,6 +700,7 @@ class CollectBankAccountViewModelTest {
             customerId = "customer_id",
             onBehalfOf = "on_behalf_of_id",
             hostedSurface = "payment_element",
+            themeMode = ThemeMode.Automatic,
             financialConnectionsAvailability = FinancialConnectionsAvailability.Full
         )
     }

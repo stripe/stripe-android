@@ -30,6 +30,7 @@ import com.stripe.android.model.PaymentMethodFixtures.US_BANK_ACCOUNT_VERIFIED
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.networking.PaymentAnalyticsEvent
+import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -102,6 +103,25 @@ class CustomerSheetViewModelTest : CustomerSheetTestHelper {
 
             assertThat(state).isInstanceOf<AddPaymentMethod>()
             assertThat(state.topBarState {}.showEditMenu).isFalse()
+        }
+    }
+
+    @OptIn(AppearanceAPIAdditionsPreview::class)
+    @Test
+    fun `init passes configured theme mode to the bank account form`() = runTest(testDispatcher) {
+        val viewModel = createViewModel(
+            workContext = testDispatcher,
+            configuration = CustomerSheet.Configuration(
+                merchantDisplayName = "Example",
+                appearance = PaymentSheet.Appearance(themeMode = PaymentSheet.ThemeMode.AlwaysDark),
+            ),
+            customerSheetLoader = FakeCustomerSheetLoader(),
+        )
+
+        viewModel.viewState.test {
+            val state = awaitViewState<AddPaymentMethod>()
+
+            assertThat(state.usBankAccountFormArguments.themeMode).isEqualTo(PaymentSheet.ThemeMode.AlwaysDark)
         }
     }
 
