@@ -916,10 +916,8 @@ internal class CheckoutSheetLauncherTest {
     }
 
     @Test
-    fun `launchPaymentOptions reports failure while configuring without a payment element`() = testScenario {
+    fun `configuring without a payment element rejects previously loaded configuration`() = testScenario {
         val configuration = CheckoutElementsController.Configuration().build()
-        embeddedContentState.value = null
-        selectionHolder.state = null
         val configureGate = CompletableDeferred<Unit>()
         coroutineScope.launch {
             operationCoordinator.runConfigure(configuration) {
@@ -933,7 +931,7 @@ internal class CheckoutSheetLauncherTest {
             paymentMethodMetadata = null,
             customerState = null,
             selection = null,
-            configuration = null,
+            configuration = requireNotNull(embeddedContentState.value).configuration,
         )
 
         assertMissingConfigurationFailure()
@@ -964,7 +962,7 @@ internal class CheckoutSheetLauncherTest {
     }
 
     @Test
-    fun `launchPaymentOptions does not launch when metadata is unavailable while idle`() = testScenario {
+    fun `launchPaymentOptions sends failed presentation when metadata is unavailable while idle`() = testScenario {
         embeddedContentState.value = null
 
         sheetLauncher.launchPaymentOptions(
@@ -975,9 +973,18 @@ internal class CheckoutSheetLauncherTest {
         )
         runCurrent()
 
-        assertThat(sheetStateHolder.sheetIsOpen).isFalse()
+        val failedArgs = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityArgs
+        assertThat(failedArgs.presentationState).isEqualTo(EmbeddedActivityArgs.PresentationState.Failed)
+        assertThat(failedArgs.launchMode).isEqualTo(EmbeddedLaunchMode.PaymentOptions)
+        assertThat(sheetStateHolder.sheetIsOpen).isTrue()
         assertThat(launcherState.isAwaitingPaymentOptionsReady).isFalse()
         assertThat(errorReporter.getLoggedErrors()).isEmpty()
+
+        registerCall.callback.asCallbackFor<EmbeddedActivityResult>().onActivityResult(
+            EmbeddedActivityResult.Error(launchMode = EmbeddedLaunchMode.PaymentOptions)
+        )
+        assertThat(sheetStateHolder.sheetIsOpen).isFalse()
+        resultCallbacks.expectNoEvents()
     }
 
     @Test

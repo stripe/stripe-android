@@ -258,22 +258,27 @@ internal class CheckoutSheetLauncher @Inject constructor(
     ) {
         if (!lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.CREATED)) return
         if (sheetStateHolder.sheetIsOpen) return
-        val presentationState = when (val status = operationCoordinator.status.value) {
+        val status = operationCoordinator.status.value
+        val appearance = when (status) {
+            is CheckoutOperationCoordinator.Status.Configuring ->
+                status.configuration.paymentElementConfiguration?.appearance?.asPaymentSheet()
+            CheckoutOperationCoordinator.Status.Idle, CheckoutOperationCoordinator.Status.Updating ->
+                configuration?.appearance
+        } ?: return reportMissingConfiguration()
+
+        val presentationState = when (status) {
             CheckoutOperationCoordinator.Status.Idle -> {
-                if (configuration == null) return reportMissingConfiguration()
-                if (paymentMethodMetadata == null) return
-                EmbeddedActivityArgs.PresentationState.Ready(
-                    paymentMethodMetadata = paymentMethodMetadata,
-                    configuration = configuration,
-                )
+                if (paymentMethodMetadata == null || configuration == null) {
+                    EmbeddedActivityArgs.PresentationState.Failed
+                } else {
+                    EmbeddedActivityArgs.PresentationState.Ready(
+                        paymentMethodMetadata = paymentMethodMetadata,
+                        configuration = configuration,
+                    )
+                }
             }
-            CheckoutOperationCoordinator.Status.Updating -> {
-                if (configuration == null) return reportMissingConfiguration()
-                EmbeddedActivityArgs.PresentationState.Loading(configuration.appearance)
-            }
+            CheckoutOperationCoordinator.Status.Updating,
             is CheckoutOperationCoordinator.Status.Configuring -> {
-                val appearance = status.configuration.paymentElementConfiguration?.appearance?.asPaymentSheet()
-                    ?: return reportMissingConfiguration()
                 EmbeddedActivityArgs.PresentationState.Loading(appearance)
             }
         }
