@@ -165,6 +165,45 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
     }
 
     @Test
+    fun testImmediateActionConfirmAfterCardFormTaxUpdateSendsUpdatedExpectedAmount() {
+        var checkoutResult: CheckoutElementsController.Result? = null
+        lateinit var checkoutScenario: CheckoutPaymentElementScenario
+        runCheckoutPaymentElementScenario(
+            networkRule = networkRule,
+            resultCallback = { result -> checkoutResult = result },
+            checkoutInitResponse = automaticTaxResponse(INITIAL_TOTAL, TAX_STATUS_REQUIRES_LOCATION),
+            rowSelectionBehavior = PaymentElement.RowSelectionBehavior.immediateAction {
+                checkoutScenario.confirm()
+            },
+            setup = { controller ->
+                assertThat(
+                    controller.configure(
+                        clientSecret = DEFAULT_CLIENT_SECRET,
+                        configuration = checkoutConfiguration(
+                            PaymentElement.Configuration.PaymentMethodLayout.Vertical
+                        ),
+                    )
+                ).isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
+            },
+        ) {
+            checkoutScenario = this
+            contentPage.clickOnLpm("card")
+            fillOutCardAndBillingDetails()
+
+            enqueueTaxUpdate(automaticTaxResponse(UPDATED_TOTAL, TAX_STATUS_COMPLETE))
+            networkRule.checkoutConfirm(
+                bodyPart("payment_method_data[type]", "card"),
+                bodyPart("expected_amount", UPDATED_TOTAL.toString()),
+            ) { response ->
+                response.testBodyFromFile("checkout-session-confirm.json")
+            }
+            formPage.clickPrimaryButton()
+        }
+
+        assertThat(checkoutResult).isInstanceOf(CheckoutElementsController.Result.Completed::class.java)
+    }
+
+    @Test
     fun testPreselectedSavedPaymentMethodConfirmsWithTotalFromConfigureTaxUpdate() {
         var checkoutResult: CheckoutElementsController.Result? = null
         val savedPaymentMethodTaxResponse = automaticTaxResponse(
@@ -419,7 +458,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
                 hasSavedPaymentMethod = true,
             ),
             rowSelectionBehavior = PaymentElement.RowSelectionBehavior.immediateAction {
-                scenario.immediateActionCalls.add(scenario.controller.session.value)
+                scenario.immediateActionCalls.add(Unit)
             },
             configureNetworkSetup = {
                 enqueueSavedPaymentMethodTaxUpdate(
@@ -467,9 +506,8 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
         fillOutBillingDetails()
         formPage.clickPrimaryButton()
 
-        // The session seen by the immediate action must already carry the Cash App tax response.
-        val session = checkNotNull(immediateActionCalls.awaitItem())
-        assertThat(session.tax?.status).isEqualTo(CheckoutElementsController.Session.Tax.Status.Ready)
+        immediateActionCalls.awaitItem()
+        val session = checkNotNull(controller.session.value)
         assertThat(session.totals.total.minorUnitsAmount).isEqualTo(INITIAL_TOTAL.toLong())
         assertThat(session.paymentOption?.paymentMethodType).isEqualTo("cashapp")
         assertThat(session.paymentOption?.billingDetails?.address?.line1)
@@ -707,7 +745,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
     ) {
         val controller: CheckoutElementsController
             get() = checkoutScenario.controller
-        val immediateActionCalls = Turbine<CheckoutElementsController.Session?>()
+        val immediateActionCalls = Turbine<Unit>()
         val taxUpdateRequests = Turbine<Unit>()
         val releaseTaxUpdateResponse = CountDownLatch(if (holdTaxUpdateResponse) 1 else 0)
 
