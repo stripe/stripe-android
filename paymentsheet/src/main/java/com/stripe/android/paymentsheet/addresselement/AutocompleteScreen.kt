@@ -118,29 +118,6 @@ internal fun AutocompleteScreenUI(
 @Composable
 internal fun AutocompleteScreenUI(
     viewModel: AutocompleteViewModel,
-    appearanceContext: AutocompleteAppearanceContext,
-    attributionDrawable: Int?,
-    isRootScreen: Boolean,
-) {
-    val predictions by viewModel.predictions.collectAsState()
-    val loading by viewModel.loading.collectAsState()
-
-    AutocompleteScreenUI(
-        predictions = predictions,
-        loading = loading,
-        queryController = viewModel.textFieldController,
-        attributionDrawable = attributionDrawable,
-        appearanceContext = appearanceContext,
-        isRootScreen = isRootScreen,
-        onBackPressed = viewModel::onBackPressed,
-        onEnterManually = viewModel::onEnterAddressManually,
-        onSelectPrediction = viewModel::selectPrediction,
-    )
-}
-
-@Composable
-internal fun AutocompleteScreenUI(
-    viewModel: AutocompleteViewModel,
     attributionDrawable: Int?,
     isRootScreen: Boolean,
     backgroundColor: Color,
@@ -160,34 +137,6 @@ internal fun AutocompleteScreenUI(
         onBackPressed = viewModel::onBackPressed,
         onEnterManually = viewModel::onEnterAddressManually,
         onSelectPrediction = viewModel::selectPrediction,
-    )
-}
-
-@Composable
-internal fun AutocompleteScreenUI(
-    predictions: List<AutocompletePrediction>?,
-    loading: Boolean,
-    queryController: TextFieldController,
-    attributionDrawable: Int?,
-    appearanceContext: AutocompleteAppearanceContext,
-    isRootScreen: Boolean,
-    onBackPressed: () -> Unit,
-    onEnterManually: () -> Unit,
-    onSelectPrediction: (AutocompletePrediction) -> Unit,
-) {
-    AutocompleteScreenUI(
-        predictions = predictions,
-        loading = loading,
-        queryController = queryController,
-        attributionDrawable = attributionDrawable,
-        isRootScreen = isRootScreen,
-        onBackPressed = onBackPressed,
-        onEnterManually = onEnterManually,
-        onSelectPrediction = onSelectPrediction,
-        backgroundColor = appearanceContext.backgroundColor,
-        appBar = { isRoot, onBack ->
-            appearanceContext.AppBar(isRoot, onBack)
-        }
     )
 }
 

@@ -538,7 +538,6 @@ internal class PlaygroundSettings private constructor(
             CollectPhoneSettingsDefinition,
             CollectAddressSettingsDefinition,
             AllowedBillingCountriesSettingsDefinition,
-            AutocompleteAddressSettingsDefinition,
             DefaultShippingAddressSettingsDefinition,
             DelayedPaymentMethodsSettingsDefinition,
             AutomaticPaymentMethodsSettingsDefinition,

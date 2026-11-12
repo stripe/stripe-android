@@ -51,7 +51,6 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.AddressLauncher
 import com.stripe.android.paymentsheet.addresselement.rememberAddressLauncher
-import com.stripe.android.paymentsheet.example.Settings
 import com.stripe.android.paymentsheet.example.playground.activity.AppearanceBottomSheetDialogFragment
 import com.stripe.android.paymentsheet.example.playground.activity.AppearanceStore
 import com.stripe.android.paymentsheet.example.playground.activity.CustomPaymentMethodActivity
@@ -674,7 +673,6 @@ internal class PaymentSheetPlaygroundActivity :
             onClick = {
                 val configuration = AddressLauncher.Configuration.Builder()
                     .address(address())
-                    .googlePlacesApiKey(Settings(context).googlePlacesApiKey)
                     .appearance(AppearanceStore.state.toPaymentSheetAppearance())
                     .build()
                 addressLauncher.present(PaymentConfiguration.getInstance(context).publishableKey, configuration)

@@ -432,7 +432,8 @@ class AddressElementTest {
                 emailConfig = AddressFieldConfiguration.OPTIONAL,
             ) { throw AssertionError("Not Expected") },
             sameAsShippingElement = null,
-            shippingValuesMap = null
+            shippingValuesMap = null,
+            isPlacesAvailable = true,
         )
 
         val formFieldIds = addressElement.fields.first().map {

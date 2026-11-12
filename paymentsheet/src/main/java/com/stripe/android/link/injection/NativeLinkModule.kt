@@ -12,6 +12,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsRequestFactory
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.core.utils.DefaultDurationProvider
 import com.stripe.android.core.utils.DurationProvider
@@ -52,10 +53,8 @@ import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PrefsRepository
-import com.stripe.android.paymentsheet.addresselement.AutocompleteActivityLauncher
-import com.stripe.android.paymentsheet.addresselement.AutocompleteAppearanceContext
-import com.stripe.android.paymentsheet.addresselement.AutocompleteLauncher
-import com.stripe.android.paymentsheet.addresselement.DefaultAutocompleteLauncher
+import com.stripe.android.paymentsheet.addresselement.DefaultStripeAutocompleteRepository
+import com.stripe.android.paymentsheet.addresselement.StripeAutocompleteRepository
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.repository.ConsumersApiService
@@ -70,6 +69,7 @@ import dagger.Provides
 import dagger.multibindings.IntoSet
 import kotlinx.coroutines.Dispatchers
 import javax.inject.Named
+import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 @Module(
@@ -136,14 +136,6 @@ internal interface NativeLinkModule {
     @Binds
     @NativeLinkScope
     fun bindsDismissalCoordinator(impl: RealLinkDismissalCoordinator): LinkDismissalCoordinator
-
-    @Binds
-    @NativeLinkScope
-    fun bindsAutocompleteActivityLauncher(impl: DefaultAutocompleteLauncher): AutocompleteActivityLauncher
-
-    @Binds
-    @NativeLinkScope
-    fun bindsAutocompleteLauncher(impl: DefaultAutocompleteLauncher): AutocompleteLauncher
 
     @Binds
     fun bindsPrefsRepositoryFactory(
@@ -248,8 +240,12 @@ internal interface NativeLinkModule {
 
         @Provides
         @NativeLinkScope
-        fun provideAutocompleteLauncher() = DefaultAutocompleteLauncher(
-            appearanceContext = AutocompleteAppearanceContext.Link,
+        fun provideStripeAutocompleteRepository(
+            requestOptionsProvider: Provider<ApiRequest.Options>,
+        ): StripeAutocompleteRepository = DefaultStripeAutocompleteRepository(
+            stripeNetworkClient = DefaultStripeNetworkClient(),
+            apiRequestFactory = ApiRequest.Factory(),
+            requestOptionsProvider = requestOptionsProvider,
         )
 
         @Provides

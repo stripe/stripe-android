@@ -84,7 +84,6 @@ import com.stripe.android.paymentsheet.PaymentSheetFixtures.BILLING_DETAILS_FORM
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
-import com.stripe.android.paymentsheet.addresselement.AutocompleteContract
 import com.stripe.android.paymentsheet.addresselement.FakeStripeAutocompleteRepository
 import com.stripe.android.paymentsheet.addresselement.analytics.FakeAddressLauncherEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -3320,7 +3319,7 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `On register for activity result, should register confirmation handler & autocomplete launcher`() =
+    fun `On register for activity result, should register confirmation handler & tap to add`() =
         confirmationTest {
             DummyActivityResultCaller.test {
                 FakeTapToAddHelper.Factory.test {
@@ -3334,10 +3333,6 @@ internal class PaymentSheetViewModelTest {
                         lifecycleOwner = lifecycleOwner,
                     )
 
-                    assertThat(awaitRegisterCall().contract).isEqualTo(AutocompleteContract)
-
-                    val autocompleteLauncher = awaitNextRegisteredLauncher()
-
                     val confirmationRegisterCall = registerTurbine.awaitItem()
 
                     assertThat(confirmationRegisterCall.activityResultCaller)
@@ -3345,8 +3340,6 @@ internal class PaymentSheetViewModelTest {
                     assertThat(confirmationRegisterCall.lifecycleOwner).isEqualTo(lifecycleOwner)
 
                     lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-
-                    assertThat(awaitNextUnregisteredLauncher()).isEqualTo(autocompleteLauncher)
 
                     val createCall = createCalls.awaitItem()
 
@@ -3752,7 +3745,6 @@ internal class PaymentSheetViewModelTest {
                 },
                 customViewModelScope = coroutineScopeCleanupRule.track(CoroutineScope(Dispatchers.Unconfined)),
                 paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
-                placesClient = null,
                 linkAccountHolder = LinkAccountHolder(thisSavedStateHandle),
                 stripeAutocompleteRepository = FakeStripeAutocompleteRepository(),
                 addressLauncherEventReporter = FakeAddressLauncherEventReporter(),

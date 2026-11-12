@@ -49,7 +49,6 @@ import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentM
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.updateState
-import com.stripe.android.paymentsheet.addresselement.AutocompleteContract
 import com.stripe.android.paymentsheet.addresselement.FakeStripeAutocompleteRepository
 import com.stripe.android.paymentsheet.addresselement.analytics.FakeAddressLauncherEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -1192,16 +1191,11 @@ internal class PaymentOptionsViewModelTest {
                     lifecycleOwner = lifecycleOwner,
                 )
 
-                assertThat(awaitRegisterCall().contract).isInstanceOf<AutocompleteContract>()
-
-                val autocompleteLauncher = awaitNextRegisteredLauncher()
-
                 verify(linkPaymentLauncher)
                     .register(eq(activityResultCaller), any())
 
                 lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
 
-                assertThat(awaitNextUnregisteredLauncher()).isEqualTo(autocompleteLauncher)
                 verify(linkPaymentLauncher).unregister()
 
                 val createCall = createCalls.awaitItem()
@@ -1525,7 +1519,6 @@ internal class PaymentOptionsViewModelTest {
             },
             customViewModelScope = coroutineScopeCleanupRule.track(CoroutineScope(Dispatchers.Unconfined)),
             paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
-            placesClient = null,
             stripeAutocompleteRepository = FakeStripeAutocompleteRepository(),
             addressLauncherEventReporter = FakeAddressLauncherEventReporter(),
         )

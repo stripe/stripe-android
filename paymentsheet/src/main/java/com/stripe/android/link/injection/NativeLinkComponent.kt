@@ -29,7 +29,7 @@ import com.stripe.android.paymentelement.confirmation.link.LinkPassthroughConfir
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.ApiRequestOptionsModule
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
-import com.stripe.android.paymentsheet.addresselement.AutocompleteLauncher
+import com.stripe.android.paymentsheet.addresselement.StripeAutocompleteRepository
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.uicore.navigation.NavigationManager
 import dagger.BindsInstance
@@ -70,7 +70,7 @@ internal interface NativeLinkComponent {
     val navigationManager: NavigationManager
     val dismissalCoordinator: LinkDismissalCoordinator
     val linkLaunchMode: LinkLaunchMode
-    val autocompleteLauncher: AutocompleteLauncher
+    val stripeAutocompleteRepository: StripeAutocompleteRepository
     val addPaymentMethodOptionsFactory: AddPaymentMethodOptions.Factory
     val oAuthConsentViewModelComponentFactory: OAuthConsentViewModelComponent.Factory
     val webLinkAuthChannel: WebLinkAuthChannel

@@ -90,7 +90,9 @@ internal class InputAddressViewModel @Inject constructor(
     private val isInlineAutocompleteEnabled = true
 
     override val autocompleteConfig: AutocompleteAddressInteractor.Config = AutocompleteAddressInteractor.Config(
-        googlePlacesApiKey = args.config?.googlePlacesApiKey,
+        // Standalone AddressLauncher always uses Stripe-hosted autocomplete, so there's no
+        // Google Places API key to thread through here.
+        googlePlacesApiKey = null,
         // If merchant is opting into Stripe-hosted autocomplete and the caller did not
         // override the launcher default countries, use the extended Stripe-hosted list.
         // Otherwise, honor the caller-provided set (or empty set if explicitly set).

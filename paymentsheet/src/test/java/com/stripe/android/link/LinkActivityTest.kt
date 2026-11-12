@@ -29,7 +29,6 @@ import com.stripe.android.link.ui.wallet.WALLET_SCREEN_PAY_ANOTHER_WAY_BUTTON
 import com.stripe.android.link.utils.TestNavigationManager
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
-import com.stripe.android.paymentsheet.addresselement.TestAutocompleteLauncher
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.testing.CoroutineTestRule
 import kotlinx.coroutines.Dispatchers
@@ -216,7 +215,6 @@ internal class LinkActivityTest {
                 navigationManager = TestNavigationManager(),
                 linkLaunchMode = linkLaunchMode,
                 linkConfirmationHandlerFactory = { FakeLinkConfirmationHandler() },
-                autocompleteLauncher = TestAutocompleteLauncher.noOp(),
                 addPaymentMethodOptionsFactory = mock()
             )
         }

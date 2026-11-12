@@ -12,7 +12,6 @@ import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.paymentsheet.injection.AutocompleteViewModelSubcomponent
-import com.stripe.android.paymentsheet.injection.DaggerAutocompleteViewModelFactoryComponent
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.ui.core.elements.autocomplete.model.AutocompletePrediction
 import com.stripe.android.uicore.elements.SimpleTextFieldConfig
@@ -207,12 +206,6 @@ internal class AutocompleteViewModel @Inject constructor(
             Type.WithinAddressElement(autoCompleteViewModelSubcomponentFactoryProvider, args)
         )
 
-        constructor(
-            args: AutocompleteContract.Args,
-        ) : this(
-            Type.Isolated(args)
-        )
-
         sealed interface Type {
             fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T
 
@@ -228,21 +221,6 @@ internal class AutocompleteViewModel @Inject constructor(
                             application = extras.requireApplication(),
                             configuration = args,
                         ).autoCompleteViewModel as T
-                }
-            }
-
-            class Isolated(
-                private val args: AutocompleteContract.Args,
-            ) : Type {
-                @Suppress("UNCHECKED_CAST")
-                override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-                    return DaggerAutocompleteViewModelFactoryComponent
-                        .factory()
-                        .build(
-                            application = extras.requireApplication(),
-                            args = args,
-                        )
-                        .autocompleteViewModel as T
                 }
             }
         }

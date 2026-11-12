@@ -10,7 +10,6 @@ import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
-import com.stripe.android.model.Address
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
@@ -22,7 +21,6 @@ import com.stripe.android.paymentsheet.addresselement.AddressElementNavigator
 import com.stripe.android.paymentsheet.addresselement.AddressElementResultStateHolder
 import com.stripe.android.paymentsheet.addresselement.AddressElementResultStateHolder.State
 import com.stripe.android.paymentsheet.addresselement.AddressLauncher
-import com.stripe.android.paymentsheet.addresselement.FakePlacesClientProxy
 import com.stripe.android.paymentsheet.addresselement.FakeStripeAutocompleteRepository
 import com.stripe.android.paymentsheet.addresselement.InputAddressViewModel
 import com.stripe.android.paymentsheet.addresselement.StripeHostedPlacesClientProxy
@@ -35,7 +33,6 @@ import com.stripe.android.paymentsheet.repositories.CheckoutStripeRepositoryFact
 import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
-import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
 import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.utils.FakeFraudDetectionDataRepository
@@ -283,11 +280,7 @@ class AddressElementViewModelModuleTest {
     }
 
     @Test
-    fun `provideInlinePlacesClient returns hosted client by default when google client is available`() {
-        val googlePlacesClient = FakePlacesClientProxy(
-            findPredictionsResult = Result.success(FindAutocompletePredictionsResponse(emptyList())),
-            fetchPlaceResult = Result.success(Address()),
-        )
+    fun `provideInlinePlacesClient returns hosted client`() {
         val addressLauncherEventReporter = FakeAddressLauncherEventReporter()
         val stripeAutocompleteRepository = FakeStripeAutocompleteRepository()
         val placesClient = module.provideInlinePlacesClient(
@@ -296,13 +289,10 @@ class AddressElementViewModelModuleTest {
                 config = AddressLauncher.Configuration(),
             ),
             stripeAutocompleteRepository = stripeAutocompleteRepository,
-            googlePlacesClient = googlePlacesClient,
             addressLauncherEventReporter = addressLauncherEventReporter,
         )
 
         assertThat(placesClient).isInstanceOf(StripeHostedPlacesClientProxy::class.java)
-        assertThat(placesClient).isNotSameInstanceAs(googlePlacesClient)
-        googlePlacesClient.ensureAllEventsConsumed()
         stripeAutocompleteRepository.ensureAllEventsConsumed()
         addressLauncherEventReporter.validate()
     }

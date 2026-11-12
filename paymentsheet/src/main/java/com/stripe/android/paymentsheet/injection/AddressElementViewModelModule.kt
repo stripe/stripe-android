@@ -105,26 +105,25 @@ internal class AddressElementViewModelModule {
         requestOptionsProvider = requestOptionsProvider,
     )
 
+    // Standalone AddressLauncher has no public API to opt out of Stripe-hosted autocomplete,
+    // so this always resolves to StripeHostedPlacesClientProxy.
     @Provides
     @Singleton
     @Named(INLINE_PLACES_CLIENT)
     internal fun provideInlinePlacesClient(
         args: AddressElementActivityContract.Args,
         stripeAutocompleteRepository: StripeAutocompleteRepository,
-        googlePlacesClient: PlacesClientProxy?,
         addressLauncherEventReporter: AddressLauncherEventReporter,
     ): PlacesClientProxy? {
-        val config = args.config ?: return null
-        return if (config.useStripeHostedAutocomplete) {
-            StripeHostedPlacesClientProxy(
-                repository = stripeAutocompleteRepository,
-                eventReporter = addressLauncherEventReporter,
-            )
-        } else {
-            googlePlacesClient
-        }
+        args.config ?: return null
+        return StripeHostedPlacesClientProxy(
+            repository = stripeAutocompleteRepository,
+            eventReporter = addressLauncherEventReporter,
+        )
     }
 
+    // Required by AutocompleteViewModelSubcomponent's full-screen autocomplete flow, which
+    // standalone AddressLauncher never navigates to (isInlineAutocompleteEnabled is always true).
     @Provides
     @Singleton
     internal fun provideGooglePlacesClient(

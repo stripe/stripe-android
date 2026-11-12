@@ -21,8 +21,6 @@ import com.stripe.android.paymentsheet.NewPaymentOptionSelection
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.addresselement.AUTOCOMPLETE_DEFAULT_COUNTRIES
-import com.stripe.android.paymentsheet.addresselement.AutocompleteAppearanceContext
-import com.stripe.android.paymentsheet.addresselement.DefaultAutocompleteLauncher
 import com.stripe.android.paymentsheet.addresselement.PaymentElementAutocompleteAddressInteractor
 import com.stripe.android.paymentsheet.addresselement.StripeAutocompleteRepository
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
@@ -37,7 +35,6 @@ import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.ui.core.elements.CvcConfig
 import com.stripe.android.ui.core.elements.CvcController
-import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.flatMapLatestAsStateFlow
@@ -69,15 +66,10 @@ internal abstract class BaseSheetViewModel(
     val mode: EventReporter.Mode,
     val customerStateHolderFactory: CustomerStateHolder.Factory,
     val customViewModelScope: CoroutineScope,
-    val placesClient: PlacesClientProxy?,
     val linkAccountHolder: LinkAccountHolder,
     stripeAutocompleteRepository: StripeAutocompleteRepository,
     addressLauncherEventReporter: AddressLauncherEventReporter,
 ) : ViewModel() {
-    private val autocompleteLauncher = DefaultAutocompleteLauncher(
-        AutocompleteAppearanceContext.PaymentElement(config.appearance)
-    )
-
     private val _paymentMethodMetadata = MutableStateFlow<PaymentMethodMetadata?>(null)
     internal val paymentMethodMetadata: StateFlow<PaymentMethodMetadata?> = _paymentMethodMetadata
 
@@ -89,14 +81,11 @@ internal abstract class BaseSheetViewModel(
     }
 
     private val paymentElementAutocompleteFactory = PaymentElementAutocompleteAddressInteractor.Factory(
-        launcher = autocompleteLauncher,
-        apiConfigurationProvider = { requireNotNull(_paymentMethodMetadata.value).apiConfiguration },
         autocompleteConfig = AutocompleteAddressInteractor.Config(
             googlePlacesApiKey = config.googlePlacesApiKey,
             autocompleteCountries = AUTOCOMPLETE_DEFAULT_COUNTRIES,
             isInlineAutocompleteEnabled = true,
         ),
-        placesClient = placesClient,
         stripeAutocompleteRepository = stripeAutocompleteRepository,
         coroutineScope = viewModelScope,
         shouldUseAutocompleteProxyEndpointsProvider = {
@@ -190,7 +179,6 @@ internal abstract class BaseSheetViewModel(
         activityResultCaller: ActivityResultCaller,
         lifecycleOwner: LifecycleOwner,
     ) {
-        autocompleteLauncher.register(activityResultCaller, lifecycleOwner)
         tapToAddHelper.register(activityResultCaller, lifecycleOwner)
         registerFromActivity(activityResultCaller, lifecycleOwner)
     }

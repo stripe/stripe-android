@@ -1,56 +1,25 @@
 package com.stripe.android.paymentsheet.addresselement
 
-import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
-import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import kotlinx.coroutines.CoroutineScope
-import javax.inject.Provider
 
+// Stripe-hosted autocomplete is unavailable (shouldUseAutocompleteProxyEndpointsProvider is false
+// or there's no active coroutine scope to run it in); real Google Places autocomplete is no
+// longer supported, so autocomplete is disabled entirely rather than falling back to it.
 internal class PaymentElementAutocompleteAddressInteractor(
-    private val launcher: AutocompleteLauncher?,
-    private val apiConfigurationProvider: Provider<ApiConfiguration.State>,
     override val autocompleteConfig: AutocompleteAddressInteractor.Config,
-) : AutocompleteAddressInteractor, AutocompleteLauncherResultHandler {
+) : AutocompleteAddressInteractor {
     private var eventListener: ((AutocompleteAddressInteractor.Event) -> Unit)? = null
 
     override fun register(onEvent: (AutocompleteAddressInteractor.Event) -> Unit) {
         eventListener = onEvent
     }
 
-    override fun onAutocomplete(country: String) {
-        autocompleteConfig.googlePlacesApiKey?.let { googlePlacesApiKey ->
-            launcher?.launch(
-                country = country,
-                googlePlacesApiKey = googlePlacesApiKey,
-                apiConfiguration = apiConfigurationProvider.get(),
-                resultHandler = this,
-            )
-        }
-    }
-
-    override fun onAutocompleteLauncherResult(result: AutocompleteLauncher.Result) {
-        val values = result.address?.toIdentifierMap()
-
-        val event = when (result) {
-            is AutocompleteLauncher.Result.EnterManually -> {
-                AutocompleteAddressInteractor.Event.OnExpandForm(values)
-            }
-            is AutocompleteLauncher.Result.OnBack -> values?.let {
-                AutocompleteAddressInteractor.Event.OnValues(it)
-            }
-        }
-
-        event?.let {
-            eventListener?.invoke(it)
-        }
-    }
+    override fun onAutocomplete(country: String) = Unit
 
     class Factory(
-        private val launcher: AutocompleteLauncher?,
-        private val apiConfigurationProvider: Provider<ApiConfiguration.State>,
         private val autocompleteConfig: AutocompleteAddressInteractor.Config,
-        private val placesClient: PlacesClientProxy?,
         private val stripeAutocompleteRepository: StripeAutocompleteRepository?,
         private val coroutineScope: CoroutineScope?,
         private val shouldUseAutocompleteProxyEndpointsProvider: () -> Boolean,
@@ -64,14 +33,13 @@ internal class PaymentElementAutocompleteAddressInteractor(
         override fun create(): AutocompleteAddressInteractor {
             if (coroutineScope != null && autocompleteConfig.isInlineAutocompleteEnabled) {
                 val useStripeHosted = shouldUseAutocompleteProxyEndpointsProvider()
-                val resolvedClient = when {
-                    useStripeHosted && stripeAutocompleteRepository != null ->
-                        StripeHostedPlacesClientProxy(
-                            repository = stripeAutocompleteRepository,
-                            eventReporter = eventReporter,
-                        )
-                    useStripeHosted -> null
-                    else -> placesClient
+                val resolvedClient = if (useStripeHosted && stripeAutocompleteRepository != null) {
+                    StripeHostedPlacesClientProxy(
+                        repository = stripeAutocompleteRepository,
+                        eventReporter = eventReporter,
+                    )
+                } else {
+                    null
                 }
                 if (resolvedClient != null) {
                     activeInlineInteractor?.dispose()
@@ -93,8 +61,6 @@ internal class PaymentElementAutocompleteAddressInteractor(
             activeInlineInteractor?.dispose()
             activeInlineInteractor = null
             return PaymentElementAutocompleteAddressInteractor(
-                launcher = launcher,
-                apiConfigurationProvider = apiConfigurationProvider,
                 autocompleteConfig = autocompleteConfig,
             )
         }
