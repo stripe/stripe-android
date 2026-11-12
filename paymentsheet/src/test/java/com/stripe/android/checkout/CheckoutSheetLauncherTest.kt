@@ -912,7 +912,7 @@ internal class CheckoutSheetLauncherTest {
     }
 
     @Test
-    fun `launchPaymentOptions does not launch while configuring without a payment element`() = testScenario {
+    fun `launchPaymentOptions launches failed state while configuring without a payment element`() = testScenario {
         val configuration = CheckoutElementsController.Configuration().build()
         embeddedContentState.value = null
         selectionHolder.state = null
@@ -932,15 +932,13 @@ internal class CheckoutSheetLauncherTest {
             configuration = null,
         )
 
-        assertThat(sheetStateHolder.sheetIsOpen).isFalse()
-        assertThat(launcherState.isAwaitingPaymentOptionsReady).isFalse()
-        assertThat(errorReporter.getLoggedErrors()).isEmpty()
+        assertFailedPaymentOptionsLaunch()
         configureGate.complete(Unit)
         runCurrent()
     }
 
     @Test
-    fun `launchPaymentOptions does not launch before configure starts`() = testScenario {
+    fun `launchPaymentOptions launches failed state before configure starts`() = testScenario {
         embeddedContentState.value = null
         selectionHolder.state = null
 
@@ -952,13 +950,11 @@ internal class CheckoutSheetLauncherTest {
         )
         runCurrent()
 
-        assertThat(sheetStateHolder.sheetIsOpen).isFalse()
-        assertThat(launcherState.isAwaitingPaymentOptionsReady).isFalse()
-        assertThat(errorReporter.getLoggedErrors()).isEmpty()
+        assertFailedPaymentOptionsLaunch()
     }
 
     @Test
-    fun `launchPaymentOptions does not launch when metadata is unavailable while idle`() = testScenario {
+    fun `launchPaymentOptions launches failed state when metadata is unavailable while idle`() = testScenario {
         embeddedContentState.value = null
 
         sheetLauncher.launchPaymentOptions(
@@ -969,17 +965,82 @@ internal class CheckoutSheetLauncherTest {
         )
         runCurrent()
 
-        assertThat(sheetStateHolder.sheetIsOpen).isFalse()
-        assertThat(launcherState.isAwaitingPaymentOptionsReady).isFalse()
-        assertThat(errorReporter.getLoggedErrors()).isEmpty()
+        assertFailedPaymentOptionsLaunch()
     }
 
     @Test
-    fun `launchPaymentOptions does not launch when configuration is unavailable while idle`() = testScenario {
+    fun `launchPaymentOptions launches failed state when configuration is unavailable while idle`() = testScenario {
         embeddedContentState.value = null
 
         sheetLauncher.launchPaymentOptions(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+            customerState = null,
+            selection = null,
+            configuration = null,
+        )
+        runCurrent()
+
+        assertFailedPaymentOptionsLaunch()
+    }
+
+    @Test
+    fun `launchPaymentOptions launches failed state when configuration is unavailable while updating`() = testScenario {
+        embeddedContentState.value = null
+        val mutationGate = CompletableDeferred<Unit>()
+        coroutineScope.launch {
+            operationCoordinator.runMutation {
+                mutationGate.await()
+                Result.success(Unit)
+            }
+        }
+        runCurrent()
+
+        sheetLauncher.launchPaymentOptions(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+            customerState = null,
+            selection = null,
+            configuration = null,
+        )
+        assertFailedPaymentOptionsLaunch()
+
+        mutationGate.complete(Unit)
+        runCurrent()
+    }
+
+    @Test
+    fun `failed payment options launch can be retried after error result`() = testScenario {
+        sheetLauncher.launchPaymentOptions(
+            paymentMethodMetadata = null,
+            customerState = null,
+            selection = null,
+            configuration = null,
+        )
+        assertFailedPaymentOptionsLaunch()
+
+        registerCall.callback.asCallbackFor<EmbeddedActivityResult>().onActivityResult(
+            EmbeddedActivityResult.Error(launchMode = EmbeddedLaunchMode.PaymentOptions)
+        )
+        assertThat(sheetStateHolder.sheetIsOpen).isFalse()
+        assertThat(launcherState.isAwaitingPaymentOptionsReady).isFalse()
+
+        val state = requireNotNull(embeddedContentState.value)
+        sheetLauncher.launchPaymentOptions(
+            paymentMethodMetadata = state.paymentMethodMetadata,
+            customerState = null,
+            selection = null,
+            configuration = state.configuration,
+        )
+        val args = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityArgs
+        assertThat(args.presentationState).isInstanceOf<EmbeddedActivityArgs.PresentationState.Ready>()
+        assertThat(sheetStateHolder.sheetIsOpen).isTrue()
+    }
+
+    @Test
+    fun `failed payment options does not launch before lifecycle creation`() = testScenario(
+        initialLifecycleState = Lifecycle.State.INITIALIZED,
+    ) {
+        sheetLauncher.launchPaymentOptions(
+            paymentMethodMetadata = null,
             customerState = null,
             selection = null,
             configuration = null,
@@ -1652,6 +1713,15 @@ internal class CheckoutSheetLauncherTest {
             createSheetLauncher(lifecycleOwner, launcherState)
             dummyActivityResultCallerScenario.awaitRegisterCall()
             dummyActivityResultCallerScenario.awaitNextRegisteredLauncher()
+        }
+
+        suspend fun assertFailedPaymentOptionsLaunch() {
+            val args = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityArgs
+            assertThat(args.presentationState).isEqualTo(EmbeddedActivityArgs.PresentationState.Failed)
+            assertThat(args.launchMode).isEqualTo(EmbeddedLaunchMode.PaymentOptions)
+            assertThat(sheetStateHolder.sheetIsOpen).isTrue()
+            assertThat(launcherState.isAwaitingPaymentOptionsReady).isFalse()
+            assertThat(errorReporter.getLoggedErrors()).isEmpty()
         }
 
         suspend fun awaitRefreshCall(): FakeCheckoutSessionRefresher.Call {
