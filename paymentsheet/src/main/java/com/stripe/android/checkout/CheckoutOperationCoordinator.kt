@@ -140,8 +140,8 @@ internal class CheckoutOperationCoordinator @Inject constructor(
         val succeeded = result as? ConfirmationHandler.Result.Succeeded
         val response = succeeded?.metadata?.get(CheckoutSessionResponseKey)
         if (response == null) {
-            refreshSession { sessionRefresher.refresh() }
-            return result to null
+            val refreshed = refreshSession { sessionRefresher.refresh() }
+            return result to refreshed.takeIf { succeeded != null }
         }
 
         // A next action returns a newer Intent than the one retrieved after /confirm.
@@ -201,13 +201,14 @@ internal class CheckoutOperationCoordinator @Inject constructor(
      * The refreshed state has to be committed before the result reaches the integrator, but a failed
      * refresh must not replace the confirmation result the integrator is waiting on.
      */
-    private suspend fun refreshSession(refresh: suspend () -> Unit) {
-        try {
+    private suspend fun <T> refreshSession(refresh: suspend () -> T): T? {
+        return try {
             refresh()
         } catch (error: CancellationException) {
             throw error
         } catch (@Suppress("TooGenericExceptionCaught") error: Exception) {
             logger.error("Failed to refresh the checkout session after confirmation.", error)
+            null
         }
     }
 

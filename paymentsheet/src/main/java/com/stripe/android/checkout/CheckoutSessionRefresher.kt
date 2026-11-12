@@ -11,7 +11,7 @@ import javax.inject.Inject
  * session or by committing a response returned by confirmation.
  */
 internal interface CheckoutSessionRefresher {
-    suspend fun refresh()
+    suspend fun refresh(): CheckoutSessionResponse?
 
     suspend fun refresh(response: CheckoutSessionResponse)
 }
@@ -34,11 +34,12 @@ internal class DefaultCheckoutSessionRefresher internal constructor(
         reloadState = checkoutStateLoader::reload,
     )
 
-    override suspend fun refresh() {
-        val state = stateHolder.state ?: return
+    override suspend fun refresh(): CheckoutSessionResponse? {
+        val state = stateHolder.state ?: return null
         val response = fetchResponse(state.checkoutSessionResponse.clientSecret).getOrThrow()
 
         refresh(response)
+        return response
     }
 
     override suspend fun refresh(response: CheckoutSessionResponse) {
