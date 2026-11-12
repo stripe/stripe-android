@@ -35,6 +35,7 @@ import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotio
 import com.stripe.android.paymentsheet.state.CustomerState
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -160,20 +161,16 @@ internal class CheckoutSheetLauncher @Inject constructor(
     ) {
         applyCustomerState(result.customerState)
         selectionHolder.setPreviousNewSelections(result.previousNewSelections)
-        val response = result.checkoutSessionResponse
-        if (response == null) {
-            selectionHolder.setSelection(result.selection)
-            if (invokeImmediateAction) rowSelectionImmediateActionHandler.invoke()
-            return
-        }
-        // Apply the selection after the refresh commits so the selection and immediate action see the
-        // sheet's response.
-        coroutineScope.launch {
-            operationCoordinator.runMutation {
-                runCatching { sessionRefresher.refresh(response) }
-            }.onFailure {
-                if (it is CancellationException) throw it
-                logger.error("Failed to refresh the checkout session after the sheet closed.", it)
+        // Apply the selection after any refresh commits so the selection and immediate action see the
+        // sheet's response. Undispatched so results without a response still apply synchronously.
+        coroutineScope.launch(start = CoroutineStart.UNDISPATCHED) {
+            result.checkoutSessionResponse?.let { response ->
+                operationCoordinator.runMutation {
+                    runCatching { sessionRefresher.refresh(response) }
+                }.onFailure {
+                    if (it is CancellationException) throw it
+                    logger.error("Failed to refresh the checkout session after the sheet closed.", it)
+                }
             }
             selectionHolder.setSelection(result.selection)
             if (invokeImmediateAction) rowSelectionImmediateActionHandler.invoke()
