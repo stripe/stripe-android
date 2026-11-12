@@ -148,6 +148,7 @@ internal class CheckoutCardIntegrationTest {
             sessionParams = CheckoutSessionParamsBuilder(unitAmount = SUBTOTAL).build(),
             configuration = configuration,
             setup = setup,
+            handleNextAction = {},
         )
         check(result)
     }
@@ -180,6 +181,7 @@ internal class CheckoutCardIntegrationTest {
                     .build(),
                 configuration = configuration,
                 setup = setup,
+                handleNextAction = {},
             )
             assertThat(result).isInstanceOf(CheckoutElementsController.Result.Completed::class.java)
         }

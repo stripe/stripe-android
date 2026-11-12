@@ -24,6 +24,7 @@ internal suspend fun runCheckoutIntegrationTest(
     sessionParams: JsonObject,
     configuration: CheckoutElementsController.Configuration,
     setup: suspend (CheckoutElementsController) -> Unit,
+    handleNextAction: suspend () -> Unit,
 ): CheckoutElementsController.Result {
     val publishableKey = backend.fetchPublishableKey().getOrThrow()
     val clientSecret = backend.createCheckoutSession(sessionParams).getOrThrow()
@@ -59,6 +60,7 @@ internal suspend fun runCheckoutIntegrationTest(
             setup(controller)
 
             presenter.confirm()
+            handleNextAction()
             withTimeout(OPERATION_TIMEOUT) { checkoutResult.await() }
         } finally {
             scenario.onActivity { controller.destroy() }
