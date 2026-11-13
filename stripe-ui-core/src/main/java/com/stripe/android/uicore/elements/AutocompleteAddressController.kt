@@ -167,7 +167,6 @@ class AutocompleteAddressController(
             countryElement = countryElement,
             sameAsShippingElement = sameAsShippingElement,
             shippingValuesMap = shippingValuesMap,
-            isPlacesAvailable = config.isPlacesAvailable,
             hideCountry = hideCountry,
             inlineAutocompleteHandler = handler,
         )
@@ -196,37 +195,11 @@ class AutocompleteAddressController(
                 nameConfig = nameConfig,
                 emailConfig = emailConfig,
             )
-        } else if (config.isInlineAutocompleteEnabled || googlePlacesApiKey == null) {
+        } else {
             AddressInputMode.NoAutocomplete(
                 phoneNumberConfig = phoneNumberConfig,
                 nameConfig = nameConfig,
                 emailConfig = emailConfig,
-            )
-        } else if (expandForm || values[FormFieldId.Line1] != null) {
-            AddressInputMode.AutocompleteExpanded(
-                googleApiKey = googlePlacesApiKey,
-                autocompleteCountries = config.autocompleteCountries,
-                phoneNumberConfig = phoneNumberConfig,
-                nameConfig = nameConfig,
-                emailConfig = emailConfig,
-                onNavigation = {
-                    interactor.onAutocomplete(
-                        country = countryDropdownFieldController.rawFieldValue.value ?: ""
-                    )
-                },
-            )
-        } else {
-            AddressInputMode.AutocompleteCondensed(
-                googleApiKey = googlePlacesApiKey,
-                autocompleteCountries = config.autocompleteCountries,
-                phoneNumberConfig = phoneNumberConfig,
-                nameConfig = nameConfig,
-                emailConfig = emailConfig,
-                onNavigation = {
-                    interactor.onAutocomplete(
-                        country = countryDropdownFieldController.rawFieldValue.value ?: ""
-                    )
-                },
             )
         }
     }

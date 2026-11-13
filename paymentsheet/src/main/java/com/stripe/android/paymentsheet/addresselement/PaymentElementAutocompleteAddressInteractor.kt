@@ -80,7 +80,6 @@ internal class PaymentElementAutocompleteAddressInteractor(
                         autocompleteConfig = AutocompleteAddressInteractor.Config(
                             googlePlacesApiKey = autocompleteConfig.googlePlacesApiKey,
                             autocompleteCountries = autocompleteConfig.autocompleteCountries,
-                            isPlacesAvailable = autocompleteConfig.isPlacesAvailable,
                             isInlineAutocompleteEnabled = autocompleteConfig.isInlineAutocompleteEnabled,
                             shouldUseStripeHostedAutocomplete = useStripeHosted ||
                                 autocompleteConfig.shouldUseStripeHostedAutocomplete,
