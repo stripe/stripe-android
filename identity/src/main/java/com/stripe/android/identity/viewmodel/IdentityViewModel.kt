@@ -171,7 +171,9 @@ internal class IdentityViewModel(
      * StateFlow to track the upload status of high/low resolution images of selfies.
      */
     private val _selfieUploadedState = MutableStateFlow(
-        savedStateHandle[SELFIE_UPLOAD_STATE] ?: SelfieUploadState()
+        // Uploads in flight at process death never complete, so drop a saved Loading state.
+        savedStateHandle.get<SelfieUploadState>(SELFIE_UPLOAD_STATE)
+            ?.takeUnless { it.isAnyLoading() } ?: SelfieUploadState()
     )
     val selfieUploadState: StateFlow<SelfieUploadState> = _selfieUploadedState
 
@@ -212,7 +214,9 @@ internal class IdentityViewModel(
      */
     @VisibleForTesting
     internal val verificationPageData = MutableStateFlow<Resource<Int>>(
-        savedStateHandle[VERIFICATION_PAGE_DATA] ?: Resource.idle()
+        // Requests in flight at process death never complete, so drop a saved Loading state.
+        savedStateHandle.get<Resource<Int>>(VERIFICATION_PAGE_DATA)
+            ?.takeUnless { it.status == Status.LOADING } ?: Resource.idle()
     )
 
     /**
@@ -220,7 +224,8 @@ internal class IdentityViewModel(
      */
     @VisibleForTesting
     internal val verificationPageSubmit = MutableStateFlow<Resource<Int>>(
-        savedStateHandle[VERIFICATION_PAGE_SUBMIT] ?: Resource.idle()
+        savedStateHandle.get<Resource<Int>>(VERIFICATION_PAGE_SUBMIT)
+            ?.takeUnless { it.status == Status.LOADING } ?: Resource.idle()
     )
 
     /**
@@ -1348,6 +1353,7 @@ internal class IdentityViewModel(
                 }
             }
         }.onFailure {
+            verificationPageSubmit.updateStateAndSave { Resource.error(msg = it.message) }
             errorCause.postValue(it)
             navController.navigateToErrorScreenWithDefaultValues(getApplication())
         }
@@ -1504,6 +1510,7 @@ internal class IdentityViewModel(
                 onCorrectResponse
             )
         }.onFailure { cause ->
+            verificationPageData.updateStateAndSave { Resource.error(msg = cause.message) }
             errorCause.postValue(cause)
             navController.navigateToErrorScreenWithDefaultValues(getApplication())
         }
