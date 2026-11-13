@@ -16,6 +16,7 @@ internal class CheckoutSessionParamsBuilder(
     private val unitAmount: Long,
 ) {
     private var customerId: String? = null
+    private var customerEmail: String = CUSTOMER_EMAIL
     private var automaticTax: Boolean = false
     private var paymentMethodSave: Boolean? = null
 
@@ -23,6 +24,12 @@ internal class CheckoutSessionParamsBuilder(
         customerId: String,
     ): CheckoutSessionParamsBuilder = apply {
         this.customerId = customerId
+    }
+
+    fun customerEmail(
+        customerEmail: String,
+    ): CheckoutSessionParamsBuilder = apply {
+        this.customerEmail = customerEmail
     }
 
     fun automaticTax(
@@ -42,7 +49,7 @@ internal class CheckoutSessionParamsBuilder(
         put("currency", CURRENCY)
         put("allowed_payment_method_types", JsonArray(listOf(JsonPrimitive("card"))))
         putCart(unitAmount, automaticTax)
-        putCustomer(customerId, automaticTax)
+        putCustomer(customerId, customerEmail, automaticTax)
         if (automaticTax) {
             put("automatic_tax", buildJsonObject { put("enabled", true) })
             put("billing_address_collection", "required")
@@ -83,9 +90,9 @@ private fun JsonObjectBuilder.putCart(unitAmount: Long, automaticTax: Boolean) {
     )
 }
 
-private fun JsonObjectBuilder.putCustomer(customerId: String?, automaticTax: Boolean) {
+private fun JsonObjectBuilder.putCustomer(customerId: String?, customerEmail: String, automaticTax: Boolean) {
     if (customerId == null) {
-        put("customer_email", CUSTOMER_EMAIL)
+        put("customer_email", customerEmail)
         return
     }
 

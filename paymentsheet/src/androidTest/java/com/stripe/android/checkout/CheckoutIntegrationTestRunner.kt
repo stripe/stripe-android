@@ -48,9 +48,11 @@ internal suspend fun runCheckoutIntegrationTest(
             lateinit var presenter: CheckoutElementsPresenter
             scenario.onActivity { activity ->
                 presenter = controller.createPresenter(activity)
+                val currencySelectorElement = presenter.currencySelectorElement()
                 val paymentElement = presenter.paymentElement()
                 activity.setContent {
                     Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                        currencySelectorElement.Content()
                         paymentElement.Content()
                     }
                 }
