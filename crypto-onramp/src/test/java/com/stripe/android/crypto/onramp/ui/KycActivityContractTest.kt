@@ -1,6 +1,7 @@
 package com.stripe.android.crypto.onramp.ui
 
 import android.app.Activity
+import android.os.Bundle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.crypto.onramp.model.KycQuestion
 import com.stripe.android.crypto.onramp.model.KycQuestionnaire
@@ -9,8 +10,10 @@ import com.stripe.android.crypto.onramp.model.KycRequirements
 import com.stripe.android.link.LinkAppearance
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
+import org.robolectric.Shadows.shadowOf
 
 @RunWith(RobolectricTestRunner::class)
 class KycActivityContractTest {
@@ -53,6 +56,28 @@ class KycActivityContractTest {
         val result = contract.parseResult(Activity.RESULT_CANCELED, null)
 
         assertThat(result.action).isEqualTo(KycScreenAction.Cancelled)
+    }
+
+    @Test
+    fun `restored activity without registered dependencies finishes with cancelled result`() {
+        val intent = contract.createIntent(
+            context,
+            KycActivityArgs(
+                requirements = requirements(),
+                linkAppearance = null,
+                submissionHandlerKey = "lost_after_process_death",
+            ),
+        )
+
+        Robolectric.buildActivity(KycActivity::class.java, intent).use { controller ->
+            controller.create(Bundle())
+            val activity = controller.get()
+            val shadow = shadowOf(activity)
+
+            assertThat(activity.isFinishing).isTrue()
+            assertThat(shadow.resultCode).isEqualTo(Activity.RESULT_CANCELED)
+            assertThat(KycActivity.actionFrom(shadow.resultIntent)).isEqualTo(KycScreenAction.Cancelled)
+        }
     }
 
     private companion object {

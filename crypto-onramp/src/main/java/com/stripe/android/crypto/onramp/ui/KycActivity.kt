@@ -28,7 +28,6 @@ import androidx.core.content.FileProvider
 import androidx.core.os.BundleCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.stripe.android.crypto.onramp.KycSubmissionHandler
 import com.stripe.android.crypto.onramp.KycSubmissionHandlerRegistry
 import com.stripe.android.crypto.onramp.R
 import com.stripe.android.crypto.onramp.model.KycRequirements
@@ -49,6 +48,14 @@ internal class KycActivity : ComponentActivity() {
             BundleCompat.getParcelable(it, EXTRA_ARGS, KycArgs::class.java)
         } ?: error("Missing KycArgs")
 
+        val uploader = KycSubmissionHandlerRegistry.uploader(args.submissionHandlerKey)
+        val submissionHandler = KycSubmissionHandlerRegistry[args.submissionHandlerKey]
+        // The registry is lost on process death. Return to the host so it can restart KYC.
+        if (uploader == null || submissionHandler == null) {
+            finishCancelled()
+            return
+        }
+
         enableEdgeToEdge()
 
         val factory = object : ViewModelProvider.Factory {
@@ -57,9 +64,8 @@ internal class KycActivity : ComponentActivity() {
                 return KycViewModel(
                     context = applicationContext,
                     stateHolder = KycStateHolder(args.requirements),
-                    uploader = KycSubmissionHandlerRegistry.uploader(args.submissionHandlerKey),
-                    submissionHandler = KycSubmissionHandlerRegistry[args.submissionHandlerKey]
-                        ?: missingSubmissionHandler(args.submissionHandlerKey),
+                    uploader = uploader,
+                    submissionHandler = submissionHandler,
                 ) as T
             }
         }
@@ -264,6 +270,10 @@ internal class KycActivity : ComponentActivity() {
             return
         }
         stateHolder.onFileSelectionCancelled()
+        finishCancelled()
+    }
+
+    private fun finishCancelled() {
         setResult(
             RESULT_CANCELED,
             createResultIntent(KycScreenAction.Cancelled),
@@ -277,14 +287,6 @@ internal class KycActivity : ComponentActivity() {
             createResultIntent(KycScreenAction.Submitted),
         )
         finish()
-    }
-
-    private fun missingSubmissionHandler(key: String): KycSubmissionHandler {
-        return KycSubmissionHandler {
-            Result.failure(
-                IllegalStateException("No KYC submission handler registered for key: $key")
-            )
-        }
     }
 
     override fun onDestroy() {
