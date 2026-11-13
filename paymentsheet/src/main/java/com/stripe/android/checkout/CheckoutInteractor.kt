@@ -143,28 +143,56 @@ internal class CheckoutInteractor @Inject constructor(
         address: CheckoutElementsController.Address.State?,
     ): OperationResult {
         val state = stateHolder.state
-        // Clearing an already-cleared address leaves the server untouched.
-        val didRequestTaxUpdate = state != null &&
+        val analyticsParams = shippingAddressAnalyticsParams(state, address)
+        return measure(
+            operation = Operation.UpdateShippingAddress,
+            params = analyticsParams,
+            startResponse = state?.checkoutSessionResponse,
+        ) {
+            // Reject a disallowed country before queueing so invalid input never shows loading.
+            if (address != null) {
+                state?.checkoutSessionResponse?.validateShippingCountry(address.country)
+                    ?.exceptionOrNull()
+                    ?.let { return@measure Result.failure(it) }
+            }
+            withCheckoutState(
+                additionalStateMutations = {
+                    copy(
+                        collectedDetails = collectedDetails.copy(
+                            shippingName = name.takeIf { address != null },
+                            shippingAddress = address,
+                        ),
+                    )
+                },
+            ) {
+                // A queued mutation may have changed the state since the call-time snapshot.
+                analyticsParams.putAll(shippingAddressAnalyticsParams(this, address))
+                // Clearing an already-cleared address leaves the server untouched.
+                if (address == null && collectedDetails.shippingAddress == null) {
+                    checkoutSessionResponse
+                } else {
+                    checkoutSessionTaxRegionUpdater.updateTaxRegionIfNeeded(
+                        checkoutSessionResponse = checkoutSessionResponse,
+                        addressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
+                        address = address,
+                    ).getOrThrow()
+                }
+            }
+        }
+    }
+
+    private fun shippingAddressAnalyticsParams(
+        state: CheckoutElementsControllerState?,
+        address: CheckoutElementsController.Address.State?,
+    ): MutableMap<String, Any?> = checkoutSessionTaxRegionUpdater.analyticsParams(
+        invocationSource = InvocationSource.Merchant,
+        didRequestTaxUpdate = state != null &&
             (address != null || state.collectedDetails.shippingAddress != null) &&
             checkoutSessionTaxRegionUpdater.requiresUpdate(
                 checkoutSessionResponse = state.checkoutSessionResponse,
                 addressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
-            )
-        return measure(
-            operation = Operation.UpdateShippingAddress,
-            params = checkoutSessionTaxRegionUpdater.analyticsParams(
-                invocationSource = InvocationSource.Merchant,
-                didRequestTaxUpdate = didRequestTaxUpdate,
             ),
-            startResponse = state?.checkoutSessionResponse,
-        ) {
-            if (address == null) {
-                clearShippingAddress()
-            } else {
-                setShippingAddress(name, address)
-            }
-        }
-    }
+    ).toMutableMap()
 
     suspend fun commitShippingAddress(
         name: String?,
@@ -200,23 +228,17 @@ internal class CheckoutInteractor @Inject constructor(
     ): OperationResult {
         val state = stateHolder.state
         val address = selection.billingDetails?.address?.toCheckoutAddress()
-        val didRequestTaxUpdate = state != null &&
-            address != null &&
-            checkoutSessionTaxRegionUpdater.requiresUpdate(
-                checkoutSessionResponse = state.checkoutSessionResponse,
-                addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
-            )
+        val analyticsParams = billingAddressAnalyticsParams(state, address)
         return measure(
             operation = Operation.UpdateBillingAddress,
-            params = checkoutSessionTaxRegionUpdater.analyticsParams(
-                invocationSource = InvocationSource.PaymentElement,
-                didRequestTaxUpdate = didRequestTaxUpdate,
-            ),
+            params = analyticsParams,
             startResponse = state?.checkoutSessionResponse,
         ) {
             withCheckoutState(
                 additionalStateMutations = { commitSelection(selection) },
             ) {
+                // A queued mutation may have changed the state since the call-time snapshot.
+                analyticsParams.putAll(billingAddressAnalyticsParams(this, address))
                 stateHolder.state = copy(
                     savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Pending(
                         selection.paymentMethod.id,
@@ -251,6 +273,19 @@ internal class CheckoutInteractor @Inject constructor(
             }
         }
     }
+
+    private fun billingAddressAnalyticsParams(
+        state: CheckoutElementsControllerState?,
+        address: CheckoutElementsController.Address.State?,
+    ): MutableMap<String, Any?> = checkoutSessionTaxRegionUpdater.analyticsParams(
+        invocationSource = InvocationSource.PaymentElement,
+        didRequestTaxUpdate = state != null &&
+            address != null &&
+            checkoutSessionTaxRegionUpdater.requiresUpdate(
+                checkoutSessionResponse = state.checkoutSessionResponse,
+                addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+            ),
+    ).toMutableMap()
 
     suspend fun updateCurrency(currency: String): OperationResult = measure(
         operation = Operation.UpdateCurrency,
@@ -310,53 +345,6 @@ internal class CheckoutInteractor @Inject constructor(
                     ).getOrThrow()
                 }
             }
-        }
-    }
-
-    private suspend fun setShippingAddress(
-        name: String?,
-        address: CheckoutElementsController.Address.State,
-    ): Result<CheckoutSessionResponse> {
-        stateHolder.state?.checkoutSessionResponse
-            ?.validateShippingCountry(address.country)
-            ?.exceptionOrNull()
-            ?.let { return Result.failure(it) }
-        return withCheckoutState(
-            additionalStateMutations = {
-                copy(
-                    collectedDetails = collectedDetails.copy(
-                        shippingName = name,
-                        shippingAddress = address,
-                    ),
-                )
-            },
-        ) {
-            checkoutSessionTaxRegionUpdater.updateTaxRegionIfNeeded(
-                checkoutSessionResponse = checkoutSessionResponse,
-                addressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
-                address = address,
-            ).getOrThrow()
-        }
-    }
-
-    private suspend fun clearShippingAddress(): Result<CheckoutSessionResponse> = withCheckoutState(
-        additionalStateMutations = {
-            copy(
-                collectedDetails = collectedDetails.copy(
-                    shippingName = null,
-                    shippingAddress = null,
-                ),
-            )
-        },
-    ) {
-        if (collectedDetails.shippingAddress == null) {
-            checkoutSessionResponse
-        } else {
-            checkoutSessionTaxRegionUpdater.updateTaxRegionIfNeeded(
-                checkoutSessionResponse = checkoutSessionResponse,
-                addressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
-                address = null,
-            ).getOrThrow()
         }
     }
 

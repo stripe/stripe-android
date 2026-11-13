@@ -28,6 +28,8 @@ import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.PaymentConfigurationTestRule
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.json.JSONArray
@@ -302,6 +304,48 @@ internal class CheckoutInteractorAnalyticsTest {
     }
 
     @Test
+    fun `queued updateShippingAddress reports the tax update it ran with`() = runConfiguredScenario(
+        initModifier = ::automaticShippingTax,
+    ) {
+        expectEvent(
+            "update_shipping_address.started",
+            analyticsPayloadField("did_request_tax_update", "true"),
+        )
+        // The clear is called while no address is set, but runs after the set commits one.
+        expectEvent(
+            "update_shipping_address.started",
+            analyticsPayloadField("did_request_tax_update", "false"),
+        )
+        expectEvent(
+            "update_shipping_address.succeeded",
+            analyticsPayloadField("did_request_tax_update", "true"),
+        )
+        expectEvent(
+            "update_shipping_address.succeeded",
+            analyticsPayloadField("did_request_tax_update", "true"),
+        )
+        networkRule.checkoutUpdate { response ->
+            response.testBodyFromFile("checkout-session-init.json", ::automaticShippingTax)
+        }
+        networkRule.checkoutUpdate { response ->
+            response.testBodyFromFile("checkout-session-init.json", ::automaticShippingTax)
+        }
+
+        coroutineScope {
+            val set = async {
+                controller.updateShippingAddress(
+                    name = "Jenny",
+                    address = CheckoutElementsController.Address(country = "US"),
+                )
+            }
+            val clear = async { controller.updateShippingAddress(name = null, address = null) }
+
+            assertSucceeded(set.await())
+            assertSucceeded(clear.await())
+        }
+    }
+
+    @Test
     fun `runServerUpdate reports the sub-durations on success`() = runConfiguredScenario {
         expectEvent(
             "run_server_update.started",
@@ -402,6 +446,16 @@ internal class CheckoutInteractorAnalyticsTest {
 
     private fun doesNotContainValue(value: String) = RequestMatcher { request ->
         value !in request.queryParams.values
+    }
+
+    private fun automaticShippingTax(json: JSONObject) {
+        json.put(
+            "automatic_tax",
+            JSONObject()
+                .put("enabled", true)
+                .put("status", "requires_address")
+                .put("address_source", "shipping"),
+        )
     }
 
     private fun automaticBillingTax(json: JSONObject) {
