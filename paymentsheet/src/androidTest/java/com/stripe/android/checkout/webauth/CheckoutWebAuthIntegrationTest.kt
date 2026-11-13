@@ -93,7 +93,25 @@ internal class CheckoutWebAuthIntegrationTest {
             handleNextAction = {
                 browserPage.awaitChromeLaunch()
                 browserPage.dismissFirstRunIfShown()
-                browserPage.awaitPageText(AUTHORIZE_TEST_PAYMENT, AUTHORIZATION_PAGE_LOAD_TIMEOUT_MS)
+                // TEMP diagnostics, remove before review.
+                try {
+                    browserPage.awaitPageText(AUTHORIZE_TEST_PAYMENT, AUTHORIZATION_PAGE_LOAD_TIMEOUT_MS)
+                } catch (e: IllegalStateException) {
+                    val texts = device.findObjects(By.text(java.util.regex.Pattern.compile(".+")))
+                        .mapNotNull { node ->
+                            runCatching { "${node.applicationPackage}/${node.className}: ${node.text}" }.getOrNull()
+                        }
+                        .take(60)
+                    val windows = device.executeShellCommand("dumpsys window windows")
+                        .lineSequence()
+                        .filter { "mCurrentFocus" in it || "mFocusedApp" in it }
+                        .toList()
+                    throw IllegalStateException(
+                        "${e.message}\nTop: ${browserPage.currentTopActivity()}\nWindows: $windows\nTexts:\n" +
+                            texts.joinToString("\n"),
+                        e,
+                    )
+                }
                 checkNotNull(device.findObject(By.textContains(AUTHORIZE_TEST_PAYMENT))) {
                     "$AUTHORIZE_TEST_PAYMENT button not found"
                 }.click()
