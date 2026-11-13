@@ -1580,7 +1580,6 @@ internal class CheckoutSheetLauncherTest {
             resultReporter = { _, _ -> },
             logger = logger,
             resultCallback = {},
-            viewModelScope = backgroundScope,
         )
         val launcherState = CheckoutSheetLauncherState(savedStateHandle)
         val embeddedContentState = MutableStateFlow<EmbeddedContentHelperStateHolder.State?>(

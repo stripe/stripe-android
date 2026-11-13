@@ -29,23 +29,17 @@ import com.stripe.android.testing.FakeLogger
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import java.util.concurrent.CopyOnWriteArrayList
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
-import kotlin.concurrent.thread
 import kotlin.test.assertFailsWith
 
 @Suppress("LargeClass")
@@ -319,6 +313,16 @@ internal class CheckoutOperationCoordinatorTest {
     }
 
     @Test
+    fun `status updates synchronously when a mutation starts and finishes`() = runScenario {
+        val statusDuringMutation = coordinator.runMutation {
+            Result.success(coordinator.status.value)
+        }
+
+        assertThat(statusDuringMutation.getOrThrow()).isEqualTo(CheckoutOperationCoordinator.Status.Updating)
+        assertThat(coordinator.status.value).isEqualTo(CheckoutOperationCoordinator.Status.Idle)
+    }
+
+    @Test
     fun `failed mutation returns the failure and resets status`() = runScenario {
         val releaseMutation = CompletableDeferred<Unit>()
         val expectedException = IllegalStateException("Mutation failed")
@@ -452,7 +456,10 @@ internal class CheckoutOperationCoordinatorTest {
             releaseMutation.complete(Unit)
             val result = mutation.await()
 
-            assertThat(result.exceptionOrNull()).isSameInstanceAs(expectedException)
+            // Coroutine stack-trace recovery copies exceptions thrown across the coordinator's withContext.
+            val exception = result.exceptionOrNull()
+            assertThat(exception).isInstanceOf<IllegalStateException>()
+            assertThat(exception).hasMessageThat().isEqualTo(expectedException.message)
             assertThat(awaitItem()).isEqualTo(CheckoutOperationCoordinator.Status.Idle)
         }
 
@@ -479,26 +486,16 @@ internal class CheckoutOperationCoordinatorTest {
     }
 
     @Test
-    fun `rejection callback runs outside admission lock`() {
+    fun `rejection callback can synchronously re-enter confirmation admission`() {
         lateinit var operationCoordinator: CheckoutOperationCoordinator
-        val mutationResults = Turbine<Result<Unit>>()
         val callbackResults = Turbine<CheckoutElementsController.Result>()
+        val reentrantArguments = Turbine<ConfirmationHandler.Args?>()
         runScenario(
             resultCallback = CheckoutElementsController.ResultCallback { result ->
-                val mutationFinished = CountDownLatch(1)
-                thread(isDaemon = true) {
-                    try {
-                        runBlocking {
-                            mutationResults.add(operationCoordinator.runMutation { Result.success(Unit) })
-                        }
-                    } finally {
-                        mutationFinished.countDown()
-                    }
-                }
-                check(mutationFinished.await(5, TimeUnit.SECONDS)) {
-                    "Rejection callback must allow another thread to acquire the admission lock."
-                }
                 callbackResults.add(result)
+                reentrantArguments.add(
+                    operationCoordinator.tryBeginConfirmation { Result.success(CONFIRMATION_PARAMETERS) }
+                )
             },
         ) {
             operationCoordinator = coordinator
@@ -508,12 +505,11 @@ internal class CheckoutOperationCoordinatorTest {
             val result = callbackResults.awaitItem()
             assertThat(result).isInstanceOf<CheckoutElementsController.Result.Failed>()
             assertThat((result as CheckoutElementsController.Result.Failed).error).isSameInstanceAs(expected)
-            assertThat(mutationResults.awaitItem().isSuccess).isTrue()
-            runCurrent()
-            assertThat(coordinator.status.value).isEqualTo(CheckoutOperationCoordinator.Status.Idle)
+            assertThat(reentrantArguments.awaitItem()).isEqualTo(CONFIRMATION_PARAMETERS)
+            assertThat(coordinator.status.value).isEqualTo(CheckoutOperationCoordinator.Status.Updating)
         }
-        mutationResults.ensureAllEventsConsumed()
         callbackResults.ensureAllEventsConsumed()
+        reentrantArguments.ensureAllEventsConsumed()
     }
 
     @Test
@@ -1164,44 +1160,30 @@ internal class CheckoutOperationCoordinatorTest {
     }
 
     @Test
-    fun `overlapping completion signals deliver exactly one result`() {
-        val callbackStarted = CountDownLatch(1)
-        val releaseCallback = CountDownLatch(1)
-        val deliveredResults = CopyOnWriteArrayList<CheckoutElementsController.Result>()
-        runScenario(
-            resultCallback = CheckoutElementsController.ResultCallback { result ->
-                deliveredResults += result
-                callbackStarted.countDown()
-                check(releaseCallback.await(5, TimeUnit.SECONDS)) {
-                    "Timed out waiting to release the result callback."
-                }
-            },
-        ) {
-            val expected = IllegalStateException("Start failed")
-            assertThat(coordinator.tryBeginConfirmation { Result.success(CONFIRMATION_PARAMETERS) }).isNotNull()
+    fun `overlapping completion signals deliver exactly one result`() = runScenario {
+        val expected = IllegalStateException("Start failed")
+        assertThat(coordinator.tryBeginConfirmation { Result.success(CONFIRMATION_PARAMETERS) }).isNotNull()
 
-            enqueueRefreshAction {}
-            val failureCompletion = async(Dispatchers.Default) {
-                coordinator.failConfirmation(expected)
-            }
-            assertThat(callbackStarted.await(5, TimeUnit.SECONDS)).isTrue()
+        val releaseRefresh = CompletableDeferred<Unit>()
+        enqueueRefreshAction { releaseRefresh.await() }
+        val failureCompletion = async { coordinator.failConfirmation(expected) }
+        assertThat(refreshCalls.awaitItem()).isEqualTo(FakeCheckoutSessionRefresher.Call.Fetch)
 
-            confirmationState.value = ConfirmationHandler.State.Complete(
-                ConfirmationHandler.Result.Succeeded(PaymentIntentFixtures.PI_SUCCEEDED)
-            )
-            runCurrent()
+        confirmationState.value = ConfirmationHandler.State.Complete(
+            ConfirmationHandler.Result.Succeeded(PaymentIntentFixtures.PI_SUCCEEDED)
+        )
+        runCurrent()
+        resultTurbine.expectNoEvents()
+        refreshCalls.expectNoEvents()
 
-            assertThat(deliveredResults).hasSize(1)
-            releaseCallback.countDown()
-            failureCompletion.await()
-            refreshCalls.awaitItem()
+        releaseRefresh.complete(Unit)
+        failureCompletion.await()
 
-            assertThat(deliveredResults).hasSize(1)
-            val result = deliveredResults.single()
-            assertThat(result).isInstanceOf<CheckoutElementsController.Result.Failed>()
-            assertThat((result as CheckoutElementsController.Result.Failed).error).isSameInstanceAs(expected)
-            assertThat(coordinator.status.value).isEqualTo(CheckoutOperationCoordinator.Status.Idle)
-        }
+        val result = resultTurbine.awaitItem()
+        assertThat(result).isInstanceOf<CheckoutElementsController.Result.Failed>()
+        assertThat((result as CheckoutElementsController.Result.Failed).error).isSameInstanceAs(expected)
+        resultTurbine.expectNoEvents()
+        assertThat(coordinator.status.value).isEqualTo(CheckoutOperationCoordinator.Status.Idle)
     }
 
     @Test
@@ -1290,7 +1272,6 @@ internal class CheckoutOperationCoordinatorTest {
             resultReporter = resultReporter,
             logger = logger,
             resultCallback = resultCallback ?: CheckoutElementsController.ResultCallback(resultTurbine::add),
-            viewModelScope = backgroundScope,
         )
         val observerJob = backgroundScope.launch {
             coordinator.observeConfirmationResults()
