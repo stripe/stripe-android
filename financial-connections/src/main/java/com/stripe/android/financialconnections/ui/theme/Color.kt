@@ -50,10 +50,24 @@ internal val Brand600 = Color(0xFF533AFD)
 
 // Link
 internal val LinkGreen50 = Color(0xFFE6FFED)
-internal val LinkGreen50Dark = Color(0xFF16211F)
 internal val LinkGreen200 = Color(0xFF00D66F)
-internal val LinkGreen500 = Color(0xFF008545)
 internal val LinkGreen900 = Color(0xFF011E0F)
+
+// Link DS 3.0. Unlike the palette above, these are a pure grey ramp rather than FC's
+// blue-tinted neutrals, and they are not light/dark pairs: the light/dark split happens
+// at the semantic-token layer in [Theme].
+internal val LinkNeutral0 = Color(0xFFFFFFFF)
+internal val LinkNeutral100 = Color(0xFFF5F5F5)
+internal val LinkNeutral200 = Color(0xFFE5E5E5)
+internal val LinkNeutral600 = Color(0xFF707070)
+internal val LinkNeutral700 = Color(0xFF404040)
+internal val LinkNeutral800 = Color(0xFF262626)
+internal val LinkNeutral900 = Color(0xFF171717)
+internal val LinkBrand600 = Color(0xFF006635)
+
+// Same values as LinkGreen50 / LinkGreen900, aliased under their DS 3.0 names.
+internal val LinkBrand50 = LinkGreen50
+internal val LinkBrand900 = LinkGreen900
 
 @Immutable
 internal data class FinancialConnectionsColors(
@@ -75,8 +89,21 @@ internal data class FinancialConnectionsColors(
     val logo: Color,
     val iconTint: Color,
     val iconBackground: Color,
+    /**
+     * Background for icons that sit on top of a grouped card surface. For themes without a card
+     * treatment this is the same as [iconBackground]; the Link DS 3.0 theme uses a slightly
+     * darker shade so the icon container stays visible against the card.
+     */
+    val iconBackgroundOnCard: Color,
     val spinner: Color,
     val border: Color,
+    val successIconBackground: Color,
+    val successIconForeground: Color,
+    val textPrimary: Color,
+    val textTertiary: Color,
+    val iconSecondary: Color,
+    val borderOnCard: Color,
+    val dividerOnCard: Color,
 )
 
 @Preview(group = "Components", name = "Colors")
@@ -104,8 +131,16 @@ internal fun ColorsPreview() {
             ColorPreview("logo", colors.logo)
             ColorPreview("iconTint", colors.iconTint)
             ColorPreview("iconBackground", colors.iconBackground)
+            ColorPreview("iconBackgroundOnCard", colors.iconBackgroundOnCard)
             ColorPreview("spinner", colors.spinner)
             ColorPreview("border", colors.border)
+            ColorPreview("successIconBackground", colors.successIconBackground)
+            ColorPreview("successIconForeground", colors.successIconForeground)
+            ColorPreview("textPrimary", colors.textPrimary)
+            ColorPreview("textTertiary", colors.textTertiary)
+            ColorPreview("iconSecondary", colors.iconSecondary)
+            ColorPreview("borderOnCard", colors.borderOnCard)
+            ColorPreview("dividerOnCard", colors.dividerOnCard)
         }
     }
 }

@@ -30,6 +30,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.testTag
@@ -59,11 +60,13 @@ import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.sdui.BulletUI
 import com.stripe.android.financialconnections.ui.sdui.fromHtml
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 import com.stripe.android.financialconnections.ui.theme.Layout
 import com.stripe.android.financialconnections.ui.theme.StripeThemeForConnections
 import com.stripe.android.financialconnections.ui.theme.Theme
+import com.stripe.android.financialconnections.ui.theme.isLink
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.uicore.elements.DropDown
 import com.stripe.android.uicore.elements.PhoneNumberCollectionSection
@@ -164,36 +167,14 @@ private fun NetworkingLinkSignupLoaded(
     Layout(
         scrollState = scrollState,
         body = {
-            Title(payload.content.title)
-            Spacer(modifier = Modifier.size(24.dp))
-
-            if (payload.content.message != null) {
-                Body(payload.content.message)
-                Spacer(modifier = Modifier.size(24.dp))
-            }
-
-            for (bullet in payload.content.bullets) {
-                ListItem(
-                    bullet = BulletUI.from(bullet),
-                    onClickableTextClick = onClickableTextClick
-                )
-                Spacer(modifier = Modifier.size(16.dp))
-            }
-
-            EmailSection(
+            NetworkingLinkSignupBody(
+                payload = payload,
                 showFullForm = showFullForm,
-                loading = lookupAccountSync is Loading,
-                emailController = payload.emailController,
-                enabled = true,
-                focusRequester = emailFocusRequester,
+                lookupAccountSync = lookupAccountSync,
+                emailFocusRequester = emailFocusRequester,
+                phoneNumberFocusRequester = phoneNumberFocusRequester,
+                onClickableTextClick = onClickableTextClick,
             )
-
-            AnimatedVisibility(showFullForm) {
-                PhoneNumberSection(
-                    payload = payload,
-                    focusRequester = phoneNumberFocusRequester,
-                )
-            }
         },
         footer = {
             NetworkingLinkSignupFooter(
@@ -206,6 +187,47 @@ private fun NetworkingLinkSignupLoaded(
             )
         }
     )
+}
+
+@Composable
+private fun NetworkingLinkSignupBody(
+    payload: Payload,
+    showFullForm: Boolean,
+    lookupAccountSync: Async<ConsumerSessionLookup>,
+    emailFocusRequester: FocusRequester,
+    phoneNumberFocusRequester: FocusRequester,
+    onClickableTextClick: (String) -> Unit,
+) {
+    val isLink = FinancialConnectionsTheme.theme.isLink
+    Title(payload.content.title)
+    if (payload.content.message != null) {
+        Spacer(modifier = Modifier.size(if (isLink) 4.dp else 24.dp))
+        Body(payload.content.message)
+    }
+    Spacer(modifier = Modifier.size(if (isLink) 16.dp else 24.dp))
+
+    for (bullet in payload.content.bullets) {
+        ListItem(
+            bullet = BulletUI.from(bullet),
+            onClickableTextClick = onClickableTextClick,
+        )
+        Spacer(modifier = Modifier.size(16.dp))
+    }
+
+    EmailSection(
+        showFullForm = showFullForm,
+        loading = lookupAccountSync is Loading,
+        emailController = payload.emailController,
+        enabled = true,
+        focusRequester = emailFocusRequester,
+    )
+
+    AnimatedVisibility(showFullForm) {
+        PhoneNumberSection(
+            payload = payload,
+            focusRequester = phoneNumberFocusRequester,
+        )
+    }
 }
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -224,7 +246,7 @@ private fun NetworkingLinkSignupFooter(
         onClickableTextClick = onClickableTextClick,
         defaultStyle = typography.labelSmall.copy(
             textAlign = TextAlign.Center,
-            color = colors.textDefault
+            color = colors.textTertiary
         )
     )
     Spacer(modifier = Modifier.size(16.dp))
@@ -261,10 +283,13 @@ private fun PhoneNumberSection(
     focusRequester: FocusRequester,
 ) {
     var focused by remember { mutableStateOf(false) }
+    val focusedBackground = linkFocusedComponentBackground()
     Column {
-        StripeThemeForConnections {
+        StripeThemeForConnections(
+            componentBackground = focusedBackground.takeIf { focused },
+        ) {
             PhoneNumberCollectionSection(
-                modifier = Modifier.onFocusChanged { focused = it.isFocused },
+                modifier = Modifier.onFocusChanged { focused = it.hasFocus },
                 countryDropdown = {
                     DropDown(
                         controller = payload.phoneController.countryDropdownController,
@@ -289,10 +314,13 @@ private fun PhoneNumberSection(
 
 @Composable
 private fun Title(title: String) {
+    val isLink = FinancialConnectionsTheme.theme.isLink
     AnnotatedText(
+        modifier = Modifier.fillMaxWidth(),
         text = TextResource.Text(fromHtml(title)),
         defaultStyle = typography.headingXLarge.copy(
-            color = colors.textDefault,
+            color = colors.textPrimary,
+            textAlign = if (isLink) TextAlign.Center else TextAlign.Start,
         ),
         onClickableTextClick = {},
     )
@@ -300,10 +328,13 @@ private fun Title(title: String) {
 
 @Composable
 private fun Body(body: String) {
+    val isLink = FinancialConnectionsTheme.theme.isLink
     AnnotatedText(
+        modifier = Modifier.fillMaxWidth(),
         text = TextResource.Text(fromHtml(body)),
         defaultStyle = typography.bodyMedium.copy(
-            color = colors.textDefault,
+            color = colors.textTertiary,
+            textAlign = if (isLink) TextAlign.Center else TextAlign.Start,
         ),
         onClickableTextClick = {},
     )
@@ -318,7 +349,10 @@ internal fun EmailSection(
     focusRequester: FocusRequester,
 ) {
     var focused by remember { mutableStateOf(false) }
-    StripeThemeForConnections {
+    val focusedBackground = linkFocusedComponentBackground()
+    StripeThemeForConnections(
+        componentBackground = focusedBackground.takeIf { focused },
+    ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -356,6 +390,18 @@ internal fun EmailSection(
             }
         }
     }
+}
+
+/**
+ * The Link DS 3.0 field background while focused, or null outside the Link theme. Read eagerly, not
+ * inside a focus-dependent branch: a composable read that only runs when focused changes the
+ * composition groups on each focus change and recreates the field, so it immediately loses focus.
+ */
+@Composable
+private fun linkFocusedComponentBackground(): Color? {
+    val isLink = FinancialConnectionsTheme.theme.isLink
+    val background = colors.background
+    return background.takeIf { isLink }
 }
 
 private suspend fun ScrollState.animateScrollToBottom(

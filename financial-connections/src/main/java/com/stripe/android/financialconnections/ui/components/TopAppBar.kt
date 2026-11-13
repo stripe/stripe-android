@@ -6,6 +6,7 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
 import androidx.compose.material.AppBarDefaults
@@ -41,6 +42,7 @@ import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.LocalNavHostController
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.Theme
+import com.stripe.android.financialconnections.ui.theme.isLink
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.uicore.navigation.KeyboardController
 import com.stripe.android.uicore.navigation.rememberKeyboardController
@@ -48,7 +50,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import com.stripe.android.uicore.R as StripeUiCoreR
 
-private val LOGO_HEIGHT = 20.dp
+private val LogoHeight = 20.dp
+private val LinkLogoHeight = 24.dp
 
 @Composable
 internal fun FinancialConnectionsTopAppBar(
@@ -88,40 +91,55 @@ private fun FinancialConnectionsTopAppBar(
 
     val keyboardController = rememberKeyboardController()
     val scope = rememberCoroutineScope()
+    // Link DS 3.0 centers the logo across the full bar width, independent of the back button.
+    val centerTitle = theme.isLink
 
-    TopAppBar(
-        title = {
+    Box(modifier = modifier) {
+        TopAppBar(
+            title = {
+                if (!centerTitle) {
+                    Title(
+                        hideStripeLogo = hideStripeLogo,
+                        theme = theme,
+                        linkBrand = linkBrand,
+                    )
+                }
+            },
+            elevation = 0.dp,
+            navigationIcon = if (canShowBackIcon && allowBackNavigation) {
+                {
+                    BackButton(
+                        scope = scope,
+                        keyboardController = keyboardController,
+                        localBackPressed = localBackPressed
+                    )
+                }
+            } else {
+                null
+            },
+            actions = {
+                CloseButton(
+                    scope = scope,
+                    keyboardController = keyboardController,
+                    onCloseClick = onCloseClick
+                )
+            },
+            backgroundColor = FinancialConnectionsTheme.colors.background,
+            contentColor = FinancialConnectionsTheme.colors.textAction,
+            modifier = Modifier.graphicsLayer {
+                shadowElevation = elevation.value.toPx()
+            }
+        )
+
+        if (centerTitle) {
             Title(
                 hideStripeLogo = hideStripeLogo,
                 theme = theme,
                 linkBrand = linkBrand,
+                modifier = Modifier.align(Alignment.Center),
             )
-        },
-        elevation = 0.dp,
-        navigationIcon = if (canShowBackIcon && allowBackNavigation) {
-            {
-                BackButton(
-                    scope = scope,
-                    keyboardController = keyboardController,
-                    localBackPressed = localBackPressed
-                )
-            }
-        } else {
-            null
-        },
-        actions = {
-            CloseButton(
-                scope = scope,
-                keyboardController = keyboardController,
-                onCloseClick = onCloseClick
-            )
-        },
-        backgroundColor = FinancialConnectionsTheme.colors.background,
-        contentColor = FinancialConnectionsTheme.colors.textAction,
-        modifier = modifier.graphicsLayer {
-            shadowElevation = elevation.value.toPx()
         }
-    )
+    }
 }
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -177,17 +195,19 @@ private fun Title(
     hideStripeLogo: Boolean,
     theme: Theme,
     linkBrand: LinkBrand,
+    modifier: Modifier = Modifier,
 ) {
     Row(
+        modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         if (hideStripeLogo.not()) {
             Image(
-                modifier = Modifier.height(LOGO_HEIGHT),
+                modifier = Modifier.height(if (theme.isLink) LinkLogoHeight else LogoHeight),
                 contentScale = ContentScale.FillHeight,
                 painter = painterResource(id = theme.icon(linkBrand)),
-                colorFilter = if (isSystemInDarkTheme()) {
+                colorFilter = if (theme.isLink.not() && isSystemInDarkTheme()) {
                     ColorFilter.tint(FinancialConnectionsTheme.colors.textDefault)
                 } else {
                     null
@@ -228,10 +248,25 @@ internal fun TopAppBarWithStripeLogoPreview() {
     }
 }
 
+@Preview(group = "Components", name = "TopAppBar - OneLink")
+@Composable
+internal fun TopAppBarWithOneLinkLogoPreview() {
+    FinancialConnectionsPreview(theme = Theme.Link(ThemeMode.Automatic)) {
+        FinancialConnectionsTopAppBar(
+            state = TopAppBarState(
+                hideStripeLogo = false,
+                linkBrand = LinkBrand.Onelink,
+                theme = Theme.Link(ThemeMode.Automatic),
+            ),
+            onCloseClick = {},
+        )
+    }
+}
+
 @Preview(group = "Components", name = "TopAppBar - Instant Debits")
 @Composable
 internal fun TopAppBarWithLinkLogoPreview() {
-    FinancialConnectionsPreview {
+    FinancialConnectionsPreview(theme = Theme.Link(ThemeMode.Automatic)) {
         FinancialConnectionsTopAppBar(
             state = TopAppBarState(
                 hideStripeLogo = false,

@@ -12,12 +12,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.domain.ConfirmVerification.OTPError
 import com.stripe.android.financialconnections.domain.ConfirmVerification.OTPError.Type
@@ -26,10 +29,13 @@ import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.StringAnnotation
 import com.stripe.android.financialconnections.ui.components.TestModeBanner
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 import com.stripe.android.financialconnections.ui.theme.StripeThemeForConnections
+import com.stripe.android.financialconnections.ui.theme.isLink
 import com.stripe.android.uicore.elements.OTPElement
+import com.stripe.android.uicore.elements.OTPElementColors
 import com.stripe.android.uicore.elements.OTPElementUI
 
 @Composable
@@ -41,6 +47,7 @@ internal fun VerificationSection(
     modifier: Modifier = Modifier,
 ) {
     val view = LocalView.current
+    val isLink = FinancialConnectionsTheme.theme.isLink
     Column(modifier) {
         StripeThemeForConnections {
             if (LocalTestMode.current) {
@@ -59,7 +66,16 @@ internal fun VerificationSection(
                 middleSpacing = 8.dp,
                 boxTextStyle = typography.headingXLargeSubdued.copy(
                     color = colors.textDefault,
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
+                    fontSize = if (isLink) 24.sp else 28.sp,
+                    fontWeight = if (isLink) FontWeight.SemiBold else FontWeight.Normal,
+                ),
+                colors = OTPElementColors(
+                    selectedBorder = colors.textFieldFocused,
+                    unselectedBorder = colors.borderNeutral,
+                    placeholder = colors.textSubdued,
+                    background = if (isLink) colors.iconBackground else Color.Transparent,
+                    selectedBackground = if (isLink) colors.iconBackground else Color.Transparent,
                 ),
                 focusRequester = focusRequester,
                 enabled = enabled,

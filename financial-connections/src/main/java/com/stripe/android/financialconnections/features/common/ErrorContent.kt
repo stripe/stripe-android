@@ -16,6 +16,7 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.intl.Locale
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.exception.APIException
@@ -32,9 +33,11 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.components.pluralStringResource
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 import com.stripe.android.financialconnections.ui.theme.LazyLayout
+import com.stripe.android.financialconnections.ui.theme.isLink
 import com.stripe.android.model.LinkBrand
 import java.text.SimpleDateFormat
 
@@ -271,6 +274,7 @@ internal fun ErrorContent(
     secondaryCta: Pair<String, () -> Unit>? = null
 ) {
     val view = LocalView.current
+    val isLink = FinancialConnectionsTheme.theme.isLink
     LaunchedEffect(Unit) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             view.performHapticFeedback(REJECT)
@@ -279,51 +283,86 @@ internal fun ErrorContent(
     LazyLayout(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         body = {
-            iconContent?.let {
-                item { Box(modifier = Modifier.padding(top = 16.dp)) { it() } }
-            }
-            item {
-                Text(
-                    text = title,
-                    style = typography.headingXLarge,
-                    color = colors.textDefault,
-                )
-            }
-            item {
-                Text(
-                    text = content,
-                    style = typography.bodyMedium,
-                    color = colors.textDefault,
-                )
-            }
+            errorBody(
+                iconContent = iconContent,
+                title = title,
+                content = content,
+                isLink = isLink,
+            )
         },
         footer = {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                secondaryCta?.let { (text, onClick) ->
-                    FinancialConnectionsButton(
-                        type = FinancialConnectionsButton.Type.Secondary,
-                        onClick = onClick,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                    ) {
-                        Text(text = text)
-                    }
-                }
-                primaryCta?.let { (text, onClick) ->
-                    FinancialConnectionsButton(
-                        type = FinancialConnectionsButton.Type.Primary,
-                        onClick = onClick,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                    ) {
-                        Text(text = text)
-                    }
-                }
-            }
+            ErrorFooter(primaryCta = primaryCta, secondaryCta = secondaryCta)
         }
     )
+}
+
+private fun androidx.compose.foundation.lazy.LazyListScope.errorBody(
+    iconContent: @Composable (() -> Unit)?,
+    title: String,
+    content: String,
+    isLink: Boolean,
+) {
+    iconContent?.let {
+        item {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp),
+                contentAlignment = if (isLink) {
+                    androidx.compose.ui.Alignment.Center
+                } else {
+                    androidx.compose.ui.Alignment.CenterStart
+                },
+            ) {
+                it()
+            }
+        }
+    }
+    item {
+        Text(
+            text = title,
+            style = typography.headingXLarge,
+            color = colors.textPrimary,
+            textAlign = if (isLink) TextAlign.Center else TextAlign.Start,
+            modifier = Modifier.fillMaxWidth(),
+        )
+    }
+    item {
+        Text(
+            text = content,
+            style = typography.bodyMedium,
+            color = colors.textTertiary,
+            textAlign = if (isLink) TextAlign.Center else TextAlign.Start,
+            modifier = Modifier.fillMaxWidth(),
+        )
+    }
+}
+
+@Composable
+private fun ErrorFooter(
+    primaryCta: Pair<String, () -> Unit>?,
+    secondaryCta: Pair<String, () -> Unit>?,
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        secondaryCta?.let { (text, onClick) ->
+            FinancialConnectionsButton(
+                type = FinancialConnectionsButton.Type.Secondary,
+                onClick = onClick,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text(text = text)
+            }
+        }
+        primaryCta?.let { (text, onClick) ->
+            FinancialConnectionsButton(
+                type = FinancialConnectionsButton.Type.Primary,
+                onClick = onClick,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text(text = text)
+            }
+        }
+    }
 }
 
 @Preview(group = "Errors", name = "no accounts available error")

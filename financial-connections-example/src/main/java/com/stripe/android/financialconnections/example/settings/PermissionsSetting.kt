@@ -11,12 +11,13 @@ data class PermissionsSetting(
     options = Permission.entries.map { Option(it.name, it) },
     selectedOption = selectedOption
 ) {
+    // Omit the parameter when nothing is selected. The API rejects an empty permissions entry.
     override fun lasRequest(body: LinkAccountSessionBody): LinkAccountSessionBody = body.copy(
-        permissions = convertToString(selectedOption)
+        permissions = convertToString(selectedOption).ifEmpty { null }
     )
 
     override fun paymentIntentRequest(body: PaymentIntentBody): PaymentIntentBody = body.copy(
-        permissions = convertToString(selectedOption)
+        permissions = convertToString(selectedOption).ifEmpty { null }
     )
 
     override fun valueUpdated(currentSettings: List<Setting<*>>, value: List<Permission>): List<Setting<*>> =

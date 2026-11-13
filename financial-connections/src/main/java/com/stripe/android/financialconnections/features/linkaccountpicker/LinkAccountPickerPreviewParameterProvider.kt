@@ -22,7 +22,7 @@ internal class LinkAccountPickerPreviewParameterProvider :
         oneAccount()
     )
 
-    private fun canonical() = LinkAccountPickerState(
+    internal fun canonical() = LinkAccountPickerState(
         payload = Success(
             LinkAccountPickerState.Payload(
                 title = display().title,
@@ -42,7 +42,7 @@ internal class LinkAccountPickerPreviewParameterProvider :
         ),
     )
 
-    private fun loading() = LinkAccountPickerState(
+    internal fun loading() = LinkAccountPickerState(
         payload = Loading(),
     )
 

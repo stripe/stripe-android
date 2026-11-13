@@ -21,7 +21,7 @@ internal class NetworkingSaveToLinkVerificationPreviewParameterProvider :
         returningUser()
     )
 
-    private fun canonical() = NetworkingSaveToLinkVerificationState(
+    internal fun canonical() = NetworkingSaveToLinkVerificationState(
         payload = Success(payload()),
         confirmVerification = Uninitialized
     )

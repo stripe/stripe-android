@@ -17,7 +17,7 @@ internal class GenericScreenPreviewParameterProvider : PreviewParameterProvider<
         modal()
     )
 
-    private fun canonical() = GenericScreenState(
+    internal fun canonical() = GenericScreenState(
         inModal = false,
         screen = FinancialConnectionsGenericInfoScreen(
             id = "sampleScreen1",
