@@ -34,6 +34,7 @@ internal object CommonConfigurationFactory {
     ): CommonConfiguration = CommonConfiguration(
         merchantDisplayName = merchantDisplayName,
         customer = customer,
+        savePaymentMethodOptInBehavior = PaymentSheet.SavePaymentMethodOptInBehavior.Automatic,
         googlePay = googlePay,
         defaultBillingDetails = defaultBillingDetails,
         shippingDetails = shippingDetails,

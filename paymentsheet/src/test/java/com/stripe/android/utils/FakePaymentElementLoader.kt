@@ -64,6 +64,7 @@ internal class FakePaymentElementLoader(
     ): PaymentMethodMetadata {
         return PaymentMethodMetadataFactory.create(
             hasCustomerConfiguration = customer != null,
+            savePaymentMethodOptInBehavior = configuration.savePaymentMethodOptInBehavior,
             stripeIntent = stripeIntent,
             billingDetailsCollectionConfiguration = configuration
                 .billingDetailsCollectionConfiguration,

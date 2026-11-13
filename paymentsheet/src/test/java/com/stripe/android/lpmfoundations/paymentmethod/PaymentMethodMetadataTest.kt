@@ -1,6 +1,8 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
+import android.os.Parcel
 import com.google.common.truth.Truth.assertThat
+import com.google.testing.junit.testparameterinjector.TestParameter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.model.asCommonConfiguration
@@ -58,17 +60,39 @@ import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SimpleTextElement
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
+import kotlinx.parcelize.parcelableCreator
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
-import org.robolectric.RobolectricTestRunner
+import org.robolectric.RobolectricTestParameterInjector
 import kotlin.test.assertFails
 import com.stripe.android.core.R as CoreR
 import com.stripe.android.uicore.R as UiCoreR
 
-@RunWith(RobolectricTestRunner::class)
+@RunWith(RobolectricTestParameterInjector::class)
 internal class PaymentMethodMetadataTest {
+
+    @Test
+    fun `save behavior propagates from configuration and survives parceling`(
+        @TestParameter behavior: PaymentSheet.SavePaymentMethodOptInBehavior,
+    ) {
+        val configuration = PaymentSheet.Configuration.Builder("Test")
+            .savePaymentMethodOptInBehavior(behavior)
+            .build()
+        val metadata = createPaymentElementMetadata(configuration = configuration)
+
+        assertThat(metadata.savePaymentMethodOptInBehavior).isEqualTo(behavior)
+        val parcel = Parcel.obtain()
+        try {
+            metadata.writeToParcel(parcel, 0)
+            parcel.setDataPosition(0)
+            val restored = parcelableCreator<PaymentMethodMetadata>().createFromParcel(parcel)
+            assertThat(restored).isEqualTo(metadata)
+        } finally {
+            parcel.recycle()
+        }
+    }
 
     @get:Rule
     val disableNfcScanningFeatureFlagRule = FeatureFlagTestRule(
@@ -1157,6 +1181,7 @@ internal class PaymentMethodMetadataTest {
             billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
             allowsDelayedPaymentMethods = true,
             allowsPaymentMethodsRequiringShippingAddress = false,
+            savePaymentMethodOptInBehavior = PaymentSheet.SavePaymentMethodOptInBehavior.Automatic,
             allowsLinkInSavedPaymentMethods = false,
             availableWallets = listOf(WalletType.Link),
             paymentMethodOrder = listOf("us_bank_account", "card", "sepa_debit"),
@@ -1333,6 +1358,7 @@ internal class PaymentMethodMetadataTest {
             billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
             allowsDelayedPaymentMethods = true,
             allowsPaymentMethodsRequiringShippingAddress = false,
+            savePaymentMethodOptInBehavior = PaymentSheet.SavePaymentMethodOptInBehavior.Automatic,
             allowsLinkInSavedPaymentMethods = false,
             availableWallets = emptyList(),
             paymentMethodOrder = listOf("us_bank_account", "card", "sepa_debit"),
@@ -2474,6 +2500,7 @@ internal class PaymentMethodMetadataTest {
             PaymentElementLoader.InitializationMode.PaymentIntent("cs_123"),
         integrationMetadata: IntegrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
         linkStateResult: LinkStateResult? = null,
+        configuration: PaymentSheet.Configuration = PaymentSheetFixtures.CONFIG_CUSTOMER,
     ): PaymentMethodMetadata {
         val elementsSession = (
             elementsSession
@@ -2496,7 +2523,7 @@ internal class PaymentMethodMetadataTest {
 
         return PaymentMethodMetadata.createForPaymentElement(
             elementsSession = elementsSession,
-            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
+            configuration = configuration.asCommonConfiguration(),
             externalPaymentMethodSpecs = emptyList(),
             isGooglePayReady = false,
             linkStateResult = linkStateResult,

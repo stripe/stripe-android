@@ -49,6 +49,7 @@ internal class USBankAccountFormArguments(
     val linkMode: LinkMode?,
     val onBehalfOf: String?,
     val showCheckbox: Boolean,
+    val savePaymentMethodOptInBehavior: PaymentSheet.SavePaymentMethodOptInBehavior,
     val isCompleteFlow: Boolean,
     val primaryButtonIcon: StateFlow<PrimaryButtonIcon>,
     val isPaymentFlow: Boolean,
