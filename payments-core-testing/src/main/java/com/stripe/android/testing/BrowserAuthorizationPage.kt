@@ -14,6 +14,15 @@ class BrowserAuthorizationPage(
     private val device: UiDevice,
     private val composeTestRule: ComposeTestRule,
 ) {
+    fun awaitChromeLaunch() {
+        composeTestRule.waitUntil(
+            conditionDescription = "Chrome to launch",
+            timeoutMillis = BROWSER_LAUNCH_TIMEOUT_MS,
+        ) {
+            currentTopActivity()?.contains(CHROME_PACKAGE) == true
+        }
+    }
+
     fun dismissFirstRunIfShown() {
         sleep(CHROME_ACTIVITY_TRANSITION_MS)
         if (currentTopActivity()?.contains(CHROME_FIRST_RUN_ACTIVITY) == true) {
