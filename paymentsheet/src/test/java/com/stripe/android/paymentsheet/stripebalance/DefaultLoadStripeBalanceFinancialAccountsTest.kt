@@ -15,9 +15,12 @@ import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.SetupIntentFactory
 import com.stripe.android.utils.FakeDurationProvider
-import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
+import java.util.concurrent.CountDownLatch
+import kotlin.coroutines.CoroutineContext
 
 internal class DefaultLoadStripeBalanceFinancialAccountsTest {
 
@@ -102,12 +105,17 @@ internal class DefaultLoadStripeBalanceFinancialAccountsTest {
     }
 
     @Test
-    fun `reports and returns null when the accounts take too long to load`() = runScenario {
-        repository.result = { awaitCancellation() }
+    fun `doesn't wait for a request that blocks past the timeout`() = runScenario(workContext = Dispatchers.IO) {
+        val requestBlocked = CountDownLatch(1)
+        repository.result = {
+            requestBlocked.await()
+            Result.success(listOf(ACCOUNT))
+        }
 
         val result = load()
 
         assertThat(result).isNull()
+        requestBlocked.countDown()
         repository.listFinancialAccountsCalls.awaitItem()
         assertFetchTimed()
         assertThat(errorReporter.awaitCall().errorEvent)
@@ -115,6 +123,7 @@ internal class DefaultLoadStripeBalanceFinancialAccountsTest {
     }
 
     private fun runScenario(
+        workContext: CoroutineContext? = null,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val repository = FakeStripeBalanceRepository()
@@ -125,6 +134,8 @@ internal class DefaultLoadStripeBalanceFinancialAccountsTest {
                 stripeBalanceRepository = repository,
                 errorReporter = errorReporter,
                 durationProvider = durationProvider,
+                viewModelScope = backgroundScope,
+                workContext = workContext ?: UnconfinedTestDispatcher(testScheduler),
             ),
             repository = repository,
             errorReporter = errorReporter,

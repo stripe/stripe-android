@@ -438,6 +438,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             val isGooglePaySupported = isGooglePaySupportedOnDevice.completeResultOrNull {
                 errorReporter.report(ErrorReporter.ExpectedErrorEvent.GOOGLE_PAY_SKIPPED_DURING_LOAD)
             } ?: false
+            val stripeBalanceFinancialAccountsResult = stripeBalanceFinancialAccounts.await()
 
             durationProvider.measureDuration(DurationProvider.Key.PaymentSheetLoadComputePaymentMethodTypes) {
                 createPaymentMethodMetadata(
@@ -451,7 +452,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                     customerMetadata = customerMetadata,
                     clientAttributionMetadata = clientAttributionMetadata,
                     apiConfiguration = apiConfiguration,
-                    stripeBalanceFinancialAccounts = stripeBalanceFinancialAccounts.await(),
+                    stripeBalanceFinancialAccounts = stripeBalanceFinancialAccountsResult,
                 )
             }
         }
