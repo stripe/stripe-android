@@ -2,6 +2,8 @@ package com.stripe.android.paymentsheet.stripebalance
 
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.exception.StripeException
+import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.model.ElementsSession
@@ -9,8 +11,11 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.async
 import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
+import kotlin.coroutines.CoroutineContext
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
@@ -32,6 +37,8 @@ internal class DefaultLoadStripeBalanceFinancialAccounts @Inject constructor(
     private val stripeBalanceRepository: StripeBalanceRepository,
     private val errorReporter: ErrorReporter,
     private val durationProvider: DurationProvider,
+    @ViewModelScope private val viewModelScope: CoroutineScope,
+    @IOContext private val workContext: CoroutineContext,
 ) : LoadStripeBalanceFinancialAccounts {
 
     override suspend fun invoke(
@@ -57,18 +64,23 @@ internal class DefaultLoadStripeBalanceFinancialAccounts @Inject constructor(
         val paymentIntent = stripeIntent as? PaymentIntent
         val currency = paymentIntent?.currency
 
+        // The request runs outside of loading, since timing out can't interrupt a blocking network call
+        val request = viewModelScope.async(workContext) {
+            stripeBalanceRepository.listFinancialAccounts(
+                customerSessionClientSecret = customerSession.customerSessionClientSecret,
+                ephemeralKeySecret = customerSession.ephemeralKeySecret,
+                amount = paymentIntent?.amount,
+                currency = currency,
+                apiConfiguration = apiConfiguration,
+            )
+        }
         val result = durationProvider.measureDuration(
             DurationProvider.Key.PaymentSheetLoadFetchStripeBalanceFinancialAccounts
         ) {
-            withTimeoutOrNull(TIMEOUT) {
-                stripeBalanceRepository.listFinancialAccounts(
-                    customerSessionClientSecret = customerSession.customerSessionClientSecret,
-                    ephemeralKeySecret = customerSession.ephemeralKeySecret,
-                    amount = paymentIntent?.amount,
-                    currency = currency,
-                    apiConfiguration = apiConfiguration,
-                )
-            } ?: Result.failure(StripeBalanceFinancialAccountsTimeoutException(TIMEOUT))
+            withTimeoutOrNull(TIMEOUT) { request.await() }
+        } ?: run {
+            request.cancel()
+            Result.failure(StripeBalanceFinancialAccountsTimeoutException(TIMEOUT))
         }
 
         return result.fold(
