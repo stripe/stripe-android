@@ -19,7 +19,6 @@ import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.AddressElementActivityContract
-import com.stripe.android.paymentsheet.addresselement.AddressElementNavigator
 import com.stripe.android.paymentsheet.addresselement.AddressElementResultStateHolder
 import com.stripe.android.paymentsheet.addresselement.AddressElementResultStateHolder.State
 import com.stripe.android.paymentsheet.addresselement.AddressLauncher
@@ -27,7 +26,6 @@ import com.stripe.android.paymentsheet.addresselement.FakePlacesClientProxy
 import com.stripe.android.paymentsheet.addresselement.FakeStripeAutocompleteRepository
 import com.stripe.android.paymentsheet.addresselement.InputAddressViewModel
 import com.stripe.android.paymentsheet.addresselement.StripeHostedPlacesClientProxy
-import com.stripe.android.paymentsheet.addresselement.TestAddressElementNavigator
 import com.stripe.android.paymentsheet.addresselement.analytics.FakeAddressLauncherEventReporter
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
@@ -355,37 +353,31 @@ class AddressElementViewModelModuleTest {
         ),
         block: suspend Scenario.() -> Unit,
     ) = runTest(UnconfinedTestDispatcher()) {
-        TestAddressElementNavigator.test {
-            val resultStateHolder = AddressElementResultStateHolder()
-            val addressLauncherEventReporter = FakeAddressLauncherEventReporter()
-            val viewModel = InputAddressViewModel(
+        val resultStateHolder = AddressElementResultStateHolder()
+        val addressLauncherEventReporter = FakeAddressLauncherEventReporter()
+        val viewModel = InputAddressViewModel(
+            args = args,
+            resultStateHolder = resultStateHolder,
+            eventReporter = module.provideAddressElementEventReporter(
                 args = args,
-                navigator = navigator,
-                resultStateHolder = resultStateHolder,
-                eventReporter = module.provideAddressElementEventReporter(
-                    args = args,
-                    addressLauncherEventReporter = addressLauncherEventReporter,
-                    analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
-                    analyticsRequestFactory = createAnalyticsRequestFactory(),
-                ),
-                placesClient = null,
-                primaryButtonAction = module.providePrimaryButtonAction(
-                    args = args,
-                    taxRegionUpdater = createTaxRegionUpdater(),
-                ),
-            ).also(viewModelStoreRule::track)
-
-            assertThat(getResultFlowCalls.awaitItem().key)
-                .isEqualTo(AddressElementNavigator.AutocompleteEvent.KEY)
-
-            Scenario(
-                resultStateHolder = resultStateHolder,
-                viewModel = viewModel,
                 addressLauncherEventReporter = addressLauncherEventReporter,
-            ).block()
+                analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
+                analyticsRequestFactory = createAnalyticsRequestFactory(),
+            ),
+            placesClient = null,
+            primaryButtonAction = module.providePrimaryButtonAction(
+                args = args,
+                taxRegionUpdater = createTaxRegionUpdater(),
+            ),
+        ).also(viewModelStoreRule::track)
 
-            addressLauncherEventReporter.validate()
-        }
+        Scenario(
+            resultStateHolder = resultStateHolder,
+            viewModel = viewModel,
+            addressLauncherEventReporter = addressLauncherEventReporter,
+        ).block()
+
+        addressLauncherEventReporter.validate()
     }
 
     private fun createAnalyticsRequestFactory() = AnalyticsRequestFactory(

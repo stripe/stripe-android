@@ -39,7 +39,6 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.ConsumerSessionRefresh
 import com.stripe.android.model.LinkAuthIntent
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
-import com.stripe.android.paymentsheet.addresselement.AutocompleteActivityLauncher
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.uicore.navigation.NavBackStackEntryUpdate
 import com.stripe.android.uicore.navigation.NavigationManager
@@ -76,7 +75,6 @@ internal class LinkActivityViewModel @Inject constructor(
     @Named(LINK_EXPRESS_MODE) private val linkExpressMode: LinkExpressMode,
     private val navigationManager: NavigationManager,
     val linkLaunchMode: LinkLaunchMode,
-    private val autocompleteLauncher: AutocompleteActivityLauncher,
     private val addPaymentMethodOptionsFactory: AddPaymentMethodOptions.Factory,
 ) : ViewModel(), DefaultLifecycleObserver {
     val confirmationHandler = confirmationHandlerFactory.create(viewModelScope)
@@ -264,7 +262,6 @@ internal class LinkActivityViewModel @Inject constructor(
         activityResultCaller: ActivityResultCaller,
         lifecycleOwner: LifecycleOwner,
     ) {
-        autocompleteLauncher.register(activityResultCaller, lifecycleOwner)
         confirmationHandler.register(activityResultCaller, lifecycleOwner)
     }
 

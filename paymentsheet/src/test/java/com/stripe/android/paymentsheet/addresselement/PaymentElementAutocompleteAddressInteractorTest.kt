@@ -1,14 +1,10 @@
 package com.stripe.android.paymentsheet.addresselement
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.model.Address
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.analytics.FakeAddressLauncherEventReporter
 import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
-import com.stripe.android.uicore.elements.FormFieldId
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -18,162 +14,12 @@ import org.junit.Test
 
 class PaymentElementAutocompleteAddressInteractorTest {
     @Test
-    fun `onAutocomplete launches when googlePlacesApiKey is present`() = test { scenario ->
-        val interactor = createInteractor(
-            launcher = scenario.launcher,
-            autocompleteConfig = AutocompleteAddressInteractor.Config(
-                googlePlacesApiKey = "test-api-key",
-                autocompleteCountries = setOf("US", "CA")
-            )
-        )
-
-        interactor.onAutocomplete("US")
-
-        scenario.launchCalls.expectMostRecentItem().let { call ->
-            assertThat(call.country).isEqualTo("US")
-            assertThat(call.googlePlacesApiKey).isEqualTo("test-api-key")
-        }
-    }
-
-    @Test
-    fun `onAutocomplete does nothing when googlePlacesApiKey is null`() = test { scenario ->
-        val interactor = createInteractor(
-            launcher = scenario.launcher,
-            autocompleteConfig = AutocompleteAddressInteractor.Config(
-                googlePlacesApiKey = null,
-                autocompleteCountries = setOf("US", "CA")
-            )
-        )
-
-        interactor.onAutocomplete("US")
-
-        scenario.launchCalls.expectNoEvents()
-    }
-
-    @Test
-    fun `emits 'OnExpandForm' event when launcher result is EnterManually`() = test { scenario ->
-        val interactor = createInteractor(launcher = scenario.launcher)
-        val deferredEvent = CompletableDeferred<AutocompleteAddressInteractor.Event>()
-
-        interactor.register {
-            deferredEvent.complete(it)
-        }
-
-        interactor.onAutocomplete("US")
-
-        val launchCall = scenario.launchCalls.awaitItem()
-
-        val address = createTestAddress()
-        val result = AutocompleteLauncher.Result.EnterManually(address)
-
-        launchCall.resultHandler.onAutocompleteLauncherResult(result)
-
-        val event = deferredEvent.await()
-
-        assertThat(event).isInstanceOf(AutocompleteAddressInteractor.Event.OnExpandForm::class.java)
-
-        val expandFormEvent = event as AutocompleteAddressInteractor.Event.OnExpandForm
-
-        assertThat(expandFormEvent.values).isNotNull()
-        assertThat(expandFormEvent.values).containsExactlyEntriesIn(
-            mapOf(
-                FormFieldId.Line1 to "123 Main Street",
-                FormFieldId.Line2 to "Apt 4B",
-                FormFieldId.City to "San Francisco",
-                FormFieldId.State to "CA",
-                FormFieldId.PostalCode to "94105",
-                FormFieldId.Country to "US",
-            )
-        )
-    }
-
-    @Test
-    fun `emits OnValues event when launcher result is OnBack with address details`() = test { scenario ->
-        val interactor = createInteractor(launcher = scenario.launcher)
-        val deferredEvent = CompletableDeferred<AutocompleteAddressInteractor.Event>()
-
-        interactor.register {
-            deferredEvent.complete(it)
-        }
-
-        interactor.onAutocomplete("US")
-
-        val launchCall = scenario.launchCalls.awaitItem()
-
-        val address = createTestAddress()
-        val result = AutocompleteLauncher.Result.OnBack(address)
-
-        launchCall.resultHandler.onAutocompleteLauncherResult(result)
-
-        val event = deferredEvent.await()
-
-        assertThat(event).isInstanceOf(AutocompleteAddressInteractor.Event.OnValues::class.java)
-
-        val valuesEvent = event as AutocompleteAddressInteractor.Event.OnValues
-
-        assertThat(valuesEvent.values).containsExactlyEntriesIn(
-            mapOf(
-                FormFieldId.Line1 to "123 Main Street",
-                FormFieldId.Line2 to "Apt 4B",
-                FormFieldId.City to "San Francisco",
-                FormFieldId.State to "CA",
-                FormFieldId.PostalCode to "94105",
-                FormFieldId.Country to "US",
-            )
-        )
-    }
-
-    @Test
-    fun `does not emit event when launcher result is OnBack with null address details`() = test { scenario ->
-        val interactor = createInteractor(launcher = scenario.launcher)
-        val deferredEvent = CompletableDeferred<AutocompleteAddressInteractor.Event>()
-
-        interactor.register {
-            deferredEvent.complete(it)
-        }
-
-        interactor.onAutocomplete("US")
-
-        val launchCall = scenario.launchCalls.awaitItem()
-        val result = AutocompleteLauncher.Result.OnBack(null)
-
-        launchCall.resultHandler.onAutocompleteLauncherResult(result)
-
-        assertThat(deferredEvent.isActive).isTrue()
-    }
-
-    @Test
-    fun `emits OnExpandForm event when launcher result is EnterManually with null address`() = test { scenario ->
-        val interactor = createInteractor(launcher = scenario.launcher)
-        val deferredEvent = CompletableDeferred<AutocompleteAddressInteractor.Event>()
-
-        interactor.register {
-            deferredEvent.complete(it)
-        }
-
-        interactor.onAutocomplete("US")
-
-        val launchCall = scenario.launchCalls.awaitItem()
-        val result = AutocompleteLauncher.Result.EnterManually(null)
-
-        launchCall.resultHandler.onAutocompleteLauncherResult(result)
-
-        val event = deferredEvent.await()
-
-        assertThat(event).isInstanceOf(AutocompleteAddressInteractor.Event.OnExpandForm::class.java)
-
-        val expandFormEvent = event as AutocompleteAddressInteractor.Event.OnExpandForm
-
-        assertThat(expandFormEvent.values).isNull()
-    }
-
-    @Test
-    fun `autocompleteConfig property returns provided config`() = test { scenario ->
+    fun `autocompleteConfig property returns provided config`() = test {
         val config = AutocompleteAddressInteractor.Config(
             googlePlacesApiKey = "test-key",
             autocompleteCountries = setOf("US", "GB")
         )
-        val interactor = createInteractor(launcher = scenario.launcher, autocompleteConfig = config)
+        val interactor = createInteractor(autocompleteConfig = config)
 
         assertThat(interactor.autocompleteConfig).isEqualTo(config)
         assertThat(interactor.autocompleteConfig.googlePlacesApiKey).isEqualTo("test-key")
@@ -181,15 +27,13 @@ class PaymentElementAutocompleteAddressInteractorTest {
     }
 
     @Test
-    fun `Factory creates PaymentElementAutocompleteAddressInteractor`() = test { scenario ->
+    fun `Factory creates PaymentElementAutocompleteAddressInteractor`() = test {
         val config = AutocompleteAddressInteractor.Config(
             googlePlacesApiKey = "test-key",
             autocompleteCountries = setOf("US")
         )
 
         val factory = PaymentElementAutocompleteAddressInteractor.Factory(
-            launcher = scenario.launcher,
-            apiConfigurationProvider = { DEFAULT_API_CONFIG },
             autocompleteConfig = config,
             placesClient = null,
             stripeAutocompleteRepository = null,
@@ -205,7 +49,7 @@ class PaymentElementAutocompleteAddressInteractorTest {
     }
 
     @Test
-    fun `Factory creates inline interactor when inline enabled with places client and scope`() = test { scenario ->
+    fun `Factory creates inline interactor when inline enabled with places client and scope`() = test {
         val config = AutocompleteAddressInteractor.Config(
             googlePlacesApiKey = "test-key",
             autocompleteCountries = setOf("US"),
@@ -213,8 +57,6 @@ class PaymentElementAutocompleteAddressInteractorTest {
         )
 
         val factory = PaymentElementAutocompleteAddressInteractor.Factory(
-            launcher = scenario.launcher,
-            apiConfigurationProvider = { DEFAULT_API_CONFIG },
             autocompleteConfig = config,
             placesClient = FakePlacesClientProxy(
                 findPredictionsResult = Result.success(FindAutocompletePredictionsResponse(emptyList())),
@@ -236,7 +78,7 @@ class PaymentElementAutocompleteAddressInteractorTest {
     }
 
     @Test
-    fun `Factory disposes previously created inline interactor on next create`() = test { scenario ->
+    fun `Factory disposes previously created inline interactor on next create`() = test {
         val config = AutocompleteAddressInteractor.Config(
             googlePlacesApiKey = "test-key",
             autocompleteCountries = setOf("US"),
@@ -247,8 +89,6 @@ class PaymentElementAutocompleteAddressInteractorTest {
             fetchPlaceResult = Result.success(Address()),
         )
         val factory = PaymentElementAutocompleteAddressInteractor.Factory(
-            launcher = scenario.launcher,
-            apiConfigurationProvider = { DEFAULT_API_CONFIG },
             autocompleteConfig = config,
             placesClient = fakePlaces,
             stripeAutocompleteRepository = null,
@@ -274,7 +114,7 @@ class PaymentElementAutocompleteAddressInteractorTest {
     }
 
     @Test
-    fun `Factory falls back to launcher when inline enabled but placesClient is null`() = test { scenario ->
+    fun `Factory falls back to no-autocomplete interactor when placesClient is null`() = test {
         val config = AutocompleteAddressInteractor.Config(
             googlePlacesApiKey = "test-key",
             autocompleteCountries = setOf("US"),
@@ -282,8 +122,6 @@ class PaymentElementAutocompleteAddressInteractorTest {
         )
 
         val factory = PaymentElementAutocompleteAddressInteractor.Factory(
-            launcher = scenario.launcher,
-            apiConfigurationProvider = { DEFAULT_API_CONFIG },
             autocompleteConfig = config,
             placesClient = null,
             stripeAutocompleteRepository = null,
@@ -298,7 +136,7 @@ class PaymentElementAutocompleteAddressInteractorTest {
     }
 
     @Test
-    fun `Factory creates inline interactor without launcher when proxy flag is on with repository`() = test {
+    fun `Factory creates inline interactor when proxy flag is on with repository`() = test {
         val config = AutocompleteAddressInteractor.Config(
             googlePlacesApiKey = null,
             autocompleteCountries = setOf("US"),
@@ -306,8 +144,6 @@ class PaymentElementAutocompleteAddressInteractorTest {
         )
 
         val factory = PaymentElementAutocompleteAddressInteractor.Factory(
-            launcher = null,
-            apiConfigurationProvider = { DEFAULT_API_CONFIG },
             autocompleteConfig = config,
             placesClient = null,
             stripeAutocompleteRepository = FakeStripeAutocompleteRepository(),
@@ -323,7 +159,7 @@ class PaymentElementAutocompleteAddressInteractorTest {
     }
 
     @Test
-    fun `Factory falls back to launcher when proxy flag is on but repository is null`() = test { scenario ->
+    fun `Factory falls back to no-autocomplete interactor when repository is null`() = test {
         val config = AutocompleteAddressInteractor.Config(
             googlePlacesApiKey = null,
             autocompleteCountries = setOf("US"),
@@ -331,8 +167,6 @@ class PaymentElementAutocompleteAddressInteractorTest {
         )
 
         val factory = PaymentElementAutocompleteAddressInteractor.Factory(
-            launcher = scenario.launcher,
-            apiConfigurationProvider = { DEFAULT_API_CONFIG },
             autocompleteConfig = config,
             placesClient = null,
             stripeAutocompleteRepository = null,
@@ -346,85 +180,16 @@ class PaymentElementAutocompleteAddressInteractorTest {
         assertThat(interactor).isInstanceOf(PaymentElementAutocompleteAddressInteractor::class.java)
     }
 
-    @Test
-    fun `Factory uses launcher when proxy flag is on but inline disabled`() = test { scenario ->
-        val factory = PaymentElementAutocompleteAddressInteractor.Factory(
-            launcher = scenario.launcher,
-            apiConfigurationProvider = { DEFAULT_API_CONFIG },
-            autocompleteConfig = AutocompleteAddressInteractor.Config(
-                googlePlacesApiKey = "test-key",
-                autocompleteCountries = setOf("US"),
-                isInlineAutocompleteEnabled = false,
-            ),
-            placesClient = null,
-            stripeAutocompleteRepository = FakeStripeAutocompleteRepository(),
-            coroutineScope = this,
-            shouldUseAutocompleteProxyEndpointsProvider = { true },
-            eventReporter = FakeAddressLauncherEventReporter(),
-        )
-
-        val interactor = factory.create()
-
-        assertThat(interactor).isInstanceOf(PaymentElementAutocompleteAddressInteractor::class.java)
-
-        interactor.onAutocomplete("US")
-
-        scenario.launchCalls.expectMostRecentItem().let { call ->
-            assertThat(call.country).isEqualTo("US")
-            assertThat(call.googlePlacesApiKey).isEqualTo("test-key")
-        }
-    }
-
-    @Test
-    fun `multiple onAutocomplete calls with different countries`() = test { scenario ->
-        val interactor = createInteractor(launcher = scenario.launcher)
-
-        interactor.onAutocomplete("US")
-        interactor.onAutocomplete("CA")
-        interactor.onAutocomplete("GB")
-
-        val usCall = scenario.launchCalls.awaitItem()
-
-        assertThat(usCall.country).isEqualTo("US")
-        assertThat(usCall.googlePlacesApiKey).isEqualTo("test-api-key")
-
-        val caCall = scenario.launchCalls.awaitItem()
-
-        assertThat(caCall.country).isEqualTo("CA")
-        assertThat(caCall.googlePlacesApiKey).isEqualTo("test-api-key")
-
-        val gbCall = scenario.launchCalls.awaitItem()
-
-        assertThat(gbCall.country).isEqualTo("GB")
-        assertThat(gbCall.googlePlacesApiKey).isEqualTo("test-api-key")
-    }
-
-    private fun test(test: suspend TestScope.(TestAutocompleteLauncher.Scenario) -> Unit) = runTest(
-        UnconfinedTestDispatcher()
-    ) {
-        TestAutocompleteLauncher.test {
-            test(this)
-        }
+    private fun test(test: suspend TestScope.() -> Unit) = runTest(UnconfinedTestDispatcher()) {
+        test()
     }
 
     private fun createInteractor(
-        launcher: AutocompleteLauncher = TestAutocompleteLauncher.noOp(),
         autocompleteConfig: AutocompleteAddressInteractor.Config = AutocompleteAddressInteractor.Config(
             googlePlacesApiKey = "test-api-key",
             autocompleteCountries = setOf("US", "CA")
         ),
     ) = PaymentElementAutocompleteAddressInteractor(
-        launcher = launcher,
-        apiConfigurationProvider = { DEFAULT_API_CONFIG },
         autocompleteConfig = autocompleteConfig,
-    )
-
-    private fun createTestAddress() = PaymentSheet.Address(
-        line1 = "123 Main Street",
-        line2 = "Apt 4B",
-        city = "San Francisco",
-        state = "CA",
-        postalCode = "94105",
-        country = "US"
     )
 }

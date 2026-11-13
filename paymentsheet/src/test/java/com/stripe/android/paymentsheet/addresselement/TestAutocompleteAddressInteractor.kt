@@ -8,30 +8,20 @@ class TestAutocompleteAddressInteractor private constructor(
     override val autocompleteConfig: AutocompleteAddressInteractor.Config,
 ) : AutocompleteAddressInteractor {
     private val registerCalls = Turbine<Call.Register>()
-    private val onAutocompleteCalls = Turbine<Call.OnAutocomplete>()
 
     override fun register(onEvent: (AutocompleteAddressInteractor.Event) -> Unit) {
         registerCalls.add(Call.Register(onEvent))
-    }
-
-    override fun onAutocomplete(country: String) {
-        onAutocompleteCalls.add(Call.OnAutocomplete(country))
     }
 
     sealed interface Call {
         class Register(
             val onEvent: (AutocompleteAddressInteractor.Event) -> Unit
         )
-
-        class OnAutocomplete(
-            val country: String
-        )
     }
 
     class Scenario(
         val interactor: AutocompleteAddressInteractor,
         val registerCalls: ReceiveTurbine<Call.Register>,
-        val onAutocompleteCalls: ReceiveTurbine<Call.OnAutocomplete>,
     )
 
     companion object {
@@ -44,18 +34,15 @@ class TestAutocompleteAddressInteractor private constructor(
             )
 
             val registerCalls = interactor.registerCalls
-            val onAutocompleteCalls = interactor.onAutocompleteCalls
 
             test(
                 Scenario(
                     interactor = interactor,
                     registerCalls = registerCalls,
-                    onAutocompleteCalls = onAutocompleteCalls,
                 )
             )
 
             registerCalls.ensureAllEventsConsumed()
-            onAutocompleteCalls.ensureAllEventsConsumed()
         }
 
         fun noOp(

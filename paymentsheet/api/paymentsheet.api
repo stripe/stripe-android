@@ -2200,12 +2200,6 @@ public abstract interface class com/stripe/android/paymentsheet/addresselement/A
 	public abstract fun onAddressLauncherResult (Lcom/stripe/android/paymentsheet/addresselement/AddressLauncherResult;)V
 }
 
-public final class com/stripe/android/paymentsheet/addresselement/ComposableSingletons$AutocompleteScreenKt {
-	public static final field INSTANCE Lcom/stripe/android/paymentsheet/addresselement/ComposableSingletons$AutocompleteScreenKt;
-	public fun <init> ()V
-	public final fun getLambda$-1578841985$paymentsheet_release ()Lkotlin/jvm/functions/Function4;
-}
-
 public final class com/stripe/android/paymentsheet/model/PaymentOption {
 	public static final field $stable I
 	public fun <init> (ILjava/lang/String;)V
