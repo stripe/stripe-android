@@ -93,7 +93,9 @@ internal class CheckoutWebAuthIntegrationTest {
                 browserPage.awaitChromeLaunch()
                 browserPage.dismissFirstRunIfShown()
                 browserPage.awaitPageText(AUTHORIZE_TEST_PAYMENT, AUTHORIZATION_PAGE_LOAD_TIMEOUT_MS)
-                device.findObject(By.textContains(AUTHORIZE_TEST_PAYMENT)).click()
+                checkNotNull(device.findObject(By.textContains(AUTHORIZE_TEST_PAYMENT))) {
+                    "$AUTHORIZE_TEST_PAYMENT button not found"
+                }.click()
             },
         )
         assertThat(result).isInstanceOf(CheckoutElementsController.Result.Completed::class.java)
