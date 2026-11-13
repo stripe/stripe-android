@@ -18,6 +18,7 @@ class BrowserAuthorizationPage(
         ) {
             currentTopActivity()?.contains(CHROME_PACKAGE) == true
         }
+        dismissFirstRunIfShown()
     }
 
     fun awaitPageText(text: String, timeoutMs: Long) {
@@ -30,6 +31,12 @@ class BrowserAuthorizationPage(
             "Authorization page content '$text' did not load"
         }
         device.waitForIdle()
+    }
+
+    fun clickAction(label: String) {
+        checkNotNull(device.findObject(By.textContains(label))) {
+            "Authorization page action '$label' not found"
+        }.click()
     }
 
     fun currentTopActivity(): String? {

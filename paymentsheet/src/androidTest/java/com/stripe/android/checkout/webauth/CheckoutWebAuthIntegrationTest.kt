@@ -3,10 +3,8 @@ package com.stripe.android.checkout.webauth
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.checkout.CHECKOUT_PLAYGROUND_BACKEND_URL
 import com.stripe.android.checkout.CheckoutElementsController
 import com.stripe.android.checkout.CheckoutPlaygroundBackend
 import com.stripe.android.checkout.CheckoutSessionParamsBuilder
@@ -57,10 +55,7 @@ internal class CheckoutWebAuthIntegrationTest {
     @Test
     fun testCardWith3ds2ChallengeCompletes() = runBlocking {
         val result = runCheckoutIntegrationTest(
-            backend = CheckoutPlaygroundBackend(
-                baseUrl = CHECKOUT_PLAYGROUND_BACKEND_URL,
-                merchant = "US",
-            ),
+            backend = CheckoutPlaygroundBackend(merchant = "US"),
             sessionParams = CheckoutSessionParamsBuilder(unitAmount = 1000L).build(),
             configuration = configuration,
             setup = {
@@ -78,10 +73,7 @@ internal class CheckoutWebAuthIntegrationTest {
     @Test
     fun testCashAppRedirectAuthorizedCompletes() = runBlocking {
         val result = runCheckoutIntegrationTest(
-            backend = CheckoutPlaygroundBackend(
-                baseUrl = CHECKOUT_PLAYGROUND_BACKEND_URL,
-                merchant = "US",
-            ),
+            backend = CheckoutPlaygroundBackend(merchant = "US"),
             sessionParams = CheckoutSessionParamsBuilder(unitAmount = 1000L)
                 .allowedPaymentMethodTypes(listOf("card", "cashapp"))
                 .build(),
@@ -92,11 +84,8 @@ internal class CheckoutWebAuthIntegrationTest {
             },
             handleNextAction = {
                 browserPage.awaitChromeLaunch()
-                browserPage.dismissFirstRunIfShown()
                 browserPage.awaitPageText(AUTHORIZE_TEST_PAYMENT, AUTHORIZATION_PAGE_LOAD_TIMEOUT_MS)
-                checkNotNull(device.findObject(By.textContains(AUTHORIZE_TEST_PAYMENT))) {
-                    "$AUTHORIZE_TEST_PAYMENT button not found"
-                }.click()
+                browserPage.clickAction(AUTHORIZE_TEST_PAYMENT)
             },
         )
         assertThat(result).isInstanceOf(CheckoutElementsController.Result.Completed::class.java)
