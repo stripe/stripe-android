@@ -6,7 +6,7 @@ import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.Until
 
-/** Drives a Stripe test authorization page in a browser, including Chrome's first-run onboarding. */
+/** Waits for Stripe test authorization pages in Chrome and dismisses Chrome's first-run onboarding. */
 class BrowserAuthorizationPage(
     private val device: UiDevice,
     private val composeTestRule: ComposeTestRule,
@@ -33,6 +33,10 @@ class BrowserAuthorizationPage(
 
     fun dismissFirstRunIfShown() {
         sleep(CHROME_ACTIVITY_TRANSITION_MS)
+        if (currentTopActivity()?.contains(CHROME_FIRST_RUN_ACTIVITY) != true) {
+            return
+        }
+
         repeat(CHROME_FIRST_RUN_MAX_SCREENS) {
             if (currentTopActivity()?.contains(CHROME_FIRST_RUN_ACTIVITY) == false) {
                 return
