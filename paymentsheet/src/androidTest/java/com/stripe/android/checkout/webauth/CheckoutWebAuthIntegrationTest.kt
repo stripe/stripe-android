@@ -76,19 +76,19 @@ internal class CheckoutWebAuthIntegrationTest {
     }
 
     @Test
-    fun testAffirmRedirectAuthorizedCompletes() = runBlocking {
+    fun testCashAppRedirectAuthorizedCompletes() = runBlocking {
         val result = runCheckoutIntegrationTest(
             backend = CheckoutPlaygroundBackend(
                 baseUrl = CHECKOUT_PLAYGROUND_BACKEND_URL,
                 merchant = "US",
             ),
-            sessionParams = CheckoutSessionParamsBuilder(unitAmount = AFFIRM_MINIMUM_AMOUNT)
-                .allowedPaymentMethodTypes(listOf("card", "affirm"))
+            sessionParams = CheckoutSessionParamsBuilder(unitAmount = 1000L)
+                .allowedPaymentMethodTypes(listOf("card", "cashapp"))
                 .build(),
             configuration = configuration,
             setup = {
-                contentPage.clickOnLpm("affirm")
-                contentPage.assertHasSelectedLpm("affirm")
+                contentPage.clickOnLpm("cashapp")
+                contentPage.assertHasSelectedLpm("cashapp")
             },
             handleNextAction = {
                 browserPage.awaitChromeLaunch()
@@ -103,7 +103,6 @@ internal class CheckoutWebAuthIntegrationTest {
     }
 
     private companion object {
-        const val AFFIRM_MINIMUM_AMOUNT = 5000L
         const val AUTHORIZE_TEST_PAYMENT = "AUTHORIZE TEST PAYMENT"
         const val AUTHORIZATION_PAGE_LOAD_TIMEOUT_MS = 60_000L
     }
