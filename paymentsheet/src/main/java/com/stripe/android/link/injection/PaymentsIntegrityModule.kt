@@ -4,29 +4,39 @@ import android.app.Application
 import com.stripe.android.BuildConfig
 import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ExponentialBackoffRetryDelaySupplier
+import com.stripe.attestation.AttestationTokenProvider
 import com.stripe.attestation.AttestationWarmer
+import com.stripe.attestation.DefaultAttestationTokenProvider
 import com.stripe.attestation.DefaultAttestationWarmer
 import com.stripe.attestation.IntegrityRequestManager
 import com.stripe.attestation.IntegrityStandardRequestManager
 import com.stripe.attestation.RealStandardIntegrityManagerFactory
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 
 @Module
-internal object PaymentsIntegrityModule {
-    @Provides
-    fun provideIntegrityRequestManager(
-        context: Application
-    ): IntegrityRequestManager = createIntegrityStandardRequestManager(context)
+internal interface PaymentsIntegrityModule {
+    @Binds
+    fun bindAttestationTokenProvider(
+        provider: DefaultAttestationTokenProvider
+    ): AttestationTokenProvider
 
-    @Provides
-    fun provideAttestationWarmer(
-        integrityRequestManager: IntegrityRequestManager
-    ): AttestationWarmer {
-        return DefaultAttestationWarmer(
-            integrityRequestManager = integrityRequestManager,
-            retryDelaySupplier = ExponentialBackoffRetryDelaySupplier()
-        )
+    companion object {
+        @Provides
+        fun provideIntegrityRequestManager(
+            context: Application
+        ): IntegrityRequestManager = createIntegrityStandardRequestManager(context)
+
+        @Provides
+        fun provideAttestationWarmer(
+            integrityRequestManager: IntegrityRequestManager
+        ): AttestationWarmer {
+            return DefaultAttestationWarmer(
+                integrityRequestManager = integrityRequestManager,
+                retryDelaySupplier = ExponentialBackoffRetryDelaySupplier()
+            )
+        }
     }
 }
 
@@ -39,10 +49,8 @@ private object LinkIntegrityRequestManagerHolder {
         return instance ?: synchronized(this) {
             instance ?: IntegrityStandardRequestManager(
                 cloudProjectNumber = 577365562050, // stripe-payments-sdk-prod
-                logError = { message, error ->
-                    Logger.getInstance(BuildConfig.DEBUG).error(message, error)
-                },
-                factory = RealStandardIntegrityManagerFactory(application)
+                factory = RealStandardIntegrityManagerFactory(application),
+                logger = Logger.getInstance(BuildConfig.DEBUG)
             ).also { instance = it }
         }
     }

@@ -58,8 +58,8 @@ internal class FinancialConnectionsSingletonSharedModule {
         context: Application
     ): IntegrityRequestManager = IntegrityStandardRequestManager(
         cloudProjectNumber = 527113280969, // stripe-financial-connections
-        logError = { message, error -> Logger.getInstance(BuildConfig.DEBUG).error(message, error) },
-        factory = RealStandardIntegrityManagerFactory(context)
+        factory = RealStandardIntegrityManagerFactory(context),
+        logger = Logger.getInstance(BuildConfig.DEBUG)
     )
 
     @Provides

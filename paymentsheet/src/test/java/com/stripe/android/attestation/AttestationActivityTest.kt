@@ -13,7 +13,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.attestation.analytics.AttestationAnalyticsEventsReporter
 import com.stripe.android.attestation.analytics.FakeAttestationAnalyticsEventsReporter
 import com.stripe.android.isInstanceOf
-import com.stripe.android.link.FakeIntegrityRequestManager
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
@@ -36,11 +35,9 @@ internal class AttestationActivityTest {
 
     @Test
     fun `activity should dismiss with success result when attestation succeeds`() = runTest {
-        val integrityRequestManager = FakeIntegrityRequestManager().apply {
-            requestResult = Result.success("token")
-        }
+        val attestationTokenProvider = FakeAttestationTokenProvider(Result.success("token"))
 
-        val scenario = launchActivityForResult(integrityRequestManager)
+        val scenario = launchActivityForResult(attestationTokenProvider)
         advanceUntilIdle()
 
         assertThat(scenario.getResult().resultCode).isEqualTo(AttestationActivity.RESULT_COMPLETE)
@@ -56,11 +53,9 @@ internal class AttestationActivityTest {
     @Test
     fun `activity should dismiss with failed result when attestation fails`() = runTest {
         val testError = Exception("Attestation failed")
-        val integrityRequestManager = FakeIntegrityRequestManager().apply {
-            requestResult = Result.failure(testError)
-        }
+        val attestationTokenProvider = FakeAttestationTokenProvider(Result.failure(testError))
 
-        val scenario = launchActivityForResult(integrityRequestManager)
+        val scenario = launchActivityForResult(attestationTokenProvider)
         advanceUntilIdle()
 
         assertThat(scenario.getResult().resultCode).isEqualTo(AttestationActivity.RESULT_COMPLETE)
@@ -122,10 +117,10 @@ internal class AttestationActivityTest {
     }
 
     private fun launchActivityForResult(
-        integrityRequestManager: FakeIntegrityRequestManager
+        attestationTokenProvider: FakeAttestationTokenProvider
     ) = injectableActivityScenario<AttestationActivity> {
         injectActivity {
-            viewModelFactory = createTestViewModelFactory(integrityRequestManager)
+            viewModelFactory = createTestViewModelFactory(attestationTokenProvider)
         }
     }.apply {
         launchForResult(createIntent())
@@ -151,14 +146,14 @@ internal class AttestationActivityTest {
     }
 
     private fun createTestViewModelFactory(
-        integrityRequestManager: FakeIntegrityRequestManager,
+        attestationTokenProvider: FakeAttestationTokenProvider,
         eventsReporter: AttestationAnalyticsEventsReporter = FakeAttestationAnalyticsEventsReporter()
     ): ViewModelProvider.Factory {
         return object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 return AttestationViewModel(
-                    integrityRequestManager = integrityRequestManager,
+                    attestationTokenProvider = attestationTokenProvider,
                     workContext = testDispatcher,
                     attestationAnalyticsEventsReporter = eventsReporter,
                     errorReporter = FakeErrorReporter()
