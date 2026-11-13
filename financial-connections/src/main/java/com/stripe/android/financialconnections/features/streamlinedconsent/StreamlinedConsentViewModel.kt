@@ -6,6 +6,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.Click
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneLoaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
 import com.stripe.android.financialconnections.analytics.logError
@@ -14,18 +15,15 @@ import com.stripe.android.financialconnections.domain.AcceptConsent
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.HandleError
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
-import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.TopAppBarLogoClicked
 import com.stripe.android.financialconnections.domain.PostAuthorizationSession
-import com.stripe.android.financialconnections.features.consent.ConsentClickableText
+import com.stripe.android.financialconnections.features.consent.consentDeeplinkActions
 import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.DataAccess
-import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.Generic
 import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.Legal
 import com.stripe.android.financialconnections.features.notice.PresentSheet
 import com.stripe.android.financialconnections.features.streamlinedconsent.StreamlinedConsentState.ViewEffect.OpenUrl
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.Destination
-import com.stripe.android.financialconnections.navigation.Destination.Companion.KEY_NEXT_PANE_ON_DISABLE_NETWORKING
 import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
@@ -35,12 +33,11 @@ import com.stripe.android.uicore.navigation.NavigationManager
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
-import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.launch
 
 internal class StreamlinedConsentViewModel @AssistedInject constructor(
     @Assisted initialState: StreamlinedConsentState,
-    private val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
+    nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val acceptConsent: AcceptConsent,
     private val getOrFetchSync: GetOrFetchSync,
     private val navigationManager: NavigationManager,
@@ -60,12 +57,16 @@ internal class StreamlinedConsentViewModel @AssistedInject constructor(
             }
             StreamlinedConsentState.Payload(
                 streamlinedConsentPane = streamlinedConsentPane,
-                // The backend may omit the notice from the streamlined consent pane,
-                // in which case we fall back to the one from the regular consent pane.
-                dataAccessNotice = streamlinedConsentPane.dataAccessNotice
-                    ?: sync.text?.consent?.dataAccessNotice,
+                // Like web and the account pickers, prefer the regular consent pane's notice so that
+                // the same notice is shown throughout the session.
+                dataAccessNotice = sync.text?.consent?.dataAccessNotice
+                    ?: streamlinedConsentPane.dataAccessNotice,
             )
         }.execute { copy(payload = it) }
+
+        onAsync(StreamlinedConsentState::payload, onSuccess = {
+            eventTracker.track(PaneLoaded(PANE))
+        })
 
         onAsync(StreamlinedConsentState::acceptConsent, onFail = {
             eventTracker.logError(
@@ -75,16 +76,6 @@ internal class StreamlinedConsentViewModel @AssistedInject constructor(
                 pane = PANE,
             )
         })
-
-        viewModelScope.launch {
-            nativeAuthFlowCoordinator()
-                .filterIsInstance<TopAppBarLogoClicked>()
-                .collect { message ->
-                    if (message.pane == PANE) {
-                        onLogoClick()
-                    }
-                }
-        }
     }
 
     override fun updateTopAppBar(state: StreamlinedConsentState): TopAppBarStateUpdate {
@@ -95,7 +86,7 @@ internal class StreamlinedConsentViewModel @AssistedInject constructor(
             allowBackNavigation = true,
             error = state.payload.error,
             canCloseWithoutConfirmation = true,
-            logoClickable = state.payload()?.streamlinedConsentPane?.moreInfoNotice != null,
+            logoClickNotice = state.payload()?.streamlinedConsentPane?.moreInfoNotice,
         )
     }
 
@@ -148,52 +139,18 @@ internal class StreamlinedConsentViewModel @AssistedInject constructor(
                 currentPane = PANE,
                 uri = uri,
                 onNetworkUrlClicked = { setState { copy(viewEffect = OpenUrl(uri)) } },
-                knownDeeplinkActions = mapOf(
-                    // Clicked on the "Data Access" link -> Open the Data Access bottom sheet
-                    ConsentClickableText.DATA.value to {
-                        presentDataAccessBottomSheet()
-                    },
-                    // Clicked on the "Legal details" link -> Open the Legal Details bottom sheet
-                    ConsentClickableText.LEGAL_DETAILS.value to {
-                        presentLegalDetailsBottomSheet()
-                    },
-                    // Clicked on the "Manual entry" link -> Navigate to the Manual Entry screen
-                    ConsentClickableText.MANUAL_ENTRY.value to {
-                        navigationManager.tryNavigateTo(Destination.ManualEntry(referrer = PANE))
-                    },
-                    // Clicked on the "Manual entry" link on NME flows -> Navigate to the Link Login Warmup screen
-                    ConsentClickableText.LINK_LOGIN_WARMUP.value to {
-                        navigationManager.tryNavigateTo(
-                            Destination.NetworkingLinkLoginWarmup(
-                                referrer = PANE,
-                                extraArgs = mapOf(
-                                    KEY_NEXT_PANE_ON_DISABLE_NETWORKING to it.nextPaneOrDrawerOnSecondaryCta
-                                ),
-                            )
-                        )
-                    },
-                    // Surfaces where user has signed in to Link and then launches the auth flow.
-                    ConsentClickableText.LINK_ACCOUNT_PICKER.value to {
-                        navigationManager.tryNavigateTo(Destination.LinkAccountPicker(referrer = PANE))
-                    },
-                )
+                knownDeeplinkActions = consentDeeplinkActions(
+                    pane = PANE,
+                    navigationManager = navigationManager,
+                    onDataAccessClick = ::presentDataAccessBottomSheet,
+                    onLegalDetailsClick = ::presentLegalDetailsBottomSheet,
+                ),
             )
         }
     }
 
     fun onViewEffectLaunched() {
         setState { copy(viewEffect = null) }
-    }
-
-    private fun onLogoClick() {
-        withPayload {
-            val moreInfoNotice = it.streamlinedConsentPane.moreInfoNotice ?: return@withPayload
-            eventTracker.track(Click(eventName = "click.nav_bar.logo", pane = PANE))
-            presentSheet(
-                content = Generic(moreInfoNotice),
-                referrer = PANE,
-            )
-        }
     }
 
     private fun presentDataAccessBottomSheet() {

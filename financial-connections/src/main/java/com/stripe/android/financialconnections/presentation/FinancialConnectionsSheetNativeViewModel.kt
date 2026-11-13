@@ -17,6 +17,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.ElementsSessionContext
 import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.AppBackgrounded
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.Click
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ClickNavBarBack
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ClickNavBarClose
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.Complete
@@ -42,6 +43,8 @@ import com.stripe.android.financialconnections.exception.FinancialConnectionsErr
 import com.stripe.android.financialconnections.exception.UnclassifiedError
 import com.stripe.android.financialconnections.features.error.FinancialConnectionsAttestationError
 import com.stripe.android.financialconnections.features.manualentry.isCustomManualEntryError
+import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.Generic
+import com.stripe.android.financialconnections.features.notice.PresentSheet
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Canceled
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Completed
@@ -99,6 +102,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     private val logger: Logger,
     private val navigationManager: NavigationManager,
     private val currentLinkBrand: CurrentLinkBrand,
+    private val presentSheet: PresentSheet,
     @Named(APPLICATION_ID) private val applicationId: String,
     private val initialState: FinancialConnectionsSheetNativeState,
 ) : FinancialConnectionsViewModel<FinancialConnectionsSheetNativeState>(
@@ -151,10 +155,6 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
 
                     is Message.UpdateTopAppBar -> {
                         updateTopAppBarState(message.update)
-                    }
-
-                    is Message.TopAppBarLogoClicked -> {
-                        // Handled by the pane that made the logo clickable
                     }
                 }
             }
@@ -228,12 +228,13 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     }
 
     fun handleOnLogoClick() {
-        if (topAppBarState.value.logoClickable) {
-            val pane = currentPane.value
-            viewModelScope.launch {
-                nativeAuthFlowCoordinator().emit(Message.TopAppBarLogoClicked(pane))
-            }
-        }
+        val notice = topAppBarState.value.logoClickNotice ?: return
+        val pane = currentPane.value
+        eventTracker.track(Click(eventName = "click.nav_bar.logo", pane = pane))
+        presentSheet(
+            content = Generic(notice),
+            referrer = pane,
+        )
     }
 
     private fun onUrlReceived(receivedUrl: String, status: String?) {

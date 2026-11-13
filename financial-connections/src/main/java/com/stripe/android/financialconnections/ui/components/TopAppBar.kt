@@ -74,7 +74,7 @@ internal fun FinancialConnectionsTopAppBar(
         linkBrand = state.linkBrand,
         elevation = elevation,
         allowBackNavigation = state.allowBackNavigation,
-        logoClickable = state.logoClickable,
+        logoClickable = state.logoClickNotice != null,
         onCloseClick = onCloseClick,
         onLogoClick = onLogoClick,
     )

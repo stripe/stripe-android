@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.navigation.topappbar
 
+import FinancialConnectionsGenericInfoScreen
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.ui.theme.Theme
 import com.stripe.android.model.LinkBrand
@@ -14,7 +15,7 @@ internal data class TopAppBarState(
     val isContentScrolled: Boolean = false,
     val error: Throwable? = null,
     val canCloseWithoutConfirmation: Boolean = false,
-    val logoClickable: Boolean = false,
+    val logoClickNotice: FinancialConnectionsGenericInfoScreen? = null,
 ) {
     val isElevated: Boolean
         get() = allowElevation && isContentScrolled
@@ -26,7 +27,7 @@ internal data class TopAppBarState(
             allowElevation = update.allowElevation,
             error = update.error ?: error,
             canCloseWithoutConfirmation = update.canCloseWithoutConfirmation,
-            logoClickable = update.logoClickable,
+            logoClickNotice = update.logoClickNotice,
             forceHideStripeLogo = false,
         )
     }
@@ -39,5 +40,8 @@ internal data class TopAppBarStateUpdate(
     val canCloseWithoutConfirmation: Boolean = false,
     val hideStripeLogo: Boolean? = null,
     val allowElevation: Boolean = true,
-    val logoClickable: Boolean = false,
+    /**
+     * When set, the logo in the top app bar becomes clickable and presents this notice.
+     */
+    val logoClickNotice: FinancialConnectionsGenericInfoScreen? = null,
 )
