@@ -9,14 +9,10 @@ import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedContentPage
 import com.stripe.android.paymentelement.EmbeddedFormPage
 import com.stripe.paymentelementtestpages.CurrencySelector
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withTimeoutOrNull
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import kotlin.time.Duration.Companion.seconds
 
 @OptIn(CheckoutSessionPreview::class)
 @RunWith(AndroidJUnit4::class)
@@ -51,16 +47,16 @@ internal class CheckoutAdaptivePricingIntegrationTest {
     }
 
     @Test
-    fun testSwitchingToSettlementCurrencyUpdatesSessionAndPays() = runScenario { controller ->
+    fun testSwitchingToIntegrationCurrencyUpdatesSessionAndPays() = runScenario { controller ->
         assertPresentsLocalCurrency(controller.session.value)
 
         currencySelector.clickCurrencyOption("USD")
 
-        val session = awaitSession(controller, "USD presentment") {
-            it.presentmentDetails?.presentmentCurrency == SETTLEMENT_CURRENCY &&
-                it.totals.total.minorUnitsAmount == SUBTOTAL
+        // The session reflects the new currency only after the update response, not when the option is tapped.
+        val session = controller.awaitSession("USD presentment") {
+            it.presentmentDetails?.presentmentCurrency == INTEGRATION_CURRENCY
         }
-        assertThat(session.currency).isEqualTo(SETTLEMENT_CURRENCY)
+        assertThat(session.totals.total.minorUnitsAmount).isEqualTo(SUBTOTAL)
         currencySelector.assertCurrencyOptionIsSelected("USD")
 
         payWithCard()
@@ -92,26 +88,15 @@ internal class CheckoutAdaptivePricingIntegrationTest {
     }
 
     private fun assertPresentsLocalCurrency(session: CheckoutElementsController.Session?) {
-        assertThat(session?.currency).isEqualTo(SETTLEMENT_CURRENCY)
+        assertThat(session?.currency).isEqualTo(INTEGRATION_CURRENCY)
         assertThat(session?.presentmentDetails?.presentmentCurrency).isEqualTo(LOCAL_CURRENCY)
         currencySelector.assertCurrencyOptionIsSelected("EUR")
     }
 
-    // The session only reflects the new currency after the update response, not when the option is tapped.
-    private suspend fun awaitSession(
-        controller: CheckoutElementsController,
-        description: String,
-        predicate: (CheckoutElementsController.Session) -> Boolean,
-    ): CheckoutElementsController.Session {
-        return withTimeoutOrNull(30.seconds) {
-            controller.session.filterNotNull().first(predicate)
-        } ?: error("Timed out waiting for $description. Last session: ${controller.session.value}")
-    }
-
     private companion object {
-        // The playground backend geolocates the customer from this email.
+        // Stripe test mode simulates a French customer from the +location_FR email suffix.
         const val FRANCE_CUSTOMER_EMAIL = "test+location_FR@example.com"
-        const val SETTLEMENT_CURRENCY = "usd"
+        const val INTEGRATION_CURRENCY = "usd"
         const val LOCAL_CURRENCY = "eur"
         const val SUBTOTAL = 1000L
     }

@@ -9,16 +9,12 @@ import com.stripe.android.paymentelement.EmbeddedContentPage
 import com.stripe.android.paymentelement.EmbeddedFormPage
 import com.stripe.android.paymentsheet.PaymentSheetPage
 import com.stripe.paymentelementtestpages.BillingDetailsPage
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import kotlin.time.Duration.Companion.seconds
 
 @OptIn(CheckoutSessionPreview::class)
 @RunWith(AndroidJUnit4::class)
@@ -84,7 +80,8 @@ internal class CheckoutCardIntegrationTest {
             paymentSheetPage.assertSaveForFutureUseCheckboxChecked()
             formPage.clickPrimaryButtonWithoutWaitingForDismissal()
 
-            val session = awaitSession(controller, "California tax") {
+            // The sheet result commits the selection before the refreshed response, so wait on response-derived fields.
+            val session = controller.awaitSession("California tax") {
                 it.tax?.status == CheckoutElementsController.Session.Tax.Status.Ready
             }
             formPage.waitUntilMissing()
@@ -112,7 +109,8 @@ internal class CheckoutCardIntegrationTest {
             fillOutCardAndBillingDetails("4242424242424242", CALIFORNIA_ADDRESS, "California")
             formPage.clickPrimaryButtonWithoutWaitingForDismissal()
 
-            val californiaSession = awaitSession(controller, "California tax") {
+            // The sheet result commits the selection before the refreshed response, so wait on response-derived fields.
+            val californiaSession = controller.awaitSession("California tax") {
                 it.tax?.status == CheckoutElementsController.Session.Tax.Status.Ready
             }
             formPage.waitUntilMissing()
@@ -125,7 +123,7 @@ internal class CheckoutCardIntegrationTest {
             formPage.clickPrimaryButtonWithoutWaitingForDismissal()
 
             val californiaTax = californiaSession.totals.taxExclusive.minorUnitsAmount
-            val oregonSession = awaitSession(controller, "Oregon tax") {
+            val oregonSession = controller.awaitSession("Oregon tax") {
                 it.totals.taxExclusive.minorUnitsAmount != californiaTax
             }
             formPage.waitUntilMissing()
@@ -199,17 +197,6 @@ internal class CheckoutCardIntegrationTest {
             stateName = stateName,
             zipCode = checkNotNull(address.postalCode),
         )
-    }
-
-    // The sheet result commits the new selection before the refreshed response, so wait on response-derived fields.
-    private suspend fun awaitSession(
-        controller: CheckoutElementsController,
-        description: String,
-        predicate: (CheckoutElementsController.Session) -> Boolean,
-    ): CheckoutElementsController.Session {
-        return withTimeoutOrNull(30.seconds) {
-            controller.session.filterNotNull().first(predicate)
-        } ?: error("Timed out waiting for $description. Last session: ${controller.session.value}")
     }
 
     private fun assertAwaitingBillingAddress(session: CheckoutElementsController.Session?) {
