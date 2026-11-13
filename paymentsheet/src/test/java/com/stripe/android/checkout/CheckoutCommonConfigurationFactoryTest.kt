@@ -74,7 +74,7 @@ internal class CheckoutCommonConfigurationFactoryTest {
         )
 
         assertThat(result.preferredNetworks).containsExactly(CardBrand.CartesBancaires)
-        assertThat(result.useRemoteMobileSession).isTrue()
+        assertThat(result.useRemoteMobileSession).isFalse()
         assertThat(result.paymentMethodOrder).containsExactly("klarna", "card").inOrder()
         assertThat(result.opensCardScannerAutomatically).isTrue()
         assertThat(result.cardBrandAcceptance).isEqualTo(
@@ -100,7 +100,7 @@ internal class CheckoutCommonConfigurationFactoryTest {
     }
 
     @Test
-    fun `matches the common configuration derived from the embedded configuration`() {
+    fun `matches embedded configuration settings with remote MobileSession disabled`() {
         val configuration = CheckoutElementsController.Configuration()
             .paymentElement(
                 PaymentElement.Configuration()
@@ -133,6 +133,7 @@ internal class CheckoutCommonConfigurationFactoryTest {
                 collectedDetails = collectedDetails,
             )
             .asCommonConfiguration()
+            .copy(useRemoteMobileSession = false)
         val actual = factory()
             .create(
                 configuration = configuration,

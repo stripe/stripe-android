@@ -4,7 +4,6 @@ import com.stripe.android.checkout.CheckoutElementsController.Configuration
 import com.stripe.android.checkout.injection.AppName
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.model.CommonConfiguration
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.elements.PaymentElement
 import com.stripe.android.paymentelement.CardFundingFilteringPrivatePreview
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -24,7 +23,6 @@ internal class CheckoutCommonConfigurationFactory @Inject constructor(
         collectedDetails: CheckoutCollectedDetails,
     ): CommonConfiguration {
         return createCommonConfiguration(
-            useRemoteMobileSession = FeatureFlags.serverPaymentMethodAvailabilityEnabled.isEnabled,
             configuration = configuration,
             paymentElementConfiguration = paymentElementConfiguration,
             checkoutSessionResponse = checkoutSessionResponse,
@@ -43,7 +41,6 @@ internal class CheckoutCommonConfigurationFactory @Inject constructor(
     ): CommonConfiguration? {
         val expressCheckoutElementConfiguration = configuration.expressCheckoutElementConfiguration ?: return null
         return createCommonConfiguration(
-            useRemoteMobileSession = false,
             configuration = configuration,
             paymentElementConfiguration = configuration.paymentElementConfiguration,
             checkoutSessionResponse = checkoutSessionResponse,
@@ -83,7 +80,6 @@ internal class CheckoutCommonConfigurationFactory @Inject constructor(
     }
 
     private fun createCommonConfiguration(
-        useRemoteMobileSession: Boolean,
         configuration: CheckoutElementsController.Configuration.State,
         paymentElementConfiguration: PaymentElement.Configuration.State?,
         checkoutSessionResponse: CheckoutSessionResponse,
@@ -93,7 +89,7 @@ internal class CheckoutCommonConfigurationFactory @Inject constructor(
         billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
     ): CommonConfiguration = CommonConfiguration(
         merchantDisplayName = configuration.resolveMerchantDisplayName(checkoutSessionResponse, appName),
-        useRemoteMobileSession = useRemoteMobileSession,
+        useRemoteMobileSession = false,
         customer = ConfigurationDefaults.customer,
         googlePay = googlePayConfiguration,
         link = linkConfiguration,
