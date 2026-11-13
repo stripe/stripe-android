@@ -45,6 +45,7 @@ internal object MerchantSettingsDefinition :
         }.toList() + listOf(
             option("Mondu", Merchant.MONDU),
             option("Naira Wallet", Merchant.NG_WALLET),
+            option("Stripe balance", Merchant.STRIPE_BALANCE),
             option(Merchant.US_TAX.name, convertToValue(Merchant.US_TAX.value)),
             option(Merchant.StripeShop.name, convertToValue(Merchant.StripeShop.value)),
             option(Merchant.Custom.name, convertToValue(Merchant.Custom.value))
@@ -105,6 +106,7 @@ internal object MerchantSettingsDefinition :
                 Merchant.MONDU -> Currency.EUR
                 Merchant.NG -> Currency.NGN
                 Merchant.NG_WALLET -> Currency.NGN
+                Merchant.STRIPE_BALANCE -> Currency.GBP
                 Merchant.StripeShop -> Currency.USD
                 Merchant.US_TAX -> Currency.USD
                 Merchant.Custom -> Currency.USD
@@ -131,6 +133,7 @@ enum class Merchant(override val value: String) : ValueEnum {
     MONDU("mondu"),
     NG("NG"),
     NG_WALLET("ng_wallet"),
+    STRIPE_BALANCE("stripe_balance"),
     StripeShop("stripe_shop_test"),
     US_TAX("us_tax"),
     Custom("custom")
@@ -157,6 +160,7 @@ val Merchant.countryCode: String
             Merchant.MONDU -> "DE"
             Merchant.NG -> "NG"
             Merchant.NG_WALLET -> "NG"
+            Merchant.STRIPE_BALANCE -> "GB"
             Merchant.StripeShop -> "US"
             Merchant.US_TAX -> "US"
             Merchant.Custom -> "US"
