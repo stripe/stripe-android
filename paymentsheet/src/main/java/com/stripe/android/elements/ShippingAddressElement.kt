@@ -13,6 +13,7 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.checkout.CheckoutElementsController
 import com.stripe.android.checkout.CheckoutElementsControllerStateHolder
+import com.stripe.android.checkout.CheckoutInteractor
 import com.stripe.android.checkout.ShippingAddressElementStateHolder
 import com.stripe.android.checkout.asPaymentSheet
 import com.stripe.android.checkout.toCheckoutAddress
@@ -39,7 +40,7 @@ internal fun interface CommitShippingAddress {
         name: String?,
         address: CheckoutElementsController.Address.State,
         checkoutSessionResponse: CheckoutSessionResponse,
-    ): Result<Unit>
+    ): CheckoutElementsController.OperationResult
 }
 
 @CheckoutSessionPreview
@@ -60,7 +61,7 @@ class ShippingAddressElement internal constructor(
         lifecycleOwner: LifecycleOwner,
         apiConfigurationProvider: Provider<ApiConfiguration.State>,
         @ViewModelScope coroutineScope: CoroutineScope,
-        checkoutElementsController: CheckoutElementsController,
+        checkoutInteractor: CheckoutInteractor,
         stateHolder: CheckoutElementsControllerStateHolder,
         shippingAddressElementStateHolder: ShippingAddressElementStateHolder,
         errorReporter: ErrorReporter,
@@ -69,7 +70,7 @@ class ShippingAddressElement internal constructor(
         lifecycleOwner = lifecycleOwner,
         apiConfigurationProvider = apiConfigurationProvider,
         coroutineScope = coroutineScope,
-        commitShippingAddress = CommitShippingAddress(checkoutElementsController::commitShippingAddress),
+        commitShippingAddress = CommitShippingAddress(checkoutInteractor::commitShippingAddress),
         stateHolder = stateHolder,
         shippingAddressElementStateHolder = shippingAddressElementStateHolder,
         errorReporter = errorReporter,

@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.stripe.android.checkout.CheckoutElementsController.OperationResult
 import com.stripe.android.checkout.CheckoutElementsController.Session
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.exception.safeAnalyticsMessage
@@ -22,7 +23,7 @@ import javax.inject.Inject
 @CheckoutSessionPreview
 internal class CurrencySelectorViewModel(
     private val session: StateFlow<Session?>,
-    private val updateCurrency: suspend (String) -> Result<Unit>,
+    private val updateCurrency: suspend (String) -> OperationResult,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
     savedStateHandle: SavedStateHandle,
@@ -48,19 +49,20 @@ internal class CurrencySelectorViewModel(
     fun onCurrencySelected(currencyCode: String) {
         val checkoutSessionId = session.value?.id
         viewModelScope.launch {
-            updateCurrency(currencyCode)
-                .onSuccess {
+            when (val result = updateCurrency(currencyCode)) {
+                is OperationResult.Succeeded -> {
                     fireEvent(PaymentSheetEvent.AdaptivePricingCurrencyToggled(checkoutSessionId))
                 }
-                .onFailure { throwable ->
-                    _errorMessage.value = throwable.stripeErrorMessage()
+                is OperationResult.Failed -> {
+                    _errorMessage.value = result.error.stripeErrorMessage()
                     fireEvent(
                         PaymentSheetEvent.AdaptivePricingCurrencyToggledFailed(
-                            error = throwable.safeAnalyticsMessage,
+                            error = result.error.safeAnalyticsMessage,
                             checkoutSessionId = checkoutSessionId,
                         )
                     )
                 }
+            }
         }
     }
 
@@ -81,6 +83,7 @@ internal class CurrencySelectorViewModel(
 
     internal class Factory @Inject constructor(
         private val checkoutElementsController: CheckoutElementsController,
+        private val checkoutInteractor: CheckoutInteractor,
         private val analyticsRequestExecutor: AnalyticsRequestExecutor,
         private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
     ) : ViewModelProvider.Factory {
@@ -96,7 +99,7 @@ internal class CurrencySelectorViewModel(
         ): T {
             return CurrencySelectorViewModel(
                 session = checkoutElementsController.session,
-                updateCurrency = checkoutElementsController::updateCurrency,
+                updateCurrency = checkoutInteractor::updateCurrency,
                 analyticsRequestExecutor = analyticsRequestExecutor,
                 paymentAnalyticsRequestFactory = paymentAnalyticsRequestFactory,
                 savedStateHandle = extras.createSavedStateHandle(),

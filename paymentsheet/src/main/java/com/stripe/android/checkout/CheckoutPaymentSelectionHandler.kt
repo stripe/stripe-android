@@ -15,7 +15,7 @@ import javax.inject.Singleton
 @OptIn(com.stripe.android.paymentelement.CheckoutSessionPreview::class)
 @Singleton
 internal class CheckoutPaymentSelectionHandler @Inject constructor(
-    private val checkoutElementsController: CheckoutElementsController,
+    private val checkoutInteractor: CheckoutInteractor,
     selectionHolder: EmbeddedSelectionHolder,
     immediateActionHandler: EmbeddedRowSelectionImmediateActionHandler,
     @ViewModelScope private val coroutineScope: CoroutineScope,
@@ -38,7 +38,8 @@ internal class CheckoutPaymentSelectionHandler @Inject constructor(
 
     private fun selectSavedPaymentMethod(selection: PaymentSelection.Saved) {
         coroutineScope.launch(start = CoroutineStart.UNDISPATCHED) {
-            checkoutElementsController.selectSavedPaymentMethod(selection).onSuccess {
+            val result = checkoutInteractor.selectSavedPaymentMethod(selection)
+            if (result is CheckoutElementsController.OperationResult.Succeeded) {
                 onSelectionComplete()
             }
         }

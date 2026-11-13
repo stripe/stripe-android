@@ -292,7 +292,7 @@ internal class ShippingAddressElementTest {
 
     @Test
     fun `successful result suppresses presentation until commit completes`() {
-        val commitResult = CompletableDeferred<Result<Unit>>()
+        val commitResult = CompletableDeferred<CheckoutElementsController.OperationResult>()
 
         runScenario(
             commitShippingAddress = FakeCommitShippingAddress(commitResult),
@@ -323,7 +323,7 @@ internal class ShippingAddressElementTest {
             testScheduler.runCurrent()
             activityLauncher.launchCalls.expectNoEvents()
 
-            commitResult.complete(Result.success(Unit))
+            commitResult.complete(CheckoutElementsController.OperationResult.Succeeded())
             assertThat(shippingAddressElementStateHolder.isPresenting).isFalse()
 
             shippingAddressElement.present()
@@ -402,7 +402,7 @@ internal class ShippingAddressElementTest {
         configured: Boolean = true,
         configuration: CheckoutElementsController.Configuration.State = configuredCheckoutConfiguration,
         commitShippingAddress: FakeCommitShippingAddress = FakeCommitShippingAddress(
-            CompletableDeferred(Result.success(Unit)),
+            CompletableDeferred(CheckoutElementsController.OperationResult.Succeeded()),
         ),
         block: suspend Scenario.() -> Unit,
     ) = runTest {
