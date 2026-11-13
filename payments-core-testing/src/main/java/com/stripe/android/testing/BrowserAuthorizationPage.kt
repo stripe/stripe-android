@@ -11,6 +11,16 @@ class BrowserAuthorizationPage(
     private val device: UiDevice,
     private val composeTestRule: ComposeTestRule,
 ) {
+    fun awaitChromeLaunch() {
+        composeTestRule.waitUntil(
+            conditionDescription = "Chrome to launch",
+            timeoutMillis = BROWSER_LAUNCH_TIMEOUT_MS,
+        ) {
+            currentTopActivity()?.contains(CHROME_PACKAGE) == true
+        }
+        dismissFirstRunIfShown()
+    }
+
     fun awaitPageText(text: String, timeoutMs: Long) {
         checkNotNull(
             device.wait(
@@ -21,6 +31,12 @@ class BrowserAuthorizationPage(
             "Authorization page content '$text' did not load"
         }
         device.waitForIdle()
+    }
+
+    fun clickAction(label: String) {
+        checkNotNull(device.findObject(By.textContains(label))) {
+            "Authorization page action '$label' not found"
+        }.click()
     }
 
     fun currentTopActivity(): String? {
