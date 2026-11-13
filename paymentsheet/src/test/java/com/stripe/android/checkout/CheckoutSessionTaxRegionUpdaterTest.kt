@@ -3,6 +3,7 @@ package com.stripe.android.checkout
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutElementsController.Address
 import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent.InvocationSource
+import com.stripe.android.checkout.analytics.CheckoutOperationMeasurer
 import com.stripe.android.checkout.analytics.FakeCheckoutAnalyticsReporter
 import com.stripe.android.checkout.analytics.LocalOperation
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
@@ -18,6 +19,7 @@ import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.repositories.CheckoutStripeRepositoryFactory
+import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.android.utils.FakeFraudDetectionDataRepository
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -101,6 +103,36 @@ internal class CheckoutSessionTaxRegionUpdaterTest {
     }
 
     @Test
+    fun `updateTaxRegionIfNeeded updates tax region without reporting analytics`() = runScenario {
+        networkRule.checkoutUpdate(
+            bodyPart("tax_region[country]", "US"),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-init.json")
+        }
+
+        val result = updater.updateTaxRegionIfNeeded(
+            checkoutSessionResponse = checkoutSessionResponse,
+            addressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+            address = ADDRESS,
+        )
+
+        assertThat(result.getOrThrow().id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
+        analyticsRequestExecutor.requestTurbine.expectNoEvents()
+    }
+
+    @Test
+    fun `updateTaxRegionIfNeeded returns original response when address source does not match`() = runScenario {
+        val result = updater.updateTaxRegionIfNeeded(
+            checkoutSessionResponse = checkoutSessionResponse,
+            addressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
+            address = ADDRESS,
+        )
+
+        assertThat(result.getOrThrow()).isSameInstanceAs(checkoutSessionResponse)
+        analyticsRequestExecutor.requestTurbine.expectNoEvents()
+    }
+
+    @Test
     fun `updateServerStateIfNeeded returns failure when tax region update fails`() = runScenario {
         networkRule.checkoutUpdate { response ->
             response.setResponseCode(400)
@@ -121,12 +153,12 @@ internal class CheckoutSessionTaxRegionUpdaterTest {
         automaticTaxEnabled: Boolean = true,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
-        val analyticsReporter = FakeCheckoutAnalyticsReporter()
+        val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
+        val analyticsReporter = FakeCheckoutAnalyticsReporter(analyticsRequestExecutor)
         val checkoutSessionRepository = CheckoutSessionRepository(
             elementsSessionClientParams = CheckoutStripeRepositoryFactory.clientParams(),
             fraudDetectionDataRepository = FakeFraudDetectionDataRepository.create(),
             stripeNetworkClient = DefaultStripeNetworkClient(),
-            analyticsReporter = analyticsReporter,
             apiRequestOptionsProvider = {
                 ApiRequest.Options(
                     apiKey = DEFAULT_API_CONFIG.publishableKey,
@@ -137,6 +169,7 @@ internal class CheckoutSessionTaxRegionUpdaterTest {
 
         val updater = CheckoutSessionTaxRegionUpdater(
             checkoutSessionRepository,
+            operationMeasurer = CheckoutOperationMeasurer(analyticsReporter),
             localOperationFactory = LocalOperation.Factory { operation, params ->
                 LocalOperation(operation, params, analyticsReporter)
             },
@@ -149,6 +182,7 @@ internal class CheckoutSessionTaxRegionUpdaterTest {
             ),
             checkoutSessionRepository = checkoutSessionRepository,
             updater = updater,
+            analyticsRequestExecutor = analyticsRequestExecutor,
         )
 
         scenario.block()
@@ -158,6 +192,7 @@ internal class CheckoutSessionTaxRegionUpdaterTest {
         val checkoutSessionResponse: CheckoutSessionResponse,
         val checkoutSessionRepository: CheckoutSessionRepository,
         val updater: CheckoutSessionTaxRegionUpdater,
+        val analyticsRequestExecutor: FakeAnalyticsRequestExecutor,
     )
 
     private companion object {

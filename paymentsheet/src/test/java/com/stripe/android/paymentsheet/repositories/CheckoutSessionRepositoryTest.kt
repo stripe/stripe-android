@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet.repositories
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutAnalyticsTestFixtures
-import com.stripe.android.checkout.analytics.FakeCheckoutAnalyticsReporter
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutFetch
 import com.stripe.android.checkouttesting.checkoutInit
@@ -47,7 +46,6 @@ class CheckoutSessionRepositoryTest {
         elementsSessionClientParams = CheckoutStripeRepositoryFactory.clientParams(),
         fraudDetectionDataRepository = FakeFraudDetectionDataRepository.create(),
         stripeNetworkClient = DefaultStripeNetworkClient(),
-        analyticsReporter = FakeCheckoutAnalyticsReporter(),
         apiRequestOptionsProvider = {
             ApiRequest.Options(
                 apiKey = DEFAULT_API_CONFIG.publishableKey,
@@ -73,7 +71,6 @@ class CheckoutSessionRepositoryTest {
         val result = repository.init(
             clientSecret = CheckoutSessionClientSecret("cs_test_abc123_secret_test"),
             adaptivePricingAllowed = true,
-            analyticsParams = emptyMap(),
         )
 
         assertThat(result.getOrThrow().clientSecret.value).isEqualTo("cs_test_abc123_secret_test")
