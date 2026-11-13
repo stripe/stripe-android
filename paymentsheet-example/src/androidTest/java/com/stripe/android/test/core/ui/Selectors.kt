@@ -1,7 +1,6 @@
 package com.stripe.android.test.core.ui
 
 import android.content.pm.PackageManager
-import android.os.SystemClock.sleep
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.hasClickAction
@@ -17,11 +16,9 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.UiObject
 import androidx.test.uiautomator.UiSelector
-import androidx.test.uiautomator.Until
 import com.stripe.android.customersheet.ui.CUSTOMER_SHEET_CONFIRM_BUTTON_TEST_TAG
 import com.stripe.android.customersheet.ui.CUSTOMER_SHEET_SAVE_BUTTON_TEST_TAG
 import com.stripe.android.model.PaymentMethod.Type.Blik
@@ -38,6 +35,8 @@ import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.DEFAULT_UI_TIMEOUT
 import com.stripe.android.test.core.HOOKS_PAGE_LOAD_TIMEOUT
 import com.stripe.android.test.core.TestParameters
+import com.stripe.android.testing.BrowserAuthorizationPage
+import com.stripe.android.testing.BrowserAuthorizationPage.Companion.BROWSER_LAUNCH_TIMEOUT_MS
 import com.stripe.android.ui.core.elements.MANDATE_TEST_TAG
 import com.stripe.android.ui.core.elements.SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG
 import com.stripe.android.uicore.elements.DROPDOWN_MENU_CLICKABLE_TEST_TAG
@@ -58,6 +57,8 @@ internal class Selectors(
     val composeTestRule: ComposeTestRule,
     private val testParameters: TestParameters
 ) {
+    private val browserAuthorizationPage = BrowserAuthorizationPage(device, composeTestRule)
+
     val continueButton = BuyButton(composeTestRule)
     val complete = ComposeButton(composeTestRule, hasTestTag(CHECKOUT_TEST_TAG))
     val reload = ComposeButton(composeTestRule, hasTestTag(RELOAD_TEST_TAG))
@@ -166,15 +167,7 @@ internal class Selectors(
             "test ${if (isSetup) "setup" else "payment"} page"
         }
 
-        checkNotNull(
-            device.wait(
-                Until.findObject(By.textContains(readinessText)),
-                HOOKS_PAGE_LOAD_TIMEOUT * 1000,
-            )
-        ) {
-            "Authorization page content '$readinessText' did not load"
-        }
-        device.waitForIdle()
+        browserAuthorizationPage.awaitPageText(readinessText, HOOKS_PAGE_LOAD_TIMEOUT * 1000)
     }
 
     /** Waits for the browser chooser or browser, then handles Chrome's first-run onboarding. */
@@ -185,7 +178,7 @@ internal class Selectors(
             conditionDescription = "browser chooser or ${browser.name} to launch",
             timeoutMillis = BROWSER_LAUNCH_TIMEOUT_MS,
         ) {
-            currentTopActivity()?.let { activity ->
+            browserAuthorizationPage.currentTopActivity()?.let { activity ->
                 val isRequestedBrowser = activity.contains(browser.packageName)
                 if (isRequestedBrowser) {
                     launchedActivity = activity
@@ -200,7 +193,7 @@ internal class Selectors(
                 conditionDescription = "${browser.name} to launch",
                 timeoutMillis = BROWSER_LAUNCH_TIMEOUT_MS,
             ) {
-                currentTopActivity()?.let { activity ->
+                browserAuthorizationPage.currentTopActivity()?.let { activity ->
                     if (activity.contains(browser.packageName)) {
                         launchedActivity = activity
                     }
@@ -210,47 +203,7 @@ internal class Selectors(
         }
 
         if (browser == BrowserUI.Chrome) {
-            sleep(CHROME_ACTIVITY_TRANSITION_MS)
-            if (currentTopActivity()?.contains(CHROME_FIRST_RUN_ACTIVITY) == true) {
-                dismissChromeFirstRunWithInput()
-            }
-        }
-    }
-
-    private fun currentTopActivity(): String? {
-        return runCatching {
-            device.executeShellCommand("dumpsys activity activities")
-                .lineSequence()
-                .firstOrNull { "topResumedActivity=" in it }
-        }.getOrNull()
-    }
-
-    private fun dismissChromeFirstRunWithInput() {
-        val chrome = BrowserUI.Chrome.packageName
-        repeat(CHROME_FIRST_RUN_MAX_SCREENS) {
-            if (currentTopActivity()?.contains(CHROME_FIRST_RUN_ACTIVITY) == false) {
-                return
-            }
-
-            var buttonId: String? = null
-            composeTestRule.waitUntil(
-                conditionDescription = "Chrome first-run dismissal button to appear",
-                timeoutMillis = BROWSER_LAUNCH_TIMEOUT_MS,
-            ) {
-                buttonId = CHROME_FIRST_RUN_BUTTON_IDS.firstOrNull { id ->
-                    device.hasObject(By.res("$chrome:id/$id"))
-                }
-                buttonId != null
-            }
-            device.findObject(By.res("$chrome:id/${checkNotNull(buttonId)}")).click()
-            sleep(CHROME_ACTIVITY_TRANSITION_MS)
-        }
-
-        composeTestRule.waitUntil(
-            conditionDescription = "Chrome first-run onboarding to close",
-            timeoutMillis = BROWSER_LAUNCH_TIMEOUT_MS,
-        ) {
-            currentTopActivity()?.contains(CHROME_FIRST_RUN_ACTIVITY) == false
+            browserAuthorizationPage.dismissFirstRunIfShown()
         }
     }
 
@@ -486,19 +439,6 @@ internal class Selectors(
     }
 
     companion object {
-        private const val BROWSER_LAUNCH_TIMEOUT_MS = 60_000L
-        private const val CHROME_ACTIVITY_TRANSITION_MS = 2_000L
-        private const val CHROME_FIRST_RUN_MAX_SCREENS = 8
-        private const val CHROME_FIRST_RUN_ACTIVITY =
-            "com.android.chrome/org.chromium.chrome.browser.firstrun.FirstRunActivity"
-        private val CHROME_FIRST_RUN_BUTTON_IDS = listOf(
-            "signin_fre_dismiss_button",
-            "negative_button",
-            "button_secondary",
-            "terms_accept",
-            "next_button",
-        )
-
         fun browserWindow(device: UiDevice, browser: BrowserUI): UiObject? =
             device.findObject(
                 UiSelector()

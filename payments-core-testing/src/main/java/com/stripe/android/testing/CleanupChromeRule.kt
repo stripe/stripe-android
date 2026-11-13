@@ -1,4 +1,4 @@
-package com.stripe.android.utils
+package com.stripe.android.testing
 
 import android.app.UiAutomation
 import android.os.Build
@@ -13,7 +13,7 @@ import org.junit.runners.model.Statement
 
 // Kills Chrome once the test is over.
 // This is to prevent the Chrome process from causing future tests to fail.
-internal object CleanupChromeRule : TestRule {
+object CleanupChromeRule : TestRule {
     override fun apply(base: Statement, description: Description): Statement {
         return object : Statement() {
             @Throws

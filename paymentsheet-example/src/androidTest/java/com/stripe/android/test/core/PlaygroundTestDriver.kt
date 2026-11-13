@@ -72,8 +72,8 @@ import com.stripe.android.test.core.ui.BrowserUI
 import com.stripe.android.test.core.ui.ComposeButton
 import com.stripe.android.test.core.ui.Selectors
 import com.stripe.android.test.core.ui.UiAutomatorText
+import com.stripe.android.testing.awaitWindowFocus
 import com.stripe.android.uicore.elements.PHONE_NUMBER_TEXT_FIELD_TAG
-import com.stripe.android.utils.awaitWindowFocus
 import kotlinx.coroutines.launch
 import org.junit.Assert.fail
 import org.junit.Assume.assumeFalse
