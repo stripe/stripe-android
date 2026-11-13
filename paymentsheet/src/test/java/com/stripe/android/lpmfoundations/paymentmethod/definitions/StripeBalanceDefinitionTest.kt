@@ -7,6 +7,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.TestUiDefinitionFactoryAr
 import com.stripe.android.lpmfoundations.paymentmethod.isSupported
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.stripebalance.StripeBalanceFinancialAccounts
 import com.stripe.android.uicore.elements.FormFieldId
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -33,6 +34,17 @@ internal class StripeBalanceDefinitionTest {
             stripeIntent = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent
                 .stripeIntent(PaymentMethod.Type.StripeBalance),
             stripeBalanceFinancialAccounts = null,
+        )
+
+        assertThat(StripeBalanceDefinition.isSupported(metadata)).isFalse()
+    }
+
+    @Test
+    fun `is not supported when the buyer has no financial accounts`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent
+                .stripeIntent(PaymentMethod.Type.StripeBalance),
+            stripeBalanceFinancialAccounts = StripeBalanceFinancialAccounts(accounts = emptyList(), currency = "usd"),
         )
 
         assertThat(StripeBalanceDefinition.isSupported(metadata)).isFalse()
