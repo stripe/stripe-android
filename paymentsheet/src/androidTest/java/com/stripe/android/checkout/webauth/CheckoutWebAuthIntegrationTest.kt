@@ -3,6 +3,7 @@ package com.stripe.android.checkout.webauth
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CHECKOUT_PLAYGROUND_BACKEND_URL
@@ -92,7 +93,7 @@ internal class CheckoutWebAuthIntegrationTest {
                 browserPage.awaitChromeLaunch()
                 browserPage.dismissFirstRunIfShown()
                 browserPage.awaitPageText(AUTHORIZE_TEST_PAYMENT, AUTHORIZATION_PAGE_LOAD_TIMEOUT_MS)
-                browserPage.clickAction(AUTHORIZE_TEST_PAYMENT)
+                device.findObject(By.textContains(AUTHORIZE_TEST_PAYMENT)).click()
             },
         )
         assertThat(result).isInstanceOf(CheckoutElementsController.Result.Completed::class.java)
