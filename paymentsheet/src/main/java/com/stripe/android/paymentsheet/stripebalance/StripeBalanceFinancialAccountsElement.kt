@@ -104,13 +104,6 @@ internal fun StripeBalanceFinancialAccountsUI(
             text = stringResource(R.string.stripe_paymentsheet_stripe_balance_pay_from),
             modifier = Modifier.padding(bottom = 8.dp),
         )
-        if (accounts.isEmpty()) {
-            Text(
-                text = stringResource(R.string.stripe_paymentsheet_stripe_balance_no_accounts),
-                style = MaterialTheme.typography.body1,
-                color = MaterialTheme.stripeColors.subtitle,
-            )
-        }
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             accounts.forEach { account ->
                 StripeBalanceFinancialAccountRow(
