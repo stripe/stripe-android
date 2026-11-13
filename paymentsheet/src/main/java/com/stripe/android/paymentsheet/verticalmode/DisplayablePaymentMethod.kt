@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodMessagePromotion
+import com.stripe.android.paymentsheet.featuredinstitutions.FeaturedInstitutions
 import com.stripe.android.paymentsheet.ui.IconHelper
 
 internal data class DisplayablePaymentMethod(
@@ -19,6 +20,7 @@ internal data class DisplayablePaymentMethod(
     val subtitle: ResolvableString? = null,
     val promoBadge: String? = null,
     val promotionProvider: (() -> PaymentMethodMessagePromotion?)? = null,
+    val featuredInstitutions: FeaturedInstitutions? = null,
     val isExpanded: Boolean,
     val onClick: () -> Unit,
     @DrawableRes private val outlinedIconResource: Int? = null,

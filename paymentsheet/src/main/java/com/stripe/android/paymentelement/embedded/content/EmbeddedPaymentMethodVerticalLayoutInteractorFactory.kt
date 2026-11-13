@@ -11,6 +11,7 @@ import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.FormHelper.FormType
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.featuredinstitutions.FeaturedInstitutionsHelper
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.paymentsheet.state.WalletsState
@@ -44,6 +45,7 @@ internal class DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory @Inje
     private val selectionHolder: EmbeddedSelectionHolder,
     private val customerStateHolder: CustomerStateHolder,
     private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper,
+    private val featuredInstitutionsHelper: FeaturedInstitutionsHelper,
     private val verticalPaymentSelectionHandler: VerticalPaymentSelectionHandler,
     @ViewModelScope private val coroutineScope: CoroutineScope,
     private val sheetStateHolder: SheetStateHolder,
@@ -157,6 +159,7 @@ internal class DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory @Inje
             linkAccount = linkAccountHolder.linkAccountInfo,
             coroutineScope = interactorScope,
             paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
+            featuredInstitutions = featuredInstitutionsHelper.featuredInstitutions,
         )
     }
 }

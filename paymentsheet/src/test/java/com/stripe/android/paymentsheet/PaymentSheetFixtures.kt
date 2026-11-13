@@ -169,7 +169,8 @@ internal object PaymentSheetFixtures {
         paymentElementCallbackIdentifier = PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER,
         linkAccountInfo = LinkAccountUpdate.Value(null),
         walletButtonsRendered = false,
-        promotions = null
+        promotions = null,
+        featuredInstitutions = null,
     )
 
     internal fun PaymentOptionContract.Args.updateState(

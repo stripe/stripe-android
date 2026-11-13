@@ -183,7 +183,8 @@ class VerticalModeInitialScreenFactoryTest {
             viewModel = fakeViewModel,
             paymentMethodMetadata = paymentMethodMetadata,
             customerStateHolder = customerStateHolder,
-            paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
+            paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
+            featuredInstitutionsHelper = null,
         )
         Scenario(
             screens = screens

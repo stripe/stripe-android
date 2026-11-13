@@ -13,6 +13,7 @@ import com.stripe.android.payments.core.injection.ApiRequestOptionsModule
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.PaymentSheetContract
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
+import com.stripe.android.paymentsheet.featuredinstitutions.FeaturedInstitutionsHelperModule
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelperModule
 import com.stripe.android.paymentsheet.state.TapToAddConnectionStarterModule
 import dagger.BindsInstance
@@ -39,6 +40,7 @@ import javax.inject.Singleton
         TapToAddConnectionStarterModule::class,
         PaymentElementConfirmationModule::class,
         PaymentMethodMessagePromotionsHelperModule::class,
+        FeaturedInstitutionsHelperModule::class,
         PaymentMethodMessagePromotionsExperimentHandlerModule::class,
     ]
 )

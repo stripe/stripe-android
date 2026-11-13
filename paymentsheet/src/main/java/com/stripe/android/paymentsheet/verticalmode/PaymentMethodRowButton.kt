@@ -30,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
@@ -40,12 +41,15 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle
+import com.stripe.android.paymentsheet.featuredinstitutions.FeaturedInstitutionIcons
+import com.stripe.android.paymentsheet.featuredinstitutions.FeaturedInstitutions
 import com.stripe.android.paymentsheet.toTextStyle
 import com.stripe.android.paymentsheet.ui.DefaultPaymentMethodLabel
 import com.stripe.android.paymentsheet.ui.PaymentMethodIcon
@@ -75,6 +79,7 @@ internal fun PaymentMethodRowButton(
     modifier: Modifier = Modifier,
     appearance: Appearance.Embedded = Appearance.Embedded(RowStyle.FloatingButton.default),
     promotionProvider: (() -> PaymentMethodMessagePromotion?)?,
+    featuredInstitutions: FeaturedInstitutions?,
     isExpanded: Boolean,
     trailingContent: (@Composable RowScope.() -> Unit)? = null,
 ) {
@@ -119,31 +124,100 @@ internal fun PaymentMethodRowButton(
             horizontalArrangement = Arrangement.spacedBy(ROW_CONTENT_HORIZONTAL_SPACING.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            RowButtonInnerContent(
-                isEnabled = isEnabled,
-                shouldShowDefaultBadge = shouldShowDefaultBadge,
-                iconContent = iconContent,
-                title = title,
-                subtitle = subtitle,
-                promotionProvider = promotionProvider,
-                isExpanded = isExpanded,
-                isSelected = isSelected,
-                contentDescription = contentDescription,
-                appearance = appearance,
-                modifier = if (appearance.style.shouldAddModifierWeight()) {
-                    Modifier.weight(1f, fill = true)
-                } else {
-                    Modifier
-                }
-            )
+            val innerContent: @Composable (Modifier) -> Unit = { innerContentModifier ->
+                RowButtonInnerContent(
+                    isEnabled = isEnabled,
+                    shouldShowDefaultBadge = shouldShowDefaultBadge,
+                    iconContent = iconContent,
+                    title = title,
+                    subtitle = subtitle,
+                    promotionProvider = promotionProvider,
+                    isExpanded = isExpanded,
+                    isSelected = isSelected,
+                    contentDescription = contentDescription,
+                    appearance = appearance,
+                    modifier = innerContentModifier,
+                )
+            }
 
-            if (promoText != null) {
-                PromoBadge(promoText)
+            // The incentive promo badge replaces the featured institution icons.
+            if (promoText == null && featuredInstitutions != null) {
+                RowButtonContentWithTrailingBadge(
+                    content = { innerContent(Modifier) },
+                    badge = {
+                        FeaturedInstitutionIcons(
+                            featuredInstitutions = featuredInstitutions,
+                            modifier = if (appearance.style.hasEndIcon()) {
+                                Modifier.padding(end = ROW_CONTENT_HORIZONTAL_SPACING.dp)
+                            } else {
+                                Modifier
+                            },
+                        )
+                    },
+                    modifier = Modifier.weight(1f, fill = true),
+                )
+            } else {
+                innerContent(
+                    if (appearance.style.shouldAddModifierWeight()) {
+                        Modifier.weight(1f, fill = true)
+                    } else {
+                        Modifier
+                    }
+                )
+
+                if (promoText != null) {
+                    PromoBadge(promoText)
+                }
             }
 
             if (trailingContent != null && displayTrailingContent) {
                 trailingContent()
             }
+        }
+    }
+}
+
+/**
+ * Lays out [content] at the start and [badge] at the end. Unlike a [Row], [content] is measured first, so the badge
+ * only gets the space that's left and gives up space before the labels do.
+ */
+@Composable
+private fun RowButtonContentWithTrailingBadge(
+    content: @Composable () -> Unit,
+    badge: @Composable () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Layout(
+        contents = listOf(content, badge),
+        modifier = modifier,
+    ) { (contentMeasurables, badgeMeasurables), constraints ->
+        val spacing = ROW_CONTENT_HORIZONTAL_SPACING.dp.roundToPx()
+        val looseConstraints = constraints.copy(minWidth = 0, minHeight = 0)
+        val contentPlaceables = contentMeasurables.map { it.measure(looseConstraints) }
+        val contentWidth = contentPlaceables.maxOfOrNull { it.width } ?: 0
+
+        val badgeMaxWidth = if (constraints.hasBoundedWidth) {
+            (constraints.maxWidth - contentWidth - spacing).coerceAtLeast(0)
+        } else {
+            Constraints.Infinity
+        }
+        val badgePlaceables = badgeMeasurables.map {
+            it.measure(looseConstraints.copy(maxWidth = badgeMaxWidth))
+        }
+        val badgeWidth = badgePlaceables.maxOfOrNull { it.width } ?: 0
+
+        val width = if (constraints.hasBoundedWidth) {
+            constraints.maxWidth
+        } else {
+            contentWidth + spacing + badgeWidth
+        }
+        val height = (contentPlaceables + badgePlaceables).maxOfOrNull { it.height }
+            ?.coerceIn(constraints.minHeight, constraints.maxHeight)
+            ?: constraints.minHeight
+
+        layout(width, height) {
+            contentPlaceables.forEach { it.placeRelative(0, (height - it.height) / 2) }
+            badgePlaceables.forEach { it.placeRelative(width - it.width, (height - it.height) / 2) }
         }
     }
 }
@@ -501,6 +575,7 @@ private fun ButtonPreview() {
                 onClick = {},
                 appearance = Appearance.Embedded.default,
                 promotionProvider = { null },
+                featuredInstitutions = null,
                 trailingContent = { Text("Edit") },
                 isExpanded = false
             )
@@ -524,6 +599,7 @@ private fun ButtonPreview() {
                 onClick = {},
                 appearance = Appearance.Embedded.default,
                 promotionProvider = { null },
+                featuredInstitutions = null,
                 trailingContent = { Text("Edit") },
                 isExpanded = false
 
@@ -542,6 +618,14 @@ private fun RowStyle.getTitleTextColor() = when (this) {
 private fun RowStyle.getSubtitleTextColor() = when (this) {
     is RowStyle.FloatingButton -> MaterialTheme.stripeColors.placeholderText
     else -> MaterialTheme.stripeColors.subtitle
+}
+
+private fun RowStyle.hasEndIcon(): Boolean {
+    return when (this) {
+        is RowStyle.FlatWithCheckmark,
+        is RowStyle.FlatWithDisclosure -> true
+        else -> false
+    }
 }
 
 private fun RowStyle.shouldAddModifierWeight(): Boolean {

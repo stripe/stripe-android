@@ -51,7 +51,8 @@ internal fun testPaymentMethodRowButton(
             shouldShowDefaultBadge = shouldShowDefaultBadge,
             appearance = appearance,
             isExpanded = false,
-            promotionProvider = null
+            promotionProvider = null,
+            featuredInstitutions = null,
         )
     }
 }

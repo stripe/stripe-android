@@ -4,6 +4,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultFormDefinitionFactory
 import com.stripe.android.paymentsheet.FormHelper
+import com.stripe.android.paymentsheet.featuredinstitutions.FeaturedInstitutionsHelper
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
@@ -14,7 +15,8 @@ internal object VerticalModeInitialScreenFactory {
         viewModel: BaseSheetViewModel,
         paymentMethodMetadata: PaymentMethodMetadata,
         customerStateHolder: CustomerStateHolder,
-        paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper?
+        paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper?,
+        featuredInstitutionsHelper: FeaturedInstitutionsHelper?,
     ): List<PaymentSheetScreen> {
         val supportedPaymentMethodTypes = paymentMethodMetadata.supportedPaymentMethodTypes()
         val bankFormInteractor = BankFormInteractor.create(viewModel)
@@ -45,7 +47,8 @@ internal object VerticalModeInitialScreenFactory {
                 paymentMethodMetadata = paymentMethodMetadata,
                 customerStateHolder = customerStateHolder,
                 bankFormInteractor = bankFormInteractor,
-                paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
+                paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
+                featuredInstitutions = featuredInstitutionsHelper?.featuredInstitutions,
             )
             val verticalModeScreen = PaymentSheetScreen.VerticalMode(interactor = interactor)
             add(verticalModeScreen)
