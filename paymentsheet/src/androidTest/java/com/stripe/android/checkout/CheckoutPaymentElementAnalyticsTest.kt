@@ -1,8 +1,11 @@
 package com.stripe.android.checkout
 
+import android.content.Context
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
 import androidx.test.espresso.intent.rule.IntentsRule
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutFetch
 import com.stripe.android.checkouttesting.checkoutUpdate
@@ -17,6 +20,7 @@ import com.stripe.android.networktesting.RequestMatchers.analyticsPayloadField
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.hasQueryParam
 import com.stripe.android.networktesting.RequestMatchers.not
+import com.stripe.android.networktesting.TestApiKeys
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedContentPage
@@ -435,6 +439,20 @@ internal class CheckoutPaymentElementAnalyticsTest {
         assertThat(controller.updateEmail("email@example.com"))
             .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
         markTestSucceeded()
+    }
+
+    @Test
+    fun testClearLocalCustomerDataReportsInvokedEventWithoutPublishableKey() {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        PaymentConfiguration.init(context, TestApiKeys.PUBLISHABLE, TestApiKeys.ACCOUNT)
+
+        networkRule.validateAnalyticsRequest(
+            eventName = "checkout_elements.clear_local_customer_data",
+            productUsage = setOf("checkout_elements"),
+            analyticsPayloadField("publishable_key", ApiRequest.Options.UNDEFINED_PUBLISHABLE_KEY),
+            applyDefaultAuthorization = false,
+        )
+        CheckoutElementsController.clearLocalCustomerData(context)
     }
 
     @Test

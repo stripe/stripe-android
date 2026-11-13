@@ -34,7 +34,7 @@ internal class CheckoutOperationCoordinator @Inject constructor(
     @ViewModelScope private val viewModelScope: CoroutineScope,
 ) {
     private val admissionLock = Any()
-    private var pendingMutations = 0
+    private val pendingMutations = mutableListOf<Mutation>()
     private var confirmationInFlight = confirmationHandler.hasReloadedFromProcessDeath ||
         confirmationHandler.state.value is ConfirmationHandler.State.Confirming
     private var confirmationWasRestored = confirmationHandler.hasReloadedFromProcessDeath
@@ -49,13 +49,27 @@ internal class CheckoutOperationCoordinator @Inject constructor(
     sealed interface Status {
         data object Idle : Status
         data object Updating : Status
+        data class Configuring(val configuration: CheckoutElementsController.Configuration.State) : Status
     }
+
+    private data class Mutation(val status: Status)
 
     suspend fun <T> runMutation(
         block: suspend () -> Result<T>,
+    ): Result<T> = runOperation(Status.Updating, block)
+
+    suspend fun <T> runConfigure(
+        configuration: CheckoutElementsController.Configuration.State,
+        block: suspend () -> Result<T>,
+    ): Result<T> = runOperation(Status.Configuring(configuration), block)
+
+    private suspend fun <T> runOperation(
+        status: Status,
+        block: suspend () -> Result<T>,
     ): Result<T> {
+        val mutation = Mutation(status)
         synchronized(admissionLock) {
-            pendingMutations += 1
+            pendingMutations += mutation
             updateStatus()
         }
 
@@ -65,7 +79,8 @@ internal class CheckoutOperationCoordinator @Inject constructor(
             }
         } finally {
             synchronized(admissionLock) {
-                pendingMutations -= 1
+                val mutationIndex = pendingMutations.indexOfFirst { it === mutation }
+                pendingMutations.removeAt(mutationIndex)
                 updateStatus()
             }
         }
@@ -77,7 +92,7 @@ internal class CheckoutOperationCoordinator @Inject constructor(
         val result = synchronized(admissionLock) {
             val rejectionMessage = when {
                 sheetStateHolder.sheetIsOpen -> "Cannot confirm checkout while a payment flow is presented."
-                pendingMutations > 0 -> "Cannot confirm checkout while checkout mutations are in progress."
+                pendingMutations.isNotEmpty() -> "Cannot confirm checkout while checkout mutations are in progress."
                 confirmationInFlight -> "Cannot confirm checkout while another confirmation is in progress."
                 else -> null
             }
@@ -199,7 +214,14 @@ internal class CheckoutOperationCoordinator @Inject constructor(
     }
 
     private fun updateStatus() = viewModelScope.launch(Dispatchers.Main) {
-        _status.value = if (confirmationInFlight || pendingMutations > 0) Status.Updating else Status.Idle
+        synchronized(admissionLock) {
+            val configuring = pendingMutations.firstNotNullOfOrNull { it.status as? Status.Configuring }
+            _status.value = when {
+                configuring != null -> configuring
+                confirmationInFlight || pendingMutations.isNotEmpty() -> Status.Updating
+                else -> Status.Idle
+            }
+        }
     }
 }
 

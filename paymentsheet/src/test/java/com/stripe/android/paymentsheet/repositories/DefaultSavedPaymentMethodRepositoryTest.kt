@@ -1,7 +1,7 @@
 package com.stripe.android.paymentsheet.repositories
 
-import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkout.analytics.FakeCheckoutAnalyticsReporter
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
@@ -11,14 +11,12 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentB
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodUpdateParams
-import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.model.CheckoutSessionClientSecret
-import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeFraudDetectionDataRepository
 import kotlinx.coroutines.test.runTest
@@ -347,11 +345,7 @@ class DefaultSavedPaymentMethodRepositoryTest {
             elementsSessionClientParams = clientParams,
             fraudDetectionDataRepository = FakeFraudDetectionDataRepository.create(),
             stripeNetworkClient = DefaultStripeNetworkClient(),
-            analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
-            paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
-                context = ApplicationProvider.getApplicationContext(),
-                publishableKey = "pk_test_123",
-            ),
+            analyticsReporter = FakeCheckoutAnalyticsReporter(),
             apiRequestOptionsProvider = {
                 ApiRequest.Options(
                     apiKey = DEFAULT_API_CONFIG.publishableKey,

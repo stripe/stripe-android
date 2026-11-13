@@ -95,7 +95,7 @@ import org.robolectric.Shadows.shadowOf
 
 @RunWith(RobolectricTestParameterInjector::class)
 @Suppress("LargeClass")
-class OnrampPresenterCoordinatorTest {
+internal class OnrampPresenterCoordinatorTest {
     private val linkController: LinkController = mock()
     private val interactor: OnrampInteractor = mock()
 
@@ -1126,6 +1126,82 @@ class OnrampPresenterCoordinatorTest {
             .isInstanceOf(OnrampPartnerTermsResult.NotRequired::class.java)
         results.ensureAllEventsConsumed()
     }
+
+    enum class TermsResponse { Required, NotRequired, Failed }
+
+    @Test
+    fun `late terms response reaches replacement callback without presenting`(
+        @TestParameter declarationType: PartnerDeclarationType,
+        @TestParameter outcome: TermsResponse,
+    ) = testScope.runTest {
+        val response = CompletableDeferred<OnrampStartPartnerTermsResult>()
+        whenever(interactor.startPartnerTerms(declarationType)).doSuspendableAnswer { response.await() }
+        val oldResults = Turbine<OnrampPartnerTermsResult>()
+        val newResults = Turbine<OnrampPartnerTermsResult>()
+        val store = OnrampCallbackStore()
+        val coordinator = createTermsCoordinator(declarationType, oldResults, store)
+        when (declarationType) {
+            PartnerDeclarationType.TransactionTerms -> coordinator.presentTermsAndConditionsIfNeeded()
+            PartnerDeclarationType.TermsOfService -> coordinator.presentTermsOfServiceIfNeeded()
+        }
+        testScheduler.runCurrent()
+        verify(interactor).startPartnerTerms(declarationType)
+        lifecycleOwner.currentState = Lifecycle.State.DESTROYED
+        val recreatedOwner = TestLifecycleOwner()
+        val recreatedActivity = Robolectric.buildActivity(ComponentActivity::class.java).create().get()
+        val error = IllegalStateException("Request failed")
+        try {
+            createTermsCoordinator(declarationType, newResults, store, recreatedOwner, recreatedActivity)
+            response.complete(
+                when (outcome) {
+                    TermsResponse.Required -> OnrampStartPartnerTermsResult.PresentationRequired(
+                        terms = PartnerTerms.Required(PartnerTerms.Declaration("decl_test", declarationType, "Terms")),
+                        appearance = null,
+                    )
+                    TermsResponse.NotRequired -> OnrampStartPartnerTermsResult.NotRequired
+                    TermsResponse.Failed -> OnrampStartPartnerTermsResult.Failed(error)
+                }
+            )
+            testScheduler.advanceUntilIdle()
+            val result = newResults.awaitItem()
+            when (outcome) {
+                TermsResponse.Required ->
+                    assertThat(result).isInstanceOf(OnrampPartnerTermsResult.Cancelled::class.java)
+                TermsResponse.NotRequired ->
+                    assertThat(result).isInstanceOf(OnrampPartnerTermsResult.NotRequired::class.java)
+                TermsResponse.Failed ->
+                    assertThat((result as OnrampPartnerTermsResult.Failed).error).isSameInstanceAs(error)
+            }
+            oldResults.ensureAllEventsConsumed()
+            newResults.ensureAllEventsConsumed()
+            assertThat(shadowOf(activity).nextStartedActivityForResult).isNull()
+            assertThat(shadowOf(recreatedActivity).nextStartedActivityForResult).isNull()
+        } finally {
+            recreatedOwner.currentState = Lifecycle.State.DESTROYED
+        }
+    }
+
+    private fun createTermsCoordinator(
+        declarationType: PartnerDeclarationType,
+        results: Turbine<OnrampPartnerTermsResult>,
+        store: OnrampCallbackStore,
+        owner: TestLifecycleOwner = lifecycleOwner,
+        host: ComponentActivity = activity,
+    ): OnrampPresenterCoordinator = createCoordinator(
+        termsAndConditionsCallback = if (declarationType == PartnerDeclarationType.TransactionTerms) {
+            OnrampPartnerTermsCallback(results::add)
+        } else {
+            null
+        },
+        termsOfServiceCallback = if (declarationType == PartnerDeclarationType.TermsOfService) {
+            OnrampPartnerTermsCallback(results::add)
+        } else {
+            null
+        },
+        callbackStore = store,
+        lifecycleOwner = owner,
+        activity = host,
+    )
 
     @Test
     fun `terms of service not required invokes callback without presenting`() = runTest {

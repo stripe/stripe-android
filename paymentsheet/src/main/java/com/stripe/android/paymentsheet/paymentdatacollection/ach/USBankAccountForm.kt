@@ -87,6 +87,7 @@ internal fun USBankAccountForm(
                 linkMode = usBankAccountFormArgs.linkMode,
                 formArgs = formArgs,
                 hostedSurface = usBankAccountFormArgs.hostedSurface,
+                themeMode = usBankAccountFormArgs.themeMode,
                 showCheckbox = usBankAccountFormArgs.showCheckbox,
                 isCompleteFlow = usBankAccountFormArgs.isCompleteFlow,
                 isPaymentFlow = usBankAccountFormArgs.isPaymentFlow,

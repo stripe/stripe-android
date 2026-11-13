@@ -19,7 +19,6 @@ import com.stripe.android.uicore.elements.SectionFieldElement
 import com.stripe.android.uicore.elements.SimpleTextElement
 import com.stripe.android.uicore.elements.SimpleTextFieldController
 import com.stripe.android.uicore.elements.TextFieldController
-import com.stripe.android.uicore.elements.TextFieldIcon
 import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -29,7 +28,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.shadows.ShadowLooper
-import java.util.concurrent.atomic.AtomicInteger
 import com.stripe.android.uicore.R as UiCoreR
 
 // TODO(ccen) Rewrite the test with generic Element and move it to stripe-ui-core
@@ -208,17 +206,15 @@ class AddressElementTest {
     }
 
     @Test
-    fun `condensed address element should have name and phone number fields when required`() = runTest {
+    fun `contact fields are shown when required`() = runTest {
         val addressElement = AddressElement(
             FormFieldId.Generic("address"),
             countryElement = countryElement,
-            addressInputMode = AddressInputMode.AutocompleteCondensed(
-                googleApiKey = null,
-                autocompleteCountries = setOf(),
+            addressInputMode = AddressInputMode.NoAutocomplete(
                 nameConfig = AddressFieldConfiguration.REQUIRED,
                 phoneNumberConfig = AddressFieldConfiguration.REQUIRED,
                 emailConfig = AddressFieldConfiguration.REQUIRED,
-            ) { throw AssertionError("Not Expected") },
+            ),
             sameAsShippingElement = null,
             shippingValuesMap = null
         )
@@ -232,17 +228,15 @@ class AddressElementTest {
     }
 
     @Test
-    fun `hidden name & phone number field is not shown`() = runTest {
+    fun `hidden contact fields are not shown`() = runTest {
         val addressElement = AddressElement(
             FormFieldId.Generic("address"),
             countryElement = countryElement,
-            addressInputMode = AddressInputMode.AutocompleteCondensed(
-                googleApiKey = null,
-                autocompleteCountries = setOf(),
+            addressInputMode = AddressInputMode.NoAutocomplete(
                 nameConfig = AddressFieldConfiguration.HIDDEN,
                 phoneNumberConfig = AddressFieldConfiguration.HIDDEN,
                 emailConfig = AddressFieldConfiguration.HIDDEN,
-            ) { throw AssertionError("Not Expected") },
+            ),
             sameAsShippingElement = null,
             shippingValuesMap = null
         )
@@ -256,17 +250,15 @@ class AddressElementTest {
     }
 
     @Test
-    fun `optional name & phone number field is shown`() = runTest {
+    fun `optional contact fields are shown`() = runTest {
         val addressElement = AddressElement(
             FormFieldId.Generic("address"),
             countryElement = countryElement,
-            addressInputMode = AddressInputMode.AutocompleteCondensed(
-                googleApiKey = null,
-                autocompleteCountries = setOf(),
+            addressInputMode = AddressInputMode.NoAutocomplete(
                 nameConfig = AddressFieldConfiguration.OPTIONAL,
                 phoneNumberConfig = AddressFieldConfiguration.OPTIONAL,
                 emailConfig = AddressFieldConfiguration.OPTIONAL,
-            ) { throw AssertionError("Not Expected") },
+            ),
             sameAsShippingElement = null,
             shippingValuesMap = null
         )
@@ -316,76 +308,6 @@ class AddressElementTest {
     }
 
     @Test
-    fun `expanded address element should have name and phone number fields when required`() = runTest {
-        val addressElement = AddressElement(
-            FormFieldId.Generic("address"),
-            countryElement = countryElement,
-            addressInputMode = AddressInputMode.AutocompleteExpanded(
-                googleApiKey = null,
-                autocompleteCountries = null,
-                nameConfig = AddressFieldConfiguration.REQUIRED,
-                phoneNumberConfig = AddressFieldConfiguration.REQUIRED,
-                emailConfig = AddressFieldConfiguration.REQUIRED,
-            ) { throw AssertionError("Not Expected") },
-            sameAsShippingElement = null,
-            shippingValuesMap = null
-        )
-
-        val formFieldIds = addressElement.fields.first().map {
-            it.identifier
-        }
-        assertThat(formFieldIds.contains(FormFieldId.Name)).isTrue()
-        assertThat(formFieldIds.contains(FormFieldId.Phone)).isTrue()
-        assertThat(formFieldIds.contains(FormFieldId.Email)).isTrue()
-    }
-
-    @Test
-    fun `expanded shipping address element should hide name and phone number when state is hidden`() = runTest {
-        val addressElement = AddressElement(
-            FormFieldId.Generic("address"),
-            countryElement = countryElement,
-            addressInputMode = AddressInputMode.AutocompleteExpanded(
-                googleApiKey = null,
-                autocompleteCountries = null,
-                nameConfig = AddressFieldConfiguration.HIDDEN,
-                phoneNumberConfig = AddressFieldConfiguration.HIDDEN,
-                emailConfig = AddressFieldConfiguration.HIDDEN,
-            ) { throw AssertionError("Not Expected") },
-            sameAsShippingElement = null,
-            shippingValuesMap = null
-        )
-
-        val formFieldIds = addressElement.fields.first().map {
-            it.identifier
-        }
-        assertThat(formFieldIds.contains(FormFieldId.Name)).isFalse()
-        assertThat(formFieldIds.contains(FormFieldId.Phone)).isFalse()
-        assertThat(formFieldIds.contains(FormFieldId.Email)).isFalse()
-    }
-
-    @Test
-    fun `expanded shipping address element should show phone number when state is optional`() = runTest {
-        val addressElement = AddressElement(
-            FormFieldId.Generic("address"),
-            countryElement = countryElement,
-            addressInputMode = AddressInputMode.AutocompleteExpanded(
-                googleApiKey = null,
-                autocompleteCountries = null,
-                nameConfig = AddressFieldConfiguration.HIDDEN,
-                phoneNumberConfig = AddressFieldConfiguration.OPTIONAL,
-                emailConfig = AddressFieldConfiguration.HIDDEN,
-            ) { throw AssertionError("Not Expected") },
-            sameAsShippingElement = null,
-            shippingValuesMap = null
-        )
-
-        val formFieldIds = addressElement.fields.first().map {
-            it.identifier
-        }
-        assertThat(formFieldIds.contains(FormFieldId.Phone)).isTrue()
-    }
-
-    @Test
     fun `normal address element should not have name, email, and phone number fields`() = runTest {
         val addressElement = AddressElement(
             FormFieldId.Generic("address"),
@@ -409,157 +331,6 @@ class AddressElementTest {
             FormFieldId.Generic("address"),
             countryElement = countryElement,
             addressInputMode = AddressInputMode.NoAutocomplete(),
-            sameAsShippingElement = null,
-            shippingValuesMap = null
-        )
-
-        val formFieldIds = addressElement.fields.first().map {
-            it.identifier
-        }
-        assertThat(formFieldIds.contains(FormFieldId.OneLineAddress)).isFalse()
-    }
-
-    @Test
-    fun `condensed shipping address element should have one line address element`() = runTest {
-        val addressElement = AddressElement(
-            FormFieldId.Generic("address"),
-            countryElement = countryElement,
-            addressInputMode = AddressInputMode.AutocompleteCondensed(
-                googleApiKey = "some key",
-                autocompleteCountries = setOf("US", "CA"),
-                nameConfig = AddressFieldConfiguration.OPTIONAL,
-                phoneNumberConfig = AddressFieldConfiguration.OPTIONAL,
-                emailConfig = AddressFieldConfiguration.OPTIONAL,
-            ) { throw AssertionError("Not Expected") },
-            sameAsShippingElement = null,
-            shippingValuesMap = null
-        )
-
-        val formFieldIds = addressElement.fields.first().map {
-            it.identifier
-        }
-        assertThat(formFieldIds.contains(FormFieldId.OneLineAddress)).isTrue()
-    }
-
-    @Test
-    fun `AddressElement should not have OneLineAddress when places is unavailable`() = runTest {
-        val addressElement = AddressElement(
-            FormFieldId.Generic("address"),
-            countryElement = countryElement,
-            addressInputMode = AddressInputMode.AutocompleteCondensed(
-                googleApiKey = "some key",
-                autocompleteCountries = setOf("US", "CA"),
-                nameConfig = AddressFieldConfiguration.OPTIONAL,
-                phoneNumberConfig = AddressFieldConfiguration.OPTIONAL,
-                emailConfig = AddressFieldConfiguration.OPTIONAL,
-            ) { throw AssertionError("Not Expected") },
-            sameAsShippingElement = null,
-            shippingValuesMap = null,
-            isPlacesAvailable = false,
-        )
-        val formFieldIds = addressElement.fields.first().map {
-            it.identifier
-        }
-        assertThat(formFieldIds.contains(FormFieldId.OneLineAddress)).isFalse()
-    }
-
-    @Test
-    fun `AddressElement has no TrailingIcon on Line1 when places is unavailable`() = runTest {
-        val countryDropdownFieldController = DropdownFieldController(
-            CountryConfig(setOf("US", "CA", "JP"), autofillType = ContentType.AddressCountry)
-        )
-        val addressElement = AddressElement(
-            FormFieldId.Generic("address"),
-            countryElement = CountryElement(
-                identifier = FormFieldId.Country,
-                controller = countryDropdownFieldController,
-            ),
-            addressInputMode = AddressInputMode.AutocompleteCondensed(
-                googleApiKey = "some key",
-                autocompleteCountries = setOf("US", "CA"),
-                nameConfig = AddressFieldConfiguration.OPTIONAL,
-                phoneNumberConfig = AddressFieldConfiguration.OPTIONAL,
-                emailConfig = AddressFieldConfiguration.OPTIONAL,
-            ) { throw AssertionError("Not Expected") },
-            sameAsShippingElement = null,
-            shippingValuesMap = null,
-            isPlacesAvailable = false,
-        )
-        countryDropdownFieldController.onValueChange(1)
-
-        val trailingIcon = addressElement.trailingIconFor(FormFieldId.Line1)
-        assertThat(trailingIcon).isNull()
-    }
-
-    @Test
-    fun `AddressElement has a TrailingIcon on Line1 when places is available`() = runTest {
-        val countryDropdownFieldController = DropdownFieldController(
-            CountryConfig(setOf("US", "CA", "JP"), autofillType = ContentType.AddressCountry)
-        )
-        val onNavigationCounter = AtomicInteger(0)
-        val addressElement = AddressElement(
-            FormFieldId.Generic("address"),
-            countryElement = CountryElement(
-                identifier = FormFieldId.Country,
-                controller = countryDropdownFieldController,
-            ),
-            addressInputMode = AddressInputMode.AutocompleteExpanded(
-                googleApiKey = "some key",
-                autocompleteCountries = setOf("US", "CA"),
-                nameConfig = AddressFieldConfiguration.OPTIONAL,
-                phoneNumberConfig = AddressFieldConfiguration.OPTIONAL,
-                emailConfig = AddressFieldConfiguration.OPTIONAL,
-            ) { onNavigationCounter.getAndIncrement() },
-            sameAsShippingElement = null,
-            shippingValuesMap = null,
-            isPlacesAvailable = true,
-        )
-        countryDropdownFieldController.onValueChange(1)
-
-        val line1TrailingIcon = addressElement.trailingIconFor(FormFieldId.Line1)
-        assertThat(line1TrailingIcon?.contentDescription)
-            .isEqualTo(UiCoreR.string.stripe_address_search_content_description)
-        assertThat(addressElement.trailingIconFor(FormFieldId.Line2)).isNull()
-
-        line1TrailingIcon?.onClick?.invoke()
-        assertThat(onNavigationCounter.get()).isEqualTo(1)
-    }
-
-    @Test
-    fun `when google api key not supplied, condensed shipping address element is not one line address element`() =
-        runTest {
-            val addressElement = AddressElement(
-                FormFieldId.Generic("address"),
-                countryElement = countryElement,
-                addressInputMode = AddressInputMode.AutocompleteCondensed(
-                    googleApiKey = null,
-                    autocompleteCountries = setOf(),
-                    nameConfig = AddressFieldConfiguration.OPTIONAL,
-                    phoneNumberConfig = AddressFieldConfiguration.OPTIONAL,
-                    emailConfig = AddressFieldConfiguration.OPTIONAL,
-                ) { throw AssertionError("Not Expected") },
-                sameAsShippingElement = null,
-                shippingValuesMap = null
-            )
-
-            val formFieldIds = addressElement.fields.first().map {
-                it.identifier
-            }
-            assertThat(formFieldIds.contains(FormFieldId.OneLineAddress)).isFalse()
-        }
-
-    @Test
-    fun `expanded shipping address element should not have one line address element`() = runTest {
-        val addressElement = AddressElement(
-            FormFieldId.Generic("address"),
-            countryElement = countryElement,
-            addressInputMode = AddressInputMode.AutocompleteExpanded(
-                googleApiKey = null,
-                autocompleteCountries = null,
-                nameConfig = AddressFieldConfiguration.OPTIONAL,
-                phoneNumberConfig = AddressFieldConfiguration.OPTIONAL,
-                emailConfig = AddressFieldConfiguration.OPTIONAL,
-            ) { throw AssertionError("Not Expected") },
             sameAsShippingElement = null,
             shippingValuesMap = null
         )
@@ -677,13 +448,11 @@ class AddressElementTest {
         val addressElement = AddressElement(
             FormFieldId.Generic("address"),
             countryElement = countryElement,
-            addressInputMode = AddressInputMode.AutocompleteCondensed(
-                googleApiKey = null,
-                autocompleteCountries = setOf(),
+            addressInputMode = AddressInputMode.NoAutocomplete(
                 nameConfig = AddressFieldConfiguration.REQUIRED,
                 phoneNumberConfig = AddressFieldConfiguration.OPTIONAL,
                 emailConfig = AddressFieldConfiguration.OPTIONAL,
-            ) { throw AssertionError("Not Expected") },
+            ),
             sameAsShippingElement = null,
             shippingValuesMap = null
         )
@@ -711,13 +480,11 @@ class AddressElementTest {
             FormFieldId.Generic("address"),
             rawValuesMap = initialValues,
             countryElement = countryElement,
-            addressInputMode = AddressInputMode.AutocompleteCondensed(
-                googleApiKey = null,
-                autocompleteCountries = setOf(),
+            addressInputMode = AddressInputMode.NoAutocomplete(
                 nameConfig = AddressFieldConfiguration.OPTIONAL,
                 phoneNumberConfig = AddressFieldConfiguration.OPTIONAL,
                 emailConfig = AddressFieldConfiguration.OPTIONAL,
-            ) { throw AssertionError("Not Expected") },
+            ),
             sameAsShippingElement = null,
             shippingValuesMap = null,
         )
@@ -738,13 +505,4 @@ private suspend fun Flow<List<SectionFieldElement>>.postalCodeController(): Text
     }
 
     return (element as SimpleTextElement).controller
-}
-
-private suspend fun AddressElement.trailingIconFor(
-    formFieldId: FormFieldId
-): TextFieldIcon.Trailing? {
-    val fieldForSpec = fields.first().first { it.identifier == formFieldId }
-    val controllerForSpec = (fieldForSpec as SimpleTextElement).controller
-    val trailingIcon = (controllerForSpec as SimpleTextFieldController).textFieldConfig.trailingIcon
-    return trailingIcon.value as? TextFieldIcon.Trailing?
 }

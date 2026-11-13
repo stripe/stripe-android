@@ -7,6 +7,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfigurationFactory
+import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.parcelize.parcelableCreator
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -14,6 +15,17 @@ import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 internal class EmbeddedActivityArgsTest {
+    @Test
+    fun `loading state preserves appearance through parceling`() {
+        val appearance = PaymentSheet.Appearance(
+            colorsLight = PaymentSheet.Colors.Builder.light().surface(0xFF123456.toInt()).build(),
+        )
+        val args = parcelRoundTrip(EmbeddedActivityArgs.PresentationState.Loading(appearance))
+
+        val loadingState = args.presentationState as EmbeddedActivityArgs.PresentationState.Loading
+        assertThat(loadingState.appearance).isEqualTo(appearance)
+    }
+
     @Test
     fun `ready state preserves metadata and configuration through parceling`() {
         val metadata = PaymentMethodMetadataFactory.create()

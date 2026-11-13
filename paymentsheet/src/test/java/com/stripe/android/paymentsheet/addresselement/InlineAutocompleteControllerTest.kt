@@ -33,6 +33,7 @@ class InlineAutocompleteControllerTest {
     @Test
     fun `query shorter than minimum chars stays Idle`() = runScenario {
         delegate.observeQueryChanges(queryFlow, countryFlow)
+        delegate.onFocusGained()
 
         queryFlow.value = "ab"
         advanceTimeBy(500)
@@ -61,6 +62,7 @@ class InlineAutocompleteControllerTest {
     ) {
         countryFlow.value = "CA"
         delegate.observeQueryChanges(queryFlow, countryFlow)
+        delegate.onFocusGained()
 
         queryFlow.value = "123 Main"
         advanceTimeBy(500)
@@ -361,6 +363,7 @@ class InlineAutocompleteControllerTest {
                 Address(line1 = "123 Main Street", country = "US")
             )
             delegate.observeQueryChanges(queryFlow, countryFlow)
+            delegate.onFocusGained()
 
             delegate.onPredictionSelected("place_1")
             advanceTimeBy(100)
@@ -442,9 +445,10 @@ class InlineAutocompleteControllerTest {
             FindAutocompletePredictionsResponse(emptyList())
         )
         delegate.observeQueryChanges(queryFlow, countryFlow)
+        delegate.onFocusGained()
 
         queryFlow.value = "123 Main"
-        // Focus lost before the debounce fires — cancels observeJob
+        // Focus lost before the debounce fires pauses predictions
         delegate.onFocusLost()
         advanceTimeBy(500)
 
@@ -471,6 +475,42 @@ class InlineAutocompleteControllerTest {
 
         val call = fakePlacesClient.findPredictionsCalls.awaitItem()
         assertThat(call.query).isEqualTo("123 Main S")
+    }
+
+    @Test
+    fun `prefilled query does not fetch before focus or search`() = runScenario {
+        queryFlow.value = "123 Coffee Street"
+        delegate.observeQueryChanges(queryFlow, countryFlow)
+        advanceTimeBy(500)
+
+        assertThat(delegate.inlinePredictionsState.value).isEqualTo(InlinePredictionsState.Idle)
+        fakePlacesClient.findPredictionsCalls.expectNoEvents()
+    }
+
+    @Test
+    fun `onFocusGained does not fetch prefilled query until it changes`() = runScenario {
+        queryFlow.value = "123 Coffee Street"
+        delegate.observeQueryChanges(queryFlow, countryFlow)
+        advanceTimeBy(500)
+
+        delegate.onFocusGained()
+        queryFlow.value = "123 Coffee Street A"
+        advanceTimeBy(500)
+
+        assertThat(fakePlacesClient.findPredictionsCalls.awaitItem().query)
+            .isEqualTo("123 Coffee Street A")
+    }
+
+    @Test
+    fun `onSearchActivated fetches prefilled query without focus`() = runScenario {
+        queryFlow.value = "123 Coffee Street"
+        delegate.observeQueryChanges(queryFlow, countryFlow)
+        advanceTimeBy(500)
+
+        delegate.onSearchActivated()
+
+        assertThat(fakePlacesClient.findPredictionsCalls.awaitItem().query)
+            .isEqualTo("123 Coffee Street")
     }
 
     @Test
@@ -1046,6 +1086,7 @@ class InlineAutocompleteControllerTest {
         val fetchGate = CompletableDeferred<Unit>()
         fakePlacesClient.onBeforeFindPredictions = { fetchGate.await() }
         delegate.observeQueryChanges(queryFlow, countryFlow)
+        delegate.onFocusGained()
 
         queryFlow.value = "123 Main"
         advanceTimeBy(500)
@@ -1073,6 +1114,7 @@ class InlineAutocompleteControllerTest {
         fakePlacesClient.onBeforeFetchPlace = { fetchPlaceGate.await() }
         fakePlacesClient.onBeforeFindPredictions = { findPredictionsGate.await() }
         delegate.observeQueryChanges(queryFlow, countryFlow)
+        delegate.onFocusGained()
         queryFlow.value = "123 Main"
 
         delegate.onPredictionSelected("place_1")
@@ -1155,6 +1197,7 @@ class InlineAutocompleteControllerTest {
                 FindAutocompletePredictionsResponse(emptyList())
             )
             delegate.observeQueryChanges(queryFlow, countryFlow)
+            delegate.onFocusGained()
 
             delegate.expandFormFromInline()
             eventCalls.awaitItem()
@@ -1214,7 +1257,6 @@ class InlineAutocompleteControllerTest {
         val config = AutocompleteAddressInteractor.Config(
             googlePlacesApiKey = "test_key",
             autocompleteCountries = autocompleteCountries,
-            isPlacesAvailable = true,
             isInlineAutocompleteEnabled = true,
             shouldUseStripeHostedAutocomplete = shouldUseStripeHostedAutocomplete,
         )

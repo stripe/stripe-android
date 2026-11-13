@@ -26,9 +26,12 @@ internal class EmbeddedSheetActivityCoordinator(
         ),
     )
 
-    val appearance: PaymentSheet.Appearance
-        get() = (state.args.presentationState as? EmbeddedActivityArgs.PresentationState.Ready)
-            ?.configuration?.appearance ?: PaymentSheet.Appearance()
+    val appearance: PaymentSheet.Appearance?
+        get() = when (val presentationState = state.args.presentationState) {
+            is EmbeddedActivityArgs.PresentationState.Loading -> presentationState.appearance
+            is EmbeddedActivityArgs.PresentationState.Ready -> presentationState.configuration.appearance
+            EmbeddedActivityArgs.PresentationState.Failed -> null
+        }
 
     fun register() {
         state.presentation.register()
@@ -51,9 +54,9 @@ internal class EmbeddedSheetActivityCoordinator(
         val updatedArgs = EmbeddedActivityArgs.fromIntent(intent) ?: return
         val isValidTransition =
             !activity.isFinishing &&
-                state.args.presentationState == EmbeddedActivityArgs.PresentationState.Loading &&
+                state.args.presentationState is EmbeddedActivityArgs.PresentationState.Loading &&
                 state.args.launchMode is EmbeddedLaunchMode.PaymentOptions &&
-                updatedArgs.presentationState != EmbeddedActivityArgs.PresentationState.Loading &&
+                updatedArgs.presentationState !is EmbeddedActivityArgs.PresentationState.Loading &&
                 updatedArgs.launchMode is EmbeddedLaunchMode.PaymentOptions
         if (!isValidTransition) return
 

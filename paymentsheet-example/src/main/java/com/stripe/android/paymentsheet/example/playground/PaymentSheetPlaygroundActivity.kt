@@ -259,6 +259,8 @@ internal class PaymentSheetPlaygroundActivity :
                         playgroundSettings = localPlaygroundSettings,
                     )
 
+                    LpmScenariosButton(playgroundSettings = localPlaygroundSettings)
+
                     AppearanceButton()
 
                     QrCodeButton(playgroundSettings = localPlaygroundSettings)
@@ -328,6 +330,34 @@ internal class PaymentSheetPlaygroundActivity :
                 it.createIntentCallback(viewModel::createIntentCallback)
             }
         }
+
+    @Composable
+    private fun LpmScenariosButton(playgroundSettings: PlaygroundSettings) {
+        val configurationData by playgroundSettings.configurationData.collectAsState()
+        if (!configurationData.integrationType.isPaymentFlow()) {
+            return
+        }
+
+        var showPicker by rememberSaveable { mutableStateOf(false) }
+        Button(
+            onClick = { showPicker = true },
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text("Choose LPM")
+        }
+
+        if (showPicker) {
+            LpmScenarioPickerDialog(
+                playgroundSettings = playgroundSettings,
+                onSelect = { scenario ->
+                    showPicker = false
+                    scenario.applyTo(playgroundSettings)
+                    viewModel.prepare(playgroundSettings)
+                },
+                onDismiss = { showPicker = false },
+            )
+        }
+    }
 
     @Composable
     private fun AppearanceButton() {

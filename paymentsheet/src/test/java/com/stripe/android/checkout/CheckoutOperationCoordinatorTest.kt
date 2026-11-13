@@ -12,6 +12,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.elements.PaymentElement
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS
@@ -55,6 +56,235 @@ internal class CheckoutOperationCoordinatorTest {
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule()
+
+    @Test
+    fun `configure exposes configuration then Updating for a queued mutation`() = runScenario {
+        val configuration = CheckoutElementsController.Configuration().build()
+        val releaseConfigure = CompletableDeferred<Unit>()
+        val mutationStarted = CompletableDeferred<Unit>()
+        val releaseMutation = CompletableDeferred<Unit>()
+
+        coordinator.status.test {
+            assertThat(awaitItem()).isEqualTo(CheckoutOperationCoordinator.Status.Idle)
+            val configure = backgroundScope.async {
+                coordinator.runConfigure(configuration) {
+                    releaseConfigure.await()
+                    Result.success("configured")
+                }
+            }
+            assertThat(awaitItem()).isEqualTo(CheckoutOperationCoordinator.Status.Configuring(configuration))
+
+            val mutation = backgroundScope.async {
+                coordinator.runMutation {
+                    mutationStarted.complete(Unit)
+                    releaseMutation.await()
+                    Result.success(Unit)
+                }
+            }
+            runCurrent()
+            assertThat(mutationStarted.isCompleted).isFalse()
+            expectNoEvents()
+
+            releaseConfigure.complete(Unit)
+            assertThat(configure.await().getOrThrow()).isEqualTo("configured")
+            mutationStarted.await()
+            assertThat(awaitItem()).isEqualTo(CheckoutOperationCoordinator.Status.Updating)
+
+            releaseMutation.complete(Unit)
+            assertThat(mutation.await().isSuccess).isTrue()
+            assertThat(awaitItem()).isEqualTo(CheckoutOperationCoordinator.Status.Idle)
+        }
+    }
+
+    @Test
+    fun `queued configure takes precedence over an active mutation`() = runScenario {
+        val configuration = CheckoutElementsController.Configuration().build()
+        val releaseMutation = CompletableDeferred<Unit>()
+        val configureStarted = CompletableDeferred<Unit>()
+        val releaseConfigure = CompletableDeferred<Unit>()
+
+        coordinator.status.test {
+            assertThat(awaitItem()).isEqualTo(CheckoutOperationCoordinator.Status.Idle)
+            val mutation = backgroundScope.async {
+                coordinator.runMutation {
+                    releaseMutation.await()
+                    Result.success(Unit)
+                }
+            }
+            assertThat(awaitItem()).isEqualTo(CheckoutOperationCoordinator.Status.Updating)
+
+            val configure = backgroundScope.async {
+                coordinator.runConfigure(configuration) {
+                    configureStarted.complete(Unit)
+                    releaseConfigure.await()
+                    Result.success(Unit)
+                }
+            }
+            assertThat(awaitItem()).isEqualTo(CheckoutOperationCoordinator.Status.Configuring(configuration))
+            assertThat(configureStarted.isCompleted).isFalse()
+
+            releaseMutation.complete(Unit)
+            assertThat(mutation.await().isSuccess).isTrue()
+            configureStarted.await()
+            expectNoEvents()
+
+            releaseConfigure.complete(Unit)
+            assertThat(configure.await().isSuccess).isTrue()
+            assertThat(awaitItem()).isEqualTo(CheckoutOperationCoordinator.Status.Idle)
+        }
+    }
+
+    @Test
+    fun `cancelling queued configure restores Updating while a mutation remains`() = runScenario {
+        val configuration = CheckoutElementsController.Configuration().build()
+        val releaseMutation = CompletableDeferred<Unit>()
+
+        coordinator.status.test {
+            assertThat(awaitItem()).isEqualTo(CheckoutOperationCoordinator.Status.Idle)
+            val mutation = backgroundScope.async {
+                coordinator.runMutation {
+                    releaseMutation.await()
+                    Result.success(Unit)
+                }
+            }
+            assertThat(awaitItem()).isEqualTo(CheckoutOperationCoordinator.Status.Updating)
+
+            val configure = backgroundScope.async {
+                coordinator.runConfigure<Unit>(configuration) {
+                    error("Queued configure must not run before the mutation completes")
+                }
+            }
+            assertThat(awaitItem()).isEqualTo(CheckoutOperationCoordinator.Status.Configuring(configuration))
+
+            configure.cancelAndJoin()
+            assertThat(awaitItem()).isEqualTo(CheckoutOperationCoordinator.Status.Updating)
+
+            releaseMutation.complete(Unit)
+            assertThat(mutation.await().isSuccess).isTrue()
+            assertThat(awaitItem()).isEqualTo(CheckoutOperationCoordinator.Status.Idle)
+        }
+    }
+
+    @Test
+    fun `pending configure takes precedence over an in-flight confirmation`() = runScenario(
+        initialConfirmationState = ConfirmationHandler.State.Confirming(
+            CONFIRMATION_PARAMETERS.confirmationOption
+        ),
+    ) {
+        val configuration = CheckoutElementsController.Configuration().build()
+
+        coordinator.status.test {
+            assertThat(awaitItem()).isEqualTo(CheckoutOperationCoordinator.Status.Updating)
+            val configure = backgroundScope.async {
+                coordinator.runConfigure<Unit>(configuration) {
+                    error("Queued configure must not run before the confirmation completes")
+                }
+            }
+            assertThat(awaitItem()).isEqualTo(CheckoutOperationCoordinator.Status.Configuring(configuration))
+
+            configure.cancelAndJoin()
+            assertThat(awaitItem()).isEqualTo(CheckoutOperationCoordinator.Status.Updating)
+        }
+    }
+
+    @Test
+    fun `failed configure returns the failure and resets status`() = runScenario {
+        val configuration = CheckoutElementsController.Configuration().build()
+        val releaseConfigure = CompletableDeferred<Unit>()
+        val error = IllegalStateException("Configure failed")
+
+        coordinator.status.test {
+            assertThat(awaitItem()).isEqualTo(CheckoutOperationCoordinator.Status.Idle)
+            val configure = backgroundScope.async {
+                coordinator.runConfigure<Unit>(configuration) {
+                    releaseConfigure.await()
+                    Result.failure(error)
+                }
+            }
+            assertThat(awaitItem()).isEqualTo(CheckoutOperationCoordinator.Status.Configuring(configuration))
+
+            releaseConfigure.complete(Unit)
+            assertThat(configure.await().exceptionOrNull()).isSameInstanceAs(error)
+            assertThat(awaitItem()).isEqualTo(CheckoutOperationCoordinator.Status.Idle)
+        }
+    }
+
+    @Test
+    fun `queued configure exposes its configuration without becoming Idle between calls`() = runScenario {
+        val configuration = CheckoutElementsController.Configuration().build()
+        val queuedConfiguration = CheckoutElementsController.Configuration()
+            .paymentElement(PaymentElement.Configuration()).build()
+        val releaseConfigure = CompletableDeferred<Unit>()
+        val releaseQueuedConfigure = CompletableDeferred<Unit>()
+
+        coordinator.status.test {
+            assertThat(awaitItem()).isEqualTo(CheckoutOperationCoordinator.Status.Idle)
+            val configure = backgroundScope.async {
+                coordinator.runConfigure(configuration) {
+                    releaseConfigure.await()
+                    Result.success(Unit)
+                }
+            }
+            assertThat(awaitItem()).isEqualTo(CheckoutOperationCoordinator.Status.Configuring(configuration))
+
+            val queuedConfigure = backgroundScope.async {
+                coordinator.runConfigure(queuedConfiguration) {
+                    releaseQueuedConfigure.await()
+                    Result.success(Unit)
+                }
+            }
+            runCurrent()
+            expectNoEvents()
+
+            releaseConfigure.complete(Unit)
+            assertThat(configure.await().isSuccess).isTrue()
+            assertThat(awaitItem()).isEqualTo(CheckoutOperationCoordinator.Status.Configuring(queuedConfiguration))
+
+            releaseQueuedConfigure.complete(Unit)
+            assertThat(queuedConfigure.await().isSuccess).isTrue()
+            assertThat(awaitItem()).isEqualTo(CheckoutOperationCoordinator.Status.Idle)
+        }
+    }
+
+    @Test
+    fun `cancelling queued configure retains the active configuration`() = runScenario {
+        val configuration = CheckoutElementsController.Configuration().build()
+        val queuedConfiguration = CheckoutElementsController.Configuration()
+            .paymentElement(PaymentElement.Configuration()).build()
+        val releaseConfigure = CompletableDeferred<Unit>()
+        val queuedStarted = CompletableDeferred<Unit>()
+
+        coordinator.status.test {
+            assertThat(awaitItem()).isEqualTo(CheckoutOperationCoordinator.Status.Idle)
+            val configure = backgroundScope.async {
+                coordinator.runConfigure(configuration) {
+                    releaseConfigure.await()
+                    Result.success(Unit)
+                }
+            }
+            assertThat(awaitItem()).isEqualTo(CheckoutOperationCoordinator.Status.Configuring(configuration))
+
+            val queuedConfigure = backgroundScope.async {
+                coordinator.runConfigure(queuedConfiguration) {
+                    queuedStarted.complete(Unit)
+                    Result.success(Unit)
+                }
+            }
+            runCurrent()
+            assertThat(queuedStarted.isCompleted).isFalse()
+            expectNoEvents()
+
+            queuedConfigure.cancelAndJoin()
+            assertThat(coordinator.status.value)
+                .isEqualTo(CheckoutOperationCoordinator.Status.Configuring(configuration))
+            expectNoEvents()
+
+            releaseConfigure.complete(Unit)
+            assertThat(configure.await().isSuccess).isTrue()
+            assertThat(awaitItem()).isEqualTo(CheckoutOperationCoordinator.Status.Idle)
+            assertThat(queuedStarted.isCompleted).isFalse()
+        }
+    }
 
     @Test
     fun `runMutation returns the block result`() = runScenario {

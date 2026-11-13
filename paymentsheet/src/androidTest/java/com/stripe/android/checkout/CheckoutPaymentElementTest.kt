@@ -133,7 +133,7 @@ internal class CheckoutPaymentElementTest {
                 ),
                 bodyPart(
                     "payment_method_data[payment_user_agent]",
-                    "stripe-android/${StripeSdkVersion.VERSION_NAME};checkout_elements",
+                    "stripe-android/${StripeSdkVersion.VERSION_NAME};PaymentElement",
                 ),
                 not(hasBodyPart("payment_method_data[billing_details][email]")),
                 not(hasBodyPart("collected_information[email]")),

@@ -14,6 +14,7 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.financialconnections.ElementsSessionContext
+import com.stripe.android.financialconnections.ThemeMode
 import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.model.Address
@@ -326,9 +327,15 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         set(value) = savedStateHandle.set(SHOULD_RESET_KEY, value)
 
     fun register(activityResultRegistryOwner: ActivityResultRegistryOwner) {
+        val themeMode = when (args.themeMode) {
+            PaymentSheet.ThemeMode.Automatic -> ThemeMode.Automatic
+            PaymentSheet.ThemeMode.AlwaysLight -> ThemeMode.AlwaysLight
+            PaymentSheet.ThemeMode.AlwaysDark -> ThemeMode.AlwaysDark
+        }
         collectBankAccountLauncher = if (args.instantDebits) {
             CollectBankAccountForInstantDebitsLauncher.createForPaymentSheet(
                 hostedSurface = args.hostedSurface,
+                themeMode = themeMode,
                 activityResultRegistryOwner = activityResultRegistryOwner,
                 financialConnectionsAvailability = args.financialConnectionsAvailability,
                 callback = ::handleInstantDebitsResult,
@@ -336,6 +343,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         } else {
             CollectBankAccountLauncher.createForPaymentSheet(
                 hostedSurface = args.hostedSurface,
+                themeMode = themeMode,
                 activityResultRegistryOwner = activityResultRegistryOwner,
                 financialConnectionsAvailability = args.financialConnectionsAvailability,
                 callback = ::handleCollectBankAccountResult,
@@ -865,6 +873,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         val savedPaymentMethod: PaymentSelection.New.USBankAccount?,
         val shippingDetails: AddressDetails?,
         val hostedSurface: String,
+        val themeMode: PaymentSheet.ThemeMode,
         val financialConnectionsAvailability: FinancialConnectionsAvailability?,
         val setAsDefaultPaymentMethodEnabled: Boolean,
         val setAsDefaultMatchesSaveForFutureUse: Boolean,

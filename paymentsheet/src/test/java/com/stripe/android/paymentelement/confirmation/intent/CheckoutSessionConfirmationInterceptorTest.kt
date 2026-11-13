@@ -7,6 +7,8 @@ import com.google.testing.junit.testparameterinjector.TestParameter
 import com.stripe.android.challenge.passive.PassiveChallengeActivityContract
 import com.stripe.android.challenge.passive.PassiveChallengeActivityResult
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
+import com.stripe.android.checkout.analytics.FakeCheckoutAnalyticsReporter
+import com.stripe.android.checkout.analytics.LocalOperation
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutConfirm
 import com.stripe.android.checkouttesting.checkoutUpdate
@@ -37,7 +39,6 @@ import com.stripe.android.model.RadarOptions
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatcher
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
@@ -58,7 +59,6 @@ import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.repositories.CheckoutStripeRepositoryFactory
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
-import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.testing.PaymentIntentFactory
@@ -212,6 +212,7 @@ class CheckoutSessionConfirmationInterceptorTest {
         @TestParameter saved: Boolean,
         @TestParameter(value = ["Card", "Link", "SepaDebit"]) type: PaymentMethod.Type,
         @TestParameter setup: Boolean,
+        @TestParameter isExpressCheckoutElement: Boolean,
     ) {
         val paymentMethod = when (type) {
             PaymentMethod.Type.Card -> PaymentMethodFixtures.CARD_PAYMENT_METHOD
@@ -242,9 +243,10 @@ class CheckoutSessionConfirmationInterceptorTest {
             type = type,
             paymentMethod = paymentMethod,
             createParams = createParams,
+            isExpressCheckoutElement = isExpressCheckoutElement,
         )
 
-        runScenario {
+        runScenario(isExpressCheckoutElement = isExpressCheckoutElement) {
             networkRule.checkoutConfirm(
                 *paymentMethodMatchers.toTypedArray(),
                 bodyPart("expected_payment_method_type", type.code),
@@ -1151,17 +1153,15 @@ class CheckoutSessionConfirmationInterceptorTest {
         customerMetadata: CustomerMetadata? = null,
         collectedEmail: String? = null,
         checkoutSessionResponse: CheckoutSessionResponse = CheckoutSessionResponseFactory.create(),
+        isExpressCheckoutElement: Boolean = false,
         block: suspend Scenario.() -> Unit,
     ) {
+        val analyticsReporter = FakeCheckoutAnalyticsReporter()
         val checkoutSessionRepository = CheckoutSessionRepository(
             elementsSessionClientParams = CheckoutStripeRepositoryFactory.clientParams(),
             fraudDetectionDataRepository = FakeFraudDetectionDataRepository.create(),
             stripeNetworkClient = DefaultStripeNetworkClient(),
-            analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
-            paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
-                context = ApplicationProvider.getApplicationContext(),
-                publishableKey = "pk_test_123",
-            ),
+            analyticsReporter = analyticsReporter,
             apiRequestOptionsProvider = {
                 ApiRequest.Options(
                     apiKey = DEFAULT_API_CONFIG.publishableKey,
@@ -1186,11 +1186,16 @@ class CheckoutSessionConfirmationInterceptorTest {
                     configuredElements = listOf("mobile-payment-element"),
                 ),
                 automaticPaymentMethodsEnabled = false,
-                isExpressCheckoutElement = false,
+                isExpressCheckoutElement = isExpressCheckoutElement,
             ) as ClientAttributionMetadata.CheckoutSession,
             context = applicationContext,
             checkoutSessionRepository = checkoutSessionRepository,
-            checkoutSessionTaxRegionUpdater = CheckoutSessionTaxRegionUpdater(checkoutSessionRepository),
+            checkoutSessionTaxRegionUpdater = CheckoutSessionTaxRegionUpdater(
+                checkoutSessionRepository,
+                localOperationFactory = LocalOperation.Factory { operation, params ->
+                    LocalOperation(operation, params, analyticsReporter)
+                },
+            ),
         )
 
         runTest {
@@ -1207,9 +1212,11 @@ class CheckoutSessionConfirmationInterceptorTest {
         type: PaymentMethod.Type,
         paymentMethod: PaymentMethod,
         createParams: PaymentMethodCreateParams,
+        isExpressCheckoutElement: Boolean,
     ): List<RequestMatcher> = if (saved) {
         listOf(bodyPart("payment_method", paymentMethod.id))
     } else {
+        val paymentUserAgentToken = if (isExpressCheckoutElement) "ExpressCheckoutElement" else "PaymentElement"
         listOf(
             when (type) {
                 PaymentMethod.Type.Card -> bodyPart("payment_method_data[card][number]", "4242424242424242")
@@ -1222,7 +1229,7 @@ class CheckoutSessionConfirmationInterceptorTest {
             },
             bodyPart(
                 "payment_method_data[payment_user_agent]",
-                setOf("stripe-android/${StripeSdkVersion.VERSION_NAME}", "checkout_elements")
+                setOf("stripe-android/${StripeSdkVersion.VERSION_NAME}", paymentUserAgentToken)
                     .plus(createParams.attribution)
                     .joinToString(";"),
             ),
