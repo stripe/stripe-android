@@ -99,6 +99,17 @@ internal enum class AddPaymentMethodRequirement {
                 metadata.linkMode == LinkMode.LinkCardBrand &&
                 metadata.supportsMobileInstantDebitsFlow
         }
+    },
+
+    /** Requires the buyer's Stripe balance financial accounts, which load only with a CustomerSession. */
+    StripeBalanceFinancialAccounts {
+        override val errorMessage: String =
+            "Stripe balance requires a customer configured with a CustomerSession, and the customer's financial " +
+                "accounts to load."
+
+        override fun isMetBy(metadata: PaymentMethodMetadata, code: String): Boolean {
+            return metadata.stripeBalanceFinancialAccounts != null
+        }
     };
 
     abstract fun isMetBy(metadata: PaymentMethodMetadata, code: String): Boolean

@@ -55,6 +55,7 @@
     <string name="stripe_paymentsheet_payment_method_shopeepay">ShopeePay</string>
     <string name="stripe_paymentsheet_payment_method_qris">QRIS</string>
     <string name="stripe_paymentsheet_payment_method_mondu">Mondu</string>
+    <string name="stripe_paymentsheet_payment_method_stripe_balance">Stripe balance</string>
     <string name="stripe_paymentsheet_payment_method_touch_n_go">Touch \'n Go</string>
     <string name="stripe_paymentsheet_payment_method_truemoney">TrueMoney</string>
     <string name="stripe_paymentsheet_payment_method_ng_card">Naira card</string>

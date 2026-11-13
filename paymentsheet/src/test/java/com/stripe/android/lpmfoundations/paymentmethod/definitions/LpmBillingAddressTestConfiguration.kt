@@ -25,6 +25,9 @@ internal data class LpmBillingAddressTestConfiguration(
                 .billingDetailsCollectionConfiguration(),
             termsDisplay = mapOf(paymentMethodType to termsDisplay),
             integrationMetadata = billingDetailsCollectionMode.integrationMetadata(stripeIntent),
+            stripeBalanceFinancialAccounts = stripeBalanceTestFinancialAccounts.takeIf {
+                paymentMethodType == PaymentMethod.Type.StripeBalance
+            },
         )
     }
 
