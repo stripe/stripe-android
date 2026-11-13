@@ -31,10 +31,11 @@ import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.paymentMethodType
-import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.state.CustomerState
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -114,11 +115,10 @@ internal class CheckoutSheetLauncher @Inject constructor(
     private fun handleFormResult(result: EmbeddedActivityResult) {
         when (result) {
             is EmbeddedActivityResult.Complete -> {
-                applyCompleteResult(result)
-                if (!result.hasBeenConfirmed) {
-                    result.selection?.let { rowSelectionImmediateActionHandler.invoke() }
-                }
-                refreshCheckoutSession(result.checkoutSessionResponse)
+                applyCompleteResult(
+                    result = result,
+                    invokeImmediateAction = !result.hasBeenConfirmed && result.selection != null,
+                )
             }
             is EmbeddedActivityResult.Cancelled -> applyCustomerState(result.customerState)
             is EmbeddedActivityResult.Error -> Unit
@@ -128,11 +128,11 @@ internal class CheckoutSheetLauncher @Inject constructor(
     private fun handleManageResult(result: EmbeddedActivityResult) {
         when (result) {
             is EmbeddedActivityResult.Complete -> {
-                applyCompleteResult(result)
-                if (result.shouldInvokeSelectionCallback && result.selection is PaymentSelection.Saved) {
-                    rowSelectionImmediateActionHandler.invoke()
-                }
-                refreshCheckoutSession(result.checkoutSessionResponse)
+                applyCompleteResult(
+                    result = result,
+                    invokeImmediateAction = result.shouldInvokeSelectionCallback &&
+                        result.selection is PaymentSelection.Saved,
+                )
             }
             is EmbeddedActivityResult.Cancelled -> Unit
             is EmbeddedActivityResult.Error -> Unit
@@ -145,8 +145,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
                 (result.selection as? PaymentSelection.Saved)?.let { selection ->
                     selectionHolder.state?.mandateState?.acknowledgeSepaMandate(selection.paymentMethod)
                 }
-                applyCompleteResult(result)
-                refreshCheckoutSession(result.checkoutSessionResponse)
+                applyCompleteResult(result = result, invokeImmediateAction = false)
             }
             is EmbeddedActivityResult.Cancelled -> {
                 applyCustomerState(result.customerState)
@@ -156,20 +155,25 @@ internal class CheckoutSheetLauncher @Inject constructor(
         }
     }
 
-    private fun applyCompleteResult(result: EmbeddedActivityResult.Complete) {
+    private fun applyCompleteResult(
+        result: EmbeddedActivityResult.Complete,
+        invokeImmediateAction: Boolean,
+    ) {
         applyCustomerState(result.customerState)
         selectionHolder.setPreviousNewSelections(result.previousNewSelections)
         selectionHolder.setSelection(result.selection)
-    }
-
-    private fun refreshCheckoutSession(response: CheckoutSessionResponse?) {
-        response ?: return
-        coroutineScope.launch {
-            operationCoordinator.runMutation {
-                runCatching { sessionRefresher.refresh(response) }
-            }.onFailure {
-                logger.error("Failed to refresh the checkout session after the sheet closed.", it)
+        // Undispatched so the refresh blocks confirmation in the same turn as the selection write, and the
+        // immediate action runs only after the sheet's response is committed.
+        coroutineScope.launch(start = CoroutineStart.UNDISPATCHED) {
+            result.checkoutSessionResponse?.let { response ->
+                operationCoordinator.runMutation {
+                    runCatching { sessionRefresher.refresh(response) }
+                }.onFailure {
+                    if (it is CancellationException) throw it
+                    logger.error("Failed to refresh the checkout session after the sheet closed.", it)
+                }
             }
+            if (invokeImmediateAction) rowSelectionImmediateActionHandler.invoke()
         }
     }
 

@@ -165,6 +165,45 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
     }
 
     @Test
+    fun testImmediateActionConfirmAfterCardFormTaxUpdateSendsUpdatedExpectedAmount() {
+        var checkoutResult: CheckoutElementsController.Result? = null
+        lateinit var checkoutScenario: CheckoutPaymentElementScenario
+        runCheckoutPaymentElementScenario(
+            networkRule = networkRule,
+            resultCallback = { result -> checkoutResult = result },
+            checkoutInitResponse = automaticTaxResponse(INITIAL_TOTAL, TAX_STATUS_REQUIRES_LOCATION),
+            rowSelectionBehavior = PaymentElement.RowSelectionBehavior.immediateAction {
+                checkoutScenario.confirm()
+            },
+            setup = { controller ->
+                assertThat(
+                    controller.configure(
+                        clientSecret = DEFAULT_CLIENT_SECRET,
+                        configuration = checkoutConfiguration(
+                            PaymentElement.Configuration.PaymentMethodLayout.Vertical
+                        ),
+                    )
+                ).isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
+            },
+        ) {
+            checkoutScenario = this
+            contentPage.clickOnLpm("card")
+            fillOutCardAndBillingDetails()
+
+            enqueueTaxUpdate(automaticTaxResponse(UPDATED_TOTAL, TAX_STATUS_COMPLETE))
+            networkRule.checkoutConfirm(
+                bodyPart("payment_method_data[type]", "card"),
+                bodyPart("expected_amount", UPDATED_TOTAL.toString()),
+            ) { response ->
+                response.testBodyFromFile("checkout-session-confirm.json")
+            }
+            formPage.clickPrimaryButton()
+        }
+
+        assertThat(checkoutResult).isInstanceOf(CheckoutElementsController.Result.Completed::class.java)
+    }
+
+    @Test
     fun testPreselectedSavedPaymentMethodConfirmsWithTotalFromConfigureTaxUpdate() {
         var checkoutResult: CheckoutElementsController.Result? = null
         val savedPaymentMethodTaxResponse = automaticTaxResponse(
