@@ -1,7 +1,6 @@
 package com.stripe.android.financialconnections.domain
 
 import com.stripe.android.financialconnections.di.ActivityRetainedScope
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
 import kotlinx.coroutines.flow.MutableSharedFlow
 import javax.inject.Inject
@@ -53,13 +52,6 @@ internal class NativeAuthFlowCoordinator @Inject constructor() {
 
         data class UpdateTopAppBar(
             val update: TopAppBarStateUpdate,
-        ) : Message
-
-        /**
-         * Notifies the given pane that the user clicked the logo in the top app bar.
-         */
-        data class TopAppBarLogoClicked(
-            val pane: Pane,
         ) : Message
     }
 }

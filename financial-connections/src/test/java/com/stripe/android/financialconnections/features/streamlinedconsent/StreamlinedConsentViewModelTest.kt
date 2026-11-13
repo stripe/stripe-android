@@ -13,12 +13,10 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsEve
 import com.stripe.android.financialconnections.domain.AcceptConsent
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
-import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.TopAppBarLogoClicked
 import com.stripe.android.financialconnections.domain.PostAuthorizationSession
 import com.stripe.android.financialconnections.features.notice.FakePresentSheet
 import com.stripe.android.financialconnections.features.notice.FakePresentSheet.PresentCall
 import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.DataAccess
-import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.Generic
 import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.Legal
 import com.stripe.android.financialconnections.model.ConsentPane
 import com.stripe.android.financialconnections.model.ConsentPaneBody
@@ -61,8 +59,22 @@ internal class StreamlinedConsentViewModelTest {
         val payload = requireNotNull(viewModel.stateFlow.value.payload())
 
         assertThat(payload.streamlinedConsentPane).isEqualTo(streamlinedConsentPane)
-        assertThat(payload.dataAccessNotice).isEqualTo(streamlinedConsentPane.dataAccessNotice)
         assertThat(payload.genericScreenState.isHeaderIconInstitutionLogo).isTrue()
+    }
+
+    @Test
+    fun `init - tracks that the pane loaded`() = runScenario {
+        eventTracker.assertContainsEvent(
+            expectedEventName = "linked_accounts.pane.loaded",
+            expectedParams = mapOf("pane" to "streamlined_consent"),
+        )
+    }
+
+    @Test
+    fun `init - uses the streamlined consent pane's data access notice without a consent pane`() = runScenario {
+        val payload = requireNotNull(viewModel.stateFlow.value.payload())
+
+        assertThat(payload.dataAccessNotice).isEqualTo(streamlinedConsentPane.dataAccessNotice)
     }
 
     @Test
@@ -73,10 +85,10 @@ internal class StreamlinedConsentViewModelTest {
     }
 
     @Test
-    fun `init - falls back to the consent pane's data access notice`() = runScenario(
+    fun `init - prefers the consent pane's data access notice`() = runScenario(
         text = TextUpdate(
             consent = consentPane(),
-            streamlinedConsentPane = streamlinedConsentPane.copy(dataAccessNotice = null),
+            streamlinedConsentPane = streamlinedConsentPane,
         ),
     ) {
         val payload = requireNotNull(viewModel.stateFlow.value.payload())
@@ -92,7 +104,7 @@ internal class StreamlinedConsentViewModelTest {
         assertThat(update.allowBackNavigation).isTrue()
         assertThat(update.canCloseWithoutConfirmation).isTrue()
         assertThat(update.hideStripeLogo).isFalse()
-        assertThat(update.logoClickable).isTrue()
+        assertThat(update.logoClickNotice).isEqualTo(streamlinedConsentPane.moreInfoNotice)
     }
 
     @Test
@@ -101,7 +113,7 @@ internal class StreamlinedConsentViewModelTest {
     ) {
         val update = viewModel.updateTopAppBar(viewModel.stateFlow.value)
 
-        assertThat(update.logoClickable).isFalse()
+        assertThat(update.logoClickNotice).isNull()
     }
 
     @Test
@@ -226,29 +238,6 @@ internal class StreamlinedConsentViewModelTest {
         )
     }
 
-    @Test
-    fun `logo click - presents the more info notice`() = runScenario {
-        nativeAuthFlowCoordinator().emit(TopAppBarLogoClicked(Pane.STREAMLINED_CONSENT))
-
-        assertThat(presentSheet.presentCalls.awaitItem()).isEqualTo(
-            PresentCall(
-                content = Generic(requireNotNull(streamlinedConsentPane.moreInfoNotice)),
-                referrer = Pane.STREAMLINED_CONSENT,
-            )
-        )
-        eventTracker.assertContainsEvent(
-            expectedEventName = "linked_accounts.click.nav_bar.logo",
-            expectedParams = mapOf("pane" to "streamlined_consent"),
-        )
-    }
-
-    @Test
-    fun `logo click - ignores clicks for other panes`() = runScenario {
-        nativeAuthFlowCoordinator().emit(TopAppBarLogoClicked(Pane.CONSENT))
-
-        presentSheet.presentCalls.expectNoEvents()
-    }
-
     private fun consentPane(): ConsentPane {
         val streamlinedPane = streamlinedConsentPane
         return ConsentPane(
@@ -306,7 +295,6 @@ internal class StreamlinedConsentViewModelTest {
             eventTracker = eventTracker,
             navigationManager = navigationManager,
             presentSheet = presentSheet,
-            nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
             handleError = handleError,
         ).apply { block() }
 
@@ -320,7 +308,6 @@ internal class StreamlinedConsentViewModelTest {
         val eventTracker: TestFinancialConnectionsAnalyticsTracker,
         val navigationManager: TestNavigationManager,
         val presentSheet: FakePresentSheet,
-        val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
         val handleError: TestHandleError,
     )
 
