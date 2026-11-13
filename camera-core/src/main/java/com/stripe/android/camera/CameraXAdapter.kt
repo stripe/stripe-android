@@ -437,9 +437,10 @@ class CameraXAdapter(
                 analysis.setAnalyzer(
                     cameraExecutor
                 ) { image ->
-                    val bitmap = image.toBitmap(getRenderScript(activity))
-                        .rotate(image.imageInfo.rotationDegrees.toFloat())
-                    image.close()
+                    val bitmap = image.use {
+                        it.toBitmap(getRenderScript(activity))
+                            .rotate(it.imageInfo.rotationDegrees.toFloat())
+                    }
                     sendImageToStream(
                         CameraPreviewImage(
                             image = bitmap,
