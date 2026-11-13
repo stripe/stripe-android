@@ -76,6 +76,7 @@ internal class FakeUpdatePaymentMethodInteractor(
             onBrandChoiceChanged = {},
             onCardUpdateParamsChanged = {},
             autocompleteAddressInteractorFactory = null,
+            requiresBillingAddressForAutomaticTax = false,
         )
     }
 

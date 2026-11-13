@@ -616,6 +616,7 @@ internal class CustomerSheetViewModel(
                         )
                     },
                     autocompleteAddressInteractorFactory = null,
+                    requiresBillingAddressForAutomaticTax = false,
                 ),
             )
         )
