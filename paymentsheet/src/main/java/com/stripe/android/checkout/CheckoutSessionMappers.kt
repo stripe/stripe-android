@@ -69,7 +69,7 @@ private fun CheckoutSessionResponse.Status.asStatus(
     CheckoutSessionResponse.Status.COMPLETE -> Session.Status.Complete(paymentStatus.asPaymentStatus())
 }
 
-private fun CheckoutSessionResponse.PaymentStatus.asPaymentStatus(): Session.Status.PaymentStatus = when (this) {
+internal fun CheckoutSessionResponse.PaymentStatus.asPaymentStatus(): Session.Status.PaymentStatus = when (this) {
     CheckoutSessionResponse.PaymentStatus.PAID -> Session.Status.PaymentStatus.Paid
     CheckoutSessionResponse.PaymentStatus.UNPAID -> Session.Status.PaymentStatus.Unpaid
     CheckoutSessionResponse.PaymentStatus.NO_PAYMENT_REQUIRED -> Session.Status.PaymentStatus.NoPaymentRequired

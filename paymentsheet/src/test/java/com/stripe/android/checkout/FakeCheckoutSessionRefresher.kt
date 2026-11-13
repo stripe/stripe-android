@@ -4,6 +4,7 @@ import app.cash.turbine.Turbine
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 
 internal class FakeCheckoutSessionRefresher : CheckoutSessionRefresher {
+    var fetchedResponse: CheckoutSessionResponse? = null
     val calls = Turbine<Call>()
     private val refreshActions = Turbine<suspend () -> Unit>()
 
@@ -11,8 +12,9 @@ internal class FakeCheckoutSessionRefresher : CheckoutSessionRefresher {
         refreshActions.add(action)
     }
 
-    override suspend fun refresh() {
+    override suspend fun refresh(): CheckoutSessionResponse? {
         record(Call.Fetch)
+        return fetchedResponse
     }
 
     override suspend fun refresh(response: CheckoutSessionResponse) {

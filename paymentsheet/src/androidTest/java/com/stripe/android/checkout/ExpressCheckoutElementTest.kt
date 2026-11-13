@@ -98,6 +98,8 @@ internal class ExpressCheckoutElementTest {
             networkRule = networkRule,
             resultCallback = { result ->
                 assertThat(result).isInstanceOf(CheckoutElementsController.Result.Completed::class.java)
+                assertThat((result as CheckoutElementsController.Result.Completed).paymentStatus)
+                    .isEqualTo(CheckoutElementsController.Session.Status.PaymentStatus.Unpaid)
             },
             assertions = { controller ->
                 assertThat(

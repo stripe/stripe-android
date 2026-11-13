@@ -125,8 +125,21 @@ internal class CheckoutOperationCoordinator @Inject constructor(
             if (state is ConfirmationHandler.State.Complete) {
                 completeConfirmation { wasRestored ->
                     val (result, response) = finalizeConfirmation(state.result)
-                    resultReporter.reportConfirmationResult(result, response)
-                    result.asCheckoutResult(wasRestored, displayMessageResolver)
+                    val checkoutResult = result.asCheckoutResult(response, wasRestored, displayMessageResolver)
+                    val reportedResult = if (
+                        result is ConfirmationHandler.Result.Succeeded &&
+                        checkoutResult is CheckoutElementsController.Result.Failed
+                    ) {
+                        ConfirmationHandler.Result.Failed(
+                            cause = checkoutResult.error,
+                            message = checkoutResult.error.stripeErrorMessage(),
+                            type = ConfirmationHandler.Result.Failed.ErrorType.Internal,
+                        )
+                    } else {
+                        result
+                    }
+                    resultReporter.reportConfirmationResult(reportedResult, response)
+                    checkoutResult
                 }
             }
         }
@@ -142,8 +155,8 @@ internal class CheckoutOperationCoordinator @Inject constructor(
         val succeeded = result as? ConfirmationHandler.Result.Succeeded
         val response = succeeded?.metadata?.get(CheckoutSessionResponseKey)
         if (response == null) {
-            refreshSession { sessionRefresher.refresh() }
-            return result to null
+            val refreshed = refreshSession { sessionRefresher.refresh() }
+            return result to refreshed.takeIf { succeeded != null }
         }
 
         // A next action returns a newer Intent than the one retrieved after /confirm.
@@ -203,13 +216,14 @@ internal class CheckoutOperationCoordinator @Inject constructor(
      * The refreshed state has to be committed before the result reaches the integrator, but a failed
      * refresh must not replace the confirmation result the integrator is waiting on.
      */
-    private suspend fun refreshSession(refresh: suspend () -> Unit) {
-        try {
+    private suspend fun <T> refreshSession(refresh: suspend () -> T): T? {
+        return try {
             refresh()
         } catch (error: CancellationException) {
             throw error
         } catch (@Suppress("TooGenericExceptionCaught") error: Exception) {
             logger.error("Failed to refresh the checkout session after confirmation.", error)
+            null
         }
     }
 
@@ -226,11 +240,24 @@ internal class CheckoutOperationCoordinator @Inject constructor(
 }
 
 private fun ConfirmationHandler.Result.asCheckoutResult(
+    response: CheckoutSessionResponse?,
     confirmationWasRestored: Boolean,
     displayMessageResolver: CheckoutDisplayMessageResolver,
 ): CheckoutElementsController.Result? {
     return when (this) {
-        is ConfirmationHandler.Result.Succeeded -> CheckoutElementsController.Result.Completed()
+        is ConfirmationHandler.Result.Succeeded -> if (response != null) {
+            CheckoutElementsController.Result.Completed(
+                paymentStatus = response.paymentStatus.asPaymentStatus(),
+            )
+        } else {
+            val error = IllegalStateException(
+                "Checkout confirmation succeeded without returning the confirmed session."
+            )
+            CheckoutElementsController.Result.Failed(
+                error = error,
+                displayMessage = displayMessageResolver.resolve(error),
+            )
+        }
         is ConfirmationHandler.Result.Canceled -> when (action) {
             ConfirmationHandler.Result.Canceled.Action.InformCancellation ->
                 CheckoutElementsController.Result.Canceled()
