@@ -46,6 +46,7 @@ internal class CheckoutSessionLoaderTest {
             id = DEFAULT_CHECKOUT_SESSION_ID,
             amount = 5099,
             elementsSession = ElementsSession(
+                mobileSession = null,
                 linkSettings = null,
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                 merchantCountry = null,

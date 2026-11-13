@@ -1408,6 +1408,7 @@ internal class PaymentMethodMetadataTest {
         ),
     ): ElementsSession {
         return ElementsSession(
+            mobileSession = null,
             stripeIntent = intent,
             cardBrandChoice = cardBrandChoice,
             merchantCountry = null,

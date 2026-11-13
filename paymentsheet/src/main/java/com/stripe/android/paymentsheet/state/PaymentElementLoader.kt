@@ -361,7 +361,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         val savedPaymentMethodSelection = retrieveSavedPaymentMethodSelection(configuration)
         val elementsSession = loadSession(
             initializationMode = initializationMode,
-            configuration = configuration,
+            configuration = integrationConfiguration,
             savedPaymentMethodSelection = savedPaymentMethodSelection,
             apiConfiguration = apiConfiguration,
         )
@@ -554,7 +554,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
 
     private suspend fun loadSession(
         initializationMode: PaymentElementLoader.InitializationMode,
-        configuration: CommonConfiguration,
+        configuration: PaymentElementLoader.Configuration,
         savedPaymentMethodSelection: SavedSelection.PaymentMethod?,
         apiConfiguration: ApiConfiguration.State,
     ): ElementsSession {

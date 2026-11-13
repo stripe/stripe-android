@@ -45,6 +45,7 @@ internal class FakeCustomerSessionElementsSessionManager(
     private val elementsSession: Result<CustomerSessionElementsSession> = Result.success(
         CustomerSessionElementsSession(
             elementsSession = ElementsSession(
+                mobileSession = null,
                 linkSettings = null,
                 stripeIntent = intent,
                 orderedPaymentMethodTypesAndWallets = intent.paymentMethodTypes,

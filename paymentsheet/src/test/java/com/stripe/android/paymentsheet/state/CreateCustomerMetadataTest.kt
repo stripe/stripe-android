@@ -322,6 +322,7 @@ internal class CreateCustomerMetadataTest {
             }
 
             return ElementsSession(
+                mobileSession = null,
                 stripeIntent = stripeIntent,
                 linkSettings = null,
                 externalPaymentMethodData = null,

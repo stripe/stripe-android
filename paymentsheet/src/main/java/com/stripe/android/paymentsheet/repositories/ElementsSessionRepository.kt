@@ -13,6 +13,7 @@ import com.stripe.android.core.networking.HTTP_INTERNAL_SERVER_ERROR
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.executeRequestWithResultParser
 import com.stripe.android.core.networking.toRequestOptions
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.model.DeferredIntentParams
 import com.stripe.android.model.ElementsSession
@@ -23,7 +24,9 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.parsers.ElementsSessionJsonParser
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.model.MobileSession
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.toDeferredIntentParams
 import kotlinx.coroutines.withContext
@@ -40,6 +43,7 @@ internal interface ElementsSessionRepository {
         savedPaymentMethodSelectionId: String?,
         countryOverride: String?,
         apiConfiguration: ApiConfiguration.State,
+        mobileSessionConfig: MobileSession.Config?,
         linkDisallowedFundingSourceCreation: Set<String> = emptySet(),
     ): Result<ElementsSession>
 }
@@ -50,6 +54,7 @@ internal class RealElementsSessionRepository @Inject constructor(
     private val stripeRepository: StripeRepository,
     @IOContext private val workContext: CoroutineContext,
     private val clientParams: ElementsSessionClientParams,
+    private val errorReporter: ErrorReporter,
 ) : ElementsSessionRepository {
     private val apiRequestFactory = ApiRequest.Factory(
         appInfo = Stripe.appInfo,
@@ -66,6 +71,7 @@ internal class RealElementsSessionRepository @Inject constructor(
         savedPaymentMethodSelectionId: String?,
         countryOverride: String?,
         apiConfiguration: ApiConfiguration.State,
+        mobileSessionConfig: MobileSession.Config?,
         linkDisallowedFundingSourceCreation: Set<String>,
     ): Result<ElementsSession> {
         DefaultFraudDetectionDataRepository(
@@ -85,7 +91,7 @@ internal class RealElementsSessionRepository @Inject constructor(
         )
 
         val requestOptions = apiConfiguration.toRequestOptions(idempotencyKey = null)
-        val elementsSession = retrieveElementsSession(params, requestOptions)
+        val elementsSession = retrieveElementsSession(params, requestOptions, mobileSessionConfig)
 
         return elementsSession.getResultOrElse { elementsSessionFailure ->
             if (shouldFallback(elementsSession)) {
@@ -99,6 +105,7 @@ internal class RealElementsSessionRepository @Inject constructor(
     private suspend fun retrieveElementsSession(
         params: ElementsSessionParams,
         options: ApiRequest.Options,
+        mobileSessionConfig: MobileSession.Config?,
     ): Result<ElementsSession> {
         val requestParams = buildMap {
             this["type"] = params.type
@@ -130,10 +137,18 @@ internal class RealElementsSessionRepository @Inject constructor(
                 url = ELEMENTS_SESSIONS_URL,
                 options = options,
                 params = requestParams + expandParam,
+                additionalHeaders = if (
+                    FeatureFlags.serverPaymentMethodAvailabilityEnabled.isEnabled && mobileSessionConfig != null
+                ) {
+                    mapOf(MobileSession.CONFIG_HEADER_NAME to MobileSession.encode(mobileSessionConfig))
+                } else {
+                    emptyMap()
+                },
             ),
             responseJsonParser = ElementsSessionJsonParser(
                 params = params,
                 isLiveMode = options.apiKeyIsLiveMode,
+                errorReporter = errorReporter,
             ),
         )
     }

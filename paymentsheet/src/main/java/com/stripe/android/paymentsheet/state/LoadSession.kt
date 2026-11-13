@@ -1,9 +1,11 @@
 package com.stripe.android.paymentsheet.state
 
-import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.ElementsSession
+import com.stripe.android.payments.financialconnections.DefaultIsFinancialConnectionsAvailable
 import com.stripe.android.paymentsheet.model.SavedSelection
+import com.stripe.android.paymentsheet.model.toMobileSessionConfig
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import javax.inject.Inject
 
@@ -30,19 +32,39 @@ internal class ElementsSessionLoader @Inject constructor(
 ) {
     suspend operator fun invoke(
         initializationMode: PaymentElementLoader.InitializationMode,
-        configuration: CommonConfiguration,
+        configuration: PaymentElementLoader.Configuration,
         savedPaymentMethodSelection: SavedSelection.PaymentMethod?,
         apiConfiguration: ApiConfiguration.State,
     ): ElementsSession {
+        val commonConfiguration = configuration.commonConfiguration
+        val sendsMobileSessionConfig = when (configuration) {
+            is PaymentElementLoader.Configuration.PaymentSheet,
+            is PaymentElementLoader.Configuration.Embedded -> true
+            is PaymentElementLoader.Configuration.CryptoOnramp,
+            is PaymentElementLoader.Configuration.StandaloneLink,
+            is PaymentElementLoader.Configuration.ExpressCheckoutElement -> false
+        }
+        val mobileSessionConfig = if (
+            sendsMobileSessionConfig && FeatureFlags.serverPaymentMethodAvailabilityEnabled.isEnabled
+        ) {
+            commonConfiguration.toMobileSessionConfig(
+                hasFinancialConnectionsSdk = DefaultIsFinancialConnectionsAvailable() &&
+                    !FeatureFlags.financialConnectionsFullSdkUnavailable.isEnabled,
+            )
+        } else {
+            null
+        }
+
         return elementsSessionRepository.get(
             initializationMode = initializationMode,
-            customer = configuration.customer,
-            externalPaymentMethods = configuration.externalPaymentMethods,
-            customPaymentMethods = configuration.customPaymentMethods,
+            customer = commonConfiguration.customer,
+            externalPaymentMethods = commonConfiguration.externalPaymentMethods,
+            customPaymentMethods = commonConfiguration.customPaymentMethods,
             savedPaymentMethodSelectionId = savedPaymentMethodSelection?.id,
-            countryOverride = configuration.userOverrideCountry,
+            countryOverride = commonConfiguration.userOverrideCountry,
             apiConfiguration = apiConfiguration,
-            linkDisallowedFundingSourceCreation = configuration.link.disallowFundingSourceCreation,
+            mobileSessionConfig = mobileSessionConfig,
+            linkDisallowedFundingSourceCreation = commonConfiguration.link.disallowFundingSourceCreation,
         ).getOrThrow()
     }
 }

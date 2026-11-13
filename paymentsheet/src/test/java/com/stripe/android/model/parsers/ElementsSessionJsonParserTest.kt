@@ -20,14 +20,22 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.FeatureFlagTestRule
 import org.json.JSONArray
 import org.json.JSONObject
+import org.junit.After
 import org.junit.Rule
 import org.junit.Test
 import java.util.UUID
 
 class ElementsSessionJsonParserTest {
+    private val errorReporter = FakeErrorReporter()
+
+    @After
+    fun verifyErrorReporter() {
+        errorReporter.ensureAllEventsConsumed()
+    }
 
     @get:Rule
     val incentivesFeatureFlagRule = FeatureFlagTestRule(
@@ -44,7 +52,8 @@ class ElementsSessionJsonParserTest {
                 customPaymentMethods = emptyList(),
                 appId = APP_ID
             ),
-            isLiveMode = false
+            isLiveMode = false,
+            errorReporter = errorReporter,
         ).parse(
             ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON
         )
@@ -72,7 +81,8 @@ class ElementsSessionJsonParserTest {
                 customPaymentMethods = emptyList(),
                 appId = APP_ID
             ),
-            isLiveMode = false
+            isLiveMode = false,
+            errorReporter = errorReporter,
         ).parse(
             ElementsSessionFixtures.EXPANDED_SETUP_INTENT_JSON
         )
@@ -99,7 +109,8 @@ class ElementsSessionJsonParserTest {
                 customPaymentMethods = emptyList(),
                 appId = APP_ID
             ),
-            isLiveMode = false
+            isLiveMode = false,
+            errorReporter = errorReporter,
         ).parse(
             ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_WITH_LINK_FUNDING_SOURCES_JSON
         )!!
@@ -118,7 +129,8 @@ class ElementsSessionJsonParserTest {
                 customPaymentMethods = emptyList(),
                 appId = APP_ID
             ),
-            isLiveMode = false
+            isLiveMode = false,
+            errorReporter = errorReporter,
         ).parse(
             ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_WITH_LINK_FUNDING_SOURCES_JSON
         )!!
@@ -147,7 +159,8 @@ class ElementsSessionJsonParserTest {
                 customPaymentMethods = emptyList(),
                 appId = APP_ID
             ),
-            isLiveMode = false
+            isLiveMode = false,
+            errorReporter = errorReporter,
         ).parse(
             ElementsSessionFixtures.EXPANDED_SETUP_INTENT_WITH_LINK_SIGNUP_DISABLED_JSON
         )!!
@@ -164,7 +177,8 @@ class ElementsSessionJsonParserTest {
                 customPaymentMethods = emptyList(),
                 appId = APP_ID
             ),
-            isLiveMode = false
+            isLiveMode = false,
+            errorReporter = errorReporter,
         ).parse(
             ElementsSessionFixtures.EXPANDED_SETUP_INTENT_WITH_LINK_SIGNUP_DISABLED_FLAG_FALSE_JSON
         )!!
@@ -205,7 +219,8 @@ class ElementsSessionJsonParserTest {
                 customPaymentMethods = emptyList(),
                 appId = APP_ID
             ),
-            isLiveMode = false
+            isLiveMode = false,
+            errorReporter = errorReporter,
         ).parse(
             ElementsSessionFixtures.EXPANDED_SETUP_INTENT_WITH_LINK_FUNDING_SOURCES_JSON
         )!!
@@ -224,7 +239,8 @@ class ElementsSessionJsonParserTest {
                 customPaymentMethods = emptyList(),
                 appId = APP_ID
             ),
-            isLiveMode = false
+            isLiveMode = false,
+            errorReporter = errorReporter,
         ).parse(
             ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_WITH_EXPERIMENTS_DATA_JSON
         )!!
@@ -251,6 +267,7 @@ class ElementsSessionJsonParserTest {
                 appId = APP_ID,
             ),
             isLiveMode = true,
+            errorReporter = errorReporter,
         ).parse(json)
 
         assertThat(elementsSession?.experimentsData?.arbId).isEqualTo("arb_123")
@@ -277,6 +294,7 @@ class ElementsSessionJsonParserTest {
                 appId = APP_ID,
             ),
             isLiveMode = true,
+            errorReporter = errorReporter,
         ).parse(json)
 
         assertThat(elementsSession?.experimentsData?.arbId).isEqualTo("arb_123")
@@ -294,7 +312,8 @@ class ElementsSessionJsonParserTest {
                 customPaymentMethods = emptyList(),
                 appId = APP_ID
             ),
-            isLiveMode = false
+            isLiveMode = false,
+            errorReporter = errorReporter,
         ).parse(
             JSONObject(
                 ElementsSessionFixtures.PI_WITH_CARD_AFTERPAY_AU_BECS
@@ -318,7 +337,8 @@ class ElementsSessionJsonParserTest {
                 customPaymentMethods = emptyList(),
                 appId = APP_ID
             ),
-            isLiveMode = false
+            isLiveMode = false,
+            errorReporter = errorReporter,
         ).parse(
             JSONObject(
                 ElementsSessionFixtures.PI_WITH_CARD_AFTERPAY_AU_BECS_NO_ORDERED_LPMS
@@ -343,7 +363,8 @@ class ElementsSessionJsonParserTest {
                 customPaymentMethods = emptyList(),
                 appId = APP_ID
             ),
-            isLiveMode = false
+            isLiveMode = false,
+            errorReporter = errorReporter,
         ).parse(
             JSONObject(
                 """
@@ -369,7 +390,8 @@ class ElementsSessionJsonParserTest {
                 customPaymentMethods = emptyList(),
                 appId = APP_ID
             ),
-            isLiveMode = false
+            isLiveMode = false,
+            errorReporter = errorReporter,
         ).parse(
             JSONObject(
                 """
@@ -395,7 +417,8 @@ class ElementsSessionJsonParserTest {
                 customPaymentMethods = emptyList(),
                 appId = APP_ID
             ),
-            isLiveMode = false
+            isLiveMode = false,
+            errorReporter = errorReporter,
         ).parse(
             JSONObject(
                 """
@@ -419,7 +442,8 @@ class ElementsSessionJsonParserTest {
                 customPaymentMethods = emptyList(),
                 appId = APP_ID
             ),
-            isLiveMode = false
+            isLiveMode = false,
+            errorReporter = errorReporter,
         ).parse(
             ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON
         )
@@ -442,7 +466,8 @@ class ElementsSessionJsonParserTest {
                 customPaymentMethods = emptyList(),
                 appId = APP_ID
             ),
-            isLiveMode = false
+            isLiveMode = false,
+            errorReporter = errorReporter,
         ).parse(
             ElementsSessionFixtures.EXPANDED_SETUP_INTENT_JSON
         )
@@ -465,7 +490,8 @@ class ElementsSessionJsonParserTest {
                 customPaymentMethods = emptyList(),
                 appId = APP_ID
             ),
-            isLiveMode = false
+            isLiveMode = false,
+            errorReporter = errorReporter,
         ).parse(
             ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON
         )
@@ -506,6 +532,7 @@ class ElementsSessionJsonParserTest {
                 appId = APP_ID
             ),
             isLiveMode = false,
+            errorReporter = errorReporter,
             timeProvider = { 1 }
         ).parse(
             ElementsSessionFixtures.DEFERRED_INTENT_JSON
@@ -553,6 +580,7 @@ class ElementsSessionJsonParserTest {
                 appId = APP_ID
             ),
             isLiveMode = false,
+            errorReporter = errorReporter,
             timeProvider = { 1 }
         ).parse(
             ElementsSessionFixtures.DEFERRED_INTENT_JSON
@@ -592,6 +620,7 @@ class ElementsSessionJsonParserTest {
                 appId = APP_ID
             ),
             isLiveMode = false,
+            errorReporter = errorReporter,
         )
 
         val intent = ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON_WITH_CBC_ELIGIBLE
@@ -611,6 +640,7 @@ class ElementsSessionJsonParserTest {
                 appId = APP_ID
             ),
             isLiveMode = false,
+            errorReporter = errorReporter,
         )
 
         val intent = ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON_WITH_CBC_NOT_ELIGIBLE
@@ -630,6 +660,7 @@ class ElementsSessionJsonParserTest {
                 appId = APP_ID
             ),
             isLiveMode = false,
+            errorReporter = errorReporter,
         )
 
         val intent = ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON
@@ -648,6 +679,7 @@ class ElementsSessionJsonParserTest {
                 appId = APP_ID
             ),
             isLiveMode = false,
+            errorReporter = errorReporter,
         )
 
         val intent = ElementsSessionFixtures.EXPANDED_SETUP_INTENT_JSON_WITH_CBC_ELIGIBLE_BUT_NO_NETWORKS
@@ -667,6 +699,7 @@ class ElementsSessionJsonParserTest {
                 appId = APP_ID
             ),
             isLiveMode = false,
+            errorReporter = errorReporter,
         )
 
         val intent = ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON
@@ -686,6 +719,7 @@ class ElementsSessionJsonParserTest {
                 appId = APP_ID
             ),
             isLiveMode = false,
+            errorReporter = errorReporter,
         )
 
         val intent = ElementsSessionFixtures.PAYMENT_INTENT_WITH_EXTERNAL_VENMO_JSON
@@ -704,6 +738,7 @@ class ElementsSessionJsonParserTest {
                 appId = APP_ID
             ),
             isLiveMode = false,
+            errorReporter = errorReporter,
         )
 
         val intent = JSONObject(ElementsSessionFixtures.PI_WITH_CARD_AFTERPAY_AU_BECS)
@@ -728,6 +763,7 @@ class ElementsSessionJsonParserTest {
                 appId = APP_ID
             ),
             isLiveMode = false,
+            errorReporter = errorReporter,
         )
 
         val intent = createWithCustomPaymentMethods(
@@ -773,6 +809,7 @@ class ElementsSessionJsonParserTest {
                 appId = APP_ID
             ),
             isLiveMode = false,
+            errorReporter = errorReporter,
         )
 
         val intent = createWithCustomPaymentMethods(customPaymentMethodData = "null")
@@ -793,6 +830,7 @@ class ElementsSessionJsonParserTest {
                 appId = APP_ID
             ),
             isLiveMode = false,
+            errorReporter = errorReporter,
         )
 
         val intent = createPaymentIntentWithCustomerSession()
@@ -870,6 +908,7 @@ class ElementsSessionJsonParserTest {
                 appId = APP_ID
             ),
             isLiveMode = false,
+            errorReporter = errorReporter,
         )
 
         val intent = createPaymentIntentWithCustomerSession(
@@ -891,6 +930,7 @@ class ElementsSessionJsonParserTest {
                 appId = APP_ID
             ),
             isLiveMode = false,
+            errorReporter = errorReporter,
         )
 
         val intent = createPaymentIntentWithCustomerSession(
@@ -929,6 +969,7 @@ class ElementsSessionJsonParserTest {
                 appId = APP_ID
             ),
             isLiveMode = false,
+            errorReporter = errorReporter,
         )
 
         val intent = createPaymentIntentWithCustomerSession(
@@ -1000,6 +1041,7 @@ class ElementsSessionJsonParserTest {
                 appId = APP_ID
             ),
             isLiveMode = false,
+            errorReporter = errorReporter,
         )
 
         val intent = createPaymentIntentWithCustomerSession(
@@ -1187,6 +1229,7 @@ class ElementsSessionJsonParserTest {
                 appId = APP_ID
             ),
             isLiveMode = false,
+            errorReporter = errorReporter,
         )
 
         val intent = createPaymentIntentWithCustomerSession(
@@ -1245,6 +1288,7 @@ class ElementsSessionJsonParserTest {
                 appId = APP_ID
             ),
             isLiveMode = false,
+            errorReporter = errorReporter,
         )
 
         val intent = createPaymentIntentWithCustomerSession(
@@ -1278,6 +1322,7 @@ class ElementsSessionJsonParserTest {
                 appId = APP_ID
             ),
             isLiveMode = false,
+            errorReporter = errorReporter,
         )
 
         val intent = ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_WITH_CUSTOMER_SESSION_AND_CUSTOMER_SHEET_COMPONENT
@@ -1345,7 +1390,8 @@ class ElementsSessionJsonParserTest {
                 customPaymentMethods = emptyList(),
                 appId = APP_ID
             ),
-            isLiveMode = false
+            isLiveMode = false,
+            errorReporter = errorReporter,
         )
 
         fun assertIsGooglePayEnabled(expectedValue: Boolean, jsonTransform: JSONObject.() -> Unit) {
@@ -1370,6 +1416,7 @@ class ElementsSessionJsonParserTest {
                 appId = APP_ID
             ),
             isLiveMode = true,
+            errorReporter = errorReporter,
         ).parse(
             JSONObject(
                 ElementsSessionFixtures.PI_WITH_CARD_AFTERPAY_AU_BECS
@@ -1391,6 +1438,7 @@ class ElementsSessionJsonParserTest {
                 appId = APP_ID
             ),
             isLiveMode = true,
+            errorReporter = errorReporter,
         ).parse(
             ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_WITH_LINK_INCENTIVE_JSON
         )
@@ -1417,6 +1465,7 @@ class ElementsSessionJsonParserTest {
                 appId = APP_ID
             ),
             isLiveMode = true,
+            errorReporter = errorReporter,
         ).parse(
             ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_WITH_LINK_INCENTIVE_JSON
         )
@@ -1434,6 +1483,7 @@ class ElementsSessionJsonParserTest {
                 appId = APP_ID
             ),
             isLiveMode = true,
+            errorReporter = errorReporter,
         ).parse(
             ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_WITH_NATIVE_LINK_FLAGS_ENABLED_JSON
         )
@@ -1452,6 +1502,7 @@ class ElementsSessionJsonParserTest {
                 appId = APP_ID
             ),
             isLiveMode = true,
+            errorReporter = errorReporter,
         ).parse(
             ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_WITH_NATIVE_LINK_FLAGS_DISABLED_JSON
         )
@@ -1470,6 +1521,7 @@ class ElementsSessionJsonParserTest {
                 appId = APP_ID
             ),
             isLiveMode = true,
+            errorReporter = errorReporter,
         ).parse(
             ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_WITH_LINK_ATTESTATION_ENDPOINTS_MISSING_JSON
         )
@@ -1509,6 +1561,7 @@ class ElementsSessionJsonParserTest {
                 appId = APP_ID
             ),
             isLiveMode = false,
+            errorReporter = errorReporter,
         )
 
         val intent = createPaymentIntentWithCustomerSession(
@@ -1535,6 +1588,7 @@ class ElementsSessionJsonParserTest {
                 appId = APP_ID
             ),
             isLiveMode = false,
+            errorReporter = errorReporter,
         )
 
         val intent = createPaymentIntentWithCustomerSession(allowRedisplay = rawAllowRedisplayValue)
@@ -1564,6 +1618,7 @@ class ElementsSessionJsonParserTest {
                 appId = APP_ID
             ),
             isLiveMode = false,
+            errorReporter = errorReporter,
         )
 
         val intent = createPaymentIntentWithCustomerSession(
@@ -1606,6 +1661,7 @@ class ElementsSessionJsonParserTest {
                 appId = APP_ID
             ),
             isLiveMode = false,
+            errorReporter = errorReporter,
         )
 
         val session = parser.parse(ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON_WITH_PASSIVE_CAPTCHA)
@@ -1629,6 +1685,7 @@ class ElementsSessionJsonParserTest {
                 appId = APP_ID
             ),
             isLiveMode = false,
+            errorReporter = errorReporter,
         )
 
         val session = parser.parse(ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON_WITHOUT_PASSIVE_CAPTCHA)
@@ -1646,6 +1703,7 @@ class ElementsSessionJsonParserTest {
                 appId = APP_ID
             ),
             isLiveMode = false,
+            errorReporter = errorReporter,
         )
 
         val json = JSONObject(
@@ -1686,6 +1744,7 @@ class ElementsSessionJsonParserTest {
                 appId = APP_ID
             ),
             isLiveMode = false,
+            errorReporter = errorReporter,
         )
 
         val json = JSONObject(
@@ -1726,6 +1785,7 @@ class ElementsSessionJsonParserTest {
                 appId = APP_ID
             ),
             isLiveMode = false,
+            errorReporter = errorReporter,
         )
 
         val session = parser.parse(ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON)
@@ -1744,6 +1804,7 @@ class ElementsSessionJsonParserTest {
                 appId = APP_ID
             ),
             isLiveMode = false,
+            errorReporter = errorReporter,
         )
 
         val session = parser.parse(ElementsSessionFixtures.PAYMENT_INTENT_WITH_EXTERNAL_VENMO_JSON)!!
@@ -1767,6 +1828,7 @@ class ElementsSessionJsonParserTest {
                 appId = APP_ID
             ),
             isLiveMode = false,
+            errorReporter = errorReporter,
         )
 
         val json = JSONObject(
@@ -1813,6 +1875,7 @@ class ElementsSessionJsonParserTest {
                 appId = APP_ID
             ),
             isLiveMode = false,
+            errorReporter = errorReporter,
         )
 
         val session = parser.parse(ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON)
@@ -1830,6 +1893,7 @@ class ElementsSessionJsonParserTest {
                 appId = APP_ID
             ),
             isLiveMode = false,
+            errorReporter = errorReporter,
         )
 
         val json = JSONObject(
@@ -1876,6 +1940,7 @@ class ElementsSessionJsonParserTest {
                 appId = APP_ID
             ),
             isLiveMode = false,
+            errorReporter = errorReporter,
         )
 
         val session = parser.parse(ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON)
@@ -1893,6 +1958,7 @@ class ElementsSessionJsonParserTest {
                 appId = APP_ID
             ),
             isLiveMode = false,
+            errorReporter = errorReporter,
         )
 
         val json = JSONObject(
@@ -1939,6 +2005,7 @@ class ElementsSessionJsonParserTest {
                 appId = APP_ID
             ),
             isLiveMode = false,
+            errorReporter = errorReporter,
         )
 
         val session = parser.parse(ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON)
@@ -1956,6 +2023,7 @@ class ElementsSessionJsonParserTest {
                 appId = APP_ID
             ),
             isLiveMode = false,
+            errorReporter = errorReporter,
         )
 
         val json = JSONObject(
@@ -2002,6 +2070,7 @@ class ElementsSessionJsonParserTest {
                 appId = APP_ID
             ),
             isLiveMode = false,
+            errorReporter = errorReporter,
         )
 
         val session = parser.parse(ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON)
@@ -2020,6 +2089,7 @@ class ElementsSessionJsonParserTest {
                 appId = APP_ID
             ),
             isLiveMode = false,
+            errorReporter = errorReporter,
         )
 
         val json = JSONObject(
@@ -2262,6 +2332,7 @@ class ElementsSessionJsonParserTest {
                 appId = APP_ID
             ),
             isLiveMode = false,
+            errorReporter = errorReporter,
         ).parse(json)
     }
 

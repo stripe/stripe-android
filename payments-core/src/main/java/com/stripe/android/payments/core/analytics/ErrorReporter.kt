@@ -118,6 +118,9 @@ interface ErrorReporter : FraudDetectionErrorReporter {
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     enum class ExpectedErrorEvent(override val eventName: String) : ErrorEvent {
+        PAYMENT_SHEET_MOBILE_SESSION_DECODE_FAILED(
+            eventName = "mc_mobile_session_decode_failed"
+        ),
         AUTH_WEB_VIEW_FAILURE(
             eventName = "payments.auth_web_view.failure"
         ),

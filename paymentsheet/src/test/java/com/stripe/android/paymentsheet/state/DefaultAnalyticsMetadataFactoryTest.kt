@@ -973,6 +973,7 @@ class DefaultAnalyticsMetadataFactoryTest {
         customPaymentMethods: List<ElementsSession.CustomPaymentMethod> = emptyList(),
     ): ElementsSession {
         return ElementsSession(
+            mobileSession = null,
             linkSettings = linkSettings,
             externalPaymentMethodData = externalPaymentMethodData,
             stripeIntent = stripeIntent,

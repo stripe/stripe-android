@@ -74,6 +74,7 @@ internal class PaymentMethodMetadataKtxTest {
         customer: ElementsSession.Customer? = null,
     ): ElementsSession {
         return ElementsSession(
+            mobileSession = null,
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             cardBrandChoice = null,
             merchantCountry = null,

@@ -94,6 +94,7 @@ internal class DefaultCustomerSessionElementsSessionManager @Inject constructor(
                     externalPaymentMethods = listOf(),
                     countryOverride = null,
                     apiConfiguration = apiConfigurationProvider.get(),
+                    mobileSessionConfig = null,
                 ).onSuccess {
                     reportSuccessfulElementsSessionLoad()
                 }.onFailure {
