@@ -76,6 +76,7 @@ import com.stripe.android.paymentsheet.injection.ApiConfigurationResolverModule
 import com.stripe.android.paymentsheet.injection.LinkHoldbackExposureModule
 import com.stripe.android.paymentsheet.injection.PaymentMethodMessagePromotionsExperimentHandlerModule
 import com.stripe.android.paymentsheet.injection.PreselectLinkExperimentModule
+import com.stripe.android.paymentsheet.injection.StripeBalanceModule
 import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.DefaultSavedPaymentMethodRepository
@@ -139,6 +140,7 @@ import javax.inject.Singleton
         ApiConfigurationFromPaymentConfigurationModule::class,
         ApiRequestOptionsModule::class,
         ApiConfigurationResolverModule::class,
+        StripeBalanceModule::class,
     ],
 )
 internal interface CheckoutElementsControllerComponent {

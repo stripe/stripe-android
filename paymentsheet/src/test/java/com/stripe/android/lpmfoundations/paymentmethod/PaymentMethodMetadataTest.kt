@@ -1150,6 +1150,7 @@ internal class PaymentMethodMetadataTest {
             isTapToAddAvailable = false,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
             apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
+            stripeBalanceFinancialAccounts = null,
         )
 
         val expectedMetadata = PaymentMethodMetadata(
@@ -1226,6 +1227,7 @@ internal class PaymentMethodMetadataTest {
             shouldUseAutocompleteProxyEndpoints = false,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
             apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
+            stripeBalanceFinancialAccounts = null,
         )
 
         assertThat(metadata).isEqualTo(expectedMetadata)
@@ -1287,6 +1289,7 @@ internal class PaymentMethodMetadataTest {
             isTapToAddAvailable = false,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
             apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
+            stripeBalanceFinancialAccounts = null,
         )
 
         // When flag is false, should use default funding types, not the configured ones
@@ -1387,6 +1390,7 @@ internal class PaymentMethodMetadataTest {
             shouldUseAutocompleteProxyEndpoints = false,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
             apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
+            stripeBalanceFinancialAccounts = null,
         )
         assertThat(metadata).isEqualTo(expectedMetadata)
     }
@@ -2139,6 +2143,7 @@ internal class PaymentMethodMetadataTest {
             isTapToAddAvailable = false,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
             apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
+            stripeBalanceFinancialAccounts = null,
         )
 
         assertThat(metadata.availableWallets)
@@ -2300,6 +2305,7 @@ internal class PaymentMethodMetadataTest {
             isTapToAddAvailable = true,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
             apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
+            stripeBalanceFinancialAccounts = null,
         )
 
         assertThat(metadata.isTapToAddSupported).isTrue()
@@ -2325,6 +2331,7 @@ internal class PaymentMethodMetadataTest {
             isTapToAddAvailable = true,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
             apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
+            stripeBalanceFinancialAccounts = null,
         )
 
         assertThat(metadata.isTapToAddSupported).isTrue()
@@ -2354,6 +2361,7 @@ internal class PaymentMethodMetadataTest {
             isTapToAddAvailable = false,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
             apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
+            stripeBalanceFinancialAccounts = null,
         )
 
         assertThat(metadata.isTapToAddSupported).isFalse()
@@ -2508,6 +2516,7 @@ internal class PaymentMethodMetadataTest {
             isTapToAddAvailable = false,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
             apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
+            stripeBalanceFinancialAccounts = null,
         )
     }
 

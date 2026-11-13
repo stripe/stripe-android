@@ -90,6 +90,7 @@ import javax.inject.Singleton
         ApiConfigurationResolverModule::class,
         PreselectLinkExperimentModule::class,
         PrimaryButtonExperimentModule::class,
+        StripeBalanceModule::class,
     ]
 )
 internal abstract class PaymentSheetCommonModule {

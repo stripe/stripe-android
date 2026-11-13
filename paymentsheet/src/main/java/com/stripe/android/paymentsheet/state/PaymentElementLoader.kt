@@ -55,6 +55,8 @@ import com.stripe.android.paymentsheet.model.validate
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
+import com.stripe.android.paymentsheet.stripebalance.LoadStripeBalanceFinancialAccounts
+import com.stripe.android.paymentsheet.stripebalance.StripeBalanceFinancialAccounts
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodsRepository
 import com.stripe.attestation.IntegrityRequestManager
@@ -297,6 +299,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     private val durationProvider: DurationProvider,
     private val paymentMethodMessagePromotionsExperimentHandler: PaymentMethodMessagePromotionsExperimentHandler,
     private val preselectLinkExperiment: PreselectLinkExperiment,
+    private val loadStripeBalanceFinancialAccounts: LoadStripeBalanceFinancialAccounts,
 ) : PaymentElementLoader {
 
     fun interface AnalyticsMetadataFactory {
@@ -407,6 +410,16 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             elementsSession = elementsSession,
         )
 
+        // Load the buyer's financial accounts alongside Link, so the Stripe balance form has them when it appears.
+        val stripeBalanceFinancialAccounts = async {
+            loadStripeBalanceFinancialAccounts(
+                initializationMode = initializationMode,
+                elementsSession = elementsSession,
+                customerMetadata = customerMetadata,
+                apiConfiguration = apiConfiguration,
+            )
+        }
+
         val linkState = async {
             durationProvider.measureDuration(DurationProvider.Key.PaymentSheetLoadCreateLinkState) {
                 createLinkState(
@@ -438,6 +451,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                     customerMetadata = customerMetadata,
                     clientAttributionMetadata = clientAttributionMetadata,
                     apiConfiguration = apiConfiguration,
+                    stripeBalanceFinancialAccounts = stripeBalanceFinancialAccounts.await(),
                 )
             }
         }
@@ -610,6 +624,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         customerMetadata: CustomerMetadata?,
         clientAttributionMetadata: ClientAttributionMetadata,
         apiConfiguration: ApiConfiguration.State,
+        stripeBalanceFinancialAccounts: StripeBalanceFinancialAccounts?,
     ): PaymentMethodMetadata {
         val externalPaymentMethodSpecs = externalPaymentMethodsRepository.getExternalPaymentMethodSpecs(
             elementsSession.externalPaymentMethodData
@@ -662,6 +677,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             isTapToAddAvailable = isTapToAddAvailable,
             paymentMethodLayout = paymentMethodLayout,
             apiConfiguration = apiConfiguration,
+            stripeBalanceFinancialAccounts = stripeBalanceFinancialAccounts,
         )
 
         return paymentMethodMetadata

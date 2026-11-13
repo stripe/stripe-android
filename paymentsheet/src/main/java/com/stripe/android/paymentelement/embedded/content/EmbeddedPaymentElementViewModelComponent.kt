@@ -34,6 +34,7 @@ import com.stripe.android.paymentsheet.injection.ApiConfigurationResolverModule
 import com.stripe.android.paymentsheet.injection.LinkHoldbackExposureModule
 import com.stripe.android.paymentsheet.injection.PaymentMethodMessagePromotionsExperimentHandlerModule
 import com.stripe.android.paymentsheet.injection.PreselectLinkExperimentModule
+import com.stripe.android.paymentsheet.injection.StripeBalanceModule
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelperModule
 import com.stripe.android.paymentsheet.repositories.RealElementsSessionRepository
@@ -88,6 +89,7 @@ import javax.inject.Singleton
         PaymentMethodMessagePromotionsExperimentHandlerModule::class,
         PreselectLinkExperimentModule::class,
         ApiConfigurationResolverModule::class,
+        StripeBalanceModule::class,
     ],
 )
 internal interface EmbeddedPaymentElementViewModelComponent {
