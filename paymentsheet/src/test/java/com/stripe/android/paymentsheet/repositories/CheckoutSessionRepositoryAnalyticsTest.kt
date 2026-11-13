@@ -5,7 +5,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutAnalyticsTestFixtures
 import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent
 import com.stripe.android.checkout.analytics.CheckoutAnalyticsReporter
-import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.core.Logger
@@ -48,28 +47,7 @@ class CheckoutSessionRepositoryAnalyticsTest {
     )
 
     @Test
-    fun `init reports started and succeeded with the configuration params`() = runScenario {
-        expectEvent(
-            "init.started",
-            doesNotContainValue(CLIENT_SECRET),
-            analyticsPayloadField("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID),
-            analyticsPayloadField("merchant_display_name", "true"),
-            analyticsPayloadField("defaults[email]", "true"),
-            analyticsPayloadField("defaults[billing_details][name]", "false"),
-            not(hasQueryParam("payment_element")),
-            not(hasQueryParam("checkout_config_id")),
-            not(hasQueryParam("ordered_lpms")),
-            not(hasQueryParam("duration")),
-        )
-        expectEvent(
-            "init.succeeded",
-            doesNotContainValue(CLIENT_SECRET),
-            *INIT_RESPONSE_SESSION_PARAMS.asPayloadMatchers(),
-            analyticsPayloadField("merchant_display_name", "true"),
-            analyticsPayloadField("defaults[email]", "true"),
-            analyticsPayloadField("defaults[billing_details][name]", "false"),
-            hasQueryParam("duration"),
-        )
+    fun `init leaves operation analytics to the controller`() = runScenario {
         networkRule.checkoutInit { response ->
             response.testBodyFromFile("checkout-session-init.json")
         }
@@ -77,53 +55,7 @@ class CheckoutSessionRepositoryAnalyticsTest {
         repository.init(
             clientSecret = CheckoutSessionClientSecret(CLIENT_SECRET),
             adaptivePricingAllowed = false,
-            analyticsParams = CONFIGURATION_PARAMS,
         ).getOrThrow()
-    }
-
-    @Test
-    fun `init reports started and failed with the error`() = runScenario {
-        expectEvent(
-            "init.started",
-            doesNotContainValue(CLIENT_SECRET),
-            analyticsPayloadField("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID),
-            analyticsPayloadField("merchant_display_name", "true"),
-            not(hasQueryParam("duration")),
-        )
-        expectEvent(
-            "init.failed",
-            doesNotContainValue(CLIENT_SECRET),
-            analyticsPayloadField("checkout_session_id", DEFAULT_CHECKOUT_SESSION_ID),
-            analyticsPayloadField("merchant_display_name", "true"),
-            analyticsPayloadField("error_type", "invalid_request_error"),
-            analyticsPayloadField("error_code", "checkout_session_invalid"),
-            analyticsPayloadField("request_id", "req_123"),
-            not(hasQueryParam("ordered_lpms")),
-            hasQueryParam("duration"),
-        )
-        networkRule.checkoutInit { response ->
-            response.setResponseCode(400)
-            response.addHeader("Request-Id", "req_123")
-            response.setBody(
-                """
-                    {
-                        "error": {
-                            "type": "invalid_request_error",
-                            "code": "checkout_session_invalid",
-                            "message": "Invalid session"
-                        }
-                    }
-                """.trimIndent()
-            )
-        }
-
-        val result = repository.init(
-            clientSecret = CheckoutSessionClientSecret(CLIENT_SECRET),
-            adaptivePricingAllowed = false,
-            analyticsParams = mapOf("merchant_display_name" to true),
-        )
-
-        assertThat(result.isFailure).isTrue()
     }
 
     @Test
@@ -353,22 +285,8 @@ class CheckoutSessionRepositoryAnalyticsTest {
     private fun Map<String, Any>.asPayloadMatchers(): Array<RequestMatcher> =
         map { (key, value) -> analyticsPayloadField(key, value.toString()) }.toTypedArray()
 
-    private fun doesNotContainValue(value: String) = RequestMatcher { request ->
-        value !in request.queryParams.values
-    }
-
     private companion object {
         const val CLIENT_SECRET = "cs_test_abc123_secret_test"
-
-        // Nested maps are flattened into bracketed query keys, e.g. defaults[billing_details][name].
-        val CONFIGURATION_PARAMS: Map<String, Any?> = mapOf(
-            "merchant_display_name" to true,
-            "defaults" to mapOf(
-                "email" to true,
-                "billing_details" to mapOf("name" to false),
-            ),
-            "payment_element" to null,
-        )
 
         // Values come from checkout-session-init.json, the response parsed by the init and update requests.
         val INIT_RESPONSE_SESSION_PARAMS: Map<String, Any> = mapOf(

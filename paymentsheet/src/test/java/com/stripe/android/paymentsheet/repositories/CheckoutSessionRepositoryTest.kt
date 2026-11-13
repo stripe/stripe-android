@@ -73,7 +73,6 @@ class CheckoutSessionRepositoryTest {
         val result = repository.init(
             clientSecret = CheckoutSessionClientSecret("cs_test_abc123_secret_test"),
             adaptivePricingAllowed = true,
-            analyticsParams = emptyMap(),
         )
 
         assertThat(result.getOrThrow().clientSecret.value).isEqualTo("cs_test_abc123_secret_test")
