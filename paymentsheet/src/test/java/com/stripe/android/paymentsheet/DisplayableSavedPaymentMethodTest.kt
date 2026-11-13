@@ -6,6 +6,7 @@ import androidx.test.core.app.ApplicationProvider.getApplicationContext
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethodFixtures
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -44,6 +45,25 @@ class DisplayableSavedPaymentMethodTest {
         val description = displayableSavedPaymentMethod.getDescription().resolve(context)
 
         assertThat(description).isEqualTo("Visa ending in 4242")
+    }
+
+    @Test
+    fun getDescription_usesBrandIfDisplayBrandIsUnrecognized() {
+        val amexWithUnrecognizedDisplayBrand = PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(
+            card = PaymentMethodFixtures.CARD_PAYMENT_METHOD.card?.copy(
+                brand = CardBrand.AmericanExpress,
+                displayBrand = "american_express",
+                last4 = "8431",
+            )
+        )
+        val displayableSavedPaymentMethod = DisplayableSavedPaymentMethod.create(
+            displayName = "unused".resolvableString,
+            paymentMethod = amexWithUnrecognizedDisplayBrand,
+        )
+
+        val description = displayableSavedPaymentMethod.getDescription().resolve(context)
+
+        assertThat(description).isEqualTo("American Express ending in 8431")
     }
 
     @Test
