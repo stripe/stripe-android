@@ -37,9 +37,7 @@ internal class ElementsSessionLoader @Inject constructor(
         savedPaymentMethodSelection: SavedSelection.PaymentMethod?,
         apiConfiguration: ApiConfiguration.State,
     ): ElementsSession {
-        val mobileSessionConfig = if (
-            configuration.usesMobileSession && FeatureFlags.serverPaymentMethodAvailabilityEnabled.isEnabled
-        ) {
+        val mobileSessionConfig = if (configuration.useRemoteMobileSession) {
             configuration.toMobileSessionConfig(
                 hasFinancialConnectionsSdk = DefaultIsFinancialConnectionsAvailable() &&
                     !FeatureFlags.financialConnectionsFullSdkUnavailable.isEnabled,

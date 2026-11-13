@@ -1,21 +1,27 @@
 package com.stripe.android.common.model
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.LinkController
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.testing.FeatureFlagTestRule
+import org.junit.Rule
 import org.junit.Test
 
 internal class CommonConfigurationTest {
+    @get:Rule
+    val featureFlag = FeatureFlagTestRule(FeatureFlags.serverPaymentMethodAvailabilityEnabled, isEnabled = true)
+
     private val configuration = CommonConfigurationFactory.create()
 
     @Test
     fun `PaymentSheet common configuration opts into MobileSession`() {
         val commonConfiguration = PaymentSheet.Configuration("Merchant").asCommonConfiguration()
 
-        assertThat(commonConfiguration.usesMobileSession).isTrue()
+        assertThat(commonConfiguration.useRemoteMobileSession).isTrue()
     }
 
     @Test
@@ -24,7 +30,27 @@ internal class CommonConfigurationTest {
             .build()
             .asCommonConfiguration()
 
-        assertThat(commonConfiguration.usesMobileSession).isTrue()
+        assertThat(commonConfiguration.useRemoteMobileSession).isTrue()
+    }
+
+    @Test
+    fun `PaymentSheet common configuration disables MobileSession when the flag is off`() {
+        featureFlag.setEnabled(false)
+
+        val commonConfiguration = PaymentSheet.Configuration("Merchant").asCommonConfiguration()
+
+        assertThat(commonConfiguration.useRemoteMobileSession).isFalse()
+    }
+
+    @Test
+    fun `Embedded common configuration disables MobileSession when the flag is off`() {
+        featureFlag.setEnabled(false)
+
+        val commonConfiguration = EmbeddedPaymentElement.Configuration.Builder("Merchant")
+            .build()
+            .asCommonConfiguration()
+
+        assertThat(commonConfiguration.useRemoteMobileSession).isFalse()
     }
 
     @Test
@@ -40,7 +66,7 @@ internal class CommonConfigurationTest {
             .commonConfiguration
 
         assertThat(commonConfiguration.apiConfiguration).isEqualTo(DEFAULT_API_CONFIG)
-        assertThat(commonConfiguration.usesMobileSession).isFalse()
+        assertThat(commonConfiguration.useRemoteMobileSession).isFalse()
     }
 
     @Test
@@ -55,7 +81,7 @@ internal class CommonConfigurationTest {
             .commonConfiguration
 
         assertThat(commonConfiguration.apiConfiguration).isEqualTo(DEFAULT_API_CONFIG)
-        assertThat(commonConfiguration.usesMobileSession).isFalse()
+        assertThat(commonConfiguration.useRemoteMobileSession).isFalse()
     }
 
     @Test

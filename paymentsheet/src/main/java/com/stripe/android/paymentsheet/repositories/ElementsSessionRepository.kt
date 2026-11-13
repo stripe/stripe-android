@@ -13,7 +13,6 @@ import com.stripe.android.core.networking.HTTP_INTERNAL_SERVER_ERROR
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.executeRequestWithResultParser
 import com.stripe.android.core.networking.toRequestOptions
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.model.DeferredIntentParams
 import com.stripe.android.model.ElementsSession
@@ -135,9 +134,7 @@ internal class RealElementsSessionRepository @Inject constructor(
                 url = ELEMENTS_SESSIONS_URL,
                 options = options,
                 params = requestParams + expandParam,
-                additionalHeaders = if (
-                    FeatureFlags.serverPaymentMethodAvailabilityEnabled.isEnabled && mobileSessionConfig != null
-                ) {
+                additionalHeaders = if (mobileSessionConfig != null) {
                     mapOf(MobileSession.CONFIG_HEADER_NAME to MobileSession.encode(mobileSessionConfig))
                 } else {
                     emptyMap()

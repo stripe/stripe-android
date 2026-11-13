@@ -31,10 +31,10 @@ internal object CommonConfigurationFactory {
         userOverrideCountry: String? = null,
         appearance: PaymentSheet.Appearance = PaymentSheet.Appearance(),
         allowedCardFundingTypes: List<CardFundingType> = CardFundingType.entries,
-        usesMobileSession: Boolean = true,
+        useRemoteMobileSession: Boolean = false,
     ): CommonConfiguration = CommonConfiguration(
         merchantDisplayName = merchantDisplayName,
-        usesMobileSession = usesMobileSession,
+        useRemoteMobileSession = useRemoteMobileSession,
         customer = customer,
         googlePay = googlePay,
         defaultBillingDetails = defaultBillingDetails,

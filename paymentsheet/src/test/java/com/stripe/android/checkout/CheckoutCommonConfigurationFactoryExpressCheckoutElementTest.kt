@@ -2,6 +2,7 @@ package com.stripe.android.checkout
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.configuration.ConfigurationDefaults
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.elements.ExpressCheckoutElement.Configuration.GooglePayConfiguration
 import com.stripe.android.elements.PaymentElement
@@ -13,6 +14,8 @@ import com.stripe.android.paymentelement.CardFundingFilteringPrivatePreview
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
+import com.stripe.android.testing.FeatureFlagTestRule
+import org.junit.Rule
 import org.junit.Test
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full as PSFull
 
@@ -22,6 +25,8 @@ import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConf
     CardFundingFilteringPrivatePreview::class,
 )
 internal class CheckoutCommonConfigurationFactoryExpressCheckoutElementTest {
+    @get:Rule
+    val featureFlag = FeatureFlagTestRule(FeatureFlags.serverPaymentMethodAvailabilityEnabled, isEnabled = true)
 
     @Test
     fun `createForExpressCheckoutElement maps Link configuration from express checkout element configuration`() {
@@ -50,7 +55,7 @@ internal class CheckoutCommonConfigurationFactoryExpressCheckoutElementTest {
 
         assertThat(result?.link?.display)
             .isEqualTo(PaymentSheet.LinkConfiguration.Display.Never)
-        assertThat(result?.usesMobileSession).isFalse()
+        assertThat(result?.useRemoteMobileSession).isFalse()
     }
 
     @Test

@@ -84,10 +84,22 @@ internal class ElementsSessionMobileSessionRequestTest {
     }
 
     @Test
-    fun `flag off omits the header`() = runScenario(
-        flagEnabled = false,
-    ) {
-        assertThat(request.headers).doesNotContainKey(MobileSession.CONFIG_HEADER_NAME)
+    fun `flag off omits the header`() {
+        featureFlag.setEnabled(false)
+
+        runScenario {
+            assertThat(request.headers).doesNotContainKey(MobileSession.CONFIG_HEADER_NAME)
+        }
+    }
+
+    @Test
+    fun `request uses the decision captured in common configuration`() {
+        val configuration = defaultConfiguration()
+        featureFlag.setEnabled(false)
+
+        runScenario(configuration = configuration) {
+            assertThat(request.headers).containsKey(MobileSession.CONFIG_HEADER_NAME)
+        }
     }
 
     @Test
@@ -111,7 +123,7 @@ internal class ElementsSessionMobileSessionRequestTest {
 
     @Test
     fun `common configuration can opt out of MobileSession`() = runScenario(
-        configuration = DEFAULT_CONFIGURATION.copy(usesMobileSession = false),
+        configuration = defaultConfiguration().copy(useRemoteMobileSession = false),
     ) {
         assertThat(request.headers).doesNotContainKey(MobileSession.CONFIG_HEADER_NAME)
     }
@@ -125,15 +137,13 @@ internal class ElementsSessionMobileSessionRequestTest {
     }
 
     private fun runScenario(
-        configuration: CommonConfiguration? = DEFAULT_CONFIGURATION,
+        configuration: CommonConfiguration? = defaultConfiguration(),
         initializationMode: PaymentElementLoader.InitializationMode =
             PaymentElementLoader.InitializationMode.PaymentIntent("pi_123_secret_123"),
         response: JSONObject = ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON,
-        flagEnabled: Boolean = true,
         fullSdkUnavailable: Boolean = false,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
-        featureFlag.setEnabled(flagEnabled)
         financialConnectionsFlag.setEnabled(fullSdkUnavailable)
         val networkClient = FakeNetworkClient(response.toString())
         val repository = RealElementsSessionRepository(
@@ -184,7 +194,7 @@ internal class ElementsSessionMobileSessionRequestTest {
     }
 
     private companion object {
-        val DEFAULT_CONFIGURATION = PaymentSheet.Configuration("Merchant").asCommonConfiguration()
+        fun defaultConfiguration() = PaymentSheet.Configuration("Merchant").asCommonConfiguration()
         val LINK_CONFIGURATION = LinkController.Configuration(
             merchantDisplayName = "Merchant",
             publishableKey = DEFAULT_API_CONFIG.publishableKey,
