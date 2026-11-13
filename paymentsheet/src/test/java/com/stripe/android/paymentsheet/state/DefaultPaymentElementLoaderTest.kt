@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.state
 
+import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CardBrandFilter
@@ -96,6 +97,9 @@ import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.state.PaymentSheetLoadingException.PaymentIntentInTerminalState
+import com.stripe.android.paymentsheet.stripebalance.LoadStripeBalanceFinancialAccounts
+import com.stripe.android.paymentsheet.stripebalance.StripeBalanceFinancialAccount
+import com.stripe.android.paymentsheet.stripebalance.StripeBalanceFinancialAccounts
 import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.testing.CustomerFactory
 import com.stripe.android.testing.FakeErrorReporter
@@ -193,6 +197,45 @@ internal class DefaultPaymentElementLoaderTest {
 
         consumeLoadingEvents()
 
+        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
+        assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
+    }
+
+    @Test
+    fun `load passes the buyer's Stripe balance financial accounts to the payment method metadata`() = runScenario {
+        val financialAccounts = StripeBalanceFinancialAccounts(
+            accounts = listOf(
+                StripeBalanceFinancialAccount(
+                    id = "fa_123",
+                    displayName = "Operating account",
+                    availableBalances = mapOf("usd" to 10_000L),
+                    eligible = true,
+                    ineligibleReason = null,
+                )
+            ),
+            currency = "usd",
+        )
+        val loadCalls = Turbine<PaymentElementLoader.InitializationMode>()
+        val loader = createPaymentElementLoader(
+            loadStripeBalanceFinancialAccounts = { initializationMode, _, _, _ ->
+                loadCalls.add(initializationMode)
+                financialAccounts
+            },
+        )
+        val initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+            clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+        )
+
+        val state = loader.load(
+            initializationMode = initializationMode,
+            paymentSheetConfiguration = PaymentSheet.Configuration("Some name"),
+            metadata = PaymentElementLoader.Metadata(initializedViaCompose = false),
+        ).getOrThrow()
+
+        assertThat(loadCalls.awaitItem()).isEqualTo(initializationMode)
+        assertThat(state.paymentMethodMetadata.stripeBalanceFinancialAccounts).isEqualTo(financialAccounts)
+        loadCalls.ensureAllEventsConsumed()
+        consumeLoadingEvents()
         assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
         assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
     }
@@ -5426,6 +5469,8 @@ internal class DefaultPaymentElementLoaderTest {
             FakePaymentMethodMessagePromotionsExperimentHandler(),
         preselectLinkExperiment: PreselectLinkExperiment = this.preselectLinkExperiment,
         createLinkState: CreateLinkState? = null,
+        loadStripeBalanceFinancialAccounts: LoadStripeBalanceFinancialAccounts =
+            LoadStripeBalanceFinancialAccounts { _, _, _, _ -> null },
     ): DefaultPaymentElementLoader {
         val retrieveCustomerEmailImpl = DefaultRetrieveCustomerEmail(
             customerRepo,
@@ -5486,6 +5531,7 @@ internal class DefaultPaymentElementLoaderTest {
             durationProvider = durationProvider,
             paymentMethodMessagePromotionsExperimentHandler = paymentMethodMessageExperimentHandler,
             preselectLinkExperiment = preselectLinkExperiment,
+            loadStripeBalanceFinancialAccounts = loadStripeBalanceFinancialAccounts,
         )
     }
 

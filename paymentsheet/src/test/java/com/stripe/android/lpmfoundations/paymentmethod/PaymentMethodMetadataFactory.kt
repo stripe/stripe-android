@@ -22,6 +22,7 @@ import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.state.LinkStateResult
+import com.stripe.android.paymentsheet.stripebalance.StripeBalanceFinancialAccounts
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
 
@@ -84,6 +85,7 @@ internal object PaymentMethodMetadataFactory {
         shouldUseAutocompleteProxyEndpoints: Boolean = false,
         paymentMethodLayout: PaymentSheet.PaymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
         apiConfiguration: ApiConfiguration.State = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
+        stripeBalanceFinancialAccounts: StripeBalanceFinancialAccounts? = null,
     ): PaymentMethodMetadata {
         return PaymentMethodMetadata(
             stripeIntent = stripeIntent,
@@ -159,6 +161,7 @@ internal object PaymentMethodMetadataFactory {
             shouldUseAutocompleteProxyEndpoints = shouldUseAutocompleteProxyEndpoints,
             paymentMethodLayout = paymentMethodLayout,
             apiConfiguration = apiConfiguration,
+            stripeBalanceFinancialAccounts = stripeBalanceFinancialAccounts,
         )
     }
 

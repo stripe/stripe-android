@@ -111,6 +111,8 @@ internal class DefaultEventReporter @Inject internal constructor(
                     DurationProvider.Key.PaymentSheetLoadCreateCustomerState -> "filterPaymentMethods"
                     DurationProvider.Key.PaymentSheetLoadRetrieveCustomer -> "retrieveCustomer"
                     DurationProvider.Key.PaymentSheetLoadComputePaymentMethodTypes -> "computePaymentMethodTypes"
+                    DurationProvider.Key.PaymentSheetLoadFetchStripeBalanceFinancialAccounts ->
+                        "fetchStripeBalanceFinancialAccounts"
                     // These are specific to Android
                     DurationProvider.Key.PaymentSheetLoadIsGooglePaySupported -> "isGooglePaySupported"
                     DurationProvider.Key.PaymentSheetLoadIsGooglePayReady -> "isGooglePayReady"

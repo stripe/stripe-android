@@ -232,6 +232,9 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         PAYMENT_OPTION_CARD_ART_LOAD_FAILURE(
             eventName = "elements.payment_option.card_art.load_failure"
         ),
+        STRIPE_BALANCE_FINANCIAL_ACCOUNTS_LOAD_FAILURE(
+            eventName = "paymentsheet.stripe_balance.financial_accounts.load_failure"
+        ),
         CHECKOUT_SHIPPING_ADDRESS_ELEMENT_PRESENT_NOT_CONFIGURED(
             eventName = "checkout.shipping_address_element.present.not_configured"
         )
@@ -283,6 +286,9 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         ),
         PAYMENT_SHEET_LOADER_ELEMENTS_SESSION_CUSTOMER_NOT_FOUND(
             partialEventName = "paymentsheet.loader.elements_session.customer.not_found"
+        ),
+        STRIPE_BALANCE_CHECKOUT_SESSION_UNSUPPORTED(
+            partialEventName = "paymentsheet.stripe_balance.checkout_session.unsupported"
         ),
         EXTERNAL_PAYMENT_METHOD_SERIALIZATION_FAILURE(
             partialEventName = "elements.external_payment_methods_serializer.error"
