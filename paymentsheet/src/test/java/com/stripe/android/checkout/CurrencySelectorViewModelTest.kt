@@ -6,6 +6,7 @@ import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.Turbine
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkout.CheckoutElementsController.OperationResult
 import com.stripe.android.checkout.CheckoutElementsController.Session
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.core.strings.resolvableString
@@ -52,7 +53,7 @@ internal class CurrencySelectorViewModelTest {
 
     @Test
     fun `onCurrencySelected calls updateCurrency with correct code`() = runScenario {
-        updateCurrencyResult.add(Result.success(Unit))
+        updateCurrencyResult.add(OperationResult.Succeeded())
 
         viewModel.onCurrencySelected("eur")
 
@@ -61,7 +62,7 @@ internal class CurrencySelectorViewModelTest {
 
     @Test
     fun `onCurrencySelected sets error message on failure`() = runScenario {
-        updateCurrencyResult.add(Result.failure(RuntimeException("Something went wrong")))
+        updateCurrencyResult.add(failedResult(RuntimeException("Something went wrong")))
         viewModel.errorMessage.test {
             assertThat(awaitItem()).isNull()
 
@@ -74,7 +75,7 @@ internal class CurrencySelectorViewModelTest {
 
     @Test
     fun `errorMessage is cleared when checkout session changes`() = runScenario {
-        updateCurrencyResult.add(Result.failure(RuntimeException("fail")))
+        updateCurrencyResult.add(failedResult(RuntimeException("fail")))
 
         viewModel.onCurrencySelected("eur")
         assertThat(updateCurrencyCalls.awaitItem()).isEqualTo("eur")
@@ -98,7 +99,7 @@ internal class CurrencySelectorViewModelTest {
 
     @Test
     fun `onCurrencySelected does not set error on success`() = runScenario {
-        updateCurrencyResult.add(Result.success(Unit))
+        updateCurrencyResult.add(OperationResult.Succeeded())
 
         viewModel.onCurrencySelected("gbp")
         assertThat(updateCurrencyCalls.awaitItem()).isEqualTo("gbp")
@@ -108,7 +109,7 @@ internal class CurrencySelectorViewModelTest {
 
     @Test
     fun `onCurrencySelected fires currency_toggled with checkout session id on success`() = runScenario {
-        updateCurrencyResult.add(Result.success(Unit))
+        updateCurrencyResult.add(OperationResult.Succeeded())
 
         viewModel.onCurrencySelected("eur")
         assertThat(updateCurrencyCalls.awaitItem()).isEqualTo("eur")
@@ -122,7 +123,7 @@ internal class CurrencySelectorViewModelTest {
     @Test
     fun `onCurrencySelected fires currency_toggled failed with checkout session id and error on failure`() =
         runScenario {
-            updateCurrencyResult.add(Result.failure(IOException("offline")))
+            updateCurrencyResult.add(failedResult(IOException("offline")))
 
             viewModel.onCurrencySelected("eur")
             assertThat(updateCurrencyCalls.awaitItem()).isEqualTo("eur")
@@ -136,18 +137,23 @@ internal class CurrencySelectorViewModelTest {
 
     @Test
     fun `multiple currency selections track all calls`() = runScenario {
-        updateCurrencyResult.add(Result.success(Unit))
+        updateCurrencyResult.add(OperationResult.Succeeded())
         viewModel.onCurrencySelected("eur")
         assertThat(updateCurrencyCalls.awaitItem()).isEqualTo("eur")
 
-        updateCurrencyResult.add(Result.success(Unit))
+        updateCurrencyResult.add(OperationResult.Succeeded())
         viewModel.onCurrencySelected("gbp")
         assertThat(updateCurrencyCalls.awaitItem()).isEqualTo("gbp")
 
-        updateCurrencyResult.add(Result.success(Unit))
+        updateCurrencyResult.add(OperationResult.Succeeded())
         viewModel.onCurrencySelected("jpy")
         assertThat(updateCurrencyCalls.awaitItem()).isEqualTo("jpy")
     }
+
+    private fun failedResult(error: Throwable) = OperationResult.Failed(
+        error = error,
+        displayMessage = "",
+    )
 
     private fun runScenario(
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
@@ -166,7 +172,7 @@ internal class CurrencySelectorViewModelTest {
             )
         )
         val updateCurrencyCalls = Turbine<String>()
-        val updateCurrencyResult = Turbine<Result<Unit>>()
+        val updateCurrencyResult = Turbine<OperationResult>()
 
         val viewModel = CurrencySelectorViewModel(
             session = sessionFlow,
@@ -198,7 +204,7 @@ internal class CurrencySelectorViewModelTest {
         val fakeAnalyticsRequestExecutor: FakeAnalyticsRequestExecutor,
         val sessionFlow: MutableStateFlow<Session>,
         val updateCurrencyCalls: Turbine<String>,
-        val updateCurrencyResult: Turbine<Result<Unit>>,
+        val updateCurrencyResult: Turbine<OperationResult>,
         val viewModel: CurrencySelectorViewModel,
     )
 }

@@ -1140,9 +1140,9 @@ internal class CheckoutElementsControllerTest {
             responseFactory = successResponseFactory(withTotal(5099)),
         )
 
-        val result = controller.updateCurrency("usd")
+        val result = interactor.updateCurrency("usd")
 
-        result.getOrThrow()
+        assertThat(result).isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
         assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isEqualTo(5099L)
     }
 
@@ -1154,9 +1154,9 @@ internal class CheckoutElementsControllerTest {
         }
         val before = controller.session.value
 
-        val result = controller.updateCurrency("invalid")
+        val result = interactor.updateCurrency("invalid")
 
-        assertThat(result.isFailure).isTrue()
+        assertThat(result).isInstanceOf(CheckoutElementsController.OperationResult.Failed::class.java)
         assertThat(controller.session.value).isEqualTo(before)
     }
 
@@ -1245,7 +1245,7 @@ internal class CheckoutElementsControllerTest {
 
             assertThat(isUpdatingTurbine.awaitItem()).isFalse()
 
-            val result = async { controller.selectSavedPaymentMethod(selection) }
+            val result = async { interactor.selectSavedPaymentMethod(selection) }
             try {
                 testScheduler.advanceUntilIdle()
 
@@ -1260,7 +1260,8 @@ internal class CheckoutElementsControllerTest {
                 )
 
                 releaseResponse.countDown()
-                result.await().getOrThrow()
+                assertThat(result.await())
+                    .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
 
                 assertThat(isUpdatingTurbine.awaitItem()).isFalse()
                 val state = committedState()
@@ -1290,9 +1291,9 @@ internal class CheckoutElementsControllerTest {
             val before = committedState()
             val selection = loadedSavedPaymentMethodSelection()
 
-            val result = controller.selectSavedPaymentMethod(selection)
+            val result = interactor.selectSavedPaymentMethod(selection)
 
-            assertThat(result.isFailure).isTrue()
+            assertThat(result).isInstanceOf(CheckoutElementsController.OperationResult.Failed::class.java)
             assertThat(
                 committedState().copy(
                     savedPaymentMethodSelectionState = SavedPaymentMethodSelectionState.Idle,
@@ -1318,9 +1319,9 @@ internal class CheckoutElementsControllerTest {
             val before = committedState().checkoutSessionResponse
             assertThat(selection.paymentMethod.billingDetails?.address).isNotNull()
 
-            val result = controller.selectSavedPaymentMethod(selection)
+            val result = interactor.selectSavedPaymentMethod(selection)
 
-            result.getOrThrow()
+            assertThat(result).isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
             val state = committedState()
             assertThat(state.checkoutSessionResponse).isSameInstanceAs(before)
             assertThat(state.paymentSelection).isEqualTo(selection)
@@ -1511,13 +1512,13 @@ internal class CheckoutElementsControllerTest {
             )
             val address = fullAddress.build()
 
-            val result = controller.commitShippingAddress(
+            val result = interactor.commitShippingAddress(
                 name = "John",
                 address = address,
                 updatedCheckoutSessionResponse = response,
             )
 
-            result.getOrThrow()
+            assertThat(result).isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
 
             val state = committedState()
             assertThat(state.checkoutSessionResponse).isSameInstanceAs(response)
@@ -1699,7 +1700,7 @@ internal class CheckoutElementsControllerTest {
                     try {
                         firstRequest.awaitItem()
                         val second = async(start = CoroutineStart.UNDISPATCHED) {
-                            controller.updateCurrency("eur")
+                            interactor.updateCurrency("eur")
                         }
                         // The undispatched call queues its Main work before this barrier. Once
                         // the barrier runs, the second mutation has reached the coordinator.
@@ -1711,7 +1712,8 @@ internal class CheckoutElementsControllerTest {
 
                         assertThat(first.await())
                             .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
-                        second.await().getOrThrow()
+                        assertThat(second.await())
+                            .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
                         secondRequest.awaitItem()
                     } finally {
                         releaseFirstResponse.countDown()
@@ -2233,17 +2235,17 @@ internal class CheckoutElementsControllerTest {
             CheckoutElementsControllerStateHolder.STATE_KEY
         )
         controllerSavedState.handle.getLiveData<CustomerState>(CustomerStateHolder.SAVED_CUSTOMER)
-        val controller = destroyControllerRule.track(
-            DaggerCheckoutElementsControllerComponent.factory().create(
-                application = applicationContext,
-                paymentElementCallbackIdentifier = integrationName,
-                resultCallback = CheckoutElementsController.ResultCallback {},
-                rowSelectionBehavior = PaymentElement.RowSelectionBehavior.default(),
-                checkoutElementsControllerSavedState = controllerSavedState,
-            ).checkoutElementsController
+        val component = DaggerCheckoutElementsControllerComponent.factory().create(
+            application = applicationContext,
+            paymentElementCallbackIdentifier = integrationName,
+            resultCallback = CheckoutElementsController.ResultCallback {},
+            rowSelectionBehavior = PaymentElement.RowSelectionBehavior.default(),
+            checkoutElementsControllerSavedState = controllerSavedState,
         )
+        val controller = destroyControllerRule.track(component.checkoutElementsController)
         return ControllerSetup(
             controller = controller,
+            interactor = component.checkoutInteractor,
             stateHolder = CheckoutElementsControllerStateFactory.createStateHolder(controllerSavedState.handle),
             sheetStateHolder = SheetStateHolder(controllerSavedState.handle),
             savedStateHandle = controllerSavedState.handle,
@@ -2252,6 +2254,7 @@ internal class CheckoutElementsControllerTest {
 
     private class ControllerSetup(
         val controller: CheckoutElementsController,
+        val interactor: CheckoutInteractor,
         val stateHolder: CheckoutElementsControllerStateHolder,
         val sheetStateHolder: SheetStateHolder,
         val savedStateHandle: SavedStateHandle,
@@ -2324,6 +2327,7 @@ internal class CheckoutElementsControllerTest {
             block(
                 MutationScenario(
                     controller = controller,
+                    interactor = setup.interactor,
                     stateHolder = setup.stateHolder,
                     savedStateHandle = setup.savedStateHandle,
                     testScope = this@runTest,
@@ -2340,6 +2344,7 @@ internal class CheckoutElementsControllerTest {
 
     private class MutationScenario(
         val controller: CheckoutElementsController,
+        val interactor: CheckoutInteractor,
         private val stateHolder: CheckoutElementsControllerStateHolder,
         private val savedStateHandle: SavedStateHandle,
         private val testScope: TestScope,

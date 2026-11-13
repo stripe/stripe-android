@@ -14,6 +14,7 @@ import com.stripe.android.checkout.CheckoutConfirmationResultReporter
 import com.stripe.android.checkout.CheckoutElementsController
 import com.stripe.android.checkout.CheckoutElementsControllerSavedState
 import com.stripe.android.checkout.CheckoutElementsControllerStateHolder
+import com.stripe.android.checkout.CheckoutInteractor
 import com.stripe.android.checkout.CheckoutLoadingEventReporter
 import com.stripe.android.checkout.CheckoutOperationCoordinator
 import com.stripe.android.checkout.CheckoutPaymentOptionDisplayDataFactory
@@ -143,6 +144,8 @@ import javax.inject.Singleton
 )
 internal interface CheckoutElementsControllerComponent {
     val checkoutElementsController: CheckoutElementsController
+
+    val checkoutInteractor: CheckoutInteractor
 
     @Component.Factory
     interface Factory {

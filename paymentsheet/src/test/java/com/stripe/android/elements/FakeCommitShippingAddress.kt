@@ -8,7 +8,7 @@ import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import kotlinx.coroutines.Deferred
 
 internal class FakeCommitShippingAddress(
-    private val result: Deferred<Result<Unit>>,
+    private val result: Deferred<CheckoutElementsController.OperationResult>,
 ) : CommitShippingAddress {
     val calls = Turbine<Call>()
 
@@ -16,7 +16,7 @@ internal class FakeCommitShippingAddress(
         name: String?,
         address: CheckoutElementsController.Address.State,
         checkoutSessionResponse: CheckoutSessionResponse,
-    ): Result<Unit> {
+    ): CheckoutElementsController.OperationResult {
         calls.add(Call(name, address, checkoutSessionResponse))
         return result.await()
     }
