@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.addresselement
 
+import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration
@@ -8,6 +9,8 @@ import com.stripe.android.uicore.elements.AutocompleteAddressController
 import com.stripe.android.uicore.elements.AutocompleteAddressElement
 import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.elements.SectionElement
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -15,14 +18,14 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class InlineAddressFormStateTest {
     @Test
-    fun `completeAddress is null without an initial address`() {
+    fun `completeAddress is null without an initial address`() = runTest {
         val state = createState(initialAddress = null)
 
         assertThat(state.completeAddress.value).isNull()
     }
 
     @Test
-    fun `completeAddress is null when a required field is missing`() {
+    fun `completeAddress is null when a required field is missing`() = runTest {
         val state = createState(
             initialAddress = AddressDetails(address = COMPLETE_ADDRESS),
         )
@@ -31,7 +34,7 @@ class InlineAddressFormStateTest {
     }
 
     @Test
-    fun `completeAddress matches a complete initial address`() {
+    fun `completeAddress matches a complete initial address`() = runTest {
         val state = createState(
             initialAddress = AddressDetails(
                 name = "Jenny Rosen",
@@ -47,7 +50,7 @@ class InlineAddressFormStateTest {
     }
 
     @Test
-    fun `an initial address outside the allowed countries is not prefilled`() {
+    fun `an initial address outside the allowed countries is not prefilled`() = runTest {
         val state = createState(
             initialAddress = AddressDetails(
                 name = "Jenny Rosen",
@@ -70,7 +73,7 @@ class InlineAddressFormStateTest {
     }
 
     @Test
-    fun `completeAddress keeps the initial name when the name is hidden`() {
+    fun `completeAddress keeps the initial name when the name is hidden`() = runTest {
         val state = createState(
             initialAddress = AddressDetails(
                 name = "Jenny Rosen",
@@ -86,7 +89,7 @@ class InlineAddressFormStateTest {
     }
 
     @Test
-    fun `a hidden name field is not shown`() {
+    fun `a hidden name field is not shown`() = runTest {
         val state = createState(
             initialAddress = null,
             nameField = AddressLauncher.NameField.Never,
@@ -99,7 +102,7 @@ class InlineAddressFormStateTest {
     }
 
     @Test
-    fun `completeAddress is null when a required phone number is missing`() {
+    fun `completeAddress is null when a required phone number is missing`() = runTest {
         val state = createState(
             initialAddress = AddressDetails(
                 name = "Jenny Rosen",
@@ -112,7 +115,7 @@ class InlineAddressFormStateTest {
     }
 
     @Test
-    fun `enteredAddress includes an incomplete address`() {
+    fun `enteredAddress includes an incomplete address`() = runTest {
         val state = createState(
             initialAddress = AddressDetails(address = COMPLETE_ADDRESS),
         )
@@ -125,7 +128,7 @@ class InlineAddressFormStateTest {
     }
 
     @Test
-    fun `enteredAddress follows input changes`() {
+    fun `enteredAddress follows input changes`() = runTest {
         val state = createState(
             initialAddress = AddressDetails(address = COMPLETE_ADDRESS),
         )
@@ -136,7 +139,7 @@ class InlineAddressFormStateTest {
     }
 
     @Test
-    fun `hasChanges is false before input changes`() {
+    fun `hasChanges is false before input changes`() = runTest {
         val state = createState(
             initialAddress = AddressDetails(
                 name = "Jenny Rosen",
@@ -148,7 +151,7 @@ class InlineAddressFormStateTest {
     }
 
     @Test
-    fun `hasChanges is true after input changes`() {
+    fun `hasChanges is true after input changes`() = runTest {
         val state = createState(
             initialAddress = AddressDetails(
                 name = "Jenny Rosen",
@@ -162,7 +165,7 @@ class InlineAddressFormStateTest {
     }
 
     @Test
-    fun `validate shows an error on an incomplete form`() {
+    fun `validate shows an error on an incomplete form`() = runTest {
         val state = createState(initialAddress = null)
         val addressController = state.addressController()
         assertThat(addressController.validationMessage.value).isNull()
@@ -173,7 +176,7 @@ class InlineAddressFormStateTest {
     }
 
     @Test
-    fun `an empty form starts with every field shown`() {
+    fun `an empty form without a publishable key starts with every field shown`() = runTest {
         val state = createState(initialAddress = null)
 
         val addressElement = state.addressController().addressElementFlow.value
@@ -182,16 +185,49 @@ class InlineAddressFormStateTest {
             .isInstanceOf(AddressInputMode.NoAutocomplete::class.java)
     }
 
-    private fun createState(
+    @Test
+    fun `an empty form with a publishable key starts with inline autocomplete`() = runTest {
+        val state = createState(
+            initialAddress = null,
+            publishableKey = "pk_test_123",
+        )
+
+        val addressElement = state.addressController().addressElementFlow.value
+
+        assertThat(addressElement.addressInputMode)
+            .isInstanceOf(AddressInputMode.AutocompleteInline::class.java)
+    }
+
+    @Test
+    fun `a prefilled form with a publishable key starts with every field shown`() = runTest {
+        val state = createState(
+            initialAddress = AddressDetails(
+                name = "Jenny Rosen",
+                address = COMPLETE_ADDRESS,
+            ),
+            publishableKey = "pk_test_123",
+        )
+
+        val addressElement = state.addressController().addressElementFlow.value
+
+        assertThat(addressElement.addressInputMode)
+            .isInstanceOf(AddressInputMode.NoAutocomplete::class.java)
+    }
+
+    private fun TestScope.createState(
         initialAddress: AddressDetails?,
         nameField: AddressLauncher.NameField = AddressLauncher.NameField.Auto,
         phone: FieldConfiguration = FieldConfiguration.HIDDEN,
+        publishableKey: String? = null,
     ): InlineAddressFormState {
         return InlineAddressFormState(
             initialAddress = initialAddress,
             allowedCountries = setOf("US"),
             nameField = nameField,
             phone = phone,
+            context = ApplicationProvider.getApplicationContext(),
+            publishableKey = publishableKey,
+            coroutineScope = backgroundScope,
         )
     }
 
