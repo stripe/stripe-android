@@ -49,19 +49,6 @@ internal class StripeBalanceFinancialAccountsScreenshotTest {
         }
     }
 
-    @Test
-    fun testNoAccounts() {
-        paparazziRule.snapshot {
-            StripeBalanceFinancialAccountsUI(
-                accounts = emptyList(),
-                currency = "usd",
-                selectedFinancialAccountId = null,
-                enabled = true,
-                onSelect = {},
-            )
-        }
-    }
-
     private fun account(
         id: String,
         displayName: String?,

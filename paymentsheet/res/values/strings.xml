@@ -322,7 +322,6 @@ to be saved and used in future checkout sessions. -->
   <!-- Shown with a Stripe balance account whose available balance can't cover the payment; the account can't be selected -->
   <string name="stripe_paymentsheet_stripe_balance_insufficient_balance">Insufficient balance</string>
   <!-- Shown in place of the list of the customer's Stripe balance accounts when they have none to pay from -->
-  <string name="stripe_paymentsheet_stripe_balance_no_accounts">No accounts available</string>
   <!-- Title above the list of the customer's Stripe balance accounts, asking them to choose the one to pay from -->
   <string name="stripe_paymentsheet_stripe_balance_pay_from">Pay from</string>
   <!-- Name of a customer's Stripe balance account that has no name of its own; %s is the last four characters of the account's ID -->
