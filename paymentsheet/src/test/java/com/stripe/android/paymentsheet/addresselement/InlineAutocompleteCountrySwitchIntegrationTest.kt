@@ -36,7 +36,6 @@ class InlineAutocompleteCountrySwitchIntegrationTest {
                 fetchPlaceResult = Result.success(Address()),
             )
             val config = AutocompleteAddressInteractor.Config(
-                googlePlacesApiKey = null,
                 autocompleteCountries = setOf("US"),
                 isInlineAutocompleteEnabled = true,
                 shouldUseStripeHostedAutocomplete = true,

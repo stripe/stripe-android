@@ -110,7 +110,6 @@ internal class CheckoutCommonConfigurationFactory @Inject constructor(
             ?: ConfigurationDefaults.cardBrandAcceptance,
         allowedCardFundingTypes = ConfigurationDefaults.allowedCardFundingTypes,
         customPaymentMethods = ConfigurationDefaults.customPaymentMethods,
-        googlePlacesApiKey = null,
         termsDisplay = paymentElementConfiguration?.termsDisplay?.asPaymentSheet() ?: emptyMap(),
         walletButtons = null,
         opensCardScannerAutomatically = paymentElementConfiguration?.opensCardScannerAutomatically

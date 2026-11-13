@@ -1917,7 +1917,6 @@ class USBankAccountFormViewModelTest {
             autocompleteAddressInteractorFactory = {
                 TestAutocompleteAddressInteractor.noOp(
                     autocompleteConfig = AutocompleteAddressInteractor.Config(
-                        googlePlacesApiKey = "gi_123",
                         autocompleteCountries = setOf("US")
                     )
                 )
@@ -1944,7 +1943,6 @@ class USBankAccountFormViewModelTest {
             autocompleteAddressInteractorFactory = {
                 TestAutocompleteAddressInteractor.noOp(
                     autocompleteConfig = AutocompleteAddressInteractor.Config(
-                        googlePlacesApiKey = "gi_123",
                         autocompleteCountries = setOf("US"),
                         isInlineAutocompleteEnabled = true,
                         shouldUseStripeHostedAutocomplete = true,

@@ -52,11 +52,9 @@ internal class NativeLinkFormHelperFactory(
     private fun createAutocompleteAddressInteractorFactory(): AutocompleteAddressInteractor.Factory {
         return PaymentElementAutocompleteAddressInteractor.Factory(
             autocompleteConfig = AutocompleteAddressInteractor.Config(
-                googlePlacesApiKey = parentComponent.configuration.googlePlacesApiKey,
                 autocompleteCountries = AUTOCOMPLETE_DEFAULT_COUNTRIES,
                 isInlineAutocompleteEnabled = true,
             ),
-            placesClient = null,
             stripeAutocompleteRepository = null,
             coroutineScope = null,
             shouldUseAutocompleteProxyEndpointsProvider = { false },

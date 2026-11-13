@@ -8,7 +8,6 @@ import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
-import com.stripe.android.paymentelement.AddressAutocompletePreview
 import com.stripe.android.paymentsheet.utils.ApiConfigurationTestType
 import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
 import com.stripe.android.paymentsheet.utils.TestRules
@@ -18,7 +17,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@OptIn(AddressAutocompletePreview::class)
 @RunWith(TestParameterInjector::class)
 internal class PaymentSheetAddressAutocompleteTest(
     @TestParameter(valuesProvider = ApiConfigurationTestTypeProvider::class)
@@ -34,7 +32,6 @@ internal class PaymentSheetAddressAutocompleteTest(
 
     private val paymentSheetPage = PaymentSheetPage(composeTestRule)
 
-    @Suppress("DEPRECATION")
     @Test
     fun testUnfilled() = runPaymentSheetTest(
         apiConfigurationTestType = apiConfigurationTestType,
@@ -55,7 +52,6 @@ internal class PaymentSheetAddressAutocompleteTest(
                                 attachDefaultsToPaymentMethod = true,
                             ),
                         )
-                        .googlePlacesApiKey("gp_123")
                         .build()
                 ),
             )
@@ -73,7 +69,6 @@ internal class PaymentSheetAddressAutocompleteTest(
         paymentSheetPage.clickPrimaryButton()
     }
 
-    @Suppress("DEPRECATION")
     @Test
     fun testPrefilled() = runPaymentSheetTest(
         apiConfigurationTestType = apiConfigurationTestType,
@@ -105,7 +100,6 @@ internal class PaymentSheetAddressAutocompleteTest(
                                 )
                             )
                         )
-                        .googlePlacesApiKey("gp_123")
                         .build()
                 ),
             )

@@ -1255,7 +1255,6 @@ class InlineAutocompleteControllerTest {
         )
         val eventCalls = Turbine<AutocompleteAddressInteractor.Event>()
         val config = AutocompleteAddressInteractor.Config(
-            googlePlacesApiKey = "test_key",
             autocompleteCountries = autocompleteCountries,
             isInlineAutocompleteEnabled = true,
             shouldUseStripeHostedAutocomplete = shouldUseStripeHostedAutocomplete,

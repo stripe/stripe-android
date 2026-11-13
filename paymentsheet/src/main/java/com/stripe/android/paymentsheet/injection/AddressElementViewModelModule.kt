@@ -9,7 +9,6 @@ import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.paymentelement.CheckoutSessionPreview
-import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.AddressElementActivityContract
@@ -104,40 +103,12 @@ internal class AddressElementViewModelModule {
     @Singleton
     @Named(INLINE_PLACES_CLIENT)
     internal fun provideInlinePlacesClient(
-        args: AddressElementActivityContract.Args,
         stripeAutocompleteRepository: StripeAutocompleteRepository,
-        googlePlacesClient: PlacesClientProxy?,
         addressLauncherEventReporter: AddressLauncherEventReporter,
-    ): PlacesClientProxy? {
-        val config = args.config ?: return null
-        return if (config.useStripeHostedAutocomplete) {
-            StripeHostedPlacesClientProxy(
-                repository = stripeAutocompleteRepository,
-                eventReporter = addressLauncherEventReporter,
-            )
-        } else {
-            googlePlacesClient
-        }
-    }
-
-    @Provides
-    @Singleton
-    internal fun provideGooglePlacesClient(
-        context: Context,
-        args: AddressElementActivityContract.Args,
-    ): PlacesClientProxy? {
-        val config = args.config ?: return null
-        return config.googlePlacesApiKey?.let {
-            PlacesClientProxy.create(
-                context,
-                it,
-                errorReporter = ErrorReporter.createFallbackInstance(
-                    context = context,
-                    apiConfigurationProvider = { args.apiConfiguration },
-                ),
-            )
-        }
-    }
+    ): PlacesClientProxy = StripeHostedPlacesClientProxy(
+        repository = stripeAutocompleteRepository,
+        eventReporter = addressLauncherEventReporter,
+    )
 
     @Provides
     @Singleton

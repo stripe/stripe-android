@@ -182,14 +182,12 @@ class AutocompleteAddressController(
         expandForm: Boolean,
         values: Map<FormFieldId, String?>
     ): AddressInputMode {
-        val googlePlacesApiKey = config.googlePlacesApiKey
         val countrySupported = isCountrySupported(values[FormFieldId.Country])
 
         val showInline = inlineAutocompleteActive && !expandForm &&
             countrySupported && values[FormFieldId.Line1].isNullOrEmpty()
         return if (showInline) {
             AddressInputMode.AutocompleteInline(
-                googleApiKey = googlePlacesApiKey,
                 autocompleteCountries = config.autocompleteCountries,
                 phoneNumberConfig = phoneNumberConfig,
                 nameConfig = nameConfig,

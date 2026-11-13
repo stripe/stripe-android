@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.injection
 
-import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
@@ -282,41 +281,17 @@ class AddressElementViewModelModuleTest {
     }
 
     @Test
-    fun `provideInlinePlacesClient returns hosted client by default when google client is available`() {
-        val googlePlacesClient = FakePlacesClientProxy(
-            findPredictionsResult = Result.success(FindAutocompletePredictionsResponse(emptyList())),
-            fetchPlaceResult = Result.success(Address()),
-        )
+    fun `provideInlinePlacesClient returns hosted client`() {
         val addressLauncherEventReporter = FakeAddressLauncherEventReporter()
         val stripeAutocompleteRepository = FakeStripeAutocompleteRepository()
         val placesClient = module.provideInlinePlacesClient(
-            args = AddressElementActivityContract.Args.Standalone(
-                apiConfiguration = DEFAULT_API_CONFIG,
-                config = AddressLauncher.Configuration(),
-            ),
             stripeAutocompleteRepository = stripeAutocompleteRepository,
-            googlePlacesClient = googlePlacesClient,
             addressLauncherEventReporter = addressLauncherEventReporter,
         )
 
         assertThat(placesClient).isInstanceOf(StripeHostedPlacesClientProxy::class.java)
-        assertThat(placesClient).isNotSameInstanceAs(googlePlacesClient)
-        googlePlacesClient.ensureAllEventsConsumed()
         stripeAutocompleteRepository.ensureAllEventsConsumed()
         addressLauncherEventReporter.validate()
-    }
-
-    @Test
-    fun `provideGooglePlacesClient returns null without google api key`() {
-        val placesClient = module.provideGooglePlacesClient(
-            context = ApplicationProvider.getApplicationContext(),
-            args = AddressElementActivityContract.Args.Standalone(
-                apiConfiguration = DEFAULT_API_CONFIG,
-                config = AddressLauncher.Configuration(billingAddress = null),
-            ),
-        )
-
-        assertThat(placesClient).isNull()
     }
 
     private fun runCheckoutShippingScenario(
@@ -355,6 +330,10 @@ class AddressElementViewModelModuleTest {
     ) = runTest(UnconfinedTestDispatcher()) {
         val resultStateHolder = AddressElementResultStateHolder()
         val addressLauncherEventReporter = FakeAddressLauncherEventReporter()
+        val placesClient = FakePlacesClientProxy(
+            findPredictionsResult = Result.success(FindAutocompletePredictionsResponse(emptyList())),
+            fetchPlaceResult = Result.success(Address()),
+        )
         val viewModel = InputAddressViewModel(
             args = args,
             resultStateHolder = resultStateHolder,
@@ -364,7 +343,7 @@ class AddressElementViewModelModuleTest {
                 analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
                 analyticsRequestFactory = createAnalyticsRequestFactory(),
             ),
-            placesClient = null,
+            placesClient = placesClient,
             primaryButtonAction = module.providePrimaryButtonAction(
                 args = args,
                 taxRegionUpdater = createTaxRegionUpdater(),
@@ -378,6 +357,7 @@ class AddressElementViewModelModuleTest {
         ).block()
 
         addressLauncherEventReporter.validate()
+        placesClient.ensureAllEventsConsumed()
     }
 
     private fun createAnalyticsRequestFactory() = AnalyticsRequestFactory(

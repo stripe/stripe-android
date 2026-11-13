@@ -38,7 +38,7 @@ internal class InputAddressViewModel @Inject constructor(
     val resultStateHolder: AddressElementResultStateHolder,
     private val eventReporter: AddressElementEventReporter,
     @Named(AddressElementViewModelModule.INLINE_PLACES_CLIENT)
-    private val placesClient: PlacesClientProxy?,
+    private val placesClient: PlacesClientProxy,
     private val primaryButtonAction: AddressElementPrimaryButtonAction,
 ) : ViewModel(), AutocompleteAddressInteractor {
     private var eventListener: ((AutocompleteAddressInteractor.Event) -> Unit)? = null
@@ -86,25 +86,21 @@ internal class InputAddressViewModel @Inject constructor(
     private val isInlineAutocompleteEnabled = true
 
     override val autocompleteConfig: AutocompleteAddressInteractor.Config = AutocompleteAddressInteractor.Config(
-        googlePlacesApiKey = args.config?.googlePlacesApiKey,
-        // If merchant is opting into Stripe-hosted autocomplete and the caller did not
-        // override the launcher default countries, use the extended Stripe-hosted list.
-        // Otherwise, honor the caller-provided set (or empty set if explicitly set).
+        // If the caller did not override the launcher default countries, use the extended
+        // Stripe-hosted list. Otherwise, honor the caller-provided set (or empty set if explicitly set).
         autocompleteCountries = run {
             val provided = args.config?.autocompleteCountries
-            if (args.config?.useStripeHostedAutocomplete == true &&
-                provided == AUTOCOMPLETE_DEFAULT_COUNTRIES
-            ) {
+            if (provided == AUTOCOMPLETE_DEFAULT_COUNTRIES) {
                 AUTOCOMPLETE_STRIPE_HOSTED_DEFAULT_COUNTRIES
             } else {
                 provided ?: emptySet()
             }
         },
         isInlineAutocompleteEnabled = isInlineAutocompleteEnabled,
-        shouldUseStripeHostedAutocomplete = args.config?.useStripeHostedAutocomplete == true,
+        shouldUseStripeHostedAutocomplete = true,
     )
 
-    private val inlineAutocompleteController = if (isInlineAutocompleteEnabled && placesClient != null) {
+    private val inlineAutocompleteController = if (isInlineAutocompleteEnabled) {
         InlineAutocompleteController(
             placesClient = placesClient,
             config = autocompleteConfig,

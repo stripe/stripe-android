@@ -34,7 +34,6 @@ internal class EmbeddedActivityModuleTest {
         shouldUseAutocompleteProxyEndpoints = true,
     ) {
         assertThat(interactor).isInstanceOf(BillingInlineAutocompleteAddressInteractor::class.java)
-        assertThat(interactor.autocompleteConfig.googlePlacesApiKey).isNull()
         assertThat(interactor.autocompleteConfig.autocompleteCountries)
             .isEqualTo(AUTOCOMPLETE_DEFAULT_COUNTRIES)
         assertThat(interactor.autocompleteConfig.isInlineAutocompleteEnabled).isTrue()
@@ -47,7 +46,6 @@ internal class EmbeddedActivityModuleTest {
             shouldUseAutocompleteProxyEndpoints = false,
         ) {
             assertThat(interactor).isInstanceOf(PaymentElementAutocompleteAddressInteractor::class.java)
-            assertThat(interactor.autocompleteConfig.googlePlacesApiKey).isNull()
             assertThat(interactor.autocompleteConfig.shouldUseStripeHostedAutocomplete).isFalse()
         }
 

@@ -237,11 +237,9 @@ internal interface EmbeddedActivityModule {
         ): AutocompleteAddressInteractor.Factory {
             return PaymentElementAutocompleteAddressInteractor.Factory(
                 autocompleteConfig = AutocompleteAddressInteractor.Config(
-                    googlePlacesApiKey = null,
                     autocompleteCountries = AUTOCOMPLETE_DEFAULT_COUNTRIES,
                     isInlineAutocompleteEnabled = true,
                 ),
-                placesClient = null,
                 stripeAutocompleteRepository = stripeAutocompleteRepository,
                 coroutineScope = coroutineScope,
                 shouldUseAutocompleteProxyEndpointsProvider = {
