@@ -273,7 +273,6 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
             resultReporter = analyticsPerformer,
             logger = Logger.noop(),
             resultCallback = results::add,
-            viewModelScope = backgroundScope,
         )
         val performer = DefaultExpressCheckoutElementConfirmationPerformer(
             stateHolder = stateHolder,

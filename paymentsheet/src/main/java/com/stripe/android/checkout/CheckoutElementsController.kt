@@ -29,7 +29,6 @@ import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentsheet.model.PaymentOptionResource
 import com.stripe.android.paymentsheet.verticalmode.CurrencySelectorOptions
-import com.stripe.android.uicore.utils.mapAsStateFlow
 import dev.drewhamilton.poko.Poko
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
@@ -88,9 +87,8 @@ class CheckoutElementsController @Inject internal constructor(
     /**
      * Whether a mutation or confirmation is currently in progress or queued.
      */
-    val isUpdating: StateFlow<Boolean> = operationCoordinator.status.mapAsStateFlow {
-        it != CheckoutOperationCoordinator.Status.Idle
-    }
+    val isUpdating: StateFlow<Boolean>
+        get() = operationCoordinator.isUpdating
 
     init {
         viewModelScope.launch {

@@ -411,7 +411,6 @@ internal class CheckoutConfirmationPerformerTest {
                 results.add(it)
                 resultThreads.add(Thread.currentThread())
             },
-            viewModelScope = backgroundScope,
         )
         val performer = CheckoutConfirmationPerformer(
             confirmationHandler = confirmationHandler,
