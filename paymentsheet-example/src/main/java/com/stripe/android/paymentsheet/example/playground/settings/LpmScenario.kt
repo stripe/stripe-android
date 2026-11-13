@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.example.playground.settings
 
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentsheet.example.playground.model.FeatureState
 
 /**
  * A playground configuration that makes a single payment method type available in PaymentSheet.
@@ -13,10 +14,24 @@ internal data class LpmScenario(
     val merchant: Merchant,
     val currency: Currency,
     val amount: String = DEFAULT_AMOUNT,
+    val customer: Customer = Customer.Guest,
 ) {
+    /** Who's paying. Most payment methods are offered to guests. */
+    enum class Customer {
+        Guest,
+
+        /** The merchant's returning customer, authenticated with a CustomerSession. */
+        ReturningWithCustomerSession,
+    }
+
     val code: String = paymentMethodType.code
 
-    val summary: String = "${merchant.name} merchant · $amount ${currency.displayName}"
+    val summary: String = buildString {
+        append("${merchant.name} merchant · $amount ${currency.displayName}")
+        if (customer == Customer.ReturningWithCustomerSession) {
+            append(" · returning customer")
+        }
+    }
 
     fun applyTo(settings: PlaygroundSettings) {
         // Merchant updates reset the currency, so set the merchant first.
@@ -31,8 +46,20 @@ internal data class LpmScenario(
         settings[CaptureMethodSettingsDefinition] = false
         // Otherwise Link is added as a payment method type
         settings[LinkSettingsDefinition] = LinkDisplaySetting.Never
-        // Offer only this payment method: no saved payment methods, EPMs, CPMs, or payment method configuration
-        settings[CustomerSettingsDefinition] = CustomerType.GUEST
+        // Offer only this payment method: no EPMs, CPMs, or payment method configuration
+        when (customer) {
+            Customer.Guest -> {
+                // No saved payment methods
+                settings[CustomerSettingsDefinition] = CustomerType.GUEST
+            }
+            Customer.ReturningWithCustomerSession -> {
+                settings[CustomerSettingsDefinition] = CustomerType.RETURNING
+                settings[CustomerSessionSettingsDefinition] = true
+                // Merchants not gated into these CustomerSession features reject them
+                settings[CustomerSessionRemoveLastSettingsDefinition] = FeatureState.Unset
+                settings[CustomerSessionSetAsDefaultSettingsDefinition] = FeatureState.Unset
+            }
+        }
         settings[ExternalPaymentMethodSettingsDefinition] = ExternalPaymentMethodType.Off
         settings[CustomPaymentMethodsSettingDefinition] = CustomPaymentMethodPlaygroundType.Off
         settings[PaymentMethodConfigurationSettingsDefinition] = ""
@@ -47,6 +74,7 @@ internal data class LpmScenario(
     }
 
     companion object {
+        private const val SMALL_AMOUNT = "100"
         private const val DEFAULT_AMOUNT = "5099"
         private const val LARGE_AMOUNT = "10000"
         private const val VERY_LARGE_AMOUNT = "1000000"
@@ -115,6 +143,17 @@ internal data class LpmScenario(
             LpmScenario(PaymentMethod.Type.SepaDebit, "SEPA Debit", Merchant.US, Currency.EUR),
             LpmScenario(PaymentMethod.Type.Sequra, "seQura", Merchant.ES, Currency.EUR, LARGE_AMOUNT),
             LpmScenario(PaymentMethod.Type.ShopeePay, "ShopeePay", Merchant.US, Currency.IDR, VERY_LARGE_AMOUNT),
+            // The merchant is gated into Stripe balance, and its returning customer is a v2 Account's backing Customer
+            // with a financial account funded in GBP.
+            LpmScenario(
+                PaymentMethod.Type.StripeBalance,
+                "Stripe balance",
+                Merchant.STRIPE_BALANCE,
+                Currency.GBP,
+                // Keeps the test financial account's balance from running out
+                SMALL_AMOUNT,
+                customer = Customer.ReturningWithCustomerSession,
+            ),
             LpmScenario(PaymentMethod.Type.Sunbit, "Sunbit", Merchant.US, Currency.USD, LARGE_AMOUNT),
             LpmScenario(PaymentMethod.Type.Swish, "Swish", Merchant.FR, Currency.SEK),
             LpmScenario(PaymentMethod.Type.TouchNGo, "Touch 'n Go", Merchant.US, Currency.MYR),
