@@ -15,7 +15,10 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.paymentsheet.MainActivity
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.JsonObject
 import kotlin.time.Duration.Companion.seconds
 
@@ -48,9 +51,12 @@ internal suspend fun runCheckoutIntegrationTest(
             lateinit var presenter: CheckoutElementsPresenter
             scenario.onActivity { activity ->
                 presenter = controller.createPresenter(activity)
+                val currencySelectorElement = presenter.currencySelectorElement()
+                    .takeIf { configuration.build().currencySelectorElementConfiguration != null }
                 val paymentElement = presenter.paymentElement()
                 activity.setContent {
                     Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                        currencySelectorElement?.Content()
                         paymentElement.Content()
                     }
                 }
@@ -66,6 +72,15 @@ internal suspend fun runCheckoutIntegrationTest(
             scenario.onActivity { controller.destroy() }
         }
     }
+}
+
+internal suspend fun CheckoutElementsController.awaitSession(
+    description: String,
+    predicate: (CheckoutElementsController.Session) -> Boolean,
+): CheckoutElementsController.Session {
+    return withTimeoutOrNull(OPERATION_TIMEOUT) {
+        session.filterNotNull().first(predicate)
+    } ?: error("Timed out waiting for $description. Last session: ${session.value}")
 }
 
 private val OPERATION_TIMEOUT = 30.seconds
