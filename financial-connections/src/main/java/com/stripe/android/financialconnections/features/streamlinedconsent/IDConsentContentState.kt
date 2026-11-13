@@ -16,7 +16,11 @@ internal data class IDConsentContentState(
     ) {
 
         val genericScreenState: GenericScreenState
-            get() = GenericScreenState(idConsentContentPane.screen, inModal = false)
+            get() = GenericScreenState(
+                screen = idConsentContentPane.screen,
+                inModal = false,
+                isHeaderIconInstitutionLogo = false,
+            )
     }
 
     sealed interface ViewEffect {

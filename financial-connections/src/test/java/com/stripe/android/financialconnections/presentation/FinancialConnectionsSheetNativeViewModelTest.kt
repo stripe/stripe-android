@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.presentation
 
+import FinancialConnectionsGenericInfoScreen
 import android.content.Intent
 import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
@@ -11,6 +12,7 @@ import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.ApiKeyFixtures.financialConnectionsSessionNoAccounts
 import com.stripe.android.financialconnections.CoroutineTestRule
 import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
+import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.ThemeMode
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
@@ -24,8 +26,13 @@ import com.stripe.android.financialconnections.domain.FakeCurrentLinkBrand
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Complete
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Complete.EarlyTerminationCause
+import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.UpdateTopAppBar
 import com.stripe.android.financialconnections.exception.CustomManualEntryRequiredError
 import com.stripe.android.financialconnections.exception.UnclassifiedError
+import com.stripe.android.financialconnections.features.notice.FakePresentSheet
+import com.stripe.android.financialconnections.features.notice.FakePresentSheet.PresentCall
+import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.Generic
+import com.stripe.android.financialconnections.features.notice.PresentSheet
 import com.stripe.android.financialconnections.financialConnectionsSessionWithNoMoreAccounts
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Canceled
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Completed
@@ -39,6 +46,8 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession.StatusDetails.Cancelled
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession.StatusDetails.Cancelled.Reason
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
+import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.Finish
 import com.stripe.android.financialconnections.ui.theme.Theme
 import com.stripe.android.financialconnections.utils.TestNavigationManager
@@ -578,6 +587,58 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
         }
     }
 
+    @Test
+    fun `handleOnLogoClick - presents the current pane's logo click notice`() = runTest {
+        val eventTracker = TestFinancialConnectionsAnalyticsTracker()
+        val presentSheet = FakePresentSheet()
+        val viewModel = createViewModel(eventTracker = eventTracker, presentSheet = presentSheet)
+        val notice = FinancialConnectionsGenericInfoScreen(id = "more_info_notice")
+
+        viewModel.topAppBarState.test {
+            skipItems(1)
+            viewModel.handlePaneChanged(Pane.STREAMLINED_CONSENT)
+            nativeAuthFlowCoordinator().emit(
+                UpdateTopAppBar(
+                    TopAppBarStateUpdate(
+                        pane = Pane.STREAMLINED_CONSENT,
+                        allowBackNavigation = true,
+                        error = null,
+                        logoClickNotice = notice,
+                    )
+                )
+            )
+            assertThat(expectMostRecentItem().logoClickNotice).isEqualTo(notice)
+
+            viewModel.handleOnLogoClick()
+        }
+
+        assertThat(presentSheet.presentCalls.awaitItem()).isEqualTo(
+            PresentCall(content = Generic(notice), referrer = Pane.STREAMLINED_CONSENT)
+        )
+        eventTracker.assertContainsEvent(
+            expectedEventName = "linked_accounts.click.nav_bar.logo",
+            expectedParams = mapOf("pane" to "streamlined_consent"),
+        )
+        presentSheet.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `handleOnLogoClick - does nothing without a logo click notice`() = runTest {
+        val eventTracker = TestFinancialConnectionsAnalyticsTracker()
+        val presentSheet = FakePresentSheet()
+        val viewModel = createViewModel(eventTracker = eventTracker, presentSheet = presentSheet)
+
+        viewModel.topAppBarState.test {
+            assertThat(awaitItem().logoClickNotice).isNull()
+
+            viewModel.handleOnLogoClick()
+        }
+
+        presentSheet.presentCalls.expectNoEvents()
+        assertThat(eventTracker.sentEvents.map { it.eventName })
+            .doesNotContain("linked_accounts.click.nav_bar.logo")
+    }
+
     private fun stateWithLinkBrand(linkBrand: LinkBrand) = FinancialConnectionsSheetNativeState(
         flowType = FinancialConnectionsSheetFlowType.ForData,
         webAuthFlow = WebAuthFlowState.Uninitialized,
@@ -612,6 +673,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
         currentLinkBrand: CurrentLinkBrand =
             FakeCurrentLinkBrand(initialState.linkBrand),
         eventTracker: FinancialConnectionsAnalyticsTracker = this.eventTracker,
+        presentSheet: PresentSheet = FakePresentSheet(),
     ) = FinancialConnectionsSheetNativeViewModel(
         eventTracker = eventTracker,
         eventContext = FinancialConnectionsEventContext(null),
@@ -623,6 +685,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
         logger = mock(),
         navigationManager = TestNavigationManager(),
         currentLinkBrand = currentLinkBrand,
+        presentSheet = presentSheet,
         savedStateHandle = SavedStateHandle(),
         initialState = initialState,
         createInstantDebitsResult = createInstantDebitsResult,
