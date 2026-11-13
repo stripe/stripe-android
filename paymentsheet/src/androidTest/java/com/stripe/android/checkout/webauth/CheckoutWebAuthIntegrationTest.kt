@@ -20,18 +20,19 @@ import com.stripe.android.testing.CleanupChromeRule
 import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import org.junit.Test
-import org.junit.rules.TestRule
+import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 
 // CI runs this package on a Google APIs emulator, apart from the aosp-atd suite whose WebView 101 leaks Activities.
 @OptIn(CheckoutSessionPreview::class)
 @RunWith(AndroidJUnit4::class)
 internal class CheckoutWebAuthIntegrationTest {
-    @get:Rule(order = 0)
-    val composeRule = createEmptyComposeRule()
+    private val composeRule = createEmptyComposeRule()
 
-    @get:Rule(order = 1)
-    val cleanupChromeRule: TestRule = CleanupChromeRule
+    @get:Rule
+    val ruleChain: RuleChain = RuleChain
+        .outerRule(composeRule)
+        .around(CleanupChromeRule)
 
     private val device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
     private val contentPage = EmbeddedContentPage(composeRule)
