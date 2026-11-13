@@ -2,6 +2,7 @@ package com.stripe.android.checkout
 
 import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent.InvocationSource
 import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent.Operation
+import com.stripe.android.checkout.analytics.CheckoutOperationMeasurer
 import com.stripe.android.checkout.analytics.LocalOperation
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
@@ -11,6 +12,7 @@ import javax.inject.Inject
 @OptIn(CheckoutSessionPreview::class)
 internal class CheckoutSessionTaxRegionUpdater @Inject constructor(
     private val checkoutSessionRepository: CheckoutSessionRepository,
+    private val operationMeasurer: CheckoutOperationMeasurer,
     private val localOperationFactory: LocalOperation.Factory,
 ) {
     fun requiresUpdate(
@@ -21,6 +23,15 @@ internal class CheckoutSessionTaxRegionUpdater @Inject constructor(
             checkoutSessionResponse.taxAddressSource == addressSource
     }
 
+    fun analyticsParams(
+        invocationSource: InvocationSource,
+        didRequestTaxUpdate: Boolean,
+    ): Map<String, Any?> = mapOf(
+        "invocation_source" to invocationSource.code,
+        "did_request_tax_update" to didRequestTaxUpdate,
+    )
+
+    /** Reports the update as its own address operation; see [updateTaxRegionIfNeeded] to skip reporting. */
     suspend fun updateServerStateIfNeeded(
         checkoutSessionResponse: CheckoutSessionResponse,
         addressSource: CheckoutSessionResponse.TaxAddressSource,
@@ -31,18 +42,19 @@ internal class CheckoutSessionTaxRegionUpdater @Inject constructor(
             checkoutSessionResponse = checkoutSessionResponse,
             addressSource = addressSource,
         )
-        val params = mapOf(
-            "invocation_source" to invocationSource.code,
-            "did_request_tax_update" to didRequestTaxUpdate,
+        val params = analyticsParams(
+            invocationSource = invocationSource,
+            didRequestTaxUpdate = didRequestTaxUpdate,
         )
         return if (didRequestTaxUpdate) {
-            checkoutSessionRepository.measure(
+            operationMeasurer.measure(
                 operation = addressSource.updateOperation(),
                 checkoutSessionResponse = checkoutSessionResponse,
                 params = params,
             ) {
-                checkoutSessionRepository.updateTaxRegion(
-                    clientSecret = checkoutSessionResponse.clientSecret,
+                updateTaxRegionIfNeeded(
+                    checkoutSessionResponse = checkoutSessionResponse,
+                    addressSource = addressSource,
                     address = address,
                 )
             }
@@ -53,6 +65,21 @@ internal class CheckoutSessionTaxRegionUpdater @Inject constructor(
                     params = params,
                 ).succeeded(checkoutSessionResponse)
             }
+        }
+    }
+
+    suspend fun updateTaxRegionIfNeeded(
+        checkoutSessionResponse: CheckoutSessionResponse,
+        addressSource: CheckoutSessionResponse.TaxAddressSource,
+        address: CheckoutElementsController.Address.State?,
+    ): Result<CheckoutSessionResponse> {
+        return if (requiresUpdate(checkoutSessionResponse, addressSource)) {
+            checkoutSessionRepository.updateTaxRegion(
+                clientSecret = checkoutSessionResponse.clientSecret,
+                address = address,
+            )
+        } else {
+            Result.success(checkoutSessionResponse)
         }
     }
 

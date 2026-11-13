@@ -4,6 +4,7 @@ import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
+import com.stripe.android.checkout.analytics.CheckoutOperationMeasurer
 import com.stripe.android.checkout.analytics.FakeCheckoutAnalyticsReporter
 import com.stripe.android.checkout.analytics.LocalOperation
 import com.stripe.android.checkouttesting.checkoutUpdate
@@ -396,7 +397,6 @@ class AddressElementViewModelModuleTest {
                 elementsSessionClientParams = CheckoutStripeRepositoryFactory.clientParams(),
                 fraudDetectionDataRepository = FakeFraudDetectionDataRepository.create(),
                 stripeNetworkClient = DefaultStripeNetworkClient(),
-                analyticsReporter = analyticsReporter,
                 apiRequestOptionsProvider = Provider {
                     ApiRequest.Options(
                         apiKey = "pk_test_123",
@@ -404,6 +404,7 @@ class AddressElementViewModelModuleTest {
                     )
                 },
             ),
+            operationMeasurer = CheckoutOperationMeasurer(analyticsReporter),
             localOperationFactory = LocalOperation.Factory { operation, params ->
                 LocalOperation(operation, params, analyticsReporter)
             },

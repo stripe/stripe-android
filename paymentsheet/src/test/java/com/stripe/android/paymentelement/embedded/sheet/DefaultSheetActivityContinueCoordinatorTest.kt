@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
+import com.stripe.android.checkout.analytics.CheckoutOperationMeasurer
 import com.stripe.android.checkout.analytics.FakeCheckoutAnalyticsReporter
 import com.stripe.android.checkout.analytics.LocalOperation
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
@@ -259,7 +260,6 @@ internal class DefaultSheetActivityContinueCoordinatorTest {
             elementsSessionClientParams = CheckoutStripeRepositoryFactory.clientParams(),
             fraudDetectionDataRepository = FakeFraudDetectionDataRepository.create(),
             stripeNetworkClient = DefaultStripeNetworkClient(),
-            analyticsReporter = analyticsReporter,
             apiRequestOptionsProvider = {
                 ApiRequest.Options(
                     apiKey = DEFAULT_API_CONFIG.publishableKey,
@@ -270,6 +270,7 @@ internal class DefaultSheetActivityContinueCoordinatorTest {
 
         return CheckoutSessionTaxRegionUpdater(
             checkoutSessionRepository,
+            operationMeasurer = CheckoutOperationMeasurer(analyticsReporter),
             localOperationFactory = LocalOperation.Factory { operation, params ->
                 LocalOperation(operation, params, analyticsReporter)
             },

@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
+import com.stripe.android.checkout.analytics.CheckoutOperationMeasurer
 import com.stripe.android.checkout.analytics.FakeCheckoutAnalyticsReporter
 import com.stripe.android.checkout.analytics.LocalOperation
 import com.stripe.android.core.Logger
@@ -155,7 +156,6 @@ internal suspend fun createIntentConfirmationInterceptor(
                     elementsSessionClientParams = CheckoutStripeRepositoryFactory.clientParams(),
                     fraudDetectionDataRepository = FakeFraudDetectionDataRepository.create(),
                     stripeNetworkClient = DefaultStripeNetworkClient(),
-                    analyticsReporter = analyticsReporter,
                     apiRequestOptionsProvider = {
                         ApiRequest.Options(
                             apiKey = DEFAULT_API_CONFIG.publishableKey,
@@ -171,6 +171,7 @@ internal suspend fun createIntentConfirmationInterceptor(
                     checkoutSessionRepository = checkoutSessionRepository,
                     checkoutSessionTaxRegionUpdater = CheckoutSessionTaxRegionUpdater(
                         checkoutSessionRepository,
+                        operationMeasurer = CheckoutOperationMeasurer(analyticsReporter),
                         localOperationFactory = LocalOperation.Factory { operation, params ->
                             LocalOperation(operation, params, analyticsReporter)
                         },

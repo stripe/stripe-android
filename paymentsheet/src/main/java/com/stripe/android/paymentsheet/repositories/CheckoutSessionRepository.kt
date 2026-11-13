@@ -2,9 +2,6 @@ package com.stripe.android.paymentsheet.repositories
 
 import com.stripe.android.Stripe
 import com.stripe.android.checkout.CheckoutElementsController.Address
-import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent.Operation
-import com.stripe.android.checkout.analytics.CheckoutAnalyticsReporter
-import com.stripe.android.checkout.analytics.MeasuredOperation
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
@@ -26,7 +23,6 @@ internal class CheckoutSessionRepository @Inject constructor(
     private val elementsSessionClientParams: ElementsSessionClientParams,
     private val stripeNetworkClient: StripeNetworkClient,
     private val fraudDetectionDataRepository: FraudDetectionDataRepository,
-    private val analyticsReporter: CheckoutAnalyticsReporter,
     private val apiRequestOptionsProvider: Provider<ApiRequest.Options>,
 ) {
     private val apiRequestFactory = ApiRequest.Factory(
@@ -58,21 +54,14 @@ internal class CheckoutSessionRepository @Inject constructor(
     suspend fun init(
         clientSecret: CheckoutSessionClientSecret,
         adaptivePricingAllowed: Boolean,
-        analyticsParams: Map<String, Any?>,
-    ): Result<CheckoutSessionResponse> = measure(
-        operation = Operation.Init,
-        checkoutSessionResponse = null,
-        params = analyticsParams + ("checkout_session_id" to clientSecret.sessionId),
-    ) {
-        executePost(
-            clientSecret = clientSecret,
-            url = initUrl(clientSecret.sessionId),
-            params = mapOf(
-                "adaptive_pricing[allowed]" to adaptivePricingAllowed,
-                "timezone" to TimeZone.getDefault().id,
-            ),
-        )
-    }
+    ): Result<CheckoutSessionResponse> = executePost(
+        clientSecret = clientSecret,
+        url = initUrl(clientSecret.sessionId),
+        params = mapOf(
+            "adaptive_pricing[allowed]" to adaptivePricingAllowed,
+            "timezone" to TimeZone.getDefault().id,
+        ),
+    )
 
     suspend fun fetch(
         clientSecret: CheckoutSessionClientSecret,
@@ -185,35 +174,23 @@ internal class CheckoutSessionRepository @Inject constructor(
     suspend fun applyPromotionCode(
         checkoutSessionResponse: CheckoutSessionResponse,
         promotionCode: String,
-    ): Result<CheckoutSessionResponse> = measure(
-        operation = Operation.ApplyPromotionCode,
-        checkoutSessionResponse = checkoutSessionResponse,
-        params = emptyMap(),
-    ) {
-        executePost(
-            clientSecret = checkoutSessionResponse.clientSecret,
-            url = updateUrl(checkoutSessionResponse.clientSecret.sessionId),
-            params = mapOf(
-                "promotion_code" to promotionCode,
-            ),
-        )
-    }
+    ): Result<CheckoutSessionResponse> = executePost(
+        clientSecret = checkoutSessionResponse.clientSecret,
+        url = updateUrl(checkoutSessionResponse.clientSecret.sessionId),
+        params = mapOf(
+            "promotion_code" to promotionCode,
+        ),
+    )
 
     suspend fun removePromotionCode(
         checkoutSessionResponse: CheckoutSessionResponse,
-    ): Result<CheckoutSessionResponse> = measure(
-        operation = Operation.RemovePromotionCode,
-        checkoutSessionResponse = checkoutSessionResponse,
-        params = emptyMap(),
-    ) {
-        executePost(
-            clientSecret = checkoutSessionResponse.clientSecret,
-            url = updateUrl(checkoutSessionResponse.clientSecret.sessionId),
-            params = mapOf(
-                "promotion_code" to "",
-            ),
-        )
-    }
+    ): Result<CheckoutSessionResponse> = executePost(
+        clientSecret = checkoutSessionResponse.clientSecret,
+        url = updateUrl(checkoutSessionResponse.clientSecret.sessionId),
+        params = mapOf(
+            "promotion_code" to "",
+        ),
+    )
 
     suspend fun updateTaxRegion(
         clientSecret: CheckoutSessionClientSecret,
@@ -238,36 +215,13 @@ internal class CheckoutSessionRepository @Inject constructor(
     suspend fun updateCurrency(
         checkoutSessionResponse: CheckoutSessionResponse,
         currencyCode: String,
-    ): Result<CheckoutSessionResponse> = measure(
-        operation = Operation.UpdateCurrency,
-        checkoutSessionResponse = checkoutSessionResponse,
-        params = mapOf("requested_currency" to currencyCode),
-    ) {
-        executePost(
-            clientSecret = checkoutSessionResponse.clientSecret,
-            url = updateUrl(checkoutSessionResponse.clientSecret.sessionId),
-            params = mapOf(
-                "adaptive_pricing[currency]" to currencyCode,
-            ),
-        )
-    }
-
-    suspend fun measure(
-        operation: Operation,
-        checkoutSessionResponse: CheckoutSessionResponse?,
-        params: Map<String, Any?>,
-        block: suspend () -> Result<CheckoutSessionResponse>,
-    ): Result<CheckoutSessionResponse> {
-        val measuredOperation = MeasuredOperation(
-            operation = operation,
-            params = params,
-            report = analyticsReporter::fireEvent,
-        )
-        measuredOperation.started(checkoutSessionResponse)
-        return block()
-            .onSuccess { measuredOperation.succeeded(it) }
-            .onFailure { measuredOperation.failed(checkoutSessionResponse, it) }
-    }
+    ): Result<CheckoutSessionResponse> = executePost(
+        clientSecret = checkoutSessionResponse.clientSecret,
+        url = updateUrl(checkoutSessionResponse.clientSecret.sessionId),
+        params = mapOf(
+            "adaptive_pricing[currency]" to currencyCode,
+        ),
+    )
 
     private companion object {
         private const val UNSUPPORTED_UPDATE_ERROR =
