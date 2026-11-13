@@ -258,20 +258,24 @@ internal class CheckoutSheetLauncher @Inject constructor(
         if (sheetStateHolder.sheetIsOpen) return
         val presentationState = when (val status = operationCoordinator.status.value) {
             CheckoutOperationCoordinator.Status.Idle -> {
-                if (paymentMethodMetadata == null || configuration == null) return
-                EmbeddedActivityArgs.PresentationState.Ready(
-                    paymentMethodMetadata = paymentMethodMetadata,
-                    configuration = configuration,
-                )
+                if (paymentMethodMetadata == null || configuration == null) {
+                    EmbeddedActivityArgs.PresentationState.Failed
+                } else {
+                    EmbeddedActivityArgs.PresentationState.Ready(
+                        paymentMethodMetadata = paymentMethodMetadata,
+                        configuration = configuration,
+                    )
+                }
             }
             CheckoutOperationCoordinator.Status.Updating -> {
-                if (configuration == null) return
-                EmbeddedActivityArgs.PresentationState.Loading(configuration.appearance)
+                configuration?.let {
+                    EmbeddedActivityArgs.PresentationState.Loading(it.appearance)
+                } ?: EmbeddedActivityArgs.PresentationState.Failed
             }
             is CheckoutOperationCoordinator.Status.Configuring -> {
-                val appearance = status.configuration.paymentElementConfiguration?.appearance?.asPaymentSheet()
-                    ?: return
-                EmbeddedActivityArgs.PresentationState.Loading(appearance)
+                status.configuration.paymentElementConfiguration?.appearance?.asPaymentSheet()?.let {
+                    EmbeddedActivityArgs.PresentationState.Loading(it)
+                } ?: EmbeddedActivityArgs.PresentationState.Failed
             }
         }
         sheetStateHolder.sheetIsOpen = true
