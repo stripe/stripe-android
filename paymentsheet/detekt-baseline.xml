@@ -37,8 +37,6 @@
     <ID>LargeClass:USBankAccountFormViewModelTest.kt:USBankAccountFormViewModelTest</ID>
     <ID>LargeClass:WalletScreenTest.kt:WalletScreenTest</ID>
     <ID>LargeClass:WalletViewModelTest.kt:WalletViewModelTest</ID>
-    <ID>LongMethod:AutocompleteScreen.kt:@Composable internal fun AutocompleteScreenUI</ID>
-    <ID>LongMethod:AutocompleteViewModelTest.kt:AutocompleteViewModelTest$@Test fun `selectPrediction emits go back event with selected prediction`</ID>
     <ID>LongMethod:CardDefinition.kt:CardUiDefinitionFactory$override fun createFormElements: List&lt;FormElement></ID>
     <ID>LongMethod:CustomerSheetScreen.kt:@Composable internal fun SelectPaymentMethod</ID>
     <ID>LongMethod:DefaultConfirmationHandlerTest.kt:DefaultConfirmationHandlerTest$private fun test</ID>

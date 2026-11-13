@@ -72,7 +72,7 @@ internal class InlineAutocompleteController(
         lastObservedCountry = country.value ?: ""
         observeJob = coroutineScope.launch {
             combine(query, country) { q, c -> q to (c ?: "") }
-                .debounce(AutocompleteViewModel.SEARCH_DEBOUNCE_MS)
+                .debounce(SEARCH_DEBOUNCE_MS)
                 .collectLatest { (q, c) ->
                     val countrySupported = isCountrySupported(c)
                     val countryChanged = c != lastObservedCountry
@@ -206,7 +206,7 @@ internal class InlineAutocompleteController(
         return !predictionsPaused &&
             activationState != ActivationState.Inactive &&
             isCountrySupported(country) &&
-            query.length >= AutocompleteViewModel.MIN_CHARS_AUTOCOMPLETE
+            query.length >= MIN_CHARS_AUTOCOMPLETE
     }
 
     private fun isCountrySupported(country: String): Boolean {
@@ -222,7 +222,7 @@ internal class InlineAutocompleteController(
         val result = placesClient.findAutocompletePredictions(
             query = query,
             country = country,
-            limit = AutocompleteViewModel.MAX_DISPLAYED_RESULTS,
+            limit = MAX_DISPLAYED_RESULTS,
         )
         currentCoroutineContext().ensureActive()
         if (_inlinePredictionsState.value == AutocompleteAddressInteractor.InlinePredictionsState.Idle) return
@@ -275,5 +275,11 @@ internal class InlineAutocompleteController(
         eventListenerProvider()?.invoke(
             AutocompleteAddressInteractor.Event.OnExpandForm(values)
         )
+    }
+
+    private companion object {
+        const val SEARCH_DEBOUNCE_MS = 400L
+        const val MAX_DISPLAYED_RESULTS = 4
+        const val MIN_CHARS_AUTOCOMPLETE = 3
     }
 }

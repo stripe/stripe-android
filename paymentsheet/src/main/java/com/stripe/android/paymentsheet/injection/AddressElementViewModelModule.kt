@@ -13,10 +13,8 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.AddressElementActivityContract
-import com.stripe.android.paymentsheet.addresselement.AddressElementNavigator
 import com.stripe.android.paymentsheet.addresselement.AddressElementPrimaryButtonAction
 import com.stripe.android.paymentsheet.addresselement.DefaultStripeAutocompleteRepository
-import com.stripe.android.paymentsheet.addresselement.NavHostAddressElementNavigator
 import com.stripe.android.paymentsheet.addresselement.StripeAutocompleteRepository
 import com.stripe.android.paymentsheet.addresselement.StripeHostedPlacesClientProxy
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressElementEventReporter
@@ -27,7 +25,6 @@ import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse.TaxAddressSource
 import com.stripe.android.paymentsheet.repositories.ElementsSessionClientParams
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
-import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import javax.inject.Named
@@ -35,11 +32,9 @@ import javax.inject.Provider
 import javax.inject.Singleton
 
 @Module(
-    includes = [AddressElementViewModelModule.Bindings::class],
     subcomponents = [
         AddressElementViewModelSubcomponent::class,
         InputAddressViewModelSubcomponent::class,
-        AutocompleteViewModelSubcomponent::class,
     ]
 )
 internal class AddressElementViewModelModule {
@@ -149,12 +144,6 @@ internal class AddressElementViewModelModule {
     fun provideApiConfiguration(
         args: AddressElementActivityContract.Args
     ) = args.apiConfiguration
-
-    @Module
-    interface Bindings {
-        @Binds
-        fun bindsAddressElementNavigator(navigator: NavHostAddressElementNavigator): AddressElementNavigator
-    }
 }
 
 private object StandalonePrimaryButtonAction : AddressElementPrimaryButtonAction {

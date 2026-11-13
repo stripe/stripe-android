@@ -18,13 +18,6 @@ import org.robolectric.RobolectricTestRunner
 class BillingInlineAutocompleteAddressInteractorTest {
 
     @Test
-    fun `onAutocomplete is a no-op and emits no event`() = runScenario {
-        interactor.onAutocomplete("US")
-
-        eventCalls.expectNoEvents()
-    }
-
-    @Test
     fun `onEnterManuallyFromInline emits OnExpandForm with null values when query is empty`() = runScenario {
         interactor.onEnterManuallyFromInline()
 

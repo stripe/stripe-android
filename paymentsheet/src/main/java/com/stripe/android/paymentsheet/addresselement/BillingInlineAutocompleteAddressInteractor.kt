@@ -27,8 +27,6 @@ internal class BillingInlineAutocompleteAddressInteractor(
         eventListener = onEvent
     }
 
-    override fun onAutocomplete(country: String) = Unit
-
     override fun observeQueryChanges(query: StateFlow<String>, country: StateFlow<String?>) {
         inlineController.observeQueryChanges(query, country)
     }

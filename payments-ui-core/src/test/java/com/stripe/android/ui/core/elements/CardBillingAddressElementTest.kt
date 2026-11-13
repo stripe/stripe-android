@@ -394,10 +394,6 @@ internal class CardBillingAddressElementTest {
                         override fun register(onEvent: (AutocompleteAddressInteractor.Event) -> Unit) {
                             // No-op
                         }
-
-                        override fun onAutocomplete(country: String) {
-                            error("Should not be called!")
-                        }
                     }
                 },
                 sameAsShippingElement = null,

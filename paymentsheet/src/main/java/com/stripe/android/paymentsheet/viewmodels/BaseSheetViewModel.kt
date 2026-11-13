@@ -21,8 +21,6 @@ import com.stripe.android.paymentsheet.NewPaymentOptionSelection
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.addresselement.AUTOCOMPLETE_DEFAULT_COUNTRIES
-import com.stripe.android.paymentsheet.addresselement.AutocompleteAppearanceContext
-import com.stripe.android.paymentsheet.addresselement.DefaultAutocompleteLauncher
 import com.stripe.android.paymentsheet.addresselement.PaymentElementAutocompleteAddressInteractor
 import com.stripe.android.paymentsheet.addresselement.StripeAutocompleteRepository
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
@@ -74,10 +72,6 @@ internal abstract class BaseSheetViewModel(
     stripeAutocompleteRepository: StripeAutocompleteRepository,
     addressLauncherEventReporter: AddressLauncherEventReporter,
 ) : ViewModel() {
-    private val autocompleteLauncher = DefaultAutocompleteLauncher(
-        AutocompleteAppearanceContext.PaymentElement(config.appearance)
-    )
-
     private val _paymentMethodMetadata = MutableStateFlow<PaymentMethodMetadata?>(null)
     internal val paymentMethodMetadata: StateFlow<PaymentMethodMetadata?> = _paymentMethodMetadata
 
@@ -89,8 +83,6 @@ internal abstract class BaseSheetViewModel(
     }
 
     private val paymentElementAutocompleteFactory = PaymentElementAutocompleteAddressInteractor.Factory(
-        launcher = autocompleteLauncher,
-        apiConfigurationProvider = { requireNotNull(_paymentMethodMetadata.value).apiConfiguration },
         autocompleteConfig = AutocompleteAddressInteractor.Config(
             googlePlacesApiKey = config.googlePlacesApiKey,
             autocompleteCountries = AUTOCOMPLETE_DEFAULT_COUNTRIES,
@@ -190,7 +182,6 @@ internal abstract class BaseSheetViewModel(
         activityResultCaller: ActivityResultCaller,
         lifecycleOwner: LifecycleOwner,
     ) {
-        autocompleteLauncher.register(activityResultCaller, lifecycleOwner)
         tapToAddHelper.register(activityResultCaller, lifecycleOwner)
         registerFromActivity(activityResultCaller, lifecycleOwner)
     }
