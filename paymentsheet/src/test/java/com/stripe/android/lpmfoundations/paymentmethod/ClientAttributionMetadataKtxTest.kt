@@ -43,7 +43,7 @@ class ClientAttributionMetadataKtxTest {
                     amount = 100L,
                     currency = "usd",
                 )
-            )
+            ).build()
         )
 
         val clientAttributionMetadata = createClientAttributionMetadata(

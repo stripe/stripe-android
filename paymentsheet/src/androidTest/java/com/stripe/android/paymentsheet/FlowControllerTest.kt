@@ -290,8 +290,8 @@ internal class FlowControllerTest(
                         mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                             amount = 5099,
                             currency = "usd",
-                            setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession
                         )
+                            .setupFutureUse(PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession)
                     ),
                     configuration = apiConfigurationTestType.applyTo(
                         PaymentSheet.Configuration.Builder("Example, Inc.")
@@ -1290,8 +1290,8 @@ internal class FlowControllerTest(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 5000,
                         currency = "USD",
-                        setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession
                     )
+                        .setupFutureUse(PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession)
                 ),
                 configuration = apiConfigurationTestType.applyTo(
                     PaymentSheet.Configuration.Builder("Example, Inc.")
@@ -1344,8 +1344,8 @@ internal class FlowControllerTest(
                         amount = 5099,
                         currency = "usd",
                     ),
-                    onBehalfOf = oboMerchantID
-                ),
+                )
+                    .onBehalfOf(oboMerchantID),
                 configuration = apiConfigurationTestType.applyTo(
                     PaymentSheet.Configuration.Builder("Example, Inc.")
                         .build()

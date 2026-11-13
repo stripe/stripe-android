@@ -83,7 +83,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
         intentConfiguration: PaymentSheet.IntentConfiguration,
         configuration: Configuration,
     ): ConfigureResult {
-        val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(intentConfiguration)
+        val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(intentConfiguration.build())
         return configurationCoordinator.configure(configuration, initializationMode)
     }
 

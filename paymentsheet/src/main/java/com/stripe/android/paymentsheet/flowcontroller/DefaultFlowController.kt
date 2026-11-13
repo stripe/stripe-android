@@ -215,7 +215,7 @@ internal class DefaultFlowController @Inject internal constructor(
         callback: PaymentSheet.FlowController.ConfigCallback
     ) {
         configure(
-            mode = PaymentElementLoader.InitializationMode.DeferredIntent(intentConfiguration),
+            mode = PaymentElementLoader.InitializationMode.DeferredIntent(intentConfiguration.build()),
             configuration = configuration ?: PaymentSheet.Configuration.default(context),
             callback = callback,
         )

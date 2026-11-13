@@ -98,7 +98,7 @@ internal suspend fun createIntentConfirmationInterceptor(
         },
         deferredIntentConfirmationInterceptorFactory = object : DeferredIntentConfirmationInterceptor.Factory {
             override fun create(
-                intentConfiguration: PaymentSheet.IntentConfiguration,
+                intentConfiguration: PaymentSheet.IntentConfiguration.State,
                 createIntentCallback: CreateIntentCallback,
                 clientAttributionMetadata: ClientAttributionMetadata,
             ): DeferredIntentConfirmationInterceptor {
@@ -114,7 +114,7 @@ internal suspend fun createIntentConfirmationInterceptor(
         },
         confirmationTokenConfirmationInterceptorFactory = object : ConfirmationTokenConfirmationInterceptor.Factory {
             override fun create(
-                intentConfiguration: PaymentSheet.IntentConfiguration,
+                intentConfiguration: PaymentSheet.IntentConfiguration.State,
                 createIntentCallback: CreateIntentWithConfirmationTokenCallback,
                 customerMetadata: CustomerMetadata?,
                 clientAttributionMetadata: ClientAttributionMetadata,
@@ -133,7 +133,7 @@ internal suspend fun createIntentConfirmationInterceptor(
         },
         sharedPaymentTokenConfirmationInterceptorFactory = object : SharedPaymentTokenConfirmationInterceptor.Factory {
             override fun create(
-                intentConfiguration: PaymentSheet.IntentConfiguration,
+                intentConfiguration: PaymentSheet.IntentConfiguration.State,
                 handler: PreparePaymentMethodHandler
             ): SharedPaymentTokenConfirmationInterceptor {
                 return SharedPaymentTokenConfirmationInterceptor(

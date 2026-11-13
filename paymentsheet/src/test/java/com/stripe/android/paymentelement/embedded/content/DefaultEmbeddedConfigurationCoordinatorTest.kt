@@ -37,7 +37,7 @@ internal class DefaultEmbeddedConfigurationCoordinatorTest {
     private val defaultInitializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
         PaymentSheet.IntentConfiguration(
             PaymentSheet.IntentConfiguration.Mode.Payment(5000, "USD"),
-        )
+        ).build()
     )
 
     private fun createPaymentElementLoaderState(

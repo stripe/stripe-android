@@ -2188,13 +2188,12 @@ internal class PaymentSheetViewModelTest {
 
     private fun FakeConfirmationHandler.Scenario.createWebLinkDeferredSetupViewModel(): PaymentSheetViewModel {
         val intentConfiguration = PaymentSheet.IntentConfiguration(
-            mode = PaymentSheet.IntentConfiguration.Mode.Setup(
-                setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OnSession,
-            ),
+            mode = PaymentSheet.IntentConfiguration.Mode.Setup()
+                .setupFutureUse(PaymentSheet.IntentConfiguration.SetupFutureUse.OnSession),
         )
         return createViewModel(
             args = ARGS_DEFERRED_INTENT.copy(
-                initializationMode = InitializationMode.DeferredIntent(intentConfiguration),
+                initializationMode = InitializationMode.DeferredIntent(intentConfiguration.build()),
             ),
             stripeIntent = SETUP_INTENT.copy(
                 id = null,
@@ -3803,7 +3802,7 @@ internal class PaymentSheetViewModelTest {
         )
 
         return createViewModel(
-            args = args.copy(initializationMode = InitializationMode.DeferredIntent(intentConfig)),
+            args = args.copy(initializationMode = InitializationMode.DeferredIntent(intentConfig.build())),
             confirmationHandlerFactory = confirmationHandlerFactory,
             stripeIntent = deferredIntent,
         )

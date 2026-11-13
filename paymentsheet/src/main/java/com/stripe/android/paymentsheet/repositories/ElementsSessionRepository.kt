@@ -262,8 +262,9 @@ internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams(
         is PaymentElementLoader.InitializationMode.CryptoOnramp -> {
             val intentConfiguration = PaymentSheet.IntentConfiguration(
                 mode = PaymentSheet.IntentConfiguration.Mode.Setup(),
-                paymentMethodTypes = paymentMethodTypes ?: emptyList(),
             )
+                .paymentMethodTypes(paymentMethodTypes ?: emptyList())
+                .build()
             ElementsSessionParams.DeferredIntentType(
                 locale = clientParams.locale,
                 deferredIntentParams = intentConfiguration.toDeferredIntentParams(),
@@ -283,8 +284,9 @@ internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams(
         is PaymentElementLoader.InitializationMode.StandaloneLink -> {
             val intentConfiguration = PaymentSheet.IntentConfiguration(
                 mode = PaymentSheet.IntentConfiguration.Mode.Setup(),
-                paymentMethodTypes = paymentMethodTypes ?: emptyList(),
             )
+                .paymentMethodTypes(paymentMethodTypes ?: emptyList())
+                .build()
             ElementsSessionParams.DeferredIntentType(
                 locale = clientParams.locale,
                 deferredIntentParams = intentConfiguration.toDeferredIntentParams(),
@@ -314,7 +316,7 @@ private fun List<PaymentSheet.CustomPaymentMethod>.toElementSessionParam(): List
 }
 
 @OptIn(SharedPaymentTokenSessionPreview::class)
-private fun PaymentSheet.IntentConfiguration.toSellerDetails(): ElementsSessionParams.SellerDetails? {
+private fun PaymentSheet.IntentConfiguration.State.toSellerDetails(): ElementsSessionParams.SellerDetails? {
     return when (intentBehavior) {
         is PaymentSheet.IntentConfiguration.IntentBehavior.SharedPaymentToken -> intentBehavior.sellerDetails?.run {
             ElementsSessionParams.SellerDetails(

@@ -78,11 +78,13 @@ internal class CreateIntentFactory(
                         mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                             amount = amount.toLong(),
                             currency = currency,
-                            setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession.takeIf {
-                                createWithSetupFutureUsage
-                            },
                         )
-                    )
+                            .setupFutureUse(
+                                PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession.takeIf {
+                                    createWithSetupFutureUsage
+                                }
+                            )
+                    ).build()
                 ),
                 intent = PaymentIntentFactory.createDeferred(),
             )
@@ -135,10 +137,9 @@ internal class CreateIntentFactory(
             CreateIntentData(
                 integrationMetadata = IntegrationMetadata.DeferredIntent.WithPaymentMethod(
                     intentConfiguration = PaymentSheet.IntentConfiguration(
-                        mode = PaymentSheet.IntentConfiguration.Mode.Setup(
-                            setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession,
-                        )
-                    )
+                        mode = PaymentSheet.IntentConfiguration.Mode.Setup()
+                            .setupFutureUse(PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession)
+                    ).build()
                 ),
                 intent = SetupIntentFactory.create(),
             )

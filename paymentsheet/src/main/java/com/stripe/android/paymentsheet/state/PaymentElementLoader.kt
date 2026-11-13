@@ -171,11 +171,11 @@ internal interface PaymentElementLoader {
 
         @Parcelize
         data class DeferredIntent(
-            val intentConfiguration: IntentConfiguration,
+            val intentConfiguration: IntentConfiguration.State,
         ) : InitializationMode() {
 
             override fun validate() {
-                (intentConfiguration.mode as? IntentConfiguration.Mode.Payment)?.let {
+                (intentConfiguration.mode as? IntentConfiguration.Mode.Payment.State)?.let {
                     if (it.amount <= 0) {
                         throw IllegalArgumentException(
                             "Payment IntentConfiguration requires a positive amount."

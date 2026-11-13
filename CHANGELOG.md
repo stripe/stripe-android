@@ -4,6 +4,9 @@ NEXT_VERSION_BUMP: MINOR
 ## XX.XX.XX - 20XX-XX-XX
 
 ### PaymentSheet
+* [ADDED][15397](https://github.com/stripe/stripe-android/pull/15397) Added builder methods to `PaymentSheet.IntentConfiguration`, `IntentConfiguration.Mode.Payment`, `IntentConfiguration.Mode.Setup`, and `IntentConfiguration.Mode.Payment.PaymentMethodOptions`. For example, `PaymentSheet.IntentConfiguration(mode).paymentMethodTypes(listOf("card")).onBehalfOf("acct_123")`.
+* [DEPRECATED][15397](https://github.com/stripe/stripe-android/pull/15397) Deprecated the `PaymentSheet.IntentConfiguration`, `Mode.Payment`, `Mode.Setup`, and `PaymentMethodOptions` constructor overloads that accept optional values in favor of the new builder methods.
+* [REMOVED][15397](https://github.com/stripe/stripe-android/pull/15397) Removed the property getters from `PaymentSheet.IntentConfiguration`, `IntentConfiguration.Mode.Payment`, `IntentConfiguration.Mode.Setup`, and `IntentConfiguration.SellerDetails`. These classes, along with `IntentConfiguration.Mode` and `IntentConfiguration.Mode.Payment.PaymentMethodOptions`, are no longer `Parcelable` and no longer implement value-based `equals`, `hashCode`, or `toString`.
 * [FIXED][15363](https://github.com/stripe/stripe-android/pull/15363) Fixed an issue where inline address autocomplete could request suggestions for a prefilled address before the customer focused the address field.
 
 ### AddressElement

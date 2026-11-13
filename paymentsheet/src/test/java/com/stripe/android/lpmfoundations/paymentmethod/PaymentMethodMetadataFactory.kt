@@ -176,16 +176,15 @@ internal object PaymentMethodMetadataFactory {
                             amount = amount ?: 5000,
                             currency = currency ?: "usd"
                         )
-                    )
+                    ).build()
                 )
             }
             is SetupIntent -> {
                 IntegrationMetadata.DeferredIntent.WithPaymentMethod(
                     intentConfiguration = PaymentSheet.IntentConfiguration(
-                        mode = PaymentSheet.IntentConfiguration.Mode.Setup(
-                            currency = "usd"
-                        )
-                    )
+                        mode = PaymentSheet.IntentConfiguration.Mode.Setup()
+                            .currency("usd")
+                    ).build()
                 )
             }
         }

@@ -27,7 +27,7 @@ class PaymentMethodConfirmationOptionTest {
             shouldSave = false,
         )
 
-        val updated = option.updatedForDeferredIntent(PAYMENT_INTENT_CONFIGURATION)
+        val updated = option.updatedForDeferredIntent(PAYMENT_INTENT_CONFIGURATION.build())
 
         assertThat(updated.createParams.attribution)
             .containsAtLeast("existing", "deferred-intent", "autopm")
@@ -49,7 +49,7 @@ class PaymentMethodConfirmationOptionTest {
             optionsParams = null,
         )
 
-        val updated = option.updatedForDeferredIntent(PAYMENT_INTENT_CONFIGURATION)
+        val updated = option.updatedForDeferredIntent(PAYMENT_INTENT_CONFIGURATION.build())
 
         assertThat(updated.optionsParams).isEqualTo(
             PaymentMethodOptionsParams.SetupFutureUsage(
@@ -222,12 +222,15 @@ class PaymentMethodConfirmationOptionTest {
             mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                 amount = 1_000,
                 currency = "usd",
-                paymentMethodOptions = PaymentSheet.IntentConfiguration.Mode.Payment.PaymentMethodOptions(
-                    setupFutureUsageValues = mapOf(
-                        PaymentMethod.Type.Card to PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession
-                    )
-                )
             )
+                .paymentMethodOptions(
+                    PaymentSheet.IntentConfiguration.Mode.Payment.PaymentMethodOptions()
+                        .setupFutureUsageValues(
+                            mapOf(
+                                PaymentMethod.Type.Card to PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession
+                            )
+                        )
+                )
         )
     }
 }

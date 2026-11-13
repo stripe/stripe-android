@@ -29,16 +29,19 @@ internal class DefaultIntentConfirmationInterceptorFactoryTest {
         runScenario(
             integrationMetadata = IntegrationMetadata.DeferredIntent.WithSharedPaymentToken(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
-                    sharedPaymentTokenSessionWithMode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 1099L,
                         currency = "usd",
                     ),
-                    sellerDetails = PaymentSheet.IntentConfiguration.SellerDetails(
-                        businessName = "My business, Inc.",
-                        networkId = "network_id",
-                        externalId = "external_id"
+                )
+                    .sharedPaymentTokenSession(
+                        PaymentSheet.IntentConfiguration.SellerDetails(
+                            businessName = "My business, Inc.",
+                            networkId = "network_id",
+                            externalId = "external_id"
+                        )
                     )
-                ),
+                    .build(),
             ),
             preparePaymentMethodHandlerProvider = Provider { PreparePaymentMethodHandler { _, _ -> } },
         ) {
@@ -54,7 +57,7 @@ internal class DefaultIntentConfirmationInterceptorFactoryTest {
                         amount = 1099L,
                         currency = "usd",
                     ),
-                ),
+                ).build(),
             ),
             intentCreationCallbackProvider = Provider {
                 CreateIntentCallback { _, _ ->
@@ -74,7 +77,7 @@ internal class DefaultIntentConfirmationInterceptorFactoryTest {
                         amount = 1099L,
                         currency = "usd",
                     ),
-                ),
+                ).build(),
             ),
             intentCreationConfirmationTokenCallbackProvider = Provider {
                 CreateIntentWithConfirmationTokenCallback { _ ->

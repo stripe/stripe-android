@@ -137,16 +137,19 @@ class SharedPaymentTokenConfirmationInterceptorTest {
     private companion object {
         val DEFAULT_INTEGRATION_METADATA = IntegrationMetadata.DeferredIntent.WithSharedPaymentToken(
             intentConfiguration = PaymentSheet.IntentConfiguration(
-                sharedPaymentTokenSessionWithMode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                     amount = 1099L,
                     currency = "usd",
                 ),
-                sellerDetails = PaymentSheet.IntentConfiguration.SellerDetails(
-                    businessName = "My business, Inc.",
-                    networkId = "network_id",
-                    externalId = "external_id"
+            )
+                .sharedPaymentTokenSession(
+                    PaymentSheet.IntentConfiguration.SellerDetails(
+                        businessName = "My business, Inc.",
+                        networkId = "network_id",
+                        externalId = "external_id"
+                    )
                 )
-            ),
+                .build(),
         )
 
         val SHIPPING_ADDRESS = ConfirmPaymentIntentParams.Shipping(

@@ -111,11 +111,11 @@ internal sealed interface PlaygroundState : Parcelable {
         fun intentConfiguration(): PaymentSheet.IntentConfiguration {
             return PaymentSheet.IntentConfiguration(
                 mode = checkoutMode.intentConfigurationMode(this),
-                paymentMethodTypes = paymentMethodTypes,
-                paymentMethodConfigurationId = paymentMethodConfigurationId,
-                requireCvcRecollection = requireCvcRecollectionForDeferred,
-                onBehalfOf = onBehalfOf,
             )
+                .paymentMethodTypes(paymentMethodTypes)
+                .paymentMethodConfigurationId(paymentMethodConfigurationId)
+                .requireCvcRecollection(requireCvcRecollectionForDeferred)
+                .onBehalfOf(onBehalfOf)
         }
 
         fun paymentSheetConfiguration(settings: Settings): PaymentSheet.Configuration {
@@ -224,18 +224,19 @@ internal sealed interface PlaygroundState : Parcelable {
         @OptIn(SharedPaymentTokenSessionPreview::class)
         fun intentConfiguration(amount: Long): PaymentSheet.IntentConfiguration {
             return PaymentSheet.IntentConfiguration(
-                sharedPaymentTokenSessionWithMode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                     amount = amount,
                     currency = currencyCode.value,
-                    captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Manual,
-                ),
-                sellerDetails = PaymentSheet.IntentConfiguration.SellerDetails(
-                    businessName = "My business, Inc.",
-                    networkId = "internal",
-                    externalId = "stripe_test_merchant"
-                ),
-                paymentMethodTypes = listOf("card")
+                ).captureMethod(PaymentSheet.IntentConfiguration.CaptureMethod.Manual),
             )
+                .sharedPaymentTokenSession(
+                    PaymentSheet.IntentConfiguration.SellerDetails(
+                        businessName = "My business, Inc.",
+                        networkId = "internal",
+                        externalId = "stripe_test_merchant"
+                    )
+                )
+                .paymentMethodTypes(listOf("card"))
         }
     }
 

@@ -57,7 +57,7 @@ class DeferredIntentConfirmationInterceptorTest {
                 amount = 1099L,
                 currency = "usd",
             ),
-        ),
+        ).build(),
     )
 
     @Test

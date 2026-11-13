@@ -29,7 +29,7 @@ internal class DeferredIntentValidatorTest {
         val failure = assertFailsWith<IllegalArgumentException> {
             DeferredIntentValidator.validate(
                 stripeIntent = paymentIntent,
-                intentConfiguration = intentConfiguration,
+                intentConfiguration = intentConfiguration.build(),
                 allowsManualConfirmation = false,
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
             )
@@ -49,7 +49,7 @@ internal class DeferredIntentValidatorTest {
         val failure = assertFailsWith<IllegalArgumentException> {
             DeferredIntentValidator.validate(
                 stripeIntent = paymentIntent,
-                intentConfiguration = intentConfiguration,
+                intentConfiguration = intentConfiguration.build(),
                 allowsManualConfirmation = false,
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
             )
@@ -73,7 +73,7 @@ internal class DeferredIntentValidatorTest {
         assertThat(
             DeferredIntentValidator.validate(
                 stripeIntent = paymentIntent,
-                intentConfiguration = intentConfiguration,
+                intentConfiguration = intentConfiguration.build(),
                 allowsManualConfirmation = false,
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
             )
@@ -92,7 +92,7 @@ internal class DeferredIntentValidatorTest {
         val failure = assertFailsWith<IllegalArgumentException> {
             DeferredIntentValidator.validate(
                 stripeIntent = paymentIntent,
-                intentConfiguration = intentConfiguration,
+                intentConfiguration = intentConfiguration.build(),
                 allowsManualConfirmation = false,
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
             )
@@ -113,7 +113,7 @@ internal class DeferredIntentValidatorTest {
 
         val result = DeferredIntentValidator.validate(
             stripeIntent = paymentIntent,
-            intentConfiguration = intentConfiguration,
+            intentConfiguration = intentConfiguration.build(),
             allowsManualConfirmation = false,
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
         )
@@ -132,7 +132,7 @@ internal class DeferredIntentValidatorTest {
         val failure = assertFailsWith<IllegalArgumentException> {
             DeferredIntentValidator.validate(
                 stripeIntent = paymentIntent,
-                intentConfiguration = intentConfiguration,
+                intentConfiguration = intentConfiguration.build(),
                 allowsManualConfirmation = false,
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
             )
@@ -154,7 +154,7 @@ internal class DeferredIntentValidatorTest {
 
         val result = DeferredIntentValidator.validate(
             stripeIntent = paymentIntent,
-            intentConfiguration = intentConfiguration,
+            intentConfiguration = intentConfiguration.build(),
             allowsManualConfirmation = true,
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
         )
@@ -169,7 +169,7 @@ internal class DeferredIntentValidatorTest {
 
         val result = DeferredIntentValidator.validate(
             stripeIntent = paymentIntent,
-            intentConfiguration = intentConfiguration,
+            intentConfiguration = intentConfiguration.build(),
             allowsManualConfirmation = true,
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
         )
@@ -186,7 +186,7 @@ internal class DeferredIntentValidatorTest {
 
         val result = DeferredIntentValidator.validate(
             stripeIntent = paymentIntent,
-            intentConfiguration = intentConfiguration,
+            intentConfiguration = intentConfiguration.build(),
             allowsManualConfirmation = true,
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
         )
@@ -202,7 +202,7 @@ internal class DeferredIntentValidatorTest {
         val failure = assertFailsWith<IllegalArgumentException> {
             DeferredIntentValidator.validate(
                 stripeIntent = setupIntent,
-                intentConfiguration = intentConfiguration,
+                intentConfiguration = intentConfiguration.build(),
                 allowsManualConfirmation = false,
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
             )
@@ -226,7 +226,7 @@ internal class DeferredIntentValidatorTest {
         assertThat(
             DeferredIntentValidator.validate(
                 stripeIntent = setupIntent,
-                intentConfiguration = intentConfiguration,
+                intentConfiguration = intentConfiguration.build(),
                 allowsManualConfirmation = false,
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
             )
@@ -240,7 +240,7 @@ internal class DeferredIntentValidatorTest {
 
         val result = DeferredIntentValidator.validate(
             stripeIntent = setupIntent,
-            intentConfiguration = intentConfiguration,
+            intentConfiguration = intentConfiguration.build(),
             allowsManualConfirmation = true,
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
         )
@@ -369,11 +369,12 @@ internal class DeferredIntentValidatorTest {
         val paymentIntent = PaymentIntentFactory.create(
             paymentMethodOptionsJsonString = PaymentIntentFixtures.PMO_SETUP_FUTURE_USAGE,
         )
-        val paymentMethodOptions = IntentConfiguration.Mode.Payment.PaymentMethodOptions(
-            setupFutureUsageValues = mapOf(
-                PaymentMethod.Type.Card to IntentConfiguration.SetupFutureUse.OffSession,
+        val paymentMethodOptions = IntentConfiguration.Mode.Payment.PaymentMethodOptions()
+            .setupFutureUsageValues(
+                mapOf(
+                    PaymentMethod.Type.Card to IntentConfiguration.SetupFutureUse.OffSession,
+                )
             )
-        )
         paymentMethodOptionsSetupFutureUsageTest(
             intent = paymentIntent,
             paymentMethodOptions = paymentMethodOptions,
@@ -389,12 +390,13 @@ internal class DeferredIntentValidatorTest {
             paymentMethodTypes = listOf("card", "affirm", "amazon_pay")
         )
 
-        val paymentMethodOptions = IntentConfiguration.Mode.Payment.PaymentMethodOptions(
-            setupFutureUsageValues = mapOf(
-                PaymentMethod.Type.Card to IntentConfiguration.SetupFutureUse.OnSession,
-                PaymentMethod.Type.AmazonPay to IntentConfiguration.SetupFutureUse.None,
+        val paymentMethodOptions = IntentConfiguration.Mode.Payment.PaymentMethodOptions()
+            .setupFutureUsageValues(
+                mapOf(
+                    PaymentMethod.Type.Card to IntentConfiguration.SetupFutureUse.OnSession,
+                    PaymentMethod.Type.AmazonPay to IntentConfiguration.SetupFutureUse.None,
+                )
             )
-        )
         paymentMethodOptionsSetupFutureUsageTest(
             intent = paymentIntent,
             paymentMethodOptions = paymentMethodOptions,
@@ -407,12 +409,13 @@ internal class DeferredIntentValidatorTest {
     fun `SFU validation succeeds if not set on intent and using PMO SFU`() {
         val paymentIntent = PaymentIntentFactory.create()
 
-        val paymentMethodOptions = IntentConfiguration.Mode.Payment.PaymentMethodOptions(
-            setupFutureUsageValues = mapOf(
-                PaymentMethod.Type.Card to IntentConfiguration.SetupFutureUse.OnSession,
-                PaymentMethod.Type.Affirm to IntentConfiguration.SetupFutureUse.None,
+        val paymentMethodOptions = IntentConfiguration.Mode.Payment.PaymentMethodOptions()
+            .setupFutureUsageValues(
+                mapOf(
+                    PaymentMethod.Type.Card to IntentConfiguration.SetupFutureUse.OnSession,
+                    PaymentMethod.Type.Affirm to IntentConfiguration.SetupFutureUse.None,
+                )
             )
-        )
 
         paymentMethodOptionsSetupFutureUsageTest(
             intent = paymentIntent,
@@ -427,12 +430,13 @@ internal class DeferredIntentValidatorTest {
     fun `PMO SFU validation succeeds if only set in intent configuration`() {
         val paymentIntent = PaymentIntentFactory.create()
 
-        val paymentMethodOptions = IntentConfiguration.Mode.Payment.PaymentMethodOptions(
-            setupFutureUsageValues = mapOf(
-                PaymentMethod.Type.Card to IntentConfiguration.SetupFutureUse.OnSession,
-                PaymentMethod.Type.Affirm to IntentConfiguration.SetupFutureUse.None,
+        val paymentMethodOptions = IntentConfiguration.Mode.Payment.PaymentMethodOptions()
+            .setupFutureUsageValues(
+                mapOf(
+                    PaymentMethod.Type.Card to IntentConfiguration.SetupFutureUse.OnSession,
+                    PaymentMethod.Type.Affirm to IntentConfiguration.SetupFutureUse.None,
+                )
             )
-        )
 
         paymentMethodOptionsSetupFutureUsageTest(
             intent = paymentIntent,
@@ -449,11 +453,12 @@ internal class DeferredIntentValidatorTest {
             paymentMethodOptionsJsonString = PaymentIntentFixtures.PMO_SETUP_FUTURE_USAGE,
         )
 
-        val paymentMethodOptions = IntentConfiguration.Mode.Payment.PaymentMethodOptions(
-            setupFutureUsageValues = mapOf(
-                PaymentMethod.Type.Card to IntentConfiguration.SetupFutureUse.None,
+        val paymentMethodOptions = IntentConfiguration.Mode.Payment.PaymentMethodOptions()
+            .setupFutureUsageValues(
+                mapOf(
+                    PaymentMethod.Type.Card to IntentConfiguration.SetupFutureUse.None,
+                )
             )
-        )
 
         paymentMethodOptionsSetupFutureUsageTest(
             intent = paymentIntent,
@@ -509,10 +514,10 @@ internal class DeferredIntentValidatorTest {
             mode = IntentConfiguration.Mode.Payment(
                 amount = 1_000,
                 currency = currency,
-                setupFutureUse = setupFutureUse,
-                captureMethod = captureMethod,
-                paymentMethodOptions = paymentMethodOptions
-            ),
+            )
+                .setupFutureUse(setupFutureUse)
+                .captureMethod(captureMethod)
+                .paymentMethodOptions(paymentMethodOptions),
         )
     }
 
@@ -520,9 +525,8 @@ internal class DeferredIntentValidatorTest {
         usage: IntentConfiguration.SetupFutureUse = IntentConfiguration.SetupFutureUse.OffSession,
     ): IntentConfiguration {
         return IntentConfiguration(
-            mode = IntentConfiguration.Mode.Setup(
-                setupFutureUse = usage,
-            ),
+            mode = IntentConfiguration.Mode.Setup()
+                .setupFutureUse(usage),
         )
     }
 
@@ -542,7 +546,7 @@ internal class DeferredIntentValidatorTest {
         if (shouldValidateSucceed) {
             val result = DeferredIntentValidator.validate(
                 stripeIntent = intent,
-                intentConfiguration = configuration,
+                intentConfiguration = configuration.build(),
                 allowsManualConfirmation = false,
                 paymentMethod = paymentMethod
             )
@@ -552,7 +556,7 @@ internal class DeferredIntentValidatorTest {
             val failure = assertFailsWith<IllegalArgumentException> {
                 DeferredIntentValidator.validate(
                     stripeIntent = intent,
-                    intentConfiguration = configuration,
+                    intentConfiguration = configuration.build(),
                     allowsManualConfirmation = false,
                     paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
                 )
