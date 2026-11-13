@@ -24,6 +24,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.parsers.ElementsSessionJsonParser
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.model.MobileSession
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.toDeferredIntentParams
 import kotlinx.coroutines.withContext
@@ -40,6 +41,7 @@ internal interface ElementsSessionRepository {
         savedPaymentMethodSelectionId: String?,
         countryOverride: String?,
         apiConfiguration: ApiConfiguration.State,
+        mobileSessionConfig: MobileSession.Config?,
         linkDisallowedFundingSourceCreation: Set<String> = emptySet(),
     ): Result<ElementsSession>
 }
@@ -66,6 +68,7 @@ internal class RealElementsSessionRepository @Inject constructor(
         savedPaymentMethodSelectionId: String?,
         countryOverride: String?,
         apiConfiguration: ApiConfiguration.State,
+        mobileSessionConfig: MobileSession.Config?,
         linkDisallowedFundingSourceCreation: Set<String>,
     ): Result<ElementsSession> {
         DefaultFraudDetectionDataRepository(
@@ -85,7 +88,7 @@ internal class RealElementsSessionRepository @Inject constructor(
         )
 
         val requestOptions = apiConfiguration.toRequestOptions(idempotencyKey = null)
-        val elementsSession = retrieveElementsSession(params, requestOptions)
+        val elementsSession = retrieveElementsSession(params, requestOptions, mobileSessionConfig)
 
         return elementsSession.getResultOrElse { elementsSessionFailure ->
             if (shouldFallback(elementsSession)) {
@@ -99,6 +102,7 @@ internal class RealElementsSessionRepository @Inject constructor(
     private suspend fun retrieveElementsSession(
         params: ElementsSessionParams,
         options: ApiRequest.Options,
+        mobileSessionConfig: MobileSession.Config?,
     ): Result<ElementsSession> {
         val requestParams = buildMap {
             this["type"] = params.type
@@ -130,6 +134,11 @@ internal class RealElementsSessionRepository @Inject constructor(
                 url = ELEMENTS_SESSIONS_URL,
                 options = options,
                 params = requestParams + expandParam,
+                additionalHeaders = if (mobileSessionConfig != null) {
+                    mapOf(MobileSession.CONFIG_HEADER_NAME to MobileSession.encode(mobileSessionConfig))
+                } else {
+                    emptyMap()
+                },
             ),
             responseJsonParser = ElementsSessionJsonParser(
                 params = params,

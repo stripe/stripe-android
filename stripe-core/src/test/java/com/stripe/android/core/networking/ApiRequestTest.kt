@@ -1,5 +1,6 @@
 package com.stripe.android.core.networking
 
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.ApiKeyFixtures
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -12,6 +13,20 @@ import kotlin.test.assertTrue
 
 @RunWith(RobolectricTestRunner::class)
 internal class ApiRequestTest {
+    @Test
+    fun `additional GET headers preserve standard headers and do not leak to other requests`() {
+        val standardRequest = FACTORY.createGet(SOURCES_URL, OPTIONS)
+        val request = FACTORY.createGet(
+            url = SOURCES_URL,
+            options = OPTIONS,
+            additionalHeaders = mapOf("X-Stripe-Mobile-Config" to "{}"),
+        )
+
+        assertThat(request.headers).containsAtLeastEntriesIn(standardRequest.headers)
+        assertThat(request.headers["X-Stripe-Mobile-Config"]).isEqualTo("{}")
+        assertThat(FACTORY.createGet(SOURCES_URL, OPTIONS).headers).isEqualTo(standardRequest.headers)
+    }
+
     @Test
     fun getContentType() {
         val contentType = FACTORY.createGet(

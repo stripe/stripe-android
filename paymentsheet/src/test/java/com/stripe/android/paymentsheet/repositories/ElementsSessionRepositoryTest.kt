@@ -56,6 +56,7 @@ internal class ElementsSessionRepositoryTest {
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
             apiConfiguration = DEFAULT_API_CONFIG.copy(betas = setOf("elements_beta=v1")),
+            mobileSessionConfig = null,
         ).getOrThrow()
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -84,6 +85,7 @@ internal class ElementsSessionRepositoryTest {
                 savedPaymentMethodSelectionId = null,
                 countryOverride = null,
                 apiConfiguration = DEFAULT_API_CONFIG,
+                mobileSessionConfig = null,
             ).getOrThrow()
         }
 
@@ -118,6 +120,7 @@ internal class ElementsSessionRepositoryTest {
                     savedPaymentMethodSelectionId = null,
                     countryOverride = null,
                     apiConfiguration = DEFAULT_API_CONFIG,
+                    mobileSessionConfig = null,
                 ).getOrThrow()
             }
 
@@ -147,6 +150,7 @@ internal class ElementsSessionRepositoryTest {
                     savedPaymentMethodSelectionId = null,
                     countryOverride = null,
                     apiConfiguration = DEFAULT_API_CONFIG,
+                    mobileSessionConfig = null,
                 ).getOrThrow()
             }
 
@@ -177,6 +181,7 @@ internal class ElementsSessionRepositoryTest {
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
             apiConfiguration = DEFAULT_API_CONFIG,
+            mobileSessionConfig = null,
         ).getOrThrow()
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -217,6 +222,7 @@ internal class ElementsSessionRepositoryTest {
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
             apiConfiguration = DEFAULT_API_CONFIG,
+            mobileSessionConfig = null,
         )
 
         assertThat(session.isSuccess).isTrue()
@@ -239,6 +245,7 @@ internal class ElementsSessionRepositoryTest {
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
             apiConfiguration = DEFAULT_API_CONFIG,
+            mobileSessionConfig = null,
         )
 
         verify(stripeNetworkClient).executeRequest(any())
@@ -261,6 +268,7 @@ internal class ElementsSessionRepositoryTest {
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
             apiConfiguration = DEFAULT_API_CONFIG,
+            mobileSessionConfig = null,
         )
 
         verify(stripeNetworkClient).executeRequest(any())
@@ -296,6 +304,7 @@ internal class ElementsSessionRepositoryTest {
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
             apiConfiguration = DEFAULT_API_CONFIG,
+            mobileSessionConfig = null,
         )
 
         assertThat(session.isSuccess).isTrue()
@@ -329,6 +338,7 @@ internal class ElementsSessionRepositoryTest {
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
             apiConfiguration = DEFAULT_API_CONFIG,
+            mobileSessionConfig = null,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -364,6 +374,7 @@ internal class ElementsSessionRepositoryTest {
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
             apiConfiguration = DEFAULT_API_CONFIG,
+            mobileSessionConfig = null,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -396,6 +407,7 @@ internal class ElementsSessionRepositoryTest {
             savedPaymentMethodSelectionId = "pm_123",
             countryOverride = null,
             apiConfiguration = DEFAULT_API_CONFIG,
+            mobileSessionConfig = null,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -444,6 +456,7 @@ internal class ElementsSessionRepositoryTest {
             savedPaymentMethodSelectionId = "pm_123",
             countryOverride = null,
             apiConfiguration = DEFAULT_API_CONFIG,
+            mobileSessionConfig = null,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -485,6 +498,7 @@ internal class ElementsSessionRepositoryTest {
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
             apiConfiguration = DEFAULT_API_CONFIG,
+            mobileSessionConfig = null,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -536,6 +550,7 @@ internal class ElementsSessionRepositoryTest {
             savedPaymentMethodSelectionId = "pm_123",
             countryOverride = null,
             apiConfiguration = DEFAULT_API_CONFIG,
+            mobileSessionConfig = null,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -577,6 +592,7 @@ internal class ElementsSessionRepositoryTest {
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
             apiConfiguration = DEFAULT_API_CONFIG,
+            mobileSessionConfig = null,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -625,6 +641,7 @@ internal class ElementsSessionRepositoryTest {
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
             apiConfiguration = DEFAULT_API_CONFIG,
+            mobileSessionConfig = null,
         ).getOrThrow()
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -662,6 +679,7 @@ internal class ElementsSessionRepositoryTest {
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
             apiConfiguration = DEFAULT_API_CONFIG,
+            mobileSessionConfig = null,
         ).getOrThrow()
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -691,6 +709,7 @@ internal class ElementsSessionRepositoryTest {
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
             apiConfiguration = DEFAULT_API_CONFIG,
+            mobileSessionConfig = null,
             linkDisallowedFundingSourceCreation = setOf("somethingThatsNotAllowed"),
         )
 
@@ -716,6 +735,7 @@ internal class ElementsSessionRepositoryTest {
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
             apiConfiguration = DEFAULT_API_CONFIG,
+            mobileSessionConfig = null,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -739,6 +759,7 @@ internal class ElementsSessionRepositoryTest {
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
             apiConfiguration = DEFAULT_API_CONFIG,
+            mobileSessionConfig = null,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -767,6 +788,7 @@ internal class ElementsSessionRepositoryTest {
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
             apiConfiguration = DEFAULT_API_CONFIG,
+            mobileSessionConfig = null,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -801,6 +823,7 @@ internal class ElementsSessionRepositoryTest {
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
             apiConfiguration = DEFAULT_API_CONFIG,
+            mobileSessionConfig = null,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -832,6 +855,7 @@ internal class ElementsSessionRepositoryTest {
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
             apiConfiguration = DEFAULT_API_CONFIG,
+            mobileSessionConfig = null,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -856,6 +880,7 @@ internal class ElementsSessionRepositoryTest {
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
             apiConfiguration = DEFAULT_API_CONFIG,
+            mobileSessionConfig = null,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -880,6 +905,7 @@ internal class ElementsSessionRepositoryTest {
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
             apiConfiguration = DEFAULT_API_CONFIG,
+            mobileSessionConfig = null,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -904,6 +930,7 @@ internal class ElementsSessionRepositoryTest {
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
             apiConfiguration = DEFAULT_API_CONFIG,
+            mobileSessionConfig = null,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -933,6 +960,7 @@ internal class ElementsSessionRepositoryTest {
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
             apiConfiguration = DEFAULT_API_CONFIG,
+            mobileSessionConfig = null,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -958,6 +986,7 @@ internal class ElementsSessionRepositoryTest {
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
             apiConfiguration = DEFAULT_API_CONFIG,
+            mobileSessionConfig = null,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -982,6 +1011,7 @@ internal class ElementsSessionRepositoryTest {
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
             apiConfiguration = DEFAULT_API_CONFIG.copy(publishableKey = "uk_12345"),
+            mobileSessionConfig = null,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -1009,6 +1039,7 @@ internal class ElementsSessionRepositoryTest {
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
             apiConfiguration = DEFAULT_API_CONFIG.copy(publishableKey = "uk_12345"),
+            mobileSessionConfig = null,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
@@ -1042,6 +1073,7 @@ internal class ElementsSessionRepositoryTest {
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
             apiConfiguration = DEFAULT_API_CONFIG.copy(publishableKey = "uk_12345"),
+            mobileSessionConfig = null,
         )
 
         verify(stripeNetworkClient).executeRequest(requestCaptor.capture())

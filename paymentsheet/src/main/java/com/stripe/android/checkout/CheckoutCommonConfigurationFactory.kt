@@ -89,6 +89,7 @@ internal class CheckoutCommonConfigurationFactory @Inject constructor(
         billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
     ): CommonConfiguration = CommonConfiguration(
         merchantDisplayName = configuration.resolveMerchantDisplayName(checkoutSessionResponse, appName),
+        useRemoteMobileSession = false,
         customer = ConfigurationDefaults.customer,
         googlePay = googlePayConfiguration,
         link = linkConfiguration,
