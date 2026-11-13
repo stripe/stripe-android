@@ -16,6 +16,7 @@ import org.tensorflow.lite.support.common.ops.NormalizeOp
 import org.tensorflow.lite.support.image.ImageProcessor
 import org.tensorflow.lite.support.image.TensorImage
 import org.tensorflow.lite.support.image.ops.ResizeOp
+import java.io.Closeable
 import java.io.File
 
 /**
@@ -24,7 +25,7 @@ import java.io.File
 internal class FaceDetectorAnalyzer(
     modelFile: File,
     private val modelPerformanceTracker: ModelPerformanceTracker
-) : Analyzer<AnalyzerInput, IdentityScanState, AnalyzerOutput> {
+) : Analyzer<AnalyzerInput, IdentityScanState, AnalyzerOutput>, Closeable {
 
     private val interpreterApi: InterpreterWrapper = InterpreterWrapperImpl(
         modelFile,
@@ -83,6 +84,10 @@ internal class FaceDetectorAnalyzer(
             ),
             resultScore = score[0].roundToMaxDecimals(2)
         )
+    }
+
+    override fun close() {
+        interpreterApi.close()
     }
 
     internal class Factory(
