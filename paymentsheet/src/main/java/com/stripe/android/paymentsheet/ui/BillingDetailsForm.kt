@@ -29,6 +29,7 @@ internal class BillingDetailsForm(
     private val collectPhone: Boolean,
     allowedBillingCountries: Set<String>,
     autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
+    requiresBillingAddressForAutomaticTax: Boolean,
 ) {
     val nameElement: SimpleTextElement? = if (nameCollection == NameCollection.OutsideBillingDetailsForm) {
         SimpleTextElement(
@@ -62,7 +63,7 @@ internal class BillingDetailsForm(
                 AddressCollectionMode.Never -> BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
                 AddressCollectionMode.Full -> BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
             },
-            requiresBillingAddressForAutomaticTax = false,
+            requiresBillingAddressForAutomaticTax = requiresBillingAddressForAutomaticTax,
         ),
         rawValuesMap = rawAddressValues(billingDetails),
         autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,

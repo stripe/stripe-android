@@ -84,6 +84,39 @@ internal class BillingDetailsEntryTest {
     }
 
     @Test
+    fun `isComplete() returns false when collected line1 is incomplete in Automatic mode`() {
+        val state = billingDetailsEntry(
+            billingDetailsFormState = billingDetailsFormState(
+                line1 = FormFieldEntry("", isComplete = false),
+            )
+        )
+
+        assertThat(state.isComplete(automaticAddressConfig)).isFalse()
+    }
+
+    @Test
+    fun `isComplete() returns false when collected city is incomplete in Automatic mode`() {
+        val state = billingDetailsEntry(
+            billingDetailsFormState = billingDetailsFormState(
+                city = FormFieldEntry("", isComplete = false),
+            )
+        )
+
+        assertThat(state.isComplete(automaticAddressConfig)).isFalse()
+    }
+
+    @Test
+    fun `isComplete() returns false when collected state is incomplete in Automatic mode`() {
+        val state = billingDetailsEntry(
+            billingDetailsFormState = billingDetailsFormState(
+                state = FormFieldEntry("", isComplete = false),
+            )
+        )
+
+        assertThat(state.isComplete(automaticAddressConfig)).isFalse()
+    }
+
+    @Test
     fun `isComplete() always returns true in Never mode`() {
         val state = billingDetailsEntry(
             billingDetailsFormState = billingDetailsFormState(
@@ -152,6 +185,10 @@ internal class BillingDetailsEntryTest {
 
         val state = billingDetailsEntry(
             billingDetailsFormState = billingDetailsFormState(
+                line1 = null,
+                line2 = null,
+                city = null,
+                state = null,
                 postalCode = FormFieldEntry("94107", isComplete = true),
                 country = FormFieldEntry("US", isComplete = true),
             )
@@ -162,6 +199,35 @@ internal class BillingDetailsEntryTest {
             billingDetailsCollectionConfiguration = automaticAddressConfig
         )
         assertThat(hasChanged).isFalse()
+    }
+
+    @Test
+    fun `hasChanged() returns true when collected line1 changes in Automatic mode`() {
+        val billingDetails = BILLING_DETAILS_FORM_DETAILS.toBuilder().setAddress(
+            address = Address(
+                line1 = "123 Main Street",
+                city = "San Francisco",
+                state = "CA",
+                postalCode = "94107",
+                country = "US"
+            )
+        ).build()
+
+        val state = billingDetailsEntry(
+            billingDetailsFormState = billingDetailsFormState(
+                line1 = FormFieldEntry("456 Market Street", isComplete = true),
+                city = FormFieldEntry("San Francisco", isComplete = true),
+                state = FormFieldEntry("CA", isComplete = true),
+                postalCode = FormFieldEntry("94107", isComplete = true),
+                country = FormFieldEntry("US", isComplete = true),
+            )
+        )
+
+        val hasChanged = state.hasChanged(
+            billingDetails = billingDetails,
+            billingDetailsCollectionConfiguration = automaticAddressConfig
+        )
+        assertThat(hasChanged).isTrue()
     }
 
     @Test

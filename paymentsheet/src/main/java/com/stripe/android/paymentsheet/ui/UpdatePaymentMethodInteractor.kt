@@ -133,6 +133,7 @@ internal class DefaultUpdatePaymentMethodInteractor(
     val editCardDetailsInteractorFactory: EditCardDetailsInteractor.Factory = DefaultEditCardDetailsInteractor
         .Factory(),
     private val autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
+    private val requiresBillingAddressForAutomaticTax: Boolean,
 ) : UpdatePaymentMethodInteractor {
     private val coroutineScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private val error = MutableStateFlow(getInitialError())
@@ -213,6 +214,7 @@ internal class DefaultUpdatePaymentMethodInteractor(
             ),
             requiresModification = true,
             autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
+            requiresBillingAddressForAutomaticTax = requiresBillingAddressForAutomaticTax,
         )
     }
 
@@ -242,6 +244,7 @@ internal class DefaultUpdatePaymentMethodInteractor(
             ),
             requiresModification = true,
             autocompleteAddressInteractorFactory = null,
+            requiresBillingAddressForAutomaticTax = false,
         )
     }
 

@@ -6,6 +6,7 @@ import com.stripe.android.CardBrandFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.isInstanceOf
+import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
@@ -16,6 +17,7 @@ import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConf
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.ui.core.elements.BillingAddressElement
+import com.stripe.android.uicore.elements.FormFieldId
 import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -25,6 +27,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
+@Suppress("LargeClass")
 @RunWith(RobolectricTestRunner::class)
 internal class DefaultEditCardDetailsInteractorTest {
     private val testDispatcher = UnconfinedTestDispatcher()
@@ -396,6 +399,94 @@ internal class DefaultEditCardDetailsInteractorTest {
     }
 
     @Test
+    fun billingDetailsFormCollectsUsTaxFieldsWhenAutomaticTaxRequiresBillingAddress() {
+        val handler = handler(
+            addressCollectionMode = AddressCollectionMode.Automatic,
+            requiresBillingAddressForAutomaticTax = true,
+        )
+
+        val hiddenElements = requireNotNull(handler.uiState.billingDetailsForm).hiddenElements.value
+        assertThat(hiddenElements).containsNoneOf(
+            FormFieldId.Line1,
+            FormFieldId.City,
+            FormFieldId.State,
+            FormFieldId.PostalCode,
+        )
+    }
+
+    @Test
+    fun billingDetailsFormOmitsUsTaxFieldsWhenAutomaticTaxDoesNotRequireBillingAddress() {
+        val handler = handler(
+            addressCollectionMode = AddressCollectionMode.Automatic,
+            requiresBillingAddressForAutomaticTax = false,
+        )
+
+        val hiddenElements = requireNotNull(handler.uiState.billingDetailsForm).hiddenElements.value
+        assertThat(hiddenElements).containsAtLeast(FormFieldId.Line1, FormFieldId.City, FormFieldId.State)
+        assertThat(hiddenElements).doesNotContain(FormFieldId.PostalCode)
+    }
+
+    @Test
+    fun cardUpdateParamsIsNullWhenAutomaticTaxFieldsAreIncomplete() {
+        var capturedCardUpdateParams: CardUpdateParams? = null
+        val handler = handler(
+            billingDetails = PaymentMethod.BillingDetails(address = Address(country = "FR")),
+            requiresBillingAddressForAutomaticTax = true,
+            onCardUpdateParamsChanged = {
+                capturedCardUpdateParams = it
+            }
+        )
+
+        handler.handleViewAction(
+            EditCardDetailsInteractor.ViewAction.BillingDetailsChanged(
+                PaymentSheetFixtures.billingDetailsFormState(
+                    line1 = FormFieldEntry("", isComplete = false),
+                    city = FormFieldEntry("", isComplete = false),
+                    state = FormFieldEntry("", isComplete = false),
+                    postalCode = FormFieldEntry("94103", isComplete = true),
+                    country = FormFieldEntry("US", isComplete = true),
+                )
+            )
+        )
+
+        assertThat(capturedCardUpdateParams).isNull()
+    }
+
+    @Test
+    fun cardUpdateParamsIncludesAutomaticTaxFieldsWhenComplete() {
+        var capturedCardUpdateParams: CardUpdateParams? = null
+        val handler = handler(
+            billingDetails = PaymentMethod.BillingDetails(address = Address(country = "FR")),
+            requiresBillingAddressForAutomaticTax = true,
+            onCardUpdateParamsChanged = {
+                capturedCardUpdateParams = it
+            }
+        )
+
+        handler.handleViewAction(
+            EditCardDetailsInteractor.ViewAction.BillingDetailsChanged(
+                PaymentSheetFixtures.billingDetailsFormState(
+                    line1 = FormFieldEntry("354 Oyster Point Blvd", isComplete = true),
+                    city = FormFieldEntry("South San Francisco", isComplete = true),
+                    state = FormFieldEntry("CA", isComplete = true),
+                    postalCode = FormFieldEntry("94103", isComplete = true),
+                    country = FormFieldEntry("US", isComplete = true),
+                )
+            )
+        )
+
+        assertThat(capturedCardUpdateParams?.billingDetails?.address).isEqualTo(
+            Address(
+                line1 = "354 Oyster Point Blvd",
+                city = "South San Francisco",
+                state = "CA",
+                postalCode = "94103",
+                country = "US",
+            )
+        )
+    }
+
+    @Test
     fun whenAddressCollectionModeIsNeverAndBillingDetailsNotNullThenCardUpdateParamsIsNull() {
         var cardUpdateParams: CardUpdateParams? = null
         val handler = handler(
@@ -699,7 +790,8 @@ internal class DefaultEditCardDetailsInteractorTest {
         billingDetails: PaymentMethod.BillingDetails? = PaymentMethodFixtures.BILLING_DETAILS,
         requiresModification: Boolean = true,
         onBrandChoiceChanged: (CardBrand) -> Unit = {},
-        onCardUpdateParamsChanged: (CardUpdateParams?) -> Unit = {}
+        onCardUpdateParamsChanged: (CardUpdateParams?) -> Unit = {},
+        requiresBillingAddressForAutomaticTax: Boolean = false,
     ): EditCardDetailsInteractor {
         return DefaultEditCardDetailsInteractor.Factory().create(
             coroutineScope = TestScope(testDispatcher),
@@ -718,6 +810,7 @@ internal class DefaultEditCardDetailsInteractorTest {
             onBrandChoiceChanged = onBrandChoiceChanged,
             onCardUpdateParamsChanged = onCardUpdateParamsChanged,
             autocompleteAddressInteractorFactory = null,
+            requiresBillingAddressForAutomaticTax = requiresBillingAddressForAutomaticTax,
         )
     }
 }

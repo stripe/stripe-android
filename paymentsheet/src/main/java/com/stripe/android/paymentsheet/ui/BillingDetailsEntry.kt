@@ -17,12 +17,10 @@ internal data class BillingDetailsEntry(
             billingDetails = billingDetails
         )
 
+        // Fields hidden by the form are null, so they never count as changed.
         val addressChanged = when (billingDetailsCollectionConfiguration.address) {
-            AddressCollectionMode.Automatic -> {
-                billingDetails?.address?.postalCode nullableNeq billingDetailsFormState.postalCode ||
-                    billingDetails?.address?.country nullableNeq billingDetailsFormState.country
-            }
             AddressCollectionMode.Never -> false
+            AddressCollectionMode.Automatic,
             AddressCollectionMode.Full -> {
                 billingDetails?.address?.postalCode nullableNeq billingDetailsFormState.postalCode ||
                     billingDetails?.address?.country nullableNeq billingDetailsFormState.country ||
@@ -63,13 +61,12 @@ internal data class BillingDetailsEntry(
     fun isComplete(configuration: BillingDetailsCollectionConfiguration): Boolean {
         val contactInfoComplete = contactInfoComplete(configuration)
 
+        // Fields hidden by the form are null, so they are always valid.
         val addressComplete = when (configuration.address) {
-            AddressCollectionMode.Automatic -> {
-                billingDetailsFormState.country.isValid && billingDetailsFormState.postalCode.isValid
-            }
             AddressCollectionMode.Never -> {
                 true
             }
+            AddressCollectionMode.Automatic,
             AddressCollectionMode.Full -> {
                 billingDetailsFormState.country.isValid && billingDetailsFormState.state.isValid &&
                     billingDetailsFormState.postalCode.isValid && billingDetailsFormState.line1.isValid &&

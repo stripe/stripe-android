@@ -100,6 +100,7 @@ internal fun UpdateCardScreenBody(
     }
 }
 
+@Suppress("LongMethod")
 @Preview
 @Composable
 internal fun UpdateCardScreenBodyPreview() {
@@ -145,6 +146,7 @@ internal fun UpdateCardScreenBodyPreview() {
                     billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(),
                     requiresModification = true,
                     autocompleteAddressInteractorFactory = null,
+                    requiresBillingAddressForAutomaticTax = false,
                 ),
                 state = UpdateCardScreenState(
                     paymentDetailsId = "card_id_1234",

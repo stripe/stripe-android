@@ -457,6 +457,7 @@ internal class CustomerSheetScreenshotTest {
                 removeMessage = null,
                 onUpdateSuccess = {},
                 autocompleteAddressInteractorFactory = null,
+                requiresBillingAddressForAutomaticTax = false,
             ).also { closeInteractorRule.track(it) },
         )
     }

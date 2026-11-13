@@ -14,6 +14,9 @@ internal class FakeEditCardDetailsInteractorFactory : EditCardDetailsInteractor.
     var autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory? = null
         private set
 
+    var requiresBillingAddressForAutomaticTax: Boolean? = null
+        private set
+
     override fun create(
         coroutineScope: CoroutineScope,
         cardEditConfiguration: CardEditConfiguration?,
@@ -23,10 +26,12 @@ internal class FakeEditCardDetailsInteractorFactory : EditCardDetailsInteractor.
         onBrandChoiceChanged: CardBrandCallback,
         onCardUpdateParamsChanged: CardUpdateParamsCallback,
         autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
+        requiresBillingAddressForAutomaticTax: Boolean,
     ): EditCardDetailsInteractor {
         this.onCardUpdateParamsChanged = onCardUpdateParamsChanged
         this.billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration
         this.autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory
+        this.requiresBillingAddressForAutomaticTax = requiresBillingAddressForAutomaticTax
         return FakeEditCardDetailsInteractor(
             payload = payload,
             shouldShowCardBrandDropdown = cardEditConfiguration?.isCbcModifiable ?: false,

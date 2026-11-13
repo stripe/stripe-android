@@ -4,6 +4,7 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.isInstanceOf
+import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
@@ -68,6 +69,49 @@ internal class BillingDetailsFormTest {
     }
 
     @Test
+    fun `automatic collection with automatic tax collects US tax fields`() = runScenario(
+        addressCollectionMode = AddressCollectionMode.Automatic,
+        requiresBillingAddressForAutomaticTax = true,
+    ) {
+        val address = PaymentMethodFixtures.BILLING_DETAILS.address
+        formFieldsState.test {
+            val item = awaitItem()
+            item.line1.isEqualTo(address?.line1)
+            item.line2.isNull()
+            item.city.isEqualTo(address?.city)
+            item.state.isEqualTo(address?.state)
+            item.postalCode.isEqualTo(address?.postalCode)
+            item.country.isEqualTo(address?.country)
+        }
+    }
+
+    @Test
+    fun `automatic collection with automatic tax collects US tax fields after changing country`() = runScenario(
+        billingDetails = PaymentMethod.BillingDetails(address = Address(country = "FR")),
+        addressCollectionMode = AddressCollectionMode.Automatic,
+        requiresBillingAddressForAutomaticTax = true,
+    ) {
+        formFieldsState.test {
+            val frenchItem = awaitItem()
+            frenchItem.line1.isNull()
+            frenchItem.city.isNull()
+            frenchItem.state.isNull()
+            frenchItem.postalCode.isNull()
+            frenchItem.country.isEqualTo("FR")
+
+            val billingAddressElement = addressSectionElement.fields[0] as BillingAddressElement
+            billingAddressElement.countryElement.controller.onRawValueChange("US")
+
+            val usItem = expectMostRecentItem()
+            assertThat(usItem.line1).isNotNull()
+            assertThat(usItem.city).isNotNull()
+            assertThat(usItem.state).isNotNull()
+            assertThat(usItem.postalCode).isNotNull()
+            usItem.country.isEqualTo("US")
+        }
+    }
+
+    @Test
     fun testAllBillingCountriesUsed() = runScenario(
         allowedCountries = emptySet()
     ) {
@@ -107,6 +151,7 @@ internal class BillingDetailsFormTest {
         billingDetails: PaymentMethod.BillingDetails? = PaymentMethodFixtures.BILLING_DETAILS,
         addressCollectionMode: AddressCollectionMode = AddressCollectionMode.Full,
         allowedCountries: Set<String> = emptySet(),
+        requiresBillingAddressForAutomaticTax: Boolean = false,
         block: suspend BillingDetailsForm.() -> Unit
     ) = runTest(testDispatcher) {
         val form = BillingDetailsForm(
@@ -117,6 +162,7 @@ internal class BillingDetailsFormTest {
             collectPhone = false,
             allowedBillingCountries = allowedCountries,
             autocompleteAddressInteractorFactory = null,
+            requiresBillingAddressForAutomaticTax = requiresBillingAddressForAutomaticTax,
         )
         block(form)
     }
