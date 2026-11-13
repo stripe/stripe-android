@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.state
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -83,8 +84,8 @@ internal class ElementsSessionLoaderTest {
     }
 
     private companion object {
-        private val DEFAULT_CONFIG = PaymentElementLoader.Configuration.PaymentSheet(
-            PaymentSheet.Configuration(merchantDisplayName = "Merchant"),
-        )
+        private val DEFAULT_CONFIG = PaymentSheet.Configuration(
+            merchantDisplayName = "Merchant",
+        ).asCommonConfiguration()
     }
 }

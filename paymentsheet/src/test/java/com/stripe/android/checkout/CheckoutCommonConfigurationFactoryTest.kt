@@ -55,6 +55,7 @@ internal class CheckoutCommonConfigurationFactoryTest {
         )
 
         assertThat(result.preferredNetworks).containsExactly(CardBrand.CartesBancaires)
+        assertThat(result.usesMobileSession).isTrue()
         assertThat(result.paymentMethodOrder).containsExactly("klarna", "card").inOrder()
         assertThat(result.opensCardScannerAutomatically).isTrue()
         assertThat(result.cardBrandAcceptance).isEqualTo(

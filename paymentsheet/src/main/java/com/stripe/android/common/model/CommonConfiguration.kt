@@ -21,6 +21,8 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 internal data class CommonConfiguration(
     val merchantDisplayName: String,
+    /** Whether this integration opts into MobileSession when the feature flag is enabled. */
+    val usesMobileSession: Boolean,
     val customer: PaymentSheet.CustomerConfiguration?,
     val googlePay: PaymentSheet.GooglePayConfiguration?,
     val link: PaymentSheet.LinkConfiguration,
@@ -227,6 +229,7 @@ internal data class CommonConfiguration(
 
 internal fun PaymentSheet.Configuration.asCommonConfiguration(): CommonConfiguration = CommonConfiguration(
     merchantDisplayName = merchantDisplayName,
+    usesMobileSession = true,
     customer = customer,
     googlePay = googlePay,
     defaultBillingDetails = defaultBillingDetails,
@@ -253,6 +256,7 @@ internal fun PaymentSheet.Configuration.asCommonConfiguration(): CommonConfigura
 
 internal fun EmbeddedPaymentElement.Configuration.asCommonConfiguration(): CommonConfiguration = CommonConfiguration(
     merchantDisplayName = merchantDisplayName,
+    usesMobileSession = true,
     customer = customer,
     googlePay = googlePay,
     defaultBillingDetails = defaultBillingDetails,
@@ -279,6 +283,7 @@ internal fun EmbeddedPaymentElement.Configuration.asCommonConfiguration(): Commo
 
 internal fun LinkController.Configuration.State.asCommonConfiguration(): CommonConfiguration = CommonConfiguration(
     merchantDisplayName = merchantDisplayName,
+    usesMobileSession = false,
     customer = null,
     googlePay = null,
     defaultBillingDetails = defaultBillingDetails,

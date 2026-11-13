@@ -3,6 +3,8 @@ package com.stripe.android.paymentsheet.repositories
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.common.model.CommonConfiguration
+import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeRequest
@@ -69,14 +71,11 @@ internal class ElementsSessionMobileSessionRequestTest {
 
     @Test
     fun `Embedded loads send their configuration in the header`() = runScenario(
-        configuration = PaymentElementLoader.Configuration.Embedded(
-            isRowSelectionImmediateAction = true,
-            configuration = EmbeddedPaymentElement.Configuration.Builder("Merchant")
-                .allowsDelayedPaymentMethods(true)
-                .paymentMethodOrder(listOf("klarna", "card"))
-                .build(),
-            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
-        ),
+        configuration = EmbeddedPaymentElement.Configuration.Builder("Merchant")
+            .allowsDelayedPaymentMethods(true)
+            .paymentMethodOrder(listOf("klarna", "card"))
+            .build()
+            .asCommonConfiguration(),
     ) {
         val config = JSONObject(requireNotNull(request.headers[MobileSession.CONFIG_HEADER_NAME]))
             .getJSONObject("payment_element_config")
@@ -98,23 +97,21 @@ internal class ElementsSessionMobileSessionRequestTest {
 
     @Test
     fun `standalone Link omits the header`() = runScenario(
-        configuration = PaymentElementLoader.Configuration.StandaloneLink(LINK_CONFIGURATION),
+        configuration = PaymentElementLoader.Configuration.StandaloneLink(LINK_CONFIGURATION).commonConfiguration,
     ) {
         assertThat(request.headers).doesNotContainKey(MobileSession.CONFIG_HEADER_NAME)
     }
 
     @Test
     fun `crypto onramp omits the header`() = runScenario(
-        configuration = PaymentElementLoader.Configuration.CryptoOnramp(LINK_CONFIGURATION),
+        configuration = PaymentElementLoader.Configuration.CryptoOnramp(LINK_CONFIGURATION).commonConfiguration,
     ) {
         assertThat(request.headers).doesNotContainKey(MobileSession.CONFIG_HEADER_NAME)
     }
 
     @Test
-    fun `express checkout omits the header`() = runScenario(
-        configuration = PaymentElementLoader.Configuration.ExpressCheckoutElement(
-            DEFAULT_CONFIGURATION.commonConfiguration,
-        ),
+    fun `common configuration can opt out of MobileSession`() = runScenario(
+        configuration = DEFAULT_CONFIGURATION.copy(usesMobileSession = false),
     ) {
         assertThat(request.headers).doesNotContainKey(MobileSession.CONFIG_HEADER_NAME)
     }
@@ -128,7 +125,7 @@ internal class ElementsSessionMobileSessionRequestTest {
     }
 
     private fun runScenario(
-        configuration: PaymentElementLoader.Configuration? = DEFAULT_CONFIGURATION,
+        configuration: CommonConfiguration? = DEFAULT_CONFIGURATION,
         initializationMode: PaymentElementLoader.InitializationMode =
             PaymentElementLoader.InitializationMode.PaymentIntent("pi_123_secret_123"),
         response: JSONObject = ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON,
@@ -187,9 +184,7 @@ internal class ElementsSessionMobileSessionRequestTest {
     }
 
     private companion object {
-        val DEFAULT_CONFIGURATION = PaymentElementLoader.Configuration.PaymentSheet(
-            PaymentSheet.Configuration("Merchant"),
-        )
+        val DEFAULT_CONFIGURATION = PaymentSheet.Configuration("Merchant").asCommonConfiguration()
         val LINK_CONFIGURATION = LinkController.Configuration(
             merchantDisplayName = "Merchant",
             publishableKey = DEFAULT_API_CONFIG.publishableKey,

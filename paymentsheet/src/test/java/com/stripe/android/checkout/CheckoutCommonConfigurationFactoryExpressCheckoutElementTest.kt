@@ -50,6 +50,7 @@ internal class CheckoutCommonConfigurationFactoryExpressCheckoutElementTest {
 
         assertThat(result?.link?.display)
             .isEqualTo(PaymentSheet.LinkConfiguration.Display.Never)
+        assertThat(result?.usesMobileSession).isFalse()
     }
 
     @Test

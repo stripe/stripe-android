@@ -23,6 +23,7 @@ internal class CheckoutCommonConfigurationFactory @Inject constructor(
         collectedDetails: CheckoutCollectedDetails,
     ): CommonConfiguration {
         return createCommonConfiguration(
+            usesMobileSession = true,
             configuration = configuration,
             paymentElementConfiguration = paymentElementConfiguration,
             checkoutSessionResponse = checkoutSessionResponse,
@@ -41,6 +42,7 @@ internal class CheckoutCommonConfigurationFactory @Inject constructor(
     ): CommonConfiguration? {
         val expressCheckoutElementConfiguration = configuration.expressCheckoutElementConfiguration ?: return null
         return createCommonConfiguration(
+            usesMobileSession = false,
             configuration = configuration,
             paymentElementConfiguration = configuration.paymentElementConfiguration,
             checkoutSessionResponse = checkoutSessionResponse,
@@ -80,6 +82,7 @@ internal class CheckoutCommonConfigurationFactory @Inject constructor(
     }
 
     private fun createCommonConfiguration(
+        usesMobileSession: Boolean,
         configuration: CheckoutElementsController.Configuration.State,
         paymentElementConfiguration: PaymentElement.Configuration.State?,
         checkoutSessionResponse: CheckoutSessionResponse,
@@ -89,6 +92,7 @@ internal class CheckoutCommonConfigurationFactory @Inject constructor(
         billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
     ): CommonConfiguration = CommonConfiguration(
         merchantDisplayName = configuration.resolveMerchantDisplayName(checkoutSessionResponse, appName),
+        usesMobileSession = usesMobileSession,
         customer = ConfigurationDefaults.customer,
         googlePay = googlePayConfiguration,
         link = linkConfiguration,
