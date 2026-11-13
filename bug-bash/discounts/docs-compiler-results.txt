@@ -1,0 +1,15 @@
+ActualDiscountApi.kt: compiler exit 0; expected 0
+Picked up JAVA_TOOL_OPTIONS: -Dlog4j2.formatMsgNoLookups=true -Dcom.sun.jndi.ldap.object.trustURLCodebase=false
+
+DocumentedDiscountApply.kt: compiler exit 1; expected 1
+Picked up JAVA_TOOL_OPTIONS: -Dlog4j2.formatMsgNoLookups=true -Dcom.sun.jndi.ldap.object.trustURLCodebase=false
+bug-bash/discounts/DocumentedDiscountApply.kt:4:41: error: unresolved reference 'onSuccess'.
+    controller.applyPromotionCode(code).onSuccess { }
+                                        ^^^^^^^^^
+
+DocumentedDiscountTotals.kt: compiler exit 1; expected 1
+Picked up JAVA_TOOL_OPTIONS: -Dlog4j2.formatMsgNoLookups=true -Dcom.sun.jndi.ldap.object.trustURLCodebase=false
+bug-bash/discounts/DocumentedDiscountTotals.kt:4:26: error: unresolved reference 'totalSummary'.
+    val totals = session.totalSummary ?: return
+                         ^^^^^^^^^^^^
+

@@ -1,0 +1,25 @@
+{"text": "Line Items", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[42,321][290,384]"}
+{"text": "Classic T-Shirt x2", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[42,395][330,448]"}
+{"text": "$70.00", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[923,395][1038,448]"}
+{"text": "Zip-Up Hoodie x1", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[42,470][329,523]"}
+{"text": "$50.00", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[923,470][1038,523]"}
+{"text": "Subtotal", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[42,601][187,664]"}
+{"text": "$120.00", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[899,601][1038,664]"}
+{"text": "Total", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[42,709][130,772]"}
+{"text": "$120.00", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[899,709][1038,772]"}
+{"text": "", "content-desc": "\u00a519,952", "class": "android.view.View", "enabled": "true", "clickable": "false", "bounds": "[42,814][540,899]"}
+{"text": "", "content-desc": "$120.00", "class": "android.view.View", "enabled": "true", "clickable": "false", "bounds": "[540,814][1038,899]"}
+{"text": "Exchange rate and fees of your bank may apply.", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[42,910][1038,952]"}
+{"text": "Card", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[238,1041][314,1090]"}
+{"text": "Amazon Pay", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[238,1181][438,1230]"}
+{"text": "Alipay", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[238,1321][337,1370]"}
+{"text": "US bank account", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[238,1461][509,1510]"}
+{"text": "Cash App Pay", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[238,1601][462,1650]"}
+{"text": "WeChat Pay", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[238,1741][433,1790]"}
+{"text": "Crypto", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[238,1881][345,1930]"}
+{"text": "\u2039", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[60,154][88,259]"}
+{"text": "Checkout", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[190,174][415,237]"}
+{"text": "No payment method selected", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[32,2011][523,2064]"}
+{"text": "Clear", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[232,2106][330,2149]"}
+{"text": "Select", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[740,2106][858,2149]"}
+{"text": "Confirm", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[465,2232][616,2275]"}

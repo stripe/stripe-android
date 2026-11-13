@@ -1,0 +1,278 @@
+[
+  {
+    "evidence": "backend-bancontact-failed.json",
+    "session_hash": "0adb82fef0b9",
+    "creation_currency": "eur",
+    "poll": {
+      "http_status": 200,
+      "confirmation_status": "failed",
+      "livemode": false,
+      "payment_status": "unpaid",
+      "status": "open"
+    }
+  },
+  {
+    "evidence": "backend-bancontact-success.json",
+    "session_hash": "02f0d9477b3b",
+    "creation_currency": "eur",
+    "poll": {
+      "http_status": 200,
+      "confirmation_status": "succeeded",
+      "livemode": false,
+      "payment_status": "paid",
+      "status": "complete"
+    }
+  },
+  {
+    "evidence": "backend-blik-card-recovery.json",
+    "session_hash": "2b2418310d57",
+    "creation_currency": "pln",
+    "poll": {
+      "http_status": 200,
+      "confirmation_status": "succeeded",
+      "livemode": false,
+      "payment_status": "paid",
+      "status": "complete"
+    }
+  },
+  {
+    "evidence": "backend-blik-initial-failure.json",
+    "session_hash": "2b2418310d57",
+    "creation_currency": "pln",
+    "poll": {
+      "http_status": 200,
+      "confirmation_status": "pending",
+      "livemode": false,
+      "payment_status": "unpaid",
+      "status": "open"
+    }
+  },
+  {
+    "evidence": "backend-blik-initial.json",
+    "session_hash": "2b2418310d57",
+    "creation_currency": "pln",
+    "poll": {
+      "http_status": 200,
+      "confirmation_status": "not_started",
+      "livemode": false,
+      "payment_status": "unpaid",
+      "status": "open"
+    }
+  },
+  {
+    "evidence": "backend-blik-repeated.json",
+    "session_hash": "2b2418310d57",
+    "creation_currency": "pln",
+    "poll": {
+      "http_status": 200,
+      "confirmation_status": "pending",
+      "livemode": false,
+      "payment_status": "unpaid",
+      "status": "open"
+    }
+  },
+  {
+    "evidence": "backend-eur-initial.json",
+    "session_hash": "beaaee604293",
+    "creation_currency": "eur",
+    "poll": {
+      "http_status": 200,
+      "confirmation_status": "not_started",
+      "livemode": false,
+      "payment_status": "unpaid",
+      "status": "open"
+    }
+  },
+  {
+    "evidence": "backend-gbp-initial.json",
+    "session_hash": "498ae1234fa0",
+    "creation_currency": "gbp",
+    "poll": {
+      "http_status": 200,
+      "confirmation_status": "not_started",
+      "livemode": false,
+      "payment_status": "unpaid",
+      "status": "open"
+    }
+  },
+  {
+    "evidence": "backend-ideal-failed.json",
+    "session_hash": "0adb82fef0b9",
+    "creation_currency": "eur",
+    "poll": {
+      "http_status": 200,
+      "confirmation_status": "failed",
+      "livemode": false,
+      "payment_status": "unpaid",
+      "status": "open"
+    }
+  },
+  {
+    "evidence": "backend-ideal-recovered.json",
+    "session_hash": "0adb82fef0b9",
+    "creation_currency": "eur",
+    "poll": {
+      "http_status": 200,
+      "confirmation_status": "succeeded",
+      "livemode": false,
+      "payment_status": "paid",
+      "status": "complete"
+    }
+  },
+  {
+    "evidence": "backend-paybybank-failed.json",
+    "session_hash": "a38d7309185b",
+    "creation_currency": "gbp",
+    "poll": {
+      "http_status": 200,
+      "confirmation_status": "failed",
+      "livemode": false,
+      "payment_status": "unpaid",
+      "status": "open"
+    }
+  },
+  {
+    "evidence": "backend-paybybank-recovered.json",
+    "session_hash": "a38d7309185b",
+    "creation_currency": "gbp",
+    "poll": {
+      "http_status": 200,
+      "confirmation_status": "succeeded",
+      "livemode": false,
+      "payment_status": "paid",
+      "status": "complete"
+    }
+  },
+  {
+    "evidence": "backend-paybybank-success.json",
+    "session_hash": "498ae1234fa0",
+    "creation_currency": "gbp",
+    "poll": {
+      "http_status": 200,
+      "confirmation_status": "succeeded",
+      "livemode": false,
+      "payment_status": "paid",
+      "status": "complete"
+    }
+  },
+  {
+    "evidence": "backend-sepa-failure-final.json",
+    "session_hash": "93e208f300c4",
+    "creation_currency": "eur",
+    "poll": {
+      "http_status": 200,
+      "confirmation_status": "failed",
+      "livemode": false,
+      "payment_status": "unpaid",
+      "status": "complete"
+    }
+  },
+  {
+    "evidence": "backend-sepa-failure-immediate.json",
+    "session_hash": "93e208f300c4",
+    "creation_currency": "eur",
+    "poll": {
+      "http_status": 200,
+      "confirmation_status": "succeeded",
+      "livemode": false,
+      "payment_status": "unpaid",
+      "status": "complete"
+    }
+  },
+  {
+    "evidence": "backend-sepa-failure-later.json",
+    "session_hash": "93e208f300c4",
+    "creation_currency": "eur",
+    "poll": {
+      "http_status": 200,
+      "confirmation_status": "failed",
+      "livemode": false,
+      "payment_status": "unpaid",
+      "status": "complete"
+    }
+  },
+  {
+    "evidence": "backend-sepa-success-followup2.json",
+    "session_hash": "beaaee604293",
+    "creation_currency": "eur",
+    "poll": {
+      "http_status": 200,
+      "confirmation_status": "succeeded",
+      "livemode": false,
+      "payment_status": "unpaid",
+      "status": "complete"
+    }
+  },
+  {
+    "evidence": "backend-sepa-success-followup3.json",
+    "session_hash": "beaaee604293",
+    "creation_currency": "eur",
+    "poll": {
+      "http_status": 200,
+      "confirmation_status": "succeeded",
+      "livemode": false,
+      "payment_status": "unpaid",
+      "status": "complete"
+    }
+  },
+  {
+    "evidence": "backend-sepa-success-immediate.json",
+    "session_hash": "beaaee604293",
+    "creation_currency": "eur",
+    "poll": {
+      "http_status": 200,
+      "confirmation_status": "succeeded",
+      "livemode": false,
+      "payment_status": "unpaid",
+      "status": "complete"
+    }
+  },
+  {
+    "evidence": "backend-sepa-success-later.json",
+    "session_hash": "beaaee604293",
+    "creation_currency": "eur",
+    "poll": {
+      "http_status": 200,
+      "confirmation_status": "succeeded",
+      "livemode": false,
+      "payment_status": "unpaid",
+      "status": "complete"
+    }
+  },
+  {
+    "evidence": "backend-sepa-success-paid.json",
+    "session_hash": "beaaee604293",
+    "creation_currency": "eur",
+    "poll": {
+      "http_status": 200,
+      "confirmation_status": "succeeded",
+      "livemode": false,
+      "payment_status": "paid",
+      "status": "complete"
+    }
+  },
+  {
+    "evidence": "backend-unionpay-confirm.json",
+    "session_hash": "92d721299284",
+    "creation_currency": "usd",
+    "poll": {
+      "http_status": 200,
+      "confirmation_status": "succeeded",
+      "livemode": false,
+      "payment_status": "paid",
+      "status": "complete"
+    }
+  },
+  {
+    "evidence": "backend-unionpay-initial.json",
+    "session_hash": "92d721299284",
+    "creation_currency": "usd",
+    "poll": {
+      "http_status": 200,
+      "confirmation_status": "not_started",
+      "livemode": false,
+      "payment_status": "unpaid",
+      "status": "open"
+    }
+  }
+]

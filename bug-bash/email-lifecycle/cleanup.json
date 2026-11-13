@@ -1,0 +1,12 @@
+{
+  "prefs_restored_byte_for_byte": true,
+  "rotation_restored": {
+    "accelerometer_rotation": "0",
+    "user_rotation": "0"
+  },
+  "reverse_mapping_removed": 18769,
+  "owned_relay_pid_stopped": 35911,
+  "private_files_removed": true,
+  "device_scratch_removed": "/sdcard/checkout-email-lifecycle.xml",
+  "app_force_stopped": true
+}

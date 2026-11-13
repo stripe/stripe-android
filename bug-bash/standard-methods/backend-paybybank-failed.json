@@ -1,0 +1,111 @@
+{
+  "creation": {
+    "currency": "gbp",
+    "amount_total": 12000,
+    "adaptive_pricing": {
+      "enabled": false
+    },
+    "livemode": false
+  },
+  "label": "paybybank-failed",
+  "session_hash": "a38d7309185b",
+  "poll_keys": [
+    "id",
+    "confirmation_status",
+    "livemode",
+    "payment_status",
+    "state",
+    "status",
+    "ui_mode"
+  ],
+  "poll": {
+    "http_status": 200,
+    "confirmation_status": "failed",
+    "livemode": false,
+    "payment_status": "unpaid",
+    "status": "open"
+  },
+  "retrieve_keys": [
+    "id",
+    "object",
+    "adaptive_pricing_info",
+    "apple_pay_preference",
+    "automatic_tax",
+    "billing_address_collection",
+    "blocked_billing_address_countries",
+    "card_brand_choice",
+    "checkout_session_config_id",
+    "country_code",
+    "customer",
+    "customer_email",
+    "elements_session_config_id",
+    "elements_session_id",
+    "email_collection",
+    "experiments_data",
+    "flags",
+    "google_pay_preference",
+    "integration_currency",
+    "items",
+    "link_settings",
+    "livemode",
+    "merchant_info",
+    "name_collection",
+    "ordered_payment_method_types_and_wallets",
+    "passive_captcha",
+    "payment_method_collection",
+    "payment_method_options",
+    "payment_response",
+    "payment_status",
+    "phone_number_collection",
+    "presentment_currency",
+    "saved_payment_method_options",
+    "setup_future_usage_for_payment_method_type",
+    "shipping_address_collection",
+    "state",
+    "status",
+    "total_summary",
+    "ui_mode",
+    "unactivated_payment_method_types"
+  ],
+  "retrieve": {
+    "http_status": 200,
+    "adaptive_pricing_info": null,
+    "integration_currency": "gbp",
+    "items": [
+      {
+        "name": "Classic T-Shirt",
+        "quantity": 2,
+        "currency": "gbp",
+        "unit_amount": 3500,
+        "subtotal": 7000,
+        "total": 7000
+      },
+      {
+        "name": "Zip-Up Hoodie",
+        "quantity": 1,
+        "currency": "gbp",
+        "unit_amount": 5000,
+        "subtotal": 5000,
+        "total": 5000
+      }
+    ],
+    "livemode": false,
+    "ordered_payment_method_types_and_wallets": [
+      "card",
+      "apple_pay",
+      "google_pay",
+      "pay_by_bank"
+    ],
+    "payment_status": "unpaid",
+    "presentment_currency": "gbp",
+    "status": "open",
+    "total_summary": {
+      "due": 12000,
+      "subtotal": 12000,
+      "tax_exclusive": 0,
+      "tax_inclusive": 0,
+      "total": 12000,
+      "total_tax_amounts": []
+    }
+  }
+}

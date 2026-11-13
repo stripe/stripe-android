@@ -1,0 +1,20 @@
+{"text": "", "content-desc": "Close sheet", "class": "android.view.View", "enabled": "true", "clickable": "true", "bounds": "[0,132][1080,1039]"}
+{"text": "Add a card", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[53,1186][303,1257]"}
+{"text": "Card information", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[53,1301][304,1348]"}
+{"text": "  Tap card", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "true", "bounds": "[842,1261][1027,1369]"}
+{"text": "4242 4242 4242 4242", "content-desc": "", "class": "android.widget.EditText", "enabled": "true", "clickable": "true", "bounds": "[56,1372][1024,1511]"}
+{"text": "", "content-desc": "4 2 4 2 4 2 4 2 4 2 4 2 4 2 4 2", "class": "android.view.View", "enabled": "true", "clickable": "false", "bounds": "[56,1372][1024,1511]"}
+{"text": "Card number", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[98,1386][302,1435]"}
+{"text": "", "content-desc": "", "class": "android.widget.EditText", "enabled": "true", "clickable": "true", "bounds": "[56,1514][538,1653]"}
+{"text": "", "content-desc": "Expiration date. December 2030", "class": "android.view.View", "enabled": "true", "clickable": "false", "bounds": "[56,1514][538,1653]"}
+{"text": "123", "content-desc": "", "class": "android.widget.EditText", "enabled": "true", "clickable": "true", "bounds": "[541,1514][1024,1653]"}
+{"text": "", "content-desc": "1 2 3", "class": "android.view.View", "enabled": "true", "clickable": "false", "bounds": "[541,1514][1024,1653]"}
+{"text": "CVC", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[583,1528][653,1577]"}
+{"text": "Billing address", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[53,1698][274,1745]"}
+{"text": "United States", "content-desc": "", "class": "android.widget.EditText", "enabled": "false", "clickable": "true", "bounds": "[56,1769][1024,1908]"}
+{"text": "Country or region", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[98,1783][370,1832]"}
+{"text": "", "content-desc": "", "class": "android.widget.EditText", "enabled": "true", "clickable": "true", "bounds": "[56,1911][1024,2050]"}
+{"text": "", "content-desc": "9 4 1 0 3", "class": "android.view.View", "enabled": "true", "clickable": "false", "bounds": "[56,1911][1024,2050]"}
+{"text": "ZIP Code", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[98,1925][244,1974]"}
+{"text": "Continue", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[456,2197][624,2246]"}
+{"text": "", "content-desc": "Close", "class": "android.view.View", "enabled": "true", "clickable": "false", "bounds": "[58,1097][90,1129]"}

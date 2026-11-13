@@ -1,0 +1,9 @@
+NetworkDispatcher: POST /v1/checkout_client/cs_test_abc123/confirm HTTP/1.1 not mocked
+Request body params: {mobile_app_id=com.stripe.android.paymentsheet.test, expand[]=payment_response.setup_intent.payment_method, mobile_session_id=6f27c1ce-2006-402c-a120-c6b391663408, expected_payment_method_type=blik, expected_amount=1000, payment_method_data[muid]=test_muid, payment_method_data[guid]=test_guid, payment_method_data[payment_user_agent]=stripe-android/23.26.0;PaymentElement, payment_method_data[type]=blik, payment_method_data[sid]=test_sid, return_url=stripesdk://payment_return_url/com.stripe.android.paymentsheet.test, client_secret=[REDACTED_TEST_SECRET], locale=en-US, client_attribution_metadata[merchant_integration_source]=mobile-checkout, client_attribution_metadata[client_session_id]=6f27c1ce-2006-402c-a120-c6b391663408, client_attribution_metadata[merchant_integration_subtype]=mobile-payment-element, client_attribution_metadata[merchant_integration_additional_elements][]=mobile-payment-element, client_attribution_metadata[elements_session_config_id]=test_session_id, client_attribution_metadata[checkout_session_id]=cs_test_abc123, client_attribution_metadata[merchant_integration_version]=stripe-android/23.26.0}
+Nearest mock: composite(stripeApiKey(betas=[]), header(original-host, api.stripe.com), method(POST), path(/v1/checkout_client/cs_test_abc123/confirm), bodyPart(payment_method_data[type], blik), bodyPart(payment_method_options[blik][code], 123456))
+  + PASS: stripeApiKey(betas=[])
+  + PASS: header(original-host, api.stripe.com)
+  + PASS: method(POST)
+  + PASS: path(/v1/checkout_client/cs_test_abc123/confirm)
+  + PASS: bodyPart(payment_method_data[type], blik)
+  - FAIL: bodyPart(payment_method_options[blik][code], 123456)

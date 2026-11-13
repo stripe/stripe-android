@@ -1,0 +1,34 @@
+{
+  "label": "next-session",
+  "session_hash": "749d514d3e58",
+  "poll": {
+    "http_status": 200,
+    "confirmation_status": "not_started",
+    "livemode": false,
+    "payment_status": "unpaid",
+    "status": "open"
+  },
+  "retrieve": {
+    "http_status": 200,
+    "livemode": false,
+    "payment_status": "unpaid",
+    "status": "open",
+    "total_summary": {
+      "due": 12000,
+      "subtotal": 12000,
+      "tax_exclusive": 0,
+      "tax_inclusive": 0,
+      "total": 12000,
+      "total_tax_amounts": []
+    },
+    "customer": {
+      "hash": "9a086e5f6750",
+      "payment_methods": []
+    },
+    "saved_payment_method_options": {
+      "payment_method_remove": "enabled",
+      "payment_method_save": "disabled"
+    },
+    "setup_future_usage_for_payment_method_type": {}
+  }
+}

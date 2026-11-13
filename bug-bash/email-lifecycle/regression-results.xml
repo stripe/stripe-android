@@ -1,0 +1,36 @@
+<?xml version='1.0' encoding='utf-8'?>
+<testsuite name="com.stripe.android.checkout.CheckoutElementsControllerTest" tests="2" skipped="0" failures="1" errors="0" timestamp="2026-11-12T22:38:06.516Z" hostname="st-amk2" time="2.604">
+  <properties />
+  <testcase name="email bugbash unchanged checkout email preserves selected card" classname="com.stripe.android.checkout.CheckoutElementsControllerTest" time="2.281" />
+  <testcase name="email bugbash changing checkout email preserves selected card" classname="com.stripe.android.checkout.CheckoutElementsControllerTest" time="0.133">
+    <failure message="com.google.common.truth.AssertionErrorWithFacts: expected not to be: null" type="com.google.common.truth.AssertionErrorWithFacts">expected not to be: null
+	at com.stripe.android.checkout.CheckoutElementsControllerTest$email bugbash changing checkout email preserves selected card$2.invokeSuspend(CheckoutElementsControllerTest.kt:1177)
+	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)
+	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:100)
+	at kotlinx.coroutines.test.TestDispatcher.processEvent$kotlinx_coroutines_test(TestDispatcher.kt:24)
+	at kotlinx.coroutines.test.TestCoroutineScheduler.tryRunNextTaskUnless$kotlinx_coroutines_test(TestCoroutineScheduler.kt:98)
+	at kotlinx.coroutines.test.TestBuildersKt__TestBuildersKt$runTest$2$1$workRunner$1.invokeSuspend(TestBuilders.kt:326)
+	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)
+	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:100)
+	at kotlinx.coroutines.EventLoopImplBase.processNextEvent(EventLoop.common.kt:256)
+	at kotlinx.coroutines.BlockingCoroutine.joinBlocking(Builders.kt:54)
+	at kotlinx.coroutines.BuildersKt__BuildersKt.runBlockingImpl(Builders.kt:30)
+	at kotlinx.coroutines.BuildersKt.runBlockingImpl(Unknown Source)
+	at kotlinx.coroutines.BuildersKt__Builders_concurrentKt.runBlockingK(Builders.concurrent.kt:172)
+	at kotlinx.coroutines.BuildersKt.runBlockingK(Unknown Source)
+	at kotlinx.coroutines.BuildersKt__Builders_concurrentKt.runBlockingK$default(Builders.concurrent.kt:157)
+	at kotlinx.coroutines.BuildersKt.runBlockingK$default(Unknown Source)
+	at kotlinx.coroutines.test.TestBuildersJvmKt.createTestResult(TestBuildersJvm.kt:10)
+	at kotlinx.coroutines.test.TestBuildersKt__TestBuildersKt.runTest-8Mi8wO0(TestBuilders.kt:309)
+	at kotlinx.coroutines.test.TestBuildersKt.runTest-8Mi8wO0(TestBuilders.kt:1)
+	at kotlinx.coroutines.test.TestBuildersKt__TestBuildersKt.runTest-8Mi8wO0(TestBuilders.kt:167)
+	at kotlinx.coroutines.test.TestBuildersKt.runTest-8Mi8wO0(TestBuilders.kt:1)
+	at kotlinx.coroutines.test.TestBuildersKt__TestBuildersKt.runTest-8Mi8wO0$default(TestBuilders.kt:159)
+	at kotlinx.coroutines.test.TestBuildersKt.runTest-8Mi8wO0$default(TestBuilders.kt:1)
+	at com.stripe.android.checkout.CheckoutElementsControllerTest.runMutationScenario(CheckoutElementsControllerTest.kt:2342)
+	at com.stripe.android.checkout.CheckoutElementsControllerTest.runMutationScenario$default(CheckoutElementsControllerTest.kt:2333)
+	at com.stripe.android.checkout.CheckoutElementsControllerTest.email bugbash changing checkout email preserves selected card(CheckoutElementsControllerTest.kt:1164)
+	Suppressed: org.robolectric.android.internal.AndroidTestEnvironment$UnExecutedRunnablesException: Main looper has queued unexecuted runnables. This might be the cause of the test failure. You might need a shadowOf(Looper.getMainLooper()).idle() call.
+</failure>
+  </testcase>
+  </testsuite>

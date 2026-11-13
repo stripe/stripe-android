@@ -1,0 +1,4 @@
+Command: ./gradlew :paymentsheet:testDebugUnitTest --tests 'com.stripe.android.checkout.CheckoutElementsControllerTest.session customer email takes precedence over updateEmail'
+Exit: 0. BUILD SUCCESSFUL in 33s.
+Tests: 1; failures: 0; errors: 0
+session customer email takes precedence over updateEmail

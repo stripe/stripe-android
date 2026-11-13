@@ -1,0 +1,48 @@
+{
+  "customer_update": {
+    "address": "auto"
+  },
+  "billing_address_collection": "required",
+  "saved_payment_method_options": {
+    "allow_redisplay_filters": [
+      "always",
+      "limited",
+      "unspecified"
+    ],
+    "payment_method_remove": "enabled",
+    "payment_method_save": "enabled"
+  },
+  "items": [
+    {
+      "type": "one_time_price",
+      "one_time_price": {
+        "items": [
+          {
+            "price_data": {
+              "currency": "usd",
+              "product_data": {
+                "name": "Classic T-Shirt",
+                "tax_code": "txcd_99999999"
+              },
+              "unit_amount": 3500,
+              "tax_behavior": "inclusive"
+            },
+            "quantity": 2
+          },
+          {
+            "price_data": {
+              "currency": "usd",
+              "product_data": {
+                "name": "Zip-Up Hoodie",
+                "tax_code": "txcd_99999999"
+              },
+              "unit_amount": 5000,
+              "tax_behavior": "inclusive"
+            },
+            "quantity": 1
+          }
+        ]
+      }
+    }
+  ]
+}

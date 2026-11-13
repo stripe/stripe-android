@@ -1,0 +1,93 @@
+diff --git a/paymentsheet/src/test/java/com/stripe/android/paymentelement/embedded/manage/EmbeddedUpdateScreenInteractorFactoryTest.kt b/paymentsheet/src/test/java/com/stripe/android/paymentelement/embedded/manage/EmbeddedUpdateScreenInteractorFactoryTest.kt
+index 0236bff39b..7040677722 100644
+--- a/paymentsheet/src/test/java/com/stripe/android/paymentelement/embedded/manage/EmbeddedUpdateScreenInteractorFactoryTest.kt
++++ b/paymentsheet/src/test/java/com/stripe/android/paymentelement/embedded/manage/EmbeddedUpdateScreenInteractorFactoryTest.kt
+@@ -1,6 +1,11 @@
+ package com.stripe.android.paymentelement.embedded.manage
+ 
++import app.cash.turbine.test
+ import androidx.lifecycle.SavedStateHandle
++import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
++import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
++import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
++import com.stripe.android.uicore.elements.FormFieldId
+ import com.google.common.truth.Truth.assertThat
+ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+ import com.stripe.android.model.PaymentMethodFixtures
+@@ -74,4 +79,76 @@ internal class EmbeddedUpdateScreenInteractorFactoryTest {
+         interactor.close()
+         eventReporter.validate()
+     }
++
++    @Test
++    fun `tax bugbash automatic saved card edit exposes required US fields`() = runTaxFormScenario(
++        PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
++    )
++
++    @Test
++    fun `tax bugbash full saved card edit exposes required US fields`() = runTaxFormScenario(
++        PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
++    )
++
++    private fun runTaxFormScenario(
++        addressMode: PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode,
++    ) = runTest {
++        val metadata = PaymentMethodMetadataFactory.create(
++            hasCustomerConfiguration = true,
++            canUpdateCardExpiryAndBillingDetails = true,
++            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
++                address = addressMode,
++            ),
++            integrationMetadata = IntegrationMetadata.CheckoutSession(
++                collectedEmail = null,
++                instancesKey = "tax_bugbash",
++                checkoutSessionResponse = CheckoutSessionResponseFactory.create(
++                    automaticTaxEnabled = true,
++                    taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
++                ),
++            ),
++        )
++        val selectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle())
++        val eventReporter = FakeEventReporter()
++        val customerStateHolder = DefaultCustomerStateHolder(
++            customerMetadata = stateFlowOf(metadata.customerMetadata),
++            paymentMethodMetadataFlow = stateFlowOf(metadata),
++            savedStateHandle = SavedStateHandle(),
++            selection = selectionHolder.selection,
++        )
++        val factory = DefaultEmbeddedUpdateScreenInteractorFactory(
++            savedPaymentMethodMutatorProvider = Provider { error("Not expected") },
++            paymentMethodMetadata = metadata,
++            customerStateHolder = customerStateHolder,
++            selectionHolder = selectionHolder,
++            savedPaymentMethodSelector = ManageLaunchSavedPaymentMethodSelector(
++                taxRegionUpdater = SheetTaxRegionUpdater { _, _, _ -> error("Not expected") },
++                paymentMethodMetadata = metadata,
++                selectionHolder = selectionHolder,
++            ),
++            eventReporter = eventReporter,
++            embeddedNavigatorProvider = Provider { error("Not expected") },
++            autocompleteAddressInteractorFactory = TestAutocompleteAddressInteractor.noOpFactory(),
++        )
++        val interactor = factory.createUpdateScreenInteractor(
++            PaymentMethodFixtures.displayableCard(),
++        ) as DefaultUpdatePaymentMethodInteractor
++        try {
++            assertThat(metadata.requiresBillingAddressForAutomaticTax).isTrue()
++            val form = requireNotNull(interactor.editCardDetailsInteractor.state.value.billingDetailsForm)
++            val element = form.addressSectionElement.fields.single() as BillingAddressElement
++            element.countryElement.controller.onRawValueChange("FR")
++            element.countryElement.controller.onRawValueChange("US")
++            form.hiddenElements.test {
++                val hidden = awaitItem()
++                assertThat(hidden).doesNotContain(FormFieldId.Line1)
++                assertThat(hidden).doesNotContain(FormFieldId.City)
++                assertThat(hidden).doesNotContain(FormFieldId.State)
++                assertThat(hidden).doesNotContain(FormFieldId.PostalCode)
++            }
++        } finally {
++            interactor.close()
++            eventReporter.validate()
++        }
++    }
+ }

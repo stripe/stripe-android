@@ -1,0 +1,9 @@
+ActualMigrationApi.kt: compiler exit 0; expected 0
+Picked up JAVA_TOOL_OPTIONS: -Dlog4j2.formatMsgNoLookups=true -Dcom.sun.jndi.ldap.object.trustURLCodebase=false
+
+DocumentedMigrationPaymentOption.kt: compiler exit 1; expected 1
+Picked up JAVA_TOOL_OPTIONS: -Dlog4j2.formatMsgNoLookups=true -Dcom.sun.jndi.ldap.object.trustURLCodebase=false
+bug-bash/migration/DocumentedMigrationPaymentOption.kt:3:84: error: unresolved reference 'paymentOptionDisplayData'.
+fun hasSelection(session: CheckoutElementsController.Session?): Boolean = session?.paymentOptionDisplayData != null
+                                                                                   ^^^^^^^^^^^^^^^^^^^^^^^^
+

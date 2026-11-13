@@ -1,0 +1,46 @@
+diff --git a/paymentsheet/src/test/java/com/stripe/android/checkout/CheckoutElementsControllerTest.kt b/paymentsheet/src/test/java/com/stripe/android/checkout/CheckoutElementsControllerTest.kt
+index c9505aea03..29ab8e92e3 100644
+--- a/paymentsheet/src/test/java/com/stripe/android/checkout/CheckoutElementsControllerTest.kt
++++ b/paymentsheet/src/test/java/com/stripe/android/checkout/CheckoutElementsControllerTest.kt
+@@ -1160,6 +1160,41 @@ internal class CheckoutElementsControllerTest {
+         assertThat(controller.session.value).isEqualTo(before)
+     }
+ 
++    @Test
++    fun `email bugbash changing checkout email preserves selected card`() = runMutationScenario(
++        initModifier = { it.remove("customer_email") },
++        paymentSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
++    ) {
++        val before = requireNotNull(controller.session.value)
++        assertThat(before.paymentOption).isNotNull()
++        assertThat(before.email).isNull()
++
++        val result = controller.updateEmail("checkout.updated@example.com")
++
++        assertThat(result).isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
++        assertThat(controller.session.value?.id).isEqualTo(before.id)
++        assertThat(controller.session.value?.email).isEqualTo("checkout.updated@example.com")
++        assertThat(controller.session.value?.paymentOption).isNotNull()
++        assertThat(committedState().paymentSelection).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
++    }
++
++    @Test
++    fun `email bugbash unchanged checkout email preserves selected card`() = runMutationScenario(
++        initModifier = { it.remove("customer_email") },
++        paymentSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
++    ) {
++        val before = requireNotNull(controller.session.value)
++        assertThat(before.paymentOption).isNotNull()
++        assertThat(before.email).isNull()
++
++        val result = controller.updateEmail(null)
++
++        assertThat(result).isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
++        assertThat(controller.session.value?.id).isEqualTo(before.id)
++        assertThat(controller.session.value?.paymentOption).isNotNull()
++        assertThat(committedState().paymentSelection).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
++    }
++
+     @Test
+     fun `updateEmail stores email locally without a network call`() = runMutationScenario(
+         initModifier = { it.remove("customer_email") },

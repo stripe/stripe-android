@@ -1,0 +1,22 @@
+[
+  {
+    "label": "Card",
+    "bounds": [
+      238,
+      861,
+      314,
+      910
+    ],
+    "background_rgb": null
+  },
+  {
+    "label": "No shipping address",
+    "bounds": [
+      42,
+      1745,
+      397,
+      1808
+    ],
+    "background_rgb": null
+  }
+]

@@ -1,0 +1,25 @@
+{
+  "label": "initial",
+  "session_hash": "5465a436a03d",
+  "poll": {
+    "http_status": 200,
+    "confirmation_status": "not_started",
+    "livemode": false,
+    "payment_status": "unpaid",
+    "status": "open"
+  },
+  "retrieve": {
+    "http_status": 200,
+    "livemode": false,
+    "payment_status": "unpaid",
+    "status": "open",
+    "total_summary": {
+      "due": 12000,
+      "subtotal": 12000,
+      "tax_exclusive": 0,
+      "tax_inclusive": 0,
+      "total": 12000,
+      "total_tax_amounts": []
+    }
+  }
+}

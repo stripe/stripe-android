@@ -1,0 +1,19 @@
+{"text": "PaymentSheet Example", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[42,170][617,241]"}
+{"text": "Internal", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[42,321][193,384]"}
+{"text": "Playground", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[42,426][269,489]"}
+{"text": "Testing playground for Stripe engineers", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[42,494][823,557]"}
+{"text": "CheckoutElementsController Example", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[42,644][799,707]"}
+{"text": "Configurable CheckoutElementsController playground", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[42,712][1038,838]"}
+{"text": "Complete Flow", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[42,922][338,985]"}
+{"text": "PaymentSheet", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[42,1027][333,1090]"}
+{"text": "Our simplest integration", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[42,1095][521,1158]"}
+{"text": "PaymentSheet with server-side confirmation", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[42,1245][937,1308]"}
+{"text": "Create and confirm the payment or setup intent on your own backend", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[42,1313][1038,1439]"}
+{"text": "Custom Flow", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[42,1523][302,1586]"}
+{"text": "FlowController", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[42,1628][336,1691]"}
+{"text": "A more advanced integration with greater flexibility", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[42,1696][1038,1822]"}
+{"text": "FlowController with server-side confirmation", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[42,1909][939,1972]"}
+{"text": "Create and confirm the payment or setup intent on your own backend", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[42,1977][1038,2103]"}
+{"text": "Embedded Payment Element", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[42,2187][612,2250]"}
+{"text": "Embedded Payment Element Example", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[42,2292][799,2355]"}
+{"text": "Our simplest integration", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[42,2360][521,2400]"}

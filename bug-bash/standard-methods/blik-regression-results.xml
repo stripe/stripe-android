@@ -1,0 +1,37 @@
+<?xml version='1.0' encoding='utf-8'?>
+<testsuite name="com.stripe.android.paymentelement.confirmation.intent.CheckoutSessionConfirmationInterceptorTest" tests="2" skipped="0" failures="1" errors="0" timestamp="2026-11-12T23:47:13.012Z" hostname="st-amk2" time="2.221">
+  <properties />
+  <testcase name="blik bugbash forwards entered code to checkout confirmation" classname="com.stripe.android.paymentelement.confirmation.intent.CheckoutSessionConfirmationInterceptorTest" time="1.928">
+    <failure message="com.google.common.truth.AssertionErrorWithFacts: expected instance of: com.stripe.android.paymentelement.confirmation.ConfirmationDefinition.Action.Complete&#10;but was instance of : com.stripe.android.paymentelement.confirmation.ConfirmationDefinition.Action.Fail&#10;with value          : Fail(cause=com.stripe.android.core.exception.APIException: Request failed with status code 500 and non-JSON error body., message=IdentifierResolvableString(id=2131821423, transformations=[], args=[]), errorType=Transaction(analyticsValue=null, errorCode=null))" type="com.google.common.truth.AssertionErrorWithFacts">expected instance of: com.stripe.android.paymentelement.confirmation.ConfirmationDefinition.Action.Complete
+but was instance of : com.stripe.android.paymentelement.confirmation.ConfirmationDefinition.Action.Fail
+with value          : Fail(cause=com.stripe.android.core.exception.APIException: Request failed with status code 500 and non-JSON error body., message=IdentifierResolvableString(id=2131821423, transformations=[], args=[]), errorType=Transaction(analyticsValue=null, errorCode=null))
+	at com.stripe.android.paymentelement.confirmation.intent.CheckoutSessionConfirmationInterceptorTest$blik bugbash forwards entered code to checkout confirmation$1.invokeSuspend(CheckoutSessionConfirmationInterceptorTest.kt:1377)
+	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)
+	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:100)
+	at kotlinx.coroutines.test.TestDispatcher.processEvent$kotlinx_coroutines_test(TestDispatcher.kt:24)
+	at kotlinx.coroutines.test.TestCoroutineScheduler.tryRunNextTaskUnless$kotlinx_coroutines_test(TestCoroutineScheduler.kt:98)
+	at kotlinx.coroutines.test.TestBuildersKt__TestBuildersKt$runTest$2$1$workRunner$1.invokeSuspend(TestBuilders.kt:326)
+	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:34)
+	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:100)
+	at kotlinx.coroutines.EventLoopImplBase.processNextEvent(EventLoop.common.kt:256)
+	at kotlinx.coroutines.BlockingCoroutine.joinBlocking(Builders.kt:54)
+	at kotlinx.coroutines.BuildersKt__BuildersKt.runBlockingImpl(Builders.kt:30)
+	at kotlinx.coroutines.BuildersKt.runBlockingImpl(Unknown Source)
+	at kotlinx.coroutines.BuildersKt__Builders_concurrentKt.runBlockingK(Builders.concurrent.kt:172)
+	at kotlinx.coroutines.BuildersKt.runBlockingK(Unknown Source)
+	at kotlinx.coroutines.BuildersKt__Builders_concurrentKt.runBlockingK$default(Builders.concurrent.kt:157)
+	at kotlinx.coroutines.BuildersKt.runBlockingK$default(Unknown Source)
+	at kotlinx.coroutines.test.TestBuildersJvmKt.createTestResult(TestBuildersJvm.kt:10)
+	at kotlinx.coroutines.test.TestBuildersKt__TestBuildersKt.runTest-8Mi8wO0(TestBuilders.kt:309)
+	at kotlinx.coroutines.test.TestBuildersKt.runTest-8Mi8wO0(TestBuilders.kt:1)
+	at kotlinx.coroutines.test.TestBuildersKt__TestBuildersKt.runTest-8Mi8wO0(TestBuilders.kt:167)
+	at kotlinx.coroutines.test.TestBuildersKt.runTest-8Mi8wO0(TestBuilders.kt:1)
+	at kotlinx.coroutines.test.TestBuildersKt__TestBuildersKt.runTest-8Mi8wO0$default(TestBuilders.kt:159)
+	at kotlinx.coroutines.test.TestBuildersKt.runTest-8Mi8wO0$default(TestBuilders.kt:1)
+	at com.stripe.android.paymentelement.confirmation.intent.CheckoutSessionConfirmationInterceptorTest.runScenario(CheckoutSessionConfirmationInterceptorTest.kt:1227)
+	at com.stripe.android.paymentelement.confirmation.intent.CheckoutSessionConfirmationInterceptorTest.runScenario$default(CheckoutSessionConfirmationInterceptorTest.kt:1178)
+	at com.stripe.android.paymentelement.confirmation.intent.CheckoutSessionConfirmationInterceptorTest.blik bugbash forwards entered code to checkout confirmation(CheckoutSessionConfirmationInterceptorTest.kt:92)
+</failure>
+  </testcase>
+  <testcase name="open confirmation completes with the unmodified confirm response for polling" classname="com.stripe.android.paymentelement.confirmation.intent.CheckoutSessionConfirmationInterceptorTest" time="0.082" />
+  </testsuite>

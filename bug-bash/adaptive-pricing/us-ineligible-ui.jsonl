@@ -1,0 +1,27 @@
+{"text": "Line Items", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[42,321][290,384]"}
+{"text": "Classic T-Shirt x2", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[42,395][330,448]"}
+{"text": "$70.00", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[923,395][1038,448]"}
+{"text": "Zip-Up Hoodie x1", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[42,470][329,523]"}
+{"text": "$50.00", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[923,470][1038,523]"}
+{"text": "Subtotal", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[42,601][187,664]"}
+{"text": "$120.00", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[899,601][1038,664]"}
+{"text": "Total", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[42,709][130,772]"}
+{"text": "$120.00", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[899,709][1038,772]"}
+{"text": "Card", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[238,861][314,910]"}
+{"text": "Amazon Pay", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[238,1001][438,1050]"}
+{"text": "Klarna", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[238,1120][341,1169]"}
+{"text": "Pay later with Klarna", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[238,1169][523,1212]"}
+{"text": "Affirm", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[238,1260][338,1309]"}
+{"text": "Pay over time with Affirm", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[238,1309][585,1352]"}
+{"text": "Afterpay", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[238,1400][376,1449]"}
+{"text": "Buy now or pay later with Cash App Afterpay", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[238,1449][850,1492]"}
+{"text": "Cash App Pay", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[238,1561][462,1610]"}
+{"text": "Sunbit", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[238,1701][341,1750]"}
+{"text": "Alipay", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[238,1841][337,1890]"}
+{"text": "US bank account", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[238,1981][509,1987]"}
+{"text": "\u2039", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[60,154][88,259]"}
+{"text": "Checkout", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[190,174][415,237]"}
+{"text": "No payment method selected", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[32,2011][523,2064]"}
+{"text": "Clear", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[232,2106][330,2149]"}
+{"text": "Select", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[740,2106][858,2149]"}
+{"text": "Confirm", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[465,2232][616,2275]"}

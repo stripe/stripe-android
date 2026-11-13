@@ -1,0 +1,38 @@
+[
+  {
+    "case": "plain",
+    "http_status": 200,
+    "updates": [
+      {
+        "operation": "apply",
+        "http_status": 400,
+        "error": {
+          "code": "parameter_unknown",
+          "message": "Received unknown parameter: promotion_code",
+          "param": "promotion_code",
+          "type": "invalid_request_error"
+        }
+      },
+      {
+        "operation": "remove",
+        "http_status": 400,
+        "error": {
+          "code": "parameter_unknown",
+          "message": "Received unknown parameter: promotion_code",
+          "param": "promotion_code",
+          "type": "invalid_request_error"
+        }
+      }
+    ]
+  },
+  {
+    "case": "allow",
+    "http_status": 400,
+    "error": "You can not pass `allow_promotion_codes` in `modeless` mode."
+  },
+  {
+    "case": "coupon",
+    "http_status": 400,
+    "error": "You can not pass `discounts` in `modeless` mode."
+  }
+]

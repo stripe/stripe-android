@@ -1,0 +1,29 @@
+{"text": "Line Items", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[42,321][290,384]"}
+{"text": "Classic T-Shirt x2", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[42,395][330,448]"}
+{"text": "$70.00", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[923,395][1038,448]"}
+{"text": "Zip-Up Hoodie x1", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[42,470][329,523]"}
+{"text": "$50.00", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[923,470][1038,523]"}
+{"text": "Subtotal", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[42,601][187,664]"}
+{"text": "$120.00", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[899,601][1038,664]"}
+{"text": "Total", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[42,709][130,772]"}
+{"text": "$120.00", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[899,709][1038,772]"}
+{"text": "Card", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[238,840][314,889]"}
+{"text": "Visa \u00b7\u00b7\u00b7\u00b7 3155", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[238,889][415,932]"}
+{"text": "Change", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[884,862][1006,911]"}
+{"text": "Session controls", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[42,1010][438,1073]"}
+{"text": "", "content-desc": "", "class": "android.widget.EditText", "enabled": "true", "clickable": "true", "bounds": "[42,1073][1038,1241]"}
+{"text": "Promotion code", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[84,1136][389,1199]"}
+{"text": "Apply", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[84,1283][189,1326]"}
+{"text": "Remove", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[294,1283][441,1326]"}
+{"text": "final.lifecycle.email@example.com", "content-desc": "", "class": "android.widget.EditText", "enabled": "true", "clickable": "true", "bounds": "[42,1367][1038,1535]"}
+{"text": "Email", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[84,1367][168,1409]"}
+{"text": "Update email", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[417,1577][664,1620]"}
+{"text": "Email updated", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[42,1661][289,1724]"}
+{"text": "Shipping address", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[42,1745][450,1808]"}
+{"text": "No shipping address", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[42,1808][397,1871]"}
+{"text": "\u2039", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[60,154][88,259]"}
+{"text": "Checkout", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[190,174][415,237]"}
+{"text": "Visa", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[137,2011][213,2074]"}
+{"text": "\u2066\u00b7\u00b7\u00b7\u00b7 3155\u2069", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[137,2074][269,2127]"}
+{"text": "Payment complete!", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[32,2127][488,2190]"}
+{"text": "Back to settings", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[386,2232][695,2275]"}

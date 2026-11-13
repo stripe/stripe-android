@@ -1,0 +1,15 @@
+ActualExpressApi.kt: compiler exit 0; expected 0
+Picked up JAVA_TOOL_OPTIONS: -Dlog4j2.formatMsgNoLookups=true -Dcom.sun.jndi.ldap.object.trustURLCodebase=false
+
+DocumentedExpressFold.kt: compiler exit 1; expected 1
+Picked up JAVA_TOOL_OPTIONS: -Dlog4j2.formatMsgNoLookups=true -Dcom.sun.jndi.ldap.object.trustURLCodebase=false
+bug-bash/express-checkout/DocumentedExpressFold.kt:6:78: error: unresolved reference 'fold'.
+    controller.configure(secret, CheckoutElementsController.Configuration()).fold(
+                                                                             ^^^^
+
+DocumentedAvailableMethods.kt: compiler exit 1; expected 1
+Picked up JAVA_TOOL_OPTIONS: -Dlog4j2.formatMsgNoLookups=true -Dcom.sun.jndi.ldap.object.trustURLCodebase=false
+bug-bash/express-checkout/DocumentedAvailableMethods.kt:6:5: error: return type mismatch: expected 'List<String>', actual 'Set<ExpressCheckoutElement.PaymentMethod>'.
+    session.availableExpressCheckoutPaymentMethods
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+

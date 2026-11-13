@@ -1,0 +1,98 @@
+[
+  {
+    "file": "backend-sepa-success-immediate.json",
+    "recorded_at_utc": "2026-11-12T23:30:41.655062+00:00",
+    "session_hash": "beaaee604293",
+    "poll": {
+      "http_status": 200,
+      "confirmation_status": "succeeded",
+      "livemode": false,
+      "payment_status": "unpaid",
+      "status": "complete"
+    }
+  },
+  {
+    "file": "backend-sepa-success-later.json",
+    "recorded_at_utc": "2026-11-12T23:31:48.369258+00:00",
+    "session_hash": "beaaee604293",
+    "poll": {
+      "http_status": 200,
+      "confirmation_status": "succeeded",
+      "livemode": false,
+      "payment_status": "unpaid",
+      "status": "complete"
+    }
+  },
+  {
+    "file": "backend-sepa-success-followup2.json",
+    "recorded_at_utc": "2026-11-12T23:32:38.536265+00:00",
+    "session_hash": "beaaee604293",
+    "poll": {
+      "http_status": 200,
+      "confirmation_status": "succeeded",
+      "livemode": false,
+      "payment_status": "unpaid",
+      "status": "complete"
+    }
+  },
+  {
+    "file": "backend-sepa-failure-immediate.json",
+    "recorded_at_utc": "2026-11-12T23:32:47.233312+00:00",
+    "session_hash": "93e208f300c4",
+    "poll": {
+      "http_status": 200,
+      "confirmation_status": "succeeded",
+      "livemode": false,
+      "payment_status": "unpaid",
+      "status": "complete"
+    }
+  },
+  {
+    "file": "backend-sepa-success-followup3.json",
+    "recorded_at_utc": "2026-11-12T23:33:31.615269+00:00",
+    "session_hash": "beaaee604293",
+    "poll": {
+      "http_status": 200,
+      "confirmation_status": "succeeded",
+      "livemode": false,
+      "payment_status": "unpaid",
+      "status": "complete"
+    }
+  },
+  {
+    "file": "backend-sepa-failure-later.json",
+    "recorded_at_utc": "2026-11-12T23:33:32.425988+00:00",
+    "session_hash": "93e208f300c4",
+    "poll": {
+      "http_status": 200,
+      "confirmation_status": "failed",
+      "livemode": false,
+      "payment_status": "unpaid",
+      "status": "complete"
+    }
+  },
+  {
+    "file": "backend-sepa-success-paid.json",
+    "recorded_at_utc": "2026-11-12T23:34:43.725110+00:00",
+    "session_hash": "beaaee604293",
+    "poll": {
+      "http_status": 200,
+      "confirmation_status": "succeeded",
+      "livemode": false,
+      "payment_status": "paid",
+      "status": "complete"
+    }
+  },
+  {
+    "file": "backend-sepa-failure-final.json",
+    "recorded_at_utc": "2026-11-12T23:34:44.504907+00:00",
+    "session_hash": "93e208f300c4",
+    "poll": {
+      "http_status": 200,
+      "confirmation_status": "failed",
+      "livemode": false,
+      "payment_status": "unpaid",
+      "status": "complete"
+    }
+  }
+]

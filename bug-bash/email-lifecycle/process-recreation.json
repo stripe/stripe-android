@@ -1,0 +1,9 @@
+{
+  "pid_before": "14245",
+  "pid_after_kill": "",
+  "pid_after_resume": "14933",
+  "task_id": 3531,
+  "launcher_result": "A new MainActivity appeared above retained Checkout Activity. Back popped only this extra MainActivity, then restored existing Checkout Activity with card3155 and default email.",
+  "checkout_activity_record": "25962652",
+  "backend_session_hash": "0009cf48f83a"
+}

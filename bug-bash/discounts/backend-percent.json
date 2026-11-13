@@ -1,0 +1,30 @@
+{
+  "label": "percent",
+  "session_hash": "fc1a7f4ee966",
+  "poll": {
+    "http_status": 200,
+    "confirmation_status": "not_started",
+    "livemode": false,
+    "payment_status": "unpaid",
+    "status": "open"
+  },
+  "retrieve": {
+    "http_status": 200,
+    "livemode": false,
+    "payment_status": "unpaid",
+    "status": "open",
+    "total_summary": {
+      "due": 12000,
+      "subtotal": 12000,
+      "tax_exclusive": 0,
+      "tax_inclusive": 0,
+      "total": 12000,
+      "total_tax_amounts": []
+    },
+    "saved_payment_method_options": {
+      "payment_method_remove": "disabled",
+      "payment_method_save": "disabled"
+    },
+    "setup_future_usage_for_payment_method_type": {}
+  }
+}

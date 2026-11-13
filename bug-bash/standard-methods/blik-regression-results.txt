@@ -1,0 +1,8 @@
+Command: ./gradlew :paymentsheet:testDebugUnitTest --tests 'com.stripe.android.paymentelement.confirmation.intent.CheckoutSessionConfirmationInterceptorTest.blik bugbash*' --tests 'com.stripe.android.paymentelement.confirmation.intent.CheckoutSessionConfirmationInterceptorTest.open confirmation completes with the unmodified confirm response for polling'
+Exit: 1; BUILD FAILED in 25s.
+tests=2 skipped=0 failures=1 errors=0
+blik bugbash forwards entered code to checkout confirmation: FAIL (expected BLIK option-preservation regression)
+com.google.common.truth.AssertionErrorWithFacts: expected instance of: com.stripe.android.paymentelement.confirmation.ConfirmationDefinition.Action.Complete
+but was instance of : com.stripe.android.paymentelement.confirmation.ConfirmationDefinition.Action.Fail
+with value          : Fail(cause=com.stripe.android.core.exception.APIException: Request failed with status code 500 and non-JSON error body., message=IdentifierResolvableString(id=2131821423, transformations=[], args=[]), errorType=Transaction(analyticsValue=null, errorCode=null))
+open confirmation completes with the unmodified confirm response for polling: PASS

@@ -1,0 +1,86 @@
+{
+  "label": "ca_edited_before_confirm",
+  "session_hash": "4441d2c27268",
+  "poll": {
+    "http_status": 200,
+    "field_names": [
+      "confirmation_status",
+      "id",
+      "livemode",
+      "payment_status",
+      "state",
+      "status",
+      "ui_mode"
+    ],
+    "confirmation_status": "not_started",
+    "livemode": false,
+    "payment_status": "unpaid",
+    "status": "open"
+  },
+  "retrieve": {
+    "http_status": 200,
+    "field_names": [
+      "adaptive_pricing_info",
+      "apple_pay_preference",
+      "automatic_tax",
+      "billing_address_collection",
+      "blocked_billing_address_countries",
+      "card_brand_choice",
+      "checkout_session_config_id",
+      "country_code",
+      "customer",
+      "customer_email",
+      "elements_session_config_id",
+      "elements_session_id",
+      "email_collection",
+      "experiments_data",
+      "flags",
+      "google_pay_preference",
+      "id",
+      "integration_currency",
+      "items",
+      "link_settings",
+      "livemode",
+      "merchant_info",
+      "name_collection",
+      "object",
+      "ordered_payment_method_types_and_wallets",
+      "passive_captcha",
+      "payment_method_collection",
+      "payment_method_options",
+      "payment_status",
+      "phone_number_collection",
+      "presentment_currency",
+      "saved_payment_method_options",
+      "setup_future_usage_for_payment_method_type",
+      "shipping_address_collection",
+      "state",
+      "status",
+      "total_summary",
+      "ui_mode",
+      "unactivated_payment_method_types"
+    ],
+    "automatic_tax": {
+      "address_source": null,
+      "enabled": false,
+      "status": "ready"
+    },
+    "livemode": false,
+    "payment_status": "unpaid",
+    "shipping_address_collection": {
+      "allowed_countries": [
+        "US",
+        "CA"
+      ]
+    },
+    "status": "open",
+    "total_summary": {
+      "due": 12000,
+      "subtotal": 12000,
+      "tax_exclusive": 0,
+      "tax_inclusive": 0,
+      "total": 12000,
+      "total_tax_amounts": []
+    }
+  }
+}

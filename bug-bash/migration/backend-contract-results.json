@@ -1,0 +1,77 @@
+{
+  "version": "2026-08-26.preview",
+  "customer_created": true,
+  "customer_livemode": false,
+  "customer_hash": "ca58f3fb80d7",
+  "cases": {
+    "plain": {
+      "http_status": 200,
+      "addition": {},
+      "livemode": false,
+      "mode": "none",
+      "ui_mode": "mobile_elements",
+      "status": "open",
+      "payment_status": "unpaid",
+      "payment_settings": null,
+      "payment_intent_data": null,
+      "session_hash": "2a31863ead1c"
+    },
+    "legacy": {
+      "http_status": 400,
+      "addition": {
+        "payment_intent_data": {
+          "setup_future_usage": "off_session"
+        }
+      },
+      "error": "You can not pass `payment_intent_data` in `modeless` mode."
+    },
+    "current": {
+      "http_status": 200,
+      "addition": {
+        "payment_settings": {
+          "setup_future_usage": "off_session"
+        }
+      },
+      "livemode": false,
+      "mode": "none",
+      "ui_mode": "mobile_elements",
+      "status": "open",
+      "payment_status": "unpaid",
+      "payment_settings": {
+        "application_fee_data": null,
+        "capture_method": null,
+        "description": null,
+        "metadata": null,
+        "setup_future_usage": "off_session",
+        "statement_descriptor": null,
+        "transfer_data": null,
+        "transfer_group": null
+      },
+      "payment_intent_data": null,
+      "session_hash": "b2c86d966b7e"
+    }
+  },
+  "base_request": {
+    "ui_mode": "mobile_elements",
+    "customer": "<same valid test Customer with synthetic email>",
+    "items": [
+      {
+        "type": "one_time_price",
+        "one_time_price": {
+          "items": [
+            {
+              "price_data": {
+                "currency": "usd",
+                "unit_amount": 1099,
+                "product_data": {
+                  "name": "T-shirt"
+                }
+              },
+              "quantity": 1
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

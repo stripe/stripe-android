@@ -1,0 +1,18 @@
+{
+  "label": "reselect-control",
+  "session_hash": "6d6c6048c89a",
+  "poll": {
+    "http_status": 200,
+    "confirmation_status": "succeeded",
+    "livemode": false,
+    "payment_status": "paid",
+    "status": "complete"
+  },
+  "retrieve": {
+    "http_status": 400,
+    "error": {
+      "code": "checkout_not_active_session",
+      "type": "invalid_request_error"
+    }
+  }
+}

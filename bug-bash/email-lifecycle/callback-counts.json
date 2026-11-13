@@ -1,0 +1,15 @@
+{
+  "pid": "14933",
+  "before_rotation": {
+    "Failed": 1,
+    "Canceled": 1
+  },
+  "after_rotation": {
+    "Failed": 1,
+    "Canceled": 1
+  },
+  "after_retry_completed": {
+    "Canceled": 1,
+    "Completed": 1
+  }
+}

@@ -1,0 +1,17 @@
+{"text": "Pay by bank test payment page", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[23,468][1055,704]"}
+{"text": "Complete the test payment", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[49,1063][1029,1153]"}
+{"text": "This is a test payment of", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[49,1158][540,1213]"}
+{"text": " ", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[538,1158][553,1213]"}
+{"text": "\u00a3120.00 GBP", "content-desc": "", "class": "android.view.View", "enabled": "true", "clickable": "false", "bounds": "[548,1158][816,1213]"}
+{"text": " with", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[813,1158][913,1213]"}
+{"text": " ", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[908,1158][924,1213]"}
+{"text": "Pay by bank", "content-desc": "", "class": "android.view.View", "enabled": "true", "clickable": "false", "bounds": "[49,1158][997,1287]"}
+{"text": ".", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[207,1231][223,1287]"}
+{"text": "", "content-desc": "AUTHORIZE TEST PAYMENT", "class": "android.view.View", "enabled": "true", "clickable": "true", "bounds": "[49,1350][653,1455]"}
+{"text": "AUTHORIZE TEST PAYMENT", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[86,1378][616,1426]"}
+{"text": "", "content-desc": "FAIL TEST PAYMENT", "class": "android.view.View", "enabled": "true", "clickable": "true", "bounds": "[49,1504][511,1615]"}
+{"text": "FAIL TEST PAYMENT", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[86,1533][475,1586]"}
+{"text": "", "content-desc": "Close tab", "class": "android.widget.ImageButton", "enabled": "true", "clickable": "true", "bounds": "[21,132][147,279]"}
+{"text": "", "content-desc": "Minimize tab", "class": "android.widget.ImageButton", "enabled": "true", "clickable": "true", "bounds": "[147,132][273,279]"}
+{"text": "[URL/secret suppressed]", "content-desc": "[URL/secret suppressed]", "class": "android.widget.TextView", "enabled": "true", "clickable": "true", "bounds": "[304,142][708,268]"}
+{"text": "", "content-desc": "Customize and control Google Chrome", "class": "android.widget.ImageButton", "enabled": "true", "clickable": "true", "bounds": "[933,132][1059,279]"}

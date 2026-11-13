@@ -1,0 +1,17 @@
+# Shared investigation handoff
+
+Read the topic assignment, `/Users/amk/.codex/skills/bug-bash/SKILL.md`, its `references/android-checkout.md`, root AGENTS.md, `DOCS_INDEX.md`, existing root ISSUE reports (duplicate root causes), and only relevant completed RUN_NOTES. Tax/saved methods additionally require `references/tax-and-saved-cards.md`. Invoke required test skills before writing test code.
+
+User requested broad **docs-driven** Android Checkout Elements investigation, with one fresh Astra agent per topic, in sequence. Parent handles orchestration and status; you exclusively own meaningful device UI during your topic. No other bug-bash agent may run concurrently. Parent wake+inert UNKNOWN keepalive runs every90s; do not stop it. Use only physical Pixel6a serial `2B211JEGR05252`, API36; emulator-5556 excluded. Initial source HEAD `8cbb695eabcafa957a86c24e1f025643979a500a` and clean tree. Preserve earlier agents' evidence/repros/settings.
+
+User authorizes debug example builds/install, native adb interactions and synthetic test-mode backend provisioning. No staging, commit, push, remote issue filing or external messaging. Keep evidence and reports local. Do not implement fixes. Screenshots must be inspected, videos finalized and decoded. Exclude personal wallet contents, keys/client secrets and other sensitive data from retained reports. Do not print secret settings backups. Parent is available for blockers; continue independent work.
+
+Home `stripe_doc` search/fetch supplies docs but merges platform branches and strips syntax; verify suspected doc errors with Sourcegraph Android Markdoc. Root URL direct curl had TLS failure. No browser fallback for docs. See DOCS_INDEX source root + revision and nine routes. Preview limitations in docs are intentional exclusions.
+
+Build: `.agents/skills/delegate-low-reasoning-work/SKILL.md` applies. Attempts to delegate exact builds to Luna and Sol repeatedly delivered empty messages, both nested and root. Parent reported tool friction. Until resolved, send parent exact Gradle commands for execution (skill fallback when no usable executor). Do not duplicate builds. Native UI via adb does not require connected test tasks. If instrumentation necessary use instructed managed-device task, never user's emulator.
+
+Follow bug-bash protocol: working control then meaningful boundaries/transitions; real backend evidence for backend claims; trace reachable public UI/API path; minimize and write focused reproduction for confirmed bugs. Search GitHub issues using `GH_HOST=github.com` and `--state all`; recheck local reports. One root cause per report. Report only concrete verified bugs and distinguish expected-failing regression tests from passed controls. No confirmed bug is a valid result.
+
+Write root `ISSUE_<surface>_<description>.md` exactly Summary/Repro/Test/Elaboration fields. Topic evidence/repro scripts and RUN_NOTES under `bug-bash/<surface>/`. RUN_NOTES must enumerate actual configurations/results, rejected leads, untested areas, revision/device/build flags, report paths and setup handoff. Restore original app settings and device state, stop owned relays/recorders, remove owned adb mappings/scratch files after evidence preservation. Document installed build/flags. Parent owns final overall ledger/keepalive cleanup.
+
+Send concise progress when a meaningful stage completes, so parent can update user. Finish your bounded topic without investigating another agent's topic deeply.

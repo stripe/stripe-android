@@ -1,0 +1,3 @@
+{"text": "Allow PaymentSheet Example to send you notifications?", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[133,1003][947,1255]"}
+{"text": "Allow", "content-desc": "", "class": "android.widget.Button", "enabled": "true", "clickable": "true", "bounds": "[133,1318][947,1444]"}
+{"text": "Don\u2019t allow", "content-desc": "", "class": "android.widget.Button", "enabled": "true", "clickable": "true", "bounds": "[133,1465][947,1591]"}

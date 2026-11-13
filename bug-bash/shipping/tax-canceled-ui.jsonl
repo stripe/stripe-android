@@ -1,0 +1,31 @@
+{"text": "Total", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[42,312][130,375]"}
+{"text": "$132.30", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[899,312][1038,375]"}
+{"text": "Card", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[238,464][314,513]"}
+{"text": "Session controls", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[42,613][438,676]"}
+{"text": "", "content-desc": "", "class": "android.widget.EditText", "enabled": "true", "clickable": "true", "bounds": "[42,676][1038,844]"}
+{"text": "Promotion code", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[84,739][389,802]"}
+{"text": "Apply", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[84,886][189,929]"}
+{"text": "Remove", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[294,886][441,929]"}
+{"text": "shipping.bugbash@example.com", "content-desc": "", "class": "android.widget.EditText", "enabled": "true", "clickable": "true", "bounds": "[42,970][1038,1138]"}
+{"text": "Email", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[84,970][168,1012]"}
+{"text": "Update email", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[417,1180][664,1223]"}
+{"text": "Shipping address", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[42,1285][450,1348]"}
+{"text": "Name", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[42,1359][374,1412]"}
+{"text": "Tax Shipping Tester", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[374,1359][1038,1412]"}
+{"text": "Line 1", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[42,1434][374,1487]"}
+{"text": "200 N Spring St", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[374,1434][1038,1487]"}
+{"text": "City", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[42,1509][374,1562]"}
+{"text": "Los Angeles", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[374,1509][1038,1562]"}
+{"text": "State", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[42,1584][374,1637]"}
+{"text": "CA", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[374,1584][1038,1637]"}
+{"text": "Postal code", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[42,1659][374,1712]"}
+{"text": "90012", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[374,1659][1038,1712]"}
+{"text": "Country", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[42,1734][374,1787]"}
+{"text": "US", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[374,1734][1038,1787]"}
+{"text": "\u2039", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[60,154][88,259]"}
+{"text": "Checkout", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[190,174][415,237]"}
+{"text": "No payment method selected", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[32,1885][523,1938]"}
+{"text": "Clear", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[232,1980][330,2023]"}
+{"text": "Select", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[740,1980][858,2023]"}
+{"text": "Set shipping address", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[341,2106][740,2149]"}
+{"text": "Confirm", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[465,2232][616,2275]"}

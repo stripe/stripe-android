@@ -1,0 +1,15 @@
+{
+  "http_status": 200,
+  "fields": {
+    "link_settings.link_funding_sources": [
+      "CARD",
+      "BANK_ACCOUNT"
+    ],
+    "link_settings.link_mode": "LINK_CARD_BRAND",
+    "ordered_payment_method_types_and_wallets": [
+      "card",
+      "apple_pay",
+      "google_pay"
+    ]
+  }
+}

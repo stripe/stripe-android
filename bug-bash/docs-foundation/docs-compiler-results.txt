@@ -1,0 +1,18 @@
+ActualController.kt: compiler exit 0; expected 0
+Picked up JAVA_TOOL_OPTIONS: -Dlog4j2.formatMsgNoLookups=true -Dcom.sun.jndi.ldap.object.trustURLCodebase=false
+
+DocumentedController.kt: compiler exit 1; expected 1
+Picked up JAVA_TOOL_OPTIONS: -Dlog4j2.formatMsgNoLookups=true -Dcom.sun.jndi.ldap.object.trustURLCodebase=false
+bug-bash/docs-foundation/DocumentedController.kt:1:36: error: unresolved reference 'CheckoutController'.
+import com.stripe.android.checkout.CheckoutController
+                                   ^^^^^^^^^^^^^^^^^^
+bug-bash/docs-foundation/DocumentedController.kt:4:38: error: unresolved reference 'CheckoutController'.
+fun documentedController(controller: CheckoutController) = controller
+                                     ^^^^^^^^^^^^^^^^^^
+
+DocumentedConfigureReturn.kt: compiler exit 1; expected 1
+Picked up JAVA_TOOL_OPTIONS: -Dlog4j2.formatMsgNoLookups=true -Dcom.sun.jndi.ldap.object.trustURLCodebase=false
+bug-bash/docs-foundation/DocumentedConfigureReturn.kt:10:12: error: return type mismatch: expected 'Result<Unit>', actual 'CheckoutElementsController.OperationResult'.
+    return controller.configure(
+           ^^^^^^^^^^^^^^^^^^^^^
+

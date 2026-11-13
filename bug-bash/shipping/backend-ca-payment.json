@@ -1,0 +1,30 @@
+{
+  "label": "ca_payment",
+  "session_hash": "4441d2c27268",
+  "poll": {
+    "http_status": 200,
+    "field_names": [
+      "confirmation_status",
+      "id",
+      "livemode",
+      "payment_status",
+      "state",
+      "status",
+      "ui_mode"
+    ],
+    "confirmation_status": "succeeded",
+    "livemode": false,
+    "payment_status": "paid",
+    "status": "complete"
+  },
+  "retrieve": {
+    "http_status": 400,
+    "field_names": [
+      "error"
+    ],
+    "error": {
+      "code": "checkout_not_active_session",
+      "type": "invalid_request_error"
+    }
+  }
+}

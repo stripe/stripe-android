@@ -1,0 +1,38 @@
+{
+  "creation": {
+    "currency": "gbp",
+    "amount_total": 12000,
+    "adaptive_pricing": {
+      "enabled": false
+    },
+    "livemode": false
+  },
+  "label": "paybybank-success",
+  "session_hash": "498ae1234fa0",
+  "poll_keys": [
+    "id",
+    "confirmation_status",
+    "livemode",
+    "payment_status",
+    "state",
+    "status",
+    "ui_mode"
+  ],
+  "poll": {
+    "http_status": 200,
+    "confirmation_status": "succeeded",
+    "livemode": false,
+    "payment_status": "paid",
+    "status": "complete"
+  },
+  "retrieve_keys": [
+    "error"
+  ],
+  "retrieve": {
+    "http_status": 400,
+    "error": {
+      "code": "checkout_not_active_session",
+      "type": "invalid_request_error"
+    }
+  }
+}

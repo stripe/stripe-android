@@ -1,0 +1,1 @@
+11-12 14:38:46.007  1715  1771 I wm_relaunch_resume_activity: [0,25962652,3531,com.stripe.android.paymentsheet.example/.playground.checkout.CheckoutElementsControllerExampleActivity,480]

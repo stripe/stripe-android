@@ -1,0 +1,44 @@
+diff --git a/paymentsheet/src/test/java/com/stripe/android/paymentelement/confirmation/intent/CheckoutSessionConfirmationInterceptorTest.kt b/paymentsheet/src/test/java/com/stripe/android/paymentelement/confirmation/intent/CheckoutSessionConfirmationInterceptorTest.kt
+index a4eb699fa4..3034b9a6e5 100644
+--- a/paymentsheet/src/test/java/com/stripe/android/paymentelement/confirmation/intent/CheckoutSessionConfirmationInterceptorTest.kt
++++ b/paymentsheet/src/test/java/com/stripe/android/paymentelement/confirmation/intent/CheckoutSessionConfirmationInterceptorTest.kt
+@@ -33,6 +33,7 @@ import com.stripe.android.model.PaymentIntentCreationFlow
+ import com.stripe.android.model.PaymentMethod
+ import com.stripe.android.model.PaymentMethodCreateParams
+ import com.stripe.android.model.PaymentMethodCreateParamsFixtures
++import com.stripe.android.model.PaymentMethodOptionsParams
+ import com.stripe.android.model.PaymentMethodFixtures
+ import com.stripe.android.model.PaymentMethodSelectionFlow
+ import com.stripe.android.model.RadarOptions
+@@ -87,6 +88,31 @@ class CheckoutSessionConfirmationInterceptorTest {
+         .outerRule(networkRule)
+         .around(PaymentConfigurationTestRule(applicationContext))
+ 
++    @Test
++    fun `blik bugbash forwards entered code to checkout confirmation`() = runScenario {
++        val option = NEW_PM_OPTION.copy(
++            createParams = PaymentMethodCreateParams.createBlik(),
++            optionsParams = PaymentMethodOptionsParams.Blik("123456"),
++        )
++        assertThat(option.optionsParams?.toParamMap()).isEqualTo(
++            mapOf("blik" to mapOf("code" to "123456")),
++        )
++        networkRule.checkoutConfirm(
++            bodyPart("payment_method_data[type]", "blik"),
++            bodyPart("payment_method_options[blik][code]", "123456"),
++        ) { response ->
++            response.testBodyFromFile("checkout-session-confirm.json")
++        }
++
++        val result = interceptor.intercept(
++            intent = PaymentIntentFactory.create(),
++            confirmationOption = option,
++            shippingValues = null,
++        )
++
++        assertThat(result).isInstanceOf<ConfirmationDefinition.Action.Complete<*>>()
++    }
++
+     @Test
+     fun `open confirmation completes with the unmodified confirm response for polling`() = runScenario {
+         networkRule.checkoutConfirm { response ->

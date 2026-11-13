@@ -1,0 +1,20 @@
+{
+  "session.backend_url": "http://127.0.0.1:18773",
+  "session.customer": "guest",
+  "session.customer_email": "adaptive+location_US@example.com",
+  "session.payment_method_save": "false",
+  "session.merchant": "US",
+  "session.automatic_payment_methods": "true",
+  "session.payment_method_types": "card, link",
+  "session.shipping_address_collection": "false",
+  "session.automatic_tax": "false",
+  "controller.payment_element.should_set_configuration": "true",
+  "payment.google_pay.display": "Never",
+  "payment.link.display": "Never",
+  "controller.express_checkout.should_set_configuration": "false",
+  "express.link.display": "Automatic",
+  "express.google_pay.display": "Automatic",
+  "express.google_pay.button_type": "Pay",
+  "controller.currency_selector.should_set_configuration": "true",
+  "currency.appearance.label": "AMOUNT"
+}

@@ -1,0 +1,46 @@
+{
+  "label": "auto-selected",
+  "session_hash": "3da40b3b7de4",
+  "poll": {
+    "http_status": 200,
+    "confirmation_status": "not_started",
+    "livemode": false,
+    "payment_status": "unpaid",
+    "status": "open"
+  },
+  "retrieve": {
+    "http_status": 200,
+    "automatic_tax": {
+      "address_source": "billing",
+      "enabled": true,
+      "status": "ready"
+    },
+    "livemode": false,
+    "payment_status": "unpaid",
+    "status": "open",
+    "total_summary": {
+      "due": 13035,
+      "subtotal": 12000,
+      "tax_exclusive": 1035,
+      "tax_inclusive": 0,
+      "total": 13035,
+      "total_tax_amounts": [
+        {
+          "amount": 1035,
+          "display_name": "Sales Tax",
+          "inclusive": false,
+          "percentage": 8.625
+        }
+      ]
+    },
+    "customer": {
+      "hash": "80a14edd2885",
+      "payment_methods": []
+    },
+    "saved_payment_method_options": {
+      "payment_method_remove": "enabled",
+      "payment_method_save": "enabled"
+    },
+    "setup_future_usage_for_payment_method_type": {}
+  }
+}

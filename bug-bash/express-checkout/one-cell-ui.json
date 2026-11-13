@@ -1,0 +1,37 @@
+[
+  {
+    "label": "google_pay",
+    "bounds": [
+      42,
+      814,
+      1038,
+      951
+    ],
+    "background_rgb": [
+      255,
+      255,
+      255,
+      255
+    ]
+  },
+  {
+    "label": "Card",
+    "bounds": [
+      238,
+      1040,
+      314,
+      1089
+    ],
+    "background_rgb": null
+  },
+  {
+    "label": "No shipping address",
+    "bounds": [
+      42,
+      1924,
+      397,
+      1987
+    ],
+    "background_rgb": null
+  }
+]

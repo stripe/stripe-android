@@ -1,0 +1,27 @@
+{"text": "Line Items", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[42,321][290,384]"}
+{"text": "Classic T-Shirt x2", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[42,395][330,448]"}
+{"text": "\u20ac70.00", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[923,395][1038,448]"}
+{"text": "Zip-Up Hoodie x1", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[42,470][329,523]"}
+{"text": "\u20ac50.00", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[923,470][1038,523]"}
+{"text": "Subtotal", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[42,601][187,664]"}
+{"text": "\u20ac120.00", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[899,601][1038,664]"}
+{"text": "Total", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[42,709][130,772]"}
+{"text": "\u20ac120.00", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[899,709][1038,772]"}
+{"text": "Bancontact", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[238,861][421,910]"}
+{"text": "Card", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[238,1001][314,1050]"}
+{"text": "iDEAL | Wero", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[238,1141][445,1190]"}
+{"text": "Change", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[884,1141][1006,1190]"}
+{"text": "SEPA Debit", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[238,1281][418,1330]"}
+{"text": "Session controls", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[42,1430][438,1493]"}
+{"text": "", "content-desc": "", "class": "android.widget.EditText", "enabled": "true", "clickable": "true", "bounds": "[42,1493][1038,1661]"}
+{"text": "Promotion code", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[84,1556][389,1619]"}
+{"text": "Apply", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[84,1703][189,1746]"}
+{"text": "Remove", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[294,1703][441,1746]"}
+{"text": "methods@example.com", "content-desc": "", "class": "android.widget.EditText", "enabled": "true", "clickable": "true", "bounds": "[42,1787][1038,1955]"}
+{"text": "Email", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[84,1787][168,1829]"}
+{"text": "Update email", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[417,1997][664,2019]"}
+{"text": "\u2039", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[60,154][88,259]"}
+{"text": "Checkout", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[190,174][415,237]"}
+{"text": "iDEAL | Wero", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[137,2054][358,2117]"}
+{"text": "Payment complete!", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[32,2127][488,2190]"}
+{"text": "Back to settings", "content-desc": "", "class": "android.widget.TextView", "enabled": "true", "clickable": "false", "bounds": "[386,2232][695,2275]"}

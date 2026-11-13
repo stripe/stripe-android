@@ -1,0 +1,7 @@
+Command: ./gradlew :paymentsheet:testDebugUnitTest --tests 'com.stripe.android.paymentelement.embedded.manage.EmbeddedUpdateScreenInteractorFactoryTest.tax bugbash*'
+Exit: 1; BUILD FAILED in 35s.
+tests=2 skipped=0 failures=1 errors=0
+tax bugbash automatic saved card edit exposes required US fields: FAIL (expected automatic tax field-visibility regression)
+com.google.common.truth.AssertionErrorWithFacts: expected not to contain: FormFieldId(v1=billing_details[address][line1], ignoreField=false, destination=Params)
+but was                : [FormFieldId(v1=billing_details[address][line1], ignoreField=false, destination=Params), FormFieldId(v1=billing_details[address][line2], ignoreField=false, destination=Params), FormFieldId(v1=billing_details[address][city], ignoreField=false, destination=Params), FormFieldId(v1=, ignoreField=false, destination=Params), FormFieldId(v1=billing_details[address][state], ignoreField=false, destination=Params)]
+tax bugbash full saved card edit exposes required US fields: PASS

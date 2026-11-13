@@ -1,0 +1,119 @@
+{
+  "label": "eur-card",
+  "session_hash": "f10518fddaba",
+  "poll_keys": [
+    "id",
+    "confirmation_status",
+    "livemode",
+    "payment_status",
+    "state",
+    "status",
+    "ui_mode"
+  ],
+  "poll": {
+    "http_status": 200,
+    "confirmation_status": "not_started",
+    "livemode": false,
+    "payment_status": "unpaid",
+    "status": "open"
+  },
+  "retrieve_keys": [
+    "id",
+    "object",
+    "adaptive_pricing_info",
+    "apple_pay_preference",
+    "automatic_tax",
+    "billing_address_collection",
+    "blocked_billing_address_countries",
+    "card_brand_choice",
+    "checkout_session_config_id",
+    "country_code",
+    "customer",
+    "customer_email",
+    "elements_session_config_id",
+    "elements_session_id",
+    "email_collection",
+    "experiments_data",
+    "flags",
+    "google_pay_preference",
+    "integration_currency",
+    "items",
+    "link_settings",
+    "livemode",
+    "merchant_info",
+    "name_collection",
+    "ordered_payment_method_types_and_wallets",
+    "passive_captcha",
+    "payment_method_collection",
+    "payment_method_options",
+    "payment_status",
+    "phone_number_collection",
+    "presentment_currency",
+    "saved_payment_method_options",
+    "setup_future_usage_for_payment_method_type",
+    "shipping_address_collection",
+    "state",
+    "status",
+    "total_summary",
+    "ui_mode",
+    "unactivated_payment_method_types"
+  ],
+  "retrieve": {
+    "http_status": 200,
+    "adaptive_pricing_info": {
+      "integration_currency_option": {
+        "amount": 12000,
+        "currency": "usd",
+        "disclosure": {
+          "caption": "Exchange rate and fees of your bank may apply."
+        }
+      },
+      "local_currency_options": [
+        {
+          "amount": 11288,
+          "currency": "eur",
+          "disclosure": {
+            "caption": "1 USD = 0.9406 EUR"
+          }
+        }
+      ]
+    },
+    "integration_currency": "usd",
+    "items": [
+      {
+        "name": "Classic T-Shirt",
+        "quantity": 2,
+        "currency": "eur",
+        "unit_amount": 3292,
+        "subtotal": 6585,
+        "total": 6585
+      },
+      {
+        "name": "Zip-Up Hoodie",
+        "quantity": 1,
+        "currency": "eur",
+        "unit_amount": 4703,
+        "subtotal": 4703,
+        "total": 4703
+      }
+    ],
+    "livemode": false,
+    "ordered_payment_method_types_and_wallets": [
+      "card",
+      "apple_pay",
+      "google_pay",
+      "link"
+    ],
+    "payment_status": "unpaid",
+    "presentment_currency": "eur",
+    "status": "open",
+    "total_summary": {
+      "due": 11288,
+      "subtotal": 11288,
+      "tax_exclusive": 0,
+      "tax_inclusive": 0,
+      "total": 11288,
+      "total_tax_amounts": []
+    }
+  }
+}

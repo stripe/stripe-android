@@ -1,0 +1,6 @@
+Command: ./gradlew :paymentsheet:testDebugUnitTest --tests 'com.stripe.android.checkout.CheckoutElementsControllerTest.email bugbash*'
+Exit: 1; BUILD FAILED in 18s.
+tests=2 skipped=0 failures=1 errors=0
+email bugbash unchanged checkout email preserves selected card: PASS
+email bugbash changing checkout email preserves selected card: FAIL (expected retention regression)
+com.google.common.truth.AssertionErrorWithFacts: expected not to be: null

@@ -1,0 +1,40 @@
+{
+  "percent": {
+    "coupon_id": "c8GSdPjO",
+    "code": "BASHPERCENT1794524321",
+    "coupon": {
+      "percent_off": 25
+    },
+    "restriction": {}
+  },
+  "fixed": {
+    "coupon_id": "cwv2L99B",
+    "code": "BASHFIXED1794524322",
+    "coupon": {
+      "amount_off": 1000,
+      "currency": "usd"
+    },
+    "restriction": {}
+  },
+  "minimum": {
+    "coupon_id": "L3meoWIM",
+    "code": "BASHMINIMUM1794524322",
+    "coupon": {
+      "percent_off": 10
+    },
+    "restriction": {
+      "restrictions": {
+        "minimum_amount": 20000,
+        "minimum_amount_currency": "usd"
+      }
+    }
+  },
+  "full": {
+    "coupon_id": "DtX5v8Qa",
+    "code": "BASHFULL1794524323",
+    "coupon": {
+      "percent_off": 100
+    },
+    "restriction": {}
+  }
+}

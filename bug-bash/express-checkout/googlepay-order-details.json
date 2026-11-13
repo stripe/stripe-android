@@ -1,0 +1,62 @@
+[
+  {
+    "text": "",
+    "description": "Close",
+    "bounds": "[933,1214][1017,1298]"
+  },
+  {
+    "text": "Classic T-Shirt x2",
+    "description": "",
+    "bounds": "[84,1756][879,1805]"
+  },
+  {
+    "text": "$70.00",
+    "description": "",
+    "bounds": "[879,1756][996,1805]"
+  },
+  {
+    "text": "Zip-Up Hoodie",
+    "description": "",
+    "bounds": "[84,1805][877,1854]"
+  },
+  {
+    "text": "$50.00",
+    "description": "",
+    "bounds": "[877,1805][996,1854]"
+  },
+  {
+    "text": "Subtotal",
+    "description": "",
+    "bounds": "[84,1854][865,1903]"
+  },
+  {
+    "text": "$120.00",
+    "description": "",
+    "bounds": "[865,1854][996,1903]"
+  },
+  {
+    "text": "Total",
+    "description": "",
+    "bounds": "[84,1903][865,1952]"
+  },
+  {
+    "text": "$120.00",
+    "description": "",
+    "bounds": "[865,1903][996,1952]"
+  },
+  {
+    "text": "Total",
+    "description": "",
+    "bounds": "[84,1990][561,2039]"
+  },
+  {
+    "text": "$120.00",
+    "description": "",
+    "bounds": "[729,1966][996,2063]"
+  },
+  {
+    "text": "Pay",
+    "description": "",
+    "bounds": "[63,2098][1017,2245]"
+  }
+]
