@@ -16,22 +16,20 @@ internal val AUTOCOMPLETE_DEFAULT_COUNTRIES = setOf(
     "FR",
     "GB",
     "IE",
+    "IN",
     "IT",
+    "JP",
     "MX",
-    "NO",
+    "MY",
     "NL",
+    "NO",
+    "NZ",
+    "PH",
     "PL",
     "RU",
     "SE",
+    "SG",
     "TR",
     "US",
     "ZA"
 )
-
-/**
- * Extended list used when using Stripe-hosted autocomplete proxy endpoints.
- * These countries are enabled only for the Stripe-hosted endpoint to avoid exposing
- * merchant-owned API keys to broader usage.
- */
-internal val AUTOCOMPLETE_STRIPE_HOSTED_DEFAULT_COUNTRIES: Set<String> =
-    AUTOCOMPLETE_DEFAULT_COUNTRIES + setOf("IN", "JP", "MY", "NZ", "PH", "SG")
