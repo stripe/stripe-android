@@ -101,14 +101,16 @@ internal enum class AddPaymentMethodRequirement {
         }
     },
 
-    /** Requires the buyer's Stripe balance financial accounts, which load only with a CustomerSession. */
+    /**
+     * Requires the buyer to have Stripe balance financial accounts, which load only with a CustomerSession. The server
+     * lists none when Stripe balance doesn't apply to the buyer.
+     */
     StripeBalanceFinancialAccounts {
         override val errorMessage: String =
-            "Stripe balance requires a customer configured with a CustomerSession, and the customer's financial " +
-                "accounts to load."
+            "Stripe balance requires a customer configured with a CustomerSession who has financial accounts."
 
         override fun isMetBy(metadata: PaymentMethodMetadata, code: String): Boolean {
-            return metadata.stripeBalanceFinancialAccounts != null
+            return metadata.stripeBalanceFinancialAccounts?.accounts?.isNotEmpty() == true
         }
     };
 
