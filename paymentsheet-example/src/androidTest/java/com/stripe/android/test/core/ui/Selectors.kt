@@ -232,9 +232,15 @@ internal class Selectors(
                 device = device
             ) {
                 override fun click() {
-                    browserAuthorizationPage.clickAction(
-                        testParameters.authorizationAction.text(testParameters.isSetupMode)
-                    )
+                    // Afterpay and some other authorization test pages
+                    // have their authorization class name of TextView instead of button,
+                    // in other cases such as bancontact and ideal the authorize class prevents
+                    // it from finding the button.  More investigation into why is needed.
+                    if (!exists()) {
+                        className = null
+                    }
+
+                    super.click()
                 }
             }
         }
