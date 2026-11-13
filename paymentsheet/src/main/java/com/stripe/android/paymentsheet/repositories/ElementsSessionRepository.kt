@@ -24,7 +24,6 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.parsers.ElementsSessionJsonParser
 import com.stripe.android.networking.StripeRepository
-import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.MobileSession
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
@@ -54,7 +53,6 @@ internal class RealElementsSessionRepository @Inject constructor(
     private val stripeRepository: StripeRepository,
     @IOContext private val workContext: CoroutineContext,
     private val clientParams: ElementsSessionClientParams,
-    private val errorReporter: ErrorReporter,
 ) : ElementsSessionRepository {
     private val apiRequestFactory = ApiRequest.Factory(
         appInfo = Stripe.appInfo,
@@ -148,7 +146,6 @@ internal class RealElementsSessionRepository @Inject constructor(
             responseJsonParser = ElementsSessionJsonParser(
                 params = params,
                 isLiveMode = options.apiKeyIsLiveMode,
-                errorReporter = errorReporter,
             ),
         )
     }

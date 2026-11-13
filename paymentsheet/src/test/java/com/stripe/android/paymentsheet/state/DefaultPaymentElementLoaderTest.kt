@@ -5607,7 +5607,6 @@ internal class DefaultPaymentElementLoaderTest {
             id = DEFAULT_CHECKOUT_SESSION_ID,
             amount = 5099,
             elementsSession = ElementsSession(
-                mobileSession = null,
                 linkSettings = null,
                 stripeIntent = stripeIntent,
                 merchantCountry = null,

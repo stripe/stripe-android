@@ -476,7 +476,6 @@ class LogLinkGlobalHoldbackExposureTest {
         customer: ElementsSession.Customer = createCustomer(MobilePaymentElement.Disabled),
     ): ElementsSession {
         return ElementsSession(
-            mobileSession = null,
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             cardBrandChoice = null,
             merchantCountry = null,

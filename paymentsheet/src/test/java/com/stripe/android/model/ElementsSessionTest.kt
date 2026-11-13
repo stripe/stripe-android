@@ -409,7 +409,6 @@ class ElementsSessionTest {
         merchantId: String? = "acct_1SGP1sPvdtoA7EjP",
     ): ElementsSession {
         return ElementsSession(
-            mobileSession = null,
             linkSettings = null,
             externalPaymentMethodData = null,
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,

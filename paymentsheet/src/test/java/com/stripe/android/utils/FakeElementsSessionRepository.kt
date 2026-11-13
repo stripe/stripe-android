@@ -65,7 +65,6 @@ internal class FakeElementsSessionRepository(
         } else {
             Result.success(
                 ElementsSession(
-                    mobileSession = null,
                     linkSettings = linkSettings,
                     stripeIntent = stripeIntent,
                     merchantCountry = null,

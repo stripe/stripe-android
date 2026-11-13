@@ -96,7 +96,6 @@ internal class DefaultTapToAddAvailabilityFactoryTest {
         flags: Map<ElementsSession.Flag, Boolean>,
     ): ElementsSession {
         return ElementsSession(
-            mobileSession = null,
             linkSettings = null,
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             merchantCountry = null,

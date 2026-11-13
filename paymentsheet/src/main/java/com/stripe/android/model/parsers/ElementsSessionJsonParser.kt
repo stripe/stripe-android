@@ -1,6 +1,5 @@
 package com.stripe.android.model.parsers
 
-import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.core.model.parsers.ModelJsonParser.Companion.jsonArrayToList
@@ -13,8 +12,6 @@ import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.payments.core.analytics.ErrorReporter
-import com.stripe.android.paymentsheet.model.MobileSession
 import org.json.JSONArray
 import org.json.JSONObject
 import java.util.UUID
@@ -22,7 +19,6 @@ import java.util.UUID
 internal class ElementsSessionJsonParser(
     private val params: ElementsSessionParams,
     private val isLiveMode: Boolean,
-    private val errorReporter: ErrorReporter,
     private val timeProvider: () -> Long = {
         System.currentTimeMillis()
     }
@@ -99,7 +95,6 @@ internal class ElementsSessionJsonParser(
 
         return if (stripeIntent != null) {
             ElementsSession(
-                mobileSession = parseMobileSession(json),
                 linkSettings = parseLinkSettings(linkSettings, linkFundingSources),
                 stripeIntent = stripeIntent,
                 customer = customer,
@@ -121,20 +116,6 @@ internal class ElementsSessionJsonParser(
         } else {
             null
         }
-    }
-
-    private fun parseMobileSession(json: JSONObject): MobileSession.Session? {
-        if (!FeatureFlags.serverPaymentMethodAvailabilityEnabled.isEnabled || json.isNull("mobile_session")) {
-            return null
-        }
-        return runCatching {
-            MobileSession.decode(json.getJSONObject("mobile_session").toString())
-        }.onFailure { error ->
-            errorReporter.report(
-                errorEvent = ErrorReporter.ExpectedErrorEvent.PAYMENT_SHEET_MOBILE_SESSION_DECODE_FAILED,
-                stripeException = StripeException.create(error),
-            )
-        }.getOrNull()
     }
 
     private class StripeIntentAssistBuilder(

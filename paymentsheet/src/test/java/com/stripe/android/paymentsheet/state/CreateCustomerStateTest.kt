@@ -342,7 +342,6 @@ internal class CreateCustomerStateTest {
         )
 
         val DEFAULT_ELEMENTS_SESSION = ElementsSession(
-            mobileSession = null,
             linkSettings = null,
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             merchantCountry = null,

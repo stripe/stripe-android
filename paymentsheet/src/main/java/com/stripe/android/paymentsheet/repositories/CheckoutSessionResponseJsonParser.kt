@@ -290,7 +290,6 @@ internal class CheckoutSessionResponseJsonParser(
         val captcha = json.optionalObject("passive_captcha")
         val flags = json.optionalObject("flags")?.let { ElementsSessionJsonParser.parseSessionFlags(it) } ?: emptyMap()
         return ElementsSession(
-            mobileSession = null,
             linkSettings = parseCheckoutLinkSettings(linkSettings, fundingSources),
             stripeIntent = stripeIntent,
             customer = null,

@@ -75,7 +75,6 @@ internal object CustomerSheetFixtures {
         val customer = getCustomer(hasCustomerSession, isPaymentMethodSyncDefaultEnabled, hasDefaultPaymentMethod)
 
         val elementsSession = ElementsSession(
-            mobileSession = null,
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             cardBrandChoice = null,
             merchantCountry = null,

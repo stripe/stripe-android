@@ -2,18 +2,13 @@ package com.stripe.android.model
 
 import com.stripe.android.core.model.StripeModel
 import com.stripe.android.model.PaymentMethod.Type.Link
-import com.stripe.android.paymentsheet.model.MobileSession
-import com.stripe.android.paymentsheet.model.MobileSessionParceler
 import kotlinx.parcelize.Parcelize
-import kotlinx.parcelize.TypeParceler
 import java.util.UUID
 
 private val LinkSupportedFundingSources = setOf("card", "bank_account")
 
 @Parcelize
 internal data class ElementsSession(
-    @TypeParceler<MobileSession.Session?, MobileSessionParceler>
-    val mobileSession: MobileSession.Session?,
     val linkSettings: LinkSettings?,
     val externalPaymentMethodData: String?,
     val stripeIntent: StripeIntent,
@@ -295,7 +290,6 @@ internal data class ElementsSession(
             elementsSessionId: String = UUID.randomUUID().toString(),
         ): ElementsSession {
             return ElementsSession(
-                mobileSession = null,
                 linkSettings = null,
                 externalPaymentMethodData = null,
                 flags = emptyMap(),
