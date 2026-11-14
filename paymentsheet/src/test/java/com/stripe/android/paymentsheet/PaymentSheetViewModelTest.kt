@@ -89,6 +89,7 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
 import com.stripe.android.paymentsheet.cvcrecollection.FakeCvcRecollectionHandler
+import com.stripe.android.paymentsheet.featuredinstitutions.FakeFeaturedInstitutionsHelper
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -3742,6 +3743,7 @@ internal class PaymentSheetViewModelTest {
                 },
                 customViewModelScope = coroutineScopeCleanupRule.track(CoroutineScope(Dispatchers.Unconfined)),
                 paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
+                featuredInstitutionsHelper = FakeFeaturedInstitutionsHelper(),
                 placesClient = null,
                 linkAccountHolder = LinkAccountHolder(thisSavedStateHandle),
                 stripeAutocompleteRepository = FakeStripeAutocompleteRepository(),

@@ -78,7 +78,8 @@ internal fun SavedPaymentMethodRowButton(
         appearance = appearance,
         shouldShowDefaultBadge = displayableSavedPaymentMethod.shouldShowDefaultBadge,
         isExpanded = false,
-        promotionProvider = null
+        promotionProvider = null,
+        featuredInstitutions = null,
     )
 }
 

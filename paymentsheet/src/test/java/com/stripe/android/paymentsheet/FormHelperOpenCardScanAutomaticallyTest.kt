@@ -26,6 +26,7 @@ import com.stripe.android.paymentsheet.addresselement.analytics.FakeAddressLaunc
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.cvcrecollection.FakeCvcRecollectionHandler
+import com.stripe.android.paymentsheet.featuredinstitutions.FakeFeaturedInstitutionsHelper
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.Args
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionInteractor
@@ -194,6 +195,7 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
                 customerStateHolderFactory = DefaultCustomerStateHolder.Factory,
                 customViewModelScope = coroutineScopeCleanupRule.track(CoroutineScope(Dispatchers.Unconfined)),
                 paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
+                featuredInstitutionsHelper = FakeFeaturedInstitutionsHelper(),
                 placesClient = null,
                 stripeAutocompleteRepository = FakeStripeAutocompleteRepository(),
                 addressLauncherEventReporter = FakeAddressLauncherEventReporter(),
@@ -252,6 +254,7 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
                 customerStateHolderFactory = DefaultCustomerStateHolder.Factory,
                 customViewModelScope = coroutineScopeCleanupRule.track(CoroutineScope(Dispatchers.Unconfined)),
                 paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
+                featuredInstitutionsHelper = FakeFeaturedInstitutionsHelper(),
                 placesClient = null,
                 linkAccountHolder = LinkAccountHolder(thisSavedStateHandle),
                 stripeAutocompleteRepository = FakeStripeAutocompleteRepository(),
@@ -282,5 +285,6 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
         ),
         walletButtonsRendered = false,
         promotions = null,
+        featuredInstitutions = null,
     )
 }

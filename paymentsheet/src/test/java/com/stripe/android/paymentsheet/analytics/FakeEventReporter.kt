@@ -113,6 +113,15 @@ internal class FakeEventReporter : EventReporter {
     val pmmPromotionsDisplayed: ReceiveTurbine<Boolean> =
         _pmmPromotionsDisplayed
 
+    private val _featuredInstitutionsShownCalls = Turbine<Unit>()
+    val featuredInstitutionsShownCalls: ReceiveTurbine<Unit> = _featuredInstitutionsShownCalls
+
+    private val _featuredInstitutionsInsufficientCalls = Turbine<Int>()
+    val featuredInstitutionsInsufficientCalls: ReceiveTurbine<Int> = _featuredInstitutionsInsufficientCalls
+
+    private val _featuredInstitutionsLoadFailedCalls = Turbine<Throwable>()
+    val featuredInstitutionsLoadFailedCalls: ReceiveTurbine<Throwable> = _featuredInstitutionsLoadFailedCalls
+
     fun validate() {
         _paymentFailureCalls.ensureAllEventsConsumed()
         _paymentSuccessCalls.ensureAllEventsConsumed()
@@ -143,6 +152,9 @@ internal class FakeEventReporter : EventReporter {
         _billingAddressCompletedCalls.ensureAllEventsConsumed()
         _pmmPromotionsFetched.ensureAllEventsConsumed()
         _pmmPromotionsDisplayed.ensureAllEventsConsumed()
+        _featuredInstitutionsShownCalls.ensureAllEventsConsumed()
+        _featuredInstitutionsInsufficientCalls.ensureAllEventsConsumed()
+        _featuredInstitutionsLoadFailedCalls.ensureAllEventsConsumed()
     }
 
     override fun onDismiss() {
@@ -311,6 +323,18 @@ internal class FakeEventReporter : EventReporter {
 
     override fun onPaymentMethodMessagePromotionDisplayed(displayedSuccessfully: Boolean) {
         _pmmPromotionsDisplayed.add(displayedSuccessfully)
+    }
+
+    override fun onFeaturedInstitutionsShown() {
+        _featuredInstitutionsShownCalls.add(Unit)
+    }
+
+    override fun onFeaturedInstitutionsInsufficient(count: Int) {
+        _featuredInstitutionsInsufficientCalls.add(count)
+    }
+
+    override fun onFeaturedInstitutionsLoadFailed(error: Throwable) {
+        _featuredInstitutionsLoadFailedCalls.add(error)
     }
 
     override fun onCardScanStarted(implementation: String) {

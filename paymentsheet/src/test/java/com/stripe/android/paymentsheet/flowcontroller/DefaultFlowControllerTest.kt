@@ -83,6 +83,7 @@ import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
+import com.stripe.android.paymentsheet.featuredinstitutions.FakeFeaturedInstitutionsHelper
 import com.stripe.android.paymentsheet.model.DefaultPaymentOptionFactory
 import com.stripe.android.paymentsheet.model.ErrorPaymentOptionResource
 import com.stripe.android.paymentsheet.model.FakePaymentOptionFactory
@@ -571,7 +572,8 @@ internal class DefaultFlowControllerTest {
             linkAccountInfo = LinkAccountUpdate.Value(null),
             paymentElementCallbackIdentifier = FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER,
             walletButtonsRendered = false,
-            promotions = listOf(KLARNA_PROMOTION)
+            promotions = listOf(KLARNA_PROMOTION),
+            featuredInstitutions = null,
         )
 
         verify(paymentOptionActivityLauncher).launch(eq(expectedArgs), anyOrNull())
@@ -2532,7 +2534,8 @@ internal class DefaultFlowControllerTest {
             confirmationHandler = confirmationHandler ?: FakeFlowControllerConfirmationHandler(),
             paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(
                 listOf(KLARNA_PROMOTION)
-            )
+            ),
+            featuredInstitutionsHelper = FakeFeaturedInstitutionsHelper(),
         )
     }
 

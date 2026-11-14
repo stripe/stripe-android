@@ -19,6 +19,7 @@ import com.stripe.android.paymentsheet.FormHelper.FormType
 import com.stripe.android.paymentsheet.LinkInlineHandler
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.code
+import com.stripe.android.paymentsheet.featuredinstitutions.FeaturedInstitutions
 import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.isModifiable
@@ -127,7 +128,8 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val linkAccount: StateFlow<LinkAccountUpdate.Value>,
     private val coroutineScope: CoroutineScope,
     mainDispatcher: CoroutineContext = Dispatchers.Main.immediate,
-    private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper?
+    private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper?,
+    private val featuredInstitutions: FeaturedInstitutions?,
 ) : PaymentMethodVerticalLayoutInteractor {
 
     companion object {
@@ -138,7 +140,8 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             paymentMethodMetadata: PaymentMethodMetadata,
             customerStateHolder: CustomerStateHolder,
             bankFormInteractor: BankFormInteractor,
-            paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper?
+            paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper?,
+            featuredInstitutions: FeaturedInstitutions?,
         ): PaymentMethodVerticalLayoutInteractor {
             val coroutineScope = viewModel.viewModelScope.childScope(Dispatchers.Default)
             val formHelperScope = coroutineScope.childScope(Dispatchers.Main)
@@ -226,6 +229,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 linkAccount = viewModel.linkAccountHolder.linkAccountInfo,
                 coroutineScope = coroutineScope,
                 paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
+                featuredInstitutions = featuredInstitutions,
             )
         }
     }
@@ -424,6 +428,10 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                     code = supportedPaymentMethod.code,
                     metadata = paymentMethodMetadata
                 ),
+                // The incentive promo badge replaces the featured institution icons.
+                featuredInstitutions = featuredInstitutions.takeIf {
+                    supportedPaymentMethod.code == PaymentMethod.Type.Link.code && paymentMethodIncentive == null
+                },
                 isExpanded = supportedPaymentMethod.code in expandedPaymentMethods,
             ) {
                 handleViewAction(ViewAction.PaymentMethodSelected(supportedPaymentMethod.code))

@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
+import com.stripe.android.paymentsheet.featuredinstitutions.FeaturedInstitutions
 import com.stripe.android.paymentsheet.ui.PaymentMethodIcon
 import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconHeight
 import com.stripe.android.uicore.image.StripeImageLoader
@@ -45,6 +46,7 @@ internal fun NewPaymentMethodRowButton(
         appearance = appearance,
         trailingContent = trailingContent,
         promotionProvider = displayablePaymentMethod.promotionProvider,
+        featuredInstitutions = displayablePaymentMethod.featuredInstitutions,
         isExpanded = displayablePaymentMethod.isExpanded
     )
 }
@@ -65,6 +67,7 @@ internal fun NewPaymentMethodRowButton(
     trailingContent: (@Composable RowScope.() -> Unit)? = null,
     appearance: Embedded = Embedded(Embedded.RowStyle.FloatingButton.default),
     promotionProvider: (() -> PaymentMethodMessagePromotion?)? = null,
+    featuredInstitutions: FeaturedInstitutions? = null,
     isExpanded: Boolean
 ) {
     PaymentMethodRowButton(
@@ -91,6 +94,7 @@ internal fun NewPaymentMethodRowButton(
         appearance = appearance,
         trailingContent = trailingContent,
         promotionProvider = promotionProvider,
+        featuredInstitutions = featuredInstitutions,
         isExpanded = isExpanded
     )
 }

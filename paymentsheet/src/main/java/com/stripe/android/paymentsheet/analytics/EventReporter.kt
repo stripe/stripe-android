@@ -271,6 +271,21 @@ internal interface EventReporter : CardScanEventsReporter {
      */
     fun onPaymentMethodMessagePromotionDisplayed(displayedSuccessfully: Boolean)
 
+    /**
+     * The featured bank institution icons on the instant debits row became visible for the first time in a load.
+     */
+    fun onFeaturedInstitutionsShown()
+
+    /**
+     * Too few featured bank institution icons were downloaded to show them.
+     */
+    fun onFeaturedInstitutionsInsufficient(count: Int)
+
+    /**
+     * The featured bank institutions request failed.
+     */
+    fun onFeaturedInstitutionsLoadFailed(error: Throwable)
+
     enum class Mode(val code: String) {
         Complete("complete"),
         Custom("custom"),
