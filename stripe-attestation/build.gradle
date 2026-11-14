@@ -1,7 +1,12 @@
 apply from: configs.androidLibrary
 
+apply plugin: 'com.google.devtools.ksp'
+
 dependencies {
     implementation project(":stripe-core")
+
+    implementation libs.dagger
+    ksp libs.daggerCompiler
 
     // Kotlin
     implementation libs.kotlin.coroutines
