@@ -133,7 +133,7 @@ internal class Stripe3ds2TransactionActivity : AppCompatActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         ViewCompat.setOnApplyWindowInsetsListener(viewBinding.root) { view, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            view.updatePaddingRelative(systemBars.bottom)
+            view.updatePaddingRelative(bottom = systemBars.bottom)
             WindowInsetsCompat.CONSUMED
         }
     }
