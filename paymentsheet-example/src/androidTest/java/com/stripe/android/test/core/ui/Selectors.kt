@@ -159,7 +159,7 @@ internal class Selectors(
 
     fun browserWindow(browser: BrowserUI): UiObject? = browserWindow(device, browser)
 
-    val closeButton = UiAutomatorText("Close", device = device)
+    val closeButton = UiAutomatorText("CLOSE", device = device)
 
     fun blockUntilAuthorizationPageLoaded(isSetup: Boolean) {
         val authorizationText = requireNotNull(testParameters.authorizationAction).text(isSetup)
