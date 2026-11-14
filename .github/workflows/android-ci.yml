@@ -1,0 +1,105 @@
+# Minimal CI that runs on GitHub Actions while Bitrise is unavailable.
+# Runs the Rigorous Controls (SOX) test, JVM unit tests, and cheap static analysis.
+# Screenshot verification, instrumentation, Maestro, and Firebase Test Lab suites stay on Bitrise.
+# `android-ci-gate` is the single job intended to be marked as a required check.
+name: Android CI
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  GRADLE_OPTS: -Dkotlin.incremental=false
+
+jobs:
+  rigorous-controls:
+    name: Rigorous Controls test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      STRIPE_END_TO_END_TESTS_BACKEND_URL: ${{ secrets.STRIPE_END_TO_END_TESTS_BACKEND_URL }}
+      STRIPE_END_TO_END_TESTS_PUBLISHABLE_KEY: ${{ secrets.STRIPE_END_TO_END_TESTS_PUBLISHABLE_KEY }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+      - uses: ./.github/actions/stripe_setup
+      # SOX control PAP.01.08d: creates a PaymentIntent on the e2e backend, confirms it with the SDK,
+      # and checks the amount, currency, and merchant are unchanged.
+      - name: Run EndToEndTest.testRigCon
+        run: ./gradlew :stripe-test-e2e:testDebugUnitTest --tests 'com.stripe.android.test.e2e.EndToEndTest.testRigCon'
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: failure()
+        with:
+          name: rigorous-controls-test-report
+          path: stripe-test-e2e/build/reports/tests/testDebugUnitTest/
+
+  unit-tests:
+    name: Unit tests (${{ matrix.shard.name }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        shard:
+          - name: paymentsheet
+            tasks: :paymentsheet:testDebugUnitTest
+          - name: payments-core
+            tasks: :payments-core:testDebugUnitTest
+          - name: other modules
+            tasks: >-
+              testDebugUnitTest :paymentsheet-example:testBaseDebugUnitTest
+              -x :paymentsheet:testDebugUnitTest
+              -x :payments-core:testDebugUnitTest
+              -x :stripe-test-e2e:testDebugUnitTest
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+      - uses: ./.github/actions/stripe_setup
+      # Runs testDebugUnitTest rather than verifyPaparazziDebug: goldens are recorded on macOS.
+      - name: Run unit tests
+        run: ./gradlew ${{ matrix.shard.tasks }} --init-script build-configuration/unit-test-init.gradle --continue
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: failure()
+        with:
+          name: unit-test-reports-${{ strategy.job-index }}
+          path: |
+            **/build/reports/tests/
+            **/build/test-results/
+
+  static-analysis:
+    name: Detekt and API check
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+      - uses: ./.github/actions/stripe_setup
+      - name: Run detekt and apiCheck
+        run: ./gradlew detekt apiCheck --continue
+
+  android-ci-gate:
+    name: android-ci-gate
+    if: always()
+    needs:
+      - rigorous-controls
+      - unit-tests
+      - static-analysis
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check that every job passed
+        env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          echo "Job results: $RESULTS"
+          for result in $RESULTS; do
+            if [ "$result" != "success" ]; then
+              echo "::error::A required job finished with '$result'."
+              exit 1
+            fi
+          done
