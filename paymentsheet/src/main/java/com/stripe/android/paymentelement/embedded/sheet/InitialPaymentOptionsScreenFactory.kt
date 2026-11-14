@@ -80,7 +80,9 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
     private fun createVerticalInitialScreens(): List<EmbeddedNavigator.Screen> {
         val canOpenDirectForm = launchMode is EmbeddedLaunchMode.PaymentOptions ||
             selectionHolder.selection.value == null
-        if (walletsInteractor.canShowDirectForm && canOpenDirectForm) {
+        // The wallet interactor's initial eligibility does not account for methods saved after launch.
+        val hasSavedPaymentMethods = customerStateHolder.paymentMethods.value.isNotEmpty()
+        if (walletsInteractor.canShowDirectForm && canOpenDirectForm && !hasSavedPaymentMethods) {
             val paymentMethodCode = paymentMethodMetadata.supportedPaymentMethodTypes().single()
             return listOf(formScreenFactory.createFormScreen(paymentMethodCode))
         }

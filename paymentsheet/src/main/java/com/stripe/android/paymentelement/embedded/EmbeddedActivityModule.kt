@@ -151,16 +151,21 @@ internal interface EmbeddedActivityModule {
         }
 
         @Provides
+        fun provideInitialScreens(
+            factory: EmbeddedInitialScreenFactory,
+        ): List<EmbeddedNavigator.Screen> = factory.create()
+
+        @Provides
         @Singleton
         fun provideEmbeddedNavigator(
-            initialScreenFactory: EmbeddedInitialScreenFactory,
+            initialScreens: List<@JvmSuppressWildcards EmbeddedNavigator.Screen>,
             @ViewModelScope viewModelScope: CoroutineScope,
             eventReporter: EventReporter,
         ): EmbeddedNavigator {
             return EmbeddedNavigator(
                 coroutineScope = viewModelScope,
                 eventReporter = eventReporter,
-                initialBackStack = initialScreenFactory.create(),
+                initialBackStack = initialScreens,
             )
         }
 
