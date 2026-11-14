@@ -165,19 +165,6 @@ internal class IdentityActivity :
             )
         }
 
-        identityViewModel.observeForVerificationPage(
-            this,
-            onSuccess = {
-                if (savedInstanceState?.getBoolean(KEY_PRESENTED, false) != true) {
-                    identityViewModel.identityAnalyticsRequestFactory.sheetPresented()
-                }
-            },
-            onFailure = {
-                identityViewModel.errorCause.postValue(it)
-                navController.navigateToFinalErrorScreen(this)
-            }
-        )
-
         identityViewModel.screenTracker.screenTransitionStart(
             startedAt = starterArgs.presentTime.asEpochMillisecondsComparableTimeMark()
         )
@@ -226,6 +213,19 @@ internal class IdentityActivity :
                         onBackPressedCallback.updateState(destination, args)
                         topBarState = updateTopBarState(destination, args)
                     }
+
+                    identityViewModel.observeForVerificationPage(
+                        this,
+                        onSuccess = {
+                            if (savedInstanceState?.getBoolean(KEY_PRESENTED, false) != true) {
+                                identityViewModel.identityAnalyticsRequestFactory.sheetPresented()
+                            }
+                        },
+                        onFailure = {
+                            identityViewModel.errorCause.postValue(it)
+                            navController.navigateToFinalErrorScreen(this)
+                        }
+                    )
                 }
             }
         }
