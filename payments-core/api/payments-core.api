@@ -2198,6 +2198,7 @@ public final class com/stripe/android/model/PaymentMethod$Type : java/lang/Enum,
 	public static final field SepaDebit Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field Sequra Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field ShopeePay Lcom/stripe/android/model/PaymentMethod$Type;
+	public static final field StripeBalance Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field Sunbit Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field Swish Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field TouchNGo Lcom/stripe/android/model/PaymentMethod$Type;
