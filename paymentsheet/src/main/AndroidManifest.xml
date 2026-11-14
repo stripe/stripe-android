@@ -5,6 +5,10 @@
 
     <application>
         <activity
+            android:name=".paymentdatacollection.upi.UpiAppChooserActivity"
+            android:theme="@style/StripeTransparentTheme"
+            android:exported="false" />
+        <activity
             android:name=".PaymentSheetActivity"
             android:theme="@style/StripePaymentSheetDefaultTheme"
             android:exported="false" />
@@ -92,4 +96,10 @@
             </intent-filter>
         </activity>
     </application>
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="upi" android:host="pay" />
+        </intent>
+    </queries>
 </manifest>
