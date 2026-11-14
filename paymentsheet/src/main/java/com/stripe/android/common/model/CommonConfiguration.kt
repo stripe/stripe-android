@@ -4,6 +4,7 @@ import android.os.Parcelable
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.validation.CustomerSessionClientSecretValidator
 import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.LinkAppearance
 import com.stripe.android.link.LinkController
 import com.stripe.android.model.CardBrand
@@ -21,6 +22,8 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 internal data class CommonConfiguration(
     val merchantDisplayName: String,
+    /** Whether to send this integration's configuration to MobileSession. */
+    val useRemoteMobileSession: Boolean,
     val customer: PaymentSheet.CustomerConfiguration?,
     val googlePay: PaymentSheet.GooglePayConfiguration?,
     val link: PaymentSheet.LinkConfiguration,
@@ -227,6 +230,7 @@ internal data class CommonConfiguration(
 
 internal fun PaymentSheet.Configuration.asCommonConfiguration(): CommonConfiguration = CommonConfiguration(
     merchantDisplayName = merchantDisplayName,
+    useRemoteMobileSession = FeatureFlags.serverPaymentMethodAvailabilityEnabled.isEnabled,
     customer = customer,
     googlePay = googlePay,
     defaultBillingDetails = defaultBillingDetails,
@@ -253,6 +257,7 @@ internal fun PaymentSheet.Configuration.asCommonConfiguration(): CommonConfigura
 
 internal fun EmbeddedPaymentElement.Configuration.asCommonConfiguration(): CommonConfiguration = CommonConfiguration(
     merchantDisplayName = merchantDisplayName,
+    useRemoteMobileSession = FeatureFlags.serverPaymentMethodAvailabilityEnabled.isEnabled,
     customer = customer,
     googlePay = googlePay,
     defaultBillingDetails = defaultBillingDetails,
@@ -279,6 +284,7 @@ internal fun EmbeddedPaymentElement.Configuration.asCommonConfiguration(): Commo
 
 internal fun LinkController.Configuration.State.asCommonConfiguration(): CommonConfiguration = CommonConfiguration(
     merchantDisplayName = merchantDisplayName,
+    useRemoteMobileSession = false,
     customer = null,
     googlePay = null,
     defaultBillingDetails = defaultBillingDetails,

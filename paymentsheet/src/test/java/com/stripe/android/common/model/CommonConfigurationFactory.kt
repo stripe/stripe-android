@@ -30,9 +30,11 @@ internal object CommonConfigurationFactory {
         opensCardScannerAutomatically: Boolean = false,
         userOverrideCountry: String? = null,
         appearance: PaymentSheet.Appearance = PaymentSheet.Appearance(),
-        allowedCardFundingTypes: List<CardFundingType> = CardFundingType.entries
+        allowedCardFundingTypes: List<CardFundingType> = CardFundingType.entries,
+        useRemoteMobileSession: Boolean = false,
     ): CommonConfiguration = CommonConfiguration(
         merchantDisplayName = merchantDisplayName,
+        useRemoteMobileSession = useRemoteMobileSession,
         customer = customer,
         googlePay = googlePay,
         defaultBillingDetails = defaultBillingDetails,

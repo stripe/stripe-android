@@ -2,8 +2,11 @@ package com.stripe.android.paymentsheet.state
 
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.ElementsSession
+import com.stripe.android.payments.financialconnections.DefaultIsFinancialConnectionsAvailable
 import com.stripe.android.paymentsheet.model.SavedSelection
+import com.stripe.android.paymentsheet.model.toMobileSessionConfig
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import javax.inject.Inject
 
@@ -34,6 +37,15 @@ internal class ElementsSessionLoader @Inject constructor(
         savedPaymentMethodSelection: SavedSelection.PaymentMethod?,
         apiConfiguration: ApiConfiguration.State,
     ): ElementsSession {
+        val mobileSessionConfig = if (configuration.useRemoteMobileSession) {
+            configuration.toMobileSessionConfig(
+                hasFinancialConnectionsSdk = DefaultIsFinancialConnectionsAvailable() &&
+                    !FeatureFlags.financialConnectionsFullSdkUnavailable.isEnabled,
+            )
+        } else {
+            null
+        }
+
         return elementsSessionRepository.get(
             initializationMode = initializationMode,
             customer = configuration.customer,
@@ -42,6 +54,7 @@ internal class ElementsSessionLoader @Inject constructor(
             savedPaymentMethodSelectionId = savedPaymentMethodSelection?.id,
             countryOverride = configuration.userOverrideCountry,
             apiConfiguration = apiConfiguration,
+            mobileSessionConfig = mobileSessionConfig,
             linkDisallowedFundingSourceCreation = configuration.link.disallowFundingSourceCreation,
         ).getOrThrow()
     }
