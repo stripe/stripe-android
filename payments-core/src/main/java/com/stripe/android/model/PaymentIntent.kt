@@ -270,7 +270,8 @@ constructor(
         }
     }
 
-    private fun isPaymentMethodOptionsSetupFutureUsageNone(code: PaymentMethodCode): Boolean {
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun isPaymentMethodOptionsSetupFutureUsageNone(code: PaymentMethodCode): Boolean {
         return paymentMethodOptionsJsonString?.let { json ->
             JSONObject(json).optJSONObject(code)?.optString(SETUP_FUTURE_USAGE) == NONE
         } ?: false

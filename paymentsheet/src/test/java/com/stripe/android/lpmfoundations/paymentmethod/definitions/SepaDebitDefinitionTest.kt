@@ -1,7 +1,10 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.isInstanceOf
+import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
@@ -10,6 +13,8 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.model.CheckoutSessionClientSecret
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.IbanConfig
 import com.stripe.android.ui.core.elements.MandateTextElement
@@ -221,6 +226,38 @@ class SepaDebitDefinitionTest {
         val ibanController = ibanController(formElements, position)
 
         assertThat(ibanController.textFieldConfig).isInstanceOf<IbanConfig>()
+    }
+
+    @Test
+    fun `'createFormElements' for checkout session does not include 'SaveForFutureUseElement' when SFU is none`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("sepa_debit"),
+                paymentMethodOptionsJsonString = """{"sepa_debit": {"setup_future_usage": "none"}}""",
+            ),
+            integrationMetadata = IntegrationMetadata.CheckoutSession(
+                instancesKey = "test_instances_key",
+                checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+                collectedEmail = null,
+            ),
+        ).copy(
+            customerMetadata = CustomerMetadata.CheckoutSession(
+                clientSecret = CheckoutSessionClientSecret("cs_test_abc123_secret_test"),
+                customerId = "cus_123",
+                removePaymentMethod = PaymentMethodRemovePermission.Full,
+                saveConsent = PaymentMethodSaveConsentBehavior.Enabled,
+            ),
+        )
+
+        val formElements = SepaDebitDefinition.formElements(metadata)
+
+        assertThat(formElements).hasSize(5)
+
+        checkNameField(formElements, 0)
+        checkEmailField(formElements, 1)
+        checkIbanField(formElements, 2)
+        checkBillingField(formElements, 3)
+        checkMandateField(formElements, metadata, 4)
     }
 
     private fun checkMandateField(

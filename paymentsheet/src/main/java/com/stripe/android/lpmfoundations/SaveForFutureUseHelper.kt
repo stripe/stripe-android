@@ -31,6 +31,11 @@ internal fun isSaveForFutureUseValueChangeable(
     intent: StripeIntent,
     hasCustomerConfiguration: Boolean,
 ): Boolean {
+    // A per-method setup_future_usage=none means the merchant doesn't want this payment method saved.
+    if ((intent as? PaymentIntent)?.isPaymentMethodOptionsSetupFutureUsageNone(code) == true) {
+        return false
+    }
+
     return when (paymentMethodSaveConsentBehavior) {
         is PaymentMethodSaveConsentBehavior.Disabled -> false
         is PaymentMethodSaveConsentBehavior.Enabled -> hasCustomerConfiguration

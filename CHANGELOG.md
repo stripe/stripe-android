@@ -4,6 +4,7 @@ NEXT_VERSION_BUMP: MINOR
 ## XX.XX.XX - 20XX-XX-XX
 
 ### PaymentSheet
+* [CHANGED][15398](https://github.com/stripe/stripe-android/pull/15398) PaymentSheet, FlowController, and EmbeddedPaymentElement no longer show the save checkbox for a payment method whose `payment_method_options[<type>][setup_future_usage]` is `none`.
 * [FIXED][15363](https://github.com/stripe/stripe-android/pull/15363) Fixed an issue where inline address autocomplete could request suggestions for a prefilled address before the customer focused the address field.
 * [FIXED][15399](https://github.com/stripe/stripe-android/pull/15399) Fixed an issue where saved cards with an unrecognized display brand were labeled as "Unknown" in accessibility descriptions and payment option labels.
 
