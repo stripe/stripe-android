@@ -141,7 +141,7 @@ public class StripeTest {
 
     @Test
     public void testApiVersion() {
-        assertEquals("2020-03-02", Stripe.API_VERSION);
+        assertEquals("2026-10-28.endive", Stripe.API_VERSION);
     }
 
     @Test
