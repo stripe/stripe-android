@@ -18,6 +18,9 @@ concurrency:
 
 env:
   GRADLE_OPTS: -Dkotlin.incremental=false
+  # Some tests assume Locale.getDefault() is en_US, as on Bitrise's macOS machines.
+  # Ubuntu runners default to C.UTF-8, which has no country. Test workers inherit this.
+  JAVA_TOOL_OPTIONS: -Duser.language=en -Duser.country=US
 
 jobs:
   rigorous-controls:
