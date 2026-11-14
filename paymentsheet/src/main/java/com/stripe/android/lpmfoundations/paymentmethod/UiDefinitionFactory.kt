@@ -20,6 +20,7 @@ import com.stripe.android.model.setupFutureUsage
 import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.paymentsheet.LinkInlineHandler
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheet.SavePaymentMethodOptInBehavior
 import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
@@ -130,7 +131,7 @@ internal sealed interface UiDefinitionFactory {
                             paymentMethodExtraParams = paymentMethodExtraParams,
                         ),
                         shippingValues = metadata.shippingDetails?.toIdentifierMap(metadata.defaultBillingDetails),
-                        saveForFutureUseInitialValue = getSaveForFutureUseInitialValue(),
+                        saveForFutureUseInitialValue = getSaveForFutureUseInitialValue(metadata),
                         billingDetailsCollectionConfiguration = metadata.billingDetailsCollectionConfiguration,
                         requiresBillingAddressForAutomaticTax = metadata.requiresBillingAddressForAutomaticTax,
                         requiresMandate = requiresMandate,
@@ -150,10 +151,10 @@ internal sealed interface UiDefinitionFactory {
                     )
                 }
 
-                private fun getSaveForFutureUseInitialValue(): Boolean {
+                private fun getSaveForFutureUseInitialValue(metadata: PaymentMethodMetadata): Boolean {
                     return paymentMethodOptionsParams?.setupFutureUsage()?.let {
                         it != ConfirmPaymentIntentParams.SetupFutureUsage.Blank
-                    } ?: false
+                    } ?: (metadata.savePaymentMethodOptInBehavior == SavePaymentMethodOptInBehavior.RequiresOptOut)
                 }
             }
         }

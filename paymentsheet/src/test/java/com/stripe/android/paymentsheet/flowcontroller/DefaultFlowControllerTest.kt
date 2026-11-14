@@ -12,6 +12,7 @@ import app.cash.turbine.Turbine
 import app.cash.turbine.plusAssign
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.google.testing.junit.testparameterinjector.TestParameter
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.PaymentConfiguration
@@ -121,13 +122,13 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.reset
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import org.robolectric.RobolectricTestRunner
+import org.robolectric.RobolectricTestParameterInjector
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
 @OptIn(CheckoutSessionPreview::class)
 @Suppress("DEPRECATION")
-@RunWith(RobolectricTestRunner::class)
+@RunWith(RobolectricTestParameterInjector::class)
 internal class DefaultFlowControllerTest {
 
     private val networkRule = NetworkRule()
@@ -543,6 +544,25 @@ internal class DefaultFlowControllerTest {
         createFlowController(
             paymentElementLoader = FakePaymentElementLoader(shouldFail = true)
         ).configureExpectingError()
+    }
+
+    @Test
+    fun `payment options launch preserves configured save behavior`(
+        @TestParameter behavior: PaymentSheet.SavePaymentMethodOptInBehavior,
+    ) = runTest {
+        val flowController = createFlowController(linkState = null)
+        val configuration = PaymentSheet.Configuration.Builder("Test")
+            .savePaymentMethodOptInBehavior(behavior)
+            .build()
+        flowController.configureExpectingSuccess(configuration = configuration)
+
+        flowController.presentPaymentOptions()
+
+        val args = argumentCaptor<PaymentOptionContract.Args>()
+        verify(paymentOptionActivityLauncher).launch(args.capture(), anyOrNull())
+        assertThat(args.firstValue.configuration.savePaymentMethodOptInBehavior).isEqualTo(behavior)
+        assertThat(args.firstValue.state.config.savePaymentMethodOptInBehavior).isEqualTo(behavior)
+        assertThat(args.firstValue.state.paymentMethodMetadata.savePaymentMethodOptInBehavior).isEqualTo(behavior)
     }
 
     @Test

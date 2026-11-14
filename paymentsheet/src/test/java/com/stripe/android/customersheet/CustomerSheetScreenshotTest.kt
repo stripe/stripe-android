@@ -101,6 +101,7 @@ internal class CustomerSheetScreenshotTest {
 
     private val usBankAccountFormArguments = USBankAccountFormArguments(
         showCheckbox = false,
+        savePaymentMethodOptInBehavior = PaymentSheet.SavePaymentMethodOptInBehavior.Automatic,
         instantDebits = false,
         incentive = null,
         linkMode = null,

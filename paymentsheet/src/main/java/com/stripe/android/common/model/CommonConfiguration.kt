@@ -21,6 +21,7 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 internal data class CommonConfiguration(
     val merchantDisplayName: String,
+    val savePaymentMethodOptInBehavior: PaymentSheet.SavePaymentMethodOptInBehavior,
     val customer: PaymentSheet.CustomerConfiguration?,
     val googlePay: PaymentSheet.GooglePayConfiguration?,
     val link: PaymentSheet.LinkConfiguration,
@@ -227,6 +228,7 @@ internal data class CommonConfiguration(
 
 internal fun PaymentSheet.Configuration.asCommonConfiguration(): CommonConfiguration = CommonConfiguration(
     merchantDisplayName = merchantDisplayName,
+    savePaymentMethodOptInBehavior = savePaymentMethodOptInBehavior,
     customer = customer,
     googlePay = googlePay,
     defaultBillingDetails = defaultBillingDetails,
@@ -253,6 +255,7 @@ internal fun PaymentSheet.Configuration.asCommonConfiguration(): CommonConfigura
 
 internal fun EmbeddedPaymentElement.Configuration.asCommonConfiguration(): CommonConfiguration = CommonConfiguration(
     merchantDisplayName = merchantDisplayName,
+    savePaymentMethodOptInBehavior = ConfigurationDefaults.savePaymentMethodOptInBehavior,
     customer = customer,
     googlePay = googlePay,
     defaultBillingDetails = defaultBillingDetails,
@@ -279,6 +282,7 @@ internal fun EmbeddedPaymentElement.Configuration.asCommonConfiguration(): Commo
 
 internal fun LinkController.Configuration.State.asCommonConfiguration(): CommonConfiguration = CommonConfiguration(
     merchantDisplayName = merchantDisplayName,
+    savePaymentMethodOptInBehavior = ConfigurationDefaults.savePaymentMethodOptInBehavior,
     customer = null,
     googlePay = null,
     defaultBillingDetails = defaultBillingDetails,

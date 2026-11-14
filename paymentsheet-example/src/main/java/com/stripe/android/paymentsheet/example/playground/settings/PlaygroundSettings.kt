@@ -507,6 +507,7 @@ internal class PlaygroundSettings private constructor(
             CustomerSheetPaymentMethodModeDefinition,
             CustomerSessionSettingsDefinition,
             CustomerSessionSaveSettingsDefinition,
+            SavePaymentMethodOptInBehaviorSettingsDefinition,
             CustomerSessionRemoveSettingsDefinition,
             CustomerSessionRemoveLastSettingsDefinition,
             CustomerSessionSetAsDefaultSettingsDefinition,

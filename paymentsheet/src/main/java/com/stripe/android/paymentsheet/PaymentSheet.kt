@@ -845,6 +845,22 @@ class PaymentSheet internal constructor(
         NEVER
     }
 
+    /**
+     * Options for the initial state of save payment method controls.
+     *
+     * Some jurisdictions may have rules governing the ability to default to opt-out behavior.
+     */
+    enum class SavePaymentMethodOptInBehavior {
+        /** The SDK chooses the initial state. Currently unselected in all countries. */
+        Automatic,
+
+        /** Initially unselected; the customer must select the control to save their payment method. */
+        RequiresOptIn,
+
+        /** Initially selected; the customer must deselect the control to not save their payment method. */
+        RequiresOptOut
+    }
+
     /** Configuration for [PaymentSheet] **/
     @Parcelize
     @Poko
@@ -951,6 +967,8 @@ class PaymentSheet internal constructor(
         internal val opensCardScannerAutomatically: Boolean = ConfigurationDefaults.opensCardScannerAutomatically,
         internal val userOverrideCountry: String? = ConfigurationDefaults.userOverrideCountry,
         internal val apiConfiguration: ApiConfiguration.State? = null,
+        internal val savePaymentMethodOptInBehavior: SavePaymentMethodOptInBehavior =
+            ConfigurationDefaults.savePaymentMethodOptInBehavior,
     ) : Parcelable {
 
         @JvmOverloads
@@ -1092,6 +1110,8 @@ class PaymentSheet internal constructor(
             private var opensCardScannerAutomatically: Boolean =
                 ConfigurationDefaults.opensCardScannerAutomatically
             private var userOverrideCountry: String? = ConfigurationDefaults.userOverrideCountry
+            private var savePaymentMethodOptInBehavior: SavePaymentMethodOptInBehavior =
+                ConfigurationDefaults.savePaymentMethodOptInBehavior
             private var apiConfiguration: ApiConfiguration.State? = null
 
             private var customPaymentMethods: List<CustomPaymentMethod> =
@@ -1099,6 +1119,15 @@ class PaymentSheet internal constructor(
 
             fun merchantDisplayName(merchantDisplayName: String) =
                 apply { this.merchantDisplayName = merchantDisplayName }
+
+            /**
+             * Sets the initial state of save payment method controls.
+             * Defaults to [SavePaymentMethodOptInBehavior.Automatic].
+             * This does not change whether a control is shown or override the customer's previous selection.
+             * Some jurisdictions may have rules governing the ability to default to opt-out behavior.
+             */
+            fun savePaymentMethodOptInBehavior(savePaymentMethodOptInBehavior: SavePaymentMethodOptInBehavior) =
+                apply { this.savePaymentMethodOptInBehavior = savePaymentMethodOptInBehavior }
 
             fun customer(customer: CustomerConfiguration?) =
                 apply { this.customer = customer }
@@ -1307,6 +1336,7 @@ class PaymentSheet internal constructor(
                 opensCardScannerAutomatically = opensCardScannerAutomatically,
                 userOverrideCountry = userOverrideCountry,
                 apiConfiguration = apiConfiguration,
+                savePaymentMethodOptInBehavior = savePaymentMethodOptInBehavior,
             )
         }
 
@@ -1325,6 +1355,7 @@ class PaymentSheet internal constructor(
         )
         internal fun newBuilder(): Builder = Builder(merchantDisplayName)
             .customer(customer)
+            .savePaymentMethodOptInBehavior(savePaymentMethodOptInBehavior)
             .googlePay(googlePay)
             .defaultBillingDetails(defaultBillingDetails)
             .shippingDetails(shippingDetails)

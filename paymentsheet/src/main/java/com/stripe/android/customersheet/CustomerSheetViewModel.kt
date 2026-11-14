@@ -877,6 +877,7 @@ internal class CustomerSheetViewModel(
             incentive = null,
             linkMode = null,
             showCheckbox = false,
+            savePaymentMethodOptInBehavior = PaymentSheet.SavePaymentMethodOptInBehavior.Automatic,
             onBehalfOf = null,
             isCompleteFlow = false,
             primaryButtonIcon = stateFlowOf(PrimaryButtonIcon.None),

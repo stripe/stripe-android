@@ -29,6 +29,8 @@ internal object PaymentMethodMetadataFactory {
     @Suppress("LongMethod")
     fun create(
         stripeIntent: StripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+        savePaymentMethodOptInBehavior: PaymentSheet.SavePaymentMethodOptInBehavior =
+            PaymentSheet.SavePaymentMethodOptInBehavior.Automatic,
         billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
             PaymentSheet.BillingDetailsCollectionConfiguration(),
         allowsDelayedPaymentMethods: Boolean = true,
@@ -87,6 +89,7 @@ internal object PaymentMethodMetadataFactory {
     ): PaymentMethodMetadata {
         return PaymentMethodMetadata(
             stripeIntent = stripeIntent,
+            savePaymentMethodOptInBehavior = savePaymentMethodOptInBehavior,
             billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
             allowsDelayedPaymentMethods = allowsDelayedPaymentMethods,
             allowsPaymentMethodsRequiringShippingAddress = allowsPaymentMethodsRequiringShippingAddress,

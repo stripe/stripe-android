@@ -57,6 +57,7 @@ internal const val IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE = fals
 @Parcelize
 internal data class PaymentMethodMetadata(
     val stripeIntent: StripeIntent,
+    val savePaymentMethodOptInBehavior: PaymentSheet.SavePaymentMethodOptInBehavior,
     val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
     val allowsDelayedPaymentMethods: Boolean,
     val allowsPaymentMethodsRequiringShippingAddress: Boolean,
@@ -404,6 +405,7 @@ internal data class PaymentMethodMetadata(
             val cardArts = elementsSession.customer?.paymentMethods?.mapNotNull { it.card?.cardArt }.orEmpty()
             return PaymentMethodMetadata(
                 stripeIntent = elementsSession.stripeIntent,
+                savePaymentMethodOptInBehavior = configuration.savePaymentMethodOptInBehavior,
                 billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
                 allowsDelayedPaymentMethods = configuration.allowsDelayedPaymentMethods,
                 allowsPaymentMethodsRequiringShippingAddress = configuration
@@ -479,6 +481,7 @@ internal data class PaymentMethodMetadata(
         ): PaymentMethodMetadata {
             return PaymentMethodMetadata(
                 stripeIntent = elementsSession.stripeIntent,
+                savePaymentMethodOptInBehavior = ConfigurationDefaults.savePaymentMethodOptInBehavior,
                 billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
                 allowsDelayedPaymentMethods = true,
                 allowsPaymentMethodsRequiringShippingAddress = false,
