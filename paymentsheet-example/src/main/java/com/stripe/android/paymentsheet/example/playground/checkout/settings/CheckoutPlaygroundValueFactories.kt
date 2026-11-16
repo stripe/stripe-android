@@ -159,9 +159,10 @@ internal fun optionalColor(
 
 internal fun font(
     key: String,
+    displayName: String,
 ) = choice(
     key = key,
-    displayName = "Font",
+    displayName = displayName,
     defaultValue = CheckoutFont.Default,
     options = listOf(
         "Default" to CheckoutFont.Default,

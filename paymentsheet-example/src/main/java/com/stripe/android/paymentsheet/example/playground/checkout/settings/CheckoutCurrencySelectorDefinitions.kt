@@ -13,76 +13,76 @@ internal object CheckoutCurrencySelectorDefinitions {
     val appearance = AppearanceDefinitions()
 
     internal class AppearanceDefinitions {
-        val verticalPadding = decimal(
-            key = "currency.appearance.vertical_padding",
-            displayName = "Vertical padding",
+        val contentVerticalPaddingDp = decimal(
+            key = "currency.appearance.content_vertical_padding_dp",
+            displayName = "contentVerticalPaddingDp",
             defaultValue = 4f,
         )
-        val cornerRadius = optionalFloat(
-            key = "currency.appearance.corner_radius",
-            displayName = "Corner radius",
+        val cornerRadiusDp = optionalFloat(
+            key = "currency.appearance.corner_radius_dp",
+            displayName = "cornerRadiusDp",
         )
-        val borderWidth = optionalFloat(
-            key = "currency.appearance.border_width",
-            displayName = "Border width",
+        val borderWidthDp = optionalFloat(
+            key = "currency.appearance.border_width_dp",
+            displayName = "borderWidthDp",
         )
         val borderColor = optionalColor(
             key = "currency.appearance.border_color",
-            displayName = "Border color",
+            displayName = "borderColor",
         )
         val background = optionalColor(
             key = "currency.appearance.background",
-            displayName = "Background",
+            displayName = "background",
         )
         val selectedBackground = optionalColor(
             key = "currency.appearance.selected_background",
-            displayName = "Selected background",
+            displayName = "selectedBackground",
         )
         val textColor = optionalColor(
             key = "currency.appearance.text_color",
-            displayName = "Text color",
+            displayName = "textColor",
         )
         val selectedTextColor = optionalColor(
             key = "currency.appearance.selected_text_color",
-            displayName = "Selected text color",
+            displayName = "selectedTextColor",
         )
-        val secondaryTextColor = optionalColor(
-            key = "currency.appearance.secondary_text_color",
-            displayName = "Secondary text color",
+        val textSecondaryColor = optionalColor(
+            key = "currency.appearance.text_secondary_color",
+            displayName = "textSecondaryColor",
         )
         val dangerColor = optionalColor(
             key = "currency.appearance.danger_color",
-            displayName = "Danger color",
+            displayName = "dangerColor",
         )
-        val font = font(key = "currency.appearance.font")
-        val scale = decimal(
-            key = "currency.appearance.scale",
-            displayName = "Size scale factor",
+        val fontResId = font(key = "currency.appearance.font_res_id", displayName = "fontResId")
+        val sizeScaleFactor = decimal(
+            key = "currency.appearance.size_scale_factor",
+            displayName = "sizeScaleFactor",
             defaultValue = 1f,
             minimumExclusive = true,
         )
-        val label = enumChoice(
-            key = "currency.appearance.label",
-            displayName = "Label content",
+        val labelContent = enumChoice(
+            key = "currency.appearance.label_content",
+            displayName = "labelContent",
             defaultValue = CurrencySelectorElement.Configuration.Appearance.LabelContent.AUTOMATIC,
         )
         val configuration: CheckoutPlaygroundSettingDefinition.Configuration = configuration(
             key = "currency.appearance",
-            displayName = "Appearance",
+            displayName = "appearance",
             children = arrayOf(
-                verticalPadding,
-                cornerRadius,
-                borderWidth,
+                contentVerticalPaddingDp,
+                cornerRadiusDp,
+                borderWidthDp,
                 borderColor,
                 background,
                 selectedBackground,
                 textColor,
                 selectedTextColor,
-                secondaryTextColor,
+                textSecondaryColor,
                 dangerColor,
-                font,
-                scale,
-                label,
+                fontResId,
+                sizeScaleFactor,
+                labelContent,
             ),
         )
     }

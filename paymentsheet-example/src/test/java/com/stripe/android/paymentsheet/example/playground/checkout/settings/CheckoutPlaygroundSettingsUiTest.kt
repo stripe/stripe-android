@@ -99,20 +99,20 @@ class CheckoutPlaygroundSettingsUiTest {
         initialConfiguration = CheckoutPlaygroundDefinitions.Controller.express.configuration,
     ) {
         val paymentCornerRadius = CheckoutPlaygroundDefinitions.Controller.payment.appearance.primaryButton.shape
-            .cornerRadius
-        val currencyCornerRadius = CheckoutPlaygroundDefinitions.Controller.currencySelector.appearance.cornerRadius
+            .cornerRadiusDp
+        val currencyCornerRadius = CheckoutPlaygroundDefinitions.Controller.currencySelector.appearance.cornerRadiusDp
 
         page.value(CheckoutPlaygroundDefinitions.Controller.express.shouldSetConfiguration).assertIsDisplayed()
 
-        setSearchQuery("CoRn Ra")
+        setSearchQuery("CoRnErRa")
 
         page.value(paymentCornerRadius).performScrollTo().assertIsDisplayed()
         page.breadcrumb(paymentCornerRadius).assertTextContains(
-            "Client side config › Payment Element › Appearance › Primary button › Shape"
+            "Client side config › Payment Element › appearance › primaryButton › shape"
         )
         page.value(currencyCornerRadius).performScrollTo().assertIsDisplayed()
         page.breadcrumb(currencyCornerRadius).assertTextContains(
-            "Client side config › Currency Selector Element › Appearance"
+            "Client side config › Currency Selector Element › appearance"
         )
         page.value(CheckoutPlaygroundDefinitions.Controller.express.shouldSetConfiguration).assertDoesNotExist()
 
@@ -125,13 +125,13 @@ class CheckoutPlaygroundSettingsUiTest {
     @Test
     fun `clicking a search result breadcrumb opens its nested configuration`() = runScenario {
         val cornerRadius = CheckoutPlaygroundDefinitions.Controller.payment.appearance.primaryButton.shape
-            .cornerRadius
+            .cornerRadiusDp
 
-        setSearchQuery("corner radius")
+        setSearchQuery("cornerRadius")
         page.breadcrumb(cornerRadius).performScrollTo().performClick()
 
         page.value(cornerRadius).assertIsDisplayed()
-        page.value(CheckoutPlaygroundDefinitions.Controller.currencySelector.appearance.cornerRadius)
+        page.value(CheckoutPlaygroundDefinitions.Controller.currencySelector.appearance.cornerRadiusDp)
             .assertDoesNotExist()
         assertThat(currentConfiguration()).isEqualTo(
             CheckoutPlaygroundDefinitions.Controller.payment.appearance.primaryButton.shape.configuration
@@ -180,9 +180,9 @@ class CheckoutPlaygroundSettingsUiTest {
 
     @Test
     fun `color setting uses color picker`() = runScenario(
-        initialConfiguration = CheckoutPlaygroundDefinitions.Controller.payment.appearance.lightColors.configuration,
+        initialConfiguration = CheckoutPlaygroundDefinitions.Controller.payment.appearance.colorsLight.configuration,
     ) {
-        val definition = CheckoutPlaygroundDefinitions.Controller.payment.appearance.lightColors.primary
+        val definition = CheckoutPlaygroundDefinitions.Controller.payment.appearance.colorsLight.primary
         settings.updateSerialized(definition, "")
         composeRule.waitForIdle()
         page.value(definition).performClick()
