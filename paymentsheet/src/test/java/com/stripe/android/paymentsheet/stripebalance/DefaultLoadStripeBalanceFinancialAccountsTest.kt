@@ -58,6 +58,13 @@ internal class DefaultLoadStripeBalanceFinancialAccountsTest {
     }
 
     @Test
+    fun `doesn't load a PaymentIntent without an amount`() = runScenario {
+        val result = load(stripeIntent = PAYMENT_INTENT.copy(amount = null))
+
+        assertThat(result).isNull()
+    }
+
+    @Test
     fun `loads without an amount or currency when setting up`() = runScenario {
         repository.result = { Result.success(listOf(ACCOUNT)) }
 

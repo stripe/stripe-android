@@ -60,16 +60,23 @@ internal class DefaultLoadStripeBalanceFinancialAccounts @Inject constructor(
         }
         // The accounts can only be listed with a CustomerSession
         val customerSession = customerMetadata as? CustomerMetadata.CustomerSession ?: return null
-        // Without an amount, e.g. when setting up, the server lists every account without eligibility
-        val paymentIntent = stripeIntent as? PaymentIntent
-        val currency = paymentIntent?.currency
+        // A PaymentIntent's accounts are checked against its amount. When setting up there's no amount, so the server
+        // lists every account without eligibility.
+        val (amount, currency) = when (stripeIntent) {
+            is PaymentIntent -> {
+                val amount = stripeIntent.amount ?: return null
+                val currency = stripeIntent.currency ?: return null
+                amount to currency
+            }
+            else -> null to null
+        }
 
         // The request runs outside of loading, since timing out can't interrupt a blocking network call
         val request = viewModelScope.async(workContext) {
             stripeBalanceRepository.listFinancialAccounts(
                 customerSessionClientSecret = customerSession.customerSessionClientSecret,
                 ephemeralKeySecret = customerSession.ephemeralKeySecret,
-                amount = paymentIntent?.amount,
+                amount = amount,
                 currency = currency,
                 apiConfiguration = apiConfiguration,
             )
