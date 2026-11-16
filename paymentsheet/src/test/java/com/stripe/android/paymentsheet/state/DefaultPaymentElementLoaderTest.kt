@@ -237,6 +237,27 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
+    fun `load succeeds without Stripe balance financial accounts when they fail to load`() = runScenario {
+        val loadStripeBalanceFinancialAccounts = FakeLoadStripeBalanceFinancialAccounts(result = null)
+        val loader = createPaymentElementLoader(loadStripeBalanceFinancialAccounts = loadStripeBalanceFinancialAccounts)
+
+        val state = loader.load(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
+            paymentSheetConfiguration = PaymentSheet.Configuration("Some name"),
+            metadata = PaymentElementLoader.Metadata(initializedViaCompose = false),
+        ).getOrThrow()
+
+        assertThat(loadStripeBalanceFinancialAccounts.calls.awaitItem()).isNotNull()
+        assertThat(state.paymentMethodMetadata.stripeBalanceFinancialAccounts).isNull()
+        loadStripeBalanceFinancialAccounts.ensureAllEventsConsumed()
+        consumeLoadingEvents()
+        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
+        assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
+    }
+
+    @Test
     fun `load with empty merchantDisplayName returns failure`() = runScenario {
         val result = createPaymentElementLoader().load(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
