@@ -43,6 +43,8 @@ import com.stripe.android.paymentsheet.state.LinkDisabledState
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.LinkStateResult
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.paymentsheet.stripebalance.StripeBalanceFinancialAccount
+import com.stripe.android.paymentsheet.stripebalance.StripeBalanceFinancialAccounts
 import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.Amount
@@ -2283,6 +2285,41 @@ internal class PaymentMethodMetadataTest {
         val metadata = createPaymentElementMetadata(elementsSession = elementsSession)
 
         assertThat(metadata.experimentsData).isEqualTo(elementsSession.experimentsData)
+    }
+
+    @Test
+    fun `createForPaymentElement sets the buyer's Stripe balance financial accounts`() {
+        val financialAccounts = StripeBalanceFinancialAccounts(
+            accounts = listOf(
+                StripeBalanceFinancialAccount(
+                    id = "fa_123",
+                    displayName = "Operating account",
+                    availableBalances = mapOf("usd" to 10_000L),
+                    eligible = true,
+                    ineligibleReason = null,
+                )
+            ),
+            currency = "usd",
+        )
+
+        val metadata = PaymentMethodMetadata.createForPaymentElement(
+            elementsSession = createElementsSession(intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD),
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
+            externalPaymentMethodSpecs = emptyList(),
+            isGooglePayReady = false,
+            linkStateResult = null,
+            customerMetadata = DEFAULT_CUSTOMER_METADATA,
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("cs_123"),
+            clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
+            integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
+            analyticsMetadata = AnalyticsMetadata(emptyMap()),
+            isTapToAddAvailable = false,
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+            apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
+            stripeBalanceFinancialAccounts = financialAccounts,
+        )
+
+        assertThat(metadata.stripeBalanceFinancialAccounts).isEqualTo(financialAccounts)
     }
 
     @Test
