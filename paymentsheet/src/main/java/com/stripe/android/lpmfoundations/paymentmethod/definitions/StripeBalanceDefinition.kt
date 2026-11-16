@@ -18,6 +18,8 @@ internal object StripeBalanceDefinition : PaymentMethodDefinition {
     override fun requirementsToBeUsedAsNewPaymentMethod(
         hasIntentToSetup: Boolean
     ): Set<AddPaymentMethodRequirement> = setOf(
+        AddPaymentMethodRequirement.UnsupportedForCheckoutSession,
+        AddPaymentMethodRequirement.CustomerSession,
         AddPaymentMethodRequirement.StripeBalanceFinancialAccounts,
     )
 

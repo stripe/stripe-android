@@ -2,7 +2,6 @@ package com.stripe.android.lpmfoundations.paymentmethod
 
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
-import com.stripe.android.lpmfoundations.paymentmethod.definitions.stripeBalanceTestFinancialAccounts
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -26,7 +25,10 @@ internal class AutomaticTaxPaymentMethodRegistryTest {
         )
         val argumentsFactory = TestUiDefinitionFactoryArgumentsFactory.create()
         val directDefinitions = PaymentMethodRegistry.all.filter { definition ->
-            definition.uiDefinitionFactory(metadata) is UiDefinitionFactory.Simple
+            definition.uiDefinitionFactory(metadata) is UiDefinitionFactory.Simple &&
+                // Automatic tax comes from a Checkout Session, which doesn't offer these
+                AddPaymentMethodRequirement.UnsupportedForCheckoutSession !in
+                definition.requirementsToBeUsedAsNewPaymentMethod(hasIntentToSetup = false)
         }
 
         directDefinitions.forEach { definition ->
@@ -103,7 +105,6 @@ internal class AutomaticTaxPaymentMethodRegistryTest {
                 instancesKey = "key",
                 checkoutSessionResponse = checkoutSessionResponse,
             ),
-            stripeBalanceFinancialAccounts = stripeBalanceTestFinancialAccounts,
         )
     }
 

@@ -2,9 +2,11 @@ package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
+import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.TestUiDefinitionFactoryArgumentsFactory
 import com.stripe.android.lpmfoundations.paymentmethod.isSupported
+import com.stripe.android.lpmfoundations.paymentmethod.unmetRequirements
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.stripebalance.StripeBalanceFinancialAccounts
@@ -21,11 +23,36 @@ internal class StripeBalanceDefinitionTest {
     ) {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = intentScenario.stripeIntent(PaymentMethod.Type.StripeBalance),
+            hasCustomerConfiguration = true,
+            customerSessionClientSecret = "cuss_123_secret_456",
             stripeBalanceFinancialAccounts = stripeBalanceTestFinancialAccounts,
         )
 
         assertThat(StripeBalanceDefinition.isSupported(metadata)).isTrue()
         assertThat(StripeBalanceDefinition.requiresMandate(metadata)).isFalse()
+    }
+
+    @Test
+    fun `is not supported without a CustomerSession or with a Checkout Session`() {
+        val stripeIntent = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent
+            .stripeIntent(PaymentMethod.Type.StripeBalance)
+        val withLegacyEphemeralKey = PaymentMethodMetadataFactory.create(
+            stripeIntent = stripeIntent,
+            hasCustomerConfiguration = true,
+            stripeBalanceFinancialAccounts = stripeBalanceTestFinancialAccounts,
+        )
+        val withCheckoutSession = PaymentMethodMetadataFactory.create(
+            stripeIntent = stripeIntent,
+            hasCustomerConfiguration = true,
+            customerSessionClientSecret = "cuss_123_secret_456",
+            integrationMetadata = LpmBillingDetailsCollectionMode.AutomaticWithTax.integrationMetadata(stripeIntent),
+            stripeBalanceFinancialAccounts = stripeBalanceTestFinancialAccounts,
+        )
+
+        assertThat(StripeBalanceDefinition.unmetRequirements(withLegacyEphemeralKey))
+            .containsExactly(AddPaymentMethodRequirement.CustomerSession)
+        assertThat(StripeBalanceDefinition.unmetRequirements(withCheckoutSession))
+            .containsExactly(AddPaymentMethodRequirement.UnsupportedForCheckoutSession)
     }
 
     @Test
@@ -59,6 +86,8 @@ internal class StripeBalanceDefinitionTest {
                 email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
                 address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
             ),
+            hasCustomerConfiguration = true,
+            customerSessionClientSecret = "cuss_123_secret_456",
             stripeBalanceFinancialAccounts = stripeBalanceTestFinancialAccounts,
         )
 
