@@ -66,7 +66,7 @@
   <!-- Klarna buy now or pay later copy -->
   <string name="stripe_klarna_buy_now_pay_later">Mua ngay hoặc thanh toán sau bằng Klarna.</string>
   <!-- Klarna mandate text -->
-  <string name="stripe_klarna_mandate">Bằng việc tiếp tục với Klarna, bạn cho phép %1$s tính phí vào tài khoản Klarna của bạn cho các khoản thanh toán trong tương lai căn cứ theo các điều khoản của khoản thanh toán và của Klarna. Bạn có thể thay đổi tùy chọn này bất kỳ lúc nào trong ứng dụng Klarna của mình hoặc bằng cách liên hệ với %2$s.</string>
+  <string name="stripe_klarna_mandate">Bằng cách tiếp tục với Klarna, bạn cho phép %1$s tính phí tài khoản Klarna của bạn cho các khoản thanh toán trong tương lai theo các điều khoản của họ và các điều khoản của Klarna. Bạn có thể thay đổi điều này bất kỳ lúc nào trong ứng dụng Klarna của mình hoặc bằng cách liên hệ với %2$s.</string>
   <!-- Klarna pay later copy -->
   <string name="stripe_klarna_pay_later">Thanh toán sau bằng Klarna.</string>
   <!-- Caption for Phone field on address form -->

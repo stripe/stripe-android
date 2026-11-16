@@ -62,12 +62,14 @@
   <string name="stripe_manualentry_title">输入银行信息</string>
   <string name="stripe_networking_link_login_warmup_cta_cancel">取消</string>
   <string name="stripe_networking_link_login_warmup_cta_continue">继续使用 Link</string>
+  <string name="stripe_networking_link_login_warmup_cta_continue_short">继续</string>
   <string name="stripe_networking_link_login_warmup_cta_continue_with_brand">继续使用 %1$s</string>
   <string name="stripe_networking_link_login_warmup_cta_skip">现在不</string>
   <!-- Networking warmup -->
   <string name="stripe_networking_link_login_warmup_description">使用您之前在 Link 账户中保存的信息。</string>
   <string name="stripe_networking_link_login_warmup_description_with_brand">使用您之前在 %1$s 账户中保存的信息。</string>
   <string name="stripe_networking_link_login_warmup_title">继续使用 Link</string>
+  <string name="stripe_networking_link_login_warmup_title_welcome_back">欢迎回来</string>
   <string name="stripe_networking_link_login_warmup_title_with_brand">继续使用 %1$s</string>
   <string name="stripe_networking_save_to_link_verification_cta_negative">现在不</string>
   <string name="stripe_networking_save_to_link_verification_title">确认是您本人</string>

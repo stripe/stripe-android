@@ -62,12 +62,14 @@
   <string name="stripe_manualentry_title">Unesite bankovne podatke</string>
   <string name="stripe_networking_link_login_warmup_cta_cancel">Otkaži</string>
   <string name="stripe_networking_link_login_warmup_cta_continue">Nastavi s Linkom</string>
+  <string name="stripe_networking_link_login_warmup_cta_continue_short">Nastavi</string>
   <string name="stripe_networking_link_login_warmup_cta_continue_with_brand">Nastavite s %1$s</string>
   <string name="stripe_networking_link_login_warmup_cta_skip">Ne sada</string>
   <!-- Networking warmup -->
   <string name="stripe_networking_link_login_warmup_description">Upotrijebite podatke koje ste prethodno spremili sa svojim Link računom.</string>
   <string name="stripe_networking_link_login_warmup_description_with_brand">Upotrijebite podatke koje ste prethodno spremili na svojem računu %1$s.</string>
   <string name="stripe_networking_link_login_warmup_title">Nastavi s Linkom</string>
+  <string name="stripe_networking_link_login_warmup_title_welcome_back">Dobro došli natrag</string>
   <string name="stripe_networking_link_login_warmup_title_with_brand">Nastavite s %1$s</string>
   <string name="stripe_networking_save_to_link_verification_cta_negative">Ne sada</string>
   <string name="stripe_networking_save_to_link_verification_title">Potvrdite da ste to vi</string>

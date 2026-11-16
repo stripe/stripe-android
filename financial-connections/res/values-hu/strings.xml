@@ -62,12 +62,14 @@
   <string name="stripe_manualentry_title">Banki adatok megadása</string>
   <string name="stripe_networking_link_login_warmup_cta_cancel">Mégse</string>
   <string name="stripe_networking_link_login_warmup_cta_continue">Folytatás a Linkkel</string>
+  <string name="stripe_networking_link_login_warmup_cta_continue_short">Folytatás</string>
   <string name="stripe_networking_link_login_warmup_cta_continue_with_brand">Folytatás ezzel: %1$s</string>
   <string name="stripe_networking_link_login_warmup_cta_skip">Most nem</string>
   <!-- Networking warmup -->
   <string name="stripe_networking_link_login_warmup_description">Használja az előzőleg a Link számlájához mentett adatokat.</string>
   <string name="stripe_networking_link_login_warmup_description_with_brand">Használja az előzőleg a(z) %1$s számlájára mentett adatokat.</string>
   <string name="stripe_networking_link_login_warmup_title">Folytatás a Linkkel</string>
+  <string name="stripe_networking_link_login_warmup_title_welcome_back">Üdvözöljük újra</string>
   <string name="stripe_networking_link_login_warmup_title_with_brand">Folytatás ezzel: %1$s</string>
   <string name="stripe_networking_save_to_link_verification_cta_negative">Most nem</string>
   <string name="stripe_networking_save_to_link_verification_title">Igazolja, hogy Ön az</string>
