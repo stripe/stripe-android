@@ -1919,6 +1919,15 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$TermsDisplay : j
 	public static fun values ()[Lcom/stripe/android/paymentsheet/PaymentSheet$TermsDisplay;
 }
 
+public final class com/stripe/android/paymentsheet/PaymentSheet$ThemeMode : java/lang/Enum {
+	public static final field AlwaysDark Lcom/stripe/android/paymentsheet/PaymentSheet$ThemeMode;
+	public static final field AlwaysLight Lcom/stripe/android/paymentsheet/PaymentSheet$ThemeMode;
+	public static final field Automatic Lcom/stripe/android/paymentsheet/PaymentSheet$ThemeMode;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/PaymentSheet$ThemeMode;
+	public static fun values ()[Lcom/stripe/android/paymentsheet/PaymentSheet$ThemeMode;
+}
+
 public final class com/stripe/android/paymentsheet/PaymentSheet$Typography : android/os/Parcelable {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;

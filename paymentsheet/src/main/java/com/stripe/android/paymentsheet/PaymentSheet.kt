@@ -1384,7 +1384,6 @@ class PaymentSheet internal constructor(
     /**
      * Determines which color set Payment Element should use.
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     enum class ThemeMode {
         /**
          * Use the system light or dark mode setting. This will use value from [AppCompatDelegate.getDefaultNightMode].
