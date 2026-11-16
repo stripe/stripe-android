@@ -52,6 +52,7 @@ internal class VerificationViewModel @Inject constructor(
     private val linkLaunchMode: LinkLaunchMode,
     private val webLinkAuthChannel: WebLinkAuthChannel,
     private val isDialog: Boolean,
+    isTestMode: Boolean,
     private val linkBrand: LinkBrand,
     private val enableMfaAuthFlow: Boolean,
     private val onVerificationSucceeded: (refresh: ConsumerSessionRefresh?) -> Unit,
@@ -63,6 +64,7 @@ internal class VerificationViewModel @Inject constructor(
 
     private val _viewState = MutableStateFlow(
         value = VerificationViewState(
+            isTestMode = isTestMode,
             isProcessingWebAuth = linkAccount.webviewOpenUrl != null,
             redactedPhoneNumber = linkAccount.redactedPhoneNumber,
             email = linkAccount.email,
@@ -474,6 +476,7 @@ internal class VerificationViewModel @Inject constructor(
                         onChangeEmailRequested = onChangeEmailClicked,
                         onDismissClicked = onDismissClicked,
                         isDialog = isDialog,
+                        isTestMode = !parentComponent.configuration.stripeIntent.isLiveMode,
                         dismissWithResult = dismissWithResult
                     )
                 }

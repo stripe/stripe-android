@@ -39,6 +39,7 @@ class LinkInline2FASectionScreenshotTest {
         )
 
         val verificationState = VerificationViewState(
+            isTestMode = false,
             authFlow = null,
             isProcessing = false,
             requestFocus = true,
@@ -78,6 +79,7 @@ class LinkInline2FASectionScreenshotTest {
         val paymentUI = paymentDetails.toDefaultPaymentUI(true)!!
 
         val verificationState = VerificationViewState(
+            isTestMode = false,
             authFlow = null,
             isProcessing = false,
             requestFocus = true,
@@ -117,6 +119,7 @@ class LinkInline2FASectionScreenshotTest {
         val paymentUI = paymentDetails.toDefaultPaymentUI(true)!!
 
         val verificationState = VerificationViewState(
+            isTestMode = false,
             authFlow = null,
             isProcessing = false,
             requestFocus = true,
@@ -158,6 +161,7 @@ class LinkInline2FASectionScreenshotTest {
         val paymentUI = paymentDetails.toDefaultPaymentUI(true)!!
 
         val verificationState = VerificationViewState(
+            isTestMode = false,
             authFlow = null,
             isProcessing = true,
             requestFocus = false,
@@ -191,6 +195,7 @@ class LinkInline2FASectionScreenshotTest {
         )
 
         val verificationState = VerificationViewState(
+            isTestMode = false,
             authFlow = null,
             isProcessing = false,
             requestFocus = false,

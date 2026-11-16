@@ -140,6 +140,7 @@ fun VerificationDialogPreview() {
         ) {
             VerificationDialogBody(
                 state = VerificationViewState(
+                    isTestMode = false,
                     authFlow = null,
                     isProcessing = false,
                     isSendingNewCode = false,

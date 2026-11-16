@@ -462,4 +462,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_wallet_update_card">Update card</string>
   <!-- A text notice shown when the user selects an expired card. -->
   <string name="stripe_wallet_update_expired_card_error">This card has expired. Update your card info or choose a different payment method.</string>
+  <!-- Title of the Link verification banner in sandbox or test mode. -->
+  <string name="stripe_link_verification_sandbox_title">You’re in sandbox mode</string>
+  <!-- Sandbox verification instructions. 000000 is the six-digit test code. -->
+  <string name="stripe_link_verification_sandbox_message">No code will be sent. Enter 000000 to continue.</string>
 </resources>

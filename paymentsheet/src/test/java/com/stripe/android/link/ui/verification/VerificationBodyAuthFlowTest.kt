@@ -139,8 +139,44 @@ internal class VerificationBodyAuthFlowTest {
         composeRule.onNodeWithTag(VERIFICATION_OTP_TAG).assertDoesNotExist()
     }
 
+    @Test
+    fun `sandbox OTP shows test code instructions`() = runScenario(
+        authFlow = authFlowState(),
+        isTestMode = true,
+    ) {
+        composeRule.onNodeWithTag(VERIFICATION_SANDBOX_BANNER_TAG)
+            .assertIsDisplayed()
+            .assert(hasText("You’re in sandbox mode"))
+            .assert(hasText("No code will be sent. Enter 000000 to continue."))
+    }
+
+    @Test
+    fun `live mode hides sandbox instructions`() = runScenario(
+        authFlow = authFlowState(),
+    ) {
+        composeRule.onNodeWithTag(VERIFICATION_SANDBOX_BANNER_TAG).assertDoesNotExist()
+    }
+
+    @Test
+    fun `sandbox legacy dialog shows test code instructions`() = runScenario(
+        authFlow = null,
+        isDialog = true,
+        isTestMode = true,
+    ) {
+        composeRule.onNodeWithTag(VERIFICATION_SANDBOX_BANNER_TAG).assertIsDisplayed()
+    }
+
+    @Test
+    fun `sandbox phone match hides OTP instructions`() = runScenario(
+        authFlow = authFlowState(screen = Screen.PhoneMatch),
+        isTestMode = true,
+    ) {
+        composeRule.onNodeWithTag(VERIFICATION_SANDBOX_BANNER_TAG).assertDoesNotExist()
+    }
+
     private fun runScenario(
-        authFlow: VerificationViewState.AuthFlowViewState,
+        authFlow: VerificationViewState.AuthFlowViewState?,
+        isTestMode: Boolean = false,
         isDialog: Boolean = false,
         errorMessage: String? = null,
         phoneNumber: String = "",
@@ -158,6 +194,7 @@ internal class VerificationBodyAuthFlowTest {
             initiallySelectedCountryCode = "US",
         )
         val state = VerificationViewState(
+            isTestMode = isTestMode,
             isProcessing = false,
             requestFocus = false,
             errorMessage = errorMessage?.resolvableString,

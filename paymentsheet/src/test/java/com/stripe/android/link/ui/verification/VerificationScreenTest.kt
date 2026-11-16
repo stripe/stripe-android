@@ -323,6 +323,7 @@ internal class VerificationScreenTest {
         dismissWithResult: (LinkActivityResult) -> Unit = {}
     ): VerificationViewModel {
         return VerificationViewModel(
+            isTestMode = false,
             linkAccount = TestFactory.LINK_ACCOUNT,
             linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
             linkAccountManager = linkAccountManager,
