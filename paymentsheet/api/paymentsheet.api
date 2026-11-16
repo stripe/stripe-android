@@ -1012,6 +1012,7 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$Appearance$Build
 	public final fun sectionSpacing (Lcom/stripe/android/paymentsheet/PaymentSheet$Spacing;)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Builder;
 	public final fun shapes (Lcom/stripe/android/paymentsheet/PaymentSheet$Shapes;)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Builder;
 	public final fun textFieldInsets (Lcom/stripe/android/paymentsheet/PaymentSheet$Insets;)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Builder;
+	public final fun themeMode (Lcom/stripe/android/paymentsheet/PaymentSheet$ThemeMode;)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Builder;
 	public final fun typography (Lcom/stripe/android/paymentsheet/PaymentSheet$Typography;)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Builder;
 	public final fun verticalModeRowPadding (F)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Builder;
 }

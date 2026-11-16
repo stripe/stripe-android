@@ -2227,7 +2227,6 @@ class PaymentSheet internal constructor(
              * Determines which color set Payment Element should use.
              * Defaults to [ThemeMode.Automatic], which follows the system light/dark mode setting.
              */
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun themeMode(themeMode: ThemeMode) = apply {
                 this.themeMode = themeMode
             }
