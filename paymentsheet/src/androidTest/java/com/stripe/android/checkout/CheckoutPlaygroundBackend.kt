@@ -14,17 +14,14 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import org.json.JSONObject
 
-internal const val CHECKOUT_PLAYGROUND_BACKEND_URL = "https://stp-mobile-playground-backend-v7.stripedemos.com/"
+private const val BASE_URL = "https://stp-mobile-playground-backend-v7.stripedemos.com"
 
 internal class CheckoutPlaygroundBackend(
-    baseUrl: String,
     private val merchant: String,
 ) {
-    private val baseUrl = baseUrl.trimEnd('/')
-
     suspend fun fetchPublishableKey(): kotlin.Result<String> {
         return execute(
-            request = Fuel.get("$baseUrl/publishable_key", listOf("merchant" to merchant)),
+            request = Fuel.get("$BASE_URL/publishable_key", listOf("merchant" to merchant)),
             responseKey = "publishable_key",
         )
     }
@@ -36,7 +33,7 @@ internal class CheckoutPlaygroundBackend(
             put("request_params", requestParams)
         }
         return execute(
-            request = Fuel.post("$baseUrl/create_checkout_session").jsonBody(body.toString()),
+            request = Fuel.post("$BASE_URL/create_checkout_session").jsonBody(body.toString()),
             responseKey = "client_secret",
         )
     }
@@ -47,7 +44,7 @@ internal class CheckoutPlaygroundBackend(
             put("request_params", requestParams)
         }
         return execute(
-            request = Fuel.post("$baseUrl/create_customer").jsonBody(body.toString()),
+            request = Fuel.post("$BASE_URL/create_customer").jsonBody(body.toString()),
             responseKey = "id",
         )
     }
