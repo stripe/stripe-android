@@ -55,7 +55,7 @@ internal class DefaultLoadStripeBalanceFinancialAccounts @Inject constructor(
             // TODO(porter) Stripe balance: Support Checkout Sessions once CheckoutClient has its own endpoint to list
             //  the buyer's financial accounts. `v1/elements/stripe_balance/customer_session/financial_accounts`
             //  requires a CustomerSession.
-            errorReporter.report(ErrorReporter.UnexpectedErrorEvent.STRIPE_BALANCE_CHECKOUT_SESSION_UNSUPPORTED)
+            errorReporter.report(ErrorReporter.ExpectedErrorEvent.STRIPE_BALANCE_CHECKOUT_SESSION_UNSUPPORTED)
             return null
         }
         // The accounts can only be listed with a CustomerSession

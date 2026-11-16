@@ -88,7 +88,7 @@ internal class DefaultLoadStripeBalanceFinancialAccountsTest {
 
         assertThat(result).isNull()
         assertThat(errorReporter.awaitCall().errorEvent)
-            .isEqualTo(ErrorReporter.UnexpectedErrorEvent.STRIPE_BALANCE_CHECKOUT_SESSION_UNSUPPORTED)
+            .isEqualTo(ErrorReporter.ExpectedErrorEvent.STRIPE_BALANCE_CHECKOUT_SESSION_UNSUPPORTED)
     }
 
     @Test
