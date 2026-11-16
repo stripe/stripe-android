@@ -4,6 +4,7 @@ NEXT_VERSION_BUMP: MINOR
 ## XX.XX.XX - 20XX-XX-XX
 
 ### PaymentSheet
+* [Added][15422](https://github.com/stripe/stripe-android/pull/15422) Added explicit control for the light or dark appearance color set used by PaymentSheet, Embedded Payment Element, CustomerSheet, and Address Element on Android. You can now use PaymentSheet.Appearance.Builder.themeMode() to set the appearance to AlwaysLight or AlwaysDark for a consistent experience, overriding the system light/dark mode setting for supported Payment Element surfaces.
 * [FIXED][15363](https://github.com/stripe/stripe-android/pull/15363) Fixed an issue where inline address autocomplete could request suggestions for a prefilled address before the customer focused the address field.
 * [FIXED][15399](https://github.com/stripe/stripe-android/pull/15399) Fixed an issue where saved cards with an unrecognized display brand were labeled as "Unknown" in accessibility descriptions and payment option labels.
 
