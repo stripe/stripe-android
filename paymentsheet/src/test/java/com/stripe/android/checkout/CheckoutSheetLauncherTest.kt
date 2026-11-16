@@ -51,6 +51,7 @@ import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.testing.asCallbackFor
 import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -507,7 +508,7 @@ internal class CheckoutSheetLauncherTest {
     }
 
     @Test
-    fun `manageSheetLauncher invokes immediate action before checkout session refresh completes`() = testScenario {
+    fun `manageSheetLauncher invokes immediate action after checkout session refresh completes`() = testScenario {
         val releaseRefresh = CompletableDeferred<Unit>()
         val response = CheckoutSessionResponseFactory.create()
         sessionRefresher.enqueueRefreshAction { releaseRefresh.await() }
@@ -518,12 +519,26 @@ internal class CheckoutSheetLauncherTest {
 
         assertThat(selectionHolder.selection.value).isEqualTo(result.selection)
         assertThat(awaitRefreshCall()).isEqualTo(FakeCheckoutSessionRefresher.Call.Commit(response))
-        assertThat(immediateActionWasInvoked()).isTrue()
+        assertThat(immediateActionWasInvoked()).isFalse()
 
         releaseRefresh.complete(Unit)
         runCurrent()
 
         assertThat(immediateActionWasInvoked()).isTrue()
+    }
+
+    @Test
+    fun `manageSheetLauncher skips immediate action when checkout session refresh is cancelled`() = testScenario {
+        val response = CheckoutSessionResponseFactory.create()
+        sessionRefresher.enqueueRefreshAction { throw CancellationException("Refresh canceled") }
+
+        registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
+            .onActivityResult(manageCompleteResult(checkoutSessionResponse = response))
+        runCurrent()
+
+        assertThat(awaitRefreshCall()).isEqualTo(FakeCheckoutSessionRefresher.Call.Commit(response))
+        assertThat(immediateActionWasInvoked()).isFalse()
+        assertThat(logger.errorLogs).isEmpty()
     }
 
     @Test
