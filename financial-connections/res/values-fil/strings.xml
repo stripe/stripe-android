@@ -62,12 +62,14 @@
   <string name="stripe_manualentry_title">Ilagay ang mga detalye ng bangko</string>
   <string name="stripe_networking_link_login_warmup_cta_cancel">Kanselahin</string>
   <string name="stripe_networking_link_login_warmup_cta_continue">Magpatuloy sa Link</string>
+  <string name="stripe_networking_link_login_warmup_cta_continue_short">Magpatuloy</string>
   <string name="stripe_networking_link_login_warmup_cta_continue_with_brand">Magpatuloy gamit ang %1$s</string>
   <string name="stripe_networking_link_login_warmup_cta_skip">Hindi ngayon</string>
   <!-- Networking warmup -->
   <string name="stripe_networking_link_login_warmup_description">Gamitin ang impormasyon na dati mong na-save sa iyong Link account.</string>
   <string name="stripe_networking_link_login_warmup_description_with_brand">Gamitin ang impormasyong dati mong nai-save sa iyong %1$s account.</string>
   <string name="stripe_networking_link_login_warmup_title">Magpatuloy sa Link</string>
+  <string name="stripe_networking_link_login_warmup_title_welcome_back">Maligayang pagbabalik</string>
   <string name="stripe_networking_link_login_warmup_title_with_brand">Magpatuloy gamit ang %1$s</string>
   <string name="stripe_networking_save_to_link_verification_cta_negative">Hindi ngayon</string>
   <string name="stripe_networking_save_to_link_verification_title">Kumpirmahin na ikaw ito</string>

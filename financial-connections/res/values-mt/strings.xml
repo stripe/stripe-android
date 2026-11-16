@@ -62,12 +62,14 @@
   <string name="stripe_manualentry_title">Daħħal id-dettalji tal-bank</string>
   <string name="stripe_networking_link_login_warmup_cta_cancel">Ikkanċella</string>
   <string name="stripe_networking_link_login_warmup_cta_continue">Kompli b\'Link</string>
+  <string name="stripe_networking_link_login_warmup_cta_continue_short">Kompli</string>
   <string name="stripe_networking_link_login_warmup_cta_continue_with_brand">Kompli b\'%1$s</string>
   <string name="stripe_networking_link_login_warmup_cta_skip">Mhux issa</string>
   <!-- Networking warmup -->
   <string name="stripe_networking_link_login_warmup_description">Uża d-dettalji li diġà kont erfajt fil-kont Link tiegħek.</string>
   <string name="stripe_networking_link_login_warmup_description_with_brand">Uża l-informazzjoni li ssejvjajt qabel bil-kont tiegħek ta\' %1$s.</string>
   <string name="stripe_networking_link_login_warmup_title">Kompli b\'Link</string>
+  <string name="stripe_networking_link_login_warmup_title_welcome_back">Merħba lura</string>
   <string name="stripe_networking_link_login_warmup_title_with_brand">Kompli b\'%1$s</string>
   <string name="stripe_networking_save_to_link_verification_cta_negative">Mhux issa</string>
   <string name="stripe_networking_save_to_link_verification_title">Ikkonferma li int min qed tgħid li int</string>

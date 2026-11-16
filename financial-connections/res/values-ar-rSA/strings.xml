@@ -62,12 +62,14 @@
   <string name="stripe_manualentry_title">إدخال التفاصيل البنكية</string>
   <string name="stripe_networking_link_login_warmup_cta_cancel">إلغاء</string>
   <string name="stripe_networking_link_login_warmup_cta_continue">متابعة مع Link</string>
+  <string name="stripe_networking_link_login_warmup_cta_continue_short">متابعة</string>
   <string name="stripe_networking_link_login_warmup_cta_continue_with_brand">المتابعة باستخدام %1$s</string>
   <string name="stripe_networking_link_login_warmup_cta_skip">ليس الآن</string>
   <!-- Networking warmup -->
   <string name="stripe_networking_link_login_warmup_description">استخدم المعلومات التي حفظتها مسبقًا في حسابك على Link.</string>
   <string name="stripe_networking_link_login_warmup_description_with_brand">استخدم المعلومات التي حفظتها مسبقًا في حسابك على %1$s.</string>
   <string name="stripe_networking_link_login_warmup_title">متابعة مع Link</string>
+  <string name="stripe_networking_link_login_warmup_title_welcome_back">مرحبًا بعودتك</string>
   <string name="stripe_networking_link_login_warmup_title_with_brand">المتابعة باستخدام %1$s</string>
   <string name="stripe_networking_save_to_link_verification_cta_negative">ليس الآن</string>
   <string name="stripe_networking_save_to_link_verification_title">يُرجى تأكيد هويتك</string>

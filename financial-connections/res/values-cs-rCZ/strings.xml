@@ -62,12 +62,14 @@
   <string name="stripe_manualentry_title">Zadejte podrobnosti o bance</string>
   <string name="stripe_networking_link_login_warmup_cta_cancel">Zrušit</string>
   <string name="stripe_networking_link_login_warmup_cta_continue">Pokračovat s Link</string>
+  <string name="stripe_networking_link_login_warmup_cta_continue_short">Pokračovat</string>
   <string name="stripe_networking_link_login_warmup_cta_continue_with_brand">Pokračovat s %1$s</string>
   <string name="stripe_networking_link_login_warmup_cta_skip">Ne teď</string>
   <!-- Networking warmup -->
   <string name="stripe_networking_link_login_warmup_description">Použijte informace, které jste dříve uložili do svého účtu Link.</string>
   <string name="stripe_networking_link_login_warmup_description_with_brand">Použijte informace, které jste dříve uložili pomocí účtu %1$s.</string>
   <string name="stripe_networking_link_login_warmup_title">Pokračovat s Link</string>
+  <string name="stripe_networking_link_login_warmup_title_welcome_back">Vítejte zpět</string>
   <string name="stripe_networking_link_login_warmup_title_with_brand">Pokračovat s %1$s</string>
   <string name="stripe_networking_save_to_link_verification_cta_negative">Ne teď</string>
   <string name="stripe_networking_save_to_link_verification_title">Potvrďte, že jste to vy</string>

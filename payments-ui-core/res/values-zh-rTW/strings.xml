@@ -126,7 +126,7 @@
   <!-- Expiration date shown for a scanned card in the card pill -->
   <string name="stripe_scanned_card_pill_expiration_date">到期日為 %1$s</string>
   <!-- SEPA mandate text -->
-  <string name="stripe_sepa_mandate">提供您的支付方式並確認該付款即表示您授權 (A) %s 與我們的支付服務商 Stripe 向您的銀行發送對您的帳戶進行扣款的指令以及 (B) 您的銀行按照這些指令對您的帳戶進行扣款。根據您與您的銀行協議的條款和條件，您有權從您的銀行得到退款。退款必須在 8 周內申請，從您的帳戶被扣款之日起算。您的權利在結單上有解釋，可從您的銀行獲取。您同意提前 2 天接收後續扣款的通知。</string>
+  <string name="stripe_sepa_mandate">提供您的支付資訊並確認此筆支付，即表示您授權 (A) %s 和我們的支付服務提供商 Stripe 傳送指示給您的銀行，以從您的帳戶扣款，以及 (B) 您的銀行根據這些指示從您的帳戶扣款。作為您權利的一部分，您有權根據您與銀行協議的條款和條件，向您的銀行要求退款。必須在您的帳戶扣款之日起的 8 週內申請退款。您可以從您的銀行取得一份聲明，其中說明您的權利。您同意在未來的扣款發生前最多 2 天接收通知。</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_set_as_default_payment_method">設定為預設支付方式</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->

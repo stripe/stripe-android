@@ -62,12 +62,14 @@
   <string name="stripe_manualentry_title">Angiv bankoplysninger</string>
   <string name="stripe_networking_link_login_warmup_cta_cancel">Annuller</string>
   <string name="stripe_networking_link_login_warmup_cta_continue">Fortsæt med Link</string>
+  <string name="stripe_networking_link_login_warmup_cta_continue_short">Fortsæt</string>
   <string name="stripe_networking_link_login_warmup_cta_continue_with_brand">Fortsæt med %1$s</string>
   <string name="stripe_networking_link_login_warmup_cta_skip">Ikke nu</string>
   <!-- Networking warmup -->
   <string name="stripe_networking_link_login_warmup_description">Brug oplysninger, du tidligere har gemt på din Link-konto.</string>
   <string name="stripe_networking_link_login_warmup_description_with_brand">Brug oplysninger, du tidligere har gemt med din %1$s-konto.</string>
   <string name="stripe_networking_link_login_warmup_title">Fortsæt med Link</string>
+  <string name="stripe_networking_link_login_warmup_title_welcome_back">Velkommen tilbage</string>
   <string name="stripe_networking_link_login_warmup_title_with_brand">Fortsæt med %1$s</string>
   <string name="stripe_networking_save_to_link_verification_cta_negative">Ikke nu</string>
   <string name="stripe_networking_save_to_link_verification_title">Bekræft, at det er dig</string>

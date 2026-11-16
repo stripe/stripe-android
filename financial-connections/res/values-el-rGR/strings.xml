@@ -62,12 +62,14 @@
   <string name="stripe_manualentry_title">Εισαγάγετε στοιχεία τράπεζας</string>
   <string name="stripe_networking_link_login_warmup_cta_cancel">Ακύρωση</string>
   <string name="stripe_networking_link_login_warmup_cta_continue">Συνέχεια με το Link</string>
+  <string name="stripe_networking_link_login_warmup_cta_continue_short">Συνέχεια</string>
   <string name="stripe_networking_link_login_warmup_cta_continue_with_brand">Συνέχεια με %1$s</string>
   <string name="stripe_networking_link_login_warmup_cta_skip">Όχι τώρα</string>
   <!-- Networking warmup -->
   <string name="stripe_networking_link_login_warmup_description">Χρησιμοποιήστε τα στοιχεία που είχατε αποθηκεύσει προηγουμένως με τον λογαριασμό σας στο Link.</string>
   <string name="stripe_networking_link_login_warmup_description_with_brand">Χρησιμοποιήστε τα στοιχεία που είχατε αποθηκεύσει προηγουμένως με τον λογαριασμό σας %1$s.</string>
   <string name="stripe_networking_link_login_warmup_title">Συνέχεια με το Link</string>
+  <string name="stripe_networking_link_login_warmup_title_welcome_back">Καλωσορίσατε ξανά</string>
   <string name="stripe_networking_link_login_warmup_title_with_brand">Συνέχεια με %1$s</string>
   <string name="stripe_networking_save_to_link_verification_cta_negative">Όχι τώρα</string>
   <string name="stripe_networking_save_to_link_verification_title">Επιβεβαιώστε ότι είστε εσείς</string>

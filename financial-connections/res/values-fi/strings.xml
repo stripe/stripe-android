@@ -62,12 +62,14 @@
   <string name="stripe_manualentry_title">Anna pankkitiedot</string>
   <string name="stripe_networking_link_login_warmup_cta_cancel">Peruuta</string>
   <string name="stripe_networking_link_login_warmup_cta_continue">Jatka Link-palvelulla</string>
+  <string name="stripe_networking_link_login_warmup_cta_continue_short">Jatka</string>
   <string name="stripe_networking_link_login_warmup_cta_continue_with_brand">Jatka kohteella %1$s</string>
   <string name="stripe_networking_link_login_warmup_cta_skip">Ei nyt</string>
   <!-- Networking warmup -->
   <string name="stripe_networking_link_login_warmup_description">Käytä Link-tilille aiemmin tallennettuja tietoja.</string>
   <string name="stripe_networking_link_login_warmup_description_with_brand">Käytä aiemmin tallentamiasi tietoja tililläsi %1$s.</string>
   <string name="stripe_networking_link_login_warmup_title">Jatka Link-palvelulla</string>
+  <string name="stripe_networking_link_login_warmup_title_welcome_back">Tervetuloa takaisin</string>
   <string name="stripe_networking_link_login_warmup_title_with_brand">Jatka kohteella %1$s</string>
   <string name="stripe_networking_save_to_link_verification_cta_negative">Ei nyt</string>
   <string name="stripe_networking_save_to_link_verification_title">Vahvista, että se olet sinä</string>

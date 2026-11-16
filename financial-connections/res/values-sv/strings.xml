@@ -62,12 +62,14 @@
   <string name="stripe_manualentry_title">Ange bankuppgifter</string>
   <string name="stripe_networking_link_login_warmup_cta_cancel">Avbryt</string>
   <string name="stripe_networking_link_login_warmup_cta_continue">Fortsätt med Link</string>
+  <string name="stripe_networking_link_login_warmup_cta_continue_short">Fortsätt</string>
   <string name="stripe_networking_link_login_warmup_cta_continue_with_brand">Fortsätt med %1$s</string>
   <string name="stripe_networking_link_login_warmup_cta_skip">Inte nu</string>
   <!-- Networking warmup -->
   <string name="stripe_networking_link_login_warmup_description">Använd information som du tidigare sparat på ditt Link-konto.</string>
   <string name="stripe_networking_link_login_warmup_description_with_brand">Använd information som du tidigare sparat på ditt %1$s-konto.</string>
   <string name="stripe_networking_link_login_warmup_title">Fortsätt med Link</string>
+  <string name="stripe_networking_link_login_warmup_title_welcome_back">Välkommen tillbaka</string>
   <string name="stripe_networking_link_login_warmup_title_with_brand">Fortsätt med %1$s</string>
   <string name="stripe_networking_save_to_link_verification_cta_negative">Inte nu</string>
   <string name="stripe_networking_save_to_link_verification_title">Bekräfta att det är du</string>

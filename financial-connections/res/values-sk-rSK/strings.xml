@@ -62,12 +62,14 @@
   <string name="stripe_manualentry_title">Zadať bankové údaje</string>
   <string name="stripe_networking_link_login_warmup_cta_cancel">Zrušiť</string>
   <string name="stripe_networking_link_login_warmup_cta_continue">Pokračovať so službou Link</string>
+  <string name="stripe_networking_link_login_warmup_cta_continue_short">Pokračovať</string>
   <string name="stripe_networking_link_login_warmup_cta_continue_with_brand">Pokračujte so službou %1$s</string>
   <string name="stripe_networking_link_login_warmup_cta_skip">Teraz nie</string>
   <!-- Networking warmup -->
   <string name="stripe_networking_link_login_warmup_description">Použite informácie, ktoré ste predtým uložili pomocou svojho účtu Link.</string>
   <string name="stripe_networking_link_login_warmup_description_with_brand">Použite informácie, ktoré ste si predtým uložili na svojom %1$s účte.</string>
   <string name="stripe_networking_link_login_warmup_title">Pokračovať so službou Link</string>
+  <string name="stripe_networking_link_login_warmup_title_welcome_back">Vitajte späť</string>
   <string name="stripe_networking_link_login_warmup_title_with_brand">Pokračujte so službou %1$s</string>
   <string name="stripe_networking_save_to_link_verification_cta_negative">Teraz nie</string>
   <string name="stripe_networking_save_to_link_verification_title">Potvrdenie vašej totožnosti</string>

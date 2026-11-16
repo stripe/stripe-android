@@ -91,7 +91,7 @@ to be saved and used in future checkout sessions. -->
   <!-- Title of the screen responsible for confirming kyc information -->
   <string name="stripe_link_onramp_kyc_verification_screen_title">Bestätigen Sie Ihre Angaben</string>
   <!-- Title for the SSN field on the KYC verification screen -->
-  <string name="stripe_link_onramp_kyc_verification_ssn_field_title">Letzte 4 Ziffern der IdNr.</string>
+  <string name="stripe_link_onramp_kyc_verification_ssn_field_title">Letzte 4 Ziffern der Sozialversicherungsnummer</string>
   <!-- Title of the screen responsible for accepting Crypto Onramp terms and conditions -->
   <string name="stripe_link_onramp_terms_and_conditions_screen_title">Konditionen</string>
   <!-- Title of the screen responsible for accepting Crypto Onramp terms of service -->

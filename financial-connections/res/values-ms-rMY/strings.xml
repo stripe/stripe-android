@@ -62,12 +62,14 @@
   <string name="stripe_manualentry_title">Masukkan butiran bank</string>
   <string name="stripe_networking_link_login_warmup_cta_cancel">Batalkan</string>
   <string name="stripe_networking_link_login_warmup_cta_continue">Teruskan dengan Link</string>
+  <string name="stripe_networking_link_login_warmup_cta_continue_short">Teruskan</string>
   <string name="stripe_networking_link_login_warmup_cta_continue_with_brand">Teruskan dengan %1$s</string>
   <string name="stripe_networking_link_login_warmup_cta_skip">Bukan sekarang</string>
   <!-- Networking warmup -->
   <string name="stripe_networking_link_login_warmup_description">Gunakan maklumat yang anda simpan sebelum ini dengan akaun Link anda.</string>
   <string name="stripe_networking_link_login_warmup_description_with_brand">Gunakan maklumat yang anda simpan sebelum ini dengan akaun %1$s anda.</string>
   <string name="stripe_networking_link_login_warmup_title">Teruskan dengan Link</string>
+  <string name="stripe_networking_link_login_warmup_title_welcome_back">Selamat kembali</string>
   <string name="stripe_networking_link_login_warmup_title_with_brand">Teruskan dengan %1$s</string>
   <string name="stripe_networking_save_to_link_verification_cta_negative">Bukan sekarang</string>
   <string name="stripe_networking_save_to_link_verification_title">Sahkan andalah orangnya</string>
