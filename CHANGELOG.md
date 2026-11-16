@@ -4,6 +4,7 @@ NEXT_VERSION_BUMP: MINOR
 ## XX.XX.XX - 20XX-XX-XX
 
 ### PaymentSheet
+* [ADDED] Added a banner to Link's OTP verification screen in sandbox and test mode with instructions for entering a test verification code.
 * [FIXED][15363](https://github.com/stripe/stripe-android/pull/15363) Fixed an issue where inline address autocomplete could request suggestions for a prefilled address before the customer focused the address field.
 * [FIXED][15399](https://github.com/stripe/stripe-android/pull/15399) Fixed an issue where saved cards with an unrecognized display brand were labeled as "Unknown" in accessibility descriptions and payment option labels.
 
