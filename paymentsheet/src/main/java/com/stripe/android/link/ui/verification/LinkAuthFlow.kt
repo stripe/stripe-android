@@ -4,6 +4,7 @@ import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.account.LinkAccountManager
+import com.stripe.android.link.analytics.LinkAuthSurface
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.utils.errorMessage
@@ -66,9 +67,27 @@ internal class LinkAuthFlow(
     private var isResending = false
     private var errorMessage: ResolvableString? = null
     private var inputRevision = 0
+    private var invalidCodeRevision = 0
 
     private val _state = MutableStateFlow(buildState())
     val state: StateFlow<LinkAuthFlowState> = _state.asStateFlow()
+
+    /**
+     * Whether [start] was called, i.e. whether this flow may have sent a code.
+     */
+    val hasStarted: Boolean
+        get() = didStart
+
+    /**
+     * Whether the attempt ended, either through [onFinish] or [invalidate].
+     */
+    val isFinished: Boolean
+        get() = finished
+
+    /**
+     * Logged with the 2FA events of this attempt. Null for flows that don't report where verification happens.
+     */
+    var analyticsSurface: LinkAuthSurface? = null
 
     private val account: LinkAccount?
         get() = linkAccountManager.linkAccountInfo.value.account
@@ -85,8 +104,16 @@ internal class LinkAuthFlow(
 
     fun cancel(switchAccount: Boolean) {
         if (finished) return
-        linkEventsReporter.on2FACancel()
+        linkEventsReporter.on2FACancel(surface = analyticsSurface)
         finish(if (switchAccount) LinkAuthFlowResult.SwitchAccount else LinkAuthFlowResult.Canceled)
+    }
+
+    /**
+     * Ends the attempt without logging a cancellation or calling [onFinish], e.g. when its account was replaced.
+     * Responses to requests in flight are ignored.
+     */
+    fun invalidate() {
+        end()
     }
 
     fun goBack() {
@@ -114,7 +141,9 @@ internal class LinkAuthFlow(
 
     fun resend() {
         if (!canResend()) return
-        challenge?.type?.let { linkEventsReporter.on2FAResendCode(verificationType = it.value) }
+        challenge?.type?.let {
+            linkEventsReporter.on2FAResendCode(verificationType = it.value, surface = analyticsSurface)
+        }
         sendCode(isResend = true)
     }
 
@@ -136,6 +165,7 @@ internal class LinkAuthFlow(
                     code = code,
                     type = challenge.type,
                     consentGranted = consentGranted(),
+                    analyticsSurface = analyticsSurface,
                 )
             },
         ) { result ->
@@ -149,6 +179,7 @@ internal class LinkAuthFlow(
                 },
                 onFailure = { error ->
                     resetInput()
+                    invalidCodeRevision += 1
                     errorMessage = error.errorMessage
                     when (error.stripeErrorCode) {
                         ERROR_VERIFICATION_EXPIRED, ERROR_VERIFICATION_NOT_FOUND -> {
@@ -264,6 +295,7 @@ internal class LinkAuthFlow(
                     type = challenge.type,
                     accountPhoneNumber = challenge.phoneNumber,
                     isResend = isResend,
+                    analyticsSurface = analyticsSurface,
                 )
             },
         ) { result ->
@@ -329,7 +361,16 @@ internal class LinkAuthFlow(
     }
 
     private fun finish(result: LinkAuthFlowResult) {
-        if (finished) return
+        if (end()) {
+            onFinish(result)
+        }
+    }
+
+    /**
+     * @return whether this call ended the attempt.
+     */
+    private fun end(): Boolean {
+        if (finished) return false
         finished = true
         generation += 1
         isLoading = false
@@ -338,7 +379,7 @@ internal class LinkAuthFlow(
         previousChallenges.clear()
         cooldownJob?.cancel()
         publish()
-        onFinish(result)
+        return true
     }
 
     private fun request(
@@ -422,6 +463,8 @@ internal class LinkAuthFlow(
         isResending = isResending && isLoading,
         errorMessage = errorMessage,
         inputRevision = inputRevision,
+        invalidCodeRevision = invalidCodeRevision,
+        isCodeSent = challenge?.isStarted == true,
         canGoBack = canGoBack(),
         canSubmitCode = canSubmitCode(),
         canResend = canResend(),
@@ -473,7 +516,18 @@ internal data class LinkAuthFlowState(
     val isLoading: Boolean,
     val isResending: Boolean,
     val errorMessage: ResolvableString?,
+    /**
+     * Changes whenever the code field should be cleared, e.g. after a new code was sent or a code was rejected.
+     */
     val inputRevision: Int,
+    /**
+     * Changes whenever confirming a submitted code failed, e.g. because it was wrong.
+     */
+    val invalidCodeRevision: Int,
+    /**
+     * Whether a code was sent for the current challenge, so one can be entered.
+     */
+    val isCodeSent: Boolean,
     val canGoBack: Boolean,
     val canSubmitCode: Boolean,
     val canResend: Boolean,

@@ -25,6 +25,7 @@ import com.stripe.android.paymentelement.embedded.EmbeddedLinkExtrasModule
 import com.stripe.android.paymentelement.embedded.EmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
+import com.stripe.android.paymentelement.embedded.linkinline.NoEmbeddedLinkInlineVerificationGateModule
 import com.stripe.android.payments.core.injection.ApiRequestOptionsModule
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
@@ -87,6 +88,7 @@ import javax.inject.Singleton
         PaymentMethodMessagePromotionsHelperModule::class,
         PaymentMethodMessagePromotionsExperimentHandlerModule::class,
         PreselectLinkExperimentModule::class,
+        NoEmbeddedLinkInlineVerificationGateModule::class,
         ApiConfigurationResolverModule::class,
     ],
 )

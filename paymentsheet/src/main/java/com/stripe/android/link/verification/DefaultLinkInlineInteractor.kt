@@ -110,6 +110,7 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
                         code = code,
                         type = VerificationType.SMS,
                         consentGranted = null,
+                        analyticsSurface = null,
                     )
                     onConfirmationResult(verificationState, result)
                 }
@@ -203,7 +204,7 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
     }
 
     override fun resendCode() {
-        linkEventsReporter.on2FAResendCode(verificationType = "SMS")
+        linkEventsReporter.on2FAResendCode(verificationType = "SMS", surface = null)
         otpElement.controller.reset()
         update2FAState { viewState ->
             viewState.copy(
@@ -233,6 +234,7 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
                     type = VerificationType.SMS,
                     accountPhoneNumber = null,
                     isResend = isResend,
+                    analyticsSurface = null,
                 )
                 val error = result.exceptionOrNull()
 

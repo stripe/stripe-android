@@ -42,27 +42,27 @@ internal open class FakeLinkEventsReporter : LinkEventsReporter {
         throw NotImplementedError()
     }
 
-    override fun on2FAStart(verificationType: String) {
+    override fun on2FAStart(verificationType: String, surface: LinkAuthSurface?) {
         throw NotImplementedError()
     }
 
-    override fun on2FAStartFailure(verificationType: String) {
+    override fun on2FAStartFailure(verificationType: String, surface: LinkAuthSurface?) {
         throw NotImplementedError()
     }
 
-    override fun on2FAComplete(verificationType: String) {
+    override fun on2FAComplete(verificationType: String, surface: LinkAuthSurface?) {
         throw NotImplementedError()
     }
 
-    override fun on2FAFailure(verificationType: String) {
+    override fun on2FAFailure(verificationType: String, surface: LinkAuthSurface?) {
         throw NotImplementedError()
     }
 
-    override fun on2FACancel() {
+    override fun on2FACancel(surface: LinkAuthSurface?) {
         throw NotImplementedError()
     }
 
-    override fun on2FAResendCode(verificationType: String) = Unit
+    override fun on2FAResendCode(verificationType: String, surface: LinkAuthSurface?) = Unit
 
     override fun onPopupShow() {
         throw NotImplementedError()

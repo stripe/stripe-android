@@ -1,9 +1,12 @@
 package com.stripe.android.common.analytics.experiment
 
+import com.stripe.android.common.analytics.toAnalyticsValue
 import com.stripe.android.common.nfcscan.analytics.NfcScanningExperimentDimensions
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSession.ExperimentAssignment
+import com.stripe.android.paymentelement.EmbeddedPaymentElement
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.utils.filterNotNullValues
@@ -137,6 +140,38 @@ internal sealed class LoggableExperiment(
             },
             "google_pay_enabled" to metadata.isGooglePayReady.toString(),
             "has_saved_payment_method" to hasSavedPaymentMethod.toString(),
+        ).filterNotNullValues(),
+    )
+
+    data class OcsMobileEmbeddedLinkInlineOtp(
+        val experimentsData: ElementsSession.ExperimentsData,
+        override val group: String,
+        val metadata: PaymentMethodMetadata,
+        val mobileSessionId: String,
+        val mobileSdkVersion: String,
+        val hasSavedPaymentMethod: Boolean,
+        val rowStyle: PaymentSheet.Appearance.Embedded.RowStyle,
+        val formSheetAction: EmbeddedPaymentElement.FormSheetAction,
+        val isRowSelectionImmediateAction: Boolean,
+        val canVerifyWithEmail: Boolean,
+        val isLargeTextSize: Boolean,
+    ) : LoggableExperiment(
+        arbId = experimentsData.arbId,
+        experiment = ExperimentAssignment.OCS_MOBILE_EMBEDDED_LINK_INLINE_OTP,
+        group = group,
+        dimensions = CommonElementsDimensions.getDimensions(metadata, EventReporter.Mode.Embedded) + mapOf(
+            "elements_session_id" to metadata.elementsSessionId,
+            "mobile_session_id" to mobileSessionId,
+            "mobile_sdk_version" to mobileSdkVersion,
+            "has_saved_payment_method" to hasSavedPaymentMethod.toString(),
+            "embedded_row_style" to rowStyle.toAnalyticsValue(),
+            "embedded_form_sheet_action" to when (formSheetAction) {
+                EmbeddedPaymentElement.FormSheetAction.Continue -> "continue"
+                EmbeddedPaymentElement.FormSheetAction.Confirm -> "confirm"
+            },
+            "embedded_row_selection_behavior" to if (isRowSelectionImmediateAction) "immediate_action" else "default",
+            "link_verification_methods" to if (canVerifyWithEmail) "sms_email" else "sms",
+            "large_text_size" to isLargeTextSize.toString(),
         ).filterNotNullValues(),
     )
 

@@ -13,6 +13,7 @@ import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.NoLinkAccountFoundException
+import com.stripe.android.link.analytics.LinkAuthSurface
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.injection.LinkAccountAnalytics
 import com.stripe.android.link.model.AccountStatus
@@ -412,10 +413,11 @@ internal class DefaultLinkAccountManager @Inject constructor(
         type: VerificationType,
         accountPhoneNumber: String?,
         isResend: Boolean,
+        analyticsSurface: LinkAuthSurface?,
     ): Result<LinkAccount> {
         val linkAccount = linkAccountHolder.linkAccountInfo.value.account
             ?: return Result.failure(NoLinkAccountFoundException())
-        linkEventsReporter.on2FAStart(verificationType = type.value)
+        linkEventsReporter.on2FAStart(verificationType = type.value, surface = analyticsSurface)
         return linkRepository.startVerification(
             consumerSessionClientSecret = linkAccount.clientSecret,
             type = type,
@@ -425,7 +427,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
             apiConfiguration = config.apiConfiguration,
         )
             .onFailure {
-                linkEventsReporter.on2FAStartFailure(verificationType = type.value)
+                linkEventsReporter.on2FAStartFailure(verificationType = type.value, surface = analyticsSurface)
             }.map { consumerSession ->
                 setAccount(consumerSession = consumerSession)
             }
@@ -434,7 +436,8 @@ internal class DefaultLinkAccountManager @Inject constructor(
     override suspend fun confirmVerification(
         code: String,
         type: VerificationType,
-        consentGranted: Boolean?
+        consentGranted: Boolean?,
+        analyticsSurface: LinkAuthSurface?,
     ): Result<LinkAccount> {
         val linkAccount = linkAccountHolder.linkAccountInfo.value.account
             ?: return Result.failure(NoLinkAccountFoundException())
@@ -446,9 +449,9 @@ internal class DefaultLinkAccountManager @Inject constructor(
             apiConfiguration = config.apiConfiguration,
         )
             .onSuccess {
-                linkEventsReporter.on2FAComplete(verificationType = type.value)
+                linkEventsReporter.on2FAComplete(verificationType = type.value, surface = analyticsSurface)
             }.onFailure {
-                linkEventsReporter.on2FAFailure(verificationType = type.value)
+                linkEventsReporter.on2FAFailure(verificationType = type.value, surface = analyticsSurface)
             }.map { consumerSession ->
                 setAccount(consumerSession = consumerSession)
             }

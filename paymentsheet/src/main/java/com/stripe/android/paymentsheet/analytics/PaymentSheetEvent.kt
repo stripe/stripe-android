@@ -7,6 +7,7 @@ import com.stripe.android.core.utils.mapOfDurationInSeconds
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkMode
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
+import com.stripe.android.paymentelement.embedded.linkinline.EmbeddedLinkInlineAuthEvent
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.isLink
@@ -358,6 +359,15 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         )
     }
 
+    class EmbeddedLinkInlineAuth(
+        event: EmbeddedLinkInlineAuthEvent,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = event.eventName
+        override val params: Map<String, Any?> = mapOf(
+            FIELD_REASON to event.reason,
+        ).filterNotNullValues()
+    }
+
     class ExperimentExposure(
         experiment: LoggableExperiment
     ) : PaymentSheetEvent() {
@@ -677,6 +687,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         const val FIELD_ADDRESS_COUNTRY_CODE = "address_country_code"
         const val FIELD_AUTO_COMPLETE_RESULT_SELECTED = "auto_complete_result_selected"
         const val FIELD_EDIT_DISTANCE = "edit_distance"
+        const val FIELD_REASON = "reason"
 
         const val VALUE_EDIT_CBC_EVENT_SOURCE = "edit"
         const val VALUE_ADD_CBC_EVENT_SOURCE = "add"

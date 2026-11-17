@@ -286,6 +286,30 @@ class ElementsSessionJsonParserTest {
     }
 
     @Test
+    fun `parses embedded inline Link OTP experiment assignment`() {
+        val json = JSONObject(ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON.toString()).put(
+            "experiments_data",
+            JSONObject().put("arb_id", "arb_123").put(
+                "experiment_assignments",
+                JSONObject().put("ocs_mobile_embedded_link_inline_otp", "treatment"),
+            ),
+        )
+        val elementsSession = ElementsSessionJsonParser(
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = "secret",
+                externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
+                appId = APP_ID,
+            ),
+            isLiveMode = true,
+        ).parse(json)
+
+        assertThat(elementsSession?.experimentsData?.experimentAssignments).containsExactly(
+            ElementsSession.ExperimentAssignment.OCS_MOBILE_EMBEDDED_LINK_INLINE_OTP, "treatment",
+        )
+    }
+
+    @Test
     fun `Test ordered payment methods returned in PI payment_method_type variable`() {
         val parsedData = ElementsSessionJsonParser(
             ElementsSessionParams.PaymentIntentType(

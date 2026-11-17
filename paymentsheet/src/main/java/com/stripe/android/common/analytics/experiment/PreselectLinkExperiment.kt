@@ -2,6 +2,7 @@ package com.stripe.android.common.analytics.experiment
 
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.ElementsSession.ExperimentAssignment
+import com.stripe.android.paymentelement.embedded.linkinline.EmbeddedLinkInlineVerificationGate
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -21,6 +22,7 @@ internal interface PreselectLinkExperiment {
 internal class DefaultPreselectLinkExperiment @Inject constructor(
     private val eventReporter: EventReporter,
     private val mode: EventReporter.Mode,
+    private val embeddedLinkInlineVerificationGate: EmbeddedLinkInlineVerificationGate,
 ) : PreselectLinkExperiment {
     override fun getSelection(
         metadata: PaymentMethodMetadata,
@@ -40,6 +42,8 @@ internal class DefaultPreselectLinkExperiment @Inject constructor(
         if (configuration.link.display != PaymentSheet.LinkConfiguration.Display.Automatic) return null
         if (configuration.walletButtons?.willDisplayExternally == true) return null
         val brand = metadata.linkState?.configuration?.linkBrand ?: return null
+        // Sessions in the inline Link verification experiment stay out of this one.
+        if (embeddedLinkInlineVerificationGate.isEligible(metadata, customer, integrationConfiguration)) return null
 
         val experimentsData = metadata.experimentsData ?: return null
         val variant = experimentsData.experimentAssignments[ExperimentAssignment.OCS_MOBILE_PRESELECT_LINK]

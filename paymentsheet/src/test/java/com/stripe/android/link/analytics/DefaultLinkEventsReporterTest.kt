@@ -52,6 +52,98 @@ class DefaultLinkEventsReporterTest {
             assertThat(loggedParams.get("analytics_value")).isEqualTo("apiError")
         }
 
+    @Test
+    fun on2FAStart_withoutSurface_sendsVerificationTypeOnly() =
+        runScenario { linkEventsReporter, fakeAnalyticsRequestExecutor, testScheduler ->
+            linkEventsReporter.on2FAStart(verificationType = "SMS", surface = null)
+
+            testScheduler.advanceUntilIdle()
+
+            val loggedParams = fakeAnalyticsRequestExecutor.awaitEvent("link.2fa.start")
+            assertThat(loggedParams["verification_type"]).isEqualTo("SMS")
+            assertThat(loggedParams).doesNotContainKey("link_auth_surface")
+        }
+
+    @Test
+    fun on2FAStart_withSurface_sendsSurface() =
+        runScenario { linkEventsReporter, fakeAnalyticsRequestExecutor, testScheduler ->
+            linkEventsReporter.on2FAStart(verificationType = "SMS", surface = LinkAuthSurface.EmbeddedInline)
+
+            testScheduler.advanceUntilIdle()
+
+            val loggedParams = fakeAnalyticsRequestExecutor.awaitEvent("link.2fa.start")
+            assertThat(loggedParams["verification_type"]).isEqualTo("SMS")
+            assertThat(loggedParams["link_auth_surface"]).isEqualTo("embedded_inline")
+        }
+
+    @Test
+    fun on2FAStartFailure_withSurface_sendsSurface() =
+        runScenario { linkEventsReporter, fakeAnalyticsRequestExecutor, testScheduler ->
+            linkEventsReporter.on2FAStartFailure(verificationType = "SMS", surface = LinkAuthSurface.EmbeddedInline)
+
+            testScheduler.advanceUntilIdle()
+
+            val loggedParams = fakeAnalyticsRequestExecutor.awaitEvent("link.2fa.start_failure")
+            assertThat(loggedParams["link_auth_surface"]).isEqualTo("embedded_inline")
+        }
+
+    @Test
+    fun on2FAComplete_withSurface_sendsSurface() =
+        runScenario { linkEventsReporter, fakeAnalyticsRequestExecutor, testScheduler ->
+            linkEventsReporter.on2FAComplete(verificationType = "SMS", surface = LinkAuthSurface.EmbeddedDialog)
+
+            testScheduler.advanceUntilIdle()
+
+            val loggedParams = fakeAnalyticsRequestExecutor.awaitEvent("link.2fa.complete")
+            assertThat(loggedParams["link_auth_surface"]).isEqualTo("embedded_dialog")
+        }
+
+    @Test
+    fun on2FAFailure_withSurface_sendsSurface() =
+        runScenario { linkEventsReporter, fakeAnalyticsRequestExecutor, testScheduler ->
+            linkEventsReporter.on2FAFailure(verificationType = "SMS", surface = LinkAuthSurface.EmbeddedInline)
+
+            testScheduler.advanceUntilIdle()
+
+            val loggedParams = fakeAnalyticsRequestExecutor.awaitEvent("link.2fa.failure")
+            assertThat(loggedParams["link_auth_surface"]).isEqualTo("embedded_inline")
+        }
+
+    @Test
+    fun on2FACancel_withoutSurface_sendsNoSurface() =
+        runScenario { linkEventsReporter, fakeAnalyticsRequestExecutor, testScheduler ->
+            linkEventsReporter.on2FACancel(surface = null)
+
+            testScheduler.advanceUntilIdle()
+
+            val loggedParams = fakeAnalyticsRequestExecutor.awaitEvent("link.2fa.cancel")
+            assertThat(loggedParams).doesNotContainKey("link_auth_surface")
+            assertThat(loggedParams).doesNotContainKey("verification_type")
+        }
+
+    @Test
+    fun on2FACancel_withSurface_sendsSurface() =
+        runScenario { linkEventsReporter, fakeAnalyticsRequestExecutor, testScheduler ->
+            linkEventsReporter.on2FACancel(surface = LinkAuthSurface.EmbeddedDialog)
+
+            testScheduler.advanceUntilIdle()
+
+            val loggedParams = fakeAnalyticsRequestExecutor.awaitEvent("link.2fa.cancel")
+            assertThat(loggedParams["link_auth_surface"]).isEqualTo("embedded_dialog")
+        }
+
+    @Test
+    fun on2FAResendCode_withSurface_sendsSurface() =
+        runScenario { linkEventsReporter, fakeAnalyticsRequestExecutor, testScheduler ->
+            linkEventsReporter.on2FAResendCode(verificationType = "SMS", surface = LinkAuthSurface.EmbeddedInline)
+
+            testScheduler.advanceUntilIdle()
+
+            val loggedParams = fakeAnalyticsRequestExecutor.awaitEvent("link.2fa.resend_code")
+            assertThat(loggedParams["verification_type"]).isEqualTo("SMS")
+            assertThat(loggedParams["link_auth_surface"]).isEqualTo("embedded_inline")
+        }
+
     private fun runScenario(
         testBlock: suspend (LinkEventsReporter, FakeAnalyticsRequestExecutor, TestCoroutineScheduler) -> Unit
     ) {

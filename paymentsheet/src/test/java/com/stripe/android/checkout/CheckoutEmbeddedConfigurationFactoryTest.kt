@@ -46,6 +46,20 @@ internal class CheckoutEmbeddedConfigurationFactoryTest {
     }
 
     @Test
+    fun `opts out of inline Link verification`() {
+        val configuration = controllerConfiguration()
+
+        val result = factory().create(
+            configuration = configuration,
+            paymentElementConfiguration = requireNotNull(configuration.paymentElementConfiguration),
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+            collectedDetails = collectedDetails(),
+        )
+
+        assertThat(result.allowsLinkInlineVerification).isFalse()
+    }
+
+    @Test
     fun `uses the provided merchant display name`() {
         val configuration = CheckoutElementsController.Configuration()
             .paymentElement(PaymentElement.Configuration())

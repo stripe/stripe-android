@@ -4,6 +4,7 @@ import com.stripe.android.link.ConsumerState
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.LinkPaymentMethod
+import com.stripe.android.link.analytics.LinkAuthSurface
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.inline.SignUpConsentAction
@@ -153,6 +154,7 @@ internal interface LinkAccountManager {
         type: VerificationType,
         accountPhoneNumber: String?,
         isResend: Boolean,
+        analyticsSurface: LinkAuthSurface?,
     ): Result<LinkAccount>
 
     /**
@@ -162,6 +164,7 @@ internal interface LinkAccountManager {
         code: String,
         type: VerificationType,
         consentGranted: Boolean?,
+        analyticsSurface: LinkAuthSurface?,
     ): Result<LinkAccount>
 
     /**

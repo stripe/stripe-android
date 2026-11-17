@@ -19,6 +19,7 @@ import com.stripe.android.paymentelement.AnalyticEvent
 import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
+import com.stripe.android.paymentelement.embedded.linkinline.EmbeddedLinkInlineAuthEvent
 import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent.BankAccountCollectorFinished
 import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent.BankAccountCollectorStarted
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -407,6 +408,10 @@ internal class DefaultEventReporter @Inject internal constructor(
             ),
             paymentMethodMetadata = paymentMethodMetadata ?: paymentMethodMetadataProvider.get(),
         )
+    }
+
+    override fun onEmbeddedLinkInlineAuthEvent(event: EmbeddedLinkInlineAuthEvent) {
+        fireEvent(PaymentSheetEvent.EmbeddedLinkInlineAuth(event))
     }
 
     override fun onSetAsDefaultPaymentMethodFailed(

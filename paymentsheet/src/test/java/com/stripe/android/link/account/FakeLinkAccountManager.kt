@@ -8,6 +8,7 @@ import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.TestFactory.CONSUMER_SHIPPING_ADDRESSES
+import com.stripe.android.link.analytics.LinkAuthSurface
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.inline.SignUpConsentAction
@@ -293,8 +294,14 @@ internal open class FakeLinkAccountManager(
         type: VerificationType,
         accountPhoneNumber: String?,
         isResend: Boolean,
+        analyticsSurface: LinkAuthSurface?,
     ): Result<LinkAccount> {
-        val call = StartVerificationCall(type = type, accountPhoneNumber = accountPhoneNumber, isResend = isResend)
+        val call = StartVerificationCall(
+            type = type,
+            accountPhoneNumber = accountPhoneNumber,
+            isResend = isResend,
+            analyticsSurface = analyticsSurface,
+        )
         startVerificationTurbine.add(call)
         return startVerificationResultProvider(call).onSuccess(::onVerificationAccount)
     }
@@ -303,8 +310,14 @@ internal open class FakeLinkAccountManager(
         code: String,
         type: VerificationType,
         consentGranted: Boolean?,
+        analyticsSurface: LinkAuthSurface?,
     ): Result<LinkAccount> {
-        val call = ConfirmVerificationCall(code = code, type = type, consentGranted = consentGranted)
+        val call = ConfirmVerificationCall(
+            code = code,
+            type = type,
+            consentGranted = consentGranted,
+            analyticsSurface = analyticsSurface,
+        )
         confirmVerificationTurbine.add(call)
         return confirmVerificationResultProvider(call).onSuccess(::onVerificationAccount)
     }
@@ -404,12 +417,14 @@ internal open class FakeLinkAccountManager(
         val type: VerificationType,
         val accountPhoneNumber: String?,
         val isResend: Boolean,
+        val analyticsSurface: LinkAuthSurface? = null,
     )
 
     data class ConfirmVerificationCall(
         val code: String,
         val type: VerificationType,
         val consentGranted: Boolean?,
+        val analyticsSurface: LinkAuthSurface? = null,
     )
 
     data class LookupCallByAuthIntent(
