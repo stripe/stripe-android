@@ -10,9 +10,9 @@
 - `./gradlew detekt` - Static analysis
 - `./gradlew :dokkaGenerate` - API docs (outputs to docs/)
 
-**GitHub Issues** — use `gh` CLI with `GH_HOST=github.com` prefix (`export` for reads, inline for writes). Always use `--state all` when searching. Check existing issues before investigating user reports.
+**GitHub Issues** — user-reported issues remain on public GitHub. Use `gh` CLI with `-R github.com/stripe/stripe-android`. Always use `--state all` when searching. Check existing issues before investigating user reports.
 
-**Pull requests** — always open pull requests as drafts. When an agent opens a pull request, include `Committed and created by <agent>.` in the PR description, where agent is the type of agent (e.g., Claude or Codex).
+**Pull requests** — the source repo is https://git.corp.stripe.com/stripe-internal/oss-android-sdk. `gh` infers it from `origin`; pass `-R git.corp.stripe.com/stripe-internal/oss-android-sdk` when a command must not depend on the working directory or `GH_HOST`. Always open pull requests as drafts. When an agent opens a pull request, include `Committed and created by <agent>.` in the PR description, where agent is the type of agent (e.g., Claude or Codex).
 
 **Internal Tools** — Jira: MOBILESDK, RUN_MOBILESDK | Trailhead space: mobile-sdk
 

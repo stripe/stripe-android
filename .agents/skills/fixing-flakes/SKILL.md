@@ -206,8 +206,8 @@ Document the 2- and 50-iteration Shampoo results in the PR's Testing section, bu
 When a pull request is opened for the flake fix, add the `flake-fix` label and verify it is present before treating PR submission as complete:
 
 ```bash
-GH_HOST=github.com gh pr edit <number> --add-label flake-fix
-GH_HOST=github.com gh pr view <number> --json labels
+gh pr edit <number> -R git.corp.stripe.com/stripe-internal/oss-android-sdk --add-label flake-fix
+gh pr view <number> -R git.corp.stripe.com/stripe-internal/oss-android-sdk --json labels
 ```
 
 ## Finish cleanly
