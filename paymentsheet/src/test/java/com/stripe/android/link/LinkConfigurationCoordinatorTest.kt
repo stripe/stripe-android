@@ -4,6 +4,8 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.account.LinkAccountManager
+import com.stripe.android.link.analytics.FakeLinkEventsReporter
+import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.attestation.FakeLinkAttestationCheck
 import com.stripe.android.link.attestation.LinkAttestationCheck
 import com.stripe.android.link.gate.FakeLinkGate
@@ -114,6 +116,8 @@ class LinkConfigurationCoordinatorTest {
         override val linkAttestationCheck: LinkAttestationCheck,
         override val inlineSignupViewModelFactory: LinkInlineSignupAssistedViewModelFactory,
     ) : LinkComponent() {
+        override val linkAccountEventsReporter: LinkEventsReporter = FakeLinkEventsReporter()
+
         class Factory(
             private val linkAccountManager: LinkAccountManager = FakeLinkAccountManager(),
             private val linkGate: LinkGate = FakeLinkGate(),

@@ -6,6 +6,7 @@ import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.EmbeddedPaymentElement.ConfigureResult
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
+import com.stripe.android.paymentelement.embedded.linkinline.EmbeddedLinkInlineAuth
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.coroutines.CoroutineScope
@@ -28,6 +29,7 @@ internal class DefaultEmbeddedConfigurationCoordinator @Inject constructor(
     private val selectionHolder: EmbeddedSelectionHolder,
     private val selectionChooser: EmbeddedSelectionChooser,
     private val stateHelper: EmbeddedStateHelper,
+    private val linkInlineAuth: EmbeddedLinkInlineAuth,
     @ViewModelScope private val viewModelScope: CoroutineScope,
     @Named(STATUS_BAR_COLOR) private val statusBarColor: Int?,
 ) : EmbeddedConfigurationCoordinator {
@@ -59,13 +61,20 @@ internal class DefaultEmbeddedConfigurationCoordinator @Inject constructor(
         state: PaymentElementLoader.State,
         configuration: EmbeddedPaymentElement.Configuration,
     ) {
-        val newPaymentSelection = selectionChooser.choose(
+        linkInlineAuth.onConfigured(
             paymentMethodMetadata = state.paymentMethodMetadata,
-            paymentMethods = state.customer?.paymentMethods,
-            previousSelection = selectionHolder.selection.value,
-            newSelection = state.paymentSelection,
-            newConfiguration = configuration.asCommonConfiguration(),
-            formSheetAction = configuration.formSheetAction,
+            customer = state.customer,
+            configuration = configuration,
+        )
+        val newPaymentSelection = linkInlineAuth.initialSelection(
+            selectionChooser.choose(
+                paymentMethodMetadata = state.paymentMethodMetadata,
+                paymentMethods = state.customer?.paymentMethods,
+                previousSelection = selectionHolder.selection.value,
+                newSelection = state.paymentSelection,
+                newConfiguration = configuration.asCommonConfiguration(),
+                formSheetAction = configuration.formSheetAction,
+            )
         )
         stateHelper.state = EmbeddedPaymentElement.State(
             confirmationState = EmbeddedConfirmationStateHolder.State(

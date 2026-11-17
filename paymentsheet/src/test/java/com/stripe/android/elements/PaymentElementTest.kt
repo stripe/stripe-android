@@ -15,6 +15,7 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.embedded.content.EmbeddedContent
 import com.stripe.android.paymentelement.embedded.content.FakeEmbeddedContentHelper
+import com.stripe.android.paymentelement.embedded.linkinline.DisabledEmbeddedLinkInlineAuth
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -110,6 +111,7 @@ internal class PaymentElementTest {
                 embeddedAppearance = Embedded(Embedded.RowStyle.FloatingButton.default),
             ),
             isImmediateAction = false,
+            linkInlineAuth = DisabledEmbeddedLinkInlineAuth(),
         ),
     ) {
         assertThat(mandateState.hasAcknowledgedSepaMandate(SAVED_SEPA)).isFalse()

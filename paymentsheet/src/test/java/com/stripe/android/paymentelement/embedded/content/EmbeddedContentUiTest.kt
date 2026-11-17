@@ -14,6 +14,7 @@ import com.stripe.android.paymentelement.embedded.DefaultEmbeddedRowSelectionImm
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
+import com.stripe.android.paymentelement.embedded.linkinline.DisabledEmbeddedLinkInlineAuth
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
@@ -193,6 +194,7 @@ internal class EmbeddedContentUiTest {
             linkAccountHolder = linkAccountHolder,
             hostProcessing = stateFlowOf(false),
             savedPaymentMethodSelectionState = stateFlowOf(SavedPaymentMethodSelectionState.Idle),
+            linkInlineAuth = DisabledEmbeddedLinkInlineAuth(),
         )
 
         val embeddedContentHelper =
@@ -209,6 +211,7 @@ internal class EmbeddedContentUiTest {
                     selectionHolder = selectionHolder,
                     errorReporter = errorReporter,
                 ),
+                linkInlineAuth = DisabledEmbeddedLinkInlineAuth(),
             )
         Scenario(
             embeddedContentHelper = embeddedContentHelper,

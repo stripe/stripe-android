@@ -8,6 +8,7 @@ import com.stripe.android.isInstanceOf
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedResultCallbackHelper
 import com.stripe.android.paymentelement.embedded.EmbeddedResultCallbackHelper
+import com.stripe.android.paymentelement.embedded.linkinline.FakeEmbeddedLinkInlineAuth
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
@@ -29,11 +30,14 @@ internal class DefaultEmbeddedResultCallbackHelperTest {
         assertThat(stateHelper.stateTurbine.awaitItem()).isNotNull()
         assertThat(callbackResult).isInstanceOf<EmbeddedPaymentElement.Result.Completed>()
         assertThat(stateHelper.stateTurbine.awaitItem()).isNull()
+        // The inline Link verification card never comes back after the intent is confirmed.
+        linkInlineAuth.onIntentConfirmedCalls.awaitItem()
     }
 
     private fun testScenario(
         block: suspend Scenario.() -> Unit
     ) = runTest {
+        val linkInlineAuth = FakeEmbeddedLinkInlineAuth()
         val stateHelper = FakeEmbeddedStateHelper()
         stateHelper.state = EmbeddedPaymentElement.State(
             confirmationState = EmbeddedConfirmationStateFixtures.defaultState(),
@@ -45,20 +49,24 @@ internal class DefaultEmbeddedResultCallbackHelperTest {
             resultCallback = {
                 resultCallbackTurbine.add(it)
             },
-            stateHelper = stateHelper
+            stateHelper = stateHelper,
+            linkInlineAuth = linkInlineAuth,
         )
         Scenario(
             stateHelper = stateHelper,
             resultCallbackTurbine = resultCallbackTurbine,
-            helper = helper
+            helper = helper,
+            linkInlineAuth = linkInlineAuth,
         ).block()
         resultCallbackTurbine.ensureAllEventsConsumed()
         stateHelper.validate()
+        linkInlineAuth.ensureAllEventsConsumed()
     }
 
     private class Scenario(
         val stateHelper: FakeEmbeddedStateHelper,
         val resultCallbackTurbine: ReceiveTurbine<EmbeddedPaymentElement.Result>,
-        val helper: EmbeddedResultCallbackHelper
+        val helper: EmbeddedResultCallbackHelper,
+        val linkInlineAuth: FakeEmbeddedLinkInlineAuth,
     )
 }

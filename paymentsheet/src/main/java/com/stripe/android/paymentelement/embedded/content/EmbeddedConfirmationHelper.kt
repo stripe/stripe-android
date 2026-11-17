@@ -8,6 +8,7 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.paymentelement.embedded.EmbeddedResultCallbackHelper
+import com.stripe.android.paymentelement.embedded.linkinline.EmbeddedLinkInlineAuth
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.utils.reportPaymentResult
 import kotlinx.coroutines.launch
@@ -24,7 +25,8 @@ internal class DefaultEmbeddedConfirmationHelper @Inject constructor(
     private val lifecycleOwner: LifecycleOwner,
     private val confirmationStateHolder: EmbeddedConfirmationStateHolder,
     private val eventReporter: EventReporter,
-    private val embeddedResultCallbackHelper: EmbeddedResultCallbackHelper
+    private val embeddedResultCallbackHelper: EmbeddedResultCallbackHelper,
+    private val linkInlineAuth: EmbeddedLinkInlineAuth,
 ) : EmbeddedConfirmationHelper {
     init {
         confirmationStarter.register(
@@ -41,6 +43,14 @@ internal class DefaultEmbeddedConfirmationHelper @Inject constructor(
     }
 
     override fun confirm() {
+        if (linkInlineAuth.isPresentingDialog) {
+            embeddedResultCallbackHelper.setResult(
+                EmbeddedPaymentElement.Result.Failed(
+                    IllegalStateException("confirm was called while Link verification is presented.")
+                )
+            )
+            return
+        }
         confirmationArgs()?.let { confirmationArgs ->
             confirmationStarter.start(confirmationArgs)
         } ?: run {

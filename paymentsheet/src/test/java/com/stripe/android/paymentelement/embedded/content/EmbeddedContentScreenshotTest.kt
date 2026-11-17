@@ -6,6 +6,7 @@ import com.stripe.android.link.TestFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
+import com.stripe.android.paymentelement.embedded.linkinline.DisabledEmbeddedLinkInlineAuth
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.state.LinkState
@@ -48,6 +49,7 @@ internal class EmbeddedContentScreenshotTest {
                 embeddedAppearance = Embedded(Embedded.RowStyle.FloatingButton.default),
             ),
             isImmediateAction = false,
+            linkInlineAuth = DisabledEmbeddedLinkInlineAuth(),
         )
         paparazziRule.snapshot {
             content.Content()
@@ -68,6 +70,7 @@ internal class EmbeddedContentScreenshotTest {
                 embeddedAppearance = Embedded(Embedded.RowStyle.FloatingButton.default),
             ),
             isImmediateAction = false,
+            linkInlineAuth = DisabledEmbeddedLinkInlineAuth(),
         )
         paparazziRule.snapshot {
             content.Content()
@@ -88,6 +91,7 @@ internal class EmbeddedContentScreenshotTest {
                 embeddedAppearance = Embedded(Embedded.RowStyle.FloatingButton.default),
             ),
             isImmediateAction = false,
+            linkInlineAuth = DisabledEmbeddedLinkInlineAuth(),
         )
         paparazziRule.snapshot {
             content.Content()
@@ -146,6 +150,7 @@ internal class EmbeddedContentScreenshotTest {
             embeddedViewDisplaysMandateText = true,
             appearance = appearance,
             isImmediateAction = false,
+            linkInlineAuth = DisabledEmbeddedLinkInlineAuth(),
         )
         rule.snapshot {
             content.Content()

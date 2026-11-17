@@ -15,6 +15,7 @@ import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
+import com.stripe.android.paymentelement.embedded.linkinline.FakeEmbeddedLinkInlineAuth
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -91,6 +92,19 @@ internal class DefaultEmbeddedConfirmationHelperTest {
     }
 
     @Test
+    fun confirmFailsWhileLinkVerificationIsPresented() = testScenario(
+        linkInlineAuth = FakeEmbeddedLinkInlineAuth(isPresentingDialog = true),
+    ) {
+        confirmationHelper.confirm()
+
+        val result = callbackHelper.callbackTurbine.awaitItem()
+        assertThat(result).isInstanceOf<EmbeddedPaymentElement.Result.Failed>()
+        assertThat((result as EmbeddedPaymentElement.Result.Failed).error.message)
+            .isEqualTo("confirm was called while Link verification is presented.")
+        assertThat(callbackHelper.stateHelper.stateTurbine.awaitItem()).isNotNull()
+    }
+
+    @Test
     fun confirmCallsConfirmationHandlerStart() = testScenario {
         confirmationHelper.confirm()
         val args = confirmationHandler.startTurbine.awaitItem()
@@ -135,6 +149,7 @@ internal class DefaultEmbeddedConfirmationHelperTest {
 
     private fun testScenario(
         loadedState: EmbeddedConfirmationStateHolder.State? = defaultLoadedState(),
+        linkInlineAuth: FakeEmbeddedLinkInlineAuth = FakeEmbeddedLinkInlineAuth(),
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val confirmationHandler = FakeConfirmationHandler()
@@ -161,7 +176,8 @@ internal class DefaultEmbeddedConfirmationHelperTest {
             lifecycleOwner = TestLifecycleOwner(coroutineDispatcher = Dispatchers.Unconfined),
             confirmationStateHolder = confirmationStateHolder,
             eventReporter = FakeEventReporter(),
-            embeddedResultCallbackHelper = callbackHelper
+            embeddedResultCallbackHelper = callbackHelper,
+            linkInlineAuth = linkInlineAuth,
         )
         assertThat(confirmationHandler.registerTurbine.awaitItem()).isNotNull()
         Scenario(

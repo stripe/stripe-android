@@ -12,6 +12,7 @@ import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedConfigurationHandler.ConfigurationCache
+import com.stripe.android.paymentelement.embedded.linkinline.FakeEmbeddedLinkInlineAuth
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.CleanupTestRule
@@ -39,6 +40,22 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
     @Test
     fun `configuration fails when sheetIsOpen`() = runScenario {
         sheetStateHolder.sheetIsOpen = true
+        val configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
+        val result = handler.configure(
+            configuration = configuration,
+            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+                PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Setup(currency = "USD"),
+                )
+            ),
+        )
+        assertThat(result.exceptionOrNull()?.message).isEqualTo("Configuring while a sheet is open is not supported.")
+    }
+
+    @Test
+    fun `configuration fails while the Link verification dialog is presented`() = runScenario(
+        linkInlineAuth = FakeEmbeddedLinkInlineAuth(isPresentingDialog = true),
+    ) {
         val configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
         val result = handler.configure(
             configuration = configuration,
@@ -353,6 +370,7 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
     }
 
     private fun runScenario(
+        linkInlineAuth: FakeEmbeddedLinkInlineAuth = FakeEmbeddedLinkInlineAuth(),
         block: suspend Scenario.() -> Unit
     ) {
         runTest {
@@ -367,6 +385,7 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
                 savedStateHandle,
                 sheetStateHolder,
                 internalRowSelectionCallback = { null },
+                linkInlineAuth = linkInlineAuth,
                 viewModelScope = viewModelScope,
             )
             Scenario(
