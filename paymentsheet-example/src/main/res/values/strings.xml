@@ -20,6 +20,8 @@
     <string name="playground_subtitle">Testing playground for Stripe engineers</string>
     <string name="checkout_elements_controller_example_title">CheckoutElementsController Example</string>
     <string name="checkout_elements_controller_example_subtitle">Configurable CheckoutElementsController playground</string>
+    <string name="checkout_two_step_example_title">CheckoutElementsController Two Step Example</string>
+    <string name="checkout_two_step_example_subtitle">Cart screen followed by a CheckoutElementsController checkout screen</string>
     <string name="onramp_title">Onramp Coordinator</string>
     <string name="onramp_subtitle">Test the OnrampCoordinator functionality</string>
     <string name="action_settings">Settings</string>
