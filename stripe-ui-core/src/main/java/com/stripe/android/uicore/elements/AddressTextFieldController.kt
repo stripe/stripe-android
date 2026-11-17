@@ -34,7 +34,6 @@ class AddressTextFieldController(
     private val inlineAutocompleteHandler: InlineAutocompleteHandler?,
     private val reportsFormValue: Boolean,
     initialQuery: String,
-    private val showEnterManually: Boolean,
 ) : InputController, SectionFieldValidationController, SectionFieldComposable {
     private val _isValidating = MutableStateFlow(false)
     private val _inlineQuery = MutableStateFlow(initialQuery)
@@ -105,11 +104,7 @@ class AddressTextFieldController(
                     attributionDrawable = inlineAutocompleteHandler.getAttributionDrawable(isDarkTheme),
                     onPredictionSelected = inlineAutocompleteHandler::onPredictionSelected,
                     onClear = ::onPredictionsDismissed,
-                    onEnterManually = if (showEnterManually) {
-                        inlineAutocompleteHandler::onEnterManually
-                    } else {
-                        null
-                    },
+                    onEnterManually = inlineAutocompleteHandler::onEnterManually,
                 )
             }
 

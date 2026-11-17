@@ -12,7 +12,6 @@ class AddressTextFieldElement(
     inlineAutocompleteHandler: InlineAutocompleteHandler?,
     reportsFormValue: Boolean,
     initialQuery: String,
-    showEnterManually: Boolean,
 ) : SectionSingleFieldElement(identifier) {
     override val allowsUserInteraction: Boolean = true
     override val mandateText: ResolvableString? = null
@@ -23,7 +22,6 @@ class AddressTextFieldElement(
             inlineAutocompleteHandler = inlineAutocompleteHandler,
             reportsFormValue = reportsFormValue,
             initialQuery = initialQuery,
-            showEnterManually = showEnterManually,
         )
 
     val inlineQuery: StateFlow<String> get() = controller.inlineQuery
