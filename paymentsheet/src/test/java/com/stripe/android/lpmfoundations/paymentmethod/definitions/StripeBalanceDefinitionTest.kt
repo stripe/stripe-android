@@ -29,19 +29,39 @@ internal class StripeBalanceDefinitionTest {
         )
 
         assertThat(StripeBalanceDefinition.isSupported(metadata)).isTrue()
+    }
+
+    @Test
+    fun `does not require a mandate`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent
+                .stripeIntent(PaymentMethod.Type.StripeBalance),
+            hasCustomerConfiguration = true,
+            customerSessionClientSecret = "cuss_123_secret_456",
+            stripeBalanceFinancialAccounts = stripeBalanceTestFinancialAccounts,
+        )
+
         assertThat(StripeBalanceDefinition.requiresMandate(metadata)).isFalse()
     }
 
     @Test
-    fun `is not supported without a CustomerSession or with a Checkout Session`() {
-        val stripeIntent = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent
-            .stripeIntent(PaymentMethod.Type.StripeBalance)
-        val withLegacyEphemeralKey = PaymentMethodMetadataFactory.create(
-            stripeIntent = stripeIntent,
+    fun `is not supported without a CustomerSession`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent
+                .stripeIntent(PaymentMethod.Type.StripeBalance),
             hasCustomerConfiguration = true,
             stripeBalanceFinancialAccounts = stripeBalanceTestFinancialAccounts,
         )
-        val withCheckoutSession = PaymentMethodMetadataFactory.create(
+
+        assertThat(StripeBalanceDefinition.unmetRequirements(metadata))
+            .containsExactly(AddPaymentMethodRequirement.CustomerSession)
+    }
+
+    @Test
+    fun `is not supported with a Checkout Session`() {
+        val stripeIntent = LpmBillingAddressTestConfiguration.IntentScenario.PaymentIntent
+            .stripeIntent(PaymentMethod.Type.StripeBalance)
+        val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = stripeIntent,
             hasCustomerConfiguration = true,
             customerSessionClientSecret = "cuss_123_secret_456",
@@ -49,9 +69,7 @@ internal class StripeBalanceDefinitionTest {
             stripeBalanceFinancialAccounts = stripeBalanceTestFinancialAccounts,
         )
 
-        assertThat(StripeBalanceDefinition.unmetRequirements(withLegacyEphemeralKey))
-            .containsExactly(AddPaymentMethodRequirement.CustomerSession)
-        assertThat(StripeBalanceDefinition.unmetRequirements(withCheckoutSession))
+        assertThat(StripeBalanceDefinition.unmetRequirements(metadata))
             .containsExactly(AddPaymentMethodRequirement.UnsupportedForCheckoutSession)
     }
 
