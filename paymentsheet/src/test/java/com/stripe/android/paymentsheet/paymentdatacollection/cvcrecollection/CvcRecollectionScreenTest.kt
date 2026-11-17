@@ -83,6 +83,5 @@ internal class CvcRecollectionScreenTest {
         cvcPage.assertCvcField(hasText("555"))
         cvcPage.assertCvcField(isEnabled())
         cvcPage.hasLabel("CVC")
-        cvcPage.hasTitle("Confirm your CVC")
     }
 }

@@ -2241,7 +2241,6 @@ public final class com/stripe/android/paymentsheet/paymentdatacollection/cvcreco
 	public static final field INSTANCE Lcom/stripe/android/paymentsheet/paymentdatacollection/cvcrecollection/ComposableSingletons$CvcRecollectionScreenKt;
 	public fun <init> ()V
 	public final fun getLambda$-1739181525$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda$208423591$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class com/stripe/android/paymentsheet/paymentdatacollection/polling/ComposableSingletons$PollingScreenKt {
@@ -2281,7 +2280,6 @@ public final class com/stripe/android/paymentsheet/ui/ComposableSingletons$Payme
 	public static final field INSTANCE Lcom/stripe/android/paymentsheet/ui/ComposableSingletons$PaymentSheetTopBarKt;
 	public fun <init> ()V
 	public final fun getLambda$1159340481$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda$1485633716$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class com/stripe/android/paymentsheet/ui/ComposableSingletons$SavedPaymentMethodTabKt {
