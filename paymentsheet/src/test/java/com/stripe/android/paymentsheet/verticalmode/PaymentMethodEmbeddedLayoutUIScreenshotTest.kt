@@ -15,6 +15,8 @@ import com.google.testing.junit.testparameterinjector.TestParameterValuesProvide
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.paymentelement.embedded.linkinline.EmbeddedLinkInlineVerificationCard
+import com.stripe.android.paymentelement.embedded.linkinline.EmbeddedLinkInlineVerificationCardScreenshotTest
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark
@@ -27,6 +29,7 @@ import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.testing.FakeStripeImageLoader
+import com.stripe.android.uicore.elements.OTPElementFactory
 import com.stripe.android.utils.MockPaymentMethodsFactory
 import com.stripe.android.utils.screenshots.PaymentSheetAppearance
 import org.junit.Rule
@@ -168,6 +171,7 @@ internal class PaymentMethodEmbeddedLayoutUIScreenshotTest {
                 onSelectSavedPaymentMethod = {},
                 onManageOneSavedPaymentMethod = {},
                 imageLoader = imageLoader,
+                linkInlineCard = null,
                 appearance = testCase.appearance,
             )
         }
@@ -221,7 +225,7 @@ internal class PaymentMethodEmbeddedLayoutUIScreenshotTest {
                 rowStyle = FlatWithCheckmark.default,
                 selection = PaymentMethodVerticalLayoutInteractor.Selection.New(
                     code = "card",
-                    changeDetails = "Visa **** 4242",
+                    changeDetails = "Visa **** 4242".resolvableString,
                     canBeChanged = true
                 )
             )
@@ -235,7 +239,7 @@ internal class PaymentMethodEmbeddedLayoutUIScreenshotTest {
                 rowStyle = FlatWithDisclosure.default,
                 selection = PaymentMethodVerticalLayoutInteractor.Selection.New(
                     code = "card",
-                    changeDetails = "Visa **** 4242",
+                    changeDetails = "Visa **** 4242".resolvableString,
                     canBeChanged = true
                 )
             )
@@ -252,6 +256,57 @@ internal class PaymentMethodEmbeddedLayoutUIScreenshotTest {
                     changeDetails = null,
                     canBeChanged = true
                 )
+            )
+        }
+    }
+
+    @Test
+    fun testLinkInlineCard(
+        @TestParameter(valuesProvider = LinkInlineCardRowStyleProvider::class)
+        testCase: LinkInlineCardRowStyleTestCase,
+    ) {
+        paparazziRule.snapshot {
+            TestPaymentMethodLayoutUiWithLinkFirst(
+                rowStyle = testCase.rowStyle,
+                selection = null,
+                linkInlineCard = {
+                    EmbeddedLinkInlineVerificationCard(
+                        state = EmbeddedLinkInlineVerificationCardScreenshotTest.CARD_STATE,
+                        otpElement = OTPElementFactory.create(),
+                        linkBrand = LinkBrand.Link,
+                        rowStyle = testCase.rowStyle,
+                        onCodeTapped = {},
+                        onClose = {},
+                        onSwitchAccount = {},
+                        onAction = {},
+                    )
+                },
+            )
+        }
+    }
+
+    @Test
+    fun testLinkFirstAfterInlineCardCollapsed() {
+        paparazziRule.snapshot {
+            TestPaymentMethodLayoutUiWithLinkFirst(
+                rowStyle = FlatWithRadio.default,
+                selection = null,
+                linkInlineCard = null,
+            )
+        }
+    }
+
+    @Test
+    fun testLinkSelectedWithPickedPaymentDetails() {
+        paparazziRule.snapshot {
+            TestPaymentMethodLayoutUiWithLinkFirst(
+                rowStyle = FlatWithRadio.default,
+                selection = PaymentMethodVerticalLayoutInteractor.Selection.New(
+                    code = "link",
+                    changeDetails = "Visa •••• 4242".resolvableString,
+                    canBeChanged = true,
+                ),
+                linkInlineCard = null,
             )
         }
     }
@@ -275,6 +330,41 @@ internal class PaymentMethodEmbeddedLayoutUIScreenshotTest {
     }
 
     @Composable
+    private fun TestPaymentMethodLayoutUiWithLinkFirst(
+        rowStyle: Embedded.RowStyle,
+        selection: PaymentMethodVerticalLayoutInteractor.Selection?,
+        linkInlineCard: (@Composable () -> Unit)?,
+    ) {
+        PaymentMethodEmbeddedLayoutUI(
+            paymentMethods = listOf(linkPaymentMethod) + paymentMethods.take(2),
+            displayedSavedPaymentMethod = null,
+            savedPaymentMethodAction = PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.NONE,
+            selection = selection,
+            linkBrand = LinkBrand.Link,
+            isEnabled = true,
+            onViewMorePaymentMethods = {},
+            onSelectSavedPaymentMethod = {},
+            onManageOneSavedPaymentMethod = {},
+            imageLoader = mock(),
+            linkInlineCard = linkInlineCard,
+            appearance = Embedded(rowStyle),
+        )
+    }
+
+    private val linkPaymentMethod = DisplayablePaymentMethod(
+        code = "link",
+        displayName = "Link".resolvableString,
+        iconResource = R.drawable.stripe_ic_paymentsheet_link_arrow,
+        iconResourceNight = null,
+        lightThemeIconUrl = null,
+        darkThemeIconUrl = null,
+        iconRequiresTinting = false,
+        subtitle = "jenny.rosen@example.com".resolvableString,
+        isExpanded = false,
+        onClick = {},
+    )
+
+    @Composable
     private fun TestPaymentMethodLayoutUi(
         appearance: Embedded,
         displayableSavedPaymentMethod: DisplayableSavedPaymentMethod? = savedPaymentMethod,
@@ -293,6 +383,7 @@ internal class PaymentMethodEmbeddedLayoutUIScreenshotTest {
             onSelectSavedPaymentMethod = {},
             onManageOneSavedPaymentMethod = {},
             imageLoader = mock(),
+            linkInlineCard = null,
             appearance = appearance,
             modifier = Modifier.verticalScroll(scrollState),
         )
@@ -317,6 +408,7 @@ internal class PaymentMethodEmbeddedLayoutUIScreenshotTest {
             onSelectSavedPaymentMethod = {},
             onManageOneSavedPaymentMethod = {},
             imageLoader = mock(),
+            linkInlineCard = null,
             appearance = Embedded(rowStyle),
             modifier = Modifier.verticalScroll(scrollState),
         )
@@ -331,6 +423,7 @@ internal class PaymentMethodEmbeddedLayoutUIScreenshotTest {
             PaymentMethodEmbeddedLayoutUI(
                 interactor = interactor,
                 embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText,
+                linkInlineCard = null,
                 appearance = getEmbeddedAppearance(FloatingButton::class),
             )
         }
@@ -376,6 +469,7 @@ internal class PaymentMethodEmbeddedLayoutUIScreenshotTest {
                 onSelectSavedPaymentMethod = {},
                 onManageOneSavedPaymentMethod = {},
                 imageLoader = mock(),
+                linkInlineCard = null,
                 appearance = getEmbeddedAppearance(FloatingButton::class),
             )
         }
@@ -468,6 +562,22 @@ internal class PaymentMethodEmbeddedLayoutUIScreenshotTest {
 
         return Embedded(row)
     }
+}
+
+internal data class LinkInlineCardRowStyleTestCase(
+    val name: String,
+    val rowStyle: Embedded.RowStyle,
+) {
+    override fun toString(): String = name
+}
+
+internal object LinkInlineCardRowStyleProvider : TestParameterValuesProvider() {
+    override fun provideValues(context: Context?): List<LinkInlineCardRowStyleTestCase> = listOf(
+        LinkInlineCardRowStyleTestCase(name = "FlatWithRadio", rowStyle = FlatWithRadio.default),
+        LinkInlineCardRowStyleTestCase(name = "FloatingButton", rowStyle = FloatingButton.default),
+        LinkInlineCardRowStyleTestCase(name = "FlatWithCheckmark", rowStyle = FlatWithCheckmark.default),
+        LinkInlineCardRowStyleTestCase(name = "FlatWithDisclosure", rowStyle = FlatWithDisclosure.default),
+    )
 }
 
 internal data class SavedPaymentMethodLoadingTestCase(

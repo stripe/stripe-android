@@ -106,6 +106,7 @@ fun OTPElementUI(
         selectedBackground = Color.Transparent
     ),
     selectedStrokeWidth: Dp = 2.dp,
+    boxHeight: Dp = 56.dp,
     focusRequester: FocusRequester = remember { FocusRequester() }
 ) {
     val focusRequesters = remember(focusRequester, element.controller.otpLength) {
@@ -150,7 +151,7 @@ fun OTPElementUI(
                 val value by element.controller.fieldValues[index].collectAsState()
 
                 var textFieldModifier = Modifier
-                    .height(56.dp)
+                    .height(boxHeight)
                     .focusRequester(focusRequesters[index])
                     .onFocusChanged { focusState ->
                         if (focusState.isFocused) {

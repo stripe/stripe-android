@@ -68,6 +68,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_email_suggestion">Did you mean %1$s? %2$s.</string>
   <!-- CTA text for accepting the suggested email correction -->
   <string name="stripe_link_email_suggestion_update">Yes, update</string>
+  <!-- Menu action to stop using the recognized Link account and use a different one. -->
+  <string name="stripe_link_inline_verification_switch_accounts">Switch accounts</string>
+  <!-- Title of the Link verification shown inline when a returning Link customer is recognized. -->
+  <string name="stripe_link_inline_verification_title">Use your saved information</string>
   <!-- Title for a button that indicates a user can log in or sign up. -->
   <string name="stripe_link_log_in_or_sign_up">Log in or sign up</string>
   <!-- Label of a button that signs the user out of their current Link account so they can log in to a different one. -->
