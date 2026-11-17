@@ -9,7 +9,9 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.paymentelement.embedded.EmbeddedResultCallbackHelper
 import com.stripe.android.paymentelement.embedded.linkinline.EmbeddedLinkInlineAuth
+import com.stripe.android.paymentelement.embedded.linkinline.EmbeddedLinkInlineAuthController.ConfirmVerificationResult
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.utils.reportPaymentResult
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -51,6 +53,27 @@ internal class DefaultEmbeddedConfirmationHelper @Inject constructor(
             )
             return
         }
+        val selection = confirmationStateHolder.state?.selection
+        if (selection is PaymentSelection.Link && selection.selectedPayment == null &&
+            linkInlineAuth.verifiesBeforeConfirming
+        ) {
+            // The customer closed the inline Link verification card, so they verify in the Link dialog first,
+            // with the code the card already sent.
+            lifecycleOwner.lifecycleScope.launch {
+                when (linkInlineAuth.verifyBeforeConfirming()) {
+                    ConfirmVerificationResult.Verified,
+                    ConfirmVerificationResult.Unavailable -> startConfirmation()
+                    ConfirmVerificationResult.Canceled -> {
+                        embeddedResultCallbackHelper.setResult(EmbeddedPaymentElement.Result.Canceled())
+                    }
+                }
+            }
+            return
+        }
+        startConfirmation()
+    }
+
+    private fun startConfirmation() {
         confirmationArgs()?.let { confirmationArgs ->
             confirmationStarter.start(confirmationArgs)
         } ?: run {
