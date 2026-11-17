@@ -78,7 +78,13 @@ internal abstract class IdentityScanViewModel(
         if (result.identityState is IdentityScanState.Finished) {
             _scannerState.update { State.Scanned(result) }
         } else if (result.identityState is IdentityScanState.TimeOut) {
-            _scannerState.update { State.Timeout(fromSelfie = result.result is FaceDetectorOutput) }
+            _scannerState.update {
+                if (result.isTimeoutFallback) {
+                    State.Scanned(result)
+                } else {
+                    State.Timeout(fromSelfie = result.result is FaceDetectorOutput)
+                }
+            }
             when (result.result) {
                 is FaceDetectorOutput -> {
                     identityAnalyticsRequestFactory.selfieTimeout()

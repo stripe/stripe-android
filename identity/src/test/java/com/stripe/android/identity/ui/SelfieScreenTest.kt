@@ -239,7 +239,8 @@ class SelfieScreenTest {
                 IdentityAggregator.FinalResult(
                     mock(),
                     mock<FaceDetectorOutput>(),
-                    finishedState
+                    finishedState,
+                    isTimeoutFallback = false
                 )
             ),
             messageId = R.string.stripe_selfie_capture_complete

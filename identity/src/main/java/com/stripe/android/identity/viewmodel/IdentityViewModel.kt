@@ -89,7 +89,6 @@ import com.stripe.android.identity.networking.models.VerificationPageRequirement
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCapturePage
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentSelfieCapturePage
 import com.stripe.android.identity.states.FaceDetectorTransitioner
-import com.stripe.android.identity.states.IDDetectorTransitioner
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.ui.IndividualCollectedStates
 import com.stripe.android.identity.utils.IdentityIO
@@ -549,15 +548,14 @@ internal class IdentityViewModel(
     ) {
         when (result.result) {
             is IDDetectorOutput -> {
-                val transitioner = result.identityState.transitioner as? IDDetectorTransitioner
-
-                val bitmap = transitioner?.getBestFrameBitmap()
-                    ?: result.frame.cameraPreviewImage.image
-                val output = transitioner?.getBestOutput()
-                    ?: result.result
+                val frame = result.frame.cameraPreviewImage
+                setCameraExposureIso(frame.exposureIso)
+                setCameraFocalLength(frame.focalLength)
+                setCameraExposureDuration(frame.exposureDurationNs?.div(NANOS_PER_MICRO))
+                setIsVirtualCamera(frame.isVirtualCamera)
                 uploadIDDetectorOutput(
-                    bitmap,
-                    output,
+                    frame.image,
+                    result.result,
                     verificationPage
                 )
             }

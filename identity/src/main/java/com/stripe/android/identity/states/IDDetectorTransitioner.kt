@@ -1,6 +1,5 @@
 package com.stripe.android.identity.states
 
-import android.graphics.Bitmap
 import android.os.SystemClock
 import android.util.Log
 import androidx.annotation.VisibleForTesting
@@ -46,22 +45,28 @@ internal class IDDetectorTransitioner(
         windowDurationMs = maxOf(timeRequired.toLong(), MIN_BEST_FRAME_WINDOW_MS)
     )
     private var bestOutput: IDDetectorOutput? = null
+    private var bestInput: AnalyzerInput? = null
 
     @VisibleForTesting
     var timeoutAt: ComparableTimeMark = TimeSource.Monotonic.markNow() + timeout
 
     /**
-     * Rest internal state and return itself.
+     * Reset the capture attempt and return itself.
      */
     @VisibleForTesting
     fun resetAndReturn(): IDDetectorTransitioner {
-        previousBoundingBox = null
-        unmatchedFrame = 0
+        resetDetection()
         timeoutAt = TimeSource.Monotonic.markNow() + timeout
-        bestFrameDetector.reset()
-        bestOutput = null
         Log.d(TAG, "Reset! timeoutAt: $timeoutAt")
         return this
+    }
+
+    private fun resetDetection() {
+        previousBoundingBox = null
+        unmatchedFrame = 0
+        bestFrameDetector.reset()
+        bestOutput = null
+        bestInput = null
     }
 
     @Suppress("NestedBlockDepth", "LongMethod")
@@ -248,6 +253,7 @@ internal class IDDetectorTransitioner(
                 )
                 if (updatedBest) {
                     bestOutput = analyzerOutput
+                    bestInput = analyzerInput
                 }
 
                 foundState
@@ -284,7 +290,9 @@ internal class IDDetectorTransitioner(
                     "Scan for ${unsatisfiedState.type} Unsatisfied with reason " +
                         "${unsatisfiedState.reason}, transition to Initial."
                 )
-                Initial(unsatisfiedState.type, this.resetAndReturn())
+                // Losing the document restarts detection, not the auto-capture deadline.
+                resetDetection()
+                Initial(unsatisfiedState.type, this)
             }
 
             else -> {
@@ -341,16 +349,11 @@ internal class IDDetectorTransitioner(
         return blurScore <= blurThreshold
     }
 
-    /**
-     * Returns the best frame's bitmap, or null if no frames were captured.
-     */
-    fun getBestFrameBitmap(): Bitmap? {
-        return bestFrameDetector.getBestFrameBitmap()
-    }
-
     fun getBestOutput(): IDDetectorOutput? {
         return bestOutput
     }
+
+    fun getBestInput(): AnalyzerInput? = bestInput
 
     private fun coverage(box: BoundingBox): Float {
         // area fraction relative to the frame
