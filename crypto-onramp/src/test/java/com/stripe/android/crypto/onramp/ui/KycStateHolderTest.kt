@@ -590,6 +590,61 @@ internal class KycStateHolderTest {
         assertThat(createSubmission()?.requirements?.values?.single()?.documents).hasSize(2)
     }
 
+    @Test
+    fun `restoration keeps uploaded files and clears interrupted uploads`() {
+        val requirements = requirements(listOf(documentRequirement(1)), emptyList(), emptyList())
+        val original = KycStateHolder(requirements)
+        original.onContinue()
+        original.onFileSelected(0, "bank.pdf", "file_bank")
+        original.onFileSelectionStarted(0)
+        original.onFileUploadStarted(0, "replacement.pdf")
+
+        val restored = KycStateHolder(requirements, original.save())
+
+        assertThat(restored.state.page).isEqualTo(KycCollectionPage.DocumentEditor)
+        assertThat(restored.state.selectingFileSlot).isNull()
+        assertThat(restored.state.uploadingFileSlot).isNull()
+        assertThat(restored.createSubmission()?.requirements?.values?.single()?.documents?.single()?.uploadedFileIds)
+            .containsExactly("file_bank")
+    }
+
+    @Test
+    fun `restoration allows retry of interrupted submission`() {
+        val requirements = requirements(listOf(questionnaireRequirement()), emptyList(), emptyList())
+        val original = KycStateHolder(requirements)
+        original.onContinue()
+        original.onQuestionAnswerChanged("purchase_purpose", "Investment")
+        val submitted = requireNotNull(original.startSubmission())
+
+        val restored = KycStateHolder(requirements, original.save())
+
+        assertThat(restored.state.submissionState).isEqualTo(KycSubmissionState.Failed)
+        assertThat(restored.state.canSubmit).isTrue()
+        assertThat(restored.startSubmission()).isEqualTo(submitted)
+    }
+
+    @Test
+    fun `restoration preserves completed requirement and advances to next`() {
+        val requirements = requirements(
+            listOf(questionnaireRequirement(), secondQuestionnaireRequirement()), emptyList(), emptyList(),
+        )
+        val original = KycStateHolder(requirements)
+        original.onContinue()
+        original.onQuestionAnswerChanged("purchase_purpose", "Investment")
+        original.startSubmission()
+        original.onSubmissionSucceeded()
+
+        val restored = KycStateHolder(requirements, original.save())
+        assertThat(restored.state.page).isEqualTo(KycCollectionPage.Submitted)
+        assertThat(restored.advanceToNextRequirement()).isTrue()
+        restored.onContinue()
+        restored.onQuestionAnswerChanged("funding_sources", "Salary")
+
+        val next = KycStateHolder(requirements, restored.save())
+        assertThat(next.state.currentRequirement).isEqualTo(2)
+        assertThat(next.state.questions.single().answer).isEqualTo("Salary")
+    }
+
     private fun runDocumentScenario(
         minDocumentTypes: Int = 1,
         maxDocumentTypes: Int = 2,

@@ -1,15 +1,18 @@
 package com.stripe.android.crypto.onramp.ui
 
+import android.app.Activity
 import android.net.Uri
+import android.os.Bundle
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.crypto.onramp.KycDocumentUploader
 import com.stripe.android.crypto.onramp.KycSubmissionHandler
-import com.stripe.android.crypto.onramp.KycSubmissionHandlerRegistry
 import com.stripe.android.crypto.onramp.model.KycSubmission
 import com.stripe.android.crypto.onramp.model.RetrieveKycRequirementsResponse
 import com.stripe.android.testing.createComposeCleanupRule
@@ -28,6 +31,7 @@ import org.junit.runner.RunWith
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
+import org.robolectric.Shadows.shadowOf
 import java.io.File
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -145,12 +149,36 @@ internal class KycViewModelTest {
         assertThat(source.exists()).isTrue()
     }
 
+    @Test
+    fun `restored success delivers submitted result without submitting again`() = runScenario {
+        viewModel.stateHolder.onFileSelected(0, "document.pdf", "file_uploaded")
+        viewModel.submit()
+        handler.calls.awaitItem()
+        handler.result.complete(Result.success(Unit))
+        runCurrent()
+        val saved = Bundle()
+        controller.pause().saveInstanceState(saved).stop().destroy()
+
+        val restored = Robolectric.buildActivity(KycActivity::class.java, controller.get().intent)
+        try {
+            restored.setup(saved)
+            composeRule.onNodeWithText("Done").performClick()
+            val activity = restored.get()
+            assertThat(activity.isFinishing).isTrue()
+            assertThat(shadowOf(activity).resultCode).isEqualTo(Activity.RESULT_OK)
+            assertThat(KycActivity.actionFrom(shadowOf(activity).resultIntent)).isEqualTo(KycScreenAction.Submitted)
+            handler.calls.expectNoEvents()
+        } finally {
+            if (restored.get().lifecycle.currentState != androidx.lifecycle.Lifecycle.State.DESTROYED) {
+                restored.pause().stop().destroy()
+            }
+        }
+    }
+
     private fun runScenario(block: suspend Scenario.() -> Unit) = runTest {
         Dispatchers.setMain(StandardTestDispatcher(testScheduler))
         val uploader = FakeUploader()
         val handler = FakeSubmissionHandler()
-        KycSubmissionHandlerRegistry.setUploader("test_handler", uploader)
-        KycSubmissionHandlerRegistry["test_handler"] = handler
         val fixture = requireNotNull(
             javaClass.classLoader?.getResourceAsStream("kyc_requirements/proof_of_address_required.json")
         ).bufferedReader().use { it.readText() }
@@ -158,9 +186,23 @@ internal class KycViewModelTest {
             .requirements.toKycRequirements()
         val intent = KycActivity.createIntent(
             RuntimeEnvironment.getApplication(),
-            KycArgs(requirements, null, "test_handler"),
+            KycArgs(requirements, null),
         )
-        val controller = Robolectric.buildActivity(KycActivity::class.java, intent).setup()
+        val controller = Robolectric.buildActivity(KycActivity::class.java, intent)
+        ViewModelProvider(
+            controller.get(),
+            viewModelFactory {
+                initializer {
+                    KycViewModel(
+                        RuntimeEnvironment.getApplication(),
+                        KycStateHolder(requirements),
+                        uploader,
+                        handler,
+                    )
+                }
+            },
+        )[KycViewModel::class.java]
+        controller.setup()
         val source = File.createTempFile("kyc-test-", ".pdf", controller.get().cacheDir).apply {
             writeText("Test document")
         }
@@ -175,10 +217,11 @@ internal class KycViewModelTest {
             uploader.calls.ensureAllEventsConsumed()
             handler.calls.ensureAllEventsConsumed()
         } finally {
-            controller.pause().stop().destroy()
+            if (controller.get().lifecycle.currentState != androidx.lifecycle.Lifecycle.State.DESTROYED) {
+                controller.pause().stop().destroy()
+            }
             runCurrent()
             source.delete()
-            KycSubmissionHandlerRegistry.remove("test_handler")
             Dispatchers.resetMain()
         }
     }

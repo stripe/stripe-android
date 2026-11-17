@@ -16,13 +16,9 @@ import com.stripe.android.crypto.onramp.CheckoutState.Status
 import com.stripe.android.crypto.onramp.exception.GooglePayNotConfiguredException
 import com.stripe.android.crypto.onramp.model.KycQuestion
 import com.stripe.android.crypto.onramp.model.KycQuestionnaire
-import com.stripe.android.crypto.onramp.model.KycQuestionnaireAnswer
-import com.stripe.android.crypto.onramp.model.KycQuestionnaireSubmission
 import com.stripe.android.crypto.onramp.model.KycRequirement
-import com.stripe.android.crypto.onramp.model.KycRequirementSubmission
 import com.stripe.android.crypto.onramp.model.KycRequirements
 import com.stripe.android.crypto.onramp.model.KycRetrieveResponse
-import com.stripe.android.crypto.onramp.model.KycSubmission
 import com.stripe.android.crypto.onramp.model.OnrampAuthorizeResult
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.OnrampCheckoutCallback
@@ -692,8 +688,6 @@ internal class OnrampPresenterCoordinatorTest {
         val startedIntent = shadowOf(activity).nextStartedActivityForResult.intent
         assertThat(startedIntent.component?.className).isEqualTo(KycActivity::class.java.name)
         assertThat(KycActivity.argsFrom(startedIntent)?.requirements).isEqualTo(requirements)
-        assertThat(KycActivity.argsFrom(startedIntent)?.submissionHandlerKey)
-            .isEqualTo(DEFAULT_ONRAMP_INSTANCE_KEY)
     }
 
     @Test
@@ -711,30 +705,6 @@ internal class OnrampPresenterCoordinatorTest {
         assertThat(callbackResult).isInstanceOf(OnrampKycResult.Failed::class.java)
         assertThat((callbackResult as OnrampKycResult.Failed).error).isSameInstanceAs(error)
         assertThat(shadowOf(activity).nextStartedActivityForResult).isNull()
-    }
-
-    @Test
-    fun `KYC submission handler fulfills requirement`() = runTest {
-        val requirements = kycRequirements()
-        val submission = kycSubmission()
-        var callbackResult: OnrampKycResult? = null
-        whenever(interactor.retrieveKycRequirements()).thenReturn(Result.success(requirements))
-        whenever(interactor.fulfillKycRequirements(submission)).thenReturn(
-            Result.success(Unit)
-        )
-        val coordinator = createCoordinator(
-            kycCallback = { callbackResult = it },
-        )
-
-        coordinator.fulfillKycRequirements()
-        testScope.testScheduler.advanceUntilIdle()
-        val startedIntent = shadowOf(activity).nextStartedActivityForResult.intent
-        val handlerKey = requireNotNull(KycActivity.argsFrom(startedIntent)).submissionHandlerKey
-        val result = requireNotNull(KycSubmissionHandlerRegistry[handlerKey]).submit(submission)
-
-        assertThat(result.isSuccess).isTrue()
-        assertThat(callbackResult).isNull()
-        verify(interactor).fulfillKycRequirements(submission)
     }
 
     @Test
@@ -1590,25 +1560,6 @@ internal class OnrampPresenterCoordinatorTest {
         assertThat(shadowOf(activity).nextStartedActivityForResult).isNull()
         verify(interactor).onKycFlowStarted()
         verify(interactor, never()).onKycFlowCompleted()
-    }
-
-    private fun kycSubmission(): KycSubmission {
-        return KycSubmission(
-            requirements = mapOf(
-                "source_of_funds" to KycRequirementSubmission(
-                    requestedBy = "swapped",
-                    documents = emptyList(),
-                    questionnaire = KycQuestionnaireSubmission(
-                        answers = listOf(
-                            KycQuestionnaireAnswer(
-                                questionId = "purchase_purpose",
-                                value = "Long-term investment",
-                            )
-                        )
-                    ),
-                )
-            ),
-        )
     }
 
     private fun createFakeLinkState(

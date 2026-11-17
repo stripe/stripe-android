@@ -1,5 +1,6 @@
 package com.stripe.android.crypto.onramp.ui
 
+import android.os.Parcelable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -7,22 +8,32 @@ import com.stripe.android.crypto.onramp.model.KycRequirement
 import com.stripe.android.crypto.onramp.model.KycRequirementSubmission
 import com.stripe.android.crypto.onramp.model.KycRequirements
 import com.stripe.android.crypto.onramp.model.KycSubmission
+import kotlinx.parcelize.Parcelize
 
 @Suppress("TooManyFunctions")
 internal class KycStateHolder(
     requirements: KycRequirements,
+    saved: SavedState? = null,
 ) {
     private val userActionRequirements = requirements.userActionRequired.sortedBy {
         if (it.description == PROOF_OF_ADDRESS) 0 else 1
     }
-    private var requirementIndex = 0
+    private var requirementIndex = saved?.requirementIndex ?: 0
     private val requirement: KycRequirement?
         get() = userActionRequirements.getOrNull(requirementIndex)
-    private var questionnaire = KycQuestionnaireModel(requirement?.questionnaire)
-    private var documents = KycDocumentCollectionModel(requirement?.document, requirement.toRequirementType())
+    private var questionnaire = KycQuestionnaireModel(requirement?.questionnaire).apply {
+        saved?.answers?.forEach { (id, answer) -> updateAnswer(id, answer) }
+    }
+    private var documents = KycDocumentCollectionModel(requirement?.document, requirement.toRequirementType()).apply {
+        saved?.documents?.let(::restore)
+    }
     private var validationError: KycValidationError? = null
-    private var submissionState = KycSubmissionState.Collecting
-    private var page = initialPage(requirement)
+    private var submissionState = when (saved?.submissionState) {
+        null -> KycSubmissionState.Collecting
+        KycSubmissionState.Submitting -> KycSubmissionState.Failed
+        else -> saved.submissionState
+    }
+    private var page = saved?.page ?: initialPage(requirement)
 
     var state by mutableStateOf(buildState())
         private set
@@ -339,6 +350,23 @@ internal class KycStateHolder(
             else -> KycRequirementType.Verification
         }
     }
+
+    fun save() = SavedState(
+        requirementIndex = requirementIndex,
+        page = page,
+        answers = state.questions.associate { it.id to it.answer },
+        documents = documents.save(),
+        submissionState = submissionState,
+    )
+
+    @Parcelize
+    internal data class SavedState(
+        val requirementIndex: Int,
+        val page: KycCollectionPage,
+        val answers: Map<String, String>,
+        val documents: KycDocumentCollectionModel.SavedState,
+        val submissionState: KycSubmissionState,
+    ) : Parcelable
 
     private companion object {
         private const val PROOF_OF_ADDRESS = "proof_of_address"
