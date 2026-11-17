@@ -45,6 +45,7 @@ internal class DefaultEmbeddedConfirmationHelper @Inject constructor(
     }
 
     override fun confirm() {
+        linkInlineAuth.endTyping()
         if (linkInlineAuth.isPresentingDialog) {
             embeddedResultCallbackHelper.setResult(
                 EmbeddedPaymentElement.Result.Failed(

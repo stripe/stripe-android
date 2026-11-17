@@ -8,8 +8,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.stripe.android.paymentelement.embedded.linkinline.EmbeddedLinkInlineAuth
+import com.stripe.android.paymentelement.embedded.linkinline.EmbeddedLinkInlineTypingPadding
 import com.stripe.android.paymentelement.embedded.linkinline.EmbeddedLinkInlineVerificationCard
 import com.stripe.android.paymentelement.embedded.linkinline.EmbeddedLinkVerificationDialogHost
+import com.stripe.android.paymentelement.embedded.linkinline.rememberEmbeddedLinkInlineTyping
 import com.stripe.android.paymentelement.embedded.linkinline.rememberEmbeddedVisibilityModifier
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
@@ -57,31 +59,41 @@ internal data class EmbeddedContent(
 
         PaymentElementTheme(appearance = appearance) {
             val linkInlineCard by linkInlineAuth.card.collectAsState()
-            Column(
-                modifier = Modifier
-                    .animateContentSize()
-                    // The container stays in place when configure replaces the list.
-                    .then(rememberEmbeddedVisibilityModifier(linkInlineAuth))
-            ) {
-                PaymentMethodEmbeddedLayoutUI(
-                    interactor = interactor,
-                    embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText,
-                    linkInlineCard = linkInlineCard?.let { card ->
-                        {
-                            EmbeddedLinkInlineVerificationCard(
-                                state = card.state,
-                                otpElement = card.otpElement,
-                                linkBrand = card.linkBrand,
-                                rowStyle = embeddedAppearance.style,
-                                onCodeTapped = linkInlineAuth::onCodeTapped,
-                                onClose = linkInlineAuth::onClose,
-                                onSwitchAccount = linkInlineAuth::onSwitchAccount,
-                                onAction = linkInlineAuth::onAction,
-                            )
-                        }
-                    },
-                    appearance = embeddedAppearance
-                )
+            val isTyping by linkInlineAuth.isTyping.collectAsState()
+            val typing = rememberEmbeddedLinkInlineTyping(linkInlineAuth)
+            // The containers stay in place when configure replaces the list.
+            Column(modifier = typing.containerModifier) {
+                Column(
+                    modifier = Modifier
+                        .animateContentSize()
+                        .then(rememberEmbeddedVisibilityModifier(linkInlineAuth))
+                ) {
+                    PaymentMethodEmbeddedLayoutUI(
+                        interactor = interactor,
+                        embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText,
+                        linkInlineCard = linkInlineCard?.let { card ->
+                            {
+                                EmbeddedLinkInlineVerificationCard(
+                                    state = card.state,
+                                    otpElement = card.otpElement,
+                                    linkBrand = card.linkBrand,
+                                    rowStyle = embeddedAppearance.style,
+                                    isTyping = isTyping,
+                                    focusRegionModifier = typing.focusRegionModifier,
+                                    onCodeTapped = linkInlineAuth::onCodeTapped,
+                                    onDone = linkInlineAuth::endTyping,
+                                    onTypingInterrupted = linkInlineAuth::endTyping,
+                                    onClose = linkInlineAuth::onClose,
+                                    onSwitchAccount = linkInlineAuth::onSwitchAccount,
+                                    onAction = linkInlineAuth::onAction,
+                                )
+                            }
+                        },
+                        appearance = embeddedAppearance
+                    )
+                }
+                // Outside the animated container, so the room is there as soon as the card is scrolled.
+                EmbeddedLinkInlineTypingPadding(typing)
             }
             EmbeddedLinkVerificationDialogHost(linkInlineAuth)
         }

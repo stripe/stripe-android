@@ -47,6 +47,7 @@ import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -107,7 +108,11 @@ fun OTPElementUI(
     ),
     selectedStrokeWidth: Dp = 2.dp,
     boxHeight: Dp = 56.dp,
-    focusRequester: FocusRequester = remember { FocusRequester() }
+    focusRequester: FocusRequester = remember { FocusRequester() },
+    /**
+     * Shows a Done key on the keyboard, which calls this.
+     */
+    onDone: (() -> Unit)? = null,
 ) {
     val focusRequesters = remember(focusRequester, element.controller.otpLength) {
         if (element.controller.otpLength <= 0) {
@@ -199,7 +204,8 @@ fun OTPElementUI(
                     placeholder = otpInputPlaceholder,
                     textStyle = boxTextStyle,
                     enabled = enabled,
-                    colors = colors
+                    colors = colors,
+                    onDone = onDone,
                 )
             }
         }
@@ -217,7 +223,8 @@ private fun OTPInputBox(
     modifier: Modifier,
     enabled: Boolean,
     colors: OTPElementColors,
-    placeholder: String
+    placeholder: String,
+    onDone: (() -> Unit)?,
 ) {
     var lastTextValue by remember(value) { mutableStateOf(value) }
 
@@ -255,10 +262,12 @@ private fun OTPInputBox(
         textStyle = textStyle,
         cursorBrush = SolidColor(MaterialTheme.stripeColors.textCursor),
         keyboardOptions = KeyboardOptions(
-            keyboardType = element.controller.keyboardType
+            keyboardType = element.controller.keyboardType,
+            imeAction = if (onDone != null) ImeAction.Done else ImeAction.Default,
         ),
         keyboardActions = KeyboardActions(
-            onNext = { focusRequesters.requestFocusSafely(index + 1) }
+            onNext = { focusRequesters.requestFocusSafely(index + 1) },
+            onDone = onDone?.let { done -> { done() } },
         ),
         singleLine = true,
         decorationBox = OTPInputDecorationBox(value, isSelected, placeholder, enabled, colors)

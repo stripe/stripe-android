@@ -16,6 +16,8 @@ internal class EmbeddedVerticalPaymentSelectionHandler @Inject constructor(
     private val linkInlineAuth: EmbeddedLinkInlineAuth,
 ) : VerticalPaymentSelectionHandler {
     override fun select(selection: PaymentSelection, isUserInput: Boolean) {
+        // Picking another row ends typing in the inline Link card.
+        linkInlineAuth.endTyping()
         if (selection is PaymentSelection.Link && linkInlineAuth.onLinkRowSelected()) return
         selectionHolder.setSelection(selection)
         onSelectionComplete()

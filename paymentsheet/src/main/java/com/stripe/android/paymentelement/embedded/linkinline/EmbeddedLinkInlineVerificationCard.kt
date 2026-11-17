@@ -1,6 +1,10 @@
 package com.stripe.android.paymentelement.embedded.linkinline
 
 import androidx.annotation.DrawableRes
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.AnimationVector1D
+import androidx.compose.animation.core.VectorConverter
+import androidx.compose.animation.core.keyframes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -8,11 +12,13 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -31,17 +37,25 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusProperties
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -57,6 +71,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
@@ -87,7 +102,12 @@ import com.stripe.android.uicore.stripeTypography
 /**
  * The card a returning Link customer verifies in, shown in place of the Link row in the Embedded Payment Element.
  *
- * It only renders [state] and reports taps. Its owner decides where a tapped code is entered.
+ * It only renders [state] and reports taps. Its owner decides where a tapped code is entered. The code field only
+ * takes focus while [isTyping].
+ *
+ * @param focusRegionModifier Applied to the part that has to stay visible while typing: the title, subtitle, code,
+ * error and action.
+ * @param onTypingInterrupted Called when the code field loses focus, or leaves the screen, while typing.
  */
 @Composable
 internal fun EmbeddedLinkInlineVerificationCard(
@@ -95,7 +115,11 @@ internal fun EmbeddedLinkInlineVerificationCard(
     otpElement: OTPElement,
     linkBrand: LinkBrand,
     rowStyle: RowStyle,
+    isTyping: Boolean,
+    focusRegionModifier: Modifier,
     onCodeTapped: () -> Unit,
+    onDone: () -> Unit,
+    onTypingInterrupted: () -> Unit,
     onClose: () -> Unit,
     onSwitchAccount: () -> Unit,
     onAction: (EmbeddedLinkInlineCardState.Action) -> Unit,
@@ -120,8 +144,12 @@ internal fun EmbeddedLinkInlineVerificationCard(
                 state = state,
                 otpElement = otpElement,
                 textStyles = textStyles,
+                isTyping = isTyping,
                 onCodeTapped = onCodeTapped,
+                onDone = onDone,
+                onTypingInterrupted = onTypingInterrupted,
                 onAction = onAction,
+                modifier = focusRegionModifier,
             )
             Spacer(modifier = Modifier.height(16.dp))
             Hairline(rowStyle = rowStyle)
@@ -272,12 +300,16 @@ private fun FocusRegion(
     state: EmbeddedLinkInlineCardState,
     otpElement: OTPElement,
     textStyles: EmbeddedLinkInlineCardTextStyles,
+    isTyping: Boolean,
     onCodeTapped: () -> Unit,
+    onDone: () -> Unit,
+    onTypingInterrupted: () -> Unit,
     onAction: (EmbeddedLinkInlineCardState.Action) -> Unit,
+    modifier: Modifier,
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .testTag(EMBEDDED_LINK_INLINE_CARD_FOCUS_REGION_TEST_TAG),
     ) {
@@ -297,10 +329,14 @@ private fun FocusRegion(
         Spacer(modifier = Modifier.height(16.dp))
         CodeBoxes(
             isEnabled = state.isCodeEntryEnabled,
+            isTyping = isTyping,
+            invalidCodeRevision = state.invalidCodeRevision,
             otpElement = otpElement,
             digitStyle = textStyles.digit,
             accessibilityLabel = subtitle.text,
             onCodeTapped = onCodeTapped,
+            onDone = onDone,
+            onTypingInterrupted = onTypingInterrupted,
         )
         state.errorMessage?.let { errorMessage ->
             Spacer(modifier = Modifier.height(12.dp))
@@ -343,10 +379,14 @@ private fun subtitle(recipient: String, textStyles: EmbeddedLinkInlineCardTextSt
 @Composable
 private fun CodeBoxes(
     isEnabled: Boolean,
+    isTyping: Boolean,
+    invalidCodeRevision: Int,
     otpElement: OTPElement,
     digitStyle: TextStyle,
     accessibilityLabel: String,
     onCodeTapped: () -> Unit,
+    onDone: () -> Unit,
+    onTypingInterrupted: () -> Unit,
 ) {
     val stripeColors = MaterialTheme.stripeColors
     val shadedColor = shadedComponentColor()
@@ -357,13 +397,20 @@ private fun CodeBoxes(
         selectedBackground = stripeColors.component,
         unselectedBorder = Color.Transparent,
     )
+    val focusRequester = remember { FocusRequester() }
+    val shakeOffset = rememberShakeOffset(invalidCodeRevision)
     CompositionLocalProvider(
         // Digits are always laid out left to right, even in right-to-left languages.
         LocalLayoutDirection provides LayoutDirection.Ltr,
         // Each box draws the component color around its digit, which would ring the shaded boxes.
         LocalColors provides stripeColors.copy(component = shadedColor),
     ) {
-        Box(modifier = Modifier.widthIn(max = CodeMaxWidth)) {
+        Box(
+            modifier = Modifier
+                .widthIn(max = CodeMaxWidth)
+                .offset { IntOffset(x = shakeOffset.value.roundToPx(), y = 0) }
+                .then(rememberTypingFocusModifier(isTyping, focusRequester, onTypingInterrupted)),
+        ) {
             OTPElementUI(
                 enabled = isEnabled,
                 element = otpElement,
@@ -375,20 +422,111 @@ private fun CodeBoxes(
                 colors = colors,
                 selectedStrokeWidth = CodeBoxFocusRingWidth,
                 boxHeight = CodeBoxHeight,
+                focusRequester = focusRequester,
+                onDone = onDone,
             )
-            // Takes taps so the field never focuses itself. The card's owner decides where the code is entered.
-            Box(
-                modifier = Modifier
-                    .matchParentSize()
-                    .clickable(
-                        enabled = isEnabled,
-                        role = Role.Button,
-                        onClickLabel = accessibilityLabel,
-                        onClick = onCodeTapped,
-                    )
-                    .testTag(EMBEDDED_LINK_INLINE_CARD_CODE_TEST_TAG),
-            )
+            if (!isTyping) {
+                CodeTapTarget(isEnabled = isEnabled, accessibilityLabel = accessibilityLabel, onClick = onCodeTapped)
+            }
         }
+    }
+}
+
+/**
+ * Takes taps so the code never focuses itself. The card's owner decides where the code is entered.
+ */
+@Composable
+private fun BoxScope.CodeTapTarget(
+    isEnabled: Boolean,
+    accessibilityLabel: String,
+    onClick: () -> Unit,
+) {
+    Box(
+        modifier = Modifier
+            .matchParentSize()
+            .clickable(
+                enabled = isEnabled,
+                role = Role.Button,
+                onClickLabel = accessibilityLabel,
+                onClick = onClick,
+            )
+            .testTag(EMBEDDED_LINK_INLINE_CARD_CODE_TEST_TAG),
+    )
+}
+
+/**
+ * Lets the code take focus only while [isTyping], focuses it when typing starts, and clears its focus when typing
+ * ends. Calls [onTypingInterrupted] when focus moves away on its own while typing, e.g. when the host clears focus,
+ * or when the code leaves the screen.
+ */
+@Composable
+private fun rememberTypingFocusModifier(
+    isTyping: Boolean,
+    focusRequester: FocusRequester,
+    onTypingInterrupted: () -> Unit,
+): Modifier {
+    val focusManager = LocalFocusManager.current
+    var hasFocus by remember { mutableStateOf(false) }
+    val currentIsTyping by rememberUpdatedState(isTyping)
+    val currentOnTypingInterrupted by rememberUpdatedState(onTypingInterrupted)
+    // Leaving the screen also takes focus away, which reports the same interruption.
+    var didReportInterruption by remember { mutableStateOf(false) }
+    val reportInterruption = {
+        if (currentIsTyping && !didReportInterruption) {
+            didReportInterruption = true
+            currentOnTypingInterrupted()
+        }
+    }
+    LaunchedEffect(isTyping) {
+        if (isTyping) {
+            didReportInterruption = false
+            focusRequester.requestFocusSafely()
+        } else if (hasFocus) {
+            focusManager.clearFocus()
+        }
+    }
+    DisposableEffect(Unit) {
+        onDispose(reportInterruption)
+    }
+    return Modifier
+        .focusProperties { canFocus = isTyping }
+        .onFocusChanged { focusState ->
+            if (hasFocus && !focusState.hasFocus) {
+                reportInterruption()
+            }
+            hasFocus = focusState.hasFocus
+        }
+}
+
+/**
+ * Shakes the code sideways each time a submitted code is rejected.
+ */
+@Composable
+private fun rememberShakeOffset(invalidCodeRevision: Int): Animatable<Dp, AnimationVector1D> {
+    val offset = remember { Animatable(0.dp, Dp.VectorConverter) }
+    // A card shown again, e.g. after configure, doesn't shake for a code rejected before.
+    var shakenRevision by remember { mutableIntStateOf(invalidCodeRevision) }
+    LaunchedEffect(invalidCodeRevision) {
+        if (invalidCodeRevision == shakenRevision) return@LaunchedEffect
+        shakenRevision = invalidCodeRevision
+        offset.animateTo(
+            targetValue = 0.dp,
+            animationSpec = keyframes {
+                durationMillis = SHAKE_DURATION_MILLIS
+                ShakeKeyframes.forEach { (timeMillis, fraction) ->
+                    ShakeDistance * fraction at timeMillis
+                }
+            },
+        )
+    }
+    return offset
+}
+
+private fun FocusRequester.requestFocusSafely() {
+    try {
+        requestFocus()
+    } catch (_: IllegalStateException) {
+        // The field isn't in the focus tree yet, e.g. while the card fades in.
     }
 }
 
@@ -607,6 +745,14 @@ private val CodeBoxSpacing = 8.dp
 private val CodeBoxFocusRingWidth = 1.5.dp
 private const val CODE_LENGTH = 6
 private val CodeMaxWidth = CodeBoxMaxWidth * CODE_LENGTH + CodeBoxSpacing * (CODE_LENGTH - 1)
+
+private val ShakeDistance = 8.dp
+private const val SHAKE_DURATION_MILLIS = 400
+
+/**
+ * The shake's keyframes: milliseconds into the shake, and the code's offset as a fraction of [ShakeDistance].
+ */
+private val ShakeKeyframes = listOf(50 to 1f, 125 to -1f, 200 to 0.75f, 275 to -0.75f, 340 to 0.375f)
 
 private val SmallMaxFontSize = 25.sp
 private val TitleMaxFontSize = 30.sp

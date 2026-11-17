@@ -17,21 +17,22 @@ import com.stripe.android.uicore.elements.OTPElement
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Owns one returning Link customer's inline verification attempt in the Embedded Payment Element.
  *
  * It outlives the list, which `configure` rebuilds, so every rebuilt list shows the same attempt. The code is sent
- * the first time the element is on screen, and entered in the card or, when the card can't take it, in the Link
+ * the first time the element is on screen, and typed in the card or, when the card can't take it, in the Link
  * dialog. Both show the same [authFlow].
  */
 @Suppress("TooManyFunctions", "LongParameterList")
@@ -60,7 +61,8 @@ internal class EmbeddedLinkInlineAuthController(
     private val prepareAttestation: suspend () -> Boolean,
     private val isScreenReaderOn: () -> Boolean,
     /**
-     * Where the code is entered when nothing else sends it to the dialog, based on the merchant's layout.
+     * Where the code is entered when nothing else sends it to the dialog, based on whether the merchant's layout can
+     * keep the card above the keyboard.
      */
     private val layoutCodeEntry: () -> CodeEntry,
     private val cardOtpElement: OTPElement,
@@ -122,6 +124,13 @@ internal class EmbeddedLinkInlineAuthController(
     private val _dialog = MutableStateFlow<EmbeddedLinkVerificationDialogSession?>(null)
     val dialog: StateFlow<EmbeddedLinkVerificationDialogSession?> = _dialog.asStateFlow()
 
+    private val _isTyping = MutableStateFlow(false)
+
+    /**
+     * Whether the code is being typed in the card.
+     */
+    val isTyping: StateFlow<Boolean> = _isTyping.asStateFlow()
+
     val card: StateFlow<EmbeddedLinkInlineCardUi?> = combineAsStateFlow(
         authFlow.state,
         phase,
@@ -164,6 +173,11 @@ internal class EmbeddedLinkInlineAuthController(
     private var didSendCode = false
     private var confirmVerification: CompletableDeferred<ConfirmVerificationResult>? = null
 
+    /**
+     * Clears a rejected code from the card once the card has shown it shaking.
+     */
+    private var rejectedCodeReset: Job? = null
+
     init {
         if (showsCard) {
             registry.claim(registryOwner)
@@ -188,13 +202,27 @@ internal class EmbeddedLinkInlineAuthController(
     }
 
     fun onCodeTapped() {
-        if (!isShowingCard || isPresentingDialog) return
+        if (!isShowingCard || isPresentingDialog || isTyping.value) return
         when (val codeEntry = codeEntry()) {
-            is CodeEntry.Inline -> {
-                eventReporter.onEmbeddedLinkInlineAuthEvent(EmbeddedLinkInlineAuthEvent.Focused)
-            }
+            is CodeEntry.Inline -> startTyping()
             is CodeEntry.Dialog -> presentDialog(codeEntry.reason)
         }
+    }
+
+    /**
+     * Ends typing in the card, e.g. on Done, when the card loses focus, or when another row is picked.
+     */
+    fun endTyping() {
+        _isTyping.value = false
+    }
+
+    /**
+     * The card stayed hidden behind the keyboard while typing, so the code is entered in the dialog instead.
+     */
+    fun onTypingObscured() {
+        if (!isTyping.value) return
+        endTyping()
+        presentDialog(DialogReason.Obscured)
     }
 
     fun onAction(action: EmbeddedLinkInlineCardState.Action) {
@@ -214,6 +242,7 @@ internal class EmbeddedLinkInlineAuthController(
      */
     fun onClose() {
         if (!isShowingCard) return
+        endTyping()
         eventReporter.onEmbeddedLinkInlineAuthEvent(EmbeddedLinkInlineAuthEvent.Dismissed)
         registry.recordDismissal(linkAccount.email)
         registry.release(registryOwner)
@@ -339,6 +368,7 @@ internal class EmbeddedLinkInlineAuthController(
      */
     private fun presentDialog(reason: DialogReason): Boolean {
         if (isPresentingDialog || phase.value == Phase.Finished || !host.canPresentDialog()) return false
+        endTyping()
         eventReporter.onEmbeddedLinkInlineAuthEvent(EmbeddedLinkInlineAuthEvent.DialogShown(reason))
         authFlow.analyticsSurface = LinkAuthSurface.EmbeddedDialog
         _dialog.value = EmbeddedLinkVerificationDialogSession(
@@ -379,16 +409,43 @@ internal class EmbeddedLinkInlineAuthController(
             }
         }
         scope.launch {
-            // A stale error goes away once the customer types a new code.
-            cardOtpElement.controller.fieldValue.drop(1).filter { it.isNotEmpty() }.collect {
-                authFlow.clearError()
+            // A stale error goes away once the customer types a new code. Clearing the code only shortens it, one
+            // box at a time, so that doesn't count.
+            var previousCode = cardOtpElement.controller.fieldValue.value
+            cardOtpElement.controller.fieldValue.collect { code ->
+                if (code != previousCode && code.length >= previousCode.length) {
+                    authFlow.clearError()
+                }
+                previousCode = code
             }
         }
         scope.launch {
-            authFlow.state.map { it.inputRevision }.distinctUntilChanged().drop(1).collect {
-                cardOtpElement.controller.reset()
+            var invalidCodeRevision = authFlow.state.value.invalidCodeRevision
+            authFlow.state.distinctUntilChanged { old, new -> old.inputRevision == new.inputRevision }.drop(1).collect {
+                rejectedCodeReset?.cancel()
+                val wasCodeRejected = it.invalidCodeRevision != invalidCodeRevision
+                invalidCodeRevision = it.invalidCodeRevision
+                if (wasCodeRejected) {
+                    // The rejected code stays while the card shakes.
+                    rejectedCodeReset = scope.launch {
+                        delay(REJECTED_CODE_CLEAR_DELAY)
+                        cardOtpElement.controller.reset()
+                    }
+                } else {
+                    cardOtpElement.controller.reset()
+                }
             }
         }
+    }
+
+    private fun startTyping() {
+        eventReporter.onEmbeddedLinkInlineAuthEvent(EmbeddedLinkInlineAuthEvent.Focused)
+        // Typing again clears a rejected code right away.
+        rejectedCodeReset?.takeIf { it.isActive }?.let { reset ->
+            reset.cancel()
+            cardOtpElement.controller.reset()
+        }
+        _isTyping.value = true
     }
 
     /**
@@ -406,6 +463,7 @@ internal class EmbeddedLinkInlineAuthController(
     }
 
     private fun finish() {
+        endTyping()
         _phase.value = Phase.Finished
         registry.release(registryOwner)
         scope.cancel()
@@ -415,5 +473,9 @@ internal class EmbeddedLinkInlineAuthController(
         val confirmVerification = confirmVerification ?: return
         this.confirmVerification = null
         confirmVerification.complete(result)
+    }
+
+    private companion object {
+        val REJECTED_CODE_CLEAR_DELAY = 1500.milliseconds
     }
 }
