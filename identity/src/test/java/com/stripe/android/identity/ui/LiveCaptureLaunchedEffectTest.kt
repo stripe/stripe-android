@@ -83,7 +83,8 @@ class LiveCaptureLaunchedEffectTest {
                 identityState = IdentityScanState.Finished(
                     type = IdentityScanState.ScanType.SELFIE,
                     transitioner = faceDetectorTransitioner
-                )
+                ),
+                isTimeoutFallback = false
             )
         )
 
@@ -140,7 +141,8 @@ class LiveCaptureLaunchedEffectTest {
                 identityState = IdentityScanState.Finished(
                     type = IdentityScanState.ScanType.DOC_FRONT,
                     transitioner = mock()
-                )
+                ),
+                isTimeoutFallback = false
             )
         )
 
@@ -191,7 +193,8 @@ class LiveCaptureLaunchedEffectTest {
                 identityState = IdentityScanState.Finished(
                     type = IdentityScanState.ScanType.DOC_BACK,
                     transitioner = mock()
-                )
+                ),
+                isTimeoutFallback = false
             )
         )
 
