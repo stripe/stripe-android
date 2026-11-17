@@ -5,6 +5,7 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.crypto.onramp.OnrampCoordinator
+import com.stripe.android.crypto.onramp.OnrampInteractor
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import dagger.BindsInstance
 import dagger.Component
@@ -21,6 +22,7 @@ import javax.inject.Singleton
 )
 internal interface OnrampComponent {
     val savedStateHandle: SavedStateHandle
+    val onrampInteractor: OnrampInteractor
     val onrampCoordinator: OnrampCoordinator
     val onrampCallbackIdentifier: String
 

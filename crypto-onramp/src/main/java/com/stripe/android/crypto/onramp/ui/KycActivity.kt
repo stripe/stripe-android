@@ -26,10 +26,12 @@ import androidx.compose.runtime.setValue
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.os.BundleCompat
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.stripe.android.crypto.onramp.KycSubmissionHandlerRegistry
+import androidx.lifecycle.createSavedStateHandle
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.crypto.onramp.R
+import com.stripe.android.crypto.onramp.di.OnrampComponentHolder
 import com.stripe.android.crypto.onramp.model.KycRequirements
 import com.stripe.android.link.LinkAppearance
 import com.stripe.android.uicore.utils.fadeOut
@@ -48,25 +50,21 @@ internal class KycActivity : ComponentActivity() {
             BundleCompat.getParcelable(it, EXTRA_ARGS, KycArgs::class.java)
         } ?: error("Missing KycArgs")
 
-        val uploader = KycSubmissionHandlerRegistry.uploader(args.submissionHandlerKey)
-        val submissionHandler = KycSubmissionHandlerRegistry[args.submissionHandlerKey]
-        // The registry is lost on process death. Return to the host so it can restart KYC.
-        if (uploader == null || submissionHandler == null) {
-            finishCancelled()
-            return
-        }
-
         enableEdgeToEdge()
 
-        val factory = object : ViewModelProvider.Factory {
-            override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                @Suppress("UNCHECKED_CAST")
-                return KycViewModel(
+        val factory = viewModelFactory {
+            initializer {
+                val saved = savedInstanceState?.let {
+                    BundleCompat.getParcelable(it, STATE_COLLECTION, KycStateHolder.SavedState::class.java)
+                }
+                val interactor = OnrampComponentHolder.getOrCreate(application, createSavedStateHandle())
+                    .onrampInteractor
+                KycViewModel(
                     context = applicationContext,
-                    stateHolder = KycStateHolder(args.requirements),
-                    uploader = uploader,
-                    submissionHandler = submissionHandler,
-                ) as T
+                    stateHolder = KycStateHolder(args.requirements, saved),
+                    uploader = interactor::uploadKycDocument,
+                    submissionHandler = interactor::fulfillKycRequirements,
+                )
             }
         }
         viewModel = ViewModelProvider(this, factory)[KycViewModel::class.java]
@@ -128,6 +126,7 @@ internal class KycActivity : ComponentActivity() {
             if (uri == null || slotIndex == null) {
                 stateHolder.onFileSelectionCancelled()
             } else {
+                stateHolder.onFileSelectionStarted(slotIndex)
                 viewModel.selectFile(uri, slotIndex)
             }
         }
@@ -191,7 +190,7 @@ internal class KycActivity : ComponentActivity() {
         var pendingSlot by rememberSaveable { mutableStateOf<Int?>(null) }
         DisposableEffect(Unit) {
             onDispose {
-                if (!isChangingConfigurations) pendingPath?.let { File(it).delete() }
+                if (isFinishing) pendingPath?.let { File(it).delete() }
             }
         }
         val camera = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { success ->
@@ -199,10 +198,11 @@ internal class KycActivity : ComponentActivity() {
             val slot = pendingSlot
             pendingPath = null
             pendingSlot = null
-            if (!success || source == null || slot == null || stateHolder.state.selectingFileSlot != slot) {
+            if (!success || source == null || slot == null || !stateHolder.canSelectFile(slot)) {
                 source?.delete()
                 stateHolder.onFileSelectionCancelled()
             } else {
+                stateHolder.onFileSelectionStarted(slot)
                 viewModel.selectCameraImage(source, slot)
             }
         }
@@ -289,6 +289,11 @@ internal class KycActivity : ComponentActivity() {
         finish()
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putParcelable(STATE_COLLECTION, viewModel.stateHolder.save())
+    }
+
     override fun onDestroy() {
         sourceDialog?.dismiss()
         sourceDialog = null
@@ -304,6 +309,7 @@ internal class KycActivity : ComponentActivity() {
     }
 
     internal companion object {
+        private const val STATE_COLLECTION = "kyc_collection"
         private const val EXTRA_ARGS = "kyc_args"
         private const val ACTION_ARG = "action"
 
@@ -357,7 +363,6 @@ internal class KycActivity : ComponentActivity() {
 internal data class KycActivityArgs(
     val requirements: KycRequirements,
     val linkAppearance: LinkAppearance?,
-    val submissionHandlerKey: String,
 )
 
 internal sealed interface KycScreenAction : Parcelable {
@@ -382,7 +387,6 @@ internal class KycActivityContract : ActivityResultContract<
             args = KycArgs(
                 requirements = input.requirements,
                 appearance = input.linkAppearance?.build(),
-                submissionHandlerKey = input.submissionHandlerKey,
             ),
         )
     }
@@ -397,5 +401,4 @@ internal class KycActivityContract : ActivityResultContract<
 internal data class KycArgs(
     val requirements: KycRequirements,
     val appearance: LinkAppearance.State?,
-    val submissionHandlerKey: String,
 ) : Parcelable

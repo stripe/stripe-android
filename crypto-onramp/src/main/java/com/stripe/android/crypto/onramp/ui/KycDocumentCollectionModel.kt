@@ -1,7 +1,9 @@
 package com.stripe.android.crypto.onramp.ui
 
+import android.os.Parcelable
 import com.stripe.android.crypto.onramp.model.KycDocumentRequirement
 import com.stripe.android.crypto.onramp.model.KycDocumentSubmission
+import kotlinx.parcelize.Parcelize
 import java.util.Locale
 
 @Suppress("TooManyFunctions")
@@ -44,6 +46,19 @@ internal class KycDocumentCollectionModel(
                 it.index == editingDocumentSlot
             }?.subtypeId
         }
+
+    @Parcelize
+    internal data class SavedState(
+        val slots: List<DocumentSlot>,
+        val editingSlot: Int?,
+    ) : Parcelable
+
+    fun save() = SavedState(documentSlots, editingDocumentSlot)
+
+    fun restore(saved: SavedState) {
+        documentSlots = saved.slots
+        editingDocumentSlot = saved.editingSlot
+    }
 
     fun clearValidation() {
         validationError = null
@@ -312,16 +327,18 @@ internal class KycDocumentCollectionModel(
         }
     }
 
-    private data class DocumentSlot(
+    @Parcelize
+    internal data class DocumentSlot(
         val index: Int,
         val subtypeId: String?,
         val file: SelectedKycFile?,
-    )
+    ) : Parcelable
 
-    private data class SelectedKycFile(
+    @Parcelize
+    internal data class SelectedKycFile(
         val displayName: String,
         val fileId: String,
-    )
+    ) : Parcelable
 
     fun createSubmission(): List<KycDocumentSubmission> {
         val completedSlots = documentSlots.filter { it.file != null }
