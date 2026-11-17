@@ -135,6 +135,19 @@ internal class DefaultEmbeddedConfirmationHelperTest {
     }
 
     @Test
+    fun confirmEndsTypingInTheLinkCard() {
+        val linkInlineAuth = FakeEmbeddedLinkInlineAuth()
+        testScenario(linkInlineAuth = linkInlineAuth) {
+            confirmationHelper.confirm()
+
+            linkInlineAuth.endTypingCalls.awaitItem()
+            confirmationHandler.startTurbine.awaitItem()
+            assertThat(callbackHelper.stateHelper.stateTurbine.awaitItem()).isNotNull()
+        }
+        linkInlineAuth.ensureAllEventsConsumed()
+    }
+
+    @Test
     fun confirmVerifiesLinkInTheDialogFirstAfterTheCardWasClosed() {
         val linkInlineAuth = FakeEmbeddedLinkInlineAuth(
             verifiesBeforeConfirming = true,
@@ -143,6 +156,7 @@ internal class DefaultEmbeddedConfirmationHelperTest {
         testScenario(loadedState = linkLoadedState(), linkInlineAuth = linkInlineAuth) {
             confirmationHelper.confirm()
 
+            linkInlineAuth.endTypingCalls.awaitItem()
             linkInlineAuth.verifyBeforeConfirmingCalls.awaitItem()
             assertThat(confirmationHandler.startTurbine.awaitItem().confirmationOption)
                 .isInstanceOf<LinkConfirmationOption>()
@@ -160,6 +174,7 @@ internal class DefaultEmbeddedConfirmationHelperTest {
         testScenario(loadedState = linkLoadedState(), linkInlineAuth = linkInlineAuth) {
             confirmationHelper.confirm()
 
+            linkInlineAuth.endTypingCalls.awaitItem()
             linkInlineAuth.verifyBeforeConfirmingCalls.awaitItem()
             assertThat(callbackHelper.callbackTurbine.awaitItem())
                 .isInstanceOf<EmbeddedPaymentElement.Result.Canceled>()
@@ -177,6 +192,7 @@ internal class DefaultEmbeddedConfirmationHelperTest {
         testScenario(loadedState = linkLoadedState(), linkInlineAuth = linkInlineAuth) {
             confirmationHelper.confirm()
 
+            linkInlineAuth.endTypingCalls.awaitItem()
             linkInlineAuth.verifyBeforeConfirmingCalls.awaitItem()
             assertThat(confirmationHandler.startTurbine.awaitItem().confirmationOption)
                 .isInstanceOf<LinkConfirmationOption>()
@@ -201,6 +217,7 @@ internal class DefaultEmbeddedConfirmationHelperTest {
         ) {
             confirmationHelper.confirm()
 
+            linkInlineAuth.endTypingCalls.awaitItem()
             assertThat(confirmationHandler.startTurbine.awaitItem().confirmationOption)
                 .isInstanceOf<LinkConfirmationOption>()
             assertThat(callbackHelper.stateHelper.stateTurbine.awaitItem()).isNotNull()

@@ -98,6 +98,8 @@ internal class DefaultEmbeddedConfigurationCoordinatorTest {
                 initializationMode = defaultInitializationMode,
             )
 
+            // The list is rebuilt, so typing in the card ends before it loads.
+            linkInlineAuth.endTypingCalls.awaitItem()
             val call = linkInlineAuth.onConfiguredCalls.awaitItem()
             assertThat(call.paymentMethodMetadata).isEqualTo(loaderState.paymentMethodMetadata)
             assertThat(call.configuration).isEqualTo(defaultConfiguration)
@@ -121,6 +123,7 @@ internal class DefaultEmbeddedConfigurationCoordinatorTest {
                 initializationMode = defaultInitializationMode,
             )
 
+            linkInlineAuth.endTypingCalls.awaitItem()
             linkInlineAuth.onConfiguredCalls.awaitItem()
             assertThat(stateHelper.stateTurbine.awaitItem()?.confirmationState?.selection).isNull()
         }

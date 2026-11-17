@@ -4,6 +4,7 @@ import app.cash.turbine.Turbine
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
+import com.stripe.android.paymentelement.embedded.linkinline.EmbeddedLinkInlineAuthController.CodeEntry
 import com.stripe.android.paymentelement.embedded.linkinline.EmbeddedLinkInlineAuthController.ConfirmVerificationResult
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.CustomerState
@@ -27,12 +28,17 @@ internal class FakeEmbeddedLinkInlineAuth(
     val onIntentConfirmedCalls = Turbine<Unit>()
     val registerDialogHostCalls = Turbine<() -> Boolean>()
     val closeDialogHostCalls = Turbine<Unit>()
+    val registerTypingHostCalls = Turbine<() -> CodeEntry>()
+    val closeTypingHostCalls = Turbine<Unit>()
+    val endTypingCalls = Turbine<Unit>()
+    val onTypingObscuredCalls = Turbine<Unit>()
 
     override val listOptions: StateFlow<EmbeddedLinkInlineListOptions> =
         MutableStateFlow(EmbeddedLinkInlineListOptions.Disabled)
     override val card: StateFlow<EmbeddedLinkInlineCardUi?> = stateFlowOf(null)
     override val dialog: StateFlow<EmbeddedLinkVerificationDialogSession?> = stateFlowOf(null)
     override val needsVisibility: StateFlow<Boolean> = stateFlowOf(false)
+    override val isTyping: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
     override fun isUiPresentedOverElement(): Boolean = isPresentingDialog
 
@@ -87,6 +93,19 @@ internal class FakeEmbeddedLinkInlineAuth(
         return AutoCloseable { closeDialogHostCalls.add(Unit) }
     }
 
+    override fun registerTypingHost(codeEntry: () -> CodeEntry): AutoCloseable {
+        registerTypingHostCalls.add(codeEntry)
+        return AutoCloseable { closeTypingHostCalls.add(Unit) }
+    }
+
+    override fun endTyping() {
+        endTypingCalls.add(Unit)
+    }
+
+    override fun onTypingObscured() {
+        onTypingObscuredCalls.add(Unit)
+    }
+
     fun ensureAllEventsConsumed() {
         onConfiguredCalls.ensureAllEventsConsumed()
         onIntentConfirmedCalls.ensureAllEventsConsumed()
@@ -95,6 +114,10 @@ internal class FakeEmbeddedLinkInlineAuth(
         verifyBeforeConfirmingCalls.ensureAllEventsConsumed()
         onLinkRowSelectedCalls.ensureAllEventsConsumed()
         onWalletResultCalls.ensureAllEventsConsumed()
+        registerTypingHostCalls.ensureAllEventsConsumed()
+        closeTypingHostCalls.ensureAllEventsConsumed()
+        endTypingCalls.ensureAllEventsConsumed()
+        onTypingObscuredCalls.ensureAllEventsConsumed()
     }
 
     data class OnConfiguredCall(

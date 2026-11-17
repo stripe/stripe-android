@@ -15,6 +15,7 @@ internal class EmbeddedVerticalPaymentSelectionHandlerTest {
     fun `tapping a row selects it and completes the selection`() = runScenario {
         handler.select(PaymentSelection.GooglePay, isUserInput = false)
 
+        linkInlineAuth.endTypingCalls.awaitItem()
         assertThat(selectionHolder.selection.value).isEqualTo(PaymentSelection.GooglePay)
         immediateActionCalls.awaitItem()
     }
@@ -23,6 +24,7 @@ internal class EmbeddedVerticalPaymentSelectionHandlerTest {
     fun `tapping the Link row selects Link when it doesn't open the wallet`() = runScenario {
         handler.select(LINK, isUserInput = false)
 
+        linkInlineAuth.endTypingCalls.awaitItem()
         linkInlineAuth.onLinkRowSelectedCalls.awaitItem()
         assertThat(selectionHolder.selection.value).isEqualTo(LINK)
         immediateActionCalls.awaitItem()
@@ -32,6 +34,7 @@ internal class EmbeddedVerticalPaymentSelectionHandlerTest {
     fun `tapping the Link row that opens the wallet selects nothing yet`() = runScenario(linkRowOpensWallet = true) {
         handler.select(LINK, isUserInput = false)
 
+        linkInlineAuth.endTypingCalls.awaitItem()
         linkInlineAuth.onLinkRowSelectedCalls.awaitItem()
         assertThat(selectionHolder.selection.value).isNull()
     }
