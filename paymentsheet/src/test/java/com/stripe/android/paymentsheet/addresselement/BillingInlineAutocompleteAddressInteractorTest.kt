@@ -51,7 +51,6 @@ class BillingInlineAutocompleteAddressInteractorTest {
         val config = AutocompleteAddressInteractor.Config(
             googlePlacesApiKey = "test_key",
             autocompleteCountries = emptySet(),
-            isInlineAutocompleteEnabled = true,
         )
         val interactor = BillingInlineAutocompleteAddressInteractor(
             placesClient = fakePlaces,

@@ -1946,7 +1946,6 @@ class USBankAccountFormViewModelTest {
                     autocompleteConfig = AutocompleteAddressInteractor.Config(
                         googlePlacesApiKey = "gi_123",
                         autocompleteCountries = setOf("US"),
-                        isInlineAutocompleteEnabled = true,
                         shouldUseStripeHostedAutocomplete = true,
                     )
                 )

@@ -33,8 +33,7 @@ class AutocompleteAddressController(
 
     private val config = interactor.autocompleteConfig
 
-    private val inlineAutocompleteActive =
-        config.isInlineAutocompleteEnabled && config.shouldUseStripeHostedAutocomplete
+    private val inlineAutocompleteActive = config.shouldUseStripeHostedAutocomplete
 
     private val inlineAutocompleteHandler: InlineAutocompleteHandler? =
         if (inlineAutocompleteActive) {

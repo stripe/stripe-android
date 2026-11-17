@@ -1413,11 +1413,6 @@ class InputAddressViewModelTest {
         )
     }
 
-    @Test
-    fun `isInlineAutocompleteEnabled is always true`() = runScenario(withPlacesClient = false) {
-        assertThat(viewModel.autocompleteConfig.isInlineAutocompleteEnabled).isTrue()
-    }
-
     // --- Inline Autocomplete Tests ---
     // Core controller logic (predictions, debouncing, selection, suppression, dismissal)
     // is tested in InlineAutocompleteControllerTest.

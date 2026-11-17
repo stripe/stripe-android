@@ -239,7 +239,6 @@ internal interface EmbeddedActivityModule {
                 autocompleteConfig = AutocompleteAddressInteractor.Config(
                     googlePlacesApiKey = null,
                     autocompleteCountries = AUTOCOMPLETE_DEFAULT_COUNTRIES,
-                    isInlineAutocompleteEnabled = true,
                 ),
                 placesClient = null,
                 stripeAutocompleteRepository = stripeAutocompleteRepository,
