@@ -415,6 +415,9 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         ),
         GOOGLE_PAY_DYNAMIC_CALLBACK_PARSING_FAILURE(
             partialEventName = "google_pay.dynamic_callbacks.parsing_failure"
+        ),
+        STRIPE_BALANCE_FORM_MISSING_FINANCIAL_ACCOUNTS(
+            partialEventName = "paymentsheet.stripe_balance.form.missing_financial_accounts"
         );
 
         override val eventName: String

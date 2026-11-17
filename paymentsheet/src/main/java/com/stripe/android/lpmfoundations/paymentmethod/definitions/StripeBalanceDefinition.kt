@@ -7,6 +7,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.stripebalance.StripeBalanceFinancialAccountsElement
 import com.stripe.android.ui.core.R
 
@@ -45,7 +46,12 @@ private object StripeBalanceUiDefinitionFactory : UiDefinitionFactory.Simple() {
         builder: FormElementsBuilder,
     ) {
         // Stripe balance is only offered once the buyer's financial accounts load
-        val financialAccounts = metadata.stripeBalanceFinancialAccounts ?: return
+        val financialAccounts = metadata.stripeBalanceFinancialAccounts ?: run {
+            arguments.errorReporter?.report(
+                ErrorReporter.UnexpectedErrorEvent.STRIPE_BALANCE_FORM_MISSING_FINANCIAL_ACCOUNTS
+            )
+            return
+        }
         // The account picker comes first, before contact information and the billing address
         builder.header(
             StripeBalanceFinancialAccountsElement(

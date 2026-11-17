@@ -35,6 +35,7 @@ import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
+import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.FakeStripeImageLoader
 import com.stripe.android.uicore.FormInsets
 import com.stripe.android.uicore.IconStyle
@@ -595,6 +596,7 @@ internal class CheckoutStateLoaderTest {
                 cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
                 savedStateHandle = savedStateHandle,
                 isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = false),
+                errorReporter = FakeErrorReporter(),
             ),
             internalRowSelectionCallback = { null },
         )

@@ -7,6 +7,7 @@ import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
@@ -19,6 +20,7 @@ internal class PaymentMethodFormFactory(
     private val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
     private val savedStateHandle: SavedStateHandle,
     private val isNfcScanningAvailable: IsNfcScanningAvailable,
+    private val errorReporter: ErrorReporter,
 ) {
     data class FormHelperArguments(
         val coroutineScope: CoroutineScope,
@@ -87,6 +89,7 @@ internal class PaymentMethodFormFactory(
             tapToAddHelper = arguments.tapToAddHelper,
             paymentMethodMessagePromotionsHelper = arguments.paymentMethodMessagePromotionsHelper,
             isNfcScanningAvailable = isNfcScanningAvailable,
+            errorReporter = errorReporter,
         )
     }
 }

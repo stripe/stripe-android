@@ -116,6 +116,7 @@ internal class DefaultFormDefinitionFactoryTest {
             tapToAddHelper = null,
             paymentMethodMessagePromotionsHelper = null,
             isNfcScanningAvailable = null,
+            errorReporter = null,
         )
     }
 

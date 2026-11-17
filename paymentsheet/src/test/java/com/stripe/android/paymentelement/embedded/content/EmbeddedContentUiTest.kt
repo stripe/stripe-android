@@ -142,6 +142,7 @@ internal class EmbeddedContentUiTest {
             embeddedSelectionHolder = selectionHolder,
             savedStateHandle = savedStateHandle,
             isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = false),
+            errorReporter = FakeErrorReporter(),
         )
         val confirmationHandler = FakeConfirmationHandler()
         val eventReporter = FakeEventReporter()

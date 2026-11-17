@@ -24,6 +24,7 @@ import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.ui.AddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.PrimaryButtonIcon
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.FakeIsNfcScanningAvailable
@@ -178,6 +179,7 @@ internal class EmbeddedAddPaymentMethodInteractorFactoryTest {
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
             savedStateHandle = SavedStateHandle(),
             isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = false),
+            errorReporter = FakeErrorReporter(),
         )
         val customerStateHolder = DefaultCustomerStateHolder(
             customerMetadata = stateFlowOf(null),

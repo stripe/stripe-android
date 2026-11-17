@@ -102,7 +102,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     linkHandler: LinkHandler,
     confirmationHandlerFactory: ConfirmationHandler.Factory,
     cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
-    private val errorReporter: ErrorReporter,
+    errorReporter: ErrorReporter,
     internal val cvcRecollectionHandler: CvcRecollectionHandler,
     private val cvcRecollectionInteractorFactory: CvcRecollectionInteractor.Factory,
     tapToAddHelperFactory: TapToAddHelper.Factory,
@@ -130,6 +130,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     customViewModelScope = customViewModelScope,
     placesClient = placesClient,
     linkAccountHolder = linkAccountHolder,
+    errorReporter = errorReporter,
     stripeAutocompleteRepository = stripeAutocompleteRepository,
     addressLauncherEventReporter = addressLauncherEventReporter,
 ) {

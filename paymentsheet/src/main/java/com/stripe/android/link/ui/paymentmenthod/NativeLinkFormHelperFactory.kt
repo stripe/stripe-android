@@ -45,6 +45,7 @@ internal class NativeLinkFormHelperFactory(
                 tapToAddHelper = null,
                 paymentMethodMessagePromotionsHelper = null,
                 isNfcScanningAvailable = null,
+                errorReporter = null,
             ),
         )
     }

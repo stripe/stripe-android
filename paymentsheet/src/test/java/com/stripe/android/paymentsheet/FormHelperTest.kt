@@ -286,6 +286,7 @@ internal class FormHelperTest {
                     tapToAddHelper = null,
                     paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
                     isNfcScanningAvailable = null,
+                    errorReporter = null,
                 ),
             )
 
@@ -849,6 +850,7 @@ internal class FormHelperTest {
                 tapToAddHelper = tapToAddHelper,
                 paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
                 isNfcScanningAvailable = null,
+                errorReporter = null,
             ),
         )
     }
