@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.addresselement
 
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
-import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import kotlinx.coroutines.CoroutineScope
 
@@ -12,7 +11,6 @@ internal class PaymentElementAutocompleteAddressInteractor(
 
     class Factory(
         private val autocompleteConfig: AutocompleteAddressInteractor.Config,
-        private val placesClient: PlacesClientProxy?,
         private val stripeAutocompleteRepository: StripeAutocompleteRepository?,
         private val coroutineScope: CoroutineScope?,
         private val shouldUseAutocompleteProxyEndpointsProvider: () -> Boolean,
@@ -24,30 +22,24 @@ internal class PaymentElementAutocompleteAddressInteractor(
             get() = activeInlineInteractor?.autocompleteFilledAddress
 
         override fun create(): AutocompleteAddressInteractor {
-            if (coroutineScope != null) {
-                val useStripeHosted = shouldUseAutocompleteProxyEndpointsProvider()
-                val resolvedClient = when {
-                    useStripeHosted && stripeAutocompleteRepository != null ->
-                        StripeHostedPlacesClientProxy(
-                            repository = stripeAutocompleteRepository,
-                            eventReporter = eventReporter,
-                        )
-                    useStripeHosted -> null
-                    else -> placesClient
-                }
-                if (resolvedClient != null) {
-                    activeInlineInteractor?.dispose()
-                    return BillingInlineAutocompleteAddressInteractor(
-                        placesClient = resolvedClient,
-                        autocompleteConfig = AutocompleteAddressInteractor.Config(
-                            googlePlacesApiKey = autocompleteConfig.googlePlacesApiKey,
-                            autocompleteCountries = autocompleteConfig.autocompleteCountries,
-                            shouldUseStripeHostedAutocomplete = useStripeHosted ||
-                                autocompleteConfig.shouldUseStripeHostedAutocomplete,
-                        ),
-                        coroutineScope = coroutineScope,
-                    ).also { activeInlineInteractor = it }
-                }
+            if (
+                coroutineScope != null &&
+                stripeAutocompleteRepository != null &&
+                shouldUseAutocompleteProxyEndpointsProvider()
+            ) {
+                activeInlineInteractor?.dispose()
+                return BillingInlineAutocompleteAddressInteractor(
+                    placesClient = StripeHostedPlacesClientProxy(
+                        repository = stripeAutocompleteRepository,
+                        eventReporter = eventReporter,
+                    ),
+                    autocompleteConfig = AutocompleteAddressInteractor.Config(
+                        googlePlacesApiKey = autocompleteConfig.googlePlacesApiKey,
+                        autocompleteCountries = autocompleteConfig.autocompleteCountries,
+                        shouldUseStripeHostedAutocomplete = true,
+                    ),
+                    coroutineScope = coroutineScope,
+                ).also { activeInlineInteractor = it }
             }
 
             activeInlineInteractor?.dispose()

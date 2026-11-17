@@ -4,12 +4,9 @@ import android.content.Context
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
-import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PaymentSheetContract
 import com.stripe.android.paymentsheet.PrefsRepository
-import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
-import com.stripe.android.uicore.elements.DefaultIsPlacesAvailable
 import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.CoroutineScope
@@ -44,16 +41,4 @@ internal class PaymentSheetViewModelModule {
     fun provideViewModelScope(): CoroutineScope {
         return CoroutineScope(SupervisorJob() + Dispatchers.Main)
     }
-
-    @Provides
-    fun providePlacesClient(
-        appContext: Context,
-        starterArgs: PaymentSheetContract.Args,
-        errorReporter: ErrorReporter,
-    ): PlacesClientProxy? = createInlineAutocompletePlacesClient(
-        context = appContext,
-        googlePlacesApiKey = starterArgs.config.googlePlacesApiKey,
-        errorReporter = errorReporter,
-        isPlacesAvailable = DefaultIsPlacesAvailable()(),
-    )
 }

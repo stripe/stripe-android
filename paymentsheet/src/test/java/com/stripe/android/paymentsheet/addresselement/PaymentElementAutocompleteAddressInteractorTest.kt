@@ -1,9 +1,7 @@
 package com.stripe.android.paymentsheet.addresselement
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.model.Address
 import com.stripe.android.paymentsheet.addresselement.analytics.FakeAddressLauncherEventReporter
-import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
@@ -35,7 +33,6 @@ class PaymentElementAutocompleteAddressInteractorTest {
 
         val factory = PaymentElementAutocompleteAddressInteractor.Factory(
             autocompleteConfig = config,
-            placesClient = null,
             stripeAutocompleteRepository = null,
             coroutineScope = this,
             shouldUseAutocompleteProxyEndpointsProvider = { false },
@@ -49,7 +46,7 @@ class PaymentElementAutocompleteAddressInteractorTest {
     }
 
     @Test
-    fun `Factory creates inline interactor when inline enabled with places client and scope`() = test {
+    fun `Factory creates Stripe-hosted inline interactor when proxy endpoints are enabled`() = test {
         val config = AutocompleteAddressInteractor.Config(
             googlePlacesApiKey = "test-key",
             autocompleteCountries = setOf("US"),
@@ -57,13 +54,9 @@ class PaymentElementAutocompleteAddressInteractorTest {
 
         val factory = PaymentElementAutocompleteAddressInteractor.Factory(
             autocompleteConfig = config,
-            placesClient = FakePlacesClientProxy(
-                findPredictionsResult = Result.success(FindAutocompletePredictionsResponse(emptyList())),
-                fetchPlaceResult = Result.success(Address()),
-            ),
-            stripeAutocompleteRepository = null,
+            stripeAutocompleteRepository = FakeStripeAutocompleteRepository(),
             coroutineScope = this,
-            shouldUseAutocompleteProxyEndpointsProvider = { false },
+            shouldUseAutocompleteProxyEndpointsProvider = { true },
             eventReporter = FakeAddressLauncherEventReporter(),
         )
 
@@ -72,25 +65,21 @@ class PaymentElementAutocompleteAddressInteractorTest {
         assertThat(interactor).isInstanceOf(BillingInlineAutocompleteAddressInteractor::class.java)
         assertThat(interactor.autocompleteConfig.googlePlacesApiKey).isEqualTo("test-key")
         assertThat(interactor.autocompleteConfig.autocompleteCountries).isEqualTo(setOf("US"))
-        assertThat(interactor.autocompleteConfig.shouldUseStripeHostedAutocomplete).isFalse()
+        assertThat(interactor.autocompleteConfig.shouldUseStripeHostedAutocomplete).isTrue()
     }
 
     @Test
     fun `Factory disposes previously created inline interactor on next create`() = test {
         val config = AutocompleteAddressInteractor.Config(
-            googlePlacesApiKey = "test-key",
+            googlePlacesApiKey = null,
             autocompleteCountries = setOf("US"),
         )
-        val fakePlaces = FakePlacesClientProxy(
-            findPredictionsResult = Result.success(FindAutocompletePredictionsResponse(emptyList())),
-            fetchPlaceResult = Result.success(Address()),
-        )
+        val repository = FakeStripeAutocompleteRepository()
         val factory = PaymentElementAutocompleteAddressInteractor.Factory(
             autocompleteConfig = config,
-            placesClient = fakePlaces,
-            stripeAutocompleteRepository = null,
+            stripeAutocompleteRepository = repository,
             coroutineScope = backgroundScope,
-            shouldUseAutocompleteProxyEndpointsProvider = { false },
+            shouldUseAutocompleteProxyEndpointsProvider = { true },
             eventReporter = FakeAddressLauncherEventReporter(),
         )
         val queryFlow = MutableStateFlow("")
@@ -107,11 +96,11 @@ class PaymentElementAutocompleteAddressInteractorTest {
         advanceTimeBy(500)
 
         // No predictions are fetched because the first interactor was disposed.
-        fakePlaces.ensureAllEventsConsumed()
+        repository.ensureAllEventsConsumed()
     }
 
     @Test
-    fun `Factory falls back to no-autocomplete interactor when placesClient is null`() = test {
+    fun `Factory falls back to no-autocomplete interactor when proxy endpoints are disabled`() = test {
         val config = AutocompleteAddressInteractor.Config(
             googlePlacesApiKey = "test-key",
             autocompleteCountries = setOf("US"),
@@ -119,8 +108,7 @@ class PaymentElementAutocompleteAddressInteractorTest {
 
         val factory = PaymentElementAutocompleteAddressInteractor.Factory(
             autocompleteConfig = config,
-            placesClient = null,
-            stripeAutocompleteRepository = null,
+            stripeAutocompleteRepository = FakeStripeAutocompleteRepository(),
             coroutineScope = this,
             shouldUseAutocompleteProxyEndpointsProvider = { false },
             eventReporter = FakeAddressLauncherEventReporter(),
@@ -129,28 +117,7 @@ class PaymentElementAutocompleteAddressInteractorTest {
         val interactor = factory.create()
 
         assertThat(interactor).isInstanceOf(PaymentElementAutocompleteAddressInteractor::class.java)
-    }
-
-    @Test
-    fun `Factory creates inline interactor when proxy flag is on with repository`() = test {
-        val config = AutocompleteAddressInteractor.Config(
-            googlePlacesApiKey = null,
-            autocompleteCountries = setOf("US"),
-        )
-
-        val factory = PaymentElementAutocompleteAddressInteractor.Factory(
-            autocompleteConfig = config,
-            placesClient = null,
-            stripeAutocompleteRepository = FakeStripeAutocompleteRepository(),
-            coroutineScope = this,
-            shouldUseAutocompleteProxyEndpointsProvider = { true },
-            eventReporter = FakeAddressLauncherEventReporter(),
-        )
-
-        val interactor = factory.create()
-
-        assertThat(interactor).isInstanceOf(BillingInlineAutocompleteAddressInteractor::class.java)
-        assertThat(interactor.autocompleteConfig.shouldUseStripeHostedAutocomplete).isTrue()
+        assertThat(interactor.autocompleteConfig).isEqualTo(config)
     }
 
     @Test
@@ -162,7 +129,6 @@ class PaymentElementAutocompleteAddressInteractorTest {
 
         val factory = PaymentElementAutocompleteAddressInteractor.Factory(
             autocompleteConfig = config,
-            placesClient = null,
             stripeAutocompleteRepository = null,
             coroutineScope = this,
             shouldUseAutocompleteProxyEndpointsProvider = { true },

@@ -148,12 +148,6 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         CUSTOMER_SHEET_ADAPTER_NOT_FOUND(
             eventName = "elements.customer_sheet.customer_adapter.not_found"
         ),
-        PLACES_FIND_AUTOCOMPLETE_ERROR(
-            eventName = "address_element.find_autocomplete.error"
-        ),
-        PLACES_FETCH_PLACE_ERROR(
-            eventName = "address_element.fetch_place.error"
-        ),
         LINK_CREATE_PAYMENT_DETAILS_FAILURE(
             eventName = "link.create_new_card.create_payment_details_failure"
         ),
@@ -262,12 +256,6 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         ),
         GOOGLE_PAY_MISSING_INTENT_DATA(
             partialEventName = "google_pay.on_result.missing_data"
-        ),
-        FIND_AUTOCOMPLETE_PREDICTIONS_WITHOUT_DEPENDENCY(
-            partialEventName = "address_element.find_autocomplete.without_dependency"
-        ),
-        FETCH_PLACE_WITHOUT_DEPENDENCY(
-            partialEventName = "address_element.fetch_place.without_dependency",
         ),
         LINK_ATTACH_CARD_WITH_NULL_ACCOUNT(
             partialEventName = "link.create_new_card.missing_link_account"
@@ -433,12 +421,6 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         ),
         GET_SAVED_PAYMENT_METHODS_SUCCESS(
             eventName = "elements.customer_repository.get_saved_payment_methods_success"
-        ),
-        PLACES_FIND_AUTOCOMPLETE_SUCCESS(
-            eventName = "address_element.find_autocomplete.success"
-        ),
-        PLACES_FETCH_PLACE_SUCCESS(
-            eventName = "address_element.fetch_place.success"
         ),
         LINK_CREATE_CARD_SUCCESS(
             eventName = "link.create_new_card.success"

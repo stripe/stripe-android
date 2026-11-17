@@ -1519,7 +1519,6 @@ internal class PaymentOptionsViewModelTest {
             },
             customViewModelScope = coroutineScopeCleanupRule.track(CoroutineScope(Dispatchers.Unconfined)),
             paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
-            placesClient = null,
             stripeAutocompleteRepository = FakeStripeAutocompleteRepository(),
             addressLauncherEventReporter = FakeAddressLauncherEventReporter(),
         )

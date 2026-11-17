@@ -1340,7 +1340,6 @@ internal class PaymentSheetActivityTest {
                 primaryButtonExperiment = FakePrimaryButtonExperiment(),
                 customerStateHolderFactory = DefaultCustomerStateHolder.Factory,
                 paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
-                placesClient = null,
                 linkAccountHolder = LinkAccountHolder(savedStateHandle),
                 stripeAutocompleteRepository = FakeStripeAutocompleteRepository(),
                 addressLauncherEventReporter = FakeAddressLauncherEventReporter(),

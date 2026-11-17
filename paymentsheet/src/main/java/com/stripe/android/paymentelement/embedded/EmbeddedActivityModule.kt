@@ -240,7 +240,6 @@ internal interface EmbeddedActivityModule {
                     googlePlacesApiKey = null,
                     autocompleteCountries = AUTOCOMPLETE_DEFAULT_COUNTRIES,
                 ),
-                placesClient = null,
                 stripeAutocompleteRepository = stripeAutocompleteRepository,
                 coroutineScope = coroutineScope,
                 shouldUseAutocompleteProxyEndpointsProvider = {

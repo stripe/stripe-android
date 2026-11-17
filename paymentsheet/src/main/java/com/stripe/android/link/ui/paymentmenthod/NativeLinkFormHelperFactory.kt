@@ -55,7 +55,6 @@ internal class NativeLinkFormHelperFactory(
                 googlePlacesApiKey = parentComponent.configuration.googlePlacesApiKey,
                 autocompleteCountries = AUTOCOMPLETE_DEFAULT_COUNTRIES,
             ),
-            placesClient = null,
             stripeAutocompleteRepository = null,
             coroutineScope = null,
             shouldUseAutocompleteProxyEndpointsProvider = { false },
