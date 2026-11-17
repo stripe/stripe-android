@@ -66,7 +66,6 @@ import androidx.compose.ui.unit.sp
 import com.godaddy.android.colorpicker.ClassicColorPicker
 import com.godaddy.android.colorpicker.HsvColor
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.R
@@ -113,16 +112,10 @@ private fun AppearancePicker(
 ) {
     val scrollState = rememberScrollState()
     val nestedScrollConnection = rememberNestedScrollInteropConnection()
-    var disableLuminanceBasedThemes by remember {
-        mutableStateOf(FeatureFlags.disableLuminanceBasedThemes.isEnabled)
-    }
 
     Scaffold(
         topBar = {
-            AppearanceTopAppBar {
-                resetAppearance()
-                disableLuminanceBasedThemes = FeatureFlags.disableLuminanceBasedThemes.isEnabled
-            }
+            AppearanceTopAppBar(resetAppearance)
         },
         modifier = Modifier
             .systemBarsPadding()
@@ -140,14 +133,6 @@ private fun AppearancePicker(
                     themeMode = currentAppearance.themeMode,
                     onThemeModeSelected = {
                         updateAppearance(currentAppearance.copy(themeMode = it))
-                    },
-                )
-                AppearanceToggle(
-                    label = FeatureFlags.disableLuminanceBasedThemes.name,
-                    value = disableLuminanceBasedThemes,
-                    onValueChange = {
-                        disableLuminanceBasedThemes = it
-                        FeatureFlags.disableLuminanceBasedThemes.setEnabled(it)
                     },
                 )
             }

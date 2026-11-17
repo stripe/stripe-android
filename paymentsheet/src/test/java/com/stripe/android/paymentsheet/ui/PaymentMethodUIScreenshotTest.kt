@@ -5,11 +5,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
-import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.ui.core.R
 import com.stripe.android.utils.screenshots.PaymentSheetAppearance
 import org.junit.Rule
@@ -33,12 +31,6 @@ internal class PaymentMethodUIScreenshotTest {
         listOf(PaymentSheetAppearance.CrazyAppearance),
         FontSize.entries,
         boxModifier = Modifier.padding(16.dp),
-    )
-
-    @get:Rule
-    val disableLuminanceBasedThemesRule = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.disableLuminanceBasedThemes,
-        isEnabled = false,
     )
 
     @Test
@@ -73,7 +65,6 @@ internal class PaymentMethodUIScreenshotTest {
 
     @Test
     fun testThemeBasedIcons(@TestParameter state: TabState) {
-        disableLuminanceBasedThemesRule.setEnabled(true)
         snapshot(state, themeBasedIconsPaparazziRule)
     }
 
