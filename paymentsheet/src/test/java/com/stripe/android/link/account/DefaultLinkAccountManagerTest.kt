@@ -12,6 +12,7 @@ import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.NoLinkAccountFoundException
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.analytics.FakeLinkEventsReporter
+import com.stripe.android.link.analytics.LinkAuthSurface
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.ConsentPresentation
@@ -666,7 +667,7 @@ class DefaultLinkAccountManagerTest {
     fun `startVerification updates account`() = runSuspendTest {
         val linkEventsReporter = object : AccountManagerEventsReporter() {
             var callCount = 0
-            override fun on2FAStart(verificationType: String) {
+            override fun on2FAStart(verificationType: String, surface: LinkAuthSurface?) {
                 callCount += 1
             }
         }
@@ -677,10 +678,126 @@ class DefaultLinkAccountManagerTest {
             type = VerificationType.SMS,
             accountPhoneNumber = null,
             isResend = false,
+            analyticsSurface = null,
         )
 
         assertThat(accountManager.linkAccountInfo.value.account).isNotNull()
         assertThat(linkEventsReporter.callCount).isEqualTo(1)
+    }
+
+    @Test
+    fun `startVerification reports the analytics surface`() = runSuspendTest {
+        val linkEventsReporter = object : AccountManagerEventsReporter() {
+            val startSurfaces = Turbine<LinkAuthSurface?>()
+            override fun on2FAStart(verificationType: String, surface: LinkAuthSurface?) {
+                startSurfaces.add(surface)
+            }
+        }
+        val accountManager = accountManager(linkEventsReporter = linkEventsReporter)
+        accountManager.setTestAccount(TestFactory.CONSUMER_SESSION, null)
+
+        accountManager.startVerification(
+            type = VerificationType.SMS,
+            accountPhoneNumber = null,
+            isResend = false,
+            analyticsSurface = LinkAuthSurface.EmbeddedInline,
+        )
+
+        assertThat(linkEventsReporter.startSurfaces.awaitItem()).isEqualTo(LinkAuthSurface.EmbeddedInline)
+        linkEventsReporter.startSurfaces.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `startVerification failure reports the analytics surface`() = runSuspendTest {
+        val linkRepository = FakeLinkRepository()
+        linkRepository.startVerificationResult = Result.failure(Exception())
+        val linkEventsReporter = object : AccountManagerEventsReporter() {
+            val startFailureSurfaces = Turbine<LinkAuthSurface?>()
+            override fun on2FAStartFailure(verificationType: String, surface: LinkAuthSurface?) {
+                startFailureSurfaces.add(surface)
+            }
+        }
+        val accountManager = accountManager(linkRepository = linkRepository, linkEventsReporter = linkEventsReporter)
+        accountManager.setTestAccount(TestFactory.CONSUMER_SESSION, null)
+
+        accountManager.startVerification(
+            type = VerificationType.SMS,
+            accountPhoneNumber = null,
+            isResend = false,
+            analyticsSurface = LinkAuthSurface.EmbeddedDialog,
+        )
+
+        assertThat(linkEventsReporter.startFailureSurfaces.awaitItem()).isEqualTo(LinkAuthSurface.EmbeddedDialog)
+        linkEventsReporter.startFailureSurfaces.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `confirmVerification reports the analytics surface`() = runSuspendTest {
+        val linkEventsReporter = object : AccountManagerEventsReporter() {
+            val completeSurfaces = Turbine<LinkAuthSurface?>()
+            override fun on2FAComplete(verificationType: String, surface: LinkAuthSurface?) {
+                completeSurfaces.add(surface)
+            }
+        }
+        val accountManager = accountManager(linkEventsReporter = linkEventsReporter)
+        accountManager.setTestAccount(TestFactory.CONSUMER_SESSION, null)
+
+        accountManager.confirmVerification(
+            code = "123",
+            type = VerificationType.SMS,
+            consentGranted = null,
+            analyticsSurface = LinkAuthSurface.EmbeddedDialog,
+        )
+
+        assertThat(linkEventsReporter.completeSurfaces.awaitItem()).isEqualTo(LinkAuthSurface.EmbeddedDialog)
+        linkEventsReporter.completeSurfaces.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `confirmVerification failure reports the analytics surface`() = runSuspendTest {
+        val linkRepository = FakeLinkRepository()
+        linkRepository.confirmVerificationResult = Result.failure(Exception())
+        val linkEventsReporter = object : AccountManagerEventsReporter() {
+            val failureSurfaces = Turbine<LinkAuthSurface?>()
+            override fun on2FAFailure(verificationType: String, surface: LinkAuthSurface?) {
+                failureSurfaces.add(surface)
+            }
+        }
+        val accountManager = accountManager(linkRepository = linkRepository, linkEventsReporter = linkEventsReporter)
+        accountManager.setTestAccount(TestFactory.CONSUMER_SESSION, null)
+
+        accountManager.confirmVerification(
+            code = "123",
+            type = VerificationType.SMS,
+            consentGranted = null,
+            analyticsSurface = LinkAuthSurface.EmbeddedInline,
+        )
+
+        assertThat(linkEventsReporter.failureSurfaces.awaitItem()).isEqualTo(LinkAuthSurface.EmbeddedInline)
+        linkEventsReporter.failureSurfaces.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `accountStatus keeps an account that is being verified without looking it up again`() = runSuspendTest {
+        val fakeLinkAuth = fakeLinkAuth()
+        val accountManager = accountManager(customerEmail = TestFactory.EMAIL, linkAuth = fakeLinkAuth)
+        accountManager.setTestAccount(
+            consumerSession = TestFactory.CONSUMER_SESSION.copy(
+                verificationSessions = listOf(
+                    ConsumerSession.VerificationSession(
+                        type = ConsumerSession.VerificationSession.SessionType.Sms,
+                        state = ConsumerSession.VerificationSession.SessionState.Started,
+                    )
+                ),
+                currentAuthenticationLevel = ConsumerSession.AuthenticationLevel.NotAuthenticated,
+            ),
+        )
+        val account = accountManager.linkAccountInfo.value.account
+
+        assertThat(accountManager.accountStatus.first()).isEqualTo(AccountStatus.VerificationStarted)
+
+        assertThat(accountManager.linkAccountInfo.value.account).isSameInstanceAs(account)
+        assertThat(fakeLinkAuth.lookupCalls).isEmpty()
     }
 
     @Test
@@ -690,9 +807,9 @@ class DefaultLinkAccountManagerTest {
 
         val linkEventsReporter = object : AccountManagerEventsReporter() {
             var callCount = 0
-            override fun on2FAStartFailure(verificationType: String) {
+            override fun on2FAStartFailure(verificationType: String, surface: LinkAuthSurface?) {
                 callCount += 1
-                super.on2FAStartFailure(verificationType)
+                super.on2FAStartFailure(verificationType, surface)
             }
         }
 
@@ -702,6 +819,7 @@ class DefaultLinkAccountManagerTest {
             type = VerificationType.SMS,
             accountPhoneNumber = null,
             isResend = false,
+            analyticsSurface = null,
         )
 
         assertThat(linkEventsReporter.callCount).isEqualTo(1)
@@ -719,6 +837,7 @@ class DefaultLinkAccountManagerTest {
             code = "123",
             type = VerificationType.SMS,
             consentGranted = null,
+            analyticsSurface = null,
         )
 
         assertThat(result.exceptionOrNull()).isInstanceOf(NoLinkAccountFoundException::class.java)
@@ -747,7 +866,7 @@ class DefaultLinkAccountManagerTest {
         }
         val linkEventsReporter = object : AccountManagerEventsReporter() {
             var callCount = 0
-            override fun on2FAComplete(verificationType: String) {
+            override fun on2FAComplete(verificationType: String, surface: LinkAuthSurface?) {
                 callCount += 1
             }
         }
@@ -760,6 +879,7 @@ class DefaultLinkAccountManagerTest {
             code = "123",
             type = VerificationType.SMS,
             consentGranted = null,
+            analyticsSurface = null,
         )
 
         assertThat(linkRepository.callCount).isEqualTo(1)
@@ -785,14 +905,14 @@ class DefaultLinkAccountManagerTest {
         }
         val linkEventsReporter = object : AccountManagerEventsReporter() {
             var callCount = 0
-            override fun on2FAFailure(verificationType: String) {
+            override fun on2FAFailure(verificationType: String, surface: LinkAuthSurface?) {
                 callCount += 1
             }
         }
         val accountManager = accountManager(linkRepository = linkRepository, linkEventsReporter = linkEventsReporter)
         accountManager.setTestAccount(TestFactory.CONSUMER_SESSION, null)
 
-        val result = accountManager.confirmVerification("123", VerificationType.SMS, null)
+        val result = accountManager.confirmVerification("123", VerificationType.SMS, null, null)
 
         assertThat(linkRepository.callCount).isEqualTo(1)
         assertThat(result).isEqualTo(Result.failure<LinkAccount>(error))
@@ -1638,10 +1758,10 @@ private open class AccountManagerEventsReporter : FakeLinkEventsReporter() {
 
     override fun onAccountLookupComplete() = Unit
 
-    override fun on2FAStartFailure(verificationType: String) = Unit
-    override fun on2FAStart(verificationType: String) = Unit
-    override fun on2FAComplete(verificationType: String) = Unit
-    override fun on2FAFailure(verificationType: String) = Unit
+    override fun on2FAStartFailure(verificationType: String, surface: LinkAuthSurface?) = Unit
+    override fun on2FAStart(verificationType: String, surface: LinkAuthSurface?) = Unit
+    override fun on2FAComplete(verificationType: String, surface: LinkAuthSurface?) = Unit
+    override fun on2FAFailure(verificationType: String, surface: LinkAuthSurface?) = Unit
 
     suspend fun awaitLookupFailureCall(): Throwable {
         return lookupFailureTurbine.awaitItem()

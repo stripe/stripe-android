@@ -59,6 +59,7 @@ import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedSelectionChooser
 import com.stripe.android.paymentelement.embedded.content.EmbeddedHostProcessing
 import com.stripe.android.paymentelement.embedded.content.EmbeddedSelectionChooser
+import com.stripe.android.paymentelement.embedded.linkinline.NoEmbeddedLinkInlineVerificationGateModule
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
 import com.stripe.android.payments.core.injection.ApiConfigurationFromPaymentConfigurationModule
@@ -134,6 +135,7 @@ import javax.inject.Singleton
         NoOpPaymentMethodMessagingPromotionHelperModule::class,
         PaymentMethodMessagePromotionsExperimentHandlerModule::class,
         PreselectLinkExperimentModule::class,
+        NoEmbeddedLinkInlineVerificationGateModule::class,
         NfcScanningAvailabilityModule::class,
         PaymentOptionCardArtModule::class,
         ApiConfigurationFromPaymentConfigurationModule::class,

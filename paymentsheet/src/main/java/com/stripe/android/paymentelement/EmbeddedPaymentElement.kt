@@ -267,6 +267,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
         internal val termsDisplay: Map<PaymentMethod.Type, TermsDisplay> = emptyMap(),
         internal val opensCardScannerAutomatically: Boolean = ConfigurationDefaults.opensCardScannerAutomatically,
         internal val userOverrideCountry: String? = ConfigurationDefaults.userOverrideCountry,
+        internal val allowsLinkInlineVerification: Boolean,
         internal val apiConfiguration: ApiConfiguration.State?,
     ) : Parcelable {
         @Suppress("TooManyFunctions")
@@ -305,6 +306,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
             private var opensCardScannerAutomatically: Boolean =
                 ConfigurationDefaults.opensCardScannerAutomatically
             private var userOverrideCountry: String? = ConfigurationDefaults.userOverrideCountry
+            private var allowsLinkInlineVerification: Boolean = true
             private var apiConfiguration: ApiConfiguration.State? = null
 
             /**
@@ -543,6 +545,15 @@ class EmbeddedPaymentElement @Inject internal constructor(
             }
 
             /**
+             * Whether a returning Link customer can verify in a card shown inline in the embedded payment element.
+             * Defaults to true.
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun allowsLinkInlineVerification(allowsLinkInlineVerification: Boolean) = apply {
+                this.allowsLinkInlineVerification = allowsLinkInlineVerification
+            }
+
+            /**
              * An optional [ApiConfiguration] for this payment session. When set, overrides the
              * global [com.stripe.android.PaymentConfiguration] singleton for all network requests made by this
              * [EmbeddedPaymentElement] instance. When not set, defaults to the value set in
@@ -577,6 +588,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
                 termsDisplay = termsDisplay,
                 opensCardScannerAutomatically = opensCardScannerAutomatically,
                 userOverrideCountry = userOverrideCountry,
+                allowsLinkInlineVerification = allowsLinkInlineVerification,
                 apiConfiguration = apiConfiguration,
             )
         }
@@ -607,6 +619,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
             .termsDisplay(termsDisplay)
             .opensCardScannerAutomatically(opensCardScannerAutomatically)
             .userOverrideCountry(userOverrideCountry)
+            .allowsLinkInlineVerification(allowsLinkInlineVerification)
             .apply {
                 primaryButtonLabel?.let { primaryButtonLabel(it) }
                 apiConfiguration?.let {

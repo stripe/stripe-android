@@ -7,6 +7,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
+import com.stripe.android.paymentelement.embedded.linkinline.EmbeddedLinkInlineAuthEvent
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormViewModel
 import com.stripe.android.paymentsheet.state.WalletsState
@@ -187,6 +188,11 @@ internal interface EventReporter : CardScanEventsReporter {
         experiment: LoggableExperiment,
         paymentMethodMetadata: PaymentMethodMetadata? = null,
     )
+
+    /**
+     * Something happened in a returning Link customer's inline verification in the Embedded Payment Element.
+     */
+    fun onEmbeddedLinkInlineAuthEvent(event: EmbeddedLinkInlineAuthEvent)
 
     /**
      * The customer has failed to set a payment method as the default.

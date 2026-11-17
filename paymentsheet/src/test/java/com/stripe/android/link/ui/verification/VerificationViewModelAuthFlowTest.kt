@@ -14,6 +14,7 @@ import com.stripe.android.link.account.FakeLinkAccountManager.ConfirmVerificatio
 import com.stripe.android.link.account.FakeLinkAccountManager.StartVerificationCall
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.analytics.FakeLinkEventsReporter
+import com.stripe.android.link.analytics.LinkAuthSurface
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.verification.LinkAuthFlowState.Screen
 import com.stripe.android.model.ConsumerSession.AuthenticationLevel
@@ -281,7 +282,7 @@ internal class VerificationViewModelAuthFlowTest {
     private class AuthFlowEventsReporter : FakeLinkEventsReporter() {
         val cancelCalls = Turbine<Unit>()
 
-        override fun on2FACancel() {
+        override fun on2FACancel(surface: LinkAuthSurface?) {
             cancelCalls.add(Unit)
         }
     }

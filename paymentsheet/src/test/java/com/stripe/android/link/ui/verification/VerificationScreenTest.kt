@@ -23,6 +23,7 @@ import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.FakeLinkEventsReporter
+import com.stripe.android.link.analytics.LinkAuthSurface
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.theme.DefaultLinkTheme
@@ -136,9 +137,10 @@ internal class VerificationScreenTest {
                 type: VerificationType,
                 accountPhoneNumber: String?,
                 isResend: Boolean,
+                analyticsSurface: LinkAuthSurface?,
             ): Result<LinkAccount> {
                 delay(1500)
-                return super.startVerification(type, accountPhoneNumber, isResend)
+                return super.startVerification(type, accountPhoneNumber, isResend, analyticsSurface)
             }
         }
 
@@ -172,9 +174,10 @@ internal class VerificationScreenTest {
                 code: String,
                 type: VerificationType,
                 consentGranted: Boolean?,
+                analyticsSurface: LinkAuthSurface?,
             ): Result<LinkAccount> {
                 delay(5500)
-                return super.confirmVerification(code, type, consentGranted)
+                return super.confirmVerification(code, type, consentGranted, analyticsSurface)
             }
         }
 
@@ -352,6 +355,6 @@ internal class VerificationScreenTest {
     private fun onVerificationHeaderButtonTag() = composeTestRule.onNodeWithTag(VERIFICATION_HEADER_BUTTON_TAG)
 
     private class VerificationLinkEventsReporter : FakeLinkEventsReporter() {
-        override fun on2FACancel() = Unit
+        override fun on2FACancel(surface: LinkAuthSurface?) = Unit
     }
 }

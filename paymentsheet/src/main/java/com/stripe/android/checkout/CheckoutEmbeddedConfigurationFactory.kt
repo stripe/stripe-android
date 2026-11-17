@@ -44,6 +44,8 @@ internal class CheckoutEmbeddedConfigurationFactory @Inject constructor(
             .shippingDetails(collectedDetails.toShippingDetails())
             .allowsDelayedPaymentMethods(true)
             .allowsPaymentMethodsRequiringShippingAddress(true)
+            // Inline Link verification is only built for the Embedded Payment Element.
+            .allowsLinkInlineVerification(false)
             .build()
     }
 }

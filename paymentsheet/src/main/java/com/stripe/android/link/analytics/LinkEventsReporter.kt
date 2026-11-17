@@ -13,12 +13,12 @@ internal interface LinkEventsReporter {
     fun onAccountLookupComplete()
     fun onAccountRefreshFailure(error: Throwable)
 
-    fun on2FAStart(verificationType: String)
-    fun on2FAStartFailure(verificationType: String)
-    fun on2FAComplete(verificationType: String)
-    fun on2FAFailure(verificationType: String)
-    fun on2FACancel()
-    fun on2FAResendCode(verificationType: String)
+    fun on2FAStart(verificationType: String, surface: LinkAuthSurface?)
+    fun on2FAStartFailure(verificationType: String, surface: LinkAuthSurface?)
+    fun on2FAComplete(verificationType: String, surface: LinkAuthSurface?)
+    fun on2FAFailure(verificationType: String, surface: LinkAuthSurface?)
+    fun on2FACancel(surface: LinkAuthSurface?)
+    fun on2FAResendCode(verificationType: String, surface: LinkAuthSurface?)
 
     fun onPopupShow()
     fun onPopupSuccess()

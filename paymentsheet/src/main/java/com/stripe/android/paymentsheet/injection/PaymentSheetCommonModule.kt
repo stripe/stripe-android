@@ -32,6 +32,7 @@ import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
+import com.stripe.android.paymentelement.embedded.linkinline.NoEmbeddedLinkInlineVerificationGateModule
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
 import com.stripe.android.paymentsheet.BuildConfig
@@ -89,6 +90,7 @@ import javax.inject.Singleton
         NfcScanningAvailabilityModule::class,
         ApiConfigurationResolverModule::class,
         PreselectLinkExperimentModule::class,
+        NoEmbeddedLinkInlineVerificationGateModule::class,
         PrimaryButtonExperimentModule::class,
     ]
 )

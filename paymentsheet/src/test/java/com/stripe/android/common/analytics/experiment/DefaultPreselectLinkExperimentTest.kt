@@ -11,6 +11,8 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.WalletButtonsPreview
+import com.stripe.android.paymentelement.embedded.linkinline.EmbeddedLinkInlineVerificationGate
+import com.stripe.android.paymentelement.embedded.linkinline.FakeEmbeddedLinkInlineVerificationGate
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -46,6 +48,35 @@ internal class DefaultPreselectLinkExperimentTest {
             "google_pay_enabled", "false",
             "has_saved_payment_method", "false",
         )
+    }
+
+    @Test
+    fun `session eligible for inline Link verification does not select Link or report exposure`() {
+        val gate = FakeEmbeddedLinkInlineVerificationGate(isEligible = true)
+        runScenario(
+            embeddedLinkInlineVerificationGate = gate,
+        ) {
+            assertNoSelectionOrExposure()
+
+            val call = gate.isEligibleCalls.awaitItem()
+            assertThat(call.metadata).isEqualTo(metadata)
+            assertThat(call.customer).isNull()
+            assertThat(call.integrationConfiguration).isEqualTo(integrationConfiguration)
+        }
+        gate.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `session not eligible for inline Link verification selects Link and reports exposure`() {
+        val gate = FakeEmbeddedLinkInlineVerificationGate(isEligible = false)
+        runScenario(
+            embeddedLinkInlineVerificationGate = gate,
+        ) {
+            assertThat(getSelection()).isEqualTo(PaymentSelection.Link(brand = LinkBrand.Link))
+            assertThat(eventReporter.experimentExposureCalls.awaitItem().experiment.group).isEqualTo("treatment")
+            assertThat(gate.isEligibleCalls.awaitItem().metadata).isEqualTo(metadata)
+        }
+        gate.ensureAllEventsConsumed()
     }
 
     @Test
@@ -196,13 +227,15 @@ internal class DefaultPreselectLinkExperimentTest {
         integrationConfiguration: PaymentElementLoader.Configuration = PaymentElementLoader.Configuration.PaymentSheet(
             PaymentSheetFixtures.CONFIG_MINIMUM,
         ),
+        embeddedLinkInlineVerificationGate: EmbeddedLinkInlineVerificationGate =
+            EmbeddedLinkInlineVerificationGate.Never,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val eventReporter = FakeEventReporter()
         Scenario(
             metadata = metadata,
             eventReporter = eventReporter,
-            experiment = DefaultPreselectLinkExperiment(eventReporter, mode),
+            experiment = DefaultPreselectLinkExperiment(eventReporter, mode, embeddedLinkInlineVerificationGate),
             integrationConfiguration = integrationConfiguration,
         ).block()
         eventReporter.validate()

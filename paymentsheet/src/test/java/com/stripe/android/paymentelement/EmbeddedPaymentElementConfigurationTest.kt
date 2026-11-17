@@ -95,6 +95,7 @@ class EmbeddedPaymentElementConfigurationTest {
             .termsDisplay(mapOf(PaymentMethod.Type.Card to TermsDisplay.NEVER))
             .opensCardScannerAutomatically(true)
             .userOverrideCountry("GB")
+            .allowsLinkInlineVerification(false)
             .apiConfiguration(
                 ApiConfiguration(DEFAULT_API_CONFIG.publishableKey)
                     .stripeAccountId(DEFAULT_API_CONFIG.stripeAccountId)
@@ -116,6 +117,22 @@ class EmbeddedPaymentElementConfigurationTest {
         // When a new property is added, this count will change, signaling that:
         // 1. newBuilder() needs to propagate the new property
         // 2. The round-trip test above needs a non-default value for it
-        assertThat(propertyCount).isEqualTo(24)
+        assertThat(propertyCount).isEqualTo(25)
+    }
+
+    @Test
+    fun `inline Link verification is allowed by default`() {
+        val configuration = EmbeddedPaymentElement.Configuration.Builder("Merchant").build()
+
+        assertThat(configuration.allowsLinkInlineVerification).isTrue()
+    }
+
+    @Test
+    fun `inline Link verification can be disallowed`() {
+        val configuration = EmbeddedPaymentElement.Configuration.Builder("Merchant")
+            .allowsLinkInlineVerification(false)
+            .build()
+
+        assertThat(configuration.allowsLinkInlineVerification).isFalse()
     }
 }

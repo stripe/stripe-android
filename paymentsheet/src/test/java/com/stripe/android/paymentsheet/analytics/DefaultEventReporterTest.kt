@@ -30,8 +30,11 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentelement.AnalyticEvent
 import com.stripe.android.paymentelement.AnalyticEventCallback
+import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
+import com.stripe.android.paymentelement.embedded.linkinline.EmbeddedLinkInlineAuthEvent
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormViewModel
@@ -115,6 +118,106 @@ class DefaultEventReporterTest {
             "dimensions-in_app_elements_integration_type", "flowcontroller",
             "dimensions-has_saved_payment_method", "false",
         )
+    }
+
+    @Test
+    fun `inline Link verification exposure includes its dimensions`() = runScenario {
+        val metadata = paymentMethodMetadataWithTestAnalyticsMetadata.copy(elementsSessionId = "es_123")
+        val experiment = LoggableExperiment.OcsMobileEmbeddedLinkInlineOtp(
+            experimentsData = ElementsSession.ExperimentsData(
+                arbId = "arb_123",
+                experimentAssignments = mapOf(ExperimentAssignment.OCS_MOBILE_EMBEDDED_LINK_INLINE_OTP to "treatment"),
+            ),
+            group = "treatment",
+            metadata = metadata,
+            mobileSessionId = "mobile_session_123",
+            mobileSdkVersion = "1.0.0",
+            hasSavedPaymentMethod = false,
+            rowStyle = PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark.default,
+            formSheetAction = EmbeddedPaymentElement.FormSheetAction.Confirm,
+            isRowSelectionImmediateAction = true,
+            canVerifyWithEmail = true,
+            isLargeTextSize = false,
+        )
+
+        eventReporter.onExperimentExposure(experiment, paymentMethodMetadata = metadata)
+
+        val request = analyticsRequestV2Executor.enqueueCalls.awaitItem()
+        assertThat(request.eventName).isEqualTo("elements.experiment_exposure")
+        assertThat(request.params.toMap()).containsAtLeast(
+            "experiment_retrieved", "ocs_mobile_embedded_link_inline_otp",
+            "arb_id", "arb_123",
+            "assignment_group", "treatment",
+            "dimensions-in_app_elements_integration_type", "embedded",
+            "dimensions-elements_session_id", "es_123",
+            "dimensions-mobile_session_id", "mobile_session_123",
+            "dimensions-mobile_sdk_version", "1.0.0",
+            "dimensions-has_saved_payment_method", "false",
+            "dimensions-embedded_row_style", "flat_with_checkmark",
+            "dimensions-embedded_form_sheet_action", "confirm",
+            "dimensions-embedded_row_selection_behavior", "immediate_action",
+            "dimensions-link_verification_methods", "sms_email",
+            "dimensions-large_text_size", "false",
+        )
+        assertThat(request.params.toMap()).containsKey("dimensions-displayed_payment_method_types")
+        assertThat(request.params.toMap()).containsKey("dimensions-displayed_payment_method_types_including_wallets")
+    }
+
+    @Test
+    fun `inline Link verification exposure reports SMS only when email is not available`() = runScenario {
+        val metadata = paymentMethodMetadataWithTestAnalyticsMetadata
+        val experiment = LoggableExperiment.OcsMobileEmbeddedLinkInlineOtp(
+            experimentsData = ElementsSession.ExperimentsData(
+                arbId = "arb_123",
+                experimentAssignments = mapOf(ExperimentAssignment.OCS_MOBILE_EMBEDDED_LINK_INLINE_OTP to "control"),
+            ),
+            group = "control",
+            metadata = metadata,
+            mobileSessionId = "mobile_session_123",
+            mobileSdkVersion = "1.0.0",
+            hasSavedPaymentMethod = false,
+            rowStyle = PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton.default,
+            formSheetAction = EmbeddedPaymentElement.FormSheetAction.Continue,
+            isRowSelectionImmediateAction = false,
+            canVerifyWithEmail = false,
+            isLargeTextSize = true,
+        )
+
+        eventReporter.onExperimentExposure(experiment, paymentMethodMetadata = metadata)
+
+        val request = analyticsRequestV2Executor.enqueueCalls.awaitItem()
+        assertThat(request.params.toMap()).containsAtLeast(
+            "dimensions-embedded_row_style", "floating_button",
+            "dimensions-embedded_form_sheet_action", "continue",
+            "dimensions-embedded_row_selection_behavior", "default",
+            "dimensions-link_verification_methods", "sms",
+            "dimensions-large_text_size", "true",
+        )
+    }
+
+    @Test
+    fun `onEmbeddedLinkInlineAuthEvent fires event without a reason`() = runScenario {
+        paymentMethodMetadataStack.push(paymentMethodMetadataWithTestAnalyticsMetadata)
+
+        eventReporter.onEmbeddedLinkInlineAuthEvent(EmbeddedLinkInlineAuthEvent.Shown)
+
+        val request = analyticsRequestExecutor.requestTurbine.awaitItem()
+        assertThat(request.params).containsEntry("event", "link.embedded_inline_auth.shown")
+        assertThat(request.params).containsEntry("example_from_test", true)
+        assertThat(request.params).doesNotContainKey("reason")
+    }
+
+    @Test
+    fun `onEmbeddedLinkInlineAuthEvent fires event with its reason`() = runScenario {
+        paymentMethodMetadataStack.push(paymentMethodMetadataWithTestAnalyticsMetadata)
+
+        eventReporter.onEmbeddedLinkInlineAuthEvent(
+            EmbeddedLinkInlineAuthEvent.DialogShown(EmbeddedLinkInlineAuthEvent.DialogReason.ScreenReader)
+        )
+
+        val request = analyticsRequestExecutor.requestTurbine.awaitItem()
+        assertThat(request.params).containsEntry("event", "link.embedded_inline_auth.dialog_shown")
+        assertThat(request.params).containsEntry("reason", "voice_over")
     }
 
     @Test

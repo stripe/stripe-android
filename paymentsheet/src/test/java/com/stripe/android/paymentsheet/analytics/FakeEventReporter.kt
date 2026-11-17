@@ -8,6 +8,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
+import com.stripe.android.paymentelement.embedded.linkinline.EmbeddedLinkInlineAuthEvent
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormViewModel
 import com.stripe.android.paymentsheet.state.WalletsState
@@ -57,6 +58,10 @@ internal class FakeEventReporter : EventReporter {
 
     private val _experimentExposureCalls = Turbine<ExperimentExposureCall>()
     val experimentExposureCalls: ReceiveTurbine<ExperimentExposureCall> = _experimentExposureCalls
+
+    private val _embeddedLinkInlineAuthEventCalls = Turbine<EmbeddedLinkInlineAuthEvent>()
+    val embeddedLinkInlineAuthEventCalls: ReceiveTurbine<EmbeddedLinkInlineAuthEvent> =
+        _embeddedLinkInlineAuthEventCalls
 
     private val _removePaymentMethodCalls = Turbine<RemovePaymentMethodCall>()
     val removePaymentMethodCalls: ReceiveTurbine<RemovePaymentMethodCall> = _removePaymentMethodCalls
@@ -127,6 +132,7 @@ internal class FakeEventReporter : EventReporter {
         _showNewPaymentOptionsCalls.ensureAllEventsConsumed()
         _showManageSavedPaymentMethods.ensureAllEventsConsumed()
         _experimentExposureCalls.ensureAllEventsConsumed()
+        _embeddedLinkInlineAuthEventCalls.ensureAllEventsConsumed()
         _removePaymentMethodCalls.ensureAllEventsConsumed()
         _formCompletedCalls.ensureAllEventsConsumed()
         _walletButtonTappedCalls.ensureAllEventsConsumed()
@@ -263,6 +269,10 @@ internal class FakeEventReporter : EventReporter {
         _experimentExposureCalls.add(
             ExperimentExposureCall(experiment, paymentMethodMetadata)
         )
+    }
+
+    override fun onEmbeddedLinkInlineAuthEvent(event: EmbeddedLinkInlineAuthEvent) {
+        _embeddedLinkInlineAuthEventCalls.add(event)
     }
 
     override fun onSetAsDefaultPaymentMethodFailed(

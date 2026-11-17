@@ -11,6 +11,7 @@ import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.account.FakeLinkAccountManager.ConfirmVerificationCall
 import com.stripe.android.link.account.FakeLinkAccountManager.StartVerificationCall
 import com.stripe.android.link.analytics.FakeLinkEventsReporter
+import com.stripe.android.link.analytics.LinkAuthSurface
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.verification.LinkAuthFlowState.Screen
 import com.stripe.android.model.ConsumerSession.AuthenticationLevel
@@ -326,7 +327,7 @@ internal class LinkAuthFlowTest {
 
         flow.resend()
 
-        assertThat(eventsReporter.resendCalls.awaitItem()).isEqualTo(VerificationType.EMAIL.value)
+        assertThat(eventsReporter.resendCalls.awaitItem().verificationType).isEqualTo(VerificationType.EMAIL.value)
         assertThat(accountManager.awaitStartVerificationCall()).isEqualTo(emailStart(isResend = true))
         assertThat(flow.state.value.resendSecondsRemaining).isEqualTo(10)
         assertThat(flow.state.value.canResend).isFalse()
@@ -351,7 +352,7 @@ internal class LinkAuthFlowTest {
 
         flow.resend()
 
-        assertThat(eventsReporter.resendCalls.awaitItem()).isEqualTo(VerificationType.SMS.value)
+        assertThat(eventsReporter.resendCalls.awaitItem().verificationType).isEqualTo(VerificationType.SMS.value)
         assertThat(accountManager.awaitStartVerificationCall()).isEqualTo(smsStart(isResend = true))
         val state = flow.state.value
         assertThat(state.errorMessage).isEqualTo("Nope".resolvableString)
@@ -525,6 +526,148 @@ internal class LinkAuthFlowTest {
         assertThat(results.awaitItem()).isEqualTo(LinkAuthFlowResult.SwitchAccount)
     }
 
+    @Test
+    fun `hasStarted is false until start`() = runScenario {
+        assertThat(flow.hasStarted).isFalse()
+
+        flow.start()
+
+        assertThat(flow.hasStarted).isTrue()
+        accountManager.awaitStartVerificationCall()
+    }
+
+    @Test
+    fun `isCodeSent becomes true once the code is sent`() = runScenario {
+        assertThat(flow.state.value.isCodeSent).isFalse()
+
+        flow.start()
+
+        accountManager.awaitStartVerificationCall()
+        assertThat(flow.state.value.isCodeSent).isTrue()
+    }
+
+    @Test
+    fun `isCodeSent stays false when the first code can't be sent`() = runScenario {
+        accountManager.startVerificationResultProvider = {
+            Result.failure(stripeException(code = "rate_limit", message = "Too many requests"))
+        }
+
+        flow.start()
+
+        accountManager.awaitStartVerificationCall()
+        assertThat(flow.state.value.screen).isEqualTo(Screen.Otp)
+        assertThat(flow.state.value.isCodeSent).isFalse()
+        assertThat(flow.state.value.isLoading).isFalse()
+    }
+
+    @Test
+    fun `invalidate ends the attempt without logging a cancel or finishing`() = runScenario {
+        flow.start()
+        accountManager.awaitStartVerificationCall()
+
+        flow.invalidate()
+
+        assertThat(flow.isFinished).isTrue()
+        assertThat(flow.state.value.canSubmitCode).isFalse()
+        eventsReporter.cancelCalls.expectNoEvents()
+        results.expectNoEvents()
+    }
+
+    @Test
+    fun `invalidate ignores the response to a request in flight`() = runScenario {
+        flow.start()
+        accountManager.awaitStartVerificationCall()
+        val response = CompletableDeferred<Result<LinkAccount>>()
+        accountManager.confirmVerificationResultProvider = { response.await() }
+        flow.confirm(CODE)
+        accountManager.awaitConfirmVerificationCall()
+
+        flow.invalidate()
+        response.complete(Result.success(accountState.spec.copy(current = MINIMUM_REACHED).toLinkAccount()))
+
+        assertThat(flow.isFinished).isTrue()
+        assertThat(flow.state.value.isLoading).isFalse()
+        results.expectNoEvents()
+    }
+
+    @Test
+    fun `cancel after invalidate does nothing`() = runScenario {
+        flow.invalidate()
+
+        flow.cancel(switchAccount = false)
+
+        eventsReporter.cancelCalls.expectNoEvents()
+        results.expectNoEvents()
+    }
+
+    @Test
+    fun `rejected code changes the invalid code revision`() = runScenario {
+        flow.start()
+        accountManager.awaitStartVerificationCall()
+        val invalidCodeRevision = flow.state.value.invalidCodeRevision
+        accountManager.confirmVerificationResultProvider = {
+            Result.failure(stripeException(code = "consumer_verification_code_invalid", message = "Bad code"))
+        }
+
+        flow.confirm(CODE)
+
+        accountManager.awaitConfirmVerificationCall()
+        assertThat(flow.state.value.invalidCodeRevision).isEqualTo(invalidCodeRevision + 1)
+    }
+
+    @Test
+    fun `resend keeps the invalid code revision`() = runScenario {
+        flow.start()
+        accountManager.awaitStartVerificationCall()
+        val invalidCodeRevision = flow.state.value.invalidCodeRevision
+        val inputRevision = flow.state.value.inputRevision
+
+        flow.resend()
+
+        eventsReporter.resendCalls.awaitItem()
+        accountManager.awaitStartVerificationCall()
+        assertThat(flow.state.value.inputRevision).isGreaterThan(inputRevision)
+        assertThat(flow.state.value.invalidCodeRevision).isEqualTo(invalidCodeRevision)
+    }
+
+    @Test
+    fun `analytics surface is not reported by default`() = runScenario {
+        flow.start()
+
+        assertThat(accountManager.awaitStartVerificationCall().analyticsSurface).isNull()
+    }
+
+    @Test
+    fun `analytics surface is reported with every 2FA request and event`() = runScenario {
+        flow.analyticsSurface = LinkAuthSurface.EmbeddedInline
+        flow.start()
+        assertThat(accountManager.awaitStartVerificationCall().analyticsSurface)
+            .isEqualTo(LinkAuthSurface.EmbeddedInline)
+
+        flow.analyticsSurface = LinkAuthSurface.EmbeddedDialog
+        flow.resend()
+        assertThat(eventsReporter.resendCalls.awaitItem()).isEqualTo(
+            AuthFlowEventsReporter.ResendCall(
+                verificationType = VerificationType.SMS.value,
+                surface = LinkAuthSurface.EmbeddedDialog,
+            )
+        )
+        assertThat(accountManager.awaitStartVerificationCall().analyticsSurface)
+            .isEqualTo(LinkAuthSurface.EmbeddedDialog)
+
+        accountManager.confirmVerificationResultProvider = {
+            Result.failure(stripeException(code = "consumer_verification_code_invalid", message = "Bad code"))
+        }
+        flow.confirm(CODE)
+        assertThat(accountManager.awaitConfirmVerificationCall().analyticsSurface)
+            .isEqualTo(LinkAuthSurface.EmbeddedDialog)
+
+        flow.analyticsSurface = LinkAuthSurface.EmbeddedInline
+        flow.cancel(switchAccount = false)
+        assertThat(eventsReporter.cancelCalls.awaitItem()).isEqualTo(LinkAuthSurface.EmbeddedInline)
+        assertThat(results.awaitItem()).isEqualTo(LinkAuthFlowResult.Canceled)
+    }
+
     private fun runScenario(
         initial: AccountSpec = AccountSpec(),
         capabilities: List<VerificationType> = listOf(VerificationType.SMS, VerificationType.EMAIL),
@@ -608,21 +751,26 @@ internal class LinkAuthFlowTest {
     }
 
     private class AuthFlowEventsReporter : FakeLinkEventsReporter() {
-        val cancelCalls = Turbine<Unit>()
-        val resendCalls = Turbine<String>()
+        val cancelCalls = Turbine<LinkAuthSurface?>()
+        val resendCalls = Turbine<ResendCall>()
 
-        override fun on2FACancel() {
-            cancelCalls.add(Unit)
+        override fun on2FACancel(surface: LinkAuthSurface?) {
+            cancelCalls.add(surface)
         }
 
-        override fun on2FAResendCode(verificationType: String) {
-            resendCalls.add(verificationType)
+        override fun on2FAResendCode(verificationType: String, surface: LinkAuthSurface?) {
+            resendCalls.add(ResendCall(verificationType, surface))
         }
 
         fun ensureAllEventsConsumed() {
             cancelCalls.ensureAllEventsConsumed()
             resendCalls.ensureAllEventsConsumed()
         }
+
+        data class ResendCall(
+            val verificationType: String,
+            val surface: LinkAuthSurface?,
+        )
     }
 
     private companion object {

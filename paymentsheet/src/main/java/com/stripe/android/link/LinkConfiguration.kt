@@ -4,6 +4,8 @@ import android.os.Parcelable
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.core.ApiConfiguration
+import com.stripe.android.core.utils.FeatureFlag
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.ClientAttributionMetadata
@@ -68,6 +70,30 @@ internal data class LinkConfiguration(
      */
     val enableMfaAuthFlow: Boolean
         get() = flags["link_mobile_enable_mfa_auth_flow"] == true
+
+    /**
+     * Whether a returning customer can verify inline in the Embedded Payment Element.
+     */
+    val enableEmbeddedInlineOtp: Boolean
+        get() = FeatureFlags.embeddedInlineLinkOtp.overrideOr(
+            serverValue = flags["link_mobile_enable_embedded_inline_otp"] == true
+        )
+
+    /**
+     * Whether every code entry in the Embedded Payment Element's inline verification uses the Link dialog.
+     */
+    val embeddedInlineOtpForcesDialog: Boolean
+        get() = FeatureFlags.embeddedInlineLinkOtpForceDialog.overrideOr(
+            serverValue = flags["link_mobile_embedded_inline_otp_force_dialog"] == true
+        )
+
+    private fun FeatureFlag.overrideOr(serverValue: Boolean): Boolean {
+        return when (value) {
+            FeatureFlag.Flag.Enabled -> true
+            FeatureFlag.Flag.Disabled -> false
+            FeatureFlag.Flag.NotSet -> serverValue
+        }
+    }
 
     @Parcelize
     data class CustomerInfo(

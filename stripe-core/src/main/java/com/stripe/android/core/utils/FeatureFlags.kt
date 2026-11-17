@@ -16,6 +16,8 @@ object FeatureFlags {
     val forceLinkWebAuth = FeatureFlag("Link: Force web auth")
     val forceOnelink = FeatureFlag("Link: Force Onelink brand")
     val forceOnelinkConsumer = FeatureFlag("Link: Force Onelink consumer")
+    val embeddedInlineLinkOtp = FeatureFlag("Link: Embedded inline OTP")
+    val embeddedInlineLinkOtpForceDialog = FeatureFlag("Link: Embedded inline OTP force dialog")
     val enableKlarnaFormRemoval = FeatureFlag("Remove forms from Klarna")
     val disableNfcScanning = FeatureFlag("Disable NFC Scanning")
     val disableNfcScanningSecurity = FeatureFlag("Disable NFC Scanning Security")

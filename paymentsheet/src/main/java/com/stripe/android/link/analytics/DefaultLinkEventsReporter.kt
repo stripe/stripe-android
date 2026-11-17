@@ -87,30 +87,30 @@ internal class DefaultLinkEventsReporter @Inject constructor(
         fireEvent(LinkEvent.AccountRefreshFailure, params)
     }
 
-    override fun on2FAStart(verificationType: String) {
-        fireEvent(LinkEvent.TwoFAStart, mapOf("verification_type" to verificationType))
+    override fun on2FAStart(verificationType: String, surface: LinkAuthSurface?) {
+        fireEvent(LinkEvent.TwoFAStart, twoFAParams(verificationType, surface))
     }
 
-    override fun on2FAStartFailure(verificationType: String) {
-        fireEvent(LinkEvent.TwoFAStartFailure, mapOf("verification_type" to verificationType))
+    override fun on2FAStartFailure(verificationType: String, surface: LinkAuthSurface?) {
+        fireEvent(LinkEvent.TwoFAStartFailure, twoFAParams(verificationType, surface))
     }
 
-    override fun on2FAComplete(verificationType: String) {
-        fireEvent(LinkEvent.TwoFAComplete, mapOf("verification_type" to verificationType))
+    override fun on2FAComplete(verificationType: String, surface: LinkAuthSurface?) {
+        fireEvent(LinkEvent.TwoFAComplete, twoFAParams(verificationType, surface))
     }
 
-    override fun on2FAFailure(verificationType: String) {
-        fireEvent(LinkEvent.TwoFAFailure, mapOf("verification_type" to verificationType))
+    override fun on2FAFailure(verificationType: String, surface: LinkAuthSurface?) {
+        fireEvent(LinkEvent.TwoFAFailure, twoFAParams(verificationType, surface))
     }
 
-    override fun on2FACancel() {
-        fireEvent(LinkEvent.TwoFACancel)
+    override fun on2FACancel(surface: LinkAuthSurface?) {
+        fireEvent(LinkEvent.TwoFACancel, twoFAParams(verificationType = null, surface = surface))
     }
 
-    override fun on2FAResendCode(verificationType: String) {
+    override fun on2FAResendCode(verificationType: String, surface: LinkAuthSurface?) {
         fireEvent(
             LinkEvent.TwoFAResendCode(verificationType),
-            mapOf("verification_type" to verificationType)
+            twoFAParams(verificationType, surface)
         )
     }
 
@@ -138,6 +138,14 @@ internal class DefaultLinkEventsReporter @Inject constructor(
 
     override fun onPopupSkipped() {
         fireEvent(LinkEvent.PopupSkipped)
+    }
+
+    private fun twoFAParams(verificationType: String?, surface: LinkAuthSurface?): Map<String, Any>? {
+        val params = buildMap {
+            verificationType?.let { put(FIELD_VERIFICATION_TYPE, it) }
+            surface?.let { put(FIELD_LINK_AUTH_SURFACE, it.analyticsValue) }
+        }
+        return params.ifEmpty { null }
     }
 
     private fun durationInSecondsFromStart(duration: Duration?): Map<String, Float>? {
@@ -175,5 +183,7 @@ internal class DefaultLinkEventsReporter @Inject constructor(
         private const val VALUE_VERIFIED = "verified"
 
         private const val FIELD_ERROR_MESSAGE = "error_message"
+        private const val FIELD_VERIFICATION_TYPE = "verification_type"
+        private const val FIELD_LINK_AUTH_SURFACE = "link_auth_surface"
     }
 }

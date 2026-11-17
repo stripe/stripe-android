@@ -14,6 +14,7 @@ import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.FakeLinkEventsReporter
+import com.stripe.android.link.analytics.LinkAuthSurface
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.model.ConsentPresentation
 import com.stripe.android.link.model.LinkAccount
@@ -53,6 +54,7 @@ internal class VerificationViewModelTest {
                 type: VerificationType,
                 accountPhoneNumber: String?,
                 isResend: Boolean,
+                analyticsSurface: LinkAuthSurface?,
             ): Result<LinkAccount> {
                 callCount += 1
                 return Result.success(TestFactory.LINK_ACCOUNT)
@@ -123,7 +125,7 @@ internal class VerificationViewModelTest {
     @Test
     fun `When confirmVerification fails then code is cleared`() = runTest(dispatcher) {
         val linkEventsReporter = object : FakeLinkEventsReporter() {
-            override fun on2FAFailure(verificationType: String) = Unit
+            override fun on2FAFailure(verificationType: String, surface: LinkAuthSurface?) = Unit
         }
         val linkAccountManager = object : FakeLinkAccountManager() {
             var codeUsed: String? = null
@@ -131,6 +133,7 @@ internal class VerificationViewModelTest {
                 code: String,
                 type: VerificationType,
                 consentGranted: Boolean?,
+                analyticsSurface: LinkAuthSurface?,
             ): Result<LinkAccount> {
                 codeUsed = code
                 return Result.failure(RuntimeException("Error"))
@@ -178,9 +181,10 @@ internal class VerificationViewModelTest {
                 type: VerificationType,
                 accountPhoneNumber: String?,
                 isResend: Boolean,
+                analyticsSurface: LinkAuthSurface?,
             ): Result<LinkAccount> {
                 delay(100)
-                return super.startVerification(type, accountPhoneNumber, isResend)
+                return super.startVerification(type, accountPhoneNumber, isResend, analyticsSurface)
             }
         }
 
@@ -212,6 +216,7 @@ internal class VerificationViewModelTest {
                 type: VerificationType,
                 accountPhoneNumber: String?,
                 isResend: Boolean,
+                analyticsSurface: LinkAuthSurface?,
             ): Result<LinkAccount> {
                 delay(100)
                 return Result.failure(RuntimeException("error"))
@@ -264,6 +269,7 @@ internal class VerificationViewModelTest {
                 code: String,
                 type: VerificationType,
                 consentGranted: Boolean?,
+                analyticsSurface: LinkAuthSurface?,
             ): Result<LinkAccount> {
                 consentGrantedValue = consentGranted
                 return Result.success(TestFactory.LINK_ACCOUNT)
@@ -304,6 +310,7 @@ internal class VerificationViewModelTest {
                 code: String,
                 type: VerificationType,
                 consentGranted: Boolean?,
+                analyticsSurface: LinkAuthSurface?,
             ): Result<LinkAccount> {
                     return Result.success(linkAccountWithInlineConsent())
                 }
@@ -341,6 +348,7 @@ internal class VerificationViewModelTest {
                 code: String,
                 type: VerificationType,
                 consentGranted: Boolean?,
+                analyticsSurface: LinkAuthSurface?,
             ): Result<LinkAccount> {
                 consentGrantedValue = consentGranted
                 return Result.success(linkAccountWithInlineConsent(mock()))
@@ -373,6 +381,7 @@ internal class VerificationViewModelTest {
                 code: String,
                 type: VerificationType,
                 consentGranted: Boolean?,
+                analyticsSurface: LinkAuthSurface?,
             ): Result<LinkAccount> {
                 consentGrantedValue = consentGranted
                 return Result.success(TestFactory.LINK_ACCOUNT)

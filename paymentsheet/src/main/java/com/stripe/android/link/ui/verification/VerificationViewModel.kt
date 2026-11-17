@@ -172,6 +172,7 @@ internal class VerificationViewModel @Inject constructor(
             code = code,
             type = VerificationType.SMS,
             consentGranted = didSeeConsentSection.takeIf { it },
+            analyticsSurface = null,
         ).fold(
             onSuccess = { account ->
                 updateViewState { it.copy(isProcessing = false) }
@@ -217,24 +218,7 @@ internal class VerificationViewModel @Inject constructor(
         if (isNewInput) {
             otpElement.controller.reset()
         }
-        updateViewState {
-            it.copy(
-                isProcessing = state.isLoading && !state.isResending,
-                isSendingNewCode = state.isResending,
-                errorMessage = state.errorMessage,
-                requestFocus = it.requestFocus || (isNewInput && state.screen == LinkAuthFlowState.Screen.Otp),
-                authFlow = VerificationViewState.AuthFlowViewState(
-                    screen = state.screen,
-                    recipient = state.recipient,
-                    canGoBack = state.canGoBack,
-                    codeEntryEnabled = state.canSubmitCode,
-                    canSendToEmail = state.canSendToEmail,
-                    canResend = state.canResend,
-                    resendSecondsRemaining = state.resendSecondsRemaining,
-                    phoneNumberLastTwoDigits = state.phoneNumberLastTwoDigits,
-                ),
-            )
-        }
+        updateViewState { it.withAuthFlowState(state, isNewInput) }
     }
 
     private fun onAuthFlowFinished(result: LinkAuthFlowResult) {
@@ -275,6 +259,7 @@ internal class VerificationViewModel @Inject constructor(
                 type = VerificationType.SMS,
                 accountPhoneNumber = null,
                 isResend = isResend,
+                analyticsSurface = null,
             )
             val error = result.exceptionOrNull()
 
@@ -331,7 +316,7 @@ internal class VerificationViewModel @Inject constructor(
             it.resend()
             return
         }
-        linkEventsReporter.on2FAResendCode(verificationType = "SMS")
+        linkEventsReporter.on2FAResendCode(verificationType = "SMS", surface = null)
         updateViewState { it.copy(isSendingNewCode = true) }
         startVerification(isResend = true)
     }
@@ -369,7 +354,7 @@ internal class VerificationViewModel @Inject constructor(
             return
         }
         onDismissClicked()
-        linkEventsReporter.on2FACancel()
+        linkEventsReporter.on2FACancel(surface = null)
     }
 
     fun onChangeEmailButtonClicked() {

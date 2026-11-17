@@ -43,3 +43,30 @@ internal data class VerificationViewState(
         val phoneNumberLastTwoDigits: String?,
     ) : Parcelable
 }
+
+/**
+ * Applies the state of a [LinkAuthFlow] to this view state.
+ *
+ * @param isNewInput Whether the flow asks for a new code, which requests focus on the code field.
+ */
+internal fun VerificationViewState.withAuthFlowState(
+    state: LinkAuthFlowState,
+    isNewInput: Boolean,
+): VerificationViewState {
+    return copy(
+        isProcessing = state.isLoading && !state.isResending,
+        isSendingNewCode = state.isResending,
+        errorMessage = state.errorMessage,
+        requestFocus = requestFocus || (isNewInput && state.screen == LinkAuthFlowState.Screen.Otp),
+        authFlow = VerificationViewState.AuthFlowViewState(
+            screen = state.screen,
+            recipient = state.recipient,
+            canGoBack = state.canGoBack,
+            codeEntryEnabled = state.canSubmitCode,
+            canSendToEmail = state.canSendToEmail,
+            canResend = state.canResend,
+            resendSecondsRemaining = state.resendSecondsRemaining,
+            phoneNumberLastTwoDigits = state.phoneNumberLastTwoDigits,
+        ),
+    )
+}
