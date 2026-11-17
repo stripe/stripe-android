@@ -147,7 +147,7 @@ internal class EmbeddedLinkInlineAuthController(
      * Paying with Link after closing the card verifies in the dialog first, reusing the code the card sent.
      */
     val verifiesBeforeConfirming: Boolean
-        get() = phase.value == Phase.Collapsed && dialog.value == null && !authFlow.isFinished
+        get() = phase.value == Phase.Collapsed && dialog.value == null && authFlow.hasStarted && !authFlow.isFinished
 
     private val didBecomeVisible = MutableStateFlow(false)
 

@@ -7,6 +7,8 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.embedded.FakeEmbeddedSheetLauncher
+import com.stripe.android.paymentelement.embedded.linkinline.FakeEmbeddedLinkInlineActivityHost
+import com.stripe.android.paymentelement.embedded.linkinline.FakeEmbeddedLinkInlineAuth
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.testing.CoroutineTestRule
 import kotlinx.coroutines.test.runTest
@@ -24,6 +26,15 @@ internal class EmbeddedPaymentElementInitializerTest {
         assertThat(sheetStateHolder.sheetLauncher).isNotNull()
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
         assertThat(sheetStateHolder.sheetLauncher).isNull()
+    }
+
+    @Test
+    fun `initialize attaches the screen to inline Link verification until it's destroyed`() = testScenario {
+        assertThat(linkInlineAuth.activityHost).isNull()
+        initializer.initialize(true)
+        assertThat(linkInlineAuth.activityHost).isSameInstanceAs(linkInlineActivityHost)
+        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+        assertThat(linkInlineAuth.activityHost).isNull()
     }
 
     @Test
@@ -81,9 +92,13 @@ internal class EmbeddedPaymentElementInitializerTest {
     ) = runTest {
         val sheetStateHolder = SheetStateHolder(SavedStateHandle())
         val eventReporter = FakeEventReporter()
+        val linkInlineAuth = FakeEmbeddedLinkInlineAuth()
+        val linkInlineActivityHost = FakeEmbeddedLinkInlineActivityHost()
         val initializer = EmbeddedPaymentElementInitializer(
             sheetLauncher = FakeEmbeddedSheetLauncher(),
             sheetStateHolder = sheetStateHolder,
+            linkInlineAuth = linkInlineAuth,
+            linkInlineActivityHost = linkInlineActivityHost,
             lifecycleOwner = lifecycleOwner,
             savedStateHandle = SavedStateHandle(),
             eventReporter = eventReporter,
@@ -94,8 +109,12 @@ internal class EmbeddedPaymentElementInitializerTest {
             sheetStateHolder = sheetStateHolder,
             lifecycleOwner = lifecycleOwner,
             eventReporter = eventReporter,
+            linkInlineAuth = linkInlineAuth,
+            linkInlineActivityHost = linkInlineActivityHost,
         ).block()
         eventReporter.validate()
+        linkInlineAuth.ensureAllEventsConsumed()
+        linkInlineActivityHost.ensureAllEventsConsumed()
     }
 
     private class Scenario(
@@ -103,6 +122,8 @@ internal class EmbeddedPaymentElementInitializerTest {
         val sheetStateHolder: SheetStateHolder,
         val lifecycleOwner: TestLifecycleOwner,
         val eventReporter: FakeEventReporter,
+        val linkInlineAuth: FakeEmbeddedLinkInlineAuth,
+        val linkInlineActivityHost: FakeEmbeddedLinkInlineActivityHost,
     )
 
     private companion object {

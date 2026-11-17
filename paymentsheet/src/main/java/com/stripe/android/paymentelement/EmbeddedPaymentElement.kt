@@ -5,6 +5,7 @@ import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
+import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -818,6 +819,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
         fun create(
             activity: Activity,
             activityResultCaller: ActivityResultCaller,
+            activityResultRegistryOwner: ActivityResultRegistryOwner,
             viewModelStoreOwner: ViewModelStoreOwner,
             lifecycleOwner: LifecycleOwner,
             paymentElementCallbackIdentifier: String,
@@ -836,6 +838,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
 
             val embeddedPaymentElementSubcomponent = viewModel.embeddedPaymentElementSubcomponentFactory.build(
                 activityResultCaller = activityResultCaller,
+                activityResultRegistryOwner = activityResultRegistryOwner,
                 lifecycleOwner = lifecycleOwner,
                 resultCallback = resultCallback,
             )

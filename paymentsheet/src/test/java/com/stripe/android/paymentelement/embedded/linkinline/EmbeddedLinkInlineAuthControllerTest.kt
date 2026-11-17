@@ -37,6 +37,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -166,7 +167,7 @@ internal class EmbeddedLinkInlineAuthControllerTest {
     fun `right code from the card verifies from the card`() = runScenario {
         sendFirstCode()
 
-        enterCode(controller.card.value?.otpElement)
+        enterCodeInCard()
 
         assertThat(accountManager.awaitConfirmVerificationCall().analyticsSurface)
             .isEqualTo(LinkAuthSurface.EmbeddedInline)
@@ -182,9 +183,7 @@ internal class EmbeddedLinkInlineAuthControllerTest {
         accountManager.confirmVerificationResultProvider = {
             Result.failure(APIException(stripeError = StripeError(code = "invalid", message = "Wrong code")))
         }
-        val otpElement = requireNotNull(controller.card.value?.otpElement)
-
-        enterCode(otpElement)
+        val otpElement = enterCodeInCard()
 
         accountManager.awaitConfirmVerificationCall()
         assertThat(otpElement.controller.fieldValue.value).isEmpty()
@@ -420,7 +419,7 @@ internal class EmbeddedLinkInlineAuthControllerTest {
             )
         }
 
-        enterCode(controller.card.value?.otpElement)
+        enterCodeInCard()
 
         accountManager.awaitConfirmVerificationCall()
         assertThat(eventReporter.embeddedLinkInlineAuthEventCalls.awaitItem())
@@ -448,6 +447,15 @@ internal class EmbeddedLinkInlineAuthControllerTest {
         assertThat(eventReporter.embeddedLinkInlineAuthEventCalls.awaitItem())
             .isEqualTo(EmbeddedLinkInlineAuthEvent.DialogShown(reason))
         assertThat(controller.dialog.value).isNotNull()
+    }
+
+    /**
+     * Waits for the card to take a code, i.e. for the send to finish, then enters one.
+     */
+    private suspend fun Scenario.enterCodeInCard(): OTPElement {
+        val otpElement = requireNotNull(controller.card.first { it?.state?.isCodeEntryEnabled == true }).otpElement
+        enterCode(otpElement)
+        return otpElement
     }
 
     private fun enterCode(otpElement: OTPElement?) {

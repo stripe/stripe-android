@@ -6,6 +6,8 @@ import androidx.lifecycle.testing.TestLifecycleOwner
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
+import com.stripe.android.link.LinkPaymentMethod
+import com.stripe.android.link.TestFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentIntentFixtures
@@ -15,6 +17,7 @@ import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
+import com.stripe.android.paymentelement.embedded.linkinline.EmbeddedLinkInlineAuthController.ConfirmVerificationResult
 import com.stripe.android.paymentelement.embedded.linkinline.FakeEmbeddedLinkInlineAuth
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
@@ -130,6 +133,91 @@ internal class DefaultEmbeddedConfirmationHelperTest {
         assertThat(args.confirmationOption).isInstanceOf<LinkConfirmationOption>()
         assertThat(callbackHelper.stateHelper.stateTurbine.awaitItem()).isNotNull()
     }
+
+    @Test
+    fun confirmVerifiesLinkInTheDialogFirstAfterTheCardWasClosed() {
+        val linkInlineAuth = FakeEmbeddedLinkInlineAuth(
+            verifiesBeforeConfirming = true,
+            verifyBeforeConfirmingResult = ConfirmVerificationResult.Verified,
+        )
+        testScenario(loadedState = linkLoadedState(), linkInlineAuth = linkInlineAuth) {
+            confirmationHelper.confirm()
+
+            linkInlineAuth.verifyBeforeConfirmingCalls.awaitItem()
+            assertThat(confirmationHandler.startTurbine.awaitItem().confirmationOption)
+                .isInstanceOf<LinkConfirmationOption>()
+            assertThat(callbackHelper.stateHelper.stateTurbine.awaitItem()).isNotNull()
+        }
+        linkInlineAuth.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun confirmIsCanceledWhenLinkVerificationIsClosed() {
+        val linkInlineAuth = FakeEmbeddedLinkInlineAuth(
+            verifiesBeforeConfirming = true,
+            verifyBeforeConfirmingResult = ConfirmVerificationResult.Canceled,
+        )
+        testScenario(loadedState = linkLoadedState(), linkInlineAuth = linkInlineAuth) {
+            confirmationHelper.confirm()
+
+            linkInlineAuth.verifyBeforeConfirmingCalls.awaitItem()
+            assertThat(callbackHelper.callbackTurbine.awaitItem())
+                .isInstanceOf<EmbeddedPaymentElement.Result.Canceled>()
+            assertThat(callbackHelper.stateHelper.stateTurbine.awaitItem()).isNotNull()
+        }
+        linkInlineAuth.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun confirmContinuesWhenTheLinkDialogCantBeShown() {
+        val linkInlineAuth = FakeEmbeddedLinkInlineAuth(
+            verifiesBeforeConfirming = true,
+            verifyBeforeConfirmingResult = ConfirmVerificationResult.Unavailable,
+        )
+        testScenario(loadedState = linkLoadedState(), linkInlineAuth = linkInlineAuth) {
+            confirmationHelper.confirm()
+
+            linkInlineAuth.verifyBeforeConfirmingCalls.awaitItem()
+            assertThat(confirmationHandler.startTurbine.awaitItem().confirmationOption)
+                .isInstanceOf<LinkConfirmationOption>()
+            assertThat(callbackHelper.stateHelper.stateTurbine.awaitItem()).isNotNull()
+        }
+        linkInlineAuth.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun confirmWithALinkPickDoesNotVerifyFirst() {
+        val linkInlineAuth = FakeEmbeddedLinkInlineAuth(verifiesBeforeConfirming = true)
+        val pick = LinkPaymentMethod.ConsumerPaymentDetails(
+            details = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
+            collectedCvc = null,
+            billingPhone = null,
+        )
+        testScenario(
+            loadedState = linkLoadedState().copy(
+                selection = PaymentSelection.Link(brand = LinkBrand.Link, selectedPayment = pick),
+            ),
+            linkInlineAuth = linkInlineAuth,
+        ) {
+            confirmationHelper.confirm()
+
+            assertThat(confirmationHandler.startTurbine.awaitItem().confirmationOption)
+                .isInstanceOf<LinkConfirmationOption>()
+            assertThat(callbackHelper.stateHelper.stateTurbine.awaitItem()).isNotNull()
+        }
+        linkInlineAuth.ensureAllEventsConsumed()
+    }
+
+    private fun linkLoadedState() = defaultLoadedState().copy(
+        selection = PaymentSelection.Link(brand = LinkBrand.Link),
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            linkState = LinkState(
+                configuration = LinkTestUtils.createLinkConfiguration(),
+                loginState = LinkState.LoginState.NeedsVerification,
+                signupMode = null,
+            )
+        )
+    )
 
     private fun defaultLoadedState(): EmbeddedConfirmationStateHolder.State {
         return EmbeddedConfirmationStateHolder.State(

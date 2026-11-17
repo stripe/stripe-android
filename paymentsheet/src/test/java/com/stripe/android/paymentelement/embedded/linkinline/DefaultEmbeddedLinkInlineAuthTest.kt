@@ -4,10 +4,13 @@ import android.app.Application
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.Turbine
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.analytics.experiment.LoggableExperiment
 import com.stripe.android.link.FakeIntegrityRequestManager
 import com.stripe.android.link.LinkAccountUpdate
+import com.stripe.android.link.LinkActivityResult
+import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.analytics.FakeLinkEventsReporter
@@ -27,6 +30,7 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationOption
+import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
 import com.stripe.android.paymentelement.embedded.linkinline.EmbeddedLinkInlineVerificationEligibility.IneligibleReason
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
@@ -38,6 +42,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -312,14 +317,222 @@ internal class DefaultEmbeddedLinkInlineAuthTest {
         assertThat(linkInlineAuth.isUiPresentedOverElement()).isTrue()
     }
 
+    @Test
+    fun `verifying in the card opens the Link wallet to pick what to pay with`() = runScenario {
+        configure()
+
+        verifyInCard()
+
+        val launch = awaitWalletLaunch()
+        assertThat(launch.selectedPayment).isNull()
+        assertThat(launch.linkAccountInfo.account).isEqualTo(TestFactory.LINK_ACCOUNT)
+        assertThat(linkInlineAuth.card.value).isNull()
+        assertThat(selectionHolder.selection.value).isNull()
+    }
+
+    @Test
+    fun `verifying in the card with FormSheetAction Confirm pays in the Link wallet`() = runScenario {
+        configure(
+            configuration = EmbeddedPaymentElement.Configuration.Builder("Merchant")
+                .formSheetAction(EmbeddedPaymentElement.FormSheetAction.Confirm)
+                .build(),
+        )
+
+        verifyInCard()
+
+        assertThat(activityHost.payWithLinkWalletCalls.awaitItem()).isEqualTo(LinkBrand.Link)
+        assertThat(sheetStateHolder.sheetIsOpen).isFalse()
+    }
+
+    @Test
+    fun `wallet pick selects Link with the payment details`() = runScenario {
+        configure()
+        verifyInCard()
+        awaitWalletLaunch()
+
+        linkInlineAuth.onWalletResult(walletPick())
+
+        assertThat(eventReporter.embeddedLinkInlineAuthEventCalls.awaitItem())
+            .isEqualTo(EmbeddedLinkInlineAuthEvent.WalletSelected)
+        assertThat(selectionHolder.selection.value).isEqualTo(
+            PaymentSelection.Link(brand = LinkBrand.Link, selectedPayment = LINK_PICK)
+        )
+        immediateActionCalls.awaitItem()
+        assertThat(sheetStateHolder.sheetIsOpen).isFalse()
+    }
+
+    @Test
+    fun `only the first wallet result counts`() = runScenario {
+        configure()
+        verifyInCard()
+        awaitWalletLaunch()
+
+        linkInlineAuth.onWalletResult(walletPick())
+        linkInlineAuth.onWalletResult(walletPick())
+
+        eventReporter.embeddedLinkInlineAuthEventCalls.awaitItem()
+        immediateActionCalls.awaitItem()
+    }
+
+    @Test
+    fun `wallet that can only pay itself selects Link without details`() = runScenario {
+        configure()
+        verifyInCard()
+        awaitWalletLaunch()
+
+        linkInlineAuth.onWalletResult(
+            LinkActivityResult.Completed(linkAccountUpdate = LinkAccountUpdate.None, selectedPayment = null)
+        )
+
+        eventReporter.embeddedLinkInlineAuthEventCalls.awaitItem()
+        assertThat(selectionHolder.selection.value).isEqualTo(PaymentSelection.Link(brand = LinkBrand.Link))
+        immediateActionCalls.awaitItem()
+    }
+
+    @Test
+    fun `closing the wallet without a pick keeps the selection`() = runScenario {
+        configure()
+        verifyInCard()
+        awaitWalletLaunch()
+
+        linkInlineAuth.onWalletResult(
+            LinkActivityResult.Canceled(linkAccountUpdate = LinkAccountUpdate.None)
+        )
+
+        assertThat(eventReporter.embeddedLinkInlineAuthEventCalls.awaitItem())
+            .isEqualTo(EmbeddedLinkInlineAuthEvent.WalletClosed)
+        assertThat(selectionHolder.selection.value).isNull()
+        assertThat(sheetStateHolder.sheetIsOpen).isFalse()
+    }
+
+    @Test
+    fun `verified Link row opens the wallet with the current pick`() = runScenario {
+        configure()
+        verifyInCard()
+        awaitWalletLaunch()
+        linkInlineAuth.onWalletResult(walletPick())
+        eventReporter.embeddedLinkInlineAuthEventCalls.awaitItem()
+        immediateActionCalls.awaitItem()
+
+        assertThat(linkInlineAuth.onLinkRowSelected()).isTrue()
+
+        assertThat(awaitWalletLaunch().selectedPayment).isEqualTo(LINK_PICK)
+    }
+
+    @Test
+    fun `Link row only selects Link before the customer verified`() = runScenario {
+        configure()
+        linkInlineAuth.onElementVisible()
+        eventReporter.embeddedLinkInlineAuthEventCalls.awaitItem()
+        accountManager.awaitStartVerificationCall()
+        linkInlineAuth.onClose()
+        eventReporter.embeddedLinkInlineAuthEventCalls.awaitItem()
+
+        assertThat(linkInlineAuth.onLinkRowSelected()).isFalse()
+        assertThat(linkInlineAuth.verifiesBeforeConfirming).isTrue()
+    }
+
+    @Test
+    fun `verified Link row selects nothing when the wallet can't open`() = runScenario {
+        configure()
+        verifyInCard()
+        awaitWalletLaunch()
+        linkInlineAuth.onWalletResult(LinkActivityResult.Canceled(linkAccountUpdate = LinkAccountUpdate.None))
+        eventReporter.embeddedLinkInlineAuthEventCalls.awaitItem()
+        linkInlineAuth.activityHost = null
+
+        assertThat(linkInlineAuth.onLinkRowSelected()).isTrue()
+
+        assertThat(selectionHolder.selection.value).isNull()
+    }
+
+    @Test
+    fun `another account drops the Link pick`() = runScenario {
+        configure()
+        verifyInCard()
+        awaitWalletLaunch()
+        linkInlineAuth.onWalletResult(walletPick())
+        eventReporter.embeddedLinkInlineAuthEventCalls.awaitItem()
+        immediateActionCalls.awaitItem()
+
+        selectionHolder.selection.test {
+            assertThat(awaitItem())
+                .isEqualTo(PaymentSelection.Link(brand = LinkBrand.Link, selectedPayment = LINK_PICK))
+
+            linkAccountHolder().set(
+                LinkAccountUpdate.Value(
+                    LinkAccount(TestFactory.CONSUMER_SESSION.copy(emailAddress = "other@example.com"))
+                )
+            )
+
+            assertThat(awaitItem()).isEqualTo(PaymentSelection.Link(brand = LinkBrand.Link))
+        }
+    }
+
+    @Test
+    fun `logging out in the wallet drops the Link pick`() = runScenario {
+        configure()
+        verifyInCard()
+        awaitWalletLaunch()
+        linkInlineAuth.onWalletResult(walletPick())
+        eventReporter.embeddedLinkInlineAuthEventCalls.awaitItem()
+        immediateActionCalls.awaitItem()
+        linkInlineAuth.onLinkRowSelected()
+        awaitWalletLaunch()
+
+        selectionHolder.selection.test {
+            assertThat(awaitItem())
+                .isEqualTo(PaymentSelection.Link(brand = LinkBrand.Link, selectedPayment = LINK_PICK))
+
+            linkInlineAuth.onWalletResult(
+                LinkActivityResult.Canceled(
+                    reason = LinkActivityResult.Canceled.Reason.LoggedOut,
+                    linkAccountUpdate = LinkAccountUpdate.Value(
+                        account = null,
+                        lastUpdateReason = LinkAccountUpdate.Value.UpdateReason.LoggedOut,
+                    ),
+                )
+            )
+
+            assertThat(awaitItem()).isEqualTo(PaymentSelection.Link(brand = LinkBrand.Link))
+        }
+        eventReporter.embeddedLinkInlineAuthEventCalls.awaitItem()
+    }
+
+    @Test
+    fun `configure keeps the pick of the same verified account`() = runScenario {
+        configure()
+        verifyInCard()
+        awaitWalletLaunch()
+        linkInlineAuth.onWalletResult(walletPick())
+        eventReporter.embeddedLinkInlineAuthEventCalls.awaitItem()
+        immediateActionCalls.awaitItem()
+
+        val selection = linkInlineAuth.initialSelection(selectionHolder.selection.value)
+
+        assertThat(selection).isEqualTo(PaymentSelection.Link(brand = LinkBrand.Link, selectedPayment = LINK_PICK))
+    }
+
+    @Test
+    fun `configure drops a pick that isn't from the current account`() = runScenario {
+        configure()
+        linkInlineAuth.onClose()
+        eventReporter.embeddedLinkInlineAuthEventCalls.awaitItem()
+
+        val selection = linkInlineAuth.initialSelection(
+            PaymentSelection.Link(brand = LinkBrand.Link, selectedPayment = LINK_PICK)
+        )
+
+        assertThat(selection).isEqualTo(PaymentSelection.Link(brand = LinkBrand.Link))
+    }
+
     private fun runScenario(
         account: LinkAccount? = needsVerificationAccount(),
         paymentMethodMetadata: PaymentMethodMetadata = metadata(),
         block: suspend Scenario.() -> Unit,
     ) = runTest(UnconfinedTestDispatcher()) {
         val savedStateHandle = SavedStateHandle()
-        val accountManager = FakeLinkAccountManager()
-        accountManager.setsAccountOnVerification = true
+        val accountManager = FakeLinkAccountManager().apply { setsAccountOnVerification = true }
         account?.let { accountManager.linkAccountHolder.set(LinkAccountUpdate.Value(it)) }
         accountManager.startVerificationResultProvider = {
             Result.success(needsVerificationAccount(sessions = listOf(STARTED_SMS_SESSION)))
@@ -337,6 +550,8 @@ internal class DefaultEmbeddedLinkInlineAuthTest {
         val sheetStateHolder = SheetStateHolder(savedStateHandle)
         val confirmationHandler = FakeConfirmationHandler()
         val integrityRequestManager = FakeIntegrityRequestManager()
+        val selectionHolder = DefaultEmbeddedSelectionHolder(savedStateHandle)
+        val immediateActionCalls = Turbine<Unit>()
         val scope = CoroutineScope(
             backgroundScope.coroutineContext + SupervisorJob(backgroundScope.coroutineContext[Job])
         )
@@ -354,7 +569,10 @@ internal class DefaultEmbeddedLinkInlineAuthTest {
             context = ApplicationProvider.getApplicationContext<Application>(),
             mobileSessionId = "mobile_session_123",
             registry = EmbeddedLinkInlineAuthRegistry(now = { testScheduler.currentTime }),
+            selectionHolder = selectionHolder,
+            immediateActionHandler = { immediateActionCalls.add(Unit) },
         )
+        val activityHost = FakeEmbeddedLinkInlineActivityHost().also { linkInlineAuth.activityHost = it }
 
         Scenario(
             linkInlineAuth = linkInlineAuth,
@@ -363,12 +581,17 @@ internal class DefaultEmbeddedLinkInlineAuthTest {
             sheetStateHolder = sheetStateHolder,
             confirmationHandler = confirmationHandler,
             paymentMethodMetadata = paymentMethodMetadata,
+            selectionHolder = selectionHolder,
+            activityHost = activityHost,
+            immediateActionCalls = immediateActionCalls,
         ).block()
 
         scope.cancel()
         accountManager.ensureVerificationEventsConsumed()
         eventReporter.validate()
         integrityRequestManager.ensureAllEventsConsumed()
+        activityHost.ensureAllEventsConsumed()
+        immediateActionCalls.ensureAllEventsConsumed()
     }
 
     private class Scenario(
@@ -378,6 +601,9 @@ internal class DefaultEmbeddedLinkInlineAuthTest {
         val sheetStateHolder: SheetStateHolder,
         val confirmationHandler: FakeConfirmationHandler,
         private val paymentMethodMetadata: PaymentMethodMetadata,
+        val selectionHolder: DefaultEmbeddedSelectionHolder,
+        val activityHost: FakeEmbeddedLinkInlineActivityHost,
+        val immediateActionCalls: Turbine<Unit>,
     ) {
         fun configure(
             paymentMethodMetadata: PaymentMethodMetadata = this.paymentMethodMetadata,
@@ -391,6 +617,29 @@ internal class DefaultEmbeddedLinkInlineAuthTest {
         }
 
         fun linkAccountHolder() = accountManager.linkAccountHolder
+
+        /**
+         * Sends the card's code and enters the right one in the card.
+         */
+        suspend fun verifyInCard() {
+            accountManager.confirmVerificationResultProvider = {
+                Result.success(TestFactory.LINK_ACCOUNT)
+            }
+            linkInlineAuth.onElementVisible()
+            assertThat(eventReporter.embeddedLinkInlineAuthEventCalls.awaitItem())
+                .isEqualTo(EmbeddedLinkInlineAuthEvent.Shown)
+            accountManager.awaitStartVerificationCall()
+            // The card takes a code once the send finishes.
+            val card = requireNotNull(linkInlineAuth.card.first { it?.state?.isCodeEntryEnabled == true })
+            card.otpElement.controller.onValueChanged(index = 0, text = "123456")
+            accountManager.awaitConfirmVerificationCall()
+        }
+
+        suspend fun awaitWalletLaunch(): FakeEmbeddedLinkInlineActivityHost.LaunchLinkWalletCall {
+            val call = activityHost.launchLinkWalletCalls.awaitItem()
+            assertThat(sheetStateHolder.sheetIsOpen).isTrue()
+            return call
+        }
     }
 
     private class NoOpLinkEventsReporter : FakeLinkEventsReporter() {
@@ -399,6 +648,17 @@ internal class DefaultEmbeddedLinkInlineAuthTest {
 
     private companion object {
         val CONFIGURATION = EmbeddedPaymentElement.Configuration.Builder("Merchant").build()
+
+        val LINK_PICK = LinkPaymentMethod.ConsumerPaymentDetails(
+            details = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
+            collectedCvc = null,
+            billingPhone = null,
+        )
+
+        fun walletPick() = LinkActivityResult.Completed(
+            linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
+            selectedPayment = LINK_PICK,
+        )
 
         fun metadata(
             isEnabledByServer: Boolean = true,
