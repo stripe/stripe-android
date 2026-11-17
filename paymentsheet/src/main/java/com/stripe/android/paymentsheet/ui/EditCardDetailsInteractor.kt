@@ -172,6 +172,7 @@ internal interface EditCardDetailsInteractor {
             requiresModification: Boolean,
             payload: EditCardPayload,
             billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration,
+            requiresBillingAddressForAutomaticTax: Boolean,
             onBrandChoiceChanged: CardBrandCallback,
             onCardUpdateParamsChanged: CardUpdateParamsCallback,
             autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
@@ -182,6 +183,7 @@ internal interface EditCardDetailsInteractor {
 internal class DefaultEditCardDetailsInteractor(
     private val payload: EditCardPayload,
     private val billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration,
+    private val requiresBillingAddressForAutomaticTax: Boolean,
     private val cardEditConfiguration: CardEditConfiguration?,
     // Whether the card details require modification to be submitted.
     // on scenarios where we prefill details, we just want the form to be completed,
@@ -292,6 +294,7 @@ internal class DefaultEditCardDetailsInteractor(
     private fun onBillingAddressFormChanged(state: BillingDetailsFormState) {
         billingDetailsEntry.value = BillingDetailsEntry(
             billingDetailsFormState = state,
+            requiresBillingAddressForAutomaticTax = requiresBillingAddressForAutomaticTax,
         )
     }
 
@@ -355,6 +358,7 @@ internal class DefaultEditCardDetailsInteractor(
         }
         return BillingDetailsForm(
             addressCollectionMode = billingDetailsCollectionConfiguration.address,
+            requiresBillingAddressForAutomaticTax = requiresBillingAddressForAutomaticTax,
             billingDetails = payload.billingDetails,
             nameCollection = when {
                 billingDetailsCollectionConfiguration.collectsName && cardEditConfiguration != null ->
@@ -397,6 +401,7 @@ internal class DefaultEditCardDetailsInteractor(
             requiresModification: Boolean,
             payload: EditCardPayload,
             billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration,
+            requiresBillingAddressForAutomaticTax: Boolean,
             onBrandChoiceChanged: CardBrandCallback,
             onCardUpdateParamsChanged: CardUpdateParamsCallback,
             autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
@@ -404,6 +409,7 @@ internal class DefaultEditCardDetailsInteractor(
             return DefaultEditCardDetailsInteractor(
                 payload = payload,
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+                requiresBillingAddressForAutomaticTax = requiresBillingAddressForAutomaticTax,
                 cardEditConfiguration = cardEditConfiguration,
                 coroutineScope = coroutineScope,
                 onBrandChoiceChanged = onBrandChoiceChanged,

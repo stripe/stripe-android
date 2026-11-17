@@ -588,6 +588,7 @@ internal class CustomerSheetViewModel(
                     canChangeCbc = customerState.cbcEligibility is CardBrandChoiceEligibility.Eligible,
                     displayableSavedPaymentMethod = paymentMethod,
                     addressCollectionMode = configuration.billingDetailsCollectionConfiguration.address,
+                    requiresBillingAddressForAutomaticTax = false,
                     allowedBillingCountries =
                     configuration.billingDetailsCollectionConfiguration.allowedBillingCountries,
                     cardBrandFilter = PaymentSheetCardBrandFilter(customerState.configuration.cardBrandAcceptance),

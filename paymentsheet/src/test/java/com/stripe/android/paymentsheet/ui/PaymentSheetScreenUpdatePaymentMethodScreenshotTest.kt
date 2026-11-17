@@ -44,6 +44,20 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
     }
 
     @Test
+    fun updatePaymentMethodScreen_forCard_withAutomaticTax() {
+        paparazziRule.snapshot {
+            PaymentSheetScreenOnUpdatePaymentMethod(
+                paymentMethod = PaymentMethodFixtures.displayableCard(),
+                canRemove = true,
+                isModifiablePaymentMethod = true,
+                canUpdateCardExpiryAndBillingDetails = true,
+                addressCollectionMode = AddressCollectionMode.Automatic,
+                requiresBillingAddressForAutomaticTax = true,
+            )
+        }
+    }
+
+    @Test
     fun updatePaymentMethodScreen_forCard_withRemoveButton() {
         paparazziRule.snapshot {
             PaymentSheetScreenOnUpdatePaymentMethod(
@@ -209,6 +223,7 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
         shouldShowCardBrandDropdown: Boolean = false,
         canUpdateCardExpiryAndBillingDetails: Boolean = false,
         addressCollectionMode: AddressCollectionMode = AddressCollectionMode.Never,
+        requiresBillingAddressForAutomaticTax: Boolean = false,
         useDefaultBillingDetails: Boolean = true,
         validating: Boolean = false,
     ) {
@@ -230,6 +245,7 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
             useDefaultBillingDetails = useDefaultBillingDetails,
             shouldShowSaveButton = isModifiablePaymentMethod || shouldShowSetAsDefaultCheckbox,
             addressCollectionMode = addressCollectionMode,
+            requiresBillingAddressForAutomaticTax = requiresBillingAddressForAutomaticTax,
             canUpdateCardExpiryAndBillingDetails = canUpdateCardExpiryAndBillingDetails,
         ).apply {
             if (validating) {

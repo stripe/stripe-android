@@ -2,8 +2,12 @@ package com.stripe.android.paymentsheet.ui
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextReplacement
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.BILLING_DETAILS_FORM_DETAILS
@@ -37,6 +41,26 @@ internal class BillingDetailsFormUITest {
         page.city.assertDoesNotExist()
         page.state.assertDoesNotExist()
         page.zipCode.assertIsDisplayed()
+    }
+
+    @Test
+    fun countryChangeCollectsUnitedStatesTaxFields() = runScenario(
+        billingDetails = PaymentMethod.BillingDetails(address = Address(country = "FR")),
+        requiresBillingAddressForAutomaticTax = true,
+    ) {
+        page.country.assertIsDisplayed()
+        page.line1.assertDoesNotExist()
+        page.city.assertDoesNotExist()
+        page.state.assertDoesNotExist()
+
+        page.country.performClick()
+        composeRule.onNodeWithText("United States", substring = true).performScrollTo().performClick()
+
+        page.line1.assertIsDisplayed()
+        page.city.assertIsDisplayed()
+        page.state.assertIsDisplayed()
+        page.zipCode.assertIsDisplayed()
+        page.line2.assertDoesNotExist()
     }
 
     @Test
@@ -75,6 +99,7 @@ internal class BillingDetailsFormUITest {
     private fun runScenario(
         billingDetails: PaymentMethod.BillingDetails = BILLING_DETAILS_FORM_DETAILS,
         addressCollectionMode: AddressCollectionMode = AddressCollectionMode.Automatic,
+        requiresBillingAddressForAutomaticTax: Boolean = false,
         onValuesChanged: (BillingDetailsFormState) -> Unit = {},
         block: TestScenario.() -> Unit
     ) {
@@ -85,6 +110,7 @@ internal class BillingDetailsFormUITest {
             collectEmail = false,
             collectPhone = false,
             allowedBillingCountries = emptySet(),
+            requiresBillingAddressForAutomaticTax = requiresBillingAddressForAutomaticTax,
             autocompleteAddressInteractorFactory = null,
         )
         composeRule.setContent {

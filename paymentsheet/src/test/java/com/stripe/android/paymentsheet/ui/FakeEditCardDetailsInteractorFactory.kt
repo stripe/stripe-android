@@ -20,6 +20,7 @@ internal class FakeEditCardDetailsInteractorFactory : EditCardDetailsInteractor.
         requiresModification: Boolean,
         payload: EditCardPayload,
         billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
+        requiresBillingAddressForAutomaticTax: Boolean,
         onBrandChoiceChanged: CardBrandCallback,
         onCardUpdateParamsChanged: CardUpdateParamsCallback,
         autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,

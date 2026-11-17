@@ -6,7 +6,8 @@ import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConf
 import com.stripe.android.uicore.forms.FormFieldEntry
 
 internal data class BillingDetailsEntry(
-    val billingDetailsFormState: BillingDetailsFormState
+    val billingDetailsFormState: BillingDetailsFormState,
+    private val requiresBillingAddressForAutomaticTax: Boolean,
 ) {
     fun hasChanged(
         billingDetails: PaymentMethod.BillingDetails?,
@@ -17,7 +18,7 @@ internal data class BillingDetailsEntry(
             billingDetails = billingDetails
         )
 
-        val addressChanged = when (billingDetailsCollectionConfiguration.address) {
+        val addressChanged = when (effectiveAddressCollectionMode(billingDetailsCollectionConfiguration.address)) {
             AddressCollectionMode.Automatic -> {
                 billingDetails?.address?.postalCode nullableNeq billingDetailsFormState.postalCode ||
                     billingDetails?.address?.country nullableNeq billingDetailsFormState.country
@@ -63,7 +64,7 @@ internal data class BillingDetailsEntry(
     fun isComplete(configuration: BillingDetailsCollectionConfiguration): Boolean {
         val contactInfoComplete = contactInfoComplete(configuration)
 
-        val addressComplete = when (configuration.address) {
+        val addressComplete = when (effectiveAddressCollectionMode(configuration.address)) {
             AddressCollectionMode.Automatic -> {
                 billingDetailsFormState.country.isValid && billingDetailsFormState.postalCode.isValid
             }
@@ -99,6 +100,14 @@ internal data class BillingDetailsEntry(
             true
         }
         return nameComplete && emailComplete && phoneComplete
+    }
+
+    private fun effectiveAddressCollectionMode(mode: AddressCollectionMode): AddressCollectionMode {
+        return if (mode == AddressCollectionMode.Automatic && requiresBillingAddressForAutomaticTax) {
+            AddressCollectionMode.Full
+        } else {
+            mode
+        }
     }
 
     private val FormFieldEntry?.isValid
