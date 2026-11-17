@@ -5,12 +5,18 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import com.stripe.android.paymentelement.embedded.linkinline.EmbeddedLinkInlineAuth
+import com.stripe.android.paymentelement.embedded.linkinline.EmbeddedLinkInlineVerificationCard
+import com.stripe.android.paymentelement.embedded.linkinline.EmbeddedLinkVerificationDialogHost
+import com.stripe.android.paymentelement.embedded.linkinline.rememberEmbeddedVisibilityModifier
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.ui.PaymentElementTheme
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodEmbeddedLayoutUI
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor
+import com.stripe.android.uicore.utils.collectAsState
 import java.io.Closeable
 
 @Immutable
@@ -19,6 +25,7 @@ internal data class EmbeddedContent(
     private val embeddedViewDisplaysMandateText: Boolean,
     private val appearance: PaymentSheet.Appearance,
     private val isImmediateAction: Boolean,
+    private val linkInlineAuth: EmbeddedLinkInlineAuth,
 ) : Closeable {
     override fun close() {
         interactor.close()
@@ -49,17 +56,34 @@ internal data class EmbeddedContent(
         }
 
         PaymentElementTheme(appearance = appearance) {
+            val linkInlineCard by linkInlineAuth.card.collectAsState()
             Column(
                 modifier = Modifier
                     .animateContentSize()
+                    // The container stays in place when configure replaces the list.
+                    .then(rememberEmbeddedVisibilityModifier(linkInlineAuth))
             ) {
                 PaymentMethodEmbeddedLayoutUI(
                     interactor = interactor,
                     embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText,
-                    linkInlineCard = null,
+                    linkInlineCard = linkInlineCard?.let { card ->
+                        {
+                            EmbeddedLinkInlineVerificationCard(
+                                state = card.state,
+                                otpElement = card.otpElement,
+                                linkBrand = card.linkBrand,
+                                rowStyle = embeddedAppearance.style,
+                                onCodeTapped = linkInlineAuth::onCodeTapped,
+                                onClose = linkInlineAuth::onClose,
+                                onSwitchAccount = linkInlineAuth::onSwitchAccount,
+                                onAction = linkInlineAuth::onAction,
+                            )
+                        }
+                    },
                     appearance = embeddedAppearance
                 )
             }
+            EmbeddedLinkVerificationDialogHost(linkInlineAuth)
         }
     }
 }

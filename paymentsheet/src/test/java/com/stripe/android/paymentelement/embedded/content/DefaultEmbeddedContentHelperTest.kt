@@ -4,6 +4,7 @@ import app.cash.turbine.Turbine
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
+import com.stripe.android.paymentelement.embedded.linkinline.DisabledEmbeddedLinkInlineAuth
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.verticalmode.FakePaymentMethodVerticalLayoutInteractor
 import com.stripe.android.testing.CoroutineTestRule
@@ -109,6 +110,7 @@ internal class DefaultEmbeddedContentHelperTest {
             embeddedWalletsHelper = { stateFlowOf(null) },
             internalRowSelectionCallback = { null },
             paymentOptionsPresenter = presenter,
+            linkInlineAuth = DisabledEmbeddedLinkInlineAuth(),
         )
         Scenario(
             embeddedContentHelper = embeddedContentHelper,

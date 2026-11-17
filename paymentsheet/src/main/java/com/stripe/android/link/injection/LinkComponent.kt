@@ -4,6 +4,7 @@ import com.stripe.android.common.di.ApplicationIdModule
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.account.LinkAccountManager
+import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.attestation.LinkAttestationCheck
 import com.stripe.android.link.gate.LinkGate
 import dagger.BindsInstance
@@ -28,6 +29,12 @@ internal annotation class LinkScope
 )
 internal abstract class LinkComponent {
     internal abstract val linkAccountManager: LinkAccountManager
+
+    /**
+     * Reports the events of [linkAccountManager]'s flows, e.g. Link 2FA started outside of Link.
+     */
+    @get:LinkAccountAnalytics
+    internal abstract val linkAccountEventsReporter: LinkEventsReporter
     internal abstract val configuration: LinkConfiguration
     internal abstract val linkGate: LinkGate
     internal abstract val linkAttestationCheck: LinkAttestationCheck

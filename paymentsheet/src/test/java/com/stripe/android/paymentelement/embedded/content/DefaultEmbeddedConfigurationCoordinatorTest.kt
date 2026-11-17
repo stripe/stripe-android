@@ -7,12 +7,16 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
+import com.stripe.android.paymentelement.embedded.linkinline.DisabledEmbeddedLinkInlineAuth
+import com.stripe.android.paymentelement.embedded.linkinline.EmbeddedLinkInlineAuth
+import com.stripe.android.paymentelement.embedded.linkinline.FakeEmbeddedLinkInlineAuth
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.paymentMethodType
@@ -80,6 +84,47 @@ internal class DefaultEmbeddedConfigurationCoordinatorTest {
             assertThat(state?.confirmationState?.paymentMethodMetadata).isNotNull()
             assertThat(state?.confirmationState?.configuration).isEqualTo(defaultConfiguration)
         }
+    }
+
+    @Test
+    fun `configure starts inline Link verification with the loaded state`() {
+        val linkInlineAuth = FakeEmbeddedLinkInlineAuth()
+        testScenario(linkInlineAuth = linkInlineAuth) {
+            val loaderState = createPaymentElementLoaderState()
+            configurationHandler.emit(Result.success(loaderState))
+
+            configurationCoordinator.configure(
+                configuration = defaultConfiguration,
+                initializationMode = defaultInitializationMode,
+            )
+
+            val call = linkInlineAuth.onConfiguredCalls.awaitItem()
+            assertThat(call.paymentMethodMetadata).isEqualTo(loaderState.paymentMethodMetadata)
+            assertThat(call.configuration).isEqualTo(defaultConfiguration)
+            assertThat(stateHelper.stateTurbine.awaitItem()).isNotNull()
+        }
+        linkInlineAuth.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `configure doesn't select Link while the inline Link verification card shows`() {
+        val linkInlineAuth = FakeEmbeddedLinkInlineAuth(showsCard = true)
+        testScenario(linkInlineAuth = linkInlineAuth) {
+            configurationHandler.emit(
+                Result.success(
+                    createPaymentElementLoaderState(paymentSelection = PaymentSelection.Link(brand = LinkBrand.Link))
+                )
+            )
+
+            configurationCoordinator.configure(
+                configuration = defaultConfiguration,
+                initializationMode = defaultInitializationMode,
+            )
+
+            linkInlineAuth.onConfiguredCalls.awaitItem()
+            assertThat(stateHelper.stateTurbine.awaitItem()?.confirmationState?.selection).isNull()
+        }
+        linkInlineAuth.ensureAllEventsConsumed()
     }
 
     @Test
@@ -198,6 +243,7 @@ internal class DefaultEmbeddedConfigurationCoordinatorTest {
 
     private fun testScenario(
         selectionChooser: (PaymentSelection?) -> PaymentSelection? = { it },
+        linkInlineAuth: EmbeddedLinkInlineAuth = DisabledEmbeddedLinkInlineAuth(),
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val confirmationHandler = FakeConfirmationHandler()
@@ -219,6 +265,7 @@ internal class DefaultEmbeddedConfigurationCoordinatorTest {
                 selectionChooser(newSelection)
             },
             stateHelper = stateHelper,
+            linkInlineAuth = linkInlineAuth,
             viewModelScope = coroutineScopeCleanupRule.track(CoroutineScope(UnconfinedTestDispatcher())),
             statusBarColor = null,
         )

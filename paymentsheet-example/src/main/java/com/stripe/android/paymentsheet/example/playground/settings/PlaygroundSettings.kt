@@ -522,6 +522,7 @@ internal class PlaygroundSettings private constructor(
             UserCountryOverrideSettingsDefinition,
             LinkSettingsDefinition,
             LinkTypeSettingsDefinition,
+            EmbeddedLinkInlineOtpSettingsDefinition,
             FeatureFlagSettingsDefinition(FeatureFlags.forceOnelink),
             FeatureFlagSettingsDefinition(FeatureFlags.forceOnelinkConsumer),
             MerchantSettingsDefinition,
