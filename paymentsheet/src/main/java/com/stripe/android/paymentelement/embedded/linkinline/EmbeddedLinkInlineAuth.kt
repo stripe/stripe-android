@@ -51,7 +51,6 @@ import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Provider
 import javax.inject.Singleton
-import kotlin.coroutines.EmptyCoroutineContext
 
 /**
  * A returning Link customer's inline verification in the Embedded Payment Element, across `configure` calls.
@@ -342,7 +341,7 @@ internal class DefaultEmbeddedLinkInlineAuth @Inject constructor(
         // Once a session is in the experiment, it stays in it for the element's lifetime.
         if (controller.value != null || placesLinkFirst) return true
         val linkConfiguration = paymentMethodMetadata.linkState?.configuration ?: return false
-        val dryRunScope = viewModelScope.childScope(EmptyCoroutineContext)
+        val dryRunScope = viewModelScope.childScope(viewModelScope.coroutineContext)
         val result = evaluate(
             paymentMethodMetadata = paymentMethodMetadata,
             customer = customer,
@@ -481,7 +480,8 @@ internal class DefaultEmbeddedLinkInlineAuth @Inject constructor(
         logsIneligibility: Boolean,
     ) {
         val linkConfiguration = paymentMethodMetadata.linkState?.configuration ?: return
-        val controllerScope = viewModelScope.childScope(EmptyCoroutineContext)
+        // Keeps the element's dispatcher, so the attempt runs on the main thread like the UI calling into it.
+        val controllerScope = viewModelScope.childScope(viewModelScope.coroutineContext)
         var newController: EmbeddedLinkInlineAuthController? = null
         val result = evaluate(
             paymentMethodMetadata = paymentMethodMetadata,

@@ -299,6 +299,25 @@ internal class EmbeddedLinkInlineAuthControllerTest {
     }
 
     @Test
+    fun `dialog verifies on the element's thread`() = runScenario {
+        sendFirstCode()
+        controller.onCodeTapped()
+        assertDialogShown(DialogReason.NotInWindow)
+        val elementThread = Thread.currentThread()
+        val confirmThreads = Turbine<Thread>()
+        accountManager.confirmVerificationResultProvider = {
+            confirmThreads.add(Thread.currentThread())
+            Result.success(needsVerificationAccount(current = AuthenticationLevel.OneFactorAuthentication))
+        }
+
+        enterCode(controller.dialog.value?.otpElement)
+
+        accountManager.awaitConfirmVerificationCall()
+        assertThat(confirmThreads.awaitItem()).isSameInstanceAs(elementThread)
+        host.verifiedCalls.awaitItem()
+    }
+
+    @Test
     fun `dialog shows the resend countdown of the card`() = runScenario {
         sendFirstCode()
         controller.onAction(EmbeddedLinkInlineCardState.Action.Resend)

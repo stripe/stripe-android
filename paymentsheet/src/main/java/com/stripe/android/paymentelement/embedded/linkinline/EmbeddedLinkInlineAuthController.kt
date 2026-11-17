@@ -26,7 +26,6 @@ import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import kotlin.coroutines.EmptyCoroutineContext
 
 /**
  * Owns one returning Link customer's inline verification attempt in the Embedded Payment Element.
@@ -346,7 +345,7 @@ internal class EmbeddedLinkInlineAuthController(
             authFlow = authFlow,
             linkAccount = linkAccount,
             linkBrand = linkBrand,
-            scope = scope.childScope(EmptyCoroutineContext),
+            scope = scope.childScope(scope.coroutineContext),
             onDismiss = ::onDialogDismissed,
         )
         return true

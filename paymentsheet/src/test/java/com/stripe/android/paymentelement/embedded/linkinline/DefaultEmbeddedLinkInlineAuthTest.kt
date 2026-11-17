@@ -179,6 +179,23 @@ internal class DefaultEmbeddedLinkInlineAuthTest {
     }
 
     @Test
+    fun `code is sent on the element's thread`() = runScenario {
+        configure()
+        val elementThread = Thread.currentThread()
+        val startThreads = Turbine<Thread>()
+        accountManager.startVerificationResultProvider = {
+            startThreads.add(Thread.currentThread())
+            Result.success(needsVerificationAccount(sessions = listOf(STARTED_SMS_SESSION)))
+        }
+
+        linkInlineAuth.onElementVisible()
+
+        eventReporter.embeddedLinkInlineAuthEventCalls.awaitItem()
+        accountManager.awaitStartVerificationCall()
+        assertThat(startThreads.awaitItem()).isSameInstanceAs(elementThread)
+    }
+
+    @Test
     fun `Link can't start out selected while the card shows`() = runScenario {
         configure()
 
