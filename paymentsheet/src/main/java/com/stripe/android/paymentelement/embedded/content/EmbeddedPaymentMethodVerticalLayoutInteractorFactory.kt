@@ -8,6 +8,7 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
+import com.stripe.android.paymentelement.embedded.linkinline.EmbeddedLinkInlineListOptions
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.FormHelper.FormType
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -155,6 +156,7 @@ internal class DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory @Inje
             // Embedded renders mandate text through its own path, not the mandate-above-button handler.
             updateMandateText = null,
             linkAccount = linkAccountHolder.linkAccountInfo,
+            linkInlineListOptions = stateFlowOf(EmbeddedLinkInlineListOptions.Disabled),
             coroutineScope = interactorScope,
             paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
         )

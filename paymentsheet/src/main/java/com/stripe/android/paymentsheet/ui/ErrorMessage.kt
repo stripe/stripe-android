@@ -12,6 +12,7 @@ import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.res.ResourcesCompat
 import com.stripe.android.uicore.StripeThemeDefaults
@@ -21,6 +22,7 @@ import com.stripe.android.uicore.stripeTypography
 internal fun ErrorMessage(
     error: String,
     modifier: Modifier = Modifier,
+    textAlign: TextAlign? = null,
 ) {
     val context = LocalContext.current
     val density = LocalDensity.current
@@ -44,6 +46,7 @@ internal fun ErrorMessage(
         fontSize = fontSize,
         color = MaterialTheme.colors.error,
         fontFamily = FontFamily(typeface),
+        textAlign = textAlign,
         modifier = modifier.semantics {
             this.liveRegion = LiveRegionMode.Assertive
         },

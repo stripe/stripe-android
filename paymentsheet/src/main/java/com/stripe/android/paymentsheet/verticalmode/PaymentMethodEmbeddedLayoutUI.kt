@@ -1,7 +1,10 @@
 package com.stripe.android.paymentsheet.verticalmode
 
 import androidx.annotation.RestrictTo
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -13,7 +16,9 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,8 +33,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.ResolvableString
-import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.LinkBrand
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle
@@ -49,10 +54,16 @@ const val TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT = "TEST_TAG_PAYMENT_METHOD_EMB
 
 internal const val EMBEDDED_MANDATE_TEXT_TEST_TAG = "EMBEDDED_MANDATE"
 
+internal const val TEST_TAG_EMBEDDED_DIVIDER = "TEST_TAG_EMBEDDED_DIVIDER"
+
+/**
+ * @param linkInlineCard Shown in place of the Link row while a returning Link customer verifies inline.
+ */
 @Composable
 internal fun ColumnScope.PaymentMethodEmbeddedLayoutUI(
     interactor: PaymentMethodVerticalLayoutInteractor,
     embeddedViewDisplaysMandateText: Boolean,
+    linkInlineCard: (@Composable () -> Unit)?,
     modifier: Modifier = Modifier,
     appearance: Embedded
 ) {
@@ -99,6 +110,7 @@ internal fun ColumnScope.PaymentMethodEmbeddedLayoutUI(
             )
         },
         imageLoader = imageLoader,
+        linkInlineCard = linkInlineCard,
         modifier = modifier
             .testTag(TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT),
         appearance = appearance
@@ -134,6 +146,7 @@ internal fun PaymentMethodEmbeddedLayoutUI(
     updatePaymentMethodVisibility: (String, LayoutCoordinates) -> Unit = { _, _ -> },
     cancelPaymentMethodVisibilityTracking: () -> Unit = {},
     imageLoader: StripeImageLoader,
+    linkInlineCard: (@Composable () -> Unit)?,
     appearance: Embedded,
     modifier: Modifier = Modifier,
 ) {
@@ -152,11 +165,19 @@ internal fun PaymentMethodEmbeddedLayoutUI(
     // Cancel tracking and any pending dispatches, when the paymentMethods used change
     DisposableEffect(paymentMethodCodes) { onDispose { cancelPaymentMethodVisibilityTracking.invoke() } }
 
+    // The card has its own border, so the separators right next to it are hidden.
+    val linkInlineCardIndex = if (linkInlineCard != null) {
+        paymentMethods.indexOfFirst { it.code == PaymentMethod.Type.Link.code }
+    } else {
+        -1
+    }
+    val cardLeadsList = linkInlineCardIndex == 0 && displayedSavedPaymentMethod == null
+
     Column(modifier = modifier, verticalArrangement = arrangement) {
-        if (appearance.style.topSeparatorEnabled()) OptionalEmbeddedDivider(appearance.style)
+        if (appearance.style.topSeparatorEnabled() && !cardLeadsList) OptionalEmbeddedDivider(appearance.style)
 
         EmbeddedSavedPaymentMethodRowButton(
-            paymentMethods = paymentMethods,
+            showsDividerBelow = paymentMethods.isNotEmpty() && linkInlineCardIndex != 0,
             displayedSavedPaymentMethod = displayedSavedPaymentMethod,
             savedPaymentMethodAction = savedPaymentMethodAction,
             selection = selection,
@@ -175,10 +196,12 @@ internal fun PaymentMethodEmbeddedLayoutUI(
             isEnabled = isEnabled,
             imageLoader = imageLoader,
             appearance = appearance,
+            linkInlineCard = linkInlineCard,
             updatePaymentMethodVisibility = updatePaymentMethodVisibility
         )
 
-        if (appearance.style.bottomSeparatorEnabled()) OptionalEmbeddedDivider(appearance.style)
+        val cardEndsList = linkInlineCardIndex >= 0 && linkInlineCardIndex == paymentMethods.lastIndex
+        if (appearance.style.bottomSeparatorEnabled() && !cardEndsList) OptionalEmbeddedDivider(appearance.style)
     }
 }
 
@@ -190,10 +213,12 @@ private fun OptionalEmbeddedDivider(rowStyle: RowStyle) {
         Divider(
             color = color,
             thickness = thickness,
-            modifier = Modifier.padding(
-                start = rowStyle.startSeparatorInset(),
-                end = rowStyle.endSeparatorInset()
-            ),
+            modifier = Modifier
+                .padding(
+                    start = rowStyle.startSeparatorInset(),
+                    end = rowStyle.endSeparatorInset()
+                )
+                .testTag(TEST_TAG_EMBEDDED_DIVIDER),
             startIndent = if (rowStyle.startSeparatorHasDefaultInset()) 32.dp else 0.dp
         )
     }
@@ -241,7 +266,7 @@ private fun Embedded.RowStyle.separatorThickness(): Dp {
     }
 }
 
-private fun Embedded.RowStyle.separatorColor(isDarkMode: Boolean): Int {
+internal fun Embedded.RowStyle.separatorColor(isDarkMode: Boolean): Int {
     return when (this) {
         is Embedded.RowStyle.FloatingButton -> 0
         is Embedded.RowStyle.FlatWithRadio -> getColors(isDarkMode).separatorColor
@@ -270,7 +295,7 @@ private fun Embedded.RowStyle.endSeparatorInset(): Dp {
 
 @Composable
 internal fun EmbeddedSavedPaymentMethodRowButton(
-    paymentMethods: List<DisplayablePaymentMethod>,
+    showsDividerBelow: Boolean,
     displayedSavedPaymentMethod: DisplayableSavedPaymentMethod?,
     savedPaymentMethodAction: PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction,
     selection: PaymentMethodVerticalLayoutInteractor.Selection?,
@@ -304,7 +329,7 @@ internal fun EmbeddedSavedPaymentMethodRowButton(
             appearance = appearance
         )
 
-        if (paymentMethods.isNotEmpty()) OptionalEmbeddedDivider(appearance.style)
+        if (showsDividerBelow) OptionalEmbeddedDivider(appearance.style)
     }
 }
 
@@ -318,6 +343,7 @@ internal fun EmbeddedNewPaymentMethodRowButtonsLayoutUi(
     isEnabled: Boolean,
     imageLoader: StripeImageLoader,
     appearance: Embedded,
+    linkInlineCard: (@Composable () -> Unit)?,
     updatePaymentMethodVisibility: (String, LayoutCoordinates) -> Unit = { _, _ -> },
 ) {
     val selectedIndex = remember(selection, paymentMethods) {
@@ -329,46 +355,125 @@ internal fun EmbeddedNewPaymentMethodRowButtonsLayoutUi(
         }
     }
 
+    val linkInlineCardIndex = if (linkInlineCard != null) {
+        paymentMethods.indexOfFirst { it.code == PaymentMethod.Type.Link.code }
+    } else {
+        -1
+    }
+
+    // Keeps the card on screen while it fades into the Link row.
+    val lastLinkInlineCard = remember { mutableStateOf(linkInlineCard) }
+    SideEffect {
+        if (linkInlineCard != null) {
+            lastLinkInlineCard.value = linkInlineCard
+        }
+    }
+
     paymentMethods.forEachIndexed { index, item ->
         val isSelected = index == selectedIndex
-
-        if (isSelected && selection is PaymentMethodVerticalLayoutInteractor.Selection.New && selection.canBeChanged) {
-            val displayablePaymentMethod = item.copy(
-                subtitle = selection.changeDetails?.resolvableString ?: item.subtitle
-            )
-            NewPaymentMethodRowButton(
-                isEnabled = isEnabled,
-                isSelected = true,
-                displayablePaymentMethod = displayablePaymentMethod,
-                imageLoader = imageLoader,
-                appearance = appearance,
-                trailingContent = {
-                    if (appearance.style !is RowStyle.FlatWithDisclosure) {
-                        EmbeddedNewPaymentMethodTrailingContent(
-                            showChevron = appearance.style !is RowStyle.FlatWithCheckmark,
-                        )
-                    }
-                },
-                modifier = Modifier.onGloballyPositioned { coordinates ->
-                    updatePaymentMethodVisibility(item.code, coordinates)
-                },
-            )
-        } else {
-            NewPaymentMethodRowButton(
-                isEnabled = isEnabled,
+        val row = @Composable {
+            EmbeddedNewPaymentMethodRowButton(
+                item = item,
                 isSelected = isSelected,
-                displayablePaymentMethod = item,
+                selection = selection,
+                isEnabled = isEnabled,
                 imageLoader = imageLoader,
                 appearance = appearance,
-                modifier = Modifier.onGloballyPositioned { coordinates ->
-                    updatePaymentMethodVisibility(item.code, coordinates)
-                },
+                updatePaymentMethodVisibility = updatePaymentMethodVisibility,
             )
         }
 
-        if (index != paymentMethods.lastIndex) OptionalEmbeddedDivider(appearance.style)
+        if (item.code == PaymentMethod.Type.Link.code && lastLinkInlineCard.value != null) {
+            Crossfade(
+                targetState = linkInlineCard != null,
+                animationSpec = tween(durationMillis = EMBEDDED_LINK_INLINE_CARD_ANIMATION_MILLIS),
+                label = "EmbeddedLinkInlineCard",
+            ) { showsCard ->
+                val card = linkInlineCard ?: lastLinkInlineCard.value
+                if (showsCard && card != null) {
+                    EmbeddedLinkInlineCardSlot(
+                        linkInlineCard = card,
+                        appearance = appearance,
+                        modifier = Modifier.onGloballyPositioned { coordinates ->
+                            updatePaymentMethodVisibility(item.code, coordinates)
+                        },
+                    )
+                } else {
+                    row()
+                }
+            }
+        } else {
+            row()
+        }
+
+        val isNextToCard = index == linkInlineCardIndex || index + 1 == linkInlineCardIndex
+        if (index != paymentMethods.lastIndex && !isNextToCard) OptionalEmbeddedDivider(appearance.style)
     }
 }
+
+@Composable
+private fun EmbeddedNewPaymentMethodRowButton(
+    item: DisplayablePaymentMethod,
+    isSelected: Boolean,
+    selection: PaymentMethodVerticalLayoutInteractor.Selection?,
+    isEnabled: Boolean,
+    imageLoader: StripeImageLoader,
+    appearance: Embedded,
+    updatePaymentMethodVisibility: (String, LayoutCoordinates) -> Unit,
+) {
+    if (
+        isSelected && selection is PaymentMethodVerticalLayoutInteractor.Selection.New && selection.canBeChanged
+    ) {
+        val displayablePaymentMethod = item.copy(
+            subtitle = selection.changeDetails ?: item.subtitle
+        )
+        NewPaymentMethodRowButton(
+            isEnabled = isEnabled,
+            isSelected = true,
+            displayablePaymentMethod = displayablePaymentMethod,
+            imageLoader = imageLoader,
+            appearance = appearance,
+            trailingContent = {
+                if (appearance.style !is RowStyle.FlatWithDisclosure) {
+                    EmbeddedNewPaymentMethodTrailingContent(
+                        showChevron = appearance.style !is RowStyle.FlatWithCheckmark,
+                    )
+                }
+            },
+            modifier = Modifier.onGloballyPositioned { coordinates ->
+                updatePaymentMethodVisibility(item.code, coordinates)
+            },
+        )
+    } else {
+        NewPaymentMethodRowButton(
+            isEnabled = isEnabled,
+            isSelected = isSelected,
+            displayablePaymentMethod = item,
+            imageLoader = imageLoader,
+            appearance = appearance,
+            modifier = Modifier.onGloballyPositioned { coordinates ->
+                updatePaymentMethodVisibility(item.code, coordinates)
+            },
+        )
+    }
+}
+
+@Composable
+private fun EmbeddedLinkInlineCardSlot(
+    linkInlineCard: @Composable () -> Unit,
+    appearance: Embedded,
+    modifier: Modifier,
+) {
+    // Flat rows have no spacing between them, so the card gets its own.
+    val verticalPadding = if (appearance.style.hasSeparators()) EmbeddedLinkInlineCardVerticalPadding else 0.dp
+    Box(modifier = modifier.padding(vertical = verticalPadding)) {
+        linkInlineCard()
+    }
+}
+
+private val EmbeddedLinkInlineCardVerticalPadding = 8.dp
+
+private const val EMBEDDED_LINK_INLINE_CARD_ANIMATION_MILLIS = 250
 
 private val RowStyle.viewMoreShowsChevron: Boolean
     get() = when (this) {

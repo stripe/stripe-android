@@ -56,6 +56,7 @@ internal data class EmbeddedContent(
                 PaymentMethodEmbeddedLayoutUI(
                     interactor = interactor,
                     embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText,
+                    linkInlineCard = null,
                     appearance = embeddedAppearance
                 )
             }

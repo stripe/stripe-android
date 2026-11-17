@@ -11,6 +11,7 @@ import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.form.OnClickOverrideDelegate
+import com.stripe.android.paymentelement.embedded.linkinline.EmbeddedLinkInlineListOptions
 import com.stripe.android.paymentelement.embedded.manage.EmbeddedManageScreenInteractorFactory
 import com.stripe.android.paymentelement.embedded.manage.EmbeddedUpdateScreenInteractorFactory
 import com.stripe.android.paymentsheet.CustomerStateHolder
@@ -279,6 +280,7 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
             coroutineScope = coroutineScope,
             paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
             linkAccount = linkAccountHolder.linkAccountInfo,
+            linkInlineListOptions = stateFlowOf(EmbeddedLinkInlineListOptions.Disabled),
         )
     }
 
