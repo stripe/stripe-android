@@ -188,6 +188,8 @@ class CheckoutElementsController @Inject internal constructor(
      *
      * @param promotionCode The promotion code to apply. Leading/trailing whitespace is trimmed.
      */
+    // applyPromotionCode won't live on this class long term, and is not ready to be exposed.
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun applyPromotionCode(
         promotionCode: String,
     ): OperationResult = withCheckoutState {
