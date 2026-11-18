@@ -212,7 +212,10 @@ internal data class SelfieUploadState(
                     errorMessageBuilder.appendLine(result.message)
                 }
             }
-            return IllegalStateException(errorMessageBuilder.toString().trimEnd())
+            return IllegalStateException(
+                errorMessageBuilder.toString().trimEnd(),
+                expectedResults(sideSelfies).firstOrNull { it.status == Status.ERROR }?.throwable
+            )
         }
     }
 
