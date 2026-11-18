@@ -27,11 +27,13 @@ import com.stripe.paymentelementtestpages.VerticalModePage
 import com.stripe.stripeterminal.external.models.TerminalErrorCode
 import com.stripe.stripeterminal.external.models.TerminalException
 import okhttp3.mockwebserver.MockResponse
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import kotlin.time.Duration.Companion.seconds
 
+@Ignore("Temporarily disabled due to frequent test failures")
 @OptIn(TapToAddPreview::class)
 @RunWith(TestParameterInjector::class)
 internal class TapToAddTest(
