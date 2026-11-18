@@ -315,6 +315,17 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_sepa_debit_details_cannot_be_changed">SEPA debit details cannot be changed.</string>
   <!-- Error message displayed when setting a default payment method fails. -->
   <string name="stripe_paymentsheet_set_default_payment_method_failed_error_message">Default payment method was not changed. Please try again.</string>
+  <!-- The available balance of a customer's Stripe balance account; %s is a formatted amount such as £392.04 -->
+  <string name="stripe_paymentsheet_stripe_balance_available">%s available</string>
+  <!-- Shown with a Stripe balance account that can't pay in the payment's currency; the account can't be selected -->
+  <string name="stripe_paymentsheet_stripe_balance_currency_not_supported">Currency not supported</string>
+  <!-- Shown with a Stripe balance account whose available balance can't cover the payment; the account can't be selected -->
+  <string name="stripe_paymentsheet_stripe_balance_insufficient_balance">Insufficient balance</string>
+  <!-- Shown in place of the list of the customer's Stripe balance accounts when they have none to pay from -->
+  <!-- Title above the list of the customer's Stripe balance accounts, asking them to choose the one to pay from -->
+  <string name="stripe_paymentsheet_stripe_balance_pay_from">Pay from</string>
+  <!-- Name of a customer's Stripe balance account that has no name of its own; %s is the last four characters of the account's ID -->
+  <string name="stripe_paymentsheet_stripe_balance_unnamed_account">Financial account · ...%s</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">Total: %s</string>
   <!-- Text displayed on manage card screen when card details are not editable. -->
