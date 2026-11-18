@@ -2,9 +2,12 @@ package com.stripe.android.paymentsheet.example.playground.embedded
 
 import android.content.Context
 import android.os.Bundle
+import android.os.Parcel
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
@@ -46,16 +49,54 @@ import com.stripe.android.paymentsheet.example.samples.networking.awaitModel
 import kotlinx.serialization.json.Json
 
 internal class EmbeddedExampleActivity : AppCompatActivity() {
+    private var mountedInstances by mutableStateOf(0)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        supportActionBar?.title = getString(R.string.embedded_example_title)
+        supportActionBar?.hide()
 
         setContent {
             val useApiConfiguration = remember {
                 val snapshot = PlaygroundSettings.createFromSharedPreferences(applicationContext).snapshot()
                 UseApiConfigurationSettingsDefinition.isEnabled(snapshot)
             }
-            CheckoutScreen(useApiConfiguration)
+            var checkoutVisible by remember { mutableStateOf(false) }
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(WindowInsets.systemBars.asPaddingValues()),
+            ) {
+                Text(getString(R.string.embedded_example_title), modifier = Modifier.padding(16.dp))
+                Button(
+                    onClick = {
+                        if (!checkoutVisible) mountedInstances += 1
+                        checkoutVisible = !checkoutVisible
+                    },
+                    modifier = Modifier.padding(16.dp),
+                ) {
+                    Text(if (checkoutVisible) "Hide checkout" else "Show checkout")
+                }
+                Text("Created instances: $mountedInstances", modifier = Modifier.padding(horizontal = 16.dp))
+                if (checkoutVisible) {
+                    Box(modifier = Modifier.weight(1f)) {
+                        CheckoutScreen(useApiConfiguration)
+                    }
+                }
+            }
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        val parcel = Parcel.obtain()
+        try {
+            outState.writeToParcel(parcel, 0)
+            Log.i(
+                "EmbeddedRetention",
+                "mounted_instances=$mountedInstances saved_state_bytes=${parcel.dataSize()}",
+            )
+        } finally {
+            parcel.recycle()
         }
     }
 }
