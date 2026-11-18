@@ -32,6 +32,7 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionDat
             StripeIntent.NextActionType.VerifyWithMicrodeposits -> VerifyWithMicrodepositsParser()
             StripeIntent.NextActionType.CashAppRedirect -> CashAppRedirectParser()
             StripeIntent.NextActionType.SwishRedirect -> SwishRedirectParser()
+            StripeIntent.NextActionType.UpiRedirect -> UpiRedirectParser()
             StripeIntent.NextActionType.AwaitAuthorization -> AwaitAuthorizationParser()
             StripeIntent.NextActionType.MbWayAwaitAuthorization -> MbWayAwaitAuthorizationParser()
             null -> return null
@@ -362,6 +363,14 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionDat
         override fun parse(json: JSONObject): StripeIntent.NextActionData.SwishRedirect {
             return StripeIntent.NextActionData.SwishRedirect(
                 mobileAuthUrl = json.optString("mobile_auth_url"),
+            )
+        }
+    }
+
+    private class UpiRedirectParser : ModelJsonParser<StripeIntent.NextActionData.UpiRedirect> {
+        override fun parse(json: JSONObject): StripeIntent.NextActionData.UpiRedirect {
+            return StripeIntent.NextActionData.UpiRedirect(
+                mobileAuthUrl = optString(json, "mobile_auth_url"),
             )
         }
     }

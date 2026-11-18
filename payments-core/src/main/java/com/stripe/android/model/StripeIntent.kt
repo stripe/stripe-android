@@ -109,7 +109,8 @@ sealed interface StripeIntent : StripeModel {
         DisplayPixDetails("pix_display_qr_code"),
         SwishRedirect("swish_handle_redirect_or_display_qr_code"),
         AwaitAuthorization("await_authorization"),
-        MbWayAwaitAuthorization("mb_way_await_authorization");
+        MbWayAwaitAuthorization("mb_way_await_authorization"),
+        UpiRedirect("upi_handle_redirect_or_display_qr_code");
 
         @Keep
         override fun toString(): String {
@@ -436,6 +437,14 @@ sealed interface StripeIntent : StripeModel {
         @Poko
         class SwishRedirect(
             val mobileAuthUrl: String,
+        ) : NextActionData()
+
+        /** Contains the UPI payment URI to open in a compatible installed app. */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @Parcelize
+        @Poko
+        class UpiRedirect(
+            val mobileAuthUrl: String?,
         ) : NextActionData()
     }
 }

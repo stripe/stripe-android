@@ -179,6 +179,9 @@ constructor(
             is StripeIntent.NextActionData.SwishRedirect -> {
                 StripeIntent.NextActionType.SwishRedirect
             }
+            is StripeIntent.NextActionData.UpiRedirect -> {
+                StripeIntent.NextActionType.UpiRedirect
+            }
             is StripeIntent.NextActionData.AwaitAuthorization -> {
                 StripeIntent.NextActionType.AwaitAuthorization
             }
