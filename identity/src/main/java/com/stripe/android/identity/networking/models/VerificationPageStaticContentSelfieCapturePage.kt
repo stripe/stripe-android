@@ -43,7 +43,13 @@ internal data class VerificationPageStaticContentSelfieCapturePage(
     @SerialName("decline_and_continue_button_text")
     val declineAndContinueButtonText: String? = null,
     @SerialName("pose_sequence")
-    val poseSequence: List<String>? = null
+    val poseSequence: List<String>? = null,
+    @SerialName("media_pipe_crop_side_padding")
+    val mediaPipeCropSidePadding: Float? = null,
+    @SerialName("media_pipe_crop_top_padding")
+    val mediaPipeCropTopPadding: Float? = null,
+    @SerialName("media_pipe_crop_bottom_padding")
+    val mediaPipeCropBottomPadding: Float? = null
 ) : Parcelable {
     internal companion object {
         const val POSE_LEFT = "left"
