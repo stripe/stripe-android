@@ -43,6 +43,7 @@ import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.validateShippingCountry
 import com.stripe.android.paymentsheet.state.SavedPaymentMethodSelectionState
 import com.stripe.android.paymentsheet.verticalmode.CurrencySelectorOptions
+import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import dev.drewhamilton.poko.Poko
 import kotlinx.coroutines.CoroutineScope
@@ -266,14 +267,20 @@ class CheckoutElementsController @Inject internal constructor(
     /**
      * Updates the customer's email address.
      *
-     * @param email The email address to set. Pass `null` to clear the customer's email.
+     * @param email The email address to set. Leading/trailing whitespace is trimmed. Pass `null` to
+     * clear the customer's email. Returns [OperationResult.Failed] if the email is not a valid email
+     * address.
      */
     suspend fun updateEmail(
         email: String?,
     ): OperationResult {
+        val trimmedEmail = email?.trim()
+        if (trimmedEmail != null && !EmailConfig.PATTERN.matcher(trimmedEmail).matches()) {
+            return kotlin.Result.failure<Unit>(InvalidEmailException(trimmedEmail)).toOperationResult()
+        }
         return withCheckoutState(
             additionalStateMutations = {
-                copy(collectedDetails = collectedDetails.copy(email = email))
+                copy(collectedDetails = collectedDetails.copy(email = trimmedEmail))
             },
         ) {
             kotlin.Result.success(checkoutSessionResponse).also {
