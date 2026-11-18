@@ -2,6 +2,7 @@ package com.stripe.android.identity.utils
 
 import android.graphics.Bitmap
 import android.net.Uri
+import androidx.annotation.WorkerThread
 import com.stripe.android.identity.ml.BoundingBox
 import java.io.File
 import java.io.IOException
@@ -31,6 +32,7 @@ internal interface IdentityIO {
      * Read the image at uri, resize it with corresponding resolution, compress it and save it as a
      * [File] with proper name.
      */
+    @WorkerThread
     fun resizeUriAndCreateFileToUpload(
         originalUri: Uri,
         verificationId: String,
@@ -44,6 +46,7 @@ internal interface IdentityIO {
      * Resize the bitmap with corresponding resolution, compress it and save as a jpeg [File] with
      * proper name.
      */
+    @WorkerThread
     fun resizeBitmapAndCreateFileToUpload(
         bitmap: Bitmap,
         verificationId: String,
@@ -55,6 +58,7 @@ internal interface IdentityIO {
     /**
      * Create a file containing the placeholder image for a test-mode upload.
      */
+    @WorkerThread
     fun createTestModeFileToUpload(image: TestModeImage): File
 
     /**
@@ -64,6 +68,7 @@ internal interface IdentityIO {
      * Then crop the the bitmap with boundingBox.
      * Finally pad the bitmap with the padding parameter.
      */
+    @WorkerThread
     fun cropAndPadBitmap(
         original: Bitmap,
         boundingBox: BoundingBox,
