@@ -153,6 +153,29 @@ internal class DefaultIdentityIO @Inject constructor(private val context: Contex
         )
     }
 
+    override fun cropAndPadBitmapAsymmetric(
+        original: Bitmap,
+        boundingBox: BoundingBox,
+        sideFraction: Float,
+        topFraction: Float,
+        bottomFraction: Float
+    ): Bitmap {
+        val modelInput = original.cropCenter(maxAspectRatioInSize(original.size(), 1f))
+        val faceWidth = modelInput.width * boundingBox.width
+        val faceHeight = modelInput.height * boundingBox.height
+        val left = modelInput.width * boundingBox.left
+        val top = modelInput.height * boundingBox.top
+
+        return modelInput.cropWithFill(
+            Rect(
+                (left - faceWidth * sideFraction).toInt(),
+                (top - faceHeight * topFraction).toInt(),
+                (left + faceWidth * (1 + sideFraction)).toInt(),
+                (top + faceHeight * (1 + bottomFraction)).toInt()
+            )
+        )
+    }
+
     override fun createTFLiteFile(modelUrl: String): File {
         return File(
             context.cacheDir,

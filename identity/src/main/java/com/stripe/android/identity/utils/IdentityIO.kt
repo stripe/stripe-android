@@ -71,6 +71,19 @@ internal interface IdentityIO {
     ): Bitmap
 
     /**
+     * Crop the center-square model input using its normalized face bounds. Side padding is a
+     * fraction of face width; top and bottom padding are fractions of face height, all measured
+     * in full-resolution pixels. Regions outside the center square are filled with gray.
+     */
+    fun cropAndPadBitmapAsymmetric(
+        original: Bitmap,
+        boundingBox: BoundingBox,
+        sideFraction: Float,
+        topFraction: Float,
+        bottomFraction: Float
+    ): Bitmap
+
+    /**
      * Create a file for tflite model.
      */
     fun createTFLiteFile(modelUrl: String): File
