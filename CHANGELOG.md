@@ -7,6 +7,7 @@ NEXT_VERSION_BUMP: MAJOR
 * [CHANGED] Bumped Dagger from 2.58 to 2.59.
 
 ### PaymentSheet
+* [Changed] Payment method icons now follow the selected light or dark theme, including when using custom component colors.
 * [FIXED][15363](https://github.com/stripe/stripe-android/pull/15363) Fixed an issue where inline address autocomplete could request suggestions for a prefilled address before the customer focused the address field.
 * [FIXED][15399](https://github.com/stripe/stripe-android/pull/15399) Fixed an issue where saved cards with an unrecognized display brand were labeled as "Unknown" in accessibility descriptions and payment option labels.
 
