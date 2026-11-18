@@ -36,13 +36,13 @@ internal object CurrencySelectorOptionsFactory {
             flagImages.containsKey(localCode)
 
         val integrationFlag: FlagContent = if (useImages) {
-            FlagContent.Image(flagImages!!.getValue(integrationCode))
+            FlagContent.Image(flagImages.getValue(integrationCode))
         } else {
             FlagContent.Emoji(currencyCodeToFlagEmoji(integrationCode))
         }
 
         val localFlag: FlagContent = if (useImages) {
-            FlagContent.Image(flagImages!!.getValue(localCode))
+            FlagContent.Image(flagImages.getValue(localCode))
         } else {
             FlagContent.Emoji(currencyCodeToFlagEmoji(localCode))
         }

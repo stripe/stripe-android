@@ -125,7 +125,7 @@ class PaymentSelectionTest {
 
     @Test
     fun `Saved Link passthrough US bank label uses linkBrand`() {
-        val pm = PaymentMethodFixtures.US_BANK_ACCOUNT!!.copy(isLinkPassthroughMode = true)
+        val pm = PaymentMethodFixtures.US_BANK_ACCOUNT.copy(isLinkPassthroughMode = true)
         val label = PaymentSelection.Saved(pm).label(linkBrand = LinkBrand.Onelink).resolve(context)
 
         assertThat(label).isEqualTo("Onelink")

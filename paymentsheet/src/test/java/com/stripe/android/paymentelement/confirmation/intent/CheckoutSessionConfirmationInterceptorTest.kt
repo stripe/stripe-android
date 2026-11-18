@@ -235,7 +235,6 @@ class CheckoutSessionConfirmationInterceptorTest {
                 ),
             )
             PaymentMethod.Type.SepaDebit -> PaymentMethodCreateParamsFixtures.DEFAULT_SEPA_DEBIT
-            else -> error("Unexpected test type: $type")
         }
 
         val paymentMethodMatchers = createPaymentMethodMatchers(

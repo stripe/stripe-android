@@ -299,7 +299,7 @@ class CustomerSheetTest {
     }
 
     private fun runFactoryScenario(
-        paymentOption: CustomerAdapter.PaymentOption? = CustomerAdapter.PaymentOption.fromId(CARD_PAYMENT_METHOD.id!!),
+        paymentOption: CustomerAdapter.PaymentOption? = CustomerAdapter.PaymentOption.fromId(CARD_PAYMENT_METHOD.id),
         configuration: CustomerSheet.Configuration = CUSTOM_CONFIGURATION,
         test: suspend FactoryScenario.() -> Unit,
     ) = runTestActivityTest {

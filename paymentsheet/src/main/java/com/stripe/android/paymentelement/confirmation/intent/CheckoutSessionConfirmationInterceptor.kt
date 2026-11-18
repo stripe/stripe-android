@@ -112,7 +112,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
         } else {
             checkoutSessionResponse
         }
-        val finalEstimatedTotal = updatedCheckoutSessionResponse?.amount
+        val finalEstimatedTotal = updatedCheckoutSessionResponse.amount
         if (initialEstimatedTotal != finalEstimatedTotal) {
             val error = LocalStripeException(
                 displayMessage = genericErrorMessage,

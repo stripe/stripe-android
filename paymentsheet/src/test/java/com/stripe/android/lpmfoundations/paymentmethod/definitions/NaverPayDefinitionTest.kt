@@ -13,7 +13,6 @@ import com.stripe.android.testing.SetupIntentFactory
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.SimpleDropdownElement
-import com.stripe.android.uicore.elements.DropdownFieldController
 import com.stripe.android.uicore.elements.SectionElement
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -28,7 +27,7 @@ class NaverPayDefinitionTest {
         assertThat(formElements).hasSize(1)
         val fundingSection = formElements.single() as SectionElement
         val fundingElement = fundingSection.fields.single() as SimpleDropdownElement
-        val controller = fundingElement.controller as DropdownFieldController
+        val controller = fundingElement.controller
 
         assertThat(fundingElement.identifier.v1).isEqualTo("naver_pay[funding]")
         assertThat(controller.displayItems).containsExactly(

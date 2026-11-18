@@ -689,7 +689,7 @@ internal class EmbeddedNavigatorTest {
     fun `SavedPaymentMethodConfirm topBarState hides edit menu`() {
         val (screen, interactor) = createSavedPaymentMethodConfirmScreen()
 
-        val topBarState = screen.topBarState().value!!
+        val topBarState = screen.topBarState().value
 
         assertThat(topBarState.showEditMenu).isFalse()
         assertThat(topBarState.isEditing).isFalse()

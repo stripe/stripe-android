@@ -354,13 +354,13 @@ internal class DefaultLinkAccountManager @Inject constructor(
         val isSameSession = consumerSession.clientSecret.isNotBlank() &&
             currentAccount?.clientSecret == consumerSession.clientSecret
         val sessionWithKey = if (isSameUser && isSameSession && consumerSession.linkSessionKey.isNullOrBlank()) {
-            consumerSession.copy(linkSessionKey = currentAccount?.linkSessionKey)
+            consumerSession.copy(linkSessionKey = currentAccount.linkSessionKey)
         } else {
             consumerSession
         }
         // Auth settings are only returned by some endpoints, so keep the last known value.
         val newSession = if (sessionWithKey.emailOtpRequiresAdditionalInfo == null && isSameUser) {
-            sessionWithKey.copy(emailOtpRequiresAdditionalInfo = currentAccount?.emailOtpRequiresAdditionalInfo)
+            sessionWithKey.copy(emailOtpRequiresAdditionalInfo = currentAccount.emailOtpRequiresAdditionalInfo)
         } else {
             sessionWithKey
         }

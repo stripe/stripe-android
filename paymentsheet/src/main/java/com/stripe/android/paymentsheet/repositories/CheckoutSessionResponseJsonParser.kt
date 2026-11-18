@@ -234,7 +234,7 @@ internal class CheckoutSessionResponseJsonParser(
             id = json.requiredString("id"),
             email = StripeJsonUtils.optString(json, "email"),
             paymentMethods = json.requiredArray("payment_methods").objects().map { paymentMethod ->
-                PaymentMethodJsonParser().parse(paymentMethod) ?: error("Invalid payment method")
+                PaymentMethodJsonParser().parse(paymentMethod)
             },
             canDetachPaymentMethod = canRemove,
         )

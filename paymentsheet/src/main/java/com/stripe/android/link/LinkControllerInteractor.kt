@@ -156,7 +156,7 @@ internal class LinkControllerInteractor @Inject constructor(
                 iconLoader = cachedIconLoader,
                 reduceLinkBranding = state.linkConfiguration?.linkAppearance?.reduceLinkBranding ?: false,
                 isDarkTheme = isDarkTheme,
-                cardFunding = state.selectedPaymentMethod?.cardFunding,
+                cardFunding = state.selectedPaymentMethod.cardFunding,
             )
         }
 
@@ -173,7 +173,7 @@ internal class LinkControllerInteractor @Inject constructor(
                         iconLoader = cachedIconLoader,
                         reduceLinkBranding = state.linkConfiguration?.linkAppearance?.reduceLinkBranding ?: false,
                         isDarkTheme = isDarkTheme,
-                        cardFunding = state.selectedPaymentMethod?.cardFunding,
+                        cardFunding = state.selectedPaymentMethod.cardFunding,
                     ),
                 createdPaymentMethod = state.createdPaymentMethod,
             )
