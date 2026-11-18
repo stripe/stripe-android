@@ -55,7 +55,7 @@ Table of contents
 
 ### Requirements
 
-* Android 6.0 (API level 23) and above
+* Android 7.0 (API level 24) and above
 * `compileSdkVersion` 36 and above
 * [Android Gradle Plugin](https://developer.android.com/studio/releases/gradle-plugin) 8.13.2
 * [Gradle](https://gradle.org/releases/) 9.3.1
