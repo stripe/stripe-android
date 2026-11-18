@@ -53,7 +53,6 @@ class PaymentElementAutocompleteAddressInteractorTest {
         val config = AutocompleteAddressInteractor.Config(
             googlePlacesApiKey = "test-key",
             autocompleteCountries = setOf("US"),
-            isInlineAutocompleteEnabled = true,
         )
 
         val factory = PaymentElementAutocompleteAddressInteractor.Factory(
@@ -73,7 +72,6 @@ class PaymentElementAutocompleteAddressInteractorTest {
         assertThat(interactor).isInstanceOf(BillingInlineAutocompleteAddressInteractor::class.java)
         assertThat(interactor.autocompleteConfig.googlePlacesApiKey).isEqualTo("test-key")
         assertThat(interactor.autocompleteConfig.autocompleteCountries).isEqualTo(setOf("US"))
-        assertThat(interactor.autocompleteConfig.isInlineAutocompleteEnabled).isTrue()
         assertThat(interactor.autocompleteConfig.shouldUseStripeHostedAutocomplete).isFalse()
     }
 
@@ -82,7 +80,6 @@ class PaymentElementAutocompleteAddressInteractorTest {
         val config = AutocompleteAddressInteractor.Config(
             googlePlacesApiKey = "test-key",
             autocompleteCountries = setOf("US"),
-            isInlineAutocompleteEnabled = true,
         )
         val fakePlaces = FakePlacesClientProxy(
             findPredictionsResult = Result.success(FindAutocompletePredictionsResponse(emptyList())),
@@ -118,7 +115,6 @@ class PaymentElementAutocompleteAddressInteractorTest {
         val config = AutocompleteAddressInteractor.Config(
             googlePlacesApiKey = "test-key",
             autocompleteCountries = setOf("US"),
-            isInlineAutocompleteEnabled = true,
         )
 
         val factory = PaymentElementAutocompleteAddressInteractor.Factory(
@@ -140,7 +136,6 @@ class PaymentElementAutocompleteAddressInteractorTest {
         val config = AutocompleteAddressInteractor.Config(
             googlePlacesApiKey = null,
             autocompleteCountries = setOf("US"),
-            isInlineAutocompleteEnabled = true,
         )
 
         val factory = PaymentElementAutocompleteAddressInteractor.Factory(
@@ -163,7 +158,6 @@ class PaymentElementAutocompleteAddressInteractorTest {
         val config = AutocompleteAddressInteractor.Config(
             googlePlacesApiKey = null,
             autocompleteCountries = setOf("US"),
-            isInlineAutocompleteEnabled = true,
         )
 
         val factory = PaymentElementAutocompleteAddressInteractor.Factory(
