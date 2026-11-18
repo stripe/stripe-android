@@ -1,6 +1,5 @@
 package com.stripe.android.ui.core.elements.autocomplete
 
-import android.os.Build
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
@@ -37,7 +36,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
-import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
 class PlacesClientProxyTest {
@@ -61,25 +59,6 @@ class PlacesClientProxyTest {
         )
 
         assertThat(client).isInstanceOf<DefaultPlacesClientProxy>()
-    }
-
-    @Test
-    @Config(sdk = [Build.VERSION_CODES.M])
-    fun `create returns unsupported client when run on old devices`() {
-        val client = PlacesClientProxy.create(
-            context = mock(),
-            googlePlacesApiKey = "abc123",
-            isPlacesAvailable = object : IsPlacesAvailable {
-                override fun invoke(): Boolean {
-                    throw IllegalStateException("Shouldn't be called.")
-                }
-            },
-            clientFactory = { mock() },
-            initializer = { /* no-op */ },
-            errorReporter = FakeErrorReporter(),
-        )
-
-        assertThat(client).isInstanceOf<UnsupportedPlacesClientProxy>()
     }
 
     @Test

@@ -33,7 +33,7 @@ android {
     compileSdkVersion rootProject.ext.compileSdkVersion
 
     defaultConfig {
-        minSdkVersion 23
+        minSdkVersion 24
         targetSdkVersion rootProject.ext.compileSdkVersion
         if (file("consumer-rules.txt").exists()) {
             consumerProguardFiles "consumer-rules.txt"
