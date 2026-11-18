@@ -764,6 +764,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
             editCardDetailsInteractorFactory = editCardDetailsInteractorFactory,
             removeMessage = null,
             allowedBillingCountries = allowedBillingCountries,
+            requiresBillingAddressForAutomaticTax = false,
             autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
         )
         cleanupRule.track(interactor)

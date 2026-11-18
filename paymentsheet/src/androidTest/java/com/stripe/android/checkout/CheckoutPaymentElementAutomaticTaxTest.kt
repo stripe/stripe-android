@@ -2,6 +2,7 @@ package com.stripe.android.checkout
 
 import android.app.Application
 import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.assertAll
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsSelected
@@ -9,8 +10,11 @@ import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.isEnabled
+import androidx.compose.ui.test.isNotEnabled
 import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToNode
@@ -35,6 +39,7 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_ICON_FROM_RES
 import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
+import com.stripe.android.paymentsheet.ui.UPDATE_PM_SAVE_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.verticalmode.SAVED_PAYMENT_METHOD_PENDING_TEST_TAG
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT
@@ -147,6 +152,95 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
                 .isEqualTo(UPDATED_BILLING_ZIP)
             markTestSucceeded()
         }
+    }
+
+    @Test
+    fun testSavedCardCountryEditCollectsTaxAddressAndPreservesSelection() {
+        val initialResponse = automaticTaxResponse(
+            total = INITIAL_TOTAL,
+            taxStatus = TAX_STATUS_COMPLETE,
+            billingAddressCollection = "auto",
+            hasSavedPaymentMethod = true,
+            savedBillingAddress = JSONObject().put("country", "FR"),
+        )
+        val updatedResponse = automaticTaxResponse(
+            total = UPDATED_TOTAL,
+            taxStatus = TAX_STATUS_COMPLETE,
+            billingAddressCollection = "auto",
+            hasSavedPaymentMethod = true,
+            savedBillingAddress = JSONObject()
+                .put("country", "US")
+                .put("line1", BILLING_ADDRESS_LINE_ONE)
+                .put("city", BILLING_ADDRESS_CITY)
+                .put("state", BILLING_ADDRESS_STATE)
+                .put("postal_code", BILLING_ADDRESS_ZIP),
+        )
+        var checkoutResult: CheckoutElementsController.Result? = null
+        runCheckoutPaymentElementScenario(
+            networkRule = networkRule,
+            checkoutInitResponse = initialResponse,
+            resultCallback = { checkoutResult = it },
+            setup = { controller ->
+                networkRule.checkoutUpdate(
+                    bodyPart("tax_region[country]", "FR"),
+                    responseFactory = initialResponse,
+                )
+                assertThat(
+                    controller.configure(
+                        clientSecret = DEFAULT_CLIENT_SECRET,
+                        configuration = checkoutConfiguration(
+                            PaymentElement.Configuration.PaymentMethodLayout.Vertical
+                        ),
+                    )
+                ).isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
+            },
+        ) {
+            contentPage.assertHasSelectedSavedPaymentMethod(SAVED_PAYMENT_METHOD_ID)
+            contentPage.clickViewMore()
+            managePage.waitUntilVisible()
+            managePage.clickEdit()
+            managePage.clickEdit(SAVED_PAYMENT_METHOD_ID)
+            editPage.waitUntilVisible()
+
+            billingDetailsPage.country.performScrollTo().performClick()
+            testRules.compose.onNodeWithText("United States", substring = true).performScrollTo().performClick()
+            billingDetailsPage.zipCode.performScrollTo().performTextReplacement(BILLING_ADDRESS_ZIP)
+            testRules.compose.onNodeWithTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG).onChildren().assertAll(isNotEnabled())
+
+            fillOutBillingDetails()
+            testRules.compose.onNodeWithTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG).onChildren().assertAll(isEnabled())
+
+            networkRule.checkoutUpdate(
+                bodyPart("payment_method_to_update[payment_method_id]", SAVED_PAYMENT_METHOD_ID),
+                bodyPart("payment_method_to_update[billing_details][address][country]", "US"),
+                bodyPart("payment_method_to_update[billing_details][address][line1]", BILLING_ADDRESS_LINE_ONE),
+                bodyPart("payment_method_to_update[billing_details][address][city]", BILLING_ADDRESS_CITY),
+                bodyPart("payment_method_to_update[billing_details][address][state]", BILLING_ADDRESS_STATE),
+                bodyPart("payment_method_to_update[billing_details][address][postal_code]", BILLING_ADDRESS_ZIP),
+                responseFactory = updatedResponse,
+            )
+            enqueueTaxUpdate(updatedResponse)
+            editPage.update()
+            managePage.waitUntilVisible()
+            managePage.clickDone()
+            managePage.clickClose(applicationContext)
+            managePage.waitUntilNotVisible()
+
+            waitForSessionTotal(controller, UPDATED_TOTAL)
+            contentPage.assertHasSelectedSavedPaymentMethod(SAVED_PAYMENT_METHOD_ID)
+            assertThat(controller.session.value?.paymentOption?.billingDetails?.address?.line1)
+                .isEqualTo(BILLING_ADDRESS_LINE_ONE)
+
+            enqueueTaxUpdate(updatedResponse)
+            networkRule.checkoutConfirm(
+                bodyPart("payment_method", SAVED_PAYMENT_METHOD_ID),
+                bodyPart("expected_amount", UPDATED_TOTAL.toString()),
+            ) { response ->
+                response.testBodyFromFile("checkout-session-confirm.json")
+            }
+            confirm()
+        }
+        assertThat(checkoutResult).isInstanceOf(CheckoutElementsController.Result.Completed::class.java)
     }
 
     @Test
@@ -883,6 +977,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
         taxStatus: String,
         billingAddressCollection: String = "required",
         hasSavedPaymentMethod: Boolean = false,
+        savedBillingAddress: JSONObject? = null,
     ): (MockResponse) -> Unit = { response ->
         response.testBodyFromFile("checkout-session-init.json") { json ->
             json.put("customer_email", "checkout@example.com")
@@ -957,6 +1052,10 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
                         """.trimIndent()
                     )
                 )
+                savedBillingAddress?.let { address ->
+                    json.getJSONObject("customer").getJSONArray("payment_methods")
+                        .getJSONObject(0).getJSONObject("billing_details").put("address", address)
+                }
             }
         }
     }

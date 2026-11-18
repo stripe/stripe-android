@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.flowOn
 internal class BillingDetailsForm(
     billingDetails: PaymentMethod.BillingDetails?,
     addressCollectionMode: AddressCollectionMode,
+    requiresBillingAddressForAutomaticTax: Boolean,
     private val nameCollection: NameCollection,
     private val collectEmail: Boolean,
     private val collectPhone: Boolean,
@@ -62,7 +63,7 @@ internal class BillingDetailsForm(
                 AddressCollectionMode.Never -> BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
                 AddressCollectionMode.Full -> BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
             },
-            requiresBillingAddressForAutomaticTax = false,
+            requiresBillingAddressForAutomaticTax = requiresBillingAddressForAutomaticTax,
         ),
         rawValuesMap = rawAddressValues(billingDetails),
         autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,

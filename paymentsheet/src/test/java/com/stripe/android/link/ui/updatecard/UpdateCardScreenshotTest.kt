@@ -53,6 +53,7 @@ internal class UpdateCardScreenshotTest(
                         billingDetailsCollectionConfiguration = testCase.billingDetailsCollectionConfiguration,
                         onBrandChoiceChanged = {},
                         onCardUpdateParamsChanged = {},
+                        requiresBillingAddressForAutomaticTax = false,
                         autocompleteAddressInteractorFactory = null,
                     ).apply {
                         if (testCase.validate) {

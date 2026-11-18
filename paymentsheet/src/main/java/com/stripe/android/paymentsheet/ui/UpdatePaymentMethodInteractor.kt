@@ -119,6 +119,7 @@ internal class DefaultUpdatePaymentMethodInteractor(
     override val displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
     override val cardBrandFilter: CardBrandFilter,
     override val addressCollectionMode: AddressCollectionMode,
+    private val requiresBillingAddressForAutomaticTax: Boolean,
     override val allowedBillingCountries: Set<String>,
     override val canUpdateCardExpiryAndBillingDetails: Boolean,
     override val canChangeCbc: Boolean,
@@ -212,6 +213,7 @@ internal class DefaultUpdatePaymentMethodInteractor(
                 allowedCountries = allowedBillingCountries,
             ),
             requiresModification = true,
+            requiresBillingAddressForAutomaticTax = requiresBillingAddressForAutomaticTax,
             autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
         )
     }
@@ -241,6 +243,7 @@ internal class DefaultUpdatePaymentMethodInteractor(
                 allowedCountries = allowedBillingCountries,
             ),
             requiresModification = true,
+            requiresBillingAddressForAutomaticTax = false,
             autocompleteAddressInteractorFactory = null,
         )
     }

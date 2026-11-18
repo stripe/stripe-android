@@ -456,6 +456,7 @@ internal class CustomerSheetScreenshotTest {
                 allowedBillingCountries = emptySet(),
                 removeMessage = null,
                 onUpdateSuccess = {},
+                requiresBillingAddressForAutomaticTax = false,
                 autocompleteAddressInteractorFactory = null,
             ).also { closeInteractorRule.track(it) },
         )

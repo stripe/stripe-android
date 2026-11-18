@@ -717,6 +717,7 @@ internal class DefaultEditCardDetailsInteractorTest {
             ),
             onBrandChoiceChanged = onBrandChoiceChanged,
             onCardUpdateParamsChanged = onCardUpdateParamsChanged,
+            requiresBillingAddressForAutomaticTax = false,
             autocompleteAddressInteractorFactory = null,
         )
     }
