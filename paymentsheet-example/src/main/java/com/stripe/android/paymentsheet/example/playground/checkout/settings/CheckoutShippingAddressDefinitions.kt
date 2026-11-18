@@ -23,124 +23,47 @@ internal object CheckoutShippingAddressDefinitions {
     val appearance = AppearanceDefinitions()
 
     internal class AppearanceDefinitions {
-        val lightColors = CheckoutPaymentColorsDefinitions(
+        val colorsLight = CheckoutColorsDefinitions(
             key = "shipping_address.appearance.colors_light",
-            displayName = "Light colors",
+            displayName = "colorsLight",
             defaultColors = StripeThemeDefaults.colorsLight,
         )
-        val darkColors = CheckoutPaymentColorsDefinitions(
+        val colorsDark = CheckoutColorsDefinitions(
             key = "shipping_address.appearance.colors_dark",
-            displayName = "Dark colors",
+            displayName = "colorsDark",
             defaultColors = StripeThemeDefaults.colorsDark,
         )
         val themeMode = enumChoice(
             key = "shipping_address.appearance.theme_mode",
-            displayName = "Theme mode",
+            displayName = "themeMode",
             defaultValue = ShippingAddressElement.Configuration.Appearance.ThemeMode.Automatic,
         )
-
-        val primaryButton = PrimaryButtonDefinitions()
-
-        internal class PrimaryButtonDefinitions {
-            val lightColors = CheckoutPrimaryButtonColorsDefinitions(
-                key = "shipping_address.appearance.primary_button.colors_light",
-                displayName = "Light colors",
-                includeSuccessColors = false,
-            )
-            val darkColors = CheckoutPrimaryButtonColorsDefinitions(
-                key = "shipping_address.appearance.primary_button.colors_dark",
-                displayName = "Dark colors",
-                includeSuccessColors = false,
-            )
-
-            val shape = ShapeDefinitions()
-
-            internal class ShapeDefinitions {
-                val cornerRadius = optionalFloat(
-                    key = "shipping_address.appearance.primary_button.shape.corner",
-                    displayName = "Corner radius",
-                )
-                val borderWidth = optionalFloat(
-                    key = "shipping_address.appearance.primary_button.shape.border",
-                    displayName = "Border width",
-                )
-                val height = optionalFloat(
-                    key = "shipping_address.appearance.primary_button.shape.height",
-                    displayName = "Height",
-                )
-                val configuration: CheckoutPlaygroundSettingDefinition.Configuration = configuration(
-                    key = "shipping_address.appearance.primary_button.shape",
-                    displayName = "Shape",
-                    children = arrayOf(cornerRadius, borderWidth, height),
-                )
-            }
-
-            val typography = TypographyDefinitions()
-
-            internal class TypographyDefinitions {
-                val font = font(key = "shipping_address.appearance.primary_button.typography.font")
-                val size = optionalFloat(
-                    key = "shipping_address.appearance.primary_button.typography.size",
-                    displayName = "Font size",
-                    minimumExclusive = true,
-                )
-                val configuration: CheckoutPlaygroundSettingDefinition.Configuration = configuration(
-                    key = "shipping_address.appearance.primary_button.typography",
-                    displayName = "Typography",
-                    children = arrayOf(font, size),
-                )
-            }
-
-            val configuration: CheckoutPlaygroundSettingDefinition.Configuration = configuration(
-                key = "shipping_address.appearance.primary_button",
-                displayName = "Primary button",
-                children = arrayOf(
-                    lightColors.configuration,
-                    darkColors.configuration,
-                    shape.configuration,
-                    typography.configuration,
-                ),
-            )
-        }
-
-        val insets = InsetsDefinitions()
-
-        internal class InsetsDefinitions {
-            val start = decimal(
-                key = "shipping_address.appearance.insets.start",
-                displayName = "Start",
-                defaultValue = 20f,
-            )
-            val top = decimal(
-                key = "shipping_address.appearance.insets.top",
-                displayName = "Top",
-            )
-            val end = decimal(
-                key = "shipping_address.appearance.insets.end",
-                displayName = "End",
-                defaultValue = 20f,
-            )
-            val bottom = decimal(
-                key = "shipping_address.appearance.insets.bottom",
-                displayName = "Bottom",
-                defaultValue = 40f,
-            )
-            val configuration: CheckoutPlaygroundSettingDefinition.Configuration = configuration(
-                key = "shipping_address.appearance.insets",
-                displayName = "Form insets",
-                children = arrayOf(start, top, end, bottom),
-            )
-        }
+        val primaryButton = CheckoutPrimaryButtonDefinitions(
+            key = "shipping_address.appearance.primary_button",
+            includeSuccessColors = false,
+        )
+        val formInsetValues = CheckoutInsetsDefinitions(
+            key = "shipping_address.appearance.form_inset_values",
+            displayName = "formInsetValues",
+            defaultStartDp = StripeThemeDefaults.formInsets.start,
+            defaultTopDp = StripeThemeDefaults.formInsets.top,
+            defaultEndDp = StripeThemeDefaults.formInsets.end,
+            defaultBottomDp = StripeThemeDefaults.formInsets.bottom,
+        )
+        val shapes = CheckoutShapesDefinitions(key = "shipping_address.appearance.shapes")
+        val typography = CheckoutTypographyDefinitions(key = "shipping_address.appearance.typography")
 
         val configuration: CheckoutPlaygroundSettingDefinition.Configuration = configuration(
             key = "shipping_address.appearance",
-            displayName = "Appearance",
+            displayName = "appearance",
             children = arrayOf(
-                lightColors.configuration,
-                darkColors.configuration,
+                colorsLight.configuration,
+                colorsDark.configuration,
                 themeMode,
                 primaryButton.configuration,
-                insets.configuration,
+                formInsetValues.configuration,
+                shapes.configuration,
+                typography.configuration,
             ),
         )
     }

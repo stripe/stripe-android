@@ -102,114 +102,49 @@ internal object CheckoutPaymentDefinitions {
     val appearance = AppearanceDefinitions()
 
     internal class AppearanceDefinitions {
-        val lightColors = CheckoutPaymentColorsDefinitions(
+        val colorsLight = CheckoutColorsDefinitions(
             key = "payment.appearance.colors_light",
-            displayName = "Light colors",
+            displayName = "colorsLight",
             defaultColors = StripeThemeDefaults.colorsLight,
         )
-        val darkColors = CheckoutPaymentColorsDefinitions(
+        val colorsDark = CheckoutColorsDefinitions(
             key = "payment.appearance.colors_dark",
-            displayName = "Dark colors",
+            displayName = "colorsDark",
             defaultColors = StripeThemeDefaults.colorsDark,
         )
         val themeMode = enumChoice(
             key = "payment.appearance.theme_mode",
-            displayName = "Theme mode",
+            displayName = "themeMode",
             defaultValue = PaymentElement.Configuration.Appearance.ThemeMode.Automatic,
         )
-
-        val primaryButton = PrimaryButtonDefinitions()
-
-        internal class PrimaryButtonDefinitions {
-            val lightColors = CheckoutPrimaryButtonColorsDefinitions(
-                key = "payment.appearance.primary_button.colors_light",
-                displayName = "Light colors",
-                includeSuccessColors = true,
-            )
-            val darkColors = CheckoutPrimaryButtonColorsDefinitions(
-                key = "payment.appearance.primary_button.colors_dark",
-                displayName = "Dark colors",
-                includeSuccessColors = true,
-            )
-
-            val shape = ShapeDefinitions()
-
-            internal class ShapeDefinitions {
-                val cornerRadius = optionalFloat(
-                    key = "payment.appearance.primary_button.shape.corner",
-                    displayName = "Corner radius",
-                )
-                val borderWidth = optionalFloat(
-                    key = "payment.appearance.primary_button.shape.border",
-                    displayName = "Border width",
-                )
-                val height = optionalFloat(
-                    key = "payment.appearance.primary_button.shape.height",
-                    displayName = "Height",
-                )
-                val configuration: CheckoutPlaygroundSettingDefinition.Configuration = configuration(
-                    key = "payment.appearance.primary_button.shape",
-                    displayName = "Shape",
-                    children = arrayOf(cornerRadius, borderWidth, height),
-                )
-            }
-
-            val typography = TypographyDefinitions()
-
-            internal class TypographyDefinitions {
-                val font = font(key = "payment.appearance.primary_button.typography.font")
-                val size = optionalFloat(
-                    key = "payment.appearance.primary_button.typography.size",
-                    displayName = "Font size",
-                    minimumExclusive = true,
-                )
-                val configuration: CheckoutPlaygroundSettingDefinition.Configuration = configuration(
-                    key = "payment.appearance.primary_button.typography",
-                    displayName = "Typography",
-                    children = arrayOf(font, size),
-                )
-            }
-
-            val configuration: CheckoutPlaygroundSettingDefinition.Configuration = configuration(
-                key = "payment.appearance.primary_button",
-                displayName = "Primary button",
-                children = arrayOf(
-                    lightColors.configuration,
-                    darkColors.configuration,
-                    shape.configuration,
-                    typography.configuration,
-                ),
-            )
-        }
-
-        val insets = InsetsDefinitions()
-
-        internal class InsetsDefinitions {
-            val horizontal = decimal(
-                key = "payment.appearance.insets.horizontal",
-                displayName = "Horizontal",
-                defaultValue = 20f,
-            )
-            val vertical = decimal(
-                key = "payment.appearance.insets.vertical",
-                displayName = "Vertical",
-            )
-            val configuration: CheckoutPlaygroundSettingDefinition.Configuration = configuration(
-                key = "payment.appearance.insets",
-                displayName = "Form insets",
-                children = arrayOf(horizontal, vertical),
-            )
-        }
+        val primaryButton = CheckoutPrimaryButtonDefinitions(
+            key = "payment.appearance.primary_button",
+            includeSuccessColors = true,
+        )
+        val typography = CheckoutTypographyDefinitions(key = "payment.appearance.typography")
+        val shapes = CheckoutShapesDefinitions(key = "payment.appearance.shapes")
+        val embeddedAppearance = CheckoutEmbeddedAppearanceDefinitions(key = "payment.appearance.embedded_appearance")
+        val formInsetValues = CheckoutInsetsDefinitions(
+            key = "payment.appearance.form_inset_values",
+            displayName = "formInsetValues",
+            defaultStartDp = StripeThemeDefaults.formInsets.start,
+            defaultTopDp = StripeThemeDefaults.formInsets.top,
+            defaultEndDp = StripeThemeDefaults.formInsets.end,
+            defaultBottomDp = StripeThemeDefaults.formInsets.bottom,
+        )
 
         val configuration: CheckoutPlaygroundSettingDefinition.Configuration = configuration(
             key = "payment.appearance",
-            displayName = "Appearance",
+            displayName = "appearance",
             children = arrayOf(
-                lightColors.configuration,
-                darkColors.configuration,
+                colorsLight.configuration,
+                colorsDark.configuration,
                 themeMode,
                 primaryButton.configuration,
-                insets.configuration,
+                typography.configuration,
+                shapes.configuration,
+                embeddedAppearance.configuration,
+                formInsetValues.configuration,
             ),
         )
     }
