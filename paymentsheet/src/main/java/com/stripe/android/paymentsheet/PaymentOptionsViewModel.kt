@@ -73,7 +73,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     private val args: PaymentOptionContract.Args,
     linkAccountHolder: LinkAccountHolder,
     private val linkGateFactory: LinkGate.Factory,
-    private val errorReporter: ErrorReporter,
+    errorReporter: ErrorReporter,
     val linkPaymentLauncher: LinkPaymentLauncher,
     eventReporter: EventReporter,
     savedPaymentMethodRepository: SavedPaymentMethodRepository,
@@ -105,6 +105,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     customViewModelScope = customViewModelScope,
     placesClient = placesClient,
     linkAccountHolder = linkAccountHolder,
+    errorReporter = errorReporter,
     stripeAutocompleteRepository = stripeAutocompleteRepository,
     addressLauncherEventReporter = addressLauncherEventReporter,
 ) {

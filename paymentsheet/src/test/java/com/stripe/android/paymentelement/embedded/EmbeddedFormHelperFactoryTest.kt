@@ -16,6 +16,7 @@ import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInt
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.ui.core.elements.AutomaticallyLaunchedCardScanFormDataHelper
 import com.stripe.android.ui.core.elements.BillingAddressElement
 import com.stripe.android.ui.core.elements.CardDetailsAction
@@ -181,6 +182,7 @@ internal class EmbeddedFormHelperFactoryTest {
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
             savedStateHandle = SavedStateHandle(),
             isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = false),
+            errorReporter = FakeErrorReporter(),
         )
         return factory.create(
             coroutineScope = TestScope(UnconfinedTestDispatcher()),
@@ -208,6 +210,7 @@ internal class EmbeddedFormHelperFactoryTest {
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
             savedStateHandle = SavedStateHandle(),
             isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = false),
+            errorReporter = FakeErrorReporter(),
         )
         return factory.createAutomaticallyLaunchedCardScanFormDataHelper(
             selectedPaymentMethodCode = selectedPaymentMethodCode,
@@ -226,6 +229,7 @@ internal class EmbeddedFormHelperFactoryTest {
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
             savedStateHandle = SavedStateHandle(),
             isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = false),
+            errorReporter = FakeErrorReporter(),
         )
         val formHelper = factory.create(
             coroutineScope = TestScope(UnconfinedTestDispatcher()),

@@ -30,6 +30,7 @@ import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.verticalmode.FakeManageScreenInteractor
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.FakeIsNfcScanningAvailable
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
@@ -544,6 +545,7 @@ internal class InitialPaymentOptionsScreenFactoryTest {
             embeddedSelectionHolder = selectionHolder,
             savedStateHandle = savedStateHandle,
             isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = false),
+            errorReporter = FakeErrorReporter(),
         )
         val updateScreenInteractorFactory = FakeEmbeddedUpdateScreenInteractorFactory()
         val manageInteractorFactory = EmbeddedManageScreenInteractorFactory {

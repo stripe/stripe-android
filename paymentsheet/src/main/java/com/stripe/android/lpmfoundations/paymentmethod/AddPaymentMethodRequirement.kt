@@ -99,6 +99,40 @@ internal enum class AddPaymentMethodRequirement {
                 metadata.linkMode == LinkMode.LinkCardBrand &&
                 metadata.supportsMobileInstantDebitsFlow
         }
+    },
+
+    /** Requires an integration that isn't a Checkout Session. */
+    UnsupportedForCheckoutSession {
+        override val errorMessage: String =
+            "This payment method is not currently supported with Checkout Sessions."
+
+        override fun isMetBy(metadata: PaymentMethodMetadata, code: String): Boolean {
+            return metadata.integrationMetadata !is IntegrationMetadata.CheckoutSession
+        }
+    },
+
+    /** Requires a customer configured with a CustomerSession, rather than a legacy ephemeral key. */
+    CustomerSession {
+        override val errorMessage: String =
+            "PaymentSheet.CustomerConfiguration must be created with " +
+                "PaymentSheet.CustomerConfiguration.createWithCustomerSession."
+
+        override fun isMetBy(metadata: PaymentMethodMetadata, code: String): Boolean {
+            return metadata.customerMetadata is CustomerMetadata.CustomerSession
+        }
+    },
+
+    /**
+     * Requires the buyer's Stripe balance financial accounts to have loaded. The server lists none when Stripe balance
+     * doesn't apply to the buyer.
+     */
+    StripeBalanceFinancialAccounts {
+        override val errorMessage: String =
+            "The customer's Stripe balance financial accounts failed to load or timed out, or the customer has none."
+
+        override fun isMetBy(metadata: PaymentMethodMetadata, code: String): Boolean {
+            return metadata.stripeBalanceFinancialAccounts?.accounts?.isNotEmpty() == true
+        }
     };
 
     abstract fun isMetBy(metadata: PaymentMethodMetadata, code: String): Boolean

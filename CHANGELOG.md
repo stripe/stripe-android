@@ -9,6 +9,7 @@ NEXT_VERSION_BUMP: MAJOR
 * [CHANGED] Bumped Dagger from 2.58 to 2.59.
 
 ### PaymentSheet
+* [ADDED][15408](https://github.com/stripe/stripe-android/pull/15408) Added support for Stripe balance (private preview) in PaymentSheet, FlowController, and EmbeddedPaymentElement, for payments and setting up future payments. Customers choose which of their financial accounts to pay from. Requires a customer configured with `PaymentSheet.CustomerConfiguration.createWithCustomerSession`.
 * [Changed] Payment method icons now follow the selected light or dark theme, including when using custom component colors.
 * [Added][15422](https://github.com/stripe/stripe-android/pull/15422) Added explicit control for the light or dark appearance color set used by PaymentSheet, Embedded Payment Element, CustomerSheet, and Address Element on Android. You can now use PaymentSheet.Appearance.Builder.themeMode() to set the appearance to AlwaysLight or AlwaysDark for a consistent experience, overriding the system light/dark mode setting for supported Payment Element surfaces.
 * [FIXED][15363](https://github.com/stripe/stripe-android/pull/15363) Fixed an issue where inline address autocomplete could request suggestions for a prefilled address before the customer focused the address field.

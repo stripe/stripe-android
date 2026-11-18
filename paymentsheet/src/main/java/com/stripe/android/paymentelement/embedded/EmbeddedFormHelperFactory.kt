@@ -8,6 +8,7 @@ import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.FormDefinitionFactory
 import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.paymentsheet.LinkInlineHandler
@@ -29,12 +30,14 @@ internal class EmbeddedFormHelperFactory @Inject constructor(
     private val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
     private val savedStateHandle: SavedStateHandle,
     private val isNfcScanningAvailable: IsNfcScanningAvailable,
+    private val errorReporter: ErrorReporter,
 ) {
     private val formFactory = PaymentMethodFormFactory(
         linkConfigurationCoordinator = linkConfigurationCoordinator,
         cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
         savedStateHandle = savedStateHandle,
         isNfcScanningAvailable = isNfcScanningAvailable,
+        errorReporter = errorReporter,
     )
 
     fun create(
