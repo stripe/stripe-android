@@ -739,7 +739,13 @@ internal class LinkControllerInteractor @Inject constructor(
         val paymentMethod = state.selectedPaymentMethod
             ?: return Result.failure(IllegalStateException("No selected payment method"))
 
-        return if (configuration.passthroughModeEnabled) {
+        val sharedDetails = (paymentMethod as? LinkPaymentMethod.LinkPaymentDetails)
+            ?.linkPaymentDetails as? LinkPaymentDetails.Passthrough
+        if (sharedDetails != null) {
+            return Result.success(sharedDetails.paymentMethod)
+        }
+
+        return if (configuration.shouldSharePaymentDetails(paymentMethod.details)) {
             component.linkAccountManager.sharePaymentDetails(
                 paymentDetailsId = paymentMethod.details.id,
                 expectedPaymentMethodType = computeExpectedPaymentMethodType(configuration, paymentMethod.details),

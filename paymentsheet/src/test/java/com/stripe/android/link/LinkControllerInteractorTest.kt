@@ -81,6 +81,71 @@ class LinkControllerInteractorTest {
     val coroutineScopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
 
     @Test
+    fun `LinkController India card in PMM returns shared card directly`() = runTest {
+        val interactor = createInteractor()
+        configure(interactor)
+        signIn()
+        linkComponent.configuration = linkComponent.configuration.copy(
+            flags = mapOf("link_route_india_card_to_passthrough" to true),
+        )
+        interactor.updateState {
+            it.copy(selectedPaymentMethod = createTestPaymentMethod().copy(
+                details = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(country = "IN"),
+            ))
+        }
+        linkAccountManager.createPaymentMethodResult = Result.failure(IllegalStateException("must share"))
+        val expected = PaymentMethodJsonParser().parse(
+            JSONObject(TestFactory.LINK_SHARE_PAYMENT_DETAILS.encodedPaymentMethod),
+        )
+
+        assertThat(interactor.createPaymentMethod())
+            .isEqualTo(LinkController.CreatePaymentMethodResult.Success(expected))
+        linkAccountManager.createPaymentMethodCalls.expectNoEvents()
+        assertThat(linkComponent.configuration.passthroughModeEnabled).isFalse()
+    }
+
+    @Test
+    fun `LinkController consumes early shared India card without sharing again`() = runTest {
+        val interactor = createInteractor()
+        configure(interactor)
+        signIn()
+        val shared = TestFactory.LINK_PASSTHROUGH_PAYMENT_DETAILS.copy(isIndiaCardOverride = true)
+        interactor.updateState {
+            it.copy(selectedPaymentMethod = LinkPaymentMethod.LinkPaymentDetails(
+                linkPaymentDetails = shared, collectedCvc = "123", billingPhone = null,
+            ))
+        }
+        linkAccountManager.sharePaymentDetails = Result.failure(IllegalStateException("must not share again"))
+        linkAccountManager.createPaymentMethodResult = Result.failure(IllegalStateException("must not create Link PM"))
+
+        assertThat(interactor.createPaymentMethod())
+            .isEqualTo(LinkController.CreatePaymentMethodResult.Success(shared.paymentMethod))
+        linkAccountManager.createPaymentMethodCalls.expectNoEvents()
+    }
+
+    @Test
+    fun `LinkController India share failure cannot create Link PM`() = runTest {
+        val interactor = createInteractor()
+        configure(interactor)
+        signIn()
+        linkComponent.configuration = linkComponent.configuration.copy(
+            flags = mapOf("link_route_india_card_to_passthrough" to true),
+        )
+        interactor.updateState {
+            it.copy(selectedPaymentMethod = createTestPaymentMethod().copy(
+                details = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(country = "IN"),
+            ))
+        }
+        val error = IllegalStateException("share failed")
+        linkAccountManager.sharePaymentDetails = Result.failure(error)
+
+        val result = interactor.createPaymentMethod() as LinkController.CreatePaymentMethodResult.Failed
+
+        assertThat(result.error).isSameInstanceAs(error)
+        linkAccountManager.createPaymentMethodCalls.expectNoEvents()
+    }
+
+    @Test
     fun `Initial state is correct`() = runTest {
         val interactor = createInteractor()
 
@@ -805,6 +870,7 @@ class LinkControllerInteractorTest {
         assertPreviewFunding(
             LinkPaymentMethod.LinkPaymentDetails(
                 linkPaymentDetails = LinkPaymentDetails.Passthrough(
+                    isIndiaCardOverride = false,
                     paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_PASSTHROUGH,
                     paymentMethod = paymentMethod,
                     createdFromNewPaymentMethod = true,

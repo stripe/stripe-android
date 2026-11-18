@@ -7,6 +7,7 @@ import org.junit.Test
 class CardPaymentDetailTest {
 
     private val card = ConsumerPaymentDetails.Card(
+        country = null,
         id = "QAAAKIL",
         last4 = "4242",
         expiryYear = 2500,

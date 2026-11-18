@@ -58,6 +58,7 @@ class PaymentSelectionTest {
         )
 
         val paymentDetails = ConsumerPaymentDetails.Card(
+            country = null,
             id = "pm_123",
             last4 = "4242",
             isDefault = true,

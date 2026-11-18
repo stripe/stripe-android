@@ -28,6 +28,7 @@ internal sealed class LinkPaymentDetails(
         override val paymentDetails: ConsumerPaymentDetails.Passthrough,
         val paymentMethod: PaymentMethod,
         val createdFromNewPaymentMethod: Boolean = false,
+        val isIndiaCardOverride: Boolean,
     ) : LinkPaymentDetails(paymentDetails)
 
     /**

@@ -22,6 +22,7 @@ import org.mockito.kotlin.mock
 
 internal object LinkTestUtils {
     val LINK_PASSTHROUGH_PAYMENT_DETAILS = LinkPaymentDetails.Passthrough(
+        isIndiaCardOverride = false,
         paymentDetails = ConsumerPaymentDetails.Passthrough(
             id = "csmrpd_123",
             last4 = "4242",
@@ -50,6 +51,7 @@ internal object LinkTestUtils {
 
     val LINK_NEW_PAYMENT_DETAILS = LinkPaymentDetails.New(
         paymentDetails = ConsumerPaymentDetails.Card(
+            country = null,
             id = "pm_123",
             last4 = "4242",
             expiryYear = 2024,

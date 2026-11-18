@@ -72,6 +72,33 @@ class WalletViewModelTest {
     val viewModelStoreRule = ViewModelStoreTestRule()
 
     @Test
+    fun `mandate follows selected India card setup semantics without changing session mode`() = runTest(dispatcher) {
+        val india = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(country = "IN", id = "pd_india")
+        val nonIndia = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(country = "US", id = "pd_us")
+        val manager = WalletLinkAccountManager().apply {
+            listPaymentDetailsResult = Result.success(ConsumerPaymentDetails(listOf(india, nonIndia)))
+        }
+        val configuration = TestFactory.LINK_CONFIGURATION.copy(
+            flags = mapOf("link_route_india_card_to_passthrough" to true),
+            stripeIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
+                setupFutureUsage = null,
+                paymentMethodOptionsJsonString = "{\"card\":{\"setup_future_usage\":\"on_session\"}}",
+            ),
+        )
+        val vm = createViewModel(configuration = configuration, linkAccountManager = manager)
+        advanceUntilIdle()
+
+        vm.uiState.test {
+            assertThat(awaitItem().isSettingUp).isTrue()
+            vm.onItemSelected(nonIndia)
+            assertThat(awaitItem().isSettingUp).isFalse()
+            vm.onItemSelected(india)
+            assertThat(awaitItem().isSettingUp).isTrue()
+        }
+        assertThat(configuration.passthroughModeEnabled).isFalse()
+    }
+
+    @Test
     fun `viewmodel should load payment methods on init`() = runTest(dispatcher) {
         val linkAccountManager = WalletLinkAccountManager()
         val configuration = TestFactory.LINK_CONFIGURATION.copy(

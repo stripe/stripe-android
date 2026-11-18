@@ -29,6 +29,24 @@ import java.util.UUID
 internal class PopupPayloadTest {
 
     @Test
+    fun `India override flag is forwarded while web request remains payment method mode`() {
+        val configuration = TestFactory.LINK_CONFIGURATION.copy(
+            passthroughModeEnabled = false,
+            flags = mapOf("link_route_india_card_to_passthrough" to true),
+        )
+        val payload = PopupPayload.create(
+            configuration = configuration,
+            context = getContext(Locale.US),
+            paymentUserAgent = "Android",
+            publishableKey = "pk_123",
+            stripeAccount = null,
+        )
+        val json = JSONObject(PopupPayload.PopupPayloadJson.encodeToString(PopupPayload.serializer(), payload))
+        assertThat(json.getString("paymentObject")).isEqualTo("link_payment_method")
+        assertThat(json.getJSONObject("flags").getBoolean("link_route_india_card_to_passthrough")).isTrue()
+    }
+
+    @Test
     fun testJsonSerialization() {
         val currentSessionId = AnalyticsRequestFactory.sessionId
         val json = PopupPayload.PopupPayloadJson.encodeToString(

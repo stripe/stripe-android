@@ -1,5 +1,6 @@
 package com.stripe.android.link.ui.paymentmethod
 
+import app.cash.turbine.Turbine
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
@@ -8,8 +9,11 @@ import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkAccountUpdate.Value.UpdateReason.PaymentConfirmed
 import com.stripe.android.link.LinkActivityResult
+import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkDismissalCoordinator
 import com.stripe.android.link.LinkLaunchMode
+import com.stripe.android.link.LinkPaymentDetails
+import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.RealLinkDismissalCoordinator
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.FakeLinkAccountManager
@@ -57,6 +61,96 @@ class PaymentMethodViewModelTest {
     @After
     fun tearDown() {
         Dispatchers.resetMain()
+    }
+
+    @Test
+    fun `new India wallet card shares once and retains override provenance`() = runTest(dispatcher) {
+        val shareCalls = Turbine<LinkPaymentDetails.New>()
+        val manager = object : FakeLinkAccountManager() {
+            override suspend fun shareCardPaymentDetails(
+                cardPaymentDetails: LinkPaymentDetails.New,
+            ): Result<LinkPaymentDetails.Passthrough> {
+                shareCalls.add(cardPaymentDetails)
+                return super.shareCardPaymentDetails(cardPaymentDetails)
+            }
+        }
+        val original = TestFactory.LINK_NEW_PAYMENT_DETAILS
+        val created = LinkPaymentDetails.New(
+            paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(country = "COUNTRY_IN"),
+            confirmParams = original.confirmParams,
+            originalParams = original.originalParams,
+        )
+        manager.createCardPaymentDetailsResult = Result.success(created)
+        manager.setLinkAccount(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
+        val results = Turbine<LinkActivityResult>()
+        val vm = createViewModel(
+            linkAccountManager = manager,
+            configuration = TestFactory.LINK_CONFIGURATION.copy(
+                flags = mapOf("link_route_india_card_to_passthrough" to true),
+            ),
+            linkLaunchMode = LinkLaunchMode.PaymentMethodSelection(
+                selectedPayment = null,
+                sharePaymentDetailsImmediatelyAfterCreation = true,
+            ),
+            dismissWithResult = results::add,
+        )
+        vm.formValuesChanged(FormFieldValues(userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest))
+
+        vm.onPayClicked()
+
+        assertThat(shareCalls.awaitItem()).isSameInstanceAs(created)
+        val result = results.awaitItem() as LinkActivityResult.Completed
+        val selection = result.selectedPayment as LinkPaymentMethod.LinkPaymentDetails
+        val shared = selection.linkPaymentDetails as LinkPaymentDetails.Passthrough
+        assertThat(shared.isIndiaCardOverride).isTrue()
+        assertThat(shared.createdFromNewPaymentMethod).isTrue()
+        shareCalls.ensureAllEventsConsumed()
+        results.ensureAllEventsConsumed()
+        manager.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `selection only India wallet card defers sharing`() = runTest(dispatcher) {
+        val shareCalls = Turbine<LinkPaymentDetails.New>()
+        val manager = object : FakeLinkAccountManager() {
+            override suspend fun shareCardPaymentDetails(
+                cardPaymentDetails: LinkPaymentDetails.New,
+            ): Result<LinkPaymentDetails.Passthrough> {
+                shareCalls.add(cardPaymentDetails)
+                return super.shareCardPaymentDetails(cardPaymentDetails)
+            }
+        }
+        val original = TestFactory.LINK_NEW_PAYMENT_DETAILS
+        val created = LinkPaymentDetails.New(
+            paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(country = "IN"),
+            confirmParams = original.confirmParams,
+            originalParams = original.originalParams,
+        )
+        manager.createCardPaymentDetailsResult = Result.success(created)
+        manager.setLinkAccount(LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
+        val results = Turbine<LinkActivityResult>()
+        val vm = createViewModel(
+            linkAccountManager = manager,
+            configuration = TestFactory.LINK_CONFIGURATION.copy(
+                flags = mapOf("link_route_india_card_to_passthrough" to true),
+            ),
+            linkLaunchMode = LinkLaunchMode.PaymentMethodSelection(
+                selectedPayment = null,
+                sharePaymentDetailsImmediatelyAfterCreation = false,
+            ),
+            dismissWithResult = results::add,
+        )
+        vm.formValuesChanged(FormFieldValues(userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest))
+
+        vm.onPayClicked()
+
+        val result = results.awaitItem() as LinkActivityResult.Completed
+        val selection = result.selectedPayment as LinkPaymentMethod.LinkPaymentDetails
+        assertThat(selection.linkPaymentDetails).isSameInstanceAs(created)
+        shareCalls.expectNoEvents()
+        shareCalls.ensureAllEventsConsumed()
+        results.ensureAllEventsConsumed()
+        manager.ensureAllEventsConsumed()
     }
 
     @Test
@@ -273,21 +367,23 @@ class PaymentMethodViewModelTest {
         logger: Logger = FakeLogger(),
         dismissalCoordinator: LinkDismissalCoordinator = RealLinkDismissalCoordinator(),
         dismissWithResult: (LinkActivityResult) -> Unit = {},
+        configuration: LinkConfiguration = TestFactory.LINK_CONFIGURATION,
+        linkLaunchMode: LinkLaunchMode = LinkLaunchMode.Full(showSecondaryButton = true),
     ): PaymentMethodViewModel {
         return PaymentMethodViewModel(
-            configuration = TestFactory.LINK_CONFIGURATION,
+            configuration = configuration,
             linkAccount = TestFactory.LINK_ACCOUNT,
             dismissWithResult = dismissWithResult,
             formHelper = formHelper,
             logger = logger,
             dismissalCoordinator = dismissalCoordinator,
             linkAccountManager = linkAccountManager,
-            linkLaunchMode = LinkLaunchMode.Full(showSecondaryButton = true),
+            linkLaunchMode = linkLaunchMode,
             completeLinkFlow = DefaultCompleteLinkFlow(
                 linkConfirmationHandler = linkConfirmationHandler,
                 linkAccountManager = linkAccountManager,
                 dismissalCoordinator = dismissalCoordinator,
-                linkLaunchMode = LinkLaunchMode.Full(showSecondaryButton = true)
+                linkLaunchMode = linkLaunchMode
             ),
         ).also { viewModelStoreRule.track(it) }
     }

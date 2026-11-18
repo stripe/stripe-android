@@ -117,6 +117,7 @@ internal fun UpdateCardScreenBodyPreview() {
                     ),
                     payload = EditCardPayload.create(
                         ConsumerPaymentDetails.Card(
+                            country = null,
                             id = "card_id_1234",
                             last4 = "4242",
                             expiryYear = 2500,

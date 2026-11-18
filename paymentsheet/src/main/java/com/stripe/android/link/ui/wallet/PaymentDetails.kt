@@ -191,6 +191,7 @@ internal fun PaymentDetailsListItem(
 @Composable
 private fun PaymentDetailsListItemPreview() {
     val card = Card(
+        country = null,
         id = "id",
         last4 = "4242",
         isDefault = false,

@@ -18,7 +18,9 @@ import com.stripe.android.link.confirmation.CompleteLinkFlow
 import com.stripe.android.link.confirmation.CompleteLinkFlow.Result
 import com.stripe.android.link.confirmation.DefaultCompleteLinkFlow
 import com.stripe.android.link.injection.NativeLinkComponent
+import com.stripe.android.link.isIndiaCardOverride
 import com.stripe.android.link.model.LinkAccount
+import com.stripe.android.link.shouldSharePaymentDetails
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.completePaymentButtonLabel
 import com.stripe.android.link.withDismissalDisabled
@@ -92,12 +94,17 @@ internal class PaymentMethodViewModel @Inject constructor(
             dismissalCoordinator.withDismissalDisabled {
                 linkAccountManager.createCardPaymentDetails(paymentMethodCreateParams)
                     .mapCatching { linkPaymentDetails ->
-                        val shouldShare = configuration.passthroughModeEnabled &&
+                        val shouldShare = configuration.shouldSharePaymentDetails(linkPaymentDetails.paymentDetails) &&
                             (linkLaunchMode as? LinkLaunchMode.PaymentMethodSelection)
                                 ?.sharePaymentDetailsImmediatelyAfterCreation != false
                         if (shouldShare) {
                             linkAccountManager.shareCardPaymentDetails(linkPaymentDetails).getOrThrow()
-                                .copy(createdFromNewPaymentMethod = true)
+                                .copy(
+                                    createdFromNewPaymentMethod = true,
+                                    isIndiaCardOverride = configuration.isIndiaCardOverride(
+                                        linkPaymentDetails.paymentDetails
+                                    ),
+                                )
                         } else {
                             linkPaymentDetails
                         }

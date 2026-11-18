@@ -29,6 +29,7 @@ internal class FakeLinkConfigurationCoordinator(
     private val attachExistingCardToAccountResult: Result<LinkPaymentDetails.Saved> = Result.success(
         LinkPaymentDetails.Saved(
             paymentDetails = ConsumerPaymentDetails.Card(
+                country = null,
                 id = "csmrpd_saved",
                 last4 = "4242",
                 isDefault = false,
@@ -49,6 +50,7 @@ internal class FakeLinkConfigurationCoordinator(
     private val attachNewCardToAccountResult: Result<LinkPaymentDetails> = Result.success(
         LinkPaymentDetails.New(
             paymentDetails = ConsumerPaymentDetails.Card(
+                country = null,
                 id = "pm_123",
                 last4 = "4242",
                 expiryYear = 2024,

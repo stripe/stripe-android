@@ -14,6 +14,15 @@ import com.stripe.android.model.ConsumerPaymentDetails.Display.Icon.Type as Icon
 class ConsumerPaymentDetailsJsonParserTest {
 
     @Test
+    fun `parse issuer country separately from billing country`() {
+        val json = JSONObject(ConsumerFixtures.CONSUMER_SINGLE_CARD_PAYMENT_DETAILS_JSON.toString())
+        json.getJSONObject("redacted_payment_details").getJSONObject("card_details").put("country", "COUNTRY_IN")
+        val card = ConsumerPaymentDetailsJsonParser.parse(json).paymentDetails.single() as ConsumerPaymentDetails.Card
+        assertThat(card.country).isEqualTo("COUNTRY_IN")
+        assertThat(card.billingAddress?.countryCode).isEqualTo(CountryCode.US)
+    }
+
+    @Test
     fun `parse single card payment details`() {
         assertEquals(
             ConsumerPaymentDetailsJsonParser
@@ -21,6 +30,7 @@ class ConsumerPaymentDetailsJsonParserTest {
             ConsumerPaymentDetails(
                 listOf(
                     ConsumerPaymentDetails.Card(
+                        country = null,
                         id = "QAAAKJ6",
                         expiryYear = 2023,
                         expiryMonth = 12,
@@ -55,6 +65,7 @@ class ConsumerPaymentDetailsJsonParserTest {
             ConsumerPaymentDetails(
                 listOf(
                     ConsumerPaymentDetails.Card(
+                        country = null,
                         id = "QAAAKJ6",
                         expiryYear = 2023,
                         expiryMonth = 12,
@@ -142,6 +153,7 @@ class ConsumerPaymentDetailsJsonParserTest {
             ConsumerPaymentDetails(
                 listOf(
                     ConsumerPaymentDetails.Card(
+                        country = null,
                         id = "QAAAKJ6",
                         last4 = "4444",
                         expiryYear = 2023,
@@ -164,6 +176,7 @@ class ConsumerPaymentDetailsJsonParserTest {
                         display = null,
                     ),
                     ConsumerPaymentDetails.Card(
+                        country = null,
                         id = "QAAAKIL",
                         last4 = "4242",
                         expiryYear = 2024,
@@ -458,6 +471,7 @@ class ConsumerPaymentDetailsJsonParserTest {
     ) = ConsumerPaymentDetails(
         listOf(
             ConsumerPaymentDetails.Card(
+                country = null,
                 id = "QAAAKJ6",
                 last4 = "4444",
                 expiryYear = 2023,
@@ -560,6 +574,7 @@ class ConsumerPaymentDetailsJsonParserTest {
             ConsumerPaymentDetails(
                 listOf(
                     ConsumerPaymentDetails.Card(
+                        country = null,
                         id = "QAAAKJ6",
                         last4 = "4444",
                         expiryYear = 2023,
@@ -582,6 +597,7 @@ class ConsumerPaymentDetailsJsonParserTest {
                         display = null,
                     ),
                     ConsumerPaymentDetails.Card(
+                        country = null,
                         id = "QAAAKIL",
                         last4 = "4242",
                         expiryYear = 2024,

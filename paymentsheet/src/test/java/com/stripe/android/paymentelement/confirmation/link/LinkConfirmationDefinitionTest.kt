@@ -12,6 +12,7 @@ import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -200,9 +201,13 @@ internal class LinkConfirmationDefinitionTest {
         val definition = createLinkConfirmationDefinition(linkStore = storeScenario.linkStore)
 
         val paymentMethod = PaymentMethodFactory.card()
+        val configuration = TestFactory.LINK_CONFIGURATION.copy(
+            passthroughModeEnabled = false,
+            flags = mapOf("link_route_india_card_to_passthrough" to true),
+        )
 
         val result = definition.toResult(
-            confirmationOption = LINK_CONFIRMATION_OPTION,
+            confirmationOption = LINK_CONFIRMATION_OPTION.copy(configuration = configuration),
             confirmationArgs = CONFIRMATION_PARAMETERS,
             launcherArgs = EmptyConfirmationLauncherArgs,
             result = LinkActivityResult.PaymentMethodObtained(paymentMethod),
@@ -217,7 +222,8 @@ internal class LinkConfirmationDefinitionTest {
 
         val savedOption = nextStepResult.confirmationOption.asSaved()
 
-        assertThat(savedOption.paymentMethod).isEqualTo(paymentMethod)
+        assertThat(savedOption.paymentMethod).isSameInstanceAs(paymentMethod)
+        assertThat(savedOption.paymentMethod.type).isEqualTo(PaymentMethod.Type.Card)
         assertThat(savedOption.originatedFromWallet).isTrue()
         assertThat(savedOption.optionsParams).isNull()
 

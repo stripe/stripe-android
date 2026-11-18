@@ -57,6 +57,47 @@ class DefaultLinkAccountManagerTest {
     val coroutineRule = CoroutineTestRule(dispatcher)
 
     @Test
+    fun `India early share requests card type and propagates original card params`() = runSuspendTest {
+        val shareCalls = Turbine<Triple<String?, String, PaymentMethodCreateParams>>()
+        val repository = object : FakeLinkRepository() {
+            override suspend fun shareCardPaymentDetails(
+                paymentMethodCreateParams: PaymentMethodCreateParams,
+                expectedPaymentMethodType: String?,
+                id: String,
+                consumerSessionClientSecret: String,
+                clientAttributionMetadata: ClientAttributionMetadata,
+                apiConfiguration: ApiConfiguration.State,
+            ): Result<LinkPaymentDetails.Passthrough> {
+                shareCalls.add(Triple(expectedPaymentMethodType, id, paymentMethodCreateParams))
+                return super.shareCardPaymentDetails(
+                    paymentMethodCreateParams, expectedPaymentMethodType, id, consumerSessionClientSecret,
+                    clientAttributionMetadata, apiConfiguration,
+                )
+            }
+        }
+        val manager = accountManager(
+            linkRepository = repository,
+            flags = mapOf("link_route_india_card_to_passthrough" to true),
+        )
+        manager.setTestAccount(TestFactory.CONSUMER_SESSION, TestFactory.PUBLISHABLE_KEY)
+        val original = TestFactory.LINK_NEW_PAYMENT_DETAILS
+        val created = LinkPaymentDetails.New(
+            paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(country = "IN"),
+            confirmParams = original.confirmParams,
+            originalParams = original.originalParams,
+        )
+
+        val result = manager.shareCardPaymentDetails(created)
+
+        assertThat(result.isSuccess).isTrue()
+        val call = shareCalls.awaitItem()
+        assertThat(call.first).isEqualTo("card")
+        assertThat(call.second).isEqualTo(created.paymentDetails.id)
+        assertThat(call.third).isSameInstanceAs(original.originalParams)
+        shareCalls.ensureAllEventsConsumed()
+    }
+
+    @Test
     fun `When cookie exists and network call fails then account status is Error`() = runSuspendTest {
         val fakeLinkAuth = fakeLinkAuth()
         val error = Exception()
@@ -588,6 +629,7 @@ class DefaultLinkAccountManagerTest {
             var shareCardPaymentDetailsCallCount = 0
             override suspend fun shareCardPaymentDetails(
                 paymentMethodCreateParams: PaymentMethodCreateParams,
+                expectedPaymentMethodType: String?,
                 id: String,
                 consumerSessionClientSecret: String,
                 clientAttributionMetadata: ClientAttributionMetadata,
@@ -599,6 +641,7 @@ class DefaultLinkAccountManagerTest {
                     shareCardPaymentDetailsCallCount += 1
                 }
                 return super.shareCardPaymentDetails(
+                    expectedPaymentMethodType = expectedPaymentMethodType,
                     paymentMethodCreateParams = paymentMethodCreateParams,
                     id = id,
                     consumerSessionClientSecret = consumerSessionClientSecret,

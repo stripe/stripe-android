@@ -117,8 +117,11 @@ internal class RealLinkConfigurationCoordinator @Inject internal constructor(
         val accountManager = getLinkPaymentLauncherComponent(configuration).linkAccountManager
         val linkPaymentDetailsResult = accountManager.createCardPaymentDetails(paymentMethodCreateParams)
         return linkPaymentDetailsResult.mapCatching { linkPaymentDetails ->
-            if (configuration.passthroughModeEnabled) {
-                accountManager.shareCardPaymentDetails(linkPaymentDetails).getOrThrow()
+            if (configuration.shouldSharePaymentDetails(linkPaymentDetails.paymentDetails)) {
+                val isIndiaOverride = configuration.isIndiaCardOverride(linkPaymentDetails.paymentDetails)
+                accountManager.shareCardPaymentDetails(linkPaymentDetails).getOrElse { error ->
+                    throw if (isIndiaOverride) IndiaCardShareException(error) else error
+                }.copy(isIndiaCardOverride = isIndiaOverride)
             } else {
                 linkPaymentDetails
             }

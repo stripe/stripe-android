@@ -5,6 +5,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.model.LinkAccount
+import com.stripe.android.link.shouldSharePaymentDetails
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.Address
@@ -130,6 +131,7 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
                     cvc = cvc,
                     paymentMethodMetadata = paymentMethodMetadata,
                     newPMTransformedForConfirmation = paymentDetails.createdFromNewPaymentMethod,
+                    isIndiaCardOverride = paymentDetails.isIndiaCardOverride,
                 )
             }
             is LinkPaymentDetails.Saved -> {
@@ -138,6 +140,7 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
                     cvc = cvc,
                     paymentMethodMetadata = paymentMethodMetadata,
                     newPMTransformedForConfirmation = false,
+                    isIndiaCardOverride = false,
                 )
             }
         }
@@ -150,7 +153,8 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
         billingPhone: String?,
         paymentMethodMetadata: PaymentMethodMetadata,
     ): ConfirmationHandler.Args {
-        val paymentMethodType = if (configuration.passthroughModeEnabled) {
+        val useShare = configuration.shouldSharePaymentDetails(paymentDetails)
+        val paymentMethodType = if (useShare) {
             computeExpectedPaymentMethodType(configuration, paymentDetails)
         } else {
             PaymentMethod.Type.Link.code
@@ -158,7 +162,7 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
 
         val allowRedisplay = allowRedisplay(paymentMethodType = paymentMethodType)
 
-        val confirmationOption = if (configuration.passthroughModeEnabled) {
+        val confirmationOption = if (useShare) {
             LinkPassthroughConfirmationOption(
                 paymentDetailsId = paymentDetails.id,
                 expectedPaymentMethodType = paymentMethodType,
@@ -206,16 +210,19 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
         paymentMethod: PaymentMethod,
         cvc: String?,
         paymentMethodMetadata: PaymentMethodMetadata,
-        newPMTransformedForConfirmation: Boolean
+        newPMTransformedForConfirmation: Boolean,
+        isIndiaCardOverride: Boolean,
     ): ConfirmationHandler.Args {
         return ConfirmationHandler.Args(
             confirmationOption = PaymentMethodConfirmationOption.Saved(
                 shippingInformation = null,
                 paymentMethod = paymentMethod,
                 optionsParams = PaymentMethodOptionsParams.Card(
-                    setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession,
+                    setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession.takeUnless {
+                        isIndiaCardOverride
+                    },
                     cvc = cvc?.takeIf {
-                        configuration.passthroughModeEnabled.not()
+                        !configuration.passthroughModeEnabled && !isIndiaCardOverride
                     }
                 ),
                 newPMTransformedForConfirmation = newPMTransformedForConfirmation
