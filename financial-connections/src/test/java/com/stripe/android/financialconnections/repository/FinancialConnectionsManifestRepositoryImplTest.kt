@@ -7,14 +7,18 @@ import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.FinancialConnectionsPreCollectedConsent
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventContext
 import com.stripe.android.financialconnections.domain.GetOrFetchSync.RefetchCondition.None
+import com.stripe.android.financialconnections.model.FinancialConnectionsInstitutionSelected
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.network.FinancialConnectionsRequestExecutor
+import com.stripe.android.financialconnections.test.readResourceAsString
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.KSerializer
+import kotlinx.serialization.json.Json
 import org.junit.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
@@ -199,6 +203,39 @@ internal class FinancialConnectionsManifestRepositoryImplTest {
             PRE_COLLECTED_CONSENT_PARAMS,
             PRE_COLLECTED_CONSENT_PARAMS,
         ).inOrder()
+    }
+
+    @Test
+    fun `selectInstitution - caches streamlined consent pane when cached sync has no text`() = runTest {
+        val institutionSelected = Json { ignoreUnknownKeys = true }.decodeFromString(
+            FinancialConnectionsInstitutionSelected.serializer(),
+            readResourceAsString("json/institution_selected_streamlined_consent.json"),
+        )
+        whenever(
+            apiRequestFactory.createPost(
+                url = any(),
+                options = any(),
+                params = any(),
+            )
+        ).thenReturn(mock())
+        whenever(mockRequestExecutor.execute(any(), any<KSerializer<*>>())).thenReturn(institutionSelected)
+        val repository = buildRepository(initialSync = ApiKeyFixtures.syncResponse())
+
+        repository.selectInstitution(
+            clientSecret = "",
+            institution = ApiKeyFixtures.institution(),
+        )
+
+        val cachedSync = repository.getOrSynchronizeFinancialConnectionsSession(
+            clientSecret = "",
+            applicationId = "",
+            supportsAppVerification = false,
+            reFetchCondition = None::shouldReFetch,
+            preCollectedConsent = null,
+        )
+        assertThat(cachedSync.manifest.nextPane).isEqualTo(Pane.STREAMLINED_CONSENT)
+        assertThat(cachedSync.text?.streamlinedConsentPane)
+            .isEqualTo(institutionSelected.text?.streamlinedConsentPane)
     }
 
     /**

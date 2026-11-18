@@ -27,6 +27,8 @@ internal data class TextUpdate(
     val successPane: SuccessPane? = null,
     @SerialName("id_consent_content_pane")
     val idConsentContentPane: IDConsentContentPane? = null,
+    @SerialName("streamlined_consent_pane")
+    val streamlinedConsentPane: StreamlinedConsentPane? = null,
 ) : Parcelable
 
 @Serializable
@@ -78,6 +80,19 @@ internal data class IDConsentContentPane(
     val screen: FinancialConnectionsGenericInfoScreen,
     @SerialName("legal_details_notice")
     val legalDetailsNotice: LegalDetailsNotice,
+) : Parcelable
+
+@Serializable
+@Parcelize
+internal data class StreamlinedConsentPane(
+    @SerialName("screen")
+    val screen: FinancialConnectionsGenericInfoScreen,
+    @SerialName("data_access_notice")
+    val dataAccessNotice: DataAccessNotice? = null,
+    @SerialName("legal_details_notice")
+    val legalDetailsNotice: LegalDetailsNotice,
+    @SerialName("more_info_notice")
+    val moreInfoNotice: FinancialConnectionsGenericInfoScreen? = null,
 ) : Parcelable
 
 @Serializable

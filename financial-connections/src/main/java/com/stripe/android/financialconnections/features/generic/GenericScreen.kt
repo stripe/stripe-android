@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.ThemeMode
 import com.stripe.android.financialconnections.features.common.IconSize
+import com.stripe.android.financialconnections.features.common.InstitutionIcon
 import com.stripe.android.financialconnections.features.common.ListItem
 import com.stripe.android.financialconnections.features.common.ShapedIcon
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
@@ -63,6 +64,7 @@ internal fun GenericScreenPreview(
         Surface(color = colors.background) {
             GenericScreen(
                 state = state,
+                isPrimaryButtonLoading = false,
                 onClickableTextClick = {},
                 onSecondaryButtonClick = {},
                 onPrimaryButtonClick = {},
@@ -78,6 +80,7 @@ internal fun GenericScreenLinkPreview() {
         Surface(color = colors.background) {
             GenericScreen(
                 state = GenericScreenPreviewParameterProvider().canonical(),
+                isPrimaryButtonLoading = false,
                 onClickableTextClick = {},
                 onSecondaryButtonClick = {},
                 onPrimaryButtonClick = {},
@@ -89,6 +92,7 @@ internal fun GenericScreenLinkPreview() {
 @Composable
 internal fun GenericScreen(
     state: GenericScreenState,
+    isPrimaryButtonLoading: Boolean,
     onPrimaryButtonClick: () -> Unit,
     onSecondaryButtonClick: () -> Unit,
     onClickableTextClick: (String) -> Unit,
@@ -100,6 +104,7 @@ internal fun GenericScreen(
             {
                 GenericFooter(
                     payload = it,
+                    isPrimaryButtonLoading = isPrimaryButtonLoading,
                     onPrimaryButtonClick = onPrimaryButtonClick,
                     onSecondaryButtonClick = onSecondaryButtonClick,
                     onClickableTextClick = onClickableTextClick,
@@ -114,6 +119,7 @@ internal fun GenericScreen(
                 GenericHeader(
                     payload = it,
                     inModal = state.inModal,
+                    isIconInstitutionLogo = state.isHeaderIconInstitutionLogo,
                     onClickableTextClick = onClickableTextClick,
                     modifier = Modifier.padding(horizontal = 24.dp),
                 )
@@ -193,6 +199,7 @@ internal fun GenericBody(
 internal fun GenericHeader(
     payload: Header,
     inModal: Boolean,
+    isIconInstitutionLogo: Boolean,
     onClickableTextClick: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -209,6 +216,7 @@ internal fun GenericHeader(
             GenericHeaderIcon(
                 iconUrl = iconUrl,
                 isBrandIcon = isBrandIcon,
+                isIconInstitutionLogo = isIconInstitutionLogo,
                 alignment = alignment,
                 modifier = Modifier.align(alignment.toComposeAlignment()),
             )
@@ -275,9 +283,24 @@ private fun GenericSubtitle(
 private fun GenericHeaderIcon(
     iconUrl: String,
     isBrandIcon: Boolean,
+    isIconInstitutionLogo: Boolean,
     alignment: Alignment?,
     modifier: Modifier,
 ) {
+    if (isIconInstitutionLogo) {
+        // Match how institutions are shown elsewhere, such as in the institution picker.
+        // InstitutionIcon applies its modifier to the image inside StripeImage rather than
+        // to its outermost layout, so the alignment has to go on a wrapper.
+        Box(modifier = modifier) {
+            InstitutionIcon(
+                institutionIcon = iconUrl,
+                // Matches the institution logo size on iOS.
+                size = 72.dp,
+            )
+        }
+        return
+    }
+
     val iconShape = if (isBrandIcon) {
         RoundedCornerShape(if (FinancialConnectionsTheme.theme.isLink) 18.dp else 12.dp)
     } else {
@@ -326,6 +349,7 @@ private fun GenericHeaderIcon(
 @Composable
 internal fun GenericFooter(
     payload: Footer,
+    isPrimaryButtonLoading: Boolean,
     modifier: Modifier = Modifier,
     onPrimaryButtonClick: () -> Unit,
     onSecondaryButtonClick: () -> Unit,
@@ -350,6 +374,7 @@ internal fun GenericFooter(
         payload.primaryCta?.let { action ->
             GenericButton(
                 type = FinancialConnectionsButton.Type.Primary,
+                loading = isPrimaryButtonLoading,
                 onClick = onPrimaryButtonClick,
                 action = action,
             )
@@ -358,6 +383,7 @@ internal fun GenericFooter(
         payload.secondaryCta?.let { secondaryCta ->
             GenericButton(
                 type = FinancialConnectionsButton.Type.Secondary,
+                loading = false,
                 onClick = onSecondaryButtonClick,
                 action = secondaryCta,
             )
@@ -381,10 +407,11 @@ internal fun GenericFooter(
 private fun GenericButton(
     onClick: () -> Unit,
     type: FinancialConnectionsButton.Type,
+    loading: Boolean,
     action: Footer.GenericInfoAction,
 ) {
     FinancialConnectionsButton(
-        loading = false,
+        loading = loading,
         type = type,
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
@@ -427,5 +454,6 @@ private fun Size?.toComposeSize() = when (this) {
 
 internal data class GenericScreenState(
     val screen: FinancialConnectionsGenericInfoScreen,
-    val inModal: Boolean
+    val inModal: Boolean,
+    val isHeaderIconInstitutionLogo: Boolean,
 )

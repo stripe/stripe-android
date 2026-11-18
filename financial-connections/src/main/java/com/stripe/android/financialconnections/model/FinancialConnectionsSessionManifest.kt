@@ -182,6 +182,9 @@ internal data class FinancialConnectionsSessionManifest(
         @SerialName(value = "institution_picker")
         INSTITUTION_PICKER("institution_picker"),
 
+        @SerialName(value = "streamlined_consent")
+        STREAMLINED_CONSENT("streamlined_consent"),
+
         @SerialName(value = "link_consent")
         LINK_CONSENT("link_consent"),
 

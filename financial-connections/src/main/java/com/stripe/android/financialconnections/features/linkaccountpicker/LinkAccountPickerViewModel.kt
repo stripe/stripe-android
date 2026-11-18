@@ -111,7 +111,8 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
                 partnerToCoreAuths = accountsResponse.partnerToCoreAuths,
                 accounts = accounts,
                 aboveCta = display.aboveCta,
-                defaultDataAccessNotice = sync.text?.consent?.dataAccessNotice,
+                defaultDataAccessNotice = sync.text?.consent?.dataAccessNotice
+                    ?: sync.text?.streamlinedConsentPane?.dataAccessNotice,
                 nextPaneOnNewAccount = accountsResponse.nextPaneOnAddAccount,
                 multipleAccountTypesSelectedDataAccessNotice = display.multipleAccountTypesSelectedDataAccessNotice,
                 addNewAccount = requireNotNull(display.addNewAccount),

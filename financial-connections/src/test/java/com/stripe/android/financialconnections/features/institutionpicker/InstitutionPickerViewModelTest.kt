@@ -18,6 +18,7 @@ import com.stripe.android.financialconnections.domain.UpdateLocalManifest
 import com.stripe.android.financialconnections.exception.InstitutionPlannedDowntimeError
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
+import com.stripe.android.financialconnections.model.FinancialConnectionsInstitutionSelected
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.InstitutionResponse
@@ -27,6 +28,7 @@ import com.stripe.android.financialconnections.presentation.withState
 import com.stripe.android.financialconnections.utils.TestHandleError
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import com.stripe.android.testing.ViewModelStoreTestRule
+import com.stripe.android.uicore.navigation.PopUpToBehavior
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -373,6 +375,49 @@ internal class InstitutionPickerViewModelTest {
 
         verify(postAuthorizationSession, never()).invoke(any(), any())
         verify(selectInstitution).invoke(institution)
+    }
+
+    @Test
+    fun `Keeps institution picker on back stack when navigating to streamlined consent`() = runTest {
+        val institution = ApiKeyFixtures.institution()
+
+        givenManifestReturns(ApiKeyFixtures.sessionManifest().copy(consentAcquiredAt = null))
+        givenSelectInstitutionReturnsNextPane(Pane.STREAMLINED_CONSENT)
+
+        val viewModel = buildViewModel(InstitutionPickerState())
+        viewModel.onInstitutionSelected(institution, fromFeatured = true)
+
+        navigationManager.assertNavigatedTo(
+            destination = Destination.StreamlinedConsent,
+            pane = Pane.INSTITUTION_PICKER,
+            popUpTo = null,
+        )
+    }
+
+    @Test
+    fun `Removes institution picker from back stack when navigating to ID consent content`() = runTest {
+        val institution = ApiKeyFixtures.institution()
+
+        givenManifestReturns(ApiKeyFixtures.sessionManifest().copy(consentAcquiredAt = null))
+        givenSelectInstitutionReturnsNextPane(Pane.ID_CONSENT_CONTENT)
+
+        val viewModel = buildViewModel(InstitutionPickerState())
+        viewModel.onInstitutionSelected(institution, fromFeatured = true)
+
+        navigationManager.assertNavigatedTo(
+            destination = Destination.IDConsentContent,
+            pane = Pane.INSTITUTION_PICKER,
+            popUpTo = PopUpToBehavior.Current(inclusive = true),
+        )
+    }
+
+    private suspend fun givenSelectInstitutionReturnsNextPane(nextPane: Pane) {
+        whenever(selectInstitution(any())).thenReturn(
+            FinancialConnectionsInstitutionSelected(
+                manifest = ApiKeyFixtures.sessionManifest().copy(nextPane = nextPane),
+                text = null,
+            )
+        )
     }
 
     private suspend fun givenCreateSessionForInstitutionThrows(throwable: Throwable) {

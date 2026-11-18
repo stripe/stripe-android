@@ -76,6 +76,7 @@ private fun GenericErrorContent(
             GenericHeader(
                 payload = pane.toHeader(),
                 inModal = false,
+                isIconInstitutionLogo = false,
                 onClickableTextClick = onClickableTextClick,
                 modifier = Modifier.padding(horizontal = 24.dp),
             )

@@ -56,6 +56,7 @@ private fun IDConsentContent(
         is Success -> {
             GenericScreen(
                 state = result().genericScreenState,
+                isPrimaryButtonLoading = state.acceptConsent is Loading,
                 onPrimaryButtonClick = onPrimaryButtonClick,
                 onSecondaryButtonClick = {
                     // There is no secondary button
