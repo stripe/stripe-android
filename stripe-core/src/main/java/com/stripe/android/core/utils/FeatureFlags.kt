@@ -21,6 +21,7 @@ object FeatureFlags {
     val disableNfcScanningSecurity = FeatureFlag("Disable NFC Scanning Security")
     val disablePassiveCaptchaWarmup = FeatureFlag("Disable Passive Captcha Warm-Up")
     val forceTapToAddWithTerminal = FeatureFlag("Tap to Add: Force Terminal integration to be available")
+    val serverPaymentMethodAvailabilityEnabled = FeatureFlag("Enable mobile_session sidecar")
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

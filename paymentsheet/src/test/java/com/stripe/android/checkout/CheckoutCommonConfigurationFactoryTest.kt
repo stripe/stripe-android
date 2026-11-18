@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutElementsController.Address
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.model.asCommonConfiguration
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.elements.ExpressCheckoutElement.Configuration.GooglePayConfiguration
 import com.stripe.android.elements.PaymentElement
@@ -16,6 +17,8 @@ import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
+import com.stripe.android.testing.FeatureFlagTestRule
+import org.junit.Rule
 import org.junit.Test
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic as PSAutomatic
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full as PSFull
@@ -26,6 +29,22 @@ import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConf
     CardFundingFilteringPrivatePreview::class,
 )
 internal class CheckoutCommonConfigurationFactoryTest {
+    @get:Rule
+    val featureFlag = FeatureFlagTestRule(FeatureFlags.serverPaymentMethodAvailabilityEnabled, isEnabled = true)
+
+    @Test
+    fun `create disables MobileSession when the flag is off`() {
+        featureFlag.setEnabled(false)
+
+        val result = factory().create(
+            configuration = CheckoutElementsController.Configuration().build(),
+            paymentElementConfiguration = PaymentElement.Configuration().build(),
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+            collectedDetails = collectedDetails(),
+        )
+
+        assertThat(result.useRemoteMobileSession).isFalse()
+    }
 
     @Test
     fun `create uses explicit payment element configuration`() {
@@ -55,6 +74,7 @@ internal class CheckoutCommonConfigurationFactoryTest {
         )
 
         assertThat(result.preferredNetworks).containsExactly(CardBrand.CartesBancaires)
+        assertThat(result.useRemoteMobileSession).isFalse()
         assertThat(result.paymentMethodOrder).containsExactly("klarna", "card").inOrder()
         assertThat(result.opensCardScannerAutomatically).isTrue()
         assertThat(result.cardBrandAcceptance).isEqualTo(
@@ -80,7 +100,7 @@ internal class CheckoutCommonConfigurationFactoryTest {
     }
 
     @Test
-    fun `matches the common configuration derived from the embedded configuration`() {
+    fun `matches embedded configuration settings with remote MobileSession disabled`() {
         val configuration = CheckoutElementsController.Configuration()
             .paymentElement(
                 PaymentElement.Configuration()
@@ -113,6 +133,7 @@ internal class CheckoutCommonConfigurationFactoryTest {
                 collectedDetails = collectedDetails,
             )
             .asCommonConfiguration()
+            .copy(useRemoteMobileSession = false)
         val actual = factory()
             .create(
                 configuration = configuration,
