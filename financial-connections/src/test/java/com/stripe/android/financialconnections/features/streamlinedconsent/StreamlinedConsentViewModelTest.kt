@@ -103,7 +103,7 @@ internal class StreamlinedConsentViewModelTest {
         assertThat(update.pane).isEqualTo(Pane.STREAMLINED_CONSENT)
         assertThat(update.allowBackNavigation).isTrue()
         assertThat(update.canCloseWithoutConfirmation).isTrue()
-        assertThat(update.hideStripeLogo).isFalse()
+        assertThat(update.hideStripeLogo).isNull()
         assertThat(update.logoClickNotice).isEqualTo(streamlinedConsentPane.moreInfoNotice)
     }
 

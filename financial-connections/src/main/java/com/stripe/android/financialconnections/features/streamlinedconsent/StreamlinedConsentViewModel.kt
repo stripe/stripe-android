@@ -81,7 +81,6 @@ internal class StreamlinedConsentViewModel @AssistedInject constructor(
     override fun updateTopAppBar(state: StreamlinedConsentState): TopAppBarStateUpdate {
         return TopAppBarStateUpdate(
             pane = PANE,
-            hideStripeLogo = false,
             // The institution picker remains on the back stack, so users can choose another institution.
             allowBackNavigation = true,
             error = state.payload.error,
