@@ -34,6 +34,7 @@ interface DurationProvider {
         PaymentSheetLoadCreateCustomerState,
         PaymentSheetLoadRetrieveInitialPaymentSelection,
         PaymentSheetLoadComputePaymentMethodTypes,
+        PaymentSheetLoadFetchStripeBalanceFinancialAccounts,
         Checkout,
         CheckoutConfirmation,
         LinkSignup,

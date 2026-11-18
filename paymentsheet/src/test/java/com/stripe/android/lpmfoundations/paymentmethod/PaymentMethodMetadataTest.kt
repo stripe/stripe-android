@@ -43,6 +43,8 @@ import com.stripe.android.paymentsheet.state.LinkDisabledState
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.LinkStateResult
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.paymentsheet.stripebalance.StripeBalanceFinancialAccount
+import com.stripe.android.paymentsheet.stripebalance.StripeBalanceFinancialAccounts
 import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.Amount
@@ -1150,6 +1152,7 @@ internal class PaymentMethodMetadataTest {
             isTapToAddAvailable = false,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
             apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
+            stripeBalanceFinancialAccounts = null,
         )
 
         val expectedMetadata = PaymentMethodMetadata(
@@ -1226,6 +1229,7 @@ internal class PaymentMethodMetadataTest {
             shouldUseAutocompleteProxyEndpoints = false,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
             apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
+            stripeBalanceFinancialAccounts = null,
         )
 
         assertThat(metadata).isEqualTo(expectedMetadata)
@@ -1287,6 +1291,7 @@ internal class PaymentMethodMetadataTest {
             isTapToAddAvailable = false,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
             apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
+            stripeBalanceFinancialAccounts = null,
         )
 
         // When flag is false, should use default funding types, not the configured ones
@@ -1387,6 +1392,7 @@ internal class PaymentMethodMetadataTest {
             shouldUseAutocompleteProxyEndpoints = false,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
             apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
+            stripeBalanceFinancialAccounts = null,
         )
         assertThat(metadata).isEqualTo(expectedMetadata)
     }
@@ -2139,6 +2145,7 @@ internal class PaymentMethodMetadataTest {
             isTapToAddAvailable = false,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
             apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
+            stripeBalanceFinancialAccounts = null,
         )
 
         assertThat(metadata.availableWallets)
@@ -2281,6 +2288,41 @@ internal class PaymentMethodMetadataTest {
     }
 
     @Test
+    fun `createForPaymentElement sets the buyer's Stripe balance financial accounts`() {
+        val financialAccounts = StripeBalanceFinancialAccounts(
+            accounts = listOf(
+                StripeBalanceFinancialAccount(
+                    id = "fa_123",
+                    displayName = "Operating account",
+                    availableBalances = mapOf("usd" to 10_000L),
+                    eligible = true,
+                    ineligibleReason = null,
+                )
+            ),
+            currency = "usd",
+        )
+
+        val metadata = PaymentMethodMetadata.createForPaymentElement(
+            elementsSession = createElementsSession(intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD),
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
+            externalPaymentMethodSpecs = emptyList(),
+            isGooglePayReady = false,
+            linkStateResult = null,
+            customerMetadata = DEFAULT_CUSTOMER_METADATA,
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("cs_123"),
+            clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
+            integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
+            analyticsMetadata = AnalyticsMetadata(emptyMap()),
+            isTapToAddAvailable = false,
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+            apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
+            stripeBalanceFinancialAccounts = financialAccounts,
+        )
+
+        assertThat(metadata.stripeBalanceFinancialAccounts).isEqualTo(financialAccounts)
+    }
+
+    @Test
     fun `createForPaymentElement maps isTapToAddAvailable to isTapToAddSupported when customer present`() {
         val elementsSession = createElementsSession(
             intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
@@ -2300,6 +2342,7 @@ internal class PaymentMethodMetadataTest {
             isTapToAddAvailable = true,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
             apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
+            stripeBalanceFinancialAccounts = null,
         )
 
         assertThat(metadata.isTapToAddSupported).isTrue()
@@ -2325,6 +2368,7 @@ internal class PaymentMethodMetadataTest {
             isTapToAddAvailable = true,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
             apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
+            stripeBalanceFinancialAccounts = null,
         )
 
         assertThat(metadata.isTapToAddSupported).isTrue()
@@ -2354,6 +2398,7 @@ internal class PaymentMethodMetadataTest {
             isTapToAddAvailable = false,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
             apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
+            stripeBalanceFinancialAccounts = null,
         )
 
         assertThat(metadata.isTapToAddSupported).isFalse()
@@ -2508,6 +2553,7 @@ internal class PaymentMethodMetadataTest {
             isTapToAddAvailable = false,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
             apiConfiguration = PaymentMethodMetadataFixtures.DEFAULT_API_CONFIG,
+            stripeBalanceFinancialAccounts = null,
         )
     }
 
