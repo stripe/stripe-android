@@ -96,6 +96,11 @@ import com.stripe.android.identity.utils.IdentityIO
 import com.stripe.android.identity.utils.IdentityImageHandler
 import com.stripe.android.identity.utils.TestModeImage
 import com.stripe.android.mlcore.base.InterpreterInitializer
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -104,6 +109,8 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.io.File
 import kotlin.coroutines.CoroutineContext
@@ -126,6 +133,35 @@ internal class IdentityViewModel(
     @IOContext internal val workContext: CoroutineContext,
     private val finishWithResult: (IdentityVerificationSheet.VerificationFlowResult) -> Unit
 ) : AndroidViewModel(application) {
+
+    private val imageUploadJobs = mutableMapOf<ImageUploadKey, Job>()
+    private val imageUploadLocks = mutableMapOf<ImageUploadKey, Mutex>()
+    private val imagePreparationLock = Mutex()
+
+    private sealed interface ImageUploadKey {
+        data class Document(val isFront: Boolean, val isHighRes: Boolean) : ImageUploadKey
+        data class Selfie(val selfie: FaceDetectorTransitioner.Selfie, val isHighRes: Boolean) : ImageUploadKey
+    }
+
+    private fun launchImageUpload(key: ImageUploadKey, block: suspend () -> Unit) {
+        imageUploadJobs[key]?.cancel()
+        val lock = imageUploadLocks.getOrPut(key) { Mutex() }
+        val job = viewModelScope.launch(start = CoroutineStart.LAZY) {
+            // Cancellation cannot interrupt bitmap encoding. Wait until the previous job has
+            // released the file before preparing another image with the same name.
+            lock.withLock { block() }
+        }
+        imageUploadJobs[key] = job
+        job.start()
+    }
+
+    private suspend fun prepareImageFile(prepare: () -> File): File = withContext(workContext) {
+        // Limit peak bitmap memory when a scan produces several high/low-resolution images.
+        imagePreparationLock.withLock {
+            currentCoroutineContext().ensureActive()
+            prepare()
+        }
+    }
 
     /**
      * StateFlow to track the upload status of high/low resolution image for front of document.
@@ -470,9 +506,8 @@ internal class IdentityViewModel(
         uploadMethod: UploadMethod,
         scanType: IdentityScanState.ScanType
     ) {
-        runCatching {
-            uploadDocumentImagesAndNotify(
-                imageFile =
+        uploadDocumentImagesAndNotify(
+            prepareImage = {
                 identityIO.resizeUriAndCreateFileToUpload(
                     uri,
                     verificationArgs.verificationSessionId,
@@ -480,27 +515,17 @@ internal class IdentityViewModel(
                     if (isFront) FRONT else BACK,
                     maxDimension = docCapturePage.highResImageMaxDimension,
                     compressionQuality = docCapturePage.highResImageCompressionQuality
-                ),
-                filePurpose = requireNotNull(
-                    StripeFilePurpose.fromCode(docCapturePage.filePurpose)
-                ),
-                uploadMethod = uploadMethod,
-                isHighRes = true,
-                isFront = isFront,
-                isLiveMode = isLiveMode,
-                scanType = scanType,
-                compressionQuality = docCapturePage.highResImageCompressionQuality
-            )
-        }.onFailure {
-            postDocumentUploadPrepError(
-                isFront = isFront,
-                isHighRes = true,
-                scanType = scanType,
-                uploadMethod = uploadMethod,
-                message = "Failed to prepare manual document image for upload",
-                throwable = it
-            )
-        }
+                )
+            },
+            preparationErrorMessage = "Failed to prepare manual document image for upload",
+            filePurpose = docCapturePage.filePurpose,
+            uploadMethod = uploadMethod,
+            isHighRes = true,
+            isFront = isFront,
+            isLiveMode = isLiveMode,
+            scanType = scanType,
+            compressionQuality = docCapturePage.highResImageCompressionQuality
+        )
     }
 
     /**
@@ -515,22 +540,17 @@ internal class IdentityViewModel(
         scanType: IdentityScanState.ScanType
     ) {
         uploadDocumentImagesAndNotify(
-            imageFile =
-            identityIO.resizeBitmapAndCreateFileToUpload(
-                bitmap = bitmap,
-                verificationId = verificationArgs.verificationSessionId,
-                fileName = buildString {
-                    append(verificationArgs.verificationSessionId)
-                    append("_")
-                    append(if (isFront) FRONT else BACK)
-                    append(".jpeg")
-                },
-                maxDimension = docCapturePage.highResImageMaxDimension,
-                compressionQuality = docCapturePage.highResImageCompressionQuality
-            ),
-            filePurpose = requireNotNull(
-                StripeFilePurpose.fromCode(docCapturePage.filePurpose)
-            ),
+            prepareImage = {
+                identityIO.resizeBitmapAndCreateFileToUpload(
+                    bitmap = bitmap,
+                    verificationId = verificationArgs.verificationSessionId,
+                    fileName = "${verificationArgs.verificationSessionId}_${if (isFront) FRONT else BACK}.jpeg",
+                    maxDimension = docCapturePage.highResImageMaxDimension,
+                    compressionQuality = docCapturePage.highResImageCompressionQuality
+                )
+            },
+            preparationErrorMessage = "Failed to prepare manual document image for upload",
+            filePurpose = docCapturePage.filePurpose,
             uploadMethod = uploadMethod,
             isHighRes = true,
             isFront = isFront,
@@ -611,53 +631,24 @@ internal class IdentityViewModel(
             }
         }
 
-        // upload high res
-        runCatching {
-            processAndUploadBitmap(
-                bitmapToUpload = cropBitmapToUpload(
-                    originalBitmap,
-                    detectorOutput.boundingBox,
-                    verificationPage
-                ),
-                docCapturePage = verificationPage.documentCapture,
-                isHighRes = true,
-                isFront = isFront,
-                scores = scores,
-                targetScanType = targetScanType,
-                isLiveMode = verificationPage.livemode
-            )
-        }.onFailure {
-            postDocumentUploadPrepError(
-                isFront = isFront,
-                isHighRes = true,
-                scanType = targetScanType,
-                uploadMethod = UploadMethod.AUTOCAPTURE,
-                message = "Failed to prepare scanned document image for upload",
-                throwable = it
-            )
-        }
-
-        // upload low res
-        runCatching {
-            processAndUploadBitmap(
-                bitmapToUpload = originalBitmap,
-                docCapturePage = verificationPage.documentCapture,
-                isHighRes = false,
-                isFront = isFront,
-                scores = scores,
-                targetScanType = targetScanType,
-                isLiveMode = verificationPage.livemode
-            )
-        }.onFailure {
-            postDocumentUploadPrepError(
-                isFront = isFront,
-                isHighRes = false,
-                scanType = targetScanType,
-                uploadMethod = UploadMethod.AUTOCAPTURE,
-                message = "Failed to prepare full-frame document image for upload",
-                throwable = it
-            )
-        }
+        processAndUploadBitmap(
+            prepareBitmap = { cropBitmapToUpload(originalBitmap, detectorOutput.boundingBox, verificationPage) },
+            docCapturePage = verificationPage.documentCapture,
+            isHighRes = true,
+            isFront = isFront,
+            scores = scores,
+            targetScanType = targetScanType,
+            isLiveMode = verificationPage.livemode
+        )
+        processAndUploadBitmap(
+            prepareBitmap = { originalBitmap },
+            docCapturePage = verificationPage.documentCapture,
+            isHighRes = false,
+            isFront = isFront,
+            scores = scores,
+            targetScanType = targetScanType,
+            isLiveMode = verificationPage.livemode
+        )
     }
 
     private fun uploadFaceDetectorOutput(
@@ -750,9 +741,8 @@ internal class IdentityViewModel(
      * Processes document scan result by cropping and padding the bitmap if necessary,
      * then upload the processed file.
      */
-    @VisibleForTesting
-    internal fun processAndUploadBitmap(
-        bitmapToUpload: Bitmap,
+    private fun processAndUploadBitmap(
+        prepareBitmap: () -> Bitmap,
         docCapturePage: VerificationPageStaticContentDocumentCapturePage,
         isHighRes: Boolean,
         isFront: Boolean,
@@ -760,50 +750,47 @@ internal class IdentityViewModel(
         targetScanType: IdentityScanState.ScanType,
         isLiveMode: Boolean,
     ) {
-        identityIO.resizeBitmapAndCreateFileToUpload(
-            bitmap = bitmapToUpload,
-            verificationId = verificationArgs.verificationSessionId,
-            fileName =
-            StringBuilder().also { nameBuilder ->
-                nameBuilder.append(verificationArgs.verificationSessionId)
-                nameBuilder.append("_${if (isFront) FRONT else BACK}")
-                if (!isHighRes) {
-                    nameBuilder.append("_full_frame")
-                }
-                nameBuilder.append(".jpeg")
-            }.toString(),
-            maxDimension =
-            if (isHighRes) {
-                docCapturePage.highResImageMaxDimension
-            } else {
-                docCapturePage.lowResImageMaxDimension
+        uploadDocumentImagesAndNotify(
+            prepareImage = {
+                identityIO.resizeBitmapAndCreateFileToUpload(
+                    bitmap = prepareBitmap(),
+                    verificationId = verificationArgs.verificationSessionId,
+                    fileName = buildString {
+                        append(verificationArgs.verificationSessionId)
+                        append("_${if (isFront) FRONT else BACK}")
+                        if (!isHighRes) append("_full_frame")
+                        append(".jpeg")
+                    },
+                    maxDimension = if (isHighRes) {
+                        docCapturePage.highResImageMaxDimension
+                    } else {
+                        docCapturePage.lowResImageMaxDimension
+                    },
+                    compressionQuality = if (isHighRes) {
+                        docCapturePage.highResImageCompressionQuality
+                    } else {
+                        docCapturePage.lowResImageCompressionQuality
+                    }
+                )
             },
-            compressionQuality =
-            if (isHighRes) {
+            preparationErrorMessage = if (isHighRes) {
+                "Failed to prepare scanned document image for upload"
+            } else {
+                "Failed to prepare full-frame document image for upload"
+            },
+            filePurpose = docCapturePage.filePurpose,
+            uploadMethod = UploadMethod.AUTOCAPTURE,
+            scores = scores,
+            isHighRes = isHighRes,
+            isFront = isFront,
+            isLiveMode = isLiveMode,
+            scanType = targetScanType,
+            compressionQuality = if (isHighRes) {
                 docCapturePage.highResImageCompressionQuality
             } else {
                 docCapturePage.lowResImageCompressionQuality
             }
-        ).let { imageFile ->
-            uploadDocumentImagesAndNotify(
-                imageFile = imageFile,
-                filePurpose = requireNotNull(
-                    StripeFilePurpose.fromCode(docCapturePage.filePurpose)
-                ),
-                uploadMethod = UploadMethod.AUTOCAPTURE,
-                scores = scores,
-                isHighRes = isHighRes,
-                isFront = isFront,
-                isLiveMode = isLiveMode,
-                scanType = targetScanType,
-                compressionQuality =
-                if (isHighRes) {
-                    docCapturePage.highResImageCompressionQuality
-                } else {
-                    docCapturePage.lowResImageCompressionQuality
-                }
-            )
-        }
+        )
     }
 
     /**
@@ -814,11 +801,12 @@ internal class IdentityViewModel(
     }
 
     /**
-     * Uploads the imageFile and notifies corresponding result [LiveData].
+     * Prepares an image off Main, uploads it, and updates the corresponding document state.
      */
     private fun uploadDocumentImagesAndNotify(
-        imageFile: File,
-        filePurpose: StripeFilePurpose,
+        prepareImage: () -> File,
+        preparationErrorMessage: String,
+        filePurpose: String,
         uploadMethod: UploadMethod,
         scores: List<Float>? = null,
         isHighRes: Boolean,
@@ -827,15 +815,29 @@ internal class IdentityViewModel(
         scanType: IdentityScanState.ScanType,
         compressionQuality: Float
     ) {
-        viewModelScope.launch {
-            if (isFront) {
-                _documentFrontUploadedState
-            } else {
-                _documentBackUploadedState
-            }.updateStateAndSave { currentState ->
-                currentState.updateLoading(isHighRes = isHighRes)
+        if (isFront) {
+            _documentFrontUploadedState
+        } else {
+            _documentBackUploadedState
+        }.updateStateAndSave { currentState ->
+            currentState.updateLoading(isHighRes = isHighRes)
+        }
+        launchImageUpload(ImageUploadKey.Document(isFront, isHighRes)) {
+            val (purpose, imageFile) = runCatching {
+                requireNotNull(StripeFilePurpose.fromCode(filePurpose)) to prepareImageFile(prepareImage)
+            }.getOrElse { error ->
+                if (error is CancellationException) throw error
+                currentCoroutineContext().ensureActive()
+                postDocumentUploadPrepError(
+                    isFront = isFront,
+                    isHighRes = isHighRes,
+                    scanType = scanType,
+                    uploadMethod = uploadMethod,
+                    message = preparationErrorMessage,
+                    throwable = error
+                )
+                return@launchImageUpload
             }
-
             var fileToUpload = imageFile
             runCatching {
                 fileToUpload = imageFile.fileForVerificationMode(
@@ -846,16 +848,17 @@ internal class IdentityViewModel(
                         TestModeImage.DOCUMENT_BACK
                     }
                 )
-                uploadPreparedImage(fileToUpload, filePurpose)
+                uploadPreparedImage(fileToUpload, purpose)
             }.fold(
                 onSuccess = { fileTimePair ->
+                    currentCoroutineContext().ensureActive()
                     identityAnalyticsRequestFactory.imageUpload(
                         value = fileTimePair.second,
                         compressionQuality = compressionQuality,
                         scanType = scanType,
                         id = fileTimePair.first.id,
                         fileName = fileTimePair.first.filename,
-                        fileSize = fileToUpload.length() / BYTES_IN_KB
+                        fileSize = withContext(workContext) { fileToUpload.length() / BYTES_IN_KB }
                     )
 
                     updateAnalyticsState { oldState ->
@@ -885,6 +888,8 @@ internal class IdentityViewModel(
                     }
                 },
                 onFailure = {
+                    if (it is CancellationException) throw it
+                    currentCoroutineContext().ensureActive()
                     identityAnalyticsRequestFactory.genericError(
                         throwable = it,
                         overrideMessage = "Failed to upload file : ${fileToUpload.name}",
@@ -960,68 +965,67 @@ internal class IdentityViewModel(
         selfie: FaceDetectorTransitioner.Selfie,
         isLiveMode: Boolean
     ) {
-        identityIO.resizeBitmapAndCreateFileToUpload(
-            bitmap =
-            if (isHighRes) {
-                identityIO.cropAndPadBitmap(
-                    originalBitmap,
-                    boundingBox,
-                    boundingBox.width * FaceDetectorAnalyzer.INPUT_WIDTH * selfieCapturePage.highResImageCropPadding
-                )
-            } else {
-                originalBitmap
-            },
-            verificationId = verificationArgs.verificationSessionId,
-            fileName =
-            StringBuilder().also { nameBuilder ->
-                nameBuilder.append(verificationArgs.verificationSessionId)
-                nameBuilder.append("_face")
-                if (isHighRes) {
-                    if (selfie != FaceDetectorTransitioner.Selfie.BEST) {
-                        nameBuilder.append("_${selfie.value}_crop_frame")
-                    }
-                } else {
-                    if (selfie == FaceDetectorTransitioner.Selfie.BEST) {
-                        nameBuilder.append("_full_frame")
+        uploadSelfieImagesAndNotify(
+            prepareImage = {
+                identityIO.resizeBitmapAndCreateFileToUpload(
+                    bitmap =
+                    if (isHighRes) {
+                        identityIO.cropAndPadBitmap(
+                            originalBitmap,
+                            boundingBox,
+                            boundingBox.width * FaceDetectorAnalyzer.INPUT_WIDTH *
+                                selfieCapturePage.highResImageCropPadding
+                        )
                     } else {
-                        nameBuilder.append("_${selfie.value}_full_frame")
+                        originalBitmap
+                    },
+                    verificationId = verificationArgs.verificationSessionId,
+                    fileName =
+                    StringBuilder().also { nameBuilder ->
+                        nameBuilder.append(verificationArgs.verificationSessionId)
+                        nameBuilder.append("_face")
+                        if (isHighRes) {
+                            if (selfie != FaceDetectorTransitioner.Selfie.BEST) {
+                                nameBuilder.append("_${selfie.value}_crop_frame")
+                            }
+                        } else {
+                            if (selfie == FaceDetectorTransitioner.Selfie.BEST) {
+                                nameBuilder.append("_full_frame")
+                            } else {
+                                nameBuilder.append("_${selfie.value}_full_frame")
+                            }
+                        }
+                        nameBuilder.append(".jpeg")
+                    }.toString(),
+                    maxDimension =
+                    if (isHighRes) {
+                        selfieCapturePage.highResImageMaxDimension
+                    } else {
+                        selfieCapturePage.lowResImageMaxDimension
+                    },
+                    compressionQuality =
+                    if (isHighRes) {
+                        selfieCapturePage.highResImageCompressionQuality
+                    } else {
+                        selfieCapturePage.lowResImageCompressionQuality
                     }
-                }
-                nameBuilder.append(".jpeg")
-            }.toString(),
-            maxDimension =
-            if (isHighRes) {
-                selfieCapturePage.highResImageMaxDimension
-            } else {
-                selfieCapturePage.lowResImageMaxDimension
+                )
             },
-            compressionQuality =
-            if (isHighRes) {
+            filePurpose = selfieCapturePage.filePurpose,
+            isHighRes = isHighRes,
+            selfie = selfie,
+            isLiveMode = isLiveMode,
+            compressionQuality = if (isHighRes) {
                 selfieCapturePage.highResImageCompressionQuality
             } else {
                 selfieCapturePage.lowResImageCompressionQuality
             }
-        ).let { imageFile ->
-            uploadSelfieImagesAndNotify(
-                imageFile = imageFile,
-                filePurpose = requireNotNull(
-                    StripeFilePurpose.fromCode(selfieCapturePage.filePurpose)
-                ),
-                isHighRes = isHighRes,
-                selfie = selfie,
-                isLiveMode = isLiveMode,
-                compressionQuality = if (isHighRes) {
-                    selfieCapturePage.highResImageCompressionQuality
-                } else {
-                    selfieCapturePage.lowResImageCompressionQuality
-                }
-            )
-        }
+        )
     }
 
     private fun uploadSelfieImagesAndNotify(
-        imageFile: File,
-        filePurpose: StripeFilePurpose,
+        prepareImage: () -> File,
+        filePurpose: String,
         isHighRes: Boolean,
         selfie: FaceDetectorTransitioner.Selfie,
         isLiveMode: Boolean,
@@ -1030,23 +1034,37 @@ internal class IdentityViewModel(
         _selfieUploadedState.updateStateAndSave { currentState ->
             currentState.updateLoading(isHighRes, selfie)
         }
-        viewModelScope.launch {
+        launchImageUpload(ImageUploadKey.Selfie(selfie, isHighRes)) {
+            val (purpose, imageFile) = runCatching {
+                requireNotNull(StripeFilePurpose.fromCode(filePurpose)) to prepareImageFile(prepareImage)
+            }.getOrElse { error ->
+                if (error is CancellationException) throw error
+                currentCoroutineContext().ensureActive()
+                postSelfieUploadPrepError(
+                    isHighRes = isHighRes,
+                    selfie = selfie,
+                    message = "Failed to prepare selfie image for upload",
+                    throwable = error
+                )
+                return@launchImageUpload
+            }
             var fileToUpload = imageFile
             runCatching {
                 fileToUpload = imageFile.fileForVerificationMode(
                     isLiveMode = isLiveMode,
                     testModeImage = TestModeImage.SELFIE
                 )
-                uploadPreparedImage(fileToUpload, filePurpose)
+                uploadPreparedImage(fileToUpload, purpose)
             }.fold(
                 onSuccess = { fileTimePair ->
+                    currentCoroutineContext().ensureActive()
                     identityAnalyticsRequestFactory.imageUpload(
                         value = fileTimePair.second,
                         compressionQuality = compressionQuality,
                         scanType = IdentityScanState.ScanType.SELFIE,
                         id = fileTimePair.first.id,
                         fileName = fileTimePair.first.filename,
-                        fileSize = fileToUpload.length() / BYTES_IN_KB
+                        fileSize = withContext(workContext) { fileToUpload.length() / BYTES_IN_KB }
                     )
                     _selfieUploadedState.updateStateAndSave { currentState ->
                         currentState.update(
@@ -1059,25 +1077,36 @@ internal class IdentityViewModel(
                     }
                 },
                 onFailure = {
-                    identityAnalyticsRequestFactory.genericError(
-                        throwable = it,
-                        overrideMessage = "Failed to upload file : ${fileToUpload.name}",
-                        additionalMetadata = selfieUploadErrorMetadata(
-                            isHighRes = isHighRes,
-                            selfie = selfie,
-                            stage = IdentityAnalyticsRequestFactory.UPLOAD_STAGE_REQUEST,
-                            fileName = fileToUpload.name
-                        )
-                    )
-                    _selfieUploadedState.updateStateAndSave { currentState ->
-                        currentState.updateError(
-                            isHighRes = isHighRes,
-                            selfie = selfie,
-                            message = "Failed to upload file : ${fileToUpload.name}",
-                            throwable = it
-                        )
-                    }
+                    if (it is CancellationException) throw it
+                    currentCoroutineContext().ensureActive()
+                    postSelfieUploadError(fileToUpload, isHighRes, selfie, it)
                 }
+            )
+        }
+    }
+
+    private fun postSelfieUploadError(
+        fileToUpload: File,
+        isHighRes: Boolean,
+        selfie: FaceDetectorTransitioner.Selfie,
+        error: Throwable
+    ) {
+        identityAnalyticsRequestFactory.genericError(
+            throwable = error,
+            overrideMessage = "Failed to upload file : ${fileToUpload.name}",
+            additionalMetadata = selfieUploadErrorMetadata(
+                isHighRes = isHighRes,
+                selfie = selfie,
+                stage = IdentityAnalyticsRequestFactory.UPLOAD_STAGE_REQUEST,
+                fileName = fileToUpload.name
+            )
+        )
+        _selfieUploadedState.updateStateAndSave { currentState ->
+            currentState.updateError(
+                isHighRes = isHighRes,
+                selfie = selfie,
+                message = "Failed to upload file : ${fileToUpload.name}",
+                throwable = error
             )
         }
     }
@@ -1110,13 +1139,13 @@ internal class IdentityViewModel(
         }
     }
 
-    private fun File.fileForVerificationMode(
+    private suspend fun File.fileForVerificationMode(
         isLiveMode: Boolean,
         testModeImage: TestModeImage
     ): File = if (isLiveMode) {
         this
     } else {
-        identityIO.createTestModeFileToUpload(testModeImage)
+        prepareImageFile { identityIO.createTestModeFileToUpload(testModeImage) }
     }
 
     private suspend fun uploadPreparedImage(
@@ -1728,6 +1757,7 @@ internal class IdentityViewModel(
     }
 
     fun clearDocumentUploadedState() {
+        imageUploadJobs.filterKeys { it is ImageUploadKey.Document }.values.forEach { it.cancel() }
         listOf(_documentFrontUploadedState, _documentBackUploadedState).forEach {
             it.updateStateAndSave {
                 SingleSideDocumentUploadState()
@@ -1736,6 +1766,7 @@ internal class IdentityViewModel(
     }
 
     fun clearSelfieUploadedState() {
+        imageUploadJobs.filterKeys { it is ImageUploadKey.Selfie }.values.forEach { it.cancel() }
         _selfieUploadedState.updateStateAndSave {
             SelfieUploadState()
         }
