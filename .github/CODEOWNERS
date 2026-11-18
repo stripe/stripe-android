@@ -1,26 +1,96 @@
-# Require approvals from the android-sdk-reviewers team for all changes not in directories listed below.
-* @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
+# Allow the general Android reviewer teams or an Android OSS superuser to approve
+# files that do not belong to a category below.
+* @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers @stripe/android-oss-superusers
+
+# Repository infrastructure
+/.agents/ @stripe/android-oss-superusers
+/.bitrise/ @stripe/android-oss-superusers
+/.claude/ @stripe/android-oss-superusers
+/.github/ @stripe/android-oss-superusers
+/.githooks/ @stripe/android-oss-superusers
+/.idea/ @stripe/android-oss-superusers
+/.editorconfig @stripe/android-oss-superusers
+/.gitignore @stripe/android-oss-superusers
+/.nexus.yaml @stripe/android-oss-superusers
+/.phraseapp.yml @stripe/android-oss-superusers
+/.ruby-version @stripe/android-oss-superusers
+/AGENTS.md @stripe/android-oss-superusers
+/CLAUDE.md @stripe/android-oss-superusers
+/Gemfile @stripe/android-oss-superusers
+/Gemfile.lock @stripe/android-oss-superusers
+/VERSION @stripe/android-oss-superusers
+/bitrise.yml @stripe/android-oss-superusers
+/build-configuration/ @stripe/android-oss-superusers
+/build.gradle @stripe/android-oss-superusers
+/config/ @stripe/android-oss-superusers
+/dependencies.gradle @stripe/android-oss-superusers
+/deploy/ @stripe/android-oss-superusers
+/dokka-stripe/ @stripe/android-oss-superusers
+/gradle.properties @stripe/android-oss-superusers
+/gradle/ @stripe/android-oss-superusers
+/gradlew @stripe/android-oss-superusers
+/gradlew.bat @stripe/android-oss-superusers
+/jitpack.yml @stripe/android-oss-superusers
+/lint/ @stripe/android-oss-superusers
+/scripts/ @stripe/android-oss-superusers
+/settings.gradle @stripe/android-oss-superusers
+/settings/ @stripe/android-oss-superusers
+/stripe-example.keystore @stripe/android-oss-superusers
 
 # Payments SDK
-/payment-method-messaging/ @stripe/android-payments-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
-/payments/ @stripe/android-payments-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
-/payments-core/ @stripe/android-payments-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
-/payments-core-testing/ @stripe/android-payments-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
-/payments-model/ @stripe/android-payments-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
-/payments-ui-core/ @stripe/android-payments-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
-/paymentsheet/ @stripe/android-payments-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
-/paymentsheet-example/ @stripe/android-payments-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
-/stripecardscan/ @stripe/android-payments-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
-/stripecardscan-example/ @stripe/android-payments-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
+/3ds2playground/ @stripe/android-payments-reviewers @stripe/android-oss-superusers
+/3ds2sdk/ @stripe/android-payments-reviewers @stripe/android-oss-superusers
+/camera-core/ @stripe/android-payments-reviewers @stripe/android-oss-superusers
+/checkout-testing/ @stripe/android-payments-reviewers @stripe/android-oss-superusers
+/example/ @stripe/android-payments-reviewers @stripe/android-oss-superusers
+/hcaptcha/ @stripe/android-payments-reviewers @stripe/android-oss-superusers
+/ml-core/ @stripe/android-payments-reviewers @stripe/android-oss-superusers
+/ml-core:base/ @stripe/android-payments-reviewers @stripe/android-oss-superusers
+/ml-core:default/ @stripe/android-payments-reviewers @stripe/android-oss-superusers
+/ml-core:googleplay/ @stripe/android-payments-reviewers @stripe/android-oss-superusers
+/network-testing/ @stripe/android-payments-reviewers @stripe/android-oss-superusers
+/payment-element-test-pages/ @stripe/android-payments-reviewers @stripe/android-oss-superusers
+/payment-method-messaging/ @stripe/android-payments-reviewers @stripe/android-oss-superusers
+/payment-method-messaging-example/ @stripe/android-payments-reviewers @stripe/android-oss-superusers
+/payments/ @stripe/android-payments-reviewers @stripe/android-oss-superusers
+/payments-core/ @stripe/android-payments-reviewers @stripe/android-oss-superusers
+/payments-core-testing/ @stripe/android-payments-reviewers @stripe/android-oss-superusers
+/payments-model/ @stripe/android-payments-reviewers @stripe/android-oss-superusers
+/payments-ui-core/ @stripe/android-payments-reviewers @stripe/android-oss-superusers
+/paymentsheet/ @stripe/android-payments-reviewers @stripe/android-link-reviewers @stripe/android-oss-superusers
+/paymentsheet-example/ @stripe/android-payments-reviewers @stripe/android-link-reviewers @stripe/android-oss-superusers
+/docs/paymentsheet/ @stripe/android-payments-reviewers @stripe/android-link-reviewers @stripe/android-oss-superusers
+/samplestore/ @stripe/android-payments-reviewers @stripe/android-oss-superusers
+/screenshot-testing/ @stripe/android-payments-reviewers @stripe/android-oss-superusers
+/stripe-attestation/ @stripe/android-payments-reviewers @stripe/android-oss-superusers
+/stripe-core/ @stripe/android-payments-reviewers @stripe/android-oss-superusers
+/stripe-test-e2e/ @stripe/android-payments-reviewers @stripe/android-oss-superusers
+/stripe-ui-core/ @stripe/android-payments-reviewers @stripe/android-oss-superusers
+/stripecardscan/ @stripe/android-payments-reviewers @stripe/android-oss-superusers
+/stripecardscan-example/ @stripe/android-payments-reviewers @stripe/android-oss-superusers
+/tap-to-add-testing/ @stripe/android-payments-reviewers @stripe/android-oss-superusers
+/wechatpay/ @stripe/android-payments-reviewers @stripe/android-oss-superusers
+
+# Crypto Onramp SDK
+/crypto-onramp/ @stripe/android-crypto-reviewers @stripe/android-oss-superusers
+/crypto-onramp-example/ @stripe/android-crypto-reviewers @stripe/android-oss-superusers
 
 # Identity SDK
-/identity/ @stripe/android-identity-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
-/identity-example/ @stripe/android-identity-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
+/docs/identity/ @stripe/android-identity-reviewers @stripe/android-oss-superusers
+/identity/ @stripe/android-identity-reviewers @stripe/android-oss-superusers
+/identity-example/ @stripe/android-identity-reviewers @stripe/android-oss-superusers
 
 # Financial Connections SDK
-/financial-connections/ @stripe/android-link-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
-/financial-connections-example/ @stripe/android-link-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
+/docs/financial-connections/ @stripe/android-link-reviewers @stripe/android-oss-superusers
+/docs/financial-connections-core/ @stripe/android-link-reviewers @stripe/android-oss-superusers
+/financial-connections/ @stripe/android-link-reviewers @stripe/android-oss-superusers
+/financial-connections-core/ @stripe/android-link-reviewers @stripe/android-oss-superusers
+/financial-connections-example/ @stripe/android-link-reviewers @stripe/android-oss-superusers
+/financial-connections-lite/ @stripe/android-link-reviewers @stripe/android-oss-superusers
+/maestro/financial-connections/ @stripe/android-link-reviewers @stripe/android-oss-superusers
 
 # Stripe Connect SDK
-/connect/ @stripe/android-sdk-connect-reviewers @stripe/mx-mobile-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
-/connect-example/ @stripe/android-sdk-connect-reviewers @stripe/mx-mobile-reviewers @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
+/connect/ @stripe/android-sdk-connect-reviewers @stripe/mx-mobile-reviewers @stripe/android-oss-superusers
+/connect-example/ @stripe/android-sdk-connect-reviewers @stripe/mx-mobile-reviewers @stripe/android-oss-superusers
+/docs/connect/ @stripe/android-sdk-connect-reviewers @stripe/mx-mobile-reviewers @stripe/android-oss-superusers
+/maestro/connect/ @stripe/android-sdk-connect-reviewers @stripe/mx-mobile-reviewers @stripe/android-oss-superusers
