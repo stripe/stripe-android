@@ -14,6 +14,8 @@
 
 **Pull requests** — the source repo is https://git.corp.stripe.com/stripe-internal/oss-android-sdk. `gh` infers it from `origin`; pass `-R git.corp.stripe.com/stripe-internal/oss-android-sdk` when a command must not depend on the working directory or `GH_HOST`. Always open pull requests as drafts. When an agent opens a pull request, include `Committed and created by <agent>.` in the PR description, where agent is the type of agent (e.g., Claude or Codex).
 
+**Changelogs** — Describe user-visible changes without mentioning or linking to pull requests (including PR numbers). This applies to changelog files and changelog text in descriptions, release notes, and summaries.
+
 **Internal Tools** — Jira: MOBILESDK, RUN_MOBILESDK | Trailhead space: mobile-sdk
 
 ## Architecture
