@@ -106,7 +106,7 @@ internal class EndToEndTest {
         val newPaymentIntent = service.createPaymentIntent(
             Request.CreatePaymentIntentParams(
                 createParams = Request.CreateParams(
-                    paymentMethodTypes = listOf("card")
+                    allowedPaymentMethodTypes = listOf("card")
                 )
             )
         )
@@ -139,7 +139,7 @@ internal class EndToEndTest {
         val newPaymentIntent = service.createSetupIntent(
             Request.CreateSetupIntentParams(
                 createParams = Request.CreateParams(
-                    paymentMethodTypes = listOf("card")
+                    allowedPaymentMethodTypes = listOf("card")
                 )
             )
         )
@@ -170,7 +170,7 @@ internal class EndToEndTest {
         val newPaymentIntent = service.createPaymentIntent(
             Request.CreatePaymentIntentParams(
                 createParams = Request.CreateParams(
-                    paymentMethodTypes = listOf("us_bank_account")
+                    allowedPaymentMethodTypes = listOf("us_bank_account")
                 )
             )
         )
@@ -231,7 +231,7 @@ internal class EndToEndTest {
         val newPaymentIntent = service.createPaymentIntent(
             Request.CreatePaymentIntentParams(
                 createParams = Request.CreateParams(
-                    paymentMethodTypes = listOf("us_bank_account")
+                    allowedPaymentMethodTypes = listOf("us_bank_account")
                 )
             )
         )
@@ -278,7 +278,7 @@ internal class EndToEndTest {
         val newPaymentIntent = service.createPaymentIntent(
             Request.CreatePaymentIntentParams(
                 createParams = Request.CreateParams(
-                    paymentMethodTypes = listOf("us_bank_account")
+                    allowedPaymentMethodTypes = listOf("us_bank_account")
                 )
             )
         )
@@ -338,7 +338,7 @@ internal class EndToEndTest {
         val newPaymentIntent = service.createSetupIntent(
             Request.CreateSetupIntentParams(
                 createParams = Request.CreateParams(
-                    paymentMethodTypes = listOf("us_bank_account")
+                    allowedPaymentMethodTypes = listOf("us_bank_account")
                 )
             )
         )
@@ -391,7 +391,7 @@ internal class EndToEndTest {
         val newPaymentIntent = service.createSetupIntent(
             Request.CreateSetupIntentParams(
                 createParams = Request.CreateParams(
-                    paymentMethodTypes = listOf("us_bank_account")
+                    allowedPaymentMethodTypes = listOf("us_bank_account")
                 )
             )
         )
@@ -433,7 +433,7 @@ internal class EndToEndTest {
 
         val paymentIntent = service.createPaymentIntent(
             Request.CreatePaymentIntentParams(
-                createParams = Request.CreateParams(paymentMethodTypes = listOf("cashapp")),
+                createParams = Request.CreateParams(allowedPaymentMethodTypes = listOf("cashapp")),
             )
         )
 
@@ -458,7 +458,7 @@ internal class EndToEndTest {
 
         val paymentIntent = service.createPaymentIntent(
             Request.CreatePaymentIntentParams(
-                createParams = Request.CreateParams(paymentMethodTypes = listOf("cashapp")),
+                createParams = Request.CreateParams(allowedPaymentMethodTypes = listOf("cashapp")),
             )
         )
 
@@ -486,7 +486,7 @@ internal class EndToEndTest {
         val paymentIntent = service.createSetupIntent(
             Request.CreateSetupIntentParams(
                 createParams = Request.CreateParams(
-                    paymentMethodTypes = listOf("cashapp"),
+                    allowedPaymentMethodTypes = listOf("cashapp"),
                 ),
             )
         )
@@ -515,7 +515,7 @@ internal class EndToEndTest {
         val newPaymentIntent = service.createSetupIntent(
             Request.CreateSetupIntentParams(
                 createParams = Request.CreateParams(
-                    paymentMethodTypes = listOf("us_bank_account")
+                    allowedPaymentMethodTypes = listOf("us_bank_account")
                 )
             )
         )
