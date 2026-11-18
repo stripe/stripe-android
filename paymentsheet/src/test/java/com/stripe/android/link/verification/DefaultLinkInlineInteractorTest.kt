@@ -30,6 +30,7 @@ import com.stripe.android.paymentsheet.utils.LinkTestUtils.createLinkConfigurati
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
 import com.stripe.android.testing.FeatureFlagTestRule
+import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.utils.FakeLinkComponent
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -305,6 +306,7 @@ class DefaultLinkInlineInteractorTest {
 
         // Setup initial state with isProcessing=true
         val initialViewState = VerificationViewState(
+            isTestMode = false,
             authFlow = null,
             isProcessing = true, // Already processing
             errorMessage = null,
@@ -351,6 +353,7 @@ class DefaultLinkInlineInteractorTest {
         val testError = RuntimeException("Invalid OTP code")
 
         val initialViewState = VerificationViewState(
+            isTestMode = false,
             authFlow = null,
             isProcessing = true,
             errorMessage = null,
@@ -401,6 +404,7 @@ class DefaultLinkInlineInteractorTest {
 
         // Setup initial state with some OTP values and error
         val initialViewState = VerificationViewState(
+            isTestMode = false,
             authFlow = null,
             isProcessing = false,
             errorMessage = "Previous error".resolvableString,
@@ -462,6 +466,7 @@ class DefaultLinkInlineInteractorTest {
         val interactor = createInteractor()
 
         val initialViewState = VerificationViewState(
+            isTestMode = false,
             authFlow = null,
             isProcessing = false,
             errorMessage = null,
@@ -511,6 +516,7 @@ class DefaultLinkInlineInteractorTest {
         val interactor = createInteractor()
 
         val initialViewState = VerificationViewState(
+            isTestMode = false,
             authFlow = null,
             isProcessing = false,
             errorMessage = "Previous error message".resolvableString,
@@ -592,6 +598,7 @@ class DefaultLinkInlineInteractorTest {
         val interactor = createInteractor()
 
         val initialViewState = VerificationViewState(
+            isTestMode = false,
             authFlow = null,
             isProcessing = false,
             errorMessage = null,
@@ -630,6 +637,35 @@ class DefaultLinkInlineInteractorTest {
 
         // Verify OTP was reset even though verification failed
         assertThat(otpController.fieldValue.value).isEmpty()
+    }
+
+    @Test
+    fun `sandbox intent enables inline sandbox banner`() = runModeScenario(isLiveMode = false)
+
+    @Test
+    fun `live intent disables inline sandbox banner`() = runModeScenario(isLiveMode = true)
+
+    private fun runModeScenario(isLiveMode: Boolean) = runTest(testDispatcher) {
+        linkAccountManager.setLinkAccount(LinkAccountUpdate.Value(createLinkAccount()))
+        val configuration = createLinkConfiguration()
+        val metadata = createPaymentMethodMetadata(
+            linkState = LinkState(
+                loginState = LoginState.NeedsVerification,
+                configuration = configuration.copy(
+                    stripeIntent = PaymentIntentFactory.create().copy(isLiveMode = isLiveMode),
+                ),
+                signupMode = null,
+            ),
+        )
+        val interactor = createInteractor()
+        interactor.state.test {
+            assertThat(awaitItem().verificationState).isEqualTo(Loading)
+            interactor.setup(metadata)
+            linkAccountManager.awaitStartVerificationCall()
+            val state = awaitItem().verificationState as Render2FA
+            assertThat(state.viewState.isTestMode).isEqualTo(!isLiveMode)
+        }
+        linkAccountManager.ensureVerificationEventsConsumed()
     }
 
     private fun createInteractor() = DefaultLinkInlineInteractor(

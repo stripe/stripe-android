@@ -209,6 +209,11 @@ private fun ColumnScope.OtpContent(
 
     Spacer(modifier = Modifier.size(24.dp))
 
+    if (state.isTestMode) {
+        VerificationSandboxBanner()
+        Spacer(modifier = Modifier.size(24.dp))
+    }
+
     OtpCodeInput(
         enabled = !state.isProcessing && state.authFlow?.codeEntryEnabled != false,
         otpElement = otpElement,
@@ -678,6 +683,7 @@ private fun Preview() {
             ) {
                 VerificationBody(
                     state = VerificationViewState(
+                        isTestMode = false,
                         authFlow = null,
                         isProcessing = false,
                         requestFocus = false,
