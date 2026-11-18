@@ -1,0 +1,9 @@
+ownership:
+  project: connect_embedded
+  additional_reviewers:
+    - project: mobile_apps
+      auto_assign: false
+    - project: mobile_sdks
+      auto_assign: false
+change_notifications:
+  slack: false

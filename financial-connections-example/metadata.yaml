@@ -1,0 +1,7 @@
+ownership:
+  project: link_mobile
+  additional_reviewers:
+    - project: mobile_sdks
+      auto_assign: false
+change_notifications:
+  slack: false
