@@ -22,10 +22,7 @@ buildscript {
         classpath buildLibs.googleServices
         classpath buildLibs.kotlinGradlePlugin
         classpath buildLibs.kotlinSerializationPlugin
-        classpath(buildLibs.paparazzi) {
-            // Keep sdk-common aligned with the Android Gradle plugin on the build classpath.
-            exclude group: 'com.android.tools', module: 'sdk-common'
-        }
+        classpath buildLibs.paparazzi
     }
 }
 
@@ -35,7 +32,7 @@ plugins {
     id 'com.google.devtools.ksp' version '2.3.6' apply false
     id 'dev.drewhamilton.poko' version '0.20.2' apply false
     id 'org.jetbrains.kotlin.jvm' version '2.2.21' apply false
-    id 'com.google.dagger.hilt.android' version '2.58' apply false
+    id 'com.google.dagger.hilt.android' version '2.59' apply false
     id 'org.gradle.test-retry' version "1.6.4" apply false
 }
 

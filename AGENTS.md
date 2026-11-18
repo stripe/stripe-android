@@ -28,7 +28,7 @@ Multi-module Android library for payment processing and financial services.
 **Key Patterns**
 - Kotlin coroutines for async; Jetpack Compose + traditional Views
 - Dagger/Hilt DI in some modules; binary-compatibility-validator for API compat
-- Gradle with shared deps (dependencies.gradle), AGP 8.13.x, Kotlin 2.3.x
+- Gradle with shared deps (dependencies.gradle), AGP 9.4.x, Kotlin 2.3.x
 - Detekt for static analysis, Paparazzi for screenshot testing
 - Parameter defaults: public APIs give parameters defaults (`= null`, `= false`) for ergonomic construction. Non-public code (`internal` or `@RestrictTo`) keeps model fields and function parameters explicit by default.
   Prefer one function with a default parameter when an overload would only forward the same arguments and supply an unambiguous value that preserves existing behavior. Do not add a forwarding overload solely to avoid a default. Check source and binary compatibility before removing an existing overload.
