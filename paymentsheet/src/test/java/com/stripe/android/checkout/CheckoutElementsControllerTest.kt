@@ -1211,6 +1211,49 @@ internal class CheckoutElementsControllerTest {
     }
 
     @Test
+    fun `updateEmail trims whitespace before storing the email`() = runMutationScenario(
+        initModifier = { it.remove("customer_email") },
+    ) {
+        val result = controller.updateEmail("  local@example.com  ")
+
+        assertThat(result).isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
+        assertThat(controller.session.value?.email).isEqualTo("local@example.com")
+    }
+
+    @Test
+    fun `updateEmail returns failure and preserves email when email is invalid`() = runMutationScenario(
+        initModifier = { it.remove("customer_email") },
+    ) {
+        assertThat(controller.updateEmail("local@example.com"))
+            .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
+
+        val result = controller.updateEmail("not-an-email")
+
+        assertThat(result).isInstanceOf(CheckoutElementsController.OperationResult.Failed::class.java)
+        val failure = result as CheckoutElementsController.OperationResult.Failed
+        assertThat(failure.error).isInstanceOf(IllegalArgumentException::class.java)
+        assertThat(failure.error).hasMessageThat()
+            .isEqualTo("Email 'not-an-email' is not a valid email address")
+        assertThat(failure.displayMessage).isEqualTo("Your email is invalid.")
+        assertThat(controller.session.value?.email).isEqualTo("local@example.com")
+        assertThat(committedState().embeddedConfiguration?.defaultBillingDetails?.email)
+            .isEqualTo("local@example.com")
+    }
+
+    @Test
+    fun `updateEmail returns failure when email is blank`() = runMutationScenario(
+        initModifier = { it.remove("customer_email") },
+    ) {
+        val result = controller.updateEmail("   ")
+
+        assertThat(result).isInstanceOf(CheckoutElementsController.OperationResult.Failed::class.java)
+        val failure = result as CheckoutElementsController.OperationResult.Failed
+        assertThat(failure.error).isInstanceOf(IllegalArgumentException::class.java)
+        assertThat(failure.displayMessage).isEqualTo("Your email is invalid.")
+        assertThat(controller.session.value?.email).isNull()
+    }
+
+    @Test
     fun `session customer email takes precedence over updateEmail`() = runMutationScenario {
         assertThat(controller.updateEmail("local@example.com"))
             .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
