@@ -158,7 +158,6 @@ class AutocompleteAddressControllerTest {
         autocompleteConfig = AutocompleteAddressInteractor.Config(
             googlePlacesApiKey = "123",
             autocompleteCountries = setOf("US"),
-            isInlineAutocompleteEnabled = true,
             shouldUseStripeHostedAutocomplete = false,
         ),
     )
@@ -169,7 +168,6 @@ class AutocompleteAddressControllerTest {
             autocompleteConfig = AutocompleteAddressInteractor.Config(
                 googlePlacesApiKey = null,
                 autocompleteCountries = setOf("US"),
-                isInlineAutocompleteEnabled = true,
                 shouldUseStripeHostedAutocomplete = true,
             ),
         ) { elements ->
@@ -185,7 +183,6 @@ class AutocompleteAddressControllerTest {
                 autocompleteConfig = AutocompleteAddressInteractor.Config(
                     googlePlacesApiKey = null,
                     autocompleteCountries = setOf("US"),
-                    isInlineAutocompleteEnabled = true,
                     shouldUseStripeHostedAutocomplete = true,
                 ),
             ) {
@@ -233,7 +230,6 @@ class AutocompleteAddressControllerTest {
                 autocompleteConfig = AutocompleteAddressInteractor.Config(
                     googlePlacesApiKey = null,
                     autocompleteCountries = setOf("US"),
-                    isInlineAutocompleteEnabled = true,
                     shouldUseStripeHostedAutocomplete = true,
                 ),
             ) {
@@ -280,7 +276,6 @@ class AutocompleteAddressControllerTest {
         autocompleteConfig = AutocompleteAddressInteractor.Config(
             googlePlacesApiKey = null,
             autocompleteCountries = setOf("CA"),
-            isInlineAutocompleteEnabled = true,
             shouldUseStripeHostedAutocomplete = true,
         ),
     )
@@ -292,7 +287,6 @@ class AutocompleteAddressControllerTest {
             autocompleteConfig = AutocompleteAddressInteractor.Config(
                 googlePlacesApiKey = null,
                 autocompleteCountries = setOf("US"),
-                isInlineAutocompleteEnabled = true,
                 shouldUseStripeHostedAutocomplete = true,
             )
         ) {
@@ -356,7 +350,6 @@ class AutocompleteAddressControllerTest {
             autocompleteConfig = AutocompleteAddressInteractor.Config(
                 googlePlacesApiKey = null,
                 autocompleteCountries = setOf("US"),
-                isInlineAutocompleteEnabled = true,
                 shouldUseStripeHostedAutocomplete = true,
             )
         ) {
@@ -411,7 +404,6 @@ class AutocompleteAddressControllerTest {
             autocompleteConfig = AutocompleteAddressInteractor.Config(
                 googlePlacesApiKey = null,
                 autocompleteCountries = setOf("US"),
-                isInlineAutocompleteEnabled = true,
                 shouldUseStripeHostedAutocomplete = true,
             )
         ) {
@@ -576,7 +568,6 @@ class AutocompleteAddressControllerTest {
             autocompleteConfig = AutocompleteAddressInteractor.Config(
                 googlePlacesApiKey = null,
                 autocompleteCountries = setOf("US"),
-                isInlineAutocompleteEnabled = true,
                 shouldUseStripeHostedAutocomplete = true,
             )
         ) {
@@ -628,7 +619,6 @@ class AutocompleteAddressControllerTest {
         autocompleteConfig = AutocompleteAddressInteractor.Config(
             googlePlacesApiKey = null,
             autocompleteCountries = setOf("US"),
-            isInlineAutocompleteEnabled = true,
             shouldUseStripeHostedAutocomplete = true,
         ),
     ) { elements ->
@@ -998,7 +988,6 @@ class AutocompleteAddressControllerTest {
         val DEFAULT_HOSTED_AUTOCOMPLETE_CONFIG = AutocompleteAddressInteractor.Config(
             googlePlacesApiKey = null,
             autocompleteCountries = setOf("US"),
-            isInlineAutocompleteEnabled = true,
             shouldUseStripeHostedAutocomplete = true,
         )
     }

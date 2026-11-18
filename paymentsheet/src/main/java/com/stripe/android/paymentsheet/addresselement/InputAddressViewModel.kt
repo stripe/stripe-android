@@ -83,8 +83,6 @@ internal class InputAddressViewModel @Inject constructor(
 
     private val initialAddress = unparsedInitialShippingAddress ?: unparsedInitialBillingAddress
 
-    private val isInlineAutocompleteEnabled = true
-
     override val autocompleteConfig: AutocompleteAddressInteractor.Config = AutocompleteAddressInteractor.Config(
         googlePlacesApiKey = args.config?.googlePlacesApiKey,
         // If merchant is opting into Stripe-hosted autocomplete and the caller did not
@@ -100,11 +98,10 @@ internal class InputAddressViewModel @Inject constructor(
                 provided ?: emptySet()
             }
         },
-        isInlineAutocompleteEnabled = isInlineAutocompleteEnabled,
         shouldUseStripeHostedAutocomplete = args.config?.useStripeHostedAutocomplete == true,
     )
 
-    private val inlineAutocompleteController = if (isInlineAutocompleteEnabled && placesClient != null) {
+    private val inlineAutocompleteController = if (placesClient != null) {
         InlineAutocompleteController(
             placesClient = placesClient,
             config = autocompleteConfig,

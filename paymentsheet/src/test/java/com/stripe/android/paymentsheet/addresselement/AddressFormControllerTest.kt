@@ -32,7 +32,6 @@ class AddressFormControllerTest {
     private val inlineAutocompleteConfig = AutocompleteAddressInteractor.Config(
         autocompleteCountries = setOf("US"),
         googlePlacesApiKey = null,
-        isInlineAutocompleteEnabled = true,
         shouldUseStripeHostedAutocomplete = true,
     )
 
@@ -126,7 +125,6 @@ class AddressFormControllerTest {
         autocompleteConfig = AutocompleteAddressInteractor.Config(
             autocompleteCountries = setOf("US"),
             googlePlacesApiKey = null,
-            isInlineAutocompleteEnabled = true,
             shouldUseStripeHostedAutocomplete = true,
         )
     ) {
@@ -213,7 +211,6 @@ class AddressFormControllerTest {
         autocompleteConfig = AutocompleteAddressInteractor.Config(
             autocompleteCountries = setOf("US"),
             googlePlacesApiKey = null,
-            isInlineAutocompleteEnabled = true,
             shouldUseStripeHostedAutocomplete = true,
         ),
     ) {
@@ -245,7 +242,6 @@ class AddressFormControllerTest {
         autocompleteConfig = AutocompleteAddressInteractor.Config(
             autocompleteCountries = setOf("US"),
             googlePlacesApiKey = null,
-            isInlineAutocompleteEnabled = true,
             shouldUseStripeHostedAutocomplete = true,
         ),
     ) {

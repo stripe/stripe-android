@@ -34,7 +34,6 @@ interface AutocompleteAddressInteractor {
     class Config(
         val googlePlacesApiKey: String?,
         val autocompleteCountries: Set<String>,
-        val isInlineAutocompleteEnabled: Boolean = false,
         val shouldUseStripeHostedAutocomplete: Boolean = false,
     )
 
