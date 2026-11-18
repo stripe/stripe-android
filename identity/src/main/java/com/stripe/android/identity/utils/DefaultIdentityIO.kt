@@ -49,32 +49,24 @@ internal class DefaultIdentityIO @Inject constructor(private val context: Contex
         maxDimension: Int,
         compressionQuality: Float
     ): File {
-        context.contentResolver.openInputStream(originalUri).use { inputStream ->
-            File(
-                context.filesDir,
-                StringBuilder().also { nameBuilder ->
-                    nameBuilder.append(verificationId)
-                    side?.let {
-                        nameBuilder.append("_$side")
-                    }
-                    if (isFullFrame) {
-                        nameBuilder.append("_full_frame")
-                    }
-                    nameBuilder.append(".jpeg")
-                }.toString()
-            ).let { fileToSave ->
-                FileOutputStream(fileToSave, false).use { fileOutputStream ->
-                    fileOutputStream.write(
-                        BitmapFactory.decodeStream(inputStream).constrainToSize(
-                            Size(
-                                maxDimension,
-                                maxDimension
-                            )
-                        ).toJpeg(quality = (compressionQuality * 100).toInt())
-                    )
-                }
-                return fileToSave
-            }
+        val bitmap = context.contentResolver.openInputStream(originalUri)?.use { inputStream ->
+            BitmapFactory.decodeStream(inputStream)
+        } ?: throw IOException("Unable to decode identity image")
+        try {
+            return resizeBitmapAndCreateFileToUpload(
+                bitmap = bitmap,
+                verificationId = verificationId,
+                fileName = buildString {
+                    append(verificationId)
+                    side?.let { append("_$it") }
+                    if (isFullFrame) append("_full_frame")
+                    append(".jpeg")
+                },
+                maxDimension = maxDimension,
+                compressionQuality = compressionQuality
+            )
+        } finally {
+            bitmap.recycle()
         }
     }
 
@@ -85,21 +77,14 @@ internal class DefaultIdentityIO @Inject constructor(private val context: Contex
         maxDimension: Int,
         compressionQuality: Float
     ): File {
-        File(
-            context.filesDir,
-            fileName
-        ).let { fileToSave ->
-            FileOutputStream(fileToSave, false).use { fileOutputStream ->
-                fileOutputStream.write(
-                    bitmap.constrainToSize(
-                        Size(
-                            maxDimension,
-                            maxDimension
-                        )
-                    ).toJpeg(quality = (compressionQuality * 100).toInt())
-                )
+        val resized = bitmap.constrainToSize(Size(maxDimension, maxDimension))
+        try {
+            return writeImageFile(File(context.filesDir, fileName)) { output ->
+                output.write(resized.toJpeg(quality = (compressionQuality * 100).toInt()))
             }
-            return fileToSave
+        } finally {
+            // Camera frames can also be used by other uploads and the scanner.
+            if (resized !== bitmap) resized.recycle()
         }
     }
 
@@ -122,12 +107,21 @@ internal class DefaultIdentityIO @Inject constructor(private val context: Contex
 
         return File(context.cacheDir, asset.fileName).also { file ->
             if (!file.exists()) {
-                context.assets.open(asset.path).use { inputStream ->
-                    FileOutputStream(file, false).use { fileOutputStream ->
-                        inputStream.copyTo(fileOutputStream)
-                    }
+                writeImageFile(file) { output ->
+                    context.assets.open(asset.path).use { input -> input.copyTo(output) }
                 }
             }
+        }
+    }
+
+    private fun writeImageFile(file: File, write: (FileOutputStream) -> Unit): File {
+        var completed = false
+        try {
+            FileOutputStream(file, false).use(write)
+            completed = true
+            return file
+        } finally {
+            if (!completed) file.delete()
         }
     }
 

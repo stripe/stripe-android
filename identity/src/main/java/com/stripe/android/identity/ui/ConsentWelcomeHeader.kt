@@ -1,5 +1,6 @@
 package com.stripe.android.identity.ui
 
+import android.graphics.drawable.Drawable
 import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -14,6 +15,9 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,6 +41,8 @@ import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.image.StripeImage
 import com.stripe.android.uicore.image.getDrawableFromUri
 import com.stripe.android.uicore.image.rememberDrawablePainter
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 @Suppress("LongMethod")
 @Composable
@@ -71,11 +77,7 @@ internal fun ConsentWelcomeHeader(
                 )
             } else {
                 Image(
-                    painter = rememberDrawablePainter(
-                        LocalContext.current.getDrawableFromUri(
-                            merchantLogoUri
-                        )
-                    ),
+                    painter = rememberDrawablePainter(rememberLocalDrawable(merchantLogoUri)),
                     modifier = Modifier
                         .width(64.dp)
                         .height(64.dp)
@@ -136,6 +138,17 @@ internal fun ConsentWelcomeHeader(
             style = MaterialTheme.typography.body1,
             textAlign = TextAlign.Center
         )
+    }
+}
+
+@Composable
+internal fun rememberLocalDrawable(uri: Uri): Drawable? {
+    val context = LocalContext.current
+    return key(uri, context) {
+        val drawable by produceState<Drawable?>(null) {
+            value = withContext(Dispatchers.IO) { context.getDrawableFromUri(uri) }
+        }
+        drawable
     }
 }
 
