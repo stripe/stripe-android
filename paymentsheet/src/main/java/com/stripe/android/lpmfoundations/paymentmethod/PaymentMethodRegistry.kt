@@ -52,6 +52,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.definitions.ScalapayDefin
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.SepaDebitDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.SequraDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.ShopeePayDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.StripeBalanceDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.SunbitDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.SwishDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.TouchNGoDefinition
@@ -117,6 +118,7 @@ internal object PaymentMethodRegistry {
         SepaDebitDefinition,
         SequraDefinition,
         ShopeePayDefinition,
+        StripeBalanceDefinition,
         SunbitDefinition,
         SwishDefinition,
         TouchNGoDefinition,

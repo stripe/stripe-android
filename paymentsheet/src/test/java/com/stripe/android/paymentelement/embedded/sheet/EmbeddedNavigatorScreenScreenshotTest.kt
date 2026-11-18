@@ -45,6 +45,7 @@ import com.stripe.android.paymentsheet.verticalmode.FakeSavedPaymentMethodConfir
 import com.stripe.android.paymentsheet.verticalmode.ManageScreenInteractor
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.utils.FakeIsNfcScanningAvailable
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
@@ -251,6 +252,7 @@ internal class EmbeddedNavigatorScreenScreenshotTest {
                 cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
                 savedStateHandle = SavedStateHandle(),
                 isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = false),
+                errorReporter = FakeErrorReporter(),
             ),
             viewModelScope = TestScope(UnconfinedTestDispatcher()),
             sheetActivityStateHolder = stateHolder,

@@ -19,12 +19,17 @@ internal data class LpmBillingAddressTestConfiguration(
 ) {
     fun metadata(): PaymentMethodMetadata {
         val stripeIntent = intentScenario.stripeIntent(paymentMethodType)
+        // Stripe balance lists the buyer's financial accounts with a CustomerSession
+        val isStripeBalance = paymentMethodType == PaymentMethod.Type.StripeBalance
         return PaymentMethodMetadataFactory.create(
             stripeIntent = stripeIntent,
             billingDetailsCollectionConfiguration = billingDetailsCollectionMode
                 .billingDetailsCollectionConfiguration(),
             termsDisplay = mapOf(paymentMethodType to termsDisplay),
             integrationMetadata = billingDetailsCollectionMode.integrationMetadata(stripeIntent),
+            hasCustomerConfiguration = isStripeBalance,
+            customerSessionClientSecret = "cuss_123_secret_456".takeIf { isStripeBalance },
+            stripeBalanceFinancialAccounts = stripeBalanceTestFinancialAccounts.takeIf { isStripeBalance },
         )
     }
 
