@@ -18,18 +18,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.R
 import com.stripe.android.common.ui.PrimaryButton
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkPaymentDetails
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
-import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.SavedPaymentMethod
 import com.stripe.android.paymentsheet.utils.testMetadata
 import com.stripe.android.uicore.elements.CheckboxElementUI
@@ -334,44 +330,6 @@ private fun GenericUi(label: String, last4: String) {
         onValueChange = {},
         enabled = false,
         label = stringResource(R.string.stripe_label_payment_method),
-    )
-}
-
-@Preview
-@Composable
-private fun PreviewUpdatePaymentMethodUI() {
-    val exampleCard = DisplayableSavedPaymentMethod.create(
-        displayName = "4242".resolvableString,
-        paymentMethod = PaymentMethod(
-            id = "002",
-            created = null,
-            liveMode = false,
-            code = PaymentMethod.Type.Card.code,
-            type = PaymentMethod.Type.Card,
-            card = PaymentMethod.Card(CardBrand.Visa)
-        ),
-    )
-    UpdatePaymentMethodUI(
-        interactor = DefaultUpdatePaymentMethodInteractor(
-            canRemove = true,
-            canUpdateCardExpiryAndBillingDetails = true,
-            canChangeCbc = true,
-            displayableSavedPaymentMethod = exampleCard,
-            addressCollectionMode = AddressCollectionMode.Automatic,
-            allowedBillingCountries = emptySet(),
-            removeExecutor = { null },
-            updatePaymentMethodExecutor = { paymentMethod, _ -> Result.success(paymentMethod) },
-            setDefaultPaymentMethodExecutor = { _ -> Result.success(Unit) },
-            cardBrandFilter = DefaultCardBrandFilter,
-            removeMessage = null,
-            onBrandChoiceSelected = {},
-            shouldShowSetAsDefaultCheckbox = true,
-            isDefaultPaymentMethod = false,
-            onUpdateSuccess = {},
-            requiresBillingAddressForAutomaticTax = false,
-            autocompleteAddressInteractorFactory = null,
-        ),
-        modifier = Modifier
     )
 }
 
