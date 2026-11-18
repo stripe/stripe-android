@@ -1,7 +1,10 @@
 # CHANGELOG
 
-NEXT_VERSION_BUMP: MINOR
+NEXT_VERSION_BUMP: MAJOR
 ## XX.XX.XX - 20XX-XX-XX
+
+### All SDKs
+* [CHANGED] Bumped Dagger from 2.58 to 2.59.
 
 ### PaymentSheet
 * [FIXED][15363](https://github.com/stripe/stripe-android/pull/15363) Fixed an issue where inline address autocomplete could request suggestions for a prefilled address before the customer focused the address field.
