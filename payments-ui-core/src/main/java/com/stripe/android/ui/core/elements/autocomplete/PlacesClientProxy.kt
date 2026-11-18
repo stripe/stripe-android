@@ -23,6 +23,7 @@ import com.stripe.android.ui.core.elements.autocomplete.model.Place
 import com.stripe.android.ui.core.elements.autocomplete.model.transformGoogleToStripeAddress
 import com.stripe.android.uicore.elements.DefaultIsPlacesAvailable
 import com.stripe.android.uicore.elements.IsPlacesAvailable
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.tasks.await
 import java.util.Locale
 import com.google.android.libraries.places.R as PlacesR
@@ -129,6 +130,8 @@ internal class DefaultPlacesClientProxy(
                     }.take(limit)
                 )
             )
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             errorReporter.report(
                 ErrorReporter.ExpectedErrorEvent.PLACES_FIND_AUTOCOMPLETE_ERROR,
@@ -164,6 +167,8 @@ internal class DefaultPlacesClientProxy(
                 }
             )
             Result.success(place.transformGoogleToStripeAddress(locale))
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             errorReporter.report(ErrorReporter.ExpectedErrorEvent.PLACES_FETCH_PLACE_ERROR, StripeException.create(e))
             Result.failure(
