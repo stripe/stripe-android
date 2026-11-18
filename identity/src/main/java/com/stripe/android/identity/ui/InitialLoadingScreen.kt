@@ -40,7 +40,7 @@ internal fun InitialLoadingScreen(
         verificationPageResource = verificationPageState,
         onError = {
             identityViewModel.errorCause.postValue(it)
-            navController.navigateToErrorScreenWithDefaultValues(context)
+            navController.navigateToErrorScreenWithDefaultValues(context, it)
         }
     ) {
         LaunchedEffect(Unit) {
