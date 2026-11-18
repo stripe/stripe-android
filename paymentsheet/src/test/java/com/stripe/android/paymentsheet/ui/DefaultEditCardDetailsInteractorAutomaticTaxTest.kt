@@ -25,19 +25,19 @@ internal class DefaultEditCardDetailsInteractorAutomaticTaxTest {
     val coroutineTestRule = CoroutineTestRule(testDispatcher)
 
     @Test
-    fun `automatic tax requires a complete street address`() = assertIncompleteTaxAddress(
-        PaymentSheetFixtures.billingDetailsFormState(line1 = FormFieldEntry("", isComplete = false))
-    )
+    fun `automatic tax rejects incomplete US address with country and postal code`() = runScenario {
+        interactor.updateBillingDetails(
+            PaymentSheetFixtures.billingDetailsFormState(
+                line1 = FormFieldEntry("", isComplete = false),
+                city = FormFieldEntry("", isComplete = false),
+                state = FormFieldEntry("", isComplete = false),
+                postalCode = FormFieldEntry("94103", isComplete = true),
+                country = FormFieldEntry("US", isComplete = true),
+            )
+        )
 
-    @Test
-    fun `automatic tax requires a complete city`() = assertIncompleteTaxAddress(
-        PaymentSheetFixtures.billingDetailsFormState(city = FormFieldEntry("", isComplete = false))
-    )
-
-    @Test
-    fun `automatic tax requires a complete state`() = assertIncompleteTaxAddress(
-        PaymentSheetFixtures.billingDetailsFormState(state = FormFieldEntry("", isComplete = false))
-    )
+        assertThat(updates.awaitItem()).isNull()
+    }
 
     @Test
     fun `automatic tax accepts complete address fields`() = runScenario {
@@ -101,12 +101,6 @@ internal class DefaultEditCardDetailsInteractorAutomaticTaxTest {
                 postalCode = FormFieldEntry("94103", isComplete = true),
             )
         )
-
-        assertThat(updates.awaitItem()).isNull()
-    }
-
-    private fun assertIncompleteTaxAddress(formState: BillingDetailsFormState) = runScenario {
-        interactor.updateBillingDetails(formState)
 
         assertThat(updates.awaitItem()).isNull()
     }
