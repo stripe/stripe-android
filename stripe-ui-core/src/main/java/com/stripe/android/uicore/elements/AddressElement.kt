@@ -60,7 +60,6 @@ class AddressElement(
         inlineAutocompleteHandler = inlineAutocompleteHandler,
         reportsFormValue = false,
         initialQuery = "",
-        showEnterManually = true,
     )
 
     private val expandedAutoCompleteElement: AddressTextFieldElement? =
@@ -71,7 +70,6 @@ class AddressElement(
                 inlineAutocompleteHandler = inlineAutocompleteHandler,
                 reportsFormValue = true,
                 initialQuery = rawValuesMap[FormFieldId.Line1] ?: "",
-                showEnterManually = false,
             )
         } else {
             null
