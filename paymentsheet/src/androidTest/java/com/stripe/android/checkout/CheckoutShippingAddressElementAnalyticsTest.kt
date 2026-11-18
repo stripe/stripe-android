@@ -234,7 +234,7 @@ internal class CheckoutShippingAddressElementAnalyticsTest {
             conditionDescription = "Checkout session shipping address to be committed",
         ) {
             val address = controller.session.value?.shippingAddress?.address
-            address?.line1 == line1 && address?.city == city
+            address?.line1 == line1 && address.city == city
         }
 
         assertThat(controller.session.value?.shippingAddress?.address?.line1).isEqualTo(line1)

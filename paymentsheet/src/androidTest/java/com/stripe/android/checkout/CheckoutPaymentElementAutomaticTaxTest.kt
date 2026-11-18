@@ -232,7 +232,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
             assertSavedPaymentMethodSpinnerCount(1)
             contentPage.assertHasSelectedLpm("cashapp")
             assertThat(controller.session.value?.totals?.total?.minorUnitsAmount)
-                .isEqualTo(INITIAL_TOTAL.toLong())
+                .isEqualTo(INITIAL_TOTAL)
             immediateActionCalls.expectNoEvents()
 
             releaseTaxUpdateResponse.countDown()
@@ -323,7 +323,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
             assertSavedPaymentMethodSpinnerCount(0)
             contentPage.assertHasSelectedLpm("cashapp")
             assertThat(controller.session.value?.totals?.total?.minorUnitsAmount)
-                .isEqualTo(INITIAL_TOTAL.toLong())
+                .isEqualTo(INITIAL_TOTAL)
             immediateActionCalls.expectNoEvents()
             contentPage.assertHasSavedPaymentMethodSelectionError(
                 applicationContext.getString(R.string.stripe_something_went_wrong)
@@ -469,7 +469,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
 
         immediateActionCalls.awaitItem()
         val session = checkNotNull(controller.session.value)
-        assertThat(session.totals.total.minorUnitsAmount).isEqualTo(INITIAL_TOTAL.toLong())
+        assertThat(session.totals.total.minorUnitsAmount).isEqualTo(INITIAL_TOTAL)
         assertThat(session.paymentOption?.paymentMethodType).isEqualTo("cashapp")
         assertThat(session.paymentOption?.billingDetails?.address?.line1)
             .isEqualTo(BILLING_ADDRESS_LINE_ONE)
@@ -477,7 +477,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
     }
 
     private fun assertSavedPaymentMethodSession(session: CheckoutElementsController.Session) {
-        assertThat(session.totals.total.minorUnitsAmount).isEqualTo(UPDATED_TOTAL.toLong())
+        assertThat(session.totals.total.minorUnitsAmount).isEqualTo(UPDATED_TOTAL)
         assertThat(session.paymentOption?.paymentMethodType).isEqualTo("card")
         assertThat(session.paymentOption?.billingDetails?.address?.line1)
             .isEqualTo(SAVED_BILLING_ADDRESS_LINE_ONE)
@@ -498,7 +498,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
         formPage.assertErrorIsShown(applicationContext.getString(R.string.stripe_something_went_wrong))
         formPage.waitUntilVisible()
         formPage.assertPrimaryButtonIsEnabled()
-        assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isEqualTo(INITIAL_TOTAL.toLong())
+        assertThat(controller.session.value?.totals?.total?.minorUnitsAmount).isEqualTo(INITIAL_TOTAL)
 
         enqueueTaxUpdate(automaticTaxResponse(UPDATED_TOTAL, TAX_STATUS_COMPLETE))
         formPage.clickPrimaryButton()
@@ -852,7 +852,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
 
     private fun waitForSessionTotal(controller: CheckoutElementsController, total: Long) {
         testRules.compose.waitUntilWithIdle {
-            controller.session.value?.totals?.total?.minorUnitsAmount == total.toLong()
+            controller.session.value?.totals?.total?.minorUnitsAmount == total
         }
     }
 

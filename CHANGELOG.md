@@ -4,6 +4,7 @@ NEXT_VERSION_BUMP: MAJOR
 ## XX.XX.XX - 20XX-XX-XX
 
 ### All SDKs
+* [CHANGED] Bumped Kotlin from 2.2.21 to 2.3.21.
 * [CHANGED] Bumped Dagger from 2.58 to 2.59.
 
 ### PaymentSheet
