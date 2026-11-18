@@ -10,6 +10,28 @@ import org.junit.Test
 class BillingDetailsCollectionConfigurationTest {
 
     @Test
+    fun `copy changes address collection without changing other settings`() {
+        val configuration = PaymentSheet.BillingDetailsCollectionConfiguration(
+            name = Always,
+            phone = Always,
+            email = Always,
+            attachDefaultsToPaymentMethod = true,
+            allowedCountries = setOf("FR", "CA"),
+        )
+
+        val copy = configuration.copy(address = Full)
+
+        assertThat(copy.address).isEqualTo(Full)
+        assertThat(copy.name).isEqualTo(configuration.name)
+        assertThat(copy.phone).isEqualTo(configuration.phone)
+        assertThat(copy.email).isEqualTo(configuration.email)
+        assertThat(copy.attachDefaultsToPaymentMethod).isEqualTo(configuration.attachDefaultsToPaymentMethod)
+        assertThat(copy.allowedBillingCountries).isEqualTo(configuration.allowedBillingCountries)
+        assertThat(configuration.address)
+            .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic)
+    }
+
+    @Test
     fun `Creates correct Google Pay billing address config with default collection configuration`() {
         val collectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration()
 

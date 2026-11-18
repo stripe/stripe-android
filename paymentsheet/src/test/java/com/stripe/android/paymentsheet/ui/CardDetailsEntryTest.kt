@@ -267,7 +267,7 @@ internal class CardDetailsEntryTest {
     private fun billingDetailsEntry(
         billingDetailsFormState: BillingDetailsFormState = billingDetailsFormState()
     ): BillingDetailsEntry {
-        return BillingDetailsEntry(billingDetailsFormState, requiresBillingAddressForAutomaticTax = false)
+        return BillingDetailsEntry(billingDetailsFormState)
     }
 
     private fun createCard(

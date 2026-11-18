@@ -194,6 +194,15 @@ internal class DefaultEditCardDetailsInteractor(
     private val onCardUpdateParamsChanged: CardUpdateParamsCallback,
     private val autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
 ) : EditCardDetailsInteractor {
+    private val billingDetailsValidationConfiguration = if (
+        billingDetailsCollectionConfiguration.address == AddressCollectionMode.Automatic &&
+        requiresBillingAddressForAutomaticTax
+    ) {
+        billingDetailsCollectionConfiguration.copy(address = AddressCollectionMode.Full)
+    } else {
+        billingDetailsCollectionConfiguration
+    }
+
     private val cardDetailsEntry = MutableStateFlow(
         value = cardEditConfiguration?.buildDefaultCardEntry()
     )
@@ -234,7 +243,7 @@ internal class DefaultEditCardDetailsInteractor(
         val hasChanges = hasCardDetailsChanged(cardDetailsEntry) ||
             hasBillingDetailsChanged(billingDetailsEntry)
         val isComplete = (cardDetailsEntry?.isComplete() != false) &&
-            billingDetailsEntry?.isComplete(billingDetailsCollectionConfiguration) != false
+            billingDetailsEntry?.isComplete(billingDetailsValidationConfiguration) != false
 
         return if ((hasChanges || requiresModification.not()) && isComplete) {
             toUpdateParams(
@@ -263,7 +272,7 @@ internal class DefaultEditCardDetailsInteractor(
     private fun hasBillingDetailsChanged(billingDetailsEntry: BillingDetailsEntry?): Boolean {
         return billingDetailsEntry?.hasChanged(
             billingDetails = payload.billingDetails,
-            billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+            billingDetailsCollectionConfiguration = billingDetailsValidationConfiguration,
         ) ?: false
     }
 
@@ -294,7 +303,6 @@ internal class DefaultEditCardDetailsInteractor(
     private fun onBillingAddressFormChanged(state: BillingDetailsFormState) {
         billingDetailsEntry.value = BillingDetailsEntry(
             billingDetailsFormState = state,
-            requiresBillingAddressForAutomaticTax = requiresBillingAddressForAutomaticTax,
         )
     }
 

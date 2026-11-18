@@ -84,62 +84,6 @@ internal class BillingDetailsEntryTest {
     }
 
     @Test
-    fun `automatic tax requires a complete street address`() = assertIncompleteTaxAddress(
-        billingDetailsFormState(line1 = FormFieldEntry("", isComplete = false))
-    )
-
-    @Test
-    fun `automatic tax requires a complete city`() = assertIncompleteTaxAddress(
-        billingDetailsFormState(city = FormFieldEntry("", isComplete = false))
-    )
-
-    @Test
-    fun `automatic tax requires a complete state`() = assertIncompleteTaxAddress(
-        billingDetailsFormState(state = FormFieldEntry("", isComplete = false))
-    )
-
-    @Test
-    fun `automatic tax accepts complete address fields`() {
-        val entry = billingDetailsEntry(requiresBillingAddressForAutomaticTax = true)
-
-        assertThat(entry.isComplete(automaticAddressConfig)).isTrue()
-    }
-
-    @Test
-    fun `automatic tax accepts country only when other fields are hidden`() {
-        val entry = billingDetailsEntry(
-            requiresBillingAddressForAutomaticTax = true,
-            billingDetailsFormState = billingDetailsFormState(
-                line1 = null,
-                line2 = null,
-                city = null,
-                state = null,
-                postalCode = null,
-                country = FormFieldEntry("FR", isComplete = true),
-            ),
-        )
-
-        assertThat(entry.isComplete(automaticAddressConfig)).isTrue()
-    }
-
-    @Test
-    fun `automatic tax detects street edits without changing country or postal code`() {
-        val entry = billingDetailsEntry(
-            requiresBillingAddressForAutomaticTax = true,
-            billingDetailsFormState = billingDetailsFormState(
-                line1 = FormFieldEntry("510 Townsend St", isComplete = true),
-            ),
-        )
-
-        assertThat(
-            entry.hasChanged(
-                billingDetails = BILLING_DETAILS_FORM_DETAILS,
-                billingDetailsCollectionConfiguration = automaticAddressConfig,
-            )
-        ).isTrue()
-    }
-
-    @Test
     fun `isComplete() always returns true in Never mode`() {
         val state = billingDetailsEntry(
             billingDetailsFormState = billingDetailsFormState(
@@ -558,22 +502,11 @@ internal class BillingDetailsEntryTest {
         assertThat(hasChanged).isTrue()
     }
 
-    private fun assertIncompleteTaxAddress(formState: BillingDetailsFormState) {
-        val entry = billingDetailsEntry(
-            requiresBillingAddressForAutomaticTax = true,
-            billingDetailsFormState = formState,
-        )
-
-        assertThat(entry.isComplete(automaticAddressConfig)).isFalse()
-    }
-
     private fun billingDetailsEntry(
-        requiresBillingAddressForAutomaticTax: Boolean = false,
         billingDetailsFormState: BillingDetailsFormState = billingDetailsFormState()
     ): BillingDetailsEntry {
         return BillingDetailsEntry(
-            billingDetailsFormState = billingDetailsFormState,
-            requiresBillingAddressForAutomaticTax = requiresBillingAddressForAutomaticTax,
+            billingDetailsFormState = billingDetailsFormState
         )
     }
 }
