@@ -42,6 +42,7 @@ internal class DefaultEmbeddedUpdateScreenInteractorFactory @Inject constructor(
             displayableSavedPaymentMethod = displayableSavedPaymentMethod,
             cardBrandFilter = paymentMethodMetadata.cardBrandFilter,
             addressCollectionMode = paymentMethodMetadata.billingDetailsCollectionConfiguration.address,
+            requiresBillingAddressForAutomaticTax = paymentMethodMetadata.requiresBillingAddressForAutomaticTax,
             allowedBillingCountries =
             paymentMethodMetadata.billingDetailsCollectionConfiguration.allowedBillingCountries,
             removeExecutor = { method ->

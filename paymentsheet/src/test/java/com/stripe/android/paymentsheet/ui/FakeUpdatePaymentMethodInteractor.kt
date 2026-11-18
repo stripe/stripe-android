@@ -29,6 +29,7 @@ internal class FakeUpdatePaymentMethodInteractor(
     override val shouldShowSetAsDefaultCheckbox: Boolean = false,
     override val shouldShowSaveButton: Boolean = false,
     override val addressCollectionMode: AddressCollectionMode = AddressCollectionMode.Automatic,
+    private val requiresBillingAddressForAutomaticTax: Boolean = false,
     override val allowedBillingCountries: Set<String> = setOf("US", "CA"),
     override val removeMessage: ResolvableString? = null,
     private val useDefaultBillingDetails: Boolean = true,
@@ -66,6 +67,7 @@ internal class FakeUpdatePaymentMethodInteractor(
                 areExpiryDateAndAddressModificationSupported = isModifiable && canUpdateCardExpiryAndBillingDetails
             ),
             requiresModification = true,
+            requiresBillingAddressForAutomaticTax = requiresBillingAddressForAutomaticTax,
             payload = EditCardPayload.create(
                 card = displayableSavedPaymentMethod.paymentMethod.card!!,
                 billingDetails = PaymentMethodFixtures.BILLING_DETAILS.takeIf { useDefaultBillingDetails },

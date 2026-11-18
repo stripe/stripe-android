@@ -368,6 +368,7 @@ private fun PreviewUpdatePaymentMethodUI() {
             shouldShowSetAsDefaultCheckbox = true,
             isDefaultPaymentMethod = false,
             onUpdateSuccess = {},
+            requiresBillingAddressForAutomaticTax = false,
             autocompleteAddressInteractorFactory = null,
         ),
         modifier = Modifier

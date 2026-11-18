@@ -116,6 +116,7 @@ internal class BillingDetailsFormTest {
             collectEmail = false,
             collectPhone = false,
             allowedBillingCountries = allowedCountries,
+            requiresBillingAddressForAutomaticTax = false,
             autocompleteAddressInteractorFactory = null,
         )
         block(form)

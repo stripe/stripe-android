@@ -102,6 +102,7 @@ internal fun UpdateCardScreenBody(
 
 @Preview
 @Composable
+@Suppress("LongMethod")
 internal fun UpdateCardScreenBodyPreview() {
     DefaultLinkTheme {
         Surface(
@@ -144,6 +145,7 @@ internal fun UpdateCardScreenBodyPreview() {
                     onCardUpdateParamsChanged = {},
                     billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(),
                     requiresModification = true,
+                    requiresBillingAddressForAutomaticTax = false,
                     autocompleteAddressInteractorFactory = null,
                 ),
                 state = UpdateCardScreenState(
