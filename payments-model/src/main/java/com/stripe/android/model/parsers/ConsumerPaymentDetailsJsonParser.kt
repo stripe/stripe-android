@@ -33,6 +33,7 @@ private const val FIELD_ADDRESS_ADMINISTRATIVE_AREA = "administrative_area"
 private const val FIELD_CARD_EXPIRY_YEAR = "exp_year"
 private const val FIELD_CARD_EXPIRY_MONTH = "exp_month"
 private const val FIELD_CARD_BRAND = "brand"
+private const val FIELD_CARD_COUNTRY = "country"
 private const val FIELD_CARD_NETWORKS = "networks"
 private const val FIELD_CARD_CHECKS = "checks"
 private const val FIELD_CARD_CVC_CHECK = "cvc_check"
@@ -78,6 +79,7 @@ object ConsumerPaymentDetailsJsonParser : ModelJsonParser<ConsumerPaymentDetails
                     val networks = jsonArrayToList(cardDetails.optJSONArray(FIELD_CARD_NETWORKS))
 
                     ConsumerPaymentDetails.Card(
+                        country = optString(cardDetails, FIELD_CARD_COUNTRY),
                         id = id,
                         expiryYear = cardDetails.getInt(FIELD_CARD_EXPIRY_YEAR),
                         expiryMonth = cardDetails.getInt(FIELD_CARD_EXPIRY_MONTH),

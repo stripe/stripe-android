@@ -3,6 +3,8 @@ package com.stripe.android.paymentelement.confirmation.linkinline
 import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
+import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.IndiaCardShareException
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.LinkPaymentDetails
@@ -17,6 +19,7 @@ import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
+import com.stripe.android.paymentsheet.R
 import kotlinx.coroutines.flow.first
 import kotlinx.parcelize.Parcelize
 
@@ -40,10 +43,18 @@ internal class LinkInlineSignupConfirmationDefinition(
         confirmationOption: LinkInlineSignupConfirmationOption,
         confirmationArgs: ConfirmationHandler.Args
     ): ConfirmationDefinition.Action<LauncherArguments> {
-        val nextConfirmationOption = createPaymentMethodConfirmationOption(
-            customerMetadata = confirmationArgs.paymentMethodMetadata.customerMetadata,
-            linkInlineSignupConfirmationOption = confirmationOption,
-        )
+        val nextConfirmationOption = try {
+            createPaymentMethodConfirmationOption(
+                customerMetadata = confirmationArgs.paymentMethodMetadata.customerMetadata,
+                linkInlineSignupConfirmationOption = confirmationOption,
+            )
+        } catch (error: IndiaCardShareException) {
+            return ConfirmationDefinition.Action.Fail(
+                cause = error.cause ?: error,
+                message = resolvableString(R.string.stripe_something_went_wrong),
+                errorType = ConfirmationHandler.Result.Failed.ErrorType.Internal,
+            )
+        }
 
         return ConfirmationDefinition.Action.Launch(
             launcherArguments = LauncherArguments(nextConfirmationOption),
@@ -153,7 +164,10 @@ internal class LinkInlineSignupConfirmationDefinition(
                 val linkPaymentDetails = linkConfigurationCoordinator.attachNewCardToAccount(
                     configuration,
                     createParams,
-                ).getOrNull()
+                ).getOrElse { error ->
+                    if (error is IndiaCardShareException) throw error
+                    null
+                }
 
                 when (linkPaymentDetails) {
                     is LinkPaymentDetails.New -> {
@@ -164,7 +178,7 @@ internal class LinkInlineSignupConfirmationDefinition(
                     is LinkPaymentDetails.Passthrough -> {
                         linkStore.markLinkAsUsed()
 
-                        linkPaymentDetails.toSavedOption(saveOption)
+                        linkPaymentDetails.toSavedOption(saveOption, linkInlineSignupConfirmationOption.optionsParams)
                     }
                     is LinkPaymentDetails.Saved -> {
                         linkStore.markLinkAsUsed()
@@ -213,15 +227,25 @@ internal class LinkInlineSignupConfirmationDefinition(
 
     private fun LinkPaymentDetails.Passthrough.toSavedOption(
         saveOption: LinkInlineSignupConfirmationOption.PaymentMethodSaveOption?,
+        originalOptionsParams: PaymentMethodOptionsParams?,
     ): PaymentMethodConfirmationOption.Saved {
         return PaymentMethodConfirmationOption.Saved(
             shippingInformation = null,
             paymentMethod = paymentMethod,
-            optionsParams = PaymentMethodOptionsParams.Card(
-                setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession.takeIf {
-                    saveOption?.shouldSave() ?: false
-                } ?: ConfirmPaymentIntentParams.SetupFutureUsage.Blank
-            ),
+            optionsParams = if (isIndiaCardOverride) {
+                // Keep the card's merchant/save-consent options, but CVC was already consumed by share.
+                val cardOptions = originalOptionsParams as? PaymentMethodOptionsParams.Card
+                cardOptions?.copy(
+                    cvc = null,
+                    setupFutureUsage = cardOptions.setupFutureUsage ?: saveOption?.setupFutureUsage,
+                ) ?: PaymentMethodOptionsParams.Card(setupFutureUsage = saveOption?.setupFutureUsage)
+            } else {
+                PaymentMethodOptionsParams.Card(
+                    setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession.takeIf {
+                        saveOption?.shouldSave() ?: false
+                    } ?: ConfirmPaymentIntentParams.SetupFutureUsage.Blank
+                )
+            },
             originatedFromWallet = true,
             newPMTransformedForConfirmation = true
         )

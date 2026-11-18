@@ -42,6 +42,7 @@ data class ConsumerPaymentDetails(
         val networks: List<String>,
         val cvcCheck: CvcCheck,
         val funding: Funding,
+        val country: String?,
         override val display: Display?,
     ) : PaymentDetails(
         id = id,

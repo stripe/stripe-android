@@ -1,5 +1,6 @@
 package com.stripe.android.link
 
+import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.account.FakeLinkAccountManager
@@ -44,6 +45,69 @@ class LinkConfigurationCoordinatorTest {
 
             component
         }
+    }
+
+    @Test
+    fun `inline India card shares after creation and retains provenance`() = runTest {
+        val card = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(country = "IN")
+        val newDetails = LinkPaymentDetails.New(
+            paymentDetails = card,
+            confirmParams = TestFactory.LINK_NEW_PAYMENT_DETAILS.confirmParams,
+            originalParams = TestFactory.LINK_NEW_PAYMENT_DETAILS.originalParams,
+        )
+        val shareCalls = Turbine<LinkPaymentDetails.New>()
+        val manager = object : FakeLinkAccountManager() {
+            override suspend fun shareCardPaymentDetails(
+                cardPaymentDetails: LinkPaymentDetails.New,
+            ): Result<LinkPaymentDetails.Passthrough> {
+                shareCalls.add(cardPaymentDetails)
+                return super.shareCardPaymentDetails(cardPaymentDetails)
+            }
+        }
+        manager.createCardPaymentDetailsResult = Result.success(newDetails)
+        val factory = FakeLinkComponent.Factory(linkAccountManager = manager)
+        val coordinator = RealLinkConfigurationCoordinator(factory)
+        val configuration = TestFactory.LINK_CONFIGURATION.copy(
+            flags = mapOf("link_route_india_card_to_passthrough" to true),
+        )
+
+        val result = coordinator.attachNewCardToAccount(configuration, newDetails.originalParams).getOrThrow()
+
+        assertThat(shareCalls.awaitItem()).isSameInstanceAs(newDetails)
+        assertThat(result).isInstanceOf(LinkPaymentDetails.Passthrough::class.java)
+        val shared = result as LinkPaymentDetails.Passthrough
+        assertThat(shared.isIndiaCardOverride).isTrue()
+        assertThat(shared.paymentMethod)
+            .isSameInstanceAs(manager.shareCardPaymentDetailsResult.getOrThrow().paymentMethod)
+        shareCalls.ensureAllEventsConsumed()
+        manager.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `inline India share failure is distinguished from creation failure`() = runTest {
+        val card = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(country = "IN")
+        val manager = FakeLinkAccountManager().apply {
+            createCardPaymentDetailsResult = Result.success(
+                LinkPaymentDetails.New(
+                    paymentDetails = card,
+                    confirmParams = TestFactory.LINK_NEW_PAYMENT_DETAILS.confirmParams,
+                    originalParams = TestFactory.LINK_NEW_PAYMENT_DETAILS.originalParams,
+                ),
+            )
+            shareCardPaymentDetailsResult = Result.failure(IllegalStateException("share failed"))
+        }
+        val factory = FakeLinkComponent.Factory(linkAccountManager = manager)
+        val configuration = TestFactory.LINK_CONFIGURATION.copy(
+            flags = mapOf("link_route_india_card_to_passthrough" to true),
+        )
+
+        val result = RealLinkConfigurationCoordinator(factory).attachNewCardToAccount(
+            configuration, TestFactory.LINK_NEW_PAYMENT_DETAILS.originalParams,
+        )
+
+        assertThat(result.exceptionOrNull()).isInstanceOf(IndiaCardShareException::class.java)
+        assertThat(result.exceptionOrNull()?.cause?.message).isEqualTo("share failed")
+        manager.ensureAllEventsConsumed()
     }
 
     @Test

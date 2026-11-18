@@ -143,6 +143,7 @@ internal interface LinkRepository {
 
     suspend fun shareCardPaymentDetails(
         paymentMethodCreateParams: PaymentMethodCreateParams,
+        expectedPaymentMethodType: String?,
         id: String,
         consumerSessionClientSecret: String,
         clientAttributionMetadata: ClientAttributionMetadata,

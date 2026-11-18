@@ -14,7 +14,9 @@ import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.NoLinkAccountFoundException
 import com.stripe.android.link.analytics.LinkEventsReporter
+import com.stripe.android.link.confirmation.computeExpectedPaymentMethodType
 import com.stripe.android.link.injection.LinkAccountAnalytics
+import com.stripe.android.link.isIndiaCardOverride
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.LinkAuthIntentInfo
@@ -282,6 +284,9 @@ internal class DefaultLinkAccountManager @Inject constructor(
             val paymentDetails = cardPaymentDetails.paymentDetails
             val paymentMethodCreateParams = cardPaymentDetails.originalParams
             linkRepository.shareCardPaymentDetails(
+                expectedPaymentMethodType = computeExpectedPaymentMethodType(config, paymentDetails).takeIf {
+                    config.isIndiaCardOverride(paymentDetails)
+                },
                 id = paymentDetails.id,
                 consumerSessionClientSecret = account.clientSecret,
                 paymentMethodCreateParams = paymentMethodCreateParams,

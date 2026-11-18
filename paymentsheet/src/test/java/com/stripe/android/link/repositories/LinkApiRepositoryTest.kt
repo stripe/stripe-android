@@ -706,6 +706,7 @@ class LinkApiRepositoryTest {
         ).thenReturn(Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
 
         val result = linkRepository.shareCardPaymentDetails(
+            expectedPaymentMethodType = null,
             paymentMethodCreateParams = cardPaymentMethodCreateParams,
             consumerSessionClientSecret = consumerSessionSecret,
             id = paymentDetailsId,
@@ -761,6 +762,7 @@ class LinkApiRepositoryTest {
         ).thenReturn(Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
 
         val result = linkRepository.shareCardPaymentDetails(
+            expectedPaymentMethodType = "card",
             paymentMethodCreateParams = cardPaymentMethodCreateParams,
             consumerSessionClientSecret = consumerSessionSecret,
             id = paymentDetailsId,
@@ -774,6 +776,7 @@ class LinkApiRepositoryTest {
             consumerSessionClientSecret = consumerSessionSecret,
             id = paymentDetailsId,
             extraParams = mapOf(
+                "expected_payment_method_type" to "card",
                 "payment_method_options" to mapOf("card" to mapOf("cvc" to "123")),
                 "expand" to listOf("payment_method"),
                 "client_attribution_metadata" to PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA.toParamMap(),
@@ -796,6 +799,7 @@ class LinkApiRepositoryTest {
         ).thenReturn(Result.failure(RuntimeException("error")))
 
         val result = linkRepository.shareCardPaymentDetails(
+            expectedPaymentMethodType = null,
             paymentMethodCreateParams = cardPaymentMethodCreateParams,
             consumerSessionClientSecret = consumerSessionSecret,
             id = "csmrpd*AYq4D_sXdAAAAOQ0",
@@ -1101,6 +1105,7 @@ class LinkApiRepositoryTest {
         ).thenReturn(Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
 
         val result = linkRepository.shareCardPaymentDetails(
+            expectedPaymentMethodType = null,
             paymentMethodCreateParams = cardPaymentMethodCreateParams.copy(allowRedisplay = allowRedisplay),
             consumerSessionClientSecret = "consumer_session_secret",
             id = "csmrpd*AYq4D_sXdAAAAOQ0",

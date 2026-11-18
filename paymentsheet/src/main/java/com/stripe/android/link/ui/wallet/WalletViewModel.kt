@@ -29,6 +29,7 @@ import com.stripe.android.link.effectiveLinkBrand
 import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.supportedPaymentMethodTypes
+import com.stripe.android.link.shouldSharePaymentDetails
 import com.stripe.android.link.ui.completePaymentButtonLabel
 import com.stripe.android.link.utils.supports
 import com.stripe.android.link.withDismissalDisabled
@@ -52,7 +53,6 @@ import com.stripe.android.uicore.navigation.NavigationManager
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.update
@@ -124,7 +124,11 @@ internal class WalletViewModel(
             }
             ?.resolvableString
 
-    val uiState: StateFlow<WalletUiState> = _uiState.asStateFlow()
+    val uiState: StateFlow<WalletUiState> = _uiState.mapAsStateFlow { state ->
+        val useShare = state.selectedItem?.let(configuration::shouldSharePaymentDetails)
+            ?: configuration.passthroughModeEnabled
+        state.copy(isSettingUp = stripeIntent.isSetupForFutureUsage(useShare))
+    }
 
     val allowLogOut: Boolean = configuration.allowLogOut
 

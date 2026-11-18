@@ -124,6 +124,7 @@ internal object TestFactory {
     )
 
     val CONSUMER_PAYMENT_DETAILS_CARD = ConsumerPaymentDetails.Card(
+        country = null,
         id = "csmrpd_123",
         last4 = "4242",
         expiryYear = 2999,
@@ -197,6 +198,7 @@ internal object TestFactory {
     )
 
     val LINK_PASSTHROUGH_PAYMENT_DETAILS = LinkPaymentDetails.Passthrough(
+        isIndiaCardOverride = false,
         paymentDetails = CONSUMER_PAYMENT_DETAILS_PASSTHROUGH,
         paymentMethod = PaymentMethod.Builder()
             .setId(CONSUMER_PAYMENT_DETAILS_PASSTHROUGH.paymentMethodId)
@@ -211,6 +213,7 @@ internal object TestFactory {
     )
 
     val LINK_PASSTHROUGH_PAYMENT_DETAILS_WITH_BILLING = LinkPaymentDetails.Passthrough(
+        isIndiaCardOverride = false,
         paymentDetails = CONSUMER_PAYMENT_DETAILS_PASSTHROUGH,
         paymentMethod = PaymentMethod.Builder()
             .setId(CONSUMER_PAYMENT_DETAILS_PASSTHROUGH.paymentMethodId)

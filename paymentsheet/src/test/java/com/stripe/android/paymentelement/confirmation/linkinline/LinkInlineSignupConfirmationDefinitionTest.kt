@@ -6,6 +6,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.isInstanceOf
+import com.stripe.android.link.IndiaCardShareException
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.LinkPaymentDetails
@@ -43,6 +44,7 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationOption
 import com.stripe.android.paymentelement.confirmation.PAYMENT_INTENT
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
+import com.stripe.android.paymentelement.confirmation.asFail
 import com.stripe.android.paymentelement.confirmation.asLaunch
 import com.stripe.android.paymentelement.confirmation.asNew
 import com.stripe.android.paymentelement.confirmation.asNextStep
@@ -63,6 +65,40 @@ import org.junit.Test
 import org.mockito.kotlin.mock
 
 internal class LinkInlineSignupConfirmationDefinitionTest {
+    @Test
+    fun `India inline share preserves on session card options and consumes CVC`() = test(
+        attachNewCardToAccountResult = Result.success(
+            TestFactory.LINK_PASSTHROUGH_PAYMENT_DETAILS.copy(isIndiaCardOverride = true),
+        ),
+    ) {
+        val confirmationOption = createLinkInlineSignupConfirmationOption().copy(
+            optionsParams = PaymentMethodOptionsParams.Card(
+                cvc = "123",
+                setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OnSession,
+            ),
+        )
+        val action = definition.action(confirmationOption, CONFIRMATION_PARAMETERS).asLaunch()
+        coordinatorScenario.getAccountStatusFlowCalls.awaitItem()
+        val attachCall = coordinatorScenario.attachNewCardToAccountCalls.awaitItem()
+        assertThat(attachCall.paymentMethodCreateParams).isEqualTo(confirmationOption.createParams)
+        storeScenario.markAsUsedCalls.awaitItem()
+        val saved = action.launcherArguments.nextConfirmationOption as PaymentMethodConfirmationOption.Saved
+        assertThat(saved.paymentMethod).isSameInstanceAs(TestFactory.LINK_PASSTHROUGH_PAYMENT_DETAILS.paymentMethod)
+        val options = saved.optionsParams as PaymentMethodOptionsParams.Card
+        assertThat(options.setupFutureUsage).isEqualTo(ConfirmPaymentIntentParams.SetupFutureUsage.OnSession)
+        assertThat(options.cvc).isNull()
+    }
+
+    @Test
+    fun `India share failure surfaces error rather than falling back to card params`() = test(
+        attachNewCardToAccountResult = Result.failure(IndiaCardShareException(IllegalStateException("share failed"))),
+    ) {
+        val action = definition.action(createLinkInlineSignupConfirmationOption(), CONFIRMATION_PARAMETERS).asFail()
+        coordinatorScenario.getAccountStatusFlowCalls.awaitItem()
+        coordinatorScenario.attachNewCardToAccountCalls.awaitItem()
+        assertThat(action.cause.message).isEqualTo("share failed")
+    }
+
     @Test
     fun `'key' should be 'LinkInlineSignup'`() {
         val definition = createLinkInlineSignupConfirmationDefinition()
@@ -239,6 +275,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
     fun `'action' should return 'Launch' after successful sign-in & attach`() = test(
         attachNewCardToAccountResult = Result.success(
             LinkPaymentDetails.Passthrough(
+                isIndiaCardOverride = false,
                 paymentDetails = ConsumerPaymentDetails.Passthrough(
                     id = "csmrpd_123",
                     last4 = "4242",
@@ -524,6 +561,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
                 attachNewCardToAccountResult = Result.success(
                     LinkPaymentDetails.New(
                         paymentDetails = ConsumerPaymentDetails.Card(
+                            country = null,
                             id = "pm_1",
                             last4 = "4242",
                             isDefault = false,
@@ -597,6 +635,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
         actionTest(
             attachNewCardToAccountResult = Result.success(
                 LinkPaymentDetails.Passthrough(
+                    isIndiaCardOverride = false,
                     paymentDetails = ConsumerPaymentDetails.Passthrough(
                         id = "csmrpd_123",
                         last4 = "4242",
@@ -1066,6 +1105,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
         )
 
         private val DEFAULT_CONSUMER_CARD = ConsumerPaymentDetails.Card(
+            country = null,
             id = "pm_123",
             last4 = "4242",
             expiryYear = 2024,

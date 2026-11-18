@@ -410,6 +410,7 @@ class ConsumerPaymentDetailsCreateParamsTest {
         )
 
         val card = ConsumerPaymentDetails.Card(
+            country = null,
             id = "card_123",
             last4 = "4242",
             isDefault = true,

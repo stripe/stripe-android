@@ -316,6 +316,7 @@ internal class LinkApiRepository @Inject constructor(
 
     override suspend fun shareCardPaymentDetails(
         paymentMethodCreateParams: PaymentMethodCreateParams,
+        expectedPaymentMethodType: String?,
         id: String,
         consumerSessionClientSecret: String,
         clientAttributionMetadata: ClientAttributionMetadata,
@@ -327,7 +328,8 @@ internal class LinkApiRepository @Inject constructor(
         val billingPhone: Map<String, String> = paymentMethodCreateParams.billingDetails?.phone?.let {
             mapOf("billing_phone" to it)
         } ?: emptyMap()
-        val paymentMethodParams = mapOf("expand" to listOf("payment_method"))
+        val paymentMethodParams = mapOf("expand" to listOf("payment_method")) +
+            expectedPaymentMethodType?.let { mapOf("expected_payment_method_type" to it) }.orEmpty()
         val clientAttributionMetadataParams = clientAttributionMetadata.toParams()
 
         stripeRepository.sharePaymentDetails(
@@ -341,6 +343,7 @@ internal class LinkApiRepository @Inject constructor(
             errorReporter.report(ErrorReporter.ExpectedErrorEvent.LINK_SHARE_CARD_FAILURE, StripeException.create(it))
         }.map { paymentMethod ->
             LinkPaymentDetails.Passthrough(
+                isIndiaCardOverride = false,
                 paymentDetails = ConsumerPaymentDetails.Passthrough(
                     id = id,
                     last4 = paymentMethodCreateParams.cardLast4().orEmpty(),

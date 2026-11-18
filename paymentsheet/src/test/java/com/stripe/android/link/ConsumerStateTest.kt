@@ -112,6 +112,7 @@ class ConsumerStateTest {
         val existingState = ConsumerState(existingPaymentDetails)
 
         val newCard = ConsumerPaymentDetails.Card(
+            country = null,
             id = "pm_different",
             last4 = "5678",
             expiryYear = 2025,
@@ -280,6 +281,7 @@ class ConsumerStateTest {
         val existingState = ConsumerState(existingPaymentDetails)
 
         val differentCard = ConsumerPaymentDetails.Card(
+            country = null,
             id = "pm_different",
             last4 = "1111",
             expiryYear = 2025,

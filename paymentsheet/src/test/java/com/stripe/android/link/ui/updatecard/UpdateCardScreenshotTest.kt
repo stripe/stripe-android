@@ -214,6 +214,7 @@ internal class UpdateCardScreenshotTest(
         }
 
         private fun card(): ConsumerPaymentDetails.Card = ConsumerPaymentDetails.Card(
+            country = null,
             id = "card_id_1234",
             last4 = "4242",
             expiryYear = 2500,

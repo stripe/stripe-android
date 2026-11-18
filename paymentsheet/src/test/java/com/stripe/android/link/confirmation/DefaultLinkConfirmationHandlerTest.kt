@@ -1,6 +1,8 @@
 package com.stripe.android.link.confirmation
 
 import com.google.common.truth.Truth.assertThat
+import com.google.testing.junit.testparameterinjector.TestParameter
+import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.core.Logger
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.resolvableString
@@ -20,6 +22,7 @@ import com.stripe.android.model.PaymentMethod.Type.USBankAccount
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntentFixtures
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
@@ -34,7 +37,9 @@ import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 
+@RunWith(TestParameterInjector::class)
 @Suppress("LargeClass")
 internal class DefaultLinkConfirmationHandlerTest {
     private val dispatcher = UnconfinedTestDispatcher()
@@ -47,6 +52,108 @@ internal class DefaultLinkConfirmationHandlerTest {
     @After
     fun cleanup() {
         Dispatchers.resetMain()
+    }
+
+    @Test
+    fun `India card routes to deferred share with card consent`(
+        @TestParameter setup: IndiaSetup,
+    ) = runTest(dispatcher) {
+        val intent = setup.intent()
+        val configuration = TestFactory.LINK_CONFIGURATION.copy(
+            passthroughModeEnabled = false,
+            linkMode = LinkMode.LinkPaymentMethod,
+            flags = mapOf("link_route_india_card_to_passthrough" to true),
+            stripeIntent = intent,
+        )
+        val confirmationHandler = FakeConfirmationHandler()
+        val handler = createHandler(configuration = configuration, confirmationHandler = confirmationHandler)
+        confirmationHandler.awaitResultTurbine.add(ConfirmationHandler.Result.Succeeded(intent))
+        val card = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(country = "COUNTRY_IN")
+
+        val result = handler.confirm(card, TestFactory.LINK_ACCOUNT, CVC, "+15555555555")
+
+        assertThat(result).isEqualTo(Result.Succeeded)
+        val args = confirmationHandler.startTurbine.awaitItem()
+        val option = args.confirmationOption as LinkPassthroughConfirmationOption
+        assertThat(option.paymentDetailsId).isEqualTo(card.id)
+        assertThat(option.expectedPaymentMethodType).isEqualTo("card")
+        assertThat(option.cvc).isEqualTo(CVC)
+        assertThat(option.billingPhone).isEqualTo("+15555555555")
+        assertThat(option.allowRedisplay).isEqualTo(
+            if (setup == IndiaSetup.OneTime || setup == IndiaSetup.LinkOnlySetup) {
+                PaymentMethod.AllowRedisplay.UNSPECIFIED
+            } else PaymentMethod.AllowRedisplay.LIMITED
+        )
+        assertThat(args.intent).isEqualTo(intent)
+        confirmationHandler.validate()
+    }
+
+    @Test
+    fun `already shared India card preserves merchant setup and omits consumed CVC`(
+        @TestParameter setup: IndiaSetup,
+    ) = runTest(dispatcher) {
+        val intent = setup.intent()
+        val configuration = TestFactory.LINK_CONFIGURATION.copy(passthroughModeEnabled = false, stripeIntent = intent)
+        val confirmationHandler = FakeConfirmationHandler()
+        val handler = createHandler(configuration = configuration, confirmationHandler = confirmationHandler)
+        confirmationHandler.awaitResultTurbine.add(ConfirmationHandler.Result.Succeeded(intent))
+        val shared = TestFactory.LINK_PASSTHROUGH_PAYMENT_DETAILS.copy(isIndiaCardOverride = true)
+
+        handler.confirm(shared, TestFactory.LINK_ACCOUNT, CVC, null)
+
+        val args = confirmationHandler.startTurbine.awaitItem()
+        val option = args.confirmationOption as PaymentMethodConfirmationOption.Saved
+        assertThat(option.paymentMethod).isSameInstanceAs(shared.paymentMethod)
+        val options = option.optionsParams as PaymentMethodOptionsParams.Card
+        assertThat(options.cvc).isNull()
+        assertThat(options.setupFutureUsage).isNull()
+        assertThat(args.intent).isEqualTo(intent)
+        confirmationHandler.validate()
+    }
+
+    @Test
+    fun `retry with a non India card does not retain the first card route`() = runTest(dispatcher) {
+        val configuration = TestFactory.LINK_CONFIGURATION.copy(
+            flags = mapOf("link_route_india_card_to_passthrough" to true),
+        )
+        val confirmationHandler = FakeConfirmationHandler()
+        val handler = createHandler(configuration = configuration, confirmationHandler = confirmationHandler)
+        confirmationHandler.awaitResultTurbine.add(ConfirmationHandler.Result.Succeeded(configuration.stripeIntent))
+        handler.confirm(
+            TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(country = "IN"), TestFactory.LINK_ACCOUNT, CVC, null,
+        )
+        assertThat(confirmationHandler.startTurbine.awaitItem().confirmationOption)
+            .isInstanceOf(LinkPassthroughConfirmationOption::class.java)
+        confirmationHandler.awaitResultTurbine.add(ConfirmationHandler.Result.Succeeded(configuration.stripeIntent))
+
+        handler.confirm(
+            TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(country = "US"), TestFactory.LINK_ACCOUNT, CVC, null,
+        )
+
+        val option = confirmationHandler.startTurbine.awaitItem().confirmationOption
+            as PaymentMethodConfirmationOption.New
+        assertThat(option.createParams.typeCode).isEqualTo(PaymentMethod.Type.Link.code)
+        confirmationHandler.validate()
+    }
+
+    enum class IndiaSetup {
+        OneTime, OnSession, OffSession, SetupIntent, CardOnlySetup, LinkOnlySetup;
+
+        fun intent(): StripeIntent = when (this) {
+            SetupIntent -> SetupIntentFixtures.SI_SUCCEEDED
+            else -> PaymentIntentFixtures.PI_SUCCEEDED.copy(
+                setupFutureUsage = when (this) {
+                    OnSession -> StripeIntent.Usage.OnSession
+                    OffSession -> StripeIntent.Usage.OffSession
+                    else -> null
+                },
+                paymentMethodOptionsJsonString = when (this) {
+                    CardOnlySetup -> "{\"card\":{\"setup_future_usage\":\"on_session\"}}"
+                    LinkOnlySetup -> "{\"link\":{\"setup_future_usage\":\"off_session\"}}"
+                    else -> null
+                },
+            )
+        }
     }
 
     @Test

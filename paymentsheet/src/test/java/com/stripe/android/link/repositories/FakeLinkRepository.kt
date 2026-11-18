@@ -197,6 +197,7 @@ internal open class FakeLinkRepository : LinkRepository {
 
     override suspend fun shareCardPaymentDetails(
         paymentMethodCreateParams: PaymentMethodCreateParams,
+        expectedPaymentMethodType: String?,
         id: String,
         consumerSessionClientSecret: String,
         clientAttributionMetadata: ClientAttributionMetadata,
