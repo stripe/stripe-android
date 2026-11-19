@@ -11,7 +11,9 @@ import com.stripe.android.link.account.LinkStore
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.EmptyConfirmationLauncherArgs
+import com.stripe.android.paymentelement.confirmation.MutableConfirmationMetadata
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
+import com.stripe.android.paymentelement.confirmation.intent.CheckoutSessionResponseKey
 import javax.inject.Inject
 
 internal class LinkConfirmationDefinition @Inject constructor(
@@ -112,7 +114,12 @@ internal class LinkConfirmationDefinition @Inject constructor(
             is LinkActivityResult.Completed -> {
                 result.linkAccountUpdate.updateLinkAccount()
                 ConfirmationDefinition.Result.Succeeded(
-                    intent = confirmationArgs.intent,
+                    intent = result.intent ?: confirmationArgs.intent,
+                    metadata = MutableConfirmationMetadata().apply {
+                        result.checkoutSessionResponse?.let {
+                            set(CheckoutSessionResponseKey, it)
+                        }
+                    },
                 )
             }
         }

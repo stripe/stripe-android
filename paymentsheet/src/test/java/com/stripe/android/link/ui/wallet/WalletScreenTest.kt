@@ -486,12 +486,8 @@ internal class WalletScreenTest {
         linkAccountManager.listPaymentDetailsResult = Result.success(
             ConsumerPaymentDetails(paymentDetails = listOf(cardRequiringCvc))
         )
-        val linkConfirmationHandler = FakeLinkConfirmationHandler()
-        linkConfirmationHandler.confirmResult = com.stripe.android.link.confirmation.Result.Succeeded
-
         val viewModel = createViewModel(
             linkAccountManager = linkAccountManager,
-            linkConfirmationHandler = linkConfirmationHandler,
             navigationManager = TestNavigationManager()
         )
         composeTestRule.setContent {

@@ -2,15 +2,19 @@ package com.stripe.android.link
 
 import android.app.Activity
 import android.content.Intent
+import android.os.Parcel
 import androidx.core.os.BundleCompat
+import androidx.core.os.ParcelCompat
 import androidx.core.os.bundleOf
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
+import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networking.RequestSurface
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -87,6 +91,35 @@ class NativeLinkActivityContractTest {
         )
 
         assertThat(result).isEqualTo(expectedResult)
+    }
+
+    @Test
+    fun `confirmed Checkout Session survives parceling the native Link result`() {
+        val confirmedIntent = PaymentIntentFixtures.PI_SUCCEEDED
+        val confirmedSession = CheckoutSessionResponseFactory.create().withIntent(confirmedIntent)
+        val expected = LinkActivityResult.Completed(
+            linkAccountUpdate = LinkAccountUpdate.None,
+            intent = confirmedIntent,
+            checkoutSessionResponse = confirmedSession,
+        )
+        val parcel = Parcel.obtain()
+        try {
+            parcel.writeParcelable(intent(expected), 0)
+            parcel.setDataPosition(0)
+            val restoredIntent = ParcelCompat.readParcelable(parcel, Intent::class.java.classLoader, Intent::class.java)
+            val contract = NativeLinkActivityContract(
+                paymentElementCallbackIdentifier = LINK_CALLBACK_TEST_IDENTIFIER,
+                requestSurface = REQUEST_SURFACE,
+            )
+
+            val result = contract.parseResult(LinkActivity.RESULT_COMPLETE, restoredIntent)
+                as LinkActivityResult.Completed
+
+            assertThat(result.intent).isEqualTo(confirmedIntent)
+            assertThat(result.checkoutSessionResponse).isEqualTo(confirmedSession)
+        } finally {
+            parcel.recycle()
+        }
     }
 
     @Test

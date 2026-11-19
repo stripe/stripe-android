@@ -37,9 +37,7 @@ internal class CompleteLinkFlowTest {
 
     @Test
     fun `invoke with ConsumerPaymentDetails on Full mode - success`() = runTest {
-        val linkConfirmationHandler = FakeLinkConfirmationHandler().apply {
-            confirmResult = LinkConfirmationResult.Succeeded
-        }
+        val linkConfirmationHandler = FakeLinkConfirmationHandler()
         val linkAccountManager = FakeLinkAccountManager()
 
         val completeLinkFlow = DefaultCompleteLinkFlow(
@@ -70,9 +68,7 @@ internal class CompleteLinkFlowTest {
 
     @Test
     fun `invoke with ConsumerPaymentDetails on Confirmation mode - success`() = runTest {
-        val linkConfirmationHandler = FakeLinkConfirmationHandler().apply {
-            confirmResult = LinkConfirmationResult.Succeeded
-        }
+        val linkConfirmationHandler = FakeLinkConfirmationHandler()
 
         val completeLinkFlow = DefaultCompleteLinkFlow(
             linkConfirmationHandler = linkConfirmationHandler,
@@ -180,9 +176,7 @@ internal class CompleteLinkFlowTest {
 
     @Test
     fun `invoke with LinkPaymentDetails on Full mode - success`() = runTest {
-        val linkConfirmationHandler = FakeLinkConfirmationHandler().apply {
-            confirmWithLinkPaymentDetailsResult = LinkConfirmationResult.Succeeded
-        }
+        val linkConfirmationHandler = FakeLinkConfirmationHandler()
         val linkAccountManager = FakeLinkAccountManager()
 
         val completeLinkFlow = DefaultCompleteLinkFlow(
@@ -240,9 +234,7 @@ internal class CompleteLinkFlowTest {
 
     @Test
     fun `invoke with null cvc works correctly`() = runTest {
-        val linkConfirmationHandler = FakeLinkConfirmationHandler().apply {
-            confirmResult = LinkConfirmationResult.Succeeded
-        }
+        val linkConfirmationHandler = FakeLinkConfirmationHandler()
         val linkAccountManager = FakeLinkAccountManager()
 
         val completeLinkFlow = DefaultCompleteLinkFlow(
