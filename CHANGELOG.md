@@ -12,18 +12,18 @@ NEXT_VERSION_BUMP: MAJOR
 * [CHANGED] Bumped AndroidX Lifecycle from 2.10.0 to 2.11.0.
 
 ### PaymentSheet
-* [ADDED][15408](https://github.com/stripe/stripe-android/pull/15408) Added support for Stripe balance (private preview) in PaymentSheet, FlowController, and EmbeddedPaymentElement, for payments and setting up future payments. Customers choose which of their financial accounts to pay from. Requires a customer configured with `PaymentSheet.CustomerConfiguration.createWithCustomerSession`.
+* [ADDED] Added support for Stripe balance (private preview) in PaymentSheet, FlowController, and EmbeddedPaymentElement, for payments and setting up future payments. Customers choose which of their financial accounts to pay from. Requires a customer configured with `PaymentSheet.CustomerConfiguration.createWithCustomerSession`.
 * [Changed] Payment method icons now follow the selected light or dark theme, including when using custom component colors.
-* [Added][15422](https://github.com/stripe/stripe-android/pull/15422) Added explicit control for the light or dark appearance color set used by PaymentSheet, Embedded Payment Element, CustomerSheet, and Address Element on Android. You can now use PaymentSheet.Appearance.Builder.themeMode() to set the appearance to AlwaysLight or AlwaysDark for a consistent experience, overriding the system light/dark mode setting for supported Payment Element surfaces.
-* [FIXED][15363](https://github.com/stripe/stripe-android/pull/15363) Fixed an issue where inline address autocomplete could request suggestions for a prefilled address before the customer focused the address field.
-* [FIXED][15399](https://github.com/stripe/stripe-android/pull/15399) Fixed an issue where saved cards with an unrecognized display brand were labeled as "Unknown" in accessibility descriptions and payment option labels.
+* [Added] Added explicit control for the light or dark appearance color set used by PaymentSheet, Embedded Payment Element, CustomerSheet, and Address Element on Android. You can now use PaymentSheet.Appearance.Builder.themeMode() to set the appearance to AlwaysLight or AlwaysDark for a consistent experience, overriding the system light/dark mode setting for supported Payment Element surfaces.
+* [FIXED] Fixed an issue where inline address autocomplete could request suggestions for a prefilled address before the customer focused the address field.
+* [FIXED] Fixed an issue where saved cards with an unrecognized display brand were labeled as "Unknown" in accessibility descriptions and payment option labels.
 
 ### AddressElement
-* [FIXED][15363](https://github.com/stripe/stripe-android/pull/15363) Fixed an issue where inline address autocomplete could request suggestions for a prefilled address before the customer focused the address field.
+* [FIXED] Fixed an issue where inline address autocomplete could request suggestions for a prefilled address before the customer focused the address field.
 
 ### Crypto Onramp
-* [Added][15296](https://github.com/stripe/stripe-android/pull/15296) Added `googlePayCardBrandAcceptance` and `linkCardBrandAcceptance` to `OnrampConfiguration` to configure accepted card brands independently for Google Pay and Link.
-* [FIXED][15268](https://github.com/stripe/stripe-android/pull/15268) Fixed stale customer and checkout state persisting or being restored by in-flight operations after logging out.
+* [Added] Added `googlePayCardBrandAcceptance` and `linkCardBrandAcceptance` to `OnrampConfiguration` to configure accepted card brands independently for Google Pay and Link.
+* [FIXED] Fixed stale customer and checkout state persisting or being restored by in-flight operations after logging out.
 
 ### Financial Connections
 * [CHANGED] Updated Link-branded Financial Connections flows, including Instant Debits, to the new Link design system.
