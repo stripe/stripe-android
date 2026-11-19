@@ -9,6 +9,7 @@ NEXT_VERSION_BUMP: MAJOR
 * [CHANGED] Bumped Kotlin from 2.2.21 to 2.3.21.
 * [CHANGED] Bumped Jetpack Compose from 1.10.6 to 1.12.1
 * [CHANGED] Bumped Dagger from 2.58 to 2.59.
+* [CHANGED] Bumped AndroidX Lifecycle from 2.10.0 to 2.11.0.
 
 ### PaymentSheet
 * [ADDED][15408](https://github.com/stripe/stripe-android/pull/15408) Added support for Stripe balance (private preview) in PaymentSheet, FlowController, and EmbeddedPaymentElement, for payments and setting up future payments. Customers choose which of their financial accounts to pay from. Requires a customer configured with `PaymentSheet.CustomerConfiguration.createWithCustomerSession`.

@@ -31,6 +31,7 @@ import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_T
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.PaymentMethodFactory.update
+import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.testing.waitUntilWithIdle
 import com.stripe.paymentelementtestpages.EditPage
 import com.stripe.paymentelementtestpages.SavedPaymentMethodsPage
@@ -54,7 +55,8 @@ class CustomerSessionCustomerSheetActivityTest {
 
     @get:Rule
     val ruleChain: RuleChain = RuleChain
-        .outerRule(composeTestRule)
+        .outerRule(createComposeCleanupRule())
+        .around(composeTestRule)
         .around(networkRule)
         .around(PaymentConfigurationTestRule(application))
 

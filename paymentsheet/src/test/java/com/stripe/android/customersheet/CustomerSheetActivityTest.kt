@@ -18,12 +18,14 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
 import com.stripe.android.utils.injectableActivityScenario
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
@@ -35,8 +37,12 @@ internal class CustomerSheetActivityTest : CustomerSheetTestHelper {
     @get:Rule
     val rule = InstantTaskExecutorRule()
 
-    @get:Rule
     val composeTestRule = createEmptyComposeRule()
+
+    @get:Rule
+    val composeRuleChain: RuleChain = RuleChain
+        .outerRule(createComposeCleanupRule())
+        .around(composeTestRule)
 
     @get:Rule
     override val viewModelStoreTestRule = ViewModelStoreTestRule()
