@@ -494,6 +494,76 @@ internal class DefaultHCaptchaServiceTest {
             assertThat((result as HCaptchaService.Result.Success).token).isEqualTo(expectedToken)
 
             captchaEventsReporter.ensureAllEventsConsumed()
+            hCaptchaProvider.ensureAllEventsConsumed()
+        }
+    }
+
+    @Test
+    fun `performPassiveHCaptcha fetches new token when site key does not match cached token`() = runTest {
+        testTokenCacheKeyMismatch(siteKey = "new-site-key")
+    }
+
+    @Test
+    fun `performPassiveHCaptcha fetches new token when rqData does not match cached token`() = runTest {
+        testTokenCacheKeyMismatch(rqData = "new-rq-data")
+    }
+
+    @Test
+    fun `performPassiveHCaptcha fetches new token when cached rqData is null`() = runTest {
+        testTokenCacheKeyMismatch(warmUpRqData = null)
+    }
+
+    @Test
+    fun `performPassiveHCaptcha fetches new token when requested rqData is null`() = runTest {
+        testTokenCacheKeyMismatch(rqData = null)
+    }
+
+    private suspend fun testTokenCacheKeyMismatch(
+        warmUpRqData: String? = TEST_RQ_DATA,
+        siteKey: String = TEST_SITE_KEY,
+        rqData: String? = TEST_RQ_DATA
+    ) {
+        TestContext.test {
+            hCaptchaProvider.hCaptchaHandler = SetupSuccessfulHCaptcha("cached-token")
+
+            service.warmUp(activity, siteKey = TEST_SITE_KEY, rqData = warmUpRqData)
+            webViewStarter.awaitCall()
+            hCaptchaProvider.awaitCall()
+            assertThat(captchaEventsReporter.awaitCall())
+                .isEqualTo(FakeCaptchaEventsReporter.Call.Init(TEST_SITE_KEY))
+            assertThat(captchaEventsReporter.awaitCall())
+                .isEqualTo(FakeCaptchaEventsReporter.Call.Execute(TEST_SITE_KEY))
+            assertThat(captchaEventsReporter.awaitCall())
+                .isEqualTo(FakeCaptchaEventsReporter.Call.Success(TEST_SITE_KEY))
+
+            hCaptchaProvider.hCaptchaHandler = SetupSuccessfulHCaptcha("fresh-token")
+
+            val result = service.performPassiveHCaptcha(
+                activity,
+                siteKey = siteKey,
+                rqData = rqData,
+                tokenTimeoutSeconds = null
+            )
+
+            assertThat(result).isEqualTo(HCaptchaService.Result.Success("fresh-token"))
+            assertThat(webViewStarter.awaitCall().context).isSameInstanceAs(activity)
+            val configCaptor = argumentCaptor<HCaptchaConfig>()
+            verify(hCaptchaProvider.awaitCall()).setup(any(), configCaptor.capture())
+            assertThat(configCaptor.firstValue.siteKey).isEqualTo(siteKey)
+            assertThat(configCaptor.firstValue.rqdata).isEqualTo(rqData)
+            assertThat(captchaEventsReporter.awaitCall())
+                .isEqualTo(FakeCaptchaEventsReporter.Call.AttachStart)
+            assertThat(captchaEventsReporter.awaitCall())
+                .isEqualTo(FakeCaptchaEventsReporter.Call.Init(siteKey))
+            assertThat(captchaEventsReporter.awaitCall())
+                .isEqualTo(FakeCaptchaEventsReporter.Call.Execute(siteKey))
+            assertThat(captchaEventsReporter.awaitCall())
+                .isEqualTo(FakeCaptchaEventsReporter.Call.Success(siteKey))
+            assertThat(captchaEventsReporter.awaitCall())
+                .isEqualTo(FakeCaptchaEventsReporter.Call.AttachEnd(isReady = true, siteKey))
+
+            captchaEventsReporter.ensureAllEventsConsumed()
+            hCaptchaProvider.ensureAllEventsConsumed()
         }
     }
 

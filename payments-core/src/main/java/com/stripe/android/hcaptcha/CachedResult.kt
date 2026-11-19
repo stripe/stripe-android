@@ -5,7 +5,9 @@ internal sealed interface CachedResult {
     data object Loading : CachedResult
     data class Success(
         val token: String,
-        val createdAt: Long
+        val createdAt: Long,
+        val siteKey: String,
+        val rqData: String?
     ) : CachedResult
     data class Failure(val error: Throwable) : CachedResult
 

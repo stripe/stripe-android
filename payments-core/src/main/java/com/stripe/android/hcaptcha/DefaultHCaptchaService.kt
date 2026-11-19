@@ -36,7 +36,12 @@ internal class DefaultHCaptchaService(
                 CachedResult.Failure(result.error)
             }
             is HCaptchaService.Result.Success -> {
-                CachedResult.Success(result.token, createdAt = SystemClock.elapsedRealtime())
+                CachedResult.Success(
+                    token = result.token,
+                    createdAt = SystemClock.elapsedRealtime(),
+                    siteKey = siteKey,
+                    rqData = rqData
+                )
             }
         }
         storage.emit(update)
@@ -150,9 +155,11 @@ internal class DefaultHCaptchaService(
                     null
                 }
                 is CachedResult.Success -> {
+                    val keyDoesNotMatch = cachedResult.rqData != rqData || cachedResult.siteKey != siteKey
                     val elapsedSeconds = (SystemClock.elapsedRealtime() - cachedResult.createdAt) / 1000
                     val isExpired = elapsedSeconds >= tokenTimeoutSeconds
-                    if (isExpired) {
+
+                    if (isExpired || keyDoesNotMatch) {
                         performPassiveHCaptchaHelper(activity, siteKey, rqData)
                     } else {
                         HCaptchaService.Result.Success(cachedResult.token)
