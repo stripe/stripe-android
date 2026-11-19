@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.example.playground.checkout
 
 import android.os.Build
 import com.stripe.android.core.version.StripeSdkVersion
+import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutCustomerUpdate
 import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutPlaygroundDefinitions
 import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutPlaygroundSettings
 import kotlinx.serialization.json.JsonArray
@@ -48,9 +49,7 @@ internal object CheckoutSessionParamsFactory {
                 customerId,
                 email,
                 paymentMethodSave,
-                automaticTax,
-                billingAddressCollection,
-                shippingAddressCollection,
+                settings,
             )
             putSavedPaymentMethodOptions(customerId, paymentMethodSave, paymentMethodRemove)
         }
@@ -131,9 +130,7 @@ internal object CheckoutSessionParamsFactory {
         customerId: String?,
         email: String?,
         paymentMethodSave: Boolean,
-        automaticTax: Boolean,
-        billingAddressCollection: Boolean,
-        shippingAddressCollection: Boolean,
+        settings: CheckoutPlaygroundSettings.Snapshot,
     ) {
         if (customerId == null) {
             email?.let { put("customer_email", it) }
@@ -142,13 +139,19 @@ internal object CheckoutSessionParamsFactory {
         }
 
         put("customer", customerId)
-        if (automaticTax) {
-            val customerUpdate = buildJsonObject {
-                if (billingAddressCollection) put("address", "auto")
-                if (shippingAddressCollection) put("shipping", "auto")
+        val definitions = CheckoutPlaygroundDefinitions.session.customerUpdate
+        val customerUpdate = buildJsonObject {
+            mapOf(
+                "address" to settings[definitions.address],
+                "name" to settings[definitions.name],
+                "shipping" to settings[definitions.shipping],
+            ).forEach { (key, value) ->
+                if (value != CheckoutCustomerUpdate.Default) {
+                    put(key, value.serializedValue)
+                }
             }
-            if (customerUpdate.isNotEmpty()) put("customer_update", customerUpdate)
         }
+        if (customerUpdate.isNotEmpty()) put("customer_update", customerUpdate)
     }
 
     private fun JsonObjectBuilder.putSavedPaymentMethodOptions(

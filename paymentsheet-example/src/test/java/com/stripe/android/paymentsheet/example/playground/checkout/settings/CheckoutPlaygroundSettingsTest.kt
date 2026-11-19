@@ -55,6 +55,19 @@ class CheckoutPlaygroundSettingsTest {
     }
 
     @Test
+    fun `customer updates survive JSON round trip`() = runScenario {
+        val definitions = CheckoutPlaygroundDefinitions.session.customerUpdate
+        settings.update(definitions.address, CheckoutCustomerUpdate.Auto)
+        settings.update(definitions.name, CheckoutCustomerUpdate.Never)
+
+        val restored = CheckoutPlaygroundSettings.createInMemory(settings.asJsonString())
+
+        assertThat(restored[definitions.address]).isEqualTo(CheckoutCustomerUpdate.Auto)
+        assertThat(restored[definitions.name]).isEqualTo(CheckoutCustomerUpdate.Never)
+        assertThat(restored[definitions.shipping]).isEqualTo(CheckoutCustomerUpdate.Default)
+    }
+
+    @Test
     fun `customer ID survives JSON round trip`() = runScenario {
         val definition = CheckoutPlaygroundDefinitions.session.customerId
         settings.update(definition, "cus_custom")

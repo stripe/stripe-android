@@ -193,6 +193,28 @@ class CheckoutPlaygroundSettingsUiTest {
     }
 
     @Test
+    fun `customer update settings are independently selectable from server config`() = runScenario(
+        initialConfiguration = CheckoutPlaygroundDefinitions.session.configuration,
+    ) {
+        val definitions = CheckoutPlaygroundDefinitions.session.customerUpdate
+        page.group(definitions.configuration).performScrollTo().assertIsDisplayed().performClick()
+
+        page.value(definitions.address).assertIsDisplayed()
+        page.value(definitions.name).assertIsDisplayed()
+        page.value(definitions.shipping).assertIsDisplayed()
+        composeRule.onNode(
+            hasText("Auto").and(hasAnyAncestor(hasTestTag(checkoutSettingValueTestTag(definitions.address))))
+        ).performClick()
+        composeRule.onNode(
+            hasText("Never").and(hasAnyAncestor(hasTestTag(checkoutSettingValueTestTag(definitions.shipping))))
+        ).performClick()
+
+        assertThat(settings[definitions.address]).isEqualTo(CheckoutCustomerUpdate.Auto)
+        assertThat(settings[definitions.name]).isEqualTo(CheckoutCustomerUpdate.Default)
+        assertThat(settings[definitions.shipping]).isEqualTo(CheckoutCustomerUpdate.Never)
+    }
+
+    @Test
     fun `customer setting toggles between guest and new`() = runScenario(
         initialConfiguration = CheckoutPlaygroundDefinitions.session.configuration,
     ) {
