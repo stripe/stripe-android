@@ -97,7 +97,6 @@ internal class AutomaticTaxPaymentMethodRegistryTest {
             billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
                 address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
             ),
-            allowsPaymentMethodsRequiringShippingAddress = true,
             externalPaymentMethodSpecs = externalPaymentMethodSpecs,
             displayableCustomPaymentMethods = displayableCustomPaymentMethods,
             integrationMetadata = IntegrationMetadata.CheckoutSession(

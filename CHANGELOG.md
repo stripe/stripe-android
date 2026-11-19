@@ -15,6 +15,7 @@ NEXT_VERSION_BUMP: MAJOR
 * [REMOVED] `returnUrl` setters from `ConfirmPaymentIntentParams` & `ConfirmSetupIntentParams` have been removed.
 
 ### PaymentSheet
+* [DEPRECATED] `allowsPaymentMethodsRequiringShippingAddress` is now deprecated. All payment methods that require a shipping address will be shown by Payment Element by default.
 * [REMOVED] Removed `PaymentSheet.Configuration.Builder.googlePlacesApiKey`. Payment Element autocomplete will continue to work without a Google Places API key.
 * [ADDED] Added support for Stripe balance (private preview) in PaymentSheet, FlowController, and EmbeddedPaymentElement, for payments and setting up future payments. Customers choose which of their financial accounts to pay from. Requires a customer configured with `PaymentSheet.CustomerConfiguration.createWithCustomerSession`.
 * [Changed] Payment method icons now follow the selected light or dark theme, including when using custom component colors.

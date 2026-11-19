@@ -1113,6 +1113,10 @@ class PaymentSheet internal constructor(
             fun allowsDelayedPaymentMethods(allowsDelayedPaymentMethods: Boolean) =
                 apply { this.allowsDelayedPaymentMethods = allowsDelayedPaymentMethods }
 
+            @Deprecated(
+                message = "This no longer has an effect. Payment methods that require a shipping " +
+                    "address are always allowed"
+            )
             fun allowsPaymentMethodsRequiringShippingAddress(
                 allowsPaymentMethodsRequiringShippingAddress: Boolean,
             ) = apply {
@@ -1317,7 +1321,6 @@ class PaymentSheet internal constructor(
             .defaultBillingDetails(defaultBillingDetails)
             .shippingDetails(shippingDetails)
             .allowsDelayedPaymentMethods(allowsDelayedPaymentMethods)
-            .allowsPaymentMethodsRequiringShippingAddress(allowsPaymentMethodsRequiringShippingAddress)
             .appearance(appearance)
             .billingDetailsCollectionConfiguration(billingDetailsCollectionConfiguration)
             .preferredNetworks(preferredNetworks)

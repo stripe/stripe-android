@@ -1228,7 +1228,6 @@ internal class PaymentSheetViewModelTest {
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
                 config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.newBuilder()
                     .shippingDetails(null)
-                    .allowsPaymentMethodsRequiringShippingAddress(false)
                     .build()
             ),
             stripeIntent = PaymentIntentFixtures.PI_WITH_SHIPPING.copy(
@@ -1244,9 +1243,7 @@ internal class PaymentSheetViewModelTest {
     fun `Verify supported payment methods include afterpay if allow flag but no shipping`() {
         val viewModel = createViewModel(
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
-                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.newBuilder()
-                    .allowsPaymentMethodsRequiringShippingAddress(true)
-                    .build()
+                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config
             ),
             stripeIntent = PaymentIntentFixtures.PI_WITH_SHIPPING.copy(
                 paymentMethodTypes = listOf("afterpay_clearpay"),
@@ -1261,9 +1258,7 @@ internal class PaymentSheetViewModelTest {
     fun `Verify supported payment methods include afterpay if shipping but no allow flag`() {
         val viewModel = createViewModel(
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
-                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.newBuilder()
-                    .allowsPaymentMethodsRequiringShippingAddress(true)
-                    .build()
+                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config
             ),
             stripeIntent = PaymentIntentFixtures.PI_WITH_SHIPPING.copy(
                 paymentMethodTypes = listOf("afterpay_clearpay"),

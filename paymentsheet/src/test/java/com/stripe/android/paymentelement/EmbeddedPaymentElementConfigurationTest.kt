@@ -60,7 +60,6 @@ class EmbeddedPaymentElementConfigurationTest {
                 )
             )
             .allowsDelayedPaymentMethods(true)
-            .allowsPaymentMethodsRequiringShippingAddress(true)
             .appearance(
                 PaymentSheet.Appearance(
                     colorsLight = PaymentSheet.Colors.configureDefaultLight(primary = Color.Red),
