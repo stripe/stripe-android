@@ -105,6 +105,8 @@ internal fun String.routeToScreenName(): String = when (this) {
         IdentityAnalyticsRequestFactory.SCREEN_NAME_ERROR
     CouldNotCaptureDestination.ROUTE.route ->
         IdentityAnalyticsRequestFactory.SCREEN_NAME_ERROR
+    CameraErrorDestination.ROUTE.route ->
+        IdentityAnalyticsRequestFactory.SCREEN_NAME_ERROR
     IndividualDestination.ROUTE.route ->
         IdentityAnalyticsRequestFactory.SCREEN_NAME_INDIVIDUAL
     CountryNotListedDestination.ROUTE.route ->

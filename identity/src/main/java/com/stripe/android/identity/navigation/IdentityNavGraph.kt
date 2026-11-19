@@ -40,6 +40,7 @@ import com.stripe.android.identity.VerificationFlowFinishable
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.networking.models.VerificationPage.Companion.requireSelfie
 import com.stripe.android.identity.ui.BottomSheetWithInsets
+import com.stripe.android.identity.ui.CameraErrorScreen
 import com.stripe.android.identity.ui.ConfirmationScreen
 import com.stripe.android.identity.ui.ConsentScreen
 import com.stripe.android.identity.ui.CountryNotListedScreen
@@ -281,6 +282,14 @@ internal fun IdentityNavGraph(
                             }
                         )
                     }
+                )
+            }
+            screen(CameraErrorDestination.ROUTE) {
+                CameraErrorScreen(
+                    navController = navController,
+                    identityViewModel = identityViewModel,
+                    requireLiveCapture =
+                    identityViewModel.verificationPage.value?.data?.documentCapture?.requireLiveCapture ?: false
                 )
             }
             screen(ErrorDestination.ROUTE) {

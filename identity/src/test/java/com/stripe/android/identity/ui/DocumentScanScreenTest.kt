@@ -14,12 +14,14 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.lifecycle.MediatorLiveData
 import androidx.navigation.NavController
+import androidx.navigation.NavOptionsBuilder
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.camera.CameraPreviewImage
 import com.stripe.android.identity.R
 import com.stripe.android.identity.TestApplication
 import com.stripe.android.identity.camera.IdentityAggregator
 import com.stripe.android.identity.ml.FaceDetectorOutput
+import com.stripe.android.identity.navigation.DocumentUploadDestination
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.DocumentUploadParam
@@ -108,6 +110,24 @@ class DocumentScanScreenTest {
             scannerState = IdentityScanViewModel.State.Initializing
         ) {
             onNodeWithTag(LOADING_SCREEN_TAG).assertExists()
+        }
+    }
+
+    @Test
+    fun `missing ID detector model opens the upload screen`() {
+        // Given the verification page loaded but the ID detector model did not
+        pageAndModelFilesLiveData.value = Resource.success(
+            createPageAndModelFiles(requireLiveCapture = false).copy(idDetectorFile = null)
+        )
+
+        // When the document scan screen is shown
+        testDocumentScanScreen(scannerState = IdentityScanViewModel.State.Initializing) {
+            // Then the upload screen opens, and the scanner does not start
+            verify(mockNavController).navigate(
+                eq(DocumentUploadDestination.routeWithArgs),
+                any<NavOptionsBuilder.() -> Unit>()
+            )
+            verify(mockDocumentScanViewModel, never()).initializeScanFlowAndUpdateState(any(), any())
         }
     }
 

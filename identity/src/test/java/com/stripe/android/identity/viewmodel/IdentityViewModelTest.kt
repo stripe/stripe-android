@@ -2,6 +2,7 @@ package com.stripe.android.identity.viewmodel
 
 import android.graphics.Bitmap
 import android.net.Uri
+import android.os.Looper
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
@@ -16,6 +17,7 @@ import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.core.model.StripeFile
 import com.stripe.android.core.model.StripeFilePurpose
 import com.stripe.android.identity.CORRECT_WITH_SUBMITTED_SUCCESS_VERIFICATION_PAGE_DATA
+import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.identity.IdentityVerificationSheetContract
 import com.stripe.android.identity.SUBMITTED_AND_CLOSED_VERIFICATION_PAGE_DATA
 import com.stripe.android.identity.SUBMITTED_AND_NOT_CLOSED_NO_MISSING_VERIFICATION_PAGE_DATA
@@ -91,6 +93,7 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.Shadows.shadowOf
 import java.io.File
 import kotlin.test.assertFailsWith
 
@@ -159,6 +162,7 @@ internal class IdentityViewModelTest {
     private val mockOnMissingPhoneOtp = mock<() -> Unit>()
     private val mockOnReadyToSubmit = mock<() -> Unit>()
     private val mockTfLiteInitializer = mock<InterpreterInitializer>()
+    private val mockFinishWithResult = mock<(IdentityVerificationSheet.VerificationFlowResult) -> Unit>()
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private val viewModel = IdentityViewModel(
@@ -184,7 +188,7 @@ internal class IdentityViewModelTest {
         mockSavedStateHandle,
         mock(),
         UnconfinedTestDispatcher(),
-        mock()
+        mockFinishWithResult
     ).also { viewModelStoreRule.track(it) }
 
     private fun mockUploadSuccess() = runBlocking {
@@ -468,6 +472,77 @@ internal class IdentityViewModelTest {
 
             assertThat(viewModel.faceDetectorModelFile.value).isEqualTo(
                 Resource.success(FACE_DETECTOR_FILE)
+            )
+        }
+
+    @Test
+    fun `ID detector model download failure does not end the flow`() = runBlocking {
+        // Given the ID detector model fails to download
+        whenever(mockIdentityModelFetcher.fetchIdentityModel(eq(ID_DETECTOR_URL)))
+            .thenThrow(IllegalStateException("download failed"))
+
+        // When the verification page and models load
+        viewModel.retrieveAndBufferVerificationPage()
+
+        // Then the model reports the error, but the flow stays open
+        assertThat(viewModel.idDetectorModelFile.value?.status).isEqualTo(Status.ERROR)
+        verify(mockFinishWithResult, never()).invoke(any())
+        verify(mockIdentityAnalyticsRequestFactory, never()).verificationFailed(
+            any(),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+            any(),
+            anyOrNull()
+        )
+    }
+
+    @Test
+    fun `face detector model download failure ends the flow`() = runBlocking {
+        // Given the face detector model fails to download
+        val cause = IllegalStateException("download failed")
+        whenever(mockIdentityModelFetcher.fetchIdentityModel(eq(FACE_DETECTOR_URL)))
+            .thenThrow(cause)
+
+        // When the verification page and models load
+        viewModel.retrieveAndBufferVerificationPage()
+
+        // Then the flow ends with a failure
+        verify(mockFinishWithResult).invoke(
+            argWhere {
+                it is IdentityVerificationSheet.VerificationFlowResult.Failed && it.throwable === cause
+            }
+        )
+    }
+
+    @Test
+    fun `pageAndModelFiles succeeds without the ID detector model when it fails to load`() =
+        runBlocking {
+            // Given TFLite is ready and the ID detector model fails to download
+            viewModel.pageAndModelFiles.observeForever {}
+            viewModel.initializeTfLite()
+            val successCaptor = argumentCaptor<() -> Unit>()
+            verify(mockTfLiteInitializer).initialize(any(), successCaptor.capture(), any())
+            successCaptor.firstValue.invoke()
+            whenever(mockIdentityModelFetcher.fetchIdentityModel(eq(ID_DETECTOR_URL)))
+                .thenThrow(IllegalStateException("download failed"))
+
+            // When the verification page and models load
+            viewModel.retrieveAndBufferVerificationPage()
+            // The view model is created before InstantTaskExecutorRule applies, so the
+            // mediator's first post waits on the main looper and holds later posts.
+            shadowOf(Looper.getMainLooper()).idle()
+
+            // Then the page and the face model are ready, with no ID detector model
+            assertThat(viewModel.pageAndModelFiles.value).isEqualTo(
+                Resource.success(
+                    IdentityViewModel.PageAndModelFiles(
+                        page = mockVerificationPage,
+                        idDetectorFile = null,
+                        faceDetectorFile = FACE_DETECTOR_FILE
+                    )
+                )
             )
         }
 

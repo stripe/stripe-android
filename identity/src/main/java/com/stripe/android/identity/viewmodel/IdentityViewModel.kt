@@ -304,9 +304,13 @@ internal class IdentityViewModel(
     private val _faceDetectorModelFile = MutableLiveData<Resource<File>>()
     val faceDetectorModelFile: LiveData<Resource<File>> = _faceDetectorModelFile
 
+    /**
+     * [idDetectorFile] is null when the ID detector model failed to load. Document capture then
+     * falls back to photo upload, and selfie capture still works.
+     */
     data class PageAndModelFiles(
         val page: VerificationPage,
-        val idDetectorFile: File,
+        val idDetectorFile: File?,
         val faceDetectorFile: File?
     )
 
@@ -316,6 +320,7 @@ internal class IdentityViewModel(
     val pageAndModelFiles = object : MediatorLiveData<Resource<PageAndModelFiles>>() {
         private var page: VerificationPage? = null
         private var idDetectorModel: File? = null
+        private var idDetectorModelValueSet = false
         private var faceDetectorModel: File? = null
         private var faceDetectorModelValueSet = false
         private var isTfliteInitialized = false
@@ -340,12 +345,15 @@ internal class IdentityViewModel(
             addSource(idDetectorModelFile) {
                 when (it.status) {
                     Status.SUCCESS -> {
+                        idDetectorModelValueSet = true
                         idDetectorModel = it.data
                         maybePostSuccess()
                     }
 
                     Status.ERROR -> {
-                        postValue(Resource.error("$idDetectorModelFile posts error"))
+                        idDetectorModelValueSet = true
+                        idDetectorModel = null
+                        maybePostSuccess()
                     }
 
                     Status.LOADING -> {} // no-op
@@ -378,18 +386,16 @@ internal class IdentityViewModel(
 
         private fun maybePostSuccess() {
             page?.let { page ->
-                idDetectorModel?.let { idDetectorModel ->
-                    if (isTfliteInitialized && faceDetectorModelValueSet) {
-                        postValue(
-                            Resource.success(
-                                PageAndModelFiles(
-                                    page,
-                                    idDetectorModel,
-                                    faceDetectorModel
-                                )
+                if (isTfliteInitialized && idDetectorModelValueSet && faceDetectorModelValueSet) {
+                    postValue(
+                        Resource.success(
+                            PageAndModelFiles(
+                                page,
+                                idDetectorModel,
+                                faceDetectorModel
                             )
                         )
-                    }
+                    )
                 }
             }
         }
@@ -1378,12 +1384,6 @@ internal class IdentityViewModel(
                             stage = IdentityAnalyticsRequestFactory.MODEL_LOADING_STAGE_DOWNLOAD
                         )
                     )
-                    identityAnalyticsRequestFactory.verificationFailed(
-                        isFromFallbackUrl = false,
-                        requireSelfie = verificationPage.value?.data?.requireSelfie(),
-                        throwable = it,
-                        lastScreenName = modelScreenName(modelType)
-                    )
                     target.postValue(
                         Resource.error(
                             "Failed to download model from $modelUrl",
@@ -1391,8 +1391,17 @@ internal class IdentityViewModel(
                         )
                     )
 
-                    // Exit with failure
-                    finishWithResult(IdentityVerificationSheet.VerificationFlowResult.Failed(it))
+                    // Document capture falls back to photo upload, so only a
+                    // selfie model failure ends the flow.
+                    if (modelType != IdentityAnalyticsRequestFactory.ModelType.DOCUMENT) {
+                        identityAnalyticsRequestFactory.verificationFailed(
+                            isFromFallbackUrl = false,
+                            requireSelfie = verificationPage.value?.data?.requireSelfie(),
+                            throwable = it,
+                            lastScreenName = modelScreenName(modelType)
+                        )
+                        finishWithResult(IdentityVerificationSheet.VerificationFlowResult.Failed(it))
+                    }
                 }
             )
         }
