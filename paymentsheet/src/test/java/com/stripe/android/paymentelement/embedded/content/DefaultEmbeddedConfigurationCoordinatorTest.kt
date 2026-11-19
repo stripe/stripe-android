@@ -55,8 +55,6 @@ internal class DefaultEmbeddedConfigurationCoordinatorTest {
                 billingDetailsCollectionConfiguration = defaultConfiguration
                     .billingDetailsCollectionConfiguration,
                 allowsDelayedPaymentMethods = defaultConfiguration.allowsDelayedPaymentMethods,
-                allowsPaymentMethodsRequiringShippingAddress = defaultConfiguration
-                    .allowsPaymentMethodsRequiringShippingAddress,
                 isGooglePayReady = isGooglePayReady,
                 cbcEligibility = CardBrandChoiceEligibility.Ineligible,
             ),

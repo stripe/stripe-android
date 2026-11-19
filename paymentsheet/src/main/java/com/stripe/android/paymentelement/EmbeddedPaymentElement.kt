@@ -366,6 +366,10 @@ class EmbeddedPaymentElement @Inject internal constructor(
              * **Note**: The payment element considers this property `true` if `shipping` details are present
              * on the PaymentIntent/SetupIntent when loaded.
              */
+            @Deprecated(
+                message = "This no longer has an effect. Payment methods that require a shipping " +
+                    "address are always allowed"
+            )
             fun allowsPaymentMethodsRequiringShippingAddress(
                 allowsPaymentMethodsRequiringShippingAddress: Boolean,
             ) = apply {
@@ -591,7 +595,6 @@ class EmbeddedPaymentElement @Inject internal constructor(
             .defaultBillingDetails(defaultBillingDetails)
             .shippingDetails(shippingDetails)
             .allowsDelayedPaymentMethods(allowsDelayedPaymentMethods)
-            .allowsPaymentMethodsRequiringShippingAddress(allowsPaymentMethodsRequiringShippingAddress)
             .appearance(appearance)
             .billingDetailsCollectionConfiguration(billingDetailsCollectionConfiguration)
             .preferredNetworks(preferredNetworks)

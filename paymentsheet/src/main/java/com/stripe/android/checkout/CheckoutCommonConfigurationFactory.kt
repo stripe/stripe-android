@@ -99,7 +99,6 @@ internal class CheckoutCommonConfigurationFactory @Inject constructor(
         ),
         shippingDetails = collectedDetails.toShippingDetails(),
         allowsDelayedPaymentMethods = true,
-        allowsPaymentMethodsRequiringShippingAddress = true,
         billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
         preferredNetworks = paymentElementConfiguration?.preferredNetworks
             ?: ConfigurationDefaults.preferredNetworks,

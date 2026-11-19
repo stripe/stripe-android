@@ -42,7 +42,6 @@ class PaymentSheetConfigurationTest {
                 address = PaymentSheet.Address(country = "US"),
             ),
             allowsDelayedPaymentMethods = true,
-            allowsPaymentMethodsRequiringShippingAddress = true,
             appearance = PaymentSheet.Appearance(
                 colorsLight = PaymentSheet.Colors.configureDefaultLight(primary = Color.Red),
             ),
