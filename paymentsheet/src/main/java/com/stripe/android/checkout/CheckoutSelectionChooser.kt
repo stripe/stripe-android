@@ -7,6 +7,7 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentelement.embedded.content.EmbeddedSelectionChooser
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.isSupportedBy
 import javax.inject.Inject
 import javax.inject.Provider
 
@@ -37,34 +38,5 @@ internal class CheckoutSelectionChooser @Inject constructor(
 
         return previousSelection?.takeIf { it.isSupportedBy(paymentMethodMetadata, paymentMethods) }
             ?: newSelection
-    }
-
-    private fun PaymentSelection.isSupportedBy(
-        paymentMethodMetadata: PaymentMethodMetadata,
-        paymentMethods: List<PaymentMethod>?,
-    ): Boolean {
-        // The types that are allowed for this intent, as returned by the backend
-        val allowedTypes = paymentMethodMetadata.supportedPaymentMethodTypes()
-
-        return when (this) {
-            is PaymentSelection.New -> {
-                paymentMethodCreateParams.typeCode in allowedTypes
-            }
-            is PaymentSelection.Saved -> {
-                paymentMethod.type?.code in allowedTypes && paymentMethod in (paymentMethods ?: emptyList())
-            }
-            is PaymentSelection.GooglePay -> {
-                paymentMethodMetadata.isGooglePayReady
-            }
-            is PaymentSelection.Link -> {
-                paymentMethodMetadata.linkState != null
-            }
-            is PaymentSelection.ExternalPaymentMethod -> {
-                paymentMethodMetadata.isExternalPaymentMethod(type)
-            }
-            is PaymentSelection.CustomPaymentMethod -> {
-                paymentMethodMetadata.isCustomPaymentMethod(id)
-            }
-        }
     }
 }

@@ -7,6 +7,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.isSupportedBy
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import javax.inject.Inject
 
@@ -48,36 +49,13 @@ internal class DefaultPaymentSelectionUpdater @Inject constructor() : PaymentSel
         potentialSelection: PaymentSelection,
         state: PaymentSheetState.Full,
     ): Boolean {
-        // The types that are allowed for this intent, as returned by the backend
-        val allowedTypes = state.paymentMethodMetadata.supportedPaymentMethodTypes()
-
-        return when (potentialSelection) {
-            is PaymentSelection.New -> {
-                val requiresMandate = shouldAskForMandate(
+        return potentialSelection.isSupportedBy(state.paymentMethodMetadata, state.customer?.paymentMethods) &&
+            (
+                potentialSelection !is PaymentSelection.New || !shouldAskForMandate(
                     currentSelection = potentialSelection,
                     metadata = state.paymentMethodMetadata,
                 )
-                val code = potentialSelection.paymentMethodCreateParams.typeCode
-                code in allowedTypes && !requiresMandate
-            }
-            is PaymentSelection.Saved -> {
-                val paymentMethod = potentialSelection.paymentMethod
-                val code = paymentMethod.type?.code
-                code in allowedTypes && paymentMethod in (state.customer?.paymentMethods ?: emptyList())
-            }
-            is PaymentSelection.GooglePay -> {
-                state.paymentMethodMetadata.isGooglePayReady
-            }
-            is PaymentSelection.Link -> {
-                state.paymentMethodMetadata.linkState != null
-            }
-            is PaymentSelection.ExternalPaymentMethod -> {
-                state.paymentMethodMetadata.isExternalPaymentMethod(potentialSelection.type)
-            }
-            is PaymentSelection.CustomPaymentMethod -> {
-                state.paymentMethodMetadata.isCustomPaymentMethod(potentialSelection.id)
-            }
-        }
+            )
     }
 
     private fun shouldAskForMandate(

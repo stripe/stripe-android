@@ -166,6 +166,20 @@ class PaymentSelectionUpdaterTest {
     }
 
     @Test
+    fun `Does not fall back to loader selection when previous selection is no longer supported`() {
+        val updater = createUpdater()
+        val result = updater(
+            selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+            previousConfig = defaultPaymentSheetConfiguration,
+            newState = mockPaymentSheetStateWithPaymentIntent(paymentSelection = PaymentSelection.GooglePay),
+            newConfig = defaultPaymentSheetConfiguration,
+            walletButtonsAlreadyShown = false,
+        )
+
+        assertThat(result).isNull()
+    }
+
+    @Test
     fun `Can use external payment method if it's supported`() {
         val paymentSelection =
             PaymentMethodFixtures.createExternalPaymentMethod(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC)

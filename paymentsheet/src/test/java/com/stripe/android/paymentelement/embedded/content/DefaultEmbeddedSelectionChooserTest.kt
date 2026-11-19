@@ -130,6 +130,20 @@ internal class DefaultEmbeddedSelectionChooserTest {
     }
 
     @Test
+    fun `Falls back to loader selection when previous selection is no longer supported`() = runScenario {
+        val selection = chooser.choose(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(isGooglePayReady = true),
+            paymentMethods = null,
+            previousSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+            newSelection = PaymentSelection.GooglePay,
+            newConfiguration = defaultConfiguration,
+            formSheetAction = EmbeddedPaymentElement.FormSheetAction.Continue,
+        )
+
+        assertThat(selection).isEqualTo(PaymentSelection.GooglePay)
+    }
+
+    @Test
     fun `Can use external payment method if it's supported`() = runScenario {
         val previousSelection =
             PaymentMethodFixtures.createExternalPaymentMethod(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC)

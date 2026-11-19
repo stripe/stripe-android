@@ -11,6 +11,7 @@ import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.paymentsheet.LinkInlineHandler
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.isSupportedBy
 import com.stripe.android.paymentsheet.model.paymentMethodType
 import com.stripe.android.ui.core.elements.FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE
 import kotlinx.coroutines.CoroutineScope
@@ -117,35 +118,13 @@ internal class DefaultEmbeddedSelectionChooser @Inject constructor(
         paymentMethods: List<PaymentMethod>?,
         previousSelection: PaymentSelection,
     ): Boolean {
-        // The types that are allowed for this intent, as returned by the backend
-        val allowedTypes = paymentMethodMetadata.supportedPaymentMethodTypes()
-
-        return when (previousSelection) {
-            is PaymentSelection.New -> {
-                val code = previousSelection.paymentMethodCreateParams.typeCode
-                code in allowedTypes && hasCompatibleForm(
+        return previousSelection.isSupportedBy(paymentMethodMetadata, paymentMethods) &&
+            (
+                previousSelection !is PaymentSelection.New || hasCompatibleForm(
                     previousSelection = previousSelection,
-                    paymentMethodMetadata = paymentMethodMetadata
+                    paymentMethodMetadata = paymentMethodMetadata,
                 )
-            }
-            is PaymentSelection.Saved -> {
-                val paymentMethod = previousSelection.paymentMethod
-                val code = paymentMethod.type?.code
-                code in allowedTypes && paymentMethod in (paymentMethods ?: emptyList())
-            }
-            is PaymentSelection.GooglePay -> {
-                paymentMethodMetadata.isGooglePayReady
-            }
-            is PaymentSelection.Link -> {
-                paymentMethodMetadata.linkState != null
-            }
-            is PaymentSelection.ExternalPaymentMethod -> {
-                paymentMethodMetadata.isExternalPaymentMethod(previousSelection.type)
-            }
-            is PaymentSelection.CustomPaymentMethod -> {
-                paymentMethodMetadata.isCustomPaymentMethod(previousSelection.id)
-            }
-        }
+            )
     }
 
     private fun hasCompatibleForm(
