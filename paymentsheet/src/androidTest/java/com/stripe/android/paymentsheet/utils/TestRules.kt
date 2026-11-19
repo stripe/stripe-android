@@ -1,8 +1,9 @@
 package com.stripe.android.paymentsheet.utils
 
 import androidx.compose.ui.test.junit4.ComposeTestRule
-import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.junit4.v2.createEmptyComposeRule
 import com.stripe.android.networktesting.NetworkRule
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import leakcanary.DetectLeaksAfterTestSuccess
 import org.junit.rules.RuleChain
 import org.junit.rules.TestRule
@@ -25,7 +26,7 @@ class TestRules private constructor(
 
     companion object {
         fun create(
-            composeTestRule: ComposeTestRule = createEmptyComposeRule(),
+            composeTestRule: ComposeTestRule = createEmptyComposeRule(effectContext = UnconfinedTestDispatcher()),
             networkRule: NetworkRule = NetworkRule(),
             terminalTestRule: TerminalWrapperTestRule = TerminalWrapperTestRule(enabled = false),
             retryRule: TestRule? = null,

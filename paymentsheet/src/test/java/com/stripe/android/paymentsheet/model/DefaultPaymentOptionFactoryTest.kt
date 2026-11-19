@@ -3,7 +3,7 @@ package com.stripe.android.paymentsheet.model
 import android.content.Context
 import android.graphics.drawable.ShapeDrawable
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
