@@ -17,6 +17,9 @@ NEXT_VERSION_BUMP: MINOR
 ### Financial Connections
 * [CHANGED] Updated Link-branded Financial Connections flows, including Instant Debits, to the new Link design system.
 
+### Identity
+* [FIXED][15448](https://github.com/stripe/stripe-android/pull/15448) Identity document capture now continues with photo upload when the document scanning model fails to load, instead of ending the flow with `VerificationFlowResult.Failed`. When the camera fails to open, it shows an error screen with an upload option, unless the session requires live capture.
+
 ## 23.26.0 - 2026-11-09
 
 ### Payments
