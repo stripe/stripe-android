@@ -38,7 +38,7 @@ internal abstract class CameraViewModel(
 
     internal fun initializeScanFlow(
         verificationPage: VerificationPage,
-        idDetectorModelFile: File,
+        idDetectorModelFile: File?,
         faceDetectorModelFile: File?
     ) {
         identityScanFlow = IdentityScanFlow(

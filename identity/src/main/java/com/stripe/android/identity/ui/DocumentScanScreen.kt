@@ -51,6 +51,10 @@ import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Cam
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_LIVE_CAPTURE
 import com.stripe.android.identity.camera.DocumentScanCameraManager
 import com.stripe.android.identity.camera.IdentityCameraManager
+import com.stripe.android.identity.navigation.CameraErrorDestination
+import com.stripe.android.identity.navigation.DocumentScanDestination
+import com.stripe.android.identity.navigation.DocumentUploadDestination
+import com.stripe.android.identity.navigation.navigateTo
 import com.stripe.android.identity.networking.models.DocumentUploadParam
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.states.IdentityScanState.Companion.isFront
@@ -94,6 +98,10 @@ internal fun DocumentScanScreen(
                 screenName = SCREEN_NAME_LIVE_CAPTURE,
                 cameraSource = CameraSource.CAMERA_SESSION
             )
+            // The camera can report an error after the user has left this screen.
+            if (navController.currentDestination?.route == DocumentScanDestination.ROUTE.route) {
+                navController.navigateTo(CameraErrorDestination)
+            }
         }
     }
 
@@ -101,6 +109,14 @@ internal fun DocumentScanScreen(
         identityViewModel = identityViewModel,
         navController = navController
     ) { pageAndModelFiles ->
+        if (pageAndModelFiles.idDetectorFile == null) {
+            // Uploading a photo does not need the ID detector model.
+            LaunchedEffect(Unit) {
+                navController.navigateTo(DocumentUploadDestination)
+            }
+            return@CheckVerificationPageModelFilesAndCompose
+        }
+
         var captureMode by rememberSaveable {
             mutableStateOf(CaptureMode.LIVE)
         }
