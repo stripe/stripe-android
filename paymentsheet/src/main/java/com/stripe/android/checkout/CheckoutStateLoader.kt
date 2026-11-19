@@ -157,9 +157,9 @@ internal class CheckoutStateLoader @Inject constructor(
         return if (loadResults.paymentMethodMetadata == null || embeddedConfig == null || commonConfiguration == null) {
             null
         } else {
-            // Preserve the customer's existing selection across reloads when it's still valid, rather
-            // than blindly adopting the loader's recomputed selection (reuses the embedded logic). The
-            // previous selection comes from the incoming state, not a separate holder. An empty
+            // Preserve the customer's existing selection across reloads while it's still supported,
+            // rather than blindly adopting the loader's recomputed selection (see CheckoutSelectionChooser).
+            // The previous selection comes from the incoming state, not a separate holder. An empty
             // selection on reload must stay empty until the customer selects again or reconfigures.
             selectionChooser.choose(
                 paymentMethodMetadata = loadResults.paymentMethodMetadata,

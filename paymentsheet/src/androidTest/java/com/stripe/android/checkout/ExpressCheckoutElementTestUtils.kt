@@ -56,7 +56,10 @@ internal fun enqueueSuccessfulGooglePayPayment(
     )
 }
 
-internal fun createCheckoutInitResponseWithRequiredShippingAddressForAutomaticTax(response: MockResponse) {
+internal fun createCheckoutInitResponseWithRequiredShippingAddressForAutomaticTax(
+    response: MockResponse,
+    modify: (JSONObject) -> Unit = {},
+) {
     createCheckoutInitResponseWithRequiredShippingAddress(response) { json ->
         json.put(
             "automatic_tax",
@@ -66,6 +69,7 @@ internal fun createCheckoutInitResponseWithRequiredShippingAddressForAutomaticTa
                 .put("address_source", "shipping")
         )
         json.getJSONObject("automatic_tax").put("status", "requires_address")
+        modify(json)
     }
 }
 
