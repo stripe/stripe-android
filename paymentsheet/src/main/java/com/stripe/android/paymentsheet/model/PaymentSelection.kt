@@ -323,6 +323,28 @@ internal sealed class PaymentSelection : Parcelable {
     }
 }
 
+/**
+ * Checks availability only. Selection precedence and any form, mandate, or configuration compatibility
+ * checks belong to the caller.
+ */
+internal fun PaymentSelection.isSupportedBy(
+    paymentMethodMetadata: PaymentMethodMetadata,
+    paymentMethods: List<PaymentMethod>?,
+): Boolean {
+    val allowedTypes = paymentMethodMetadata.supportedPaymentMethodTypes()
+
+    return when (this) {
+        is PaymentSelection.New -> paymentMethodCreateParams.typeCode in allowedTypes
+        is PaymentSelection.Saved -> {
+            paymentMethod.type?.code in allowedTypes && paymentMethod in (paymentMethods ?: emptyList())
+        }
+        is PaymentSelection.GooglePay -> paymentMethodMetadata.isGooglePayReady
+        is PaymentSelection.Link -> paymentMethodMetadata.linkState != null
+        is PaymentSelection.ExternalPaymentMethod -> paymentMethodMetadata.isExternalPaymentMethod(type)
+        is PaymentSelection.CustomPaymentMethod -> paymentMethodMetadata.isCustomPaymentMethod(id)
+    }
+}
+
 internal val PaymentSelection.isLink: Boolean
     get() = when (this) {
         is PaymentSelection.GooglePay -> false

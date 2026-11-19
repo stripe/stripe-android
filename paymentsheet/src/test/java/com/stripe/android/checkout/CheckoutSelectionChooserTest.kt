@@ -99,6 +99,23 @@ internal class CheckoutSelectionChooserTest {
     }
 
     @Test
+    fun `keeps the previous selection instead of the loader default when set as default is enabled`() = runScenario {
+        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        val selection = choose(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                hasCustomerConfiguration = true,
+                isPaymentMethodSetAsDefaultEnabled = true,
+                isGooglePayReady = true,
+            ),
+            paymentMethods = listOf(paymentMethod),
+            previousSelection = PaymentSelection.GooglePay,
+            newSelection = PaymentSelection.Saved(paymentMethod),
+        )
+
+        assertThat(selection).isEqualTo(PaymentSelection.GooglePay)
+    }
+
+    @Test
     fun `returns no selection when rows confirm immediately and the form sheet confirms`() = runScenario(
         internalRowSelectionCallback = {},
     ) {
