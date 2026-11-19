@@ -412,6 +412,12 @@ internal class CheckoutPaymentElementAnalyticsTest {
     @Test
     fun testUpdateEmailReportsSucceededWithoutDurationOrConfiguration() = runCheckoutPaymentElementScenario(
         networkRule = networkRule,
+        checkoutInitResponse = { response ->
+            response.testBodyFromFile("checkout-session-init.json") { json ->
+                json.remove("customer_email")
+                json.remove("link_settings")
+            }
+        },
         renderPaymentElementContent = false,
         setup = { controller ->
             networkRule.validateCheckoutInitStartedAndSucceeded()

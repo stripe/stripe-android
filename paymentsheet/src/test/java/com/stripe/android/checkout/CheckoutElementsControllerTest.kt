@@ -1254,13 +1254,29 @@ internal class CheckoutElementsControllerTest {
     }
 
     @Test
-    fun `session customer email takes precedence over updateEmail`() = runMutationScenario {
-        assertThat(controller.updateEmail("local@example.com"))
-            .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
+    fun `updateEmail fails when session has customer_email`() = runMutationScenario {
+        assertEmailUpdateRejected("local@example.com")
+    }
 
-        assertThat(controller.session.value?.email).isEqualTo("checkout@example.com")
-        assertThat(committedState().embeddedConfiguration?.defaultBillingDetails?.email)
-            .isEqualTo("checkout@example.com")
+    @Test
+    fun `updateEmail fails when Customer has email`() = runMutationScenario(
+        initModifier = { json ->
+            json.remove("customer_email")
+            json.put(
+                "customer",
+                JSONObject()
+                    .put("id", "cus_email")
+                    .put("email", "customer@example.com")
+                    .put("payment_methods", JSONArray()),
+            )
+        },
+    ) {
+        assertEmailUpdateRejected("local@example.com")
+    }
+
+    @Test
+    fun `updateEmail cannot clear server email`() = runMutationScenario {
+        assertEmailUpdateRejected(null)
     }
 
     @Test
@@ -1931,6 +1947,27 @@ internal class CheckoutElementsControllerTest {
         }
 
     // endregion
+
+    private suspend fun MutationScenario.assertEmailUpdateRejected(email: String?) {
+        val before = committedState()
+        val sessionBefore = controller.session.value
+
+        controller.session.test {
+            assertThat(awaitItem()).isEqualTo(sessionBefore)
+
+            val result = controller.updateEmail(email)
+
+            assertThat(result).isInstanceOf(CheckoutElementsController.OperationResult.Failed::class.java)
+            val error = (result as CheckoutElementsController.OperationResult.Failed).error
+            assertThat(error).isInstanceOf(IllegalStateException::class.java)
+            assertThat(error).hasMessageThat().isEqualTo(
+                "Email cannot be set locally when the Checkout Session was created with " +
+                    "customer_email or a Customer with an email."
+            )
+            assertThat(committedState()).isSameInstanceAs(before)
+            expectNoEvents()
+        }
+    }
 
     private suspend fun <T> fromBackgroundThread(block: suspend () -> T): T = withContext(Dispatchers.IO) {
         // A test dispatcher alone does not move the caller off Robolectric's main thread.
