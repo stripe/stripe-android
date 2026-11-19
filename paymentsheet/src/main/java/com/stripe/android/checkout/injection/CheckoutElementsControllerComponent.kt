@@ -18,6 +18,7 @@ import com.stripe.android.checkout.CheckoutLoadingEventReporter
 import com.stripe.android.checkout.CheckoutOperationCoordinator
 import com.stripe.android.checkout.CheckoutPaymentOptionDisplayDataFactory
 import com.stripe.android.checkout.CheckoutPaymentSelectionHandler
+import com.stripe.android.checkout.CheckoutSelectionChooser
 import com.stripe.android.checkout.CheckoutSessionRefresher
 import com.stripe.android.checkout.DefaultCheckoutConfirmationFinalizer
 import com.stripe.android.checkout.DefaultCheckoutPaymentOptionDisplayDataFactory
@@ -56,7 +57,6 @@ import com.stripe.android.paymentelement.embedded.EmbeddedLinkExtrasModule
 import com.stripe.android.paymentelement.embedded.EmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
-import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedSelectionChooser
 import com.stripe.android.paymentelement.embedded.content.EmbeddedHostProcessing
 import com.stripe.android.paymentelement.embedded.content.EmbeddedSelectionChooser
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -223,7 +223,7 @@ internal interface CheckoutElementsControllerModule {
     ): AnalyticsRequestFactory
 
     @Binds
-    fun bindsEmbeddedSelectionChooser(impl: DefaultEmbeddedSelectionChooser): EmbeddedSelectionChooser
+    fun bindsEmbeddedSelectionChooser(impl: CheckoutSelectionChooser): EmbeddedSelectionChooser
 
     @Binds
     fun bindsEmbeddedSelectionHolder(impl: CheckoutElementsControllerStateHolder): EmbeddedSelectionHolder

@@ -158,10 +158,6 @@ internal class CheckoutPaymentElementAnalyticsTest {
         networkRule.validateCheckoutSessionAnalyticsRequest("mc_dismiss")
         // The session refresh reloads the Payment Element with the kept card selection.
         networkRule.validateCheckoutSessionAnalyticsRequest("mc_initial_displayed_payment_methods")
-        networkRule.validateAnalyticsRequest(
-            eventName = "stripe_android.card_metadata_pk_available",
-            productUsage = setOf("checkout_elements"),
-        )
         formPage.clickPrimaryButton()
 
         testRules.compose.waitUntilWithIdle {

@@ -25,6 +25,7 @@ import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutConfirm
+import com.stripe.android.checkouttesting.checkoutFetch
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.elements.PaymentElement
@@ -256,6 +257,118 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
             .isEqualTo(CheckoutElementsController.Session.Tax.Status.Ready)
         contentPage.assertHasSelectedLpm("card")
         markTestSucceeded()
+    }
+
+    @Test
+    fun testCardSelectionIsPreservedWhenConfirmFailsForMissingShippingTaxLocation() =
+        runConfirmFailsForMissingShippingTaxLocationTest(
+            configuration = checkoutConfiguration(PaymentElement.Configuration.PaymentMethodLayout.Vertical),
+            modifySession = { json -> json.remove("link_settings") },
+        )
+
+    @Test
+    fun testCardSelectionIsPreservedWhenFailedConfirmCreatesCustomer() =
+        runConfirmFailsForMissingShippingTaxLocationTest(
+            configuration = checkoutConfiguration(PaymentElement.Configuration.PaymentMethodLayout.Vertical),
+            modifySession = { json ->
+                json.remove("link_settings")
+                json.getJSONObject("saved_payment_method_options").put("payment_method_save", "enabled")
+            },
+            modifyRetrievedSession = ::addCustomerWithoutPaymentMethods,
+        )
+
+    @Test
+    fun testCardSelectionIsPreservedWhenFailedConfirmCreatesCustomerWithLink() =
+        runConfirmFailsForMissingShippingTaxLocationTest(
+            configuration = CheckoutElementsController.Configuration().paymentElement(PaymentElement.Configuration()),
+            modifySession = { json ->
+                json.getJSONObject("link_settings").put("link_mode", "LINK_PAYMENT_METHOD")
+                json.getJSONObject("saved_payment_method_options").put("payment_method_save", "enabled")
+            },
+            modifyRetrievedSession = ::addCustomerWithoutPaymentMethods,
+            beforeConfigure = { networkRule.enqueueLinkAccountLookup() },
+            beforeOpenCardForm = { networkRule.enqueueLinkAccountLookup() },
+            beforeConfirm = { networkRule.enqueueLinkAccountLookup() },
+        )
+
+    private fun runConfirmFailsForMissingShippingTaxLocationTest(
+        configuration: CheckoutElementsController.Configuration,
+        modifySession: (JSONObject) -> Unit,
+        modifyRetrievedSession: (JSONObject) -> Unit = {},
+        beforeConfigure: () -> Unit = {},
+        beforeOpenCardForm: () -> Unit = {},
+        beforeConfirm: () -> Unit = {},
+    ) {
+        val sessionResponse: (MockResponse) -> Unit = { response ->
+            createCheckoutInitResponseWithRequiredShippingAddressForAutomaticTax(response, modifySession)
+        }
+        val retrievedSessionResponse: (MockResponse) -> Unit = { response ->
+            createCheckoutInitResponseWithRequiredShippingAddressForAutomaticTax(response) { json ->
+                modifySession(json)
+                modifyRetrievedSession(json)
+            }
+        }
+        val checkoutResults = Turbine<CheckoutElementsController.Result>()
+        beforeConfigure()
+        runCheckoutPaymentElementScenario(
+            networkRule = networkRule,
+            resultCallback = { result -> checkoutResults.add(result) },
+            checkoutInitResponse = sessionResponse,
+            setup = { controller ->
+                assertThat(
+                    controller.configure(
+                        clientSecret = DEFAULT_CLIENT_SECRET,
+                        configuration = configuration,
+                    )
+                ).isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
+            },
+        ) {
+            beforeOpenCardForm()
+            contentPage.clickOnLpm("card")
+            formPage.fillOutCardDetails()
+            formPage.clickPrimaryButton()
+            contentPage.assertHasSelectedLpm("card")
+
+            networkRule.checkoutConfirm(
+                bodyPart("payment_method_data[type]", "card"),
+            ) { response ->
+                response.setResponseCode(400)
+                response.setBody(
+                    """
+                    {
+                        "error": {
+                            "type": "invalid_request_error",
+                            "code": "customer_tax_location_invalid",
+                            "message": "$TAX_LOCATION_ERROR_MESSAGE"
+                        }
+                    }
+                    """.trimIndent()
+                )
+            }
+            networkRule.checkoutFetch(responseFactory = retrievedSessionResponse)
+            // Adding a customer changes Link's configuration, so the refresh looks up the account again.
+            beforeConfirm()
+            confirm()
+
+            val result = checkoutResults.awaitItem()
+            assertThat(result).isInstanceOf(CheckoutElementsController.Result.Failed::class.java)
+            assertThat((result as CheckoutElementsController.Result.Failed).displayMessage)
+                .isEqualTo(TAX_LOCATION_ERROR_MESSAGE)
+
+            contentPage.assertHasSelectedLpm("card")
+            assertThat(controller.session.value?.paymentOption?.paymentMethodType).isEqualTo("card")
+            checkoutResults.ensureAllEventsConsumed()
+        }
+    }
+
+    // A failed confirm can create the guest Customer the session saves payment methods to.
+    private fun addCustomerWithoutPaymentMethods(json: JSONObject) {
+        json.put(
+            "customer",
+            JSONObject()
+                .put("id", "cus_123")
+                .put("payment_methods", JSONArray()),
+        )
     }
 
     @Test
@@ -1098,5 +1211,7 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
         const val UPDATED_BILLING_ZIP = "94107"
         val SAVED_CARD = CardPaymentMethodDetails(id = "pm_12345", last4 = "4242")
         const val TAX_STATUS_COMPLETE = "complete"
+        const val TAX_LOCATION_ERROR_MESSAGE = "The customer's location isn't recognized. " +
+            "Set a valid customer address in order to automatically calculate tax."
     }
 }
