@@ -24,13 +24,16 @@ import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.elements.PaymentElement
 import com.stripe.android.elements.ShippingAddressElement
 import com.stripe.android.elements.ece.ExpressButtonType
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.hasBodyPart
+import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.not
+import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
@@ -1211,6 +1214,66 @@ internal class CheckoutElementsControllerTest {
     }
 
     @Test
+    fun `updateEmail looks up the new email in Link after the previous email had a Link account`() =
+        runMutationScenario(
+            initModifier = { json ->
+                json.remove("customer_email")
+                // The shared init response removes link_settings; turn Link back on for this test
+                json.put(
+                    "link_settings",
+                    JSONObject()
+                        .put("link_mode", "LINK_PAYMENT_METHOD")
+                        .put("link_brand", "link")
+                        .put("link_funding_sources", JSONArray().put("CARD"))
+                        .put("link_supported_payment_methods", JSONArray().put("CARD"))
+                        .put("link_supported_payment_methods_onboarding_enabled", JSONArray().put("CARD"))
+                        .put("link_mobile_disable_signup", false)
+                        .put("link_mobile_use_attestation_endpoints", false)
+                        .put("link_popup_webview_option", "shared")
+                )
+            },
+        ) {
+            // Given the merchant set an email that has a Link account, and Link looked it up
+            enqueueLinkLookup(email = "previous@example.com")
+            assertThat(controller.updateEmail("previous@example.com"))
+                .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
+            assertThat(heldLinkAccountEmail()).isEqualTo("previous@example.com")
+
+            // When the merchant updates the email
+            enqueueLinkLookup(email = "new@example.com")
+            assertThat(controller.updateEmail("new@example.com"))
+                .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
+
+            // Then Link looks up the new email, and its account replaces the previous email's account
+            assertThat(heldLinkAccountEmail()).isEqualTo("new@example.com")
+        }
+
+    private fun enqueueLinkLookup(email: String) {
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/sessions/lookup"),
+            bodyPart("email_address", email),
+        ) { response ->
+            // An existing, unverified Link consumer for the looked-up email
+            response.setBody(
+                JSONObject()
+                    .put("exists", true)
+                    .put("publishable_key", "pk_test_link")
+                    .put(
+                        "consumer_session",
+                        JSONObject()
+                            .put("client_secret", "pscs_test")
+                            .put("email_address", email)
+                            .put("redacted_phone_number", "+1********56")
+                            .put("redacted_formatted_phone_number", "(***) *** **56")
+                            .put("verification_sessions", JSONArray())
+                    )
+                    .toString()
+            )
+        }
+    }
+
+    @Test
     fun `session customer email takes precedence over updateEmail`() = runMutationScenario {
         assertThat(controller.updateEmail("local@example.com"))
             .isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
@@ -2350,6 +2413,9 @@ internal class CheckoutElementsControllerTest {
         // Reads the state the controller committed via its state holder, which shares this
         // SavedStateHandle in the production graph.
         fun committedState(): CheckoutElementsControllerState = requireNotNull(stateHolder.state)
+
+        // Reads the Link account held across reloads, which shares this SavedStateHandle in the production graph.
+        fun heldLinkAccountEmail(): String? = LinkAccountHolder(savedStateHandle).linkAccountInfo.value.account?.email
 
         fun loadedSavedPaymentMethodSelection(): PaymentSelection.Saved {
             val customerState: CustomerState = requireNotNull(
