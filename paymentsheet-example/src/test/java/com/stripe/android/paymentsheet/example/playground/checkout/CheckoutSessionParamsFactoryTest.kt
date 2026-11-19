@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.example.playground.checkout
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.example.playground.checkout.settings.AdaptivePricingCountry
+import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutCustomerUpdate
 import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutPlaygroundDefinitions.session
 import com.stripe.android.paymentsheet.example.playground.checkout.settings.CheckoutPlaygroundSettings
 import com.stripe.android.paymentsheet.example.playground.settings.Currency
@@ -98,7 +99,7 @@ class CheckoutSessionParamsFactoryTest {
     }
 
     @Test
-    fun `customer parameters include tax and address updates`() = runScenario {
+    fun `tax and address collection do not implicitly update customer`() = runScenario {
         settings.update(session.automaticTax, true)
         settings.update(session.billingAddressCollection, true)
         settings.update(session.shippingAddressCollection, true)
@@ -110,9 +111,49 @@ class CheckoutSessionParamsFactoryTest {
         assertThat(params.string("billing_address_collection")).isEqualTo("required")
         assertThat(params["shipping_address_collection"]!!.jsonObject["allowed_countries"]!!.jsonArray)
             .containsExactlyElementsIn(listOf("US", "CA", "IE", "GB").map(::JsonPrimitive)).inOrder()
+        assertThat(params).doesNotContainKey("customer_update")
+    }
+
+    @Test
+    fun `customer updates are sent independently of tax and address collection`() = runScenario {
+        settings.update(session.customerUpdate.address, CheckoutCustomerUpdate.Auto)
+        settings.update(session.customerUpdate.name, CheckoutCustomerUpdate.Never)
+        settings.update(session.customerUpdate.shipping, CheckoutCustomerUpdate.Auto)
+
+        val params = createParams(customerId = "cus_123")
+
         assertThat(params["customer_update"]!!.jsonObject).isEqualTo(
-            JsonObject(mapOf("address" to JsonPrimitive("auto"), "shipping" to JsonPrimitive("auto")))
+            JsonObject(
+                mapOf(
+                    "address" to JsonPrimitive("auto"),
+                    "name" to JsonPrimitive("never"),
+                    "shipping" to JsonPrimitive("auto"),
+                )
+            )
         )
+        assertThat(params).doesNotContainKey("automatic_tax")
+        assertThat(params).doesNotContainKey("billing_address_collection")
+        assertThat(params).doesNotContainKey("shipping_address_collection")
+    }
+
+    @Test
+    fun `default customer update fields are omitted`() = runScenario {
+        settings.update(session.customerUpdate.name, CheckoutCustomerUpdate.Auto)
+
+        val params = createParams(customerId = "cus_123")
+
+        assertThat(params["customer_update"]!!.jsonObject).isEqualTo(
+            JsonObject(mapOf("name" to JsonPrimitive("auto")))
+        )
+    }
+
+    @Test
+    fun `customer updates are omitted without an existing customer`() = runScenario {
+        settings.update(session.customerUpdate.address, CheckoutCustomerUpdate.Auto)
+
+        val params = createParams()
+
+        assertThat(params).doesNotContainKey("customer_update")
     }
 
     @Test

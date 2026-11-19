@@ -76,6 +76,22 @@ class CheckoutPlaygroundScenariosTest {
     }
 
     @Test
+    fun `required billing tax scenario explicitly updates customer address`() {
+        val snapshot = snapshotFor("automatic_tax_required_billing")
+
+        assertThat(snapshot[CheckoutPlaygroundDefinitions.session.customerUpdate.address])
+            .isEqualTo(CheckoutCustomerUpdate.Auto)
+    }
+
+    @Test
+    fun `shipping tax scenario explicitly updates customer shipping`() {
+        val snapshot = snapshotFor("automatic_tax_shipping")
+
+        assertThat(snapshot[CheckoutPlaygroundDefinitions.session.customerUpdate.shipping])
+            .isEqualTo(CheckoutCustomerUpdate.Auto)
+    }
+
+    @Test
     fun `ECE scenarios hide Link and Google Pay in Payment Element`() {
         val snapshot = snapshotFor("link_google_pay", parentKey = "ece")
 
