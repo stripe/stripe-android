@@ -2,7 +2,6 @@
 
 require_relative 'permissions_check'
 require_relative 'release_cli'
-require_relative 'translations'
 require_relative 'update_version_numbers'
 require_relative 'validate_version_number'
 require_relative 'version_bump_pr_steps'
@@ -23,7 +22,6 @@ parse_release_options!(flow_name: 'propose release')
 
 steps = [
     method(:check_permissions),
-    method(:validate_translations_merged),
     method(:validate_version_number),
     method(:ensure_clean_repo),
     method(:pull_latest),
