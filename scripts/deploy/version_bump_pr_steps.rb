@@ -30,6 +30,9 @@ def create_version_bump_pr()
     update_changelog()
     update_version()
     update_3ds2_version()
+    execute_or_fail("rm -rf docs/")
+    execute_or_fail("./gradlew :dokkaGenerate")
+    execute_or_fail("git add -A docs/")
     execute_or_fail("git commit -m \"Bump version to #{@version}\"")
 
     begin
@@ -37,9 +40,9 @@ def create_version_bump_pr()
     
         pr_description = create_pr_description()
         if (@is_dry_run)
-          user_message = "Verify that a draft PR containing version number bumps was opened."
+          user_message = "Verify that a draft PR containing version number bumps and Dokka documentation was opened."
         else
-          user_message = "Verify that a PR containing version number bumps was opened. Press enter once you've confirmed the PR was created."
+          user_message = "Verify that a PR containing version number bumps and Dokka documentation was opened. Press enter once you've confirmed the PR was created."
         end
 
         create_pr(
@@ -63,7 +66,7 @@ private def create_pr_description()
     template = File.read(File.join(File.dirname(__FILE__), '../../../.github/pull_request_template.md'))
 
     <<~EOS
-    Bump version to `#{@version}`
+    Bump version to `#{@version}` and regenerate Dokka documentation.
 
     #{template}
     EOS
