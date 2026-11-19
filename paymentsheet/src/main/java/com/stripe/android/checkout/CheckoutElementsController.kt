@@ -267,6 +267,8 @@ class CheckoutElementsController @Inject internal constructor(
     /**
      * Updates the customer's email address.
      *
+     * Returns [OperationResult.Failed] if the Checkout Session has `customer_email` or a Customer with an email.
+     *
      * @param email The email address to set. Leading/trailing whitespace is trimmed. Pass `null` to
      * clear the customer's email. Returns [OperationResult.Failed] if the email is not a valid email
      * address.
@@ -283,6 +285,14 @@ class CheckoutElementsController @Inject internal constructor(
                 copy(collectedDetails = collectedDetails.copy(email = trimmedEmail))
             },
         ) {
+            if (checkoutSessionResponse.fixedEmail != null) {
+                return@withCheckoutState kotlin.Result.failure(
+                    IllegalStateException(
+                        "Email cannot be set locally when the Checkout Session was created with " +
+                            "customer_email or a Customer with an email."
+                    )
+                )
+            }
             kotlin.Result.success(checkoutSessionResponse).also {
                 localOperationFactory.create(
                     operation = Operation.UpdateEmail,
