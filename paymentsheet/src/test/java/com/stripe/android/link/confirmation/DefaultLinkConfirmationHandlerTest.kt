@@ -8,6 +8,8 @@ import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.model.LinkAccount
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.Address
 import com.stripe.android.model.ConsumerPaymentDetails
@@ -22,9 +24,12 @@ import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.MutableConfirmationMetadata
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
+import com.stripe.android.paymentelement.confirmation.intent.CheckoutSessionResponseKey
 import com.stripe.android.paymentelement.confirmation.link.LinkPassthroughConfirmationOption
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.testing.FakeLogger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -71,7 +76,7 @@ internal class DefaultLinkConfirmationHandlerTest {
             billingPhone = null
         )
 
-        assertThat(result).isEqualTo(Result.Succeeded)
+        assertThat(result).isEqualTo(Result.Succeeded(configuration.stripeIntent, checkoutSessionResponse = null))
         confirmationHandler.startTurbine.awaitItem().assertConfirmationArgs(
             configuration = configuration,
             linkAccount = TestFactory.LINK_ACCOUNT,
@@ -85,6 +90,52 @@ internal class DefaultLinkConfirmationHandlerTest {
             ),
             allowRedisplay = PaymentMethod.AllowRedisplay.UNSPECIFIED,
         )
+    }
+
+    @Test
+    fun `successful Checkout Session confirmation preserves the confirmed intent and session`() = runTest(dispatcher) {
+        val configuration = TestFactory.LINK_CONFIGURATION.copy(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+        )
+        val initialSession = CheckoutSessionResponseFactory.create().withIntent(configuration.stripeIntent)
+        val integrationMetadata = IntegrationMetadata.CheckoutSession(
+            instancesKey = "instances_key",
+            checkoutSessionResponse = initialSession,
+            collectedEmail = null,
+        )
+        val confirmationHandler = FakeConfirmationHandler()
+        val handler = createHandler(
+            configuration = configuration,
+            confirmationHandler = confirmationHandler,
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = configuration.stripeIntent,
+                integrationMetadata = integrationMetadata,
+            ),
+        )
+        val confirmedIntent = PaymentIntentFixtures.PI_SUCCEEDED
+        val confirmedSession = initialSession.withIntent(confirmedIntent)
+        confirmationHandler.awaitResultTurbine.add(
+            ConfirmationHandler.Result.Succeeded(
+                intent = confirmedIntent,
+                metadata = MutableConfirmationMetadata().apply {
+                    set(CheckoutSessionResponseKey, confirmedSession)
+                },
+            )
+        )
+
+        val result = handler.confirm(
+            paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
+            linkAccount = TestFactory.LINK_ACCOUNT,
+            cvc = CVC,
+            billingPhone = null,
+        ) as Result.Succeeded
+
+        assertThat(result.intent).isEqualTo(confirmedIntent)
+        assertThat(result.checkoutSessionResponse).isEqualTo(confirmedSession)
+        val args = confirmationHandler.startTurbine.awaitItem()
+        assertThat(args.intent).isEqualTo(configuration.stripeIntent)
+        assertThat(args.paymentMethodMetadata.integrationMetadata).isEqualTo(integrationMetadata)
+        confirmationHandler.validate()
     }
 
     @Test
@@ -137,7 +188,7 @@ internal class DefaultLinkConfirmationHandlerTest {
             billingPhone = null
         )
 
-        assertThat(result).isEqualTo(Result.Succeeded)
+        assertThat(result).isEqualTo(Result.Succeeded(configuration.stripeIntent, checkoutSessionResponse = null))
         confirmationHandler.startTurbine.awaitItem().assertConfirmationArgs(
             configuration = configuration,
             linkAccount = TestFactory.LINK_ACCOUNT,
@@ -251,7 +302,7 @@ internal class DefaultLinkConfirmationHandlerTest {
             billingPhone = null
         )
 
-        assertThat(result).isEqualTo(Result.Succeeded)
+        assertThat(result).isEqualTo(Result.Succeeded(configuration.stripeIntent, checkoutSessionResponse = null))
         confirmationHandler.startTurbine.awaitItem().assertConfirmationArgs(
             configuration = configuration,
             linkAccount = TestFactory.LINK_ACCOUNT,
@@ -290,7 +341,7 @@ internal class DefaultLinkConfirmationHandlerTest {
             billingPhone = null
         )
 
-        assertThat(result).isEqualTo(Result.Succeeded)
+        assertThat(result).isEqualTo(Result.Succeeded(configuration.stripeIntent, checkoutSessionResponse = null))
         confirmationHandler.startTurbine.awaitItem().assertSavedConfirmationArgs(
             configuration = configuration,
             paymentDetails = TestFactory.LINK_PASSTHROUGH_PAYMENT_DETAILS,
@@ -321,7 +372,7 @@ internal class DefaultLinkConfirmationHandlerTest {
             billingPhone = null
         )
 
-        assertThat(result).isEqualTo(Result.Succeeded)
+        assertThat(result).isEqualTo(Result.Succeeded(configuration.stripeIntent, checkoutSessionResponse = null))
         val args = confirmationHandler.startTurbine.awaitItem()
 
         val option = args.confirmationOption as PaymentMethodConfirmationOption.Saved
@@ -351,7 +402,7 @@ internal class DefaultLinkConfirmationHandlerTest {
             billingPhone = null
         )
 
-        assertThat(result).isEqualTo(Result.Succeeded)
+        assertThat(result).isEqualTo(Result.Succeeded(configuration.stripeIntent, checkoutSessionResponse = null))
         confirmationHandler.startTurbine.awaitItem().assertSavedConfirmationArgs(
             configuration = configuration,
             paymentDetails = TestFactory.LINK_PASSTHROUGH_PAYMENT_DETAILS,
@@ -382,7 +433,7 @@ internal class DefaultLinkConfirmationHandlerTest {
                 billingPhone = null
             )
 
-            assertThat(result).isEqualTo(Result.Succeeded)
+            assertThat(result).isEqualTo(Result.Succeeded(configuration.stripeIntent, checkoutSessionResponse = null))
 
             val args = confirmationHandler.startTurbine.awaitItem()
             assertThat(args.intent).isEqualTo(configuration.stripeIntent)
@@ -415,7 +466,7 @@ internal class DefaultLinkConfirmationHandlerTest {
                 billingPhone = null
             )
 
-            assertThat(result).isEqualTo(Result.Succeeded)
+            assertThat(result).isEqualTo(Result.Succeeded(configuration.stripeIntent, checkoutSessionResponse = null))
 
             val args = confirmationHandler.startTurbine.awaitItem()
             assertThat(args.intent).isEqualTo(configuration.stripeIntent)
@@ -452,7 +503,7 @@ internal class DefaultLinkConfirmationHandlerTest {
             billingPhone = null
         )
 
-        assertThat(result).isEqualTo(Result.Succeeded)
+        assertThat(result).isEqualTo(Result.Succeeded(configuration.stripeIntent, checkoutSessionResponse = null))
 
         val args = confirmationHandler.startTurbine.awaitItem()
         assertThat(args.intent).isEqualTo(configuration.stripeIntent)
@@ -493,7 +544,7 @@ internal class DefaultLinkConfirmationHandlerTest {
                 billingPhone = null
             )
 
-            assertThat(result).isEqualTo(Result.Succeeded)
+            assertThat(result).isEqualTo(Result.Succeeded(configuration.stripeIntent, checkoutSessionResponse = null))
 
             val args = confirmationHandler.startTurbine.awaitItem()
             assertThat(args.intent).isEqualTo(configuration.stripeIntent)
@@ -528,7 +579,7 @@ internal class DefaultLinkConfirmationHandlerTest {
                 billingPhone = null
             )
 
-            assertThat(result).isEqualTo(Result.Succeeded)
+            assertThat(result).isEqualTo(Result.Succeeded(configuration.stripeIntent, checkoutSessionResponse = null))
 
             val args = confirmationHandler.startTurbine.awaitItem()
             assertThat(args.intent).isEqualTo(configuration.stripeIntent)
@@ -574,7 +625,7 @@ internal class DefaultLinkConfirmationHandlerTest {
                 billingPhone = "+15555555555",
             )
 
-            assertThat(result).isEqualTo(Result.Succeeded)
+            assertThat(result).isEqualTo(Result.Succeeded(configuration.stripeIntent, checkoutSessionResponse = null))
 
             val args = confirmationHandler.startTurbine.awaitItem()
             assertThat(args.intent).isEqualTo(configuration.stripeIntent)
@@ -621,7 +672,7 @@ internal class DefaultLinkConfirmationHandlerTest {
                 billingPhone = null
             )
 
-            assertThat(result).isEqualTo(Result.Succeeded)
+            assertThat(result).isEqualTo(Result.Succeeded(configuration.stripeIntent, checkoutSessionResponse = null))
             confirmationHandler.startTurbine.awaitItem().assertConfirmationArgs(
                 configuration = configuration,
                 linkAccount = TestFactory.LINK_ACCOUNT,
@@ -663,7 +714,7 @@ internal class DefaultLinkConfirmationHandlerTest {
                 billingPhone = null
             )
 
-            assertThat(result).isEqualTo(Result.Succeeded)
+            assertThat(result).isEqualTo(Result.Succeeded(configuration.stripeIntent, checkoutSessionResponse = null))
             confirmationHandler.startTurbine.awaitItem().assertSavedConfirmationArgs(
                 configuration = configuration,
                 paymentDetails = TestFactory.LINK_PASSTHROUGH_PAYMENT_DETAILS,
@@ -706,7 +757,7 @@ internal class DefaultLinkConfirmationHandlerTest {
             billingPhone = null
         )
 
-        assertThat(result).isEqualTo(Result.Succeeded)
+        assertThat(result).isEqualTo(Result.Succeeded(configuration.stripeIntent, checkoutSessionResponse = null))
         confirmationHandler.startTurbine.awaitItem().assertSavedConfirmationArgs(
             configuration = configuration,
             paymentDetails = savedPaymentDetails,
@@ -765,11 +816,11 @@ internal class DefaultLinkConfirmationHandlerTest {
         confirmationHandler: FakeConfirmationHandler = FakeConfirmationHandler(),
         passiveCaptchaParams: PassiveCaptchaParams? = PASSIVE_CAPTCHA_PARAMS,
         statusBarColor: Int? = null,
-    ): DefaultLinkConfirmationHandler {
-        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+        paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(
             passiveCaptchaParams = passiveCaptchaParams,
             stripeIntent = configuration.stripeIntent,
-        )
+        ),
+    ): DefaultLinkConfirmationHandler {
         val handler = DefaultLinkConfirmationHandler(
             confirmationHandler = confirmationHandler,
             configuration = configuration,

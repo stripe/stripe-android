@@ -95,10 +95,12 @@ internal class DefaultCompleteLinkFlow @Inject constructor(
                 when (result) {
                     LinkConfirmationResult.Canceled -> Result.Canceled
                     is LinkConfirmationResult.Failed -> Result.Failed(result.message)
-                    LinkConfirmationResult.Succeeded -> Result.Completed(
+                    is LinkConfirmationResult.Succeeded -> Result.Completed(
                         linkActivityResult = LinkActivityResult.Completed(
                             linkAccountUpdate = LinkAccountUpdate.Value(null, PaymentConfirmed),
                             selectedPayment = null,
+                            intent = result.intent,
+                            checkoutSessionResponse = result.checkoutSessionResponse,
                         )
                     )
                 }

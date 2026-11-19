@@ -7,11 +7,19 @@ import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkExpressMode
+import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentLauncher
+import com.stripe.android.link.LinkPaymentMethod
+import com.stripe.android.link.RealLinkDismissalCoordinator
 import com.stripe.android.link.TestFactory
+import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkStore
+import com.stripe.android.link.confirmation.CompleteLinkFlow
+import com.stripe.android.link.confirmation.DefaultCompleteLinkFlow
+import com.stripe.android.link.confirmation.FakeLinkConfirmationHandler
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -24,7 +32,9 @@ import com.stripe.android.paymentelement.confirmation.asLaunch
 import com.stripe.android.paymentelement.confirmation.asNextStep
 import com.stripe.android.paymentelement.confirmation.asSaved
 import com.stripe.android.paymentelement.confirmation.fakeLifecycleOwner
+import com.stripe.android.paymentelement.confirmation.intent.CheckoutSessionResponseKey
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.utils.FakeLinkStore
@@ -37,6 +47,7 @@ import org.mockito.Mockito.mock
 import org.mockito.kotlin.any
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
+import com.stripe.android.link.confirmation.Result as LinkConfirmationResult
 
 internal class LinkConfirmationDefinitionTest {
     @Test
@@ -243,6 +254,47 @@ internal class LinkConfirmationDefinitionTest {
             )
         )
         assertThat(storeScenario.markAsUsedCalls.awaitItem()).isNotNull()
+    }
+
+    @Test
+    fun `native Link wallet preserves the confirmed Checkout Session and intent`() = test {
+        val confirmedIntent = PaymentIntentFixtures.PI_SUCCEEDED
+        val confirmedSession = CheckoutSessionResponseFactory.create().withIntent(confirmedIntent)
+        val linkConfirmationHandler = FakeLinkConfirmationHandler().apply {
+            confirmResult = LinkConfirmationResult.Succeeded(
+                intent = confirmedIntent,
+                checkoutSessionResponse = confirmedSession,
+            )
+        }
+        val linkAccountManager = FakeLinkAccountManager()
+        val completeLinkFlow = DefaultCompleteLinkFlow(
+            linkConfirmationHandler = linkConfirmationHandler,
+            linkAccountManager = linkAccountManager,
+            dismissalCoordinator = RealLinkDismissalCoordinator(),
+            linkLaunchMode = LinkLaunchMode.Full(showSecondaryButton = true),
+        )
+
+        val completed = completeLinkFlow(
+            selectedPaymentDetails = LinkPaymentMethod.ConsumerPaymentDetails(
+                details = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
+                collectedCvc = "123",
+                billingPhone = null,
+            ),
+            linkAccount = TestFactory.LINK_ACCOUNT,
+        ) as CompleteLinkFlow.Result.Completed
+        linkAccountManager.ensureAllEventsConsumed()
+
+        val definition = createLinkConfirmationDefinition(linkStore = storeScenario.linkStore)
+        val result = definition.toResult(
+            confirmationOption = LINK_CONFIRMATION_OPTION,
+            confirmationArgs = CONFIRMATION_PARAMETERS,
+            launcherArgs = EmptyConfirmationLauncherArgs,
+            result = completed.linkActivityResult,
+        ) as ConfirmationDefinition.Result.Succeeded
+
+        assertThat(storeScenario.markAsUsedCalls.awaitItem()).isNotNull()
+        assertThat(result.metadata[CheckoutSessionResponseKey]).isEqualTo(confirmedSession)
+        assertThat(result.intent).isEqualTo(confirmedIntent)
     }
 
     @Test

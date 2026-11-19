@@ -242,6 +242,62 @@ internal class CheckoutPaymentElementTest {
     }
 
     @Test
+    fun testSuccessfulLinkWalletPayment() {
+        var checkoutResult: CheckoutElementsController.Result? = null
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/sessions/lookup"),
+        ) { response ->
+            response.testBodyFromFile("consumer-accounts-signup-success.json") { json ->
+                json.put("exists", true)
+            }
+        }
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/payment_details/list"),
+        ) { response ->
+            response.testBodyFromFile("consumer-payment-details-success.json") { json ->
+                val paymentDetails = json.getJSONObject("redacted_payment_details")
+                json.put("redacted_payment_details", JSONArray().put(paymentDetails))
+            }
+        }
+
+        runCheckoutPaymentElementScenario(
+            networkRule = networkRule,
+            resultCallback = { result -> checkoutResult = result },
+            checkoutInitResponse = { response ->
+                response.testBodyFromFile("checkout-session-init.json") { json ->
+                    json.put("customer_email", "test@stripe.com")
+                    json.getJSONObject("link_settings").put("link_mode", "LINK_PAYMENT_METHOD")
+                }
+            },
+            setup = { controller ->
+                assertThat(
+                    controller.configure(
+                        DEFAULT_CLIENT_SECRET,
+                        CheckoutElementsController.Configuration().paymentElement(PaymentElement.Configuration()),
+                    )
+                ).isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
+            },
+        ) {
+            networkRule.checkoutConfirm(
+                bodyPart("payment_method_data[type]", "link"),
+                bodyPart("payment_method_data[link][payment_details_id]", "QAAAKJ6"),
+            ) { response ->
+                response.testBodyFromFile("checkout-session-confirm.json")
+            }
+
+            contentPage.clickOnLpm("link")
+            confirm()
+            linkWalletPage.pay()
+        }
+
+        assertThat(checkoutResult).isInstanceOf(CheckoutElementsController.Result.Completed::class.java)
+        val completed = checkoutResult as CheckoutElementsController.Result.Completed
+        assertThat(completed.paymentStatus).isEqualTo(CheckoutElementsController.Session.Status.PaymentStatus.Paid)
+    }
+
+    @Test
     fun testPaymentOptionsBridgesLinkAccountStateThroughCheckout() {
         val checkoutInitResponse: (MockResponse) -> Unit = { response ->
             response.testBodyFromFile("checkout-session-init.json") { json ->

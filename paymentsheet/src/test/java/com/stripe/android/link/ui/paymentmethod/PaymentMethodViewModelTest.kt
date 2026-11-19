@@ -137,6 +137,7 @@ class PaymentMethodViewModelTest {
                 LinkActivityResult.Completed(
                     linkAccountUpdate = LinkAccountUpdate.Value(null, PaymentConfirmed),
                     selectedPayment = null,
+                    intent = TestFactory.LINK_CONFIGURATION.stripeIntent,
                 )
             )
         assertThat(viewModel.state.value.primaryButtonState).isEqualTo(PrimaryButtonState.Enabled)
