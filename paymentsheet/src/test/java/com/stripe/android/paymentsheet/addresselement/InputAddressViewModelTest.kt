@@ -1422,7 +1422,6 @@ class InputAddressViewModelTest {
     fun `onEnterManuallyFromInline emits OnExpandForm with current country when query is empty`() =
         runScenario(
             config = AddressLauncher.Configuration.Builder()
-                .googlePlacesApiKey("test_key")
                 .autocompleteCountries(emptySet())
                 .build(),
         ) {
@@ -1444,7 +1443,6 @@ class InputAddressViewModelTest {
     fun `onEnterManuallyFromInline pre-fills Line1 with typed inline query`() =
         runScenario(
             config = AddressLauncher.Configuration.Builder()
-                .googlePlacesApiKey("test_key")
                 .autocompleteCountries(emptySet())
                 .build(),
         ) {

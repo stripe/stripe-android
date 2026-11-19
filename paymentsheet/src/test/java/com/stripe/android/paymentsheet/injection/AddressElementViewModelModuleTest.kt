@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.injection
 
-import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
@@ -307,16 +306,8 @@ class AddressElementViewModelModuleTest {
     }
 
     @Test
-    fun `provideGooglePlacesClient returns null without google api key`() {
-        val placesClient = module.provideGooglePlacesClient(
-            context = ApplicationProvider.getApplicationContext(),
-            args = AddressElementActivityContract.Args.Standalone(
-                apiConfiguration = DEFAULT_API_CONFIG,
-                config = AddressLauncher.Configuration(billingAddress = null),
-            ),
-        )
-
-        assertThat(placesClient).isNull()
+    fun `provideGooglePlacesClient returns null`() {
+        assertThat(module.provideGooglePlacesClient()).isNull()
     }
 
     private fun runCheckoutShippingScenario(

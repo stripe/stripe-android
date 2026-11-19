@@ -16,20 +16,17 @@ class PaymentElementAutocompleteAddressInteractorTest {
     @Test
     fun `autocompleteConfig property returns provided config`() = test {
         val config = AutocompleteAddressInteractor.Config(
-            googlePlacesApiKey = "test-key",
             autocompleteCountries = setOf("US", "GB")
         )
         val interactor = createInteractor(autocompleteConfig = config)
 
         assertThat(interactor.autocompleteConfig).isEqualTo(config)
-        assertThat(interactor.autocompleteConfig.googlePlacesApiKey).isEqualTo("test-key")
         assertThat(interactor.autocompleteConfig.autocompleteCountries).containsExactly("US", "GB")
     }
 
     @Test
     fun `Factory creates PaymentElementAutocompleteAddressInteractor`() = test {
         val config = AutocompleteAddressInteractor.Config(
-            googlePlacesApiKey = "test-key",
             autocompleteCountries = setOf("US")
         )
 
@@ -51,7 +48,6 @@ class PaymentElementAutocompleteAddressInteractorTest {
     @Test
     fun `Factory creates inline interactor when inline enabled with places client and scope`() = test {
         val config = AutocompleteAddressInteractor.Config(
-            googlePlacesApiKey = "test-key",
             autocompleteCountries = setOf("US"),
         )
 
@@ -70,7 +66,6 @@ class PaymentElementAutocompleteAddressInteractorTest {
         val interactor = factory.create()
 
         assertThat(interactor).isInstanceOf(BillingInlineAutocompleteAddressInteractor::class.java)
-        assertThat(interactor.autocompleteConfig.googlePlacesApiKey).isEqualTo("test-key")
         assertThat(interactor.autocompleteConfig.autocompleteCountries).isEqualTo(setOf("US"))
         assertThat(interactor.autocompleteConfig.shouldUseStripeHostedAutocomplete).isFalse()
     }
@@ -78,7 +73,6 @@ class PaymentElementAutocompleteAddressInteractorTest {
     @Test
     fun `Factory disposes previously created inline interactor on next create`() = test {
         val config = AutocompleteAddressInteractor.Config(
-            googlePlacesApiKey = "test-key",
             autocompleteCountries = setOf("US"),
         )
         val fakePlaces = FakePlacesClientProxy(
@@ -113,7 +107,6 @@ class PaymentElementAutocompleteAddressInteractorTest {
     @Test
     fun `Factory falls back to no-autocomplete interactor when placesClient is null`() = test {
         val config = AutocompleteAddressInteractor.Config(
-            googlePlacesApiKey = "test-key",
             autocompleteCountries = setOf("US"),
         )
 
@@ -134,7 +127,6 @@ class PaymentElementAutocompleteAddressInteractorTest {
     @Test
     fun `Factory creates inline interactor when proxy flag is on with repository`() = test {
         val config = AutocompleteAddressInteractor.Config(
-            googlePlacesApiKey = null,
             autocompleteCountries = setOf("US"),
         )
 
@@ -156,7 +148,6 @@ class PaymentElementAutocompleteAddressInteractorTest {
     @Test
     fun `Factory falls back to no-autocomplete interactor when repository is null`() = test {
         val config = AutocompleteAddressInteractor.Config(
-            googlePlacesApiKey = null,
             autocompleteCountries = setOf("US"),
         )
 
@@ -180,7 +171,6 @@ class PaymentElementAutocompleteAddressInteractorTest {
 
     private fun createInteractor(
         autocompleteConfig: AutocompleteAddressInteractor.Config = AutocompleteAddressInteractor.Config(
-            googlePlacesApiKey = "test-api-key",
             autocompleteCountries = setOf("US", "CA")
         ),
     ) = PaymentElementAutocompleteAddressInteractor(

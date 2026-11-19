@@ -114,7 +114,6 @@ internal class ShippingAddressElementTest {
             .isEqualTo(AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration.HIDDEN)
         assertThat(config.additionalFields?.checkboxLabel).isNull()
         assertThat(config.title).isNull()
-        assertThat(config.googlePlacesApiKey).isNull()
         assertThat(config.autocompleteCountries).isEqualTo(AUTOCOMPLETE_DEFAULT_COUNTRIES)
         assertThat(config.billingAddress).isNull()
         assertThat(config.useStripeHostedAutocomplete).isTrue()

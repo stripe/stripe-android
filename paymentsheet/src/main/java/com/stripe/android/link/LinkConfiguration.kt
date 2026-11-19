@@ -38,7 +38,6 @@ internal data class LinkConfiguration(
     val elementsSessionId: String,
     val linkMode: LinkMode?,
     val allowDefaultOptIn: Boolean,
-    val googlePlacesApiKey: String? = null,
     val collectMissingBillingDetailsForExistingPaymentMethods: Boolean,
     val allowUserEmailEdits: Boolean,
     val allowLogOut: Boolean,

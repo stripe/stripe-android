@@ -40,7 +40,6 @@ internal class PaymentElementAutocompleteAddressInteractor(
                     return BillingInlineAutocompleteAddressInteractor(
                         placesClient = resolvedClient,
                         autocompleteConfig = AutocompleteAddressInteractor.Config(
-                            googlePlacesApiKey = autocompleteConfig.googlePlacesApiKey,
                             autocompleteCountries = autocompleteConfig.autocompleteCountries,
                             shouldUseStripeHostedAutocomplete = useStripeHosted ||
                                 autocompleteConfig.shouldUseStripeHostedAutocomplete,
