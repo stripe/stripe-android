@@ -12,6 +12,9 @@
 # This script can be run with no arguments:
 #  ./localize.sh
 
+# Stop on download or copy failures so callers cannot commit incomplete translations.
+set -eo pipefail
+
 FETCH_ALL_LANGUAGES=true
 if [ $# -ne 0 ] && [ $1 = "ENGLISH_ONLY" ]; then
     FETCH_ALL_LANGUAGES=false
@@ -19,8 +22,8 @@ fi
 
 API_TOKEN=$LOKALISE_API_TOKEN
 if [ -z "$API_TOKEN" ]; then
-  echo "You need to add the API_TOKEN to: localization_vars.sh"
-  exit
+  echo "ERROR: set LOKALISE_API_TOKEN before fetching translations."
+  exit 1
 fi
 
 if [[ -z $(which lokalise2) ]]; then
@@ -122,8 +125,8 @@ do
         mv android/$MODULE/values-zh-rHant android/$MODULE/values-zh-rTW
         mv android/$MODULE/values-zh-rHans android/$MODULE/values-zh
         mv android/$MODULE/values-id android/$MODULE/values-in
-        cp -R "android/$MODULE/values-ro-rRO" "android/$MODULE/values-ro" || exit 1
-        rm -r -- "android/$MODULE/values-ro-rRO" || exit 1
+        cp -R "android/$MODULE/values-ro-rRO" "android/$MODULE/values-ro"
+        rm -r -- "android/$MODULE/values-ro-rRO"
     fi
 
     # This is used by the untranslated_project_keys.sh script

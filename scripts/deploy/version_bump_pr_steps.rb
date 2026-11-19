@@ -22,8 +22,20 @@ def revert_version_bump_changes()
     delete_git_branch(release_branch, @deploy_branch)
 end
 
+def fetch_release_translations()
+    api_token = fetch_password('lokalise-api-token-manual').strip
+
+    puts "Fetching latest translations from Lokalise..."
+    scripts_dir = File.expand_path('..', __dir__)
+    system({ 'LOKALISE_API_TOKEN' => api_token }, './localize.sh', chdir: scripts_dir) or
+        raise "Failed to fetch translations from Lokalise"
+
+    execute_or_fail("git add -- ':(glob)*/res/values*/strings.xml'")
+end
+
 def create_version_bump_pr()
     switch_to_release_branch()
+    fetch_release_translations()
     update_read_me()
     update_stripe_sdk_version()
     update_gradle_properties()
@@ -40,9 +52,9 @@ def create_version_bump_pr()
     
         pr_description = create_pr_description()
         if (@is_dry_run)
-          user_message = "Verify that a draft PR containing version number bumps and Dokka documentation was opened."
+          user_message = "Verify that a draft PR containing version number bumps, updated translations, and Dokka documentation was opened."
         else
-          user_message = "Verify that a PR containing version number bumps and Dokka documentation was opened. Press enter once you've confirmed the PR was created."
+          user_message = "Verify that a PR containing version number bumps, updated translations, and Dokka documentation was opened. Press enter once you've confirmed the PR was created."
         end
 
         create_pr(
@@ -66,7 +78,7 @@ private def create_pr_description()
     template = File.read(File.join(File.dirname(__FILE__), '../../../.github/pull_request_template.md'))
 
     <<~EOS
-    Bump version to `#{@version}` and regenerate Dokka documentation.
+    Bump version to `#{@version}`, fetch the latest translations from Lokalise, and regenerate Dokka documentation.
 
     #{template}
     EOS
