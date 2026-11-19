@@ -10,12 +10,11 @@ def update_pay_server_docs()
         return
     end
 
-    mint_repo = "../mint"
     constants_file = "pay-server/docs/content/constants.yaml"
 
     unless Dir.exist?(mint_repo)
         puts 'Mint repo not found. Cloning mint (this may take a while)...'
-        execute_or_fail("cd .. && pay get mint")
+        execute_or_fail("cd #{File.dirname(mint_repo)} && pay get mint")
     end
 
     mint_base_ref = "origin/green-pay-server"
@@ -57,7 +56,11 @@ def update_pay_server_docs()
 end
 
 def delete_pay_server_branch
-    delete_git_branch(pay_server_branch, "origin/green-pay-server", repo: "../mint")
+    delete_git_branch(pay_server_branch, "origin/green-pay-server", repo: mint_repo)
+end
+
+private def mint_repo
+    File.expand_path("~/stripe/mint")
 end
 
 private def pay_server_branch

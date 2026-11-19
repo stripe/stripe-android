@@ -1,7 +1,6 @@
 #!/usr/bin/env ruby
 
 require 'open3'
-require 'octokit'
 
 require_relative 'common'
 
@@ -61,15 +60,11 @@ private def release_branch
 end
 
 private def create_pr_description()
-    template_file_path = File.join(File.dirname(__FILE__), '../../.github/PULL_REQUEST_TEMPLATE.md')
-    template_file = File.open(template_file_path)
-    template = template_file.read
-    template_file.close
+    template = File.read(File.join(File.dirname(__FILE__), '../../../.github/pull_request_template.md'))
 
-    summary = <<~EOS
+    <<~EOS
     Bump version to `#{@version}`
-    EOS
 
-    template["<!-- Simple summary of what was changed. -->"] = summary
-    template
+    #{template}
+    EOS
 end

@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-require 'octokit'
+require 'open3'
 
 def validate_version_number_format(version_number)
   part_names = ['major', 'minor', 'patch']
@@ -37,9 +37,19 @@ def target_version_is_newer(target_version, current_version)
   end
 end
 
+# The most recently released version, prefixed with "v" (e.g. "v23.4.0"). This is the
+# contents of the VERSION file on the branch being released from, which only changes
+# when a version bump PR merges.
 def get_current_version()
-  latest_version = Octokit.latest_release("stripe/stripe-android")
-  latest_version.tag_name
+  @current_version ||= begin
+    _, stderr, status = Open3.capture3("git", "fetch", "origin", @deploy_branch)
+    raise("Failed to fetch #{@deploy_branch} from origin: #{stderr}") unless status.success?
+
+    stdout, stderr, status = Open3.capture3("git", "show", "FETCH_HEAD:stripe-android/VERSION")
+    raise("Failed to read VERSION on #{@deploy_branch}: #{stderr}") unless status.success?
+
+    "v#{stdout.strip}"
+  end
 end
 
 def validate_target_version_is_newer(target_version)
