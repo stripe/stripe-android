@@ -11,7 +11,7 @@ sealed interface ConfirmStripeIntentParams : StripeParamsModel, Parcelable {
 
     val clientSecret: String
 
-    var returnUrl: String?
+    val returnUrl: String?
 
     fun shouldUseStripeSdk(): Boolean
 
@@ -42,3 +42,10 @@ internal val ConfirmStripeIntentParams.paymentMethodCode: PaymentMethodCode?
             paymentMethodCode
         }
     }
+
+internal fun ConfirmStripeIntentParams.withReturnUrl(returnUrl: String?): ConfirmStripeIntentParams {
+    return when (this) {
+        is ConfirmPaymentIntentParams -> copy(returnUrl = returnUrl)
+        is ConfirmSetupIntentParams -> copy(returnUrl = returnUrl)
+    }
+}

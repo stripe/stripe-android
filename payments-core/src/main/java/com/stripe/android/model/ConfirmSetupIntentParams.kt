@@ -36,7 +36,7 @@ constructor(
      * supply an application URI scheme. This parameter is only used for cards and other
      * redirect-based payment methods.
      */
-    override var returnUrl: String? = null,
+    override val returnUrl: String? = null,
     private val useStripeSdk: Boolean = false,
     /**
      * ID of the mandate to be used for this payment.

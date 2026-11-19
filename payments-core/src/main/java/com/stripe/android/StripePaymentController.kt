@@ -155,17 +155,13 @@ constructor(
         val result = when (confirmStripeIntentParams) {
             is ConfirmPaymentIntentParams -> {
                 confirmPaymentIntent(
-                    confirmStripeIntentParams.also {
-                        it.returnUrl = returnUrl
-                    },
+                    confirmStripeIntentParams.copy(returnUrl = returnUrl),
                     requestOptions
                 )
             }
             is ConfirmSetupIntentParams -> {
                 confirmSetupIntent(
-                    confirmStripeIntentParams.also {
-                        it.returnUrl = returnUrl
-                    },
+                    confirmStripeIntentParams.copy(returnUrl = returnUrl),
                     requestOptions
                 )
             }
