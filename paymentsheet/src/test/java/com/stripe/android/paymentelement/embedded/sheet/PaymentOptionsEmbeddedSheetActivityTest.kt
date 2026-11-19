@@ -8,7 +8,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTextContains
-import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.junit4.v2.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -92,6 +92,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
         Espresso.pressBack()
 
         onIdle()
+        composeTestRule.waitForIdle()
 
         assertThat(scenario.result.resultCode).isEqualTo(Activity.RESULT_OK)
         val result = EmbeddedSheetContract.parseResult(scenario.result.resultCode, scenario.result.resultData)
@@ -341,6 +342,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
         Espresso.pressBack()
 
         onIdle()
+        composeTestRule.waitForIdle()
 
         val result = EmbeddedSheetContract.parseResult(scenario.result.resultCode, scenario.result.resultData)
         val cancelled = result as EmbeddedActivityResult.Cancelled

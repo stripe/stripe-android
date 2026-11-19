@@ -2,7 +2,7 @@ package com.stripe.android.paymentsheet.ui
 
 import android.content.Context
 import android.os.Build
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ApplicationProvider.getApplicationContext
@@ -301,11 +301,6 @@ internal class AddPaymentMethodTest {
     @Test
     fun `selecting a new payment method starts an OnPaymentMethodSelected ViewAction`() = runTest {
         runScenario {
-            viewActionRecorder.consume {
-                it is AddPaymentMethodInteractor.ViewAction.UpdatePaymentMethodVisibility &&
-                    it.initialVisibilityTrackerData.paymentMethodCodes == listOf("card", "klarna")
-            }
-
             assertThat(viewActionRecorder.viewActions).isEmpty()
 
             composeRule.onNodeWithTag("PaymentMethodsUITestTagcard", useUnmergedTree = true).performClick()
@@ -321,11 +316,6 @@ internal class AddPaymentMethodTest {
     @Test
     fun `interacting with a form field sends form events`() = runTest {
         runScenario {
-            viewActionRecorder.consume {
-                it is AddPaymentMethodInteractor.ViewAction.UpdatePaymentMethodVisibility &&
-                    it.initialVisibilityTrackerData.paymentMethodCodes == listOf("card", "klarna")
-            }
-
             assertThat(viewActionRecorder.viewActions).isEmpty()
 
             composeRule.onNodeWithTag(DEFAULT_CHECKBOX_TEST_TAG, useUnmergedTree = true).performClick()
@@ -697,7 +687,12 @@ internal class AddPaymentMethodTest {
                 interactor = addPaymentMethodInteractor,
             )
         }
+        composeRule.waitForIdle()
 
+        viewActionRecorder.consume {
+            it is AddPaymentMethodInteractor.ViewAction.UpdatePaymentMethodVisibility &&
+                it.initialVisibilityTrackerData.paymentMethodCodes == listOf("card", "klarna")
+        }
         viewActionRecorder.consume(
             AddPaymentMethodInteractor.ViewAction.OnFormFieldValuesChanged(
                 formValues = null,

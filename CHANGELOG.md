@@ -7,6 +7,7 @@ NEXT_VERSION_BUMP: MAJOR
 * [CHANGED] Bumped `compileSdkVersion` from 36 to 37.
 * [CHANGED] Bumped `minSdkVersion` from 23 to 24.
 * [CHANGED] Bumped Kotlin from 2.2.21 to 2.3.21.
+* [CHANGED] Bumped Jetpack Compose from 1.10.6 to 1.12.1
 * [CHANGED] Bumped Dagger from 2.58 to 2.59.
 
 ### PaymentSheet
