@@ -237,7 +237,6 @@ internal interface EmbeddedActivityModule {
         ): AutocompleteAddressInteractor.Factory {
             return PaymentElementAutocompleteAddressInteractor.Factory(
                 autocompleteConfig = AutocompleteAddressInteractor.Config(
-                    googlePlacesApiKey = null,
                     autocompleteCountries = AUTOCOMPLETE_DEFAULT_COUNTRIES,
                 ),
                 placesClient = null,

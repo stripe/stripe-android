@@ -516,7 +516,6 @@ internal class CheckoutCommonConfigurationFactoryTest {
         assertThat(result.cardBrandAcceptance).isEqualTo(ConfigurationDefaults.cardBrandAcceptance)
         assertThat(result.customPaymentMethods).isEqualTo(ConfigurationDefaults.customPaymentMethods)
         assertThat(result.walletButtons).isNull()
-        assertThat(result.googlePlacesApiKey).isNull()
     }
 
     @Test

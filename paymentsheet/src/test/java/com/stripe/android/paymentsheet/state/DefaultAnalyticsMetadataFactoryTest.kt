@@ -1096,7 +1096,6 @@ class DefaultAnalyticsMetadataFactoryTest {
                 billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
                 defaultBillingDetails = null,
                 allowDefaultOptIn = false,
-                googlePlacesApiKey = null,
                 collectMissingBillingDetailsForExistingPaymentMethods = false,
                 allowUserEmailEdits = true,
                 allowLogOut = true,

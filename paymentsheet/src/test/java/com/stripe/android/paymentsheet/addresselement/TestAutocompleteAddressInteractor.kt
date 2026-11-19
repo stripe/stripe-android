@@ -47,7 +47,6 @@ class TestAutocompleteAddressInteractor private constructor(
 
         fun noOp(
             autocompleteConfig: AutocompleteAddressInteractor.Config = AutocompleteAddressInteractor.Config(
-                googlePlacesApiKey = null,
                 autocompleteCountries = emptySet()
             ),
         ) = TestAutocompleteAddressInteractor(

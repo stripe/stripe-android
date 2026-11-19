@@ -12,6 +12,7 @@ NEXT_VERSION_BUMP: MAJOR
 * [CHANGED] Bumped AndroidX Lifecycle from 2.10.0 to 2.11.0.
 
 ### PaymentSheet
+* [REMOVED] Removed `PaymentSheet.Configuration.Builder.googlePlacesApiKey`. Payment Element autocomplete will continue to work without a Google Places API key.
 * [ADDED] Added support for Stripe balance (private preview) in PaymentSheet, FlowController, and EmbeddedPaymentElement, for payments and setting up future payments. Customers choose which of their financial accounts to pay from. Requires a customer configured with `PaymentSheet.CustomerConfiguration.createWithCustomerSession`.
 * [Changed] Payment method icons now follow the selected light or dark theme, including when using custom component colors.
 * [Added] Added explicit control for the light or dark appearance color set used by PaymentSheet, Embedded Payment Element, CustomerSheet, and Address Element on Android. You can now use PaymentSheet.Appearance.Builder.themeMode() to set the appearance to AlwaysLight or AlwaysDark for a consistent experience, overriding the system light/dark mode setting for supported Payment Element surfaces.
@@ -19,6 +20,7 @@ NEXT_VERSION_BUMP: MAJOR
 * [FIXED] Fixed an issue where saved cards with an unrecognized display brand were labeled as "Unknown" in accessibility descriptions and payment option labels.
 
 ### AddressElement
+* [REMOVED] Removed `AddressLauncher.Configuration.Builder.googlePlacesApiKey` and the `googlePlacesApiKey` constructor parameters for AddressLauncher. Address autocomplete will continue to work without a Google Places API key.
 * [FIXED] Fixed an issue where inline address autocomplete could request suggestions for a prefilled address before the customer focused the address field.
 
 ### Crypto Onramp

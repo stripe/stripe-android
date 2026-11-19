@@ -31,7 +31,6 @@ class AddressFormControllerTest {
 
     private val inlineAutocompleteConfig = AutocompleteAddressInteractor.Config(
         autocompleteCountries = setOf("US"),
-        googlePlacesApiKey = null,
         shouldUseStripeHostedAutocomplete = true,
     )
 
@@ -39,7 +38,6 @@ class AddressFormControllerTest {
     fun `Ensure expected set of elements`() = fieldsTest(
         autocompleteConfig = AutocompleteAddressInteractor.Config(
             autocompleteCountries = setOf("US"),
-            googlePlacesApiKey = null,
         ),
         launcherConfig = AddressLauncher.Configuration(
             address = AddressDetails(
@@ -124,7 +122,6 @@ class AddressFormControllerTest {
     fun `Complete form values are set when element flows are complete`() = test(
         autocompleteConfig = AutocompleteAddressInteractor.Config(
             autocompleteCountries = setOf("US"),
-            googlePlacesApiKey = null,
             shouldUseStripeHostedAutocomplete = true,
         )
     ) {
@@ -210,7 +207,6 @@ class AddressFormControllerTest {
     fun `Complete form values is empty when element flows are not complete`() = test(
         autocompleteConfig = AutocompleteAddressInteractor.Config(
             autocompleteCountries = setOf("US"),
-            googlePlacesApiKey = null,
             shouldUseStripeHostedAutocomplete = true,
         ),
     ) {
@@ -241,7 +237,6 @@ class AddressFormControllerTest {
     fun `Last text field identifier points to last element`() = test(
         autocompleteConfig = AutocompleteAddressInteractor.Config(
             autocompleteCountries = setOf("US"),
-            googlePlacesApiKey = null,
             shouldUseStripeHostedAutocomplete = true,
         ),
     ) {
@@ -273,7 +268,6 @@ class AddressFormControllerTest {
         ),
         autocompleteConfig = AutocompleteAddressInteractor.Config(
             autocompleteCountries = setOf("US"),
-            googlePlacesApiKey = null,
         ),
     ) {
         val element = awaitItem()
@@ -441,7 +435,6 @@ class AddressFormControllerTest {
         initialValues: Map<FormFieldId, String?> = emptyMap(),
         autocompleteConfig: AutocompleteAddressInteractor.Config = AutocompleteAddressInteractor.Config(
             autocompleteCountries = setOf("US"),
-            googlePlacesApiKey = null,
         ),
         launcherConfig: AddressLauncher.Configuration = AddressLauncher.Configuration(),
         test: suspend TurbineTestContext<List<SectionFieldElement>>.() -> Unit
@@ -461,7 +454,6 @@ class AddressFormControllerTest {
         initialValues: Map<FormFieldId, String?> = emptyMap(),
         autocompleteConfig: AutocompleteAddressInteractor.Config = AutocompleteAddressInteractor.Config(
             autocompleteCountries = setOf("US"),
-            googlePlacesApiKey = null,
         ),
         launcherConfig: AddressLauncher.Configuration = AddressLauncher.Configuration(),
         test: suspend TurbineTestContext<AddressElement>.() -> Unit
@@ -494,7 +486,6 @@ class AddressFormControllerTest {
     private fun test(
         autocompleteConfig: AutocompleteAddressInteractor.Config = AutocompleteAddressInteractor.Config(
             autocompleteCountries = setOf("US"),
-            googlePlacesApiKey = null,
         ),
         block: suspend TestAutocompleteAddressInteractor.Scenario.() -> Unit
     ) = runTest {

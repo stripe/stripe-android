@@ -32,7 +32,6 @@ interface AutocompleteAddressInteractor {
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Config(
-        val googlePlacesApiKey: String?,
         val autocompleteCountries: Set<String>,
         val shouldUseStripeHostedAutocomplete: Boolean = false,
     )
