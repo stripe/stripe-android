@@ -10,9 +10,6 @@ if stdout.empty?
     exit true
 end
 
-bitrise_build_url = ENV["BITRISE_BUILD_URL"]
-artifacts_link = "#{bitrise_build_url}?tab=artifacts"
-puts "Dependencies check failed.\n\n#{stdout}\n\nUpdated dependencies here:"
-puts artifacts_link
+puts "Dependencies check failed.\n\n#{stdout}\n\nSee the dependency baseline changes in the build's user files."
 puts "\n\nYou can also regenerate them locally via `ruby scripts/dependencies/update_transitive_dependencies.rb`"
 exit false

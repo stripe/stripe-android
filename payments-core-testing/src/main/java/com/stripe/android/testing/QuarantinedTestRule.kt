@@ -96,6 +96,6 @@ internal class QuarantinedTestMatcher(
     )
 
     private companion object {
-        private const val QUARANTINE_ENV_KEY = "bitriseQuarantinedTests"
+        private const val QUARANTINE_ENV_KEY = "quarantinedTests"
     }
 }

@@ -41,7 +41,7 @@ class QuarantinedTestMatcherTest {
     }
 
     @Test
-    fun `match is false when bitriseQuarantinedTests is absent`() {
+    fun `match is false when quarantinedTests is absent`() {
         val matcher = QuarantinedTestMatcher(Bundle())
 
         val description = Description.createTestDescription("com.example.Foo", "bar")
@@ -49,8 +49,8 @@ class QuarantinedTestMatcherTest {
     }
 
     @Test
-    fun `match is false when bitriseQuarantinedTests is blank after trim`() {
-        val bundle = Bundle().apply { putString("bitriseQuarantinedTests", "   \t  ") }
+    fun `match is false when quarantinedTests is blank after trim`() {
+        val bundle = Bundle().apply { putString("quarantinedTests", "   \t  ") }
         val matcher = QuarantinedTestMatcher(bundle)
 
         val description = Description.createTestDescription("com.example.Foo", "bar")
@@ -60,7 +60,7 @@ class QuarantinedTestMatcherTest {
     @Test
     fun `match is false when payload is not valid gzip base64`() {
         val bundle = Bundle().apply {
-            putString("bitriseQuarantinedTests", "not-valid-data!!!")
+            putString("quarantinedTests", "not-valid-data!!!")
         }
         val matcher = QuarantinedTestMatcher(bundle)
 
@@ -122,7 +122,7 @@ class QuarantinedTestMatcherTest {
             baos.toByteArray()
         }
         val encoded = Base64.encodeToString(compressed, Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING)
-        val bundle = Bundle().apply { putString("bitriseQuarantinedTests", encoded) }
+        val bundle = Bundle().apply { putString("quarantinedTests", encoded) }
         return QuarantinedTestMatcher(bundle)
     }
 }

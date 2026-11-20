@@ -71,7 +71,7 @@ if [ "$RETRY_COUNT" -eq "$MAX_RETRIES" ]; then
 fi
 
 # install APK.
-adb install $BITRISE_APK_PATH
+adb install "${APK_PATH:?APK_PATH must point to the app APK}"
 
 # Function to check if a YAML file contains a specific tag
 contains_tag() {

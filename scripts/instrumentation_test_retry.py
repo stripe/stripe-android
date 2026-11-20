@@ -4,7 +4,7 @@
 Excluding successes, instead of including only reported failures, leaves tests
 that never ran (for example after an emulator crash) eligible for the next run.
 Only reports written by this invocation are trusted. Earlier successes are kept
-for the final Bitrise report even when AGP replaces its output on the next run.
+for the final CI report even when AGP replaces its output on the next run.
 """
 
 import hashlib
