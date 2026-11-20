@@ -4,10 +4,8 @@ set -eo pipefail
 # Replaces the "emulator" package already present in $ANDROID_HOME with a known-good,
 # explicitly pinned build, regardless of whatever version the CI stack's image bundles.
 #
-# This is CI's own pin, separate from (and in addition to) the `emulator_build_number`
-# input on the `avd-manager@2` Bitrise step: Gradle Managed Device tests
-# (e.g. pixel2api33DebugAndroidTest) boot the emulator straight from $ANDROID_HOME/emulator
-# without going through avd-manager, so they need this binary swapped in directly.
+# Both CI's emulators and Gradle Managed Device tests (e.g. pixel2api33DebugAndroidTest)
+# boot the emulator straight from $ANDROID_HOME/emulator, so pin that binary directly.
 #
 # Usage: pin_emulator_version.sh <emulator_build_number> <emulator_version>
 # emulator_version must match emulator_build_number.

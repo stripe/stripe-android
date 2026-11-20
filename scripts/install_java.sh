@@ -34,7 +34,7 @@ if [ ! -f "$JAVA_DIR/bin/java" ] && [ ! -f "$JAVA_DIR/Contents/Home/bin/java" ];
 
   mkdir -p "$JAVA_DIR"
 
-  # Download (wrapped with retry.sh from bitrise.yml)
+  # Download (callers can wrap this script with retry.sh)
   curl -fSL --connect-timeout 30 --max-time 600 \
        "$DOWNLOAD_URL" -o "/tmp/java-${JAVA_VERSION}.tar.gz"
 
@@ -90,9 +90,9 @@ else
   fi
 fi
 
-# Export for subsequent Bitrise steps
-envman add --key JAVA_HOME --value "$JAVA_HOME"
-envman add --key PATH --value "$JAVA_HOME/bin:$PATH"
+# Export for this shell; source this script to keep these in the caller's environment.
+export JAVA_HOME
+export PATH="$JAVA_HOME/bin:$PATH"
 
 # Verify
 echo "Java installed successfully at $JAVA_HOME"

@@ -1,10 +1,8 @@
 #!/usr/bin/env python3
-"""Merge Maestro JUnit try-reports and publish for Bitrise Test Reports."""
+"""Merge Maestro JUnit try-reports for CI result publishing."""
 from __future__ import annotations
 
 import argparse
-import json
-import os
 import shutil
 import sys
 import xml.etree.ElementTree as ET
@@ -13,14 +11,10 @@ from pathlib import Path
 DEFAULT_STAGING = Path("/tmp/test_results")
 
 
-def merged_junit_path(staging: Path, module: str) -> Path:
-    return staging / f"{module}.xml"
-
-
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--tag", required=True, help="JUnit testsuite name (e.g. Maestro tag)")
-    p.add_argument("--module", required=True, help="Module label for paths and test-info.json")
+    p.add_argument("--module", required=True, help="Module label for the merged report filename")
     p.add_argument(
         "--staging",
         type=Path,
@@ -50,7 +44,7 @@ def collect_testcases(root: ET.Element) -> list[ET.Element]:
 
 
 def merge_junits(staging: Path, suite_name: str, module: str) -> Path | None:
-    out_path = merged_junit_path(staging, module)
+    out_path = staging / f"{module}.xml"
     inputs = iter_try_junit_files(staging, out_path)
     if not inputs:
         print("No per-attempt JUnit XML (*-try*.xml) to merge.", file=sys.stderr)
@@ -103,20 +97,8 @@ def merge_junits(staging: Path, suite_name: str, module: str) -> Path | None:
             "time": str(round(elapsed, 4)),
         },
     )
-    suite = ET.SubElement(
-        testsuites,
-        "testsuite",
-        {
-            "name": suite_name,
-            "tests": str(total),
-            "failures": str(failures),
-            "errors": str(errors),
-            "skipped": str(skipped),
-            "time": str(round(elapsed, 4)),
-        },
-    )
-    for tc in merged_cases:
-        suite.append(tc)
+    suite = ET.SubElement(testsuites, "testsuite", name=suite_name, **testsuites.attrib)
+    suite.extend(merged_cases)
 
     tree = ET.ElementTree(testsuites)
     ET.indent(tree, space="  ")
@@ -143,20 +125,6 @@ def copy_tree_contents(src: Path, dest: Path) -> None:
             shutil.copy2(child, target)
 
 
-def bitrise_test_results_dir() -> str | None:
-    return os.environ.get("BITRISE_TEST_RESULT_DIR")
-
-
-def maestro_test_info_name(module: str, tag: str) -> str:
-    if module == "financial-connections":
-        base = "FC Maestro Tests"
-    elif module == "connect":
-        base = "Connect Maestro Tests"
-    else:
-        base = "Maestro Tests"
-    return f"{base} - {tag}"
-
-
 def main() -> None:
     args = parse_args()
     staging: Path = args.staging
@@ -174,20 +142,7 @@ def main() -> None:
     if staging.resolve() != test_results.resolve():
         copy_tree_contents(staging, test_results)
 
-    bitrise_dir_raw = bitrise_test_results_dir()
-    if bitrise_dir_raw:
-        dest = Path(bitrise_dir_raw) / module
-        dest.mkdir(parents=True, exist_ok=True)
-        copy_tree_contents(test_results, dest)
-        test_name = maestro_test_info_name(module, args.tag)
-        info_path = dest / "test-info.json"
-        info_path.write_text(json.dumps({"test-name": test_name}, separators=(",", ":")), encoding="utf-8")
-        print(f"Published Maestro results under {dest}")
-    else:
-        print(
-            "BITRISE_TEST_RESULT_DIR unset; skipped Bitrise export.",
-            file=sys.stderr,
-        )
+    print(f"Merged Maestro results: {test_results / merged.name}")
 
 
 if __name__ == "__main__":
