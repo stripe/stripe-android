@@ -32,7 +32,7 @@ import dagger.assisted.AssistedInject
 import javax.inject.Named
 
 internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor(
-    @Assisted private val intentConfiguration: PaymentSheet.IntentConfiguration,
+    @Assisted private val intentConfiguration: PaymentSheet.IntentConfiguration.State,
     @Assisted private val createIntentCallback: CreateIntentCallback,
     @Assisted private val clientAttributionMetadata: ClientAttributionMetadata,
     private val stripeRepository: StripeRepository,
@@ -72,7 +72,7 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
     }
 
     private suspend fun handleNewPaymentMethod(
-        intentConfiguration: PaymentSheet.IntentConfiguration,
+        intentConfiguration: PaymentSheet.IntentConfiguration.State,
         intent: StripeIntent,
         confirmationOption: PaymentMethodConfirmationOption.New,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
@@ -108,7 +108,7 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
     }
 
     private suspend fun handleSavedPaymentMethod(
-        intentConfiguration: PaymentSheet.IntentConfiguration,
+        intentConfiguration: PaymentSheet.IntentConfiguration.State,
         intent: StripeIntent,
         paymentMethod: PaymentMethod,
         confirmationOption: PaymentMethodConfirmationOption.Saved,
@@ -133,7 +133,7 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
 
     private suspend fun handleDeferredIntentCreationFromPaymentMethod(
         intent: StripeIntent,
-        intentConfiguration: PaymentSheet.IntentConfiguration,
+        intentConfiguration: PaymentSheet.IntentConfiguration.State,
         confirmationOption: PaymentMethodConfirmationOption,
         paymentMethod: PaymentMethod,
         shouldSavePaymentMethod: Boolean,
@@ -183,7 +183,7 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
 
     private suspend fun handleDeferredIntentCreationSuccess(
         clientSecret: String,
-        intentConfiguration: PaymentSheet.IntentConfiguration,
+        intentConfiguration: PaymentSheet.IntentConfiguration.State,
         confirmationOption: PaymentMethodConfirmationOption,
         paymentMethod: PaymentMethod,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
@@ -257,7 +257,7 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
     private fun handleIntentConfirmation(
         clientSecret: String,
         intent: StripeIntent,
-        intentConfiguration: PaymentSheet.IntentConfiguration,
+        intentConfiguration: PaymentSheet.IntentConfiguration.State,
         confirmationOption: PaymentMethodConfirmationOption,
         paymentMethod: PaymentMethod,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
@@ -303,17 +303,17 @@ internal class DeferredIntentConfirmationInterceptor @AssistedInject constructor
 
     private fun shouldSavePaymentMethod(
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
-        intentConfiguration: PaymentSheet.IntentConfiguration
+        intentConfiguration: PaymentSheet.IntentConfiguration.State
     ): Boolean {
         return paymentMethodOptionsParams?.setupFutureUsage()?.hasIntentToSetup() == true ||
-            (intentConfiguration.mode as? PaymentSheet.IntentConfiguration.Mode.Payment)
+            (intentConfiguration.mode as? PaymentSheet.IntentConfiguration.Mode.Payment.State)
                 ?.setupFutureUse?.toConfirmParamsSetupFutureUsage()?.hasIntentToSetup() == true
     }
 
     @AssistedFactory
     interface Factory {
         fun create(
-            intentConfiguration: PaymentSheet.IntentConfiguration,
+            intentConfiguration: PaymentSheet.IntentConfiguration.State,
             createIntentCallback: CreateIntentCallback,
             clientAttributionMetadata: ClientAttributionMetadata,
         ): DeferredIntentConfirmationInterceptor

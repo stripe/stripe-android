@@ -91,6 +91,7 @@ fun CheckoutScreen(useApiConfiguration: Boolean = false) {
                 mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                     amount = 1099,
                     currency = "EUR",
+                    captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
                 ),
                 // Optional intent configuration options...
             ),

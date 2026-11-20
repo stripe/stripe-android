@@ -12,21 +12,21 @@ internal sealed class IntegrationMetadata : Parcelable {
     ) : IntegrationMetadata()
 
     sealed class DeferredIntent : IntegrationMetadata() {
-        abstract val intentConfiguration: IntentConfiguration
+        abstract val intentConfiguration: IntentConfiguration.State
 
         @Parcelize
         data class WithPaymentMethod(
-            override val intentConfiguration: IntentConfiguration,
+            override val intentConfiguration: IntentConfiguration.State,
         ) : DeferredIntent()
 
         @Parcelize
         data class WithSharedPaymentToken(
-            override val intentConfiguration: IntentConfiguration,
+            override val intentConfiguration: IntentConfiguration.State,
         ) : DeferredIntent()
 
         @Parcelize
         data class WithConfirmationToken(
-            override val intentConfiguration: IntentConfiguration,
+            override val intentConfiguration: IntentConfiguration.State,
         ) : DeferredIntent()
     }
 

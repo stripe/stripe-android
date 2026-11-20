@@ -124,8 +124,9 @@ internal class CustomerAdapterDataSource @Inject constructor(
         val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
             PaymentSheet.IntentConfiguration(
                 mode = PaymentSheet.IntentConfiguration.Mode.Setup(),
-                paymentMethodTypes = paymentMethodTypes,
             )
+                .paymentMethodTypes(paymentMethodTypes)
+                .build()
         )
 
         return elementsSessionRepository.get(

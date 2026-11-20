@@ -26,7 +26,8 @@ internal sealed class TapToAddIntegrationTestRunnerContext(
     protected val intentConfiguration = StripePaymentSheet.IntentConfiguration(
         mode = StripePaymentSheet.IntentConfiguration.Mode.Payment(
             amount = 5099,
-            currency = "usd"
+            currency = "usd",
+            captureMethod = StripePaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
         )
     )
 
@@ -138,6 +139,7 @@ internal sealed class TapToAddIntegrationTestRunnerContext(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 5099,
                         currency = "usd",
+                        captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
                     )
                 ),
                 configurationMutator = {

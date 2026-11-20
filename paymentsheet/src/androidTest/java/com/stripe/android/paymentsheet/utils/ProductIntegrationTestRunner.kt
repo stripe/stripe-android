@@ -116,7 +116,8 @@ internal sealed interface ProductIntegrationTestRunnerContext {
                         intentConfiguration = PaymentSheet.IntentConfiguration(
                             mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                                 amount = 5099,
-                                currency = "usd"
+                                currency = "usd",
+                                captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
                             )
                         ),
                         configuration = context.apiConfigurationTestType.applyTo(configuration),
@@ -152,6 +153,7 @@ internal sealed interface ProductIntegrationTestRunnerContext {
                             mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                                 amount = 5099,
                                 currency = "usd",
+                                captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
                             )
                         ),
                         configuration = context.apiConfigurationTestType.applyTo(configuration),

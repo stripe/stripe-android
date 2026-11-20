@@ -36,8 +36,12 @@ internal class DefaultEmbeddedConfigurationCoordinatorTest {
     private val defaultConfiguration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
     private val defaultInitializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
         PaymentSheet.IntentConfiguration(
-            PaymentSheet.IntentConfiguration.Mode.Payment(5000, "USD"),
-        )
+            PaymentSheet.IntentConfiguration.Mode.Payment(
+                amount = 5000,
+                currency = "USD",
+                captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
+            ),
+        ).build()
     )
 
     private fun createPaymentElementLoaderState(

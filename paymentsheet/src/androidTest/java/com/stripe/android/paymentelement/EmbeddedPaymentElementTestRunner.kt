@@ -33,7 +33,11 @@ internal class EmbeddedPaymentElementTestRunnerContext(
 ) {
     suspend fun configure(
         intentConfiguration: PaymentSheet.IntentConfiguration = PaymentSheet.IntentConfiguration(
-            mode = PaymentSheet.IntentConfiguration.Mode.Payment(amount = 5000, currency = "USD")
+            mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                amount = 5000,
+                currency = "USD",
+                captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
+            )
         ),
         configurationMutator: EmbeddedPaymentElement.Configuration.Builder.() -> EmbeddedPaymentElement.Configuration.Builder = { this },
     ) {
