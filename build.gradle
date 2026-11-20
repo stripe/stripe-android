@@ -1,4 +1,7 @@
 import java.time.Duration
+import kotlinx.validation.KotlinApiBuildTask
+import kotlinx.validation.KotlinApiCompareTask
+import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
@@ -131,6 +134,49 @@ apiValidation {
 }
 
 subprojects {
+    plugins.withId('com.android.library') {
+        if (project.name in rootProject.apiValidation.ignoredProjects) {
+            return
+        }
+
+        // BCV 0.18.1 only registers Android tasks for the legacy Kotlin Android plugin.
+        dependencies.add('bcv-rt-jvm-cp', "org.jetbrains.kotlin:kotlin-metadata-jvm:${versions.kotlin}")
+
+        tasks.withType(KotlinJvmCompile).configureEach {
+            if (name == 'compileReleaseKotlin') {
+                // Preserve the module suffix used by existing API snapshots before AGP's built-in Kotlin support.
+                compilerOptions.moduleName.set("${project.name}_release")
+            }
+        }
+
+        def apiBuild = tasks.register('apiBuild', KotlinApiBuildTask) {
+            inputClassesDirs.from(tasks.named('compileReleaseKotlin').flatMap { it.destinationDirectory })
+            inputClassesDirs.from(tasks.named('compileReleaseJavaWithJavac').flatMap { it.destinationDirectory })
+            runtimeClasspath.from(configurations.named('bcv-rt-jvm-cp-resolver'))
+            outputApiFile.set(layout.buildDirectory.file("api/${project.name}.api"))
+        }
+
+        tasks.register('apiDump', KotlinApiBuildTask) {
+            group = 'other'
+            description = 'Dumps public API signatures.'
+            inputClassesDirs.from(apiBuild.map { it.inputClassesDirs })
+            runtimeClasspath.from(apiBuild.map { it.runtimeClasspath })
+            outputApiFile.set(layout.projectDirectory.file("api/${project.name}.api"))
+        }
+
+        def apiCheck = tasks.register('apiCheck', KotlinApiCompareTask) {
+            group = 'verification'
+            description = 'Checks public API signatures against the API dump.'
+            projectApiFile.set(layout.projectDirectory.file("api/${project.name}.api"))
+            generatedApiFile.set(apiBuild.flatMap { it.outputApiFile })
+            mustRunAfter(tasks.named('apiDump'))
+        }
+
+        tasks.named('check').configure {
+            dependsOn(apiCheck)
+        }
+    }
+
     plugins.withId("app.cash.paparazzi") {
         tasks.withType(Test).configureEach { test ->
             // https://github.com/cashapp/paparazzi/issues/2111
