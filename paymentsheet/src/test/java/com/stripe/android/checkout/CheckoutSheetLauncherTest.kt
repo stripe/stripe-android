@@ -1703,6 +1703,11 @@ internal class CheckoutSheetLauncherTest {
                 customerStateHolder = customerStateHolder,
                 linkAccountHolder = mock(),
                 sheetStateHolder = sheetStateHolder,
+                taxRegionUpdater = mock(),
+                operationCoordinator = operationCoordinator,
+                sessionRefresher = sessionRefresher,
+                logger = logger,
+                coroutineScope = coroutineScope,
             )
         }
 

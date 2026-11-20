@@ -17,6 +17,7 @@ import com.stripe.android.link.LinkDismissalCoordinator
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.LinkScreen.UpdateCard.BillingDetailsUpdateFlow
+import com.stripe.android.link.LinkTotalUpdater
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.confirmation.CompleteLinkFlow
 import com.stripe.android.link.confirmation.CompleteLinkFlow.Result
@@ -54,6 +55,8 @@ internal class UpdateCardScreenViewModel @Inject constructor(
     private val configuration: LinkConfiguration,
     private val linkLaunchMode: LinkLaunchMode,
     private val completeLinkFlow: CompleteLinkFlow,
+    private val linkTotalUpdater: LinkTotalUpdater,
+    private val requiresBillingAddressForAutomaticTax: Boolean,
     private val dismissWithResult: (LinkActivityResult) -> Unit,
     paymentDetailsId: String,
     billingDetailsUpdateFlow: BillingDetailsUpdateFlow?,
@@ -63,7 +66,7 @@ internal class UpdateCardScreenViewModel @Inject constructor(
         UpdateCardScreenState(
             paymentDetailsId = paymentDetailsId,
             billingDetailsUpdateFlow = billingDetailsUpdateFlow,
-            primaryButtonLabel = primaryButtonLabel(billingDetailsUpdateFlow)
+            primaryButtonLabel = primaryButtonLabel(billingDetailsUpdateFlow, linkTotalUpdater.state.value.amount)
         )
     )
 
@@ -89,6 +92,15 @@ internal class UpdateCardScreenViewModel @Inject constructor(
         }.onFailure {
             logger.error("Failed to render payment update screen", it)
             navigationManager.tryNavigateBack()
+        }
+
+        viewModelScope.launch {
+            // The total may change when confirming with the updated billing address.
+            linkTotalUpdater.state.collect { totalState ->
+                _state.update {
+                    it.copy(primaryButtonLabel = primaryButtonLabel(it.billingDetailsUpdateFlow, totalState.amount))
+                }
+            }
         }
     }
 
@@ -182,6 +194,9 @@ internal class UpdateCardScreenViewModel @Inject constructor(
         }
 
         val defaultConfiguration = configuration.billingDetailsCollectionConfiguration
+        // When tax is calculated from the billing address, collect a full address so tax can be calculated.
+        val collectsFullAddressForAutomaticTax =
+            requiresBillingAddressForAutomaticTax && state.value.isBillingDetailsUpdateFlow
 
         return DefaultEditCardDetailsInteractor.Factory().create(
             coroutineScope = viewModelScope,
@@ -198,7 +213,9 @@ internal class UpdateCardScreenViewModel @Inject constructor(
                     state.value.isBillingDetailsUpdateFlow
                 } ?: PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
                 // Should always allow updating ZIP/postal code at minimum
-                address = if (
+                address = if (collectsFullAddressForAutomaticTax) {
+                    PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
+                } else if (
                     paymentDetails.type == PaymentMethod.Type.Card.code &&
                     defaultConfiguration.address ==
                     PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
@@ -240,10 +257,11 @@ internal class UpdateCardScreenViewModel @Inject constructor(
     }
 
     private fun primaryButtonLabel(
-        billingDetailsUpdateFlow: BillingDetailsUpdateFlow?
+        billingDetailsUpdateFlow: BillingDetailsUpdateFlow?,
+        amount: Long?,
     ): ResolvableString = if (billingDetailsUpdateFlow != null) {
         // In billing details update flow, payment details are updated and then confirmed,
-        completePaymentButtonLabel(configuration.stripeIntent, linkLaunchMode)
+        completePaymentButtonLabel(configuration.stripeIntent, linkLaunchMode, amount)
     } else {
         // In regular update flow, we just update the card details
         R.string.stripe_link_update_card_confirm_cta.resolvableString
@@ -273,6 +291,9 @@ internal class UpdateCardScreenViewModel @Inject constructor(
                             dismissalCoordinator = parentComponent.dismissalCoordinator,
                             linkLaunchMode = parentComponent.linkLaunchMode,
                         ),
+                        linkTotalUpdater = parentComponent.linkTotalUpdater,
+                        requiresBillingAddressForAutomaticTax =
+                            parentComponent.paymentMethodMetadata.requiresBillingAddressForAutomaticTax,
                         dismissWithResult = dismissWithResult,
                         paymentDetailsId = paymentDetailsId,
                         billingDetailsUpdateFlow = billingDetailsUpdateFlow,

@@ -21,6 +21,7 @@ import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.LinkScreen.UpdateCard.BillingDetailsUpdateFlow
+import com.stripe.android.link.LinkTotalUpdater
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.account.linkAccountUpdate
 import com.stripe.android.link.confirmation.CompleteLinkFlow
@@ -29,6 +30,7 @@ import com.stripe.android.link.effectiveLinkBrand
 import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.supportedPaymentMethodTypes
+import com.stripe.android.link.toAddress
 import com.stripe.android.link.ui.completePaymentButtonLabel
 import com.stripe.android.link.utils.supports
 import com.stripe.android.link.withDismissalDisabled
@@ -43,6 +45,7 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.state.hasSufficientBillingDetailsForAutomaticTax
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
 import com.stripe.android.ui.core.elements.CardDetailsUtil.createExpiryDateFormFieldValues
 import com.stripe.android.ui.core.elements.CvcController
@@ -54,7 +57,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
@@ -69,6 +74,8 @@ internal class WalletViewModel(
     private val navigationManager: NavigationManager,
     private val linkLaunchMode: LinkLaunchMode,
     private val dismissalCoordinator: LinkDismissalCoordinator,
+    private val linkTotalUpdater: LinkTotalUpdater,
+    private val requiresBillingAddressForAutomaticTax: Boolean,
     private val navigateAndClearStack: (route: LinkScreen) -> Unit,
     private val dismissWithResult: (LinkActivityResult) -> Unit
 ) : ViewModel() {
@@ -91,7 +98,11 @@ internal class WalletViewModel(
             hasCompleted = false,
             // initially expand the wallet if a payment method is preselected.
             userSetIsExpanded = linkLaunchMode.selectedItemId != null,
-            primaryButtonLabel = completePaymentButtonLabel(configuration.stripeIntent, linkLaunchMode),
+            primaryButtonLabel = completePaymentButtonLabel(
+                stripeIntent = configuration.stripeIntent,
+                linkLaunchMode = linkLaunchMode,
+                amount = linkTotalUpdater.state.value.amount,
+            ),
             secondaryButtonLabel = configuration.stripeIntent.secondaryButtonLabel(linkLaunchMode),
             addPaymentMethodOptions = addPaymentMethodOptions.values,
             paymentSelectionHint = paymentSelectionHint,
@@ -180,6 +191,28 @@ internal class WalletViewModel(
         }
 
         viewModelScope.launch {
+            linkTotalUpdater.state.collect { totalState ->
+                _uiState.update {
+                    it.copy(
+                        primaryButtonLabel = completePaymentButtonLabel(
+                            stripeIntent = configuration.stripeIntent,
+                            linkLaunchMode = linkLaunchMode,
+                            amount = totalState.amount,
+                        ),
+                        isUpdatingTotal = totalState.isUpdating,
+                    )
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            uiState
+                .map { it.selectedItem?.billingAddress }
+                .distinctUntilChanged()
+                .collect(::syncTotalForSelectedPaymentMethod)
+        }
+
+        viewModelScope.launch {
             expiryDateController.formFieldValue.collectLatest { input ->
                 _uiState.update {
                     it.copy(expiryDateInput = input)
@@ -226,6 +259,20 @@ internal class WalletViewModel(
                 linkAccountUpdate = linkAccountManager.linkAccountUpdate
             )
         )
+    }
+
+    /**
+     * Updates the displayed total for the selected payment method's billing address, if the total depends on it.
+     */
+    private fun syncTotalForSelectedPaymentMethod(billingAddress: ConsumerPaymentDetails.BillingAddress?) {
+        if (billingAddress == null || _uiState.value.isProcessing) return
+        viewModelScope.launch {
+            linkTotalUpdater.sync(billingAddress = billingAddress.toAddress(), showsProgress = true)
+                .onFailure { error ->
+                    logger.error("WalletViewModel: Failed to update the total", error)
+                    _uiState.update { it.copy(errorMessage = error.stripeErrorMessage()) }
+                }
+        }
     }
 
     fun onItemSelected(item: ConsumerPaymentDetails.PaymentDetails) {
@@ -313,10 +360,14 @@ internal class WalletViewModel(
         selectedPaymentDetails: ConsumerPaymentDetails.PaymentDetails,
     ) {
         // Check if billing details are missing before proceeding with payment
-        val shouldCollectMissingBillingDetails = selectedPaymentDetails.supports(
+        val isMissingRequestedBillingDetails = selectedPaymentDetails.supports(
             billingDetailsConfig = configuration.billingDetailsCollectionConfiguration,
             linkAccount = linkAccount
         ).not() && _uiState.value.collectMissingBillingDetailsForExistingPaymentMethods
+        // Tax can't be calculated without these, so recollect them regardless of the merchant's setting.
+        val isMissingAutomaticTaxBillingDetails = requiresBillingAddressForAutomaticTax &&
+            !selectedPaymentDetails.billingAddress?.toAddress().hasSufficientBillingDetailsForAutomaticTax()
+        val shouldCollectMissingBillingDetails = isMissingRequestedBillingDetails || isMissingAutomaticTaxBillingDetails
 
         if (shouldCollectMissingBillingDetails) {
             setProcessingState(false)
@@ -620,6 +671,9 @@ internal class WalletViewModel(
                         navigationManager = parentComponent.navigationManager,
                         dismissalCoordinator = parentComponent.dismissalCoordinator,
                         linkAccount = linkAccount,
+                        linkTotalUpdater = parentComponent.linkTotalUpdater,
+                        requiresBillingAddressForAutomaticTax =
+                            parentComponent.paymentMethodMetadata.requiresBillingAddressForAutomaticTax,
                         navigateAndClearStack = navigateAndClearStack,
                         linkLaunchMode = parentComponent.linkLaunchMode,
                         dismissWithResult = dismissWithResult

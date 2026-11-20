@@ -239,9 +239,23 @@ internal class LinkActivityViewModel @Inject constructor(
             )
             // Flows that end up in confirmation -> we can launch the web flow.
             is LinkLaunchMode.Confirmation,
-            is LinkLaunchMode.Full -> launchWebFlow?.let { launcher ->
-                navigate(LinkScreen.Loading, clearStack = true)
-                launcher.invoke(linkConfiguration, paymentMethodMetadata)
+            is LinkLaunchMode.Full -> if (paymentMethodMetadata.requiresBillingAddressForAutomaticTax) {
+                // Web Link can't update its total while it's open, so it can't support a total that depends on
+                // the billing address.
+                dismissWithResult(
+                    LinkActivityResult.Failed(
+                        error = IllegalStateException(
+                            "Native Link failed, and web Link doesn't support a total that depends on the " +
+                                "billing address."
+                        ),
+                        linkAccountUpdate = LinkAccountUpdate.None
+                    )
+                )
+            } else {
+                launchWebFlow?.let { launcher ->
+                    navigate(LinkScreen.Loading, clearStack = true)
+                    launcher.invoke(linkConfiguration, paymentMethodMetadata)
+                }
             }
         }
     }
