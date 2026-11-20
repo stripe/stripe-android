@@ -15,6 +15,7 @@ import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.hasBodyPart
 import com.stripe.android.networktesting.RequestMatchers.not
+import com.stripe.android.networktesting.enqueueConsumerSessionLookup
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.utils.TestRules
@@ -38,7 +39,7 @@ internal class ExpressCheckoutElementTest {
     @Test
     fun testSuccessfulGooglePayPayment() {
         // Link is disabled for ECE in this test, but this is still called for PE.
-        networkRule.enqueueLinkAccountLookup()
+        networkRule.enqueueConsumerSessionLookup()
 
         runExpressCheckoutElementScenario(
             networkRule = networkRule,
@@ -91,7 +92,7 @@ internal class ExpressCheckoutElementTest {
     fun testSuccessfulNativeLinkPayment() {
         // This is called twice during load - once for ECE, once for PE
         repeat(2) {
-            networkRule.enqueueLinkAccountLookup()
+            networkRule.enqueueConsumerSessionLookup()
         }
 
         runExpressCheckoutElementScenario(
@@ -116,7 +117,7 @@ internal class ExpressCheckoutElementTest {
             enqueueSuccessfulNativeLinkPayment()
 
             repeat(2) {
-                networkRule.enqueueLinkAccountLookup()
+                networkRule.enqueueConsumerSessionLookup()
             }
             networkRule.checkoutFetch()
 
@@ -130,7 +131,7 @@ internal class ExpressCheckoutElementTest {
     fun testGooglePayAndLinkLoad() {
         // This is called for both ECE and PE
         repeat(2) {
-            networkRule.enqueueLinkAccountLookup()
+            networkRule.enqueueConsumerSessionLookup()
         }
 
         runExpressCheckoutElementScenario(
@@ -152,7 +153,7 @@ internal class ExpressCheckoutElementTest {
     @Test
     fun testFailedGooglePayPayment() {
         repeat(2) {
-            networkRule.enqueueLinkAccountLookup()
+            networkRule.enqueueConsumerSessionLookup()
         }
 
         val expectedErrorMessage = "Google Pay failed"
@@ -167,7 +168,7 @@ internal class ExpressCheckoutElementTest {
             enqueueFailedGooglePayPayment(IllegalStateException(expectedErrorMessage))
 
             repeat(2) {
-                networkRule.enqueueLinkAccountLookup()
+                networkRule.enqueueConsumerSessionLookup()
             }
             networkRule.checkoutFetch()
 
@@ -180,7 +181,7 @@ internal class ExpressCheckoutElementTest {
     @Test
     fun testFailedNativeLinkPayment() {
         repeat(2) {
-            networkRule.enqueueLinkAccountLookup()
+            networkRule.enqueueConsumerSessionLookup()
         }
 
         val expectedErrorMessage = "Link failed"
@@ -195,7 +196,7 @@ internal class ExpressCheckoutElementTest {
             enqueueFailedNativeLinkPayment(IllegalStateException(expectedErrorMessage))
 
             repeat(2) {
-                networkRule.enqueueLinkAccountLookup()
+                networkRule.enqueueConsumerSessionLookup()
             }
             networkRule.checkoutFetch()
 
@@ -208,7 +209,7 @@ internal class ExpressCheckoutElementTest {
     @Test
     fun testLinkIsHiddenWhenShippingAddressIsRequired() {
         repeat(2) {
-            networkRule.enqueueLinkAccountLookup()
+            networkRule.enqueueConsumerSessionLookup()
         }
 
         runExpressCheckoutElementScenario(
@@ -229,7 +230,7 @@ internal class ExpressCheckoutElementTest {
     @Test
     fun testGooglePayCollectsAndConfirmsRequiredShippingAddress() {
         repeat(2) {
-            networkRule.enqueueLinkAccountLookup()
+            networkRule.enqueueConsumerSessionLookup()
         }
 
         runExpressCheckoutElementScenario(
@@ -275,7 +276,7 @@ internal class ExpressCheckoutElementTest {
     @Test
     fun testGooglePayUpdatesAutomaticTaxForRequiredShippingAddress() {
         repeat(2) {
-            networkRule.enqueueLinkAccountLookup()
+            networkRule.enqueueConsumerSessionLookup()
         }
 
         runExpressCheckoutElementScenario(
@@ -340,7 +341,7 @@ internal class ExpressCheckoutElementTest {
     @Test
     fun testGooglePayCollectsAndConfirmsRequiredBillingAddress() {
         repeat(2) {
-            networkRule.enqueueLinkAccountLookup()
+            networkRule.enqueueConsumerSessionLookup()
         }
 
         runExpressCheckoutElementScenario(
@@ -441,7 +442,7 @@ internal class ExpressCheckoutElementTest {
     @Test
     fun testNativeLinkCollectsAndConfirmsRequiredBillingAddress() {
         repeat(2) {
-            networkRule.enqueueLinkAccountLookup()
+            networkRule.enqueueConsumerSessionLookup()
         }
 
         runExpressCheckoutElementScenario(

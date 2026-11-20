@@ -11,6 +11,7 @@ import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.RequestMatchers.query
 import com.stripe.android.networktesting.TestApiKeys
+import com.stripe.android.networktesting.enqueueConsumerSessionLookup
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.expectNoResult
@@ -371,10 +372,7 @@ internal class PaymentSheetLoadParallelismTest(
         }
 
         fun enqueueLinkAccountLookup() {
-            networkRule.enqueue(
-                method("POST"),
-                path("/v1/consumers/sessions/lookup"),
-            ) { _, response ->
+            networkRule.enqueueConsumerSessionLookup { response ->
                 enqueueTrackedResponse(Request.LinkAccountLookup) {
                     response.setBody("""{"exists":"false"}""")
                 }

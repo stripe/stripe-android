@@ -11,6 +11,7 @@ import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.ResponseReplacement
+import com.stripe.android.networktesting.enqueueConsumerSessionLookup
 import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.utils.ConfirmationType
@@ -154,7 +155,7 @@ internal class HCaptchaTokenTest(
         val page = createPaymentSheetPage()
         page.fillOutCardDetails()
 
-        enqueueConsumerSessionLookup()
+        networkRule.enqueueConsumerSessionLookup()
 
         page.clickOnLinkCheckbox()
         page.fillOutLinkEmail()
@@ -172,15 +173,6 @@ internal class HCaptchaTokenTest(
     }
 
     private fun createPaymentSheetPage() = PaymentSheetPage(testRules.compose)
-
-    private fun enqueueConsumerSessionLookup() {
-        networkRule.enqueue(
-            method("POST"),
-            path("/v1/consumers/sessions/lookup"),
-        ) { response ->
-            response.testBodyFromFile("consumer-session-lookup-success.json")
-        }
-    }
 
     private fun enqueueConsumerSignUp() {
         networkRule.enqueue(

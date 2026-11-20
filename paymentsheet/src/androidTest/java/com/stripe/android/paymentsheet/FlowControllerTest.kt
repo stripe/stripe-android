@@ -29,6 +29,7 @@ import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.RequestMatchers.query
 import com.stripe.android.networktesting.TestApiKeys
+import com.stripe.android.networktesting.enqueueConsumerSessionLookup
 import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.WalletButtonsPage
@@ -1136,12 +1137,7 @@ internal class FlowControllerTest(
             response.testBodyFromFile("elements-sessions-requires_pm_with_link_and_cs.json")
         }
 
-        networkRule.enqueue(
-            method("POST"),
-            path("/v1/consumers/sessions/lookup"),
-        ) { response ->
-            response.testBodyFromFile("consumer-session-lookup-success.json")
-        }
+        networkRule.enqueueConsumerSessionLookup()
 
         testContext.flowController.configureWithPaymentIntent(
             paymentIntentClientSecret = "pi_123_secret_123",
@@ -1200,12 +1196,7 @@ internal class FlowControllerTest(
             response.testBodyFromFile("elements-sessions-requires_pm_with_link_and_cs.json")
         }
 
-        networkRule.enqueue(
-            method("POST"),
-            path("/v1/consumers/sessions/lookup"),
-        ) { response ->
-            response.testBodyFromFile("consumer-session-lookup-success.json")
-        }
+        networkRule.enqueueConsumerSessionLookup()
 
         val activityLaunchObserver = ActivityLaunchObserver(PaymentOptionsActivity::class.java)
 

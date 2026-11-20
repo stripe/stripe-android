@@ -32,6 +32,7 @@ import com.stripe.android.elements.PaymentElement
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
+import com.stripe.android.networktesting.enqueueConsumerSessionLookup
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedContentPage
@@ -286,9 +287,9 @@ internal class CheckoutPaymentElementAutomaticTaxTest {
                 json.getJSONObject("saved_payment_method_options").put("payment_method_save", "enabled")
             },
             modifyRetrievedSession = ::addCustomerWithoutPaymentMethods,
-            beforeConfigure = { networkRule.enqueueLinkAccountLookup() },
-            beforeOpenCardForm = { networkRule.enqueueLinkAccountLookup() },
-            beforeConfirm = { networkRule.enqueueLinkAccountLookup() },
+            beforeConfigure = { networkRule.enqueueConsumerSessionLookup() },
+            beforeOpenCardForm = { networkRule.enqueueConsumerSessionLookup() },
+            beforeConfirm = { networkRule.enqueueConsumerSessionLookup() },
         )
 
     private fun runConfirmFailsForMissingShippingTaxLocationTest(
