@@ -16,8 +16,7 @@ import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor.Companion.setDefaultPaymentMethodErrorMessage
-import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor.Companion.updateCardBrandErrorMessage
-import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor.Companion.updatesFailedErrorMessage
+import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor.Companion.updateCardErrorMessage
 import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
@@ -232,7 +231,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
                 val state = awaitItem()
                 // Save button is still enabled -- the user could try again.
                 assertThat(state.isSaveButtonEnabled).isTrue()
-                assertThat(state.error).isEqualTo(updateCardBrandErrorMessage)
+                assertThat(state.error).isEqualTo(updateCardErrorMessage)
             }
         }
     }
@@ -415,7 +414,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
             updateCardAndDefaultPaymentMethod(interactor)
 
             interactor.state.test {
-                assertThat(awaitItem().error).isEqualTo(updateCardBrandErrorMessage)
+                assertThat(awaitItem().error).isEqualTo(updateCardErrorMessage)
             }
         }
     }
@@ -451,7 +450,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
             updateCardAndDefaultPaymentMethod(interactor)
 
             interactor.state.test {
-                assertThat(awaitItem().error).isEqualTo(updatesFailedErrorMessage)
+                assertThat(awaitItem().error).isEqualTo(updateCardErrorMessage)
             }
         }
     }
