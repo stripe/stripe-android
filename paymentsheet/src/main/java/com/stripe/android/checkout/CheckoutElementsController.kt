@@ -1539,6 +1539,7 @@ class CheckoutElementsController @Inject internal constructor(
          *
          * @property paymentStatus The payment status after Checkout completed.
          */
+        @Poko
         @CheckoutSessionPreview
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         class Completed internal constructor(
