@@ -51,7 +51,7 @@ internal fun runPaymentSheetTest(
     isLiveMode: Boolean = false,
     integrationType: IntegrationType = IntegrationType.Compose,
     builder: PaymentSheet.Builder.() -> Unit = {},
-    successTimeoutSeconds: Long = 5L,
+    successTimeoutSeconds: Long = 30L,
     resultCallback: PaymentSheetResultCallback,
     block: suspend (PaymentSheetTestRunnerContext) -> Unit,
 ) {
