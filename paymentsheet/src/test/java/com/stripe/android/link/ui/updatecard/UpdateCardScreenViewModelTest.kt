@@ -9,6 +9,7 @@ import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkDismissalCoordinator
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkScreen.UpdateCard.BillingDetailsUpdateFlow
+import com.stripe.android.link.LinkTotalUpdaterFactory
 import com.stripe.android.link.RealLinkDismissalCoordinator
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.FakeLinkAccountManager
@@ -484,6 +485,8 @@ class UpdateCardScreenViewModelTest {
             ),
             billingDetailsUpdateFlow = billingDetailsUpdateFlow,
             linkLaunchMode = LinkLaunchMode.Full(showSecondaryButton = true),
+            linkTotalUpdater = LinkTotalUpdaterFactory.disabled(),
+            requiresBillingAddressForAutomaticTax = false,
             dismissWithResult = {}
         ).also { viewModelStoreRule.track(it) }
     }

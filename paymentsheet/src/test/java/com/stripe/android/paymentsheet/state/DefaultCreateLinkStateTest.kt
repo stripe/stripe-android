@@ -95,33 +95,20 @@ internal class DefaultCreateLinkStateTest {
         )
 
     @Test
-    fun `link is disabled when checkout session should disable wallets for automatic tax billing`() = runTest {
-        val createLinkState = createLinkStateFactory()
-        val elementsSession = createElementsSession()
-        val initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
-            collectedEmail = null,
-            instancesKey = "DefaultCreateLinkStateTest",
-            checkoutSessionResponse = CheckoutSessionResponseFactory.create(
-                elementsSession = elementsSession,
-                automaticTaxEnabled = true,
-                taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
-            ),
-            configuredElements = emptyList(),
-        )
-
-        val result = createLinkState(
-            elementsSession = elementsSession,
-            configuration = PaymentSheetFixtures.CONFIG_MINIMUM.asCommonConfiguration(),
-            initializationMode = initializationMode,
-            customerMetadata = null,
-            clientAttributionMetadata = DEFAULT_CLIENT_ATTRIBUTION_METADATA,
-            apiConfiguration = DEFAULT_API_CONFIG,
-        )
+    fun `web Link is disabled when checkout session collects tax from the billing address`() = runTest {
+        val result = createLinkStateForAutomaticTaxBilling(useNativeLink = false)
 
         assertThat(result).isInstanceOf<LinkDisabledState>()
         val disabledState = result as LinkDisabledState
         assertThat(disabledState.linkDisabledReasons)
             .contains(LinkDisabledReason.AutomaticTaxBillingAddress)
+    }
+
+    @Test
+    fun `native Link is enabled when checkout session collects tax from the billing address`() = runTest {
+        val result = createLinkStateForAutomaticTaxBilling(useNativeLink = true)
+
+        assertThat(result).isInstanceOf<LinkState>()
     }
 
     @Test
@@ -229,6 +216,30 @@ internal class DefaultCreateLinkStateTest {
 
         assertThat(result).isInstanceOf<LinkState>()
         assertThat((result as LinkState).signupMode).isEqualTo(LinkSignupMode.AlongsideSaveForFutureUse)
+    }
+
+    private suspend fun createLinkStateForAutomaticTaxBilling(useNativeLink: Boolean): LinkStateResult {
+        val createLinkState = createLinkStateFactory(useNativeLink = useNativeLink)
+        val elementsSession = createElementsSession()
+        val initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+            collectedEmail = null,
+            instancesKey = "DefaultCreateLinkStateTest",
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+                elementsSession = elementsSession,
+                automaticTaxEnabled = true,
+                taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+            ),
+            configuredElements = emptyList(),
+        )
+
+        return createLinkState(
+            elementsSession = elementsSession,
+            configuration = PaymentSheetFixtures.CONFIG_MINIMUM.asCommonConfiguration(),
+            initializationMode = initializationMode,
+            customerMetadata = null,
+            clientAttributionMetadata = DEFAULT_CLIENT_ATTRIBUTION_METADATA,
+            apiConfiguration = DEFAULT_API_CONFIG,
+        )
     }
 
     private fun testLinkInlineSignupWithSavedPaymentMethodsEnabledFlag(

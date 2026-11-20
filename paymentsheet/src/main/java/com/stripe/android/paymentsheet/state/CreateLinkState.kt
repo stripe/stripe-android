@@ -155,7 +155,10 @@ internal class DefaultCreateLinkState @Inject constructor(
 
         when (initializationMode.walletsDisabledReason()) {
             WalletsDisabledReason.AutomaticTaxBillingAddress -> {
-                add(LinkDisabledReason.AutomaticTaxBillingAddress)
+                // Native Link can update its total when the billing address changes, but web Link can't.
+                if (useWebLink) {
+                    add(LinkDisabledReason.AutomaticTaxBillingAddress)
+                }
             }
             null -> Unit
         }

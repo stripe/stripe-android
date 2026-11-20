@@ -48,4 +48,5 @@ internal class FakeNativeLinkComponent(
     override val addPaymentMethodOptionsFactory: AddPaymentMethodOptions.Factory = mock(),
     override val oAuthConsentViewModelComponentFactory: OAuthConsentViewModelComponent.Factory = mock(),
     override val webLinkAuthChannel: WebLinkAuthChannel = WebLinkAuthChannel(),
+    override val linkTotalUpdater: LinkTotalUpdater = LinkTotalUpdaterFactory.disabled(),
 ) : NativeLinkComponent

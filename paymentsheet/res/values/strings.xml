@@ -114,6 +114,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_sign_up_message_v2_with_brand">Pay faster everywhere %s is accepted.</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_link_sign_up_terms"><![CDATA[By continuing you agree to the <terms>Terms</terms> and <privacy>Privacy Policy</privacy>.]]></string>
+  <!-- Error shown when the order total changed because tax was recalculated from the billing address of the selected payment method. -->
+  <string name="stripe_link_total_updated_for_billing_address">Your total was updated based on your billing address. Review it and try again.</string>
   <!-- Confirm CTA for the update card screen in Link native -->
   <string name="stripe_link_update_card_confirm_cta">Update card</string>
   <!-- Text informing the user that the card to be updated is their default -->

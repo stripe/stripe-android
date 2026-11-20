@@ -29,6 +29,7 @@ import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkDismissalCoordinator
 import com.stripe.android.link.LinkLaunchMode
+import com.stripe.android.link.LinkTotalUpdaterFactory
 import com.stripe.android.link.RealLinkDismissalCoordinator
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.FakeLinkAccountManager
@@ -819,6 +820,8 @@ internal class WalletScreenTest {
             dismissWithResult = {},
             navigationManager = navigationManager,
             linkLaunchMode = linkLaunchMode,
+            linkTotalUpdater = LinkTotalUpdaterFactory.disabled(),
+            requiresBillingAddressForAutomaticTax = false,
             dismissalCoordinator = dismissalCoordinator,
             completeLinkFlow = DefaultCompleteLinkFlow(
                 linkConfirmationHandler = linkConfirmationHandler,
