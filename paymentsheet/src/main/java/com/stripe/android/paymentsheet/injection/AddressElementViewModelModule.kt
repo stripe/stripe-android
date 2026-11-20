@@ -15,7 +15,7 @@ import com.stripe.android.paymentsheet.addresselement.AddressElementActivityCont
 import com.stripe.android.paymentsheet.addresselement.AddressElementPrimaryButtonAction
 import com.stripe.android.paymentsheet.addresselement.DefaultStripeAutocompleteRepository
 import com.stripe.android.paymentsheet.addresselement.StripeAutocompleteRepository
-import com.stripe.android.paymentsheet.addresselement.StripeHostedPlacesClientProxy
+import com.stripe.android.paymentsheet.addresselement.StripeHostedAddressAutocompleteClient
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressElementEventReporter
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.paymentsheet.addresselement.analytics.CheckoutShippingAddressElementEventReporter
@@ -23,7 +23,7 @@ import com.stripe.android.paymentsheet.addresselement.analytics.StandaloneAddres
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse.TaxAddressSource
 import com.stripe.android.paymentsheet.repositories.ElementsSessionClientParams
-import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
+import com.stripe.android.ui.core.elements.autocomplete.AddressAutocompleteClient
 import dagger.Module
 import dagger.Provides
 import javax.inject.Named
@@ -38,7 +38,7 @@ import javax.inject.Singleton
 )
 internal class AddressElementViewModelModule {
     companion object {
-        internal const val INLINE_PLACES_CLIENT = "inline_places_client"
+        internal const val INLINE_AUTOCOMPLETE_CLIENT = "inline_autocomplete_client"
     }
 
     @Provides
@@ -101,15 +101,15 @@ internal class AddressElementViewModelModule {
 
     @Provides
     @Singleton
-    @Named(INLINE_PLACES_CLIENT)
-    internal fun provideInlinePlacesClient(
+    @Named(INLINE_AUTOCOMPLETE_CLIENT)
+    internal fun provideInlineAutocompleteClient(
         args: AddressElementActivityContract.Args,
         stripeAutocompleteRepository: StripeAutocompleteRepository,
         addressLauncherEventReporter: AddressLauncherEventReporter,
-    ): PlacesClientProxy? {
+    ): AddressAutocompleteClient? {
         val config = args.config ?: return null
         return if (config.useStripeHostedAutocomplete) {
-            StripeHostedPlacesClientProxy(
+            StripeHostedAddressAutocompleteClient(
                 repository = stripeAutocompleteRepository,
                 eventReporter = addressLauncherEventReporter,
             )

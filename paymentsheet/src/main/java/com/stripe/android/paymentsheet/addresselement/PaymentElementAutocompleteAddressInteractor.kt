@@ -29,7 +29,7 @@ internal class PaymentElementAutocompleteAddressInteractor(
             ) {
                 activeInlineInteractor?.dispose()
                 return BillingInlineAutocompleteAddressInteractor(
-                    placesClient = StripeHostedPlacesClientProxy(
+                    autocompleteClient = StripeHostedAddressAutocompleteClient(
                         repository = stripeAutocompleteRepository,
                         eventReporter = eventReporter,
                     ),

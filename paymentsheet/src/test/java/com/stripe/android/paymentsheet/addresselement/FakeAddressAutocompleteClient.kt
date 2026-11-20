@@ -3,14 +3,14 @@ package com.stripe.android.paymentsheet.addresselement
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import com.stripe.android.model.Address
-import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
+import com.stripe.android.ui.core.elements.autocomplete.AddressAutocompleteClient
 import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
 import java.util.Locale
 
-internal class FakePlacesClientProxy(
+internal class FakeAddressAutocompleteClient(
     var findPredictionsResult: Result<FindAutocompletePredictionsResponse>,
     var fetchPlaceResult: Result<Address>,
-) : PlacesClientProxy {
+) : AddressAutocompleteClient {
     var onBeforeFindPredictions: (suspend () -> Unit)? = null
     var onBeforeFetchPlace: (suspend () -> Unit)? = null
 

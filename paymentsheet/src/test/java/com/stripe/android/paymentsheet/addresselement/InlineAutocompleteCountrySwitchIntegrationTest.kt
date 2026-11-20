@@ -31,7 +31,7 @@ class InlineAutocompleteCountrySwitchIntegrationTest {
     @Test
     fun `switching country unsupported then back to supported reverts to inline mode`() =
         runTest(UnconfinedTestDispatcher()) {
-            val fakePlaces = FakePlacesClientProxy(
+            val fakeAutocomplete = FakeAddressAutocompleteClient(
                 findPredictionsResult = Result.success(FindAutocompletePredictionsResponse(emptyList())),
                 fetchPlaceResult = Result.success(Address()),
             )
@@ -40,7 +40,7 @@ class InlineAutocompleteCountrySwitchIntegrationTest {
                 shouldUseStripeHostedAutocomplete = true,
             )
             val interactor = BillingInlineAutocompleteAddressInteractor(
-                placesClient = fakePlaces,
+                autocompleteClient = fakeAutocomplete,
                 autocompleteConfig = config,
                 coroutineScope = backgroundScope,
             )
