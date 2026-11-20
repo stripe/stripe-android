@@ -33,9 +33,7 @@ internal class TestAuthorization : BasePlaygroundTest() {
     fun testAuthorizeFailure() {
         testDriver.confirmNewOrGuestComplete(
             testParameters.copy(
-                authorizationAction = AuthorizeAction.Fail(
-                    expectedError = "Your payment method was declined.",
-                ),
+                authorizationAction = AuthorizeAction.Fail,
             )
         )
     }
