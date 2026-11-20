@@ -132,7 +132,7 @@ internal sealed interface AuthorizeAction {
         override val isConsideredDone: Boolean = true
     }
 
-    data class Fail(val expectedError: String) : AuthorizeAction {
+    data object Fail : AuthorizeAction {
         override fun text(isSetup: Boolean): String = "FAIL TEST PAYMENT"
 
         override val requiresBrowser: Boolean = true
