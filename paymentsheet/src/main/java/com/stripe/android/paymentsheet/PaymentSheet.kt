@@ -126,6 +126,7 @@ class PaymentSheet internal constructor(
     )
     constructor(
         activity: ComponentActivity,
+        @Suppress("DEPRECATION")
         externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler,
         callback: PaymentSheetResultCallback,
     ) : this(
@@ -214,6 +215,7 @@ class PaymentSheet internal constructor(
     constructor(
         activity: ComponentActivity,
         createIntentCallback: CreateIntentCallback,
+        @Suppress("DEPRECATION")
         externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler,
         paymentResultCallback: PaymentSheetResultCallback,
     ) : this(
@@ -283,6 +285,7 @@ class PaymentSheet internal constructor(
     )
     constructor(
         fragment: Fragment,
+        @Suppress("DEPRECATION")
         externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler,
         callback: PaymentSheetResultCallback,
     ) : this(
@@ -371,6 +374,7 @@ class PaymentSheet internal constructor(
     constructor(
         fragment: Fragment,
         createIntentCallback: CreateIntentCallback,
+        @Suppress("DEPRECATION")
         externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler,
         paymentResultCallback: PaymentSheetResultCallback,
     ) : this(
@@ -407,6 +411,13 @@ class PaymentSheet internal constructor(
          * @param handler Called when a user confirms payment for an external payment method. Use with
          * [Configuration.Builder.externalPaymentMethods] to specify external payment methods.
          */
+        @Deprecated(
+            message = "External payment methods are deprecated. " +
+                "Use [custom payment methods](https://docs.stripe.com/payments/mobile/custom-payment-methods) " +
+                "instead.",
+            level = DeprecationLevel.WARNING,
+        )
+        @Suppress("DEPRECATION")
         fun externalPaymentMethodConfirmHandler(handler: ExternalPaymentMethodConfirmHandler) = apply {
             callbacksBuilder.externalPaymentMethodConfirmHandler(handler)
         }
@@ -1173,6 +1184,12 @@ class PaymentSheet internal constructor(
              * supported payment methods, see
              * https://docs.stripe.com/payments/external-payment-methods?platform=android#available-external-payment-methods.
              */
+            @Deprecated(
+                message = "External payment methods are deprecated. " +
+                    "Use [custom payment methods](https://docs.stripe.com/payments/mobile/custom-payment-methods) " +
+                    "instead.",
+                level = DeprecationLevel.WARNING,
+            )
             fun externalPaymentMethods(externalPaymentMethods: List<String>): Builder = apply {
                 this.externalPaymentMethods = externalPaymentMethods
             }
@@ -1315,6 +1332,7 @@ class PaymentSheet internal constructor(
             CardFundingFilteringPrivatePreview::class,
             AddressAutocompletePreview::class,
         )
+        @Suppress("DEPRECATION")
         internal fun newBuilder(): Builder = Builder(merchantDisplayName)
             .customer(customer)
             .googlePay(googlePay)
@@ -4149,6 +4167,13 @@ class PaymentSheet internal constructor(
             /**
              * @param handler Called when a user confirms payment for an external payment method.
              */
+            @Deprecated(
+                message = "External payment methods are deprecated. " +
+                    "Use [custom payment methods](https://docs.stripe.com/payments/mobile/custom-payment-methods) " +
+                    "instead.",
+                level = DeprecationLevel.WARNING,
+            )
+            @Suppress("DEPRECATION")
             fun externalPaymentMethodConfirmHandler(handler: ExternalPaymentMethodConfirmHandler) = apply {
                 callbacksBuilder.externalPaymentMethodConfirmHandler(handler)
             }
@@ -4339,6 +4364,7 @@ class PaymentSheet internal constructor(
                         ".build(activity)"
                 )
             )
+            @Suppress("DEPRECATION")
             fun create(
                 activity: ComponentActivity,
                 externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler,
@@ -4432,6 +4458,7 @@ class PaymentSheet internal constructor(
                         ".build(activity)"
                 )
             )
+            @Suppress("DEPRECATION")
             fun create(
                 activity: ComponentActivity,
                 paymentOptionCallback: PaymentOptionCallback,
@@ -4511,6 +4538,7 @@ class PaymentSheet internal constructor(
                         ".build(fragment)"
                 )
             )
+            @Suppress("DEPRECATION")
             fun create(
                 fragment: Fragment,
                 externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler,
@@ -4604,6 +4632,7 @@ class PaymentSheet internal constructor(
                         ".build(fragment)"
                 )
             )
+            @Suppress("DEPRECATION")
             fun create(
                 fragment: Fragment,
                 paymentOptionCallback: PaymentOptionCallback,

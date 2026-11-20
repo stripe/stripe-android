@@ -8,6 +8,12 @@ import com.stripe.android.model.PaymentMethod
  * To learn more about external payment methods, see
  * https://docs.stripe.com/payments/external-payment-methods?platform=android.
  */
+@Deprecated(
+    message = "External payment methods are deprecated. " +
+        "Use [custom payment methods](https://docs.stripe.com/payments/mobile/custom-payment-methods) " +
+        "instead.",
+    level = DeprecationLevel.WARNING,
+)
 fun interface ExternalPaymentMethodConfirmHandler {
 
     /**

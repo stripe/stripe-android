@@ -168,6 +168,7 @@ class PaymentSheetConfigurationKtxTest {
     }
 
     @Test
+    @Suppress("DEPRECATION")
     fun `'validate' should succeed when external payment methods have correct prefix`() {
         val configWithValidExternalPaymentMethods = configuration.newBuilder()
             .externalPaymentMethods(listOf("external_paypal", "external_fawry"))
@@ -183,6 +184,7 @@ class PaymentSheetConfigurationKtxTest {
     }
 
     @Test
+    @Suppress("DEPRECATION")
     fun `'validate' should fail when external payment method does not have external_ prefix`() {
         val configWithInvalidExternalPaymentMethod = configuration.newBuilder()
             .externalPaymentMethods(listOf("paypal", "external_fawry"))
@@ -205,6 +207,7 @@ class PaymentSheetConfigurationKtxTest {
     }
 
     @Test
+    @Suppress("DEPRECATION")
     fun `'validate' should succeed when external payment methods list is empty`() {
         val configWithEmptyExternalPaymentMethods = configuration.newBuilder()
             .externalPaymentMethods(emptyList())
@@ -220,6 +223,7 @@ class PaymentSheetConfigurationKtxTest {
     }
 
     @Test
+    @Suppress("DEPRECATION")
     fun `'validate' should fail when multiple external payment methods have incorrect prefix`() {
         val configWithMultipleInvalidExternalPaymentMethods = configuration.newBuilder()
             .externalPaymentMethods(listOf("paypal", "venmo", "external_fawry"))
@@ -242,6 +246,7 @@ class PaymentSheetConfigurationKtxTest {
     }
 
     @Test
+    @Suppress("DEPRECATION")
     fun `'validate' should succeed when in live mode with invalid external payment methods`() {
         val configWithInvalidExternalPaymentMethods = configuration.newBuilder()
             .externalPaymentMethods(listOf("paypal", "venmo"))
@@ -432,6 +437,7 @@ class PaymentSheetConfigurationKtxTest {
     }
 
     @Test
+    @Suppress("DEPRECATION")
     fun `'validate' should fail when using CheckoutSession mode with non-empty externalPaymentMethods`() {
         val config = configuration.newBuilder()
             .customer(null)

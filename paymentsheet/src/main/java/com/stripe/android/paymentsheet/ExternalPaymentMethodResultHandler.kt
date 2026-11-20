@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.stripe.android.paymentsheet
 
 import android.app.Activity
@@ -12,6 +14,12 @@ import kotlinx.parcelize.Parcelize
 /**
  * Handler used to respond to external payment method confirm results.
  */
+@Deprecated(
+    message = "External payment methods are deprecated. " +
+        "Use [custom payment methods](https://docs.stripe.com/payments/mobile/custom-payment-methods) " +
+        "instead.",
+    level = DeprecationLevel.WARNING,
+)
 object ExternalPaymentMethodResultHandler {
 
     /**
@@ -45,6 +53,12 @@ object ExternalPaymentMethodResultHandler {
 /**
  * The result of an attempt to confirm an external payment method.
  */
+@Deprecated(
+    message = "External payment methods are deprecated. " +
+        "Use [custom payment methods](https://docs.stripe.com/payments/mobile/custom-payment-methods) " +
+        "instead.",
+    level = DeprecationLevel.WARNING,
+)
 sealed class ExternalPaymentMethodResult : Parcelable {
 
     internal abstract fun toPaymentResult(): PaymentResult
