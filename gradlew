@@ -213,6 +213,24 @@ set -- \
         -jar "$APP_HOME/gradle/wrapper/gradle-wrapper.jar" \
         "$@"
 
+# Apply the internal devbox network configuration to every Gradle invocation on a devbox.
+devbox_init="$APP_HOME/../ci/devbox-repositories.gradle"
+if [ -f "$devbox_init" ]; then
+    case "$(hostname -s)" in
+        *mydev--*)
+            set -- "$@" --init-script "$devbox_init"
+            # Gradle's download happens before the init script can run.
+            proxy=${HTTPS_PROXY:-${https_proxy:-}}
+            proxy=${proxy#http://}
+            proxy_host=${proxy%:*}
+            if [ "$proxy_host" != "$proxy" ]; then
+                set -- "-Dhttps.proxyHost=$proxy_host" "-Dhttps.proxyPort=${proxy##*:}" \
+                    '-Dhttp.nonProxyHosts=*.stripe.build|localhost|127.*|[::1]' "$@"
+            fi
+            ;;
+    esac
+fi
+
 # Stop when "xargs" is not available.
 if ! command -v xargs >/dev/null 2>&1
 then
