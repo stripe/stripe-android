@@ -6,7 +6,7 @@ import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePr
 import java.util.Locale
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-interface PlacesClientProxy {
+interface AddressAutocompleteClient {
     suspend fun findAutocompletePredictions(
         query: String?,
         country: String,

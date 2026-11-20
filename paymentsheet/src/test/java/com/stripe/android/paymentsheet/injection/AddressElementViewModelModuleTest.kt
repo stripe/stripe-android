@@ -22,7 +22,7 @@ import com.stripe.android.paymentsheet.addresselement.AddressElementResultStateH
 import com.stripe.android.paymentsheet.addresselement.AddressLauncher
 import com.stripe.android.paymentsheet.addresselement.FakeStripeAutocompleteRepository
 import com.stripe.android.paymentsheet.addresselement.InputAddressViewModel
-import com.stripe.android.paymentsheet.addresselement.StripeHostedPlacesClientProxy
+import com.stripe.android.paymentsheet.addresselement.StripeHostedAddressAutocompleteClient
 import com.stripe.android.paymentsheet.addresselement.analytics.FakeAddressLauncherEventReporter
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
@@ -278,10 +278,10 @@ class AddressElementViewModelModuleTest {
     }
 
     @Test
-    fun `provideInlinePlacesClient returns hosted client by default`() {
+    fun `provideInlineAutocompleteClient returns hosted client by default`() {
         val addressLauncherEventReporter = FakeAddressLauncherEventReporter()
         val stripeAutocompleteRepository = FakeStripeAutocompleteRepository()
-        val placesClient = module.provideInlinePlacesClient(
+        val autocompleteClient = module.provideInlineAutocompleteClient(
             args = AddressElementActivityContract.Args.Standalone(
                 apiConfiguration = DEFAULT_API_CONFIG,
                 config = AddressLauncher.Configuration(),
@@ -290,7 +290,7 @@ class AddressElementViewModelModuleTest {
             addressLauncherEventReporter = addressLauncherEventReporter,
         )
 
-        assertThat(placesClient).isInstanceOf(StripeHostedPlacesClientProxy::class.java)
+        assertThat(autocompleteClient).isInstanceOf(StripeHostedAddressAutocompleteClient::class.java)
         stripeAutocompleteRepository.ensureAllEventsConsumed()
         addressLauncherEventReporter.validate()
     }
@@ -340,7 +340,7 @@ class AddressElementViewModelModuleTest {
                 analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
                 analyticsRequestFactory = createAnalyticsRequestFactory(),
             ),
-            placesClient = null,
+            autocompleteClient = null,
             primaryButtonAction = module.providePrimaryButtonAction(
                 args = args,
                 taxRegionUpdater = createTaxRegionUpdater(),

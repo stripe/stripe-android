@@ -7,7 +7,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import java.util.Locale
 
-class StripeHostedPlacesClientProxyTest {
+class StripeHostedAddressAutocompleteClientTest {
 
     @Test
     fun `findAutocompletePredictions maps result to FindAutocompletePredictionsResponse`() = runTest {
@@ -532,7 +532,7 @@ class StripeHostedPlacesClientProxyTest {
     private fun createProxy(
         repository: FakeStripeAutocompleteRepository = defaultRepository(),
         eventReporter: FakeAddressLauncherEventReporter = FakeAddressLauncherEventReporter(),
-    ) = StripeHostedPlacesClientProxy(
+    ) = StripeHostedAddressAutocompleteClient(
         repository = repository,
         eventReporter = eventReporter,
     )

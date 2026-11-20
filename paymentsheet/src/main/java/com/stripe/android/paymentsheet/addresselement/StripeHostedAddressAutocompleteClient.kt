@@ -4,16 +4,16 @@ import android.text.SpannableString
 import androidx.appcompat.app.AppCompatDelegate
 import com.stripe.android.model.Address
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
-import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
+import com.stripe.android.ui.core.elements.autocomplete.AddressAutocompleteClient
 import com.stripe.android.ui.core.elements.autocomplete.model.AutocompletePrediction
 import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
 import java.util.Locale
 import java.util.UUID
 
-internal class StripeHostedPlacesClientProxy(
+internal class StripeHostedAddressAutocompleteClient(
     private val repository: StripeAutocompleteRepository,
     private val eventReporter: AddressLauncherEventReporter,
-) : PlacesClientProxy {
+) : AddressAutocompleteClient {
     private val lock = Any()
     private var sessionToken: String = newSessionToken()
     private var lastQueryLength: Int = 0
