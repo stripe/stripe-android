@@ -204,9 +204,9 @@ class CurrencySelectorElement @Inject internal constructor(
             )
 
             internal companion object {
-                const val DEFAULT_VERTICAL_PADDING_DP = 4f
-                const val DEFAULT_SIZE_SCALE_FACTOR = 1.0f
-                const val MIN_SECONDARY_ALPHA = 0.5f
+                private const val DEFAULT_VERTICAL_PADDING_DP = 4f
+                private const val DEFAULT_SIZE_SCALE_FACTOR = 1.0f
+                private const val MIN_SECONDARY_ALPHA = 0.5f
             }
         }
     }
