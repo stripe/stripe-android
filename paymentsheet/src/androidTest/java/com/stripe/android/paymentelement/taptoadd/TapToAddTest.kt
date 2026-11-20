@@ -1,8 +1,10 @@
 package com.stripe.android.paymentelement.taptoadd
 
+import android.graphics.Bitmap
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import com.stripe.android.common.taptoadd.TapToAddStripeImageLoaderFactory
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
@@ -22,18 +24,19 @@ import com.stripe.android.tta.testing.TapToAddConfirmationPage
 import com.stripe.android.tta.testing.TapToAddLinkTestHelper
 import com.stripe.android.tta.testing.TapToAddSavedPaymentMethodPage
 import com.stripe.android.tta.testing.TerminalTestDelegate
+import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.paymentelementtestpages.FormPage
 import com.stripe.paymentelementtestpages.VerticalModePage
 import com.stripe.stripeterminal.external.models.TerminalErrorCode
 import com.stripe.stripeterminal.external.models.TerminalException
 import okhttp3.mockwebserver.MockResponse
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.ExternalResource
+import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 import kotlin.time.Duration.Companion.seconds
 
-@Ignore("Temporarily disabled due to frequent test failures")
 @OptIn(TapToAddPreview::class)
 @RunWith(TestParameterInjector::class)
 internal class TapToAddTest(
@@ -49,8 +52,7 @@ internal class TapToAddTest(
 
     val terminalWrapperTestRule = TerminalWrapperTestRule(enabled = true)
 
-    @get:Rule
-    val testRules: TestRules = TestRules.create(
+    private val testRules: TestRules = TestRules.create(
         networkRule = networkRule,
         terminalTestRule = terminalWrapperTestRule,
     )
@@ -68,6 +70,30 @@ internal class TapToAddTest(
     private val confirmationPage = TapToAddConfirmationPage(composeTestRule)
     private val savedPaymentMethodPage = TapToAddSavedPaymentMethodPage(composeTestRule, linkHelper)
     private val tapToAddCardFormPage = TapToAddCardFormPage(composeTestRule)
+
+    // Keep the override installed through activity/Compose teardown, then restore the prior loader.
+    private val cardArtRule: ExternalResource = object : ExternalResource() {
+        private var previousImageLoader: StripeImageLoader? = null
+
+        override fun before() {
+            previousImageLoader = TapToAddStripeImageLoaderFactory.override
+            // Card art is not under test. Avoid CDN downloads starving payment collection's IO work.
+            TapToAddStripeImageLoaderFactory.override = object : StripeImageLoader {
+                override suspend fun load(url: String, width: Int, height: Int): Result<Bitmap?> = Result.success(null)
+
+                override suspend fun load(url: String): Result<Bitmap?> = Result.success(null)
+
+                override suspend fun get(url: String): Result<Bitmap?> = Result.success(null)
+            }
+        }
+
+        override fun after() {
+            TapToAddStripeImageLoaderFactory.override = previousImageLoader
+        }
+    }
+
+    @get:Rule
+    val ruleChain: RuleChain = RuleChain.outerRule(cardArtRule).around(testRules)
 
     @Test
     fun successWithCompleteMode(
