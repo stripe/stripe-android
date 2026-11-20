@@ -105,7 +105,6 @@ internal class AddressElementViewModelModule {
     internal fun provideInlinePlacesClient(
         args: AddressElementActivityContract.Args,
         stripeAutocompleteRepository: StripeAutocompleteRepository,
-        googlePlacesClient: PlacesClientProxy?,
         addressLauncherEventReporter: AddressLauncherEventReporter,
     ): PlacesClientProxy? {
         val config = args.config ?: return null
@@ -115,14 +114,9 @@ internal class AddressElementViewModelModule {
                 eventReporter = addressLauncherEventReporter,
             )
         } else {
-            googlePlacesClient
+            null
         }
     }
-
-    @Provides
-    @Singleton
-    @Suppress("FunctionOnlyReturningConstant")
-    internal fun provideGooglePlacesClient(): PlacesClientProxy? = null
 
     @Provides
     @Singleton
