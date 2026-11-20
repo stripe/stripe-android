@@ -1,10 +1,8 @@
 package com.stripe.android.elements
 
-import android.content.Context
 import android.os.Parcelable
 import androidx.annotation.AnyThread
 import androidx.annotation.ColorInt
-import androidx.annotation.DimenRes
 import androidx.annotation.DrawableRes
 import androidx.annotation.FontRes
 import androidx.annotation.RestrictTo
@@ -23,7 +21,6 @@ import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.embedded.content.EmbeddedContentHelper
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.StripeThemeDefaults
-import com.stripe.android.uicore.getRawValueFromDimenResource
 import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -1239,34 +1236,11 @@ class PaymentElement @Inject internal constructor(
                 }
 
                 /**
-                 * The border used for inputs, tabs, and other components in Payment Element.
-                 *
-                 * @param borderStrokeWidthRes The border width resource ID.
-                 */
-                fun borderStrokeWidthDp(context: Context, @DimenRes borderStrokeWidthRes: Int): Shapes = apply {
-                    this.borderStrokeWidthDp = context.getRawValueFromDimenResource(borderStrokeWidthRes)
-                }
-
-                /**
                  * The corner radius used for sheets displayed by Payment Element. By default, this is
                  * set to the same value as [cornerRadiusDp].
                  */
                 fun bottomSheetCornerRadiusDp(bottomSheetCornerRadiusDp: Float): Shapes = apply {
                     this.bottomSheetCornerRadiusDp = bottomSheetCornerRadiusDp
-                }
-
-                /**
-                 * The corner radius used for sheets displayed by Payment Element. By default, this is
-                 * set to the same value as [cornerRadiusDp].
-                 *
-                 * @param bottomSheetCornerRadiusRes The bottom sheet corner radius resource ID.
-                 */
-                fun bottomSheetCornerRadiusDp(
-                    context: Context,
-                    @DimenRes bottomSheetCornerRadiusRes: Int
-                ): Shapes = apply {
-                    this.bottomSheetCornerRadiusDp =
-                        context.getRawValueFromDimenResource(bottomSheetCornerRadiusRes)
                 }
 
                 @Parcelize
