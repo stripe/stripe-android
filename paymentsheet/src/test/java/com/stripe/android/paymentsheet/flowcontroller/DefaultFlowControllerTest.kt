@@ -291,6 +291,7 @@ internal class DefaultFlowControllerTest {
                         mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                             amount = 5000,
                             currency = "USD",
+                            captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
                         ),
                     ),
                     callback = { _, _ -> }
@@ -513,6 +514,7 @@ internal class DefaultFlowControllerTest {
             mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                 amount = 5000,
                 currency = "usd",
+                captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
             ),
         )
 
@@ -529,8 +531,8 @@ internal class DefaultFlowControllerTest {
             mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                 amount = 5000,
                 currency = "usd",
-                setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession,
-            ),
+                captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
+            ).setupFutureUse(PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession),
         )
         flowController.configureWithIntentConfigurationExpectingSuccess(intentConfigWithSFU)
 
@@ -1703,7 +1705,8 @@ internal class DefaultFlowControllerTest {
         val intentConfiguration = PaymentSheet.IntentConfiguration(
             mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                 amount = 12345,
-                currency = "usd"
+                currency = "usd",
+                captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
             )
         )
         val flowController = createAndConfigureFlowControllerForDeferred(
@@ -1736,7 +1739,7 @@ internal class DefaultFlowControllerTest {
             )
         )
         assertThat(arguments.paymentMethodMetadata.integrationMetadata)
-            .isEqualTo(IntegrationMetadata.DeferredIntent.WithPaymentMethod(intentConfiguration))
+            .isEqualTo(IntegrationMetadata.DeferredIntent.WithPaymentMethod(intentConfiguration.build()))
     }
 
     @Test
@@ -2375,7 +2378,8 @@ internal class DefaultFlowControllerTest {
         intentConfiguration: PaymentSheet.IntentConfiguration = PaymentSheet.IntentConfiguration(
             mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                 amount = 12345,
-                currency = "usd"
+                currency = "usd",
+                captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
             )
         ),
     ): DefaultFlowController {

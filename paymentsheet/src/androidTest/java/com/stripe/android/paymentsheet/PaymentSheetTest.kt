@@ -577,10 +577,11 @@ internal class PaymentSheetTest(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 5000,
-                        currency = "USD"
+                        currency = "USD",
+                        captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
                     ),
-                    requireCvcRecollection = true,
-                ),
+                )
+                    .requireCvcRecollection(true),
                 configuration = apiConfigurationTestType.applyTo(
                     defaultConfiguration.newBuilder()
                         .customer(
@@ -938,8 +939,9 @@ internal class PaymentSheetTest(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 5000,
                         currency = "USD",
-                        setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession
+                        captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
                     )
+                        .setupFutureUse(PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession)
                 ),
                 configuration = apiConfigurationTestType.applyTo(configurationWithTermsDisplayNever),
             )
@@ -995,10 +997,11 @@ internal class PaymentSheetTest(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 5000,
-                        currency = "USD"
+                        currency = "USD",
+                        captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
                     ),
-                    onBehalfOf = oboMerchantID
-                ),
+                )
+                    .onBehalfOf(oboMerchantID),
                 configuration = apiConfigurationTestType.applyTo(defaultConfiguration),
             )
         }

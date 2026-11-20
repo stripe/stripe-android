@@ -61,7 +61,13 @@ internal class ElementsSessionMobileSessionRequestTest {
     @Test
     fun `deferred intent loads send the config header`() = runScenario(
         initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-            PaymentSheet.IntentConfiguration(PaymentSheet.IntentConfiguration.Mode.Payment(1000, "usd")),
+            PaymentSheet.IntentConfiguration(
+                PaymentSheet.IntentConfiguration.Mode.Payment(
+                    amount = 1000,
+                    currency = "usd",
+                    captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
+                )
+            ).build(),
         ),
         response = ElementsSessionFixtures.DEFERRED_INTENT_JSON,
     ) {

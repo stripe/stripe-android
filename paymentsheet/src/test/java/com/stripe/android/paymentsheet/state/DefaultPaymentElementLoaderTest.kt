@@ -2021,9 +2021,10 @@ internal class DefaultPaymentElementLoaderTest {
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = -1099,
-                        currency = "USD"
+                        currency = "USD",
+                        captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
                     ),
-                ),
+                ).build(),
             ).validate()
         }
     }
@@ -2035,9 +2036,10 @@ internal class DefaultPaymentElementLoaderTest {
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 0,
-                        currency = "USD"
+                        currency = "USD",
+                        captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
                     ),
-                ),
+                ).build(),
             ).validate()
         }
     }
@@ -2106,8 +2108,9 @@ internal class DefaultPaymentElementLoaderTest {
             mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                 amount = 1234,
                 currency = "cad",
+                captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
             ),
-        )
+        ).build()
         val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
             intentConfiguration = intentConfiguration
         )
@@ -2127,8 +2130,9 @@ internal class DefaultPaymentElementLoaderTest {
             mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                 amount = 1234,
                 currency = "cad",
+                captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
             ),
-        )
+        ).build()
         val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
             intentConfiguration = intentConfiguration
         )
@@ -2148,8 +2152,9 @@ internal class DefaultPaymentElementLoaderTest {
             mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                 amount = 1234,
                 currency = "cad",
+                captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
             ),
-        )
+        ).build()
         val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
             intentConfiguration = intentConfiguration
         )
@@ -2170,8 +2175,9 @@ internal class DefaultPaymentElementLoaderTest {
                 mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                     amount = 1234,
                     currency = "cad",
+                    captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
                 ),
-            ),
+            ).build(),
         )
 
         assertFailsWith<IllegalStateException>("No callback for deferred intent.") {
@@ -2258,8 +2264,9 @@ internal class DefaultPaymentElementLoaderTest {
                 mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                     amount = 1234,
                     currency = "cad",
+                    captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
                 ),
-            ),
+            ).build(),
         )
 
         loader.load(
@@ -2285,8 +2292,9 @@ internal class DefaultPaymentElementLoaderTest {
                 mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                     amount = 1234,
                     currency = "cad",
+                    captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
                 ),
-            ),
+            ).build(),
         )
 
         val result = loader.load(
@@ -2333,8 +2341,9 @@ internal class DefaultPaymentElementLoaderTest {
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 1234,
                         currency = "cad",
+                        captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
                     ),
-                ),
+                ).build(),
             ),
             paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
             metadata = PaymentElementLoader.Metadata(
@@ -2365,8 +2374,9 @@ internal class DefaultPaymentElementLoaderTest {
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 1234,
                         currency = "cad",
+                        captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
                     ),
-                ),
+                ).build(),
             ),
             paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
             metadata = PaymentElementLoader.Metadata(
@@ -4960,9 +4970,10 @@ internal class DefaultPaymentElementLoaderTest {
             intentConfiguration = PaymentSheet.IntentConfiguration(
                 mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                     amount = 5000,
-                    currency = "USD"
+                    currency = "USD",
+                    captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
                 ),
-            ),
+            ).build(),
         )
 
         loader.load(

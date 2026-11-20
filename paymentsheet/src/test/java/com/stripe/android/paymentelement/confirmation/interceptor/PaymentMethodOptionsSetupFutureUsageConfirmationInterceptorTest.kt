@@ -37,14 +37,19 @@ class PaymentMethodOptionsSetupFutureUsageConfirmationInterceptorTest {
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 1099L,
                         currency = "usd",
-                        setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession,
-                        paymentMethodOptions = PaymentSheet.IntentConfiguration.Mode.Payment.PaymentMethodOptions(
-                            setupFutureUsageValues = mapOf(
-                                PaymentMethod.Type.Affirm to PaymentSheet.IntentConfiguration.SetupFutureUse.None
-                            )
-                        )
-                    ),
-                ),
+                        captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
+                    )
+                        .setupFutureUse(PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession)
+                        .paymentMethodOptions(
+                            PaymentSheet.IntentConfiguration.Mode.Payment.PaymentMethodOptions()
+                                .setupFutureUsageValues(
+                                    mapOf(
+                                        PaymentMethod.Type.Affirm to
+                                            PaymentSheet.IntentConfiguration.SetupFutureUse.None
+                                    )
+                                )
+                        ),
+                ).build(),
             ),
             stripeRepository = object : AbsFakeStripeRepository() {
                 override suspend fun retrieveStripeIntent(
@@ -78,13 +83,18 @@ class PaymentMethodOptionsSetupFutureUsageConfirmationInterceptorTest {
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 1099L,
                         currency = "usd",
-                        paymentMethodOptions = PaymentSheet.IntentConfiguration.Mode.Payment.PaymentMethodOptions(
-                            setupFutureUsageValues = mapOf(
-                                PaymentMethod.Type.Card to PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession
-                            )
-                        )
-                    ),
-                ),
+                        captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
+                    )
+                        .paymentMethodOptions(
+                            PaymentSheet.IntentConfiguration.Mode.Payment.PaymentMethodOptions()
+                                .setupFutureUsageValues(
+                                    mapOf(
+                                        PaymentMethod.Type.Card to
+                                            PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession
+                                    )
+                                )
+                        ),
+                ).build(),
             ),
             stripeRepository = object : AbsFakeStripeRepository() {
                 override suspend fun retrieveStripeIntent(
@@ -114,16 +124,20 @@ class PaymentMethodOptionsSetupFutureUsageConfirmationInterceptorTest {
             integrationMetadata = IntegrationMetadata.DeferredIntent.WithPaymentMethod(
                 PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
-                        currency = "usd",
                         amount = 5000,
-                        paymentMethodOptions = PaymentSheet.IntentConfiguration.Mode.Payment.PaymentMethodOptions(
-                            setupFutureUsageValues = mapOf(
-                                PaymentMethod.Type.Card to
-                                    PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession
-                            )
-                        )
-                    ),
-                )
+                        currency = "usd",
+                        captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
+                    )
+                        .paymentMethodOptions(
+                            PaymentSheet.IntentConfiguration.Mode.Payment.PaymentMethodOptions()
+                                .setupFutureUsageValues(
+                                    mapOf(
+                                        PaymentMethod.Type.Card to
+                                            PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession
+                                    )
+                                )
+                        ),
+                ).build()
             ),
             scenario = InterceptorTestScenario(
                 stripeRepository = object : AbsFakeStripeRepository() {
@@ -179,16 +193,21 @@ class PaymentMethodOptionsSetupFutureUsageConfirmationInterceptorTest {
             integrationMetadata = IntegrationMetadata.DeferredIntent.WithPaymentMethod(
                 PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
-                        currency = "usd",
                         amount = 5000,
-                        setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession,
-                        paymentMethodOptions = PaymentSheet.IntentConfiguration.Mode.Payment.PaymentMethodOptions(
-                            setupFutureUsageValues = mapOf(
-                                PaymentMethod.Type.Affirm to PaymentSheet.IntentConfiguration.SetupFutureUse.None
-                            )
-                        )
-                    ),
-                )
+                        currency = "usd",
+                        captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
+                    )
+                        .setupFutureUse(PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession)
+                        .paymentMethodOptions(
+                            PaymentSheet.IntentConfiguration.Mode.Payment.PaymentMethodOptions()
+                                .setupFutureUsageValues(
+                                    mapOf(
+                                        PaymentMethod.Type.Affirm to
+                                            PaymentSheet.IntentConfiguration.SetupFutureUse.None
+                                    )
+                                )
+                        ),
+                ).build()
             ),
             scenario = InterceptorTestScenario(
                 stripeRepository = object : AbsFakeStripeRepository() {

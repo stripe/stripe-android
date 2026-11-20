@@ -276,7 +276,8 @@ internal class PaymentSheetAnalyticsTest(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 5099,
-                        currency = "usd"
+                        currency = "usd",
+                        captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
                     )
                 ),
                 configuration = apiConfigurationTestType.applyTo(horizontalModeConfiguration)

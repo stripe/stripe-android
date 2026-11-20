@@ -56,8 +56,9 @@ class DeferredIntentConfirmationInterceptorTest {
             mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                 amount = 1099L,
                 currency = "usd",
+                captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
             ),
-        ),
+        ).build(),
     )
 
     @Test

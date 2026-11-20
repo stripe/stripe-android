@@ -117,11 +117,11 @@ internal class IntentConfirmationFlowTest {
                 paymentMethodMetadata = DEFERRED_CONFIRMATION_PARAMETERS.paymentMethodMetadata.copy(
                     integrationMetadata = IntegrationMetadata.DeferredIntent.WithSharedPaymentToken(
                         intentConfiguration = PaymentSheet.IntentConfiguration(
-                            sharedPaymentTokenSessionWithMode = PaymentSheet.IntentConfiguration.Mode.Setup(
-                                currency = "USD",
-                            ),
-                            sellerDetails = null,
+                            mode = PaymentSheet.IntentConfiguration.Mode.Setup()
+                                .currency("USD"),
                         )
+                            .sharedPaymentTokenSession(null)
+                            .build()
                     )
                 ),
             ),

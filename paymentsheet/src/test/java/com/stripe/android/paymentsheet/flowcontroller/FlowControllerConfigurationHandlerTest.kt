@@ -265,8 +265,9 @@ class FlowControllerConfigurationHandlerTest {
                         mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                             amount = amount,
                             currency = "cad",
+                            captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
                         )
-                    )
+                    ).build()
                 ),
                 configuration = PaymentSheet.Configuration("Some name"),
                 initializedViaCompose = false,
@@ -372,8 +373,9 @@ class FlowControllerConfigurationHandlerTest {
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 1234,
                         currency = "cad",
+                        captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
                     ),
-                ),
+                ).build(),
             ),
             configuration = PaymentSheet.Configuration("Some name"),
             initializedViaCompose = false,
@@ -408,8 +410,9 @@ class FlowControllerConfigurationHandlerTest {
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 1234,
                         currency = "cad",
+                        captureMethod = PaymentSheet.IntentConfiguration.CaptureMethod.Automatic,
                     ),
-                ),
+                ).build(),
             ),
             configuration = PaymentSheet.Configuration("Some name"),
             initializedViaCompose = false,
