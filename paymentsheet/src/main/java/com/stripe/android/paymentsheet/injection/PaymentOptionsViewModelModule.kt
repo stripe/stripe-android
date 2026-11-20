@@ -10,7 +10,6 @@ import com.stripe.android.paymentsheet.PaymentOptionContract
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.repositories.PrefetchedPaymentMethodMessagePromotionsHelper
-import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.CoroutineScope
@@ -55,8 +54,4 @@ internal class PaymentOptionsViewModelModule {
     ): PaymentMethodMessagePromotionsHelper {
         return PrefetchedPaymentMethodMessagePromotionsHelper(args.promotions, eventReporter)
     }
-
-    @Provides
-    @Suppress("FunctionOnlyReturningConstant")
-    fun providePlacesClient(): PlacesClientProxy? = null
 }

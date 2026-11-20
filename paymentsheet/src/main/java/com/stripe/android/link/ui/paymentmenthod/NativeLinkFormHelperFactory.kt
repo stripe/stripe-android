@@ -55,7 +55,6 @@ internal class NativeLinkFormHelperFactory(
             autocompleteConfig = AutocompleteAddressInteractor.Config(
                 autocompleteCountries = AUTOCOMPLETE_DEFAULT_COUNTRIES,
             ),
-            placesClient = null,
             stripeAutocompleteRepository = null,
             coroutineScope = null,
             shouldUseAutocompleteProxyEndpointsProvider = { false },

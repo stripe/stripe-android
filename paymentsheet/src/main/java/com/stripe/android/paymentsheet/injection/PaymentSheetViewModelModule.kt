@@ -7,7 +7,6 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentif
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PaymentSheetContract
 import com.stripe.android.paymentsheet.PrefsRepository
-import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.CoroutineScope
@@ -42,8 +41,4 @@ internal class PaymentSheetViewModelModule {
     fun provideViewModelScope(): CoroutineScope {
         return CoroutineScope(SupervisorJob() + Dispatchers.Main)
     }
-
-    @Provides
-    @Suppress("FunctionOnlyReturningConstant")
-    fun providePlacesClient(): PlacesClientProxy? = null
 }

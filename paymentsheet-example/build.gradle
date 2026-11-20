@@ -130,7 +130,6 @@ dependencies {
     implementation libs.loggingInterceptor
     implementation libs.material
     implementation libs.okio
-    implementation libs.places
     implementation libs.retrofitKotlinSerializationConverter
     implementation libs.zxing
 

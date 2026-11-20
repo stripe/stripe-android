@@ -60,7 +60,6 @@ internal class FakeBaseSheetViewModel private constructor(
     mode = EventReporter.Mode.Complete,
     customerStateHolderFactory = DefaultCustomerStateHolder.Factory,
     customViewModelScope = customViewModelScope,
-    placesClient = null,
     linkAccountHolder = LinkAccountHolder(savedStateHandle),
     errorReporter = FakeErrorReporter(),
     stripeAutocompleteRepository = FakeStripeAutocompleteRepository(),
