@@ -292,7 +292,7 @@ class ExpressCheckoutElement @Inject internal constructor(
                 )
 
                 private companion object {
-                    const val MAX_LAYOUT_DIMENSION = 10
+                    private const val MAX_LAYOUT_DIMENSION = 10
                 }
             }
 
