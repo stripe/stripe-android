@@ -12,6 +12,7 @@ import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
+import com.stripe.android.networktesting.enqueueConsumerSessionLookup
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.testing.waitUntilWithIdle
 
@@ -20,13 +21,9 @@ class TapToAddLinkTestHelper(
     private val networkRule: NetworkRule,
 ) {
     fun enqueueLookup() {
-        networkRule.enqueue(
-            method("POST"),
-            path("/v1/consumers/sessions/lookup"),
-            bodyPart("email_address", urlEncode(EMAIL)),
-        ) { response ->
-            response.testBodyFromFile("consumer-sessions-lookup-does-not-exist-success.json")
-        }
+        networkRule.enqueueConsumerSessionLookup(
+            bodyPart("email_address", EMAIL),
+        )
     }
 
     fun enqueueSignup(withName: Boolean = true) {

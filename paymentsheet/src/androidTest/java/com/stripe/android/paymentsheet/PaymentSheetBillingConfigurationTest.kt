@@ -13,6 +13,7 @@ import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.TestApiKeys
+import com.stripe.android.networktesting.enqueueConsumerSessionLookup
 import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.PaymentSheet.Builder
@@ -119,10 +120,7 @@ internal class PaymentSheetBillingConfigurationTest(
 
     @Test
     fun testPayloadWithoutDefaults() {
-        networkRule.enqueue(
-            method("POST"),
-            path("/v1/consumers/sessions/lookup"),
-        ) { response ->
+        networkRule.enqueueConsumerSessionLookup { response ->
             response.setResponseCode(500)
         }
 

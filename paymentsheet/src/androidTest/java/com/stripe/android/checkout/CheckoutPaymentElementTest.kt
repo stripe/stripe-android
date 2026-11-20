@@ -17,6 +17,7 @@ import com.stripe.android.networktesting.RequestMatchers.hasBodyPart
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.RequestMatchers.path
+import com.stripe.android.networktesting.enqueueConsumerSessionLookup
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedContentPage
@@ -244,10 +245,7 @@ internal class CheckoutPaymentElementTest {
     @Test
     fun testSuccessfulLinkWalletPayment() {
         var checkoutResult: CheckoutElementsController.Result? = null
-        networkRule.enqueue(
-            method("POST"),
-            path("/v1/consumers/sessions/lookup"),
-        ) { response ->
+        networkRule.enqueueConsumerSessionLookup { response ->
             response.testBodyFromFile("consumer-accounts-signup-success.json") { json ->
                 json.put("exists", true)
             }
@@ -315,10 +313,7 @@ internal class CheckoutPaymentElementTest {
                 )
         )
 
-        networkRule.enqueue(
-            method("POST"),
-            path("/v1/consumers/sessions/lookup"),
-        ) { response ->
+        networkRule.enqueueConsumerSessionLookup { response ->
             response.testBodyFromFile("consumer-accounts-signup-success.json") { json ->
                 json.put("exists", true)
             }
@@ -404,10 +399,7 @@ internal class CheckoutPaymentElementTest {
         )
 
         if (expectedToLoadLinkAccount) {
-            networkRule.enqueue(
-                method("POST"),
-                path("/v1/consumers/sessions/lookup"),
-            ) { response ->
+            networkRule.enqueueConsumerSessionLookup { response ->
                 response.testBodyFromFile("consumer-accounts-signup-success.json") { json ->
                     json.put("exists", true)
                 }

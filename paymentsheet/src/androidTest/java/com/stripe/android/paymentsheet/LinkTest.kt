@@ -9,6 +9,7 @@ import com.stripe.android.paymentsheet.utils.ApiConfigurationTestTypeProvider
 import com.stripe.android.link.account.DefaultLinkStore
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.TestApiKeys
+import com.stripe.android.networktesting.enqueueConsumerSessionLookup
 import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatcher
@@ -70,12 +71,7 @@ internal class LinkTest(
 
         page.fillOutCardDetails()
 
-        networkRule.enqueue(
-            method("POST"),
-            path("/v1/consumers/sessions/lookup"),
-        ) { response ->
-            response.testBodyFromFile("consumer-session-lookup-success.json")
-        }
+        networkRule.enqueueConsumerSessionLookup()
 
         page.clickOnLinkCheckbox()
         page.fillOutLinkEmail()
@@ -166,12 +162,7 @@ internal class LinkTest(
             networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.USBankAccount.code)
             networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.SepaDebit.code)
 
-            networkRule.enqueue(
-                method("POST"),
-                path("/v1/consumers/sessions/lookup"),
-            ) { response ->
-                response.testBodyFromFile("consumer-session-lookup-success.json")
-            }
+            networkRule.enqueueConsumerSessionLookup()
 
             testContext.launch(
                 configuration = PaymentSheet.Configuration(
@@ -189,23 +180,13 @@ internal class LinkTest(
 
             closeSoftKeyboard()
 
-            networkRule.enqueue(
-                method("POST"),
-                path("/v1/consumers/sessions/lookup"),
-            ) { response ->
-                response.testBodyFromFile("consumer-session-lookup-success.json")
-            }
+            networkRule.enqueueConsumerSessionLookup()
 
             page.fillOutLinkPhone()
 
             closeSoftKeyboard()
 
-            networkRule.enqueue(
-                method("POST"),
-                path("/v1/consumers/sessions/lookup"),
-            ) { response ->
-                response.testBodyFromFile("consumer-session-lookup-success.json")
-            }
+            networkRule.enqueueConsumerSessionLookup()
 
             networkRule.enqueue(
                 method("POST"),
@@ -260,12 +241,7 @@ internal class LinkTest(
 
         page.fillOutCardDetailsWithCardBrandChoiceSelector()
 
-        networkRule.enqueue(
-            method("POST"),
-            path("/v1/consumers/sessions/lookup"),
-        ) { response ->
-            response.testBodyFromFile("consumer-session-lookup-success.json")
-        }
+        networkRule.enqueueConsumerSessionLookup()
 
         page.clickOnLinkCheckbox()
         page.fillOutLinkEmail()
@@ -344,12 +320,7 @@ internal class LinkTest(
 
         page.fillOutCardDetails()
 
-        networkRule.enqueue(
-            method("POST"),
-            path("/v1/consumers/sessions/lookup"),
-        ) { response ->
-            response.testBodyFromFile("consumer-session-lookup-success.json")
-        }
+        networkRule.enqueueConsumerSessionLookup()
 
         page.clickOnLinkCheckbox()
         page.fillOutLinkEmail()
@@ -456,12 +427,7 @@ internal class LinkTest(
             networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.USBankAccount.code)
             networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.SepaDebit.code)
 
-            networkRule.enqueue(
-                method("POST"),
-                path("/v1/consumers/sessions/lookup"),
-            ) { response ->
-                response.testBodyFromFile("consumer-session-lookup-success.json")
-            }
+            networkRule.enqueueConsumerSessionLookup()
 
             testContext.launch(
                 configuration = PaymentSheet.Configuration(
@@ -479,23 +445,13 @@ internal class LinkTest(
 
             closeSoftKeyboard()
 
-            networkRule.enqueue(
-                method("POST"),
-                path("/v1/consumers/sessions/lookup"),
-            ) { response ->
-                response.testBodyFromFile("consumer-session-lookup-success.json")
-            }
+            networkRule.enqueueConsumerSessionLookup()
 
             page.fillOutLinkPhone()
 
             closeSoftKeyboard()
 
-            networkRule.enqueue(
-                method("POST"),
-                path("/v1/consumers/sessions/lookup"),
-            ) { response ->
-                response.testBodyFromFile("consumer-session-lookup-success.json")
-            }
+            networkRule.enqueueConsumerSessionLookup()
 
             networkRule.enqueue(
                 method("POST"),
@@ -558,12 +514,7 @@ internal class LinkTest(
 
         page.fillOutCardDetailsWithCardBrandChoiceSelector()
 
-        networkRule.enqueue(
-            method("POST"),
-            path("/v1/consumers/sessions/lookup"),
-        ) { response ->
-            response.testBodyFromFile("consumer-session-lookup-success.json")
-        }
+        networkRule.enqueueConsumerSessionLookup()
 
         page.clickOnLinkCheckbox()
         page.fillOutLinkEmail()
@@ -658,12 +609,7 @@ internal class LinkTest(
 
         page.fillOutCardDetails()
 
-        networkRule.enqueue(
-            method("POST"),
-            path("/v1/consumers/sessions/lookup"),
-        ) { response ->
-            response.testBodyFromFile("consumer-session-lookup-success.json")
-        }
+        networkRule.enqueueConsumerSessionLookup()
 
         page.clickOnLinkCheckbox()
         page.fillOutLinkEmail()
@@ -724,12 +670,7 @@ internal class LinkTest(
 
         page.fillOutCardDetails()
 
-        networkRule.enqueue(
-            method("POST"),
-            path("/v1/consumers/sessions/lookup"),
-        ) { response ->
-            response.testBodyFromFile("consumer-session-lookup-success.json")
-        }
+        networkRule.enqueueConsumerSessionLookup()
 
         page.clickOnLinkCheckbox()
         page.fillOutLinkEmail()
@@ -790,12 +731,7 @@ internal class LinkTest(
 
         page.fillOutCardDetails()
 
-        networkRule.enqueue(
-            method("POST"),
-            path("/v1/consumers/sessions/lookup"),
-        ) { response ->
-            response.testBodyFromFile("consumer-session-lookup-success.json")
-        }
+        networkRule.enqueueConsumerSessionLookup()
 
         page.clickOnLinkCheckbox()
         page.fillOutLinkEmail()
@@ -864,10 +800,7 @@ internal class LinkTest(
 
         page.fillOutCardDetails()
 
-        networkRule.enqueue(
-            method("POST"),
-            path("/v1/consumers/sessions/lookup"),
-        ) { response ->
+        networkRule.enqueueConsumerSessionLookup { response ->
             response.testBodyFromFile("consumer-session-lookup-exists-success.json")
         }
 
@@ -876,10 +809,7 @@ internal class LinkTest(
 
         closeSoftKeyboard()
 
-        networkRule.enqueue(
-            method("POST"),
-            path("/v1/consumers/sessions/lookup"),
-        ) { response ->
+        networkRule.enqueueConsumerSessionLookup { response ->
             response.testBodyFromFile("consumer-session-lookup-exists-success.json")
         }
 
@@ -950,12 +880,7 @@ internal class LinkTest(
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
-        networkRule.enqueue(
-            method("POST"),
-            path("/v1/consumers/sessions/lookup"),
-        ) { response ->
-            response.testBodyFromFile("consumer-session-lookup-success.json")
-        }
+        networkRule.enqueueConsumerSessionLookup()
 
         val configuration = PaymentSheet.Configuration(
             merchantDisplayName = "Merchant, Inc.",
@@ -1025,12 +950,7 @@ internal class LinkTest(
 
         page.fillOutCardDetails()
 
-        networkRule.enqueue(
-            method("POST"),
-            path("/v1/consumers/sessions/lookup"),
-        ) { response ->
-            response.testBodyFromFile("consumer-session-lookup-success.json")
-        }
+        networkRule.enqueueConsumerSessionLookup()
 
         page.clickOnLinkCheckbox()
         page.fillOutLinkEmail()
@@ -1096,12 +1016,7 @@ internal class LinkTest(
             response.testBodyFromFile("elements-sessions-requires_pm_with_link_and_cs.json")
         }
 
-        networkRule.enqueue(
-            method("POST"),
-            path("/v1/consumers/sessions/lookup"),
-        ) { response ->
-            response.testBodyFromFile("consumer-session-lookup-success.json")
-        }
+        networkRule.enqueueConsumerSessionLookup()
 
         testContext.launch(
             configuration = PaymentSheet.Configuration(
@@ -1119,23 +1034,13 @@ internal class LinkTest(
 
         closeSoftKeyboard()
 
-        networkRule.enqueue(
-            method("POST"),
-            path("/v1/consumers/sessions/lookup"),
-        ) { response ->
-            response.testBodyFromFile("consumer-session-lookup-success.json")
-        }
+        networkRule.enqueueConsumerSessionLookup()
 
         page.fillOutLinkPhone()
 
         closeSoftKeyboard()
 
-        networkRule.enqueue(
-            method("POST"),
-            path("/v1/consumers/sessions/lookup"),
-        ) { response ->
-            response.testBodyFromFile("consumer-session-lookup-success.json")
-        }
+        networkRule.enqueueConsumerSessionLookup()
 
         networkRule.enqueue(
             method("POST"),
@@ -1222,12 +1127,7 @@ internal class LinkTest(
 
         // Only ONE lookup should happen (during Link initialization).
         // The holdback experiment should NOT trigger a second lookup.
-        networkRule.enqueue(
-            method("POST"),
-            path("/v1/consumers/sessions/lookup"),
-        ) { response ->
-            response.testBodyFromFile("consumer-session-lookup-success.json")
-        }
+        networkRule.enqueueConsumerSessionLookup()
 
         testContext.launch(
             configuration = PaymentSheet.Configuration(
