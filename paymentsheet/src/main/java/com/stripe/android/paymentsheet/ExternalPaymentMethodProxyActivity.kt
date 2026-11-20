@@ -62,6 +62,7 @@ internal class ExternalPaymentMethodProxyActivity : AppCompatActivity() {
             return
         }
 
+        @Suppress("DEPRECATION")
         externalPaymentMethodResult?.let {
             when (it) {
                 is ExternalPaymentMethodResult.Completed -> setResult(ExternalPaymentMethodResult.Completed.RESULT_CODE)

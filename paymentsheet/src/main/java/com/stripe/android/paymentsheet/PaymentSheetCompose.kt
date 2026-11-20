@@ -102,6 +102,7 @@ fun rememberPaymentSheet(
             "}.build()"
     )
 )
+@Suppress("DEPRECATION")
 fun rememberPaymentSheet(
     createIntentCallback: CreateIntentCallback? = null,
     externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler,

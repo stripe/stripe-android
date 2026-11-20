@@ -273,6 +273,7 @@ internal class PaymentElementBuilderTest {
         }
 
     @Test
+    @Suppress("DEPRECATION")
     fun `On activity build, should properly register callbacks for Payment Sheet`() = testWithActivity { activity ->
         val createIntentCallback = newCreateIntentCallback()
         val externalPaymentMethodConfirmHandler = newExternalPaymentMethodConfirmHandler()
@@ -292,6 +293,7 @@ internal class PaymentElementBuilderTest {
     }
 
     @Test
+    @Suppress("DEPRECATION")
     fun `On activity build, should properly register callbacks for Flow Controller`() = testWithActivity { activity ->
         val createIntentCallback = newCreateIntentCallback()
         val externalPaymentMethodConfirmHandler = newExternalPaymentMethodConfirmHandler()
@@ -314,6 +316,7 @@ internal class PaymentElementBuilderTest {
     }
 
     @Test
+    @Suppress("DEPRECATION")
     fun `On fragment build, should properly register callbacks for Payment Sheet`() = testWithFragment { fragment ->
         val createIntentCallback = newCreateIntentCallback()
         val externalPaymentMethodConfirmHandler = newExternalPaymentMethodConfirmHandler()
@@ -333,6 +336,7 @@ internal class PaymentElementBuilderTest {
     }
 
     @Test
+    @Suppress("DEPRECATION")
     fun `On fragment build, should properly register callbacks for Flow Controller`() = testWithFragment { fragment ->
         val createIntentCallback = newCreateIntentCallback()
         val externalPaymentMethodConfirmHandler = newExternalPaymentMethodConfirmHandler()
@@ -372,6 +376,7 @@ internal class PaymentElementBuilderTest {
         }
     }
 
+    @Suppress("DEPRECATION")
     private fun newExternalPaymentMethodConfirmHandler(): ExternalPaymentMethodConfirmHandler {
         return ExternalPaymentMethodConfirmHandler { _, _ ->
             error("Should not be called!")

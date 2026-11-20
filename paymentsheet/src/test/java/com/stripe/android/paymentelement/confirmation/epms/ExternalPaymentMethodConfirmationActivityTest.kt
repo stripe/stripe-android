@@ -29,7 +29,6 @@ import com.stripe.android.paymentelement.confirmation.assertFailed
 import com.stripe.android.paymentelement.confirmation.assertIdle
 import com.stripe.android.paymentelement.confirmation.assertSucceeded
 import com.stripe.android.paymentelement.confirmation.paymentElementConfirmationTest
-import com.stripe.android.paymentsheet.ExternalPaymentMethodResult
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.createTestActivityRule
 import com.stripe.android.testing.PaymentIntentFactory
@@ -91,6 +90,7 @@ internal class ExternalPaymentMethodConfirmationActivityTest {
     }
 
     @Test
+    @Suppress("DEPRECATION")
     fun `On EPM confirmation option provided, should launch EPM flow and fail`() = test {
         val failureMessage = "EPM failure"
 
@@ -98,7 +98,7 @@ internal class ExternalPaymentMethodConfirmationActivityTest {
             Instrumentation.ActivityResult(
                 Activity.RESULT_FIRST_USER,
                 Intent().putExtra(
-                    ExternalPaymentMethodResult.Failed.DISPLAY_MESSAGE_EXTRA,
+                    com.stripe.android.paymentsheet.ExternalPaymentMethodResult.Failed.DISPLAY_MESSAGE_EXTRA,
                     failureMessage,
                 )
             )

@@ -84,6 +84,7 @@ class ExternalPaymentMethodProxyActivityTest {
     }
 
     @Test
+    @Suppress("DEPRECATION")
     fun `ExternalPaymentMethodResultHandler finishes EPM activity with correct result on completed`() {
         val scenario = ActivityScenario.launchActivityForResult<ExternalPaymentMethodProxyActivity>(
             ExternalPaymentMethodResultHandler.createResultIntent(context, ExternalPaymentMethodResult.completed())
@@ -93,6 +94,7 @@ class ExternalPaymentMethodProxyActivityTest {
     }
 
     @Test
+    @Suppress("DEPRECATION")
     fun `ExternalPaymentMethodResultHandler finishes EPM activity with correct result on canceled`() {
         val scenario = ActivityScenario.launchActivityForResult<ExternalPaymentMethodProxyActivity>(
             ExternalPaymentMethodResultHandler.createResultIntent(context, ExternalPaymentMethodResult.canceled())
@@ -102,6 +104,7 @@ class ExternalPaymentMethodProxyActivityTest {
     }
 
     @Test
+    @Suppress("DEPRECATION")
     fun `ExternalPaymentMethodResultHandler finishes EPM activity with correct result on failed`() {
         val expectedDisplayMessage = "error!"
         val scenario = ActivityScenario.launchActivityForResult<ExternalPaymentMethodProxyActivity>(
@@ -180,6 +183,7 @@ class ExternalPaymentMethodProxyActivityTest {
         )
     }
 
+    @Suppress("DEPRECATION")
     class DefaultExternalPaymentMethodConfirmHandler : ExternalPaymentMethodConfirmHandler {
 
         var confirmedType: String? = null

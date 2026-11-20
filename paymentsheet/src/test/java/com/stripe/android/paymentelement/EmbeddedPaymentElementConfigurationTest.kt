@@ -48,6 +48,7 @@ class EmbeddedPaymentElementConfigurationTest {
         CardFundingFilteringPrivatePreview::class,
     )
     @Test
+    @Suppress("DEPRECATION")
     fun `newBuilder round-trips all properties`() {
         val original = EmbeddedPaymentElement.Configuration.Builder("Test Merchant")
             .customer(PaymentSheet.CustomerConfiguration("cus_1", "ek_1"))

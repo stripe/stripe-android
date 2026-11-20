@@ -9,7 +9,6 @@ import com.stripe.android.paymentelement.confirmation.PAYMENT_INTENT
 import com.stripe.android.paymentelement.confirmation.runLaunchTest
 import com.stripe.android.paymentelement.confirmation.runResultTest
 import com.stripe.android.payments.paymentlauncher.PaymentResult
-import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.testing.FakeErrorReporter
 import org.junit.Test
 
@@ -21,7 +20,7 @@ class ExternalPaymentMethodConfirmationFlowTest {
         definition = ExternalPaymentMethodConfirmationDefinition(
             paymentElementCallbackIdentifier = "ExternalPaymentMethodTestIdentifier",
             externalPaymentMethodConfirmHandlerProvider = {
-                ExternalPaymentMethodConfirmHandler { _, _ ->
+                com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler { _, _ ->
                     error("Not implemented!")
                 }
             },
@@ -36,7 +35,7 @@ class ExternalPaymentMethodConfirmationFlowTest {
         definition = ExternalPaymentMethodConfirmationDefinition(
             paymentElementCallbackIdentifier = "ExternalPaymentMethodTestIdentifier",
             externalPaymentMethodConfirmHandlerProvider = {
-                ExternalPaymentMethodConfirmHandler { _, _ ->
+                com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler { _, _ ->
                     error("Not implemented!")
                 }
             },
