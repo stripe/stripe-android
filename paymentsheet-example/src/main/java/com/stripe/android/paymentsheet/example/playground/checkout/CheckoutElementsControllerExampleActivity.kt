@@ -49,7 +49,6 @@ internal class CheckoutElementsControllerExampleActivity : AppCompatActivity() {
             val status by viewModel.status.collectAsState()
             val session by viewModel.controller.session.collectAsState()
             val confirmationMessage by viewModel.confirmationMessage.collectAsState()
-            val isConfirmationCompleted by viewModel.isConfirmationCompleted.collectAsState()
             val operationMessage by viewModel.operationMessage.collectAsState()
             val isUpdating by viewModel.controller.isUpdating.collectAsState()
             val settingValues by viewModel.settings.values.collectAsState()
@@ -208,7 +207,6 @@ internal class CheckoutElementsControllerExampleActivity : AppCompatActivity() {
                             ConfirmationControls(
                                 paymentOption = session?.paymentOption,
                                 confirmationMessage = confirmationMessage,
-                                isCompleted = isConfirmationCompleted,
                                 isUpdating = isUpdating,
                                 displayMandate = viewModel.displayMandate,
                                 isShippingAddressElementConfigured = viewModel.isShippingAddressElementConfigured,
@@ -219,7 +217,6 @@ internal class CheckoutElementsControllerExampleActivity : AppCompatActivity() {
                                     viewModel.clearConfirmationMessage()
                                     presenter.confirm()
                                 },
-                                onBackToSettings = viewModel::returnToSettings,
                             )
                         }
                         else -> Unit
