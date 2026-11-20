@@ -23,7 +23,6 @@ import com.stripe.android.checkout.CheckoutElementsController.Session.PaymentOpt
 internal fun ConfirmationControls(
     paymentOption: PaymentOptionDisplayData?,
     confirmationMessage: String?,
-    isCompleted: Boolean,
     isUpdating: Boolean,
     displayMandate: Boolean,
     isShippingAddressElementConfigured: Boolean,
@@ -31,13 +30,8 @@ internal fun ConfirmationControls(
     onSelectPaymentMethod: () -> Unit,
     onSetShippingAddress: () -> Unit,
     onConfirm: () -> Unit,
-    onBackToSettings: () -> Unit,
 ) {
     PaymentOptionRow(paymentOption)
-    if (isCompleted) {
-        CompletedControls(onBackToSettings)
-        return
-    }
     if (displayMandate) {
         paymentOption?.mandateText?.let { Text(text = it, style = MaterialTheme.typography.caption) }
     }
@@ -66,15 +60,6 @@ internal fun ConfirmationControls(
         enabled = !isUpdating,
         modifier = Modifier.fillMaxWidth(),
     ) { Text("Confirm") }
-}
-
-@Composable
-private fun CompletedControls(onBackToSettings: () -> Unit) {
-    Text("Payment complete!", style = MaterialTheme.typography.h6)
-    Button(
-        onClick = onBackToSettings,
-        modifier = Modifier.fillMaxWidth(),
-    ) { Text("Back to settings") }
 }
 
 @Composable
