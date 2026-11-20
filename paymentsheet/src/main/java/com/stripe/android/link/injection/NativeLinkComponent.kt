@@ -12,6 +12,7 @@ import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkDismissalCoordinator
 import com.stripe.android.link.LinkExpressMode
 import com.stripe.android.link.LinkLaunchMode
+import com.stripe.android.link.LinkTotalUpdater
 import com.stripe.android.link.WebLinkActivityContract
 import com.stripe.android.link.WebLinkAuthChannel
 import com.stripe.android.link.account.LinkAccountHolder
@@ -73,6 +74,7 @@ internal interface NativeLinkComponent {
     val oAuthConsentViewModelComponentFactory: OAuthConsentViewModelComponent.Factory
     val webLinkAuthChannel: WebLinkAuthChannel
     val paymentMethodMetadata: PaymentMethodMetadata
+    val linkTotalUpdater: LinkTotalUpdater
 
     @Component.Factory
     interface Factory {

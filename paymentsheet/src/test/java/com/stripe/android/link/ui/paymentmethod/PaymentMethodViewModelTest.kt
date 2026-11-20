@@ -10,6 +10,7 @@ import com.stripe.android.link.LinkAccountUpdate.Value.UpdateReason.PaymentConfi
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkDismissalCoordinator
 import com.stripe.android.link.LinkLaunchMode
+import com.stripe.android.link.LinkTotalUpdaterFactory
 import com.stripe.android.link.RealLinkDismissalCoordinator
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.FakeLinkAccountManager
@@ -71,7 +72,8 @@ class PaymentMethodViewModelTest {
                 isValidating = false,
                 primaryButtonLabel = completePaymentButtonLabel(
                     TestFactory.LINK_CONFIGURATION.stripeIntent,
-                    LinkLaunchMode.Full(showSecondaryButton = true)
+                    LinkLaunchMode.Full(showSecondaryButton = true),
+                    amount = null,
                 )
             )
         )
@@ -284,6 +286,7 @@ class PaymentMethodViewModelTest {
             dismissalCoordinator = dismissalCoordinator,
             linkAccountManager = linkAccountManager,
             linkLaunchMode = LinkLaunchMode.Full(showSecondaryButton = true),
+            linkTotalUpdater = LinkTotalUpdaterFactory.disabled(),
             completeLinkFlow = DefaultCompleteLinkFlow(
                 linkConfirmationHandler = linkConfirmationHandler,
                 linkAccountManager = linkAccountManager,

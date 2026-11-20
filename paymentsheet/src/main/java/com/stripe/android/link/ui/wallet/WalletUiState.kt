@@ -43,6 +43,7 @@ internal data class WalletUiState(
     val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
     val linkBrand: LinkBrand,
     val isValidating: Boolean = false,
+    val isUpdatingTotal: Boolean = false,
 ) {
 
     val selectedItem: ConsumerPaymentDetails.PaymentDetails?
@@ -89,6 +90,10 @@ internal data class WalletUiState(
                 }
                 isProcessing -> {
                     PrimaryButtonState.Processing
+                }
+                isUpdatingTotal -> {
+                    // Keep showing the current total with a spinner until it reflects the selected billing address.
+                    PrimaryButtonState.Updating
                 }
                 disableButton -> {
                     PrimaryButtonState.Disabled

@@ -1,11 +1,18 @@
+@file:OptIn(com.stripe.android.paymentelement.CheckoutSessionPreview::class)
+
 package com.stripe.android.link.confirmation
 
+import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkout.CheckoutElementsController
+import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.Logger
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkPaymentDetails
+import com.stripe.android.link.LinkTotalUpdater
+import com.stripe.android.link.LinkTotalUpdaterFactory
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
@@ -29,6 +36,7 @@ import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationO
 import com.stripe.android.paymentelement.confirmation.intent.CheckoutSessionResponseKey
 import com.stripe.android.paymentelement.confirmation.link.LinkPassthroughConfirmationOption
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.testing.FakeLogger
 import kotlinx.coroutines.Dispatchers
@@ -136,6 +144,101 @@ internal class DefaultLinkConfirmationHandlerTest {
         assertThat(args.intent).isEqualTo(configuration.stripeIntent)
         assertThat(args.paymentMethodMetadata.integrationMetadata).isEqualTo(integrationMetadata)
         confirmationHandler.validate()
+    }
+
+    @Test
+    fun `confirmation stops when the total changed for the billing address`() = runTest(dispatcher) {
+        val taxRegionUpdates = Turbine<CheckoutElementsController.Address.State>()
+        val confirmationHandler = FakeConfirmationHandler()
+        val handler = createHandler(
+            confirmationHandler = confirmationHandler,
+            linkTotalUpdater = LinkTotalUpdaterFactory.create(
+                initialCheckoutSessionResponse = automaticTaxSession(amount = 1000L),
+            ) { _, address ->
+                taxRegionUpdates.add(address)
+                Result.success(automaticTaxSession(amount = 1100L))
+            },
+        )
+
+        val result = handler.confirm(
+            paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
+            linkAccount = TestFactory.LINK_ACCOUNT,
+            cvc = CVC,
+            billingPhone = null
+        )
+
+        assertThat(result).isEqualTo(
+            Result.Failed(R.string.stripe_link_total_updated_for_billing_address.resolvableString)
+        )
+        assertThat(taxRegionUpdates.awaitItem().postalCode).isEqualTo("12312")
+        confirmationHandler.startTurbine.expectNoEvents()
+        taxRegionUpdates.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `confirmation fails when the total can't be updated`() = runTest(dispatcher) {
+        val confirmationHandler = FakeConfirmationHandler()
+        val handler = createHandler(
+            confirmationHandler = confirmationHandler,
+            linkTotalUpdater = LinkTotalUpdaterFactory.create(
+                initialCheckoutSessionResponse = automaticTaxSession(amount = 1000L),
+            ) { _, _ ->
+                Result.failure(APIConnectionException())
+            },
+        )
+
+        val result = handler.confirm(
+            paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
+            linkAccount = TestFactory.LINK_ACCOUNT,
+            cvc = CVC,
+            billingPhone = null
+        )
+
+        assertThat(result).isInstanceOf(Result.Failed::class.java)
+        confirmationHandler.startTurbine.expectNoEvents()
+    }
+
+    @Test
+    fun `confirmation uses the latest checkout session when the total is unchanged`() = runTest(dispatcher) {
+        val configuration = TestFactory.LINK_CONFIGURATION
+        val initialSession = automaticTaxSession(amount = 1000L)
+        val updatedSession = automaticTaxSession(amount = 1000L).copy(configId = "updated")
+        val confirmationHandler = FakeConfirmationHandler()
+        val handler = createHandler(
+            configuration = configuration,
+            confirmationHandler = confirmationHandler,
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = configuration.stripeIntent,
+                passiveCaptchaParams = PASSIVE_CAPTCHA_PARAMS,
+                integrationMetadata = IntegrationMetadata.CheckoutSession(
+                    instancesKey = "DefaultLinkConfirmationHandlerTest",
+                    checkoutSessionResponse = initialSession,
+                    collectedEmail = null,
+                ),
+            ),
+            linkTotalUpdater = LinkTotalUpdaterFactory.create(
+                initialCheckoutSessionResponse = initialSession,
+            ) { _, _ ->
+                Result.success(updatedSession)
+            },
+        )
+        confirmationHandler.awaitResultTurbine.add(
+            item = ConfirmationHandler.Result.Succeeded(intent = configuration.stripeIntent)
+        )
+
+        val result = handler.confirm(
+            paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
+            linkAccount = TestFactory.LINK_ACCOUNT,
+            cvc = CVC,
+            billingPhone = null
+        )
+
+        assertThat(result).isEqualTo(
+            Result.Succeeded(configuration.stripeIntent, checkoutSessionResponse = null)
+        )
+        val integrationMetadata = confirmationHandler.startTurbine.awaitItem()
+            .paymentMethodMetadata.integrationMetadata as IntegrationMetadata.CheckoutSession
+        assertThat(integrationMetadata.checkoutSessionResponse).isEqualTo(updatedSession)
     }
 
     @Test
@@ -820,6 +923,7 @@ internal class DefaultLinkConfirmationHandlerTest {
             passiveCaptchaParams = passiveCaptchaParams,
             stripeIntent = configuration.stripeIntent,
         ),
+        linkTotalUpdater: LinkTotalUpdater = LinkTotalUpdaterFactory.disabled(),
     ): DefaultLinkConfirmationHandler {
         val handler = DefaultLinkConfirmationHandler(
             confirmationHandler = confirmationHandler,
@@ -827,6 +931,7 @@ internal class DefaultLinkConfirmationHandlerTest {
             logger = logger,
             paymentMethodMetadata = paymentMethodMetadata,
             statusBarColor = statusBarColor,
+            linkTotalUpdater = linkTotalUpdater,
         )
         assertThat(confirmationHandler.bootstrapTurbine.awaitItem().paymentMethodMetadata)
             .isEqualTo(paymentMethodMetadata)
@@ -836,6 +941,15 @@ internal class DefaultLinkConfirmationHandlerTest {
 
     companion object {
         private const val CVC = "333"
+
+        private fun automaticTaxSession(amount: Long): CheckoutSessionResponse {
+            return CheckoutSessionResponseFactory.create(
+                amount = amount,
+                automaticTaxEnabled = true,
+                taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+            )
+        }
+
         private val PASSIVE_CAPTCHA_PARAMS = PassiveCaptchaParamsFactory.passiveCaptchaParams()
     }
 }

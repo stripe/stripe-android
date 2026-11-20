@@ -6,7 +6,11 @@ import com.stripe.android.ui.core.elements.automaticTaxRequiredFields
 import com.stripe.android.uicore.elements.FormFieldId
 
 internal fun PaymentMethod.hasSufficientBillingDetailsForAutomaticTax(): Boolean {
-    val address = billingDetails?.address ?: return false
+    return billingDetails?.address.hasSufficientBillingDetailsForAutomaticTax()
+}
+
+internal fun Address?.hasSufficientBillingDetailsForAutomaticTax(): Boolean {
+    val address = this ?: return false
     val countryCode = address.country?.takeUnless { it.isBlank() }?.uppercase() ?: return false
 
     return automaticTaxRequiredFields(countryCode).all { requiredField ->

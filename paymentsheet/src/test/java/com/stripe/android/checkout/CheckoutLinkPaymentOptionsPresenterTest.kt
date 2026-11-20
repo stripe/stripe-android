@@ -9,6 +9,7 @@ import androidx.core.app.ActivityOptionsCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
+import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.injection.CHECKOUT_LINK_PAYMENT_METHOD_SELECTION_LAUNCHER
@@ -40,12 +41,17 @@ import com.stripe.android.networking.RequestSurface
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedPaymentOptionsPresenter
 import com.stripe.android.paymentelement.embedded.content.EmbeddedSheetLauncher
+import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
+import com.stripe.android.paymentelement.embedded.sheet.SheetTaxRegionUpdater
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.createCustomerState
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.testing.FakeErrorReporter
+import com.stripe.android.testing.FakeLogger
 import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.FakeLinkStore
 import kotlinx.coroutines.Dispatchers
@@ -121,6 +127,30 @@ internal class CheckoutLinkPaymentOptionsPresenterTest {
         assertThat(stateHolder.state?.paymentSelection)
             .isEqualTo(linkSelection.copy(selectedPayment = updatedPayment))
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
+    }
+
+    @Test
+    fun `completion syncs the billing address for automatic tax`() = runScenario(
+        checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+            automaticTaxEnabled = true,
+            taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+        ),
+    ) {
+        val launch = presentLink()
+        sessionRefresher.enqueueRefreshAction {}
+
+        dispatchResult(
+            launch = launch,
+            result = LinkActivityResult.Completed(LinkAccountUpdate.None, selectedPayment = selectedPayment)
+        )
+
+        val update = taxRegionUpdates.awaitItem()
+        assertThat(update.addressSource).isEqualTo(CheckoutSessionResponse.TaxAddressSource.BILLING)
+        assertThat(update.address?.country).isEqualTo("US")
+        assertThat(update.address?.postalCode).isEqualTo("12312")
+        val commit = sessionRefresher.calls.awaitItem() as FakeCheckoutSessionRefresher.Call.Commit
+        assertThat(commit.response.configId).isEqualTo("updated")
+        assertThat(stateHolder.state?.paymentSelection).isEqualTo(linkSelection)
     }
 
     @Test
@@ -298,6 +328,7 @@ internal class CheckoutLinkPaymentOptionsPresenterTest {
     private fun runScenario(
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
         selection: PaymentSelection? = linkSelection,
+        checkoutSessionResponse: CheckoutSessionResponse = CheckoutSessionResponseFactory.create(),
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
@@ -311,6 +342,7 @@ internal class CheckoutLinkPaymentOptionsPresenterTest {
             CheckoutElementsControllerStateHolder.STATE_KEY
         )
         val state = existingState ?: CheckoutElementsControllerStateFactory.create(
+            checkoutSessionResponse = checkoutSessionResponse,
             paymentSelection = selection,
             paymentMethodMetadata = paymentMethodMetadata,
         )
@@ -356,6 +388,19 @@ internal class CheckoutLinkPaymentOptionsPresenterTest {
         )
         val activityResultRegistry = FakeLinkActivityResultRegistry()
         val lifecycleOwner = TestLifecycleOwner(coroutineDispatcher = Dispatchers.Unconfined)
+        val taxRegionUpdates = Turbine<TaxRegionUpdateCall>()
+        val sessionRefresher = FakeCheckoutSessionRefresher()
+        val operationCoordinator = CheckoutOperationCoordinator(
+            displayMessageResolver = CheckoutDisplayMessageResolver(ApplicationProvider.getApplicationContext()),
+            confirmationHandler = FakeConfirmationHandler(),
+            sheetStateHolder = sheetStateHolder,
+            sessionRefresher = sessionRefresher,
+            confirmationFinalizer = { Result.success(it) },
+            resultReporter = { _, _ -> },
+            logger = FakeLogger(),
+            resultCallback = {},
+            viewModelScope = backgroundScope,
+        )
         val presenter = CheckoutLinkPaymentOptionsPresenter(
             defaultPresenter = defaultPresenter,
             selectionLauncher = LinkPaymentMethodSelectionLauncher(
@@ -371,6 +416,14 @@ internal class CheckoutLinkPaymentOptionsPresenterTest {
             customerStateHolder = customerStateHolder,
             linkAccountHolder = linkAccountHolder,
             sheetStateHolder = sheetStateHolder,
+            taxRegionUpdater = SheetTaxRegionUpdater { response, addressSource, address ->
+                taxRegionUpdates.add(TaxRegionUpdateCall(addressSource, address))
+                Result.success(response.copy(configId = "updated"))
+            },
+            operationCoordinator = operationCoordinator,
+            sessionRefresher = sessionRefresher,
+            logger = FakeLogger(),
+            coroutineScope = backgroundScope,
         )
 
         Scenario(
@@ -387,6 +440,8 @@ internal class CheckoutLinkPaymentOptionsPresenterTest {
             linkAccountInfo = linkAccountInfo,
             paymentMethodMetadata = requireNotNull(state.paymentMethodMetadata),
             errorReporter = errorReporter,
+            taxRegionUpdates = taxRegionUpdates,
+            sessionRefresher = sessionRefresher,
         ).block()
 
         activityResultRegistry.launchCalls.ensureAllEventsConsumed()
@@ -394,7 +449,14 @@ internal class CheckoutLinkPaymentOptionsPresenterTest {
         linkAnalyticsHelper.ensureAllEventsConsumed()
         linkStore.ensureAllEventsConsumed()
         errorReporter.ensureAllEventsConsumed()
+        taxRegionUpdates.ensureAllEventsConsumed()
+        sessionRefresher.ensureAllEventsConsumed()
     }
+
+    private data class TaxRegionUpdateCall(
+        val addressSource: CheckoutSessionResponse.TaxAddressSource,
+        val address: CheckoutElementsController.Address.State?,
+    )
 
     private data class Scenario(
         val presenter: CheckoutLinkPaymentOptionsPresenter,
@@ -410,6 +472,8 @@ internal class CheckoutLinkPaymentOptionsPresenterTest {
         val linkAccountInfo: LinkAccountUpdate.Value,
         val paymentMethodMetadata: PaymentMethodMetadata,
         val errorReporter: FakeErrorReporter,
+        val taxRegionUpdates: Turbine<TaxRegionUpdateCall>,
+        val sessionRefresher: FakeCheckoutSessionRefresher,
     ) {
         val linkConfiguration: LinkConfiguration
             get() = requireNotNull(paymentMethodMetadata.linkState?.configuration)

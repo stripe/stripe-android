@@ -13,6 +13,7 @@ import com.stripe.android.link.LinkDismissalCoordinator
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.LinkPaymentMethod
+import com.stripe.android.link.LinkTotalUpdater
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.confirmation.CompleteLinkFlow
 import com.stripe.android.link.confirmation.CompleteLinkFlow.Result
@@ -23,8 +24,10 @@ import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.completePaymentButtonLabel
 import com.stripe.android.link.withDismissalDisabled
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.paymentsheet.forms.FormFieldValues
+import com.stripe.android.uicore.utils.combineAsStateFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -40,6 +43,7 @@ internal class PaymentMethodViewModel @Inject constructor(
     private val formHelper: FormHelper,
     private val dismissalCoordinator: LinkDismissalCoordinator,
     private val linkLaunchMode: LinkLaunchMode,
+    private val linkTotalUpdater: LinkTotalUpdater,
     private val dismissWithResult: (LinkActivityResult) -> Unit,
 ) : ViewModel() {
     private val _state = MutableStateFlow(
@@ -47,12 +51,33 @@ internal class PaymentMethodViewModel @Inject constructor(
             formElements = formHelper.formElementsForCode(PaymentMethod.Type.Card.code),
             formArguments = formHelper.createFormArguments(PaymentMethod.Type.Card.code),
             primaryButtonState = PrimaryButtonState.Disabled,
-            primaryButtonLabel = completePaymentButtonLabel(configuration.stripeIntent, linkLaunchMode),
+            primaryButtonLabel = completePaymentButtonLabel(
+                stripeIntent = configuration.stripeIntent,
+                linkLaunchMode = linkLaunchMode,
+                amount = linkTotalUpdater.state.value.amount,
+            ),
             isValidating = false,
         )
     )
 
-    val state: StateFlow<PaymentMethodState> = _state
+    val state: StateFlow<PaymentMethodState> = combineAsStateFlow(
+        _state,
+        linkTotalUpdater.state,
+    ) { state, totalState ->
+        state.copy(
+            primaryButtonLabel = completePaymentButtonLabel(
+                stripeIntent = configuration.stripeIntent,
+                linkLaunchMode = linkLaunchMode,
+                amount = totalState.amount,
+            ),
+            primaryButtonState = if (totalState.isUpdating && state.primaryButtonState == PrimaryButtonState.Enabled) {
+                // Keep showing the current total with a spinner until it reflects the entered billing address.
+                PrimaryButtonState.Updating
+            } else {
+                state.primaryButtonState
+            },
+        )
+    }
 
     fun formValuesChanged(formValues: FormFieldValues?) {
         val paymentMethodCreateParams = formHelper.getPaymentMethodParams(
@@ -72,6 +97,23 @@ internal class PaymentMethodViewModel @Inject constructor(
                     PrimaryButtonState.Disabled
                 }
             )
+        }
+        syncTotalForEnteredBillingAddress(paymentMethodCreateParams)
+    }
+
+    /**
+     * Updates the displayed total for the entered billing address once the form is complete, if the total depends
+     * on it.
+     */
+    private fun syncTotalForEnteredBillingAddress(paymentMethodCreateParams: PaymentMethodCreateParams?) {
+        val billingAddress = paymentMethodCreateParams?.billingDetails?.address ?: return
+        if (_state.value.primaryButtonState == PrimaryButtonState.Processing) return
+        viewModelScope.launch {
+            linkTotalUpdater.sync(billingAddress = billingAddress, showsProgress = true)
+                .onFailure { error ->
+                    logger.error("PaymentMethodViewModel: Failed to update the total", error)
+                    _state.update { it.copy(errorMessage = error.stripeErrorMessage()) }
+                }
         }
     }
 
@@ -195,6 +237,7 @@ internal class PaymentMethodViewModel @Inject constructor(
                         logger = parentComponent.logger,
                         dismissalCoordinator = parentComponent.dismissalCoordinator,
                         linkLaunchMode = parentComponent.linkLaunchMode,
+                        linkTotalUpdater = parentComponent.linkTotalUpdater,
                         dismissWithResult = dismissWithResult
                     )
                 }

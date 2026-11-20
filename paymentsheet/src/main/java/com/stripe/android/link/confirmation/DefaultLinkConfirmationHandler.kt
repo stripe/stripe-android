@@ -1,10 +1,13 @@
 package com.stripe.android.link.confirmation
 
+import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkPaymentDetails
+import com.stripe.android.link.LinkTotalUpdater
 import com.stripe.android.link.model.LinkAccount
+import com.stripe.android.link.toAddress
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.Address
@@ -33,6 +36,7 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
     private val statusBarColor: Int?,
     private val logger: Logger,
     private val confirmationHandler: ConfirmationHandler,
+    private val linkTotalUpdater: LinkTotalUpdater,
 ) : LinkConfirmationHandler {
 
     init {
@@ -45,7 +49,7 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
         cvc: String?,
         billingPhone: String?,
     ): Result {
-        return confirm {
+        return confirm(billingAddress = paymentDetails.billingAddress?.toAddress()) { paymentMethodMetadata ->
             newConfirmationArgs(
                 paymentDetails = paymentDetails,
                 linkAccount = linkAccount,
@@ -62,7 +66,7 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
         cvc: String?,
         billingPhone: String?
     ): Result {
-        return confirm {
+        return confirm(billingAddress = paymentDetails.billingAddress) { paymentMethodMetadata ->
             confirmationArgs(
                 paymentDetails = paymentDetails,
                 linkAccount = linkAccount,
@@ -74,10 +78,25 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
     }
 
     private suspend fun confirm(
-        createArgs: () -> ConfirmationHandler.Args
+        billingAddress: Address?,
+        createArgs: (PaymentMethodMetadata) -> ConfirmationHandler.Args
     ): Result {
+        // Make sure the total reflects the billing address we're about to pay with. If it changed,
+        // stop so the customer can review the new total before paying.
+        val totalChanged = linkTotalUpdater.sync(billingAddress = billingAddress, showsProgress = false)
+            .getOrElse { error ->
+                logger.error(
+                    msg = "DefaultLinkConfirmationHandler: Failed to update the total",
+                    t = error
+                )
+                return Result.Failed(error.stripeErrorMessage())
+            }
+        if (totalChanged) {
+            return Result.Failed(R.string.stripe_link_total_updated_for_billing_address.resolvableString)
+        }
+
         return runCatching {
-            val args = createArgs()
+            val args = createArgs(linkTotalUpdater.applyTo(paymentMethodMetadata))
             confirmationHandler.start(args)
             val result = confirmationHandler.awaitResult()
             transformResult(result)
@@ -234,10 +253,12 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
         private val paymentMethodMetadata: PaymentMethodMetadata,
         @Named(STATUS_BAR_COLOR) private val statusBarColor: Int?,
         private val logger: Logger,
+        private val linkTotalUpdater: LinkTotalUpdater,
     ) : LinkConfirmationHandler.Factory {
         override fun create(confirmationHandler: ConfirmationHandler): LinkConfirmationHandler {
             return DefaultLinkConfirmationHandler(
                 confirmationHandler = confirmationHandler,
+                linkTotalUpdater = linkTotalUpdater,
                 logger = logger,
                 configuration = configuration,
                 paymentMethodMetadata = paymentMethodMetadata,
@@ -256,16 +277,7 @@ internal fun createPaymentMethodCreateParams(
     allowRedisplay: PaymentMethod.AllowRedisplay? = null,
 ): PaymentMethodCreateParams {
     val billingDetails = PaymentMethod.BillingDetails(
-        address = selectedPaymentDetails.billingAddress?.let {
-            Address(
-                line1 = it.line1,
-                line2 = it.line2,
-                postalCode = it.postalCode,
-                city = it.locality,
-                state = it.administrativeArea,
-                country = it.countryCode?.value,
-            )
-        },
+        address = selectedPaymentDetails.billingAddress?.toAddress(),
         email = selectedPaymentDetails.billingEmailAddress,
         name = selectedPaymentDetails.billingAddress?.name,
         phone = billingPhone,
@@ -309,4 +321,11 @@ private val PaymentMethodSaveConsentBehavior.overrideAllowRedisplay: PaymentMeth
     get() = when (this) {
         is PaymentMethodSaveConsentBehavior.Disabled -> overrideAllowRedisplay
         is PaymentMethodSaveConsentBehavior.Enabled, PaymentMethodSaveConsentBehavior.Legacy -> null
+    }
+
+private val LinkPaymentDetails.billingAddress: Address?
+    get() = when (this) {
+        is LinkPaymentDetails.New -> paymentDetails.billingAddress?.toAddress()
+        is LinkPaymentDetails.Passthrough -> paymentMethod.billingDetails?.address
+        is LinkPaymentDetails.Saved -> paymentMethod.billingDetails?.address
     }

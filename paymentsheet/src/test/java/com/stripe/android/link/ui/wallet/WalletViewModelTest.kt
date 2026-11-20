@@ -1,8 +1,12 @@
+@file:OptIn(com.stripe.android.paymentelement.CheckoutSessionPreview::class)
+
 package com.stripe.android.link.ui.wallet
 
+import app.cash.turbine.Turbine
 import app.cash.turbine.TurbineTestContext
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkout.CheckoutElementsController
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.Logger
@@ -21,6 +25,8 @@ import com.stripe.android.link.LinkDismissalCoordinator
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentMethodFilter
 import com.stripe.android.link.LinkScreen
+import com.stripe.android.link.LinkTotalUpdater
+import com.stripe.android.link.LinkTotalUpdaterFactory
 import com.stripe.android.link.RealLinkDismissalCoordinator
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT
@@ -31,6 +37,7 @@ import com.stripe.android.link.confirmation.DefaultCompleteLinkFlow
 import com.stripe.android.link.confirmation.FakeLinkConfirmationHandler
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
 import com.stripe.android.link.model.LinkAccount
+import com.stripe.android.link.ui.completePaymentButtonLabel
 import com.stripe.android.link.utils.TestNavigationManager
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilter
 import com.stripe.android.model.ConsumerPaymentDetails
@@ -41,6 +48,8 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
@@ -410,6 +419,63 @@ class WalletViewModelTest {
             viewModel.onItemSelected(item = expandedState.paymentDetailsList.last())
             assertThat(awaitItem().isExpanded).isFalse()
         }
+    }
+
+    @Test
+    fun `selected payment method's billing address updates the displayed total`() = runTest(dispatcher) {
+        val taxRegionUpdates = Turbine<CheckoutElementsController.Address.State>()
+        val linkAccountManager = WalletLinkAccountManager()
+        linkAccountManager.listPaymentDetailsResult = Result.success(
+            ConsumerPaymentDetails(paymentDetails = listOf(TestFactory.CONSUMER_PAYMENT_DETAILS_CARD))
+        )
+
+        val viewModel = createViewModel(
+            linkAccountManager = linkAccountManager,
+            linkTotalUpdater = LinkTotalUpdaterFactory.create(
+                initialCheckoutSessionResponse = automaticTaxSession(amount = 1000L),
+            ) { _, address ->
+                taxRegionUpdates.add(address)
+                Result.success(automaticTaxSession(amount = 1100L))
+            },
+        )
+
+        assertThat(taxRegionUpdates.awaitItem().postalCode).isEqualTo("12312")
+        assertThat(viewModel.uiState.value.primaryButtonLabel).isEqualTo(
+            completePaymentButtonLabel(
+                stripeIntent = TestFactory.LINK_CONFIGURATION.stripeIntent,
+                linkLaunchMode = LinkLaunchMode.Full(showSecondaryButton = true),
+                amount = 1100L,
+            )
+        )
+        assertThat(viewModel.uiState.value.isUpdatingTotal).isFalse()
+        taxRegionUpdates.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `performPaymentConfirmation recollects billing details required for automatic tax`() = runTest(dispatcher) {
+        val linkAccountManager = WalletLinkAccountManager()
+        linkAccountManager.listPaymentDetailsResult = Result.success(
+            ConsumerPaymentDetails(paymentDetails = listOf(TestFactory.CONSUMER_PAYMENT_DETAILS_CARD))
+        )
+        val navigationManager = TestNavigationManager()
+        val linkConfirmationHandler = FakeLinkConfirmationHandler()
+
+        val viewModel = createViewModel(
+            linkAccountManager = linkAccountManager,
+            navigationManager = navigationManager,
+            linkConfirmationHandler = linkConfirmationHandler,
+            requiresBillingAddressForAutomaticTax = true,
+        )
+        viewModel.onPrimaryButtonClicked()
+
+        // The card's US billing address is missing the street address, city, and state needed for tax.
+        navigationManager.assertNavigatedTo(
+            route = LinkScreen.UpdateCard(
+                paymentDetailsId = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.id,
+                billingDetailsUpdateFlow = LinkScreen.UpdateCard.BillingDetailsUpdateFlow(cvc = null),
+            )
+        )
+        assertThat(linkConfirmationHandler.calls).isEmpty()
     }
 
     @Test
@@ -1173,6 +1239,14 @@ class WalletViewModelTest {
         return PaymentMethodFilterTestData(cardPayment, bankPayment, linkAccountManager)
     }
 
+    private fun automaticTaxSession(amount: Long): CheckoutSessionResponse {
+        return CheckoutSessionResponseFactory.create(
+            amount = amount,
+            automaticTaxEnabled = true,
+            taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+        )
+    }
+
     private fun createPaymentMethodSelectionMode(
         selectedPayment: ConsumerPaymentDetails.PaymentDetails? = null,
         paymentMethodFilters: List<LinkPaymentMethodFilter>? = null
@@ -1191,7 +1265,9 @@ class WalletViewModelTest {
         navigateAndClearStack: (route: LinkScreen) -> Unit = {},
         dismissWithResult: (LinkActivityResult) -> Unit = {},
         configuration: LinkConfiguration = TestFactory.LINK_CONFIGURATION,
-        linkLaunchMode: LinkLaunchMode = LinkLaunchMode.Full(showSecondaryButton = true)
+        linkLaunchMode: LinkLaunchMode = LinkLaunchMode.Full(showSecondaryButton = true),
+        linkTotalUpdater: LinkTotalUpdater = LinkTotalUpdaterFactory.disabled(),
+        requiresBillingAddressForAutomaticTax: Boolean = false,
     ): WalletViewModel {
         return WalletViewModel(
             configuration = configuration,
@@ -1209,6 +1285,8 @@ class WalletViewModelTest {
                 linkLaunchMode = linkLaunchMode
             ),
             linkLaunchMode = linkLaunchMode,
+            linkTotalUpdater = linkTotalUpdater,
+            requiresBillingAddressForAutomaticTax = requiresBillingAddressForAutomaticTax,
             addPaymentMethodOptions = AddPaymentMethodOptions(
                 linkAccount = linkAccount,
                 configuration = configuration,

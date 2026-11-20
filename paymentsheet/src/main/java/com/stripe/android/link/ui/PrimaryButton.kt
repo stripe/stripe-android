@@ -117,7 +117,8 @@ private fun PrimaryContent(
     @DrawableRes iconEnd: Int? = null
 ) {
     when (state) {
-        PrimaryButtonState.Processing -> LinkSpinner(
+        PrimaryButtonState.Processing,
+        PrimaryButtonState.Updating -> LinkSpinner(
             modifier = Modifier
                 .size(20.dp)
                 .semantics { testTag = ProgressIndicatorTestTag },
@@ -201,18 +202,27 @@ enum class PrimaryButtonState(val isBlocking: Boolean) {
     Enabled(false),
     Disabled(false),
     Processing(true),
-    Completed(true)
+    Completed(true),
+
+    /**
+     * Shows a spinner without blocking other UI elements, e.g. while the total is updated for a new billing address.
+     */
+    Updating(false),
 }
 
+/**
+ * @param amount The total to show instead of the intent's amount, e.g. after it was updated for the billing address.
+ */
 internal fun completePaymentButtonLabel(
     stripeIntent: StripeIntent,
     linkLaunchMode: LinkLaunchMode,
+    amount: Long?,
 ): ResolvableString = when (linkLaunchMode) {
     is LinkLaunchMode.Full,
     is LinkLaunchMode.Confirmation -> when (stripeIntent) {
         is PaymentIntent -> {
             Amount(
-                requireNotNull(stripeIntent.amount),
+                amount ?: requireNotNull(stripeIntent.amount),
                 requireNotNull(stripeIntent.currency)
             ).buildPayButtonLabel()
         }
