@@ -183,7 +183,9 @@ Do not consider the task complete until this simplification attempt is complete 
 
 ## Keep Shampoo out of commits and PRs
 
-Before any `git add`, `git commit`, `gh stack push`, `gh stack submit`, or PR creation:
+For stacked PRs, use `pay stack` following the workflow in `AGENTS.md`.
+
+Before any `git add`, `git commit`, `pay stack push`, or PR creation:
 
 1. Restore the rule file to its pre-soak `RetryRule` configuration using `apply_patch`. Do not discard unrelated or pre-existing changes.
 2. Inspect both unstaged and staged rule-file diffs:
