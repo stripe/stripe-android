@@ -308,7 +308,10 @@ internal class EmbeddedNavigator private constructor(
                 PaymentSheetTopBarStateFactory.create(PaymentSheetTopBarState.Editable.Never)
             )
 
-            override fun title() = stateFlowOf<ResolvableString?>(null)
+            override fun title() = stateFlowOf<ResolvableString?>(
+                R.string.stripe_paymentsheet_added_card.resolvableString
+            )
+
             override fun isPerformingNetworkOperation() = sheetActivityStateHolder.state.mapAsStateFlow {
                 it.isProcessing
             }

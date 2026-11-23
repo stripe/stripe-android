@@ -43,4 +43,13 @@ internal class PaymentSheetCvcRecollectionTest {
                 assertThat(itemTwo?.isEditing).isFalse()
             }
     }
+
+    @Test
+    fun `title returns confirm your cvc`() = runTest {
+        PaymentSheetScreen.CvcRecollection(FakeCvcRecollectionInteractor())
+            .title(isCompleteFlow = true, isWalletEnabled = false).test {
+                assertThat(awaitItem())
+                    .isEqualTo(R.string.stripe_paymentsheet_confirm_your_cvc.resolvableString)
+            }
+    }
 }

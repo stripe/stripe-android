@@ -698,10 +698,10 @@ internal class EmbeddedNavigatorTest {
     }
 
     @Test
-    fun `SavedPaymentMethodConfirm title returns null`() {
+    fun `SavedPaymentMethodConfirm title returns added card`() {
         val (screen, interactor) = createSavedPaymentMethodConfirmScreen()
 
-        assertThat(screen.title().value).isNull()
+        assertThat(screen.title().value).isEqualTo(PaymentSheetR.string.stripe_paymentsheet_added_card.resolvableString)
         interactor.validate()
     }
 

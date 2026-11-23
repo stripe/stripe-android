@@ -62,7 +62,6 @@ import com.stripe.android.paymentsheet.utils.EventReporterProvider
 import com.stripe.android.paymentsheet.utils.PaymentSheetContentPadding
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.CircularProgressIndicator
-import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.ui.core.elements.Mandate
 import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.strings.resolve
@@ -75,24 +74,22 @@ internal fun PaymentSheetScreen(
     viewModel: PaymentSheetViewModel,
 ) {
     val contentVisible by viewModel.contentVisible.collectAsState()
-    val scrollState = rememberScrollState()
     PaymentSheetScreen(
         viewModel = viewModel,
-        scrollState = scrollState,
-        contentVisible = contentVisible
-    ) {
-        PaymentSheetScreenContent(viewModel, type = Complete, scrollState = scrollState)
-    }
+        type = Complete,
+        contentVisible = contentVisible,
+    )
 }
 
 @Composable
 internal fun PaymentSheetScreen(
     viewModel: PaymentOptionsViewModel,
 ) {
-    val scrollState = rememberScrollState()
-    PaymentSheetScreen(viewModel, scrollState) {
-        PaymentSheetScreenContent(viewModel, type = Custom, scrollState = scrollState)
-    }
+    PaymentSheetScreen(
+        viewModel = viewModel,
+        type = Custom,
+        contentVisible = true,
+    )
 }
 
 @Composable
@@ -101,23 +98,23 @@ internal fun PaymentSheetScreen(
     type: PaymentSheetFlowType,
     contentVisible: Boolean = true,
 ) {
-    val scrollState = rememberScrollState()
-    PaymentSheetScreen(viewModel = viewModel, scrollState = scrollState, contentVisible = contentVisible) {
-        PaymentSheetScreenContent(viewModel, type = type, scrollState = scrollState)
-    }
-}
-
-@Composable
-private fun PaymentSheetScreen(
-    viewModel: BaseSheetViewModel,
-    scrollState: ScrollState,
-    contentVisible: Boolean = true,
-    content: @Composable () -> Unit,
-) {
     val processing by viewModel.processing.collectAsState()
 
+    val walletsState by viewModel.walletsState.collectAsState()
     val walletsProcessingState by viewModel.walletsProcessingState.collectAsState()
+    val currentScreen by viewModel.navigationHandler.currentScreen.collectAsState()
 
+    val showsWalletsHeader by remember(currentScreen, type) {
+        currentScreen.showsWalletsHeader(isCompleteFlow = type == Complete)
+    }.collectAsState()
+
+    val actualWalletsState = walletsState.takeIf { showsWalletsHeader }
+
+    val headerText by remember(currentScreen, type, actualWalletsState != null) {
+        currentScreen.title(isCompleteFlow = type == Complete, isWalletEnabled = actualWalletsState != null)
+    }.collectAsState()
+
+    val scrollState = rememberScrollState()
     val density = LocalDensity.current
     var contentHeight by remember { mutableStateOf(0.dp) }
     val minContentHeight =
@@ -133,28 +130,48 @@ private fun PaymentSheetScreen(
             // Set a min height to reduce size changes during initialization.
             .heightIn(min = minContentHeight),
         topBar = {
-            val currentScreen by viewModel.navigationHandler.currentScreen.collectAsState()
             val topBarState by remember(currentScreen) {
                 currentScreen.topBarState()
             }.collectAsState()
 
             PaymentSheetTopBar(
                 state = topBarState,
+                title = headerText?.resolve(),
                 canNavigateBack = viewModel.navigationHandler.canGoBack,
                 isEnabled = !processing,
-                handleBackPressed = viewModel::handleBackPressed,
+                onNavigationIconPressed = viewModel::handleBackPressed,
             )
         },
         content = {
             AnimatedVisibility(
                 visible = contentVisible,
                 modifier = Modifier.fillMaxWidth(),
-                content = { content() }
+                content = {
+                    PaymentSheetScreenContent(
+                        viewModel = viewModel,
+                        walletsState = actualWalletsState,
+                        currentScreen = currentScreen,
+                        scrollState = scrollState,
+                    )
+                }
             )
         },
         scrollState = scrollState,
     )
 
+    ContentOverlay(
+        contentVisible = contentVisible,
+        contentHeight = contentHeight,
+        walletsProcessingState = walletsProcessingState,
+    )
+}
+
+@Composable
+private fun ContentOverlay(
+    contentVisible: Boolean,
+    contentHeight: Dp,
+    walletsProcessingState: WalletsProcessingState?,
+) {
     AnimatedVisibility(
         visible = !contentVisible ||
             (walletsProcessingState != null && walletsProcessingState !is WalletsProcessingState.Idle),
@@ -178,35 +195,22 @@ private fun PaymentSheetScreen(
 }
 
 @Composable
-internal fun PaymentSheetScreenContent(
+private fun PaymentSheetScreenContent(
     viewModel: BaseSheetViewModel,
-    type: PaymentSheetFlowType,
-    modifier: Modifier = Modifier,
+    walletsState: WalletsState?,
+    currentScreen: PaymentSheetScreen,
     scrollState: ScrollState,
 ) {
-    val walletsState by viewModel.walletsState.collectAsState()
     val walletsProcessingState by viewModel.walletsProcessingState.collectAsState()
     val error by viewModel.error.collectAsState()
     val mandateText by viewModel.mandateHandler.mandateText.collectAsState()
-    val currentScreen by viewModel.navigationHandler.currentScreen.collectAsState()
 
     ResetScroll(scrollState = scrollState, currentScreen = currentScreen)
 
-    val showsWalletsHeader by remember(currentScreen, type) {
-        currentScreen.showsWalletsHeader(isCompleteFlow = type == Complete)
-    }.collectAsState()
-
-    val actualWalletsState = walletsState.takeIf { showsWalletsHeader }
-
-    val headerText by remember(currentScreen, type, actualWalletsState != null) {
-        currentScreen.title(isCompleteFlow = type == Complete, isWalletEnabled = actualWalletsState != null)
-    }.collectAsState()
-
-    Column(modifier) {
+    Column {
         PaymentSheetContent(
             viewModel = viewModel,
-            headerText = headerText,
-            walletsState = actualWalletsState,
+            walletsState = walletsState,
             walletsProcessingState = walletsProcessingState,
             error = error,
             currentScreen = currentScreen,
@@ -275,7 +279,6 @@ internal fun ProgressOverlayProcessing() {
 @Composable
 private fun PaymentSheetContent(
     viewModel: BaseSheetViewModel,
-    headerText: ResolvableString?,
     walletsState: WalletsState?,
     walletsProcessingState: WalletsProcessingState?,
     error: ResolvableString?,
@@ -286,7 +289,6 @@ private fun PaymentSheetContent(
     fun Content(modifier: Modifier) {
         PaymentSheetContent(
             viewModel = viewModel,
-            headerText = headerText,
             walletsState = walletsState,
             walletsProcessingState = walletsProcessingState,
             error = error,
@@ -311,7 +313,6 @@ private fun PaymentSheetContent(
 @Composable
 private fun PaymentSheetContent(
     viewModel: BaseSheetViewModel,
-    headerText: ResolvableString?,
     walletsState: WalletsState?,
     walletsProcessingState: WalletsProcessingState?,
     error: ResolvableString?,
@@ -321,15 +322,6 @@ private fun PaymentSheetContent(
 ) {
     val horizontalPadding = MaterialTheme.stripeFormInsets.getOuterFormInsets()
     Column(modifier = modifier.padding(bottom = currentScreen.bottomContentPadding)) {
-        headerText?.let { text ->
-            H4Text(
-                text = text.resolve(),
-                modifier = Modifier
-                    .padding(bottom = 16.dp)
-                    .padding(horizontalPadding),
-            )
-        }
-
         walletsState?.let { state ->
             val bottomSpacing = currentScreen.walletsDividerSpacing - currentScreen.topContentPadding
             Wallet(

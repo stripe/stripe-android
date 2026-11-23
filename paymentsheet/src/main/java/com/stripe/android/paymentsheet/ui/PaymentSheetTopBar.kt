@@ -2,14 +2,19 @@ package com.stripe.android.paymentsheet.ui
 
 import android.graphics.Typeface
 import androidx.annotation.RestrictTo
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -18,12 +23,14 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.content.res.ResourcesCompat
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.StripeThemeDefaults
 import com.stripe.android.uicore.stripeColors
@@ -31,6 +38,7 @@ import com.stripe.android.uicore.stripeTypography
 import com.stripe.android.ui.core.R as StripeUiCoreR
 
 internal const val SHEET_NAVIGATION_BUTTON_TAG = "SHEET_NAVIGATION_BUTTON_TAG"
+internal const val SHEET_TITLE_TEST_TAG = "SHEET_TITLE_TEST_TAG"
 
 // Same as the default value for `TopAppBar`
 internal val PaymentSheetTopBarHeight = 56.dp
@@ -38,75 +46,92 @@ internal val PaymentSheetTopBarHeight = 56.dp
 @Composable
 internal fun PaymentSheetTopBar(
     state: PaymentSheetTopBarState?,
+    title: String?,
     canNavigateBack: Boolean,
     isEnabled: Boolean,
-    handleBackPressed: () -> Unit,
-    elevation: Dp = 0.dp,
+    onNavigationIconPressed: () -> Unit,
 ) {
-    if (state != null) {
-        PaymentSheetTopBar(
-            state = state,
+    if (state == null) {
+        return
+    }
+
+    val tintColor = MaterialTheme.stripeColors.appBarIcon
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = PaymentSheetTopBarHeight)
+            .background(MaterialTheme.colors.surface)
+            .padding(horizontal = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        NavigationButton(
             canNavigateBack = canNavigateBack,
             isEnabled = isEnabled,
-            elevation = elevation,
-            onNavigationIconPressed = handleBackPressed,
+            tintColor = tintColor,
+            onClick = onNavigationIconPressed,
         )
+
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .padding(horizontal = 4.dp, vertical = 12.dp),
+        ) {
+            title?.let {
+                H4Text(
+                    text = it,
+                    modifier = Modifier
+                        .semantics { heading() }
+                        .testTag(SHEET_TITLE_TEST_TAG),
+                )
+            }
+        }
+
+        if (state.showEditMenu) {
+            EditButton(
+                labelResourceId = state.editMenuLabel,
+                isEnabled = isEnabled,
+                tintColor = tintColor,
+                onClick = state.onEditIconPressed,
+            )
+        }
     }
 }
 
 @Composable
-internal fun PaymentSheetTopBar(
-    state: PaymentSheetTopBarState,
+private fun NavigationButton(
     canNavigateBack: Boolean,
     isEnabled: Boolean,
-    elevation: Dp,
-    onNavigationIconPressed: () -> Unit,
+    tintColor: Color,
+    onClick: () -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
-    val tintColor = MaterialTheme.stripeColors.appBarIcon
 
-    TopAppBar(
-        title = {},
-        navigationIcon = {
-            IconButton(
-                enabled = isEnabled,
-                onClick = {
-                    keyboardController?.hide()
-                    onNavigationIconPressed()
-                },
-                modifier = Modifier.testTag(SHEET_NAVIGATION_BUTTON_TAG)
-            ) {
-                val icon = if (canNavigateBack) {
-                    R.drawable.stripe_ic_paymentsheet_back
-                } else {
-                    R.drawable.stripe_ic_paymentsheet_close
-                }
+    IconButton(
+        enabled = isEnabled,
+        onClick = {
+            keyboardController?.hide()
+            onClick()
+        },
+        modifier = Modifier.testTag(SHEET_NAVIGATION_BUTTON_TAG)
+    ) {
+        val icon = if (canNavigateBack) {
+            R.drawable.stripe_ic_paymentsheet_back
+        } else {
+            R.drawable.stripe_ic_paymentsheet_close
+        }
 
-                val contentDescription = if (canNavigateBack) {
-                    StripeUiCoreR.string.stripe_back
-                } else {
-                    R.string.stripe_paymentsheet_close
-                }
-                Icon(
-                    painter = painterResource(icon),
-                    contentDescription = stringResource(contentDescription),
-                    tint = tintColor,
-                )
-            }
-        },
-        backgroundColor = MaterialTheme.colors.surface,
-        elevation = elevation,
-        actions = {
-            if (state.showEditMenu) {
-                EditButton(
-                    labelResourceId = state.editMenuLabel,
-                    isEnabled = isEnabled,
-                    tintColor = tintColor,
-                    onClick = state.onEditIconPressed,
-                )
-            }
-        },
-    )
+        val contentDescription = if (canNavigateBack) {
+            StripeUiCoreR.string.stripe_back
+        } else {
+            R.string.stripe_paymentsheet_close
+        }
+        Icon(
+            painter = painterResource(icon),
+            contentDescription = stringResource(contentDescription),
+            tint = tintColor,
+        )
+    }
 }
 
 @Composable
@@ -160,9 +185,9 @@ internal fun PaymentSheetTopBar_Preview() {
 
         PaymentSheetTopBar(
             state = state,
+            title = "Select your payment method",
             canNavigateBack = true,
             isEnabled = true,
-            elevation = 0.dp,
             onNavigationIconPressed = {},
         )
     }

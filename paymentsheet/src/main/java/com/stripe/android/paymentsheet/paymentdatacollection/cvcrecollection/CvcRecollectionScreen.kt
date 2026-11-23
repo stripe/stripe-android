@@ -8,18 +8,14 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Divider
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
@@ -45,9 +41,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.ui.PaymentSheetTopBar
+import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.PrimaryButtonIcon
-import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.Placeholder
 import com.stripe.android.uicore.elements.SectionCard
@@ -66,24 +63,35 @@ internal fun CvcRecollectionScreen(
     viewActionHandler: (action: CvcRecollectionViewAction) -> Unit
 ) {
     Column(
-        Modifier
-            .background(MaterialTheme.stripeColors.materialColors.surface)
-            .padding(MaterialTheme.stripeFormInsets.getOuterFormInsets())
+        Modifier.background(MaterialTheme.stripeColors.materialColors.surface)
     ) {
-        CvcRecollectionTopBar {
-            viewActionHandler.invoke(CvcRecollectionViewAction.OnBackPressed)
-        }
-        CvcRecollectionTitle()
-        CvcRecollectionField(
-            lastFour = lastFour,
-            enabled = true,
-            cvcState = cvcState,
-            onValueChanged = {
-                viewActionHandler(CvcRecollectionViewAction.OnCvcChanged(it))
-            }
+        PaymentSheetTopBar(
+            state = PaymentSheetTopBarState(
+                showEditMenu = false,
+                isEditing = false,
+                onEditIconPressed = {},
+            ),
+            title = stringResource(R.string.stripe_paymentsheet_confirm_your_cvc),
+            canNavigateBack = false,
+            isEnabled = true,
+            onNavigationIconPressed = {
+                viewActionHandler.invoke(CvcRecollectionViewAction.OnBackPressed)
+            },
         )
-        CvcRecollectionButton(cvcState.isValid) {
-            viewActionHandler.invoke(CvcRecollectionViewAction.OnConfirmPressed)
+        Column(
+            Modifier.padding(MaterialTheme.stripeFormInsets.getOuterFormInsets())
+        ) {
+            CvcRecollectionField(
+                lastFour = lastFour,
+                enabled = true,
+                cvcState = cvcState,
+                onValueChanged = {
+                    viewActionHandler(CvcRecollectionViewAction.OnCvcChanged(it))
+                }
+            )
+            CvcRecollectionButton(cvcState.isValid) {
+                viewActionHandler.invoke(CvcRecollectionViewAction.OnConfirmPressed)
+            }
         }
     }
 }
@@ -99,7 +107,6 @@ internal fun CvcRecollectionPaymentSheetScreen(
             .background(MaterialTheme.stripeColors.materialColors.surface)
             .padding(MaterialTheme.stripeFormInsets.getOuterFormInsets())
     ) {
-        CvcRecollectionTitle()
         CvcRecollectionField(
             lastFour = state.lastFour,
             enabled = state.isEnabled,
@@ -209,35 +216,6 @@ internal fun CvcRecollectionField(
 }
 
 @Composable
-private fun CvcRecollectionTopBar(
-    onClosePressed: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .padding(0.dp, 16.dp, 0.dp, 0.dp)
-            .height(32.dp)
-    ) {
-        Spacer(modifier = Modifier.weight(1f))
-        IconButton(
-            onClick = { onClosePressed.invoke() },
-            Modifier.offset(16.dp, -8.dp)
-        ) {
-            Icon(painterResource(id = R.drawable.stripe_ic_paymentsheet_close), contentDescription = null)
-        }
-    }
-}
-
-@Composable
-private fun CvcRecollectionTitle() {
-    H4Text(
-        text = stringResource(R.string.stripe_paymentsheet_confirm_your_cvc),
-        modifier = Modifier
-            .padding(0.dp, 0.dp, 0.dp, 16.dp)
-            .testTag(TEST_TAG_CONFIRM_CVC)
-    )
-}
-
-@Composable
 private fun CvcRecollectionButton(
     isComplete: Boolean,
     onConfirmPressed: () -> Unit
@@ -277,7 +255,6 @@ private fun CvcRecollectionFieldPreview() {
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 const val CVC_RECOLLECTION_SCREEN_CONFIRM = "CVC_CONFIRM"
 
-internal const val TEST_TAG_CONFIRM_CVC = "TEST_TAG_CONFIRM_CVC"
 internal const val TEST_TAG_CVC_FIELD = "TEST_TAG_CVC_FIELD"
 internal const val TEST_TAG_CVC_LAST_FOUR = "TEST_TAG_CVC_LAST_FOUR"
 internal const val TEST_TAG_CVC_LABEL = "TEST_TAG_CVC_LABEL"
