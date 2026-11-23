@@ -2,7 +2,6 @@ package com.stripe.android.checkout
 
 import com.stripe.android.checkout.injection.AppName
 import com.stripe.android.elements.PaymentElement
-import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import javax.inject.Inject

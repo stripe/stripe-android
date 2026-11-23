@@ -3,7 +3,6 @@ package com.stripe.android.checkout
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdate
 import com.stripe.android.isInstanceOf
-import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import kotlinx.coroutines.test.runTest
 import org.junit.Test

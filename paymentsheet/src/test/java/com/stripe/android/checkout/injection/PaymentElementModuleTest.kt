@@ -6,7 +6,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutElementsControllerState
 import com.stripe.android.checkout.CheckoutElementsControllerStateFactory
 import com.stripe.android.checkout.CheckoutElementsControllerStateHolder
-import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.checkout.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.content.EmbeddedContentHelperStateHolder
 import com.stripe.android.testing.FakeErrorReporter

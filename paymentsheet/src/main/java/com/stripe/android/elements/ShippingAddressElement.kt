@@ -13,6 +13,7 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.checkout.CheckoutElementsController
 import com.stripe.android.checkout.CheckoutElementsControllerStateHolder
+import com.stripe.android.checkout.CheckoutSessionPreview
 import com.stripe.android.checkout.ShippingAddressElementStateHolder
 import com.stripe.android.checkout.asPaymentSheet
 import com.stripe.android.checkout.toCheckoutAddress
@@ -20,7 +21,6 @@ import com.stripe.android.checkout.toShippingDetails
 import com.stripe.android.core.ApiConfiguration
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
-import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.addresselement.AddressElementActivityContract
 import com.stripe.android.paymentsheet.addresselement.AddressLauncher

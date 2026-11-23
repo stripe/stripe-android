@@ -3,7 +3,6 @@ package com.stripe.android.checkout
 import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent.InvocationSource
 import com.stripe.android.checkout.analytics.CheckoutAnalyticsEvent.Operation
 import com.stripe.android.checkout.analytics.LocalOperation
-import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import javax.inject.Inject

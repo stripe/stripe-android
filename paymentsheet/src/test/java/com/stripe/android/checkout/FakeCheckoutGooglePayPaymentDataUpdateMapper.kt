@@ -3,7 +3,6 @@ package com.stripe.android.checkout
 import app.cash.turbine.Turbine
 import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdate
 import com.stripe.android.googlepaylauncher.GooglePayPaymentDataUpdateResponse
-import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 
 @OptIn(CheckoutSessionPreview::class)

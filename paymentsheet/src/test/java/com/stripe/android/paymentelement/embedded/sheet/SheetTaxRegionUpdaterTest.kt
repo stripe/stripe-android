@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.embedded.sheet
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkout.CheckoutSessionPreview
 import com.stripe.android.checkout.CheckoutSessionTaxRegionUpdater
 import com.stripe.android.checkout.analytics.FakeCheckoutAnalyticsReporter
 import com.stripe.android.checkout.analytics.LocalOperation
@@ -15,7 +16,6 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.testBodyFromFile
-import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse

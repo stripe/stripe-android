@@ -58,8 +58,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
+import com.stripe.android.checkout.CheckoutSessionPreview
 import com.stripe.android.elements.CurrencySelectorElement
-import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.enabledStateAlpha
 import androidx.compose.ui.R as ComposeR

@@ -1,7 +1,6 @@
 package com.stripe.android.checkout
 
 import com.stripe.android.elements.CheckoutGooglePayConfiguration
-import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 
 @OptIn(CheckoutSessionPreview::class)

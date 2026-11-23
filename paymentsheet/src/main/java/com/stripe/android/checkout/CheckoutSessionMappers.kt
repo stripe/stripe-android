@@ -6,7 +6,6 @@ import android.graphics.Bitmap
 import com.stripe.android.checkout.CheckoutElementsController.Session
 import com.stripe.android.checkout.CheckoutElementsController.Session.PaymentOptionDisplayData
 import com.stripe.android.elements.ece.ExpressButtonType
-import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.verticalmode.CurrencySelectorOptionsFactory
 import com.stripe.android.uicore.format.CurrencyFormatter

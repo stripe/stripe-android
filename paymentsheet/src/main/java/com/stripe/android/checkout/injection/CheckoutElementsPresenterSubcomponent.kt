@@ -7,7 +7,7 @@ import androidx.activity.result.ActivityResultRegistry
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.checkout.CheckoutElementsPresenter
 import com.stripe.android.checkout.CheckoutElementsPresenterInitializer
-import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.checkout.CheckoutSessionPreview
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import dagger.BindsInstance
 import dagger.Subcomponent

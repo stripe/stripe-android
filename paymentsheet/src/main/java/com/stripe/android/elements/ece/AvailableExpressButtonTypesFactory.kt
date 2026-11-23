@@ -2,13 +2,13 @@
 package com.stripe.android.elements.ece
 
 import androidx.annotation.VisibleForTesting
+import com.stripe.android.checkout.CheckoutSessionPreview
 import com.stripe.android.elements.CheckoutGooglePayConfiguration
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.lpmfoundations.paymentmethod.LinkButtonAvailability
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.lpmfoundations.paymentmethod.linkButtonAvailability
-import com.stripe.android.paymentelement.CheckoutSessionPreview
 import javax.inject.Inject
 import kotlin.math.min
 

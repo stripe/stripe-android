@@ -4,6 +4,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutElementsController
+import com.stripe.android.checkout.CheckoutSessionPreview
 import com.stripe.android.elements.CurrencySelectorElement
 import com.stripe.android.elements.ExpressCheckoutElement
 import com.stripe.android.elements.PaymentElement
@@ -11,7 +12,6 @@ import com.stripe.android.elements.ShippingAddressElement
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
-import com.stripe.android.paymentelement.CheckoutSessionPreview
 import kotlin.test.Test
 
 @OptIn(CheckoutSessionPreview::class, AppearanceAPIAdditionsPreview::class)

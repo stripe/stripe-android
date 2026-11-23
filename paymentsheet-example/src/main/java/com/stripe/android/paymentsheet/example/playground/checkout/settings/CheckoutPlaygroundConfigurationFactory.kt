@@ -1,6 +1,6 @@
 @file:OptIn(
     com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview::class,
-    com.stripe.android.paymentelement.CheckoutSessionPreview::class,
+    com.stripe.android.checkout.CheckoutSessionPreview::class,
 )
 
 package com.stripe.android.paymentsheet.example.playground.checkout.settings

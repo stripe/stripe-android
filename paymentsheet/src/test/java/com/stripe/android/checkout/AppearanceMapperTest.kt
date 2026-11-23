@@ -10,7 +10,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import org.junit.Test
 
 @OptIn(
-    com.stripe.android.paymentelement.CheckoutSessionPreview::class,
+    CheckoutSessionPreview::class,
     com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview::class,
 )
 class AppearanceMapperTest {
