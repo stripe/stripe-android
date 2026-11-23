@@ -51,6 +51,7 @@ import com.stripe.android.connect.example.ui.common.ConnectExampleScaffold
 import com.stripe.android.connect.example.ui.common.CustomizeAppearanceIconButton
 import com.stripe.android.connect.example.ui.embeddedcomponentmanagerloader.EmbeddedComponentLoaderViewModel
 import com.stripe.android.connect.example.ui.embeddedcomponentmanagerloader.EmbeddedComponentManagerLoader
+import com.stripe.android.connect.example.ui.features.notificationbanner.NotificationBannerExampleActivity
 import com.stripe.android.connect.example.ui.features.payments.PaymentsExampleActivity
 import com.stripe.android.connect.example.ui.features.payouts.PayoutsExampleActivity
 import com.stripe.android.connect.example.ui.settings.SettingsViewModel
@@ -149,6 +150,9 @@ fun ComponentPickerContent(
                             MenuItem.Payments -> {
                                 context.startActivity(Intent(context, PaymentsExampleActivity::class.java))
                             }
+                            MenuItem.NotificationBanner -> {
+                                context.startActivity(Intent(context, NotificationBannerExampleActivity::class.java))
+                            }
                         }
                     },
                 )
@@ -159,7 +163,9 @@ fun ComponentPickerContent(
 
 @Composable
 private fun ComponentPickerList(onMenuItemClick: (MenuItem) -> Unit) {
-    val items = remember { listOf(MenuItem.AccountOnboarding, MenuItem.Payouts, MenuItem.Payments) }
+    val items = remember {
+        listOf(MenuItem.AccountOnboarding, MenuItem.Payouts, MenuItem.Payments, MenuItem.NotificationBanner)
+    }
     LazyColumn {
         items(items) { menuItem ->
             MenuRowItem(menuItem, onMenuItemClick)
@@ -235,6 +241,11 @@ private enum class MenuItem(
         title = R.string.payments,
         subtitle = R.string.payments_menu_subtitle,
         isBeta = false,
+    ),
+    NotificationBanner(
+        title = R.string.notification_banner,
+        subtitle = R.string.notification_banner_menu_subtitle,
+        isBeta = true,
     ),
 }
 

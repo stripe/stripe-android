@@ -11,6 +11,9 @@
     <string name="payouts_menu_subtitle">Show payout information and allow your users to perform payouts</string>
     <string name="payments">Payments</string>
     <string name="payments_menu_subtitle">Show payments and allow your users to view payment details and manage disputes</string>
+    <string name="notification_banner">Notification Banner</string>
+    <string name="notification_banner_menu_subtitle">Show open tasks that can affect the account\'s capabilities</string>
+    <string name="notification_banner_summary">%1$d notifications, %2$d require action</string>
     <string name="connect_sdk_example">Connect SDK Example</string>
     <string name="customize_appearance">Customize Appearance</string>
     <string name="settings">Settings</string>
