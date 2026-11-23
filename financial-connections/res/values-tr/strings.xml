@@ -62,12 +62,14 @@
   <string name="stripe_manualentry_title">Banka ayrıntılarını girin</string>
   <string name="stripe_networking_link_login_warmup_cta_cancel">İptal</string>
   <string name="stripe_networking_link_login_warmup_cta_continue">Link ile Devam Et</string>
+  <string name="stripe_networking_link_login_warmup_cta_continue_short">Devam et</string>
   <string name="stripe_networking_link_login_warmup_cta_continue_with_brand">%1$s ile devam edin</string>
   <string name="stripe_networking_link_login_warmup_cta_skip">Şimdi değil</string>
   <!-- Networking warmup -->
   <string name="stripe_networking_link_login_warmup_description">Daha önce Link hesabınıza kaydettiğiniz bilgileri kullanın.</string>
   <string name="stripe_networking_link_login_warmup_description_with_brand">%1$s hesabınıza daha önce kaydettiğiniz bilgileri kullanın.</string>
   <string name="stripe_networking_link_login_warmup_title">Link ile Devam Et</string>
+  <string name="stripe_networking_link_login_warmup_title_welcome_back">Tekrar hoş geldiniz</string>
   <string name="stripe_networking_link_login_warmup_title_with_brand">%1$s ile devam edin</string>
   <string name="stripe_networking_save_to_link_verification_cta_negative">Şimdi değil</string>
   <string name="stripe_networking_save_to_link_verification_title">Siz olduğunuzu teyit edin</string>

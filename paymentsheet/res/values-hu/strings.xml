@@ -122,6 +122,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_verification_message">A mentett adatai használatához adja meg a(z) %s telefonszámra küldött kódot.</string>
   <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
   <string name="stripe_link_verification_message_short">Adja meg a(z) %s telefonszámra küldött kódot.</string>
+  <!-- Sandbox verification instructions. 000000 is the six-digit test code. -->
+  <string name="stripe_link_verification_sandbox_message">Nem küldünk kódot. A folytatáshoz adja meg a 000000 számsort.</string>
+  <!-- Title of the Link verification banner in sandbox or test mode. -->
+  <string name="stripe_link_verification_sandbox_title">Ön tesztkörnyezet módban van</string>
   <!-- Menu option to update card on the wallet screen on Link native -->
   <string name="stripe_link_wallet_menu_action_update_card">Kártya módosítása</string>
   <!-- Title of the logout action. -->

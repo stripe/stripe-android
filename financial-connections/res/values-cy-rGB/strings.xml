@@ -62,12 +62,14 @@
   <string name="stripe_manualentry_title">Rhoi\'r manylion banc</string>
   <string name="stripe_networking_link_login_warmup_cta_cancel">Canslo</string>
   <string name="stripe_networking_link_login_warmup_cta_continue">Parhau gyda Link</string>
+  <string name="stripe_networking_link_login_warmup_cta_continue_short">Parhau</string>
   <string name="stripe_networking_link_login_warmup_cta_continue_with_brand">Parhau gyda %1$s</string>
   <string name="stripe_networking_link_login_warmup_cta_skip">Dim nawr</string>
   <!-- Networking warmup -->
   <string name="stripe_networking_link_login_warmup_description">Defnyddio\'r wybodaeth rydych chi wedi\'i chadw\'n flaenorol gyda\'ch cyfrif Link.</string>
   <string name="stripe_networking_link_login_warmup_description_with_brand">Defnyddiwch yr wybodaeth rydych wedi’i chadw’n barod gyda’ch cyfrif %1$s.</string>
   <string name="stripe_networking_link_login_warmup_title">Parhau gyda Link</string>
+  <string name="stripe_networking_link_login_warmup_title_welcome_back">Croeso’n ôl</string>
   <string name="stripe_networking_link_login_warmup_title_with_brand">Parhau gyda %1$s</string>
   <string name="stripe_networking_save_to_link_verification_cta_negative">Dim nawr</string>
   <string name="stripe_networking_save_to_link_verification_title">Cadarnhewch mai chi sydd yno</string>

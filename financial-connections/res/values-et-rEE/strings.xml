@@ -62,12 +62,14 @@
   <string name="stripe_manualentry_title">Sisestage pangaandmed</string>
   <string name="stripe_networking_link_login_warmup_cta_cancel">Tühista</string>
   <string name="stripe_networking_link_login_warmup_cta_continue">Jätka Linkiga</string>
+  <string name="stripe_networking_link_login_warmup_cta_continue_short">Jätka</string>
   <string name="stripe_networking_link_login_warmup_cta_continue_with_brand">Jätka %1$s-iga</string>
   <string name="stripe_networking_link_login_warmup_cta_skip">Mitte praegu</string>
   <!-- Networking warmup -->
   <string name="stripe_networking_link_login_warmup_description">Kasutage teavet, mille olete varem oma Linki kontole salvestanud.</string>
   <string name="stripe_networking_link_login_warmup_description_with_brand">Kasutage infot, mida olete varem oma %1$s kontoga salvestanud.</string>
   <string name="stripe_networking_link_login_warmup_title">Jätka Linkiga</string>
+  <string name="stripe_networking_link_login_warmup_title_welcome_back">Tere tulemast tagasi</string>
   <string name="stripe_networking_link_login_warmup_title_with_brand">Jätka %1$s-iga</string>
   <string name="stripe_networking_save_to_link_verification_cta_negative">Mitte praegu</string>
   <string name="stripe_networking_save_to_link_verification_title">Kinnitage, et see olete teie</string>

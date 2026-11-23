@@ -62,12 +62,14 @@
   <string name="stripe_manualentry_title">Įvesti banko duomenis</string>
   <string name="stripe_networking_link_login_warmup_cta_cancel">Atšaukti</string>
   <string name="stripe_networking_link_login_warmup_cta_continue">Tęsti naudojant „Link“</string>
+  <string name="stripe_networking_link_login_warmup_cta_continue_short">Tęsti</string>
   <string name="stripe_networking_link_login_warmup_cta_continue_with_brand">Tęsti su %1$s</string>
   <string name="stripe_networking_link_login_warmup_cta_skip">Ne dabar</string>
   <!-- Networking warmup -->
   <string name="stripe_networking_link_login_warmup_description">Naudokite anksčiau savo „Link“ sąskaitoje išsaugotą informaciją.</string>
   <string name="stripe_networking_link_login_warmup_description_with_brand">Naudokite informaciją, kurią anksčiau įrašėte su %1$s paskyra.</string>
   <string name="stripe_networking_link_login_warmup_title">Tęsti naudojant „Link“</string>
+  <string name="stripe_networking_link_login_warmup_title_welcome_back">Sveiki sugrįžę</string>
   <string name="stripe_networking_link_login_warmup_title_with_brand">Tęsti su %1$s</string>
   <string name="stripe_networking_save_to_link_verification_cta_negative">Ne dabar</string>
   <string name="stripe_networking_save_to_link_verification_title">Patvirtinkite, kad tai jūs</string>

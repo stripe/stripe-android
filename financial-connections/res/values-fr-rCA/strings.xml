@@ -62,12 +62,14 @@
   <string name="stripe_manualentry_title">Saisissez vos coordonnées bancaires</string>
   <string name="stripe_networking_link_login_warmup_cta_cancel">Annuler</string>
   <string name="stripe_networking_link_login_warmup_cta_continue">Continuer avec Link</string>
+  <string name="stripe_networking_link_login_warmup_cta_continue_short">Continuer</string>
   <string name="stripe_networking_link_login_warmup_cta_continue_with_brand">Continuez avec %1$s</string>
   <string name="stripe_networking_link_login_warmup_cta_skip">Pas maintenant</string>
   <!-- Networking warmup -->
   <string name="stripe_networking_link_login_warmup_description">Utilisez les informations précédemment enregistrées dans votre compte Link.</string>
   <string name="stripe_networking_link_login_warmup_description_with_brand">Utilisez les informations que vous avez précédemment enregistrées avec votre compte %1$s.</string>
   <string name="stripe_networking_link_login_warmup_title">Continuer avec Link</string>
+  <string name="stripe_networking_link_login_warmup_title_welcome_back">Bienvenue</string>
   <string name="stripe_networking_link_login_warmup_title_with_brand">Continuez avec %1$s</string>
   <string name="stripe_networking_save_to_link_verification_cta_negative">Pas maintenant</string>
   <string name="stripe_networking_save_to_link_verification_title">Confirmez votre identité</string>

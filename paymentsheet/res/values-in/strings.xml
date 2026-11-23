@@ -122,6 +122,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_verification_message">Masukkan kode yang dikirim ke %s untuk menggunakan informasi tersimpan Anda.</string>
   <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
   <string name="stripe_link_verification_message_short">Masukkan kode yang dikirim ke %s.</string>
+  <!-- Sandbox verification instructions. 000000 is the six-digit test code. -->
+  <string name="stripe_link_verification_sandbox_message">Tidak ada kode yang akan dikirim. Masukkan 000000 untuk melanjutkan.</string>
+  <!-- Title of the Link verification banner in sandbox or test mode. -->
+  <string name="stripe_link_verification_sandbox_title">Anda berada dalam mode sandbox</string>
   <!-- Menu option to update card on the wallet screen on Link native -->
   <string name="stripe_link_wallet_menu_action_update_card">Perbarui kartu</string>
   <!-- Title of the logout action. -->
