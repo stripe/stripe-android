@@ -62,12 +62,14 @@
   <string name="stripe_manualentry_title">ป้อนรายละเอียดของธนาคาร</string>
   <string name="stripe_networking_link_login_warmup_cta_cancel">ยกเลิก</string>
   <string name="stripe_networking_link_login_warmup_cta_continue">ดำเนินการต่อด้วย Link</string>
+  <string name="stripe_networking_link_login_warmup_cta_continue_short">ดำเนินการต่อ</string>
   <string name="stripe_networking_link_login_warmup_cta_continue_with_brand">ดำเนินการต่อกับ %1$s</string>
   <string name="stripe_networking_link_login_warmup_cta_skip">ไว้ทีหลัง</string>
   <!-- Networking warmup -->
   <string name="stripe_networking_link_login_warmup_description">ใช้ข้อมูลที่บันทึกไว้ก่อนหน้านี้ด้วยบัญชี Link</string>
   <string name="stripe_networking_link_login_warmup_description_with_brand">ใช้ข้อมูลที่บันทึกไว้ก่อนหน้านี้ด้วยบัญชี %1$s</string>
   <string name="stripe_networking_link_login_warmup_title">ดำเนินการต่อด้วย Link</string>
+  <string name="stripe_networking_link_login_warmup_title_welcome_back">ยินดีต้อนรับกลับมา</string>
   <string name="stripe_networking_link_login_warmup_title_with_brand">ดำเนินการต่อกับ %1$s</string>
   <string name="stripe_networking_save_to_link_verification_cta_negative">ไว้ทีหลัง</string>
   <string name="stripe_networking_save_to_link_verification_title">ยืนยันว่าเป็นคุณจริงๆ</string>

@@ -62,12 +62,14 @@
   <string name="stripe_manualentry_title">Ievadiet bankas rekvizītus</string>
   <string name="stripe_networking_link_login_warmup_cta_cancel">Atcelt</string>
   <string name="stripe_networking_link_login_warmup_cta_continue">Turpināt ar Link</string>
+  <string name="stripe_networking_link_login_warmup_cta_continue_short">Turpināt</string>
   <string name="stripe_networking_link_login_warmup_cta_continue_with_brand">Turpināt ar %1$s</string>
   <string name="stripe_networking_link_login_warmup_cta_skip">Ne tagad</string>
   <!-- Networking warmup -->
   <string name="stripe_networking_link_login_warmup_description">Izmantojiet iepriekš Link kontā saglabāto informāciju.</string>
   <string name="stripe_networking_link_login_warmup_description_with_brand">Izmantojiet informāciju, ko iepriekš saglabājāt savā %1$s kontā.</string>
   <string name="stripe_networking_link_login_warmup_title">Turpināt ar Link</string>
+  <string name="stripe_networking_link_login_warmup_title_welcome_back">Laipni lūdzam atpakaļ!</string>
   <string name="stripe_networking_link_login_warmup_title_with_brand">Turpināt ar %1$s</string>
   <string name="stripe_networking_save_to_link_verification_cta_negative">Ne tagad</string>
   <string name="stripe_networking_save_to_link_verification_title">Apstipriniet, ka tas esat jūs</string>

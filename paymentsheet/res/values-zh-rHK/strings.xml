@@ -122,6 +122,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_verification_message">輸入傳送到 %s 的驗證碼來使用您儲存的資訊。</string>
   <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
   <string name="stripe_link_verification_message_short">請輸入發送至 %s 的驗證碼。</string>
+  <!-- Sandbox verification instructions. 000000 is the six-digit test code. -->
+  <string name="stripe_link_verification_sandbox_message">不會發送任何代碼。輸入 000000 以繼續。</string>
+  <!-- Title of the Link verification banner in sandbox or test mode. -->
+  <string name="stripe_link_verification_sandbox_title">閣下處於沙箱模式</string>
   <!-- Menu option to update card on the wallet screen on Link native -->
   <string name="stripe_link_wallet_menu_action_update_card">更新銀行卡</string>
   <!-- Title of the logout action. -->

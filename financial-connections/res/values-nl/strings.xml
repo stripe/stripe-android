@@ -62,12 +62,14 @@
   <string name="stripe_manualentry_title">Bankgegevens invoeren</string>
   <string name="stripe_networking_link_login_warmup_cta_cancel">Annuleren</string>
   <string name="stripe_networking_link_login_warmup_cta_continue">Doorgaan met Link</string>
+  <string name="stripe_networking_link_login_warmup_cta_continue_short">Doorgaan</string>
   <string name="stripe_networking_link_login_warmup_cta_continue_with_brand">Doorgaan met %1$s</string>
   <string name="stripe_networking_link_login_warmup_cta_skip">Niet nu</string>
   <!-- Networking warmup -->
   <string name="stripe_networking_link_login_warmup_description">Gebruik informatie die je eerder hebt opgeslagen met je Link-account.</string>
   <string name="stripe_networking_link_login_warmup_description_with_brand">Gebruik gegevens die je eerder hebt opgeslagen met je %1$s-account.</string>
   <string name="stripe_networking_link_login_warmup_title">Doorgaan met Link</string>
+  <string name="stripe_networking_link_login_warmup_title_welcome_back">Welkom terug</string>
   <string name="stripe_networking_link_login_warmup_title_with_brand">Doorgaan met %1$s</string>
   <string name="stripe_networking_save_to_link_verification_cta_negative">Niet nu</string>
   <string name="stripe_networking_save_to_link_verification_title">Bevestig dat jij het bent</string>

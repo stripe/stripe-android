@@ -62,12 +62,14 @@
   <string name="stripe_manualentry_title">Nhập thông tin ngân hàng</string>
   <string name="stripe_networking_link_login_warmup_cta_cancel">Hủy</string>
   <string name="stripe_networking_link_login_warmup_cta_continue">Tiếp tục với Link</string>
+  <string name="stripe_networking_link_login_warmup_cta_continue_short">Tiếp tục</string>
   <string name="stripe_networking_link_login_warmup_cta_continue_with_brand">Tiếp tục với %1$s</string>
   <string name="stripe_networking_link_login_warmup_cta_skip">Không phải lúc này</string>
   <!-- Networking warmup -->
   <string name="stripe_networking_link_login_warmup_description">Sử dụng thông tin bạn đã lưu vào tài khoản Link trước đây.</string>
   <string name="stripe_networking_link_login_warmup_description_with_brand">Sử dụng thông tin bạn đã lưu vào tài khoản %1$s trước đây.</string>
   <string name="stripe_networking_link_login_warmup_title">Tiếp tục với Link</string>
+  <string name="stripe_networking_link_login_warmup_title_welcome_back">Chào mừng bạn quay lại</string>
   <string name="stripe_networking_link_login_warmup_title_with_brand">Tiếp tục với %1$s</string>
   <string name="stripe_networking_save_to_link_verification_cta_negative">Không phải lúc này</string>
   <string name="stripe_networking_save_to_link_verification_title">Xác nhận đó là bạn</string>

@@ -62,12 +62,14 @@
   <string name="stripe_manualentry_title">銀行口座情報を入力する</string>
   <string name="stripe_networking_link_login_warmup_cta_cancel">キャンセル</string>
   <string name="stripe_networking_link_login_warmup_cta_continue">Link で続ける</string>
+  <string name="stripe_networking_link_login_warmup_cta_continue_short">続行</string>
   <string name="stripe_networking_link_login_warmup_cta_continue_with_brand">%1$s で続行</string>
   <string name="stripe_networking_link_login_warmup_cta_skip">今はやめておく</string>
   <!-- Networking warmup -->
   <string name="stripe_networking_link_login_warmup_description">Link アカウントにすでに保存されている情報を使用します。</string>
   <string name="stripe_networking_link_login_warmup_description_with_brand">%1$s アカウントに以前保存した情報を使用。</string>
   <string name="stripe_networking_link_login_warmup_title">Link で続ける</string>
+  <string name="stripe_networking_link_login_warmup_title_welcome_back">おかえりなさい</string>
   <string name="stripe_networking_link_login_warmup_title_with_brand">%1$s で続行</string>
   <string name="stripe_networking_save_to_link_verification_cta_negative">今はやめておく</string>
   <string name="stripe_networking_save_to_link_verification_title">ご本人様の確認</string>

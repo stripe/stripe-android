@@ -122,6 +122,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_verification_message">Чтобы использовать ранее сохраненные данные, введите код, отправленный на %s.</string>
   <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
   <string name="stripe_link_verification_message_short">Введите код, отправленный на %s.</string>
+  <!-- Sandbox verification instructions. 000000 is the six-digit test code. -->
+  <string name="stripe_link_verification_sandbox_message">Отправка кода не предусмотрена. Введите 000000, чтобы продолжить.</string>
+  <!-- Title of the Link verification banner in sandbox or test mode. -->
+  <string name="stripe_link_verification_sandbox_title">Вы в режиме тестовой среды</string>
   <!-- Menu option to update card on the wallet screen on Link native -->
   <string name="stripe_link_wallet_menu_action_update_card">Обновить карту</string>
   <!-- Title of the logout action. -->

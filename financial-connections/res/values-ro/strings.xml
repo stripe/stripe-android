@@ -62,12 +62,14 @@
   <string name="stripe_manualentry_title">Introduceți detaliile bancare</string>
   <string name="stripe_networking_link_login_warmup_cta_cancel">Anulare</string>
   <string name="stripe_networking_link_login_warmup_cta_continue">Continuare cu Link</string>
+  <string name="stripe_networking_link_login_warmup_cta_continue_short">Continuare</string>
   <string name="stripe_networking_link_login_warmup_cta_continue_with_brand">Continuați cu %1$s</string>
   <string name="stripe_networking_link_login_warmup_cta_skip">Nu acum</string>
   <!-- Networking warmup -->
   <string name="stripe_networking_link_login_warmup_description">Utilizați informațiile pe care le-ați salvat anterior cu contul dvs. Link.</string>
   <string name="stripe_networking_link_login_warmup_description_with_brand">Folosiți informațiile pe care le-ați salvat anterior cu contul dvs. %1$s.</string>
   <string name="stripe_networking_link_login_warmup_title">Continuare cu Link</string>
+  <string name="stripe_networking_link_login_warmup_title_welcome_back">Bine ați revenit</string>
   <string name="stripe_networking_link_login_warmup_title_with_brand">Continuați cu %1$s</string>
   <string name="stripe_networking_save_to_link_verification_cta_negative">Nu acum</string>
   <string name="stripe_networking_save_to_link_verification_title">Confirmați că sunteți dvs.</string>

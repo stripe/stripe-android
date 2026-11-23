@@ -122,6 +122,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_verification_message">Norėdami naudoti savo išsaugotą informaciją, įveskite %s gautą kodą.</string>
   <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
   <string name="stripe_link_verification_message_short">Įveskite kodą, išsiųstą %s.</string>
+  <!-- Sandbox verification instructions. 000000 is the six-digit test code. -->
+  <string name="stripe_link_verification_sandbox_message">Joks kodas nebus siunčiamas. Įveskite „000000“, kad tęstumėte.</string>
+  <!-- Title of the Link verification banner in sandbox or test mode. -->
+  <string name="stripe_link_verification_sandbox_title">Naudojate „smėlio dėžės“ režimą</string>
   <!-- Menu option to update card on the wallet screen on Link native -->
   <string name="stripe_link_wallet_menu_action_update_card">Atnaujinti kortelę</string>
   <!-- Title of the logout action. -->

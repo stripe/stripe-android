@@ -62,12 +62,14 @@
   <string name="stripe_manualentry_title">Введите банковские реквизиты</string>
   <string name="stripe_networking_link_login_warmup_cta_cancel">Отмена</string>
   <string name="stripe_networking_link_login_warmup_cta_continue">Продолжить с Link</string>
+  <string name="stripe_networking_link_login_warmup_cta_continue_short">Продолжить</string>
   <string name="stripe_networking_link_login_warmup_cta_continue_with_brand">Продолжить с %1$s</string>
   <string name="stripe_networking_link_login_warmup_cta_skip">Не сейчас</string>
   <!-- Networking warmup -->
   <string name="stripe_networking_link_login_warmup_description">Используйте данные, ранее сохраненные в вашей учетной записи Link.</string>
   <string name="stripe_networking_link_login_warmup_description_with_brand">Используйте данные, ранее сохраненные в счете %1$s.</string>
   <string name="stripe_networking_link_login_warmup_title">Продолжить с Link</string>
+  <string name="stripe_networking_link_login_warmup_title_welcome_back">С возвращением</string>
   <string name="stripe_networking_link_login_warmup_title_with_brand">Продолжить с %1$s</string>
   <string name="stripe_networking_save_to_link_verification_cta_negative">Не сейчас</string>
   <string name="stripe_networking_save_to_link_verification_title">Подтвердите, что это вы</string>

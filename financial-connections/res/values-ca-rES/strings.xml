@@ -62,12 +62,14 @@
   <string name="stripe_manualentry_title">Introduïu les dades bancàries</string>
   <string name="stripe_networking_link_login_warmup_cta_cancel">Cancel·la</string>
   <string name="stripe_networking_link_login_warmup_cta_continue">Continua amb Link</string>
+  <string name="stripe_networking_link_login_warmup_cta_continue_short">Continua</string>
   <string name="stripe_networking_link_login_warmup_cta_continue_with_brand">Continua amb %1$s</string>
   <string name="stripe_networking_link_login_warmup_cta_skip">Ara no</string>
   <!-- Networking warmup -->
   <string name="stripe_networking_link_login_warmup_description">Feu servir la informació que hàgiu desat prèviament amb el vostre compte de Link.</string>
   <string name="stripe_networking_link_login_warmup_description_with_brand">Utilitzeu la informació que heu desat anteriorment al vostre compte de %1$s.</string>
   <string name="stripe_networking_link_login_warmup_title">Continua amb Link</string>
+  <string name="stripe_networking_link_login_warmup_title_welcome_back">Us donem la benvinguda de nou</string>
   <string name="stripe_networking_link_login_warmup_title_with_brand">Continua amb %1$s</string>
   <string name="stripe_networking_save_to_link_verification_cta_negative">Ara no</string>
   <string name="stripe_networking_save_to_link_verification_title">Confirmeu la vostra identitat</string>
