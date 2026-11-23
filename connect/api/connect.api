@@ -113,6 +113,8 @@ public final class com/stripe/android/connect/EmbeddedComponentManager {
 	public final fun createAccountOnboardingController (Landroidx/fragment/app/FragmentActivity;Ljava/lang/String;)Lcom/stripe/android/connect/AccountOnboardingController;
 	public final fun createAccountOnboardingController (Landroidx/fragment/app/FragmentActivity;Ljava/lang/String;Lcom/stripe/android/connect/AccountOnboardingProps;)Lcom/stripe/android/connect/AccountOnboardingController;
 	public static synthetic fun createAccountOnboardingController$default (Lcom/stripe/android/connect/EmbeddedComponentManager;Landroidx/fragment/app/FragmentActivity;Ljava/lang/String;Lcom/stripe/android/connect/AccountOnboardingProps;ILjava/lang/Object;)Lcom/stripe/android/connect/AccountOnboardingController;
+	public final fun createNotificationBannerView (Landroid/content/Context;Lcom/stripe/android/connect/NotificationBannerListener;Lcom/stripe/android/connect/NotificationBannerProps;Ljava/lang/String;)Landroid/view/View;
+	public static synthetic fun createNotificationBannerView$default (Lcom/stripe/android/connect/EmbeddedComponentManager;Landroid/content/Context;Lcom/stripe/android/connect/NotificationBannerListener;Lcom/stripe/android/connect/NotificationBannerProps;Ljava/lang/String;ILjava/lang/Object;)Landroid/view/View;
 	public final fun createPaymentsView (Landroid/content/Context;Lcom/stripe/android/connect/PaymentsListener;Lcom/stripe/android/connect/PaymentsProps;Ljava/lang/String;)Landroid/view/View;
 	public static synthetic fun createPaymentsView$default (Lcom/stripe/android/connect/EmbeddedComponentManager;Landroid/content/Context;Lcom/stripe/android/connect/PaymentsListener;Lcom/stripe/android/connect/PaymentsProps;Ljava/lang/String;ILjava/lang/Object;)Landroid/view/View;
 	public final fun createPayoutsView (Landroid/content/Context;Lcom/stripe/android/connect/PayoutsListener;Ljava/lang/String;)Landroid/view/View;
@@ -138,6 +140,24 @@ public abstract class com/stripe/android/connect/FetchClientSecretTask : com/str
 
 public abstract interface class com/stripe/android/connect/FetchClientSecretTask$ResultCallback {
 	public abstract fun onResult (Ljava/lang/String;)V
+}
+
+public abstract interface class com/stripe/android/connect/NotificationBannerListener : com/stripe/android/connect/StripeEmbeddedComponentListener {
+	public fun onContentHeightChange (F)V
+	public fun onNotificationsChange (II)V
+}
+
+public final class com/stripe/android/connect/NotificationBannerListener$DefaultImpls {
+	public static fun onContentHeightChange (Lcom/stripe/android/connect/NotificationBannerListener;F)V
+	public static fun onLoadError (Lcom/stripe/android/connect/NotificationBannerListener;Ljava/lang/Throwable;)V
+	public static fun onLoaderStart (Lcom/stripe/android/connect/NotificationBannerListener;)V
+	public static fun onNotificationsChange (Lcom/stripe/android/connect/NotificationBannerListener;II)V
+}
+
+public final class com/stripe/android/connect/NotificationBannerProps {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun collectionOptions (Lcom/stripe/android/connect/AccountOnboardingProps$CollectionOptions;)Lcom/stripe/android/connect/NotificationBannerProps;
 }
 
 public abstract interface class com/stripe/android/connect/PaymentsListener : com/stripe/android/connect/StripeEmbeddedComponentListener {

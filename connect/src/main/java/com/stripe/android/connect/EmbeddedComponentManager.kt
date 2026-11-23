@@ -114,6 +114,32 @@ class EmbeddedComponentManager @JvmOverloads constructor(
         )
     }
 
+    /**
+     * Creates a notification banner, which shows the connected account's open tasks, like onboarding
+     * requirements and risk interventions, that can affect capabilities such as accepting payments and
+     * receiving payouts.
+     *
+     * @param context The [Context] to use for creating the view.
+     * @param listener Optional [NotificationBannerListener] to use for handling events from the view.
+     * @param props Optional [NotificationBannerProps] to use for configuring the view.
+     * @param cacheKey Key to use for caching the internal WebView within an Activity across configuration changes.
+     */
+    @PrivatePreviewConnectSDK
+    fun createNotificationBannerView(
+        context: Context,
+        listener: NotificationBannerListener? = null,
+        props: NotificationBannerProps? = null,
+        cacheKey: String? = null,
+    ): View {
+        return NotificationBannerView(
+            context = context,
+            embeddedComponentManager = this,
+            listener = listener,
+            props = props,
+            cacheKey = cacheKey,
+        )
+    }
+
     fun update(appearance: Appearance) {
         coordinator.update(appearance)
     }

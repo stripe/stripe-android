@@ -76,6 +76,15 @@ internal data class SetOnLoadError(
 }
 
 /**
+ * The notification banner's notification counts changed.
+ */
+@Serializable
+internal data class SetOnNotificationsChange(
+    val total: Int,
+    val actionRequired: Int,
+) : SetterFunctionCalledMessage.Value
+
+/**
  * The connected account has exited the onboarding process.
  */
 @Serializable
