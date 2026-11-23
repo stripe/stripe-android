@@ -1,5 +1,5 @@
 @file:OptIn(
-    com.stripe.android.paymentelement.CheckoutSessionPreview::class,
+    CheckoutSessionPreview::class,
     com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview::class,
 )
 

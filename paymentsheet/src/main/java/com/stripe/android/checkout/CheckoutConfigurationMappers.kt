@@ -1,7 +1,6 @@
 package com.stripe.android.checkout
 
 import com.stripe.android.elements.PaymentElement
-import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails

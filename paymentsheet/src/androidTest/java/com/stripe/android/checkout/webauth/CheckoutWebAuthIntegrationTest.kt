@@ -9,9 +9,9 @@ import com.stripe.android.checkout.CHECKOUT_PLAYGROUND_BACKEND_URL
 import com.stripe.android.checkout.CheckoutElementsController
 import com.stripe.android.checkout.CheckoutPlaygroundBackend
 import com.stripe.android.checkout.CheckoutSessionParamsBuilder
+import com.stripe.android.checkout.CheckoutSessionPreview
 import com.stripe.android.checkout.runCheckoutIntegrationTest
 import com.stripe.android.elements.PaymentElement
-import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedContentPage
 import com.stripe.android.paymentelement.EmbeddedFormPage
 import kotlinx.coroutines.runBlocking

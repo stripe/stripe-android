@@ -4,7 +4,6 @@ import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.account.DefaultLinkStore
-import com.stripe.android.paymentelement.CheckoutSessionPreview
 import org.junit.After
 import org.junit.Test
 import org.junit.runner.RunWith

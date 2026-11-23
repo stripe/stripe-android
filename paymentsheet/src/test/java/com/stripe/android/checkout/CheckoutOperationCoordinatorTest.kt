@@ -1,4 +1,4 @@
-@file:OptIn(com.stripe.android.paymentelement.CheckoutSessionPreview::class)
+@file:OptIn(CheckoutSessionPreview::class)
 
 package com.stripe.android.checkout
 

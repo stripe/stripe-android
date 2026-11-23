@@ -2,11 +2,11 @@
 
 package com.stripe.android.elements.ece
 
+import com.stripe.android.checkout.CheckoutSessionPreview
 import com.stripe.android.elements.ExpressCheckoutElement.Configuration.Appearance
 import com.stripe.android.elements.ExpressCheckoutElement.Configuration.GooglePayConfiguration
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
-import com.stripe.android.paymentelement.CheckoutSessionPreview
 
 internal object ExpressCheckoutElementInteractorStateFactory {
     private val paymentMethodMetadata = PaymentMethodMetadataFactory.create(

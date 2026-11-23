@@ -2,7 +2,6 @@ package com.stripe.android.checkout
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.elements.ExpressCheckoutElement.Configuration.GooglePayConfiguration
-import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import org.junit.Test
 

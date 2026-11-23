@@ -6,7 +6,6 @@ import android.os.Parcelable
 import com.stripe.android.checkout.CheckoutElementsController.Session
 import com.stripe.android.elements.ece.AvailableExpressButtonTypesFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
-import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.stashNewSelection
 import com.stripe.android.paymentsheet.model.PaymentSelection

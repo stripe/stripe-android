@@ -2,7 +2,6 @@ package com.stripe.android.checkout
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.elements.PaymentElement
-import com.stripe.android.paymentelement.CheckoutSessionPreview
 import org.junit.Test
 
 @OptIn(CheckoutSessionPreview::class)

@@ -1,4 +1,4 @@
-package com.stripe.android.paymentelement
+package com.stripe.android.checkout
 
 import androidx.annotation.RestrictTo
 
