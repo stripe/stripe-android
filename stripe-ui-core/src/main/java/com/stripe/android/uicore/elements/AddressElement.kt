@@ -247,7 +247,7 @@ class AddressElement(
     }
 
     private fun syncExpandedLine1(values: Map<FormFieldId, String?>) {
-        expandedAutoCompleteElement?.controller?.onRawValueChange(values[FormFieldId.Line1] ?: "")
+        values[FormFieldId.Line1]?.let { expandedAutoCompleteElement?.controller?.onRawValueChange(it) }
     }
 
     override fun onValidationStateChanged(isValidating: Boolean) {
