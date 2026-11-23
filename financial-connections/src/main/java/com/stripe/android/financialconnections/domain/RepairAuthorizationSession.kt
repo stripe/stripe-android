@@ -3,6 +3,7 @@ package com.stripe.android.financialconnections.domain
 import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
 import com.stripe.android.financialconnections.di.APPLICATION_ID
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
+import com.stripe.android.financialconnections.repository.ConsumerSessionProvider
 import com.stripe.android.financialconnections.repository.FinancialConnectionsManifestRepository
 import javax.inject.Inject
 import javax.inject.Named
@@ -11,6 +12,7 @@ internal class RepairAuthorizationSession @Inject constructor(
     private val repository: FinancialConnectionsManifestRepository,
     private val configuration: FinancialConnectionsSheetConfiguration,
     @Named(APPLICATION_ID) private val applicationId: String,
+    private val consumerSessionProvider: ConsumerSessionProvider,
 ) {
 
     suspend operator fun invoke(
@@ -20,6 +22,7 @@ internal class RepairAuthorizationSession @Inject constructor(
             clientSecret = configuration.financialConnectionsSessionClientSecret,
             coreAuthorization = coreAuthorization,
             applicationId = applicationId,
+            consumerSessionClientSecret = consumerSessionProvider.provideConsumerSession()?.clientSecret,
         )
     }
 }

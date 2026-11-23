@@ -136,6 +136,7 @@ internal interface FinancialConnectionsManifestRepository {
         clientSecret: String,
         coreAuthorization: String,
         applicationId: String,
+        consumerSessionClientSecret: String?,
     ): FinancialConnectionsAuthorizationSession
 
     /**
@@ -418,6 +419,7 @@ private class FinancialConnectionsManifestRepositoryImpl(
         clientSecret: String,
         coreAuthorization: String,
         applicationId: String,
+        consumerSessionClientSecret: String?,
     ): FinancialConnectionsAuthorizationSession {
         val repairSession = requestExecutor.execute(
             request = apiRequestFactory.createPost(
@@ -427,7 +429,8 @@ private class FinancialConnectionsManifestRepositoryImpl(
                     NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret,
                     "core_authorization" to coreAuthorization,
                     "return_url" to "auth-redirect/$applicationId",
-                )
+                    NetworkConstants.PARAMS_CONSUMER_CLIENT_SECRET to consumerSessionClientSecret,
+                ).filterNotNullValues()
             ),
             AuthorizationRepairResponse.serializer()
         )

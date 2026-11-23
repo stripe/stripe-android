@@ -1,7 +1,10 @@
 package com.stripe.android.financialconnections.features.partnerauth
 
 import androidx.lifecycle.SavedStateHandle
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
+import com.stripe.android.core.StripeError
+import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.financialconnections.ApiKeyFixtures.institution
 import com.stripe.android.financialconnections.ApiKeyFixtures.sessionManifest
 import com.stripe.android.financialconnections.ApiKeyFixtures.syncResponse
@@ -18,6 +21,7 @@ import com.stripe.android.financialconnections.presentation.Async
 import com.stripe.android.financialconnections.repository.CoreAuthorizationPendingNetworkingRepairRepository
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import com.stripe.android.financialconnections.utils.UriUtils
+import com.stripe.android.financialconnections.utils.error
 import com.stripe.android.testing.ViewModelStoreTestRule
 import com.stripe.android.uicore.navigation.NavigationManager
 import com.stripe.android.uicore.navigation.PopUpToBehavior
@@ -30,6 +34,7 @@ import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class PartnerAuthViewModelTest {
@@ -110,6 +115,42 @@ class PartnerAuthViewModelTest {
             coreAuthorization = "fcauth_123",
         )
 
+        verify(createAuthorizationSession, never()).invoke(any(), any())
+    }
+
+    @Test
+    fun `Expired repair credential fails once without creating a new auth session`() = runTest {
+        val syncResponse = syncResponse(
+            manifest = sessionManifest().copy(activeInstitution = institution())
+        )
+        val getOrFetchSync = mock<GetOrFetchSync> {
+            on { invoke(any(), any()) } doReturn syncResponse
+        }
+        val error = InvalidRequestException(
+            stripeError = StripeError(message = "Consumer session expired"),
+            statusCode = 400,
+        )
+        val repairAuthSession = mock<RepairAuthorizationSession>()
+        whenever(repairAuthSession.invoke("fcauth_123")).thenAnswer { throw error }
+        val createAuthorizationSession = mock<PostAuthorizationSession>()
+        val pendingRepairRepository = CoreAuthorizationPendingNetworkingRepairRepository(
+            savedStateHandle = SavedStateHandle(),
+            logger = Logger.noop(),
+        ).apply { set("fcauth_123") }
+
+        val viewModel = makeViewModel(
+            initialState = SharedPartnerAuthState(
+                pane = Pane.BANK_AUTH_REPAIR,
+                inModal = false,
+            ),
+            getOrFetchSync = getOrFetchSync,
+            createAuthorizationSession = createAuthorizationSession,
+            repairAuthSession = repairAuthSession,
+            pendingRepairRepository = pendingRepairRepository,
+        )
+
+        assertThat(viewModel.stateFlow.value.payload.error).isSameInstanceAs(error)
+        verify(repairAuthSession).invoke("fcauth_123")
         verify(createAuthorizationSession, never()).invoke(any(), any())
     }
 

@@ -7,6 +7,9 @@ import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.FinancialConnectionsPreCollectedConsent
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventContext
 import com.stripe.android.financialconnections.domain.GetOrFetchSync.RefetchCondition.None
+import com.stripe.android.financialconnections.model.AuthorizationRepairResponse
+import com.stripe.android.financialconnections.model.Display
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.network.FinancialConnectionsRequestExecutor
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -18,6 +21,7 @@ import kotlinx.serialization.KSerializer
 import org.junit.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.given
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
@@ -50,6 +54,77 @@ internal class FinancialConnectionsManifestRepositoryImplTest {
         locale = Locale.US,
         eventContext = eventContext
     )
+
+    @Test
+    fun `repair includes the consumer secret and caches the returned authorization session`() = runTest {
+        givenRepairRequestReturns()
+        val paramsCaptor = argumentCaptor<Map<String, Any?>>()
+        val repository = buildRepository(initialSync = ApiKeyFixtures.syncResponse())
+
+        val result = repository.repairAuthorizationSession(
+            clientSecret = "fc_secret",
+            coreAuthorization = "fcauth_123",
+            applicationId = "com.app.id",
+            consumerSessionClientSecret = "consumer_secret",
+        )
+
+        verify(apiRequestFactory).createPost(
+            url = eq("https://api.stripe.com/v1/connections/repair_sessions/generate_url"),
+            options = eq(ApiRequest.Options(apiKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)),
+            params = paramsCaptor.capture(),
+        )
+        assertThat(paramsCaptor.firstValue).containsExactly(
+            "client_secret", "fc_secret",
+            "core_authorization", "fcauth_123",
+            "return_url", "auth-redirect/com.app.id",
+            "consumer_session_client_secret", "consumer_secret",
+        )
+        assertThat(result.id).isEqualTo("repair_123")
+        assertThat(result.url).isEqualTo("https://example.com/repair")
+        assertThat(result.nextPane).isEqualTo(Pane.SUCCESS)
+        assertThat(repository.syncFlow.value?.manifest?.activeAuthSession).isEqualTo(result)
+        verify(mockRequestExecutor).execute(any(), any<KSerializer<*>>())
+    }
+
+    @Test
+    fun `repair omits a null consumer secret and preserves same-holder request fields`() = runTest {
+        givenRepairRequestReturns()
+        val paramsCaptor = argumentCaptor<Map<String, Any?>>()
+
+        buildRepository().repairAuthorizationSession(
+            clientSecret = "fc_secret",
+            coreAuthorization = "fcauth_123",
+            applicationId = "com.app.id",
+            consumerSessionClientSecret = null,
+        )
+
+        verify(apiRequestFactory).createPost(
+            url = eq("https://api.stripe.com/v1/connections/repair_sessions/generate_url"),
+            options = eq(ApiRequest.Options(apiKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)),
+            params = paramsCaptor.capture(),
+        )
+        assertThat(paramsCaptor.firstValue).containsExactly(
+            "client_secret", "fc_secret",
+            "core_authorization", "fcauth_123",
+            "return_url", "auth-redirect/com.app.id",
+        )
+        verify(mockRequestExecutor).execute(any(), any<KSerializer<*>>())
+    }
+
+    private suspend fun givenRepairRequestReturns() {
+        whenever(apiRequestFactory.createPost(url = any(), options = any(), params = any()))
+            .thenReturn(mock())
+        whenever(mockRequestExecutor.execute(any(), any<KSerializer<*>>())).thenReturn(
+            AuthorizationRepairResponse(
+                id = "repair_123",
+                url = "https://example.com/repair",
+                flow = "mx_oauth",
+                institution = ApiKeyFixtures.institution(),
+                display = Display(),
+                isOAuth = true,
+            )
+        )
+    }
 
     @Test
     fun `getOrFetchSession - when manifest retrieved twice concurrently, API call runs once`() =
