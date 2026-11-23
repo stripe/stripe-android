@@ -29,6 +29,7 @@ dependencies {
     implementation libs.androidx.lifecycleCompose
     implementation libs.androidx.savedState
     implementation libs.androidx.viewModel
+    implementation libs.androidx.viewModelCompose
     implementation libs.androidx.webkit
 
     // DI

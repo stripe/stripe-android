@@ -7,7 +7,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
+import androidx.lifecycle.viewmodel.compose.rememberViewModelStoreOwner
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.ui.PaymentElementActivityResultCaller
 import com.stripe.android.common.ui.UpdateCallbacks
@@ -24,9 +24,7 @@ import java.util.UUID
 fun rememberEmbeddedPaymentElement(
     builder: EmbeddedPaymentElement.Builder
 ): EmbeddedPaymentElement {
-    val viewModelStoreOwner = requireNotNull(LocalViewModelStoreOwner.current) {
-        "EmbeddedPaymentElement must have a ViewModelStoreOwner."
-    }
+    val viewModelStoreOwner = rememberViewModelStoreOwner()
 
     val paymentElementCallbackIdentifier = rememberSaveable {
         UUID.randomUUID().toString()

@@ -1107,6 +1107,7 @@
 |    |    +--- androidx.lifecycle:lifecycle-runtime-compose:2.11.0 (*)
 |    |    +--- androidx.lifecycle:lifecycle-viewmodel-savedstate:2.11.0 (*)
 |    |    +--- androidx.lifecycle:lifecycle-viewmodel-ktx:2.11.0 (*)
+|    |    +--- androidx.lifecycle:lifecycle-viewmodel-compose:2.11.0 (*)
 |    |    +--- androidx.webkit:webkit:1.15.0 (*)
 |    |    +--- com.google.dagger:dagger:2.59 (*)
 |    |    +--- androidx.compose.ui:ui-viewbinding:1.12.1
