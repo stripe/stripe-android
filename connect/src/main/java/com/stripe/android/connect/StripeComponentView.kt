@@ -1,5 +1,6 @@
 package com.stripe.android.connect
 
+import android.app.Activity
 import android.app.Application
 import android.content.Context
 import android.util.AttributeSet
@@ -12,6 +13,8 @@ import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import androidx.core.view.isVisible
 import androidx.core.view.updateMargins
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.findViewTreeLifecycleOwner
@@ -21,7 +24,11 @@ import androidx.lifecycle.viewmodel.MutableCreationExtras
 import com.stripe.android.connect.di.StripeConnectComponent
 import com.stripe.android.connect.util.AndroidClock
 import com.stripe.android.connect.util.Clock
+import com.stripe.android.connect.util.findActivity
+import com.stripe.android.connect.util.getContrastingColor
+import com.stripe.android.connect.webview.InlineSheet
 import com.stripe.android.connect.webview.MobileInput
+import com.stripe.android.connect.webview.StripeConnectSheetDialog
 import com.stripe.android.connect.webview.StripeConnectWebView
 import com.stripe.android.connect.webview.StripeConnectWebViewContainer
 import com.stripe.android.connect.webview.StripeConnectWebViewContainerState
@@ -32,11 +39,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
+import kotlin.math.ceil
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@Suppress("TooManyFunctions")
 abstract class StripeComponentView<Listener, Props> internal constructor(
     context: Context,
     attrs: AttributeSet?,
@@ -61,6 +71,19 @@ abstract class StripeComponentView<Listener, Props> internal constructor(
     // See StripeConnectWebViewContainerViewModel for why we're getting a WebView from a ViewModel.
     private val webView: StripeConnectWebView? get() = viewModel?.webView
     private var webViewCacheKey: String? = null
+
+    private val isInline = embeddedComponent.isInline
+
+    private var contentHeight = 0
+
+    private val sheetDialogs = mutableMapOf<String, StripeConnectSheetDialog>()
+
+    // Dialogs must be dismissed before their activity's window goes away.
+    private val releaseSheetsOnDestroy = object : DefaultLifecycleObserver {
+        override fun onDestroy(owner: LifecycleOwner) {
+            releaseSheetDialogs()
+        }
+    }
 
     private val _receivedCloseWebView = MutableStateFlow(false)
     internal val receivedCloseWebView: StateFlow<Boolean> = _receivedCloseWebView.asStateFlow()
@@ -163,6 +186,17 @@ abstract class StripeComponentView<Listener, Props> internal constructor(
                 launch {
                     viewModel.eventFlow.collectLatest(::handleEvent)
                 }
+                if (isInline) {
+                    launch {
+                        viewModel.componentHeightFlow.filterNotNull().collect(::onContentHeightChanged)
+                    }
+                    launch {
+                        viewModel.sheetsFlow.collect(::bindSheets)
+                    }
+                }
+            }
+            if (isInline) {
+                lifecycleOwner.lifecycle.addObserver(releaseSheetsOnDestroy)
             }
 
             viewModel.onViewAttached()
@@ -172,6 +206,8 @@ abstract class StripeComponentView<Listener, Props> internal constructor(
             val containerView = v as ViewGroup
 
             // Clean up.
+            releaseSheetDialogs()
+            containerView.findViewTreeLifecycleOwner()?.lifecycle?.removeObserver(releaseSheetsOnDestroy)
             viewModel?.let { containerView.findViewTreeLifecycleOwner()?.lifecycle?.removeObserver(it) }
             logger.debug("($loggerTag) Removing WebView from container view")
             containerView.removeView(webView)
@@ -226,8 +262,11 @@ abstract class StripeComponentView<Listener, Props> internal constructor(
             }
         addView(webView)
 
-        // Add progress bar on top of WebView.
-        addProgressBar()
+        // Inline components show Connect.js's loading UI at the height it reports.
+        if (!isInline) {
+            // Add progress bar on top of WebView.
+            addProgressBar()
+        }
     }
 
     internal fun setPropsFromXml(props: Props) {
@@ -263,6 +302,7 @@ abstract class StripeComponentView<Listener, Props> internal constructor(
 
         webView?.let { bindWebView(it, state) }
         progressBar?.let { bindProgressBar(it, state) }
+        sheetDialogs.values.forEach { it.updateColors(state.backgroundColor, state.sheetTextColor) }
     }
 
     private fun bindWebView(
@@ -270,7 +310,102 @@ abstract class StripeComponentView<Listener, Props> internal constructor(
         state: StripeConnectWebViewContainerState
     ) {
         webView.setBackgroundColor(state.backgroundColor)
-        webView.isVisible = !state.isNativeLoadingIndicatorVisible
+        webView.isVisible = isInline || !state.isNativeLoadingIndicatorVisible
+    }
+
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        if (!isInline) {
+            super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+            return
+        }
+
+        val height = resolveSize(contentHeight, heightMeasureSpec)
+        super.onMeasure(widthMeasureSpec, MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY))
+
+        // Chromium doesn't render content outside the web view's viewport, so it's never shorter than the content.
+        val webView = webView?.takeIf { it.parent == this } ?: return
+        val webViewHeight = maxOf(height, contentHeight, 1)
+        if (webViewHeight != webView.measuredHeight) {
+            webView.measure(
+                MeasureSpec.makeMeasureSpec(measuredWidth, MeasureSpec.EXACTLY),
+                MeasureSpec.makeMeasureSpec(webViewHeight, MeasureSpec.EXACTLY),
+            )
+        }
+    }
+
+    private fun onContentHeightChanged(height: Float) {
+        handleEvent(ComponentEvent.ContentHeightChanged(height))
+        val heightPx = ceil(height * resources.displayMetrics.density).toInt()
+        if (heightPx != contentHeight) {
+            contentHeight = heightPx
+            requestLayout()
+        }
+    }
+
+    private fun bindSheets(sheets: List<InlineSheet>) {
+        val viewModel = viewModel ?: return
+        val activity = findActivity() ?: return
+
+        val sheetIds = sheets.map { it.id }.toSet()
+        (sheetDialogs.keys - sheetIds).forEach { sheetDialogs.remove(it)?.release() }
+        // In order, so sheets opened later end up on top.
+        sheets.forEach { bindSheet(it, viewModel, activity) }
+    }
+
+    private fun bindSheet(sheet: InlineSheet, viewModel: StripeConnectWebViewContainerViewModel, activity: Activity) {
+        when (sheet.state) {
+            InlineSheet.State.STAGED, InlineSheet.State.SHOWING -> {
+                val dialog = sheetDialogs[sheet.id]
+                    ?: createSheetDialog(sheet.id, viewModel, activity)
+                    ?: return
+                val state = viewModel.stateFlow.value
+                dialog.bind(sheet.height, sheet.isDismissible, state.backgroundColor, state.sheetTextColor)
+                if (sheet.state == InlineSheet.State.SHOWING) {
+                    dialog.reveal()
+                }
+            }
+            InlineSheet.State.CLOSING -> {
+                val dialog = sheetDialogs[sheet.id]
+                if (dialog == null) {
+                    viewModel.onSheetReleased(sheet.id)
+                } else {
+                    dialog.close {
+                        sheetDialogs.remove(sheet.id)
+                        viewModel.onSheetReleased(sheet.id)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun createSheetDialog(
+        sheetId: String,
+        viewModel: StripeConnectWebViewContainerViewModel,
+        activity: Activity,
+    ): StripeConnectSheetDialog? {
+        if (activity.isFinishing || activity.isDestroyed) return null
+        val sheetWebView = viewModel.sheetWebView(sheetId) ?: return null
+        return StripeConnectSheetDialog(
+            activity = activity,
+            webView = sheetWebView,
+            onDismissed = {
+                sheetDialogs.remove(sheetId)
+                viewModel.onSheetDismissed(sheetId)
+            },
+            onCloseRequested = { viewModel.onSheetCloseRequested(sheetId) },
+        ).also {
+            sheetDialogs[sheetId] = it
+            it.show()
+        }
+    }
+
+    private fun releaseSheetDialogs() {
+        if (!isInline) return
+        sheetDialogs.values.forEach { it.release() }
+        sheetDialogs.clear()
+        if (findActivity()?.isChangingConfigurations != true) {
+            viewModel?.onHostDismissed()
+        }
     }
 
     private fun bindProgressBar(progressBar: StripeWebViewSpinner, state: StripeConnectWebViewContainerState) {
@@ -299,3 +434,6 @@ abstract class StripeComponentView<Listener, Props> internal constructor(
         listener?.let { listenerDelegate.delegate(it, event) }
     }
 }
+
+private val StripeConnectWebViewContainerState.sheetTextColor: Int
+    get() = appearance?.colors?.text ?: getContrastingColor(backgroundColor)

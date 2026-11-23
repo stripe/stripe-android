@@ -5,7 +5,13 @@ package com.stripe.android.connect
  * [componentName] matches the canonical name passed into the JS Stripe Connect Instance
  * `create` method: https://docs.stripe.com/connect/supported-embedded-components
  */
-internal enum class StripeEmbeddedComponent(val componentName: String) {
+internal enum class StripeEmbeddedComponent(
+    val componentName: String,
+    /**
+     * True if the component sizes itself to its content and opens its dialogs as native sheets.
+     */
+    val isInline: Boolean = false,
+) {
     /**
      * Represents the Account Onboarding component: [https://docs.stripe.com/connect/supported-embedded-components/account-onboarding](https://docs.stripe.com/connect/supported-embedded-components/account-onboarding)
      */
@@ -20,4 +26,9 @@ internal enum class StripeEmbeddedComponent(val componentName: String) {
      * Represents the Payments component: [https://docs.stripe.com/connect/supported-embedded-components/payments](https://docs.stripe.com/connect/supported-embedded-components/payments)
      */
     PAYMENTS("payments"),
+
+    /**
+     * Represents the Notification Banner component: [https://docs.stripe.com/connect/supported-embedded-components/notification-banner](https://docs.stripe.com/connect/supported-embedded-components/notification-banner)
+     */
+    NOTIFICATION_BANNER("notification-banner", isInline = true),
 }

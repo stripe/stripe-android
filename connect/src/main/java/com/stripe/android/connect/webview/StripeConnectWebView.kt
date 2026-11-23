@@ -10,6 +10,9 @@ import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Rect
 import android.net.Uri
+import android.os.Handler
+import android.os.Looper
+import android.os.Message
 import android.view.ViewTreeObserver
 import android.view.WindowManager
 import android.webkit.JavascriptInterface
@@ -35,6 +38,7 @@ import com.stripe.android.connect.util.isInInstrumentationTest
 import com.stripe.android.connect.webview.serialization.AccountSessionClaimedMessage
 import com.stripe.android.connect.webview.serialization.AlertJs
 import com.stripe.android.connect.webview.serialization.AppInfoJs
+import com.stripe.android.connect.webview.serialization.ComponentHeightChangedMessage
 import com.stripe.android.connect.webview.serialization.ConnectInstanceJs
 import com.stripe.android.connect.webview.serialization.ConnectJson
 import com.stripe.android.connect.webview.serialization.OpenAuthenticatedWebViewMessage
@@ -43,6 +47,7 @@ import com.stripe.android.connect.webview.serialization.PageLoadMessage
 import com.stripe.android.connect.webview.serialization.SetCollectMobileFinancialConnectionsResultPayloadJs
 import com.stripe.android.connect.webview.serialization.SetOnLoaderStart
 import com.stripe.android.connect.webview.serialization.SetterFunctionCalledMessage
+import com.stripe.android.connect.webview.serialization.SheetChangedMessage
 import com.stripe.android.connect.webview.serialization.toJs
 import com.stripe.android.core.Logger
 import com.stripe.android.core.version.StripeSdkVersion
@@ -68,6 +73,11 @@ internal class StripeConnectWebView private constructor(
     @property:VisibleForTesting internal val delegate: Delegate,
     private val logger: Logger,
     coroutineScope: CoroutineScope,
+    /**
+     * True if this web view shows an inline component: it sizes to its content, and windows it opens can
+     * become native sheets.
+     */
+    private val isInline: Boolean,
 ) : WebView(mutableContext), WebViewForPaparazzi {
 
     constructor(
@@ -75,11 +85,13 @@ internal class StripeConnectWebView private constructor(
         delegate: Delegate,
         logger: Logger,
         coroutineScope: CoroutineScope,
+        isInline: Boolean,
     ) : this(
         mutableContext = MutableContextWrapper(application),
         delegate = delegate,
         logger = logger,
         coroutineScope = coroutineScope,
+        isInline = isInline,
     )
 
     private val loggerTag = javaClass.simpleName
@@ -91,7 +103,9 @@ internal class StripeConnectWebView private constructor(
     internal val stripeWebChromeClient = StripeConnectWebChromeClient()
 
     @VisibleForTesting
-    internal val stripeJsInterface = StripeJsInterface()
+    internal val stripeJsInterface = if (isInline) InlineStripeJsInterface() else StripeJsInterface()
+
+    private val mainHandler = Handler(Looper.getMainLooper())
 
     private val webViewLifecycleScope get() = findViewTreeLifecycleOwner()?.lifecycleScope
 
@@ -115,6 +129,17 @@ internal class StripeConnectWebView private constructor(
             // Fixes front camera "paused" issue on Samsung devices with Gelato selfie verification
             // by allowing camera activation without requiring explicit user interaction first
             mediaPlaybackRequiresUserGesture = false
+
+            if (isInline) {
+                setSupportMultipleWindows(true)
+                // Connect.js opens sheets after async work, which loses the user gesture.
+                javaScriptCanOpenWindowsAutomatically = true
+            }
+        }
+        if (isInline) {
+            isVerticalScrollBarEnabled = false
+            isHorizontalScrollBarEnabled = false
+            overScrollMode = OVER_SCROLL_NEVER
         }
 
         setDownloadListener(
@@ -155,6 +180,24 @@ internal class StripeConnectWebView private constructor(
         )
     }
 
+    fun sheetClosed(sheetId: String) {
+        evaluateSdkJs(
+            function = "sheetClosed",
+            payload = buildJsonObject {
+                put("sheetId", sheetId)
+            },
+        )
+    }
+
+    fun sheetCloseRequested(sheetId: String) {
+        evaluateSdkJs(
+            function = "sheetCloseRequested",
+            payload = buildJsonObject {
+                put("sheetId", sheetId)
+            },
+        )
+    }
+
     fun returnedFromAuthenticatedWebView(url: String?) {
         evaluateSdkJs(
             function = "returnedFromAuthenticatedWebView",
@@ -172,7 +215,10 @@ internal class StripeConnectWebView private constructor(
 
         // Set up keyboard detection to resize the webview according to keyboard heights
         // This fixes input fields being covered by keyboard on Samsung devices.
-        setupKeyboardHandling(activity)
+        // Inline web views size to their content, and their inputs are in native sheets.
+        if (!isInline) {
+            setupKeyboardHandling(activity)
+        }
     }
 
     override fun onDetachedFromWindow() {
@@ -328,6 +374,22 @@ internal class StripeConnectWebView private constructor(
          * Callback to invoke upon receiving 'openAuthenticatedWebView' message.
          */
         fun onReceivedOpenAuthenticatedWebView(activity: Activity, message: OpenAuthenticatedWebViewMessage)
+
+        /**
+         * Callback to invoke upon receiving 'componentHeightChanged' message, with [height] in CSS pixels.
+         */
+        fun onComponentHeightChanged(height: Float)
+
+        /**
+         * Callback to invoke upon receiving 'sheetChanged' message, with [height] in CSS pixels.
+         */
+        fun onSheetChanged(sheetId: String, height: Float, isDismissible: Boolean)
+
+        /**
+         * Callback to invoke when the page opens a window. Returns the web view to load it in, or null to not
+         * open it.
+         */
+        fun onCreateWindow(isUserGesture: Boolean): WebView?
 
         /**
          * Callback to invoke upon receiving 'openFinancialConnections' message.
@@ -492,6 +554,21 @@ internal class StripeConnectWebView private constructor(
             return true
         }
 
+        override fun onCreateWindow(
+            view: WebView,
+            isDialog: Boolean,
+            isUserGesture: Boolean,
+            resultMsg: Message
+        ): Boolean {
+            if (!isInline) return false
+            val transport = resultMsg.obj as? WebViewTransport ?: return false
+            val windowWebView = delegate.onCreateWindow(isUserGesture) ?: return false
+            // WebView allows one pending window, so the transport must be sent before returning.
+            transport.webView = windowWebView
+            resultMsg.sendToTarget()
+            return true
+        }
+
         override fun onPermissionRequest(request: PermissionRequest) {
             val activity = findActivity()
                 ?: return request.deny()
@@ -532,7 +609,7 @@ internal class StripeConnectWebView private constructor(
     }
 
     @VisibleForTesting
-    internal inner class StripeJsInterface {
+    internal open inner class StripeJsInterface {
         @JavascriptInterface
         fun debug(message: String) {
             logger.debug("($loggerTag) Debug log from JS: $message")
@@ -638,6 +715,34 @@ internal class StripeConnectWebView private constructor(
         fun closeWebView() {
             logger.debug("($loggerTag) Close WebView")
             delegate.onCloseWebView()
+        }
+    }
+
+    /**
+     * Adds the messages only inline components send. Other components don't expose them to the page.
+     */
+    @VisibleForTesting
+    internal inner class InlineStripeJsInterface : StripeJsInterface() {
+        @JavascriptInterface
+        fun componentHeightChanged(message: String) {
+            val parsed = tryDeserializeWebMessage<ComponentHeightChangedMessage>(
+                webFunctionName = "componentHeightChanged",
+                message = message,
+            ) ?: return
+            val height = InlineContract.clampHeight(parsed.height) ?: return
+            mainHandler.post { delegate.onComponentHeightChanged(height) }
+        }
+
+        @JavascriptInterface
+        fun sheetChanged(message: String) {
+            val parsed = tryDeserializeWebMessage<SheetChangedMessage>(
+                webFunctionName = "sheetChanged",
+                message = message,
+            ) ?: return
+            if (!InlineContract.isValidSheetId(parsed.sheetId)) return
+            val height = InlineContract.clampHeight(parsed.height) ?: return
+            val isDismissible = parsed.dismissible ?: true
+            mainHandler.post { delegate.onSheetChanged(parsed.sheetId, height, isDismissible) }
         }
     }
 

@@ -109,7 +109,7 @@ class StripeConnectWebViewContainerViewModelTest {
             embeddedComponent = embeddedComponent,
             stripeIntentLauncher = mockStripeIntentLauncher,
             logger = mockLogger,
-            createWebView = { _, _, _, _ -> webView }
+            createWebView = { _, _, _, _, _ -> webView }
         ).also { viewModelStoreRule.track(it) }
     }
 
@@ -128,7 +128,7 @@ class StripeConnectWebViewContainerViewModelTest {
             embeddedComponent = embeddedComponent,
             analyticsService = analyticsService,
             logger = mockLogger,
-            createWebView = { _, _, _, scope ->
+            createWebView = { _, _, _, scope, _ ->
                 coroutineScope = scope
                 webView
             },

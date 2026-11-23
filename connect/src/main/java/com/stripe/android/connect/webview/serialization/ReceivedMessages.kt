@@ -36,3 +36,15 @@ internal data class OpenFinancialConnectionsMessage(
     val clientSecret: String,
     val connectedAccountId: String,
 )
+
+@Serializable
+internal data class ComponentHeightChangedMessage(
+    val height: Double,
+)
+
+@Serializable
+internal data class SheetChangedMessage(
+    val sheetId: String,
+    val height: Double,
+    val dismissible: Boolean? = null,
+)

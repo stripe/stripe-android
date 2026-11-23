@@ -6,6 +6,9 @@ import android.content.Context
 import android.content.ContextWrapper
 import android.content.Intent
 import android.net.Uri
+import android.os.Handler
+import android.os.Looper
+import android.os.Message
 import android.webkit.JsResult
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
@@ -35,12 +38,14 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyBlocking
 import org.mockito.kotlin.whenever
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
+import org.robolectric.Shadows.shadowOf
 
 @RunWith(RobolectricTestRunner::class)
 class StripeConnectWebViewTest {
@@ -61,6 +66,7 @@ class StripeConnectWebViewTest {
             delegate = mockDelegate,
             logger = Logger.getInstance(enableLogging = true),
             coroutineScope = TestScope(),
+            isInline = false,
         )
     }
 
@@ -225,6 +231,18 @@ class StripeConnectWebViewTest {
 
         containerView.removeView(webView)
         assertWebViewContext(Application::class.java)
+    }
+
+    @Test
+    fun `non-inline web views can't open windows or receive inline messages`() {
+        val message = Message.obtain(Handler(Looper.getMainLooper())).apply { obj = webView.WebViewTransport() }
+
+        assertThat(webView.settings.supportMultipleWindows()).isFalse()
+        assertThat(webView.settings.javaScriptCanOpenWindowsAutomatically).isFalse()
+        assertThat(shadowOf(webView).getJavascriptInterface("Android"))
+            .isNotInstanceOf(StripeConnectWebView.InlineStripeJsInterface::class.java)
+        assertThat(webView.stripeWebChromeClient.onCreateWindow(webView, false, true, message)).isFalse()
+        verify(mockDelegate, never()).onCreateWindow(any())
     }
 
     private fun Context.findRealContext(): Context? {

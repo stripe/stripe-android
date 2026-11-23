@@ -27,8 +27,18 @@ internal open class ComponentListenerDelegate<Listener : StripeEmbeddedComponent
         // Override me.
     }
 
+    /**
+     * Called for inline components when their content height changes, in dp.
+     */
+    open fun onContentHeightChanged(listener: Listener, height: Float) {
+        // Override me.
+    }
+
     fun delegate(listener: Listener, event: ComponentEvent) {
         when (event) {
+            is ComponentEvent.ContentHeightChanged -> {
+                onContentHeightChanged(listener, event.height)
+            }
             is ComponentEvent.LoadError -> {
                 listener.onLoadError(event.error)
             }
@@ -53,6 +63,10 @@ internal open class ComponentListenerDelegate<Listener : StripeEmbeddedComponent
 }
 
 internal sealed interface ComponentEvent {
+    /**
+     * An inline component's content height changed. [height] is in dp.
+     */
+    data class ContentHeightChanged(val height: Float) : ComponentEvent
     data class LoadError(val error: Throwable) : ComponentEvent
     data class Message(val message: SetterFunctionCalledMessage) : ComponentEvent
 }

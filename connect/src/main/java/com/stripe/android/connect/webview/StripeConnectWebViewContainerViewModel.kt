@@ -8,6 +8,8 @@ import android.content.Intent
 import android.net.Uri
 import android.webkit.PermissionRequest
 import android.webkit.ValueCallback
+import android.webkit.WebChromeClient
+import android.webkit.WebView
 import androidx.annotation.VisibleForTesting
 import androidx.core.net.toUri
 import androidx.lifecycle.DefaultLifecycleObserver
@@ -30,6 +32,7 @@ import com.stripe.android.connect.analytics.ComponentAnalyticsService
 import com.stripe.android.connect.analytics.ConnectAnalyticsEvent
 import com.stripe.android.connect.di.StripeConnectComponent
 import com.stripe.android.connect.util.Clock
+import com.stripe.android.connect.util.findActivity
 import com.stripe.android.connect.util.isInInstrumentationTest
 import com.stripe.android.connect.webview.StripeConnectWebView.Delegate
 import com.stripe.android.connect.webview.serialization.ConnectInstanceJs
@@ -83,6 +86,8 @@ internal class StripeConnectWebViewContainerViewModel(
     private val logger: Logger,
     private val stripeIntentLauncher: StripeIntentLauncher = StripeIntentLauncherImpl(),
     createWebView: CreateWebView = CreateWebView(::StripeConnectWebView),
+    private val createSheetWebView: (StripeConnectSheetWebView.Listener) -> StripeConnectSheetWebView =
+        { listener -> StripeConnectSheetWebView(application, listener) },
 ) : ViewModel(),
     DefaultLifecycleObserver {
 
@@ -113,6 +118,8 @@ internal class StripeConnectWebViewContainerViewModel(
     @VisibleForTesting
     internal val delegate = StripeConnectWebViewDelegate()
 
+    private val isInline = embeddedComponent.isInline
+
     @SuppressLint("StaticFieldLeak") // Should be safe because we're using application.
     val webView: StripeConnectWebView =
         createWebView(
@@ -120,7 +127,69 @@ internal class StripeConnectWebViewContainerViewModel(
             delegate = delegate,
             logger = logger,
             coroutineScope = viewModelScope,
+            isInline = isInline,
         )
+
+    private val _componentHeightFlow = MutableStateFlow<Float?>(null)
+
+    /**
+     * An inline component's content height in CSS pixels, or null until Connect.js reports it.
+     */
+    val componentHeightFlow: StateFlow<Float?> get() = _componentHeightFlow.asStateFlow()
+
+    // Kept here, like the component's web view, so sheets survive configuration changes.
+    private val sheetController: InlineSheetController? =
+        if (isInline) {
+            InlineSheetController(
+                componentUrl = Uri.parse(componentCoordinator.getStripeURL(embeddedComponent)),
+                callbacks = SheetCallbacks(),
+                logger = logger,
+                createWebView = createSheetWebView,
+            )
+        } else {
+            null
+        }
+
+    /**
+     * Native sheets an inline component opened. Always empty for other components.
+     */
+    val sheetsFlow: StateFlow<List<InlineSheet>> =
+        sheetController?.sheetsFlow ?: MutableStateFlow(emptyList<InlineSheet>()).asStateFlow()
+
+    fun sheetWebView(sheetId: String): StripeConnectSheetWebView? = sheetController?.sheetWebView(sheetId)
+
+    /**
+     * Called when the user dismisses a dismissible sheet with a swipe, a tap outside it, or back.
+     */
+    fun onSheetDismissed(sheetId: String) {
+        sheetController?.onSheetDismissed(sheetId)
+    }
+
+    /**
+     * Called when the user tries to close a sheet that isn't dismissible with a swipe, a tap outside it, or back.
+     */
+    fun onSheetCloseRequested(sheetId: String) {
+        sheetController?.onSheetCloseRequested(sheetId)
+    }
+
+    /**
+     * Called once a sheet whose window closed is off screen.
+     */
+    fun onSheetReleased(sheetId: String) {
+        sheetController?.onSheetReleased(sheetId)
+    }
+
+    /**
+     * Called when the screen showing the component goes away for good, rather than for a configuration change.
+     */
+    fun onHostDismissed() {
+        sheetController?.onHostDismissed()
+    }
+
+    override fun onCleared() {
+        sheetController?.reset()
+        super.onCleared()
+    }
 
     /**
      * Callback to invoke when the view is attached.
@@ -169,6 +238,8 @@ internal class StripeConnectWebViewContainerViewModel(
 
         override fun onPageStarted(url: String) {
             updateState { copy(isNativeLoadingIndicatorVisible = !receivedSetOnLoaderStart) }
+            // Sheets belong to the document that opened them.
+            sheetController?.reset()
 
             val pageLoadUrl = Uri.parse(url)
             val expectedUrl = Uri.parse(componentCoordinator.getStripeURL(embeddedComponent))
@@ -342,6 +413,19 @@ internal class StripeConnectWebViewContainerViewModel(
             )
         }
 
+        override fun onComponentHeightChanged(height: Float) {
+            if (!isInline) return
+            _componentHeightFlow.value = height
+        }
+
+        override fun onSheetChanged(sheetId: String, height: Float, isDismissible: Boolean) {
+            sheetController?.onSheetChanged(sheetId, height, isDismissible)
+        }
+
+        override fun onCreateWindow(isUserGesture: Boolean): WebView? {
+            return sheetController?.createWindow(isUserGesture)
+        }
+
         override suspend fun onOpenFinancialConnections(
             activity: Activity,
             message: OpenFinancialConnectionsMessage,
@@ -400,6 +484,40 @@ internal class StripeConnectWebViewContainerViewModel(
                 }
             }
             _eventFlow.tryEmit(ComponentEvent.Message(message))
+        }
+    }
+
+    private inner class SheetCallbacks : InlineSheetController.Callbacks {
+        override fun onSheetClosed(sheetId: String) {
+            webView.sheetClosed(sheetId)
+        }
+
+        override fun onSheetCloseRequested(sheetId: String) {
+            webView.sheetCloseRequested(sheetId)
+        }
+
+        override fun openOutsideSheet(url: Uri) {
+            val activity = webView.findActivity() ?: return
+            delegate.shouldOverrideUrlLoading(activity, url)
+        }
+
+        override fun onShowFileChooser(
+            webView: WebView,
+            filePathCallback: ValueCallback<Array<Uri>>,
+            fileChooserParams: WebChromeClient.FileChooserParams,
+        ): Boolean {
+            val activity = webView.findActivity() ?: return false
+            viewModelScope.launch {
+                delegate.onChooseFile(activity, filePathCallback, fileChooserParams.createIntent())
+            }
+            return true
+        }
+
+        override fun onPermissionRequest(webView: WebView, request: PermissionRequest) {
+            val activity = webView.findActivity() ?: return request.deny()
+            viewModelScope.launch {
+                delegate.onPermissionRequest(activity, request)
+            }
         }
     }
 
@@ -465,6 +583,7 @@ internal fun interface CreateWebView {
         delegate: Delegate,
         logger: Logger,
         coroutineScope: CoroutineScope,
+        isInline: Boolean,
     ): StripeConnectWebView
 }
 
