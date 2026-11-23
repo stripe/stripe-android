@@ -26,8 +26,4 @@ internal class CvcPage(
     fun hasLabel(label: String) {
         composeTestRule.onNode(hasTestTag(TEST_TAG_CVC_LABEL), useUnmergedTree = true).assert(hasText(label))
     }
-
-    fun hasTitle(title: String) {
-        composeTestRule.onNodeWithTag(TEST_TAG_CONFIRM_CVC).assert(hasText(title))
-    }
 }

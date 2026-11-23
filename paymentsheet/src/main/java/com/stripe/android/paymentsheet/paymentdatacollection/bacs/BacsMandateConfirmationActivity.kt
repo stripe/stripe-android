@@ -76,9 +76,10 @@ internal class BacsMandateConfirmationActivity : AppCompatActivity() {
                                     isEditing = false,
                                     onEditIconPressed = {},
                                 ),
+                                title = null,
                                 canNavigateBack = false,
                                 isEnabled = true,
-                                handleBackPressed = {
+                                onNavigationIconPressed = {
                                     viewModel.handleViewAction(OnBackPressed)
                                 },
                             )

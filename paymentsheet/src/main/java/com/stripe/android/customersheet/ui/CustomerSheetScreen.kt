@@ -85,9 +85,10 @@ internal fun CustomerSheetScreen(
                 state = viewState.topBarState {
                     viewActionHandler(CustomerSheetViewAction.OnEditPressed)
                 },
+                title = null,
                 canNavigateBack = viewState.canNavigateBack,
                 isEnabled = !viewState.isProcessing,
-                handleBackPressed = {
+                onNavigationIconPressed = {
                     viewActionHandler(
                         CustomerSheetViewAction.OnBackPressed
                     )

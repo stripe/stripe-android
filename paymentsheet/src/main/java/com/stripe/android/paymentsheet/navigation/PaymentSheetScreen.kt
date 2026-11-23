@@ -429,7 +429,9 @@ internal sealed interface PaymentSheetScreen {
             }
         }
 
-        override fun title(isCompleteFlow: Boolean, isWalletEnabled: Boolean) = stateFlowOf(null)
+        override fun title(isCompleteFlow: Boolean, isWalletEnabled: Boolean): StateFlow<ResolvableString?> {
+            return stateFlowOf(R.string.stripe_paymentsheet_confirm_your_cvc.resolvableString)
+        }
 
         override fun showsWalletsHeader(isCompleteFlow: Boolean) = stateFlowOf(false)
 
@@ -493,7 +495,7 @@ internal sealed interface PaymentSheetScreen {
             isCompleteFlow: Boolean,
             isWalletEnabled: Boolean
         ): StateFlow<ResolvableString?> {
-            return stateFlowOf(null)
+            return stateFlowOf(R.string.stripe_paymentsheet_added_card.resolvableString)
         }
 
         override fun showsWalletsHeader(isCompleteFlow: Boolean): StateFlow<Boolean> {
