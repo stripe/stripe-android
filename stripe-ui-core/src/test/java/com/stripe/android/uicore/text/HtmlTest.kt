@@ -1,15 +1,20 @@
 package com.stripe.android.uicore.text
 
+import android.app.Application
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.Shadows.shadowOf
 
 @RunWith(AndroidJUnit4::class)
 class HtmlTest {
@@ -93,6 +98,16 @@ class HtmlTest {
             )
             assertThat(annotatedString.text).contains("\u2022\tOne")
         }
+    }
+
+    @Test
+    fun `clicking a link does not crash when no app can open it`() {
+        shadowOf(ApplicationProvider.getApplicationContext<Application>()).checkActivities(true)
+        composeTestRule.setContent {
+            Html(html = "<a href=\"https://stripe.com\">link</a>")
+        }
+
+        composeTestRule.onNodeWithText("link").performClick()
     }
 
     private fun annotatedStringFor(html: String): AnnotatedString {

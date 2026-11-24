@@ -1,5 +1,6 @@
 package com.stripe.android.uicore.text
 
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.graphics.Typeface
 import android.net.Uri
@@ -257,7 +258,10 @@ fun Html(
             annotatedStringRanges.firstOrNull()?.let { annotation ->
                 val openURL = Intent(Intent.ACTION_VIEW)
                 openURL.data = Uri.parse(annotation.item)
-                context.startActivity(openURL)
+                try {
+                    context.startActivity(openURL)
+                } catch (ignored: ActivityNotFoundException) {
+                }
             }
         }
     }
