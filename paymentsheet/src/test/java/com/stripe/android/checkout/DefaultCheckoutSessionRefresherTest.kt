@@ -57,6 +57,7 @@ internal class DefaultCheckoutSessionRefresherTest {
             stateHolder = stateHolder,
             fetchResponse = refreshActions::fetch,
             reloadState = refreshActions::reload,
+            clearState = { error("Refreshing must not clear the checkout session.") },
         )
 
         Scenario(

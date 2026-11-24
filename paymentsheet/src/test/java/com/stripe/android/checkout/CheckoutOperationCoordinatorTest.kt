@@ -578,6 +578,7 @@ internal class CheckoutOperationCoordinatorTest {
         assertThat(confirmationFinalizer.calls.awaitItem()).isEqualTo(response)
         assertThat(refreshCalls.awaitItem()).isEqualTo(FakeCheckoutSessionRefresher.Call.Commit(response))
         assertThat(resultTurbine.awaitItem()).isInstanceOf<CheckoutElementsController.Result.Completed>()
+        sessionRefresher.completeCalls.awaitItem()
         assertThat(mutation.await().isSuccess).isTrue()
         assertThat(coordinator.status.value).isEqualTo(CheckoutOperationCoordinator.Status.Idle)
     }
@@ -599,6 +600,7 @@ internal class CheckoutOperationCoordinatorTest {
         assertThat(confirmationFinalizer.calls.awaitItem()).isEqualTo(response)
         assertThat(refreshCalls.awaitItem()).isEqualTo(FakeCheckoutSessionRefresher.Call.Commit(response))
         assertThat(resultTurbine.awaitItem()).isInstanceOf<CheckoutElementsController.Result.Completed>()
+        sessionRefresher.completeCalls.awaitItem()
         assertThat(coordinator.status.value).isEqualTo(CheckoutOperationCoordinator.Status.Idle)
         assertThat(coordinator.tryBeginConfirmation { Result.success(CONFIRMATION_PARAMETERS) }).isNotNull()
     }
@@ -633,6 +635,7 @@ internal class CheckoutOperationCoordinatorTest {
         assertThat(confirmationFinalizer.calls.awaitItem()).isEqualTo(response)
         assertThat(refreshCalls.awaitItem()).isEqualTo(FakeCheckoutSessionRefresher.Call.Commit(response))
         assertThat(resultTurbine.awaitItem()).isInstanceOf<CheckoutElementsController.Result.Completed>()
+        sessionRefresher.completeCalls.awaitItem()
         assertThat(coordinator.status.value).isEqualTo(CheckoutOperationCoordinator.Status.Idle)
     }
 
@@ -656,6 +659,7 @@ internal class CheckoutOperationCoordinatorTest {
         assertThat(confirmationFinalizer.calls.awaitItem()).isEqualTo(response)
         assertThat(refreshCalls.awaitItem()).isEqualTo(FakeCheckoutSessionRefresher.Call.Commit(response))
         assertThat(resultTurbine.awaitItem()).isInstanceOf<CheckoutElementsController.Result.Completed>()
+        sessionRefresher.completeCalls.awaitItem()
         assertThat(coordinator.status.value).isEqualTo(CheckoutOperationCoordinator.Status.Idle)
     }
 
@@ -833,9 +837,43 @@ internal class CheckoutOperationCoordinatorTest {
     }
 
     @Test
-    fun `successful response is committed under operation gate before delivering result`() {
+    fun `throwing success callback still clears session and releases gate`() {
+        val expected = IllegalStateException("Callback failed")
+        runScenario(
+            resultCallback = { result ->
+                assertThat(result).isInstanceOf<CheckoutElementsController.Result.Completed>()
+                throw expected
+            },
+        ) {
+            observerJob.cancelAndJoin()
+            val observation = backgroundScope.async {
+                runCatching { coordinator.observeConfirmationResults() }
+            }
+            coordinator.tryBeginConfirmation { Result.success(CONFIRMATION_PARAMETERS) }
+            enqueueRefreshAction {}
+            confirmationState.value = ConfirmationHandler.State.Complete(succeededWithSession(response))
+
+            assertThat(observation.await().exceptionOrNull()).isSameInstanceAs(expected)
+            assertThat(confirmationFinalizer.calls.awaitItem()).isEqualTo(response)
+            assertThat(refreshCalls.awaitItem()).isEqualTo(FakeCheckoutSessionRefresher.Call.Commit(response))
+            sessionRefresher.completeCalls.awaitItem()
+            assertThat(coordinator.status.value).isEqualTo(CheckoutOperationCoordinator.Status.Idle)
+            assertThat(coordinator.runMutation { Result.success(Unit) }.isSuccess).isTrue()
+        }
+    }
+
+    @Test
+    fun `successful response is committed before callback and cleared before releasing gate`() {
         val releaseCommit = CompletableDeferred<Unit>()
-        runScenario {
+        val callbackResults = Turbine<CheckoutElementsController.Result>()
+        lateinit var refresher: FakeCheckoutSessionRefresher
+        runScenario(
+            resultCallback = { result ->
+                refresher.completeCalls.expectNoEvents()
+                callbackResults.add(result)
+            },
+        ) {
+            refresher = sessionRefresher
             coordinator.tryBeginConfirmation { Result.success(CONFIRMATION_PARAMETERS) }
             assertThat(coordinator.status.value).isEqualTo(CheckoutOperationCoordinator.Status.Updating)
 
@@ -844,11 +882,12 @@ internal class CheckoutOperationCoordinatorTest {
             assertThat(confirmationFinalizer.calls.awaitItem()).isEqualTo(response)
             assertThat(refreshCalls.awaitItem())
                 .isEqualTo(FakeCheckoutSessionRefresher.Call.Commit(response))
-            resultTurbine.expectNoEvents()
+            callbackResults.expectNoEvents()
 
             val mutationStarted = CompletableDeferred<Unit>()
             val mutation = backgroundScope.async {
                 coordinator.runMutation {
+                    assertThat(sessionRefresher.completeCalls.expectMostRecentItem()).isEqualTo(Unit)
                     mutationStarted.complete(Unit)
                     Result.success(Unit)
                 }
@@ -859,10 +898,11 @@ internal class CheckoutOperationCoordinatorTest {
             assertThat(coordinator.status.value).isEqualTo(CheckoutOperationCoordinator.Status.Updating)
 
             releaseCommit.complete(Unit)
-            assertThat(resultTurbine.awaitItem()).isInstanceOf<CheckoutElementsController.Result.Completed>()
+            assertThat(callbackResults.awaitItem()).isInstanceOf<CheckoutElementsController.Result.Completed>()
             assertThat(mutation.await().isSuccess).isTrue()
             assertThat(coordinator.status.value).isEqualTo(CheckoutOperationCoordinator.Status.Idle)
         }
+        callbackResults.ensureAllEventsConsumed()
     }
 
     @Test
@@ -881,6 +921,7 @@ internal class CheckoutOperationCoordinatorTest {
             assertThat(refreshCalls.awaitItem()).isEqualTo(FakeCheckoutSessionRefresher.Call.Commit(finalized))
             val result = resultTurbine.awaitItem() as CheckoutElementsController.Result.Completed
             assertThat(result.paymentStatus).isEqualTo(CheckoutElementsController.Session.Status.PaymentStatus.Paid)
+            sessionRefresher.completeCalls.awaitItem()
             assertThat(logger.errorLogs).containsExactly(
                 "Failed to refresh the checkout session after confirmation." to expected
             )
@@ -928,6 +969,7 @@ internal class CheckoutOperationCoordinatorTest {
             releaseCommit.complete(Unit)
 
             assertThat(resultTurbine.awaitItem()).isInstanceOf<CheckoutElementsController.Result.Completed>()
+            sessionRefresher.completeCalls.awaitItem()
             resultTurbine.expectNoEvents()
             refreshCalls.expectNoEvents()
         }
@@ -954,6 +996,7 @@ internal class CheckoutOperationCoordinatorTest {
                 .isEqualTo(FakeCheckoutConfirmationResultReporter.Call(succeeded, finalized))
             val result = resultTurbine.awaitItem() as CheckoutElementsController.Result.Completed
             assertThat(result.paymentStatus).isEqualTo(CheckoutElementsController.Session.Status.PaymentStatus.Paid)
+            sessionRefresher.completeCalls.awaitItem()
         }
         reporter.ensureAllEventsConsumed()
     }
@@ -970,6 +1013,7 @@ internal class CheckoutOperationCoordinatorTest {
         assertThat(finalized.paymentIntent).isEqualTo(PaymentIntentFixtures.PI_SUCCEEDED)
         assertThat(refreshCalls.awaitItem()).isEqualTo(FakeCheckoutSessionRefresher.Call.Commit(finalized))
         assertThat(resultTurbine.awaitItem()).isInstanceOf<CheckoutElementsController.Result.Completed>()
+        sessionRefresher.completeCalls.awaitItem()
     }
 
     @Test
@@ -1039,6 +1083,7 @@ internal class CheckoutOperationCoordinatorTest {
             assertThat(refreshCalls.awaitItem()).isEqualTo(FakeCheckoutSessionRefresher.Call.Fetch)
             val result = resultTurbine.awaitItem() as CheckoutElementsController.Result.Completed
             assertThat(result.paymentStatus).isEqualTo(CheckoutElementsController.Session.Status.PaymentStatus.Paid)
+            sessionRefresher.completeCalls.awaitItem()
             assertThat(reporter.calls.awaitItem())
                 .isEqualTo(FakeCheckoutConfirmationResultReporter.Call(succeeded, fetched))
         }
@@ -1257,6 +1302,7 @@ internal class CheckoutOperationCoordinatorTest {
             assertThat(refreshCalls.awaitItem()).isEqualTo(FakeCheckoutSessionRefresher.Call.Commit(response))
             val result = resultTurbine.awaitItem() as CheckoutElementsController.Result.Completed
             assertThat(result.paymentStatus).isEqualTo(CheckoutElementsController.Session.Status.PaymentStatus.Unpaid)
+            sessionRefresher.completeCalls.awaitItem()
             assertThat(awaitItem()).isEqualTo(CheckoutOperationCoordinator.Status.Idle)
         }
     }
@@ -1363,6 +1409,7 @@ internal class CheckoutOperationCoordinatorTest {
         assertThat(refreshCalls.awaitItem()).isEqualTo(FakeCheckoutSessionRefresher.Call.Commit(finalized))
         val result = resultTurbine.awaitItem() as CheckoutElementsController.Result.Completed
         assertThat(result.paymentStatus).isEqualTo(expected)
+        sessionRefresher.completeCalls.awaitItem()
         assertThat(coordinator.status.value).isEqualTo(CheckoutOperationCoordinator.Status.Idle)
     }
 

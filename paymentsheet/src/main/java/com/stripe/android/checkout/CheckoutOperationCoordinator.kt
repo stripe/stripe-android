@@ -200,7 +200,15 @@ internal class CheckoutOperationCoordinator @Inject constructor(
         }
 
         try {
-            mapResult(wasRestored)?.let(resultCallback::onResult)
+            mapResult(wasRestored)?.let { result ->
+                try {
+                    resultCallback.onResult(result)
+                } finally {
+                    if (result is CheckoutElementsController.Result.Completed) {
+                        sessionRefresher.complete()
+                    }
+                }
+            }
         } finally {
             synchronized(admissionLock) {
                 confirmationInFlight = false

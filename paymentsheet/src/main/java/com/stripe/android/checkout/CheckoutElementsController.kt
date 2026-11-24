@@ -106,7 +106,8 @@ class CheckoutElementsController @Inject internal constructor(
     }
 
     /**
-     * The latest [Session] data, or `null` until [configure] has completed successfully.
+     * The latest [Session] data, or `null` when no checkout is configured. After successful confirmation,
+     * this is cleared after [ResultCallback] returns.
      */
     val session: StateFlow<Session?>
         get() = stateHolder.session

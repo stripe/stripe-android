@@ -152,16 +152,21 @@ internal class CheckoutPaymentElementTest {
 
     @Test
     fun testCardPaymentSendsCollectedEmailOnlyAsCollectedInformation() {
+        lateinit var checkoutController: CheckoutElementsController
         var checkoutResult: CheckoutElementsController.Result? = null
         runCheckoutPaymentElementScenario(
             networkRule = networkRule,
-            resultCallback = { result -> checkoutResult = result },
+            resultCallback = { result ->
+                assertThat(checkoutController.session.value).isNotNull()
+                checkoutResult = result
+            },
             checkoutInitResponse = { response ->
                 response.testBodyFromFile("checkout-session-init.json") { json ->
                     json.remove("link_settings")
                 }
             },
             setup = { controller ->
+                checkoutController = controller
                 assertThat(
                     controller.configure(
                         DEFAULT_CLIENT_SECRET,
@@ -185,6 +190,8 @@ internal class CheckoutPaymentElementTest {
             formPage.fillOutCardDetails()
             formPage.clickPrimaryButton()
             confirm()
+            testRules.compose.waitUntilWithIdle { checkoutResult != null }
+            assertThat(checkoutController.session.value).isNull()
         }
 
         assertThat(checkoutResult).isInstanceOf(CheckoutElementsController.Result.Completed::class.java)
