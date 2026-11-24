@@ -1,6 +1,7 @@
 package com.stripe.android.uicore.elements
 
 import android.os.Build
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.ExperimentalTestApi
@@ -8,6 +9,7 @@ import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performTextInput
@@ -82,6 +84,64 @@ class OTPElementUITest {
         otpNode(1).performKeyInput {
             pressKey(Key.Backspace)
         }
+
+        otpNode(0).assertIsFocused()
+    }
+
+    @Test
+    fun `tapping any box focuses the next digit`() {
+        val element = testElement()
+
+        composeTestRule.setContent {
+            OTPElementUI(
+                enabled = true,
+                element = element,
+            )
+        }
+
+        otpNode(4).performClick()
+        otpNode(0).assertIsFocused()
+
+        otpNode(0).performTextInput("1")
+        otpNode(3).performClick()
+        otpNode(1).assertIsFocused()
+    }
+
+    @Test
+    fun `focus requester focuses the next digit`() {
+        val element = testElement()
+        val focusRequester = FocusRequester()
+
+        composeTestRule.setContent {
+            OTPElementUI(
+                enabled = true,
+                element = element,
+                focusRequester = focusRequester,
+            )
+        }
+
+        element.controller.onValueChanged(0, "12")
+        composeTestRule.runOnIdle { focusRequester.requestFocus() }
+
+        otpNode(2).assertIsFocused()
+    }
+
+    @Test
+    fun `clearing the code moves focus back to the first box`() {
+        val element = testElement()
+
+        composeTestRule.setContent {
+            OTPElementUI(
+                enabled = true,
+                element = element,
+            )
+        }
+
+        otpNode(0).requestFocus()
+        otpNode(0).performTextInput("123")
+        otpNode(3).assertIsFocused()
+
+        element.controller.reset()
 
         otpNode(0).assertIsFocused()
     }

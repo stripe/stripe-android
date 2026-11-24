@@ -493,7 +493,8 @@ private fun rememberTypingFocusModifier(
     }
     val scope = rememberCoroutineScope()
     return Modifier
-        .focusProperties { canFocus = isTyping }
+        // Only ever disallows focus, so the code can still limit it to the next digit.
+        .focusProperties { if (!isTyping) canFocus = false }
         .onFocusChanged { focusState ->
             val didLoseFocus = hasFocus && !focusState.hasFocus
             hasFocus = focusState.hasFocus

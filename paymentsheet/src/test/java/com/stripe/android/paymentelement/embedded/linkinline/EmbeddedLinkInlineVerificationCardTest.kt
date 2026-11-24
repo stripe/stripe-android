@@ -176,6 +176,39 @@ internal class EmbeddedLinkInlineVerificationCardTest {
     }
 
     @Test
+    fun `tapping another digit while typing keeps focus on the next digit`() = runScenario(isTyping = true) {
+        composeRule.onNodeWithTag(FIRST_DIGIT_TEST_TAG).performTextInput("1")
+        composeRule.onNodeWithTag("OTP-1").assertIsFocused()
+
+        composeRule.onNodeWithTag("OTP-4").performClick()
+        composeRule.onNodeWithTag("OTP-1").assertIsFocused()
+
+        composeRule.onNodeWithTag(FIRST_DIGIT_TEST_TAG).performClick()
+        composeRule.onNodeWithTag("OTP-1").assertIsFocused()
+
+        codeTapCalls.expectNoEvents()
+    }
+
+    @Test
+    fun `typing again continues from the next digit`() = runScenario {
+        otpElement.controller.onValueChanged(0, "12")
+
+        isTyping.value = true
+
+        composeRule.onNodeWithTag("OTP-2").assertIsFocused()
+    }
+
+    @Test
+    fun `clearing the code while typing moves focus back to the first digit`() = runScenario(isTyping = true) {
+        composeRule.onNodeWithTag(FIRST_DIGIT_TEST_TAG).performTextInput("123")
+        composeRule.onNodeWithTag("OTP-3").assertIsFocused()
+
+        otpElement.controller.reset()
+
+        composeRule.onNodeWithTag(FIRST_DIGIT_TEST_TAG).assertIsFocused()
+    }
+
+    @Test
     fun `typing moves through every digit`() = runScenario(isTyping = true) {
         "123456".forEachIndexed { index, digit ->
             composeRule.onNodeWithTag("OTP-$index").assertIsFocused()

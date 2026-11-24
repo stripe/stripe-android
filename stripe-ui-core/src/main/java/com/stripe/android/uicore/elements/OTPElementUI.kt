@@ -5,6 +5,9 @@ package com.stripe.android.uicore.elements
 import android.view.KeyEvent
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -21,6 +24,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -31,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.autofill.ContentType
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
@@ -39,6 +44,9 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentType
 import androidx.compose.ui.semantics.onAutofillText
@@ -114,17 +122,39 @@ fun OTPElementUI(
      */
     onDone: (() -> Unit)? = null,
 ) {
-    val focusRequesters = remember(focusRequester, element.controller.otpLength) {
-        if (element.controller.otpLength <= 0) {
-            emptyList()
-        } else {
-            listOf(focusRequester) + List(element.controller.otpLength - 1) { FocusRequester() }
-        }
+    // Digits are entered in order: only the box the next digit goes in takes focus, and [focusRequester] or a tap on
+    // any box focuses it.
+    val focusRequesters = remember(element.controller.otpLength) {
+        List(element.controller.otpLength) { FocusRequester() }
     }
+    val keyboardController = LocalSoftwareKeyboardController.current
     Row(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .pointerInput(element, enabled) {
+                if (!enabled) return@pointerInput
+                awaitEachGesture {
+                    // Sees the tap before the boxes do, without taking it from them.
+                    awaitFirstDown(pass = PointerEventPass.Initial)
+                    if (waitForUpOrCancellation(pass = PointerEventPass.Initial) != null) {
+                        focusRequesters.requestFocusSafely(element.controller.nextDigitIndex())
+                        // The box can already have focus after the keyboard was dismissed.
+                        keyboardController?.show()
+                    }
+                }
+            },
     ) {
         var focusedElementIndex by remember { mutableIntStateOf(-1) }
+
+        LaunchedEffect(element) {
+            // A code cleared or shortened while a later box has focus, e.g. on reset, moves focus back.
+            element.controller.fieldValue.collect {
+                val nextDigitIndex = element.controller.nextDigitIndex()
+                if (focusedElementIndex >= 0 && focusedElementIndex != nextDigitIndex) {
+                    focusRequesters.requestFocusSafely(nextDigitIndex)
+                }
+            }
+        }
 
         (0 until element.controller.otpLength).map { index ->
             val isSelected = focusedElementIndex == index
@@ -158,6 +188,11 @@ fun OTPElementUI(
                 var textFieldModifier = Modifier
                     .height(boxHeight)
                     .focusRequester(focusRequesters[index])
+                    // Requesting focus focuses the first attached box that can take it, which is the next digit.
+                    .focusRequester(focusRequester)
+                    .focusProperties {
+                        if (index != element.controller.nextDigitIndex()) canFocus = false
+                    }
                     .onFocusChanged { focusState ->
                         if (focusState.isFocused) {
                             focusedElementIndex = index
@@ -171,9 +206,9 @@ fun OTPElementUI(
                             event.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_DEL &&
                             value.isEmpty()
                         ) {
-                            // If the current field is empty, move to the previous one and delete
-                            focusRequesters.requestFocusSafely(index - 1)
+                            // If the current field is empty, delete the previous one and move to it
                             element.controller.onValueChanged(index - 1, "")
+                            focusRequesters.requestFocusSafely(index - 1)
                             return@onPreviewKeyEvent true
                         }
                         false
@@ -272,6 +307,13 @@ private fun OTPInputBox(
         singleLine = true,
         decorationBox = OTPInputDecorationBox(value, isSelected, placeholder, enabled, colors)
     )
+}
+
+/**
+ * The first empty box, or the last box once every digit is entered.
+ */
+private fun OTPController.nextDigitIndex(): Int {
+    return fieldValues.indexOfFirst { it.value.isEmpty() }.takeIf { it >= 0 } ?: (otpLength - 1)
 }
 
 private fun List<FocusRequester>.requestFocusSafely(index: Int) {
