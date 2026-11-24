@@ -414,7 +414,6 @@ internal class StripeConnectWebViewContainerViewModel(
         }
 
         override fun onComponentHeightChanged(height: Float) {
-            if (!isInline) return
             _componentHeightFlow.value = height
         }
 

@@ -115,11 +115,11 @@ internal class InlineSheetController(
     }
 
     /**
-     * Called when the screen showing the component goes away, which takes its sheets with it.
+     * Called when the screen showing the component goes away, which takes its shown sheets with it.
      */
     fun onHostDismissed() {
         _sheetsFlow.value
-            .filter { it.state == State.STAGED || it.state == State.SHOWING }
+            .filter { it.state == State.SHOWING }
             .forEach { sheet ->
                 removeSheet(sheet.id)
                 callbacks.onSheetClosed(sheet.id)

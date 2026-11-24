@@ -209,7 +209,7 @@ internal class StripeConnectSheetDialog(
         val maxContentHeight = max(0, maxSheetHeight - handleArea.measuredHeight - bottomInset)
         // Before Connect.js measures the dialog, lay it out at full height so it can render.
         val contentHeight = contentHeight?.let { ceil(it * density).toInt() } ?: maxContentHeight
-        val webViewHeight = min(max(contentHeight, 1), maxContentHeight)
+        val webViewHeight = min(max(contentHeight, dp(MIN_CONTENT_HEIGHT_DP)), maxContentHeight)
         if (webView.layoutParams?.height != webViewHeight) {
             webView.updateLayoutParams<LinearLayout.LayoutParams> { height = webViewHeight }
         }
@@ -316,8 +316,9 @@ internal class StripeConnectSheetDialog(
         const val STAGED_WINDOW_FLAGS =
             WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE or WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
         const val SCRIM_COLOR = 0x66000000
-        const val CORNER_RADIUS_DP = 16
+        const val CORNER_RADIUS_DP = 28
         const val TOP_GAP_DP = 24
+        const val MIN_CONTENT_HEIGHT_DP = 120
         const val HANDLE_AREA_HEIGHT_DP = 28
         const val MIN_REVEAL_OFFSET_DP = 120
         const val SWIPE_DISTANCE_DP = 80

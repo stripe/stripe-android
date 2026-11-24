@@ -92,11 +92,8 @@ class StripeConnectWebViewContainerViewModelInlineTest {
             },
         ).also { viewModelStoreRule.track(it) }
 
-        viewModel.delegate.onComponentHeightChanged(248f)
-
         assertThat(isInline).isFalse()
         assertThat(viewModel.delegate.onCreateWindow(isUserGesture = true)).isNull()
-        assertThat(viewModel.componentHeightFlow.value).isNull()
     }
 
     private fun createBannerViewModelWithSheet(

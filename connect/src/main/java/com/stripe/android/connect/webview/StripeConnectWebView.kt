@@ -739,7 +739,6 @@ internal class StripeConnectWebView private constructor(
                 webFunctionName = "sheetChanged",
                 message = message,
             ) ?: return
-            if (!InlineContract.isValidSheetId(parsed.sheetId)) return
             val height = InlineContract.clampHeight(parsed.height) ?: return
             val isDismissible = parsed.dismissible ?: true
             mainHandler.post { delegate.onSheetChanged(parsed.sheetId, height, isDismissible) }

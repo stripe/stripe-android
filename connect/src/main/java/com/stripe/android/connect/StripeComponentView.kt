@@ -3,6 +3,7 @@ package com.stripe.android.connect
 import android.app.Activity
 import android.app.Application
 import android.content.Context
+import android.graphics.Color
 import android.util.AttributeSet
 import android.view.Gravity
 import android.view.View
@@ -298,18 +299,22 @@ abstract class StripeComponentView<Listener, Props> internal constructor(
         logger.debug("($loggerTag) Binding view state: $state")
 
         _receivedCloseWebView.value = state.receivedCloseWebView
-        setBackgroundColor(state.backgroundColor)
+        setBackgroundColor(viewBackgroundColor(state))
 
         webView?.let { bindWebView(it, state) }
         progressBar?.let { bindProgressBar(it, state) }
         sheetDialogs.values.forEach { it.updateColors(state.backgroundColor, state.sheetTextColor) }
     }
 
+    // An inline component shows the app's screen around what Connect.js draws, like its rounded corners.
+    private fun viewBackgroundColor(state: StripeConnectWebViewContainerState): Int =
+        if (isInline) Color.TRANSPARENT else state.backgroundColor
+
     private fun bindWebView(
         webView: StripeConnectWebView,
         state: StripeConnectWebViewContainerState
     ) {
-        webView.setBackgroundColor(state.backgroundColor)
+        webView.setBackgroundColor(viewBackgroundColor(state))
         webView.isVisible = isInline || !state.isNativeLoadingIndicatorVisible
     }
 

@@ -50,8 +50,6 @@ internal object InlineContract {
         return height.takeIf { it.isFinite() }?.coerceIn(0.0, MAX_HEIGHT)?.toFloat()
     }
 
-    fun isValidSheetId(id: String): Boolean = SHEET_ID.matches(id)
-
     /**
      * Returns the sheet id if [url] is a window Connect.js opened to show as a native sheet, or null if it isn't.
      * The window must be an accessory layer page on the exact scheme, host, and port of [componentUrl].
@@ -61,7 +59,7 @@ internal object InlineContract {
 
         val params = parseHashParams(url.encodedFragment) ?: return null
         if (params[OS_SHEET_PARAM] != "true") return null
-        return params[OS_SHEET_ID_PARAM]?.takeIf(::isValidSheetId)
+        return params[OS_SHEET_ID_PARAM]?.takeIf(SHEET_ID::matches)
     }
 
     private fun isSameOrigin(url: Uri, componentUrl: Uri): Boolean {
@@ -92,5 +90,5 @@ internal object InlineContract {
         return params
     }
 
-    private fun decodeParam(value: String): String = Uri.decode(value.replace('+', ' '))
+    private fun decodeParam(value: String): String = Uri.decode(value)
 }
