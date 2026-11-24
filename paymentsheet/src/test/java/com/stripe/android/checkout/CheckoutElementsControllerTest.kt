@@ -834,7 +834,38 @@ internal class CheckoutElementsControllerTest {
     }
 
     @Test
-    fun `destroy clears persisted state`() = runConfigureScenario {
+    fun `configure after destroy fails without a request`() = runTest {
+        val controller = createController()
+        controller.destroy()
+
+        // No response is enqueued, so NetworkRule fails the test if a request is sent.
+        val result = controller.configure(DEFAULT_CLIENT_SECRET)
+
+        val failure = result as CheckoutElementsController.OperationResult.Failed
+        assertThat(failure.error).isInstanceOf(IllegalStateException::class.java)
+        assertThat(failure.error.message)
+            .isEqualTo("Cannot configure checkout session after the controller has been destroyed.")
+        assertThat(failure.displayMessage)
+            .isEqualTo(applicationContext.getString(R.string.stripe_something_went_wrong))
+        assertThat(controller.session.value).isNull()
+        assertThat(controller.isUpdating.value).isFalse()
+    }
+
+    @Test
+    fun `configure after destroy rejects malformed client secret before validation`() = runTest {
+        val controller = createController()
+        controller.destroy()
+
+        val result = controller.configure("cs_test_malformed")
+
+        val failure = result as CheckoutElementsController.OperationResult.Failed
+        assertThat(failure.error).isInstanceOf(IllegalStateException::class.java)
+        assertThat(failure.error.message)
+            .isEqualTo("Cannot configure checkout session after the controller has been destroyed.")
+    }
+
+    @Test
+    fun `destroy clears persisted state and rejects background reconfiguration`() = runConfigureScenario {
         assertThat(result).isInstanceOf(CheckoutElementsController.OperationResult.Succeeded::class.java)
         // Pre-condition: configure committed a non-null state so the clear is observable.
         assertThat(committedState).isNotNull()
@@ -845,6 +876,17 @@ internal class CheckoutElementsControllerTest {
         assertThat(controller.session.value).isNull()
         assertThat(savedStateHandle.keys()).doesNotContain(DEFAULT_INTEGRATION_NAME)
         assertThat(createController(savedStateHandle.simulateProcessDeath()).session.value).isNull()
+
+        // The initial configure consumed the only response, so no further requests are allowed.
+        val reconfigureResult = fromBackgroundThread { controller.configure(DEFAULT_CLIENT_SECRET) }
+
+        val failure = reconfigureResult as CheckoutElementsController.OperationResult.Failed
+        assertThat(failure.error).isInstanceOf(IllegalStateException::class.java)
+        assertThat(failure.error.message)
+            .isEqualTo("Cannot configure checkout session after the controller has been destroyed.")
+        assertThat(committedState).isNull()
+        assertThat(controller.session.value).isNull()
+        assertThat(savedStateHandle.keys()).doesNotContain(DEFAULT_INTEGRATION_NAME)
     }
 
     @Test

@@ -105,6 +105,8 @@ class CheckoutElementsController @Inject internal constructor(
         }
     }
 
+    private var isDestroyed = false
+
     /**
      * The latest [Session] data, or `null` when no checkout is configured. After successful confirmation,
      * this is cleared after [ResultCallback] returns.
@@ -129,6 +131,8 @@ class CheckoutElementsController @Inject internal constructor(
      * Loads the Checkout Session identified by [clientSecret] and prepares the
      * payment UI, populating [session] on success.
      *
+     * Returns [OperationResult.Failed] immediately if [destroy] has been called.
+     *
      * @param clientSecret The client secret of the Checkout Session to load.
      * @param configuration Options controlling how the checkout is configured and displayed.
      */
@@ -136,6 +140,11 @@ class CheckoutElementsController @Inject internal constructor(
         clientSecret: String,
         configuration: Configuration = Configuration(),
     ): OperationResult = withContext(Dispatchers.Main.immediate) {
+        if (isDestroyed) {
+            return@withContext kotlin.Result.failure(
+                IllegalStateException("Cannot configure checkout session after the controller has been destroyed.")
+            )
+        }
         // A re-configure while a payment flow is presented would reload the session out from under
         // the open sheet. The first configure runs with null state, so this only blocks re-configures.
         if (sheetStateHolder.sheetIsOpen) {
@@ -502,6 +511,7 @@ class CheckoutElementsController @Inject internal constructor(
      */
     @MainThread
     fun destroy() {
+        isDestroyed = true
         viewModelScope.cancel()
         checkoutStateLoader.clear()
         savedState.clear()
