@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.sp
 import com.stripe.android.connect.example.R
 
 @Composable
-fun BetaBadge() {
+fun PrivatePreviewBadge() {
     val shape = RoundedCornerShape(4.dp)
     val labelMediumEmphasized = TextStyle.Default.copy(
         fontSize = 14.sp,
@@ -41,14 +41,14 @@ fun BetaBadge() {
         fontSize = 12.sp,
         lineHeight = 16.sp,
         style = labelMediumEmphasized,
-        text = stringResource(R.string.beta_all_caps)
+        text = stringResource(R.string.private_preview_all_caps)
     )
 }
 
 @Composable
 @Preview(showBackground = true)
-private fun BetaBadgePreview() {
+private fun PrivatePreviewBadgePreview() {
     ConnectSdkExampleTheme {
-        BetaBadge()
+        PrivatePreviewBadge()
     }
 }

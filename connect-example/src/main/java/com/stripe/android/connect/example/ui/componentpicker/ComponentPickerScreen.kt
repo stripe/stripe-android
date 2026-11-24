@@ -46,9 +46,9 @@ import com.stripe.android.connect.example.core.Success
 import com.stripe.android.connect.example.core.then
 import com.stripe.android.connect.example.ui.appearance.AppearanceView
 import com.stripe.android.connect.example.ui.appearance.AppearanceViewModel
-import com.stripe.android.connect.example.ui.common.BetaBadge
 import com.stripe.android.connect.example.ui.common.ConnectExampleScaffold
 import com.stripe.android.connect.example.ui.common.CustomizeAppearanceIconButton
+import com.stripe.android.connect.example.ui.common.PrivatePreviewBadge
 import com.stripe.android.connect.example.ui.embeddedcomponentmanagerloader.EmbeddedComponentLoaderViewModel
 import com.stripe.android.connect.example.ui.embeddedcomponentmanagerloader.EmbeddedComponentManagerLoader
 import com.stripe.android.connect.example.ui.features.notificationbanner.NotificationBannerExampleActivity
@@ -198,8 +198,8 @@ private fun LazyItemScope.MenuRowItem(
                         fontSize = 16.sp,
                         fontWeight = FontWeight.SemiBold,
                     )
-                    if (menuItem.isBeta) {
-                        BetaBadge()
+                    if (menuItem.isPrivatePreview) {
+                        PrivatePreviewBadge()
                     }
                 }
                 Spacer(modifier = Modifier.height(8.dp))
@@ -225,27 +225,27 @@ private fun LazyItemScope.MenuRowItem(
 private enum class MenuItem(
     @StringRes val title: Int,
     @StringRes val subtitle: Int,
-    val isBeta: Boolean = false,
+    val isPrivatePreview: Boolean = false,
 ) {
     AccountOnboarding(
         title = R.string.account_onboarding,
         subtitle = R.string.account_onboarding_menu_subtitle,
-        isBeta = false,
+        isPrivatePreview = false,
     ),
     Payouts(
         title = R.string.payouts,
         subtitle = R.string.payouts_menu_subtitle,
-        isBeta = false,
+        isPrivatePreview = false,
     ),
     Payments(
         title = R.string.payments,
         subtitle = R.string.payments_menu_subtitle,
-        isBeta = false,
+        isPrivatePreview = false,
     ),
     NotificationBanner(
         title = R.string.notification_banner,
         subtitle = R.string.notification_banner_menu_subtitle,
-        isBeta = true,
+        isPrivatePreview = true,
     ),
 }
 
