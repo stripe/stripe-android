@@ -1,0 +1,27 @@
+# Changes reach master only as exports from Stripe's internal repository. This check
+# passes when the pull request has the gh-export label.
+name: gh-export
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+
+permissions: {}
+
+# The newest run decides, for example the "labeled" run that follows "opened".
+concurrency:
+  group: gh-export-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  gh-export:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check that the pull request has the gh-export label
+        env:
+          HAS_LABEL: ${{ contains(github.event.pull_request.labels.*.name, 'gh-export') }}
+        run: |
+          if [[ "$HAS_LABEL" != true ]]; then
+            echo "::error::The pull request does not have the gh-export label."
+            exit 1
+          fi
