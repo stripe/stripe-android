@@ -1,5 +1,6 @@
 package com.stripe.android.challenge.confirmation
 
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -73,7 +74,11 @@ internal class IntentConfirmationChallengeActivity : AppCompatActivity() {
                             },
                             openUri = { uri ->
                                 val browserIntent = Intent(Intent.ACTION_VIEW, uri)
-                                startActivity(browserIntent)
+                                try {
+                                    startActivity(browserIntent)
+                                } catch (e: ActivityNotFoundException) {
+                                    viewModel.logger.error("Failed to open $uri.", e)
+                                }
                             },
                         )
                     }

@@ -52,7 +52,10 @@ fun HyperlinkedText(
                     annotatedString.getStringAnnotations(position, position).firstOrNull()
                         ?.let { result ->
                             if (result.tag == "URL") {
-                                uriHandler.openUri(result.item)
+                                try {
+                                    uriHandler.openUri(result.item)
+                                } catch (ignored: IllegalArgumentException) {
+                                }
                             }
                         }
                 }

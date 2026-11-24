@@ -1,5 +1,6 @@
 package com.stripe.android.ui.core.elements
 
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
 import androidx.annotation.RestrictTo
@@ -58,7 +59,10 @@ fun AfterpayClearpayElementUI(
         imageAlign = PlaceholderVerticalAlign.Bottom,
         onClick = {
             val openURL = Intent(Intent.ACTION_VIEW, Uri.parse(element.infoUrl))
-            context.startActivity(openURL)
+            try {
+                context.startActivity(openURL)
+            } catch (ignored: ActivityNotFoundException) {
+            }
         }
     )
 }
