@@ -22,7 +22,7 @@ import java.io.IOException
 internal class KycViewModel(
     context: Context,
     val stateHolder: KycStateHolder,
-    private val uploader: KycDocumentUploader?,
+    private val uploader: KycDocumentUploader,
     private val submissionHandler: KycSubmissionHandler,
 ) : ViewModel() {
     private val contentResolver = context.applicationContext.contentResolver
@@ -148,8 +148,7 @@ internal class KycViewModel(
         slotIndex: Int,
     ) {
         stateHolder.onFileUploadStarted(slotIndex, selection.displayName)
-        val result = uploader?.upload(selection.file)
-            ?: Result.failure(IllegalStateException("Missing KYC document uploader"))
+        val result = uploader.upload(selection.file)
         currentCoroutineContext().ensureActive()
         if (stateHolder.state.selectingFileSlot != slotIndex) return
         result.fold(

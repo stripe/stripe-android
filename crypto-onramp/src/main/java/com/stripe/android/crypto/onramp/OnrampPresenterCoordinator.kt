@@ -155,15 +155,6 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         )
 
     init {
-        KycSubmissionHandlerRegistry.setUploader(
-            onrampCallbackIdentifier,
-            KycDocumentUploader(interactor::uploadKycDocument),
-        )
-        KycSubmissionHandlerRegistry[onrampCallbackIdentifier] =
-            KycSubmissionHandler { submission ->
-                interactor.fulfillKycRequirements(submission)
-            }
-
         // Observe Link controller state
         lifecycleOwner.lifecycleScope.launch {
             linkControllerState.collect { state ->
@@ -199,10 +190,6 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                     kycResultLauncher.unregister()
                     termsAndConditionsResultLauncher.unregister()
                     termsOfServiceResultLauncher.unregister()
-
-                    if (activity.isFinishing) {
-                        KycSubmissionHandlerRegistry.remove(onrampCallbackIdentifier)
-                    }
                 }
             }
         )
@@ -329,7 +316,6 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                         KycActivityArgs(
                             requirements = requirements,
                             linkAppearance = interactor.state.value.configurationState?.appearance,
-                            submissionHandlerKey = onrampCallbackIdentifier,
                         )
                     )
                 },
